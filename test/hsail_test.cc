@@ -9,3 +9,9 @@ TEST(LexTest, Bug1) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(1,yylex());
 }
+
+TEST(LexTest, Bug2) {
+  std::string input("12345");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(2,yylex());
+}
