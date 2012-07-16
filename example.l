@@ -1,6 +1,7 @@
 %option noyywrap
 %{
 #include <stdio.h>
+#include "tokens.h"
 %}
 %%
 [a-z]+ { return 1; }
