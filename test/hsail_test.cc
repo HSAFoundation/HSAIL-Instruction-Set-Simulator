@@ -38,3 +38,9 @@ TEST(LexTest, Bug6) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_SREGISTER,yylex());
 }
+
+TEST(LexTest, Bug11) {
+  std::string input("0x2f");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(4,yylex());
+}
