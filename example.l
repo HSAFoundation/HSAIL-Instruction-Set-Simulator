@@ -143,5 +143,19 @@ workitemaid_flat	{ return  WORKITEMAID_FLAT; }
 debugtrap			{ return  DEBUGTRAP; }
 
 
+abs					{ return  ABS; }
+neg					{ return  NEG; }
+not					{ return  NOT; }
+popcount			{ return  POPCOUNT; }
+firstbit			{ return  FIRSTBIT; }
+lastbit				{ return  LASTBIT; }
+bitrev				{ return  BITREV; }
+movs_lo				{ return  MOVS_LO; }
+movs_hi				{ return  MOVS_HI; }
+fbar_initSize		{ return  FBAR_INITSIZE; }
+fbar_init			{ return  FBAR_INIT; }
+fbar_releaseCF		{ return  FBAR_RELEASECF; }
+count				{ return  COUNT; }
+mask				{ return  MASK; }
 
 .	{ fprintf(stderr, "unexpected char"); return 0;}
