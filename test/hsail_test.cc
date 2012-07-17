@@ -351,3 +351,38 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(BOUNDARYW,yylex());
 }
+
+ TEST(LexTest, Bug45) {				// keywords for queryOp
+  std::string input("query_order");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_ORDER,yylex());
+  
+  input.assign("query_data");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_DATA,yylex());
+  
+  input.assign("query_array");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_ARRAY,yylex());
+  
+  input.assign("query_width");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_WIDTH,yylex());
+  
+  input.assign("query_depth");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_DEPTH,yylex());
+  
+  input.assign("query_height");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_HEIGHT,yylex());
+  
+  input.assign("query_normalized");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_NORMALIZED,yylex());
+
+  input.assign("query_filtering");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_FILTERING,yylex());
+
+}
