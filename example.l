@@ -434,4 +434,10 @@ _u32x4				{ return  _U32X4;}
 _f64x2				{ return  _F64X2;}
 _s64x2				{ return  _S64X2;}
 _u64x2				{ return  _U64X2;}
+
+
+_ftz				{ return _FTZ;}
+nop					{ return NOP;}
+clock				{ return CLOCK;}
+syscall				{ return SYSCALL;}
 .	{ fprintf(stderr, "unexpected char"); return 0;}
