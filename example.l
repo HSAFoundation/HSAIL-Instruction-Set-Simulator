@@ -22,9 +22,9 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 {DEC_INT} { int_val = strtol(yytext, NULL, 10); return TOKEN_INTEGER_CONSTANT; }
 {HEX_INT} { int_val = strtol(yytext, NULL, 16); return TOKEN_INTEGER_CONSTANT; }
 
-{DEC_SINGLE} { return 5; }
-{HEX_SINGLE} { return 6; }
-{IEEE_SINGLE} { return 7; }
+{DEC_SINGLE} { return TOKEN_SINGLE_CONSTANT; }
+{HEX_SINGLE} { return TOKEN_SINGLE_CONSTANT; }
+{IEEE_SINGLE} { return TOKEN_SINGLE_CONSTANT; }
 
 {DEC_DOUBLE} { return 8; }
 {HEX_DOUBLE} { return 9; }
