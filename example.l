@@ -179,4 +179,25 @@ workitemaid			{ return  WORKITEMAID;}
 workgroupsize		{ return  WORKGROUPSIZE;}
 NDRangesize			{ return  NDRANGESIZE;}
 NDRangegroups		{ return  NDRANGEGROUPS; }
+
+add					{ return  ADD;}
+carry				{ return  CARRY; }
+borrow				{ return  BORROW; }
+div					{ return  DIV; }
+rem					{ return  REM; }
+sub					{ return  SUB; }
+shl					{ return  SHL;}
+shr					{ return  SHR;}
+and					{ return  AND;}
+xor					{ return  XOR;}
+or					{ return  OR;}
+unpacklo			{ return  UNPACKLO;}
+unpackhi			{ return  UNPACKHI;}
+movd_lo				{ return  MOVD_LO;}
+movd_hi				{ return  MOVD_HI;}
+copysign			{ return  COPYSIGN;}
+class				{ return  CLASS;}
+send				{ return  SEND;}
+receive				{ return  RECEIVE;}
+
 .	{ fprintf(stderr, "unexpected char"); return 0;}
