@@ -4,6 +4,7 @@
 #include "tokens.h"
 
 int int_val;
+float float_val;
 %}
 OCT_INT		([+|-]?0[0-7]*)
 DEC_INT		([+|-]?(0|([1-9]*[0-9]+)))

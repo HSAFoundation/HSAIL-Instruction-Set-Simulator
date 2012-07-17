@@ -4,6 +4,7 @@
 #include "../tokens.h"
 
 extern int int_val;
+extern float float_val;
 
 TEST(LexTest, Bug1) {
   std::string input("foo");
@@ -52,18 +53,21 @@ TEST(LexTest, Bug12) {
   std::string input("0.5e3f");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
+  EXPECT_EQ(0.5e3f, float_val);
 }
 
 TEST(LexTest, Bug23) {
-  std::string input("0xA.0f");
+  std::string input("0x1.0p0f");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0f, float_val);
 }
 
 TEST(LexTest, Bug24) {
-  std::string input("0f00000001");
+  std::string input("0f3F800000");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0f, float_val);
 }
 
 TEST(LexTest, Bug26) {
