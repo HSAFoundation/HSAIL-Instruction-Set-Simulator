@@ -194,6 +194,40 @@ boundaryV			{ return  BOUNDARYV; }
 boundaryW			{ return  BOUNDARYW; }
 
 
+
+
+	/*-- Atom Modifiers --*/
+_ar				{ return _AR;}
+_region			{ return _REGION;}
+atomic_cas		{ return ATOMIC_CAS;}
+atomic			{ return ATOMIC;}
+atomicNoRet		{ return ATOMICNORET;}
+atomicNoRet_cas		{ return ATOMICNORET_CAS;}
+atomic_image		{ return ATOMIC_IMAGE;}
+atomicNoRet_image	{ return ATOMICNORET_IMAGE;}
+
+cvt				{ return CVT;}
+
+_dep			{ return _DEP;}
+_equiv			{ return _EQUIV;}
+_acq			{ return _ACQ;}
+_rel			{ return _REL;}
+ld				{ return LD;}
+sync			{ return SYNC;}
+barrier			{ return BARRIER;}
+segmentp		{ return SEGMENTP;}
+ftos			{ return FTOS;}
+stof			{ return STOF; }
+mov				{ return MOV;}
+lad				{ return LAD;}
+ldc				{ return LDC;}
+ret				{ return RET;}
+packedcmp		{ return PACKEDCMP;}
+cmp				{ return CMP;}
+st				{ return ST;}
+
+
+
 	/* -- geometry ID -- */
 _1d				{ return _1D;}
 _2d				{ return _2D;}
