@@ -194,6 +194,18 @@ boundaryV			{ return  BOUNDARYV; }
 boundaryW			{ return  BOUNDARYW; }
 
 
+	/*-- mul --*/
+mul				{ return MUL;}
+mul_hi			{ return MUL_HI;}
+mul24_hi		{ return MUL24_HI;}
+mul24			{ return MUL24;}
+mad24			{ return MAD24;}
+mad24_hi		{ return MAD24_HI;}
+
+f2u4			{ return F2U4;}
+
+
+
 	/*-- Atom Modifiers --*/
 _ar				{ return _AR;}
 _region			{ return _REGION;}
