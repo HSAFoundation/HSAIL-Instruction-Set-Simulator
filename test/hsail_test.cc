@@ -122,7 +122,9 @@ TEST(LexTest, Bug21) {
   EXPECT_EQ(TOKEN_WAVESIZE,yylex());
 }
 
-TEST(LexTest, Bug22) {
+TEST(LexTest, Bug22) {			// common keywords
+
+
   std::string input("workgroupid");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(WORKGROUPID,yylex());
@@ -239,3 +241,34 @@ TEST(LexTest, Bug22) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(LOC,yylex());
 }
+
+TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
+  std::string input("_readonly");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_READONLY,yylex());
+  
+  input.assign("_kernarg");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_KERNARG,yylex());
+  
+  input.assign("_global");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_GLOBAL,yylex());
+  
+  input.assign("_private");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_PRIVATE,yylex());
+  
+  input.assign("_arg");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_ARG,yylex());
+  
+  input.assign("_group");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_GROUP,yylex());
+  
+  input.assign("_spill");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SPILL,yylex());
+  
+ }

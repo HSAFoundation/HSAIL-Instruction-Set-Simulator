@@ -41,5 +41,17 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  SPILL,
 				  GROUP,
 				  READONLY,
-				  LOC
+				  LOC,
+				  
+				  /* addressSpaceIdentifier keywords */
+				  _READONLY,
+				  _KERNARG,
+				  _GLOBAL,
+				  _PRIVATE,
+				  _ARG,
+				  _GROUP,
+				  _SPILL
+				  
+				  
+				  
 		 };  // begin from 258 to avoid conflict with ASCII characters
