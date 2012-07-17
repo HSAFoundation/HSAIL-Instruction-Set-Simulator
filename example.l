@@ -200,4 +200,22 @@ class				{ return  CLASS;}
 send				{ return  SEND;}
 receive				{ return  RECEIVE;}
 
+
+max					{ return  MAX;}
+min					{ return  MIN;}
+
+mad					{ return  MAD;}
+extract				{ return  EXTRACT;}
+insert				{ return  INSERT;}
+shuffle				{ return  SHUFFLE;}
+cmov				{ return  CMOV;}
+fma					{ return  FMA;}
+bitalign			{ return  BITALIGN;}
+bytealign			{ return  BYTEALIGN;}
+lerp				{ return  LERP;}
+sad					{ return  SAD;}
+sad2				{ return  SAD2;}
+sad4				{ return  SAD4;}
+sad4hi				{ return  SAD4HI;}
+bitselect			{ return  BITSELECT;}
 .	{ fprintf(stderr, "unexpected char"); return 0;}
