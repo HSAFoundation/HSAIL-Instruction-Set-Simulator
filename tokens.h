@@ -163,7 +163,18 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  SAD2,
 				  SAD4,
 				  SAD4HI,
-				  BITSELECT
+				  BITSELECT,
+				  
+				  _AND_,
+				  _OR_,
+				  _XOR_,
+				  _EXCH_,
+				  _ADD_,
+				  _SUB_,
+				  _INC_,
+				  _DEC_,
+				  _MAX_,
+				  _MIN_
 				
 				 
 				  

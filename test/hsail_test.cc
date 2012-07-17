@@ -751,3 +751,49 @@ TEST(LexTest, Bug42) {
   EXPECT_EQ(BITSELECT,yylex());
   
   }
+  
+        
+TEST(LexTest, Bug43) {				// AtomicOperationId
+  std::string input("_and");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_AND_,yylex());
+  
+  input.assign("_or");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_OR_,yylex());
+  
+  input.assign("_xor");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_XOR_,yylex());
+  
+  input.assign("_exch");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_EXCH_,yylex());
+  
+    
+  input.assign("_add");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_ADD_,yylex());
+  
+  input.assign("_sub");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SUB_,yylex());
+  
+  input.assign("_inc");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_INC_,yylex());
+  
+  input.assign("_dec");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_DEC_,yylex());
+  
+  input.assign("_max");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_MAX_,yylex());
+  
+  input.assign("_min");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_MIN_,yylex());
+ 
+  
+  }
