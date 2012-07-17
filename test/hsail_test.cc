@@ -59,3 +59,9 @@ TEST(LexTest, Bug23) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(6,yylex());
 }
+
+TEST(LexTest, Bug24) {
+  std::string input("0f00000001");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(7,yylex());
+}
