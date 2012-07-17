@@ -71,3 +71,10 @@ TEST(LexTest, Bug17) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_LOCAL_IDENTIFIER,yylex());
 }
+
+
+TEST(LexTest, Bug18) {
+  std::string input("&Test_global_id_123");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_GLOBAL_IDENTIFIER,yylex());
+}

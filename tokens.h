@@ -3,5 +3,6 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  TOKEN_SREGISTER,
 				  TOKEN_QREGISTER,
 				  TOKEN_COMMENT,
-				  TOKEN_LOCAL_IDENTIFIER
+				  TOKEN_LOCAL_IDENTIFIER,
+				  TOKEN_GLOBAL_IDENTIFIER
 				 };  // begin from 258 to avoid conflict with ASCII characters
