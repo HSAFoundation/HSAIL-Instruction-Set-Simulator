@@ -174,7 +174,37 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  _INC_,
 				  _DEC_,
 				  _MAX_,
-				  _MIN_
+				  _MIN_,
+				  
+				  /* comparison*/
+				  _EQ,
+				  _NE,
+				  _LT,
+				  _LE,
+				  _GT,
+				  _GE,
+				  _EQU,
+				  _NEU,
+				  _LTU,
+				  _LEU,
+				  _GTU,
+				  _GEU,
+				  _NUM,
+				  _NAN,
+				  _SEQ,
+				  _SNE,
+				  _SLT,
+				  _SLE,
+				  _SGT,
+				  _SGE,
+				  _SNUM,
+				  _SNAN,
+				  _SEQU,
+				  _SNEU,
+				  _SLTU,
+				  _SLEU,
+				  _SGTU,
+				  _SGEU
 				
 				 
 				  

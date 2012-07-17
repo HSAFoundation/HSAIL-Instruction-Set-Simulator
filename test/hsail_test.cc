@@ -794,6 +794,124 @@ TEST(LexTest, Bug43) {				// AtomicOperationId
   input.assign("_min");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_MIN_,yylex());
+}
+  
+  
+         
+TEST(LexTest, Bug44) {				// Comparison
+  std::string input("_eq");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_EQ,yylex());
+  
+  input.assign("_ne");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_NE,yylex());
+  
+  input.assign("_lt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_LT,yylex());
+  
+  input.assign("_le");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_LE,yylex());
+  
+    
+  input.assign("_gt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_GT,yylex());
+  
+  input.assign("_ge");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_GE,yylex());
+  
+  input.assign("_equ");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_EQU,yylex());
+  
+  input.assign("_neu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_NEU,yylex());
+  
+  input.assign("_ltu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_LTU,yylex());
+  
+  input.assign("_leu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_LEU,yylex());
  
+   input.assign("_gtu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_GTU,yylex());
+  
+  input.assign("_geu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_GEU,yylex());
+  
+  input.assign("_num");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_NUM,yylex());
+  
+    
+  input.assign("_nan");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_NAN,yylex());
+  
+  input.assign("_seq");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SEQ,yylex());
+  
+  input.assign("_sne");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SNE,yylex());
+  
+  input.assign("_slt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SLT,yylex());
+  
+  input.assign("_sle");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SLE,yylex());
+  
+  input.assign("_sgt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SGT,yylex());
+  
+    input.assign("_sge");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SGE,yylex());
+  
+  input.assign("_snum");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SNUM,yylex());
+  
+  input.assign("_snan");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SNAN,yylex());
+  
+  input.assign("_sequ");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SEQU,yylex());
+  
+  input.assign("_sneu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SNEU,yylex());
+  
+  input.assign("_sltu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SLTU,yylex());
+  
+    input.assign("_sleu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SLEU,yylex());
+  
+  input.assign("_sgtu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SGTU,yylex());
+  
+  input.assign("_sgeu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SGEU,yylex());
+
   
   }
