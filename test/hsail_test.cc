@@ -112,3 +112,121 @@ TEST(LexTest, Bug21) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_WAVESIZE,yylex());
 }
+
+TEST(LexTest, Bug22) {
+  std::string input("workgroupid");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WORKGROUPID,yylex());
+  
+  input.assign("version");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(VERSION,yylex());
+  
+  input.assign("global");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(GLOBAL,yylex());
+  
+  input.assign("_Samp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SAMP,yylex());
+  
+  input.assign("_RWImg");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_RWIMG,yylex());
+  
+  input.assign("_ROImg");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_ROIMG,yylex());
+  
+  input.assign("align");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ALIGN,yylex());
+  
+  input.assign("file");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_FILE,yylex());
+  
+  input.assign("arg");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ARG,yylex());
+  
+    input.assign("kernarg");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(KERNARG,yylex());
+  
+  input.assign("function");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FUNCTION,yylex());
+  
+  input.assign(":fbar");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_FBAR,yylex());
+  
+  input.assign("signature");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SIGNATURE,yylex());
+  
+    input.assign("block");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BLOCK,yylex());
+  
+  input.assign("endblock");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ENDBLOCK,yylex());
+  
+  input.assign("blocknumeric");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BLOCKNUMERIC,yylex());
+  
+    input.assign("blockstring");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BLOCKSTRING,yylex());
+  
+  input.assign("kernel");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(KERNEL,yylex());
+  
+  input.assign("pragma");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(PRAGMA,yylex());
+  
+  input.assign("labeltargets");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LABELTARGETS,yylex());
+  
+    input.assign("extension");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(EXTENSION,yylex());
+  
+  input.assign("extern");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(EXTERN,yylex());
+  
+  input.assign("static");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(STATIC,yylex());
+  
+    input.assign("const");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CONST,yylex());
+  
+  input.assign("private");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(PRIVATE,yylex());
+  
+  input.assign("spill");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SPILL,yylex());
+  
+  input.assign("group");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(GROUP,yylex());
+ 
+   input.assign("readonly");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(READONLY,yylex());
+  
+  input.assign("loc");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LOC,yylex());
+}
