@@ -10,6 +10,7 @@ DEC_INT		([+|-]?(0|([1-9]*[0-9]+)))
 HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)	
 
 DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(f|F))
+HEX_SINGLE	(0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(f|F))
 
 %%
 [a-z]+ { return 1; }
@@ -18,6 +19,7 @@ DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0
 {HEX_INT} { int_val = strtol(yytext, NULL, 16); return TOKEN_INTEGER_CONSTANT; }
 
 {DEC_SINGLE} { return 5; }
+{HEX_SINGLE} { return 6; }
 
 \$c(0|1|2|3|4|5|6|7) 	{ return TOKEN_CREGISTER;}
 \$d(0|1|2|3|4|5|6|7) 	{ return TOKEN_DREGISTER;}
