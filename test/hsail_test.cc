@@ -83,3 +83,9 @@ TEST(LexTest, Bug18) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_GLOBAL_IDENTIFIER,yylex());
 }
+
+TEST(LexTest, Bug19) {
+  std::string input(" \" This is a string \" ");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_STRING,yylex());
+}
