@@ -2,16 +2,22 @@
 %{
 #include <stdio.h>
 #include "tokens.h"
+
+int int_val;
 %}
 OCT_INT		([+|-]?0[0-7]*)
 DEC_INT		([+|-]?(0|([1-9]*[0-9]+)))
 HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)	
 %x INLINE_COMMENT
 %x COMMENT
+DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(f|F))
+
 %%
-{OCT_INT} { return 3; } 
-{DEC_INT} { return 2; }
-{HEX_INT} { return 4; }
+{OCT_INT} { int_val = strtol(yytext, NULL, 8); return TOKEN_INTEGER_CONSTANT; } 
+{DEC_INT} { int_val = strtol(yytext, NULL, 10); return TOKEN_INTEGER_CONSTANT; }
+{HEX_INT} { int_val = strtol(yytext, NULL, 16); return TOKEN_INTEGER_CONSTANT; }
+
+{DEC_SINGLE} { return 5; }
 
 "/*"					{ BEGIN (COMMENT); }
 <COMMENT>"*/"			{ BEGIN (INITIAL); return TOKEN_COMMENT; }
