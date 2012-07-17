@@ -7,11 +7,6 @@ extern int int_val;
 extern float float_val;
 extern double double_val;
 
-TEST(LexTest, Bug1) {
-  std::string input("foo");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(1,yylex());
-}
 
 TEST(LexTest, Bug2) {
   std::string input("12345");
