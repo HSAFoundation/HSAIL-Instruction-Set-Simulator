@@ -158,4 +158,13 @@ fbar_releaseCF		{ return  FBAR_RELEASECF; }
 count				{ return  COUNT; }
 mask				{ return  MASK; }
 
+sqrt				{ return  SQRT; }
+fract				{ return  FRACT; }
+fcos				{ return  FCOS; }
+fsin				{ return  FSIN; }
+flog2				{ return  FLOG2; }
+fexp2				{ return  FEXP2; }
+fsqrt				{ return  FSQRT; }
+frsqrt				{ return  FRSQRT; }
+frcp				{ return  FRCP; }
 .	{ fprintf(stderr, "unexpected char"); return 0;}

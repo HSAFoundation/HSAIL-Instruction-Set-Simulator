@@ -554,6 +554,6 @@ TEST(LexTest, Bug39) {
   
   input.assign("frcp");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(FRSQRT,yylex());
+  EXPECT_EQ(FRCP,yylex());
   
   }
