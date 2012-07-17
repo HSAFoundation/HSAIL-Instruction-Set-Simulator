@@ -21,6 +21,7 @@ TEST(LexTest, Bug3) {
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT,yylex());
   EXPECT_EQ(16,int_val);
 }
+
 TEST(LexTest, Bug4) {
   std::string input("$c7");
   yy_scan_string((char*)input.c_str());
@@ -63,14 +64,13 @@ TEST(LexTest, Bug10) {
   EXPECT_EQ(TOKEN_COMMENT,yylex());
 }
 
-
-
 TEST(LexTest, Bug11) {
   std::string input("0x11");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT,yylex());
   EXPECT_EQ(17,int_val);
 }
+
 TEST(LexTest, Bug12) {
   std::string input("0.5e3f");
   yy_scan_string((char*)input.c_str());
@@ -78,47 +78,11 @@ TEST(LexTest, Bug12) {
   EXPECT_EQ(0.5e3f, float_val);
 }
 
-TEST(LexTest, Bug23) {
-  std::string input("0x1.0p0f");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
-  EXPECT_EQ(1.0f, float_val);
-}
-
-TEST(LexTest, Bug24) {
-  std::string input("0f3F800000");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
-  EXPECT_EQ(1.0f, float_val);
-}
-
-TEST(LexTest, Bug26) {
-  std::string input("0.5e3l");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
-  EXPECT_EQ(0.5e3, double_val);
-}
-
-TEST(LexTest, Bug28) {
-  std::string input("0x1.0l");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
-  EXPECT_EQ(1.0, double_val);
-}
-
-TEST(LexTest, Bug29) {
-  std::string input("0d3FF0000000000000");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
-  EXPECT_EQ(1.0, double_val);
-}
-
 TEST(LexTest, Bug17) {
   std::string input("%Test_id_123");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_LOCAL_IDENTIFIER,yylex());
 }
-
 
 TEST(LexTest, Bug18) {
   std::string input("&Test_global_id_123");
@@ -281,6 +245,20 @@ TEST(LexTest, Bug22) {			// common keywords
   EXPECT_EQ(LOC,yylex());
 }
 
+TEST(LexTest, Bug23) {
+  std::string input("0x1.0p0f");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0f, float_val);
+}
+
+TEST(LexTest, Bug24) {
+  std::string input("0f3F800000");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0f, float_val);
+}
+
 TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   std::string input("_readonly");
   yy_scan_string((char*)input.c_str());
@@ -312,6 +290,13 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   
  }
  
+TEST(LexTest, Bug26) {
+  std::string input("0.5e3l");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(0.5e3, double_val);
+}
+
  TEST(LexTest, Bug27) {				// keywords _v2 and _v4
   std::string input("_v2");
   yy_scan_string((char*)input.c_str());
@@ -320,6 +305,20 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   input.assign("_v4");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_V4,yylex());
+}
+
+TEST(LexTest, Bug28) {
+  std::string input("0x1.0l");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0, double_val);
+}
+
+TEST(LexTest, Bug29) {
+  std::string input("0d3FF0000000000000");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0, double_val);
 }
 
  TEST(LexTest, Bug30) {				// keywords format, order, coord, filter, boundaryU, boundaryV, boundaryW
@@ -499,8 +498,7 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   EXPECT_EQ(DEBUGTRAP,yylex());
  }
  
- 
-TEST(LexTest, Bug38) {			
+ TEST(LexTest, Bug38) {			
   std::string input("abs");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(ABS,yylex());
@@ -555,7 +553,6 @@ TEST(LexTest, Bug38) {
   EXPECT_EQ(MASK,yylex());  
   
   }
-  
    
 TEST(LexTest, Bug39) {			
   std::string input("sqrt");
@@ -596,8 +593,7 @@ TEST(LexTest, Bug39) {
   EXPECT_EQ(FRCP,yylex());
   
   }
-  
-     
+      
 TEST(LexTest, Bug40) {			
   std::string input("unpack3");
   yy_scan_string((char*)input.c_str());
@@ -640,8 +636,7 @@ TEST(LexTest, Bug40) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(NDRANGEGROUPS,yylex());
   }
-  
-      
+        
 TEST(LexTest, Bug41) {			
   std::string input("add");
   yy_scan_string((char*)input.c_str());
@@ -721,8 +716,7 @@ TEST(LexTest, Bug41) {
   EXPECT_EQ(RECEIVE,yylex());
  
   }
-  
-       
+         
 TEST(LexTest, Bug42) {			
   std::string input("max");
   yy_scan_string((char*)input.c_str());
@@ -790,8 +784,7 @@ TEST(LexTest, Bug42) {
   EXPECT_EQ(BITSELECT,yylex());
   
   }
-  
-        
+         
 TEST(LexTest, Bug43) {				// AtomicOperationId
   std::string input("_and");
   yy_scan_string((char*)input.c_str());
@@ -834,9 +827,7 @@ TEST(LexTest, Bug43) {				// AtomicOperationId
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_MIN_,yylex());
 }
-  
-  
-         
+        
 TEST(LexTest, Bug44) {				// Comparison
   std::string input("_eq");
   yy_scan_string((char*)input.c_str());
@@ -954,8 +945,42 @@ TEST(LexTest, Bug44) {				// Comparison
 
   
 }
+
+ TEST(LexTest, Bug45) {				// keywords for queryOp
+  std::string input("query_order");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_ORDER,yylex());
   
-           
+  input.assign("query_data");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_DATA,yylex());
+  
+  input.assign("query_array");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_ARRAY,yylex());
+  
+  input.assign("query_width");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_WIDTH,yylex());
+  
+  input.assign("query_depth");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_DEPTH,yylex());
+  
+  input.assign("query_height");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_HEIGHT,yylex());
+  
+  input.assign("query_normalized");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_NORMALIZED,yylex());
+
+  input.assign("query_filtering");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(QUERY_FILTERING,yylex());
+
+}
+        
 TEST(LexTest, Bug46) {				// Rounding modes
   std::string input("_upi");
   yy_scan_string((char*)input.c_str());
@@ -991,8 +1016,7 @@ TEST(LexTest, Bug46) {				// Rounding modes
   EXPECT_EQ(_NEAR,yylex());
   
 }
-
-          
+   
 TEST(LexTest, Bug47) {				// packing modes
   std::string input("_pp");
   yy_scan_string((char*)input.c_str());
@@ -1042,10 +1066,47 @@ TEST(LexTest, Bug47) {				// packing modes
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_S_SAT,yylex());
   
+}      
+
+ TEST(LexTest, Bug48) {				// keywords for geometry ID
+  std::string input("_1d");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_1D,yylex());
+  
+  input.assign("_2d");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_2D,yylex());
+  
+  input.assign("_3d");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_3D,yylex());
+  
+  input.assign("_1db");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_1DB,yylex());
+  
+  input.assign("_1da");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_1DA,yylex());
+  
+  input.assign("_2da");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_2DA,yylex());
+  
+  input.assign("rd_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(RD_IMAGE,yylex());
+
+  input.assign("ld_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LD_IMAGE,yylex());
+
+  input.assign("st_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ST_IMAGE,yylex());
+
 }
-  
-  
-          
+		   
 TEST(LexTest, Bug49) {				// targets
   std::string input("$small");
   yy_scan_string((char*)input.c_str());
@@ -1072,9 +1133,8 @@ TEST(LexTest, Bug49) {				// targets
   EXPECT_EQ(_NOSFTZ,yylex());
    
 }  
-
-          
-TEST(LexTest, Bug45) {				
+   
+TEST(LexTest, Bug50) {				
   std::string input("width");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(WIDTH,yylex());
@@ -1087,8 +1147,146 @@ TEST(LexTest, Bug45) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(DEPTH,yylex());
 }
-  
 
+ TEST(LexTest, Bug51) {				// keywords for Atom Modifiers
+  std::string input("_ar");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_AR,yylex());
+  
+  input.assign("_region");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_REGION,yylex());
+  
+  input.assign("atomic_cas");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMIC_CAS,yylex());
+  
+  input.assign("atomic");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMIC,yylex());
+  
+  input.assign("atomicNoRet");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMICNORET,yylex());
+  
+  input.assign("atomicNoRet_cas");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMICNORET_CAS,yylex());
+  
+  input.assign("atomic_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMIC_IMAGE,yylex());
+
+  input.assign("atomicNoRet_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMICNORET_IMAGE,yylex());
+
+  input.assign("cvt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CVT,yylex());
+
+  input.assign("_dep");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_DEP,yylex());
+  
+  input.assign("_equiv");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_EQUIV,yylex());
+  
+  input.assign("_acq");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_ACQ,yylex());
+  
+  input.assign("_rel");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_REL,yylex());
+  
+  input.assign("ld");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LD,yylex());
+  
+  input.assign("sync");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SYNC,yylex());
+
+  input.assign("barrier");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BARRIER,yylex());
+
+  input.assign("segmentp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SEGMENTP,yylex());
+
+  input.assign("ftos");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FTOS,yylex());
+  
+  input.assign("stof");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(STOF,yylex());
+  
+  input.assign("mov");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MOV,yylex());
+  
+  input.assign("lad");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LAD,yylex());
+  
+  input.assign("ldc");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LDC,yylex());
+  
+  input.assign("ret");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(RET,yylex());
+
+  input.assign("packedcmp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(PACKEDCMP,yylex());
+
+  input.assign("cmp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CMP,yylex());
+  
+  input.assign("st");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ST,yylex());
+
+
+
+}
+
+ TEST(LexTest, Bug52) {				// keywords for mul
+  std::string input("mul");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MUL,yylex());
+  
+  input.assign("mul_hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MUL_HI,yylex());
+  
+  input.assign("mul24_hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MUL24_HI,yylex());
+  
+  input.assign("mul24");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MUL24,yylex());
+  
+  input.assign("mad24");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MAD24,yylex());
+  
+  input.assign("mad24_hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MAD24_HI,yylex());
+  
+  input.assign("f2u4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(F2U4,yylex());
+}
+       
 TEST(LexTest, Bug53) {			// dataTypeId		
   std::string input("_u8");
   yy_scan_string((char*)input.c_str());
@@ -1263,8 +1461,6 @@ TEST(LexTest, Bug53) {			// dataTypeId
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_U64X2,yylex());   
 }  
-
-
           
 TEST(LexTest, Bug54) {				
   std::string input("_ftz");

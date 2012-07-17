@@ -440,4 +440,78 @@ _ftz				{ return _FTZ;}
 nop					{ return NOP;}
 clock				{ return CLOCK;}
 syscall				{ return SYSCALL;}
+
+
+	/*-- mul --*/
+mul				{ return MUL;}
+mul_hi			{ return MUL_HI;}
+mul24_hi		{ return MUL24_HI;}
+mul24			{ return MUL24;}
+mad24			{ return MAD24;}
+mad24_hi		{ return MAD24_HI;}
+
+f2u4			{ return F2U4;}
+
+
+
+	/*-- Atom Modifiers --*/
+_ar				{ return _AR;}
+_region			{ return _REGION;}
+atomic_cas		{ return ATOMIC_CAS;}
+atomic			{ return ATOMIC;}
+atomicNoRet		{ return ATOMICNORET;}
+atomicNoRet_cas		{ return ATOMICNORET_CAS;}
+atomic_image		{ return ATOMIC_IMAGE;}
+atomicNoRet_image	{ return ATOMICNORET_IMAGE;}
+
+cvt				{ return CVT;}
+
+
+_dep			{ return _DEP;}
+_equiv			{ return _EQUIV;}
+_acq			{ return _ACQ;}
+_rel			{ return _REL;}
+ld				{ return LD;}
+sync			{ return SYNC;}
+barrier			{ return BARRIER;}
+segmentp		{ return SEGMENTP;}
+ftos			{ return FTOS;}
+stof			{ return STOF; }
+mov				{ return MOV;}
+lad				{ return LAD;}
+ldc				{ return LDC;}
+ret				{ return RET;}
+packedcmp		{ return PACKEDCMP;}
+cmp				{ return CMP;}
+st				{ return ST;}
+
+
+
+	/* -- geometry ID -- */
+_1d				{ return _1D;}
+_2d				{ return _2D;}
+_3d				{ return _3D;}
+_1db			{ return _1DB;}
+_1da			{ return _1DA;}
+_2da			{ return _2DA;}
+
+rd_image		{ return RD_IMAGE;}
+ld_image		{ return LD_IMAGE;}
+st_image		{ return ST_IMAGE;}
+
+
+
+
+	/* -- queryOp --*/
+query_order		{ return QUERY_ORDER;}
+query_data		{ return QUERY_DATA;}
+query_array		{ return QUERY_ARRAY;}
+query_width		{ return QUERY_WIDTH;}
+query_depth		{ return QUERY_DEPTH;}
+query_height		{ return QUERY_HEIGHT;}
+query_normalized	{ return QUERY_NORMALIZED;}
+query_filtering		{ return QUERY_FILTERING;}
+
+
+
 .	{ fprintf(stderr, "unexpected char"); return 0;}

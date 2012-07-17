@@ -288,13 +288,67 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 		 _FTZ,
 		 NOP,
 		 CLOCK,
-		 SYSCALL
-		 
+		 SYSCALL,
+		 				
+		  /* Atom Modifiers */
+		  _AR,
+		  _REGION,
+		  ATOMIC_CAS,
+		  ATOMIC,
+		  ATOMICNORET,
+		  ATOMICNORET_CAS,
+		  ATOMIC_IMAGE,
+		  ATOMICNORET_IMAGE,
 
+		  CVT,
+		  _DEP,
+		  _EQUIV,
+		  _ACQ,
+		  _REL,
+		  LD,
+		  SYNC,
+		  BARRIER,
+		  SEGMENTP,
+		  FTOS,
+		  STOF,
+		  MOV,
+		  LAD,
+		  LDC,
+		  RET,
+		  PACKEDCMP,
+		  CMP,
+		  ST,
+
+
+		  /* mul */
+		  MUL,
+		  MUL_HI,
+		  MUL24_HI,
+		  MUL24,
+		  MAD24,
+		  MAD24_HI,
+		  F2U4,
+		  
+		  /* geometry ID */
+		  _1D,
+		  _2D,
+		  _3D,
+		  _1DB,
+		  _1DA,
+		  _2DA,
+
+		  RD_IMAGE,
+		  LD_IMAGE,
+		  ST_IMAGE,		  
 				
-				 
-				  
-				
-		  		  
+		  /* queryOp */
+		  QUERY_ORDER,
+		  QUERY_DATA,
+		  QUERY_ARRAY,
+		  QUERY_WIDTH,
+		  QUERY_DEPTH,
+		  QUERY_HEIGHT,
+		  QUERY_NORMALIZED,
+		  QUERY_FILTERING
 		 };  // begin from 258 to avoid conflict with ASCII characters
 
