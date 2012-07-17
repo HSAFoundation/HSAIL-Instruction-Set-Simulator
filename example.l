@@ -260,4 +260,15 @@ _sltu				{ return  _SLTU;}
 _sleu				{ return  _SLEU;}
 _sgtu				{ return  _SGTU;}
 _sgeu				{ return  _SGEU;}
+
+	/*-- rounding --*/
+_upi				{ return  _UPI;}
+_downi				{ return  _DOWNI;}
+_zeroi				{ return  _ZEROI;}
+_neari				{ return  _NEARI;}
+
+_up					{ return  _UP;}
+_down				{ return  _DOWN;}
+_zero				{ return  _ZERO;}
+_near				{ return  _NEAR;}
 .	{ fprintf(stderr, "unexpected char"); return 0;}
