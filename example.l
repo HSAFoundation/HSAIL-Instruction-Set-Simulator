@@ -193,4 +193,18 @@ boundaryU			{ return  BOUNDARYU; }
 boundaryV			{ return  BOUNDARYV; }
 boundaryW			{ return  BOUNDARYW; }
 
+
+
+
+	/* -- queryOp --*/
+query_order		{ return QUERY_ORDER;}
+query_data		{ return QUERY_DATA;}
+query_array		{ return QUERY_ARRAY;}
+query_width		{ return QUERY_WIDTH;}
+query_depth		{ return QUERY_DEPTH;}
+query_height		{ return QUERY_HEIGHT;}
+query_normalized	{ return QUERY_NORMALIZED;}
+query_filtering		{ return QUERY_FILTERING;}
+
+
 .	{ fprintf(stderr, "unexpected char"); return 0;}
