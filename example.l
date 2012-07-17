@@ -123,4 +123,25 @@ itemsperworkgroup	{ return  ITEMS_PER_WORKGROUP; }
 workgroupspercu		{ return  WORKGROUPS_PER_CU; }
 memopt_on			{ return  MEMOPT_ON; }
 memopt_off			{ return  MEMOPT_OFF; }
+
+	/* -- Opcode -- */
+fbar_initSizeWg		{ return  FBAR_INITSIZEWG; }
+fbar_wait			{ return  FBAR_WAIT; }
+fbar_arrive			{ return  FBAR_ARRIVE; }
+fbar_skip			{ return  FBAR_SKIP; }
+fbar_release		{ return  FBAR_RELEASE; }
+countup				{ return  COUNTUP; }
+
+laneid				{ return  LANEID; }
+dynwaveid			{ return  DYNWAVEID; }
+maxdynwaveid		{ return  MAXDYNWAVEID; }
+dispatchid			{ return  DISPATCHID; }
+cu					{ return  CU; }
+workdim				{ return  WORKDIM; }
+workitemid_flat		{ return  WORKITEMID_FLAT; }
+workitemaid_flat	{ return  WORKITEMAID_FLAT; }
+debugtrap			{ return  DEBUGTRAP; }
+
+
+
 .	{ fprintf(stderr, "unexpected char"); return 0;}

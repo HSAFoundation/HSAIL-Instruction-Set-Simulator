@@ -89,7 +89,22 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  WORKDIM,
 				  WORKITEMID_FLAT,
 				  WORKITEMAID_FLAT,
-				  DEBUGTRAP
+				  DEBUGTRAP,
+				  
+				  ABS,
+				  NEG,
+				  NOT,
+				  POPCOUNT,
+				  FIRSTBIT,
+				  LASTBIT,
+				  BITREV,
+				  MOVS_LO,
+				  MOVS_HI,
+				  FBAR_INITSIZE,
+				  FBAR_INIT,
+				  FBAR_RELEASECF,
+				  COUNT,
+				  MASK
 				 
 				  
 				

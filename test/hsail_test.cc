@@ -393,6 +393,8 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
  }
  
   TEST(LexTest, Bug37) {				// opcodes 
+  
+  
   std::string input("fbar_initSizeWg");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(FBAR_INITSIZEWG,yylex());
@@ -457,3 +459,60 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(DEBUGTRAP,yylex());
  }
+ 
+ 
+TEST(LexTest, Bug38) {			
+  std::string input("abs");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ABS,yylex());
+  
+  input.assign("neg");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(NEG,yylex());
+  
+  input.assign("not");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(NOT,yylex());
+  
+  input.assign("popcount");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(POPCOUNT,yylex());
+  
+    
+  input.assign("firstbit");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FIRSTBIT,yylex());
+  
+  input.assign("lastbit");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LASTBIT,yylex());
+  
+  input.assign("bitrev");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BITREV,yylex());
+  
+  input.assign("movs_lo");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MOVS_LO,yylex());
+  
+  input.assign("movs_hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MOVS_HI,yylex());
+  
+  input.assign("fbar_initSize");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FBAR_INITSIZE,yylex());
+  
+  input.assign("fbar_releaseCF");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FBAR_RELEASECF,yylex());
+  
+  input.assign("count");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(COUNT,yylex());
+  
+  input.assign("mask");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MASK,yylex());  
+  
+  }
