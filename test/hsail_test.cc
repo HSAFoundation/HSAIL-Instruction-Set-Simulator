@@ -534,3 +534,33 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
 
 
 }
+
+ TEST(LexTest, Bug52) {				// keywords for mul
+  std::string input("mul");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MUL,yylex());
+  
+  input.assign("mul_hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MUL_HI,yylex());
+  
+  input.assign("mul24_hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MUL24_HI,yylex());
+  
+  input.assign("mul24");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MUL24,yylex());
+  
+  input.assign("mad24");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MAD24,yylex());
+  
+  input.assign("mad24_hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MAD24_HI,yylex());
+  
+  input.assign("f2u4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(F2U4,yylex());
+}

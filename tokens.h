@@ -96,6 +96,16 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 		  PACKEDCMP,
 		  CMP,
 		  ST,
+
+
+		  /* mul */
+		  MUL,
+		  MUL_HI,
+		  MUL24_HI,
+		  MUL24,
+		  MAD24,
+		  MAD24_HI,
+		  F2U4,
 		  
 
 

@@ -194,8 +194,6 @@ boundaryV			{ return  BOUNDARYV; }
 boundaryW			{ return  BOUNDARYW; }
 
 
-
-
 	/*-- Atom Modifiers --*/
 _ar				{ return _AR;}
 _region			{ return _REGION;}
