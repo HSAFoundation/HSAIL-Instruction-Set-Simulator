@@ -42,4 +42,36 @@ HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)
 (wrap|clamp|mirror|mirroronce|border) {return TOKEN_PROPERTY;}
 
 WAVESIZE			{return TOKEN_WAVESIZE; }
+
+	/* keywords */
+workgroupid			{ return WORKGROUPID; printf("WORKGROUPID\n");}
+version				{ return VERSION; }
+global				{ return GLOBAL; }
+_Samp				{ return _SAMP; }
+_RWImg				{ return _RWIMG; }
+_ROImg				{ return _ROIMG; }
+align				{ return ALIGN; }
+file				{ return _FILE; }
+arg					{ return ARG; }
+kernarg				{ return KERNARG; }
+function			{ return FUNCTION; }
+:fbar				{ return _FBAR; }
+signature			{ return SIGNATURE; }
+block				{ return BLOCK; }
+endblock			{ return ENDBLOCK; }
+blocknumeric		{ return BLOCKNUMERIC; }
+blockstring			{ return BLOCKSTRING; }
+kernel				{ return KERNEL; }
+pragma				{ return PRAGMA; }
+labeltargets		{ return LABELTARGETS; }
+extension			{ return EXTENSION; }
+extern				{ return EXTERN; }
+static				{ return STATIC; }
+const				{ return CONST; }
+private				{ return PRIVATE; }
+spill				{ return SPILL; }
+group				{ return GROUP; }
+readonly			{ return READONLY; }
+loc					{ return LOC; }
+
 .	{ fprintf(stderr, "unexpected char"); return 0;}
