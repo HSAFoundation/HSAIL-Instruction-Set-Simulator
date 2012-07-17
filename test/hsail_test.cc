@@ -331,7 +331,7 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   EXPECT_EQ(MEMOPT_OFF,yylex());
  }
  
-  TEST(LexTest, Bug34) {				//control keywords
+  TEST(LexTest, Bug34) {				//punctuations
   std::string input("+");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ('+',yylex());
@@ -390,4 +390,70 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   input.assign(",");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(',',yylex());
+ }
+ 
+  TEST(LexTest, Bug37) {				// opcodes 
+  std::string input("fbar_initSizeWg");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FBAR_INITSIZEWG,yylex());
+  
+  input.assign("fbar_wait");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FBAR_WAIT,yylex());
+  
+  input.assign("fbar_arrive");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FBAR_ARRIVE,yylex());
+  
+  input.assign("fbar_skip");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FBAR_SKIP,yylex());
+  
+    
+  input.assign("fbar_release");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FBAR_RELEASE,yylex());
+  
+  input.assign("countup");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(COUNTUP,yylex());
+  
+  input.assign("laneid");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LANEID,yylex());
+  
+  input.assign("dynwaveid");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(DYNWAVEID,yylex());
+  
+    
+  input.assign("maxdynwaveid");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MAXDYNWAVEID,yylex());
+  
+  input.assign("dispatchid");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(DISPATCHID,yylex());
+  
+  input.assign("cu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CU,yylex());
+  
+    
+  input.assign("workdim");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WORKDIM,yylex());
+  
+  input.assign("workitemid_flat");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WORKITEMID_FLAT,yylex());
+  
+  input.assign("workitemaid_flat");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WORKITEMAID_FLAT,yylex());
+  
+    
+  input.assign("debugtrap");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(DEBUGTRAP,yylex());
  }

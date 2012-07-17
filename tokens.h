@@ -71,7 +71,26 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  ITEMS_PER_WORKGROUP,
 				  WORKGROUPS_PER_CU,
 				  MEMOPT_ON,
-				  MEMOPT_OFF
+				  MEMOPT_OFF,
+				  
+				  /* opcode */
+				  FBAR_INITSIZEWG,
+				  FBAR_WAIT,
+				  FBAR_ARRIVE,
+				  FBAR_SKIP,
+				  FBAR_RELEASE,
+				  COUNTUP,
+				  
+				  LANEID,
+				  DYNWAVEID,
+				  MAXDYNWAVEID,
+				  DISPATCHID,
+				  CU,
+				  WORKDIM,
+				  WORKITEMID_FLAT,
+				  WORKITEMAID_FLAT,
+				  DEBUGTRAP
+				 
 				  
 				
 				  
