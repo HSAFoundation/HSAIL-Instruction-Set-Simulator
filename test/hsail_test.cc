@@ -15,12 +15,14 @@ TEST(LexTest, Bug2) {
   std::string input("12345");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT,yylex());
+  EXPECT_EQ(12345,int_val);
 }
 
 TEST(LexTest, Bug3) {
   std::string input("020");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT,yylex());
+  EXPECT_EQ(16,int_val);
 }
 TEST(LexTest, Bug4) {
   std::string input("$c7");
@@ -41,9 +43,10 @@ TEST(LexTest, Bug6) {
 }
 
 TEST(LexTest, Bug11) {
-  std::string input("0x2f");
+  std::string input("0x11");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT,yylex());
+  EXPECT_EQ(17,int_val);
 }
 TEST(LexTest, Bug12) {
   std::string input("0.5e3f");
