@@ -1088,3 +1088,178 @@ TEST(LexTest, Bug45) {
   EXPECT_EQ(DEPTH,yylex());
 }
   
+
+TEST(LexTest, Bug53) {			// dataTypeId		
+  std::string input("_u8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U8,yylex());
+  
+  input.assign("_u16");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U16,yylex());
+  
+  input.assign("_u32");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U32,yylex());
+  
+  input.assign("_u64");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U64,yylex());
+
+  input.assign("_s8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S8,yylex());
+
+  input.assign("_s16");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S16,yylex());
+
+  input.assign("_s32");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S32,yylex());
+
+  input.assign("_s64");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S64,yylex());
+
+  input.assign("_f16");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F16,yylex());
+
+  input.assign("_f32");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F32,yylex());
+
+  input.assign("_f64");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F64,yylex());
+
+  input.assign("_b1");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B1,yylex());
+
+  input.assign("_b8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B8,yylex());
+
+  input.assign("_b16");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B16,yylex());
+
+  input.assign("_b32");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B32,yylex());  
+  
+  input.assign("_b64");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B64,yylex());
+
+  input.assign("_b128");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B128,yylex());
+
+  input.assign("_b32");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B32,yylex()); 
+  
+  input.assign("_b8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B8,yylex());
+
+  input.assign("_b16");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B16,yylex());
+
+  input.assign("_b32");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_B32,yylex()); 
+  
+
+  input.assign("_u8x4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U8X4,yylex());
+
+  input.assign("_s8x4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S8X4,yylex());
+
+  input.assign("_u16x2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U16X2,yylex());  
+  
+  input.assign("_s16x2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S16X2,yylex());
+
+  input.assign("_f16x2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F16X2,yylex());
+
+  input.assign("_f32x2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F32X2,yylex()); 
+  
+  input.assign("_u8x8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U8X8,yylex());
+
+  input.assign("_s8x8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S8X8,yylex());
+
+  input.assign("_u16x4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U16X4,yylex());   
+  
+    input.assign("_s16x4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S16X4,yylex());
+
+  input.assign("_f16x4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F16X4,yylex());  
+  
+  input.assign("_u8x16");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U8X16,yylex());
+
+  input.assign("_s8x16");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S8X16,yylex());
+
+  input.assign("_u16x8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U16X8,yylex()); 
+  
+  input.assign("_s16x8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S16X8,yylex());
+
+  input.assign("_f16x8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F16X8,yylex());
+
+  input.assign("_f32x4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F32X4,yylex());  
+  
+  input.assign("_s32x4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S32X4,yylex());  
+
+  input.assign("_u32x4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U32X4,yylex());  
+
+  input.assign("_f64x2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_F64X2,yylex());    
+  
+  input.assign("_s64x2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S64X2,yylex()); 
+
+  input.assign("_u64x2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_U64X2,yylex());   
+}  
