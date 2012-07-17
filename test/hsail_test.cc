@@ -330,3 +330,64 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(MEMOPT_OFF,yylex());
  }
+ 
+  TEST(LexTest, Bug34) {				//control keywords
+  std::string input("+");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('+',yylex());
+  
+  input.assign("-");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('-',yylex());
+  
+  input.assign("=");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('=',yylex());
+  
+  input.assign("<");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('<',yylex());
+  
+    
+  input.assign(">");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('>',yylex());
+  
+  input.assign("[");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('[',yylex());
+  
+  input.assign("]");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(']',yylex());
+  
+  input.assign("{");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('{',yylex());
+  
+    
+  input.assign("}");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('}',yylex());
+  
+  input.assign("(");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ('(',yylex());
+  
+  input.assign(")");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(')',yylex());
+  
+    
+  input.assign(":");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(':',yylex());
+  
+  input.assign(";");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(';',yylex());
+  
+  input.assign(",");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(',',yylex());
+ }

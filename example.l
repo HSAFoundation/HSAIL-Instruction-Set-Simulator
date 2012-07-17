@@ -101,4 +101,10 @@ filter				{ return  FILTER; }
 boundaryU			{ return  BOUNDARYU; }
 boundaryV			{ return  BOUNDARYV; }
 boundaryW			{ return  BOUNDARYW; }
+
+	/* -- control -- */
+itemsperworkgroup	{ return  ITEMS_PER_WORKGROUP; }
+workgroupspercu		{ return  WORKGROUPS_PER_CU; }
+memopt_on			{ return  MEMOPT_ON; }
+memopt_off			{ return  MEMOPT_OFF; }
 .	{ fprintf(stderr, "unexpected char"); return 0;}
