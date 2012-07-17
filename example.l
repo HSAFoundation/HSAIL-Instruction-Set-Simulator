@@ -1,4 +1,4 @@
-%option noyywrap
+%option noyywrap 
 %{
 #include <stdio.h>
 #include "tokens.h"
@@ -135,6 +135,7 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 <COMMENT><<EOF>>		{ printf("%d: Unterminated comment\n", yylineno); return 0; }
 
 "//"					{ BEGIN(INLINE_COMMENT); }
+<INLINE_COMMENT>.		{}
 <INLINE_COMMENT>\n		{ BEGIN(INITIAL); return TOKEN_COMMENT;}
 <INLINE_COMMENT><<EOF>>		{ printf("%d: Unterminated comment\n", yylineno); return 0; }
 
