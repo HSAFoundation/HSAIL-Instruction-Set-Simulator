@@ -6,7 +6,7 @@
 OCT_INT		([+|-]?0[0-7]*)
 DEC_INT		([+|-]?(0|([1-9]*[0-9]+)))
 HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)	
-
+%x INLINE_COMMENT
 %x COMMENT
 %%
 [a-z]+ { return 1; }
@@ -18,6 +18,10 @@ HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)
 <COMMENT>"*/"			{ BEGIN (INITIAL); return TOKEN_COMMENT; }
 <COMMENT>([^*]|\n)+|./"*/" 	{}
 <COMMENT><<EOF>>		{ printf("%d: Unterminated comment\n", yylineno); return 0; }
+
+"//"					{ BEGIN(INLINE_COMMENT); }
+<INLINE_COMMENT>\n		{ BEGIN(INITIAL); return TOKEN_COMMENT;}
+<INLINE_COMMENT><<EOF>>		{ printf("%d: Unterminated comment\n", yylineno); return 0; }
 
 \$c(0|1|2|3|4|5|6|7) 	{ return TOKEN_CREGISTER;}
 \$d(0|1|2|3|4|5|6|7) 	{ return TOKEN_DREGISTER;}
