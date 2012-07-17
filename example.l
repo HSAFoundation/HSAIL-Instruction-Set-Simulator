@@ -91,4 +91,14 @@ _spill				{ return  _SPILL; }
 	/* -- vector -- */
 _v2					{ return _V2; }
 _v4					{ return _V4; }
+
+
+	/* -- init -- */
+format				{ return  FORMAT; }
+order				{ return  ORDER; }
+coord				{ return  COORD; }
+filter				{ return  FILTER; }
+boundaryU			{ return  BOUNDARYU; }
+boundaryV			{ return  BOUNDARYV; }
+boundaryW			{ return  BOUNDARYW; }
 .	{ fprintf(stderr, "unexpected char"); return 0;}
