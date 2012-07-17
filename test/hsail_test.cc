@@ -65,3 +65,9 @@ TEST(LexTest, Bug24) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(7,yylex());
 }
+
+TEST(LexTest, Bug26) {
+  std::string input("0.5e3l");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(8,yylex());
+}
