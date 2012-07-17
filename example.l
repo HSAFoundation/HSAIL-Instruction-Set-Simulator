@@ -79,5 +79,12 @@ spill				{ return SPILL; }
 group				{ return GROUP; }
 readonly			{ return READONLY; }
 loc					{ return LOC; }
-
+	/* -- addressSpaceIdentifier -- */
+_readonly			{ return  _READONLY; }
+_kernarg			{ return  _KERNARG; 	}
+_global				{ return  _GLOBAL; }	
+_private			{ return  _PRIVATE; }
+_arg				{ return  _ARG; 	}
+_group				{ return  _GROUP; }
+_spill				{ return  _SPILL; }
 .	{ fprintf(stderr, "unexpected char"); return 0;}
