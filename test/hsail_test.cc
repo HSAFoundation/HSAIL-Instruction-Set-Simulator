@@ -33,17 +33,22 @@ TEST(LexTest, Bug5) {
   EXPECT_EQ(TOKEN_DREGISTER,yylex());
 }
 
+TEST(LexTest, Bug6) {
+  std::string input("$s15");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_SREGISTER,yylex());
+}
+
 TEST(LexTest, Bug7) {
   std::string input("$q5");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_QREGISTER,yylex());
 }
 
-
-TEST(LexTest, Bug6) {
-  std::string input("$s15");
+TEST(LexTest, Bug8) {
+  std::string input("@Go_to_this");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(TOKEN_SREGISTER,yylex());
+  EXPECT_EQ(TOKEN_LABEL,yylex());
 }
 
 TEST(LexTest, Bug9) {
