@@ -282,3 +282,33 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_V4,yylex());
 }
+
+ TEST(LexTest, Bug30) {				// keywords _v2 and _v4
+  std::string input("format");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FORMAT,yylex());
+  
+  input.assign("order");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ORDER,yylex());
+  
+  input.assign("coord");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(COORD,yylex());
+  
+  input.assign("filter");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FILTER,yylex());
+  
+  input.assign("boundaryU");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BOUNDARYU,yylex());
+  
+  input.assign("boundaryV");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BOUNDARYV,yylex());
+  
+  input.assign("boundaryW");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BOUNDARYW,yylex());
+}

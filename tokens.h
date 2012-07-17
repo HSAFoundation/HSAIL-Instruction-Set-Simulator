@@ -54,7 +54,17 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  
 				  /* vector*/
 				  _V2,
-				  _V4
+				  _V4,
+				  
+				  /* init */
+				  FORMAT,
+				  ORDER,
+				  COORD,
+				  FILTER,
+				  BOUNDARYU,
+				  BOUNDARYV,
+				  BOUNDARYW
+				  
 				  
 				  
 				  
