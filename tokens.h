@@ -50,7 +50,11 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  _PRIVATE,
 				  _ARG,
 				  _GROUP,
-				  _SPILL
+				  _SPILL,
+				  
+				  /* vector*/
+				  _V2,
+				  _V4
 				  
 				  
 				  

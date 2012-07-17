@@ -272,3 +272,13 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   EXPECT_EQ(_SPILL,yylex());
   
  }
+ 
+ TEST(LexTest, Bug27) {				// keywords _v2 and _v4
+  std::string input("_v2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_V2,yylex());
+  
+  input.assign("_v4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_V4,yylex());
+}
