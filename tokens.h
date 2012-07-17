@@ -104,7 +104,17 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  FBAR_INIT,
 				  FBAR_RELEASECF,
 				  COUNT,
-				  MASK
+				  MASK,
+				  
+				  SQRT,
+				  FRACT,
+				  FCOS,
+				  FSIN,
+				  FLOG2,
+				  FEXP2,
+				  FSQRT,
+				  FRSQRT,
+				  FRCP
 				 
 				  
 				

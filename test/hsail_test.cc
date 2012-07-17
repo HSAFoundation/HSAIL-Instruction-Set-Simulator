@@ -516,3 +516,44 @@ TEST(LexTest, Bug38) {
   EXPECT_EQ(MASK,yylex());  
   
   }
+  
+   
+TEST(LexTest, Bug39) {			
+  std::string input("sqrt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SQRT,yylex());
+  
+  input.assign("fract");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FRACT,yylex());
+  
+  input.assign("fcos");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FCOS,yylex());
+  
+  input.assign("fsin");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FSIN,yylex());
+  
+    
+  input.assign("flog2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FLOG2,yylex());
+  
+  input.assign("fexp2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FEXP2,yylex());
+  
+  input.assign("fsqrt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FSQRT,yylex());
+  
+  input.assign("frsqrt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FRSQRT,yylex());
+  
+  input.assign("frcp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FRSQRT,yylex());
+  
+  }
