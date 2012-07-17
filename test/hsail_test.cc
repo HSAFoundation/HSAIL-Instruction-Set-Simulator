@@ -4,6 +4,9 @@
 #include "../tokens.h"
 
 extern int int_val;
+extern float float_val;
+extern double double_val;
+
 
 TEST(LexTest, Bug2) {
   std::string input("12345");
@@ -61,6 +64,7 @@ TEST(LexTest, Bug10) {
 }
 
 
+
 TEST(LexTest, Bug11) {
   std::string input("0x11");
   yy_scan_string((char*)input.c_str());
@@ -70,9 +74,44 @@ TEST(LexTest, Bug11) {
 TEST(LexTest, Bug12) {
   std::string input("0.5e3f");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(5,yylex());
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
+  EXPECT_EQ(0.5e3f, float_val);
 }
 
+TEST(LexTest, Bug23) {
+  std::string input("0x1.0p0f");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0f, float_val);
+}
+
+TEST(LexTest, Bug24) {
+  std::string input("0f3F800000");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0f, float_val);
+}
+
+TEST(LexTest, Bug26) {
+  std::string input("0.5e3l");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(0.5e3, double_val);
+}
+
+TEST(LexTest, Bug28) {
+  std::string input("0x1.0l");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0, double_val);
+}
+
+TEST(LexTest, Bug29) {
+  std::string input("0d3FF0000000000000");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0, double_val);
+}
 
 TEST(LexTest, Bug17) {
   std::string input("%Test_id_123");
