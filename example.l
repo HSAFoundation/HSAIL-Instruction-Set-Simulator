@@ -19,6 +19,22 @@ DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0
 
 {DEC_SINGLE} { return 5; }
 
+	/* puctuation */
+"+" |
+"-" |
+"=" |
+"<" |
+">" |
+"[" |
+"]" |
+"{" |
+"}" |
+"(" |
+")" |
+":" |
+";" |
+","		               { return yytext[0];}
+
 "/*"					{ BEGIN (COMMENT); }
 <COMMENT>"*/"			{ BEGIN (INITIAL); return TOKEN_COMMENT; }
 <COMMENT>([^*]|\n)+|./"*/" 	{}

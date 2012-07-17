@@ -12,6 +12,8 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  TOKEN_PROPERTY,
 				  TOKEN_WAVESIZE,
 				  
+
+				  
 				  /* common keywords */
 				  WORKGROUPID,
 				  VERSION,
