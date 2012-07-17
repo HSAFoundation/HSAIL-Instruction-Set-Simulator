@@ -87,4 +87,8 @@ _private			{ return  _PRIVATE; }
 _arg				{ return  _ARG; 	}
 _group				{ return  _GROUP; }
 _spill				{ return  _SPILL; }
+
+	/* -- vector -- */
+_v2					{ return _V2; }
+_v4					{ return _V4; }
 .	{ fprintf(stderr, "unexpected char"); return 0;}
