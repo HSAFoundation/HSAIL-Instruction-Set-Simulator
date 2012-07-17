@@ -5,6 +5,26 @@
 
 int int_val;
 float float_val;
+
+/* helper function for IEEE to Single */
+float ieee754tof(char* text) {
+	float floatval;
+	unsigned int mem_single=0; 
+	unsigned int first; 
+	char first2[3]; 
+	
+	first2[0] = text[2]; 
+	first2[1] = text[3]; 
+	first2[2] = '\0';
+	first = strtol(first2, NULL, 16); 
+	mem_single = strtol(text+4, NULL, 16); 
+	first = first << 24; 
+	mem_single += first; 
+	memcpy(&floatval, &mem_single, sizeof(float)); 
+	
+	return floatval;
+}
+
 %}
 OCT_INT		([+|-]?0[0-7]*)
 DEC_INT		([+|-]?(0|([1-9]*[0-9]+)))
@@ -23,9 +43,9 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 {DEC_INT} { int_val = strtol(yytext, NULL, 10); return TOKEN_INTEGER_CONSTANT; }
 {HEX_INT} { int_val = strtol(yytext, NULL, 16); return TOKEN_INTEGER_CONSTANT; }
 
-{DEC_SINGLE} { return TOKEN_SINGLE_CONSTANT; }
-{HEX_SINGLE} { return TOKEN_SINGLE_CONSTANT; }
-{IEEE_SINGLE} { return TOKEN_SINGLE_CONSTANT; }
+{DEC_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
+{HEX_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
+{IEEE_SINGLE} { float_val = ieee754tof(yytext); return TOKEN_SINGLE_CONSTANT; }
 
 {DEC_DOUBLE} { return 8; }
 {HEX_DOUBLE} { return 9; }
