@@ -393,4 +393,45 @@ width				{ return WIDTH;}
 height				{ return HEIGHT;}
 depth				{ return DEPTH;}
 
+
+	/*-- dataTypeId --*/
+_u32				{ return  _U32;}
+_s32				{ return  _S32;}
+_s64				{ return  _S64;}
+_u64				{ return  _U64;}
+_b1					{ return  _B1;}
+_b32				{ return  _B32;}
+_f64				{ return  _F64;}
+_f32				{ return  _F32;}
+_b64				{ return  _B64;}
+_b8					{ return  _B8;}
+_b16				{ return  _B16;}
+_s8					{ return  _S8;}
+_s16				{ return  _S16;}
+_u8					{ return  _U8;}
+_u16				{ return  _U16;}
+_f16				{ return  _F16;}
+_b128				{ return  _B128;}
+_u8x4				{ return  _U8X4;}
+_s8x4				{ return  _S8X4;}
+_u16x2				{ return  _U16X2;}
+_s16x2				{ return  _S16X2;}
+_f16x2				{ return  _F16X2;}
+_f32x2				{ return  _F32X2;}
+_u8x8				{ return  _U8X8;}
+_s8x8				{ return  _S8X8;}
+_u16x4				{ return  _U16X4;}
+_s16x4				{ return  _S16X4;}
+_f16x4				{ return  _F16X4;}
+_u8x16				{ return  _U8X16;}
+_s8x16				{ return  _S8X16;}
+_u16x8				{ return  _U16X8;}
+_s16x8				{ return  _S16X8;}
+_f16x8				{ return  _F16X8;}
+_f32x4				{ return  _F32X4;}
+_s32x4				{ return  _S32X4;}
+_u32x4				{ return  _U32X4;}
+_f64x2				{ return  _F64X2;}
+_s64x2				{ return  _S64X2;}
+_u64x2				{ return  _U64X2;}
 .	{ fprintf(stderr, "unexpected char"); return 0;}
