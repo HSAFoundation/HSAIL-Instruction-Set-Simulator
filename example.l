@@ -167,4 +167,16 @@ fexp2				{ return  FEXP2; }
 fsqrt				{ return  FSQRT; }
 frsqrt				{ return  FRSQRT; }
 frcp				{ return  FRCP; }
+
+
+unpack3				{ return  UNPACK3; }
+unpack2				{ return  UNPACK2; }
+unpack1				{ return  UNPACK1; }
+unpack0				{ return  UNPACK0; }
+alloca				{ return  ALLOCA;}
+workitemid			{ return  WORKITEMID; }
+workitemaid			{ return  WORKITEMAID;}
+workgroupsize		{ return  WORKGROUPSIZE;}
+NDRangesize			{ return  NDRANGESIZE;}
+NDRangegroups		{ return  NDRANGEGROUPS; }
 .	{ fprintf(stderr, "unexpected char"); return 0;}

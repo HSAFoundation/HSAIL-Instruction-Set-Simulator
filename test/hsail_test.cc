@@ -557,3 +557,47 @@ TEST(LexTest, Bug39) {
   EXPECT_EQ(FRCP,yylex());
   
   }
+  
+     
+TEST(LexTest, Bug40) {			
+  std::string input("unpack3");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(UNPACK3,yylex());
+  
+  input.assign("unpack2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(UNPACK2,yylex());
+  
+  input.assign("unpack1");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(UNPACK1,yylex());
+  
+  input.assign("unpack0");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(UNPACK0,yylex());
+  
+    
+  input.assign("alloca");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ALLOCA,yylex());
+  
+  input.assign("workitemid");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WORKITEMID,yylex());
+  
+  input.assign("workitemaid");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WORKITEMAID,yylex());
+  
+  input.assign("workgroupsize");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WORKGROUPSIZE,yylex());
+  
+  input.assign("NDRangesize");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(NDRANGESIZE,yylex());
+  
+  input.assign("NDRangegroups");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(NDRANGEGROUPS,yylex());
+  }

@@ -114,7 +114,18 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  FEXP2,
 				  FSQRT,
 				  FRSQRT,
-				  FRCP
+				  FRCP,
+				  
+				  UNPACK3,
+				  UNPACK2,
+				  UNPACK1,
+				  UNPACK0,
+				  ALLOCA,
+				  WORKITEMID,
+				  WORKITEMAID,
+				  WORKGROUPSIZE,
+				  NDRANGESIZE,
+				  NDRANGEGROUPS
 				 
 				  
 				
