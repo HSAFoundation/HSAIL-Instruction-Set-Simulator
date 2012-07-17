@@ -207,4 +207,6 @@ query_normalized	{ return QUERY_NORMALIZED;}
 query_filtering		{ return QUERY_FILTERING;}
 
 
+
+
 .	{ fprintf(stderr, "unexpected char"); return 0;}

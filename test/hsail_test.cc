@@ -386,3 +386,42 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   EXPECT_EQ(QUERY_FILTERING,yylex());
 
 }
+
+ TEST(LexTest, Bug48) {				// keywords for queryOp
+  std::string input("_1d");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_1D,yylex());
+  
+  input.assign("_2d");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_2D,yylex());
+  
+  input.assign("_3d");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_3D,yylex());
+  
+  input.assign("_1db");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_1DB,yylex());
+  
+  input.assign("_1da");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_1DA,yylex());
+  
+  input.assign("_2da");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_2DA,yylex());
+  
+  input.assign("rd_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(RD_IMAGE,yylex());
+
+  input.assign("ld_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LD_IMAGE,yylex());
+
+  input.assign("st_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ST_IMAGE,yylex());
+
+}

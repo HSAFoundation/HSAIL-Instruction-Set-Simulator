@@ -73,10 +73,20 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 
 
 
+		  /* geometry ID */
+		  _1D,
+		  _2D,
+		  _3D,
+		  _1DB,
+		  _1DA,
+		  _2DA,
+
+		  RD_IMAGE,
+		  LD_IMAGE,
+		  ST_IMAGE,
 
 
-
-		 /* queryOp */
+		  /* queryOp */
 		  QUERY_ORDER,
 		  QUERY_DATA,
 		  QUERY_ARRAY,
