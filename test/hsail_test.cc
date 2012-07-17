@@ -952,4 +952,56 @@ TEST(LexTest, Bug46) {				// Rounding modes
   EXPECT_EQ(_NEAR,yylex());
   
 }
+
+          
+TEST(LexTest, Bug47) {				// packing modes
+  std::string input("_pp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_PP,yylex());
+  
+  input.assign("_ps");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_PS,yylex());
+  
+  input.assign("_sp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SP,yylex());
+  
+  input.assign("_ss");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SS,yylex());
+  
+  input.assign("_s");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(__S,yylex());
+  
+  input.assign("_p");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(__P,yylex());
+    
+  input.assign("_pp_sat");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_PP_SAT,yylex());
+  
+  input.assign("_ps_sat");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_PS_SAT,yylex());
+  
+  input.assign("_sp_sat");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SP_SAT,yylex());
+  
+  input.assign("_ss_sat");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SS_SAT,yylex());
+  
+  input.assign("_p_sat");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_P_SAT,yylex());
+  
+  input.assign("_s_sat");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_S_SAT,yylex());
+  
+}
   

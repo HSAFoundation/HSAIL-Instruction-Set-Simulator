@@ -215,7 +215,22 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  _UP,
 				  _DOWN,
 				  _ZERO,
-				  _NEAR
+				  _NEAR,
+				  
+				  /* packing */
+				  _PP,
+				  _PS,
+				  _SP,
+				  _SS,
+				  __S,
+				  __P,
+				  _PP_SAT,
+				  _PS_SAT,
+				  _SP_SAT,
+				  _SS_SAT,
+				  _S_SAT,
+				  _P_SAT
+				 
 				
 				 
 				  
