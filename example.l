@@ -13,9 +13,9 @@ DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0
 
 %%
 [a-z]+ { return 1; }
-{OCT_INT} { return TOKEN_INTEGER_CONSTANT; } 
-{DEC_INT} { return TOKEN_INTEGER_CONSTANT; }
-{HEX_INT} { return TOKEN_INTEGER_CONSTANT; }
+{OCT_INT} { int_val = strtol(yytext, NULL, 8); return TOKEN_INTEGER_CONSTANT; } 
+{DEC_INT} { int_val = strtol(yytext, NULL, 10); return TOKEN_INTEGER_CONSTANT; }
+{HEX_INT} { int_val = strtol(yytext, NULL, 16); return TOKEN_INTEGER_CONSTANT; }
 
 {DEC_SINGLE} { return 5; }
 
