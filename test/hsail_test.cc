@@ -77,3 +77,9 @@ TEST(LexTest, Bug28) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(9,yylex());
 }
+
+TEST(LexTest, Bug29) {
+  std::string input("0xA.0l");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(10,yylex());
+}
