@@ -64,3 +64,10 @@ TEST(LexTest, Bug11) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(4,yylex());
 }
+
+
+TEST(LexTest, Bug17) {
+  std::string input("%Test_id_123");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_LOCAL_IDENTIFIER,yylex());
+}
