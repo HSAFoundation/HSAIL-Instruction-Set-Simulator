@@ -283,7 +283,7 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   EXPECT_EQ(_V4,yylex());
 }
 
- TEST(LexTest, Bug30) {				// keywords _v2 and _v4
+ TEST(LexTest, Bug30) {				// keywords format, order, coord, filter, boundaryU, boundaryV, boundaryW
   std::string input("format");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(FORMAT,yylex());
@@ -312,3 +312,21 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(BOUNDARYW,yylex());
 }
+
+ TEST(LexTest, Bug33) {				//control keywords
+  std::string input("itemsperworkgroup");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ITEMS_PER_WORKGROUP,yylex());
+  
+  input.assign("workgroupspercu");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WORKGROUPS_PER_CU,yylex());
+  
+  input.assign("memopt_on");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MEMOPT_ON,yylex());
+  
+  input.assign("memopt_off");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MEMOPT_OFF,yylex());
+ }

@@ -63,7 +63,15 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  FILTER,
 				  BOUNDARYU,
 				  BOUNDARYV,
-				  BOUNDARYW
+				  BOUNDARYW,
+				  
+				  /* control */
+				  ITEMS_PER_WORKGROUP,
+				  WORKGROUPS_PER_CU,
+				  MEMOPT_ON,
+				  MEMOPT_OFF
+				  
+				
 				  
 				  
 				  
