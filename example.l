@@ -285,4 +285,13 @@ _sp_sat				{ return  _SP_SAT;}
 _ss_sat				{ return  _SS_SAT;}
 _s_sat				{ return  _S_SAT;}
 _p_sat				{ return  _P_SAT;}
+
+	/*-- target --*/
+\$small				{return  _SMALL;}
+\$large				{return  _LARGE;}
+\$full				{ return  _FULL;}
+\$reduced			{ return  _REDUCED;}
+\$sftz				{ return  _SFTZ;}
+\$nosftz			{ return  _NOSFTZ;}		
+
 .	{ fprintf(stderr, "unexpected char"); return 0;}
