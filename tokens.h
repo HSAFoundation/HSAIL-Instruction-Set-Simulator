@@ -204,7 +204,18 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  _SLTU,
 				  _SLEU,
 				  _SGTU,
-				  _SGEU
+				  _SGEU,
+				  
+				  /* rounding */
+				  _UPI,
+				  _DOWNI,
+				  _ZEROI,
+				  _NEARI,
+				  
+				  _UP,
+				  _DOWN,
+				  _ZERO,
+				  _NEAR
 				
 				 
 				  

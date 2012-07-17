@@ -914,4 +914,42 @@ TEST(LexTest, Bug44) {				// Comparison
   EXPECT_EQ(_SGEU,yylex());
 
   
-  }
+}
+  
+           
+TEST(LexTest, Bug46) {				// Rounding modes
+  std::string input("_upi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_UPI,yylex());
+  
+  input.assign("_downi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_DOWNI,yylex());
+  
+  input.assign("_zeroi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_ZEROI,yylex());
+  
+  input.assign("_neari");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_NEARI,yylex());
+  
+    
+  input.assign("_up");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_UP,yylex());
+  
+  input.assign("_down");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_DOWN,yylex());
+  
+  input.assign("_zero");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_ZERO,yylex());
+  
+  input.assign("_near");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_NEAR,yylex());
+  
+}
+  
