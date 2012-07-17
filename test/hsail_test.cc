@@ -73,17 +73,17 @@ TEST(LexTest, Bug24) {
 TEST(LexTest, Bug26) {
   std::string input("0.5e3l");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(8,yylex());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
 }
 
 TEST(LexTest, Bug28) {
   std::string input("0xA.0l");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(9,yylex());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
 }
 
 TEST(LexTest, Bug29) {
   std::string input("0d0000000000000001");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(10,yylex());
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
 }
