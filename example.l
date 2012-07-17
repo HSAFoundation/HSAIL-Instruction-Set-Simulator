@@ -97,21 +97,6 @@ DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0
 HEX_SINGLE	(0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(f|F))
 IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 %%
-
-{OCT_INT} { int_val = strtol(yytext, NULL, 8); return TOKEN_INTEGER_CONSTANT; } 
-{DEC_INT} { int_val = strtol(yytext, NULL, 10); return TOKEN_INTEGER_CONSTANT; }
-{HEX_INT} { int_val = strtol(yytext, NULL, 16); return TOKEN_INTEGER_CONSTANT; }
-
-{DEC_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
-{HEX_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
-{IEEE_SINGLE} { float_val = ieee754tof(yytext); return TOKEN_SINGLE_CONSTANT; }
-
-
-
-{DEC_DOUBLE} { double_val = strtod(yytext,NULL); return TOKEN_DOUBLE_CONSTANT; }
-{HEX_DOUBLE} { double_val = strtod(yytext,NULL); return TOKEN_DOUBLE_CONSTANT; }
-{IEEE_DOUBLE} { double_val = ieee754tod(yytext); return TOKEN_DOUBLE_CONSTANT; }
-
 	/* puctuation */
 "+" |
 "-" |
@@ -127,6 +112,22 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 ":" |
 ";" |
 ","		               { return yytext[0];}
+
+{OCT_INT} { int_val = strtol(yytext, NULL, 8); return TOKEN_INTEGER_CONSTANT; } 
+{DEC_INT} { int_val = strtol(yytext, NULL, 10); return TOKEN_INTEGER_CONSTANT; }
+{HEX_INT} { int_val = strtol(yytext, NULL, 16); return TOKEN_INTEGER_CONSTANT; }
+
+{DEC_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
+{HEX_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
+{IEEE_SINGLE} { float_val = ieee754tof(yytext); return TOKEN_SINGLE_CONSTANT; }
+
+
+
+{DEC_DOUBLE} {double_val = strtod(yytext,NULL); return TOKEN_DOUBLE_CONSTANT; }
+{HEX_DOUBLE} {double_val = strtod(yytext,NULL); return TOKEN_DOUBLE_CONSTANT; }
+{IEEE_DOUBLE} {  double_val = ieee754tod(yytext); return TOKEN_DOUBLE_CONSTANT; }
+
+
 
 "/*"					{ BEGIN (COMMENT); }
 <COMMENT>"*/"			{ BEGIN (INITIAL); return TOKEN_COMMENT; }
