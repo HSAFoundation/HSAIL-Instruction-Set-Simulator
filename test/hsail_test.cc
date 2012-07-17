@@ -16,7 +16,11 @@ TEST(LexTest, Bug2) {
   EXPECT_EQ(2,yylex());
 }
 
-
+TEST(LexTest, Bug3) {
+  std::string input("010");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(3,yylex());
+}
 TEST(LexTest, Bug4) {
   std::string input("$c7");
   yy_scan_string((char*)input.c_str());
