@@ -1031,6 +1031,21 @@ TEST(LexTest, Bug49) {				// targets
   input.assign("$nosftz");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_NOSFTZ,yylex());
- 
-  
+   
 }  
+
+          
+TEST(LexTest, Bug45) {				
+  std::string input("width");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(WIDTH,yylex());
+  
+  input.assign("height");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(HEIGHT,yylex());
+  
+  input.assign("depth");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(DEPTH,yylex());
+}
+  

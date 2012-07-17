@@ -237,7 +237,11 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  _FULL,
 				  _REDUCED,
 				  _SFTZ,
-				  _NOSFTZ
+				  _NOSFTZ,
+				  
+				  WIDTH,
+				  HEIGHT,
+				  DEPTH
 				 
 				
 				 
