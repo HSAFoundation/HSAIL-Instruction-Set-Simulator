@@ -230,4 +230,34 @@ _inc				{ return  _INC_;}
 _dec				{ return  _DEC_;}
 _max				{ return   _MAX_;}
 _min				{ return   _MIN_;}
+
+	/*-- comparison --*/
+_eq					{ return  _EQ;}
+_ne					{ return  _NE;}
+_lt					{ return  _LT;}
+_le					{ return  _LE;}
+_gt					{ return  _GT;}
+_ge					{ return  _GE;}
+_equ				{ return  _EQU;}
+_neu				{ return  _NEU;}
+_ltu				{ return  _LTU;}
+_leu				{ return  _LEU;}
+_gtu				{ return  _GTU;}
+_geu				{ return  _GEU;}
+_num				{ return  _NUM;}
+_nan				{ return  _NAN;}
+_seq				{ return  _SEQ;}
+_sne				{ return  _SNE;}
+_slt				{ return  _SLT;}
+_sle				{ return  _SLE;}
+_sgt				{ return  _SGT;}
+_sge				{ return  _SGE;}
+_snum				{ return  _SNUM;}
+_snan				{ return  _SNAN;}
+_sequ				{ return  _SEQU;}
+_sneu				{ return  _SNEU;}
+_sltu				{ return  _SLTU;}
+_sleu				{ return  _SLEU;}
+_sgtu				{ return  _SGTU;}
+_sgeu				{ return  _SGEU;}
 .	{ fprintf(stderr, "unexpected char"); return 0;}
