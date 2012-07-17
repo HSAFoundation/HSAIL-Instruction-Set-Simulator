@@ -7,5 +7,6 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  TOKEN_GLOBAL_IDENTIFIER,
 				  TOKEN_LABEL,
 				  TOKEN_STRING,
-				  TOKEN_PROPERTY
+				  TOKEN_PROPERTY,
+				  TOKEN_WAVESIZE
 				 };  // begin from 258 to avoid conflict with ASCII characters

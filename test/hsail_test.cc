@@ -104,6 +104,11 @@ TEST(LexTest, Bug20) {
   input.assign("wrap");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_PROPERTY,yylex());
+ 
+}
 
-  
+TEST(LexTest, Bug21) {
+  std::string input("WAVESIZE");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_WAVESIZE,yylex());
 }
