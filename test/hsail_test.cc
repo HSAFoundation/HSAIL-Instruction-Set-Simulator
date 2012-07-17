@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "lexer.h"
 #include <string>
-#include "tokens.h"
+#include "../tokens.h"
 
 
 TEST(LexTest, Bug1) {
@@ -21,4 +21,10 @@ TEST(LexTest, Bug4) {
   std::string input("$c7");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_CREGISTER,yylex());
+}
+
+TEST(LexTest, Bug5) {
+  std::string input("$d7");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_DREGISTER,yylex());
 }
