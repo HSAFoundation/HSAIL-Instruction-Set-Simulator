@@ -387,7 +387,7 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
 
 }
 
- TEST(LexTest, Bug48) {				// keywords for queryOp
+ TEST(LexTest, Bug48) {				// keywords for geometry ID
   std::string input("_1d");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_1D,yylex());
@@ -423,5 +423,114 @@ TEST(LexTest, Bug25) {			// addressSpaceIdentifier keywords
   input.assign("st_image");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(ST_IMAGE,yylex());
+
+}
+
+ TEST(LexTest, Bug51) {				// keywords for Atom Modifiers
+  std::string input("_ar");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_AR,yylex());
+  
+  input.assign("_region");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_REGION,yylex());
+  
+  input.assign("atomic_cas");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMIC_CAS,yylex());
+  
+  input.assign("atomic");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMIC,yylex());
+  
+  input.assign("atomicNoRet");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMICNORET,yylex());
+  
+  input.assign("atomicNoRet_cas");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMICNORET_CAS,yylex());
+  
+  input.assign("atomic_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMIC_IMAGE,yylex());
+
+  input.assign("atomicNoRet_image");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ATOMICNORET_IMAGE,yylex());
+
+  input.assign("cvt");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CVT,yylex());
+
+  input.assign("_dep");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_DEP,yylex());
+  
+  input.assign("_equiv");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_EQUIV,yylex());
+  
+  input.assign("_acq");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_ACQ,yylex());
+  
+  input.assign("_rel");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_REL,yylex());
+  
+  input.assign("ld");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LD,yylex());
+  
+  input.assign("sync");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SYNC,yylex());
+
+  input.assign("barrier");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BARRIER,yylex());
+
+  input.assign("segmentp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SEGMENTP,yylex());
+
+  input.assign("ftos");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FTOS,yylex());
+  
+  input.assign("stof");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(STOF,yylex());
+  
+  input.assign("mov");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MOV,yylex());
+  
+  input.assign("lad");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LAD,yylex());
+  
+  input.assign("ldc");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LDC,yylex());
+  
+  input.assign("ret");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(RET,yylex());
+
+  input.assign("packedcmp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(PACKEDCMP,yylex());
+
+  input.assign("cmp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CMP,yylex());
+  
+  input.assign("st");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ST,yylex());
+
+
 
 }

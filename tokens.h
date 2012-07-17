@@ -65,6 +65,37 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 		  BOUNDARYU,
 		  BOUNDARYV,
 		  BOUNDARYW,
+
+
+		  /* Atom Modifiers */
+
+		  _AR,
+		  _REGION,
+		  ATOMIC_CAS,
+		  ATOMIC,
+		  ATOMICNORET,
+		  ATOMICNORET_CAS,
+		  ATOMIC_IMAGE,
+		  ATOMICNORET_IMAGE,
+
+		  CVT,
+		  _DEP,
+		  _EQUIV,
+		  _ACQ,
+		  _REL,
+		  LD,
+		  SYNC,
+		  BARRIER,
+		  SEGMENTP,
+		  FTOS,
+		  STOF,
+		  MOV,
+		  LAD,
+		  LDC,
+		  RET,
+		  PACKEDCMP,
+		  CMP,
+		  ST,
 		  
 
 
