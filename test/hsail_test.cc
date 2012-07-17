@@ -52,6 +52,12 @@ TEST(LexTest, Bug9) {
   EXPECT_EQ(TOKEN_COMMENT,yylex());
 }
 
+TEST(LexTest, Bug10) {
+  std::string input("//this is an inline comment\n");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_COMMENT,yylex());
+}
+
 
 TEST(LexTest, Bug11) {
   std::string input("0x2f");
