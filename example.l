@@ -207,6 +207,18 @@ query_normalized	{ return QUERY_NORMALIZED;}
 query_filtering		{ return QUERY_FILTERING;}
 
 
+	/* -- geometry ID -- */
+_1d				{ return _1D;}
+_2d				{ return _2D;}
+_3d				{ return _3D;}
+_1db			{ return _1DB;}
+_1da			{ return _1DA;}
+_2da			{ return _2DA;}
+
+rd_image		{ return RD_IMAGE;}
+ld_image		{ return LD_IMAGE;}
+st_image		{ return ST_IMAGE;}
+
 
 
 .	{ fprintf(stderr, "unexpected char"); return 0;}
