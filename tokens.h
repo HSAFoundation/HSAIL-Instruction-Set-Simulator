@@ -145,7 +145,25 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  COPYSIGN,
 				  CLASS,
 				  SEND,
-				  RECEIVE
+				  RECEIVE,
+				  
+				  MAX,
+				  MIN,
+				  
+				  MAD,
+				  EXTRACT,
+				  INSERT,
+				  SHUFFLE,
+				  CMOV,
+				  FMA,
+				  BITALIGN,
+				  BYTEALIGN,
+				  LERP,
+				  SAD,
+				  SAD2,
+				  SAD4,
+				  SAD4HI,
+				  BITSELECT
 				
 				 
 				  

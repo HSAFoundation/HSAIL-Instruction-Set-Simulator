@@ -682,3 +682,72 @@ TEST(LexTest, Bug41) {
   EXPECT_EQ(RECEIVE,yylex());
  
   }
+  
+       
+TEST(LexTest, Bug42) {			
+  std::string input("max");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MAX,yylex());
+  
+  input.assign("min");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MIN,yylex());
+  
+  input.assign("mad");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MAD,yylex());
+  
+  input.assign("extract");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(EXTRACT,yylex());
+  
+    
+  input.assign("insert");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(INSERT,yylex());
+  
+  input.assign("shuffle");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SHUFFLE,yylex());
+  
+  input.assign("cmov");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CMOV,yylex());
+  
+  input.assign("fma");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(FMA,yylex());
+  
+  input.assign("bitalign");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BITALIGN,yylex());
+  
+  input.assign("bytealign");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BYTEALIGN,yylex());
+ 
+  input.assign("lerp");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(LERP,yylex());
+  
+  input.assign("sad");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SAD,yylex());
+  
+  input.assign("sad2");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SAD2,yylex());
+  
+  input.assign("sad4");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SAD4,yylex());
+  
+  input.assign("sad4hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SAD4HI,yylex());
+  
+  input.assign("bitselect");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BITSELECT,yylex());
+  
+  }
