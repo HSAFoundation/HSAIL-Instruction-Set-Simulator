@@ -47,9 +47,9 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 {HEX_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
 {IEEE_SINGLE} { float_val = ieee754tof(yytext); return TOKEN_SINGLE_CONSTANT; }
 
-{DEC_DOUBLE} { return 8; }
-{HEX_DOUBLE} { return 9; }
-{IEEE_DOUBLE} { return 10; }
+{DEC_DOUBLE} { return TOKEN_DOUBLE_CONSTANT; }
+{HEX_DOUBLE} { return TOKEN_DOUBLE_CONSTANT; }
+{IEEE_DOUBLE} { return TOKEN_DOUBLE_CONSTANT; }
 
 \$c(0|1|2|3|4|5|6|7) 	{ return TOKEN_CREGISTER;}
 \$d(0|1|2|3|4|5|6|7) 	{ return TOKEN_DREGISTER;}
