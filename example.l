@@ -41,4 +41,5 @@ HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)
 (nearest|linear) { return TOKEN_PROPERTY; }	
 (wrap|clamp|mirror|mirroronce|border) {return TOKEN_PROPERTY;}
 
+WAVESIZE			{return TOKEN_WAVESIZE; }
 .	{ fprintf(stderr, "unexpected char"); return 0;}
