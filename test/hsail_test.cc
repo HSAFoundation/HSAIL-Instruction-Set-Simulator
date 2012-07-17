@@ -5,6 +5,7 @@
 
 extern int int_val;
 extern float float_val;
+extern double double_val;
 
 TEST(LexTest, Bug1) {
   std::string input("foo");
@@ -74,16 +75,19 @@ TEST(LexTest, Bug26) {
   std::string input("0.5e3l");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(0.5e3, double_val);
 }
 
 TEST(LexTest, Bug28) {
-  std::string input("0xA.0l");
+  std::string input("0x1.0l");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0, double_val);
 }
 
 TEST(LexTest, Bug29) {
-  std::string input("0d0000000000000001");
+  std::string input("0d3FF0000000000000");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT,yylex());
+  EXPECT_EQ(1.0, double_val);
 }

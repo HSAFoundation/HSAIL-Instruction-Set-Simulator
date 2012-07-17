@@ -5,6 +5,7 @@
 
 int int_val;
 float float_val;
+float double_val;
 
 /* helper function for IEEE to Single */
 float ieee754tof(char* text) {
@@ -25,6 +26,60 @@ float ieee754tof(char* text) {
 	return floatval;
 }
 
+/*
+double ieee754tod(char* text) {
+	double return_val = 0.0;	// return value
+	unsigned int* int_ptr = 0;
+	unsigned char first4[5];	// first 2 bytes(4 chars after 0d)
+	unsigned char temp_str[5];	// temporary string to hold part of yytext
+	unsigned int i;
+	unsigned int first_int;		// convert the double as 2 integers
+	unsigned int second_int;
+	unsigned int temp = 0;
+	
+	// convert the first 2 bytes 	
+	for (i=0;i<4;i++)
+		first4[i] = text[i+2];
+	
+	first4[5] = '\0';
+	first_int = strtol(first4, NULL, 16);		
+	
+	// get the next 2 bytes;
+	for (i=0;i<4;i++) 
+		temp_str[i] = text[i+6];
+	temp_str[5] = '\0';
+	temp = strtol(temp_str,NULL,16);
+	first_int <<= 16;
+	
+	temp += first_int;
+	
+	int_ptr = (unsigned int*)&return_val;
+	
+	memcpy(int_ptr+1,&temp, sizeof(float));
+	//printf("Return value after update first 4 bytes: %2.16f\n",return_val);
+	
+
+	//for the last 4bytes, do the same thing, to avoid treating the first bit as the SIGN.
+	for (i=0;i<4;i++)
+		first4[i] = text[i+10];
+	
+	first4[5] = '\0';
+	second_int = strtol(first4, NULL, 16);		
+	
+	// get the last 2 bytes;
+	for (i=0;i<4;i++) 
+		temp_str[i] = text[i+14];
+	temp_str[5] = '\0';
+	temp = strtol(temp_str,NULL,16);
+	second_int <<= 16;
+	temp += second_int;
+
+	memcpy(int_ptr,&temp, sizeof(int));
+	
+	//printf("Final return value: %2.14f\n",return_val);
+	return return_val;
+}
+*/
 %}
 OCT_INT		([+|-]?0[0-7]*)
 DEC_INT		([+|-]?(0|([1-9]*[0-9]+)))
@@ -47,9 +102,9 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 {HEX_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
 {IEEE_SINGLE} { float_val = ieee754tof(yytext); return TOKEN_SINGLE_CONSTANT; }
 
-{DEC_DOUBLE} { return TOKEN_DOUBLE_CONSTANT; }
-{HEX_DOUBLE} { return TOKEN_DOUBLE_CONSTANT; }
-{IEEE_DOUBLE} { return TOKEN_DOUBLE_CONSTANT; }
+{DEC_DOUBLE} { /*double_val = strtod(yytext,NULL);*/ return TOKEN_DOUBLE_CONSTANT; }
+{HEX_DOUBLE} { /*double_val = strtod(yytext,NULL);*/ return TOKEN_DOUBLE_CONSTANT; }
+{IEEE_DOUBLE} { /*double_val = ieee754tod(yytext);*/ return TOKEN_DOUBLE_CONSTANT; }
 
 \$c(0|1|2|3|4|5|6|7) 	{ return TOKEN_CREGISTER;}
 \$d(0|1|2|3|4|5|6|7) 	{ return TOKEN_DREGISTER;}
