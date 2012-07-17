@@ -79,7 +79,7 @@ TEST(LexTest, Bug28) {
 }
 
 TEST(LexTest, Bug29) {
-  std::string input("0xA.0l");
+  std::string input("0d0000000000000001");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(10,yylex());
 }

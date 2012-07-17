@@ -11,7 +11,8 @@ HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)
 
 DEC_DOUBLE 	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(l|L)?)  
 HEX_DOUBLE	(0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(l|L)?)
-
+IEEE_DOUBLE	(0(d|D)[0-9a-fA-F]{16}) 
+	
 DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(f|F))
 HEX_SINGLE	(0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(f|F))
 IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
@@ -27,6 +28,7 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 
 {DEC_DOUBLE} { return 8; }
 {HEX_DOUBLE} { return 9; }
+{IEEE_DOUBLE} { return 10; }
 
 \$c(0|1|2|3|4|5|6|7) 	{ return TOKEN_CREGISTER;}
 \$d(0|1|2|3|4|5|6|7) 	{ return TOKEN_DREGISTER;}
