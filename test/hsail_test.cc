@@ -1263,3 +1263,24 @@ TEST(LexTest, Bug53) {			// dataTypeId
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(_U64X2,yylex());   
 }  
+
+
+          
+TEST(LexTest, Bug54) {				
+  std::string input("_ftz");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_FTZ,yylex());
+  
+  input.assign("nop");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(NOP,yylex());
+  
+  input.assign("clock");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CLOCK,yylex());
+  
+    
+  input.assign("syscall");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SYSCALL,yylex());
+}

@@ -283,7 +283,12 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 		 _U32X4,
 		 _F64X2,
 		 _S64X2,
-		 _U64X2
+		 _U64X2,
+		 
+		 _FTZ,
+		 NOP,
+		 CLOCK,
+		 SYSCALL
 		 
 
 				
