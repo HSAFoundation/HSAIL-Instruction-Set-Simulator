@@ -294,4 +294,8 @@ _p_sat				{ return  _P_SAT;}
 \$sftz				{ return  _SFTZ;}
 \$nosftz			{ return  _NOSFTZ;}		
 
+width				{ return WIDTH;}
+height				{ return HEIGHT;}
+depth				{ return DEPTH;}
+
 .	{ fprintf(stderr, "unexpected char"); return 0;}
