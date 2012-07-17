@@ -51,19 +51,19 @@ TEST(LexTest, Bug11) {
 TEST(LexTest, Bug12) {
   std::string input("0.5e3f");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(5,yylex());
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
 }
 
 TEST(LexTest, Bug23) {
   std::string input("0xA.0f");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(6,yylex());
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
 }
 
 TEST(LexTest, Bug24) {
   std::string input("0f00000001");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(7,yylex());
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT,yylex());
 }
 
 TEST(LexTest, Bug26) {
