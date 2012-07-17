@@ -4,12 +4,6 @@
 #include "../tokens.h"
 
 
-TEST(LexTest, Bug1) {
-  std::string input("foo");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(1,yylex());
-}
-
 TEST(LexTest, Bug2) {
   std::string input("12345");
   yy_scan_string((char*)input.c_str());
@@ -88,4 +82,28 @@ TEST(LexTest, Bug19) {
   std::string input("\" This is a string\"");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_STRING,yylex());
+}
+
+TEST(LexTest, Bug20) {
+  std::string input("snorm_int8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_PROPERTY,yylex());
+  
+  input.assign("unorm_int16");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_PROPERTY,yylex());
+  
+  input.assign("rx");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_PROPERTY,yylex());
+  
+  input.assign("intensity");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_PROPERTY,yylex());
+  
+  input.assign("wrap");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_PROPERTY,yylex());
+
+  
 }

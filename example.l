@@ -9,7 +9,6 @@ HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)
 %x INLINE_COMMENT
 %x COMMENT
 %%
-[a-z]+ { return 1; }
 {OCT_INT} { return 3; } 
 {DEC_INT} { return 2; }
 {HEX_INT} { return 4; }
@@ -33,5 +32,13 @@ HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)
 
 \@[_a-zA-Z]+[_a-zA-Z0-9]* 	{ return TOKEN_LABEL; }
 \"(\\.|[^\\"])*\" 		{ return TOKEN_STRING; }
+
+((snorm_|unorm_)(((int)(8|16|32))|((short_)(565|555|101010)))) |
+((signed_|unsigned_)(int)(8|16|32)) |
+((half_)?(float))													{return TOKEN_PROPERTY; }
+(r|rx|a|rg|rgx|ra|rgb|rgbx|ra|rgb|rgbx|rgba|bgra|argb|intensity|luminance) {return TOKEN_PROPERTY; }
+(normalized|unnormalized) { return TOKEN_PROPERTY; }
+(nearest|linear) { return TOKEN_PROPERTY; }	
+(wrap|clamp|mirror|mirroronce|border) {return TOKEN_PROPERTY;}
 
 .	{ fprintf(stderr, "unexpected char"); return 0;}
