@@ -85,7 +85,7 @@ TEST(LexTest, Bug18) {
 }
 
 TEST(LexTest, Bug19) {
-  std::string input(" \" This is a string \" ");
+  std::string input("\" This is a string\"");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_STRING,yylex());
 }
