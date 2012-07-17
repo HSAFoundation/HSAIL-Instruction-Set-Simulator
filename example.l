@@ -271,4 +271,18 @@ _up					{ return  _UP;}
 _down				{ return  _DOWN;}
 _zero				{ return  _ZERO;}
 _near				{ return  _NEAR;}
+
+	/*-- packing -- */
+_pp					{ return  _PP;}
+_ps					{ return  _PS;}
+_sp					{ return  _SP;}
+_ss					{ return  _SS;}
+_s					{ return  __S;}
+_p					{ return  __P;}
+_pp_sat				{ return  _PP_SAT;}
+_ps_sat				{ return  _PS_SAT;}
+_sp_sat				{ return  _SP_SAT;}
+_ss_sat				{ return  _SS_SAT;}
+_s_sat				{ return  _S_SAT;}
+_p_sat				{ return  _P_SAT;}
 .	{ fprintf(stderr, "unexpected char"); return 0;}

@@ -1005,3 +1005,32 @@ TEST(LexTest, Bug47) {				// packing modes
   
 }
   
+  
+          
+TEST(LexTest, Bug49) {				// targets
+  std::string input("$small");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SMALL,yylex());
+  
+  input.assign("$large");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_LARGE,yylex());
+  
+  input.assign("$full");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_FULL,yylex());
+  
+  input.assign("$reduced");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_REDUCED,yylex());
+  
+  input.assign("$sftz");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_SFTZ,yylex());
+  
+  input.assign("$nosftz");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(_NOSFTZ,yylex());
+ 
+  
+}  

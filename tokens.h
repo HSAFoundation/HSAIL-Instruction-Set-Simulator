@@ -229,7 +229,15 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  _SP_SAT,
 				  _SS_SAT,
 				  _S_SAT,
-				  _P_SAT
+				  _P_SAT,
+				  
+				  /* target */
+				  _SMALL,
+				  _LARGE,
+				  _FULL,
+				  _REDUCED,
+				  _SFTZ,
+				  _NOSFTZ
 				 
 				
 				 
