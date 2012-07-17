@@ -17,7 +17,7 @@ TEST(LexTest, Bug2) {
 }
 
 TEST(LexTest, Bug3) {
-  std::string input("010");
+  std::string input("020");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(3,yylex());
 }
