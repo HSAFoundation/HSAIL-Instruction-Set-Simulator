@@ -601,3 +601,84 @@ TEST(LexTest, Bug40) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(NDRANGEGROUPS,yylex());
   }
+  
+      
+TEST(LexTest, Bug41) {			
+  std::string input("add");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(ADD,yylex());
+  
+  input.assign("carry");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CARRY,yylex());
+  
+  input.assign("borrow");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(BORROW,yylex());
+  
+  input.assign("div");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(DIV,yylex());
+  
+    
+  input.assign("rem");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(REM,yylex());
+  
+  input.assign("sub");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SUB,yylex());
+  
+  input.assign("shl");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SHL,yylex());
+  
+  input.assign("shr");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SHR,yylex());
+  
+  input.assign("and");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(AND,yylex());
+  
+  input.assign("xor");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(XOR,yylex());
+ 
+  input.assign("or");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(OR,yylex());
+  
+  input.assign("unpacklo");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(UNPACKLO,yylex());
+  
+  input.assign("unpackhi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(UNPACKHI,yylex());
+  
+  input.assign("movd_lo");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MOVD_LO,yylex());
+  
+  input.assign("movd_hi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(MOVD_HI,yylex());
+  
+  input.assign("copysign");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(COPYSIGN,yylex());
+  
+  input.assign("class");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(CLASS,yylex());
+  
+  input.assign("send");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(SEND,yylex());
+  
+  input.assign("receive");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(RECEIVE,yylex());
+ 
+  }

@@ -125,7 +125,28 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 				  WORKITEMAID,
 				  WORKGROUPSIZE,
 				  NDRANGESIZE,
-				  NDRANGEGROUPS
+				  NDRANGEGROUPS,
+				  
+				  ADD,
+				  CARRY,
+				  BORROW,
+				  DIV,
+				  REM,
+				  SUB,
+				  SHL,
+				  SHR,
+				  AND,
+				  XOR,
+				  OR,
+				  UNPACKLO,
+				  UNPACKHI,
+				  MOVD_LO,
+				  MOVD_HI,
+				  COPYSIGN,
+				  CLASS,
+				  SEND,
+				  RECEIVE
+				
 				 
 				  
 				
