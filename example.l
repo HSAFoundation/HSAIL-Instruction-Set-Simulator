@@ -218,4 +218,16 @@ sad2				{ return  SAD2;}
 sad4				{ return  SAD4;}
 sad4hi				{ return  SAD4HI;}
 bitselect			{ return  BITSELECT;}
+
+	/*-- atomicOperationId --*/
+_and				{ return  _AND_;}
+_or					{ return  _OR_;}
+_xor				{ return  _XOR_;}
+_exch				{ return  _EXCH_;}
+_add				{ return  _ADD_;}
+_sub				{ return  _SUB_;}
+_inc				{ return  _INC_;}
+_dec				{ return  _DEC_;}
+_max				{ return   _MAX_;}
+_min				{ return   _MIN_;}
 .	{ fprintf(stderr, "unexpected char"); return 0;}
