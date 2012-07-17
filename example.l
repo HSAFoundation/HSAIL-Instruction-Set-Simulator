@@ -31,4 +31,5 @@ HEX_INT		([+|-]?0(x|X)[0-9a-fA-F]*)
 \%[_a-zA-Z]+[_a-zA-Z0-9]*  	{return TOKEN_LOCAL_IDENTIFIER; }
 \&[_a-zA-Z]+[_a-zA-Z0-9]*	{return TOKEN_GLOBAL_IDENTIFIER; }
 
+\@[_a-zA-Z]+[_a-zA-Z0-9]* 	{ return TOKEN_LABEL; }
 .	{ fprintf(stderr, "unexpected char"); return 0;}
