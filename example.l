@@ -2,6 +2,8 @@
 %{
 #include <stdio.h>
 #include "tokens.h"
+
+int int_val;
 %}
 OCT_INT		([+|-]?0[0-7]*)
 DEC_INT		([+|-]?(0|([1-9]*[0-9]+)))
@@ -11,9 +13,9 @@ DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0
 
 %%
 [a-z]+ { return 1; }
-{OCT_INT} { return 3; } 
-{DEC_INT} { return 2; }
-{HEX_INT} { return 4; }
+{OCT_INT} { return TOKEN_INTEGER_CONSTANT; } 
+{DEC_INT} { return TOKEN_INTEGER_CONSTANT; }
+{HEX_INT} { return TOKEN_INTEGER_CONSTANT; }
 
 {DEC_SINGLE} { return 5; }
 
