@@ -32,3 +32,9 @@ TEST(LexTest, Bug5) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_DREGISTER,yylex());
 }
+
+TEST(LexTest, Bug6) {
+  std::string input("$s15");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(TOKEN_SREGISTER,yylex());
+}
