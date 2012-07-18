@@ -1582,5 +1582,37 @@ TEST(ParserTest, Bug01) {
   ASSERT_EQ(0, parse(input));
   input.assign("query_order_u64x2  $c1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, parse(input));
+
+    //test for operand
+    //1. Identifier
+  input.assign("query_order_f32x4  $c1 , [&Test<$d7  + 100>]");
+  ASSERT_EQ(0, parse(input)); 
+  input.assign("query_order_s32x4  $d1 , [&Test<$d7  + 100>]");
+  ASSERT_EQ(0, parse(input));
+  input.assign("query_order_u32x4  $s1 , [&Test<$d7  + 100>]");
+  ASSERT_EQ(0, parse(input));
+  input.assign("query_order_f64x2  $q1 , [&Test<$d7  + 100>]");
+  ASSERT_EQ(0, parse(input));
+  input.assign("query_order_s64x2  %a1 , [&Test<$d7  + 100>]");
+  ASSERT_EQ(0, parse(input));
+  input.assign("query_order_u64x2  &a1 , [&Test<$d7  + 100>]");
+  ASSERT_EQ(0, parse(input));
+    //2. baseOperand
+  
+
+    //test for addressableOperand
+  input.assign("query_order_f32x4  $c1 , [%Test<100>]");
+  ASSERT_EQ(0, parse(input)); 
+  input.assign("query_order_s32x4  $d1 , [&Test<$d7  - 100>]");
+  ASSERT_EQ(0, parse(input));
+  input.assign("query_order_u32x4  $s1 , [&Test]");
+  ASSERT_EQ(0, parse(input));
+  input.assign("query_order_f64x2  $q1 , [&Test<$d7  + 100>]");
+  ASSERT_EQ(0, parse(input));
+  input.assign("query_order_s64x2  %a1 , [%Test<$d7]");
+  ASSERT_EQ(0, parse(input));
+
+
+
 }
 
