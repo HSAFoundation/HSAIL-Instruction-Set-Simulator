@@ -271,3 +271,8 @@ int addressableOperand(int first_token)
 
 }
 
+int arrayOperandList(int first_token)
+{
+	return 1;
+}
+
