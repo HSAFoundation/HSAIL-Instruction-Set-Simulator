@@ -10,6 +10,7 @@ set(foo_SOURCES
 	test/hsail_test.cc
 	gtest/gtest-all.cc
 	gtest/gtest_main.cc
+	parser.cc
 	${FLEX_lexer_OUTPUTS}
 	)
 add_executable(foo ${foo_SOURCES})

@@ -1,3 +1,6 @@
+#ifndef _TOKENS_H_
+#define _TOKENS_H_
+
 enum token_type { TOKEN_CREGISTER= 258 ,
 		  TOKEN_DREGISTER,
 		  TOKEN_SREGISTER,
@@ -352,3 +355,4 @@ enum token_type { TOKEN_CREGISTER= 258 ,
 		  QUERY_FILTERING
 		 };  // begin from 258 to avoid conflict with ASCII characters
 
+#endif

@@ -2,12 +2,15 @@
 #include "lexer.h"
 #include <string>
 #include "../tokens.h"
-
+#include "../parser.h"
 extern int int_val;
 extern float float_val;
 extern double double_val;
 
+int parser_main(std::string input);
 
+
+// ------------------ LEXER TESTS -----------------
 TEST(LexTest, Bug2) {
   std::string input("12345");
   yy_scan_string((char*)input.c_str());
@@ -35,7 +38,7 @@ TEST(LexTest, Bug5) {
 }
 
 TEST(LexTest, Bug6) {
-  std::string input("$s15");
+  std::string input("        $s15");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_SREGISTER,yylex());
 }
@@ -1480,3 +1483,13 @@ TEST(LexTest, Bug54) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(SYSCALL,yylex());
 }
+
+
+// ------------------ PARSER TESTS -----------------
+TEST(ParserTest, Bug1) {
+  std::string input("query_width_u32 $s1. [%RWImg3]");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(1,parser_main(input));
+}
+
+
