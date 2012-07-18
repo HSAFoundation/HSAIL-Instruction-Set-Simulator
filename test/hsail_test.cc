@@ -1487,7 +1487,7 @@ TEST(LexTest, Bug54) {
 // ------------------ PARSER TESTS -----------------
 
 TEST(ParserTest, Bug01) {  
-  std::string input("query_order_u32 12");
+  std::string input("query_order_u32  $c1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, parse(input));
 
 }

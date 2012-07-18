@@ -18,5 +18,5 @@ int query(int queryOp) ;
 int operand(int first_token);
 int identifier(int first_token);
 int baseOperand(int first_token);
-
+int addressableOperand(int first_token);
 #endif

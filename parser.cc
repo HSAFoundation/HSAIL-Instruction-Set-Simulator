@@ -100,9 +100,20 @@ int query(int queryOp)
     return 1;
   
   // next token should be an operand
-  if (operand(yylex()))
-    return 1; 		  // invalid operand
-  
+  if (operand(yylex())) {
+     printf("invalid first operand\n");
+     return 1; 		  // invalid operand
+  }
+  // next should be a comma
+  if (yylex() != ',') {
+    printf("Missing comma\n"); 
+    return 1;
+  }
+  // then finally an addressable operand
+  if (addressableOperand(yylex())) {
+    printf("second operand is invalid\n");
+    return 1;
+  }
 
   return 0;
   
@@ -160,6 +171,122 @@ int baseOperand(int first_token) {
 		printf("integer constant\n");
        return 0;
   }
+  else if (get_token_type(first_token) == DATA_TYPE_ID )
+  {
+	 // scan next token
+     if (yylex() != '(') { // should be '('
+        printf("Missing '(' \n");   
+ 		return 1;
+     }
+     else {
+         // check if we have a decimal list single or float list single
+     }
 
-  
+  }
+ 
+}
+
+int addressableOperand(int first_token) {
+  if (first_token != '[') {
+    printf ("Missing '['\n");
+    return 1;
+  }
+
+  if ((yylex() != TOKEN_GLOBAL_IDENTIFIER)&& (yylex() != TOKEN_LOCAL_IDENTIFIER)) {
+     printf ("Missing nonRegister\n");
+     return 1;
+  }
+  int c = yylex();
+  if (c == ']')
+  {
+     printf ("addressableOperand\n");
+     return 0;
+  }
+  else if (c == '<')
+  {
+     c  = yylex();
+     if (c == TOKEN_INTEGER_CONSTANT) 
+     { 
+
+        if (yylex() != '>')
+	{ 
+	   printf("Missing '>'\n");
+           return 1;
+	}
+        if (yylex() != ']')
+	{ 
+	   printf("Missing ']'\n");
+           return 1;
+	}
+        printf ("addressableOperand\n");
+        return 0;
+     }
+     else if (get_token_type(c) == REGISTER)
+     {
+         c= yylex();
+         if (c=='>') {
+           if (yylex() == ']')
+           {
+              printf("addressableOperand\n");
+              return 0;
+   	       } 
+           else return 1;
+         }
+         else {
+           if  (c == '+') {
+             if (yylex()==TOKEN_INTEGER_CONSTANT) {
+				if (yylex()=='>') {
+           			if (yylex() == ']')
+           			{
+              			printf("addressableOperand\n");
+		                return 0;
+   	      		    } 
+           			else return 1;
+         		}
+
+             }
+             else 
+               return 1;
+          
+           }
+
+	else if  (c== '-') {
+             if (yylex()==TOKEN_INTEGER_CONSTANT) {
+				if (yylex()=='>') {
+           			if (yylex() == ']')
+           			{
+              			printf("addressableOperand\n");
+		                return 0;
+   	      		    } 
+           			else return 1;
+         		}
+
+
+             }
+             else 
+               return 1;
+          
+           }
+           
+
+
+
+
+
+        }
+
+
+
+     }
+     else
+        return 1;
+    
+     
+      
+
+  }
+
+  else
+     return 1;
+
 }
