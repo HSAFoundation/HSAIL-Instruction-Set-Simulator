@@ -97,6 +97,9 @@ DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0
 HEX_SINGLE	(0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(f|F))
 IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 %%
+
+\n					/* ignore EOL */;
+[  \t]+					/* ignore whitespace */;
 	/* puctuation */
 "+" |
 "-" |
@@ -456,7 +459,7 @@ f2u4			{ return F2U4;}
 
 
 	/*-- Atom Modifiers --*/
-_ar				{ return _AR;}
+_ar			{ return _AR;}
 _region			{ return _REGION;}
 atomic_cas		{ return ATOMIC_CAS;}
 atomic			{ return ATOMIC;}
@@ -465,33 +468,33 @@ atomicNoRet_cas		{ return ATOMICNORET_CAS;}
 atomic_image		{ return ATOMIC_IMAGE;}
 atomicNoRet_image	{ return ATOMICNORET_IMAGE;}
 
-cvt				{ return CVT;}
+cvt			{ return CVT;}
 
 
 _dep			{ return _DEP;}
 _equiv			{ return _EQUIV;}
 _acq			{ return _ACQ;}
 _rel			{ return _REL;}
-ld				{ return LD;}
+ld			{ return LD;}
 sync			{ return SYNC;}
 barrier			{ return BARRIER;}
 segmentp		{ return SEGMENTP;}
 ftos			{ return FTOS;}
 stof			{ return STOF; }
-mov				{ return MOV;}
-lad				{ return LAD;}
-ldc				{ return LDC;}
-ret				{ return RET;}
+mov			{ return MOV;}
+lad			{ return LAD;}
+ldc			{ return LDC;}
+ret			{ return RET;}
 packedcmp		{ return PACKEDCMP;}
-cmp				{ return CMP;}
-st				{ return ST;}
+cmp			{ return CMP;}
+st			{ return ST;}
 
 
 
 	/* -- geometry ID -- */
-_1d				{ return _1D;}
-_2d				{ return _2D;}
-_3d				{ return _3D;}
+_1d			{ return _1D;}
+_2d			{ return _2D;}
+_3d			{ return _3D;}
 _1db			{ return _1DB;}
 _1da			{ return _1DA;}
 _2da			{ return _2DA;}

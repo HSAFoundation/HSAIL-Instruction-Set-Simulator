@@ -2,12 +2,14 @@
 #include "lexer.h"
 #include <string>
 #include "../tokens.h"
-
+#include "../parser.h"
 extern int int_val;
 extern float float_val;
 extern double double_val;
 
 
+
+// ------------------ LEXER TESTS -----------------
 TEST(LexTest, Bug2) {
   std::string input("12345");
   yy_scan_string((char*)input.c_str());
@@ -1480,3 +1482,13 @@ TEST(LexTest, Bug54) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(SYSCALL,yylex());
 }
+
+
+// ------------------ PARSER TESTS -----------------
+
+TEST(ParserTest, Bug01) {  
+  std::string input("query_order_u32 12");
+  ASSERT_EQ(0, parse(input));
+
+}
+
