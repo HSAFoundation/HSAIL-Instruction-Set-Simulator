@@ -72,6 +72,7 @@ terminal_type get_token_type(int token)
     case QUERY_ARRAY:
     case QUERY_WIDTH:
     case QUERY_DEPTH:
+    case QUERY_HEIGHT:
     case QUERY_NORMALIZED:
     case QUERY_FILTERING:
         return QUERY_OP;

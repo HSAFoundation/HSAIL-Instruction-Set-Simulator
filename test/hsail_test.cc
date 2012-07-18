@@ -1582,13 +1582,5 @@ TEST(ParserTest, Bug01) {
   ASSERT_EQ(0, parse(input));
   input.assign("query_order_u64x2  $c1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, parse(input));
-  input.assign("query_order_ftz  $c1 , [&Test<$d7  + 100>]");
-  ASSERT_EQ(0, parse(input));
-  input.assign("query_ordernop  $c1 , [&Test<$d7  + 100>]");
-  ASSERT_EQ(0, parse(input));
-  input.assign("query_orderclock  $c1 , [&Test<$d7  + 100>]");
-  ASSERT_EQ(0, parse(input));
-  input.assign("query_ordersyscall  $c1 , [&Test<$d7  + 100>]");
-  ASSERT_EQ(0, parse(input));
 }
 
