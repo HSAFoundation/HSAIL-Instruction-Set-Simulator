@@ -72,6 +72,7 @@ terminal_type get_token_type(int token)
     case QUERY_ARRAY:
     case QUERY_WIDTH:
     case QUERY_DEPTH:
+    case QUERY_HEIGHT:
     case QUERY_NORMALIZED:
     case QUERY_FILTERING:
         return QUERY_OP;
@@ -97,7 +98,7 @@ int query(int queryOp)
 		// next token should be an operand
 		if (!operand(yylex())) 
 		{
-		    // next should be a comma
+			// next should be a comma
 			if (yylex() == ',') 
 			{
 				// then finally an addressable operand
@@ -108,7 +109,6 @@ int query(int queryOp)
 			}
 		}
 	}
-	
 	
     return 1;
 
@@ -143,7 +143,7 @@ int identifier(int first_token)
 
 int baseOperand(int first_token)
 {
-	int next;
+    int next;
     if (first_token == TOKEN_DOUBLE_CONSTANT) {
         return 0;
     } else if (first_token == TOKEN_SINGLE_CONSTANT) {
@@ -159,7 +159,7 @@ int baseOperand(int first_token)
         // scan next token
         if (yylex() == '(') { // should be '('
             // check if we have a decimal list single or float list single
-			next = yylex();
+            next = yylex();
 			if (next == TOKEN_INTEGER_CONSTANT)	// we should have a decimalListSingle
 			{
 				next = yylex();
@@ -209,6 +209,7 @@ int baseOperand(int first_token)
 			
 				
 			
+ 
         }
     }
 	else
@@ -224,14 +225,13 @@ int addressableOperand(int first_token)
     if (first_token == '[') 
 	{
 		// next should be a non register
-		next = yylex();
+        next = yylex();
 		if ( (next == TOKEN_GLOBAL_IDENTIFIER)||(next == TOKEN_LOCAL_IDENTIFIER) )
 		{
 			next = yylex();
 			
 			if (next == ']')
 				return 0;
-			
 			else if (next == '<') 
 			{
 				next = yylex();
@@ -269,9 +269,7 @@ int addressableOperand(int first_token)
 		}
     }
 	return 1;
-
 }
-
 int arrayOperandList(int first_token)
 {
 	// assumed first_token is '('
