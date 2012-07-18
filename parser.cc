@@ -145,8 +145,57 @@ int baseOperand(int first_token) {
         if (yylex() == '(') {   // should be '('
             // check if we have a decimal list single or float list single
             next = yylex();
-            if (next == TOKEN_INTEGER_CONSTANT)
-                return( decimalListSingle(next) );
+			if (next == TOKEN_INTEGER_CONSTANT)	// we should have a decimalListSingle
+			{
+				next = yylex();
+				if (next == ')')
+					return 0;
+				else
+				{
+					while(next == ',')
+					{
+						next = yylex();
+						if (next == TOKEN_INTEGER_CONSTANT)
+						{
+							next = yylex();
+							if (next == ')')
+								return 0;
+							else if (next != ',')
+								return 1;
+						}
+						else
+							return 1;
+					}
+				}
+			}
+			else if (next == TOKEN_DOUBLE_CONSTANT)	// we should have a floatListSingle
+			{
+				next = yylex();
+				if (next == ')')
+					return 0;
+				else
+				{
+					while(next == ',')
+					{
+						next = yylex();
+						if (next == TOKEN_DOUBLE_CONSTANT)
+						{
+							next = yylex();
+							if (next == ')')
+								return 0;
+							else if (next != ',')
+								return 1;
+						}
+						else
+							return 1;
+					}
+				}
+			}
+
+
+
+
+
         }
     } else {
         return 1;
@@ -192,17 +241,30 @@ int addressableOperand(int first_token) {
     }
     return 1;
 }
-int decimalListSingle(int first_token) {
-    int next;
-    next = yylex();
-    while (next == ',') {   // continue list
-        next = yylex();
-        if (next == TOKEN_INTEGER_CONSTANT)
-            next = yylex();             // scan next
-        else
-            return 1;
-    }
-    return 0;
+
+int arrayOperandList(int first_token)
+{
+	// assumed first_token is '('
+	int next;
+	while (1)
+	{
+		next = yylex();
+		if (!identifier(next))
+		{
+			next = yylex();
+			if (next == ')')
+				return 0;
+			else if (next == ',') {}
+			else
+				return 1;
+		}
+		else {
+			return 1;
+		}
+	
+	}
+		
+		
 }
 
 

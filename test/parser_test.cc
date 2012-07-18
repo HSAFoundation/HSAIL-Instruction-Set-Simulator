@@ -32,7 +32,9 @@ TEST(ParserTest, BaseOperand_Test) {
 	
 	// Need more test for decimalListSingle and floatListSingle
 	
-	
+	input.assign("_u32(12, 13 ,14)");	// decimalListSingle
+	yy_scan_string((char*)input.c_str());
+	EXPECT_EQ(0, baseOperand(yylex()));
 	
 	
 	
@@ -77,7 +79,20 @@ TEST(ParserTest, Query_Test) {
 TEST(ParserTest, Bug_55) {
   std::string input("query_order_u32 _u32(1,2,3), [%a_local_id]");
   EXPECT_EQ(0, parse(input));
-  
-  
+    
+
+}
+
+TEST(ParserTest, Bug_57) {
+  std::string input("($d7,&global_id, %local_id)");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, arrayOperandList(yylex()));
+   
+
+}
+
+TEST(ParserTest, Bug_58) {
+	std::string input("query_order_u32 _f32(1.2,.2,3.4), [%a_local_id]");
+
 
 }
