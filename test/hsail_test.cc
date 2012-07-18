@@ -1487,7 +1487,7 @@ TEST(LexTest, Bug54) {
 
 // ------------------ PARSER TESTS -----------------
 TEST(ParserTest, Bug1) {
-  std::string input("query_width_u32 $s1. [%RWImg3]");
+  std::string input("query_width_u32 $s1, [%RWImg3]");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(1,parser_main(input));
 }
