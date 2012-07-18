@@ -1609,7 +1609,7 @@ TEST(ParserTest, Bug01) {
   ASSERT_EQ(0, parse(input));
   input.assign("query_order_f64x2  $q1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, parse(input));
-  input.assign("query_order_s64x2  %a1 , [%Test<$d7]");
+  input.assign("query_order_s64x2  %a1 , [%Test<$d7>]");
   ASSERT_EQ(0, parse(input));
 
 
