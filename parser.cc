@@ -182,6 +182,30 @@ int baseOperand(int first_token)
 					}
 				}
 			}
+			else if (next == TOKEN_DOUBLE_CONSTANT)	// we should have a floatListSingle
+			{
+				next = yylex();
+				if (next == ')')
+					return 0;
+				else
+				{
+					while(next == ',')
+					{
+						next = yylex();
+						if (next == TOKEN_DOUBLE_CONSTANT)
+						{
+							next = yylex();
+							if (next == ')')
+								return 0;
+							else if (next != ',')
+								return 1;
+						}
+						else
+							return 1;
+					}
+				}
+			}
+			
 				
 			
         }
