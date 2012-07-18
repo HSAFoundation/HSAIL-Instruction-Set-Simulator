@@ -79,7 +79,13 @@ TEST(ParserTest, Query_Test) {
 TEST(ParserTest, Bug_55) {
   std::string input("query_order_u32 _u32(1,2,3), [%a_local_id]");
   EXPECT_EQ(0, parse(input));
-  
-  
+    
+
+}
+
+TEST(ParserTest, Bug_57) {
+  std::string input("query_order_u32 _f32(1.2,.2,3.4), [%a_local_id]");
+  EXPECT_EQ(0, parse(input));
+    
 
 }
