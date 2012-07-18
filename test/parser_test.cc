@@ -84,7 +84,7 @@ TEST(ParserTest, Bug_55) {
 }
 
 TEST(ParserTest, Bug_57) {
-  std::string input("($d7,&global_id, &local_id)");
+  std::string input("($d7,&global_id, %local_id)");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, arrayOperandList(yylex()));
    
