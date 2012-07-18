@@ -6,7 +6,8 @@
 enum terminal_type { UNKNOWN_TERM = 0,              // terminals in hsail grammars
 		     REGISTER,
 		     DATA_TYPE_ID,
-		     QUERY_OP
+		     QUERY_OP,
+
  		   };
 
 
