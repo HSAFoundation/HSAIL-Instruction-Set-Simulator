@@ -99,8 +99,7 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 %%
 
 \n					/* ignore EOL */;
-[  \t]+				/* ignore whitespace */;
-
+[  \t]+					/* ignore whitespace */;
 	/* puctuation */
 "+" |
 "-" |

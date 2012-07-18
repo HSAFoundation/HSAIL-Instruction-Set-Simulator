@@ -7,7 +7,6 @@ extern int int_val;
 extern float float_val;
 extern double double_val;
 
-int parser_main(std::string input);
 
 
 // ------------------ LEXER TESTS -----------------
@@ -38,7 +37,7 @@ TEST(LexTest, Bug5) {
 }
 
 TEST(LexTest, Bug6) {
-  std::string input("        $s15");
+  std::string input("$s15");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(TOKEN_SREGISTER,yylex());
 }
@@ -1486,10 +1485,10 @@ TEST(LexTest, Bug54) {
 
 
 // ------------------ PARSER TESTS -----------------
-TEST(ParserTest, Bug1) {
-  std::string input("query_width_u32 $s1, [%RWImg3]");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(1,parser_main(input));
-}
 
+TEST(ParserTest, Bug01) {  
+  std::string input("query_order_u32  $c1 , [&Test<$d7  + 100>]");
+  ASSERT_EQ(0, parse(input));
+
+}
 
