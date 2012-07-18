@@ -6,7 +6,8 @@
 enum terminal_type { UNKNOWN_TERM = 0,              // terminals in hsail grammars
 		     REGISTER,
 		     DATA_TYPE_ID,
-		     QUERY_OP
+		     QUERY_OP,
+
  		   };
 
 
@@ -19,4 +20,6 @@ int operand(int first_token);
 int identifier(int first_token);
 int baseOperand(int first_token);
 int addressableOperand(int first_token);
+int decimalListSingle(int first_token);
+
 #endif

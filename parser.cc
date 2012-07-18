@@ -142,6 +142,7 @@ int identifier(int first_token)
 
 int baseOperand(int first_token)
 {
+    int next;
     if (first_token == TOKEN_DOUBLE_CONSTANT) {
         return 0;
     } else if (first_token == TOKEN_SINGLE_CONSTANT) {
@@ -157,6 +158,11 @@ int baseOperand(int first_token)
         // scan next token
         if (yylex() == '(') { // should be '('
             // check if we have a decimal list single or float list single
+            next = yylex();
+			if (next == TOKEN_INTEGER_CONSTANT)
+				return( decimalListSingle(next)) ; // we should have a decimalListSingle
+			
+ 
         }
     }
 	else
@@ -217,3 +223,22 @@ int addressableOperand(int first_token)
     }
 	return 1;
 }
+int decimalListSingle(int first_token)
+{
+	int next;
+	next = yylex();
+	while (next == ',')   // continue list
+	{
+		next = yylex();
+		if (next == TOKEN_INTEGER_CONSTANT)
+			next = yylex();				// scan next
+		else
+			return 1;
+			
+	}
+	return 0;
+
+
+}
+
+
