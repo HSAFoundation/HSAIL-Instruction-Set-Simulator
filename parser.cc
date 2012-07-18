@@ -1,12 +1,15 @@
 /* Copyright 2012 <MulticorewareInc>*/
 
-#include "parser.h"
-#include "tokens.h"
-#include "build/lexer.h"
+#include "./parser.h"
+
 #include <string>
 
+#include "./tokens.h"
+#include "./build/lexer.h"
+
+
 int parse(std::string input) {
-    yy_scan_string((char*) input.c_str());
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
     int token = yylex();   // get first token
     int result;
 
@@ -140,62 +143,48 @@ int baseOperand(int first_token) {
     } else if (first_token == '-') {
         if (yylex() == TOKEN_INTEGER_CONSTANT)
             return 0;
-    } else if ( get_token_type(first_token) == DATA_TYPE_ID ) {
+    } else if (get_token_type(first_token) == DATA_TYPE_ID) {
         // scan next token
         if (yylex() == '(') {   // should be '('
             // check if we have a decimal list single or float list single
             next = yylex();
-			if (next == TOKEN_INTEGER_CONSTANT)	// we should have a decimalListSingle
-			{
-				next = yylex();
-				if (next == ')')
-					return 0;
-				else
-				{
-					while(next == ',')
-					{
-						next = yylex();
-						if (next == TOKEN_INTEGER_CONSTANT)
-						{
-							next = yylex();
-							if (next == ')')
-								return 0;
-							else if (next != ',')
-								return 1;
-						}
-						else
-							return 1;
-					}
-				}
-			}
-			else if (next == TOKEN_DOUBLE_CONSTANT)	// we should have a floatListSingle
-			{
-				next = yylex();
-				if (next == ')')
-					return 0;
-				else
-				{
-					while(next == ',')
-					{
-						next = yylex();
-						if (next == TOKEN_DOUBLE_CONSTANT)
-						{
-							next = yylex();
-							if (next == ')')
-								return 0;
-							else if (next != ',')
-								return 1;
-						}
-						else
-							return 1;
-					}
-				}
-			}
-
-
-
-
-
+            if (next == TOKEN_INTEGER_CONSTANT) {
+                next = yylex();
+                if (next == ')') {
+                    return 0;
+                } else {
+                    while (next == ',') {
+                        next = yylex();
+                        if (next == TOKEN_INTEGER_CONSTANT) {
+                            next = yylex();
+                            if (next == ')')
+                                return 0;
+                            else if (next != ',')
+                                return 1;
+                        } else {
+                            return 1;
+                        }
+                    }
+                }
+            } else if (next == TOKEN_DOUBLE_CONSTANT)   {
+                next = yylex();
+                if (next == ')') {
+                    return 0;
+                } else {
+                    while (next == ',') {
+                        next = yylex();
+                        if (next == TOKEN_DOUBLE_CONSTANT) {
+                            next = yylex();
+                            if (next == ')')
+                                return 0;
+                            else if (next != ',')
+                                return 1;
+                        } else {
+                            return 1;
+                        }
+                    }
+                }
+            }
         }
     } else {
         return 1;
@@ -242,29 +231,23 @@ int addressableOperand(int first_token) {
     return 1;
 }
 
-int arrayOperandList(int first_token)
-{
-	// assumed first_token is '('
-	int next;
-	while (1)
-	{
-		next = yylex();
-		if (!identifier(next))
-		{
-			next = yylex();
-			if (next == ')')
-				return 0;
-			else if (next == ',') {}
-			else
-				return 1;
-		}
-		else {
-			return 1;
-		}
-	
-	}
-		
-		
+int arrayOperandList(int first_token) {
+    // assumed first_token is '('
+    int next;
+    while (1) {
+        next = yylex();
+        if (!identifier(next)) {
+            next = yylex();
+            if (next == ')')
+                return 0;
+            else if (next == ',') {
+            } else {
+                return 1;
+            }
+        } else {
+            return 1;
+        }
+    }
 }
 
 
