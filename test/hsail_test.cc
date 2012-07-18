@@ -2,7 +2,7 @@
 #include "lexer.h"
 #include <string>
 #include "../tokens.h"
-#include "../parser.h"
+
 extern int int_val;
 extern float float_val;
 extern double double_val;
@@ -1483,12 +1483,4 @@ TEST(LexTest, Bug54) {
   EXPECT_EQ(SYSCALL,yylex());
 }
 
-
-// ------------------ PARSER TESTS -----------------
-
-TEST(ParserTest, Bug01) {  
-  std::string input("query_order_u32  $c1 , [&Test<$d7  + 100>]");
-  ASSERT_EQ(0, parse(input));
-
-}
 

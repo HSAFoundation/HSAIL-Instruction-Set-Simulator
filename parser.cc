@@ -96,7 +96,7 @@ int query(int queryOp)
 		// next token should be an operand
 		if (!operand(yylex())) 
 		{
-			// next should be a comma
+		    // next should be a comma
 			if (yylex() == ',') 
 			{
 				// then finally an addressable operand
@@ -107,6 +107,7 @@ int query(int queryOp)
 			}
 		}
 	}
+	
 	
     return 1;
 
@@ -171,12 +172,14 @@ int addressableOperand(int first_token)
     if (first_token == '[') 
 	{
 		// next should be a non register
-		if ( (yylex() == TOKEN_GLOBAL_IDENTIFIER)||(yylex() == TOKEN_LOCAL_IDENTIFIER) )
+		next = yylex();
+		if ( (next == TOKEN_GLOBAL_IDENTIFIER)||(next == TOKEN_LOCAL_IDENTIFIER) )
 		{
 			next = yylex();
 			
 			if (next == ']')
 				return 0;
+			
 			else if (next == '<') 
 			{
 				next = yylex();
