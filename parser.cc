@@ -1,10 +1,11 @@
+/* Copyright 2012 <MulticorewareInc>*/
+
 #include "parser.h"
 #include "tokens.h"
 #include "build/lexer.h"
 #include <string>
 
-int parse(std::string input)
-{
+int parse(std::string input) {
     yy_scan_string((char*) input.c_str());
     int token = yylex();   // get first token
     int result;
@@ -21,8 +22,7 @@ int parse(std::string input)
     }
 }
 
-terminal_type get_token_type(int token)
-{
+terminal_type get_token_type(int token) {
     switch (token) {
         /* DataTypeId */
     case _U32:
@@ -84,64 +84,50 @@ terminal_type get_token_type(int token)
     case TOKEN_QREGISTER:
         return REGISTER;
 
-		default:
+        default:
         return UNKNOWN_TERM;  // unknown
     }
 }
 
-int query(int queryOp)
-{
+int query(int queryOp) {
     // next token should be a dataTypeId
-    if (get_token_type(yylex()) == DATA_TYPE_ID)
-	{
-		// next token should be an operand
-		if (!operand(yylex())) 
-		{
-			// next should be a comma
-			if (yylex() == ',') 
-			{
-				// then finally an addressable operand
-				if (!addressableOperand(yylex())) 
-				{
-					return 0;
-				}
-			}
-		}
-	}
-	
+    if (get_token_type(yylex()) == DATA_TYPE_ID) {
+        // next token should be an operand
+        if (!operand(yylex())) {
+            // next should be a comma
+            if (yylex() == ',') {
+                // then finally an addressable operand
+                if (!addressableOperand(yylex())) {
+                    return 0;
+                }
+            }
+        }
+    }
     return 1;
-
 }
 
 
-int operand(int first_token)
-{
+int operand(int first_token) {
     if (!identifier(first_token))   // an identifier
         return 0;
-    else if (!baseOperand(first_token)) // a base operand
+    else if (!baseOperand(first_token))     // a base operand
         return 0;
 
-
     return 1;
-
 }
 
-int identifier(int first_token)
-{
+int identifier(int first_token) {
     if (first_token == TOKEN_GLOBAL_IDENTIFIER)
         return 0;
     else if (first_token == TOKEN_LOCAL_IDENTIFIER)
         return 0;
-    else if (get_token_type(first_token)==REGISTER)
+    else if (get_token_type(first_token) == REGISTER)
         return 0;
-
-
 
     return 1;
 }
 
-int baseOperand(int first_token)
-{
+int baseOperand(int first_token) {
     int next;
     if (first_token == TOKEN_DOUBLE_CONSTANT) {
         return 0;
@@ -154,91 +140,69 @@ int baseOperand(int first_token)
     } else if (first_token == '-') {
         if (yylex() == TOKEN_INTEGER_CONSTANT)
             return 0;
-    } else if (get_token_type(first_token) == DATA_TYPE_ID ) {
+    } else if ( get_token_type(first_token) == DATA_TYPE_ID ) {
         // scan next token
-        if (yylex() == '(') { // should be '('
+        if (yylex() == '(') {   // should be '('
             // check if we have a decimal list single or float list single
             next = yylex();
-			if (next == TOKEN_INTEGER_CONSTANT)
-				return( decimalListSingle(next)) ; // we should have a decimalListSingle
-			
- 
+            if (next == TOKEN_INTEGER_CONSTANT)
+                return( decimalListSingle(next) );
+        }
+    } else {
+        return 1;
+    }
+}
+
+int addressableOperand(int first_token) {
+    int next;
+    if (first_token == '[') {
+        // next should be a non register
+        next = yylex();
+        if ( (next == TOKEN_GLOBAL_IDENTIFIER) \
+            || (next == TOKEN_LOCAL_IDENTIFIER) ) {
+            next = yylex();
+
+            if (next == ']')
+                return 0;
+            else if (next == '<') {
+                next = yylex();
+                if (next == TOKEN_INTEGER_CONSTANT) {
+                    if (yylex() == '>') {
+                        if (yylex() == ']')
+                            return 0;
+                    }
+
+                } else if (get_token_type(next) == REGISTER) {
+                    next = yylex();
+                    if (next == '>') {
+                        if (yylex() == ']')
+                            return 0;
+
+                    } else if ((next == '+') || (next == '-')) {
+                        if (yylex() == TOKEN_INTEGER_CONSTANT) {
+                            if (yylex() == '>') {
+                                if (yylex() == ']')
+                                    return 0;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-	else
-	{
-		return 1;
-	}
-
+    return 1;
 }
-
-int addressableOperand(int first_token)
-{
-	int next;
-    if (first_token == '[') 
-	{
-		// next should be a non register
+int decimalListSingle(int first_token) {
+    int next;
+    next = yylex();
+    while (next == ',') {   // continue list
         next = yylex();
-		if ( (next == TOKEN_GLOBAL_IDENTIFIER)||(next == TOKEN_LOCAL_IDENTIFIER) )
-		{
-			next = yylex();
-			
-			if (next == ']')
-				return 0;
-			else if (next == '<') 
-			{
-				next = yylex();
-				if (next == TOKEN_INTEGER_CONSTANT) 
-				{
-					if (yylex() == '>') 
-					{
-						if (yylex() == ']')
-							return 0;
-					}
-				
-				}
-				else if (get_token_type(next) == REGISTER) 
-				{
-					next = yylex();
-					if (next == '>')
-					{
-						if (yylex()==']')
-							return 0;
-					
-					}
-					else if ((next == '+') || (next == '-'))
-					{
-						if (yylex() == TOKEN_INTEGER_CONSTANT) 
-						{
-							if (yylex()=='>') 
-							{
-								if (yylex() == ']') 
-								    return 0;
-                            }
-						}
-					}
-				}
-			}
-		}
+        if (next == TOKEN_INTEGER_CONSTANT)
+            next = yylex();             // scan next
+        else
+            return 1;
     }
-	return 1;
-}
-int decimalListSingle(int first_token)
-{
-	int next;
-	next = yylex();
-	while (next == ',')   // continue list
-	{
-		next = yylex();
-		if (next == TOKEN_INTEGER_CONSTANT)
-			next = yylex();				// scan next
-		else
-			return 1;
-			
-	}
-	return 0;
-
-
+    return 0;
 }
 
 
