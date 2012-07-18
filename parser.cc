@@ -82,7 +82,6 @@ terminal_type get_token_type(int token)
     case TOKEN_DREGISTER:
     case TOKEN_SREGISTER:
     case TOKEN_QREGISTER:
-		printf("Register\n");
         return REGISTER;
 
 		default:
@@ -274,7 +273,6 @@ int arrayOperandList(int first_token)
 {
 	// assumed first_token is '('
 	int next;
-	printf("%c\n", first_token); // check
 	while (1)
 	{
 		next = yylex();
