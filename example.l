@@ -96,6 +96,7 @@ IEEE_DOUBLE	(0(d|D)[0-9a-fA-F]{16})
 DEC_SINGLE	([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(f|F))
 HEX_SINGLE	(0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(f|F))
 IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
+
 %%
 
 \n					/* ignore EOL */;
@@ -123,8 +124,6 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 {DEC_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
 {HEX_SINGLE} { float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
 {IEEE_SINGLE} { float_val = ieee754tof(yytext); return TOKEN_SINGLE_CONSTANT; }
-
-
 
 {DEC_DOUBLE} {double_val = strtod(yytext,NULL); return TOKEN_DOUBLE_CONSTANT; }
 {HEX_DOUBLE} {double_val = strtod(yytext,NULL); return TOKEN_DOUBLE_CONSTANT; }

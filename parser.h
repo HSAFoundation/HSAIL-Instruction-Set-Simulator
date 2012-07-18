@@ -1,24 +1,24 @@
-#ifndef _PARSER_H_
-#define _PARSER_H_
-#include "tokens.h"
+#ifndef HSAIL2BRIG_PARSER_H_
+#define HSAIL2BRIG_PARSER_H_
+
 #include <string>
+#include "tokens.h"
 
-enum terminal_type { UNKNOWN_TERM = 0,              // terminals in hsail grammars
-		     REGISTER,
-		     DATA_TYPE_ID,
-		     QUERY_OP,
+enum TerminalType { UNKNOWN_TERM = 0,
+                    REGISTER,
+                    DATA_TYPE_ID,
+                    QUERY_OP
+                  };
 
- 		   };
+// classify token into different terminal type
+TerminalType GetTokenType(int token);
 
+int Parse(std::string input);
+int Query(int queryOp);
+int Operand(int first_token);
+int Identifier(int first_token);
+int BaseOperand(int first_token);
+int AddressableOperand(int first_token);
+int ArrayOperandList(int first_token);
 
-int parse(std::string input); 
-
-terminal_type get_token_type(int token);  // classify token into different terminal types
-
-int query(int queryOp) ;
-int operand(int first_token);
-int identifier(int first_token);
-int baseOperand(int first_token);
-int addressableOperand(int first_token);
-int arrayOperandList(int first_token);
-#endif
+#endif  // HSAIL2BRIG_PARSER_H_
