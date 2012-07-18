@@ -32,7 +32,9 @@ TEST(ParserTest, BaseOperand_Test) {
 	
 	// Need more test for decimalListSingle and floatListSingle
 	
-	
+	input.assign("_u32(12, 13 ,14)");	// decimalListSingle
+	yy_scan_string((char*)input.c_str());
+	EXPECT_EQ(0, baseOperand(yylex()));
 	
 	
 	
