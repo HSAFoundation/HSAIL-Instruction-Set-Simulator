@@ -1,8 +1,10 @@
-#ifndef HSAIL2BRIG_PARSER_H_
-#define HSAIL2BRIG_PARSER_H_
+// Copyright 2012 MulticoreWare Inc.
+
+#ifndef PARSER_H_
+#define PARSER_H_
 
 #include <string>
-#include "tokens.h"
+#include "./tokens.h"
 
 enum TerminalType { UNKNOWN_TERM = 0,
                     REGISTER,
@@ -21,4 +23,4 @@ int BaseOperand(int first_token);
 int AddressableOperand(int first_token);
 int ArrayOperandList(int first_token);
 
-#endif  // HSAIL2BRIG_PARSER_H_
+#endif  // PARSER_H_

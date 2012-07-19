@@ -1,5 +1,6 @@
-#include "gtest/gtest.h"
-#include "lexer.h"
+// Copyright 2012 MulticoreWare Inc.
+#include "./gtest/gtest.h"
+#include "./lexer.h"
 #include "../parser.h"
 
 

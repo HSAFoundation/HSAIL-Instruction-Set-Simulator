@@ -1,7 +1,9 @@
-#ifndef HSAIL2BRIG_TOKENS_H_
-#define HSAIL2BRIG_TOKENS_H_
+// Copyright 2012 MulticoreWare Inc.
+#ifndef TOKENS_H_
+#define TOKENS_H_
 
-enum TokenType { TOKEN_CREGISTER= 258 ,
+// begin from 258 to avoid conflict with ASCII characters
+enum TokenType { TOKEN_CREGISTER= 258,
                  TOKEN_DREGISTER,
                  TOKEN_SREGISTER,
                  TOKEN_QREGISTER,
@@ -15,9 +17,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  TOKEN_STRING,
                  TOKEN_PROPERTY,
                  TOKEN_WAVESIZE,
-
-
-
                  /* common keywords */
                  WORKGROUPID,
                  VERSION,
@@ -48,7 +47,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  GROUP,
                  READONLY,
                  LOC,
-
                  /* addressSpaceIdentifier keywords */
                  _READONLY,
                  _KERNARG,
@@ -57,11 +55,9 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  _ARG,
                  _GROUP,
                  _SPILL,
-
                  /* vector*/
                  _V2,
                  _V4,
-
                  /* init */
                  FORMAT,
                  ORDER,
@@ -70,13 +66,11 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  BOUNDARYU,
                  BOUNDARYV,
                  BOUNDARYW,
-
                  /* control */
                  ITEMS_PER_WORKGROUP,
                  WORKGROUPS_PER_CU,
                  MEMOPT_ON,
                  MEMOPT_OFF,
-
                  /* opcode */
                  FBAR_INITSIZEWG,
                  FBAR_WAIT,
@@ -84,7 +78,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  FBAR_SKIP,
                  FBAR_RELEASE,
                  COUNTUP,
-
                  LANEID,
                  DYNWAVEID,
                  MAXDYNWAVEID,
@@ -94,7 +87,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  WORKITEMID_FLAT,
                  WORKITEMAID_FLAT,
                  DEBUGTRAP,
-
                  ABS,
                  NEG,
                  NOT,
@@ -109,7 +101,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  FBAR_RELEASECF,
                  COUNT,
                  MASK,
-
                  SQRT,
                  FRACT,
                  FCOS,
@@ -119,7 +110,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  FSQRT,
                  FRSQRT,
                  FRCP,
-
                  UNPACK3,
                  UNPACK2,
                  UNPACK1,
@@ -130,7 +120,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  WORKGROUPSIZE,
                  NDRANGESIZE,
                  NDRANGEGROUPS,
-
                  ADD,
                  CARRY,
                  BORROW,
@@ -150,10 +139,8 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  CLASS,
                  SEND,
                  RECEIVE,
-
                  MAX,
                  MIN,
-
                  MAD,
                  EXTRACT,
                  INSERT,
@@ -168,7 +155,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  SAD4,
                  SAD4HI,
                  BITSELECT,
-
                  _AND_,
                  _OR_,
                  _XOR_,
@@ -179,7 +165,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  _DEC_,
                  _MAX_,
                  _MIN_,
-
                  /* comparison*/
                  _EQ,
                  _NE,
@@ -209,18 +194,15 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  _SLEU,
                  _SGTU,
                  _SGEU,
-
                  /* rounding */
                  _UPI,
                  _DOWNI,
                  _ZEROI,
                  _NEARI,
-
                  _UP,
                  _DOWN,
                  _ZERO,
                  _NEAR,
-
                  /* packing */
                  _PP,
                  _PS,
@@ -234,7 +216,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  _SS_SAT,
                  _S_SAT,
                  _P_SAT,
-
                  /* target */
                  _SMALL,
                  _LARGE,
@@ -242,11 +223,9 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  _REDUCED,
                  _SFTZ,
                  _NOSFTZ,
-
                  WIDTH,
                  HEIGHT,
                  DEPTH,
-
                  /* dataTypeId */
                  _U32,
                  _S32,
@@ -287,12 +266,10 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  _F64X2,
                  _S64X2,
                  _U64X2,
-
                  _FTZ,
                  NOP,
                  CLOCK,
                  SYSCALL,
-
                  /* Atom Modifiers */
                  _AR,
                  _REGION,
@@ -302,7 +279,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  ATOMICNORET_CAS,
                  ATOMIC_IMAGE,
                  ATOMICNORET_IMAGE,
-
                  CVT,
                  _DEP,
                  _EQUIV,
@@ -321,8 +297,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  PACKEDCMP,
                  CMP,
                  ST,
-
-
                  /* mul */
                  MUL,
                  MUL_HI,
@@ -331,7 +305,6 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  MAD24,
                  MAD24_HI,
                  F2U4,
-
                  /* geometry ID */
                  _1D,
                  _2D,
@@ -339,11 +312,9 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  _1DB,
                  _1DA,
                  _2DA,
-
                  RD_IMAGE,
                  LD_IMAGE,
                  ST_IMAGE,
-
                  /* queryOp */
                  QUERY_ORDER,
                  QUERY_DATA,
@@ -353,6 +324,5 @@ enum TokenType { TOKEN_CREGISTER= 258 ,
                  QUERY_HEIGHT,
                  QUERY_NORMALIZED,
                  QUERY_FILTERING
-               };  // begin from 258 to avoid conflict with ASCII characters
-
-#endif  // HSAIL2BRIG_TOKENS_H_
+               };
+#endif  // TOKENS_H_

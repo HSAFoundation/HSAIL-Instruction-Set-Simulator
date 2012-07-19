@@ -1,10 +1,11 @@
+// Copyright 2012 MulticoreWare Inc.
 #include <string>
-#include "build/lexer.h"
-#include "parser.h"
-#include "tokens.h"
+#include "./build/lexer.h"
+#include "./parser.h"
+#include "./tokens.h"
 
 int Parse(std::string input) {
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<char*>input.c_str());
   int token = yylex();   // get first token
   int result;
 
