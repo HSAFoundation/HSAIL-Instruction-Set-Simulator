@@ -1,4 +1,4 @@
-/* Copyright 2012 <MulticorewareInc>*/
+/* Copyright 2012 <MulticorewareInc> */
 
 #include "./parser.h"
 

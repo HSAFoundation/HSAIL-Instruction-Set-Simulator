@@ -1,7 +1,9 @@
+/* Copyright 2012 <MulticorewareInc> */
+
 %option noyywrap 
 %{
 #include <stdio.h>
-#include "tokens.h"
+#include "./tokens.h"
 
 int int_val;
 float float_val;
@@ -10,19 +12,19 @@ double double_val;
 /* helper function for IEEE to Single */
 float ieee754tof(char* text) {
 	float floatval;
-	unsigned int mem_single=0; 
-	unsigned int first; 
-	char first2[3]; 
-	
-	first2[0] = text[2]; 
-	first2[1] = text[3]; 
+	unsigned int mem_single=0;
+	unsigned int first;
+	char first2[3];
+
+	first2[0] = text[2];
+	first2[1] = text[3];
 	first2[2] = '\0';
-	first = strtol(first2, NULL, 16); 
-	mem_single = strtol(text+4, NULL, 16); 
-	first = first << 24; 
-	mem_single += first; 
-	memcpy(&floatval, &mem_single, sizeof(float)); 
-	
+	first = strtol(first2, NULL, 16);
+	mem_single = strtol(text+4, NULL, 16);
+	first = first << 24;
+	mem_single += first;
+	memcpy(&floatval, &mem_single, sizeof(float));
+
 	return floatval;
 }
 
@@ -36,38 +38,38 @@ double ieee754tod(char* text) {
 	unsigned int first_int;		// convert the double as 2 integers
 	unsigned int second_int;
 	unsigned int temp = 0;
-	
+
 	// convert the first 2 bytes 	
-	for (i=0;i<4;i++)
+	for (i=0; i<4; i++)
 		first4[i] = text[i+2];
-	
+
 	first4[5] = '\0';
 	first_int = strtol(first4, NULL, 16);		
-	
+
 	// get the next 2 bytes;
-	for (i=0;i<4;i++) 
+	for (i=0;i<4;i++)
 		temp_str[i] = text[i+6];
 	temp_str[5] = '\0';
 	temp = strtol(temp_str,NULL,16);
 	first_int <<= 16;
-	
-	temp += first_int;
-	
-	int_ptr = (unsigned int*)&return_val;
-	
-	memcpy(int_ptr+1,&temp, sizeof(float));
-	//printf("Return value after update first 4 bytes: %2.16f\n",return_val);
-	
 
-	//for the last 4bytes, do the same thing, to avoid treating the first bit as the SIGN.
+	temp += first_int;
+
+	int_ptr = (unsigned int*)&return_val;
+
+	memcpy(int_ptr+1,&temp, sizeof(float));
+	// printf("Return value after update first 4 bytes: %2.16f\n",return_val);
+
+
+	// for the last 4bytes, do the same thing, to avoid treating the first bit as the SIGN.
 	for (i=0;i<4;i++)
 		first4[i] = text[i+10];
-	
+
 	first4[5] = '\0';
 	second_int = strtol(first4, NULL, 16);		
-	
+
 	// get the last 2 bytes;
-	for (i=0;i<4;i++) 
+	for (i=0;i<4;i++)
 		temp_str[i] = text[i+14];
 	temp_str[5] = '\0';
 	temp = strtol(temp_str,NULL,16);
@@ -75,7 +77,7 @@ double ieee754tod(char* text) {
 	temp += second_int;
 
 	memcpy(int_ptr,&temp, sizeof(int));
-	
+
 	//printf("Final return value: %2.14f\n",return_val);
 	return return_val;
 }
