@@ -8,24 +8,24 @@
 #include "./build/lexer.h"
 
 
-int parse(std::string input) {
+int Parse(std::string input) {
     yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
     int token = yylex();   // get first token
     int result;
 
-    terminal_type term = get_token_type(token);
+    TerminalType term = GetTokenType(token);
     switch (term) {
     case QUERY_OP:
-        // have a query
+        // have a Query
         // check syntax
-        result = query(token);
+        result = Query(token);
         return result;
     default:
         return 1;
     }
 }
 
-terminal_type get_token_type(int token) {
+TerminalType GetTokenType(int token) {
     switch (token) {
         /* DataTypeId */
     case _U32:
@@ -69,7 +69,7 @@ terminal_type get_token_type(int token) {
     case _U64X2:
         return DATA_TYPE_ID;
 
-        /* queryOp */
+        /* QueryOp */
     case QUERY_ORDER:
     case QUERY_DATA:
     case QUERY_ARRAY:
@@ -92,15 +92,15 @@ terminal_type get_token_type(int token) {
     }
 }
 
-int query(int queryOp) {
+int Query(int QueryOp) {
     // next token should be a dataTypeId
-    if (get_token_type(yylex()) == DATA_TYPE_ID) {
-        // next token should be an operand
-        if (!operand(yylex())) {
+    if (GetTokenType(yylex()) == DATA_TYPE_ID) {
+        // next token should be an Operand
+        if (!Operand(yylex())) {
             // next should be a comma
             if (yylex() == ',') {
-                // then finally an addressable operand
-                if (!addressableOperand(yylex())) {
+                // then finally an addressable Operand
+                if (!AddressableOperand(yylex())) {
                     return 0;
                 }
             }
@@ -110,27 +110,27 @@ int query(int queryOp) {
 }
 
 
-int operand(int first_token) {
-    if (!identifier(first_token))   // an identifier
+int Operand(int first_token) {
+    if (!Identifier(first_token))   // an Identifier
         return 0;
-    else if (!baseOperand(first_token))     // a base operand
+    else if (!BaseOperand(first_token))     // a base Operand
         return 0;
 
     return 1;
 }
 
-int identifier(int first_token) {
+int Identifier(int first_token) {
     if (first_token == TOKEN_GLOBAL_IDENTIFIER)
         return 0;
     else if (first_token == TOKEN_LOCAL_IDENTIFIER)
         return 0;
-    else if (get_token_type(first_token) == REGISTER)
+    else if (GetTokenType(first_token) == REGISTER)
         return 0;
 
     return 1;
 }
 
-int baseOperand(int first_token) {
+int BaseOperand(int first_token) {
     int next;
     if (first_token == TOKEN_DOUBLE_CONSTANT) {
         return 0;
@@ -143,7 +143,7 @@ int baseOperand(int first_token) {
     } else if (first_token == '-') {
         if (yylex() == TOKEN_INTEGER_CONSTANT)
             return 0;
-    } else if (get_token_type(first_token) == DATA_TYPE_ID) {
+    } else if (GetTokenType(first_token) == DATA_TYPE_ID) {
         // scan next token
         if (yylex() == '(') {   // should be '('
             // check if we have a decimal list single or float list single
@@ -191,7 +191,7 @@ int baseOperand(int first_token) {
     }
 }
 
-int addressableOperand(int first_token) {
+int AddressableOperand(int first_token) {
     int next;
     if (first_token == '[') {
         // next should be a non register
@@ -210,7 +210,7 @@ int addressableOperand(int first_token) {
                             return 0;
                     }
 
-                } else if (get_token_type(next) == REGISTER) {
+                } else if (GetTokenType(next) == REGISTER) {
                     next = yylex();
                     if (next == '>') {
                         if (yylex() == ']')
@@ -231,12 +231,12 @@ int addressableOperand(int first_token) {
     return 1;
 }
 
-int arrayOperandList(int first_token) {
+int ArrayOperandList(int first_token) {
     // assumed first_token is '('
     int next;
     while (1) {
         next = yylex();
-        if (!identifier(next)) {
+        if (!Identifier(next)) {
             next = yylex();
             if (next == ')')
                 return 0;

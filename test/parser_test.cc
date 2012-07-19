@@ -1,26 +1,27 @@
 // Copyright 2012 MulticoreWare Inc.
 #include "./gtest/gtest.h"
 #include "./lexer.h"
-#include "../parser.h"
+#include "../Parser.h"
 
 
-// ------------------ PARSER TESTS -----------------
+// ------------------ Parser TESTS -----------------
+
 TEST(ParserTest, IdentifierTest) {
-  std::string input("&a_global_id123");   // global id
+  std::string input("&a_global_id123");  // global id
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Identifier(yylex()));
 
-  input.assign("%a_local_id");  	// local id
+  input.assign("%a_local_id");  // local id
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Identifier(yylex()));
 
-  input.assign("$d7"); // register
+  input.assign("$d7");  // register
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Identifier(yylex()));
 }
 
 TEST(ParserTest, BaseOperandTest) {
-  std::string input("1352"); // Int constant
+  std::string input("1352");  // Int constant
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, BaseOperand(yylex()));
 
@@ -28,13 +29,13 @@ TEST(ParserTest, BaseOperandTest) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, BaseOperand(yylex()));
 
-  input.assign("_u32(12, 13 ,14)");	// decimalListSingle
+  input.assign("_u32(12, 13 ,14)");  // decimalListSingle
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, BaseOperand(yylex()));
 }
 
-TEST(ParserTest, addressable_operand_test) {
-  std::string input("[%local_id]"); // Int constant
+TEST(ParserTest, AddressableOperandTest) {
+  std::string input("[%local_id]");  // Int constant
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, AddressableOperand(yylex()));
 
@@ -53,11 +54,10 @@ TEST(ParserTest, addressable_operand_test) {
   input.assign("[%global_id<$d6 - 10 >]");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, AddressableOperand(yylex()));
-
 }
 
-TEST(ParserTest, query_test) {
-  //test the Query types;
+TEST(ParserTest, QueryTest) {
+  // test the Query types;
   std::string input("query_order_u32  $c1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, Parse(input));
   input.assign("query_data_u32  $c1 , [&Test<$d7  + 100>]");
@@ -75,7 +75,7 @@ TEST(ParserTest, query_test) {
   input.assign("query_filtering_u32  $c1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, Parse(input));
 
-  //test the dataTypes;
+  // test the dataTypes;
   input.assign("query_order_s32  $c1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, Parse(input));
   input.assign("query_order_s64  $c1 , [&Test<$d7  + 100>]");
@@ -153,8 +153,8 @@ TEST(ParserTest, query_test) {
   input.assign("query_order_u64x2  $c1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, Parse(input));
 
-  //test for Operand
-  //1. Identifier
+  // test for Operand
+  // 1. Identifier
   input.assign("query_order_f32x4  $c1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, Parse(input));
   input.assign("query_order_s32x4  $d1 , [&Test<$d7  + 100>]");
@@ -167,10 +167,10 @@ TEST(ParserTest, query_test) {
   ASSERT_EQ(0, Parse(input));
   input.assign("query_order_u64x2  &a1 , [&Test<$d7  + 100>]");
   ASSERT_EQ(0, Parse(input));
-  //2. BaseOperand
+  // 2. BaseOperand
 
 
-  //test for AddressableOperand
+  // test for AddressableOperand
   input.assign("query_order_f32x4  $c1 , [%Test<100>]");
   ASSERT_EQ(0, Parse(input));
   input.assign("query_order_s32x4  $d1 , [&Test<$d7  - 100>]");
