@@ -15,7 +15,8 @@ enum TerminalType { UNKNOWN_TERM = 0,
 					PACKING,
 					INSTRUCTION2_OPCODE,
 					INSTRUCTION2_OPCODE_NODT,
-					INSTRUCTION2_OPCODE_FTZ
+					INSTRUCTION2_OPCODE_FTZ,
+					TARGET
                   };
 
 // classify token into different terminal type

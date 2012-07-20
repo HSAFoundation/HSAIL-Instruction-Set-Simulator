@@ -114,6 +114,14 @@ TerminalType GetTokenType(int token) {
 	case _S_SAT:
 	case _P_SAT:
 	  return PACKING;
+	  
+	case _SMALL:
+	case _LARGE:
+	case _FULL:
+	case _REDUCED:
+	case _SFTZ:
+	case _NOSFTZ:
+	  return TARGET;
     		
         /* Instruction2Opcode */
     case ABS:
@@ -426,6 +434,35 @@ int Instruction2(int first_token) {
 
 int Version(int first_token) {
   //first token must be version keyword
+  
+  // check for major
+  if (yylex() == TOKEN_INTEGER_CONSTANT) {
+    if (yylex() == ':') {
+	  //check for minor
+	  if (yylex() == TOKEN_INTEGER_CONSTANT) {
+	    int next = yylex();
+	    if (next == ';') {
+		  return 0; 
+		} else if (next == ':') {
+		  // check for target
+		  next = yylex();
+		  while(next != ';') {
+		    if (GetTokenType(next) == TARGET) {
+			  next = yylex();
+			  if (next == ',')
+			    next = yylex();      // next target
+			  else if (next != ';')
+			    return 1;
+			} else {
+			  return 1;
+			}
+		  }	  
+		  return 0;
+		}
+	  
+	  }
+	}
+  }
   return 1;
 
 };

@@ -328,5 +328,8 @@ TEST(ParserTest, Instruction2FTZ) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Version(yylex()));
   
-
- }
+  input.assign("version 1:0:$large;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Version(yylex()));
+  
+}
