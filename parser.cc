@@ -516,7 +516,7 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
     // first is const
       next_token = yylex();
       *last_token = next_token;
-    if (next_token == ALIGN) {
+    if (next_token == ALIGN) { 
       if (!Alignment(next_token)) {
       // const alignment
       next_token = yylex();
@@ -528,18 +528,17 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
         // const alignment
         *recheck_last_token = true;
       }
-      }
+      } 
     } else if ((next_token == EXTERN)||(next_token == STATIC)) {
       // const externOrStatic
       next_token = yylex();
       *last_token = next_token;
-
+	  
       if (next_token == ALIGN) {
-      if (!Alignment(next_token)) {
-        // const externOrStatic alignment
-            *last_token = next_token;
+        if (!Alignment(next_token)) {
+          // const externOrStatic alignment
         } else {
-          return 1;
+    	  return 1;
         }
       } else {
         // const externOrStatic
@@ -626,26 +625,36 @@ int ArrayDimensionSet(int first_token,
 }
 
 int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
-  // The caller must have looked at "arg" to know that this is an argumentDecl
-  // So let's assume the the first token is "arg"
-  int next = yylex();
-  if ((GetTokenType(next) == DATA_TYPE_ID)||
-      (next == _RWIMG) ||
-      (next == _SAMP) ||
-      (next == _ROIMG)) {
-    next = yylex();
-    if (next == TOKEN_LOCAL_IDENTIFIER) {
-      // scan for arrayDimensions
+  bool rescan_after_declPrefix;
+  int last_token_of_declPrefix;
+  int next;
+  if (!DeclPrefix(first_token, &rescan_after_declPrefix, &last_token_of_declPrefix)) {
+    if (!rescan_after_declPrefix) {
       next = yylex();
-      if (next == '[') {
-         if (!ArrayDimensionSet(next, rescan_last_token, last_token)) {
-           return 0;
-         }
-      } else {
-        // no arrayDimensions
-        *last_token = next;
-        *rescan_last_token = true;
-        return 0;
+	} else {
+	  next = last_token_of_declPrefix;
+	}
+	  
+	next = yylex(); // skip over "arg"
+	
+    if ((GetTokenType(next) == DATA_TYPE_ID)||
+        (next == _RWIMG) ||
+        (next == _SAMP) ||
+        (next == _ROIMG)) {
+      next = yylex();
+      if (next == TOKEN_LOCAL_IDENTIFIER) {
+        // scan for arrayDimensions
+        next = yylex();
+        if (next == '[') {
+          if (!ArrayDimensionSet(next, rescan_last_token, last_token)) {
+             return 0;
+          }
+        } else {
+         // no arrayDimensions
+          *last_token = next;
+          *rescan_last_token = true;
+          return 0;
+        }
       }
     }
   }

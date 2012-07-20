@@ -390,94 +390,49 @@ TEST(ParserTest, ArrayDimensionSet) {
 TEST(ParserTest, ArgumentDecl) {
   bool rescan = false;
   int last_tok = 0;
+  
   // test 1
-  std::string input("const static arg_u32 %local_id[2][2] ");
+  std::string input("const static arg_u32 %local_id[2][2] "); 
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
-
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok)); 
 
   // test 2
   input.assign("align 8 const static arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
-
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
   // test 3
   input.assign("align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
-
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
     // test 4
   input.assign("extern arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
-
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
     // test 5
   input.assign("const align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
-
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
     // test 6
   input.assign("const static align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
-
-
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
-
-      // test 7
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+ 
+   // test 7
   input.assign("const align 8 static arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
-
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
       // test 8
   input.assign("static const align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
-
-      // test 6
+      // test 9
   input.assign("static align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
-    last_tok = yylex();
-
-  EXPECT_EQ(ARG, last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok)); 
 }
