@@ -369,3 +369,10 @@ TEST(ParserTest, Instruction2FTZ) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
 }
+
+TEST(ParserTest, FBar) {
+  std::string input(":fbar(1)");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, FBar(yylex()));
+
+}

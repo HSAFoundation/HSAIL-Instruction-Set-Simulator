@@ -570,3 +570,8 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
   return 0;
 
 }
+
+int FBar(int first_token) {
+  return 1;
+
+};

@@ -34,4 +34,5 @@ int Instruction2(int first_token);
 int Version(int first_token);
 int Alignment(int first_token);
 int DeclPrefix(int first_token, bool* rescan_last_token, int* last_token);
+int FBar(int first_token);
 #endif  // PARSER_H_

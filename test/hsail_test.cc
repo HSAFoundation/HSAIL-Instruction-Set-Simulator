@@ -1451,4 +1451,3 @@ TEST(LexTest, Bug54) {
   EXPECT_EQ(SYSCALL, yylex());
 }
 
-
