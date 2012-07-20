@@ -1,7 +1,7 @@
 // Copyright 2012 MulticoreWare Inc.
 #include "./gtest/gtest.h"
 #include "./lexer.h"
-#include "../Parser.h"
+#include "../parser.h"
 
 
 // ------------------ Parser TESTS -----------------
