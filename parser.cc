@@ -572,6 +572,12 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
 }
 
 int FBar(int first_token) {
+  // first token must be _FBAR
+  if (yylex() == '(' )
+    if (yylex() == TOKEN_INTEGER_CONSTANT)
+	  if (yylex() == ')')
+	    return 0;
+  
   return 1;
 
 };
