@@ -297,6 +297,18 @@ TEST(ParserTest, Instruction2NoDT) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Instruction2(yylex()));
 
- 
+  input.assign("unpack2_ftz $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
+  
+  
+  input.assign("unpack2_ftz_zero $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
+  
+    
+  input.assign("unpack2_neari $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
 
 }

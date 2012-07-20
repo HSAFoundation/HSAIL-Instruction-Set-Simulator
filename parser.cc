@@ -338,33 +338,58 @@ int Instruction2(int first_token) {
   //to get last token returned by RoundingMode in case _ftz
   int temp = 0;  
   bool is_ftz = false;
-  if (!RoundingMode(next, &is_ftz, &temp)) {
-    // there is a rounding mode specified
-	if (is_ftz)
-	  //need to check the token returned by rounding mode
-	  next = temp;
-	else
-	  next = yylex();
-  } 
   
-  // check whether there is a Packing
-  if (GetTokenType(next) == PACKING)
-    //there is packing
-	next = yylex();
+  if (GetTokenType(first_token) == INSTRUCTION2_OPCODE) {
+    if (!RoundingMode(next, &is_ftz, &temp)) {
+      // there is a rounding mode specified
+	  if (is_ftz)
+	    //need to check the token returned by rounding mode
+	    next = temp;
+	  else
+	    next = yylex();
+    } 
+  
+    // check whether there is a Packing
+    if (GetTokenType(next) == PACKING)
+      //there is packing
+	  next = yylex();
  
-  // now we must have a dataTypeId
-  if (GetTokenType(next) == DATA_TYPE_ID) {
+    // now we must have a dataTypeId
+    if (GetTokenType(next) == DATA_TYPE_ID) {
+	  //check the operands
+	  if (!Operand(yylex()))
+	  {
+	    if (yylex() == ',') {
+          if (!Operand(yylex())) {
+		    if (yylex() == ';')
+		      return 0;
+		  }
+	    }
+	  }
+    } 
+  } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_NODT) {
+    if (!RoundingMode(next, &is_ftz, &temp)) {
+      // there is a rounding mode specified
+	  if (is_ftz)
+	    //need to check the token returned by rounding mode
+	    next = temp;
+	  else
+	    next = yylex();
+    }
+	
 	//check the operands
 	if (!Operand(yylex()))
 	{
 	  if (yylex() == ',') {
         if (!Operand(yylex())) {
-		  if (yylex() == ';')
+	      if (yylex() == ';')
 		    return 0;
 		}
 	  }
-	   
 	}
+	
+	
+  
   } else {
     return 1;
   }
