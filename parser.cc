@@ -468,6 +468,8 @@ int Version(int first_token) {
 
 int Alignment(int first_token) {
   // first token must be "align" keyword
-
+  if (yylex() == TOKEN_INTEGER_CONSTANT)
+    return 0;
+  else 
     return 1;
 }
