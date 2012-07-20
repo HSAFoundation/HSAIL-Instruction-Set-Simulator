@@ -376,3 +376,20 @@ TEST(ParserTest, FBar) {
   EXPECT_EQ(0, FBar(yylex()));
 
 }
+
+TEST(ParserTest, ArrayDimensionSet) {
+  bool rescan = false;
+  int last_tok = 0;
+  std::string input("[]");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(),&rescan,&last_tok));
+  
+  input.assign("[1]");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(),&rescan,&last_tok));
+  
+  input.assign("[1][2][][3]");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(),&rescan,&last_tok));
+
+}

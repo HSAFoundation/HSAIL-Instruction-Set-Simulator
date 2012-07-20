@@ -580,4 +580,27 @@ int FBar(int first_token) {
   
   return 1;
 
-};
+}
+
+int ArrayDimensionSet(int first_token, bool* rescan_last_token, int* last_token) {
+  // first token must be '['
+  *rescan_last_token = false;
+  int next_token = yylex();
+  while (1) {
+    if (next_token == ']') {
+	  next_token = yylex();  // check if there is more item
+	  if (next_token == '[') {  // more item
+	    next_token = yylex();
+	  } else { // no more item
+	    *last_token = next_token;
+		*rescan_last_token  = true;
+		return 0;
+	  }
+    } else if (next_token == TOKEN_INTEGER_CONSTANT) {
+	  next_token = yylex(); // scan next
+	} else {
+	  printf("Missing closing bracket.\n");
+	  return 1;
+	}
+  }  
+}
