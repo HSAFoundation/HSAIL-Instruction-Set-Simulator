@@ -9,7 +9,9 @@
 enum TerminalType { UNKNOWN_TERM = 0,
                     REGISTER,
                     DATA_TYPE_ID,
-                    QUERY_OP
+                    QUERY_OP,
+					INT_ROUNDING,
+					FLOAT_ROUNDING		
                   };
 
 // classify token into different terminal type
@@ -22,5 +24,6 @@ int Identifier(int first_token);
 int BaseOperand(int first_token);
 int AddressableOperand(int first_token);
 int ArrayOperandList(int first_token);
+int RoundingMode(int first_token);
 
 #endif  // PARSER_H_

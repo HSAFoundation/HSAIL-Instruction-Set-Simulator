@@ -198,3 +198,57 @@ TEST(ParserTest, Bug58) {
   std::string input("query_order_u32 _f32(1.2,.2,3.4, 5.6), [%a_local_id]");
   EXPECT_EQ(0, Parse(input));
 }
+
+TEST(ParserTest, ParseRoundingMode) {
+  std::string input("_upi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+
+  input.assign("_downi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+  
+  input.assign("_zeroi");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+  
+  input.assign("_neari");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+
+  input.assign("_up");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+
+  input.assign("_down");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+  
+  input.assign("_zero");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+  
+  input.assign("_near");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+  
+  input.assign("_ftz_up");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+
+  input.assign("_ftz_down");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+  
+  input.assign("_ftz_zero");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+  
+  input.assign("_ftz_near");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));
+  
+  input.assign("_ftz");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, RoundingMode(yylex()));  
+}

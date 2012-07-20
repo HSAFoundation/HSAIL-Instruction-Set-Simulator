@@ -86,6 +86,20 @@ TerminalType GetTokenType(int token) {
     case TOKEN_SREGISTER:
     case TOKEN_QREGISTER:
         return REGISTER;
+		
+		/* IntRounding */
+	case _UPI:
+	case _DOWNI:
+	case _ZEROI:
+	case _NEARI:
+		return INT_ROUNDING;
+	
+		/* FloatRounding */
+	case _UP:
+	case _DOWN:
+	case _ZERO:
+	case _NEAR:
+		return FLOAT_ROUNDING;
 
         default:
         return UNKNOWN_TERM;  // unknown
@@ -250,4 +264,7 @@ int ArrayOperandList(int first_token) {
     }
 }
 
+int RoundingMode(int first_token) {
+  return 1;
+}
 
