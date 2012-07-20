@@ -473,3 +473,8 @@ int Alignment(int first_token) {
   else 
     return 1;
 }
+
+int DeclPrefix(int first_token) {
+  return 1;
+
+}

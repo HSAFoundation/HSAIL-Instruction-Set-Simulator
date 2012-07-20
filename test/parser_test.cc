@@ -341,3 +341,17 @@ TEST(ParserTest, Instruction2FTZ) {
 
   
 }
+
+ TEST(ParserTest, DeclPrefix) {
+  std::string input("align 8 extern");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, DeclPrefix(yylex()));
+
+  input.assign("align 8 static");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, DeclPrefix(yylex()));
+  
+  input.assign("align 8 extern const");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, DeclPrefix(yylex()));
+}
