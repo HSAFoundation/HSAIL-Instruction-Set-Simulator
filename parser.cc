@@ -265,6 +265,17 @@ int ArrayOperandList(int first_token) {
 }
 
 int RoundingMode(int first_token) {
-  return 1;
+    int next;
+  if (first_token == _FTZ) {
+    next = yylex();
+	if (GetTokenType(next) == FLOAT_ROUNDING) { };
+	return 0;
+  } else if (GetTokenType(first_token) == INT_ROUNDING) {
+    return 0;
+  } else if (GetTokenType(first_token) == FLOAT_ROUNDING) {
+    return 0;
+  } else {
+    return 1;
+  } 
 }
 
