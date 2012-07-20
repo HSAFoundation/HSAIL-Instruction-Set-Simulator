@@ -434,8 +434,7 @@ int Instruction2(int first_token) {
 
 int Version(int first_token) {
   //first token must be version keyword
-  
-  // check for major
+    // check for major
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
     if (yylex() == ':') {
 	  //check for minor
@@ -466,3 +465,9 @@ int Version(int first_token) {
   return 1;
 
 };
+
+int Alignment(int first_token) {
+  // first token must be "align" keyword
+
+    return 1;
+}

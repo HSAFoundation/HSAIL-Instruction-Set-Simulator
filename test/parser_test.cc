@@ -333,3 +333,11 @@ TEST(ParserTest, Instruction2FTZ) {
   EXPECT_EQ(0, Version(yylex()));
   
 }
+
+ TEST(ParserTest, AlignStatement) {
+  std::string input("align 8");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Alignment(yylex()));
+
+  
+}

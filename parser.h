@@ -32,4 +32,6 @@ int ArrayOperandList(int first_token);
 int RoundingMode(int first_token, bool* is_ftz, int* last_token);
 int Instruction2(int first_token);
 int Version(int first_token);
+int Alignment(int first_token);
+
 #endif  // PARSER_H_
