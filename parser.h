@@ -10,13 +10,13 @@ enum TerminalType { UNKNOWN_TERM = 0,
                     REGISTER,
                     DATA_TYPE_ID,
                     QUERY_OP,
-					INT_ROUNDING,
-					FLOAT_ROUNDING,
-					PACKING,
-					INSTRUCTION2_OPCODE,
-					INSTRUCTION2_OPCODE_NODT,
-					INSTRUCTION2_OPCODE_FTZ,
-					TARGET
+                    INT_ROUNDING,
+                    FLOAT_ROUNDING,
+                    PACKING,
+                    INSTRUCTION2_OPCODE,
+                    INSTRUCTION2_OPCODE_NODT,
+                    INSTRUCTION2_OPCODE_FTZ,
+                    TARGET
                   };
 
 // classify token into different terminal type

@@ -86,14 +86,14 @@ TerminalType GetTokenType(int token) {
     case TOKEN_SREGISTER:
     case TOKEN_QREGISTER:
       return REGISTER;
-        
+
         /* IntRounding */
     case _UPI:
     case _DOWNI:
     case _ZEROI:
     case _NEARI:
       return INT_ROUNDING;
-    
+
         /* FloatRounding */
     case _UP:
     case _DOWN:
@@ -101,28 +101,28 @@ TerminalType GetTokenType(int token) {
     case _NEAR:
       return FLOAT_ROUNDING;
         /* Packing */
-	case _PP:
-	case _PS:
-	case _SP:
-	case _SS:
-	case __S:
-	case __P:
-	case _PP_SAT:
-	case _PS_SAT:
-	case _SP_SAT:
-	case _SS_SAT:
-	case _S_SAT:
-	case _P_SAT:
-	  return PACKING;
-	  
-	case _SMALL:
-	case _LARGE:
-	case _FULL:
-	case _REDUCED:
-	case _SFTZ:
-	case _NOSFTZ:
-	  return TARGET;
-    		
+    case _PP:
+    case _PS:
+    case _SP:
+    case _SS:
+    case __S:
+    case __P:
+    case _PP_SAT:
+    case _PS_SAT:
+    case _SP_SAT:
+    case _SS_SAT:
+    case _S_SAT:
+    case _P_SAT:
+      return PACKING;
+
+    case _SMALL:
+    case _LARGE:
+    case _FULL:
+    case _REDUCED:
+    case _SFTZ:
+    case _NOSFTZ:
+      return TARGET;
+
         /* Instruction2Opcode */
     case ABS:
     case NEG:
@@ -130,7 +130,7 @@ TerminalType GetTokenType(int token) {
     case POPCOUNT:
     case FIRSTBIT:
     case LASTBIT:
-	case BITREV:
+    case BITREV:
     case MOVS_LO:
     case MOVS_HI:
     case FBAR_INITSIZE:
@@ -139,8 +139,8 @@ TerminalType GetTokenType(int token) {
     case COUNT:
     case MASK:
       return INSTRUCTION2_OPCODE;
-	  
-	    /* Instruction2Opcode NoDT */
+
+        /* Instruction2Opcode NoDT */
     case UNPACK3:
     case UNPACK2:
     case UNPACK1:
@@ -150,11 +150,11 @@ TerminalType GetTokenType(int token) {
     case WORKITEMAID:
     case WORKGROUPSIZE:
     case NDRANGESIZE:
-    case NDRANGEGROUPS:		
-	  return INSTRUCTION2_OPCODE_NODT;
-	  
-        /* Instruction2OpcodeFTZ */	  
-	case SQRT:
+    case NDRANGEGROUPS:
+      return INSTRUCTION2_OPCODE_NODT;
+
+        /* Instruction2OpcodeFTZ */
+    case SQRT:
     case FRACT:
     case FCOS:
     case FSIN:
@@ -163,7 +163,7 @@ TerminalType GetTokenType(int token) {
     case FSQRT:
     case FRSQRT:
     case FRCP:
-	  return INSTRUCTION2_OPCODE_FTZ;
+      return INSTRUCTION2_OPCODE_FTZ;
     default:
       return UNKNOWN_TERM;  // unknown
     }
@@ -331,101 +331,98 @@ int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
   *is_ftz = false;
   *last_token = first_token;
   int next;
-  
+
   if (first_token == _FTZ) {
-    next = yylex(); 
-	*last_token = next;		
-	
-	if (GetTokenType(next) == FLOAT_ROUNDING) { 
-	  // next is floatRounding
-	} else {
+    next = yylex();
+    *last_token = next;
+
+    if (GetTokenType(next) == FLOAT_ROUNDING) {
+      // next is floatRounding
+    } else {
        *is_ftz = true;
-	}
-	return 0;
+    }
+    return 0;
   } else if (GetTokenType(first_token) == INT_ROUNDING) {
     return 0;
   } else if (GetTokenType(first_token) == FLOAT_ROUNDING) {
     return 0;
   } else {
     return 1;
-  } 
+  }
 }
 
 int Instruction2(int first_token) {
   // First token must be an Instruction2Opcode
   int next = yylex();
-  //to get last token returned by RoundingMode in case _ftz
-  int temp = 0;  
+  // to get last token returned by RoundingMode in case _ftz
+  int temp = 0;
   bool is_ftz = false;
-  
+
   if (GetTokenType(first_token) == INSTRUCTION2_OPCODE) {
     if (!RoundingMode(next, &is_ftz, &temp)) {
       // there is a rounding mode specified
-	  if (is_ftz)
-	    //need to check the token returned by rounding mode
-	    next = temp;
-	  else
-	    next = yylex();
-    } 
-  
+      if (is_ftz)
+        // need to check the token returned by rounding mode
+        next = temp;
+      else
+        next = yylex();
+    }
+
     // check whether there is a Packing
     if (GetTokenType(next) == PACKING)
-      //there is packing
-	  next = yylex();
- 
+      // there is packing
+      next = yylex();
+
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
-	  //check the operands
-	  if (!Operand(yylex()))
-	  {
-	    if (yylex() == ',') {
+      // check the operands
+      if (!Operand(yylex())) {
+        if (yylex() == ',') {
           if (!Operand(yylex())) {
-		    if (yylex() == ';')
-		      return 0;
-		  }
-	    }
-	  }
-    } 
+            if (yylex() == ';')
+              return 0;
+          }
+        }
+      }
+    }
   } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_NODT) {
     if (!RoundingMode(next, &is_ftz, &temp)) {
       // there is a rounding mode specified
-	  if (is_ftz)
-	    //need to check the token returned by rounding mode
-	    next = temp;
-	  else
-	    next = yylex();
+      if (is_ftz)
+        // need to check the token returned by rounding mode
+        next = temp;
+      else
+        next = yylex();
     }
-	
-	//check the operands
-	if (!Operand(yylex()))
-	{
-	  if (yylex() == ',') {
+
+    // check the operands
+    if (!Operand(yylex())) {
+      if (yylex() == ',') {
         if (!Operand(yylex())) {
-	      if (yylex() == ';')
-		    return 0;
-		}
-	  }
-	}
+          if (yylex() == ';')
+            return 0;
+        }
+      }
+    }
   } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_FTZ) {
     // Optional FTZ
-	next = yylex();
-	if (next == _FTZ) {
-	  //has a _ftz
-	  next = yylex();
-	}
-	
-	// now we must have a dataTypeId
+    next = yylex();
+    if (next == _FTZ) {
+      // has a _ftz
+      next = yylex();
+    }
+
+    // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
-	  //check the operands
-	  if (!Operand(yylex()))
-	  {
-	    if (yylex() == ',') {
+      // check the operands
+      if (!Operand(yylex())) {
+        if (yylex() == ',') {
           if (!Operand(yylex())) {
-		    if (yylex() == ';')
-		      return 0;
-		  }
-	    }
-	  }
+            if (yylex() == ';')
+              return 0;
+          }
+        }
+      }
     }
   } else {
     return 1;
@@ -433,50 +430,49 @@ int Instruction2(int first_token) {
 }
 
 int Version(int first_token) {
-  //first token must be version keyword
+  // first token must be version keyword
     // check for major
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
     if (yylex() == ':') {
-	  //check for minor
-	  if (yylex() == TOKEN_INTEGER_CONSTANT) {
-	    int next = yylex();
-	    if (next == ';') {
-		  return 0; 
-		} else if (next == ':') {
-		  // check for target
-		  next = yylex();
-		  while(next != ';') {
-		    if (GetTokenType(next) == TARGET) {
-			  next = yylex();
-			  if (next == ',')
-			    next = yylex();      // next target
-			  else if (next != ';')
-			    return 1;
-			} else {
-			  return 1;
-			}
-		  }	  
-		  return 0;
-		}
-	  
-	  }
-	}
+      // check for minor
+      if (yylex() == TOKEN_INTEGER_CONSTANT) {
+        int next = yylex();
+        if (next == ';') {
+          return 0;
+        } else if (next == ':') {
+          // check for target
+          next = yylex();
+          while (next != ';') {
+            if (GetTokenType(next) == TARGET) {
+              next = yylex();
+              if (next == ',')
+                next = yylex();      // next target
+              else if (next != ';')
+                return 1;
+            } else {
+              return 1;
+            }
+          }
+          return 0;
+        }
+      }
+    }
   }
   return 1;
-
 };
 
 int Alignment(int first_token) {
   // first token must be "align" keyword
   if (yylex() == TOKEN_INTEGER_CONSTANT)
     return 0;
-  else 
+  else
     return 1;
 }
 
 // parse declaration prefix
 // since this function checks for one token lookahead
-// if the last token is not consumed by this, it will notify the caller to recheck
+// if the last token is not consumed by this,
+// it will notify the caller to recheck
 int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
   *recheck_last_token = false;
   *last_token = 0;
@@ -485,99 +481,97 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
   if (!Alignment(first_token)) {
     // first is alignment
     if (next_token == CONST) {
-	  // alignment const
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if ((next_token == EXTERN)||(next_token == STATIC)) { 	    
-	    // alignment const externOrStatic
-	  } else {
-	    // alignment const
-		*recheck_last_token = true;
-	  }	  
- 	} else if ((next_token == EXTERN)||(next_token == STATIC)) {
-	  // alignment externOrStatic
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if (next_token == CONST) {
-	    // alignmnet externOrStatic const
-	  } else {
-	    // alignment externOrStatic
-		*recheck_last_token = true;
-	  }
-	} else {
-	  // alignment
-	  *recheck_last_token = true;
-	}
-	
+      // alignment const
+      next_token = yylex();
+      *last_token = next_token;
+
+      if ((next_token == EXTERN)||(next_token == STATIC)) {
+        // alignment const externOrStatic
+      } else {
+        // alignment const
+        *recheck_last_token = true;
+      }
+    } else if ((next_token == EXTERN)||(next_token == STATIC)) {
+      // alignment externOrStatic
+      next_token = yylex();
+      *last_token = next_token;
+
+      if (next_token == CONST) {
+        // alignmnet externOrStatic const
+      } else {
+        // alignment externOrStatic
+        *recheck_last_token = true;
+      }
+    } else {
+      // alignment
+      *recheck_last_token = true;
+    }
+
   } else if (first_token == CONST) {
     // first is const
     if (!Alignment(next_token)) {
-	  // const alignment
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if ((next_token == EXTERN)||(next_token == STATIC)) {
-	    // const alignment externOrStatic
-	  } else {
-	    // const alignment
-	    *recheck_last_token = true;
-	  }
-	} else if ((next_token == EXTERN)||(next_token == STATIC)) {
-	  // const externOrStatic
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if (!Alignment(next_token)) {
-	    //const externOrStatic alignment
-	  } else {
-	    // const externOrStatic
-		*recheck_last_token = true;
-	  }
-	} else {  // const does not stand alone
-	  *recheck_last_token = true;
-	  return 1;
-	}
+      // const alignment
+      next_token = yylex();
+      *last_token = next_token;
+
+      if ((next_token == EXTERN)||(next_token == STATIC)) {
+        // const alignment externOrStatic
+      } else {
+        // const alignment
+        *recheck_last_token = true;
+      }
+    } else if ((next_token == EXTERN)||(next_token == STATIC)) {
+      // const externOrStatic
+      next_token = yylex();
+      *last_token = next_token;
+
+      if (!Alignment(next_token)) {
+        // const externOrStatic alignment
+      } else {
+        // const externOrStatic
+        *recheck_last_token = true;
+      }
+    } else {  // const does not stand alone
+      *recheck_last_token = true;
+      return 1;
+    }
   } else if ((first_token == EXTERN)||(first_token == STATIC)) {
     // externOrStatic first
-	if (!Alignment(next_token)) {
-	  // externOrStatic alignment
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if (next_token == CONST) {
-	    // externOrStatic alignment const
-	  } else {
-	    // externOrStatic alignment
-		*recheck_last_token = true;
-	  }  
-	} else if (next_token == CONST) {
-	  // externOrStatic const
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if (!Alignment(next_token)) {
-	     // externOrStatic const alignment
-	  } else {
-	    *recheck_last_token = true;
-	  }
-	} else {
-	  *recheck_last_token = true;
+    if (!Alignment(next_token)) {
+      // externOrStatic alignment
+      next_token = yylex();
+      *last_token = next_token;
+
+      if (next_token == CONST) {
+        // externOrStatic alignment const
+      } else {
+        // externOrStatic alignment
+        *recheck_last_token = true;
+      }
+    } else if (next_token == CONST) {
+      // externOrStatic const
+      next_token = yylex();
+      *last_token = next_token;
+
+      if (!Alignment(next_token)) {
+         // externOrStatic const alignment
+      } else {
+        *recheck_last_token = true;
+      }
+    } else {
+      *recheck_last_token = true;
     }
   }
-  
-  return 0;
 
+  return 0;
 }
 
 int FBar(int first_token) {
   // first token must be _FBAR
   if (yylex() == '(' )
     if (yylex() == TOKEN_INTEGER_CONSTANT)
-	  if (yylex() == ')')
-	    return 0;
-  
-  return 1;
+      if (yylex() == ')')
+        return 0;
 
-};
+  return 1;
+}

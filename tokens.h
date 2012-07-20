@@ -1,4 +1,5 @@
-// Copyright 2012 MulticoreWare Inc.
+/* Copyright 2012 <MulticorewareInc> */
+
 #ifndef TOKENS_H_
 #define TOKENS_H_
 

@@ -1,4 +1,5 @@
 // Copyright 2012 MulticoreWare Inc.
+
 #include "./gtest/gtest.h"
 #include "./lexer.h"
 #include "../parser.h"
@@ -8,51 +9,51 @@
 
 TEST(ParserTest, IdentifierTest) {
   std::string input("&a_global_id123");  // global id
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Identifier(yylex()));
 
   input.assign("%a_local_id");  // local id
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Identifier(yylex()));
 
   input.assign("$d7");  // register
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Identifier(yylex()));
 }
 
 TEST(ParserTest, BaseOperandTest) {
   std::string input("1352");  // Int constant
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, BaseOperand(yylex()));
 
   input.assign("WAVESIZE");  // TOKEN_WAVE_SIZE
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, BaseOperand(yylex()));
 
   input.assign("_u32(12, 13 ,14)");  // decimalListSingle
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, BaseOperand(yylex()));
 }
 
 TEST(ParserTest, AddressableOperandTest) {
   std::string input("[%local_id]");  // Int constant
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, AddressableOperand(yylex()));
 
   input.assign("[%local_id <100> ]");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, AddressableOperand(yylex()));
 
   input.assign("[%local_id<$d7>]");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, AddressableOperand(yylex()));
 
   input.assign("[%global_id<$q5 + 10 >]");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, AddressableOperand(yylex()));
 
   input.assign("[%global_id<$d6 - 10 >]");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, AddressableOperand(yylex()));
 }
 
@@ -190,7 +191,7 @@ TEST(ParserTest, Bug55) {
 
 TEST(ParserTest, Bug57) {
   std::string input("($d4,&global_id, %local_id)");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, ArrayOperandList(yylex()));
 }
 
@@ -203,176 +204,169 @@ TEST(ParserTest, RoundingMode) {
   bool is_ftz = false;
   int current_token;
   std::string input("_upi");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
 
   input.assign("_downi");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+
   input.assign("_zeroi");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+
   input.assign("_neari");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
 
   input.assign("_up");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
 
   input.assign("_down");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+
   input.assign("_zero");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+
   input.assign("_near");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+
   input.assign("_ftz_up");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
 
   input.assign("_ftz_down");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+
   input.assign("_ftz_zero");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+
   input.assign("_ftz_near");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+
   input.assign("_ftz");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
 }
 
 
 TEST(ParserTest, Instruction2) {
   // with packing
-  
+
   std::string input("abs_p_s8x4 $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 
   // with _ftz and packing
   input.assign("abs_ftz_p_s8x4 $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
-  
+
   // with _ftz floatRounding and packing
   input.assign("abs_ftz_up_s8x4 $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 
   // without roundingMode or packing
   input.assign("abs_s8x4 $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 
   // with _ftz
   input.assign("abs_ftz_s8x4 $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
-  
+
   // with _ftz floatRounding
   input.assign("abs_ftz_s8x4_up $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, Instruction2(yylex()));  
-
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Instruction2(yylex()));
 }
 
 
 TEST(ParserTest, Instruction2NoDT) {
-
   std::string input("unpack2 $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 
   input.assign("unpack2_ftz $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, Instruction2(yylex()));
-  
-  
-  input.assign("unpack2_ftz_zero $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, Instruction2(yylex()));
-  
-    
-  input.assign("unpack2_neari $s1, $s2;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 
+
+  input.assign("unpack2_ftz_zero $s1, $s2;");
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Instruction2(yylex()));
+
+
+  input.assign("unpack2_neari $s1, $s2;");
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Instruction2(yylex()));
 }
 
 TEST(ParserTest, Instruction2FTZ) {
   std::string input("frsqrt_f32 $s1, $s0;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
-  
+
   input.assign("frsqrt_ftz_f32 $s1, $s0;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
- }
- 
- TEST(ParserTest, VersionStatement) {
+}
+
+TEST(ParserTest, VersionStatement) {
   std::string input("version 1:0;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex()));
-  
+
   input.assign("version 1:0:$large;");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex()));
-  
 }
 
- TEST(ParserTest, AlignStatement) {
+TEST(ParserTest, AlignStatement) {
   std::string input("align 8");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Alignment(yylex()));
-
-  
 }
 
- TEST(ParserTest, DeclPrefix) {
+TEST(ParserTest, DeclPrefix) {
   bool recheck;
   int last_token;
   std::string input("align 8");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
 
   input.assign("align 8 static");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+
   input.assign("align 8 extern const");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
-  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+
   input.assign("extern const");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
-  
-    input.assign("extern const align 1");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
-  
-    input.assign("const extern");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+
+  input.assign("extern const align 1");
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+
+  input.assign("const extern");
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
 }
 
 TEST(ParserTest, FBar) {
   std::string input(":fbar(1)");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, FBar(yylex()));
-
 }
