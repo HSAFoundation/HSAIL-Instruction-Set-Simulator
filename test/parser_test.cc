@@ -343,15 +343,29 @@ TEST(ParserTest, Instruction2FTZ) {
 }
 
  TEST(ParserTest, DeclPrefix) {
-  std::string input("align 8 extern");
+  bool recheck;
+  int last_token;
+  std::string input("align 8");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex()));
+  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
 
   input.assign("align 8 static");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex()));
+  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
   
   input.assign("align 8 extern const");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, DeclPrefix(yylex()));
+  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
+  
+  input.assign("extern const");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
+  
+    input.assign("extern const align 1");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
+  
+    input.assign("const extern");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, DeclPrefix(yylex(),&recheck,&last_token));
 }

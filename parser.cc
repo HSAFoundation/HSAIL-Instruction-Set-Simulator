@@ -474,7 +474,99 @@ int Alignment(int first_token) {
     return 1;
 }
 
-int DeclPrefix(int first_token) {
-  return 1;
+// parse declaration prefix
+// since this function checks for one token lookahead
+// if the last token is not consumed by this, it will notify the caller to recheck
+int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
+  *recheck_last_token = false;
+  *last_token = 0;
+  int next_token = yylex();
+  *last_token = next_token;
+  if (!Alignment(first_token)) {
+    // first is alignment
+    if (next_token == CONST) {
+	  // alignment const
+	  next_token = yylex();
+	  *last_token = next_token;
+	  
+	  if ((next_token == EXTERN)||(next_token == STATIC)) { 	    
+	    // alignment const externOrStatic
+	  } else {
+	    // alignment const
+		*recheck_last_token = true;
+	  }	  
+ 	} else if ((next_token == EXTERN)||(next_token == STATIC)) {
+	  // alignment externOrStatic
+	  next_token = yylex();
+	  *last_token = next_token;
+	  
+	  if (next_token == CONST) {
+	    // alignmnet externOrStatic const
+	  } else {
+	    // alignment externOrStatic
+		*recheck_last_token = true;
+	  }
+	} else {
+	  // alignment
+	  *recheck_last_token = true;
+	}
+	
+  } else if (first_token == CONST) {
+    // first is const
+    if (!Alignment(next_token)) {
+	  // const alignment
+	  next_token = yylex();
+	  *last_token = next_token;
+	  
+	  if ((next_token == EXTERN)||(next_token == STATIC)) {
+	    // const alignment externOrStatic
+	  } else {
+	    // const alignment
+	    *recheck_last_token = true;
+	  }
+	} else if ((next_token == EXTERN)||(next_token == STATIC)) {
+	  // const externOrStatic
+	  next_token = yylex();
+	  *last_token = next_token;
+	  
+	  if (!Alignment(next_token)) {
+	    //const externOrStatic alignment
+	  } else {
+	    // const externOrStatic
+		*recheck_last_token = true;
+	  }
+	} else {  // const does not stand alone
+	  *recheck_last_token = true;
+	  return 1;
+	}
+  } else if ((first_token == EXTERN)||(first_token == STATIC)) {
+    // externOrStatic first
+	if (!Alignment(next_token)) {
+	  // externOrStatic alignment
+	  next_token = yylex();
+	  *last_token = next_token;
+	  
+	  if (next_token == CONST) {
+	    // externOrStatic alignment const
+	  } else {
+	    // externOrStatic alignment
+		*recheck_last_token = true;
+	  }  
+	} else if (next_token == CONST) {
+	  // externOrStatic const
+	  next_token = yylex();
+	  *last_token = next_token;
+	  
+	  if (!Alignment(next_token)) {
+	     // externOrStatic const alignment
+	  } else {
+	    *recheck_last_token = true;
+	  }
+	} else {
+	  *recheck_last_token = true;
+    }
+  }
+  
+  return 0;
 
 }
