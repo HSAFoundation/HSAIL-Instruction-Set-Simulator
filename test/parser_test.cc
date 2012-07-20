@@ -289,3 +289,14 @@ TEST(ParserTest, Instruction2) {
   EXPECT_EQ(0, Instruction2(yylex()));  
 
 }
+
+
+TEST(ParserTest, Instruction2NoDT) {
+
+  std::string input("unpack2 $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
+
+ 
+
+}

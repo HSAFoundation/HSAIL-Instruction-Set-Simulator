@@ -131,6 +131,20 @@ TerminalType GetTokenType(int token) {
     case COUNT:
     case MASK:
       return INSTRUCTION2_OPCODE;
+	  
+	  
+	    /* Instruction2Opcode NoDT */
+    case UNPACK3:
+    case UNPACK2:
+    case UNPACK1:
+    case UNPACK0:
+    case ALLOCA:
+    case WORKITEMID:
+    case WORKITEMAID:
+    case WORKGROUPSIZE:
+    case NDRANGESIZE:
+    case NDRANGEGROUPS:		
+	  return INSTRUCTION2_OPCODE_NODT;
     default:
       return UNKNOWN_TERM;  // unknown
     }
