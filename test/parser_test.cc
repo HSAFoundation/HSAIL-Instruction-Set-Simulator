@@ -189,12 +189,12 @@ TEST(ParserTest, Bug55) {
 }
 
 TEST(ParserTest, Bug57) {
-  std::string input("($d7,&global_id, %local_id)");
+  std::string input("($d4,&global_id, %local_id)");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, ArrayOperandList(yylex()));
 }
 
 TEST(ParserTest, Bug58) {
-  std::string input("query_order_u32 _f32(1.2,.2,3.4), [%a_local_id]");
+  std::string input("query_order_u32 _f32(1.2,.2,3.4, 5.6), [%a_local_id]");
   EXPECT_EQ(0, Parse(input));
 }
