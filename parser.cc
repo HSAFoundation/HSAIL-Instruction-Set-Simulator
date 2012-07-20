@@ -279,3 +279,6 @@ int RoundingMode(int first_token) {
   } 
 }
 
+int Instruction2(int first_token) {
+  return 1;
+}

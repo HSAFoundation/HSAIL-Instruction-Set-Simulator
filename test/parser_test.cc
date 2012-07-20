@@ -199,7 +199,7 @@ TEST(ParserTest, Bug58) {
   EXPECT_EQ(0, Parse(input));
 }
 
-TEST(ParserTest, ParseRoundingMode) {
+TEST(ParserTest, RoundingMode) {
   std::string input("_upi");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, RoundingMode(yylex()));
@@ -251,4 +251,14 @@ TEST(ParserTest, ParseRoundingMode) {
   input.assign("_ftz");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, RoundingMode(yylex()));  
+}
+
+
+TEST(ParserTest, Instruction2) {
+  std::string input("abs_p_s8x4 $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
+
+  
+
 }
