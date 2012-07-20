@@ -376,16 +376,15 @@ TEST(ParserTest, ArrayDimensionSet) {
   int last_tok = 0;
   std::string input("[]");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, ArrayDimensionSet(yylex(),&rescan,&last_tok));
-  
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
+
   input.assign("[1]");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, ArrayDimensionSet(yylex(),&rescan,&last_tok));
-  
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
+
   input.assign("[1][2][][3]");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, ArrayDimensionSet(yylex(),&rescan,&last_tok));
-
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
 }
 
 TEST(ParserTest, ArgumentDecl) {
@@ -397,88 +396,88 @@ TEST(ParserTest, ArgumentDecl) {
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
   if (!rescan)
     last_tok = yylex();
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
- 
-  // test 2 
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+
+  // test 2
   input.assign("align 8 const static arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
   if (!rescan)
     last_tok = yylex();
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
-  
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+
   // test 3
   input.assign("align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
   if (!rescan)
     last_tok = yylex();
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
-  
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+
     // test 4
   input.assign("extern arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
   if (!rescan)
     last_tok = yylex();
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
-  
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+
     // test 5
   input.assign("const align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
   if (!rescan)
     last_tok = yylex();
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
-  
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+
     // test 6
   input.assign("const static align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan) 
+  if (!rescan)
     last_tok = yylex();
-  
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
-  
+
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+
       // test 7
   input.assign("const align 8 static arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
   if (!rescan)
     last_tok = yylex();
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
-  
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+
       // test 8
   input.assign("static const align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
   if (!rescan)
     last_tok = yylex();
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
-  
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
+
       // test 6
   input.assign("static align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
   if (!rescan)
     last_tok = yylex();
-	
-  EXPECT_EQ(ARG,last_tok);
-  EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
+
+  EXPECT_EQ(ARG, last_tok);
+  EXPECT_EQ(0, ArgumentDecl(last_tok, &rescan, &last_tok));
 }

@@ -463,7 +463,6 @@ int Version(int first_token) {
 
 int Alignment(int first_token) {
   // first token must be "align" keyword
-  
   if (yylex() == TOKEN_INTEGER_CONSTANT)
     return 0;
   else
@@ -480,12 +479,11 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
   *recheck_last_token = false;
   *last_token = 0;
 
-  
-  if (first_token==ALIGN) {
+  if (first_token == ALIGN) {
     if (!Alignment(first_token)) {
-	  next_token = yylex();  // need to go to next token
-	  *last_token = next_token;
-	  // first is alignment
+      next_token = yylex();  // need to go to next token
+      *last_token = next_token;
+      // first is alignment
       if (next_token == CONST) {
       // alignment const
       next_token = yylex();
@@ -493,7 +491,7 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
 
       if ((next_token == EXTERN)||(next_token == STATIC)) {
         // alignment const externOrStatic
-	*recheck_last_token = false;
+    *recheck_last_token = false;
       } else {
         // alignment const
         *recheck_last_token = true;
@@ -513,12 +511,12 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
       // alignment
       *recheck_last_token = true;
     }
-	}
+    }
   } else if (first_token == CONST) {
     // first is const
-	  next_token = yylex();
+      next_token = yylex();
       *last_token = next_token;
-	if (next_token == ALIGN) {
+    if (next_token == ALIGN) {
       if (!Alignment(next_token)) {
       // const alignment
       next_token = yylex();
@@ -530,19 +528,19 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
         // const alignment
         *recheck_last_token = true;
       }
-	  }
+      }
     } else if ((next_token == EXTERN)||(next_token == STATIC)) {
       // const externOrStatic
       next_token = yylex();
       *last_token = next_token;
 
-	  if (next_token==ALIGN) {
+      if (next_token == ALIGN) {
       if (!Alignment(next_token)) {
         // const externOrStatic alignment
-			*last_token = next_token;
-	    } else {
-		  return 1;
-		}
+            *last_token = next_token;
+        } else {
+          return 1;
+        }
       } else {
         // const externOrStatic
         *recheck_last_token = true;
@@ -553,9 +551,9 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
     }
   } else if ((first_token == EXTERN)||(first_token == STATIC)) {
     // externOrStatic first
-	next_token = yylex();
+    next_token = yylex();
     *last_token = next_token;
-	if (next_token == ALIGN) {
+    if (next_token == ALIGN) {
     if (!Alignment(next_token)) {
       // externOrStatic alignment
       next_token = yylex();
@@ -567,19 +565,18 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
         // externOrStatic alignment
         *recheck_last_token = true;
       }
-	  }
+      }
     } else if (next_token == CONST) {
       // externOrStatic const
       next_token = yylex();
       *last_token = next_token;
 
-	  if (next_token==ALIGN) {
+      if (next_token == ALIGN) {
       if (!Alignment(next_token)) {
-		  *last_token = next_token;
-		}
-		else {
-		  return 1;
-		}
+          *last_token = next_token;
+        } else {
+          return 1;
+        }
          // externOrStatic const alignment
       } else {
         *recheck_last_token = true;
@@ -603,54 +600,54 @@ int FBar(int first_token) {
 }
 
 
-int ArrayDimensionSet(int first_token, bool* rescan_last_token, int* last_token) {
+int ArrayDimensionSet(int first_token,
+                      bool* rescan_last_token,
+                      int* last_token) {
   // first token must be '['
   *rescan_last_token = false;
   int next_token = yylex();
   while (1) {
     if (next_token == ']') {
-	  next_token = yylex();  // check if there is more item
-	  if (next_token == '[') {  // more item
-	    next_token = yylex();
-	  } else { // no more item
-	    *last_token = next_token;
-		*rescan_last_token  = true;
-		return 0;
-	  }
+      next_token = yylex();  // check if there is more item
+      if (next_token == '[') {  // more item
+        next_token = yylex();
+      } else {  // no more item
+        *last_token = next_token;
+        *rescan_last_token  = true;
+        return 0;
+      }
     } else if (next_token == TOKEN_INTEGER_CONSTANT) {
-	  next_token = yylex(); // scan next
-	} else {
-	  printf("Missing closing bracket.\n");
-	  return 1;
-	}
-  }  
+      next_token = yylex();  // scan next
+    } else {
+      printf("Missing closing bracket.\n");
+      return 1;
+    }
+  }
 }
 
 int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
   // The caller must have looked at "arg" to know that this is an argumentDecl
   // So let's assume the the first token is "arg"
   int next = yylex();
-  if ((GetTokenType(next)==DATA_TYPE_ID)||
+  if ((GetTokenType(next) == DATA_TYPE_ID)||
       (next == _RWIMG) ||
-	  (next == _SAMP) ||
-	  (next == _ROIMG)) {
-	next = yylex();
+      (next == _SAMP) ||
+      (next == _ROIMG)) {
+    next = yylex();
     if (next == TOKEN_LOCAL_IDENTIFIER) {
-	  // scan for arrayDimensions
-	  next = yylex();
-	  if (next == '[') {
-	     if (!ArrayDimensionSet(next,rescan_last_token,last_token)) {
-            // TODO ?		 
-			return 0;
-		 }
-	  } else {
-	    // no arrayDimensions
-		*last_token = next;
-		*rescan_last_token = true;
-		return 0;
-	  }
-	}		  
+      // scan for arrayDimensions
+      next = yylex();
+      if (next == '[') {
+         if (!ArrayDimensionSet(next, rescan_last_token, last_token)) {
+           return 0;
+         }
+      } else {
+        // no arrayDimensions
+        *last_token = next;
+        *rescan_last_token = true;
+        return 0;
+      }
+    }
   }
   return 1;
-
 }
