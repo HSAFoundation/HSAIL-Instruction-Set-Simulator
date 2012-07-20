@@ -200,65 +200,92 @@ TEST(ParserTest, Bug58) {
 }
 
 TEST(ParserTest, RoundingMode) {
+  bool is_ftz = false;
+  int current_token;
   std::string input("_upi");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
 
   input.assign("_downi");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
   
   input.assign("_zeroi");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
   
   input.assign("_neari");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
 
   input.assign("_up");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
 
   input.assign("_down");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
   
   input.assign("_zero");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
   
   input.assign("_near");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
   
   input.assign("_ftz_up");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
 
   input.assign("_ftz_down");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
   
   input.assign("_ftz_zero");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
   
   input.assign("_ftz_near");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));
   
   input.assign("_ftz");
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, RoundingMode(yylex()));  
+  EXPECT_EQ(0, RoundingMode(yylex(),&is_ftz, &current_token));  
 }
 
 
 TEST(ParserTest, Instruction2) {
+  // with packing
+  
   std::string input("abs_p_s8x4 $s1, $s2;");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Instruction2(yylex()));
 
+  // with _ftz and packing
+  input.assign("abs_ftz_p_s8x4 $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
   
+  // with _ftz floatRounding and packing
+  input.assign("abs_ftz_up_s8x4 $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
+
+  // without roundingMode or packing
+  input.assign("abs_s8x4 $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
+
+  // with _ftz
+  input.assign("abs_ftz_s8x4 $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
+  
+  // with _ftz floatRounding
+  input.assign("abs_ftz_s8x4_up $s1, $s2;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));  
 
 }

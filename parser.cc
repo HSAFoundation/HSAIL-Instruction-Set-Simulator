@@ -67,7 +67,7 @@ TerminalType GetTokenType(int token) {
     case _F64X2:
     case _S64X2:
     case _U64X2:
-        return DATA_TYPE_ID;
+      return DATA_TYPE_ID;
 
         /* QueryOp */
     case QUERY_ORDER:
@@ -78,31 +78,61 @@ TerminalType GetTokenType(int token) {
     case QUERY_HEIGHT:
     case QUERY_NORMALIZED:
     case QUERY_FILTERING:
-        return QUERY_OP;
+      return QUERY_OP;
 
         /* Register */
     case TOKEN_CREGISTER:
     case TOKEN_DREGISTER:
     case TOKEN_SREGISTER:
     case TOKEN_QREGISTER:
-        return REGISTER;
-		
-		/* IntRounding */
-	case _UPI:
-	case _DOWNI:
-	case _ZEROI:
-	case _NEARI:
-		return INT_ROUNDING;
-	
-		/* FloatRounding */
-	case _UP:
-	case _DOWN:
-	case _ZERO:
-	case _NEAR:
-		return FLOAT_ROUNDING;
-
-        default:
-        return UNKNOWN_TERM;  // unknown
+      return REGISTER;
+        
+        /* IntRounding */
+    case _UPI:
+    case _DOWNI:
+    case _ZEROI:
+    case _NEARI:
+      return INT_ROUNDING;
+    
+        /* FloatRounding */
+    case _UP:
+    case _DOWN:
+    case _ZERO:
+    case _NEAR:
+      return FLOAT_ROUNDING;
+        /* Packing */
+	case _PP:
+	case _PS:
+	case _SP:
+	case _SS:
+	case __S:
+	case __P:
+	case _PP_SAT:
+	case _PS_SAT:
+	case _SP_SAT:
+	case _SS_SAT:
+	case _S_SAT:
+	case _P_SAT:
+	  return PACKING;
+    		
+        /* Instruction2Opcode */
+    case ABS:
+    case NEG:
+    case NOT:
+    case POPCOUNT:
+    case FIRSTBIT:
+    case LASTBIT:
+	case BITREV:
+    case MOVS_LO:
+    case MOVS_HI:
+    case FBAR_INITSIZE:
+    case FBAR_INIT:
+    case FBAR_RELEASECF:
+    case COUNT:
+    case MASK:
+      return INSTRUCTION2_OPCODE;
+    default:
+      return UNKNOWN_TERM;  // unknown
     }
 }
 
@@ -264,11 +294,20 @@ int ArrayOperandList(int first_token) {
     }
 }
 
-int RoundingMode(int first_token) {
-    int next;
+int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
+  *is_ftz = false;
+  *last_token = first_token;
+  int next;
+  
   if (first_token == _FTZ) {
-    next = yylex();
-	if (GetTokenType(next) == FLOAT_ROUNDING) { };
+    next = yylex(); 
+	*last_token = next;		
+	
+	if (GetTokenType(next) == FLOAT_ROUNDING) { 
+	  // next is floatRounding
+	} else {
+       *is_ftz = true;
+	}
 	return 0;
   } else if (GetTokenType(first_token) == INT_ROUNDING) {
     return 0;
@@ -280,5 +319,39 @@ int RoundingMode(int first_token) {
 }
 
 int Instruction2(int first_token) {
-  return 1;
+  // First token must be an Instruction2Opcode
+  int next = yylex();
+  //to get last token returned by RoundingMode in case _ftz
+  int temp = 0;  
+  bool is_ftz = false;
+  if (!RoundingMode(next, &is_ftz, &temp)) {
+    // there is a rounding mode specified
+	if (is_ftz)
+	  //need to check the token returned by rounding mode
+	  next = temp;
+	else
+	  next = yylex();
+  } 
+  
+  // check whether there is a Packing
+  if (GetTokenType(next) == PACKING)
+    //there is packing
+	next = yylex();
+ 
+  // now we must have a dataTypeId
+  if (GetTokenType(next) == DATA_TYPE_ID) {
+	//check the operands
+	if (!Operand(yylex()))
+	{
+	  if (yylex() == ',') {
+        if (!Operand(yylex())) {
+		  if (yylex() == ';')
+		    return 0;
+		}
+	  }
+	   
+	}
+  } else {
+    return 1;
+  }
 }
