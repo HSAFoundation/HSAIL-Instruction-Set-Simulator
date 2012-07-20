@@ -423,3 +423,9 @@ int Instruction2(int first_token) {
     return 1;
   }
 }
+
+int Version(int first_token) {
+  //first token must be version keyword
+  return 1;
+
+};

@@ -318,7 +318,15 @@ TEST(ParserTest, Instruction2FTZ) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Instruction2(yylex()));
   
-  input.assign("frsqrt__ftz_f32 $s1, $s0;");
+  input.assign("frsqrt_ftz_f32 $s1, $s0;");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Instruction2(yylex()));
+ }
+ 
+ TEST(ParserTest, VersionStatement) {
+  std::string input("version 1:0;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Version(yylex()));
+  
+
  }
