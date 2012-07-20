@@ -14,7 +14,8 @@ enum TerminalType { UNKNOWN_TERM = 0,
 					FLOAT_ROUNDING,
 					PACKING,
 					INSTRUCTION2_OPCODE,
-					INSTRUCTION2_OPCODE_NODT
+					INSTRUCTION2_OPCODE_NODT,
+					INSTRUCTION2_OPCODE_FTZ
                   };
 
 // classify token into different terminal type

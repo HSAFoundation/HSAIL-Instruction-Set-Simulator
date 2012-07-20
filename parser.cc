@@ -132,7 +132,6 @@ TerminalType GetTokenType(int token) {
     case MASK:
       return INSTRUCTION2_OPCODE;
 	  
-	  
 	    /* Instruction2Opcode NoDT */
     case UNPACK3:
     case UNPACK2:
@@ -145,6 +144,18 @@ TerminalType GetTokenType(int token) {
     case NDRANGESIZE:
     case NDRANGEGROUPS:		
 	  return INSTRUCTION2_OPCODE_NODT;
+	  
+        /* Instruction2OpcodeFTZ */	  
+	case SQRT:
+    case FRACT:
+    case FCOS:
+    case FSIN:
+    case FLOG2:
+    case FEXP2:
+    case FSQRT:
+    case FRSQRT:
+    case FRCP:
+	  return INSTRUCTION2_OPCODE_FTZ;
     default:
       return UNKNOWN_TERM;  // unknown
     }
@@ -387,9 +398,27 @@ int Instruction2(int first_token) {
 		}
 	  }
 	}
+  } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_FTZ) {
+    // Optional FTZ
+	next = yylex();
+	if (next == _FTZ) {
+	  //has a _ftz
+	  next = yylex();
+	}
 	
-	
-  
+	// now we must have a dataTypeId
+    if (GetTokenType(next) == DATA_TYPE_ID) {
+	  //check the operands
+	  if (!Operand(yylex()))
+	  {
+	    if (yylex() == ',') {
+          if (!Operand(yylex())) {
+		    if (yylex() == ';')
+		      return 0;
+		  }
+	    }
+	  }
+    }
   } else {
     return 1;
   }

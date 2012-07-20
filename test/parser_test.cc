@@ -317,4 +317,8 @@ TEST(ParserTest, Instruction2FTZ) {
   std::string input("frsqrt_f32 $s1, $s0;");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, Instruction2(yylex()));
+  
+  input.assign("frsqrt__ftz_f32 $s1, $s0;");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Instruction2(yylex()));
  }
