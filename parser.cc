@@ -468,6 +468,7 @@ int Version(int first_token) {
 
 int Alignment(int first_token) {
   // first token must be "align" keyword
+  
   if (yylex() == TOKEN_INTEGER_CONSTANT)
     return 0;
   else 
@@ -478,20 +479,25 @@ int Alignment(int first_token) {
 // since this function checks for one token lookahead
 // if the last token is not consumed by this, it will notify the caller to recheck
 int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
+  int last_align_token;
+  int next_token;
   *recheck_last_token = false;
   *last_token = 0;
-  int next_token = yylex();
-  *last_token = next_token;
+
+  
   if (first_token==ALIGN) {
     if (!Alignment(first_token)) {
-      // first is alignment
+	  next_token = yylex();  // need to go to next token
+	  *last_token = next_token;
+	  // first is alignment
       if (next_token == CONST) {
-	    // alignment const
-	    next_token = yylex();
+        // alignment const
+	    next_token = yylex();  // externOrstatic or none
 	    *last_token = next_token;
 	  
 	    if ((next_token == EXTERN)||(next_token == STATIC)) { 	    
 	      // alignment const externOrStatic
+		  *recheck_last_token = false;
 	    } else {
 	      // alignment const
 		  *recheck_last_token = true;
@@ -514,6 +520,8 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
 	}
   } else if (first_token == CONST) {
     // first is const
+	  next_token = yylex();
+      *last_token = next_token;
 	if (next_token == ALIGN) {
       if (!Alignment(next_token)) {
 	    // const alignment
@@ -533,9 +541,10 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
 	  *last_token = next_token;
 	  
 	  if (next_token==ALIGN) {
-	    if (!Alignment(next_token)) {}
+	    if (!Alignment(next_token)) {
 		    //const externOrStatic alignment
-	    else {
+			*last_token = next_token;
+	    } else {
 		  return 1;
 		}
 	  } else {
@@ -548,6 +557,8 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
 	}
   } else if ((first_token == EXTERN)||(first_token == STATIC)) {
     // externOrStatic first
+	next_token = yylex();
+    *last_token = next_token;
 	if (next_token == ALIGN) {
 	  if (!Alignment(next_token)) {
 	    // externOrStatic alignment
@@ -567,7 +578,9 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
 	  *last_token = next_token;
 	  
 	  if (next_token==ALIGN) {
-	    if (!Alignment(next_token)) {}
+	    if (!Alignment(next_token)) { 
+		  *last_token = next_token;
+		}
 		else {
 		  return 1;
 		}
@@ -621,6 +634,28 @@ int ArrayDimensionSet(int first_token, bool* rescan_last_token, int* last_token)
 int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
   // The caller must have looked at "arg" to know that this is an argumentDecl
   // So let's assume the the first token is "arg"
+  int next = yylex();
+  if ((GetTokenType(next)==DATA_TYPE_ID)||
+      (next == _RWIMG) ||
+	  (next == _SAMP) ||
+	  (next == _ROIMG)) {
+	next = yylex();
+    if (next == TOKEN_LOCAL_IDENTIFIER) {
+	  // scan for arrayDimensions
+	  next = yylex();
+	  if (next == '[') {
+	     if (!ArrayDimensionSet(next,rescan_last_token,last_token)) {
+            // TODO ?		 
+			return 0;
+		 }
+	  } else {
+	    // no arrayDimensions
+		*last_token = next;
+		*rescan_last_token = true;
+		return 0;
+	  }
+	}		  
+  }
   return 1;
-  
+
 }

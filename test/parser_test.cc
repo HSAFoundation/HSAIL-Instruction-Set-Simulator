@@ -451,8 +451,9 @@ TEST(ParserTest, ArgumentDecl) {
   input.assign("const static align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, DeclPrefix(yylex(), &rescan, &last_tok));
-  if (!rescan)
+  if (!rescan) 
     last_tok = yylex();
+  
 	
   EXPECT_EQ(ARG,last_tok);
   EXPECT_EQ(0, ArgumentDecl(last_tok,&rescan,&last_tok));
