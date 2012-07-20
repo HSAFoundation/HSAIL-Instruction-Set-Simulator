@@ -482,55 +482,62 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
   *last_token = 0;
   int next_token = yylex();
   *last_token = next_token;
-  if (!Alignment(first_token)) {
-    // first is alignment
-    if (next_token == CONST) {
-	  // alignment const
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if ((next_token == EXTERN)||(next_token == STATIC)) { 	    
-	    // alignment const externOrStatic
-	  } else {
+  if (first_token==ALIGN) {
+    if (!Alignment(first_token)) {
+      // first is alignment
+      if (next_token == CONST) {
 	    // alignment const
-		*recheck_last_token = true;
-	  }	  
- 	} else if ((next_token == EXTERN)||(next_token == STATIC)) {
-	  // alignment externOrStatic
-	  next_token = yylex();
-	  *last_token = next_token;
+	    next_token = yylex();
+	    *last_token = next_token;
 	  
-	  if (next_token == CONST) {
-	    // alignmnet externOrStatic const
-	  } else {
+	    if ((next_token == EXTERN)||(next_token == STATIC)) { 	    
+	      // alignment const externOrStatic
+	    } else {
+	      // alignment const
+		  *recheck_last_token = true;
+	    }	  
+ 	  } else if ((next_token == EXTERN)||(next_token == STATIC)) {
 	    // alignment externOrStatic
-		*recheck_last_token = true;
+	    next_token = yylex();
+	    *last_token = next_token;
+	  
+	    if (next_token == CONST) {
+	      // alignmnet externOrStatic const
+	    } else {
+	      // alignment externOrStatic
+		  *recheck_last_token = true;
+	    }
+	  } else {
+	    // alignment
+	    *recheck_last_token = true;
 	  }
-	} else {
-	  // alignment
-	  *recheck_last_token = true;
 	}
-	
   } else if (first_token == CONST) {
     // first is const
-    if (!Alignment(next_token)) {
-	  // const alignment
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if ((next_token == EXTERN)||(next_token == STATIC)) {
-	    // const alignment externOrStatic
-	  } else {
+	if (next_token == ALIGN) {
+      if (!Alignment(next_token)) {
 	    // const alignment
-	    *recheck_last_token = true;
+	    next_token = yylex();
+	    *last_token = next_token;
+	  
+	    if ((next_token == EXTERN)||(next_token == STATIC)) {
+	      // const alignment externOrStatic
+	    } else {
+	      // const alignment
+	      *recheck_last_token = true;
+	    }
 	  }
 	} else if ((next_token == EXTERN)||(next_token == STATIC)) {
 	  // const externOrStatic
 	  next_token = yylex();
 	  *last_token = next_token;
 	  
-	  if (!Alignment(next_token)) {
-	    //const externOrStatic alignment
+	  if (next_token==ALIGN) {
+	    if (!Alignment(next_token)) {}
+		    //const externOrStatic alignment
+	    else {
+		  return 1;
+		}
 	  } else {
 	    // const externOrStatic
 		*recheck_last_token = true;
@@ -541,23 +548,29 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
 	}
   } else if ((first_token == EXTERN)||(first_token == STATIC)) {
     // externOrStatic first
-	if (!Alignment(next_token)) {
-	  // externOrStatic alignment
-	  next_token = yylex();
-	  *last_token = next_token;
-	  
-	  if (next_token == CONST) {
-	    // externOrStatic alignment const
-	  } else {
+	if (next_token == ALIGN) {
+	  if (!Alignment(next_token)) {
 	    // externOrStatic alignment
-		*recheck_last_token = true;
-	  }  
+	    next_token = yylex();
+	    *last_token = next_token;
+	  
+	    if (next_token == CONST) {
+	      // externOrStatic alignment const
+	    } else {
+	      // externOrStatic alignment
+		  *recheck_last_token = true;
+	    }  
+	  }
 	} else if (next_token == CONST) {
 	  // externOrStatic const
 	  next_token = yylex();
 	  *last_token = next_token;
 	  
-	  if (!Alignment(next_token)) {
+	  if (next_token==ALIGN) {
+	    if (!Alignment(next_token)) {}
+		else {
+		  return 1;
+		}
 	     // externOrStatic const alignment
 	  } else {
 	    *recheck_last_token = true;
@@ -603,4 +616,11 @@ int ArrayDimensionSet(int first_token, bool* rescan_last_token, int* last_token)
 	  return 1;
 	}
   }  
+}
+
+int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
+  // The caller must have looked at "arg" to know that this is an argumentDecl
+  // So let's assume the the first token is "arg"
+  return 1;
+  
 }
