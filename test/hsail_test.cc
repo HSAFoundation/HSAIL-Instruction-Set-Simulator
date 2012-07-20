@@ -21,10 +21,10 @@ TEST(LexTest, Bug2) {
 }
 
 TEST(LexTest, Bug3) {
-  std::string input("020");
+  std::string input("030");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, yylex());
-  EXPECT_EQ(16, int_val);
+  EXPECT_EQ(24, int_val);
 }
 
 TEST(LexTest, Bug4) {
