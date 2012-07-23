@@ -831,5 +831,8 @@ int FunctionDecl(int first_token) {
   
   
   return 1;
+}
+
+int Codeblock(int first_token) {
   return 1;
 }
