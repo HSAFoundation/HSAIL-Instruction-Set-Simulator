@@ -13,6 +13,7 @@ int Parse(std::string input) {
     int token = yylex();   // get first token
     int result;
 
+  while (token != 0) {
 	// check token
 	switch (token) {
 	  case VERSION:
@@ -34,10 +35,9 @@ int Parse(std::string input) {
 	case INSTRUCTION2_OPCODE_FTZ:
 	    result = Instruction2(token);
 		return result;
-		
-    default:
-	    return 1;
     }
+	token = yylex();
+  }
 }
 
 TerminalType GetTokenType(int token) {
@@ -877,5 +877,9 @@ int Codeblock(int first_token) {
 	  break;
 	}
   }
+  return 1;
+}
+
+int Function(int first_token) {
   return 1;
 }

@@ -458,3 +458,10 @@ TEST(ParserTest, Codeblock) {
   EXPECT_EQ(0, Codeblock(yylex())); 
 }
 
+TEST(ParserTest, Function) {
+  std::string input("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0) :fbar(1)"); 
+  input.append("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; };");
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, Function(yylex())); 
+}
+
