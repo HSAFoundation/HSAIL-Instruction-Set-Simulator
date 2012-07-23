@@ -53,5 +53,6 @@ int Program(int first_token);
 int Branch(int first_token);
 int CallTargets(int first_token);
 int CallArgs(int first_token);
+int Call(int first_token);
 #endif  // PARSER_H_
 

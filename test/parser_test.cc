@@ -598,3 +598,9 @@ TEST(ParserTest, ParseCallArgs) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, CallArgs(yylex()));
 };
+
+TEST(ParserTest, Call) {
+  std::string input("call &callee (%output)(%input);");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Call(yylex()));
+};

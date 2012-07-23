@@ -1246,3 +1246,7 @@ int Branch(int first_token) {
   }
   return 1;
 }
+
+int Call(int first_token) {
+  return 1;
+};
