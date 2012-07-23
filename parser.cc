@@ -664,5 +664,22 @@ int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
 int ArgumentListBody(int first_token, bool* rescan_last_token, int* last_token) {
 	*last_token = 0;
 	*rescan_last_token = false;
-	return 1;
+	
+	int prev_token = 0;
+	bool rescan = false;
+	while (1) {
+	  if(!ArgumentDecl(first_token, &rescan, &prev_token)) {
+	    if (!rescan)
+   	      prev_token = yylex();
+        if (prev_token == ',') {
+		  first_token = yylex();
+		} else {
+		  *last_token = first_token;
+		  *rescan_last_token = true;
+		  return 0;
+		}	
+	  } else {
+	    return 1;
+	  }
+	}
 }
