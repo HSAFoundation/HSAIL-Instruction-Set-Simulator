@@ -881,5 +881,13 @@ int Codeblock(int first_token) {
 }
 
 int Function(int first_token) {
+  bool rescan = false;
+  int last_token = 0;
+  if (!FunctionDefinition(first_token,&rescan,&last_token)) {
+    if (!rescan)
+	  last_token = yylex();
+	if (!Codeblock(last_token)) 
+	  return 0;
+  }
   return 1;
 }
