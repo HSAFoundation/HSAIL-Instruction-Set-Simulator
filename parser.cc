@@ -354,7 +354,24 @@ int CallTargets(int first_token) {
 }
 
 int CallArgs(int first_token) {
-  return 1;
+  // assumed first_token is '('
+  int next;
+  while (1) {
+    next = yylex();
+    if (next == ')') {
+	  return 0;
+	} else if (!Operand(next)) {
+      next = yylex();
+      if (next == ')')
+        return 0;
+      else if (next == ',') {
+      } else {
+        return 1;
+      }
+    } else {
+      return 1;
+    }
+  }  
 }
 
 int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
