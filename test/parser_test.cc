@@ -499,10 +499,10 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("function &return_true(arg_f32 %ret_val) () {");
   input.append(" ret;");
   input.append(" }; ");
-  
+
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
-  
+
   // Example 4
   input.clear();
   input.assign("version 1:0:$small;");
@@ -513,7 +513,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;");
   input.append(" @outof_IF: ret;");
   input.append(" }; ");
-  
+
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
 };
@@ -528,21 +528,20 @@ TEST(ParserTest, OptionalWidth) {
   std::string input("_width(all)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, OptionalWidth(yylex()));
-  
+
   input.assign("_width(32)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, OptionalWidth(yylex()));
-
 };
 
 TEST(ParserTest, BranchOperation) {
   bool rescan = false;
   int last_tok = 0;
-  
+
   std::string input("cbr_width(all)_fbar $s1, @then;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Branch(yylex()));
-  
+
   input.assign("cbr_width(all)_fbar $c1, 10 , [@first, @then];");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Branch(yylex()));
@@ -554,7 +553,7 @@ TEST(ParserTest, BranchOperation) {
   input.assign("cbr_width(all)_fbar $c1, 5, [%local]; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Branch(yylex()));
-  
+
   input.assign("cbr_width(all)_fbar $c1, 10, @label; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Branch(yylex()));
@@ -574,7 +573,7 @@ TEST(ParserTest, BranchOperation) {
   input.assign("brn_width(all)_fbar &global, [@goto]; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Branch(yylex()));
-  
+
   input.assign("cbr $s1, @then; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Branch(yylex()));
