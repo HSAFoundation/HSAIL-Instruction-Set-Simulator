@@ -40,7 +40,9 @@ int ArrayDimensionSet(int first_token,
                       int* last_token);
 int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token);
 int ArgumentListBody(int first_token, bool* rescan_last_token, int* last_token);
-int FunctionDefinition(int first_token, bool* rescan_last_token, int* last_token);
+int FunctionDefinition(int first_token,
+                       bool* rescan_last_token,
+                       int* last_token);
 int FunctionDecl(int first_token);
 int Codeblock(int first_token);
 int Function(int first_token);

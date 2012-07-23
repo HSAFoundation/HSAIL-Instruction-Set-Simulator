@@ -361,107 +361,111 @@ TEST(ParserTest, ArrayDimensionSet) {
   bool rescan = false;
   int last_tok = 0;
   std::string input("[]");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
 
   input.assign("[1]");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
 
   input.assign("[1][2][][3]");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
 }
 
 TEST(ParserTest, ArgumentDecl) {
   bool rescan = false;
   int last_tok = 0;
-  
+
   // test 1
-  std::string input("const static arg_u32 %local_id[2][2] "); 
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok)); 
+  std::string input("const static arg_u32 %local_id[2][2] ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
   // test 2
   input.assign("align 8 const static arg_u32 %local_id[2][2] ");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
   // test 3
   input.assign("align 8 arg_u32 %local_id[2][2] ");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
     // test 4
   input.assign("extern arg_u32 %local_id[2][2] ");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
     // test 5
   input.assign("const align 8 arg_u32 %local_id[2][2] ");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
     // test 6
   input.assign("const static align 8 arg_u32 %local_id[2][2] ");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
- 
-   // test 7
+
+  // test 7
   input.assign("const align 8 static arg_u32 %local_id[2][2] ");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
       // test 8
   input.assign("static const align 8 arg_u32 %local_id[2][2] ");
-  yy_scan_string((char*)input.c_str());
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 
       // test 9
   input.assign("static align 8 arg_u32 %local_id[2][2] ");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok)); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
 }
 
 
 TEST(ParserTest, ArgumentListBody) {
   bool rescan = false;
   int last_tok = 0;
-  
+
   // test 1
-  std::string input("const static arg_u32 %local_id[2][2], static arg_f16 %local_id[], align 8 arg_u64 %test "); 
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, ArgumentListBody(yylex(), &rescan, &last_tok)); 
+  std::string input("const static arg_u32 %local_id[2][2],");
+  input.append("static arg_f16 %local_id[], align 8 arg_u64 %test ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, ArgumentListBody(yylex(), &rescan, &last_tok));
 }
 
 TEST(ParserTest, FunctionDefinition) {
   bool rescan = false;
   int last_tok = 0;
-  
+
   // test 1
-  std::string input("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0) :fbar(1)"); 
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, FunctionDefinition(yylex(), &rescan, &last_tok)); 
+  std::string input("function &get_global_id(arg_u32 %ret_val)");
+  input.append("(arg_u32 %arg_val0) :fbar(1)");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, FunctionDefinition(yylex(), &rescan, &last_tok));
 }
 
 TEST(ParserTest, FunctionDecl) {
   // test 1
-  std::string input("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0) :fbar(1);"); 
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, FunctionDecl(yylex())); 
+  std::string input("function &get_global_id(arg_u32 %ret_val)");
+  input.append("(arg_u32 %arg_val0) :fbar(1);");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, FunctionDecl(yylex()));
 }
 
 TEST(ParserTest, Codeblock) {
   // test 1
-  std::string input("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; }; "); 
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, Codeblock(yylex())); 
+  std::string input("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; }; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Codeblock(yylex()));
 }
 
 TEST(ParserTest, Function) {
-  std::string input("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0) :fbar(1)"); 
+  std::string input("function &get_global_id(arg_u32 %ret_val)");
+  input.append(" (arg_u32 %arg_val0) :fbar(1)");
   input.append("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; };");
-  yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, Function(yylex())); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Function(yylex()));
 }
 
