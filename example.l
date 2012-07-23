@@ -195,6 +195,7 @@ spill				{ return SPILL; }
 group				{ return GROUP; }
 readonly			{ return READONLY; }
 loc					{ return LOC; }
+
 	/* -- addressSpaceIdentifier -- */
 _readonly			{ return  _READONLY; }
 _kernarg			{ return  _KERNARG; 	}

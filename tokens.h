@@ -324,6 +324,9 @@ enum TokenType { TOKEN_CREGISTER= 258,
                  QUERY_DEPTH,
                  QUERY_HEIGHT,
                  QUERY_NORMALIZED,
-                 QUERY_FILTERING
+                 QUERY_FILTERING,
+				 /* optional width */
+				 _WIDTH,
+				 ALL
                };
 #endif  // TOKENS_H_

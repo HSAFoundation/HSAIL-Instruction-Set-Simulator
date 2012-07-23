@@ -506,3 +506,14 @@ TEST(ParserTest, Instruction3) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Instruction3(yylex()));
 };
+
+TEST(ParserTest, OptionalWidth) {
+  std::string input("_width(all)");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, OptionalWidth(yylex()));
+  
+  input.assign("_width(32)");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, OptionalWidth(yylex()));
+
+};

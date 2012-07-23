@@ -1089,3 +1089,7 @@ int Program(int first_token) {
     return 1;
   }
 }
+
+int OptionalWidth(int first_token) {
+  return 1;
+}
