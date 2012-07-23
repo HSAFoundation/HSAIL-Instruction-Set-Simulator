@@ -761,7 +761,10 @@ int FunctionDefinition(int first_token, bool* rescan_last_token,int* last_token)
   }	
   
   
-  
-  
+  return 1;
+}
+
+int FunctionDecl(int first_token) {
+
   return 1;
 }
