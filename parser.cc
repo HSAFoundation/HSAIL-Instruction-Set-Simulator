@@ -941,11 +941,10 @@ int Program(int first_token) {
               }
             }
 		  
-            if (first_token == ';') {
+            if (first_token == ';') {  // this is a functionDecl
 			  first_token = yylex();
 			  continue;
-			}
-              
+			} 
           }	   // if found TOKEN_GLOBAL_ID
 		} else {  // if first_token == FUNCTION
 		  return 1;  // currently only support functions

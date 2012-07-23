@@ -484,3 +484,13 @@ TEST(ParserTest, SimpleProg) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
 };
+
+TEST(ParserTest, ProgWithFunctionDefinition) {
+  std::string input("version 1:0:$small;");
+  input.append("function &packed_ops (arg_u8x4 %x)() {");
+  input.append(" abs_p_s8x4 $s1, $s2; ");
+  input.append(" }; ");
+  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+};
