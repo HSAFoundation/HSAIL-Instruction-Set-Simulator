@@ -197,12 +197,13 @@ int Operand(int first_token) {
 }
 
 int Identifier(int first_token) {
-    if (first_token == TOKEN_GLOBAL_IDENTIFIER)
+    if (first_token == TOKEN_GLOBAL_IDENTIFIER) {
         return 0;
-    else if (first_token == TOKEN_LOCAL_IDENTIFIER)
+    } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
         return 0;
-    else if (GetTokenType(first_token) == REGISTER)
+    } else if (GetTokenType(first_token) == REGISTER) {
         return 0;
+	}
 
     return 1;
 }
@@ -379,51 +380,58 @@ int Instruction2(int first_token) {
       if (!Operand(yylex())) {
         if (yylex() == ',') {
           if (!Operand(yylex())) {
-            if (yylex() == ';')
-              return 0;
+            if (yylex() == ';') {
+			  return 0;
+			}
           }
         }
       }
     }
+	return 1;
   } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_NODT) {
     if (!RoundingMode(next, &is_ftz, &temp)) {
       // there is a rounding mode specified
-      if (is_ftz)
+	  if (is_ftz)
         // need to check the token returned by rounding mode
         next = temp;
       else
         next = yylex();
     }
-
+    
+	
     // check the operands
-    if (!Operand(yylex())) {
-      if (yylex() == ',') {
+    if (!Operand(next)) {
+	  if (yylex() == ',') {
         if (!Operand(yylex())) {
-          if (yylex() == ';')
-            return 0;
+		  if (yylex() == ';') {
+		    return 0;
+		  }
         }
       }
     }
+	return 1;
   } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_FTZ) {
     // Optional FTZ
-    next = yylex();
-    if (next == _FTZ) {
-      // has a _ftz
+	if (next == _FTZ) {
+	  // has a _ftz
       next = yylex();
     }
+	
 
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
-      // check the operands
+	  // check the operands
       if (!Operand(yylex())) {
-        if (yylex() == ',') {
+	   if (yylex() == ',') {
           if (!Operand(yylex())) {
-            if (yylex() == ';')
-              return 0;
+		    if (yylex() == ';') {
+			  return 0;
+			}
           }
         }
       }
     }
+	return 1;
   } else {
     return 1;
   }
@@ -834,5 +842,25 @@ int FunctionDecl(int first_token) {
 }
 
 int Codeblock(int first_token) {
+  // first token should be '{'
+  // currently only supports Instruction2 as body statement
+  int next_token = 0;
+  while (1) {
+    next_token = yylex();
+	if ((GetTokenType(next_token)==INSTRUCTION2_OPCODE) ||
+        (GetTokenType(next_token)==INSTRUCTION2_OPCODE_NODT) ||
+        (GetTokenType(next_token)==INSTRUCTION2_OPCODE_FTZ)) {		
+	  if (!Instruction2(next_token)) {
+	  } else {	  
+	    return 1;
+	  }
+    } else if (next_token == '}') {
+	  next_token = yylex();
+	  if (next_token == ';') 
+	    return 0;
+    } else {
+	  break;
+	}
+  }
   return 1;
 }

@@ -285,7 +285,7 @@ TEST(ParserTest, Instruction2) {
   EXPECT_EQ(0, Instruction2(yylex()));
 
   // with _ftz floatRounding
-  input.assign("abs_ftz_s8x4_up $s1, $s2;");
+  input.assign("abs_ftz_up_s8x4 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 }
@@ -312,7 +312,7 @@ TEST(ParserTest, Instruction2NoDT) {
 }
 
 TEST(ParserTest, Instruction2FTZ) {
-  std::string input("frsqrt_f32 $s1, $s0;");
+  std::string input("frsqrt_ftz_f32 $s1, $s0;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 
@@ -464,10 +464,11 @@ TEST(ParserTest, FunctionDecl) {
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, FunctionDecl(yylex())); 
 }
+
 TEST(ParserTest, Codeblock) {
   // test 1
-  std::string input("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; };"); 
+  std::string input("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; }; "); 
   yy_scan_string((char*)input.c_str());
-  EXPECT_EQ(0, FunctionDecl(yylex())); 
+  EXPECT_EQ(0, Codeblock(yylex())); 
 }
 
