@@ -160,7 +160,10 @@ int Query(int QueryOp) {
             if (yylex() == ',') {
                 // then finally an addressable Operand
                 if (!AddressableOperand(yylex())) {
+				  if (yylex() == ';')
                     return 0;
+                  else
+                    printf("Missing ';' in query\n");					
                 }
             }
         }
@@ -831,14 +834,25 @@ int Codeblock(int first_token) {
   int next_token = 0;
   while (1) {
     next_token = yylex();
-    if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
+    if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||        // Instruction 2 Operation
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_NODT) ||
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
       if (!Instruction2(next_token)) {
       } else {
         return 1;
       }
-    } else if (next_token == '}') {
+    } else if (GetTokenType(next_token) == QUERY_OP) {  // Query Operation
+	  if (!Query(next_token)) {
+	  } else {
+	    return 1;
+	  }
+    } else if (next_token == RET) {  // ret operation
+	  if (yylex() == ';') {
+	  } else {
+	    printf("Missing ';' at the end of ret operation\n");
+		return 1;
+	  }
+	}else if (next_token == '}') {
       next_token = yylex();
       if (next_token == ';')
         return 0;
@@ -944,7 +958,15 @@ int Program(int first_token) {
             if (first_token == ';') {  // this is a functionDecl
 			  first_token = yylex();
 			  continue;
-			} 
+			} else if (first_token == '{') { //so this must be a functionDefinition
+			  if (!Codeblock(first_token)) {  // check codeblock of function
+			    first_token = yylex();
+				continue;
+			  } else {
+			    printf("Error in function's codeblock\n");
+				return 1;
+			  }		  
+			}
           }	   // if found TOKEN_GLOBAL_ID
 		} else {  // if first_token == FUNCTION
 		  return 1;  // currently only support functions
