@@ -351,7 +351,11 @@ int CallTargets(int first_token) {
       return 1;
     }
   }
-};
+}
+
+int CallArgs(int first_token) {
+  return 1;
+}
 
 int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
   *is_ftz = false;

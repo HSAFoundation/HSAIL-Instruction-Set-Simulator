@@ -584,3 +584,17 @@ TEST(ParserTest, ParseCallTargets) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, CallTargets(yylex()));
 };
+
+TEST(ParserTest, ParseCallArgs) {
+  std::string input("()");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, CallArgs(yylex()));
+  
+  input.assign("(&a,%b,%c)");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, CallArgs(yylex()));
+  
+  input.assign("(1,2,3)");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, CallArgs(yylex()));
+};
