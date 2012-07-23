@@ -660,3 +660,9 @@ int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
   }
   return 1;
 }
+
+int ArgumentListBody(int first_token, bool* rescan_last_token, int* last_token) {
+	*last_token = 0;
+	*rescan_last_token = false;
+	return 1;
+}
