@@ -517,3 +517,47 @@ TEST(ParserTest, OptionalWidth) {
   EXPECT_EQ(0, OptionalWidth(yylex()));
 
 };
+
+TEST(ParserTest, BranchOperation) {
+  bool rescan = false;
+  int last_tok = 0;
+  
+  std::string input("cbr_width(all)_fbar $s1, @then;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  
+  input.assign("cbr_width(all)_fbar $c1, $c2 , [@first, @then];");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+
+  input.assign("cbr_width(all)_fbar $c1, &global;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+
+  input.assign("cbr_width(all)_fbar $c1, $c2, [%local]; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  
+  input.assign("cbr_width(all)_fbar $c1, $c2, @label ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+
+  input.assign("brn_width(all)_fbar &global; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+
+  input.assign("brn_width(all)_fbar @goto; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+
+  input.assign("brn_width(all)_fbar &global, [%local]; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+
+  input.assign("brn_width(all)_fbar &global, [@goto]; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));  
+  
+  
+  
+};

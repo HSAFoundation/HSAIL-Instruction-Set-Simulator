@@ -1107,3 +1107,12 @@ int OptionalWidth(int first_token) {
   }
   return 1;
 }
+
+int Branch(int first_token, 
+           bool* rescan_last_token,
+		   int* last_token) {
+  *rescan_last_token = false;
+  *last_token = 0;
+  return 1;  
+		   
+}		   
