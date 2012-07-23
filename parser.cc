@@ -765,6 +765,71 @@ int FunctionDefinition(int first_token, bool* rescan_last_token,int* last_token)
 }
 
 int FunctionDecl(int first_token) {
+  int token_to_scan;
+  bool rescan;
+  
+  if (!DeclPrefix(first_token, &rescan, &token_to_scan)) {
+    if (!rescan)
+	  token_to_scan = yylex();
+	
+	if (token_to_scan == FUNCTION) {
+	  if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
+	    // check return argument list
+		if(yylex() == '(') {
+		  token_to_scan = yylex();
+		  
+		  if (token_to_scan == ')') {   // empty argument list body
+		    token_to_scan = yylex();
+		  } else if (!ArgumentListBody(token_to_scan, &rescan, &token_to_scan)) {
+		    if (!rescan)
+			  token_to_scan = yylex();
 
+			if (token_to_scan == ')') 
+              token_to_scan = yylex();
+			else 
+			  return 1;
+		  } else {
+		    return 1; 
+		  }
+		} else {
+		  return 1;
+		}
+		// check argument list
+		if(token_to_scan == '(') {
+		  token_to_scan = yylex();
+		  
+		  if (token_to_scan == ')') {   // empty argument list body
+		    token_to_scan = yylex();
+		  } else if (!ArgumentListBody(token_to_scan, &rescan, &token_to_scan)) {
+		    if (!rescan)
+			  token_to_scan = yylex();
+			if (token_to_scan == ')') 
+              token_to_scan = yylex();
+			else
+			  return 1;
+		  } else {
+		    return 1; 
+		  }
+		} else {
+		  return 1;	
+		}
+		
+		
+		// check for optional FBar
+		if (token_to_scan == _FBAR) {
+		  if(!FBar(token_to_scan)) {
+		    token_to_scan = yylex();	
+          }			
+		} 
+		if (token_to_scan == ';')
+		  return 0;
+		 
+		
+	  }
+	}
+  }	
+  
+  
+  return 1;
   return 1;
 }
