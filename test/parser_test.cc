@@ -453,7 +453,7 @@ TEST(ParserTest, FunctionDefinition) {
   int last_tok = 0;
   
   // test 1
-  std::string input("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0) "); 
+  std::string input("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0) :fbar(1)"); 
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, FunctionDefinition(yylex(), &rescan, &last_tok)); 
 }

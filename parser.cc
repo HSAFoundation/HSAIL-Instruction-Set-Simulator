@@ -583,7 +583,12 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
     } else {
       *recheck_last_token = true;
     }
+  } else {
+    *recheck_last_token = true;
+	*last_token = first_token;
+  
   }
+ 
 
   return 0;
 }
@@ -668,13 +673,14 @@ int ArgumentListBody(int first_token, bool* rescan_last_token, int* last_token) 
   int prev_token = 0;
   bool rescan = false;
   while (1) {
+
     if(!ArgumentDecl(first_token, &rescan, &prev_token)) {
       if (!rescan)
         prev_token = yylex();
       if (prev_token == ',') {
         first_token = yylex();
-      } else {
-        *last_token = first_token;
+	  } else {
+        *last_token = prev_token;
         *rescan_last_token = true;
         return 0;
       }
@@ -687,6 +693,75 @@ int ArgumentListBody(int first_token, bool* rescan_last_token, int* last_token) 
 int FunctionDefinition(int first_token, bool* rescan_last_token,int* last_token) {
   *last_token = 0;
   * rescan_last_token = false;
+  
+  int token_to_scan;
+  bool rescan;
+  
+  if (!DeclPrefix(first_token, &rescan, &token_to_scan)) {
+    if (!rescan)
+	  token_to_scan = yylex();
+	
+	if (token_to_scan == FUNCTION) {
+	  if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
+	    // check return argument list
+		if(yylex() == '(') {
+		  token_to_scan = yylex();
+		  
+		  if (token_to_scan == ')') {   // empty argument list body
+		    token_to_scan = yylex();
+		  } else if (!ArgumentListBody(token_to_scan, &rescan, &token_to_scan)) {
+		    if (!rescan)
+			  token_to_scan = yylex();
+
+			if (token_to_scan == ')') 
+              token_to_scan = yylex();
+			else 
+			  return 1;
+		  } else {
+		    return 1; 
+		  }
+		} else {
+		  return 1;
+		}
+		// check argument list
+		if(token_to_scan == '(') {
+		  token_to_scan = yylex();
+		  
+		  if (token_to_scan == ')') {   // empty argument list body
+		    token_to_scan = yylex();
+		  } else if (!ArgumentListBody(token_to_scan, &rescan, &token_to_scan)) {
+		    if (!rescan)
+			  token_to_scan = yylex();
+			if (token_to_scan == ')') 
+              token_to_scan = yylex();
+			else
+			  return 1;
+		  } else {
+		    return 1; 
+		  }
+		} else {
+		  return 1;	
+		}
+		
+		
+		// check for optional FBar
+		if (token_to_scan == _FBAR) {
+		  if(!FBar(token_to_scan)) {
+		    return 0;	
+          }			
+		} else {
+		  *rescan_last_token = true;
+		  *last_token = token_to_scan;
+		  return 0;
+		}
+		 
+		
+	  }
+	}
+  }	
+  
+  
+  
   
   return 1;
 }
