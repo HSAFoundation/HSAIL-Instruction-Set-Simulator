@@ -446,5 +446,14 @@ TEST(ParserTest, ArgumentListBody) {
   std::string input("const static arg_u32 %local_id[2][2], static arg_f16 %local_id[], align 8 arg_u64 %test "); 
   yy_scan_string((char*)input.c_str());
   EXPECT_EQ(0, ArgumentListBody(yylex(), &rescan, &last_tok)); 
+}
 
+TEST(ParserTest, FunctionDefinition) {
+  bool rescan = false;
+  int last_tok = 0;
+  
+  // test 1
+  std::string input("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0) "); 
+  yy_scan_string((char*)input.c_str());
+  EXPECT_EQ(0, FunctionDefinition(yylex(), &rescan, &last_tok)); 
 }
