@@ -959,6 +959,17 @@ int Codeblock(int first_token) {
         printf("Missing ';' at the end of ret operation\n");
         return 1;
       }
+	} else if ((next_token == BRN) ||
+	           (next_token == CBR)) {
+	  if (!Branch(next_token)) {
+	  } else {
+        return 1; 
+      }
+    } else if (next_token == TOKEN_LABEL) {  // label
+      if (yylex() == ':') {
+	  } else {
+	    return 1;
+	  }
     } else if (next_token == '}') {
       next_token = yylex();
       if (next_token == ';')
@@ -1108,11 +1119,97 @@ int OptionalWidth(int first_token) {
   return 1;
 }
 
-int Branch(int first_token, 
-           bool* rescan_last_token,
-		   int* last_token) {
-  *rescan_last_token = false;
-  *last_token = 0;
-  return 1;  
-		   
+int Branch(int first_token) {
+
+  int op = first_token;  // CBR or BRN
+  int current_token = yylex();
+
+  
+  // check for optionalWidth
+  if (current_token == _WIDTH) {
+    if (!OptionalWidth(current_token)) {
+	} else {
+      printf("Invalid optional width.\n"); 
+	  return 1;
+	}
+	current_token = yylex();
+  }
+  
+  // check for optional _fbar modifier
+  if (current_token == __FBAR)
+    current_token = yylex();
+
+  // parse operands
+  if (op == CBR) {
+	  if (!Operand(current_token)) {
+	  if (yylex() == ',') {
+	    current_token = yylex();
+		if (current_token == TOKEN_LABEL) {
+		  current_token = yylex();  // should be ';'
+		} else if (!Identifier(current_token)) {
+		  current_token = yylex();  // should be ';'
+		  
+	    } else if (!Operand(current_token)) {
+		  if (yylex() == ',') {
+		    current_token = yylex();
+			if (current_token == TOKEN_LABEL) {  // LABEL
+			  current_token = yylex();  // should be ';'
+			} else if (current_token == '[') {
+			  current_token = yylex();
+			  if (!Identifier(current_token)) {
+			    current_token = yylex();  // should be ']'
+			  } else if (current_token == TOKEN_LABEL) {
+			    current_token = yylex();
+				
+				while (current_token != ']') {
+				  if (current_token == ',') {
+				    if(yylex() == TOKEN_LABEL)
+                      current_token = yylex();  //scan next;							
+					else {
+					  printf("Should have TOKEN_LABEL\n");
+					  return 1;
+					}
+				  } else {
+				    printf("Missing ','\n");
+				    return 1;
+				  }
+				}   // while
+     		  }
+			  // current token should be ']'
+			  current_token = yylex() ; // should be ';'
+			} 
+		  }  // yylex() = ','	
+		} else {
+		  return 1;
+		}
+	  if (current_token == ';')
+	    return 0;
+      } // yylex = ','
+	}  // first operand
+  } else if (op == BRN) {
+    if (current_token == TOKEN_LABEL) {
+	  if (yylex() == ';')
+	    return 0;
+    } else if (!Identifier(current_token)) {
+	  current_token = yylex();
+
+	  if (current_token == ';')
+	    return 0;
+	  else if (current_token == ',') {
+	    if (yylex() == '[') {
+		  current_token = yylex();
+		  if (current_token == TOKEN_LABEL) {
+		    current_token = yylex();    // should be ']'
+		  } else if (!Identifier(current_token)) {
+            current_token = yylex();    // should be ']'
+		  }
+		}
+		
+
+		if (yylex() == ';')
+	      return 0;
+	  }
+	}
+  }
+  return 1;		   
 }		   

@@ -327,6 +327,11 @@ enum TokenType { TOKEN_CREGISTER= 258,
                  QUERY_FILTERING,
 				 /* optional width */
 				 _WIDTH,
-				 ALL
+				 ALL,				 
+				 /* branchOp */
+				 CBR,
+				 BRN,
+				 __FBAR
+				 
                };
 #endif  // TOKENS_H_

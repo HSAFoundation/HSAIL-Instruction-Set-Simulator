@@ -499,6 +499,23 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("function &return_true(arg_f32 %ret_val) () {");
   input.append(" ret;");
   input.append(" }; ");
+  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+  
+  // Example 4
+  input.clear();
+  input.assign("version 1:0:$small;");
+  input.append("function &branch_ops (arg_u8x4 %x)() {");
+  input.append("cbr $c1, @then;");
+  input.append("abs_p_s8x4 $s1, $s2;");
+  input.append(" brn @outof_IF;");
+  input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;");
+  input.append(" @outof_IF: ret;");
+  input.append(" }; ");
+  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
 };
 
 TEST(ParserTest, Instruction3) {
@@ -524,40 +541,41 @@ TEST(ParserTest, BranchOperation) {
   
   std::string input("cbr_width(all)_fbar $s1, @then;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, Branch(yylex()));
   
-  input.assign("cbr_width(all)_fbar $c1, $c2 , [@first, @then];");
+  input.assign("cbr_width(all)_fbar $c1, 10 , [@first, @then];");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, Branch(yylex()));
 
   input.assign("cbr_width(all)_fbar $c1, &global;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, Branch(yylex()));
 
-  input.assign("cbr_width(all)_fbar $c1, $c2, [%local]; ");
+  input.assign("cbr_width(all)_fbar $c1, 5, [%local]; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, Branch(yylex()));
   
-  input.assign("cbr_width(all)_fbar $c1, $c2, @label ");
+  input.assign("cbr_width(all)_fbar $c1, 10, @label; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, Branch(yylex()));
 
   input.assign("brn_width(all)_fbar &global; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, Branch(yylex()));
 
   input.assign("brn_width(all)_fbar @goto; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, Branch(yylex()));
 
   input.assign("brn_width(all)_fbar &global, [%local]; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, Branch(yylex()));
 
   input.assign("brn_width(all)_fbar &global, [@goto]; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex(), &rescan, &last_tok));  
+  EXPECT_EQ(0, Branch(yylex()));
   
-  
-  
+  input.assign("cbr $s1, @then; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Branch(yylex()));
 };

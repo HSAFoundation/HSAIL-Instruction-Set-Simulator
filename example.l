@@ -197,6 +197,7 @@ readonly			{ return READONLY; }
 loc					{ return LOC; }
 _width				{ return _WIDTH; }
 all					{ return ALL; }
+
 	/* -- addressSpaceIdentifier -- */
 _readonly			{ return  _READONLY; }
 _kernarg			{ return  _KERNARG; 	}
@@ -320,7 +321,9 @@ sad2				{ return  SAD2;}
 sad4				{ return  SAD4;}
 sad4hi				{ return  SAD4HI;}
 bitselect			{ return  BITSELECT;}
-
+cbr					{ return CBR; }
+brn                 { return BRN; }
+_fbar				{ return __FBAR; }
 	/*-- atomicOperationId --*/
 _and				{ return  _AND_;}
 _or					{ return  _OR_;}
