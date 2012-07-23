@@ -862,22 +862,99 @@ int Function(int first_token) {
 }
 
 int Program(int first_token) {
+  int result;
+  int last_token;
+  bool rescan;
+   
   if (first_token == VERSION) {
     if (!Version(first_token)) {
 	// parse topLevelStatement
 	  first_token = yylex();
 	  while (first_token) {
-        if (!FunctionDecl(first_token)) {
-		  first_token = yylex();
+	    if ( (first_token == ALIGN) ||
+	       (first_token == CONST) ||
+		   (first_token == EXTERN) ||
+		   (first_token == STATIC) ) {
+	      result = DeclPrefix(first_token, &rescan, &last_token);
+		  if (result)
+		    return 1;
+		
+		  if (!rescan)
+		    first_token = yylex();
+		  else
+		    first_token = last_token;
+	    }  
+	  
+	    // Found "function" keyword ------------------------
+	    if (first_token == FUNCTION) {
+	      // look at next token
+          if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
+            // check return argument list
+            if (yylex() == '(') {
+              first_token = yylex();
+
+              if (first_token == ')') {   // empty argument list body
+                first_token = yylex();
+              } else if (!ArgumentListBody(first_token,
+                                           &rescan,
+                                           &first_token)) {
+                if (!rescan)
+                  first_token = yylex();
+
+                if (first_token == ')')
+                  first_token = yylex();
+                else
+                  return 1;
+              } else {
+                return 1;
+              }  
+			} else {  // missing '('
+              return 1;
+            }          // if found '(' - returnArgList
+          
+		    // check argument list
+            if (first_token == '(') {
+              first_token = yylex();
+
+			  if (first_token == ')') {   // empty argument list body
+                first_token = yylex();
+              } else if (!ArgumentListBody(first_token,
+                                           &rescan,
+                                           &first_token)) {
+                if (!rescan)
+                  first_token = yylex();
+                if (first_token == ')')
+                  first_token = yylex();
+                else
+                  return 1;
+              } else {  // missing body
+                return 1;
+              }
+            } else {  // missing '('
+              return 1;
+            }            // if found '(' - argList
+
+            // check for optional FBar
+            if (first_token == _FBAR) {
+              if (!FBar(first_token)) {
+                first_token = yylex();
+              }
+            }
+		  
+            if (first_token == ';') {
+			  first_token = yylex();
+			  continue;
+			}
+              
+          }	   // if found TOKEN_GLOBAL_ID
+		} else {  // if first_token == FUNCTION
+		  return 1;  // currently only support functions
 		}
-		else {
-		  return 1;
-    	}  
-      }
+	  }    // while (first_token)
 	  return 0;
-	} else {
+	} else { 
 	  return 1;
-	}
+	}  // if (!Version)
   } else {
     printf("Program must start with version statement.\n");
 	return 1;
