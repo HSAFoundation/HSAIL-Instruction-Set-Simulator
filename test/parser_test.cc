@@ -261,74 +261,60 @@ TEST(ParserTest, Instruction2) {
   // with packing
 
   std::string input("abs_p_s8x4 $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
   // with _ftz and packing
   input.assign("abs_ftz_p_s8x4 $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
   // with _ftz floatRounding and packing
   input.assign("abs_ftz_up_s8x4 $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
   // without roundingMode or packing
   input.assign("abs_s8x4 $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
   // with _ftz
   input.assign("abs_ftz_s8x4 $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
   // with _ftz floatRounding
   input.assign("abs_ftz_up_s8x4 $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 }
 
 
 TEST(ParserTest, Instruction2NoDT) {
   std::string input("unpack2 $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
   input.assign("unpack2_ftz $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
 
   input.assign("unpack2_ftz_zero $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
 
   input.assign("unpack2_neari $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 }
 
 TEST(ParserTest, Instruction2FTZ) {
   std::string input("frsqrt_ftz_f32 $s1, $s0;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
   input.assign("frsqrt_ftz_f32 $s1, $s0;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Parse(input));
 }
 
 TEST(ParserTest, VersionStatement) {
   std::string input("version 1:0;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Version(yylex()));
+  EXPECT_EQ(0, Parse(input));
 
   input.assign("version 1:0:$large;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Version(yylex()));
+  EXPECT_EQ(0, Parse(input));
 }
 
 TEST(ParserTest, AlignStatement) {

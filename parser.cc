@@ -13,6 +13,14 @@ int Parse(std::string input) {
     int token = yylex();   // get first token
     int result;
 
+	// check token
+	switch (token) {
+	  case VERSION:
+	    result = Version(token);
+		return result;
+	  
+	}
+	
     TerminalType term = GetTokenType(token);
     switch (term) {
     case QUERY_OP:
@@ -20,8 +28,15 @@ int Parse(std::string input) {
         // check syntax
         result = Query(token);
         return result;
+		
+	case INSTRUCTION2_OPCODE:
+	case INSTRUCTION2_OPCODE_NODT:
+	case INSTRUCTION2_OPCODE_FTZ:
+	    result = Instruction2(token);
+		return result;
+		
     default:
-        return 1;
+	    return 1;
     }
 }
 
