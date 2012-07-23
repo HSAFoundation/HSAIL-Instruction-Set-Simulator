@@ -480,5 +480,7 @@ TEST(ParserTest, SimpleProg) {
   std::string input("version 1:0:$small;");
   input.append("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0);");
   input.append("function &abort() (); ");
-
+  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
 };

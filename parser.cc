@@ -860,3 +860,8 @@ int Function(int first_token) {
   }
   return 1;
 }
+
+int Program(int first_token) {
+  return 1;
+
+};

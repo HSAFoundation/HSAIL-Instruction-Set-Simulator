@@ -45,5 +45,8 @@ int FunctionDefinition(int first_token,
 int FunctionDecl(int first_token);
 int Codeblock(int first_token);
 int Function(int first_token);
+
+int Program (int first_token);
+
 #endif  // PARSER_H_
 
