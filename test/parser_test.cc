@@ -498,3 +498,11 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" ret;");
   input.append(" }; ");
 };
+
+TEST(ParserTest, Instruction3) {
+  std::string input(" add_pp_sat_u16x2 $s1, $s0, $s3;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0,Instruction3(yylex()));
+  
+
+};

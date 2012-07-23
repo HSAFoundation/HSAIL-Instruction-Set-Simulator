@@ -30,6 +30,7 @@ int AddressableOperand(int first_token);
 int ArrayOperandList(int first_token);
 int RoundingMode(int first_token, bool* is_ftz, int* last_token);
 int Instruction2(int first_token);
+int Instruction3(int first_token);
 int Version(int first_token);
 int Alignment(int first_token);
 int DeclPrefix(int first_token, bool* rescan_last_token, int* last_token);

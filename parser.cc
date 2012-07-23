@@ -422,6 +422,10 @@ int Instruction2(int first_token) {
   }
 }
 
+int Instruction3(int first_token) {
+  return 1;
+}
+
 int Version(int first_token) {
   // first token must be version keyword
     // check for major
