@@ -160,10 +160,10 @@ int Query(int QueryOp) {
             if (yylex() == ',') {
                 // then finally an addressable Operand
                 if (!AddressableOperand(yylex())) {
-				  if (yylex() == ';')
+                  if (yylex() == ';')
                     return 0;
                   else
-                    printf("Missing ';' in query\n");					
+                    printf("Missing ';' in query\n");
                 }
             }
         }
@@ -834,25 +834,26 @@ int Codeblock(int first_token) {
   int next_token = 0;
   while (1) {
     next_token = yylex();
-    if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||        // Instruction 2 Operation
+    if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_NODT) ||
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
+        // Instruction 2 Operation
       if (!Instruction2(next_token)) {
       } else {
         return 1;
       }
     } else if (GetTokenType(next_token) == QUERY_OP) {  // Query Operation
-	  if (!Query(next_token)) {
-	  } else {
-	    return 1;
-	  }
+      if (!Query(next_token)) {
+      } else {
+        return 1;
+      }
     } else if (next_token == RET) {  // ret operation
-	  if (yylex() == ';') {
-	  } else {
-	    printf("Missing ';' at the end of ret operation\n");
-		return 1;
-	  }
-	}else if (next_token == '}') {
+      if (yylex() == ';') {
+      } else {
+        printf("Missing ';' at the end of ret operation\n");
+        return 1;
+      }
+    } else if (next_token == '}') {
       next_token = yylex();
       if (next_token == ';')
         return 0;
@@ -879,29 +880,29 @@ int Program(int first_token) {
   int result;
   int last_token;
   bool rescan;
-   
+
   if (first_token == VERSION) {
     if (!Version(first_token)) {
-	// parse topLevelStatement
-	  first_token = yylex();
-	  while (first_token) {
-	    if ( (first_token == ALIGN) ||
-	       (first_token == CONST) ||
-		   (first_token == EXTERN) ||
-		   (first_token == STATIC) ) {
-	      result = DeclPrefix(first_token, &rescan, &last_token);
-		  if (result)
-		    return 1;
-		
-		  if (!rescan)
-		    first_token = yylex();
-		  else
-		    first_token = last_token;
-	    }  
-	  
-	    // Found "function" keyword ------------------------
-	    if (first_token == FUNCTION) {
-	      // look at next token
+    // parse topLevelStatement
+      first_token = yylex();
+      while (first_token) {
+        if ( (first_token == ALIGN) ||
+           (first_token == CONST) ||
+           (first_token == EXTERN) ||
+           (first_token == STATIC) ) {
+          result = DeclPrefix(first_token, &rescan, &last_token);
+          if (result)
+            return 1;
+
+          if (!rescan)
+            first_token = yylex();
+          else
+            first_token = last_token;
+        }
+
+        // Found "function" keyword ------------------------
+        if (first_token == FUNCTION) {
+          // look at next token
           if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
             // check return argument list
             if (yylex() == '(') {
@@ -921,16 +922,16 @@ int Program(int first_token) {
                   return 1;
               } else {
                 return 1;
-              }  
-			} else {  // missing '('
+              }
+            } else {  // missing '('
               return 1;
             }          // if found '(' - returnArgList
-          
-		    // check argument list
+
+            // check argument list
             if (first_token == '(') {
               first_token = yylex();
 
-			  if (first_token == ')') {   // empty argument list body
+              if (first_token == ')') {   // empty argument list body
                 first_token = yylex();
               } else if (!ArgumentListBody(first_token,
                                            &rescan,
@@ -954,30 +955,31 @@ int Program(int first_token) {
                 first_token = yylex();
               }
             }
-		  
+
             if (first_token == ';') {  // this is a functionDecl
-			  first_token = yylex();
-			  continue;
-			} else if (first_token == '{') { //so this must be a functionDefinition
-			  if (!Codeblock(first_token)) {  // check codeblock of function
-			    first_token = yylex();
-				continue;
-			  } else {
-			    printf("Error in function's codeblock\n");
-				return 1;
-			  }		  
-			}
-          }	   // if found TOKEN_GLOBAL_ID
-		} else {  // if first_token == FUNCTION
-		  return 1;  // currently only support functions
-		}
-	  }    // while (first_token)
-	  return 0;
-	} else { 
-	  return 1;
-	}  // if (!Version)
+              first_token = yylex();
+              continue;
+            } else if (first_token == '{') {
+              // so this must be a functionDefinition
+              if (!Codeblock(first_token)) {  // check codeblock of function
+                first_token = yylex();
+                continue;
+              } else {
+                printf("Error in function's codeblock\n");
+                return 1;
+              }
+            }
+          }       // if found TOKEN_GLOBAL_ID
+        } else {  // if first_token == FUNCTION
+          return 1;  // currently only support functions
+        }
+      }    // while (first_token)
+      return 0;
+    } else {
+      return 1;
+    }  // if (!Version)
   } else {
     printf("Program must start with version statement.\n");
-	return 1;
+    return 1;
   }
 }

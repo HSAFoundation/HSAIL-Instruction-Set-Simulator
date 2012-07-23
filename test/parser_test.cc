@@ -62,11 +62,11 @@ TEST(ParserTest, QueryTest) {
   std::string input("query_order_u32  $c1 , [&Test<$d7  + 100>];");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Query(yylex()));
-  
+
   input.assign("query_data_u32  $c1 , [&Test<$d7  + 100>];");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Query(yylex()));
-  
+
   input.assign("query_array_u32  $c1 , [&Test<$d7  + 100>];");
     yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   input.assign("query_width_u32  $c1 , [&Test<$d7  + 100>];");
@@ -282,11 +282,8 @@ TEST(ParserTest, Instruction2) {
   input.assign("abs_ftz_up_s8x4 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
-}
 
-
-TEST(ParserTest, Instruction2NoDT) {
-  std::string input("unpack2 $s1, $s2;");
+  input.assign("unpack2 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 
@@ -302,10 +299,8 @@ TEST(ParserTest, Instruction2NoDT) {
   input.assign("unpack2_neari $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
-}
 
-TEST(ParserTest, Instruction2FTZ) {
-  std::string input("frsqrt_ftz_f32 $s1, $s0;");
+  input.assign("frsqrt_ftz_f32 $s1, $s0;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Instruction2(yylex()));
 
@@ -478,9 +473,10 @@ TEST(ParserTest, Function) {
 
 TEST(ParserTest, SimpleProg) {
   std::string input("version 1:0:$small;");
-  input.append("function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0);");
+  input.append("function &get_global_id(arg_u32 %ret_val)");
+  input.append(" (arg_u32 %arg_val0);");
   input.append("function &abort() (); ");
-  
+
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
 };
@@ -489,17 +485,16 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   std::string input("version 1:0:$small;");
   input.append("function &packed_ops (arg_u8x4 %x)() {");
   input.append(" abs_p_s8x4 $s1, $s2; ");
-  input.append(" query_order_u32  $c1 , [&Test<$d7  + 100>];"  );
+  input.append(" query_order_u32  $c1 , [&Test<$d7  + 100>];");
   input.append(" }; ");
-  
+
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
-  
+
   // Example 2
   input.clear();
   input.assign("version 1:0:$small;");
   input.append("function &return_true(arg_f32 %ret_val) () {");
   input.append(" ret;");
-  input.append(" }; ");  
-  
+  input.append(" }; ");
 };
