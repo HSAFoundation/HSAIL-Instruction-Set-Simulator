@@ -1091,5 +1091,19 @@ int Program(int first_token) {
 }
 
 int OptionalWidth(int first_token) {
+  // first token must be _WIDTH
+  int next_token = yylex();
+  if (next_token == '(') {
+    next_token = yylex();
+	if (next_token == ALL){
+	  next_token = yylex();
+	} else if (next_token == TOKEN_INTEGER_CONSTANT) {
+	  next_token = yylex();
+	} else {
+	  return 1;
+	}
+	if (next_token == ')')
+	  return 0;	 
+  }
   return 1;
 }
