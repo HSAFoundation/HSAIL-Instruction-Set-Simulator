@@ -22,7 +22,6 @@ enum TerminalType { UNKNOWN_TERM = 0,
 // classify token into different terminal type
 TerminalType GetTokenType(int token);
 
-int Parse(std::string input);
 int Query(int queryOp);
 int Operand(int first_token);
 int Identifier(int first_token);

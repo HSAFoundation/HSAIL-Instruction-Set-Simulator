@@ -7,37 +7,6 @@
 #include "./tokens.h"
 #include "./build/lexer.h"
 
-int Parse(std::string input) {
-    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-    int token = yylex();   // get first token
-    int result;
-
-  while (token != 0) {
-    // check token
-    switch (token) {
-      case VERSION:
-        result = Version(token);
-        return result;
-    }
-
-    TerminalType term = GetTokenType(token);
-    switch (term) {
-      case QUERY_OP:
-        // have a Query
-        // check syntax
-        result = Query(token);
-        return result;
-
-      case INSTRUCTION2_OPCODE:
-      case INSTRUCTION2_OPCODE_NODT:
-      case INSTRUCTION2_OPCODE_FTZ:
-        result = Instruction2(token);
-        return result;
-    }
-    token = yylex();
-  }
-}
-
 TerminalType GetTokenType(int token) {
     switch (token) {
         /* DataTypeId */
