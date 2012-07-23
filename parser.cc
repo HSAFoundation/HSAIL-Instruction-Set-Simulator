@@ -862,6 +862,24 @@ int Function(int first_token) {
 }
 
 int Program(int first_token) {
-  return 1;
-
-};
+  if (first_token == VERSION) {
+    if (!Version(first_token)) {
+	// parse topLevelStatement
+	  first_token = yylex();
+	  while (first_token) {
+        if (!FunctionDecl(first_token)) {
+		  first_token = yylex();
+		}
+		else {
+		  return 1;
+    	}  
+      }
+	  return 0;
+	} else {
+	  return 1;
+	}
+  } else {
+    printf("Program must start with version statement.\n");
+	return 1;
+  }
+}
