@@ -16,6 +16,8 @@ enum TerminalType { UNKNOWN_TERM = 0,
                     INSTRUCTION2_OPCODE,
                     INSTRUCTION2_OPCODE_NODT,
                     INSTRUCTION2_OPCODE_FTZ,
+                    INSTRUCTION3_OPCODE,
+                    INSTRUCTION3_OPCODE_FTZ,
                     TARGET
                   };
 

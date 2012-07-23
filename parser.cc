@@ -146,6 +146,31 @@ TerminalType GetTokenType(int token) {
     case FRSQRT:
     case FRCP:
       return INSTRUCTION2_OPCODE_FTZ;
+
+        /* Instruction3Opcode */
+    case ADD:
+    case CARRY:
+    case BORROW:
+    case DIV:
+    case REM:
+    case SUB:
+    case SHL:
+    case SHR:
+    case AND:
+    case XOR:
+    case OR:
+    case UNPACKLO:
+    case UNPACKHI:
+    case MOVD_LO:
+    case MOVD_HI:
+    case COPYSIGN:
+    case CLASS:
+    case SEND:
+    case RECEIVE:
+      return INSTRUCTION3_OPCODE;
+    case MAX:
+    case MIN:
+      return INSTRUCTION3_OPCODE_FTZ;
     default:
       return UNKNOWN_TERM;  // unknown
     }
@@ -423,6 +448,76 @@ int Instruction2(int first_token) {
 }
 
 int Instruction3(int first_token) {
+  // First token must be an Instruction3Opcode
+  int next = yylex();
+  // to get last token returned by RoundingMode in case _ftz
+  int temp = 0;
+  bool is_ftz = false;
+
+  if (GetTokenType(first_token) == INSTRUCTION3_OPCODE) {
+    if (!RoundingMode(next, &is_ftz, &temp)) {
+      // there is a rounding mode specified
+      if (is_ftz)
+        // need to check the token returned by rounding mode
+        next = temp;
+      else
+        next = yylex();
+    }
+
+    // check whether there is a Packing
+    if (GetTokenType(next) == PACKING)
+      // there is packing
+      next = yylex();
+
+    // now we must have a dataTypeId
+    if (GetTokenType(next) == DATA_TYPE_ID) {
+      // check the operands
+      if (!Operand(yylex())) {
+        if (yylex() == ',') {
+          if (!Operand(yylex())) {
+            if (yylex() == ',') {
+              if (!Operand(yylex())) {
+                if (yylex() == ';')
+                  return 0;
+              }  // 3rd operand
+            }  // 2nd comma
+          }  // 2nd operand
+        }  // 1st comma
+      }  // 1st operand
+    }  // DATA_TYPE_ID
+    return 1;
+  } else if (GetTokenType(first_token) == INSTRUCTION3_OPCODE_FTZ) {
+    // Optional FTZ
+    if (next == _FTZ) {
+      // has a _ftz
+      next = yylex();
+    }
+
+    // check whether there is a Packing
+    if (GetTokenType(next) == PACKING)
+      // there is packing
+      next = yylex();
+
+    // now we must have a dataTypeId
+    if (GetTokenType(next) == DATA_TYPE_ID) {
+      // check the operands
+      if (!Operand(yylex())) {
+        if (yylex() == ',') {
+          if (!Operand(yylex())) {
+            if (yylex() == ',') {
+              if (!Operand(yylex())) {
+                if (yylex() == ';')
+                  return 0;
+              }  // 3rd operand
+            }  // 2nd comma
+          }  // 2nd operand
+        }  // 1st comma
+      }  // 1st operand
+    }  // DATA_TYPE_ID
+    return 1;
+  } else {
+    return 1;
+  }
   return 1;
 }
 
@@ -843,6 +938,13 @@ int Codeblock(int first_token) {
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
         // Instruction 2 Operation
       if (!Instruction2(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if ((GetTokenType(next_token) == INSTRUCTION3_OPCODE) ||
+               (GetTokenType(next_token) == INSTRUCTION3_OPCODE_FTZ)) {
+      // Instruction 3 Operation
+      if (!Instruction3(next_token)) {
       } else {
         return 1;
       }

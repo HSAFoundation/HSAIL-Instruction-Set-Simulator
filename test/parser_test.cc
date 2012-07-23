@@ -482,9 +482,11 @@ TEST(ParserTest, SimpleProg) {
 };
 
 TEST(ParserTest, ProgWithFunctionDefinition) {
+  // Example 3
   std::string input("version 1:0:$small;");
   input.append("function &packed_ops (arg_u8x4 %x)() {");
   input.append(" abs_p_s8x4 $s1, $s2; ");
+  input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; ");
   input.append(" query_order_u32  $c1 , [&Test<$d7  + 100>];");
   input.append(" }; ");
 
@@ -502,7 +504,5 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
 TEST(ParserTest, Instruction3) {
   std::string input(" add_pp_sat_u16x2 $s1, $s0, $s3;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0,Instruction3(yylex()));
-  
-
+  EXPECT_EQ(0, Instruction3(yylex()));
 };
