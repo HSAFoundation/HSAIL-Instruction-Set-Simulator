@@ -331,6 +331,7 @@ enum TokenType { TOKEN_CREGISTER= 258,
                  /* branchOp */
                  CBR,
                  BRN,
-                 __FBAR
+                 __FBAR,
+				 CALL
                };
 #endif  // TOKENS_H_

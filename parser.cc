@@ -359,8 +359,8 @@ int CallArgs(int first_token) {
   while (1) {
     next = yylex();
     if (next == ')') {
-	  return 0;
-	} else if (!Operand(next)) {
+      return 0;
+    } else if (!Operand(next)) {
       next = yylex();
       if (next == ')')
         return 0;
@@ -371,7 +371,7 @@ int CallArgs(int first_token) {
     } else {
       return 1;
     }
-  }  
+  }
 }
 
 int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
@@ -1248,5 +1248,46 @@ int Branch(int first_token) {
 }
 
 int Call(int first_token) {
+  // first token is "call"
+  int next = yylex();
+
+  // optional width
+  if (next == _WIDTH) {
+    if (!OptionalWidth(next)) {
+      next = yylex();
+    } else {
+      printf("Error in optionalwidth\n");
+      return 1;
+    }
+  }
+
+  if (!Operand(next)) {
+    next = yylex();
+    // check for twoCallArgs
+    if (next == '(') {
+      if (!CallArgs(next))
+        next = yylex();
+      else
+        return 1;
+    }
+
+    if (next == '(') {
+      if (!CallArgs(next))
+        next = yylex();
+      else
+        return 1;
+    }
+
+    // check for CallTarget
+    if (next == ';') {
+      return 0;
+    } else if (next == '[') {
+      if (!CallTargets(next)) {
+        if (yylex() == ';')
+           return 0;
+      }
+      return 1;
+    }
+  }
   return 1;
-};
+}

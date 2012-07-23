@@ -589,11 +589,11 @@ TEST(ParserTest, ParseCallArgs) {
   std::string input("()");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, CallArgs(yylex()));
-  
+
   input.assign("(&a,%b,%c)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, CallArgs(yylex()));
-  
+
   input.assign("(1,2,3)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, CallArgs(yylex()));
@@ -601,6 +601,11 @@ TEST(ParserTest, ParseCallArgs) {
 
 TEST(ParserTest, Call) {
   std::string input("call &callee (%output)(%input);");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Call(yylex()));
+
+  input.assign("call_width(all) &callee ");
+  input.append("(%output1,&output2)(%input1, $d7) [&id1, &id2];");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Call(yylex()));
 };

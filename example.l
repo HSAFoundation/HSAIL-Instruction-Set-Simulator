@@ -324,6 +324,7 @@ bitselect			{ return  BITSELECT;}
 cbr					{ return CBR; }
 brn                 { return BRN; }
 _fbar				{ return __FBAR; }
+call				{ return CALL; }
 	/*-- atomicOperationId --*/
 _and				{ return  _AND_;}
 _or					{ return  _OR_;}
