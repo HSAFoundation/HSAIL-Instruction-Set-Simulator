@@ -8,339 +8,349 @@
 #include "./build/lexer.h"
 
 TerminalType GetTokenType(int token) {
-    switch (token) {
-        /* DataTypeId */
-    case _U32:
-    case _S32:
-    case _S64:
-    case _U64:
-    case _B1:
-    case _B32:
-    case _F64:
-    case _F32:
-    case _B64:
-    case _B8:
-    case _B16:
-    case _S8:
-    case _S16:
-    case _U8:
-    case _U16:
-    case _F16:
-    case _B128:
-    case _U8X4:
-    case _S8X4:
-    case _U16X2:
-    case _S16X2:
-    case _F16X2:
-    case _F32X2:
-    case _U8X8:
-    case _S8X8:
-    case _U16X4:
-    case _S16X4:
-    case _F16X4:
-    case _U8X16:
-    case _S8X16:
-    case _U16X8:
-    case _S16X8:
-    case _F16X8:
-    case _F32X4:
-    case _S32X4:
-    case _U32X4:
-    case _F64X2:
-    case _S64X2:
-    case _U64X2:
-      return DATA_TYPE_ID;
+  switch (token) {
+    /* DataTypeId */
+  case _U32:
+  case _S32:
+  case _S64:
+  case _U64:
+  case _B1:
+  case _B32:
+  case _F64:
+  case _F32:
+  case _B64:
+  case _B8:
+  case _B16:
+  case _S8:
+  case _S16:
+  case _U8:
+  case _U16:
+  case _F16:
+  case _B128:
+  case _U8X4:
+  case _S8X4:
+  case _U16X2:
+  case _S16X2:
+  case _F16X2:
+  case _F32X2:
+  case _U8X8:
+  case _S8X8:
+  case _U16X4:
+  case _S16X4:
+  case _F16X4:
+  case _U8X16:
+  case _S8X16:
+  case _U16X8:
+  case _S16X8:
+  case _F16X8:
+  case _F32X4:
+  case _S32X4:
+  case _U32X4:
+  case _F64X2:
+  case _S64X2:
+  case _U64X2:
+    return DATA_TYPE_ID;
 
-        /* QueryOp */
-    case QUERY_ORDER:
-    case QUERY_DATA:
-    case QUERY_ARRAY:
-    case QUERY_WIDTH:
-    case QUERY_DEPTH:
-    case QUERY_HEIGHT:
-    case QUERY_NORMALIZED:
-    case QUERY_FILTERING:
-      return QUERY_OP;
+    /* QueryOp */
+  case QUERY_ORDER:
+  case QUERY_DATA:
+  case QUERY_ARRAY:
+  case QUERY_WIDTH:
+  case QUERY_DEPTH:
+  case QUERY_HEIGHT:
+  case QUERY_NORMALIZED:
+  case QUERY_FILTERING:
+    return QUERY_OP;
 
-        /* Register */
-    case TOKEN_CREGISTER:
-    case TOKEN_DREGISTER:
-    case TOKEN_SREGISTER:
-    case TOKEN_QREGISTER:
-      return REGISTER;
+    /* Register */
+  case TOKEN_CREGISTER:
+  case TOKEN_DREGISTER:
+  case TOKEN_SREGISTER:
+  case TOKEN_QREGISTER:
+    return REGISTER;
 
-        /* IntRounding */
-    case _UPI:
-    case _DOWNI:
-    case _ZEROI:
-    case _NEARI:
-      return INT_ROUNDING;
+    /* IntRounding */
+  case _UPI:
+  case _DOWNI:
+  case _ZEROI:
+  case _NEARI:
+    return INT_ROUNDING;
 
-        /* FloatRounding */
-    case _UP:
-    case _DOWN:
-    case _ZERO:
-    case _NEAR:
-      return FLOAT_ROUNDING;
-        /* Packing */
-    case _PP:
-    case _PS:
-    case _SP:
-    case _SS:
-    case __S:
-    case __P:
-    case _PP_SAT:
-    case _PS_SAT:
-    case _SP_SAT:
-    case _SS_SAT:
-    case _S_SAT:
-    case _P_SAT:
-      return PACKING;
+    /* FloatRounding */
+  case _UP:
+  case _DOWN:
+  case _ZERO:
+  case _NEAR:
+    return FLOAT_ROUNDING;
+    /* Packing */
+  case _PP:
+  case _PS:
+  case _SP:
+  case _SS:
+  case __S:
+  case __P:
+  case _PP_SAT:
+  case _PS_SAT:
+  case _SP_SAT:
+  case _SS_SAT:
+  case _S_SAT:
+  case _P_SAT:
+    return PACKING;
 
-    case _SMALL:
-    case _LARGE:
-    case _FULL:
-    case _REDUCED:
-    case _SFTZ:
-    case _NOSFTZ:
-      return TARGET;
+  case _SMALL:
+  case _LARGE:
+  case _FULL:
+  case _REDUCED:
+  case _SFTZ:
+  case _NOSFTZ:
+    return TARGET;
 
-        /* Instruction2Opcode */
-    case ABS:
-    case NEG:
-    case NOT:
-    case POPCOUNT:
-    case FIRSTBIT:
-    case LASTBIT:
-    case BITREV:
-    case MOVS_LO:
-    case MOVS_HI:
-    case FBAR_INITSIZE:
-    case FBAR_INIT:
-    case FBAR_RELEASECF:
-    case COUNT:
-    case MASK:
-      return INSTRUCTION2_OPCODE;
+    /* Instruction2Opcode */
+  case ABS:
+  case NEG:
+  case NOT:
+  case POPCOUNT:
+  case FIRSTBIT:
+  case LASTBIT:
+  case BITREV:
+  case MOVS_LO:
+  case MOVS_HI:
+  case FBAR_INITSIZE:
+  case FBAR_INIT:
+  case FBAR_RELEASECF:
+  case COUNT:
+  case MASK:
+    return INSTRUCTION2_OPCODE;
 
-        /* Instruction2Opcode NoDT */
-    case UNPACK3:
-    case UNPACK2:
-    case UNPACK1:
-    case UNPACK0:
-    case ALLOCA:
-    case WORKITEMID:
-    case WORKITEMAID:
-    case WORKGROUPSIZE:
-    case NDRANGESIZE:
-    case NDRANGEGROUPS:
-      return INSTRUCTION2_OPCODE_NODT;
+    /* Instruction2Opcode NoDT */
+  case UNPACK3:
+  case UNPACK2:
+  case UNPACK1:
+  case UNPACK0:
+  case ALLOCA:
+  case WORKITEMID:
+  case WORKITEMAID:
+  case WORKGROUPSIZE:
+  case NDRANGESIZE:
+  case NDRANGEGROUPS:
+    return INSTRUCTION2_OPCODE_NODT;
 
-        /* Instruction2OpcodeFTZ */
-    case SQRT:
-    case FRACT:
-    case FCOS:
-    case FSIN:
-    case FLOG2:
-    case FEXP2:
-    case FSQRT:
-    case FRSQRT:
-    case FRCP:
-      return INSTRUCTION2_OPCODE_FTZ;
+    /* Instruction2OpcodeFTZ */
+  case SQRT:
+  case FRACT:
+  case FCOS:
+  case FSIN:
+  case FLOG2:
+  case FEXP2:
+  case FSQRT:
+  case FRSQRT:
+  case FRCP:
+    return INSTRUCTION2_OPCODE_FTZ;
 
-        /* Instruction3Opcode */
-    case ADD:
-    case CARRY:
-    case BORROW:
-    case DIV:
-    case REM:
-    case SUB:
-    case SHL:
-    case SHR:
-    case AND:
-    case XOR:
-    case OR:
-    case UNPACKLO:
-    case UNPACKHI:
-    case MOVD_LO:
-    case MOVD_HI:
-    case COPYSIGN:
-    case CLASS:
-    case SEND:
-    case RECEIVE:
-      return INSTRUCTION3_OPCODE;
-    case MAX:
-    case MIN:
-      return INSTRUCTION3_OPCODE_FTZ;
-    default:
-      return UNKNOWN_TERM;  // unknown
-    }
+    /* Instruction3Opcode */
+  case ADD:
+  case CARRY:
+  case BORROW:
+  case DIV:
+  case REM:
+  case SUB:
+  case SHL:
+  case SHR:
+  case AND:
+  case XOR:
+  case OR:
+  case UNPACKLO:
+  case UNPACKHI:
+  case MOVD_LO:
+  case MOVD_HI:
+  case COPYSIGN:
+  case CLASS:
+  case SEND:
+  case RECEIVE:
+    return INSTRUCTION3_OPCODE;
+  case MAX:
+  case MIN:
+    return INSTRUCTION3_OPCODE_FTZ;
+  default:
+    return UNKNOWN_TERM;  // unknown
+  }
 }
 
 int Query(int QueryOp) {
-    // next token should be a dataTypeId
-    if (GetTokenType(yylex()) == DATA_TYPE_ID) {
-        // next token should be an Operand
-        if (!Operand(yylex())) {
-            // next should be a comma
-            if (yylex() == ',') {
-                // then finally an addressable Operand
-                if (!AddressableOperand(yylex())) {
-                  if (yylex() == ';')
-                    return 0;
-                  else
-                    printf("Missing ';' in query\n");
-                }
-            }
+  // next token should be a dataTypeId
+  if (GetTokenType(yylex()) == DATA_TYPE_ID) {
+    // next token should be an Operand
+    if (!Operand(yylex())) {
+      // next should be a comma
+      if (yylex() == ',') {
+        // then finally an addressable Operand
+        if (!AddressableOperand(yylex())) {
+          if (yylex() == ';')
+            return 0;
+          else
+            printf("Missing ';' in query\n");
         }
+      }
     }
-    return 1;
+  }
+  return 1;
 }
 
-
 int Operand(int first_token) {
-    if (!Identifier(first_token))   // an Identifier
-        return 0;
-    else if (!BaseOperand(first_token))     // a base Operand
-        return 0;
+  if (!Identifier(first_token))   // an Identifier
+    return 0;
+  else if (!BaseOperand(first_token))     // a base Operand
+    return 0;
 
-    return 1;
+  return 1;
 }
 
 int Identifier(int first_token) {
-    if (first_token == TOKEN_GLOBAL_IDENTIFIER) {
-        return 0;
-    } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
-        return 0;
-    } else if (GetTokenType(first_token) == REGISTER) {
-        return 0;
-    }
+  if (first_token == TOKEN_GLOBAL_IDENTIFIER) {
+    return 0;
+  } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
+    return 0;
+  } else if (GetTokenType(first_token) == REGISTER) {
+    return 0;
+  }
 
-    return 1;
+  return 1;
 }
 
 int BaseOperand(int first_token) {
-    int next;
-    if (first_token == TOKEN_DOUBLE_CONSTANT) {
-        return 0;
-    } else if (first_token == TOKEN_SINGLE_CONSTANT) {
-        return 0;
-    } else if (first_token == TOKEN_INTEGER_CONSTANT) {
-        return 0;
-    } else if (first_token == TOKEN_WAVESIZE) {
-        return 0;
-    } else if (first_token == '-') {
-        if (yylex() == TOKEN_INTEGER_CONSTANT)
-            return 0;
-    } else if (GetTokenType(first_token) == DATA_TYPE_ID) {
-        // scan next token
-        if (yylex() == '(') {   // should be '('
-            // check if we have a decimal list single or float list single
+  int next;
+  if (first_token == TOKEN_DOUBLE_CONSTANT) {
+    return 0;
+  } else if (first_token == TOKEN_SINGLE_CONSTANT) {
+    return 0;
+  } else if (first_token == TOKEN_INTEGER_CONSTANT) {
+    return 0;
+  } else if (first_token == TOKEN_WAVESIZE) {
+    return 0;
+  } else if (first_token == '-') {
+    if (yylex() == TOKEN_INTEGER_CONSTANT)
+      return 0;
+  } else if (GetTokenType(first_token) == DATA_TYPE_ID) {
+    // scan next token
+    if (yylex() == '(') {   // should be '('
+      // check if we have a decimal list single or float list single
+      next = yylex();
+      if (next == TOKEN_INTEGER_CONSTANT) {
+        next = yylex();
+        if (next == ')') {
+          return 0;
+        } else {
+          while (next == ',') {
             next = yylex();
             if (next == TOKEN_INTEGER_CONSTANT) {
-                next = yylex();
-                if (next == ')') {
-                    return 0;
-                } else {
-                    while (next == ',') {
-                        next = yylex();
-                        if (next == TOKEN_INTEGER_CONSTANT) {
-                            next = yylex();
-                            if (next == ')')
-                                return 0;
-                            else if (next != ',')
-                                return 1;
-                        } else {
-                            return 1;
-                        }
-                    }
-                }
-            } else if (next == TOKEN_DOUBLE_CONSTANT)   {
-                next = yylex();
-                if (next == ')') {
-                    return 0;
-                } else {
-                    while (next == ',') {
-                        next = yylex();
-                        if (next == TOKEN_DOUBLE_CONSTANT) {
-                            next = yylex();
-                            if (next == ')')
-                                return 0;
-                            else if (next != ',')
-                                return 1;
-                        } else {
-                            return 1;
-                        }
-                    }
-                }
+              next = yylex();
+              if (next == ')')
+                return 0;
+              else if (next != ',')
+                return 1;
+            } else {
+              return 1;
             }
+          }  // while
         }
-    } else {
-        return 1;
+      } else if (next == TOKEN_DOUBLE_CONSTANT)   {
+        next = yylex();
+        if (next == ')') {
+          return 0;
+        } else {
+          while (next == ',') {
+            next = yylex();
+            if (next == TOKEN_DOUBLE_CONSTANT) {
+              next = yylex();
+              if (next == ')')
+                return 0;
+              else if (next != ',')
+                return 1;
+            } else {
+              return 1;
+            }
+          }  // while
+        }
+      }
     }
+  } else {
+    return 1;
+  }
 }
 
 int AddressableOperand(int first_token) {
-    int next;
-    if (first_token == '[') {
-        // next should be a non register
+  int next;
+  if (first_token == '[') {
+    // next should be a non register
+    next = yylex();
+    if ((next == TOKEN_GLOBAL_IDENTIFIER) ||
+        (next == TOKEN_LOCAL_IDENTIFIER)) {
+      next = yylex();
+      if (next == ']')
+        return 0;
+      else if (next == '<') {
         next = yylex();
-        if ( (next == TOKEN_GLOBAL_IDENTIFIER) \
-            || (next == TOKEN_LOCAL_IDENTIFIER) ) {
-            next = yylex();
-
-            if (next == ']')
-                return 0;
-            else if (next == '<') {
-                next = yylex();
-                if (next == TOKEN_INTEGER_CONSTANT) {
-                    if (yylex() == '>') {
-                        if (yylex() == ']')
-                            return 0;
-                    }
-
-                } else if (GetTokenType(next) == REGISTER) {
-                    next = yylex();
-                    if (next == '>') {
-                        if (yylex() == ']')
-                            return 0;
-
-                    } else if ((next == '+') || (next == '-')) {
-                        if (yylex() == TOKEN_INTEGER_CONSTANT) {
-                            if (yylex() == '>') {
-                                if (yylex() == ']')
-                                    return 0;
-                            }
-                        }
-                    }
-                }
+        if (next == TOKEN_INTEGER_CONSTANT) {
+          if (yylex() == '>') {
+            if (yylex() == ']')
+              return 0;
+          }
+        } else if (GetTokenType(next) == REGISTER) {
+          next = yylex();
+          if (next == '>') {
+            if (yylex() == ']')
+              return 0;
+          } else if ((next == '+') || (next == '-')) {
+            if (yylex() == TOKEN_INTEGER_CONSTANT) {
+              if (yylex() == '>') {
+                if (yylex() == ']')
+                  return 0;
+              }
             }
+          }
         }
+      }
     }
-    return 1;
+  }
+  return 1;
 }
 
 int ArrayOperandList(int first_token) {
-    // assumed first_token is '('
-    int next;
-    while (1) {
-        next = yylex();
-        if (!Identifier(next)) {
-            next = yylex();
-            if (next == ')')
-                return 0;
-            else if (next == ',') {
-            } else {
-                return 1;
-            }
-        } else {
-            return 1;
-        }
+  // assumed first_token is '('
+  int next;
+  while (1) {
+    next = yylex();
+    if (!Identifier(next)) {
+      next = yylex();
+      if (next == ')')
+        return 0;
+      else if (next == ',') {
+      } else {
+        return 1;
+      }
+    } else {
+      return 1;
     }
+  }
 }
 
 int CallTargets(int first_token) {
-  return 1;
-
+  // assumed first_token is '['
+  int next;
+  while (1) {
+    next = yylex();
+    if (!Identifier(next)) {
+      next = yylex();
+      if (next == ']')
+        return 0;
+      else if (next == ',') {
+      } else {
+        return 1;
+      }
+    } else {
+      return 1;
+    }
+  }
 };
 
 int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
@@ -355,7 +365,7 @@ int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
     if (GetTokenType(next) == FLOAT_ROUNDING) {
       // next is floatRounding
     } else {
-       *is_ftz = true;
+      *is_ftz = true;
     }
     return 0;
   } else if (GetTokenType(first_token) == INT_ROUNDING) {
@@ -437,7 +447,7 @@ int Instruction2(int first_token) {
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
       if (!Operand(yylex())) {
-       if (yylex() == ',') {
+        if (yylex() == ',') {
           if (!Operand(yylex())) {
             if (yylex() == ';') {
               return 0;
@@ -528,7 +538,7 @@ int Instruction3(int first_token) {
 
 int Version(int first_token) {
   // first token must be version keyword
-    // check for major
+  // check for major
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
     if (yylex() == ':') {
       // check for minor
@@ -582,49 +592,49 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
       *last_token = next_token;
       // first is alignment
       if (next_token == CONST) {
-      // alignment const
-      next_token = yylex();
-      *last_token = next_token;
-
-      if ((next_token == EXTERN)||(next_token == STATIC)) {
-        // alignment const externOrStatic
-    *recheck_last_token = false;
-      } else {
         // alignment const
-        *recheck_last_token = true;
-      }
-    } else if ((next_token == EXTERN)||(next_token == STATIC)) {
-      // alignment externOrStatic
-      next_token = yylex();
-      *last_token = next_token;
+        next_token = yylex();
+        *last_token = next_token;
 
-      if (next_token == CONST) {
-        // alignmnet externOrStatic const
-      } else {
+        if ((next_token == EXTERN)||(next_token == STATIC)) {
+          // alignment const externOrStatic
+          *recheck_last_token = false;
+        } else {
+          // alignment const
+          *recheck_last_token = true;
+        }
+      } else if ((next_token == EXTERN)||(next_token == STATIC)) {
         // alignment externOrStatic
+        next_token = yylex();
+        *last_token = next_token;
+
+        if (next_token == CONST) {
+          // alignmnet externOrStatic const
+        } else {
+          // alignment externOrStatic
+          *recheck_last_token = true;
+        }
+      } else {
+        // alignment
         *recheck_last_token = true;
       }
-    } else {
-      // alignment
-      *recheck_last_token = true;
-    }
     }
   } else if (first_token == CONST) {
     // first is const
-      next_token = yylex();
-      *last_token = next_token;
+    next_token = yylex();
+    *last_token = next_token;
     if (next_token == ALIGN) {
       if (!Alignment(next_token)) {
-      // const alignment
-      next_token = yylex();
-      *last_token = next_token;
-
-      if ((next_token == EXTERN)||(next_token == STATIC)) {
-        // const alignment externOrStatic
-      } else {
         // const alignment
-        *recheck_last_token = true;
-      }
+        next_token = yylex();
+        *last_token = next_token;
+
+        if ((next_token == EXTERN)||(next_token == STATIC)) {
+          // const alignment externOrStatic
+        } else {
+          // const alignment
+          *recheck_last_token = true;
+        }
       }
     } else if ((next_token == EXTERN)||(next_token == STATIC)) {
       // const externOrStatic
@@ -650,17 +660,17 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
     next_token = yylex();
     *last_token = next_token;
     if (next_token == ALIGN) {
-    if (!Alignment(next_token)) {
-      // externOrStatic alignment
-      next_token = yylex();
-      *last_token = next_token;
-
-      if (next_token == CONST) {
-        // externOrStatic alignment const
-      } else {
+      if (!Alignment(next_token)) {
         // externOrStatic alignment
-        *recheck_last_token = true;
-      }
+        next_token = yylex();
+        *last_token = next_token;
+
+        if (next_token == CONST) {
+          // externOrStatic alignment const
+        } else {
+          // externOrStatic alignment
+          *recheck_last_token = true;
+        }
       }
     } else if (next_token == CONST) {
       // externOrStatic const
@@ -668,12 +678,12 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
       *last_token = next_token;
 
       if (next_token == ALIGN) {
-      if (!Alignment(next_token)) {
+        if (!Alignment(next_token)) {
           *last_token = next_token;
         } else {
           return 1;
         }
-         // externOrStatic const alignment
+        // externOrStatic const alignment
       } else {
         *recheck_last_token = true;
       }
@@ -748,10 +758,10 @@ int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
         next = yylex();
         if (next == '[') {
           if (!ArrayDimensionSet(next, rescan_last_token, last_token)) {
-             return 0;
+            return 0;
           }
         } else {
-         // no arrayDimensions
+          // no arrayDimensions
           *last_token = next;
           *rescan_last_token = true;
           return 0;
@@ -941,7 +951,7 @@ int Codeblock(int first_token) {
     if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_NODT) ||
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
-        // Instruction 2 Operation
+      // Instruction 2 Operation
       if (!Instruction2(next_token)) {
       } else {
         return 1;
@@ -1005,13 +1015,13 @@ int Program(int first_token) {
 
   if (first_token == VERSION) {
     if (!Version(first_token)) {
-    // parse topLevelStatement
+      // parse topLevelStatement
       first_token = yylex();
       while (first_token) {
         if ( (first_token == ALIGN) ||
-           (first_token == CONST) ||
-           (first_token == EXTERN) ||
-           (first_token == STATIC) ) {
+             (first_token == CONST) ||
+             (first_token == EXTERN) ||
+             (first_token == STATIC) ) {
           result = DeclPrefix(first_token, &rescan, &last_token);
           if (result)
             return 1;
@@ -1145,7 +1155,7 @@ int Branch(int first_token) {
 
   // parse operands
   if (op == CBR) {
-      if (!Operand(current_token)) {
+    if (!Operand(current_token)) {
       if (yylex() == ',') {
         current_token = yylex();
         if (current_token == TOKEN_LABEL) {
@@ -1176,7 +1186,7 @@ int Branch(int first_token) {
                     return 1;
                   }
                 }   // while
-               }
+              }
               // current token should be ']'
               current_token = yylex();  // should be ';'
             }
@@ -1184,8 +1194,8 @@ int Branch(int first_token) {
         } else {
           return 1;
         }
-      if (current_token == ';')
-        return 0;
+        if (current_token == ';')
+          return 0;
       }  // yylex = ','
     }  // first operand
   } else if (op == BRN) {
