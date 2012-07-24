@@ -4,10 +4,85 @@
 // PRM 20.4
 typedef uint16_t BrigPacking16_t;
 typedef uint16_t BrigDataType16_t;
+typedef uint32_t BrigsOffset32_t;
+typedef uint32_t BrigcOffset32_t;
+typedef uint32_t BrigdOffset32_t;
 typedef uint32_t BrigoOffset32_t;
+typedef uint16_t BrigMachine16_t;
+typedef uint16_t BrigProfile16_t;
+typedef uint16_t BrigSftz16_t;
+typedef uint16_t BrigAttribute16_t;
 typedef uint32_t BrigStorageClass32_t;
 typedef uint32_t BrigOpcode32_t;
 typedef uint32_t BrigMemorySemantic32_t;
+// PRM 20.5.8
+enum BrigDirectiveKinds {
+  BrigEDirectiveFunction,
+  BrigEDirectiveKernel,
+  BrigEDirectiveSymbol,
+  BrigEDirectiveImage,
+  BrigEDirectiveSamp,
+  BrigEDirectiveLabel,
+  BrigEDirectiveLabelList,
+  BrigEDirectiveVersion,
+  BrigEDirectiveProto,
+  BrigEDirectiveFile,
+  BrigEDirectiveComment,
+  BrigEDirectiveLoc,
+  BrigEDirectiveInit,
+  BrigEDirectiveLabelInit,
+  BrigEDirectiveControl,
+  BrigEDirectivePragma,
+  BrigEDirectiveExtension,
+  BrigEDirectiveArgStart,
+  BrigEDirectiveArgEnd,
+  BrigEDirectiveBlockStart,
+  BrigEDirectiveBlockNumeric,
+  BrigEDirectiveBlockString,
+  BrigEDirectiveBlockEnd,
+  BrigEDirectivePad
+};
+// PRM 20.5.12
+enum BrigInstKinds {
+  BrigEInstBase,
+  BrigEInstMod,
+  BrigEInstCvt,
+  BrigEInstRead,
+  BrigEInstBar,
+  BrigEInstLdSt,
+  BrigEInstCmp,
+  BrigEInstMem,
+  BrigEInstAtomic,
+  BrigEInstAtomicImage,
+  BrigEInstImage
+};
+// 20.8.8
+struct BrigDirectiveFunction {
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigsOffset32_t s_name;
+  uint32_t inParamCount;
+  BrigdOffset32_t d_firstScopedDirective;
+  uint32_t operationCount;
+  BrigdOffset32_t d_nextDirective;
+  BrigAttribute16_t attribute;
+  uint16_t fbarCount;
+  uint32_t outParamCount;
+  BrigdOffset32_t d_firstInParam;
+};
+// 20.8.22
+struct BrigDirectiveVersion {
+    uint16_t size;
+    uint16_t kind;
+    BrigcOffset32_t c_code;
+    uint16_t major;
+    uint16_t minor;
+    BrigMachine16_t machine;
+    BrigProfile16_t profile;
+    BrigSftz16_t ftz;
+    uint16_t reserved;
+};
 // 20.9.9
 struct BrigInstLdSt {
   uint16_t size;
