@@ -638,31 +638,31 @@ TEST(ParserTest, Call) {
 TEST(ParserTest, Initializers) {
   bool rescan = false;
   int last_token = 0;
-  std::string input("= {12, 13,14, -13}");                      // DecimalInitializer
+  std::string input("= {12, 13,14, -13}");  // DecimalInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
 
-  input.assign("= 12, 13,14 ");                      // DecimalInitializer
+  input.assign("= 12, 13,14 ");  // DecimalInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
-  
-  input.assign("={ 1.2f, 1.3f,-1.4f }");                      // SingleInitializer
+
+  input.assign("={ 1.2f, 1.3f,-1.4f }");  // SingleInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
-  
-  input.assign("= 1.2f, 1.3f,-1.4f ");                      // SingleInitializer
+
+  input.assign("= 1.2f, 1.3f,-1.4f ");  // SingleInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
-  
-  input.assign("={ 1.2L, 1.3L,-1.4L }");                      // FloatInitializer
+
+  input.assign("={ 1.2L, 1.3L,-1.4L }");  // FloatInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
-  
-  input.assign("= 1.2L, 1.3L,-1.4L ");                      // FloatInitializer
+
+  input.assign("= 1.2L, 1.3L,-1.4L ");  // FloatInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
-  
-  input.assign("= {@a, @b, @c} ");                      // LabelInitializer
+
+  input.assign("= {@a, @b, @c} ");  // LabelInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
 };

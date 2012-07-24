@@ -1320,8 +1320,87 @@ int Initializer(int first_token, bool* rescan, int* last_token) {
   // first token should be '='
   *rescan = false;
   *last_token =0;
+  int next = yylex();
 
-  
-  return 1;  
-  
+  if (next == TOKEN_LABEL) {
+    printf("Label initializers must be inside '{' and '}'\n");
+    return 1;
+  } else if (next == '{') {
+    next = yylex();
+  }
+
+  // check type of initializer
+  if (next == TOKEN_LABEL) {
+    // label initializer
+    while (1) {
+      next = yylex();
+      if (next == ',') {
+        next = yylex();
+        if (next == TOKEN_LABEL) {
+          continue;
+        } else {
+          return 1;
+        }
+      } else {
+        *last_token = next;
+        *rescan = true;
+        break;
+      }
+    }  // while(1)
+
+  } else if (next == TOKEN_INTEGER_CONSTANT) {
+    // decimal initializer
+    while (1) {
+      next = yylex();
+      if (next == ',') {
+        next = yylex();
+        if (next == TOKEN_INTEGER_CONSTANT) {
+          continue;
+        } else {
+          return 1;
+        }
+      } else {
+        *last_token = next;
+        *rescan = true;
+        break;
+      }
+    }  // while(1)
+  } else if (next == TOKEN_SINGLE_CONSTANT) {
+    // single initializer
+    while (1) {
+      next = yylex();
+      if (next == ',') {
+        next = yylex();
+        if (next == TOKEN_SINGLE_CONSTANT) {
+          continue;
+        } else {
+          return 1;
+        }
+      } else {
+        *last_token = next;
+        *rescan = true;
+        break;
+      }
+    }  // while(1)
+  } else if (next == TOKEN_DOUBLE_CONSTANT) {
+    // double initializer
+    while (1) {
+      next = yylex();
+      if (next == ',') {
+        next = yylex();
+        if (next == TOKEN_DOUBLE_CONSTANT) {
+          continue;
+        } else {
+          return 1;
+        }
+      } else {
+        *last_token = next;
+        *rescan = true;
+        break;
+      }
+    }  // while(1)
+  } else {
+    return 1;
+  }
+  return 0;
 }
