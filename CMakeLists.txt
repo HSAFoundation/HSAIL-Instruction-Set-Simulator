@@ -2,6 +2,7 @@ project(foo)
 cmake_minimum_required(VERSION 2.6.2)
 find_package(FLEX)
 include_directories(.)
+include_directories(include)
 include_directories(${CMAKE_BINARY_DIR})
 add_definitions(-DGTEST_HAS_PTHREAD=0)
 flex_target(lexer example.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
@@ -9,6 +10,7 @@ flex_target(lexer example.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 set(foo_SOURCES
 	test/hsail_test.cc
 	test/parser_test.cc
+	test/brig2llvm_test.cc
 	gtest/gtest-all.cc
 	gtest/gtest_main.cc
 	parser.cc
