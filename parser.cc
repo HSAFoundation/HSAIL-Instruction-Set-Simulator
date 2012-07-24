@@ -1315,3 +1315,13 @@ int Call(int first_token) {
   }
   return 1;
 }
+
+int Initializer(int first_token, bool* rescan, int* last_token) {
+  // first token should be '='
+  *rescan = false;
+  *last_token =0;
+
+  
+  return 1;  
+  
+}
