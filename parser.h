@@ -6,6 +6,7 @@
 #include <string>
 #include "./tokens.h"
 
+
 enum TerminalType { UNKNOWN_TERM = 0,
                     REGISTER,
                     DATA_TYPE_ID,
@@ -18,7 +19,9 @@ enum TerminalType { UNKNOWN_TERM = 0,
                     INSTRUCTION2_OPCODE_FTZ,
                     INSTRUCTION3_OPCODE,
                     INSTRUCTION3_OPCODE_FTZ,
-                    TARGET
+                    TARGET,
+                    INITIALIZABLE_ADDRESS,
+                    UNINITIALIZABLE_ADDRESS
                   };
 
 // classify token into different terminal type
@@ -46,7 +49,7 @@ int FunctionDefinition(int first_token,
                        bool* rescan_last_token,
                        int* last_token);
 int FunctionDecl(int first_token);
-int Codeblock(int first_token, int level);  // level to detect nesting scope
+int Codeblock(int first_token);  // level to detect nesting scope
 int Function(int first_token);
 int OptionalWidth(int first_token);
 int Program(int first_token);
@@ -55,5 +58,12 @@ int CallTargets(int first_token);
 int CallArgs(int first_token);
 int Call(int first_token);
 int checkVersion(int token);
+int Initializer(int first_token,
+                bool* rescan,
+                int* last_token);
+int InitializableDecl(int first_token);
+int UninitializableDecl(int first_token);
+int ArgUninitializableDecl(int first_token);
+
 #endif  // PARSER_H_
 

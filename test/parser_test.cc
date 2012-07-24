@@ -481,68 +481,6 @@ TEST(ParserTest, SimpleProg) {
   EXPECT_EQ(0, Program(yylex()));
 };
 
-TEST(ParserTest, ProgWithFunctionDefinition) {
-  // Example 3
-  std::string input("version 1:0:$small;");
-  input.append("function &packed_ops (arg_u8x4 %x)() {");
-  input.append(" abs_p_s8x4 $s1, $s2; ");
-  input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; ");
-  input.append(" query_order_u32  $c1 , [&Test<$d7  + 100>];");
-  input.append(" }; ");
-
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
-
-  // Example 2
-  input.clear();
-  input.assign("version 1:0:$small;");
-  input.append("function &return_true(arg_f32 %ret_val) () {");
-  input.append(" ret;");
-  input.append(" }; ");
-
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
-
-  // Example 4
-  input.clear();
-  input.assign("version 1:0:$small;");
-  input.append("function &branch_ops (arg_u8x4 %x)() {");
-  input.append("cbr $c1, @then;");
-  input.append("abs_p_s8x4 $s1, $s2;");
-  input.append(" brn @outof_IF;");
-  input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;");
-  input.append(" @outof_IF: ret;");
-  input.append(" }; ");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
-
-  // Example 5 - Call to simple function
-  input.clear();
-  input.assign("version 1:0:$small;");
-  input.append("function &callee()() {");
-  input.append("ret;");
-  input.append("};");
-
-  input.append(" function &caller()() {");
-  input.append("{call &callee;}");
-  input.append(" }; ");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
-
-  // Example 6 - Call to a complex function
-  input.clear();
-  input.assign("version 1:0:$small;");
-  input.append("function &callee(arg_f32 %output)(arg_f32 %input) {");
-  input.append("ret;");
-  input.append("};");
-
-  input.append(" function &caller()() {");
-  input.append("{call &callee (%output)(%input);}");
-  input.append(" }; ");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
-};
-
 TEST(ParserTest, Instruction3) {
   std::string input(" add_pp_sat_u16x2 $s1, $s0, $s3;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
@@ -633,6 +571,178 @@ TEST(ParserTest, Call) {
   input.append("(%output1,&output2)(%input1, $d7) [&id1, &id2];");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Call(yylex()));
+};
+
+TEST(ParserTest, Initializers) {
+  bool rescan = false;
+  int last_token = 0;
+  std::string input("= {12, 13,14, -13}");  // DecimalInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+
+  input.assign("= 12, 13,14 ");  // DecimalInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+
+  input.assign("={ 1.2f, 1.3f,-1.4f }");  // SingleInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+
+  input.assign("= 1.2f, 1.3f,-1.4f ");  // SingleInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+
+  input.assign("={ 1.2L, 1.3L,-1.4L }");  // FloatInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+
+  input.assign("= 1.2L, 1.3L,-1.4L ");  // FloatInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+
+  input.assign("= {@a, @b, @c} ");  // LabelInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+};
+
+TEST(ParserTest, InitializableDecl) {
+  // DecimalInitializer
+  std::string input("readonly_s32 &x[4]= {12, 13,14, -13};");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  input.assign("global_u32 &x[3] = 12, 13,14 ; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  // SingleInitializer
+  input.assign("readonly_f32 %f[3] = { 1.2f, 1.3f,-1.4f };");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  input.assign("global_f32 &c[3] = 1.2f, 1.3f,-1.4f ;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  // FloatInitializer
+  input.assign("readonly_f64 %d[3] ={ 1.2L, 1.3L,-1.4L; }");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  input.assign("global_f64 %g[3] = 1.2L, 1.3L,-1.4L ;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+};
+
+TEST(ParserTest, ProgWithFunctionDefinition) {
+  // Example 3
+  std::string input("version 1:0:$small;");
+  input.append("function &packed_ops (arg_u8x4 %x)() {");
+  input.append(" abs_p_s8x4 $s1, $s2; ");
+  input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; ");
+  input.append(" }; ");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+
+  // Example 2
+  input.clear();
+  input.assign("version 1:0:$small;");
+  input.append("function &return_true(arg_f32 %ret_val) () {");
+  input.append(" ret;");
+  input.append(" }; ");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+
+  // Example 4
+  input.clear();
+  input.assign("version 1:1:$small;");
+  input.append("function &branch_ops (arg_u8x4 %x)() {");
+  input.append("cbr $c1, @then;");
+  input.append("abs_p_s8x4 $s1, $s2;");
+  input.append(" brn @outof_IF;");
+  input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;");
+  input.append(" @outof_IF: ret;");
+  input.append(" }; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+
+  // Example 5 - Call to simple function
+  input.clear();
+  input.assign("version 1:0:$small;");
+  input.append("function &callee()() {");
+  input.append("ret;");
+  input.append("};");
+
+  input.append(" function &caller()() {");
+  input.append("{call &callee;}");
+  input.append(" }; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+
+  // Example 6a - Call to a complex function
+  input.clear();
+  input.assign("version 1:0:$small;");
+  input.append("function &callee(arg_f32 %output)(arg_f32 %input) {");
+  input.append("ret;");
+  input.append("};");
+
+  input.append(" function &caller()() {");
+  input.append(" { arg_f32 %input; ");
+  input.append("  arg_f32 %output; ");
+  input.append("call &callee (%output)(%input);}");
+  input.append(" }; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+};
+
+TEST(ParserTest, ProgWithGlobalDecl) {
+  std::string input("version 1:0:$small;");
+  input.append("readonly_f32 %f[3] = { 1.2f, 1.3f,-1.4f };");
+  input.append("function &callee(arg_f32 %output)(arg_f32 %input) {");
+  input.append("ret;");
+  input.append("};");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+};
+
+TEST(ParserTest, ProgWithUninitializableDecl ) {
+  // Example 1 - PRM 20.8.2
+  std::string input("version 1:0:$large;");
+  input.append("global_f32 &x = 2;");
+  input.append("function &test()() {");
+  input.append("{private_u32 %z;}");
+  input.append(" }; ");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+};
+
+TEST(ParserTest, UninitializableDecl) {
+  std::string input("private_f32 %f[3];");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, UninitializableDecl(yylex()));
+};
+
+TEST(ParserTest, ArgUninitializableDecl) {
+  std::string input("arg_f32 %f[3];");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, ArgUninitializableDecl(yylex()));
+};
+
+TEST(ParserTest, ProgWithArgUninitializableDecl ) {
+  std::string input("version 1:0:$large;");
+  input.append("global_f32 &x = 2;");
+  input.append("function &test()() {");
+  input.append("{arg_u32 %z;}");
+  input.append(" }; ");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
 };
 */
 

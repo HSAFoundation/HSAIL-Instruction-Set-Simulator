@@ -191,6 +191,15 @@ TerminalType GetTokenType(int token) {
   case MAX:
   case MIN:
     return INSTRUCTION3_OPCODE_FTZ;
+    /* initializable address */
+  case READONLY:
+  case GLOBAL:
+    return INITIALIZABLE_ADDRESS;
+  case PRIVATE:
+  case GROUP:
+  case SPILL:
+    return UNINITIALIZABLE_ADDRESS;
+
   default:
     return UNKNOWN_TERM;  // unknown
   }
@@ -1036,15 +1045,13 @@ int FunctionDecl(int first_token) {
   return 1;
 }
 
-int Codeblock(int first_token, int level) {
-  // first token should be '{'
-  // currently only supports Instruction2 as body statement
+int ArgBlock(int first_token) {
+  // first token should be {
+  bool rescan = false;
+  int last_token;
   int next_token = 0;
-  // printf("Level = %d\n",level);
-  if (level > 1) {
-    printf("Scope cannot be nested.\n");
-    return 1;
-  }
+    // printf("In arg scope\n");
+
   while (1) {
     next_token = yylex();
     if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
@@ -1084,23 +1091,56 @@ int Codeblock(int first_token, int level) {
       } else {
         return 1;
       }
-    } else if (next_token == CALL) {  // call
+    } else if (next_token == CALL) {  // call  (only inside argblock
+
       if (!Call(next_token)) {
       } else {
         return 1;
       }
-    } else if (next_token == '{') {  // argument scope -> inner codeblock
-      if (!Codeblock(next_token, ++level)) {
-        level--;
+    } else if ((next_token == ALIGN) ||
+               (next_token == CONST) ||
+               (next_token == STATIC) ||
+               (next_token == EXTERN)) {
+      if (!DeclPrefix(first_token, &rescan, &last_token)) {
+        if (!rescan)
+          next_token = yylex();
+        else
+          next_token = last_token;
+
+        if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+          // initializable decl
+          if (!InitializableDecl(next_token)) {
+          }
+        } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+          // uninitializable decl
+          if (!UninitializableDecl(next_token)) {
+          }
+        } else if (next_token == ARG) {
+          // arg uninitializable decl
+          if (!ArgUninitializableDecl(next_token)) {
+          }
+        }
+      }
+    } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+      if (!InitializableDecl(next_token)) {
       } else {
         return 1;
       }
+    } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+      // printf("An unintializable address\n");
+      if (!UninitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (next_token == ARG) {
+      if (!ArgUninitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (next_token == '{') {
+      printf("Argument scope cannot be nested\n");
+      return 1;
     } else if (next_token == '}') {
-      /*
-      next_token = yylex();
-      if (next_token == ';')
-        return 0;
-      */
       return 0;
     } else {
       break;
@@ -1109,14 +1149,162 @@ int Codeblock(int first_token, int level) {
   return 1;
 }
 
+int Codeblock(int first_token) {
+  // first token should be '{'
+  bool rescan = false;
+  int last_token;
+  int next_token = 0;
+
+  while (1) {
+    next_token = yylex();
+    if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
+        (GetTokenType(next_token) == INSTRUCTION2_OPCODE_NODT) ||
+        (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
+      // Instruction 2 Operation
+      if (!Instruction2(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if ((GetTokenType(next_token) == INSTRUCTION3_OPCODE) ||
+               (GetTokenType(next_token) == INSTRUCTION3_OPCODE_FTZ)) {
+      // Instruction 3 Operation
+      if (!Instruction3(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (GetTokenType(next_token) == QUERY_OP) {  // Query Operation
+      if (!Query(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (next_token == RET) {  // ret operation
+      if (yylex() == ';') {
+      } else {
+        printf("Missing ';' at the end of ret operation\n");
+        return 1;
+      }
+    } else if ((next_token == BRN) ||
+               (next_token == CBR)) {
+      if (!Branch(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (next_token == TOKEN_LABEL) {  // label
+      if (yylex() == ':') {
+      } else {
+        return 1;
+      }
+    } else if (next_token == '{') {  // argument scope -> inner codeblock
+      if (!ArgBlock(next_token)) {
+        // printf("Out of arg scope \n");
+      } else {
+        return 1;
+      }
+    } else if ((next_token == ALIGN) ||
+               (next_token == CONST) ||
+               (next_token == STATIC) ||
+               (next_token == EXTERN)) {
+      if (!DeclPrefix(first_token, &rescan, &last_token)) {
+        if (!rescan)
+          next_token = yylex();
+        else
+          next_token = last_token;
+
+        if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+          // initializable decl
+          if (!InitializableDecl(next_token)) {
+          } else {
+            return 1;
+          }
+        } else if (GetTokenType(first_token) == UNINITIALIZABLE_ADDRESS) {
+          // uninitializable decl
+          if (!UninitializableDecl(first_token)) {
+          } else {
+            return 1;
+          }
+        } else {
+          return 1;
+        }
+      } else {
+        return 1;
+      }
+    } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+      if (!InitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+      // printf("An unintializable address\n");
+      if (!UninitializableDecl(next_token)) {
+      
+    } else if (next_token == '{') {  // argument scope -> inner codeblock
+      if (!ArgBlock(next_token)) {
+        // printf("Out of arg scope \n");
+      } else {
+        return 1;
+      }
+    } else if ((next_token == ALIGN) ||
+               (next_token == CONST) ||
+               (next_token == STATIC) ||
+               (next_token == EXTERN)) {
+      if (!DeclPrefix(first_token, &rescan, &last_token)) {
+        if (!rescan)
+          next_token = yylex();
+        else
+          next_token = last_token;
+
+        if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+          // initializable decl
+          if (!InitializableDecl(next_token)) {
+          } else {
+            return 1;
+          }
+        } else if (GetTokenType(first_token) == UNINITIALIZABLE_ADDRESS) {
+          // uninitializable decl
+          if (!UninitializableDecl(first_token)) {
+          } else {
+            return 1;
+          }
+        } else {
+          return 1;
+        }
+      } else {
+        return 1;
+      }
+    } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+      if (!InitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+      // printf("An unintializable address\n");
+      if (!UninitializableDecl(next_token)) {
+
+      } else {
+        return 1;
+      }
+    } else if (next_token == '}') {
+      return 0;
+    } else {
+      break;
+    }
+  }
+  return 1;
+}
+}
+
 int Function(int first_token) {
   bool rescan = false;
   int last_token = 0;
   if (!FunctionDefinition(first_token, &rescan, &last_token)) {
     if (!rescan)
       last_token = yylex();
-    if (!Codeblock(last_token, 0))
-      return 0;
+    if (!Codeblock(last_token)) {
+      if (yylex() == ';')
+        return 0;
+      else
+        printf("Missing ';'\n");
+    }
   }
   return 1;
 }
@@ -1206,7 +1394,7 @@ int Program(int first_token) {
               continue;
             } else if (first_token == '{') {
               // so this must be a functionDefinition
-              if (!Codeblock(first_token, 0)) {  // check codeblock of function
+              if (!Codeblock(first_token)) {  // check codeblock of function
                 first_token = yylex();
                 if (first_token == ';') {
                   first_token = yylex();
@@ -1220,18 +1408,24 @@ int Program(int first_token) {
               }
             }
           }       // if found TOKEN_GLOBAL_ID
-        } else {  // if first_token == FUNCTION
+        } else if (GetTokenType(first_token) == INITIALIZABLE_ADDRESS) {
+          // global initializable
+          // this is an initializable declaration
+          if (!InitializableDecl(first_token)) {
+            first_token = yylex();
+          } else {
+            return 1;
+          }
+        } else  {
           return 1;  // currently only support functions
         }
       }    // while (first_token)
       return 0;
-    } else {
-      return 1;
     }  // if (!Version)
   } else {
     printf("Program must start with version statement.\n");
-    return 1;
   }
+  return 1;
 }
 
 int OptionalWidth(int first_token) {
@@ -1400,4 +1594,196 @@ int checkVersion(int token){
 
     //printf ("offset %d; count %d\n", directiveOffset, directiveCount);
     return result;
+}
+int Initializer(int first_token, bool* rescan, int* last_token) {
+  // first token should be '='
+  *rescan = false;
+  *last_token =0;
+  int next = yylex();
+
+  if (next == TOKEN_LABEL) {
+    printf("Label initializers must be inside '{' and '}'\n");
+    return 1;
+  } else if (next == '{') {
+    next = yylex();
+  }
+
+  // check type of initializer
+  if (next == TOKEN_LABEL) {
+    // label initializer
+    while (1) {
+      next = yylex();
+      if (next == ',') {
+        next = yylex();
+        if (next == TOKEN_LABEL) {
+          continue;
+        } else {
+          return 1;
+        }
+      } else {
+        *last_token = next;
+        *rescan = true;
+        break;
+      }
+    }  // while(1)
+
+  } else if (next == TOKEN_INTEGER_CONSTANT) {
+    // decimal initializer
+    while (1) {
+      next = yylex();
+      if (next == ',') {
+        next = yylex();
+        if (next == TOKEN_INTEGER_CONSTANT) {
+          continue;
+        } else {
+          return 1;
+        }
+      } else {
+        *last_token = next;
+        *rescan = true;
+        break;
+      }
+    }  // while(1)
+  } else if (next == TOKEN_SINGLE_CONSTANT) {
+    // single initializer
+    while (1) {
+      next = yylex();
+      if (next == ',') {
+        next = yylex();
+        if (next == TOKEN_SINGLE_CONSTANT) {
+          continue;
+        } else {
+          return 1;
+        }
+      } else {
+        *last_token = next;
+        *rescan = true;
+        break;
+      }
+    }  // while(1)
+  } else if (next == TOKEN_DOUBLE_CONSTANT) {
+    // double initializer
+    while (1) {
+      next = yylex();
+      if (next == ',') {
+        next = yylex();
+        if (next == TOKEN_DOUBLE_CONSTANT) {
+          continue;
+        } else {
+          return 1;
+        }
+      } else {
+        *last_token = next;
+        *rescan = true;
+        break;
+      }
+    }  // while(1)
+  } else {
+    return 1;
+  }
+  if (!*rescan)
+    next = yylex();
+  if (next == '}') {
+    *rescan = false;
+  } else {
+    *rescan = true;
+    *last_token = next;
+  }
+
+
+  return 0;
+}
+
+int InitializableDecl(int first_token) {
+  // first_token is READONLY or GLOBAL
+  bool rescan;
+  int last_token;
+  int next = yylex();
+
+  if (GetTokenType(next) == DATA_TYPE_ID) {
+    next = yylex();
+    if (!Identifier(next)) {
+      // scan for arrayDimensions
+      next = yylex();
+      if (next == '[') {
+        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+          if (!rescan)
+            next = yylex();
+          else
+            next = last_token;
+        }
+      }
+      if (!Initializer(next, &rescan, &last_token)) {
+        if (rescan)
+          next = last_token;
+        else
+          next = yylex();
+
+        if (next == ';')
+          return 0;
+        else
+          printf("Missing ';' at the end of statement\n");
+      }
+    }
+  }
+  return 1;
+};
+
+int UninitializableDecl(int first_token) {
+  // first_token is PRIVATE, GROUP or SPILL
+  bool rescan;
+  int last_token;
+  int next = yylex();
+  if (GetTokenType(next) == DATA_TYPE_ID) {
+    // printf("DataTypeId\n");
+    next = yylex();
+    if (!Identifier(next)) {
+      // scan for arrayDimensions
+      next = yylex();
+      if (next == '[') {
+        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+          if (!rescan)
+            next = yylex();
+          else
+            next = last_token;
+        }
+      }
+
+      if (next == ';')
+        return 0;
+      else
+        printf("Missing ';' at the end of statement\n");
+    }
+  }
+  return 1;
+}
+
+
+int ArgUninitializableDecl(int first_token) {
+  // first token is ARG
+  bool rescan;
+  int last_token;
+  int next = yylex();
+  if (GetTokenType(next) == DATA_TYPE_ID) {
+    // printf("DataTypeId\n");
+    next = yylex();
+    if (!Identifier(next)) {
+      // scan for arrayDimensions
+      next = yylex();
+      if (next == '[') {
+        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+          if (!rescan)
+            next = yylex();
+          else
+            next = last_token;
+        }
+      }
+
+      if (next == ';')
+        return 0;
+      else
+        printf("Missing ';' at the end of statement\n");
+    }
+  }
+  return 1;
 }
