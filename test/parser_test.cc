@@ -524,7 +524,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("};");
 
   input.append(" function &caller()() {");
-  input.append("call &callee;");
+  input.append("{call &callee;}");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
@@ -537,7 +537,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("};");
 
   input.append(" function &caller()() {");
-  input.append("call &callee (%output)(%input);");
+  input.append("{call &callee (%output)(%input);}");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
