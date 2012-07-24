@@ -7,6 +7,12 @@ class buffer {
   buffer(void) {}
   template <class T>
   void append(const T *item) {
+    size_t item_sz = sizeof(T);
+    const unsigned char * item_charp = 
+      reinterpret_cast<const unsigned char*>(item);
+    while(item_sz --) {
+      buf_.push_back(*item_charp++);
+    }
   }
   const std::vector<unsigned char>& get(void) { return buf_; }
  private:
