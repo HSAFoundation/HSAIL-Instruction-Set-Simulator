@@ -171,6 +171,11 @@ TerminalType GetTokenType(int token) {
   case MAX:
   case MIN:
     return INSTRUCTION3_OPCODE_FTZ;
+    /* initializable address */
+  case READONLY:
+  case GLOBAL:
+    return INITIALIZABLE_ADDRESS;
+  
   default:
     return UNKNOWN_TERM;  // unknown
   }
@@ -1404,3 +1409,8 @@ int Initializer(int first_token, bool* rescan, int* last_token) {
   }
   return 0;
 }
+
+int InitializableDecl(int first_token) {
+  return 1;
+
+};

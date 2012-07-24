@@ -666,3 +666,29 @@ TEST(ParserTest, Initializers) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
 };
+
+TEST(ParserTest, InitializableDecl) {
+  std::string input("readonly_s32 &x[4]= {12, 13,14, -13};");  // DecimalInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  input.assign("global_u32 = 12, 13,14; ");  // DecimalInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  input.assign("readonly_f32 = { 1.2f, 1.3f,-1.4f }");  // SingleInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  input.assign("global_f32= 1.2f, 1.3f,-1.4f ");  // SingleInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  input.assign("readonly_f64={ 1.2L, 1.3L,-1.4L }");  // FloatInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+
+  input.assign("global_f64= 1.2L, 1.3L,-1.4L ");  // FloatInitializer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, InitializableDecl(yylex()));
+};
