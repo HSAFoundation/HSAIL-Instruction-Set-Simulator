@@ -1,3 +1,5 @@
+/* Copyright 2012 <MulticorewareInc> */
+
 #ifndef INCLUDE_BRIG_H_
 #define INCLUDE_BRIG_H_
 #include <stdint.h>
@@ -16,6 +18,8 @@ typedef uint32_t BrigStorageClass32_t;
 typedef uint32_t BrigOpcode32_t;
 typedef uint32_t BrigMemorySemantic32_t;
 // PRM 20.5.8
+// BrigDirectiveKinds
+// BrigDirectiveKinds is used to specify the kind of directive.
 enum BrigDirectiveKinds {
   BrigEDirectiveFunction,
   BrigEDirectiveKernel,
@@ -42,6 +46,30 @@ enum BrigDirectiveKinds {
   BrigEDirectiveBlockEnd,
   BrigEDirectivePad
 };
+// BrigMachine
+// BrigMachine is used to specify the type of machine model.
+enum BrigMachine {
+  BrigESmall,  // 32-bit model (all addresses are 32 bits;
+               // a pointer fits into an s register)
+  BrigELarge   // 64-bit model (all addresses are 64 bits;
+               // a pointer fits into a d register)
+};
+
+// BrigProfile
+// BrigProfile is used to specify the kind of profile.
+enum BrigProfile {
+  BrigEFull,
+  BrigEReduced
+};
+
+// BrigSftz
+// BrigSftz is used to specify the use (or non-use) of single-precision
+// flush to zero.
+enum BrigSftz {
+  BrigESftz,
+  BrigENosftz
+};
+
 // PRM 20.5.12
 enum BrigInstKinds {
   BrigEInstBase,
@@ -83,6 +111,7 @@ struct BrigDirectiveVersion {
     BrigSftz16_t ftz;
     uint16_t reserved;
 };
+
 // 20.9.9
 struct BrigInstLdSt {
   uint16_t size;
@@ -93,6 +122,6 @@ struct BrigInstLdSt {
   BrigoOffset32_t o_operands[5];
   BrigStorageClass32_t storageClass;
   BrigMemorySemantic32_t memorySemantic;
-  uint32_t equivClass; 
+  uint32_t equivClass;
 };
 #endif //INCLUDE_BRIG_H_

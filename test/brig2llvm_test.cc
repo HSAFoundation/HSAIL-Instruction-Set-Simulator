@@ -1,10 +1,11 @@
 // Copyright 2012 MulticoreWare Inc.
+
 #include "./gtest/gtest.h"
 #include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
 // ------------------ Brig2LLVM TESTS -----------------
-extern void driver(void);
+
 TEST(Brig2LLVMTest, AppendBuffer) {
   {
     BrigInstLdSt foo = {

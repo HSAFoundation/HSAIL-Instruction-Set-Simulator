@@ -9,7 +9,9 @@ flex_target(lexer example.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
 set(foo_SOURCES
 	test/hsail_test.cc
-	test/parser_test.cc
+    test/codegen_test.cc
+    test/parser_test.cc
+    test/hsail_test.cc
 	gtest/gtest-all.cc
 	gtest/gtest_main.cc
 	parser.cc
