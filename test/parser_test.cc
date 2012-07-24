@@ -689,7 +689,9 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("};");
 
   input.append(" function &caller()() {");
-  input.append("{call &callee (%output)(%input);}");
+  input.append(" { arg_f32 %input; ");
+  input.append("  arg_f32 %output; ");
+  input.append("call &callee (%output)(%input);}");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
@@ -730,4 +732,15 @@ TEST(ParserTest, ArgUninitializableDecl) {
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArgUninitializableDecl(yylex()));
+};
+
+TEST(ParserTest, ProgWithArgUninitializableDecl ) {
+  std::string input("version 1:0:$large;");
+  input.append("global_f32 &x = 2;");
+  input.append("function &test()() {");
+  input.append("{arg_u32 %z;}");
+  input.append(" }; ");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
 };

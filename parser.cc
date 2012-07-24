@@ -1035,6 +1035,14 @@ int ArgBlock(int first_token) {
           // initializable decl
           if (!InitializableDecl(next_token)) {
           }
+        } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+          // uninitializable decl
+          if (!UninitializableDecl(next_token)) {
+          }
+        } else if (next_token == ARG) {
+          // arg uninitializable decl
+          if (!ArgUninitializableDecl(next_token)) {
+          }
         }
       }
     } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
@@ -1043,8 +1051,13 @@ int ArgBlock(int first_token) {
         return 1;
       }
     } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
-      printf("An unintializable address\n");
+      // printf("An unintializable address\n");
       if (!UninitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (next_token == ARG) {
+      if (!ArgUninitializableDecl(next_token)) {
       } else {
         return 1;
       }
@@ -1616,5 +1629,30 @@ int UninitializableDecl(int first_token) {
 
 
 int ArgUninitializableDecl(int first_token) {
+  // first token is ARG
+  bool rescan;
+  int last_token;
+  int next = yylex();
+  if (GetTokenType(next) == DATA_TYPE_ID) {
+    // printf("DataTypeId\n");
+    next = yylex();
+    if (!Identifier(next)) {
+      // scan for arrayDimensions
+      next = yylex();
+      if (next == '[') {
+        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+          if (!rescan)
+            next = yylex();
+          else
+            next = last_token;
+        }
+      }
+
+      if (next == ';')
+        return 0;
+      else
+        printf("Missing ';' at the end of statement\n");
+    }
+  }
   return 1;
 }
