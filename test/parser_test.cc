@@ -3,10 +3,10 @@
 #include "./gtest/gtest.h"
 #include "./lexer.h"
 #include "../parser.h"
-
+#include "./include/brig.h"
 
 // ------------------ Parser TESTS -----------------
-
+/*
 TEST(ParserTest, IdentifierTest) {
   std::string input("&a_global_id123");  // global id
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
@@ -634,11 +634,34 @@ TEST(ParserTest, Call) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Call(yylex()));
 };
+*/
+
+extern int stringCount;
+extern int directiveCount;
+extern int codeCount;
+extern int operandCount;
+
+extern int stringOffset;
+extern int directiveOffset;
+extern int codeOffset;
+extern int operandOffset;
+
+extern BrigDirectiveList directiveList[20]; 
+extern BrigCodeList codeList[20]; 
+extern BrigOperandList operandList[20]; 
+
+
+//should be dynamic or a relatively large number
 
 
 TEST(ParserTest, writeVersion) {
   std::string input("version 1:0:$small;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, checkVersion(yylex()));
+  BrigDirectiveVersion* ref = new BrigDirectiveVersion(0,1,0,0,0,0);
+  if  ( directiveList[0].thisDirective )
+    EXPECT_EQ(0, directiveList[0].thisDirective->test(ref));
+  delete ref;
+  delete directiveList[0].thisDirective;
 };
 

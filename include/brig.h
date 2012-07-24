@@ -21,7 +21,7 @@ struct BrigInstLdSt {
   BrigMemorySemantic32_t memorySemantic;
   uint32_t equivClass; 
 };
-#endif //INCLUDE_BRIG_H_
+
 
 
 
@@ -119,6 +119,8 @@ class BrigDirectiveBase {
     public :
         uint16_t size;
         uint16_t kind;
+        virtual uint16_t test(BrigDirectiveBase* ref){
+        };
 };
 
 class BrigDirectiveList {
@@ -151,8 +153,8 @@ class BrigOperandList {
 
 class BrigDirectiveVersion : public BrigDirectiveBase {
     public:
-        uint16_t size;
-        uint16_t kind;
+        //uint16_t size;
+        //uint16_t kind;
         BrigcOffset32_t c_code;
         uint16_t major;
         uint16_t minor;
@@ -160,6 +162,7 @@ class BrigDirectiveVersion : public BrigDirectiveBase {
         BrigProfile16_t profile;
         BrigSftz16_t ftz;
         uint16_t reserved;
+
         BrigDirectiveVersion(){};
         BrigDirectiveVersion(BrigcOffset32_t c_codeT , uint16_t majorT , uint16_t minorT ,
 	                   BrigMachine16_t machineT , BrigProfile16_t profileT , 
@@ -177,10 +180,20 @@ class BrigDirectiveVersion : public BrigDirectiveBase {
 
         };
         
+        uint16_t test(BrigDirectiveBase *ref){
+          BrigDirectiveVersion * t_ref = (BrigDirectiveVersion *)ref;
+          if( t_ref->major != major || t_ref->minor != minor || t_ref->machine != machine)
+          {
+            printf("major: %d, minor: %d, machine: %d\n", major, minor, machine);
+            return 1;
+          }
+          return 0;
+        };
+        
 };
 
 /*
-BrigDirectiveVersion::BrigDirectiveVersion (BrigcOffset32_t c_code , uint16_t major , uint16_t minor ,
+int writeDirectiveVersion (BrigDirectiveVersion* version, BrigcOffset32_t c_code , uint16_t major , uint16_t minor ,
 	                   BrigMachine16_t machine , BrigProfile16_t profile , 
 					   BrigSftz16_t ftz )
 {
@@ -195,7 +208,9 @@ BrigDirectiveVersion::BrigDirectiveVersion (BrigcOffset32_t c_code , uint16_t ma
 	version->reserved = 0;
 
 //	WriteItIntoFile( BDVersion.size , &BDVersion );
-	return TRUE; 
+	return 0; 
 } 
 */
 #endif
+
+#endif //INCLUDE_BRIG_H_

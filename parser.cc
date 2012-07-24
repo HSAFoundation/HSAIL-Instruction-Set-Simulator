@@ -216,6 +216,7 @@ int checkMachineStatusVersion (int token, BrigMachine16_t* machine, BrigProfile1
     case _NOSFTZ:
         *ftz = BrigENosftz;
         break;
+    default: break;
    } 
    return 0;
 };
@@ -611,8 +612,8 @@ int Version(int first_token) {
   BrigMachine16_t machine = BrigELarge;
   BrigProfile16_t profile = BrigEFull; 
   BrigSftz16_t ftz = BrigENosftz;
-  
-  if (yylex() == TOKEN_INTEGER_CONSTANT) {
+
+if (yylex() == TOKEN_INTEGER_CONSTANT) {
     major = int_val;
     if (yylex() == ':') {
       // check for minor
@@ -621,9 +622,14 @@ int Version(int first_token) {
         int next = yylex();
         if (next == ';') {
           directiveList[directiveCount].offset = directiveOffset;
-          directiveList[directiveCount].thisDirective = new BrigDirectiveVersion(c_code, major, minor, machine, profile, ftz);
+          directiveList[directiveCount].thisDirective = 
+                new BrigDirectiveVersion(c_code, 
+                                         major, minor, machine, profile, ftz);
+
+          directiveOffset += directiveList[directiveCount].thisDirective->size;
           directiveCount ++;
-          directiveOffset += directiveList[directiveCount].thisDirective->size;           return 0;
+          return 0;
+            
         } else if (next == ':') {
           // check for target
           next = yylex();
@@ -642,10 +648,12 @@ int Version(int first_token) {
             }
           }
           directiveList[directiveCount].offset = directiveOffset;
-          directiveList[directiveCount].thisDirective = new BrigDirectiveVersion(c_code, major, minor, machine, profile, ftz);
-          directiveCount ++;
-          directiveOffset += directiveList[directiveCount].thisDirective->size;
+          directiveList[directiveCount].thisDirective = 
+                new BrigDirectiveVersion(c_code, 
+                                         major, minor, machine, profile, ftz);
 
+          directiveOffset += directiveList[directiveCount].thisDirective->size;
+          directiveCount ++;
           return 0;
         }
       }
@@ -1385,8 +1393,11 @@ int Call(int first_token) {
 int checkVersion(int token){
     int result = 0;
     Version(token);
-    if (directiveCount != 1 && directiveOffset != 20)
+    if (directiveCount != 1 || directiveOffset != 20)
         result ++;
+    //result += directiveList[0].thisDirective->test();
+    //printf ("size %d; kind %d\n", directiveList[0].thisDirective->size, directiveList[0].thisDirective->kind);
 
+    //printf ("offset %d; count %d\n", directiveOffset, directiveCount);
     return result;
 }
