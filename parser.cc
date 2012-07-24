@@ -1112,10 +1112,32 @@ int Codeblock(int first_token) {
           // initializable decl
           if (!InitializableDecl(next_token)) {
           }
+          else {
+            return 1;
+          }
+        } else if (GetTokenType(first_token) == UNINITIALIZABLE_ADDRESS) {
+          // uninitializable decl
+          if (!UninitializableDecl(first_token)) {
+          } else {
+            return 1;
+          }
+        } else {
+          return 1;
         }
       } else {
         return 1;
       }
+    } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+      if (!InitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }   
+    } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+      printf("An unintializable address\n");
+      if (!UninitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }        
     } else if (next_token == '}') {
       return 0;
     } else {
@@ -1131,8 +1153,12 @@ int Function(int first_token) {
   if (!FunctionDefinition(first_token, &rescan, &last_token)) {
     if (!rescan)
       last_token = yylex();
-    if (!Codeblock(last_token))
-      return 0;
+    if (!Codeblock(last_token)) {
+      if (yylex() == ';')
+        return 0;
+      else 
+        printf("Missing ';'\n");
+    }
   }
   return 1;
 }
@@ -1549,6 +1575,30 @@ int InitializableDecl(int first_token) {
 
 int UninitializableDecl(int first_token) {
   // first_token is PRIVATE, GROUP or SPILL
+  bool rescan;
+  int last_token;
+  int next = yylex();
+  if (GetTokenType(next) == DATA_TYPE_ID) {
+    printf("DataTypeId\n");
+    next = yylex();
+    if (!Identifier(next)) {
+      // scan for arrayDimensions
+      next = yylex();
+      if (next == '[') {
+        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+          if (!rescan)
+            next = yylex();
+          else
+            next = last_token;
+        }
+      }
+      
+      if (next == ';')
+        return 0;
+      else
+        printf("Missing ';' at the end of statement\n");
+    }
+  }
   return 1;
 }
 
