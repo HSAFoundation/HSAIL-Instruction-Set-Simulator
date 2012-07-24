@@ -4,12 +4,13 @@
 #define INCLUDE_BRIG_BUFFER_H_
 
 #include <vector>
-
+#include <stdint.h>
+#include <stdlib.h>
 namespace hsa {
 namespace brig {
-class buffer {
+class Buffer {
  public:
-  buffer(void) {}
+  Buffer(void) {}
   template <class T>
   void append(const T *item) {
     size_t item_sz = sizeof(T);
