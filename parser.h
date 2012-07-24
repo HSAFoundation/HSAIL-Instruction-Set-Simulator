@@ -46,7 +46,7 @@ int FunctionDefinition(int first_token,
                        bool* rescan_last_token,
                        int* last_token);
 int FunctionDecl(int first_token);
-int Codeblock(int first_token);
+int Codeblock(int first_token, int level);  // level to detect nesting scope
 int Function(int first_token);
 int OptionalWidth(int first_token);
 int Program(int first_token);

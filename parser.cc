@@ -963,10 +963,15 @@ int FunctionDecl(int first_token) {
   return 1;
 }
 
-int Codeblock(int first_token) {
+int Codeblock(int first_token, int level) {
   // first token should be '{'
   // currently only supports Instruction2 as body statement
   int next_token = 0;
+  // printf("Level = %d\n",level);
+  if (level > 1) {
+    printf("Scope cannot be nested.\n");
+    return 1;
+  }
   while (1) {
     next_token = yylex();
     if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
@@ -1012,7 +1017,8 @@ int Codeblock(int first_token) {
         return 1;
       }
     } else if (next_token == '{') {  // argument scope -> inner codeblock
-      if (!Codeblock(next_token)) {
+      if (!Codeblock(next_token, ++level)) {
+        level--;
       } else {
         return 1;
       }
@@ -1036,7 +1042,7 @@ int Function(int first_token) {
   if (!FunctionDefinition(first_token, &rescan, &last_token)) {
     if (!rescan)
       last_token = yylex();
-    if (!Codeblock(last_token))
+    if (!Codeblock(last_token, 0))
       return 0;
   }
   return 1;
@@ -1127,7 +1133,7 @@ int Program(int first_token) {
               continue;
             } else if (first_token == '{') {
               // so this must be a functionDefinition
-              if (!Codeblock(first_token)) {  // check codeblock of function
+              if (!Codeblock(first_token, 0)) {  // check codeblock of function
                 first_token = yylex();
                 if (first_token == ';') {
                   first_token = yylex();

@@ -460,7 +460,7 @@ TEST(ParserTest, Codeblock) {
   // test 1
   std::string input("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Codeblock(yylex()));
+  EXPECT_EQ(0, Codeblock(yylex(), 0));
 }
 
 TEST(ParserTest, Function) {
