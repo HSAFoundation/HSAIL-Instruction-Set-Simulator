@@ -6,6 +6,26 @@
 
 #include "./tokens.h"
 #include "./build/lexer.h"
+#include "./include/brig.h"
+
+extern int int_val;
+extern float float_val;
+extern double double_val;
+
+int stringCount = 0;
+int directiveCount = 0;
+int codeCount = 0;
+int operandCount = 0;
+
+int stringOffset = 0;
+int directiveOffset = 0;
+int codeOffset = 0;
+int operandOffset = 0;
+
+//should be dynamic or a relatively large number
+BrigDirectiveList directiveList[20]; 
+BrigCodeList codeList[20]; 
+BrigOperandList operandList[20]; 
 
 TerminalType GetTokenType(int token) {
   switch (token) {
@@ -175,6 +195,31 @@ TerminalType GetTokenType(int token) {
     return UNKNOWN_TERM;  // unknown
   }
 }
+
+int checkMachineStatusVersion (int token, BrigMachine16_t* machine, BrigProfile16_t* profile, BrigSftz16_t* ftz) {
+    switch (token) {
+    case _SMALL:
+        *machine = BrigESmall;
+        break;
+    case _LARGE:
+        *machine = BrigELarge;
+        break;
+    case _FULL:
+        *profile = BrigEFull;
+        break;
+    case _REDUCED:
+        *profile = BrigEReduced;
+        break;
+    case _SFTZ:
+        *ftz = BrigESftz;
+        break;
+    case _NOSFTZ:
+        *ftz = BrigENosftz;
+        break;
+   } 
+   return 0;
+};
+
 
 int Query(int QueryOp) {
   // next token should be a dataTypeId
@@ -560,27 +605,47 @@ int Instruction3(int first_token) {
 int Version(int first_token) {
   // first token must be version keyword
   // check for major
+  BrigcOffset32_t c_code = codeOffset;
+  uint16_t major;
+  uint16_t minor;
+  BrigMachine16_t machine = BrigELarge;
+  BrigProfile16_t profile = BrigEFull; 
+  BrigSftz16_t ftz = BrigENosftz;
+  
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
+    major = int_val;
     if (yylex() == ':') {
       // check for minor
       if (yylex() == TOKEN_INTEGER_CONSTANT) {
+        minor = int_val;
         int next = yylex();
         if (next == ';') {
-          return 0;
+          directiveList[directiveCount].offset = directiveOffset;
+          directiveList[directiveCount].thisDirective = new BrigDirectiveVersion(c_code, major, minor, machine, profile, ftz);
+          directiveCount ++;
+          directiveOffset += directiveList[directiveCount].thisDirective->size;           return 0;
         } else if (next == ':') {
           // check for target
           next = yylex();
           while (next != ';') {
             if (GetTokenType(next) == TARGET) {
+              checkMachineStatusVersion(next, &machine, &profile, &ftz);
               next = yylex();
-              if (next == ',')
+              if (next == ','){
                 next = yylex();      // next target
-              else if (next != ';')
+                checkMachineStatusVersion(next, &machine, &profile, &ftz);
+              } else if (next != ';') {
                 return 1;
+             }
             } else {
               return 1;
             }
           }
+          directiveList[directiveCount].offset = directiveOffset;
+          directiveList[directiveCount].thisDirective = new BrigDirectiveVersion(c_code, major, minor, machine, profile, ftz);
+          directiveCount ++;
+          directiveOffset += directiveList[directiveCount].thisDirective->size;
+
           return 0;
         }
       }
@@ -1314,4 +1379,14 @@ int Call(int first_token) {
     }
   }
   return 1;
+}
+
+
+int checkVersion(int token){
+    int result = 0;
+    Version(token);
+    if (directiveCount != 1 && directiveOffset != 20)
+        result ++;
+
+    return result;
 }

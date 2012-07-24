@@ -634,3 +634,11 @@ TEST(ParserTest, Call) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Call(yylex()));
 };
+
+
+TEST(ParserTest, writeVersion) {
+  std::string input("version 1:0:$small;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, checkVersion(yylex()));
+};
+
