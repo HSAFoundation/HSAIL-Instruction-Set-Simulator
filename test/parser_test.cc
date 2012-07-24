@@ -513,7 +513,32 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;");
   input.append(" @outof_IF: ret;");
   input.append(" }; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
 
+  // Example 5 - Call to simple function
+  input.clear();
+  input.assign("version 1:0:$small;");
+  input.append("function &callee()() {");
+  input.append("ret;");
+  input.append("};");
+
+  input.append(" function &caller()() {");
+  input.append("call &callee;");
+  input.append(" }; ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Program(yylex()));
+
+  // Example 6 - Call to a complex function
+  input.clear();
+  input.assign("version 1:0:$small;");
+  input.append("function &callee(arg_f32 %output)(arg_f32 %input) {");
+  input.append("ret;");
+  input.append("};");
+
+  input.append(" function &caller()() {");
+  input.append("call &callee (%output)(%input);");
+  input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
 };

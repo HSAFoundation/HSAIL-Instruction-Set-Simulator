@@ -1006,6 +1006,11 @@ int Codeblock(int first_token) {
       } else {
         return 1;
       }
+    } else if (next_token == CALL) {  // call
+      if (!Call(next_token)) {
+      } else {
+        return 1;
+      }
     } else if (next_token == '}') {
       next_token = yylex();
       if (next_token == ';')
