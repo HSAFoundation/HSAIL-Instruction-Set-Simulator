@@ -175,7 +175,10 @@ TerminalType GetTokenType(int token) {
   case READONLY:
   case GLOBAL:
     return INITIALIZABLE_ADDRESS;
-
+  case PRIVATE:
+  case GROUP:
+  case SPILL:
+    return UNINITIALIZABLE_ADDRESS;
   default:
     return UNKNOWN_TERM;  // unknown
   }
@@ -970,6 +973,8 @@ int FunctionDecl(int first_token) {
 
 int ArgBlock(int first_token) {
   // first token should be {
+  bool rescan = false;
+  int last_token;
   int next_token = 0;
   while (1) {
     next_token = yylex();
@@ -1014,6 +1019,22 @@ int ArgBlock(int first_token) {
       if (!Call(next_token)) {
       } else {
         return 1;
+      }
+    } else if ((next_token == ALIGN) ||
+               (next_token == CONST) ||
+               (next_token == STATIC) ||
+               (next_token == EXTERN)) {
+      if (!DeclPrefix(first_token, &rescan, &last_token)) {
+        if (!rescan)
+          next_token = yylex();
+        else
+          next_token = last_token;
+
+        if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+          // initializable decl
+          if (!InitializableDecl(next_token)) {
+          }
+        }
       }
     } else if (next_token == '{') {
       printf("Argument scope cannot be nested\n");
@@ -1525,3 +1546,10 @@ int InitializableDecl(int first_token) {
   }
   return 1;
 };
+
+int UninitializableDecl(int first_token) {
+  // first_token is PRIVATE, GROUP or SPILL
+  return 1;
+}
+
+

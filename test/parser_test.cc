@@ -705,3 +705,10 @@ TEST(ParserTest, ProgWithGlobalDecl) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex()));
 };
+
+TEST(ParserTest, UninitializableDecl) {
+  std::string input("private_f32 %f[3];");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, UninitializableDecl(yylex()));
+};

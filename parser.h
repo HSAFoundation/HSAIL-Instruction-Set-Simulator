@@ -19,7 +19,8 @@ enum TerminalType { UNKNOWN_TERM = 0,
                     INSTRUCTION3_OPCODE,
                     INSTRUCTION3_OPCODE_FTZ,
                     TARGET,
-                    INITIALIZABLE_ADDRESS
+                    INITIALIZABLE_ADDRESS,
+                    UNINITIALIZABLE_ADDRESS
                   };
 
 // classify token into different terminal type
@@ -59,5 +60,6 @@ int Initializer(int first_token,
                 bool* rescan,
                 int* last_token);
 int InitializableDecl(int first_token);
+int UninitializableDecl(int first_token);
 #endif  // PARSER_H_
 
