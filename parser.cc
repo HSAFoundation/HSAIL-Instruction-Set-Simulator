@@ -7,6 +7,9 @@
 #include "./tokens.h"
 #include "./build/lexer.h"
 
+
+extern int int_val;
+
 TerminalType GetTokenType(int token) {
   switch (token) {
     /* DataTypeId */
@@ -565,21 +568,65 @@ int Instruction3(int first_token) {
   return 1;
 }
 
-int Version(int first_token) {
+int Version(int first_token, BrigDirectiveVersion* version_brig) {
   // first token must be version keyword
   // check for major
+  if (version_brig == NULL) {
+    printf("Please allocate variable for BrigDirectiveVersion\n");
+    return 1;
+  }
+  version_brig->kind = BrigEDirectiveVersion;
+  version_brig->size = 20;
+  version_brig->reserved = 0;
+
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
+    version_brig->major = int_val;
+    // printf("Major = %d\n",int_val);
     if (yylex() == ':') {
       // check for minor
       if (yylex() == TOKEN_INTEGER_CONSTANT) {
+        version_brig->minor = int_val;
+        // printf("Minor = %d\n",int_val);
         int next = yylex();
         if (next == ';') {
+          // set default values
+          version_brig->machine = BrigESmall;
+          version_brig->profile = BrigEFull;
+          version_brig->ftz = BrigENosftz;
           return 0;
         } else if (next == ':') {
           // check for target
           next = yylex();
           while (next != ';') {
             if (GetTokenType(next) == TARGET) {
+              switch (next) {
+                case _SMALL:
+                  // printf("Target: $small \n");
+                  version_brig->machine = BrigESmall;
+                  break;
+                case _LARGE:
+                  // printf("Target: $large \n");
+                  version_brig->machine = BrigELarge;
+                  break;
+                case _FULL:
+                  // printf("Target: $full \n");
+                  version_brig->profile = BrigEFull;
+                  break;
+                case _REDUCED:
+                  // printf("Target: $reduced \n");
+                  version_brig->profile = BrigEReduced;
+                  break;
+                case _SFTZ:
+                  // printf("Target: $sftz \n");
+                  version_brig->ftz = BrigESftz;
+                  break;
+                case _NOSFTZ:
+                  // printf("Target: $nosftz \n");
+                  version_brig->ftz = BrigENosftz;
+                  break;
+              }
+
+
               next = yylex();
               if (next == ',')
                 next = yylex();      // next target
@@ -589,6 +636,7 @@ int Version(int first_token) {
               return 1;
             }
           }
+
           return 0;
         }
       }
@@ -976,7 +1024,7 @@ int ArgBlock(int first_token) {
   bool rescan = false;
   int last_token;
   int next_token = 0;
-  printf("In arg scope\n");
+  // printf("In arg scope\n");
   while (1) {
     next_token = yylex();
     if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
@@ -1194,7 +1242,8 @@ int Program(int first_token) {
   bool rescan;
 
   if (first_token == VERSION) {
-    if (!Version(first_token)) {
+    BrigDirectiveVersion version_brig;
+    if (!Version(first_token, &version_brig)) {
       // parse topLevelStatement
       first_token = yylex();
       while (first_token) {
