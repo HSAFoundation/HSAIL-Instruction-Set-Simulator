@@ -61,5 +61,6 @@ int Initializer(int first_token,
                 int* last_token);
 int InitializableDecl(int first_token);
 int UninitializableDecl(int first_token);
+int ArgUninitializableDecl(int first_token);
 #endif  // PARSER_H_
 

@@ -724,3 +724,10 @@ TEST(ParserTest, UninitializableDecl) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, UninitializableDecl(yylex()));
 };
+
+TEST(ParserTest, ArgUninitializableDecl) {
+  std::string input("arg_f32 %f[3];");
+
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, ArgUninitializableDecl(yylex()));
+};

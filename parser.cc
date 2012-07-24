@@ -1615,3 +1615,6 @@ int UninitializableDecl(int first_token) {
 }
 
 
+int ArgUninitializableDecl(int first_token) {
+  return 1;
+}
