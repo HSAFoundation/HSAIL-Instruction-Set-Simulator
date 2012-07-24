@@ -1011,10 +1011,18 @@ int Codeblock(int first_token) {
       } else {
         return 1;
       }
+    } else if (next_token == '{') {  // argument scope -> inner codeblock
+      if (!Codeblock(next_token)) {
+      } else {
+        return 1;
+      }
     } else if (next_token == '}') {
+      /*
       next_token = yylex();
       if (next_token == ';')
         return 0;
+      */
+      return 0;
     } else {
       break;
     }
@@ -1121,7 +1129,12 @@ int Program(int first_token) {
               // so this must be a functionDefinition
               if (!Codeblock(first_token)) {  // check codeblock of function
                 first_token = yylex();
-                continue;
+                if (first_token == ';') {
+                  first_token = yylex();
+                  continue;
+                } else {
+                  return 1;
+                }
               } else {
                 printf("Error in function's codeblock\n");
                 return 1;
