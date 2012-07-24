@@ -1,3 +1,5 @@
+/* Copyright 2012 <MulticorewareInc> */
+
 #ifndef INCLUDE_BRIG_H_
 #define INCLUDE_BRIG_H_
 #include <stdint.h>
@@ -18,6 +20,6 @@ struct BrigInstLdSt {
   BrigoOffset32_t o_operands[5];
   BrigStorageClass32_t storageClass;
   BrigMemorySemantic32_t memorySemantic;
-  uint32_t equivClass; 
+  uint32_t equivClass;
 };
-#endif //INCLUDE_BRIG_H_
+#endif  // INCLUDE_BRIG_H_

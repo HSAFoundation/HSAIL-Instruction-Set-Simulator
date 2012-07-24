@@ -175,7 +175,7 @@ TerminalType GetTokenType(int token) {
   case READONLY:
   case GLOBAL:
     return INITIALIZABLE_ADDRESS;
-  
+
   default:
     return UNKNOWN_TERM;  // unknown
   }
@@ -1407,10 +1407,50 @@ int Initializer(int first_token, bool* rescan, int* last_token) {
   } else {
     return 1;
   }
+  if (!*rescan)
+    next = yylex();
+  if (next == '}') {
+    *rescan = false;
+  } else {
+    *rescan = true;
+    *last_token = next;
+  }
+
+
   return 0;
 }
 
 int InitializableDecl(int first_token) {
-  return 1;
+  // first_token is READONLY or GLOBAL
+  bool rescan;
+  int last_token;
+  int next = yylex();
 
+  if (GetTokenType(next) == DATA_TYPE_ID) {
+    next = yylex();
+    if (!Identifier(next)) {
+      // scan for arrayDimensions
+      next = yylex();
+      if (next == '[') {
+        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+          if (!rescan)
+            next = yylex();
+          else
+            next = last_token;
+        }
+      }
+      if (!Initializer(next, &rescan, &last_token)) {
+        if (rescan)
+          next = last_token;
+        else
+          next = yylex();
+
+        if (next == ';')
+          return 0;
+        else
+          printf("Missing ';' at the end of statement\n");
+      }
+    }
+  }
+  return 1;
 };
