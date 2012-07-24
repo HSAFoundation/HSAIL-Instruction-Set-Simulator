@@ -976,6 +976,7 @@ int ArgBlock(int first_token) {
   bool rescan = false;
   int last_token;
   int next_token = 0;
+  printf("In arg scope\n");
   while (1) {
     next_token = yylex();
     if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
@@ -1036,6 +1037,17 @@ int ArgBlock(int first_token) {
           }
         }
       }
+    } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+      if (!InitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }
+    } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+      printf("An unintializable address\n");
+      if (!UninitializableDecl(next_token)) {
+      } else {
+        return 1;
+      }
     } else if (next_token == '{') {
       printf("Argument scope cannot be nested\n");
       return 1;
@@ -1095,6 +1107,7 @@ int Codeblock(int first_token) {
       }
     } else if (next_token == '{') {  // argument scope -> inner codeblock
       if (!ArgBlock(next_token)) {
+        // printf("Out of arg scope \n");
       } else {
         return 1;
       }
@@ -1111,8 +1124,7 @@ int Codeblock(int first_token) {
         if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
           // initializable decl
           if (!InitializableDecl(next_token)) {
-          }
-          else {
+          } else {
             return 1;
           }
         } else if (GetTokenType(first_token) == UNINITIALIZABLE_ADDRESS) {
@@ -1131,13 +1143,13 @@ int Codeblock(int first_token) {
       if (!InitializableDecl(next_token)) {
       } else {
         return 1;
-      }   
+      }
     } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
-      printf("An unintializable address\n");
+      // printf("An unintializable address\n");
       if (!UninitializableDecl(next_token)) {
       } else {
         return 1;
-      }        
+      }
     } else if (next_token == '}') {
       return 0;
     } else {
@@ -1156,7 +1168,7 @@ int Function(int first_token) {
     if (!Codeblock(last_token)) {
       if (yylex() == ';')
         return 0;
-      else 
+      else
         printf("Missing ';'\n");
     }
   }
@@ -1579,7 +1591,7 @@ int UninitializableDecl(int first_token) {
   int last_token;
   int next = yylex();
   if (GetTokenType(next) == DATA_TYPE_ID) {
-    printf("DataTypeId\n");
+    // printf("DataTypeId\n");
     next = yylex();
     if (!Identifier(next)) {
       // scan for arrayDimensions
@@ -1592,7 +1604,7 @@ int UninitializableDecl(int first_token) {
             next = last_token;
         }
       }
-      
+
       if (next == ';')
         return 0;
       else

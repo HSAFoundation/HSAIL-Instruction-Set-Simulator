@@ -711,7 +711,7 @@ TEST(ParserTest, ProgWithUninitializableDecl ) {
   std::string input("version 1:0:$large;");
   input.append("global_f32 &x = 2;");
   input.append("function &test()() {");
-  input.append("private_u32 %z;");
+  input.append("{private_u32 %z;}");
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
