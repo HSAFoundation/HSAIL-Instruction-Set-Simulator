@@ -4,6 +4,9 @@
 #include "./lexer.h"
 #include "../parser.h"
 
+namespace hsa {
+namespace brig {
+extern Context* context;
 // ------------------ Parser TESTS -----------------
 
 TEST(ParserTest, IdentifierTest) {
@@ -310,13 +313,12 @@ TEST(ParserTest, Instruction2) {
 TEST(ParserTest, VersionStatement) {
   std::string input("version 1:0;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  BrigDirectiveVersion version_brig;
-  EXPECT_EQ(0, Version(yylex(), &version_brig));
-  
+  EXPECT_EQ(0, Program(yylex(), context));
+
+
   input.assign("version 2:0:$large;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Version(yylex(), &version_brig));
-
+  EXPECT_EQ(0, Program(yylex(), context));
 }
 
 TEST(ParserTest, AlignStatement) {
@@ -478,7 +480,7 @@ TEST(ParserTest, SimpleProg) {
   input.append("function &abort() (); ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
 TEST(ParserTest, Instruction3) {
@@ -643,7 +645,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
   // Example 2
   input.clear();
@@ -653,7 +655,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
   // Example 4
   input.clear();
@@ -666,7 +668,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" @outof_IF: ret;");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
   // Example 5 - Call to simple function
   input.clear();
@@ -679,7 +681,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("{call &callee;}");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
   // Example 6a - Call to a complex function
   input.clear();
@@ -694,7 +696,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("call &callee (%output)(%input);}");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
 TEST(ParserTest, ProgWithGlobalDecl) {
@@ -705,7 +707,7 @@ TEST(ParserTest, ProgWithGlobalDecl) {
   input.append("};");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
 TEST(ParserTest, ProgWithUninitializableDecl ) {
@@ -717,7 +719,7 @@ TEST(ParserTest, ProgWithUninitializableDecl ) {
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
 TEST(ParserTest, UninitializableDecl) {
@@ -742,5 +744,8 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
+
+}  // namespace brig
+}  // namespace hsa

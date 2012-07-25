@@ -6,7 +6,10 @@
 #include <string>
 #include "./tokens.h"
 #include "include/brig.h"
+#include "include/brig_buffer.h"
 
+namespace hsa {
+namespace brig {
 enum TerminalType { UNKNOWN_TERM = 0,
                     REGISTER,
                     DATA_TYPE_ID,
@@ -36,7 +39,7 @@ int ArrayOperandList(int first_token);
 int RoundingMode(int first_token, bool* is_ftz, int* last_token);
 int Instruction2(int first_token);
 int Instruction3(int first_token);
-int Version(int first_token, BrigDirectiveVersion* version_brig);
+int Version(int first_token, Context* context);
 int Alignment(int first_token);
 int DeclPrefix(int first_token, bool* rescan_last_token, int* last_token);
 int FBar(int first_token);
@@ -52,7 +55,7 @@ int FunctionDecl(int first_token);
 int Codeblock(int first_token);
 int Function(int first_token);
 int OptionalWidth(int first_token);
-int Program(int first_token);
+int Program(int first_token, Context* context);
 int Branch(int first_token);
 int CallTargets(int first_token);
 int CallArgs(int first_token);
@@ -63,5 +66,7 @@ int Initializer(int first_token,
 int InitializableDecl(int first_token);
 int UninitializableDecl(int first_token);
 int ArgUninitializableDecl(int first_token);
+}  // namespace brig
+}  // namespace hsa
 #endif  // PARSER_H_
 

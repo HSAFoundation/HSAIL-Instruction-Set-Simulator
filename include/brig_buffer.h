@@ -2,7 +2,7 @@
 
 #ifndef INCLUDE_BRIG_BUFFER_H_
 #define INCLUDE_BRIG_BUFFER_H_
-
+#include <iostream>
 #include <vector>
 #include <stdint.h>
 #include <stdlib.h>
@@ -20,7 +20,9 @@ class Buffer {
       buf_.push_back(*item_charp++);
     }
   }
-  const std::vector<unsigned char>& get(void) { return buf_; }
+  const std::vector<unsigned char>& get(void) {
+    return buf_; 
+  }
  private:
   std::vector<unsigned char> buf_;
 };
@@ -55,22 +57,46 @@ class Context {
   
     // get directive
     template <class T>
-    T* get_d(void) {
-      if (!dbuf)
-        return NULL;
-      
-      std::vector<unsigned char> temp = dbuf->get();
+    void get_d(T* item) {
+      std::vector<unsigned char> d_buffer = dbuf->get();
       int return_size = sizeof(T);
-      int begin = temp.size() - return_size; 
-      T* ret = new T();
-      memcpy((void*)ret,(void*)&temp[begin], return_size);
-      return ret;
+      int begin = d_buffer.size() - return_size; 
+
+      std::vector<unsigned char>::iterator it;
+      unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
+      
+      for (it = d_buffer.begin()+begin; it < d_buffer.end(); it++)
+        *temp_ptr++ = *it;     
     }    
-      
-      
-      
-      
   
+    // get code
+    template <class T>
+    void get_c(T* item) {
+      std::vector<unsigned char> c_buffer = cbuf->get();
+      int return_size = sizeof(T);
+      int begin = c_buffer.size() - return_size; 
+
+      std::vector<unsigned char>::iterator it;
+      unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
+      
+      for (it = c_buffer.begin()+begin; it < c_buffer.end(); it++)
+        *temp_ptr++ = *it;     
+    }    
+    
+    // get operand
+    template <class T>
+    void get_o(T* item) {
+      std::vector<unsigned char> o_buffer = obuf->get();
+      int return_size = sizeof(T);
+      int begin = o_buffer.size() - return_size; 
+
+      std::vector<unsigned char>::iterator it;
+      unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
+      
+      for (it = o_buffer.begin()+begin; it < o_buffer.end(); it++)
+        *temp_ptr++ = *it;     
+    }    
+        
   private:
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
@@ -82,16 +108,4 @@ class Context {
 
 }  // namespace brig
 }  // namespace hsa
-
-
-
-
-
-
-
-
-
-
-
-
 #endif  // INCLUDE_BRIG_BUFFER_H_
