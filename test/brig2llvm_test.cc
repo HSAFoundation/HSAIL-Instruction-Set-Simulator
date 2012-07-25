@@ -59,7 +59,18 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     hsa::brig::GenLLVM codegen(directives, strings);
     codegen();
     EXPECT_NE(0, codegen.str().size());
-    EXPECT_NE(std::string::npos,codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "define void @return_true(float* %ret_val)")));
+    // HSA-48
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%c_regs = type { [8 x i1] }")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%s_regs = type { [8 x i32] }")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%d_regs = type { [8 x i64] }")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%q_regs = type { [8 x i128] }")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%struct.regs = type { %c_regs, %s_regs, %d_regs, %q_regs }")));
   }
 }
