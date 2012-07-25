@@ -32,6 +32,23 @@ class Buffer {
   void append_char(unsigned char c) {
     buf_.push_back(c);
   }
+    // Buffer modifier, used for update the buffer contents.
+  void modifier(uint16_t offset,
+                unsigned char* value,
+                uint16_t nuBytes) 
+                {
+    std::vector<unsigned char>::iterator it;
+    if ( buf_.end() < buf_.begin()+offset+nuBytes ) {
+      std::cout << "Invalid access to Buffer." << std::endl;
+      return ;
+    } else {
+      for (it = buf_.begin()+offset; it < buf_.begin()+offset+nuBytes; it++) {
+        *it = *value;
+        value++;
+      }
+    }
+  }
+
  private:
   std::vector<unsigned char> buf_;
 };
@@ -158,6 +175,73 @@ class Context {
     std::string get_s(uint32_t offset) {
       return sbuf->at(offset);
     }
+
+    /*---- functions for update a certain buffer by offset. ----*/
+        // directive
+    void get_d(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
+      std::vector<unsigned char> d_buffer = dbuf->get();
+      if (d_buffer.size() == 0) {
+        std::cout << "Empty directive buffer." << std::endl;
+        return;
+      }
+      std::vector<unsigned char>::iterator it;
+
+      for (it = d_buffer.begin()+offset; 
+                it < d_buffer.begin()+offset+nuBytes; it++)
+        *value++ = *it;
+    }
+
+        // code
+    void get_c(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
+      std::vector<unsigned char> c_buffer = cbuf->get();
+      if (c_buffer.size() == 0) {
+        std::cout << "Empty directive buffer." << std::endl;
+        return;
+      }
+      std::vector<unsigned char>::iterator it;
+
+      for (it = c_buffer.begin()+offset; 
+                it < c_buffer.begin()+offset+nuBytes; it++)
+        *value++ = *it;
+    }
+        // operand
+    void get_o(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
+      std::vector<unsigned char> o_buffer = obuf->get();
+      if (o_buffer.size() == 0) {
+        std::cout << "Empty directive buffer." << std::endl;
+        return;
+      }
+      std::vector<unsigned char>::iterator it;
+
+      for (it = o_buffer.begin()+offset; 
+                it < o_buffer.begin()+offset+nuBytes; it++)
+        *value++ = *it;
+    }
+
+
+    /*---- functions for update a certain buffer by offset. ----*/
+    void updateBuffer_d (uint16_t offset,
+                         unsigned char* value,
+                         uint16_t nuBytes) 
+                         {
+      dbuf->modifier(offset, value, nuBytes);
+    }
+
+    void updateBuffer_c (uint16_t offset,
+                         unsigned char* value,
+                         uint16_t nuBytes) 
+                         {
+      cbuf->modifier(offset, value, nuBytes);
+    }
+
+    void updateBuffer_o (uint16_t offset,
+                         unsigned char* value,
+                         uint16_t nuBytes) 
+                         {
+      obuf->modifier(offset, value, nuBytes);
+    }
+
+
 
   private:
     Buffer* cbuf;  // code buffer
