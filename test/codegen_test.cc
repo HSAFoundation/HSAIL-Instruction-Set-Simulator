@@ -62,7 +62,29 @@ TEST(CodegenTest, Version) {
   EXPECT_EQ(ref.machine, get.machine);
   EXPECT_EQ(ref.profile, get.profile);
   EXPECT_EQ(ref.ftz, get.ftz);
-}
 
+      /* TEST 3, Multi Target */
+  input.assign("version 2:0:$large, $reduced, $sftz;");
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Version(yylex(), context));
+
+  // reference struct
+  ref.major = 2;
+  ref.machine = BrigELarge;
+  ref.profile = BrigEReduced;
+  ref.ftz = BrigESftz;
+
+  // get structure back
+  context->get_d<BrigDirectiveVersion>(&get);
+
+  // compare two structs
+
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.major, get.major);
+  EXPECT_EQ(ref.minor, get.minor);
+  EXPECT_EQ(ref.machine, get.machine);
+  EXPECT_EQ(ref.profile, get.profile);
+  EXPECT_EQ(ref.ftz, get.ftz);
+}
 }  // namespace brig
 }  // namespace hsa
