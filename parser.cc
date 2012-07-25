@@ -189,6 +189,33 @@ TerminalType GetTokenType(int token) {
   }
 }
 
+
+int GetTargetInfo (int token, BrigMachine16_t* machine, BrigProfile16_t* profile, BrigSftz16_t* ftz) {
+    switch (token) {
+    case _SMALL:
+        *machine = BrigESmall;
+        break;
+    case _LARGE:
+        *machine = BrigELarge;
+        break;
+    case _FULL:
+        *profile = BrigEFull;
+        break;
+    case _REDUCED:
+        *profile = BrigEReduced;
+        break;
+    case _SFTZ:
+        *ftz = BrigESftz;
+        break;
+    case _NOSFTZ:
+        *ftz = BrigENosftz;
+        break;
+    default: return 1; 
+        break;
+   } 
+   return 0;
+};
+
 int Query(int QueryOp, Context* context) {
   // next token should be a dataTypeId
   if (GetTokenType(yylex()) == DATA_TYPE_ID) {
@@ -625,37 +652,14 @@ int Version(int first_token, Context* context) {
           next = yylex();
           while (next != ';') {
             if (GetTokenType(next) == TARGET) {
-              switch (next) {
-                case _SMALL:
-                  // printf("Target: $small \n");
-                  bdv.machine = BrigESmall;
-                  break;
-                case _LARGE:
-                  // printf("Target: $large \n");
-                  bdv.machine = BrigELarge;
-                  break;
-                case _FULL:
-                  // printf("Target: $full \n");
-                  bdv.profile = BrigEFull;
-                  break;
-                case _REDUCED:
-                  // printf("Target: $reduced \n");
-                  bdv.profile = BrigEReduced;
-                  break;
-                case _SFTZ:
-                  // printf("Target: $sftz \n");
-                  bdv.ftz = BrigESftz;
-                  break;
-                case _NOSFTZ:
-                  // printf("Target: $nosftz \n");
-                  bdv.ftz = BrigENosftz;
-                  break;
-              }
-              next = yylex();
-              if (next == ',')
-                next = yylex();      // next target
-              else if (next != ';')
+              if (GetTargetInfo(next, &bdv.machine, &bdv.profile, &bdv.ftz))
                 return 1;
+              next = yylex();
+              if (next == ',') {
+                next = yylex();      // next target
+              } else if (next != ';'){
+                return 1;
+              }
             } else {
               return 1;
             }
