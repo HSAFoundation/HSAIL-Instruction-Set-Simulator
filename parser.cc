@@ -190,7 +190,10 @@ TerminalType GetTokenType(int token) {
 }
 
 
-int GetTargetInfo (int token, BrigMachine16_t* machine, BrigProfile16_t* profile, BrigSftz16_t* ftz) {
+int GetTargetInfo(int token,
+                   BrigMachine16_t* machine,
+                   BrigProfile16_t* profile,
+                   BrigSftz16_t* ftz) {
     switch (token) {
     case _SMALL:
         *machine = BrigESmall;
@@ -210,10 +213,10 @@ int GetTargetInfo (int token, BrigMachine16_t* machine, BrigProfile16_t* profile
     case _NOSFTZ:
         *ftz = BrigENosftz;
         break;
-    default: return 1; 
+    default: return 1;
         break;
-   } 
-   return 0;
+    }
+  return 0;
 };
 
 int Query(int QueryOp, Context* context) {
@@ -260,22 +263,22 @@ int Identifier(int first_token, Context* context) {
         break;
       case TOKEN_DREGISTER:
         bor.type = Brigb64;
-        break;      
+        break;
       case TOKEN_SREGISTER:
         bor.type = Brigb32;
-        break;      
+        break;
       case TOKEN_QREGISTER:
         bor.type = Brigb128;
-        break;      
+        break;
     }
     bor.reserved = 0;
-    // TODO: put offset to strings section for name
+    // TODO(Huy): put offset to strings section for name
     bor.name = 0;
-      
+
     // printf("Register: %s\n",string_val);
-    
+
     context->append_o(&bor);
-    
+
     return 0;
   }
 
@@ -657,7 +660,7 @@ int Version(int first_token, Context* context) {
               next = yylex();
               if (next == ',') {
                 next = yylex();      // next target
-              } else if (next != ';'){
+              } else if (next != ';') {
                 return 1;
               }
             } else {

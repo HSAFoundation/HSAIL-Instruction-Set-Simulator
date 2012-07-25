@@ -91,7 +91,7 @@ TEST(CodegenTest, RegisterCodeGen) {
   std::string input("$d7");  // register
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
-  
+
   // reference struct
   BrigOperandReg ref = {
     sizeof(ref),      // size
@@ -100,16 +100,15 @@ TEST(CodegenTest, RegisterCodeGen) {
     0,                // reserved
     0                // name -> offset in .strings section (unknown now)
   };
-  
+
   // get structure from context and compare
   BrigOperandReg get;
   context->get_o<BrigOperandReg>(&get);
-  
+
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.name, get.name);
-  
 }
 
 }  // namespace brig

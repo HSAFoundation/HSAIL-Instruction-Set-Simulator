@@ -7,6 +7,7 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+#include <string>
 
 namespace hsa {
 namespace brig {
@@ -59,24 +60,43 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
-      sbuf = new Buffer();
+      sbuf = new StringBuffer();
+      code_offset = 0;
+      directive_offset = 0;
+      string_offset = 0;
+      operand_offset = 0;
     }
 
     // append code
     template <class T>
-    void append_c(const T* item) { cbuf->append(item); }
+    void append_c(const T* item) {
+      cbuf->append(item);
+      code_offset+=sizeof(item);
+      // std::cout << "Code offset: " << code_offset << std::endl;
+    }
 
     // append directive
     template <class T>
-    void append_d(const T* item) { dbuf->append(item); }
+    void append_d(const T* item) {
+      dbuf->append(item);
+      directive_offset+=sizeof(item);
+      // std::cout << "Directive offset: " << directive_offset << std::endl;
+    }
 
     // append operand
     template <class T>
-    void append_o(const T* item) { obuf->append(item); }
+    void append_o(const T* item) {
+      obuf->append(item);
+      operand_offset+=sizeof(item);
+      // std::cout << "Operand offset: " << operand_offset << std::endl;
+    }
 
     // append string
-    template <class T>
-    void append_s(const T* item) { sbuf->append(item); }
+    void append_s(const std::string& item) {
+      sbuf->append(item);
+      string_offset+-item.length();
+      // std::cout << "String offset: " << string_offset << std::endl;
+    }
 
     // get directive
     template <class T>
@@ -85,7 +105,7 @@ class Context {
       if (d_buffer.size() == 0) {
         std::cout << "Empty directive buffer." << std::endl;
         return;
-      } 
+      }
       int return_size = sizeof(T);
       int begin = d_buffer.size() - return_size;
 
@@ -104,7 +124,7 @@ class Context {
         std::cout << "Empty code buffer." << std::endl;
         return;
       }
-        
+
       int return_size = sizeof(T);
       int begin = c_buffer.size() - return_size;
 
@@ -123,7 +143,7 @@ class Context {
       if (o_buffer.size() == 0) {
         std::cout << "Empty operand buffer." << std::endl;
         return;
-      }      
+      }
       int return_size = sizeof(T);
       int begin = o_buffer.size() - return_size;
 
@@ -134,11 +154,20 @@ class Context {
         *temp_ptr++ = *it;
     }
 
+    // get string at a specific offset
+    std::string get_s(uint32_t offset) {
+      return sbuf->at(offset);
+    }
+
   private:
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
     Buffer* obuf;  // operand buffer
-    Buffer* sbuf;  // string buffer
+    StringBuffer* sbuf;  // string buffer
+    BrigcOffset32_t code_offset;
+    BrigdOffset32_t directive_offset;
+    BrigsOffset32_t string_offset;
+    BrigoOffset32_t operand_offset;
 };
 }  // namespace brig
 }  // namespace hsa

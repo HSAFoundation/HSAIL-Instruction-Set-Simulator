@@ -155,7 +155,7 @@ enum BrigInstKinds {
   BrigEInstAtomicImage,
   BrigEInstImage
 };
-//20.5.20
+// 20.5.20
 enum BrigStorageClass {
     BrigGlobalSpace,
     BrigGroupSpace,
@@ -168,25 +168,25 @@ enum BrigStorageClass {
 };
 // 8-16 reserved for extensions
 
-//BrigOperandKinds
-//BrigOperandKinds is used to specify the kind of operand.
+// BrigOperandKinds
+// BrigOperandKinds is used to specify the kind of operand.
 enum BrigOperandKinds {
-	BrigEOperandBase,
-	BrigEOperandReg,
-	BrigEOperandImmed,
-	BrigEOperandRegV2,
-	BrigEOperandRegV4,
-	BrigEOperandAddress,
-	BrigEOperandLabelRef,
-	BrigEOperandIndirect,
-	BrigEOperandCompound,
-	BrigEOperandArgumentList,
-	BrigEOperandFunctionList,
-	BrigEOperandArgumentRef,
-	BrigEOperandWaveSz,
-	BrigEOperandFunctionRef,
-	BrigEOperandPad,
-	BrigEOperandOpaque
+  BrigEOperandBase,
+  BrigEOperandReg,
+  BrigEOperandImmed,
+  BrigEOperandRegV2,
+  BrigEOperandRegV4,
+  BrigEOperandAddress,
+  BrigEOperandLabelRef,
+  BrigEOperandIndirect,
+  BrigEOperandCompound,
+  BrigEOperandArgumentList,
+  BrigEOperandFunctionList,
+  BrigEOperandArgumentRef,
+  BrigEOperandWaveSz,
+  BrigEOperandFunctionRef,
+  BrigEOperandPad,
+  BrigEOperandOpaque
 };
 // Directive structures
 
@@ -242,13 +242,13 @@ struct BrigInstLdSt {
 };
 
 // Operand structures
-//BrigOperandReg
-//BrigOperandReg is used for a register (c, s, or d).
+// BrigOperandReg
+// BrigOperandReg is used for a register (c, s, or d).
 typedef struct BrigOperandReg {
-	uint16_t size;
-	uint16_t kind;
-	BrigDataType16_t type;
-	uint16_t reserved;
-	uint32_t name;
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  uint32_t name;
 }BrigOperandReg;
-#endif //INCLUDE_BRIG_H_
+#endif  // INCLUDE_BRIG_H_
