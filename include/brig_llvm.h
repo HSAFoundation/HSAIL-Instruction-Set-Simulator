@@ -1,3 +1,6 @@
+#ifndef INCLUDE_BRIG_LLVM_H_
+#define INCLUDE_BRIG_LLVM_H_
+
 namespace llvm {
   class Module;
 }
@@ -23,3 +26,4 @@ class GenLLVM{
 };
 }
 }
+#endif //INCLUDE_BRIG_LLVM_H_
