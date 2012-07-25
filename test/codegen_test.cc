@@ -4,30 +4,47 @@
 #include "./lexer.h"
 #include "../parser.h"
 #include "../include/brig.h"
+#include "../include/brig_buffer.h"
 
+using namespace hsa::brig;
+
+Context* context = new Context();
 TEST(CodegenTest, Version) {
+  BrigDirectiveVersion version_brig;
+  
   std::string input("version 1:0;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  BrigDirectiveVersion version_brig;
   EXPECT_EQ(0, Version(yylex(), &version_brig));
-  // test returned structure
-  EXPECT_EQ(BrigEDirectiveVersion, version_brig.kind);
-  EXPECT_EQ(1, version_brig.major);
-  EXPECT_EQ(0, version_brig.minor);
-  EXPECT_EQ(BrigESmall, version_brig.machine);
-  EXPECT_EQ(BrigEFull, version_brig.profile);
-  EXPECT_EQ(BrigENosftz, version_brig.ftz);
-  EXPECT_EQ(0, version_brig.reserved);
+  
+  // append directive 
+  context->append_d(&version_brig);
+  // get structure back
+  BrigDirectiveVersion *get  = context->get_d<BrigDirectiveVersion>();
+ 
+  // compare two structs      
+  EXPECT_EQ(version_brig.kind, get->kind);
+  EXPECT_EQ(version_brig.major, get->major);
+  EXPECT_EQ(version_brig.minor, get->minor);
+  EXPECT_EQ(version_brig.machine, get->machine);
+  EXPECT_EQ(version_brig.profile, get->profile);
+  EXPECT_EQ(version_brig.ftz, get->ftz);
 
+    /* TEST 2 */
   input.assign("version 2:0:$large;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), &version_brig));
-    // test returned structure
-  EXPECT_EQ(BrigEDirectiveVersion, version_brig.kind);
-  EXPECT_EQ(2, version_brig.major);
-  EXPECT_EQ(0, version_brig.minor);
-  EXPECT_EQ(BrigELarge, version_brig.machine);
-  EXPECT_EQ(BrigEFull, version_brig.profile);
-  EXPECT_EQ(BrigENosftz, version_brig.ftz);
-  EXPECT_EQ(0, version_brig.reserved);
+  
+  // append directive 
+  context->append_d(&version_brig);
+  // get structure back
+  get  = context->get_d<BrigDirectiveVersion>();
+ 
+  // compare two structs      
+  EXPECT_EQ(version_brig.kind, get->kind);
+  EXPECT_EQ(version_brig.major, get->major);
+  EXPECT_EQ(version_brig.minor, get->minor);
+  EXPECT_EQ(version_brig.machine, get->machine);
+  EXPECT_EQ(version_brig.profile, get->profile);
+  EXPECT_EQ(version_brig.ftz, get->ftz);
+
 }
