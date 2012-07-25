@@ -99,7 +99,7 @@ struct BrigDirectiveFunction {
   uint32_t outParamCount;
   BrigdOffset32_t d_firstInParam;
 };
-// 20.8.22
+/* // 20.8.22
 struct BrigDirectiveVersion {
     uint16_t size;
     uint16_t kind;
@@ -111,7 +111,7 @@ struct BrigDirectiveVersion {
     BrigSftz16_t ftz;
     uint16_t reserved;
 };
-
+*/
 // 20.9.9
 struct BrigInstLdSt {
   uint16_t size;
@@ -124,4 +124,85 @@ struct BrigInstLdSt {
   BrigMemorySemantic32_t memorySemantic;
   uint32_t equivClass;
 };
+
+class stringSection {
+};
+
+class BrigDirectiveBase {
+    public :
+        uint16_t size;
+        uint16_t kind;
+        virtual uint16_t test(BrigDirectiveBase* ref){
+        };
+};
+
+class BrigDirectiveList {
+    public :
+        BrigdOffset32_t offset;
+        BrigDirectiveBase* thisDirective;
+};
+
+class BrigCodeBase {
+    public :
+        uint16_t size;
+        uint16_t kind;
+};
+class BrigCodeList {
+    public :
+        BrigdOffset32_t offset;
+        BrigCodeBase* thisCode;
+};
+
+class BrigOperandBase {
+    public :
+        uint16_t size;
+        uint16_t kind;
+};
+class BrigOperandList {
+    public :
+        BrigdOffset32_t offset;
+        BrigOperandBase* thisOperand;
+};
+
+class BrigDirectiveVersion : public BrigDirectiveBase {
+    public:
+        //uint16_t size;
+        //uint16_t kind;
+        BrigcOffset32_t c_code;
+        uint16_t major;
+        uint16_t minor;
+        BrigMachine16_t machine;
+        BrigProfile16_t profile;
+        BrigSftz16_t ftz;
+        uint16_t reserved;
+
+        BrigDirectiveVersion(){};
+        BrigDirectiveVersion(BrigcOffset32_t c_codeT , uint16_t majorT , uint16_t minorT ,
+	                   BrigMachine16_t machineT , BrigProfile16_t profileT , 
+					   BrigSftz16_t ftzT ) 
+        {
+	        size = 20;
+        	kind = BrigEDirectiveVersion;
+        	c_code = c_codeT;       
+            major = majorT;  
+        	minor = minorT;         
+            machine = machineT;
+        	profile = profileT;     
+            ftz = ftzT;
+        	reserved = 0;
+
+        };
+        
+        uint16_t test(BrigDirectiveBase *ref){
+          BrigDirectiveVersion * t_ref = (BrigDirectiveVersion *)ref;
+          if( t_ref->major != major || t_ref->minor != minor || t_ref->machine != machine)
+          {
+            printf("major: %d, minor: %d, machine: %d\n", major, minor, machine);
+            return 1;
+          }
+          return 0;
+        };
+        
+};
+
 #endif //INCLUDE_BRIG_H_

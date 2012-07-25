@@ -1050,7 +1050,7 @@ int ArgBlock(int first_token) {
   bool rescan = false;
   int last_token;
   int next_token = 0;
-    // printf("In arg scope\n");
+  // printf("In arg scope\n");
 
   while (1) {
     next_token = yylex();
@@ -1091,7 +1091,7 @@ int ArgBlock(int first_token) {
       } else {
         return 1;
       }
-    } else if (next_token == CALL) {  // call  (only inside argblock
+    } else if (next_token == CALL) {  // call (only inside argblock
 
       if (!Call(next_token)) {
       } else {
@@ -1236,50 +1236,6 @@ int Codeblock(int first_token) {
     } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
       // printf("An unintializable address\n");
       if (!UninitializableDecl(next_token)) {
-      
-    } else if (next_token == '{') {  // argument scope -> inner codeblock
-      if (!ArgBlock(next_token)) {
-        // printf("Out of arg scope \n");
-      } else {
-        return 1;
-      }
-    } else if ((next_token == ALIGN) ||
-               (next_token == CONST) ||
-               (next_token == STATIC) ||
-               (next_token == EXTERN)) {
-      if (!DeclPrefix(first_token, &rescan, &last_token)) {
-        if (!rescan)
-          next_token = yylex();
-        else
-          next_token = last_token;
-
-        if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
-          // initializable decl
-          if (!InitializableDecl(next_token)) {
-          } else {
-            return 1;
-          }
-        } else if (GetTokenType(first_token) == UNINITIALIZABLE_ADDRESS) {
-          // uninitializable decl
-          if (!UninitializableDecl(first_token)) {
-          } else {
-            return 1;
-          }
-        } else {
-          return 1;
-        }
-      } else {
-        return 1;
-      }
-    } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
-      if (!InitializableDecl(next_token)) {
-      } else {
-        return 1;
-      }
-    } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
-      // printf("An unintializable address\n");
-      if (!UninitializableDecl(next_token)) {
-
       } else {
         return 1;
       }
@@ -1291,7 +1247,7 @@ int Codeblock(int first_token) {
   }
   return 1;
 }
-}
+
 
 int Function(int first_token) {
   bool rescan = false;
@@ -1595,6 +1551,7 @@ int checkVersion(int token){
     //printf ("offset %d; count %d\n", directiveOffset, directiveCount);
     return result;
 }
+
 int Initializer(int first_token, bool* rescan, int* last_token) {
   // first token should be '='
   *rescan = false;
