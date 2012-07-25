@@ -9,7 +9,7 @@ namespace hsa {
 namespace brig {
 Context* context = new Context();
 
-TEST(CodegenTest, Version) {
+TEST(CodegenTest, VersionCodeGen) {
   // reference struct
   BrigDirectiveVersion ref = {
     sizeof(ref),
@@ -63,6 +63,7 @@ TEST(CodegenTest, Version) {
   EXPECT_EQ(ref.profile, get.profile);
   EXPECT_EQ(ref.ftz, get.ftz);
 }
+
 
 }  // namespace brig
 }  // namespace hsa

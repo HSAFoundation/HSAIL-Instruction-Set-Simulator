@@ -188,15 +188,15 @@ TerminalType GetTokenType(int token) {
   }
 }
 
-int Query(int QueryOp) {
+int Query(int QueryOp, Context* context) {
   // next token should be a dataTypeId
   if (GetTokenType(yylex()) == DATA_TYPE_ID) {
     // next token should be an Operand
-    if (!Operand(yylex())) {
+    if (!Operand(yylex(), context)) {
       // next should be a comma
       if (yylex() == ',') {
         // then finally an addressable Operand
-        if (!AddressableOperand(yylex())) {
+        if (!AddressableOperand(yylex(), context)) {
           if (yylex() == ';')
             return 0;
           else
@@ -208,16 +208,16 @@ int Query(int QueryOp) {
   return 1;
 }
 
-int Operand(int first_token) {
-  if (!Identifier(first_token))   // an Identifier
+int Operand(int first_token, Context* context) {
+  if (!Identifier(first_token, context))   // an Identifier
     return 0;
-  else if (!BaseOperand(first_token))     // a base Operand
+  else if (!BaseOperand(first_token, context))     // a base Operand
     return 0;
 
   return 1;
 }
 
-int Identifier(int first_token) {
+int Identifier(int first_token, Context* context) {
   if (first_token == TOKEN_GLOBAL_IDENTIFIER) {
     return 0;
   } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
@@ -229,7 +229,7 @@ int Identifier(int first_token) {
   return 1;
 }
 
-int BaseOperand(int first_token) {
+int BaseOperand(int first_token, Context* context) {
   int next;
   if (first_token == TOKEN_DOUBLE_CONSTANT) {
     return 0;
@@ -290,7 +290,7 @@ int BaseOperand(int first_token) {
   }
 }
 
-int AddressableOperand(int first_token) {
+int AddressableOperand(int first_token, Context* context) {
   int next;
   if (first_token == '[') {
     // next should be a non register
@@ -327,12 +327,12 @@ int AddressableOperand(int first_token) {
   return 1;
 }
 
-int ArrayOperandList(int first_token) {
+int ArrayOperandList(int first_token, Context* context) {
   // assumed first_token is '('
   int next;
   while (1) {
     next = yylex();
-    if (!Identifier(next)) {
+    if (!Identifier(next, context)) {
       next = yylex();
       if (next == ')')
         return 0;
@@ -346,12 +346,12 @@ int ArrayOperandList(int first_token) {
   }
 }
 
-int CallTargets(int first_token) {
+int CallTargets(int first_token, Context* context) {
   // assumed first_token is '['
   int next;
   while (1) {
     next = yylex();
-    if (!Identifier(next)) {
+    if (!Identifier(next, context)) {
       next = yylex();
       if (next == ']')
         return 0;
@@ -365,14 +365,14 @@ int CallTargets(int first_token) {
   }
 }
 
-int CallArgs(int first_token) {
+int CallArgs(int first_token, Context* context) {
   // assumed first_token is '('
   int next;
   while (1) {
     next = yylex();
     if (next == ')') {
       return 0;
-    } else if (!Operand(next)) {
+    } else if (!Operand(next, context)) {
       next = yylex();
       if (next == ')')
         return 0;
@@ -386,7 +386,10 @@ int CallArgs(int first_token) {
   }
 }
 
-int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
+int RoundingMode(int first_token,
+                 bool* is_ftz,
+                 int* last_token,
+                 Context* context) {
   *is_ftz = false;
   *last_token = first_token;
   int next;
@@ -410,7 +413,7 @@ int RoundingMode(int first_token, bool* is_ftz, int* last_token) {
   }
 }
 
-int Instruction2(int first_token) {
+int Instruction2(int first_token, Context* context) {
   // First token must be an Instruction2Opcode
   int next = yylex();
   // to get last token returned by RoundingMode in case _ftz
@@ -418,7 +421,7 @@ int Instruction2(int first_token) {
   bool is_ftz = false;
 
   if (GetTokenType(first_token) == INSTRUCTION2_OPCODE) {
-    if (!RoundingMode(next, &is_ftz, &temp)) {
+    if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
       if (is_ftz)
         // need to check the token returned by rounding mode
@@ -435,9 +438,9 @@ int Instruction2(int first_token) {
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
-      if (!Operand(yylex())) {
+      if (!Operand(yylex(), context)) {
         if (yylex() == ',') {
-          if (!Operand(yylex())) {
+          if (!Operand(yylex(), context)) {
             if (yylex() == ';') {
               return 0;
             }
@@ -447,7 +450,7 @@ int Instruction2(int first_token) {
     }
     return 1;
   } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_NODT) {
-    if (!RoundingMode(next, &is_ftz, &temp)) {
+    if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
       if (is_ftz)
         // need to check the token returned by rounding mode
@@ -458,9 +461,9 @@ int Instruction2(int first_token) {
 
 
     // check the operands
-    if (!Operand(next)) {
+    if (!Operand(next, context)) {
       if (yylex() == ',') {
-        if (!Operand(yylex())) {
+        if (!Operand(yylex(), context)) {
           if (yylex() == ';') {
             return 0;
           }
@@ -479,9 +482,9 @@ int Instruction2(int first_token) {
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
-      if (!Operand(yylex())) {
+      if (!Operand(yylex(), context)) {
         if (yylex() == ',') {
-          if (!Operand(yylex())) {
+          if (!Operand(yylex(), context)) {
             if (yylex() == ';') {
               return 0;
             }
@@ -495,7 +498,7 @@ int Instruction2(int first_token) {
   }
 }
 
-int Instruction3(int first_token) {
+int Instruction3(int first_token, Context* context) {
   // First token must be an Instruction3Opcode
   int next = yylex();
   // to get last token returned by RoundingMode in case _ftz
@@ -503,7 +506,7 @@ int Instruction3(int first_token) {
   bool is_ftz = false;
 
   if (GetTokenType(first_token) == INSTRUCTION3_OPCODE) {
-    if (!RoundingMode(next, &is_ftz, &temp)) {
+    if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
       if (is_ftz)
         // need to check the token returned by rounding mode
@@ -520,11 +523,11 @@ int Instruction3(int first_token) {
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
-      if (!Operand(yylex())) {
+      if (!Operand(yylex(), context)) {
         if (yylex() == ',') {
-          if (!Operand(yylex())) {
+          if (!Operand(yylex(), context)) {
             if (yylex() == ',') {
-              if (!Operand(yylex())) {
+              if (!Operand(yylex(), context)) {
                 if (yylex() == ';')
                   return 0;
               }  // 3rd operand
@@ -549,11 +552,11 @@ int Instruction3(int first_token) {
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
-      if (!Operand(yylex())) {
+      if (!Operand(yylex(), context)) {
         if (yylex() == ',') {
-          if (!Operand(yylex())) {
+          if (!Operand(yylex(), context)) {
             if (yylex() == ',') {
-              if (!Operand(yylex())) {
+              if (!Operand(yylex(), context)) {
                 if (yylex() == ';')
                   return 0;
               }  // 3rd operand
@@ -644,7 +647,7 @@ int Version(int first_token, Context* context) {
   return 1;
 };
 
-int Alignment(int first_token) {
+int Alignment(int first_token, Context* context) {
   // first token must be "align" keyword
   if (yylex() == TOKEN_INTEGER_CONSTANT)
     return 0;
@@ -656,14 +659,17 @@ int Alignment(int first_token) {
 // since this function checks for one token lookahead
 // if the last token is not consumed by this,
 // it will notify the caller to recheck
-int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
+int DeclPrefix(int first_token,
+               bool* recheck_last_token,
+               int* last_token,
+               Context* context) {
   int last_align_token;
   int next_token;
   *recheck_last_token = false;
   *last_token = 0;
 
   if (first_token == ALIGN) {
-    if (!Alignment(first_token)) {
+    if (!Alignment(first_token, context)) {
       next_token = yylex();  // need to go to next token
       *last_token = next_token;
       // first is alignment
@@ -700,7 +706,7 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
     next_token = yylex();
     *last_token = next_token;
     if (next_token == ALIGN) {
-      if (!Alignment(next_token)) {
+      if (!Alignment(next_token, context)) {
         // const alignment
         next_token = yylex();
         *last_token = next_token;
@@ -718,7 +724,7 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
       *last_token = next_token;
 
       if (next_token == ALIGN) {
-        if (!Alignment(next_token)) {
+        if (!Alignment(next_token, context)) {
           // const externOrStatic alignment
         } else {
           return 1;
@@ -736,7 +742,7 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
     next_token = yylex();
     *last_token = next_token;
     if (next_token == ALIGN) {
-      if (!Alignment(next_token)) {
+      if (!Alignment(next_token, context)) {
         // externOrStatic alignment
         next_token = yylex();
         *last_token = next_token;
@@ -754,7 +760,7 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
       *last_token = next_token;
 
       if (next_token == ALIGN) {
-        if (!Alignment(next_token)) {
+        if (!Alignment(next_token, context)) {
           *last_token = next_token;
         } else {
           return 1;
@@ -773,7 +779,7 @@ int DeclPrefix(int first_token, bool* recheck_last_token, int* last_token) {
   return 0;
 }
 
-int FBar(int first_token) {
+int FBar(int first_token, Context* context) {
   // first token must be _FBAR
   if (yylex() == '(' )
     if (yylex() == TOKEN_INTEGER_CONSTANT)
@@ -786,7 +792,8 @@ int FBar(int first_token) {
 
 int ArrayDimensionSet(int first_token,
                       bool* rescan_last_token,
-                      int* last_token) {
+                      int* last_token,
+                      Context* context) {
   // first token must be '['
   *rescan_last_token = false;
   int next_token = yylex();
@@ -809,13 +816,17 @@ int ArrayDimensionSet(int first_token,
   }
 }
 
-int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
+int ArgumentDecl(int first_token,
+                 bool* rescan_last_token,
+                 int* last_token,
+                 Context* context) {
   bool rescan_after_declPrefix;
   int last_token_of_declPrefix;
   int next;
   if (!DeclPrefix(first_token,
                   &rescan_after_declPrefix,
-                  &last_token_of_declPrefix)) {
+                  &last_token_of_declPrefix,
+                  context)) {
     if (!rescan_after_declPrefix) {
       next = yylex();
     } else {
@@ -833,7 +844,10 @@ int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
         // scan for arrayDimensions
         next = yylex();
         if (next == '[') {
-          if (!ArrayDimensionSet(next, rescan_last_token, last_token)) {
+          if (!ArrayDimensionSet(next,
+                                 rescan_last_token,
+                                 last_token,
+                                 context)) {
             return 0;
           }
         } else {
@@ -850,14 +864,15 @@ int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token) {
 
 int ArgumentListBody(int first_token,
                      bool* rescan_last_token,
-                     int* last_token) {
+                     int* last_token,
+                     Context* context) {
   *last_token = 0;
   *rescan_last_token = false;
 
   int prev_token = 0;
   bool rescan = false;
   while (1) {
-    if (!ArgumentDecl(first_token, &rescan, &prev_token)) {
+    if (!ArgumentDecl(first_token, &rescan, &prev_token, context)) {
       if (!rescan)
         prev_token = yylex();
       if (prev_token == ',') {
@@ -875,14 +890,15 @@ int ArgumentListBody(int first_token,
 
 int FunctionDefinition(int first_token,
                        bool* rescan_last_token,
-                       int* last_token) {
+                       int* last_token,
+                       Context* context) {
   *last_token = 0;
   * rescan_last_token = false;
 
   int token_to_scan;
   bool rescan;
 
-  if (!DeclPrefix(first_token, &rescan, &token_to_scan)) {
+  if (!DeclPrefix(first_token, &rescan, &token_to_scan, context)) {
     if (!rescan)
       token_to_scan = yylex();
 
@@ -896,7 +912,8 @@ int FunctionDefinition(int first_token,
             token_to_scan = yylex();
           } else if (!ArgumentListBody(token_to_scan,
                                        &rescan,
-                                       &token_to_scan)) {
+                                       &token_to_scan,
+                                       context)) {
             if (!rescan)
               token_to_scan = yylex();
 
@@ -918,7 +935,8 @@ int FunctionDefinition(int first_token,
             token_to_scan = yylex();
           } else if (!ArgumentListBody(token_to_scan,
                                        &rescan,
-                                       &token_to_scan)) {
+                                       &token_to_scan,
+                                       context)) {
             if (!rescan)
               token_to_scan = yylex();
             if (token_to_scan == ')')
@@ -933,7 +951,7 @@ int FunctionDefinition(int first_token,
         }
         // check for optional FBar
         if (token_to_scan == _FBAR) {
-          if (!FBar(token_to_scan)) {
+          if (!FBar(token_to_scan, context)) {
             return 0;
           }
         } else {
@@ -947,11 +965,11 @@ int FunctionDefinition(int first_token,
   return 1;
 }
 
-int FunctionDecl(int first_token) {
+int FunctionDecl(int first_token, Context* context) {
   int token_to_scan;
   bool rescan;
 
-  if (!DeclPrefix(first_token, &rescan, &token_to_scan)) {
+  if (!DeclPrefix(first_token, &rescan, &token_to_scan, context)) {
     if (!rescan)
       token_to_scan = yylex();
 
@@ -965,7 +983,8 @@ int FunctionDecl(int first_token) {
             token_to_scan = yylex();
           } else if (!ArgumentListBody(token_to_scan,
                                        &rescan,
-                                       &token_to_scan)) {
+                                       &token_to_scan,
+                                       context)) {
             if (!rescan)
               token_to_scan = yylex();
 
@@ -987,7 +1006,8 @@ int FunctionDecl(int first_token) {
             token_to_scan = yylex();
           } else if (!ArgumentListBody(token_to_scan,
                                        &rescan,
-                                       &token_to_scan)) {
+                                       &token_to_scan,
+                                       context)) {
             if (!rescan)
               token_to_scan = yylex();
             if (token_to_scan == ')')
@@ -1004,7 +1024,7 @@ int FunctionDecl(int first_token) {
 
         // check for optional FBar
         if (token_to_scan == _FBAR) {
-          if (!FBar(token_to_scan)) {
+          if (!FBar(token_to_scan, context)) {
             token_to_scan = yylex();
           }
         }
@@ -1018,7 +1038,7 @@ int FunctionDecl(int first_token) {
   return 1;
 }
 
-int ArgBlock(int first_token) {
+int ArgBlock(int first_token, Context* context) {
   // first token should be {
   bool rescan = false;
   int last_token;
@@ -1030,19 +1050,19 @@ int ArgBlock(int first_token) {
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_NODT) ||
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
       // Instruction 2 Operation
-      if (!Instruction2(next_token)) {
+      if (!Instruction2(next_token, context)) {
       } else {
         return 1;
       }
     } else if ((GetTokenType(next_token) == INSTRUCTION3_OPCODE) ||
                (GetTokenType(next_token) == INSTRUCTION3_OPCODE_FTZ)) {
       // Instruction 3 Operation
-      if (!Instruction3(next_token)) {
+      if (!Instruction3(next_token, context)) {
       } else {
         return 1;
       }
     } else if (GetTokenType(next_token) == QUERY_OP) {  // Query Operation
-      if (!Query(next_token)) {
+      if (!Query(next_token, context)) {
       } else {
         return 1;
       }
@@ -1054,7 +1074,7 @@ int ArgBlock(int first_token) {
       }
     } else if ((next_token == BRN) ||
                (next_token == CBR)) {
-      if (!Branch(next_token)) {
+      if (!Branch(next_token, context)) {
       } else {
         return 1;
       }
@@ -1064,7 +1084,7 @@ int ArgBlock(int first_token) {
         return 1;
       }
     } else if (next_token == CALL) {  // call (only inside argblock
-      if (!Call(next_token)) {
+      if (!Call(next_token, context)) {
       } else {
         return 1;
       }
@@ -1072,7 +1092,7 @@ int ArgBlock(int first_token) {
                (next_token == CONST) ||
                (next_token == STATIC) ||
                (next_token == EXTERN)) {
-      if (!DeclPrefix(first_token, &rescan, &last_token)) {
+      if (!DeclPrefix(first_token, &rescan, &last_token, context)) {
         if (!rescan)
           next_token = yylex();
         else
@@ -1080,31 +1100,31 @@ int ArgBlock(int first_token) {
 
         if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
           // initializable decl
-          if (!InitializableDecl(next_token)) {
+          if (!InitializableDecl(next_token, context)) {
           }
         } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
           // uninitializable decl
-          if (!UninitializableDecl(next_token)) {
+          if (!UninitializableDecl(next_token, context)) {
           }
         } else if (next_token == ARG) {
           // arg uninitializable decl
-          if (!ArgUninitializableDecl(next_token)) {
+          if (!ArgUninitializableDecl(next_token, context)) {
           }
         }
       }
     } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
-      if (!InitializableDecl(next_token)) {
+      if (!InitializableDecl(next_token, context)) {
       } else {
         return 1;
       }
     } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
       // printf("An unintializable address\n");
-      if (!UninitializableDecl(next_token)) {
+      if (!UninitializableDecl(next_token, context)) {
       } else {
         return 1;
       }
     } else if (next_token == ARG) {
-      if (!ArgUninitializableDecl(next_token)) {
+      if (!ArgUninitializableDecl(next_token, context)) {
       } else {
         return 1;
       }
@@ -1120,7 +1140,7 @@ int ArgBlock(int first_token) {
   return 1;
 }
 
-int Codeblock(int first_token) {
+int Codeblock(int first_token, Context* context) {
   // first token should be '{'
   bool rescan = false;
   int last_token;
@@ -1132,19 +1152,19 @@ int Codeblock(int first_token) {
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_NODT) ||
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
       // Instruction 2 Operation
-      if (!Instruction2(next_token)) {
+      if (!Instruction2(next_token, context)) {
       } else {
         return 1;
       }
     } else if ((GetTokenType(next_token) == INSTRUCTION3_OPCODE) ||
                (GetTokenType(next_token) == INSTRUCTION3_OPCODE_FTZ)) {
       // Instruction 3 Operation
-      if (!Instruction3(next_token)) {
+      if (!Instruction3(next_token, context)) {
       } else {
         return 1;
       }
     } else if (GetTokenType(next_token) == QUERY_OP) {  // Query Operation
-      if (!Query(next_token)) {
+      if (!Query(next_token, context)) {
       } else {
         return 1;
       }
@@ -1156,7 +1176,7 @@ int Codeblock(int first_token) {
       }
     } else if ((next_token == BRN) ||
                (next_token == CBR)) {
-      if (!Branch(next_token)) {
+      if (!Branch(next_token, context)) {
       } else {
         return 1;
       }
@@ -1166,7 +1186,7 @@ int Codeblock(int first_token) {
         return 1;
       }
     } else if (next_token == '{') {  // argument scope -> inner codeblock
-      if (!ArgBlock(next_token)) {
+      if (!ArgBlock(next_token, context)) {
         // printf("Out of arg scope \n");
       } else {
         return 1;
@@ -1175,7 +1195,7 @@ int Codeblock(int first_token) {
                (next_token == CONST) ||
                (next_token == STATIC) ||
                (next_token == EXTERN)) {
-      if (!DeclPrefix(first_token, &rescan, &last_token)) {
+      if (!DeclPrefix(first_token, &rescan, &last_token, context)) {
         if (!rescan)
           next_token = yylex();
         else
@@ -1183,13 +1203,13 @@ int Codeblock(int first_token) {
 
         if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
           // initializable decl
-          if (!InitializableDecl(next_token)) {
+          if (!InitializableDecl(next_token, context)) {
           } else {
             return 1;
           }
         } else if (GetTokenType(first_token) == UNINITIALIZABLE_ADDRESS) {
           // uninitializable decl
-          if (!UninitializableDecl(first_token)) {
+          if (!UninitializableDecl(first_token, context)) {
           } else {
             return 1;
           }
@@ -1200,13 +1220,13 @@ int Codeblock(int first_token) {
         return 1;
       }
     } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
-      if (!InitializableDecl(next_token)) {
+      if (!InitializableDecl(next_token, context)) {
       } else {
         return 1;
       }
     } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
       // printf("An unintializable address\n");
-      if (!UninitializableDecl(next_token)) {
+      if (!UninitializableDecl(next_token, context)) {
       } else {
         return 1;
       }
@@ -1219,13 +1239,13 @@ int Codeblock(int first_token) {
   return 1;
 }
 
-int Function(int first_token) {
+int Function(int first_token, Context* context) {
   bool rescan = false;
   int last_token = 0;
-  if (!FunctionDefinition(first_token, &rescan, &last_token)) {
+  if (!FunctionDefinition(first_token, &rescan, &last_token, context)) {
     if (!rescan)
       last_token = yylex();
-    if (!Codeblock(last_token)) {
+    if (!Codeblock(last_token, context)) {
       if (yylex() == ';')
         return 0;
       else
@@ -1249,7 +1269,7 @@ int Program(int first_token, Context* context) {
              (first_token == CONST) ||
              (first_token == EXTERN) ||
              (first_token == STATIC) ) {
-          result = DeclPrefix(first_token, &rescan, &last_token);
+          result = DeclPrefix(first_token, &rescan, &last_token, context);
           if (result)
             return 1;
 
@@ -1271,7 +1291,8 @@ int Program(int first_token, Context* context) {
                 first_token = yylex();
               } else if (!ArgumentListBody(first_token,
                                            &rescan,
-                                           &first_token)) {
+                                           &first_token,
+                                           context)) {
                 if (!rescan)
                   first_token = yylex();
 
@@ -1294,7 +1315,8 @@ int Program(int first_token, Context* context) {
                 first_token = yylex();
               } else if (!ArgumentListBody(first_token,
                                            &rescan,
-                                           &first_token)) {
+                                           &first_token,
+                                           context)) {
                 if (!rescan)
                   first_token = yylex();
                 if (first_token == ')')
@@ -1310,7 +1332,7 @@ int Program(int first_token, Context* context) {
 
             // check for optional FBar
             if (first_token == _FBAR) {
-              if (!FBar(first_token)) {
+              if (!FBar(first_token, context)) {
                 first_token = yylex();
               } else {
                 return 1;
@@ -1322,7 +1344,8 @@ int Program(int first_token, Context* context) {
               continue;
             } else if (first_token == '{') {
               // so this must be a functionDefinition
-              if (!Codeblock(first_token)) {  // check codeblock of function
+              if (!Codeblock(first_token, context)) {
+                // check codeblock of function
                 first_token = yylex();
                 if (first_token == ';') {
                   first_token = yylex();
@@ -1339,7 +1362,7 @@ int Program(int first_token, Context* context) {
         } else if (GetTokenType(first_token) == INITIALIZABLE_ADDRESS) {
           // global initializable
           // this is an initializable declaration
-          if (!InitializableDecl(first_token)) {
+          if (!InitializableDecl(first_token, context)) {
             first_token = yylex();
           } else {
             return 1;
@@ -1356,7 +1379,7 @@ int Program(int first_token, Context* context) {
   return 1;
 }
 
-int OptionalWidth(int first_token) {
+int OptionalWidth(int first_token, Context* context) {
   // first token must be _WIDTH
   int next_token = yylex();
   if (next_token == '(') {
@@ -1374,14 +1397,14 @@ int OptionalWidth(int first_token) {
   return 1;
 }
 
-int Branch(int first_token) {
+int Branch(int first_token, Context* context) {
   int op = first_token;  // CBR or BRN
   int current_token = yylex();
 
 
   // check for optionalWidth
   if (current_token == _WIDTH) {
-    if (!OptionalWidth(current_token)) {
+    if (!OptionalWidth(current_token, context)) {
     } else {
       printf("Invalid optional width.\n");
       return 1;
@@ -1395,22 +1418,22 @@ int Branch(int first_token) {
 
   // parse operands
   if (op == CBR) {
-    if (!Operand(current_token)) {
+    if (!Operand(current_token, context)) {
       if (yylex() == ',') {
         current_token = yylex();
         if (current_token == TOKEN_LABEL) {
           current_token = yylex();  // should be ';'
-        } else if (!Identifier(current_token)) {
+        } else if (!Identifier(current_token, context)) {
           current_token = yylex();  // should be ';'
 
-        } else if (!Operand(current_token)) {
+        } else if (!Operand(current_token, context)) {
           if (yylex() == ',') {
             current_token = yylex();
             if (current_token == TOKEN_LABEL) {  // LABEL
               current_token = yylex();  // should be ';'
             } else if (current_token == '[') {
               current_token = yylex();
-              if (!Identifier(current_token)) {
+              if (!Identifier(current_token, context)) {
                 current_token = yylex();  // should be ']'
               } else if (current_token == TOKEN_LABEL) {
                 current_token = yylex();
@@ -1442,7 +1465,7 @@ int Branch(int first_token) {
     if (current_token == TOKEN_LABEL) {
       if (yylex() == ';')
         return 0;
-    } else if (!Identifier(current_token)) {
+    } else if (!Identifier(current_token, context)) {
       current_token = yylex();
 
       if (current_token == ';')
@@ -1452,7 +1475,7 @@ int Branch(int first_token) {
           current_token = yylex();
           if (current_token == TOKEN_LABEL) {
             current_token = yylex();    // should be ']'
-          } else if (!Identifier(current_token)) {
+          } else if (!Identifier(current_token, context)) {
             current_token = yylex();    // should be ']'
           }
         }
@@ -1466,13 +1489,13 @@ int Branch(int first_token) {
   return 1;
 }
 
-int Call(int first_token) {
+int Call(int first_token, Context* context) {
   // first token is "call"
   int next = yylex();
 
   // optional width
   if (next == _WIDTH) {
-    if (!OptionalWidth(next)) {
+    if (!OptionalWidth(next, context)) {
       next = yylex();
     } else {
       printf("Error in optionalwidth\n");
@@ -1480,18 +1503,18 @@ int Call(int first_token) {
     }
   }
 
-  if (!Operand(next)) {
+  if (!Operand(next, context)) {
     next = yylex();
     // check for twoCallArgs
     if (next == '(') {
-      if (!CallArgs(next))
+      if (!CallArgs(next, context))
         next = yylex();
       else
         return 1;
     }
 
     if (next == '(') {
-      if (!CallArgs(next))
+      if (!CallArgs(next, context))
         next = yylex();
       else
         return 1;
@@ -1501,7 +1524,7 @@ int Call(int first_token) {
     if (next == ';') {
       return 0;
     } else if (next == '[') {
-      if (!CallTargets(next)) {
+      if (!CallTargets(next, context)) {
         if (yylex() == ';')
            return 0;
       }
@@ -1511,7 +1534,10 @@ int Call(int first_token) {
   return 1;
 }
 
-int Initializer(int first_token, bool* rescan, int* last_token) {
+int Initializer(int first_token,
+                bool* rescan,
+                int* last_token,
+                Context* context) {
   // first token should be '='
   *rescan = false;
   *last_token =0;
@@ -1610,7 +1636,7 @@ int Initializer(int first_token, bool* rescan, int* last_token) {
   return 0;
 }
 
-int InitializableDecl(int first_token) {
+int InitializableDecl(int first_token, Context* context) {
   // first_token is READONLY or GLOBAL
   bool rescan;
   int last_token;
@@ -1618,18 +1644,18 @@ int InitializableDecl(int first_token) {
 
   if (GetTokenType(next) == DATA_TYPE_ID) {
     next = yylex();
-    if (!Identifier(next)) {
+    if (!Identifier(next, context)) {
       // scan for arrayDimensions
       next = yylex();
       if (next == '[') {
-        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+        if (!ArrayDimensionSet(next, &rescan, &last_token, context)) {
           if (!rescan)
             next = yylex();
           else
             next = last_token;
         }
       }
-      if (!Initializer(next, &rescan, &last_token)) {
+      if (!Initializer(next, &rescan, &last_token, context)) {
         if (rescan)
           next = last_token;
         else
@@ -1645,7 +1671,7 @@ int InitializableDecl(int first_token) {
   return 1;
 };
 
-int UninitializableDecl(int first_token) {
+int UninitializableDecl(int first_token, Context* context) {
   // first_token is PRIVATE, GROUP or SPILL
   bool rescan;
   int last_token;
@@ -1653,11 +1679,11 @@ int UninitializableDecl(int first_token) {
   if (GetTokenType(next) == DATA_TYPE_ID) {
     // printf("DataTypeId\n");
     next = yylex();
-    if (!Identifier(next)) {
+    if (!Identifier(next, context)) {
       // scan for arrayDimensions
       next = yylex();
       if (next == '[') {
-        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+        if (!ArrayDimensionSet(next, &rescan, &last_token, context)) {
           if (!rescan)
             next = yylex();
           else
@@ -1675,7 +1701,7 @@ int UninitializableDecl(int first_token) {
 }
 
 
-int ArgUninitializableDecl(int first_token) {
+int ArgUninitializableDecl(int first_token, Context* context) {
   // first token is ARG
   bool rescan;
   int last_token;
@@ -1683,11 +1709,11 @@ int ArgUninitializableDecl(int first_token) {
   if (GetTokenType(next) == DATA_TYPE_ID) {
     // printf("DataTypeId\n");
     next = yylex();
-    if (!Identifier(next)) {
+    if (!Identifier(next, context)) {
       // scan for arrayDimensions
       next = yylex();
       if (next == '[') {
-        if (!ArrayDimensionSet(next, &rescan, &last_token)) {
+        if (!ArrayDimensionSet(next, &rescan, &last_token, context)) {
           if (!rescan)
             next = yylex();
           else

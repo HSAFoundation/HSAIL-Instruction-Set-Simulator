@@ -9,65 +9,63 @@ namespace brig {
 extern Context* context;
 // ------------------ Parser TESTS -----------------
 
-TEST(ParserTest, IdentifierTest) {
+TEST(ParserTest, OperandTest) {
   std::string input("&a_global_id123");  // global id
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Identifier(yylex()));
+  EXPECT_EQ(0, Operand(yylex(), context));
 
   input.assign("%a_local_id");  // local id
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Identifier(yylex()));
+  EXPECT_EQ(0, Operand(yylex(), context));
 
   input.assign("$d7");  // register
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Identifier(yylex()));
-}
+  EXPECT_EQ(0, Operand(yylex(), context));
 
-TEST(ParserTest, BaseOperandTest) {
-  std::string input("1352");  // Int constant
+  input.assign("1352");  // Int constant
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, BaseOperand(yylex()));
+  EXPECT_EQ(0, Operand(yylex(), context));
 
   input.assign("WAVESIZE");  // TOKEN_WAVE_SIZE
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, BaseOperand(yylex()));
+  EXPECT_EQ(0, Operand(yylex(), context));
 
   input.assign("_u32(12, 13 ,14)");  // decimalListSingle
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, BaseOperand(yylex()));
+  EXPECT_EQ(0, Operand(yylex(), context));
 }
 
 TEST(ParserTest, AddressableOperandTest) {
   std::string input("[%local_id]");  // Int constant
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, AddressableOperand(yylex()));
+  EXPECT_EQ(0, AddressableOperand(yylex(), context));
 
   input.assign("[%local_id <100> ]");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, AddressableOperand(yylex()));
+  EXPECT_EQ(0, AddressableOperand(yylex(), context));
 
   input.assign("[%local_id<$d7>]");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, AddressableOperand(yylex()));
+  EXPECT_EQ(0, AddressableOperand(yylex(), context));
 
   input.assign("[%global_id<$q5 + 10 >]");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, AddressableOperand(yylex()));
+  EXPECT_EQ(0, AddressableOperand(yylex(), context));
 
   input.assign("[%global_id<$d6 - 10 >]");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, AddressableOperand(yylex()));
+  EXPECT_EQ(0, AddressableOperand(yylex(), context));
 }
 
 TEST(ParserTest, QueryTest) {
   // test the Query types;
   std::string input("query_order_u32  $c1 , [&Test<$d7  + 100>];");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Query(yylex()));
+  EXPECT_EQ(0, Query(yylex(), context));
 
   input.assign("query_data_u32  $c1 , [&Test<$d7  + 100>];");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Query(yylex()));
+  EXPECT_EQ(0, Query(yylex(), context));
 
   input.assign("query_array_u32  $c1 , [&Test<$d7  + 100>];");
     yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
@@ -193,7 +191,7 @@ TEST(ParserTest, QueryTest) {
 TEST(ParserTest, Bug57) {
   std::string input("($d4,&global_id, %local_id)");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, ArrayOperandList(yylex()));
+  EXPECT_EQ(0, ArrayOperandList(yylex(), context));
 }
 
 TEST(ParserTest, RoundingMode) {
@@ -201,55 +199,55 @@ TEST(ParserTest, RoundingMode) {
   int current_token;
   std::string input("_upi");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_downi");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_zeroi");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_neari");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_up");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_down");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_zero");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_near");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_ftz_up");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_ftz_down");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_ftz_zero");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_ftz_near");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 
   input.assign("_ftz");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
+  EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
 }
 
 TEST(ParserTest, Instruction2) {
@@ -257,57 +255,57 @@ TEST(ParserTest, Instruction2) {
 
   std::string input("abs_p_s8x4 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   // with _ftz and packing
   input.assign("abs_ftz_p_s8x4 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   // with _ftz floatRounding and packing
   input.assign("abs_ftz_up_s8x4 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   // without roundingMode or packing
   input.assign("abs_s8x4 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   // with _ftz
   input.assign("abs_ftz_s8x4 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   // with _ftz floatRounding
   input.assign("abs_ftz_up_s8x4 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   input.assign("unpack2 $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   input.assign("unpack2_ftz $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   input.assign("unpack2_ftz_zero $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
 
   input.assign("unpack2_neari $s1, $s2;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   input.assign("frsqrt_ftz_f32 $s1, $s0;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 
   input.assign("frsqrt_ftz_f32 $s1, $s0;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Instruction2(yylex()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
 }
 
 TEST(ParserTest, VersionStatement) {
@@ -324,7 +322,7 @@ TEST(ParserTest, VersionStatement) {
 TEST(ParserTest, AlignStatement) {
   std::string input("align 8");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Alignment(yylex()));
+  EXPECT_EQ(0, Alignment(yylex(), context));
 }
 
 TEST(ParserTest, DeclPrefix) {
@@ -332,33 +330,33 @@ TEST(ParserTest, DeclPrefix) {
   int last_token;
   std::string input("align 8");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token, context));
 
   input.assign("align 8 static");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token, context));
 
   input.assign("align 8 extern const");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token, context));
 
   input.assign("extern const");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token, context));
 
   input.assign("extern const align 1");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token, context));
 
   input.assign("const extern");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token));
+  EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token, context));
 }
 
 TEST(ParserTest, FBar) {
   std::string input(":fbar(1)");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, FBar(yylex()));
+  EXPECT_EQ(0, FBar(yylex(), context));
 }
 
 TEST(ParserTest, ArrayDimensionSet) {
@@ -366,15 +364,15 @@ TEST(ParserTest, ArrayDimensionSet) {
   int last_tok = 0;
   std::string input("[]");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok, context));
 
   input.assign("[1]");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok, context));
 
   input.assign("[1][2][][3]");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok, context));
 }
 
 TEST(ParserTest, ArgumentDecl) {
@@ -384,47 +382,47 @@ TEST(ParserTest, ArgumentDecl) {
   // test 1
   std::string input("const static arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 
   // test 2
   input.assign("align 8 const static arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 
   // test 3
   input.assign("align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 
     // test 4
   input.assign("extern arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 
     // test 5
   input.assign("const align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 
     // test 6
   input.assign("const static align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 
   // test 7
   input.assign("const align 8 static arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 
       // test 8
   input.assign("static const align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 
       // test 9
   input.assign("static align 8 arg_u32 %local_id[2][2] ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentDecl(yylex(), &rescan, &last_tok, context));
 }
 
 
@@ -436,7 +434,7 @@ TEST(ParserTest, ArgumentListBody) {
   std::string input("const static arg_u32 %local_id[2][2],");
   input.append("static arg_f16 %local_id[], align 8 arg_u64 %test ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgumentListBody(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, ArgumentListBody(yylex(), &rescan, &last_tok, context));
 }
 
 TEST(ParserTest, FunctionDefinition) {
@@ -447,7 +445,7 @@ TEST(ParserTest, FunctionDefinition) {
   std::string input("function &get_global_id(arg_u32 %ret_val)");
   input.append("(arg_u32 %arg_val0) :fbar(1)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, FunctionDefinition(yylex(), &rescan, &last_tok));
+  EXPECT_EQ(0, FunctionDefinition(yylex(), &rescan, &last_tok, context));
 }
 
 TEST(ParserTest, FunctionDecl) {
@@ -455,14 +453,14 @@ TEST(ParserTest, FunctionDecl) {
   std::string input("function &get_global_id(arg_u32 %ret_val)");
   input.append("(arg_u32 %arg_val0) :fbar(1);");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, FunctionDecl(yylex()));
+  EXPECT_EQ(0, FunctionDecl(yylex(), context));
 }
 
 TEST(ParserTest, Codeblock) {
   // test 1
   std::string input("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Codeblock(yylex()));
+  EXPECT_EQ(0, Codeblock(yylex(), context));
 }
 
 TEST(ParserTest, Function) {
@@ -470,7 +468,7 @@ TEST(ParserTest, Function) {
   input.append(" (arg_u32 %arg_val0) :fbar(1)");
   input.append("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; };");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Function(yylex()));
+  EXPECT_EQ(0, Function(yylex(), context));
 }
 
 TEST(ParserTest, SimpleProg) {
@@ -486,17 +484,17 @@ TEST(ParserTest, SimpleProg) {
 TEST(ParserTest, Instruction3) {
   std::string input(" add_pp_sat_u16x2 $s1, $s0, $s3;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Instruction3(yylex()));
+  EXPECT_EQ(0, Instruction3(yylex(), context));
 };
 
 TEST(ParserTest, OptionalWidth) {
   std::string input("_width(all)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, OptionalWidth(yylex()));
+  EXPECT_EQ(0, OptionalWidth(yylex(), context));
 
   input.assign("_width(32)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, OptionalWidth(yylex()));
+  EXPECT_EQ(0, OptionalWidth(yylex(), context));
 };
 
 TEST(ParserTest, BranchOperation) {
@@ -505,74 +503,74 @@ TEST(ParserTest, BranchOperation) {
 
   std::string input("cbr_width(all)_fbar $s1, @then;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("cbr_width(all)_fbar $c1, 10 , [@first, @then];");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("cbr_width(all)_fbar $c1, &global;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("cbr_width(all)_fbar $c1, 5, [%local]; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("cbr_width(all)_fbar $c1, 10, @label; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("brn_width(all)_fbar &global; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("brn_width(all)_fbar @goto; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("brn_width(all)_fbar &global, [%local]; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("brn_width(all)_fbar &global, [@goto]; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 
   input.assign("cbr $s1, @then; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Branch(yylex()));
+  EXPECT_EQ(0, Branch(yylex(), context));
 };
 
 TEST(ParserTest, ParseCallTargets) {
   std::string input("[&global, %local]");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, CallTargets(yylex()));
+  EXPECT_EQ(0, CallTargets(yylex(), context));
 };
 
 TEST(ParserTest, ParseCallArgs) {
   std::string input("()");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, CallArgs(yylex()));
+  EXPECT_EQ(0, CallArgs(yylex(), context));
 
   input.assign("(&a,%b,%c)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, CallArgs(yylex()));
+  EXPECT_EQ(0, CallArgs(yylex(), context));
 
   input.assign("(1,2,3)");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, CallArgs(yylex()));
+  EXPECT_EQ(0, CallArgs(yylex(), context));
 };
 
 TEST(ParserTest, Call) {
   std::string input("call &callee (%output)(%input);");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Call(yylex()));
+  EXPECT_EQ(0, Call(yylex(), context));
 
   input.assign("call_width(all) &callee ");
   input.append("(%output1,&output2)(%input1, $d7) [&id1, &id2];");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Call(yylex()));
+  EXPECT_EQ(0, Call(yylex(), context));
 };
 
 TEST(ParserTest, Initializers) {
@@ -580,60 +578,60 @@ TEST(ParserTest, Initializers) {
   int last_token = 0;
   std::string input("= {12, 13,14, -13}");  // DecimalInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token, context));
 
   input.assign("= 12, 13,14 ");  // DecimalInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token, context));
 
   input.assign("={ 1.2f, 1.3f,-1.4f }");  // SingleInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token, context));
 
   input.assign("= 1.2f, 1.3f,-1.4f ");  // SingleInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token, context));
 
   input.assign("={ 1.2L, 1.3L,-1.4L }");  // FloatInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token, context));
 
   input.assign("= 1.2L, 1.3L,-1.4L ");  // FloatInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token, context));
 
   input.assign("= {@a, @b, @c} ");  // LabelInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token));
+  EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token, context));
 };
 
 TEST(ParserTest, InitializableDecl) {
   // DecimalInitializer
   std::string input("readonly_s32 &x[4]= {12, 13,14, -13};");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, InitializableDecl(yylex()));
+  EXPECT_EQ(0, InitializableDecl(yylex(), context));
 
   input.assign("global_u32 &x[3] = 12, 13,14 ; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, InitializableDecl(yylex()));
+  EXPECT_EQ(0, InitializableDecl(yylex(), context));
 
   // SingleInitializer
   input.assign("readonly_f32 %f[3] = { 1.2f, 1.3f,-1.4f };");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, InitializableDecl(yylex()));
+  EXPECT_EQ(0, InitializableDecl(yylex(), context));
 
   input.assign("global_f32 &c[3] = 1.2f, 1.3f,-1.4f ;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, InitializableDecl(yylex()));
+  EXPECT_EQ(0, InitializableDecl(yylex(), context));
 
   // FloatInitializer
   input.assign("readonly_f64 %d[3] ={ 1.2L, 1.3L,-1.4L; }");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, InitializableDecl(yylex()));
+  EXPECT_EQ(0, InitializableDecl(yylex(), context));
 
   input.assign("global_f64 %g[3] = 1.2L, 1.3L,-1.4L ;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, InitializableDecl(yylex()));
+  EXPECT_EQ(0, InitializableDecl(yylex(), context));
 };
 
 TEST(ParserTest, ProgWithFunctionDefinition) {
@@ -726,14 +724,14 @@ TEST(ParserTest, UninitializableDecl) {
   std::string input("private_f32 %f[3];");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, UninitializableDecl(yylex()));
+  EXPECT_EQ(0, UninitializableDecl(yylex(), context));
 };
 
 TEST(ParserTest, ArgUninitializableDecl) {
   std::string input("arg_f32 %f[3];");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, ArgUninitializableDecl(yylex()));
+  EXPECT_EQ(0, ArgUninitializableDecl(yylex(), context));
 };
 
 TEST(ParserTest, ProgWithArgUninitializableDecl ) {

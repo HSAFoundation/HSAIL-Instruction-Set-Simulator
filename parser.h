@@ -30,42 +30,58 @@ enum TerminalType { UNKNOWN_TERM = 0,
 // classify token into different terminal type
 TerminalType GetTokenType(int token);
 
-int Query(int queryOp);
-int Operand(int first_token);
-int Identifier(int first_token);
-int BaseOperand(int first_token);
-int AddressableOperand(int first_token);
-int ArrayOperandList(int first_token);
-int RoundingMode(int first_token, bool* is_ftz, int* last_token);
-int Instruction2(int first_token);
-int Instruction3(int first_token);
+int Query(int queryOp, Context* context);
+int Operand(int first_token, Context* context);
+int Identifier(int first_token, Context* context);
+int BaseOperand(int first_token, Context* context);
+int AddressableOperand(int first_token, Context* context);
+int ArrayOperandList(int first_token, Context* context);
+int RoundingMode(int first_token,
+                 bool* is_ftz,
+                 int* last_token,
+                 Context* context);
+
+int Instruction2(int first_token, Context* context);
+int Instruction3(int first_token, Context* context);
 int Version(int first_token, Context* context);
-int Alignment(int first_token);
-int DeclPrefix(int first_token, bool* rescan_last_token, int* last_token);
-int FBar(int first_token);
+int Alignment(int first_token, Context* context);
+int DeclPrefix(int first_token,
+               bool* rescan_last_token,
+               int* last_token,
+               Context* context);
+int FBar(int first_token, Context* context);
 int ArrayDimensionSet(int first_token,
                       bool* rescan_last_token,
-                      int* last_token);
-int ArgumentDecl(int first_token, bool* rescan_last_token, int* last_token);
-int ArgumentListBody(int first_token, bool* rescan_last_token, int* last_token);
+                      int* last_token,
+                      Context* context);
+int ArgumentDecl(int first_token,
+                 bool* rescan_last_token,
+                 int* last_token,
+                 Context* context);
+int ArgumentListBody(int first_token,
+                     bool* rescan_last_token,
+                     int* last_token,
+                     Context* context);
 int FunctionDefinition(int first_token,
                        bool* rescan_last_token,
-                       int* last_token);
-int FunctionDecl(int first_token);
-int Codeblock(int first_token);
-int Function(int first_token);
-int OptionalWidth(int first_token);
+                       int* last_token,
+                       Context* context);
+int FunctionDecl(int first_token, Context* context);
+int Codeblock(int first_token, Context* context);
+int Function(int first_token, Context* context);
+int OptionalWidth(int first_token, Context* context);
 int Program(int first_token, Context* context);
-int Branch(int first_token);
-int CallTargets(int first_token);
-int CallArgs(int first_token);
-int Call(int first_token);
+int Branch(int first_token, Context* context);
+int CallTargets(int first_token, Context* context);
+int CallArgs(int first_token, Context* context);
+int Call(int first_token, Context* context);
 int Initializer(int first_token,
                 bool* rescan,
-                int* last_token);
-int InitializableDecl(int first_token);
-int UninitializableDecl(int first_token);
-int ArgUninitializableDecl(int first_token);
+                int* last_token,
+                Context* context);
+int InitializableDecl(int first_token, Context* context);
+int UninitializableDecl(int first_token, Context* context);
+int ArgUninitializableDecl(int first_token, Context* context);
 }  // namespace brig
 }  // namespace hsa
 #endif  // PARSER_H_
