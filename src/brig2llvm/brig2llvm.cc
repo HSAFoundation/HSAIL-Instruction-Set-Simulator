@@ -2,6 +2,7 @@
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/IRBuilder.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
 #include "brig.h"
@@ -12,6 +13,36 @@ struct directive_header {
   uint16_t size;
   uint16_t kind;
 };
+static llvm::StructType *create_soa_type(
+  llvm::Type *t, std::string name, int nr) {
+  // [nr x t]
+  llvm::ArrayType *tx8 = llvm::ArrayType::get(t, nr);
+  std::vector<llvm::Type *> tv(1, tx8);
+  // name = {[nr x t]}
+  llvm::StructType *soa_type = llvm::StructType::create(
+    llvm::getGlobalContext(), tv, name, false);
+  return soa_type;
+}
+
+void GenLLVM::gen_GPU_states(void) {
+  llvm::StructType *c_reg_type = create_soa_type(
+    llvm::Type::getInt1Ty(llvm::getGlobalContext()), "c_regs",8);
+  llvm::StructType *s_reg_type = create_soa_type(
+    llvm::Type::getInt32Ty(llvm::getGlobalContext()), "s_regs",8);
+  llvm::StructType *d_reg_type = create_soa_type(
+    llvm::Type::getInt64Ty(llvm::getGlobalContext()), "d_regs",8);
+  llvm::StructType *q_reg_type = create_soa_type(
+    llvm::Type::getIntNTy(llvm::getGlobalContext(), 128), "q_regs",8);
+  std::vector<llvm::Type *> tv1;
+  tv1.push_back(c_reg_type);
+  tv1.push_back(s_reg_type);
+  tv1.push_back(d_reg_type);
+  tv1.push_back(q_reg_type);
+  llvm::StructType *gpu_states_ty = llvm::StructType::create(
+    llvm::getGlobalContext(), tv1, std::string("struct.regs"), false);
+  gpu_states_type_ = gpu_states_ty;
+}
+
 size_t GenLLVM::gen_function(size_t index,
   const struct BrigDirectiveFunction *directive) {
   assert(directive->inParamCount == 0);
@@ -52,6 +83,9 @@ size_t GenLLVM::gen_function(size_t index,
     llvm::BasicBlock *bb =
       llvm::BasicBlock::Create(llvm::getGlobalContext(), "entry",
         func);
+    // Create alloca of local GPU state
+    llvm::IRBuilder<> TmpB(bb, bb->begin());
+    TmpB.CreateAlloca(gpu_states_type_, 0, "gpu_reg_p");
   }
 //  std::cout << "A function\n";
   return index;
@@ -84,13 +118,14 @@ GenLLVM::GenLLVM(const Buffer &directives, const StringBuffer &strings):
 void GenLLVM::operator()(void) {
    llvm::LLVMContext &context = llvm::getGlobalContext();
   brig_frontend_ = new llvm::Module("BRIG", context);
+  gen_GPU_states();
   size_t index = 0;
   while(index < directives_.size()) {
     index = gen_directive(index);
   }
   llvm::raw_string_ostream ros(output_);
   brig_frontend_->print(ros, NULL);
-  //brig_frontend_->dump();
+  brig_frontend_->dump();
 }
 
 }
