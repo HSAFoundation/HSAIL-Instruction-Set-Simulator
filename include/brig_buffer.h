@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-include <iostream>
+#include <iostream>
 #include <vector>
 
 namespace hsa {
