@@ -20,7 +20,7 @@ class Buffer {
       buf_.push_back(*item_charp++);
     }
   }
-  const std::vector<unsigned char>& get(void) {
+  const std::vector<unsigned char>& get(void) const {
     return buf_; 
   }
  private:
