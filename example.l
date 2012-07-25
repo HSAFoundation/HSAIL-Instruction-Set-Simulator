@@ -8,6 +8,7 @@
 int int_val;
 float float_val;
 double double_val;
+char* string_val;
 
 /* helper function for IEEE to Single */
 float ieee754tof(char* text) {
@@ -144,16 +145,16 @@ IEEE_SINGLE	(0(f|F)[0-9a-fA-F]{8})
 <INLINE_COMMENT><<EOF>>		{ printf("%d: Unterminated comment\n", yylineno); return 0; }
 
 
-\$c(0|1|2|3|4|5|6|7) 	{ return TOKEN_CREGISTER;}
-\$d(0|1|2|3|4|5|6|7) 	{ return TOKEN_DREGISTER;}
-\$s(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15) { return TOKEN_SREGISTER;}
-\$q(0|1|2|3|4|5|6|7) 	{ return TOKEN_QREGISTER;}
+\$c(0|1|2|3|4|5|6|7) 	{string_val = strdup(yytext);  return TOKEN_CREGISTER;}
+\$d(0|1|2|3|4|5|6|7) 	{string_val = strdup(yytext);  return TOKEN_DREGISTER;}
+\$s(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15) {string_val = strdup(yytext);  return TOKEN_SREGISTER;}
+\$q(0|1|2|3|4|5|6|7) 	{string_val = strdup(yytext);  return TOKEN_QREGISTER;}
 
-\%[_a-zA-Z]+[_a-zA-Z0-9]*  	{return TOKEN_LOCAL_IDENTIFIER; }
-\&[_a-zA-Z]+[_a-zA-Z0-9]*	{return TOKEN_GLOBAL_IDENTIFIER; }
+\%[_a-zA-Z]+[_a-zA-Z0-9]*  	{string_val = strdup(yytext); return TOKEN_LOCAL_IDENTIFIER; }
+\&[_a-zA-Z]+[_a-zA-Z0-9]*	  {string_val = strdup(yytext); return TOKEN_GLOBAL_IDENTIFIER; }
 
-\@[_a-zA-Z]+[_a-zA-Z0-9]* 	{ return TOKEN_LABEL; }
-\"(\\.|[^\\"])*\" 		{ return TOKEN_STRING; }
+\@[_a-zA-Z]+[_a-zA-Z0-9]* 	{string_val = strdup(yytext);  return TOKEN_LABEL; }
+\"(\\.|[^\\"])*\" 		{string_val = strdup(yytext);  return TOKEN_STRING; }
 
 ((snorm_|unorm_)(((int)(8|16|32))|((short_)(565|555|101010)))) |
 ((signed_|unsigned_)(int)(8|16|32)) |

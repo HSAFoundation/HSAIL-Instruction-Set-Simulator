@@ -9,6 +9,7 @@
 
 
 extern int int_val;
+extern char* string_val;
 namespace hsa {
 namespace brig {
 TerminalType GetTokenType(int token) {
@@ -223,6 +224,31 @@ int Identifier(int first_token, Context* context) {
   } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
     return 0;
   } else if (GetTokenType(first_token) == REGISTER) {
+    BrigOperandReg bor;
+    bor.size = 12;
+    bor.kind = BrigEOperandReg;
+    switch (first_token) {
+      case TOKEN_CREGISTER:
+        bor.type = Brigb1;
+        break;
+      case TOKEN_DREGISTER:
+        bor.type = Brigb64;
+        break;      
+      case TOKEN_SREGISTER:
+        bor.type = Brigb32;
+        break;      
+      case TOKEN_QREGISTER:
+        bor.type = Brigb128;
+        break;      
+    }
+    bor.reserved = 0;
+    // TODO: put offset to strings section for name
+    bor.name = 0;
+      
+    // printf("Register: %s\n",string_val);
+    
+    context->append_o(&bor);
+    
     return 0;
   }
 

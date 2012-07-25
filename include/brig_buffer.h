@@ -96,7 +96,7 @@ class Context {
     template <class T>
     void get_o(T* item) {
       std::vector<unsigned char> o_buffer = obuf->get();
-      std::cout << "Operand buffer size: " << o_buffer.size() << std::endl;
+      // std::cout << "Operand buffer size: " << o_buffer.size() << std::endl;
       if (o_buffer.size() == 0) {
         std::cout << "Empty operand buffer." << std::endl;
         return;
