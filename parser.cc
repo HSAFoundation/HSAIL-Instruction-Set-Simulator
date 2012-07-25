@@ -6,27 +6,11 @@
 
 #include "./tokens.h"
 #include "./build/lexer.h"
-#include "./include/brig.h"
+
 
 extern int int_val;
-extern float float_val;
-extern double double_val;
-
-int stringCount = 0;
-int directiveCount = 0;
-int codeCount = 0;
-int operandCount = 0;
-
-int stringOffset = 0;
-int directiveOffset = 0;
-int codeOffset = 0;
-int operandOffset = 0;
-
-//should be dynamic or a relatively large number
-BrigDirectiveList directiveList[20]; 
-BrigCodeList codeList[20]; 
-BrigOperandList operandList[20]; 
-
+namespace hsa {
+namespace brig {
 TerminalType GetTokenType(int token) {
   switch (token) {
     /* DataTypeId */
@@ -199,37 +183,10 @@ TerminalType GetTokenType(int token) {
   case GROUP:
   case SPILL:
     return UNINITIALIZABLE_ADDRESS;
-
   default:
     return UNKNOWN_TERM;  // unknown
   }
 }
-
-int checkMachineStatusVersion (int token, BrigMachine16_t* machine, BrigProfile16_t* profile, BrigSftz16_t* ftz) {
-    switch (token) {
-    case _SMALL:
-        *machine = BrigESmall;
-        break;
-    case _LARGE:
-        *machine = BrigELarge;
-        break;
-    case _FULL:
-        *profile = BrigEFull;
-        break;
-    case _REDUCED:
-        *profile = BrigEReduced;
-        break;
-    case _SFTZ:
-        *ftz = BrigESftz;
-        break;
-    case _NOSFTZ:
-        *ftz = BrigENosftz;
-        break;
-    default: break;
-   } 
-   return 0;
-};
-
 
 int Query(int QueryOp) {
   // next token should be a dataTypeId
@@ -612,59 +569,75 @@ int Instruction3(int first_token) {
   return 1;
 }
 
-int Version(int first_token) {
+int Version(int first_token, Context* context) {
   // first token must be version keyword
   // check for major
-  BrigcOffset32_t c_code = codeOffset;
-  uint16_t major;
-  uint16_t minor;
-  BrigMachine16_t machine = BrigELarge;
-  BrigProfile16_t profile = BrigEFull; 
-  BrigSftz16_t ftz = BrigENosftz;
+  BrigDirectiveVersion bdv;
+  bdv.kind = BrigEDirectiveVersion;
+  bdv.size = 20;
+  bdv.reserved = 0;
 
-if (yylex() == TOKEN_INTEGER_CONSTANT) {
-    major = int_val;
+  // set default values
+  bdv.machine = BrigESmall;
+  bdv.profile = BrigEFull;
+  bdv.ftz = BrigENosftz;
+  if (yylex() == TOKEN_INTEGER_CONSTANT) {
+    bdv.major = int_val;
+    // printf("Major = %d\n",int_val);
     if (yylex() == ':') {
       // check for minor
       if (yylex() == TOKEN_INTEGER_CONSTANT) {
-        minor = int_val;
+        bdv.minor = int_val;
+        // printf("Minor = %d\n",int_val);
         int next = yylex();
         if (next == ';') {
-          directiveList[directiveCount].offset = directiveOffset;
-          directiveList[directiveCount].thisDirective = 
-                new BrigDirectiveVersion(c_code, 
-                                         major, minor, machine, profile, ftz);
-
-          directiveOffset += directiveList[directiveCount].thisDirective->size;
-          directiveCount ++;
-          return 0;
-            
         } else if (next == ':') {
           // check for target
           next = yylex();
           while (next != ';') {
             if (GetTokenType(next) == TARGET) {
-              checkMachineStatusVersion(next, &machine, &profile, &ftz);
+              switch (next) {
+                case _SMALL:
+                  // printf("Target: $small \n");
+                  bdv.machine = BrigESmall;
+                  break;
+                case _LARGE:
+                  // printf("Target: $large \n");
+                  bdv.machine = BrigELarge;
+                  break;
+                case _FULL:
+                  // printf("Target: $full \n");
+                  bdv.profile = BrigEFull;
+                  break;
+                case _REDUCED:
+                  // printf("Target: $reduced \n");
+                  bdv.profile = BrigEReduced;
+                  break;
+                case _SFTZ:
+                  // printf("Target: $sftz \n");
+                  bdv.ftz = BrigESftz;
+                  break;
+                case _NOSFTZ:
+                  // printf("Target: $nosftz \n");
+                  bdv.ftz = BrigENosftz;
+                  break;
+              }
               next = yylex();
-              if (next == ','){
+              if (next == ',')
                 next = yylex();      // next target
-                checkMachineStatusVersion(next, &machine, &profile, &ftz);
-              } else if (next != ';') {
+              else if (next != ';')
                 return 1;
-             }
             } else {
               return 1;
             }
           }
-          directiveList[directiveCount].offset = directiveOffset;
-          directiveList[directiveCount].thisDirective = 
-                new BrigDirectiveVersion(c_code, 
-                                         major, minor, machine, profile, ftz);
-
-          directiveOffset += directiveList[directiveCount].thisDirective->size;
-          directiveCount ++;
-          return 0;
         }
+        if (context) {
+          context->append_d(&bdv);
+        } else {
+          printf("Invalid context\n");
+        }
+        return 0;
       }
     }
   }
@@ -1051,7 +1024,6 @@ int ArgBlock(int first_token) {
   int last_token;
   int next_token = 0;
   // printf("In arg scope\n");
-
   while (1) {
     next_token = yylex();
     if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
@@ -1092,7 +1064,6 @@ int ArgBlock(int first_token) {
         return 1;
       }
     } else if (next_token == CALL) {  // call (only inside argblock
-
       if (!Call(next_token)) {
       } else {
         return 1;
@@ -1248,7 +1219,6 @@ int Codeblock(int first_token) {
   return 1;
 }
 
-
 int Function(int first_token) {
   bool rescan = false;
   int last_token = 0;
@@ -1265,13 +1235,13 @@ int Function(int first_token) {
   return 1;
 }
 
-int Program(int first_token) {
+int Program(int first_token, Context* context) {
   int result;
   int last_token;
   bool rescan;
 
   if (first_token == VERSION) {
-    if (!Version(first_token)) {
+    if (!Version(first_token, context)) {
       // parse topLevelStatement
       first_token = yylex();
       while (first_token) {
@@ -1308,7 +1278,7 @@ int Program(int first_token) {
                 if (first_token == ')')
                   first_token = yylex();
                 else
-                  return 1;
+                  return 1;  // missing closing )
               } else {
                 return 1;
               }
@@ -1330,8 +1300,8 @@ int Program(int first_token) {
                 if (first_token == ')')
                   first_token = yylex();
                 else
-                  return 1;
-              } else {  // missing body
+                  return 1;  // missing closing )
+              } else {
                 return 1;
               }
             } else {  // missing '('
@@ -1342,6 +1312,8 @@ int Program(int first_token) {
             if (first_token == _FBAR) {
               if (!FBar(first_token)) {
                 first_token = yylex();
+              } else {
+                return 1;
               }
             }
 
@@ -1377,7 +1349,7 @@ int Program(int first_token) {
         }
       }    // while (first_token)
       return 0;
-    }  // if (!Version)
+    }   // if (!Version)
   } else {
     printf("Program must start with version statement.\n");
   }
@@ -1537,19 +1509,6 @@ int Call(int first_token) {
     }
   }
   return 1;
-}
-
-
-int checkVersion(int token){
-    int result = 0;
-    Version(token);
-    if (directiveCount != 1 || directiveOffset != 20)
-        result ++;
-    //result += directiveList[0].thisDirective->test();
-    //printf ("size %d; kind %d\n", directiveList[0].thisDirective->size, directiveList[0].thisDirective->kind);
-
-    //printf ("offset %d; count %d\n", directiveOffset, directiveCount);
-    return result;
 }
 
 int Initializer(int first_token, bool* rescan, int* last_token) {
@@ -1744,3 +1703,6 @@ int ArgUninitializableDecl(int first_token) {
   }
   return 1;
 }
+
+}  // namespace brig
+}  // namespace hsa

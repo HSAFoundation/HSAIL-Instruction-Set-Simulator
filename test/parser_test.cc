@@ -3,10 +3,12 @@
 #include "./gtest/gtest.h"
 #include "./lexer.h"
 #include "../parser.h"
-#include "./include/brig.h"
 
+namespace hsa {
+namespace brig {
+extern Context* context;
 // ------------------ Parser TESTS -----------------
-/*
+
 TEST(ParserTest, IdentifierTest) {
   std::string input("&a_global_id123");  // global id
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
@@ -250,7 +252,6 @@ TEST(ParserTest, RoundingMode) {
   EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token));
 }
 
-
 TEST(ParserTest, Instruction2) {
   // with packing
 
@@ -312,11 +313,12 @@ TEST(ParserTest, Instruction2) {
 TEST(ParserTest, VersionStatement) {
   std::string input("version 1:0;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Version(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
-  input.assign("version 1:0:$large;");
+
+  input.assign("version 2:0:$large;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Version(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 }
 
 TEST(ParserTest, AlignStatement) {
@@ -460,7 +462,7 @@ TEST(ParserTest, Codeblock) {
   // test 1
   std::string input("{ abs_p_s8x4 $s1, $s2; abs_s8x4 $s1, $s2; }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Codeblock(yylex(), 0));
+  EXPECT_EQ(0, Codeblock(yylex()));
 }
 
 TEST(ParserTest, Function) {
@@ -478,7 +480,7 @@ TEST(ParserTest, SimpleProg) {
   input.append("function &abort() (); ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
 TEST(ParserTest, Instruction3) {
@@ -643,7 +645,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
   // Example 2
   input.clear();
@@ -653,7 +655,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
   // Example 4
   input.clear();
@@ -666,7 +668,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" @outof_IF: ret;");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
   // Example 5 - Call to simple function
   input.clear();
@@ -679,7 +681,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("{call &callee;}");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 
   // Example 6a - Call to a complex function
   input.clear();
@@ -694,7 +696,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append("call &callee (%output)(%input);}");
   input.append(" }; ");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
 TEST(ParserTest, ProgWithGlobalDecl) {
@@ -705,7 +707,7 @@ TEST(ParserTest, ProgWithGlobalDecl) {
   input.append("};");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
 TEST(ParserTest, ProgWithUninitializableDecl ) {
@@ -717,7 +719,7 @@ TEST(ParserTest, ProgWithUninitializableDecl ) {
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
 TEST(ParserTest, UninitializableDecl) {
@@ -742,36 +744,8 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   input.append(" }; ");
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, Program(yylex()));
-};
-*/
-
-extern int stringCount;
-extern int directiveCount;
-extern int codeCount;
-extern int operandCount;
-
-extern int stringOffset;
-extern int directiveOffset;
-extern int codeOffset;
-extern int operandOffset;
-
-extern BrigDirectiveList directiveList[20]; 
-extern BrigCodeList codeList[20]; 
-extern BrigOperandList operandList[20]; 
-
-
-//should be dynamic or a relatively large number
-
-
-TEST(ParserTest, writeVersion) {
-  std::string input("version 1:0:$small;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_EQ(0, checkVersion(yylex()));
-  BrigDirectiveVersion* ref = new BrigDirectiveVersion(0,1,0,0,0,0);
-  if  ( directiveList[0].thisDirective )
-    EXPECT_EQ(0, directiveList[0].thisDirective->test(ref));
-  delete ref;
-  delete directiveList[0].thisDirective;
+  EXPECT_EQ(0, Program(yylex(), context));
 };
 
+}  // namespace brig
+}  // namespace hsa
