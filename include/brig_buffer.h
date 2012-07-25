@@ -4,7 +4,7 @@
 #define INCLUDE_BRIG_BUFFER_H_
 #include <stdint.h>
 #include <stdlib.h>
-
+#include <cassert>
 #include <iostream>
 #include <vector>
 
@@ -25,8 +25,30 @@ class Buffer {
   const std::vector<unsigned char>& get(void) const {
     return buf_;
   }
+  size_t size(void) const {
+    return buf_.size();
+  }
+  void append_char(unsigned char c) {
+    buf_.push_back(c);
+  }
  private:
   std::vector<unsigned char> buf_;
+};
+
+class StringBuffer: public Buffer {
+ public:
+  StringBuffer(void) {}
+  void append(const std::string& s) {
+    const char *sp = s.c_str();
+    for (size_t i = 0; i < s.size(); i++) {
+      append_char(*sp++);
+    }
+    append_char('\0');
+  }
+  std::string at(uint32_t index) const {
+    assert(index < get().size());
+    return std::string(reinterpret_cast<const char *>(&(get()[index])));
+  }
 };
 
 

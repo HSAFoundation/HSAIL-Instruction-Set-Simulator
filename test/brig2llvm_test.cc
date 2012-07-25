@@ -17,6 +17,9 @@ TEST(Brig2LLVMTest, AppendBuffer) {
   }
   {
     hsa::brig::Buffer directives;
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&return_true"));
+    strings.append(std::string("%ret_val"));
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
       BrigEDirectiveVersion
@@ -36,17 +39,27 @@ TEST(Brig2LLVMTest, AppendBuffer) {
       0 //d_firstInParam
     };
     directives.append(&bdf);
-    hsa::brig::GenLLVM codegen(directives);
+    BrigSymbolCommon s = {
+      0, // c_code
+      BrigArgSpace, //storageClass
+      BrigNone, // attribute
+      0, // reserved
+      0, // symbolModifier
+      0, // dim
+      13, //s_name
+      Brigf32, //type
+      1, // align
+    };
+    BrigDirectiveSymbol bds = {
+      s,
+      96, //d_init
+      0, // reserved
+    };
+    directives.append(&bds);
+    hsa::brig::GenLLVM codegen(directives, strings);
     codegen();
-    EXPECT_EQ(std::string(
-    "; GPU register declarations\n"
-    "%c_regs = type { [8 x i1] }\n"
-    "%s_regs = type { [8 x i32] }\n"
-    "%d_regs = type { [8 x i64] }\n"
-    "%q_regs = type { [8 x i128] }\n"
-    "%struct.regs = type {%c_regs, %s_regs, %d_regs, %q_regs}\n"
-    "declare void @get_global_id(i32 *, i32 *)\n"
-    "declare void @abort()\n"
-    ), codegen.str());
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos,codegen.str().find(std::string(
+    "define void @return_true(float* %ret_val)")));
   }
 }
