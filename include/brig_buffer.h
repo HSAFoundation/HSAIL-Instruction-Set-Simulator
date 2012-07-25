@@ -34,7 +34,7 @@ class Context {
     Context(void) {
       cbuf = new Buffer();
       dbuf = new Buffer();
-      cbuf = new Buffer();
+      obuf = new Buffer();
       sbuf = new Buffer();
       
     }
@@ -59,6 +59,10 @@ class Context {
     template <class T>
     void get_d(T* item) {
       std::vector<unsigned char> d_buffer = dbuf->get();
+      if (d_buffer.size() == 0) {
+        std::cout << "Empty directive buffer." << std::endl;
+        return;
+      } 
       int return_size = sizeof(T);
       int begin = d_buffer.size() - return_size; 
 
@@ -73,6 +77,11 @@ class Context {
     template <class T>
     void get_c(T* item) {
       std::vector<unsigned char> c_buffer = cbuf->get();
+      if (c_buffer.size() == 0) {
+        std::cout << "Empty code buffer." << std::endl;
+        return;
+      }
+        
       int return_size = sizeof(T);
       int begin = c_buffer.size() - return_size; 
 
@@ -87,6 +96,11 @@ class Context {
     template <class T>
     void get_o(T* item) {
       std::vector<unsigned char> o_buffer = obuf->get();
+      std::cout << "Operand buffer size: " << o_buffer.size() << std::endl;
+      if (o_buffer.size() == 0) {
+        std::cout << "Empty operand buffer." << std::endl;
+        return;
+      }      
       int return_size = sizeof(T);
       int begin = o_buffer.size() - return_size; 
 
