@@ -10,6 +10,62 @@ namespace hsa {
 namespace brig {
 Context* context = new Context();
 
+TEST(CodegenTest, AlignmentCheck) {
+  // Try the situation in PRM 20.2 (pg. 226)
+ 
+  // use a new context object to ensure the problem happen 
+  // since if at beginning the offset is a multiple of 4 but not a multiple of 8
+  // then appending a 4-byte aligned item will lead to a multiple-of-8 offset
+  
+  Context* context1 = new Context();
+  
+  // First append a 4-byte aligned item BrigBlockStart
+  int old_offset;
+  int curr_offset = context1->get_directive_offset();
+  
+  BrigBlockStart bbs = {
+    12,  // size
+    BrigEDirectiveBlockStart,  // kind
+    0,  // c_code
+    0,  // s_name;
+  };
+  
+  context1->append_d(&bbs);    // append_directive
+  old_offset = curr_offset;
+  curr_offset = context1->get_directive_offset();
+  
+  std::cout << "Old offset: " << old_offset << std::endl;
+  std::cout << "New offset: " << curr_offset << std::endl;
+  
+  EXPECT_EQ(old_offset+sizeof(bbs), curr_offset);
+  EXPECT_EQ(0, curr_offset%4);
+  
+  // Next append a 8-byte aligned item  such as BrigBlockNumeric
+  
+  BrigBlockNumeric bbn = {
+    16,  // size
+    BrigEDirectiveBlockNumeric,  // kind
+    Brigb64,  // type
+    1,  // elementCount
+    1,  // u64
+  };
+  
+  context1->append_d(&bbn);  
+  old_offset = curr_offset;
+  curr_offset = context1->get_directive_offset();
+  
+  std::cout << "Old offset: " << old_offset << std::endl;
+  std::cout << "New offset: " << curr_offset << std::endl;
+  
+  EXPECT_EQ(old_offset+sizeof(bbn), curr_offset);
+  
+  // this is a 8-byte aligned item and has a size of multiple of 8.
+  // so the offset after appending this item should be a multiple of 8.
+  EXPECT_EQ(0, curr_offset%8);  
+  
+  delete context1;
+}
+
 TEST(CodegenTest, VersionCodeGen) {
   // reference struct
   BrigDirectiveVersion ref = {
@@ -94,7 +150,7 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.ftz, get.ftz);
 }
 
-TEST(CodegenTest, RegisterCodeGen) {
+TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string input("$d7");  // register
   
   int curr_o_offset = context->get_operand_offset();  // current operand offset value

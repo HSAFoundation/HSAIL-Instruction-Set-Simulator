@@ -188,6 +188,7 @@ enum BrigOperandKinds {
   BrigEOperandPad,
   BrigEOperandOpaque
 };
+
 // Directive structures
 
 // 20.8.8
@@ -225,6 +226,38 @@ struct BrigDirectiveVersion {
     BrigSftz16_t ftz;
     uint16_t reserved;
 };
+
+// 20.6.3
+// BrigBlockNumeric
+// BrigBlockNumeric is a variable-size list of numeric values. All the values should have
+// the same type.
+// More than one BrigBlockNumeric can be in a single block section.
+// This structure must be aligned to an 8-byte boundary (because of the uint64_t field).
+typedef struct BrigBlockNumeric {
+	uint16_t size;
+	uint16_t kind;
+	BrigDataType16_t type;
+	uint16_t elementCount;
+	union {
+		uint8_t u8[8];
+		uint16_t u16[4];
+		uint32_t u32[2];
+		uint64_t u64[1];
+	};
+}BrigBlockNumeric;
+
+// 20.6.4
+// BrigBlockStart
+// BrigBlockStart starts a block section.
+// It provides a name that can be used to separate information used by different
+// debuggers or runtimes.
+// More than one BrigBlockStart can have the same name.
+typedef struct BrigBlockStart {
+	uint16_t size;
+	uint16_t kind;
+	BrigcOffset32_t c_code;
+	BrigsOffset32_t s_name;
+}BrigBlockStart;
 
 // Code structures
 
