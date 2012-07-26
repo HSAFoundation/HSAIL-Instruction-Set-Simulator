@@ -88,94 +88,120 @@ class Context {
     template <class T>
     void append_c(const T* item) {
       cbuf->append(item);
-      code_offset+=sizeof(item);
-      // std::cout << "Code offset: " << code_offset << std::endl;
+      code_offset+=sizeof(T);
     }
 
     // append directive
     template <class T>
     void append_d(const T* item) {
       dbuf->append(item);
-      directive_offset+=sizeof(item);
-      // std::cout << "Directive offset: " << directive_offset << std::endl;
+      directive_offset+=sizeof(T);
     }
 
     // append operand
     template <class T>
     void append_o(const T* item) {
       obuf->append(item);
-      operand_offset+=sizeof(item);
-      // std::cout << "Operand offset: " << operand_offset << std::endl;
+      operand_offset+=sizeof(T);
     }
 
     // append string
     void append_s(const std::string& item) {
       sbuf->append(item);
       string_offset+-item.length();
-      // std::cout << "String offset: " << string_offset << std::endl;
     }
 
-    // get directive
+    // get directive at a specific offset
     template <class T>
-    void get_d(T* item) {
+    void get_d(T* item, int offset) {
+      if (item == NULL) {
+        std::cout << "Caller must allocate the memory for item first." << std::endl;
+        return;
+      }
+      
       std::vector<unsigned char> d_buffer = dbuf->get();
+      int return_size = sizeof(T);      
+      
       if (d_buffer.size() == 0) {
         std::cout << "Empty directive buffer." << std::endl;
         return;
       }
-      int return_size = sizeof(T);
-      int begin = d_buffer.size() - return_size;
+      
+      if (d_buffer.end() < d_buffer.begin()+ offset + return_size) {
+        std::cout << "Invalid offset value" << std::endl;
+        return;
+      }
 
       std::vector<unsigned char>::iterator it;
       unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
 
-      for (it = d_buffer.begin()+begin; it < d_buffer.end(); it++)
+      for (it = d_buffer.begin()+offset; it < d_buffer.begin()+offset+return_size; it++)
         *temp_ptr++ = *it;
     }
 
     // get code
     template <class T>
-    void get_c(T* item) {
+    void get_c(T* item, int offset) {
+      if (item == NULL) {
+        std::cout << "Caller must allocate the memory for item first." << std::endl;
+        return;
+      }
+      
       std::vector<unsigned char> c_buffer = cbuf->get();
+      int return_size = sizeof(T);
+      
       if (c_buffer.size() == 0) {
         std::cout << "Empty code buffer." << std::endl;
         return;
       }
-
-      int return_size = sizeof(T);
-      int begin = c_buffer.size() - return_size;
+      
+      if (c_buffer.end() < c_buffer.begin()+ offset + return_size) {
+        std::cout << "Invalid offset value" << std::endl;
+        return;
+      }
 
       std::vector<unsigned char>::iterator it;
       unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
 
-      for (it = c_buffer.begin()+begin; it < c_buffer.end(); it++)
+      for (it = c_buffer.begin()+offset; it < c_buffer.begin()+offset+return_size; it++)
         *temp_ptr++ = *it;
     }
 
     // get operand
     template <class T>
-    void get_o(T* item) {
+    void get_o(T* item, int offset) {
+      if (item == NULL) {
+        std::cout << "Caller must allocate the memory for item first." << std::endl;
+        return;
+      }
+      
       std::vector<unsigned char> o_buffer = obuf->get();
-      // std::cout << "Operand buffer size: " << o_buffer.size() << std::endl;
+      int return_size = sizeof(T);
+      
       if (o_buffer.size() == 0) {
         std::cout << "Empty operand buffer." << std::endl;
         return;
       }
-      int return_size = sizeof(T);
-      int begin = o_buffer.size() - return_size;
+            
+      if (o_buffer.end() < o_buffer.begin()+ offset + return_size) {
+        std::cout << "Invalid offset value" << std::endl;
+        return;
+      }
 
       std::vector<unsigned char>::iterator it;
       unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
 
-      for (it = o_buffer.begin()+begin; it < o_buffer.end(); it++)
+      for (it = o_buffer.begin() + offset; it < o_buffer.begin() + offset + return_size; it++)
         *temp_ptr++ = *it;
     }
 
-    // get string at a specific offset
-    std::string get_s(uint32_t offset) {
-      return sbuf->at(offset);
-    }
 
+
+    BrigcOffset32_t get_code_offset(void) const { return code_offset; }
+    BrigdOffset32_t get_directive_offset(void) const { return directive_offset; }
+    BrigoOffset32_t get_operand_offset(void) const { return operand_offset; }
+    BrigsOffset32_t get_string_offset(void) const { return string_offset; }
+    
     /*---- functions for update a certain buffer by offset. ----*/
         // directive
     void get_d(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
@@ -191,7 +217,7 @@ class Context {
         *value++ = *it;
     }
 
-        // code
+        //get code
     void get_c(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
       std::vector<unsigned char> c_buffer = cbuf->get();
       if (c_buffer.size() == 0) {
@@ -204,7 +230,7 @@ class Context {
                 it < c_buffer.begin()+offset+nuBytes; it++)
         *value++ = *it;
     }
-        // operand
+        //get operand
     void get_o(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
       std::vector<unsigned char> o_buffer = obuf->get();
       if (o_buffer.size() == 0) {
@@ -216,6 +242,11 @@ class Context {
       for (it = o_buffer.begin()+offset; 
                 it < o_buffer.begin()+offset+nuBytes; it++)
         *value++ = *it;
+    }
+    
+        // get string at a specific offset
+    std::string get_s(uint32_t offset) {
+      return sbuf->at(offset);
     }
 
 
