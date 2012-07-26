@@ -77,16 +77,15 @@ TEST(CodegenTest, VersionCodeGen) {
   ref.minor = 0;
 
   // current directive offset value
-  int curr_d_offset = context->get_directive_offset();
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context));
 
   // after append BrigDirectiveVersion
-  int new_d_offset = context->get_directive_offset();
-  EXPECT_EQ(new_d_offset, curr_d_offset + sizeof(BrigDirectiveVersion));
+  int curr_d_offset = context->get_directive_offset();
+  
   // get structure back
   BrigDirectiveVersion get;
-  context->get_d<BrigDirectiveVersion>(&get, curr_d_offset);
+  context->get_d<BrigDirectiveVersion>(&get, curr_d_offset-sizeof(get));
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.major, get.major);
@@ -97,7 +96,6 @@ TEST(CodegenTest, VersionCodeGen) {
 
       /* TEST 2 */
   input.assign("version 2:0:$large;");
-  curr_d_offset = context->get_directive_offset();
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context));
 
@@ -106,7 +104,8 @@ TEST(CodegenTest, VersionCodeGen) {
   ref.machine = BrigELarge;
 
   // get structure back
-  context->get_d(&get, curr_d_offset);
+  curr_d_offset = context->get_directive_offset();
+  context->get_d(&get, curr_d_offset - sizeof(get));
 
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
@@ -118,7 +117,6 @@ TEST(CodegenTest, VersionCodeGen) {
 
       /* TEST 3, Multi Target */
   input.assign("version 2:0:$large, $reduced, $sftz;");
-  curr_d_offset = context->get_directive_offset();
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context));
 
@@ -129,7 +127,8 @@ TEST(CodegenTest, VersionCodeGen) {
   ref.ftz = BrigESftz;
 
   // get structure back
-  context->get_d<BrigDirectiveVersion>(&get, curr_d_offset);
+  curr_d_offset = context->get_directive_offset();
+  context->get_d<BrigDirectiveVersion>(&get, curr_d_offset - sizeof(get));
 
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
@@ -144,7 +143,6 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string input("$d7");  // register
 
   // current operand offset value
-  int curr_o_offset = context->get_operand_offset();
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
@@ -159,7 +157,8 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
 
   // get structure from context and compare
   BrigOperandReg get;
-  context->get_o<BrigOperandReg>(&get, curr_o_offset);
+  int curr_o_offset = context->get_operand_offset();
+  context->get_o<BrigOperandReg>(&get, curr_o_offset-sizeof(get));
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -170,7 +169,6 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
 TEST(CodegenTest, NumericValueOperandCodeGen) {
   
   /* Integer */
-  
   std::string input("5");  
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
@@ -195,12 +193,31 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.bits.u, get.bits.u);
   
+    /* Negative Integer */
+  input.assign("-5");  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Operand(yylex(), context));
+
+  // reference struct
+  ref.type = Brigb32; 
+  ref.bits.u = -5;
+  // get structure from context and compare
+  curr_o_offset = context->get_operand_offset();
+  // to overcome padding
+  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.bits.u, get.bits.u);
+  
   /* float single */
   input.assign("5.0f");  
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
   // reference struct
+  ref.type = Brigb32;
   ref.bits.f = 5;
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
@@ -230,6 +247,24 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.bits.d, get.bits.d);
 
+  /* Integer List */
+  input.assign("_b32(5,6,8)");  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Operand(yylex(), context));
+
+  // reference struct
+  ref.type = Brigb32;
+  ref.bits.u = 8;
+  // get last structure from context and compare
+  curr_o_offset = context->get_operand_offset();
+  // to overcome padding
+  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.bits.u, get.bits.u);
+  
 }
 
 

@@ -10,6 +10,9 @@
 
 extern int int_val;
 extern char* string_val;
+extern float float_val;
+extern double double_val;
+
 namespace hsa {
 namespace brig {
 TerminalType GetTokenType(int token) {
@@ -288,22 +291,70 @@ int Identifier(int first_token, Context* context) {
 int BaseOperand(int first_token, Context* context) {
   int next;
   if (first_token == TOKEN_DOUBLE_CONSTANT) {
+    BrigOperandImmed boi = {
+      sizeof(boi),        // size
+      BrigEOperandImmed,  // kind
+      Brigb64,            // type
+      0                   // reserved
+    };
+    boi.bits.d = double_val;
+    context->append_o(&boi);
+    
     return 0;
   } else if (first_token == TOKEN_SINGLE_CONSTANT) {
+    BrigOperandImmed boi = {
+      sizeof(boi),        // size
+      BrigEOperandImmed,  // kind
+      Brigb32,            // type
+      0                   // reserved
+    };
+    boi.bits.f = float_val;
+    context->append_o(&boi);
     return 0;
   } else if (first_token == TOKEN_INTEGER_CONSTANT) {
+    BrigOperandImmed boi = {
+      sizeof(boi),        // size
+      BrigEOperandImmed,  // kind
+      Brigb32,            // type
+      0                   // reserved
+    };
+    // TODO (Huy): check context for operation type and decide the type
+    boi.bits.u = int_val;
+    context->append_o(&boi);
+  
     return 0;
   } else if (first_token == TOKEN_WAVESIZE) {
     return 0;
   } else if (first_token == '-') {
-    if (yylex() == TOKEN_INTEGER_CONSTANT)
-      return 0;
+    if (yylex() == TOKEN_INTEGER_CONSTANT) {
+      BrigOperandImmed boi = {
+      sizeof(boi),        // size
+      BrigEOperandImmed,  // kind
+      Brigb32,            // type
+      0                   // reserved
+      };
+      // TODO (Huy): check context for operation type and decide the type
+      boi.bits.u = -int_val;
+      context->append_o(&boi);
+     
+     return 0;
+    }
   } else if (GetTokenType(first_token) == DATA_TYPE_ID) {
     // scan next token
     if (yylex() == '(') {   // should be '('
       // check if we have a decimal list single or float list single
       next = yylex();
       if (next == TOKEN_INTEGER_CONSTANT) {
+        BrigOperandImmed boi = {
+        sizeof(boi),        // size
+        BrigEOperandImmed,  // kind
+        Brigb32,            // type
+        0                   // reserved
+        };
+        // TODO (Huy): check context for operation type and decide the type
+        boi.bits.u = -int_val;
+        context->append_o(&boi);
+        
         next = yylex();
         if (next == ')') {
           return 0;
@@ -311,6 +362,16 @@ int BaseOperand(int first_token, Context* context) {
           while (next == ',') {
             next = yylex();
             if (next == TOKEN_INTEGER_CONSTANT) {
+              BrigOperandImmed boi = {
+                sizeof(boi),        // size
+                BrigEOperandImmed,  // kind
+                Brigb32,            // type
+                0                   // reserved
+              };
+              // TODO (Huy): check context for operation type and decide the type
+              boi.bits.u = int_val;
+              context->append_o(&boi);
+                       
               next = yylex();
               if (next == ')')
                 return 0;
@@ -322,6 +383,15 @@ int BaseOperand(int first_token, Context* context) {
           }  // while
         }
       } else if (next == TOKEN_DOUBLE_CONSTANT)   {
+        BrigOperandImmed boi = {
+        sizeof(boi),        // size
+        BrigEOperandImmed,  // kind
+        Brigb64,            // type
+        0                   // reserved
+        };
+        boi.bits.d = double_val;
+        context->append_o(&boi);
+        
         next = yylex();
         if (next == ')') {
           return 0;
@@ -329,6 +399,14 @@ int BaseOperand(int first_token, Context* context) {
           while (next == ',') {
             next = yylex();
             if (next == TOKEN_DOUBLE_CONSTANT) {
+              BrigOperandImmed boi = {
+                sizeof(boi),        // size
+                BrigEOperandImmed,  // kind
+                Brigb64,            // type
+                0                   // reserved
+              };
+              boi.bits.d = double_val;
+              context->append_o(&boi);
               next = yylex();
               if (next == ')')
                 return 0;
