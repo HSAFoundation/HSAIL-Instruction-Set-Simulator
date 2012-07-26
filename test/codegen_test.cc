@@ -267,6 +267,28 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   
 }
 
+TEST(CodegenTest, LookupStringTest) {
+  std::string input("&test_string1");
+  
+  StringBuffer* strBuf = new StringBuffer();
+  
+  strBuf->append(input);
+  
+  int offset = strBuf->size();
+  input.assign("&test_string2");
+  strBuf->append(input);
+  
+  // lookup first string
+  input.assign("&test_string1");
+  int loc = strBuf->lookup(input);
+  EXPECT_EQ(0,loc);
+  
+  input.assign("&test_string2");
+  loc = strBuf->lookup(input);
+  EXPECT_EQ(offset,loc);
+
+}
+
 
 }  // namespace brig
 }  // namespace hsa

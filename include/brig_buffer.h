@@ -99,6 +99,8 @@ class Buffer {
 class StringBuffer: public Buffer {
  public:
   StringBuffer(void) {}
+  
+  // append string
   void append(const std::string& s) {
     const char *sp = s.c_str();
     for (size_t i = 0; i < s.size(); i++) {
@@ -106,10 +108,21 @@ class StringBuffer: public Buffer {
     }
     append_char('\0');
   }
+  
+  // get string at an index
   std::string at(uint32_t index) const {
     assert(index < get().size());
     return std::string(reinterpret_cast<const char *>(&(get()[index])));
   }
+  
+  // look up offset to a string
+  // return the offset if the string exists in buffer
+  // return -1 if string does not exist
+  int lookup(const std::string& s) {
+
+    return -1;
+  
+  };
   
 };
 
