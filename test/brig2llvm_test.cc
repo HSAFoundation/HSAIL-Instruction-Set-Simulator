@@ -1,9 +1,9 @@
 // Copyright 2012 MulticoreWare Inc.
 
 #include "./gtest/gtest.h"
-#include "brig.h"
-#include "brig_buffer.h"
-#include "brig_llvm.h"
+#include "./brig.h"
+#include "./brig_buffer.h"
+#include "./brig_llvm.h"
 // ------------------ Brig2LLVM TESTS -----------------
 
 TEST(Brig2LLVMTest, AppendBuffer) {
@@ -12,7 +12,7 @@ TEST(Brig2LLVMTest, AppendBuffer) {
       sizeof(foo), BrigEInstLdSt,
     };
     hsa::brig::Buffer bb;
-    bb.append(&foo); 
+    bb.append(&foo);
     EXPECT_EQ(bb.get().size(), sizeof(foo));
   }
   {
@@ -27,33 +27,33 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     directives.append(&bdv);
     BrigDirectiveFunction bdf = {
       sizeof(bdf), BrigEDirectiveFunction,
-      0, //c_code
-      0, //s_name
-      0, //inParamCount
-      60,//d_firstScopedDirective
-      1, //operationCount
-      96, //d_nextDirective
-      0, //attribute
-      0, //fbarCount
-      1, //outParamCount
-      0 //d_firstInParam
+      0,   // c_code
+      0,   // s_name
+      0,   // inParamCount
+      60,  // d_firstScopedDirective
+      1,   // operationCount
+      96,  // d_nextDirective
+      0,   // attribute
+      0,   // fbarCount
+      1,   // outParamCount
+      0    // d_firstInParam
     };
     directives.append(&bdf);
     BrigSymbolCommon s = {
-      0, // c_code
-      BrigArgSpace, //storageClass
-      BrigNone, // attribute
-      0, // reserved
-      0, // symbolModifier
-      0, // dim
-      13, //s_name
-      Brigf32, //type
-      1, // align
+      0,             // c_code
+      BrigArgSpace,  // storageClass
+      BrigNone,      // attribute
+      0,             // reserved
+      0,             // symbolModifier
+      0,             // dim
+      13,            // s_name
+      Brigf32,       // type
+      1,            // align
     };
     BrigDirectiveSymbol bds = {
       s,
-      96, //d_init
-      0, // reserved
+      96,  // d_init
+      0,   // reserved
     };
     directives.append(&bds);
     hsa::brig::GenLLVM codegen(directives, strings);

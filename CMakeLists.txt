@@ -7,7 +7,7 @@ include_directories(${CMAKE_BINARY_DIR})
 add_definitions(-DGTEST_HAS_PTHREAD=0)
 flex_target(lexer example.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
-set(foo_SOURCES
+set(hsail2brig_test_SOURCES
     test/codegen_test.cc
     test/parser_test.cc
     test/hsail_test.cc
@@ -16,7 +16,7 @@ set(foo_SOURCES
 	parser.cc
 	${FLEX_lexer_OUTPUTS}
 	)
-add_executable(foo ${foo_SOURCES})
+add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
 option(ENABLE_BRIG_FE "Build LLVM frontend for BRIG" OFF)
 if (ENABLE_BRIG_FE)
   add_subdirectory(src/brig2llvm)

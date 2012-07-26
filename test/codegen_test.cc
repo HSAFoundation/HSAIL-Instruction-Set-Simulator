@@ -24,10 +24,10 @@ TEST(CodegenTest, AlignmentCheck) {
   int curr_offset = context1->get_directive_offset();
 
   BrigBlockStart bbs = {
-    12,  // size
+    12,                        // size
     BrigEDirectiveBlockStart,  // kind
-    0,  // c_code
-    0,  // s_name;
+    0,                         // c_code
+    0                          // s_name;
   };
 
   context1->append_d(&bbs);    // append_directive
@@ -39,11 +39,11 @@ TEST(CodegenTest, AlignmentCheck) {
 
   // Next append a 8-byte aligned item  such as BrigBlockNumeric
   BrigBlockNumeric bbn = {
-    16,  // size
+    16,                          // size
     BrigEDirectiveBlockNumeric,  // kind
-    Brigb64,  // type
-    1,  // elementCount
-    1,  // u64
+    Brigb64,                     // type
+    1,                           // elementCount
+    1,                           // u64
   };
 
   context1->append_d(&bbn);
@@ -63,13 +63,13 @@ TEST(CodegenTest, VersionCodeGen) {
   BrigDirectiveVersion ref = {
     sizeof(ref),
     BrigEDirectiveVersion,
-    0,  // unknown c_code
-    1,  // major
-    0,  // minor
-    BrigESmall,  // machine
-    BrigEFull,  // profile
+    0,            // unknown c_code
+    1,            // major
+    0,            // minor
+    BrigESmall,   // machine
+    BrigEFull,    // profile
     BrigENosftz,  // ftz
-    0   // reserved
+    0             // reserved
     };
 
   std::string input("version 1:0;");
@@ -78,7 +78,6 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // current directive offset value
   int curr_d_offset = context->get_directive_offset();
-
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context));
 
@@ -98,10 +97,7 @@ TEST(CodegenTest, VersionCodeGen) {
 
       /* TEST 2 */
   input.assign("version 2:0:$large;");
-
   curr_d_offset = context->get_directive_offset();
-
-
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context));
 
@@ -113,7 +109,6 @@ TEST(CodegenTest, VersionCodeGen) {
   context->get_d(&get, curr_d_offset);
 
   // compare two structs
-
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.major, get.major);
   EXPECT_EQ(ref.minor, get.minor);
@@ -137,7 +132,6 @@ TEST(CodegenTest, VersionCodeGen) {
   context->get_d<BrigDirectiveVersion>(&get, curr_d_offset);
 
   // compare two structs
-
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.major, get.major);
   EXPECT_EQ(ref.minor, get.minor);
@@ -160,7 +154,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
     BrigEOperandReg,  // kind
     Brigb64,          // type
     0,                // reserved
-    0                // name -> offset in .strings section (unknown now)
+    0                 // name
   };
 
   // get structure from context and compare

@@ -90,7 +90,7 @@ class Context {
           (code_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
-          4,  // Size
+          4,                 // Size
           BrigEDirectivePad  // type
         };
         cbuf->append(&bdp);
@@ -107,7 +107,7 @@ class Context {
           (directive_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
-          4,  // Size
+          4,                 // Size
           BrigEDirectivePad  // type
         };
         dbuf->append(&bdp);
@@ -124,7 +124,7 @@ class Context {
           (operand_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
-          4,  // Size
+          4,                 // Size
           BrigEDirectivePad  // type
         };
         obuf->append(&bdp);

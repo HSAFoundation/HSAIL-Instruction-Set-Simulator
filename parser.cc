@@ -5,7 +5,7 @@
 #include <string>
 
 #include "./tokens.h"
-#include "./build/lexer.h"
+#include "./lexer.h"
 
 
 extern int int_val;

@@ -3,9 +3,9 @@
 #include "llvm/Module.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IRBuilder.h"
+#include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
-#include "brig.h"
 #include <iostream>
 namespace hsa{
 namespace brig{
