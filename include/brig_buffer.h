@@ -35,12 +35,11 @@ class Buffer {
     // Buffer modifier, used for update the buffer contents.
   void modifier(uint16_t offset,
                 unsigned char* value,
-                uint16_t nuBytes) 
-                {
+                uint16_t nuBytes) {
     std::vector<unsigned char>::iterator it;
     if ( buf_.end() < buf_.begin()+offset+nuBytes ) {
       std::cout << "Invalid access to Buffer." << std::endl;
-      return ;
+      return;
     } else {
       for (it = buf_.begin()+offset; it < buf_.begin()+offset+nuBytes; it++) {
         *it = *value;
@@ -87,7 +86,7 @@ class Context {
     // append code
     template <class T>
     void append_c(const T* item) {
-      if ((alignment_check(*item) == BrigEAlignment_8) && 
+      if ((alignment_check(*item) == BrigEAlignment_8) &&
           (code_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
@@ -95,7 +94,7 @@ class Context {
           BrigEDirectivePad  // type
         };
         cbuf->append(&bdp);
-        code_offset+=4;   
+        code_offset+=4;
       }
       cbuf->append(item);
       code_offset+=sizeof(T);
@@ -104,7 +103,7 @@ class Context {
     // append directive
     template <class T>
     void append_d(const T* item) {
-      if ((alignment_check(*item) == BrigEAlignment_8) && 
+      if ((alignment_check(*item) == BrigEAlignment_8) &&
           (directive_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
@@ -112,7 +111,7 @@ class Context {
           BrigEDirectivePad  // type
         };
         dbuf->append(&bdp);
-        directive_offset+=4;   
+        directive_offset+=4;
       }
       dbuf->append(item);
       directive_offset+=sizeof(T);
@@ -121,7 +120,7 @@ class Context {
     // append operand
     template <class T>
     void append_o(const T* item) {
-      if ((alignment_check(*item) == BrigEAlignment_8) && 
+      if ((alignment_check(*item) == BrigEAlignment_8) &&
           (operand_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
@@ -129,7 +128,7 @@ class Context {
           BrigEDirectivePad  // type
         };
         obuf->append(&bdp);
-        operand_offset+=4;   
+        operand_offset+=4;
       }
       obuf->append(item);
       operand_offset+=sizeof(T);
@@ -146,18 +145,19 @@ class Context {
     template <class T>
     void get_d(T* item, int offset) {
       if (item == NULL) {
-        std::cout << "Caller must allocate the memory for item first." << std::endl;
+        std::cout << "Caller must allocate the memory for item first."
+                  << std::endl;
         return;
       }
-      
+
       std::vector<unsigned char> d_buffer = dbuf->get();
-      int return_size = sizeof(T);      
-      
+      int return_size = sizeof(T);
+
       if (d_buffer.size() == 0) {
         std::cout << "Empty directive buffer." << std::endl;
         return;
       }
-      
+
       if (d_buffer.end() < d_buffer.begin()+ offset + return_size) {
         std::cout << "Invalid offset value" << std::endl;
         return;
@@ -166,7 +166,9 @@ class Context {
       std::vector<unsigned char>::iterator it;
       unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
 
-      for (it = d_buffer.begin()+offset; it < d_buffer.begin()+offset+return_size; it++)
+      for (it = d_buffer.begin()+offset;
+           it < d_buffer.begin()+offset+return_size;
+           it++)
         *temp_ptr++ = *it;
     }
 
@@ -174,18 +176,19 @@ class Context {
     template <class T>
     void get_c(T* item, int offset) {
       if (item == NULL) {
-        std::cout << "Caller must allocate the memory for item first." << std::endl;
+        std::cout << "Caller must allocate the memory for item first."
+                  << std::endl;
         return;
       }
-      
+
       std::vector<unsigned char> c_buffer = cbuf->get();
       int return_size = sizeof(T);
-      
+
       if (c_buffer.size() == 0) {
         std::cout << "Empty code buffer." << std::endl;
         return;
       }
-      
+
       if (c_buffer.end() < c_buffer.begin()+ offset + return_size) {
         std::cout << "Invalid offset value" << std::endl;
         return;
@@ -194,7 +197,9 @@ class Context {
       std::vector<unsigned char>::iterator it;
       unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
 
-      for (it = c_buffer.begin()+offset; it < c_buffer.begin()+offset+return_size; it++)
+      for (it = c_buffer.begin()+offset;
+           it < c_buffer.begin()+offset+return_size;
+           it++)
         *temp_ptr++ = *it;
     }
 
@@ -202,18 +207,19 @@ class Context {
     template <class T>
     void get_o(T* item, int offset) {
       if (item == NULL) {
-        std::cout << "Caller must allocate the memory for item first." << std::endl;
+        std::cout << "Caller must allocate the memory for item first."
+                  << std::endl;
         return;
       }
-      
+
       std::vector<unsigned char> o_buffer = obuf->get();
       int return_size = sizeof(T);
-      
+
       if (o_buffer.size() == 0) {
         std::cout << "Empty operand buffer." << std::endl;
         return;
       }
-            
+
       if (o_buffer.end() < o_buffer.begin()+ offset + return_size) {
         std::cout << "Invalid offset value" << std::endl;
         return;
@@ -222,15 +228,25 @@ class Context {
       std::vector<unsigned char>::iterator it;
       unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
 
-      for (it = o_buffer.begin() + offset; it < o_buffer.begin() + offset + return_size; it++)
+      for (it = o_buffer.begin() + offset;
+           it < o_buffer.begin() + offset + return_size;
+           it++)
         *temp_ptr++ = *it;
     }
 
-    BrigcOffset32_t get_code_offset(void) const { return code_offset; }
-    BrigdOffset32_t get_directive_offset(void) const { return directive_offset; }
-    BrigoOffset32_t get_operand_offset(void) const { return operand_offset; }
-    BrigsOffset32_t get_string_offset(void) const { return string_offset; }
-    
+    BrigcOffset32_t get_code_offset(void) const {
+      return code_offset;
+    }
+    BrigdOffset32_t get_directive_offset(void) const {
+      return directive_offset;
+    }
+    BrigoOffset32_t get_operand_offset(void) const {
+      return operand_offset;
+    }
+    BrigsOffset32_t get_string_offset(void) const {
+      return string_offset;
+    }
+
     /*---- functions for update a certain buffer by offset. ----*/
         // directive
     void get_d(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
@@ -241,12 +257,12 @@ class Context {
       }
       std::vector<unsigned char>::iterator it;
 
-      for (it = d_buffer.begin()+offset; 
+      for (it = d_buffer.begin()+offset;
                 it < d_buffer.begin()+offset+nuBytes; it++)
         *value++ = *it;
     }
 
-        //get code
+        // get code
     void get_c(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
       std::vector<unsigned char> c_buffer = cbuf->get();
       if (c_buffer.size() == 0) {
@@ -255,11 +271,11 @@ class Context {
       }
       std::vector<unsigned char>::iterator it;
 
-      for (it = c_buffer.begin()+offset; 
+      for (it = c_buffer.begin()+offset;
                 it < c_buffer.begin()+offset+nuBytes; it++)
         *value++ = *it;
     }
-        //get operand
+        // get operand
     void get_o(unsigned char* value, uint16_t offset, uint16_t nuBytes) {
       std::vector<unsigned char> o_buffer = obuf->get();
       if (o_buffer.size() == 0) {
@@ -268,11 +284,11 @@ class Context {
       }
       std::vector<unsigned char>::iterator it;
 
-      for (it = o_buffer.begin()+offset; 
+      for (it = o_buffer.begin()+offset;
                 it < o_buffer.begin()+offset+nuBytes; it++)
         *value++ = *it;
     }
-    
+
         // get string at a specific offset
     std::string get_s(uint32_t offset) {
       return sbuf->at(offset);
@@ -280,31 +296,28 @@ class Context {
 
 
     /*---- functions for update a certain buffer by offset. ----*/
-    void updateBuffer_d (uint16_t offset,
+    void updateBuffer_d(uint16_t offset,
                          unsigned char* value,
-                         uint16_t nuBytes) 
-                         {
+                         uint16_t nuBytes) {
       dbuf->modifier(offset, value, nuBytes);
     }
 
-    void updateBuffer_c (uint16_t offset,
+    void updateBuffer_c(uint16_t offset,
                          unsigned char* value,
-                         uint16_t nuBytes) 
-                         {
+                         uint16_t nuBytes) {
       cbuf->modifier(offset, value, nuBytes);
     }
 
-    void updateBuffer_o (uint16_t offset,
+    void updateBuffer_o(uint16_t offset,
                          unsigned char* value,
-                         uint16_t nuBytes) 
-                         {
+                         uint16_t nuBytes) {
       obuf->modifier(offset, value, nuBytes);
     }
-    
+
     /* helper function to check alignment requirement of each structure */
     template<class T>
     static BrigAlignment alignment_check(T item) {
-      switch(item.kind) {
+      switch (item.kind) {
         // directive
         case BrigEDirectiveBlockNumeric:
         case BrigEDirectiveInit:
