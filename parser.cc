@@ -1,11 +1,11 @@
 /* Copyright 2012 <MulticorewareInc> */
 
-#include "./parser.h"
+#include "parser.h"
 
 #include <string>
 
-#include "./tokens.h"
-#include "./build/lexer.h"
+#include "tokens.h"
+#include "lexer.h"
 
 
 extern int int_val;
