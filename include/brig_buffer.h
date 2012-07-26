@@ -119,7 +119,13 @@ class StringBuffer: public Buffer {
   // return the offset if the string exists in buffer
   // return -1 if string does not exist
   int lookup(const std::string& s) {
-
+    std::string temp;
+    uint32_t index;
+    for (index = 0; index < size(); index++) {
+      temp = at(index);
+      if (!temp.compare(s))
+        return index;    
+    }
     return -1;
   
   };
