@@ -69,7 +69,6 @@ class StringBuffer: public Buffer {
   }
 };
 
-
 // context for code generation
 class Context {
   public:
@@ -84,9 +83,20 @@ class Context {
       operand_offset = 0;
     }
 
+    /* code to append Brig structures to buffers */
     // append code
     template <class T>
     void append_c(const T* item) {
+      if ((alignment_check(*item) == BrigEAlignment_8) && 
+          (code_offset%8)) {
+        // need padding to ensure code_offset is a multiple of 8
+        BrigDirectivePad bdp = {
+          4,  // Size
+          BrigEDirectivePad  // type
+        };
+        cbuf->append(&bdp);
+        code_offset+=4;   
+      }
       cbuf->append(item);
       code_offset+=sizeof(T);
     }
@@ -94,6 +104,16 @@ class Context {
     // append directive
     template <class T>
     void append_d(const T* item) {
+      if ((alignment_check(*item) == BrigEAlignment_8) && 
+          (directive_offset%8)) {
+        // need padding to ensure code_offset is a multiple of 8
+        BrigDirectivePad bdp = {
+          4,  // Size
+          BrigEDirectivePad  // type
+        };
+        dbuf->append(&bdp);
+        directive_offset+=4;   
+      }
       dbuf->append(item);
       directive_offset+=sizeof(T);
     }
@@ -101,6 +121,16 @@ class Context {
     // append operand
     template <class T>
     void append_o(const T* item) {
+      if ((alignment_check(*item) == BrigEAlignment_8) && 
+          (operand_offset%8)) {
+        // need padding to ensure code_offset is a multiple of 8
+        BrigDirectivePad bdp = {
+          4,  // Size
+          BrigEDirectivePad  // type
+        };
+        obuf->append(&bdp);
+        operand_offset+=4;   
+      }
       obuf->append(item);
       operand_offset+=sizeof(T);
     }
@@ -111,6 +141,7 @@ class Context {
       string_offset+-item.length();
     }
 
+    /* code to get Brig structures from buffers */
     // get directive at a specific offset
     template <class T>
     void get_d(T* item, int offset) {
@@ -195,8 +226,6 @@ class Context {
         *temp_ptr++ = *it;
     }
 
-
-
     BrigcOffset32_t get_code_offset(void) const { return code_offset; }
     BrigdOffset32_t get_directive_offset(void) const { return directive_offset; }
     BrigoOffset32_t get_operand_offset(void) const { return operand_offset; }
@@ -271,8 +300,21 @@ class Context {
                          {
       obuf->modifier(offset, value, nuBytes);
     }
-
-
+    
+    /* helper function to check alignment requirement of each structure */
+    template<class T>
+    static BrigAlignment alignment_check(T item) {
+      switch(item.kind) {
+        // directive
+        case BrigEDirectiveBlockNumeric:
+        case BrigEDirectiveInit:
+        // operand
+        case BrigEOperandImmed:
+          return BrigEAlignment_8;
+        default:
+          return BrigEAlignment_4;
+      }
+    }
 
   private:
     Buffer* cbuf;  // code buffer

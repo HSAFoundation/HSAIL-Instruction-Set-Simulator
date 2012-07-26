@@ -23,6 +23,12 @@ typedef uint32_t BrigMemorySemantic32_t;
 
 // Enums
 
+// Custom enum to check for alignment of structs
+enum BrigAlignment {
+    BrigEAlignment_4,
+    BrigEAlignment_8
+};
+
 // 20.5.3
 enum BrigAttribute {
     BrigExtern,
@@ -257,8 +263,15 @@ typedef struct BrigBlockStart {
 	uint16_t kind;
 	BrigcOffset32_t c_code;
 	BrigsOffset32_t s_name;
-}BrigBlockStart;
+} BrigBlockStart;
 
+// 20.8.16
+// BrigDirectivePad
+// BrigDirectivePad is used to pad out the .directives stream to ensure alignment.
+typedef struct BrigDirectivePad {
+  uint16_t size;
+  uint16_t kind;
+} BrigDirectivePad;
 // Code structures
 
 // 20.9.9
