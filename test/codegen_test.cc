@@ -167,5 +167,71 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   EXPECT_EQ(ref.name, get.name);
 }
 
+TEST(CodegenTest, NumericValueOperandCodeGen) {
+  
+  /* Integer */
+  
+  std::string input("5");  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Operand(yylex(), context));
+
+  // reference struct
+  BrigOperandImmed ref = {
+    sizeof(ref),        // size
+    BrigEOperandImmed,  // kind
+    Brigb32,            // type
+    0                   // reserved
+  };
+  
+  ref.bits.u = 5;
+  // get structure from context and compare
+  BrigOperandImmed get;
+  int curr_o_offset = context->get_operand_offset();
+  // to overcome padding
+  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.bits.u, get.bits.u);
+  
+  /* float single */
+  input.assign("5.0f");  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Operand(yylex(), context));
+
+  // reference struct
+  ref.bits.f = 5;
+  // get structure from context and compare
+  curr_o_offset = context->get_operand_offset();
+  // to overcome padding
+  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.bits.f, get.bits.f);
+  
+  /* double */
+  input.assign("5.0l");  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Operand(yylex(), context));
+
+  // reference struct
+  ref.bits.d = 5;
+  ref.type = Brigb64;
+  // get structure from context and compare
+  curr_o_offset = context->get_operand_offset();
+  // to overcome padding
+  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.bits.d, get.bits.d);
+
+}
+
+
 }  // namespace brig
 }  // namespace hsa

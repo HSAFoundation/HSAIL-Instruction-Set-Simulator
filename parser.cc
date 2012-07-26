@@ -240,9 +240,34 @@ int Query(int QueryOp, Context* context) {
 }
 
 int Operand(int first_token, Context* context) {
-  if (!Identifier(first_token, context))   // an Identifier
+  if (!Identifier(first_token, context)) {  // an Identifier
+    if (GetTokenType(first_token) == REGISTER) {
+      BrigOperandReg bor;
+      bor.size = 12;
+      bor.kind = BrigEOperandReg;
+      switch (first_token) {
+        case TOKEN_CREGISTER:
+          bor.type = Brigb1;
+          break;
+        case TOKEN_DREGISTER:
+          bor.type = Brigb64;
+          break;
+        case TOKEN_SREGISTER:
+          bor.type = Brigb32;
+          break;
+        case TOKEN_QREGISTER:
+          bor.type = Brigb128;
+          break;
+      }
+    
+      bor.reserved = 0;
+      // TODO(Huy): put offset to strings section for name
+      bor.name = 0;
+      // printf("Register: %s\n",string_val);
+      context->append_o(&bor);
+    }
     return 0;
-  else if (!BaseOperand(first_token, context))     // a base Operand
+  } else if (!BaseOperand(first_token, context))     // a base Operand
     return 0;
 
   return 1;
@@ -254,31 +279,6 @@ int Identifier(int first_token, Context* context) {
   } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
     return 0;
   } else if (GetTokenType(first_token) == REGISTER) {
-    BrigOperandReg bor;
-    bor.size = 12;
-    bor.kind = BrigEOperandReg;
-    switch (first_token) {
-      case TOKEN_CREGISTER:
-        bor.type = Brigb1;
-        break;
-      case TOKEN_DREGISTER:
-        bor.type = Brigb64;
-        break;
-      case TOKEN_SREGISTER:
-        bor.type = Brigb32;
-        break;
-      case TOKEN_QREGISTER:
-        bor.type = Brigb128;
-        break;
-    }
-    bor.reserved = 0;
-    // TODO(Huy): put offset to strings section for name
-    bor.name = 0;
-
-    // printf("Register: %s\n",string_val);
-
-    context->append_o(&bor);
-
     return 0;
   }
 
