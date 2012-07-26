@@ -264,9 +264,9 @@ int Operand(int first_token, Context* context) {
       }
     
       bor.reserved = 0;
-      // TODO(Huy): put offset to strings section for name
-      bor.name = 0;
-      // printf("Register: %s\n",string_val);
+      std::string name(string_val);
+      bor.name = context->add_symbol(name);
+      
       context->append_o(&bor);
     }
     return 0;

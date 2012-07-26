@@ -125,6 +125,7 @@ class StringBuffer: public Buffer {
       temp = at(index);
       if (!temp.compare(s))
         return index;    
+      
     }
     return -1;
   
@@ -190,11 +191,28 @@ class Context {
       }
       obuf->append(item);
     }
-
-    // append string
-    void append_s(const std::string& item) {
-      sbuf->append(item);
-    }
+    
+    // add a new symbol to .strings section.
+    // return the offset to that symbol
+    int add_symbol(const std::string& s) {
+      // check if symbol exists
+      int offset = sbuf->lookup(s);   
+      if (offset < 0) {
+        // symbol does not exist. Add new       
+        offset = sbuf->size();  // current offset
+        sbuf->append(s);
+        return offset;
+      } else {
+      // symbol already exists in buffer
+        return offset;
+      }
+    };
+    
+    // lookup offset to a symbol
+    // if symbol does not exist, return -1
+    int lookup_symbol(const std::string& s) {
+      return sbuf->lookup(s);
+    };
 
     /* code to get Brig structures from buffers */
     // get directive at a specific offset

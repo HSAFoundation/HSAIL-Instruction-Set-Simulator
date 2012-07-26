@@ -140,9 +140,9 @@ TEST(CodegenTest, VersionCodeGen) {
 }
 
 TEST(CodegenTest, RegisterOperandCodeGen) {
+  std::string name;
   std::string input("$d7");  // register
 
-  // current operand offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
@@ -151,13 +151,30 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
     sizeof(ref),      // size
     BrigEOperandReg,  // kind
     Brigb64,          // type
-    0,                // reserved
-    0                 // name
+    0                // reserved   
   };
+  name.assign("$d7");
+  ref.name = context->lookup_symbol(name);
 
   // get structure from context and compare
   BrigOperandReg get;
   int curr_o_offset = context->get_operand_offset();
+  context->get_o<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.name, get.name);
+  
+  // second register
+  input.assign("$q7");
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Operand(yylex(), context));
+  
+  name.assign("$q7");
+  ref.name = context->lookup_symbol(name);
+  ref.type = Brigb128;
+  curr_o_offset = context->get_operand_offset();
   context->get_o<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
@@ -289,6 +306,30 @@ TEST(CodegenTest, LookupStringTest) {
 
 }
 
+TEST(CodegenTest, AddSymbolTest) {
+  std::string symbol("&symbol1");
+  int offset = context->get_string_offset();
+  // add symbol
+  int sym1_offset = context->add_symbol(symbol);
+  EXPECT_EQ(offset, sym1_offset);
+  
+  offset = context->get_string_offset();
+  symbol.assign("%symbol2");
+  int sym2_offset = context->add_symbol(symbol);
+  EXPECT_EQ(offset, sym2_offset);
+  
+  // try to add symbol 1 again
+  symbol.assign("&symbol1");
+  int sym1b_offset = context->add_symbol(symbol);
+  EXPECT_EQ(sym1_offset, sym1b_offset);
+  
+  std::cout << "Buffer size: " << context->get_string_offset() << std::endl;
+  // lookup
+  symbol.assign("%symbol2");
+  int lookup_sym2 = context->lookup_symbol(symbol);
+  
+  EXPECT_EQ(sym2_offset, lookup_sym2);
+}
 
 }  // namespace brig
 }  // namespace hsa
