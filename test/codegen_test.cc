@@ -85,7 +85,7 @@ TEST(CodegenTest, VersionCodeGen) {
   
   // get structure back
   BrigDirectiveVersion get;
-  context->get_d<BrigDirectiveVersion>(&get, curr_d_offset-sizeof(get));
+  context->get_d<BrigDirectiveVersion>(curr_d_offset-sizeof(get), &get);
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.major, get.major);
@@ -105,7 +105,7 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // get structure back
   curr_d_offset = context->get_directive_offset();
-  context->get_d(&get, curr_d_offset - sizeof(get));
+  context->get_d(curr_d_offset-sizeof(get), &get);
 
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
@@ -128,7 +128,7 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // get structure back
   curr_d_offset = context->get_directive_offset();
-  context->get_d<BrigDirectiveVersion>(&get, curr_d_offset - sizeof(get));
+  context->get_d<BrigDirectiveVersion>(curr_d_offset-sizeof(get), &get);
 
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
@@ -158,7 +158,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   // get structure from context and compare
   BrigOperandReg get;
   int curr_o_offset = context->get_operand_offset();
-  context->get_o<BrigOperandReg>(&get, curr_o_offset-sizeof(get));
+  context->get_o<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -186,7 +186,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   BrigOperandImmed get;
   int curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -204,7 +204,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -222,7 +222,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -240,7 +240,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -258,7 +258,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   // get last structure from context and compare
   curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(&get, curr_o_offset - sizeof(get));
+  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
