@@ -15,6 +15,25 @@ extern double double_val;
 
 namespace hsa {
 namespace brig {
+
+// scan the source code and add symbols to string buffer
+void ScanString(int first_token, Context* context) {
+  std::string temp;
+  while(first_token) {
+    if ((first_token == TOKEN_GLOBAL_IDENTIFIER) ||
+        (first_token == TOKEN_LOCAL_IDENTIFIER) ||
+        (GetTokenType(first_token) == REGISTER) ||
+        (first_token == TOKEN_LABEL)) {
+      
+      temp.assign(string_val);
+      int offset = context->add_symbol(temp);
+      std::cout << "Added symbol: " << temp <<" at " << offset << std::endl;
+      temp.clear();
+    }
+    first_token = yylex(); 
+  }
+}
+
 TerminalType GetTokenType(int token) {
   switch (token) {
     /* DataTypeId */
@@ -265,7 +284,7 @@ int Operand(int first_token, Context* context) {
     
       bor.reserved = 0;
       std::string name(string_val);
-      bor.name = context->add_symbol(name);
+      bor.name = context->lookup_symbol(name);
       
       context->append_o(&bor);
     }

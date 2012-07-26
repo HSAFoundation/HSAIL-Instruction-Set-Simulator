@@ -142,7 +142,11 @@ TEST(CodegenTest, VersionCodeGen) {
 TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string name;
   std::string input("$d7");  // register
-
+ 
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  // scan for strings first
+  ScanString(yylex(), context);
+  // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
@@ -168,6 +172,10 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   
   // second register
   input.assign("$q7");
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  // scan for strings first
+  ScanString(yylex(), context);
+  // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
   
@@ -309,6 +317,7 @@ TEST(CodegenTest, LookupStringTest) {
 TEST(CodegenTest, AddSymbolTest) {
   std::string symbol("&symbol1");
   int offset = context->get_string_offset();
+  
   // add symbol
   int sym1_offset = context->add_symbol(symbol);
   EXPECT_EQ(offset, sym1_offset);
@@ -322,14 +331,19 @@ TEST(CodegenTest, AddSymbolTest) {
   symbol.assign("&symbol1");
   int sym1b_offset = context->add_symbol(symbol);
   EXPECT_EQ(sym1_offset, sym1b_offset);
-  
-  std::cout << "Buffer size: " << context->get_string_offset() << std::endl;
+
   // lookup
   symbol.assign("%symbol2");
   int lookup_sym2 = context->lookup_symbol(symbol);
   
   EXPECT_EQ(sym2_offset, lookup_sym2);
 }
+
+TEST(CodegenTest, StringScanTest) {
+
+
+
+};
 
 }  // namespace brig
 }  // namespace hsa

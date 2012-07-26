@@ -27,6 +27,8 @@ enum TerminalType { UNKNOWN_TERM = 0,
                     UNINITIALIZABLE_ADDRESS
                   };
 
+// scan the source code and add symbols to string buffer
+void ScanString(int first_token, Context* context);
 // classify token into different terminal type
 TerminalType GetTokenType(int token);
 
