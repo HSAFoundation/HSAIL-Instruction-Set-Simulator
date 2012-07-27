@@ -1,12 +1,10 @@
 // Copyright 2012 MulticoreWare Inc.
 
-#ifndef PARSER_H_
-#define PARSER_H_
+#ifndef INCLUDE_PARSER_H_
+#define INCLUDE_PARSER_H_
 
 #include <string>
-#include "./tokens.h"
-#include "include/brig.h"
-#include "include/brig_buffer.h"
+#include "context.h"
 
 namespace hsa {
 namespace brig {
@@ -27,6 +25,8 @@ enum TerminalType { UNKNOWN_TERM = 0,
                     UNINITIALIZABLE_ADDRESS
                   };
 
+// scan the source code and add symbols to string buffer
+void ScanString(int first_token, Context* context);
 // classify token into different terminal type
 TerminalType GetTokenType(int token);
 
@@ -84,5 +84,5 @@ int UninitializableDecl(int first_token, Context* context);
 int ArgUninitializableDecl(int first_token, Context* context);
 }  // namespace brig
 }  // namespace hsa
-#endif  // PARSER_H_
+#endif  // INCLUDE_PARSER_H_
 

@@ -1,7 +1,7 @@
 /* Copyright 2012 <MulticorewareInc> */
 
-#ifndef TOKENS_H_
-#define TOKENS_H_
+#ifndef INCLUDE_TOKENS_H_
+#define INCLUDE_TOKENS_H_
 
 // begin from 258 to avoid conflict with ASCII characters
 enum TokenType { TOKEN_CREGISTER= 258,
@@ -334,4 +334,4 @@ enum TokenType { TOKEN_CREGISTER= 258,
                  __FBAR,
                  CALL
                };
-#endif  // TOKENS_H_
+#endif  // INCLUDE_TOKENS_H_

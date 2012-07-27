@@ -1,8 +1,8 @@
 // Copyright 2012 MulticoreWare Inc.
 
-#include "./gtest/gtest.h"
-#include "./lexer.h"
-#include "../parser.h"
+#include "gtest/gtest.h"
+#include "lexer.h"
+#include "parser.h"
 
 namespace hsa {
 namespace brig {

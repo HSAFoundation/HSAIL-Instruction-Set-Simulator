@@ -36,7 +36,23 @@ class Buffer {
   const std::vector<unsigned char>& get(void) const {
     return buf_;
   }
-  
+
+  // get a specific number of bytes from a specific offset
+  error_t get_bytes(unsigned char* value, uint32_t offset, uint32_t nBytes) {
+    if (buf_.size() == 0)
+      return EMPTY_BUFFER;
+    if (buf_.end() < buf_.begin()+ offset + nBytes)
+      return INVALID_OFFSET;
+
+    std::vector<unsigned char>::iterator it;
+    for (it = buf_.begin()+offset;
+         it < buf_.begin()+offset+nBytes;
+         it++)
+      *value++ = *it;
+    return SUCCESS;
+  }
+
+
   // get a specific item at specific offset
   // input: offset value
   //        a pointer to allocated memory for returned item
@@ -45,16 +61,14 @@ class Buffer {
   // return 0 if succeed
   // return -1 if fail
   template <class T>
-  error_t get(int offset, T* item) {
+  error_t get(uint32_t offset, T* item) {
     int return_size = sizeof(T);
 
-    if (buf_.size() == 0) {
+    if (buf_.size() == 0)
       return EMPTY_BUFFER;
-    }
-
     if (buf_.end() < buf_.begin()+ offset + return_size) {
       return INVALID_OFFSET;
-    }
+
 
     std::vector<unsigned char>::iterator it;
     unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
@@ -63,34 +77,39 @@ class Buffer {
          it < buf_.begin()+offset+return_size;
          it++)
       *temp_ptr++ = *it;
-     
-    return SUCCESS; 
+
+    return SUCCESS;
   }
-  
+
   // get buffer size
   size_t size(void) const {
     return buf_.size();
   }
-  
+
   // append char
   void append_char(unsigned char c) {
     buf_.push_back(c);
   }
-  // Buffer modifier, used for update the buffer contents.
-  void modifier(uint32_t offset,
-                unsigned char* value,
-                uint16_t nuBytes) {
+  // Buffer modify, used for update the buffer contents.
+  error_t modify(unsigned char* value,
+                uint32_t offset,
+                uint32_t nBytes) {
     std::vector<unsigned char>::iterator it;
-    if ( buf_.end() < buf_.begin()+offset+nuBytes ) {
-      std::cout << "Invalid access to Buffer." << std::endl;
-      return;
+    if ( buf_.end() < buf_.begin()+offset+nBytes ) {
+      return INVALID_OFFSET;
     } else {
-      for (it = buf_.begin()+offset; it < buf_.begin()+offset+nuBytes; it++) {
+      for (it = buf_.begin()+offset; it < buf_.begin()+offset+nBytes; it++) {
         *it = *value;
         value++;
       }
+      return SUCCESS;
     }
   }
+
+  void clear(void) {
+    buf_.clear();
+  }
+
 
  private:
   std::vector<unsigned char> buf_;
@@ -99,7 +118,7 @@ class Buffer {
 class StringBuffer: public Buffer {
  public:
   StringBuffer(void) {}
-  
+
   // append string
   void append(const std::string& s) {
     const char *sp = s.c_str();
@@ -108,23 +127,25 @@ class StringBuffer: public Buffer {
     }
     append_char('\0');
   }
-  
+
   // get string at an index
   std::string at(uint32_t index) const {
     assert(index < get().size());
     return std::string(reinterpret_cast<const char *>(&(get()[index])));
   }
-  
+
   // look up offset to a string
   // return the offset if the string exists in buffer
   // return -1 if string does not exist
   int lookup(const std::string& s) {
     std::string temp;
-    uint32_t index;
-    for (index = 0; index < size(); index++) {
+    uint32_t index = 0;
+    while (index < size()) {
       temp = at(index);
       if (!temp.compare(s))
-        return index;    
+        return index;
+      else
+        index+=temp.length()+1;
       
     }
     return -1;

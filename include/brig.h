@@ -302,20 +302,20 @@ typedef struct BrigOperandReg {
   uint32_t name;
 }BrigOperandReg;
 
-//BrigOperandImmed
-//BrigOperandImmed is used for a numeric value.
+// BrigOperandImmed
+// BrigOperandImmed is used for a numeric value.
 typedef struct BrigOperandImmed {
-	uint16_t size;
-	uint16_t kind;
-	BrigDataType16_t type;
-	uint16_t reserved;
-	union {
-		uint32_t u;
-		float f;
-		double d;
-		uint64_t l[2];
-		uint16_t h;
-		uint8_t c;
-	} bits;
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  union {
+    uint32_t u;
+    float f;
+    double d;
+    uint64_t l[2];
+    uint16_t h;
+    uint8_t c;
+  } bits;
 }BrigOperandImmed;
 #endif  // INCLUDE_BRIG_H_

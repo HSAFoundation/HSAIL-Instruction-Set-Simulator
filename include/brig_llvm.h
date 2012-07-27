@@ -6,8 +6,8 @@ namespace llvm {
   class Module;
   class Type;
 }
-#include "./brig.h"
-#include "./brig_buffer.h"
+#include "brig.h"
+#include "brig_buffer.h"
 #include <string>
 namespace hsa {
 namespace brig {
