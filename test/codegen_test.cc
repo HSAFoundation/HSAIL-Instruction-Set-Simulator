@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "brig.h"
+#include "lexer_wrapper.h"
 
 namespace hsa {
 namespace brig {
@@ -376,8 +377,13 @@ TEST(CodegenTest, StringScanTest) {
     std::cout << "Index " << index << ": " << temp << std::endl;
     index+=temp.length()+1;  
   }
+};
+
+TEST(CodegenTest, TestLexWrapper) {
+  Lexer* lexer = new Lexer();
+  int token = lexer->get_next_token();
   
-  
+  EXPECT_TRUE(token >= 0);
 
 };
 

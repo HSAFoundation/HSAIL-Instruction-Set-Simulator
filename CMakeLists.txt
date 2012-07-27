@@ -14,6 +14,10 @@ set(hsail2brig_test_SOURCES
 	  gtest/gtest-all.cc
 	  gtest/gtest_main.cc
 	  src/parser.cc
+    src/brig_buffer.cc
+    src/parser_wrapper.cc
+    src/lexer_wrapper.cc
+    src/hsail2brig.cc
 	  ${FLEX_lexer_OUTPUTS}
 	  )
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
