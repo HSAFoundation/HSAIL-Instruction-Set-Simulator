@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "gtest/gtest.h"
+#include "tokens.h"
 #include "lexer.h"
 #include "parser.h"
 #include "brig.h"
@@ -381,9 +382,16 @@ TEST(CodegenTest, StringScanTest) {
 
 TEST(CodegenTest, TestLexWrapper) {
   Lexer* lexer = new Lexer();
-  int token = lexer->get_next_token();
+  std::string input("$c1");
+  lexer->set_source_string(input);
   
+  int token = lexer->get_next_token();
+   
   EXPECT_TRUE(token >= 0);
+  EXPECT_EQ(token, TOKEN_CREGISTER);
+  
+  std::string token_str = lexer->get_token_value();
+  EXPECT_STREQ("$c1", token_str.c_str());
 
 };
 
