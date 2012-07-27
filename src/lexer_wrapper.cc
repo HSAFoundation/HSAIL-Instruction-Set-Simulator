@@ -10,7 +10,7 @@ namespace brig {
   }
   
   int Lexer::get_int_value(void) {
-    return -1;
+    return int_val;
   }
   
   float Lexer::get_float_value(void) {
