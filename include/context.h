@@ -151,6 +151,10 @@ class Context {
         return CONTEXT_OK;
     }
 
+    // get string at an index
+    std::string get_string(uint32_t index) {
+      return sbuf->at(index); 
+    }
   // get current offset
     BrigcOffset32_t get_code_offset(void) const {
       return cbuf->size();
@@ -256,6 +260,29 @@ class Context {
       }
     }
 
+    // clear buffer
+    void clear_code_buffer(void) {
+      cbuf->clear();
+    }
+    
+    void clear_directive_buffer(void) {
+      dbuf->clear();
+    }
+    
+    void clear_operand_buffer(void) {
+      obuf->clear();
+    }
+    
+    void clear_string_buffer(void) {
+      sbuf->clear();
+    }
+    
+    void clear_all_buffers(void) {
+      cbuf->clear();
+      dbuf->clear();
+      obuf->clear();
+      sbuf->clear();
+    }
   private:
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer

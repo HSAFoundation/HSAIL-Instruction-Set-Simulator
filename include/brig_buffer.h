@@ -105,6 +105,10 @@ class Buffer {
       return SUCCESS;
     }
   }
+  
+  void clear(void) {
+    buf_.clear();
+  }
 
  private:
   std::vector<unsigned char> buf_;

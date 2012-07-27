@@ -354,5 +354,32 @@ TEST(CodegenTest, LookupStringBugTest) {
   EXPECT_EQ(offset, loc);
 };
 
+TEST(CodegenTest, StringScanTest) {
+  std::string input("version 1:0:$large;\n");
+  input.append("global_f32 &x = 2;\n");
+  input.append("function &test()() {\n");
+  input.append("{arg_u32 %z;}\n");
+  input.append(" }; \n");
+  
+  std::cout << input << std::endl;
+  
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->clear_all_buffers();
+  // scan for strings first
+  ScanString(yylex(), context);
+  // Print out string buffer content:
+  int index = 0;
+  std::string temp;
+  std::cout << "Buffer content: " << std::endl;
+  while(index < context->get_string_offset()) {
+    temp = context->get_string(index);
+    std::cout << "Index " << index << ": " << temp << std::endl;
+    index+=temp.length()+1;  
+  }
+  
+  
+
+};
+
 }  // namespace brig
 }  // namespace hsa

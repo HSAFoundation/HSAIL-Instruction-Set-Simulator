@@ -741,8 +741,6 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   input.append("{arg_u32 %z;}");
   input.append(" }; ");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  ScanString(yylex(), context);
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex(), context));
 };
