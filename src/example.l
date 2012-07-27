@@ -3,7 +3,8 @@
 %option noyywrap 
 %{
 #include <stdio.h>
-#include "./tokens.h"
+#include "tokens.h"
+
 
 int int_val;
 float float_val;
@@ -527,3 +528,4 @@ query_filtering		{ return QUERY_FILTERING;}
 
 
 .	{ fprintf(stderr, "unexpected char"); return 0;}
+

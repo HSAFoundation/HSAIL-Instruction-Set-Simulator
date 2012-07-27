@@ -390,10 +390,21 @@ TEST(CodegenTest, TestLexWrapper) {
   EXPECT_TRUE(token >= 0);
   EXPECT_EQ(token, TOKEN_CREGISTER);
   
-  std::string token_str = lexer->get_token_value();
+  std::string token_str = lexer->get_string_value();
   EXPECT_STREQ("$c1", token_str.c_str());
 
 };
+
+TEST(CodegenTest, TestLexerWithIntToken) {
+  std::string input("10");
+  Lexer* lexer = new Lexer(input); 
+  
+  int token = lexer->get_next_token();
+  EXPECT_EQ(token,TOKEN_INTEGER_CONSTANT);
+  EXPECT_EQ(10, lexer->get_int_value());
+  
+
+}
 
 }  // namespace brig
 }  // namespace hsa
