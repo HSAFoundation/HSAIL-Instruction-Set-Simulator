@@ -33,6 +33,7 @@ namespace brig {
   }
   
   void Lexer::restart(void) {
+    yy_scan_string(reinterpret_cast<const char*>(src.c_str()));
   }
 
 }  // namespace brig
