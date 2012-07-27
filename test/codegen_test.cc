@@ -336,7 +336,22 @@ TEST(CodegenTest, AddSymbolTest) {
   EXPECT_EQ(sym2_offset, lookup_sym2);
 }
 
-TEST(CodegenTest, StringScanTest) {
+TEST(CodegenTest, LookupStringBugTest) {
+  std::string input("&previous_test_string1");
+
+  StringBuffer* strBuf = new StringBuffer();
+
+  strBuf->append(input);
+
+  int offset = strBuf->size();
+  input.assign("test_string1");
+  strBuf->append(input);
+
+
+  // lookup second string
+  input.assign("test_string1");
+  int loc = strBuf->lookup(input);
+  EXPECT_EQ(offset, loc);
 };
 
 }  // namespace brig
