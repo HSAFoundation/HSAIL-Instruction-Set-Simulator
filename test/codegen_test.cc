@@ -422,5 +422,27 @@ TEST(CodegenTest, GetDoubleValFromLexer) {
   EXPECT_EQ(10.0, lexer->get_double_value());
 }
 
+TEST(CodegenTest, ResetLexer) {
+  std::string input("$c1 10 10.5f");
+  Lexer* lexer = new Lexer(input); 
+  
+  int token = lexer->get_next_token();
+  EXPECT_EQ(token,TOKEN_CREGISTER);
+  
+  token = lexer->get_next_token();  
+  EXPECT_EQ(token,TOKEN_INTEGER_CONSTANT);
+  EXPECT_EQ(10, lexer->get_int_value());
+
+  token = lexer->get_next_token();  
+  EXPECT_EQ(token,TOKEN_SINGLE_CONSTANT);
+  EXPECT_EQ(10.5, lexer->get_float_value());
+  
+  // restart from begin
+  lexer->restart();
+  token = lexer->get_next_token();
+  EXPECT_EQ(token,TOKEN_CREGISTER);
+  
+}
+
 }  // namespace brig
 }  // namespace hsa

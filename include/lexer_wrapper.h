@@ -34,6 +34,11 @@ class Lexer {
     // set source string
     void set_source_string(const std::string& src);
     
+    // reset to begining of src
+    void restart(void);
+    
+  private:
+    std::string src;  // local copy of source string
   };
 
 }  // namespace brig
