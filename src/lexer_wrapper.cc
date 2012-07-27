@@ -18,7 +18,7 @@ namespace brig {
   }
   
   double Lexer::get_double_value(void) {
-    return -1.0l;
+    return double_val;
   }
   
   std::string Lexer::get_string_value(void) {
