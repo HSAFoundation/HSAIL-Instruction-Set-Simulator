@@ -639,6 +639,13 @@ int Instruction3(int first_token, Context* context) {
   int temp = 0;
   bool is_ftz = false;
 
+
+  // we need to add real meaning to instruction3_opcode.
+  // good thing, all instruction3 operations are related to
+  // BrigInstBase, we can set it first then update it on the fly.
+  // Well, it maybe better to just determine the type after reading all the modifiers?
+  // or we know it when we read the version statement?
+  
   if (GetTokenType(first_token) == INSTRUCTION3_OPCODE) {
     if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
@@ -1013,7 +1020,7 @@ int FunctionDefinition(int first_token,
     if (!rescan)
       token_to_scan = yylex();
 
-    if (token_to_scan == FUNCTION) {
+    if (token_to_scan == FUNCTION) {  
       if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
         // check return argument list
         if (yylex() == '(') {
@@ -1257,6 +1264,21 @@ int Codeblock(int first_token, Context* context) {
   int last_token;
   int next_token = 0;
 
+  // TBD (Miao) add a variable corresponding to operation count.
+  // Maybe it is good to get it in BodyStatementList.
+  // Also if it is ArgBlock, need to know its current offset in 
+  // the d_buf.
+
+  // one idea, can we make the following operations or directives
+  // directly access the BrigDirectiveFunction in the d_buf. 
+  // in this way, it may make life easier. just update it intime.
+  // Hopefully the efficiency is not so low.
+  // just need a "if" to see if there it is the real FIRST.
+  // set the default value 0.
+
+  // only kernel and function has code block. promising.
+  // seems applicable after reading the ref.
+
   while (1) {
     next_token = yylex();
     if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
@@ -1471,7 +1493,7 @@ int Program(int first_token, Context* context) {
             }
           }       // if found TOKEN_GLOBAL_ID
         } else if (GetTokenType(first_token) == INITIALIZABLE_ADDRESS) {
-          // global initializable
+          // global initializable      
           // this is an initializable declaration
           if (!InitializableDecl(first_token, context)) {
             first_token = yylex();
@@ -1613,7 +1635,6 @@ int Call(int first_token, Context* context) {
       return 1;
     }
   }
-
   if (!Operand(next, context)) {
     next = yylex();
     // check for twoCallArgs

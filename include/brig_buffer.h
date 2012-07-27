@@ -77,7 +77,7 @@ class Buffer {
     buf_.push_back(c);
   }
   // Buffer modifier, used for update the buffer contents.
-  void modifier(uint16_t offset,
+  void modifier(uint32_t offset,
                 unsigned char* value,
                 uint16_t nuBytes) {
     std::vector<unsigned char>::iterator it;
@@ -334,19 +334,19 @@ class Context {
 
 
     /*---- functions for update a certain buffer by offset. ----*/
-    void updateBuffer_d(uint16_t offset,
+    void updateBuffer_d(uint32_t offset,
                          unsigned char* value,
                          uint16_t nuBytes) {
       dbuf->modifier(offset, value, nuBytes);
     }
 
-    void updateBuffer_c(uint16_t offset,
+    void updateBuffer_c(uint32_t offset,
                          unsigned char* value,
                          uint16_t nuBytes) {
       cbuf->modifier(offset, value, nuBytes);
     }
 
-    void updateBuffer_o(uint16_t offset,
+    void updateBuffer_o(uint32_t offset,
                          unsigned char* value,
                          uint16_t nuBytes) {
       obuf->modifier(offset, value, nuBytes);
@@ -366,6 +366,26 @@ class Context {
           return BrigEAlignment_4;
       }
     }
+
+
+    /* functions for adding default structures used for */
+    template<class T>    
+    int add_def_struct_d (uint16_t size, BrigDirectiveKinds kind, T* item){
+      
+    }
+
+    template<class T> 
+    int add_def_struct_c (uint16_t size, BrigInstKinds kind, T* item){
+      
+    }
+
+    template<class T> 
+    int add_def_struct_o (uint16_t size, BrigOperandKinds kind, T* item){
+      
+    }
+
+   BrigcOffset32_t current_bdf_offset; 
+
 
   private:
     Buffer* cbuf;  // code buffer
