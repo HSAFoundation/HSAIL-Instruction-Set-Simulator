@@ -17,6 +17,10 @@ namespace brig {
     return float_val;
   }
   
+  double Lexer::get_double_value(void) {
+    return -1.0l;
+  }
+  
   std::string Lexer::get_string_value(void) {
     std::string value(string_val);
     return value;

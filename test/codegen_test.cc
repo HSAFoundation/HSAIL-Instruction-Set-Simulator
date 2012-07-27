@@ -413,6 +413,14 @@ TEST(CodegenTest, GetFloatValFromLexer) {
   EXPECT_EQ(10.0, lexer->get_float_value());
 }
 
+TEST(CodegenTest, GetDoubleValFromLexer) {
+  std::string input("10.0l");
+  Lexer* lexer = new Lexer(input); 
+  
+  int token = lexer->get_next_token();
+  EXPECT_EQ(token,TOKEN_DOUBLE_CONSTANT);
+  EXPECT_EQ(10.0, lexer->get_double_value());
+}
 
 }  // namespace brig
 }  // namespace hsa
