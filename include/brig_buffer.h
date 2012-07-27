@@ -3,6 +3,7 @@
 #ifndef INCLUDE_BRIG_BUFFER_H_
 #define INCLUDE_BRIG_BUFFER_H_
 
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <cassert>
@@ -133,11 +134,14 @@ class StringBuffer: public Buffer {
   // return -1 if string does not exist
   int lookup(const std::string& s) {
     std::string temp;
-    uint32_t index;
-    for (index = 0; index < size(); index++) {
+    uint32_t index = 0;
+
+    while (index < size()) {
       temp = at(index);
       if (!temp.compare(s))
         return index;
+      else
+        index+=temp.length()+1;
     }
     return -1;
   };

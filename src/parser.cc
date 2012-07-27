@@ -23,6 +23,7 @@ void ScanString(int first_token, Context* context) {
         (first_token == TOKEN_LABEL)) {
       temp.assign(string_val);
       int offset = context->add_symbol(temp);
+      // printf("Added: %s, at %d\n",temp.c_str(), offset);
       temp.clear();
     }
     first_token = yylex();
