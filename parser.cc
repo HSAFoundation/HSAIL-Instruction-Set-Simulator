@@ -1020,8 +1020,57 @@ int FunctionDefinition(int first_token,
     if (!rescan)
       token_to_scan = yylex();
 
-    if (token_to_scan == FUNCTION) {  
+    if (token_to_scan == FUNCTION) {
+
+
+      // add default struct (Miao)
+  
+      context->current_bdf_offset = context->get_directive_offset();
+      BrigdOffset32_t bdf_offset = context->current_bdf_offset;
+
+      BrigDirectiveFunction bdf = {
+      40, //size
+      BrigEDirectiveFunction, //kind
+      0,
+      0,
+      0,
+      bdf_offset+40,  // d_firstScopedDirective
+      0,
+      bdf_offset+40,  // d_nextDirective
+      BrigNone,
+      0,
+      0,
+      0,
+      };
+
+      context->append_d(&bdf);
+
+      // update it when necessary. 
+      // the later functions should have a entry point of bdf 
+      // just update it in time.
+      //
+    
       if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
+        // should have meaning of Global_Identifier,
+        // and check if there is existing global identifier
+        // if there is, just use the current string,
+        // if not write into string.
+
+        std::string func_name = string_val;
+        // std::cout << func_name << std::endl;
+        BrigsOffset32_t check_result = context->add_symbol(func_name);
+        //std::cout << check_result << std::endl;
+
+
+        unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);
+        context->updateBuffer_d(context->current_bdf_offset, value, 4);
+        
+        /* Debug */
+        // BrigDirectiveFunction get;
+        // context->get_d<BrigDirectiveFunction>(bdf_offset, &get);
+        // std::cout << get.s_name << std::endl;
+
+
         // check return argument list
         if (yylex() == '(') {
           token_to_scan = yylex();
