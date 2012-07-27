@@ -283,6 +283,10 @@ class Context {
       obuf->clear();
       sbuf->clear();
     }
+    
+   BrigcOffset32_t current_bdf_offset; 
+
+
   private:
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer

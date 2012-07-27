@@ -1043,7 +1043,7 @@ int FunctionDefinition(int first_token,
       0,
       };
 
-      context->append_d(&bdf);
+      context->append_directive(&bdf);
 
       // update it when necessary. 
       // the later functions should have a entry point of bdf 
@@ -1063,7 +1063,7 @@ int FunctionDefinition(int first_token,
 
 
         unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);
-        context->updateBuffer_d(context->current_bdf_offset, value, 4);
+        context->update_directive_bytes(value, context->current_bdf_offset, 4);
         
         /* Debug */
         // BrigDirectiveFunction get;
