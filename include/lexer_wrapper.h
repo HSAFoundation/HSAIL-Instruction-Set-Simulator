@@ -17,31 +17,31 @@ namespace brig {
 class Lexer {
   public:
     Lexer() {}
-    
-    Lexer(std::string& s) {
+
+    explicit Lexer(const std::string& s) {
       set_source_string(s);
     }
-    
+
     // get the next token
     int get_next_token(void);
-    
-    // get the value of token 
+
+    // get the value of token
     int get_int_value(void);
     double get_double_value(void);
     float get_float_value(void);
     std::string get_string_value(void);
-    
+
     // set source string
     void set_source_string(const std::string& src);
-    
+
     // reset to begining of src
     void restart(void);
-    
+
   private:
     std::string src;  // local copy of source string
   };
 
 }  // namespace brig
-}  // namespace hsa  
+}  // namespace hsa
 #endif  // INCLUDE_LEXER_WRAPPER_H_
 

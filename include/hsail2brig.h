@@ -18,16 +18,16 @@ class Hsail2Brig {
       lexer = new Lexer();
       parser = new Parser();
     }
-    
+
     // get current context
     Context* get_current_context(void) const { return context; }
-    
+
     // clear context
     void clear_context(void) { context->clear_all_buffers(); }
-    
+
     // Compile hsail text source to Brig
     Context* compile_string(const std::string& src);
-    
+
   private:
     Context* context;
     Lexer* lexer;
@@ -35,7 +35,7 @@ class Hsail2Brig {
   };
 
 }  // namespace brig
-}  // namespace hsa  
+}  // namespace hsa
 
 
 

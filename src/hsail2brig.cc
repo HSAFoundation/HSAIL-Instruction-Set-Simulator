@@ -8,5 +8,6 @@ namespace brig {
 
 
 }  // namespace brig
-}  // namespace hsa  
+}  // namespace hsa
+
 

@@ -105,7 +105,7 @@ class Buffer {
       return SUCCESS;
     }
   }
-  
+
   void clear(void) {
     buf_.clear();
   }
