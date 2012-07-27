@@ -395,16 +395,24 @@ TEST(CodegenTest, TestLexWrapper) {
 
 };
 
-TEST(CodegenTest, TestLexerWithIntToken) {
+TEST(CodegenTest, GetIntValFromLexer) {
   std::string input("10");
   Lexer* lexer = new Lexer(input); 
   
   int token = lexer->get_next_token();
   EXPECT_EQ(token,TOKEN_INTEGER_CONSTANT);
   EXPECT_EQ(10, lexer->get_int_value());
-  
-
 }
+
+TEST(CodegenTest, GetFloatValFromLexer) {
+  std::string input("10.0f");
+  Lexer* lexer = new Lexer(input); 
+  
+  int token = lexer->get_next_token();
+  EXPECT_EQ(token,TOKEN_SINGLE_CONSTANT);
+  EXPECT_EQ(10.0, lexer->get_float_value());
+}
+
 
 }  // namespace brig
 }  // namespace hsa
