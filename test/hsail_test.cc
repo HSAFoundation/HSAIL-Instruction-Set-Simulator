@@ -2,10 +2,10 @@
 
 #include <string>
 
-#include "./gtest/gtest.h"
-#include "./lexer.h"
-#include "../tokens.h"
-#include "../parser.h"
+#include "gtest/gtest.h"
+#include "lexer.h"
+#include "tokens.h"
+#include "parser.h"
 
 extern int int_val;
 extern float float_val;

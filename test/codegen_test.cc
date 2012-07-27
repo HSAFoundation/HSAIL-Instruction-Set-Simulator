@@ -1,10 +1,10 @@
 // Copyright 2012 MulticoreWare Inc.
 
 #include <iostream>
-#include "./gtest/gtest.h"
-#include "./lexer.h"
-#include "../parser.h"
-#include "../include/brig.h"
+#include "gtest/gtest.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
 
 namespace hsa {
 namespace brig {
@@ -30,7 +30,7 @@ TEST(CodegenTest, AlignmentCheck) {
     0                          // s_name;
   };
 
-  context1->append_d(&bbs);    // append_directive
+  context1->append_directive(&bbs);    // append_directiveirective
   old_offset = curr_offset;
   curr_offset = context1->get_directive_offset();
 
@@ -46,7 +46,7 @@ TEST(CodegenTest, AlignmentCheck) {
     1,                           // u64
   };
 
-  context1->append_d(&bbn);
+  context1->append_directive(&bbn);
   old_offset = curr_offset;
   curr_offset = context1->get_directive_offset();
 
@@ -82,10 +82,10 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // after append BrigDirectiveVersion
   int curr_d_offset = context->get_directive_offset();
-  
+
   // get structure back
   BrigDirectiveVersion get;
-  context->get_d<BrigDirectiveVersion>(curr_d_offset-sizeof(get), &get);
+  context->get_directive<BrigDirectiveVersion>(curr_d_offset-sizeof(get), &get);
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.major, get.major);
@@ -105,7 +105,7 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // get structure back
   curr_d_offset = context->get_directive_offset();
-  context->get_d(curr_d_offset-sizeof(get), &get);
+  context->get_directive(curr_d_offset-sizeof(get), &get);
 
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
@@ -128,7 +128,7 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // get structure back
   curr_d_offset = context->get_directive_offset();
-  context->get_d<BrigDirectiveVersion>(curr_d_offset-sizeof(get), &get);
+  context->get_directive<BrigDirectiveVersion>(curr_d_offset-sizeof(get), &get);
 
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
@@ -142,7 +142,7 @@ TEST(CodegenTest, VersionCodeGen) {
 TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string name;
   std::string input("$d7");  // register
- 
+
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   // scan for strings first
   ScanString(yylex(), context);
@@ -155,7 +155,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
     sizeof(ref),      // size
     BrigEOperandReg,  // kind
     Brigb64,          // type
-    0                // reserved   
+    0                // reserved
   };
   name.assign("$d7");
   ref.name = context->lookup_symbol(name);
@@ -163,13 +163,13 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   // get structure from context and compare
   BrigOperandReg get;
   int curr_o_offset = context->get_operand_offset();
-  context->get_o<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
+  context->get_operand<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.name, get.name);
-  
+
   // second register
   input.assign("$q7");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
@@ -178,12 +178,12 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
-  
+
   name.assign("$q7");
   ref.name = context->lookup_symbol(name);
   ref.type = Brigb128;
   curr_o_offset = context->get_operand_offset();
-  context->get_o<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
+  context->get_operand<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -192,9 +192,8 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
 }
 
 TEST(CodegenTest, NumericValueOperandCodeGen) {
-  
   /* Integer */
-  std::string input("5");  
+  std::string input("5");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
@@ -205,39 +204,39 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
     Brigb32,            // type
     0                   // reserved
   };
-  
+
   ref.bits.u = 5;
   // get structure from context and compare
   BrigOperandImmed get;
   int curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.bits.u, get.bits.u);
-  
+
     /* Negative Integer */
-  input.assign("-5");  
+  input.assign("-5");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
   // reference struct
-  ref.type = Brigb32; 
+  ref.type = Brigb32;
   ref.bits.u = -5;
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.bits.u, get.bits.u);
-  
+
   /* float single */
-  input.assign("5.0f");  
+  input.assign("5.0f");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
@@ -247,15 +246,15 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.bits.f, get.bits.f);
-  
+
   /* double */
-  input.assign("5.0l");  
+  input.assign("5.0l");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
@@ -265,7 +264,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -273,7 +272,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   EXPECT_EQ(ref.bits.d, get.bits.d);
 
   /* Integer List */
-  input.assign("_b32(5,6,8)");  
+  input.assign("_b32(5,6,8)");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
@@ -283,50 +282,48 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   // get last structure from context and compare
   curr_o_offset = context->get_operand_offset();
   // to overcome padding
-  context->get_o<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.bits.u, get.bits.u);
-  
 }
 
 TEST(CodegenTest, LookupStringTest) {
   std::string input("&test_string1");
-  
+
   StringBuffer* strBuf = new StringBuffer();
-  
+
   strBuf->append(input);
-  
+
   int offset = strBuf->size();
   input.assign("&test_string2");
   strBuf->append(input);
-  
+
   // lookup first string
   input.assign("&test_string1");
   int loc = strBuf->lookup(input);
-  EXPECT_EQ(0,loc);
-  
+  EXPECT_EQ(0, loc);
+
   input.assign("&test_string2");
   loc = strBuf->lookup(input);
-  EXPECT_EQ(offset,loc);
-
+  EXPECT_EQ(offset, loc);
 }
 
 TEST(CodegenTest, AddSymbolTest) {
   std::string symbol("&symbol1");
   int offset = context->get_string_offset();
-  
+
   // add symbol
   int sym1_offset = context->add_symbol(symbol);
   EXPECT_EQ(offset, sym1_offset);
-  
+
   offset = context->get_string_offset();
   symbol.assign("%symbol2");
   int sym2_offset = context->add_symbol(symbol);
   EXPECT_EQ(offset, sym2_offset);
-  
+
   // try to add symbol 1 again
   symbol.assign("&symbol1");
   int sym1b_offset = context->add_symbol(symbol);
@@ -335,14 +332,11 @@ TEST(CodegenTest, AddSymbolTest) {
   // lookup
   symbol.assign("%symbol2");
   int lookup_sym2 = context->lookup_symbol(symbol);
-  
+
   EXPECT_EQ(sym2_offset, lookup_sym2);
 }
 
 TEST(CodegenTest, StringScanTest) {
-
-
-
 };
 
 }  // namespace brig

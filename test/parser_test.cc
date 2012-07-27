@@ -1,8 +1,8 @@
 // Copyright 2012 MulticoreWare Inc.
 
-#include "./gtest/gtest.h"
-#include "./lexer.h"
-#include "../parser.h"
+#include "gtest/gtest.h"
+#include "lexer.h"
+#include "parser.h"
 
 namespace hsa {
 namespace brig {
@@ -740,9 +740,9 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   input.append("function &test()() {");
   input.append("{arg_u32 %z;}");
   input.append(" }; ");
-  
+
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  ScanString(yylex(),context);
+  ScanString(yylex(), context);
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex(), context));
 };

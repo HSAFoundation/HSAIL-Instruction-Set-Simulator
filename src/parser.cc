@@ -1,12 +1,9 @@
 /* Copyright 2012 <MulticorewareInc> */
 
-#include "./parser.h"
-
+#include "parser.h"
 #include <string>
-
-#include "./tokens.h"
-#include "./lexer.h"
-
+#include "tokens.h"
+#include "lexer.h"
 
 extern int int_val;
 extern char* string_val;
@@ -19,18 +16,16 @@ namespace brig {
 // scan the source code and add symbols to string buffer
 void ScanString(int first_token, Context* context) {
   std::string temp;
-  while(first_token) {
+  while (first_token) {
     if ((first_token == TOKEN_GLOBAL_IDENTIFIER) ||
         (first_token == TOKEN_LOCAL_IDENTIFIER) ||
         (GetTokenType(first_token) == REGISTER) ||
         (first_token == TOKEN_LABEL)) {
-      
       temp.assign(string_val);
       int offset = context->add_symbol(temp);
-      std::cout << "Added symbol: " << temp <<" at " << offset << std::endl;
       temp.clear();
     }
-    first_token = yylex(); 
+    first_token = yylex();
   }
 }
 
@@ -281,17 +276,17 @@ int Operand(int first_token, Context* context) {
           bor.type = Brigb128;
           break;
       }
-    
+
       bor.reserved = 0;
       std::string name(string_val);
       bor.name = context->lookup_symbol(name);
-      
-      context->append_o(&bor);
+
+      context->append_operand(&bor);
     }
     return 0;
-  } else if (!BaseOperand(first_token, context))     // a base Operand
+  } else if (!BaseOperand(first_token, context)) {    // a base Operand
     return 0;
-
+  }
   return 1;
 }
 
@@ -317,8 +312,8 @@ int BaseOperand(int first_token, Context* context) {
       0                   // reserved
     };
     boi.bits.d = double_val;
-    context->append_o(&boi);
-    
+    context->append_operand(&boi);
+
     return 0;
   } else if (first_token == TOKEN_SINGLE_CONSTANT) {
     BrigOperandImmed boi = {
@@ -328,7 +323,7 @@ int BaseOperand(int first_token, Context* context) {
       0                   // reserved
     };
     boi.bits.f = float_val;
-    context->append_o(&boi);
+    context->append_operand(&boi);
     return 0;
   } else if (first_token == TOKEN_INTEGER_CONSTANT) {
     BrigOperandImmed boi = {
@@ -337,10 +332,10 @@ int BaseOperand(int first_token, Context* context) {
       Brigb32,            // type
       0                   // reserved
     };
-    // TODO (Huy): check context for operation type and decide the type
+    // TODO(Huy): check context for operation type and decide the type
     boi.bits.u = int_val;
-    context->append_o(&boi);
-  
+    context->append_operand(&boi);
+
     return 0;
   } else if (first_token == TOKEN_WAVESIZE) {
     return 0;
@@ -352,10 +347,10 @@ int BaseOperand(int first_token, Context* context) {
       Brigb32,            // type
       0                   // reserved
       };
-      // TODO (Huy): check context for operation type and decide the type
+      // TODO(Huy): check context for operation type and decide the type
       boi.bits.u = -int_val;
-      context->append_o(&boi);
-     
+      context->append_operand(&boi);
+
      return 0;
     }
   } else if (GetTokenType(first_token) == DATA_TYPE_ID) {
@@ -370,10 +365,10 @@ int BaseOperand(int first_token, Context* context) {
         Brigb32,            // type
         0                   // reserved
         };
-        // TODO (Huy): check context for operation type and decide the type
+        // TODO(Huy): check context for operation type and decide the type
         boi.bits.u = -int_val;
-        context->append_o(&boi);
-        
+        context->append_operand(&boi);
+
         next = yylex();
         if (next == ')') {
           return 0;
@@ -387,10 +382,10 @@ int BaseOperand(int first_token, Context* context) {
                 Brigb32,            // type
                 0                   // reserved
               };
-              // TODO (Huy): check context for operation type and decide the type
+  // TODO(Huy): check context for operation type and decide the type
               boi.bits.u = int_val;
-              context->append_o(&boi);
-                       
+              context->append_operand(&boi);
+
               next = yylex();
               if (next == ')')
                 return 0;
@@ -409,8 +404,8 @@ int BaseOperand(int first_token, Context* context) {
         0                   // reserved
         };
         boi.bits.d = double_val;
-        context->append_o(&boi);
-        
+        context->append_operand(&boi);
+
         next = yylex();
         if (next == ')') {
           return 0;
@@ -425,7 +420,7 @@ int BaseOperand(int first_token, Context* context) {
                 0                   // reserved
               };
               boi.bits.d = double_val;
-              context->append_o(&boi);
+              context->append_operand(&boi);
               next = yylex();
               if (next == ')')
                 return 0;
@@ -766,7 +761,7 @@ int Version(int first_token, Context* context) {
           }
         }
         if (context) {
-          context->append_d(&bdv);
+          context->append_directive(&bdv);
         } else {
           printf("Invalid context\n");
         }

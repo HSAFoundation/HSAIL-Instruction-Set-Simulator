@@ -1,12 +1,10 @@
 // Copyright 2012 MulticoreWare Inc.
 
-#ifndef PARSER_H_
-#define PARSER_H_
+#ifndef INCLUDE_PARSER_H_
+#define INCLUDE_PARSER_H_
 
 #include <string>
-#include "./tokens.h"
-#include "include/brig.h"
-#include "include/brig_buffer.h"
+#include "context.h"
 
 namespace hsa {
 namespace brig {
@@ -86,5 +84,5 @@ int UninitializableDecl(int first_token, Context* context);
 int ArgUninitializableDecl(int first_token, Context* context);
 }  // namespace brig
 }  // namespace hsa
-#endif  // PARSER_H_
+#endif  // INCLUDE_PARSER_H_
 
