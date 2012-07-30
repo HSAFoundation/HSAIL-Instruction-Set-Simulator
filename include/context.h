@@ -60,6 +60,13 @@ class Context {
       dbuf->append(item);
     }
 
+    template <class T>
+    void append_directive_symbol(const T* item) {
+      int directive_offset = dbuf->size();
+      dbuf->append(item);
+    }
+
+
     // append operand
     template <class T>
     void append_operand(const T* item) {
@@ -285,6 +292,7 @@ class Context {
     }
 
    BrigcOffset32_t current_bdf_offset; 
+   bool arg_output;
 
 
   private:

@@ -207,6 +207,137 @@ TerminalType GetTokenType(int token) {
   }
 }
 
+BrigDataType GetDataType(int token) {
+  switch (token) {
+    /* DataTypeId */
+  case _U32:
+    return Brigu32;
+    break;
+  case _S32:
+    return Brigs32;
+    break;
+  case _S64:
+    return Brigs64;
+    break;
+  case _U64:
+    return Brigu64;
+    break;
+  case _B1:
+    return Brigb1;
+    break;
+  case _B32:
+    return Brigb32;
+    break;
+  case _F64:
+    return Brigf64;
+    break;
+  case _F32:
+    return Brigf32;
+    break;
+  case _B64:
+    return Brigb64;
+    break;
+  case _B8:
+    return Brigb8;
+    break;
+  case _B16:
+    return Brigb16;
+    break;
+  case _S8:
+    return Brigs8;
+    break;
+  case _S16:
+    return Brigs16;
+    break;
+  case _U8:
+    return Brigu8;
+    break;
+  case _U16:
+    return Brigu16;
+    break;
+  case _F16:
+    return Brigf16;
+    break;
+  case _B128:
+    return Brigb128;
+    break;
+  case _U8X4:
+    return Brigu8x4;
+    break;
+  case _S8X4:
+    return Brigs8x4;
+    break;
+  case _U16X2:
+    return Brigu16x2;
+    break;
+  case _S16X2:
+    return Brigs16x2;
+    break;
+  case _F16X2:
+    return Brigf16x2;
+    break;
+  case _F32X2:
+    return Brigf32x2;
+    break;
+  case _U8X8:
+    return Brigu8x8;
+    break;
+  case _S8X8:
+    return Brigs8x8;
+    break;
+  case _U16X4:
+    return Brigu16x4;
+    break;
+  case _S16X4:
+    return Brigs16x4;
+    break;
+  case _F16X4:
+    return Brigf16x4;
+    break;
+  case _U8X16:
+    return Brigu8x16;
+    break;
+  case _S8X16:
+    return Brigs8x16;
+    break;
+  case _U16X8:
+    return Brigu16x8;
+    break;
+  case _S16X8:
+    return Brigs16x8;
+    break;
+  case _F16X8:
+    return Brigf16x8;
+    break;
+  case _F32X4:
+    return Brigf32x4;
+    break;
+  case _S32X4:
+    return Brigs32x4;
+    break;
+  case _U32X4:
+    return Brigu32x4;
+    break;
+  case _F64X2:
+    return Brigf64x2;
+    break;
+  case _S64X2:
+    return Brigs64x2;
+    break;
+  case _U64X2:
+    return Brigu64x2;
+    break;
+  case _ROIMG:
+    return BrigROImg;
+    break;
+  case _RWIMG:
+    return BrigRWImg;
+    break;
+  case _SAMP:
+    return BrigSamp;
+    break;
+}
+}
 
 int GetTargetInfo(int token,
                    BrigMachine16_t* machine,
@@ -960,13 +1091,20 @@ int ArgumentDecl(int first_token,
     }
 
     next = yylex();  // skip over "arg"
-
     if ((GetTokenType(next) == DATA_TYPE_ID)||
         (next == _RWIMG) ||
         (next == _SAMP) ||
         (next == _ROIMG)) {
+      BrigDataType16_t data_type = GetDataType(next);
       next = yylex();
       if (next == TOKEN_LOCAL_IDENTIFIER) {
+        // should have a meaning for DATA_TYPE_ID.
+        // for argument, we need to set a BrigDirectiveSymbol
+        // and write the corresponding string into .string section.
+
+
+        std::string arg_name = string_val;
+        int arg_name_offset = context->add_symbol(arg_name);
         // scan for arrayDimensions
         next = yylex();
         if (next == '[') {
@@ -978,6 +1116,50 @@ int ArgumentDecl(int first_token,
           }
         } else {
           // no arrayDimensions
+          BrigdOffset32_t dsize = context->get_directive_offset();
+          BrigDirectiveSymbol sym_decl = {
+          context->get_code_offset(),
+          BrigArgSpace,
+          BrigNone,
+          0,
+          0,
+          0,
+          arg_name_offset,
+          data_type,
+          1,
+          0, // d_init = 0 for arg
+          0 // reserved
+          };
+          // append the DirectiveSymbol to .directive section.
+          context->append_directive_symbol<BrigDirectiveSymbol>(&sym_decl);
+          
+          // update the current DirectiveFunction.
+          // 1. update the directive offset.
+          BrigDirectiveFunction bdf;
+          context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
+          if(bdf.d_firstScopedDirective == bdf.d_nextDirective){
+            bdf.d_nextDirective += 36;
+            bdf.d_firstScopedDirective = bdf.d_nextDirective;
+          } else {
+            bdf.d_nextDirective += 36;
+          }
+          // std::cout << bdf.d_nextDirective << std::endl;
+          // update param count
+          if (context->arg_output) {
+            bdf.outParamCount ++;
+          } else {
+            if(!bdf.inParamCount)
+              bdf.d_firstInParam = dsize;
+            bdf.inParamCount ++;
+          }
+          unsigned char * bdf_charp =
+            reinterpret_cast<unsigned char*>(&bdf);
+          context->update_directive_bytes(bdf_charp,context->current_bdf_offset,40);
+
+          context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
+          // std::cout << bdf.size << std::endl;
+
+
           *last_token = next;
           *rescan_last_token = true;
           return 0;
@@ -1039,7 +1221,7 @@ int FunctionDefinition(int first_token,
       BrigDirectiveFunction bdf = {
       40, //size
       BrigEDirectiveFunction, //kind
-      0,
+      context->get_code_offset(),
       0,
       0,
       bdf_offset+40,  // d_firstScopedDirective
@@ -1065,13 +1247,10 @@ int FunctionDefinition(int first_token,
         // if not write into string.
 
         std::string func_name = string_val;
-         // std::cout << func_name << std::endl;
         BrigsOffset32_t check_result = context->add_symbol(func_name);
-         // std::cout << check_result << std::endl;
-
 
         unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);
-        context->update_directive_bytes(value, context->current_bdf_offset, 4);
+        context->update_directive_bytes(value, context->current_bdf_offset + 8, bdf.size);
         
         /* Debug */
         // BrigDirectiveFunction get;
@@ -1080,6 +1259,7 @@ int FunctionDefinition(int first_token,
       
         // check return argument list
         if (yylex() == '(') {
+          context->arg_output = true;
           token_to_scan = yylex();
 
           if (token_to_scan == ')') {   // empty argument list body
@@ -1103,6 +1283,7 @@ int FunctionDefinition(int first_token,
         }
         // check argument list
         if (token_to_scan == '(') {
+          context->arg_output = false;
           token_to_scan = yylex();
 
           if (token_to_scan == ')') {   // empty argument list body
@@ -1344,6 +1525,7 @@ int Codeblock(int first_token, Context* context) {
       }
     } else if (next_token == RET) {  // ret operation
       if (yylex() == ';') {
+      BrigcOffset32_t csize = context->get_code_offset();
       BrigInstBase op_ret = {
         32,
         BrigEInstBase,
@@ -1354,6 +1536,13 @@ int Codeblock(int first_token, Context* context) {
         };
       // write to .code section
       context->append_code<BrigInstBase>(&op_ret);
+      BrigDirectiveFunction bdf;
+      context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
+      bdf.operationCount++;
+
+      unsigned char * bdf_charp =
+        reinterpret_cast<unsigned char*>(&bdf);
+      context->update_directive_bytes(bdf_charp,context->current_bdf_offset,bdf.size);
 
       } else {
         printf("Missing ';' at the end of ret operation\n");
