@@ -14,17 +14,16 @@ namespace brig {
 Context* context = new Context();
 
 TEST(CodegenTest, SimplestFunction_CodeGen) {
-
   Context* context1 = new Context();
   BrigDirectiveFunction ref = {
-    40, //size
-    BrigEDirectiveFunction, //kind
+    40,                       // size
+    BrigEDirectiveFunction,   // kind
     0,
     0,
     0,
-    40,  // d_firstScopedDirective
+    40,                       // d_firstScopedDirective
     0,
-    40,  // d_nextDirective
+    40,                       // d_nextDirective
     BrigNone,
     0,
     0,
@@ -35,11 +34,11 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0,Function(yylex(),context1));
+  EXPECT_EQ(0, Function(yylex(), context1));
 
   // test the .directive section size
   BrigdOffset32_t dsize = context1->get_directive_offset();
-  EXPECT_EQ(40,dsize);
+  EXPECT_EQ(40, dsize);
 
   // test the offset to the .string section
   BrigDirectiveFunction get;
@@ -48,7 +47,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .string size
   BrigsOffset32_t size = context1->get_string_offset();
-  EXPECT_EQ(13,size);
+  EXPECT_EQ(13, size);
 
   // find the string.
   std::string func_name("&return_true");
@@ -420,7 +419,7 @@ TEST(CodegenTest, StringScanTest) {
   // scan for strings first
   ScanString(yylex(), context);
   // Print out string buffer content:
-  int index = 0;
+  unsigned int index = 0;
   std::string temp;
   std::cout << "Buffer content: " << std::endl;
   while (index < context->get_string_offset()) {
@@ -498,15 +497,15 @@ TEST(CodegenTest, ScanSymbolsWithParser) {
   input.append("function &test()() {\n");
   input.append("{arg_u32 %z;}\n");
   input.append(" }; \n");
-  
+
   Parser* parser = new Parser(input);
   parser->scan_symbols();
-  
+
   // read symbols
   Context* context = parser->get_context();
-  
+
   // Print out string buffer content:
-  int index = 0;
+  unsigned int index = 0;
   std::string temp;
   std::cout << "Buffer content: " << std::endl;
   while (index < context->get_string_offset()) {
