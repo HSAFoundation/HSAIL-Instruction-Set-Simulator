@@ -1352,7 +1352,8 @@ int Codeblock(int first_token, Context* context) {
         BrigNoPacking,
         {0, 0, 0, 0, 0}
         };
-
+      // write to .code section
+      context->append_code<BrigInstBase>(&op_ret);
 
       } else {
         printf("Missing ';' at the end of ret operation\n");
