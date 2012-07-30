@@ -437,7 +437,7 @@ TEST(CodegenTest, TestLexWrapper) {
   int token = lexer->get_next_token();
 
   EXPECT_GE(token, 0);
-  EXPECT_EQ(token, TOKEN_CREGISTER);
+  EXPECT_EQ(TOKEN_CREGISTER, token);
 
   std::string token_str = lexer->get_string_value();
   EXPECT_STREQ("$c1", token_str.c_str());
