@@ -16,7 +16,7 @@ class LexerInterface {
       set_source_string(s);
     };
 
-    virtual int get_next_token() = 0;
+    virtual unsigned int get_next_token() = 0;
     virtual int get_int_value() = 0;
     virtual double get_double_value() = 0;
     virtual float get_float_value() = 0;
@@ -26,7 +26,7 @@ class LexerInterface {
       this->src.assign(src.c_str());
     }
 
-    virtual void restart() = 0;
+    void restart() {}  // rescan the source string from beginning
 
   protected:
     std::string src;

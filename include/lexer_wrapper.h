@@ -25,7 +25,7 @@ class Lexer: public LexerInterface {
     }
 
     // get the next token
-    int get_next_token(void);
+    unsigned int get_next_token(void);
 
     // get the value of token
     int get_int_value(void);

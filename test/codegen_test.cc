@@ -6,8 +6,6 @@
 #include "lexer.h"
 #include "parser.h"
 #include "brig.h"
-#include "lexer_wrapper.h"
-#include "parser_wrapper.h"
 
 namespace hsa {
 namespace brig {
@@ -428,92 +426,5 @@ TEST(CodegenTest, StringScanTest) {
     index+=temp.length()+1;
   }
 };
-
-TEST(CodegenTest, TestLexWrapper) {
-  Lexer* lexer = new Lexer();
-  std::string input("$c1");
-  lexer->set_source_string(input);
-
-  int token = lexer->get_next_token();
-
-  EXPECT_GE(token, 0);
-  EXPECT_EQ(TOKEN_CREGISTER, token);
-
-  std::string token_str = lexer->get_string_value();
-  EXPECT_STREQ("$c1", token_str.c_str());
-};
-
-TEST(CodegenTest, GetIntValFromLexer) {
-  std::string input("10");
-  Lexer* lexer = new Lexer(input);
-
-  int token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_INTEGER_CONSTANT);
-  EXPECT_EQ(10, lexer->get_int_value());
-}
-
-TEST(CodegenTest, GetFloatValFromLexer) {
-  std::string input("10.0f");
-  Lexer* lexer = new Lexer(input);
-
-  int token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_SINGLE_CONSTANT);
-  EXPECT_EQ(10.0, lexer->get_float_value());
-}
-
-TEST(CodegenTest, GetDoubleValFromLexer) {
-  std::string input("10.0l");
-  Lexer* lexer = new Lexer(input);
-
-  int token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_DOUBLE_CONSTANT);
-  EXPECT_EQ(10.0, lexer->get_double_value());
-}
-
-TEST(CodegenTest, ResetLexer) {
-  std::string input("$c1 10 10.5f");
-  Lexer* lexer = new Lexer(input);
-
-  int token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_CREGISTER);
-
-  token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_INTEGER_CONSTANT);
-  EXPECT_EQ(10, lexer->get_int_value());
-
-  token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_SINGLE_CONSTANT);
-  EXPECT_EQ(10.5, lexer->get_float_value());
-
-  // restart from begin
-  lexer->restart();
-  token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_CREGISTER);
-}
-
-TEST(CodegenTest, ScanSymbolsWithParser) {
-  std::string input("version 1:0:$large;\n");
-  input.append("global_f32 &x = 2;\n");
-  input.append("function &test()() {\n");
-  input.append("{arg_u32 %z;}\n");
-  input.append(" }; \n");
-
-  Parser* parser = new Parser(input);
-  parser->scan_symbols();
-
-  // read symbols
-  Context* context = parser->get_context();
-
-  // Print out string buffer content:
-  unsigned int index = 0;
-  std::string temp;
-  std::cout << "Buffer content: " << std::endl;
-  while (index < context->get_string_offset()) {
-    temp = context->get_string(index);
-    std::cout << "Index " << index << ": " << temp << std::endl;
-    index+=temp.length()+1;
-  }
-}
-
 }  // namespace brig
 }  // namespace hsa
