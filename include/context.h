@@ -153,7 +153,7 @@ class Context {
 
     // get string at an index
     std::string get_string(uint32_t index) {
-      return sbuf->at(index); 
+      return sbuf->at(index);
     }
   // get current offset
     BrigcOffset32_t get_code_offset(void) const {
@@ -264,26 +264,26 @@ class Context {
     void clear_code_buffer(void) {
       cbuf->clear();
     }
-    
+
     void clear_directive_buffer(void) {
       dbuf->clear();
     }
-    
+
     void clear_operand_buffer(void) {
       obuf->clear();
     }
-    
+
     void clear_string_buffer(void) {
       sbuf->clear();
     }
-    
+
     void clear_all_buffers(void) {
       cbuf->clear();
       dbuf->clear();
       obuf->clear();
       sbuf->clear();
     }
-    
+
    BrigcOffset32_t current_bdf_offset; 
 
 
