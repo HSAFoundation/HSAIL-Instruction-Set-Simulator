@@ -16,19 +16,28 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   BrigDirectiveFunction ref = {
     40,                       // size
     BrigEDirectiveFunction,   // kind
-    0,
-    0,
-    0,
-    40,                       // d_firstScopedDirective
-    0,
-    40,                       // d_nextDirective
+    0,   // c_code
+    0,   // s_name
+    0,   // inParamCount
+    96,  // d_firstScopedDirective
+    1,   // operationCount
+    96,  // d_nextDirective
     BrigNone,
     0,
-    0,
+    1,   // outParamCount
     0,
   };
 
-  std::string input("function &return_true()(){};");
+  std::string input("version 1:0;$small");
+//  ref.major = 1;
+//  ref.minor = 0;
+
+  // current directive offset value
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Version(yylex(), context1));
+
+
+  input.assign("function &return_true(arg_f32 %ret_val)(){ret;};");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
@@ -36,22 +45,31 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .directive section size
   BrigdOffset32_t dsize = context1->get_directive_offset();
-  EXPECT_EQ(40, dsize);
+  EXPECT_EQ(96,dsize);
 
   // test the offset to the .string section
   BrigDirectiveFunction get;
-  context1->get_directive<BrigDirectiveFunction>(dsize-sizeof(get), &get);
+  context1->get_directive<BrigDirectiveFunction>(context1->current_bdf_offset, &get);
   EXPECT_EQ(ref.s_name, get.s_name);
+  EXPECT_EQ(ref.c_code, get.c_code);
+  EXPECT_EQ(ref.outParamCount, get.outParamCount);
+  EXPECT_EQ(ref.inParamCount, get.inParamCount);
+  EXPECT_EQ(ref.operationCount, get.operationCount);
+  EXPECT_EQ(ref.d_nextDirective, get.d_nextDirective);
+  EXPECT_EQ(ref.d_firstScopedDirective, get.d_firstScopedDirective);
+
 
   // test the .string size
   BrigsOffset32_t size = context1->get_string_offset();
-  EXPECT_EQ(13, size);
+  EXPECT_EQ(22,size);
 
   // find the string.
   std::string func_name("&return_true");
   int str_offset = context1->lookup_symbol(func_name);
   EXPECT_EQ(0, str_offset);
 
+  BrigcOffset32_t csize = context1->get_code_offset();
+  EXPECT_EQ(32, csize);
 
   delete context1;
 }
