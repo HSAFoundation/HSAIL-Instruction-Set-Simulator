@@ -195,6 +195,150 @@ enum BrigOperandKinds {
   BrigEOperandOpaque
 };
 
+// BrigPacking
+// BrigPacking is used to specify the packing type of HSAIL operation.
+enum BrigPacking {
+	BrigNoPacking,
+	BrigPackPP,
+	BrigPackPS,
+	BrigPackSP,
+	BrigPackSS,
+	BrigPackS,
+	BrigPackP,
+	BrigPackPPsat,
+	BrigPackPSsat,
+	BrigPackSPsat,
+	BrigPackSSsat,
+	BrigPackSsat,
+	BrigPackPsat
+};
+
+//BrigOpcode
+//BrigOpcode is used to specify the opcode for the HSAIL operation.
+enum BrigOpcode {
+	BrigAbs = 0,
+	BrigAdd = 1,
+	BrigCarry = 2,
+	BrigBorrow = 3,
+	BrigDiv = 4,
+	BrigMax = 5,
+	BrigMin = 6,
+	BrigMul = 7,
+	BrigNeg = 8,
+	BrigRem = 9,
+	BrigSub = 10,
+	BrigMad = 11,
+	BrigMul24 = 12,
+	BrigMad24 = 13,
+	BrigShl = 14,
+	BrigShr = 15,
+	BrigAnd = 16,
+	BrigOr = 17,
+	BrigXor = 18,
+	BrigNot = 19,
+	BrigPopcount = 20,
+	BrigFirstbit = 21,
+	BrigLastbit = 22,
+	BrigBitRev = 23,
+	BrigExtract = 24,
+	BrigInsert = 25,
+	BrigMov = 26,
+	BrigUnpacklo = 27,
+	BrigUnpackhi = 28,
+	BrigShuffle = 29,
+	Brigmovslo = 30,
+	Brigmovshi = 31,
+	Brigmovdlo = 32,
+	Brigmovdhi = 33,
+	BrigLda = 34,
+	BrigLdc = 36,
+	BrigCmov = 37,
+	BrigPackedCmp = 38,
+	BrigCopySign = 39,
+	BrigFma = 40,
+	BrigClass = 41,
+	BrigSqrt = 42,
+	BrigFract = 43,
+	BrigFcos = 44,
+	BrigFsin = 45,
+	BrigFlog2 = 46,
+	BrigFexp2 = 47,
+	BrigFrsqrt = 48,
+	BrigFrcp = 49,
+	BrigCmp = 50,
+	BrigSegmentp = 51,
+	BrigFtoS = 52,
+	BrigStoF = 53,
+	BrigCvt = 54,
+	BrigF2u4 = 55,
+	BrigUnpack3 = 56,
+	BrigUnpack2 = 57,
+	BrigUnpack1 = 58,
+	BrigUnpack0 = 59,
+	BrigBitAlign = 60,
+	BrigByteAlign = 61,
+	BrigLerp = 62,
+	BrigSad = 63,
+	BrigSad2 = 64,
+	BrigSad4 = 65,
+	BrigSad4hi = 66,
+	BrigLd = 67,
+	BrigSt = 68,
+	BrigAtomic = 69,
+	BrigAtomicNoRet = 70,
+	BrigRdImage = 71,
+	BrigLdImage = 72,
+	BrigStImage = 73,
+	BrigAtomicNoRetImage = 74,
+	BrigAtomicImage = 75,
+	BrigQueryWidth = 76,
+	BrigQueryHeight = 77,
+	BrigQueryDepth = 78,
+	BrigQueryOrder = 79,
+	BrigQueryFiltering = 80,
+	BrigQueryData = 81,
+	BrigQueryArray = 82,
+	BrigQueryNormalized = 83,
+	BrigCbr = 84,
+	BrigBrn = 85,
+	BrigSync = 86,
+	BrigBarrier = 87,
+	BrigFbarInitSize = 88,
+	BrigFbarInitSizeWg = 89,
+	BrigFbarInit = 90,
+	BrigFbarWait = 91,
+	BrigFbarArrive = 92,
+	BrigFbarSkip = 93,
+	BrigFbarRelease = 94,
+	BrigFbarReleaseCF = 95,
+	BrigCount = 96,
+	BrigCountup = 97,
+	BrigMask = 98,
+	BrigSend = 99,
+	BrigReceive = 100,
+	BrigRet = 101,
+	BrigSyscall = 102,
+	BrigAlloca = 103,
+	BrigCall = 104,
+	BrigWorkItemId = 105,
+	BrigWorkItemAId = 106,
+	BrigWorkGroupId = 107,
+	BrigWorkGroupSize = 108,
+	BrigNDRangesize = 109,
+	BrigNDRangegroups = 110,
+	BrigLaneId = 111,
+	BrigDynWaveId = 112,
+	BrigMaxDynWaveId = 113,
+	BrigDispatchId = 114,
+	BrigCU = 115,
+	BrigWorkDim = 116,
+	BrigClock = 117,
+	Brigworkitemidflat = 118,
+	Brigworkitemaidflat = 119,
+	BrigNop = 120,
+	BrigDebugtrap = 121,
+	BrigBitselect = 122
+};
 // Directive structures
 
 // 20.8.8
@@ -318,4 +462,14 @@ typedef struct BrigOperandImmed {
     uint8_t c;
   } bits;
 }BrigOperandImmed;
+
+typedef struct BrigInstBase {
+	uint16_t size;
+	uint16_t kind;
+	BrigOpcode32_t opcode;
+	BrigDataType16_t type;
+	BrigPacking16_t packing;
+	BrigoOffset32_t o_operands[5];
+}BrigInstBase;
+
 #endif  // INCLUDE_BRIG_H_

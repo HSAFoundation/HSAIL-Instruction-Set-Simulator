@@ -1344,6 +1344,16 @@ int Codeblock(int first_token, Context* context) {
       }
     } else if (next_token == RET) {  // ret operation
       if (yylex() == ';') {
+      BrigInstBase op_ret = {
+        32,
+        BrigEInstBase,
+        BrigRet,
+        Brigf32,
+        BrigNoPacking,
+        {0, 0, 0, 0, 0}
+        };
+
+
       } else {
         printf("Missing ';' at the end of ret operation\n");
         return 1;

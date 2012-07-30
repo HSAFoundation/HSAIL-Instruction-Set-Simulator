@@ -31,7 +31,16 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
     0,
   };
 
-  std::string input("function &return_true()(){};");
+  std::string input("version 1:0;");
+//  ref.major = 1;
+//  ref.minor = 0;
+
+  // current directive offset value
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Version(yylex(), context1));
+
+
+  input.assign("function &return_true()(){ret;};");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
@@ -39,7 +48,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .directive section size
   BrigdOffset32_t dsize = context1->get_directive_offset();
-  EXPECT_EQ(40,dsize);
+  EXPECT_EQ(60,dsize);
 
   // test the offset to the .string section
   BrigDirectiveFunction get;
@@ -55,6 +64,8 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   int str_offset = context1->lookup_symbol(func_name);
   EXPECT_EQ(0, str_offset);
 
+  BrigcOffset32_t csize = context1->get_code_offset();
+  EXPECT_EQ(32, csize);
 
   delete context1;
 }
