@@ -43,7 +43,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the offset to the .string section
   BrigDirectiveFunction get;
-  context1->get_d<BrigDirectiveFunction>(dsize-sizeof(get), &get);
+  context1->get_directive<BrigDirectiveFunction>(dsize-sizeof(get), &get);
   EXPECT_EQ(ref.s_name, get.s_name);
 
   // test the .string size

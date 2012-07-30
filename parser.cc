@@ -1057,9 +1057,9 @@ int FunctionDefinition(int first_token,
         // if not write into string.
 
         std::string func_name = string_val;
-        // std::cout << func_name << std::endl;
+         std::cout << func_name << std::endl;
         BrigsOffset32_t check_result = context->add_symbol(func_name);
-        //std::cout << check_result << std::endl;
+         std::cout << check_result << std::endl;
 
 
         unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);

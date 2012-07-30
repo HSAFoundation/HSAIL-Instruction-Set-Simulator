@@ -66,7 +66,7 @@ class Buffer {
 
     if (buf_.size() == 0)
       return EMPTY_BUFFER;
-    if (buf_.end() < buf_.begin()+ offset + return_size) {
+    if (buf_.end() < buf_.begin()+ offset + return_size)
       return INVALID_OFFSET;
 
 
