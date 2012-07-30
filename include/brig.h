@@ -64,7 +64,7 @@ enum BrigDataType {
     Brigu8x16,         // 16 bytes unsigned
     Brigs8x16,         // 16 bytes signed
     Brigu16x2,         // two short unsigned integers
-    Brigs16x2,         // two short signed integers
+    Brigs16x2,         // two short signed integer
     Brigf16x2,         // two half-floats
     Brigu16x4,         // four short unsigned integers
     Brigs16x4,         // four short signed integers
