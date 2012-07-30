@@ -292,7 +292,7 @@ class Context {
       sbuf->clear();
     }
 
-   bool arg_output;
+  bool arg_output;
 
   BrigcOffset32_t current_bdf_offset;
 

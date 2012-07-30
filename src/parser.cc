@@ -1127,17 +1127,19 @@ int ArgumentDecl(unsigned int first_token,
           arg_name_offset,
           data_type,
           1,
-          0, // d_init = 0 for arg
-          0 // reserved
+          0,               // d_init = 0 for arg
+          0                // reserved
           };
           // append the DirectiveSymbol to .directive section.
           context->append_directive_symbol<BrigDirectiveSymbol>(&sym_decl);
-          
+
           // update the current DirectiveFunction.
           // 1. update the directive offset.
           BrigDirectiveFunction bdf;
-          context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
-          if(bdf.d_firstScopedDirective == bdf.d_nextDirective){
+          context->get_directive<BrigDirectiveFunction>(
+                    context->current_bdf_offset,
+                    &bdf);
+          if (bdf.d_firstScopedDirective == bdf.d_nextDirective) {
             bdf.d_nextDirective += 36;
             bdf.d_firstScopedDirective = bdf.d_nextDirective;
           } else {
@@ -1146,17 +1148,21 @@ int ArgumentDecl(unsigned int first_token,
           // std::cout << bdf.d_nextDirective << std::endl;
           // update param count
           if (context->arg_output) {
-            bdf.outParamCount ++;
+            bdf.outParamCount++;
           } else {
-            if(!bdf.inParamCount)
+            if (!bdf.inParamCount)
               bdf.d_firstInParam = dsize;
-            bdf.inParamCount ++;
+            bdf.inParamCount++;
           }
           unsigned char * bdf_charp =
             reinterpret_cast<unsigned char*>(&bdf);
-          context->update_directive_bytes(bdf_charp,context->current_bdf_offset,40);
+          context->update_directive_bytes(bdf_charp,
+                                          context->current_bdf_offset,
+                                          40);
 
-          context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
+          context->get_directive<BrigDirectiveFunction>(
+                    context->current_bdf_offset,
+                    &bdf);
           // std::cout << bdf.size << std::endl;
 
 
@@ -1248,7 +1254,9 @@ int FunctionDefinition(unsigned int first_token,
         BrigsOffset32_t check_result = context->add_symbol(func_name);
 
         unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);
-        context->update_directive_bytes(value, context->current_bdf_offset + 8, bdf.size);
+        context->update_directive_bytes(value,
+                                        context->current_bdf_offset + 8,
+                                        bdf.size);
 
         /* Debug */
         // BrigDirectiveFunction get;
@@ -1535,12 +1543,16 @@ int Codeblock(unsigned int first_token, Context* context) {
       // write to .code section
       context->append_code<BrigInstBase>(&op_ret);
       BrigDirectiveFunction bdf;
-      context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
+      context->get_directive<BrigDirectiveFunction>(
+                context->current_bdf_offset,
+                &bdf);
       bdf.operationCount++;
 
       unsigned char * bdf_charp =
         reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp,context->current_bdf_offset,bdf.size);
+      context->update_directive_bytes(bdf_charp,
+                                      context->current_bdf_offset,
+                                      bdf.size);
 
       } else {
         printf("Missing ';' at the end of ret operation\n");

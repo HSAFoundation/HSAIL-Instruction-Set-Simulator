@@ -45,11 +45,13 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .directive section size
   BrigdOffset32_t dsize = context1->get_directive_offset();
-  EXPECT_EQ(96,dsize);
+  EXPECT_EQ(96, dsize);
 
   // test the offset to the .string section
   BrigDirectiveFunction get;
-  context1->get_directive<BrigDirectiveFunction>(context1->current_bdf_offset, &get);
+  context1->get_directive<BrigDirectiveFunction>(
+              context1->current_bdf_offset,
+              &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -61,7 +63,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .string size
   BrigsOffset32_t size = context1->get_string_offset();
-  EXPECT_EQ(22,size);
+  EXPECT_EQ(22, size);
 
   // find the string.
   std::string func_name("&return_true");
