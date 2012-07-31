@@ -7,7 +7,6 @@
 #include "brig.h"
 #include "brig_buffer.h"
 
-
 namespace hsa {
 namespace brig {
 // context for code generation
@@ -32,7 +31,7 @@ class Context {
     // append code
     template <class T>
     void append_code(const T* item) {
-      int code_offset = cbuf->size();
+      uint32_t code_offset = cbuf->size();
       if ((alignment_check(*item) == BrigEAlignment_8) &&
           (code_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
@@ -48,7 +47,7 @@ class Context {
     // append directive
     template <class T>
     void append_directive(const T* item) {
-      int directive_offset = dbuf->size();
+      uint32_t directive_offset = dbuf->size();
       if ((alignment_check(*item) == BrigEAlignment_8) &&
           (directive_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
@@ -63,7 +62,7 @@ class Context {
 
     template <class T>
     void append_directive_symbol(const T* item) {
-      int directive_offset = dbuf->size();
+      uint32_t directive_offset = dbuf->size();
       dbuf->append(item);
     }
 
@@ -71,7 +70,7 @@ class Context {
     // append operand
     template <class T>
     void append_operand(const T* item) {
-    int operand_offset = obuf->size();
+    uint32_t operand_offset = obuf->size();
       if ((alignment_check(*item) == BrigEAlignment_8) &&
           (operand_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
@@ -110,7 +109,7 @@ class Context {
 
     // get directive at a specific offset
     template <class T>
-    context_error_t get_directive(int offset, T* item) {
+    context_error_t get_directive(uint32_t offset, T* item) {
       // check for valid pointer
       if (item == NULL)
         return INVALID_POINTER;
@@ -127,7 +126,7 @@ class Context {
 
     // get code at a specific offset
     template <class T>
-    context_error_t get_code(int offset, T* item) {
+    context_error_t get_code(uint32_t offset, T* item) {
       // check for valid pointer
       if (item == NULL)
         return INVALID_POINTER;
@@ -144,7 +143,7 @@ class Context {
 
     // get operand at a specific offset
     template <class T>
-    context_error_t get_operand(int offset, T* item) {
+    context_error_t get_operand(uint32_t offset, T* item) {
       // check for valid pointer
       if (item == NULL)
         return INVALID_POINTER;

@@ -18,11 +18,11 @@ TEST(MockLexerTest, GetNewToken) {
     .WillOnce(Return(TOKEN_CREGISTER))
     .WillOnce(Return(TOKEN_DREGISTER));
 
-  int token = lexer.get_next_token();
+  unsigned int token = lexer.get_next_token();
   EXPECT_EQ(TOKEN_CREGISTER, token);
 
   token = lexer.get_next_token();
-  EXPECT_EQ(TOKEN_DREGISTER, token);
+  EXPECT_EQ(TOKEN_DREGISTER, token);  
 };
 }  // namespace brig
 }  // namespace hsa

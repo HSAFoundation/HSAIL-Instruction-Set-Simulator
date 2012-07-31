@@ -33,7 +33,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 //  ref.minor = 0;
 
   // current directive offset value
-    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context1));
 
 
@@ -87,8 +87,8 @@ TEST(CodegenTest, AlignmentCheck) {
   Context* context1 = new Context();
 
   // First append a 4-byte aligned item BrigBlockStart
-  int old_offset;
-  int curr_offset = context1->get_directive_offset();
+  uint32_t old_offset;
+  uint32_t curr_offset = context1->get_directive_offset();
 
   BrigBlockStart bbs = {
     12,                        // size
@@ -149,7 +149,7 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(0, Version(yylex(), context));
 
   // after append BrigDirectiveVersion
-  int curr_d_offset = context->get_directive_offset();
+  uint32_t curr_d_offset = context->get_directive_offset();
 
   // get structure back
   BrigDirectiveVersion get;
@@ -231,7 +231,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
 
   // get structure from context and compare
   BrigOperandReg get;
-  int curr_o_offset = context->get_operand_offset();
+  uint32_t curr_o_offset = context->get_operand_offset();
   context->get_operand<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
@@ -277,7 +277,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   ref.bits.u = 5;
   // get structure from context and compare
   BrigOperandImmed get;
-  int curr_o_offset = context->get_operand_offset();
+  uint32_t curr_o_offset = context->get_operand_offset();
   // to overcome padding
   context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
 
@@ -366,7 +366,7 @@ TEST(CodegenTest, LookupStringTest) {
 
   strBuf->append(input);
 
-  int offset = strBuf->size();
+  uint32_t offset = strBuf->size();
   input.assign("&test_string2");
   strBuf->append(input);
 
@@ -382,20 +382,20 @@ TEST(CodegenTest, LookupStringTest) {
 
 TEST(CodegenTest, AddSymbolTest) {
   std::string symbol("&symbol1");
-  int offset = context->get_string_offset();
+  uint32_t offset = context->get_string_offset();
 
   // add symbol
-  int sym1_offset = context->add_symbol(symbol);
+  uint32_t sym1_offset = context->add_symbol(symbol);
   EXPECT_EQ(offset, sym1_offset);
 
   offset = context->get_string_offset();
   symbol.assign("%symbol2");
-  int sym2_offset = context->add_symbol(symbol);
+  uint32_t sym2_offset = context->add_symbol(symbol);
   EXPECT_EQ(offset, sym2_offset);
 
   // try to add symbol 1 again
   symbol.assign("&symbol1");
-  int sym1b_offset = context->add_symbol(symbol);
+  uint32_t sym1b_offset = context->add_symbol(symbol);
   EXPECT_EQ(sym1_offset, sym1b_offset);
 
   // lookup
@@ -412,7 +412,7 @@ TEST(CodegenTest, LookupStringBugTest) {
 
   strBuf->append(input);
 
-  int offset = strBuf->size();
+  uint32_t offset = strBuf->size();
   input.assign("test_string1");
   strBuf->append(input);
 
