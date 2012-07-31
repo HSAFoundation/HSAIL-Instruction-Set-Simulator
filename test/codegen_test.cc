@@ -20,6 +20,80 @@ namespace brig {
 ErrorReporter* main_reporter = ErrorReporter::get_instance();
 Context* context = new Context(main_reporter);
 
+TEST(CodegenTest, Example3_CodeGen) {
+  main_reporter->show_error(true);
+  // test error reporter
+  Context* context1 = new Context(main_reporter);
+  BrigDirectiveFunction ref = {
+    40,                       // size
+    BrigEDirectiveFunction,   // kind
+    0,   // c_code
+    0,   // s_name
+    0,   // inParamCount
+    96,  // d_firstScopedDirective
+    2,   // operationCount
+    96,  // d_nextDirective
+    BrigNone,
+    0,
+    1,   // outParamCount
+    0,
+  };
+
+  std::string input("version 1:0:$small;");
+//  ref.major = 1;
+//  ref.minor = 0;
+
+  // current directive offset value
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Version(yylex(), context1));
+
+  input.assign("function &packed_ops (arg_u8x4 %x)(){abs_p_s8x4 $s1, $s2;add_pp_sat_u16x2 $s1, $s0, $s3;};");
+
+  // test the rule
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Function(yylex(), context1));
+
+  // test the .directive section size
+  BrigdOffset32_t dsize = context1->get_directive_offset();
+  EXPECT_EQ(96, dsize);
+
+  // test the .directive section
+  BrigDirectiveFunction get;
+  context1->get_directive<BrigDirectiveFunction>(
+              context1->current_bdf_offset,
+              &get);
+  EXPECT_EQ(ref.s_name, get.s_name);
+  EXPECT_EQ(ref.c_code, get.c_code);
+  EXPECT_EQ(ref.outParamCount, get.outParamCount);
+  EXPECT_EQ(ref.inParamCount, get.inParamCount);
+  EXPECT_EQ(ref.operationCount, get.operationCount);
+  EXPECT_EQ(ref.d_nextDirective, get.d_nextDirective);
+  EXPECT_EQ(ref.d_firstScopedDirective, get.d_firstScopedDirective);
+
+  // test the .string size
+  BrigsOffset32_t size = context1->get_string_offset();
+  EXPECT_EQ(31, size);
+
+  // test .code section.
+  BrigcOffset32_t csize = context1->get_code_offset();
+  EXPECT_EQ(64, csize);
+
+  BrigInstBase get_c;
+  context1->get_code<BrigInstBase>(
+              32,
+              &get_c);
+  EXPECT_EQ(BrigAdd, get_c.opcode);
+  EXPECT_EQ(BrigPackPPsat, get_c.packing);
+  EXPECT_EQ(Brigu16x2, get_c.type);
+  EXPECT_EQ(8, get_c.o_operands[0]);
+  EXPECT_EQ(32, get_c.o_operands[1]);
+  EXPECT_EQ(44, get_c.o_operands[2]);
+
+  main_reporter->show_error(false);
+  delete context1;
+}
+
+
 TEST(CodegenTest, Instrustion3Op_CodeGen) {
   main_reporter->show_error(true);
   // test error reporter
