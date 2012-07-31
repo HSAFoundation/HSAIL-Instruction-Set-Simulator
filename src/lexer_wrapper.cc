@@ -5,7 +5,7 @@
 namespace hsa {
 namespace brig {
 
-  int Lexer::get_next_token(void) {
+  unsigned int Lexer::get_next_token(void) {
     return yylex();
   }
 
@@ -26,10 +26,12 @@ namespace brig {
     return value;
   }
 
+
   void Lexer::set_source_string(const std::string& src) {
     this->src.assign(src.c_str());
     yy_scan_string(reinterpret_cast<const char*>(src.c_str()));
   }
+
 
   void Lexer::restart(void) {
     yy_scan_string(reinterpret_cast<const char*>(src.c_str()));

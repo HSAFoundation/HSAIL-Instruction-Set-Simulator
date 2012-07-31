@@ -6,19 +6,16 @@
 #include "lexer.h"
 #include "parser.h"
 #include "brig.h"
-#include "lexer_wrapper.h"
-#include "parser_wrapper.h"
 
 namespace hsa {
 namespace brig {
 Context* context = new Context();
 
 TEST(CodegenTest, SimplestFunction_CodeGen) {
-
   Context* context1 = new Context();
   BrigDirectiveFunction ref = {
-    40, //size
-    BrigEDirectiveFunction, //kind
+    40,                       // size
+    BrigEDirectiveFunction,   // kind
     0,   // c_code
     0,   // s_name
     0,   // inParamCount
@@ -44,15 +41,17 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0,Function(yylex(),context1));
+  EXPECT_EQ(0, Function(yylex(), context1));
 
   // test the .directive section size
   BrigdOffset32_t dsize = context1->get_directive_offset();
-  EXPECT_EQ(96,dsize);
+  EXPECT_EQ(96, dsize);
 
   // test the offset to the .string section
   BrigDirectiveFunction get;
-  context1->get_directive<BrigDirectiveFunction>(context1->current_bdf_offset, &get);
+  context1->get_directive<BrigDirectiveFunction>(
+              context1->current_bdf_offset,
+              &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -64,7 +63,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .string size
   BrigsOffset32_t size = context1->get_string_offset();
-  EXPECT_EQ(22,size);
+  EXPECT_EQ(22, size);
 
   // find the string.
   std::string func_name("&return_true");
@@ -438,7 +437,7 @@ TEST(CodegenTest, StringScanTest) {
   // scan for strings first
   ScanString(yylex(), context);
   // Print out string buffer content:
-  int index = 0;
+  unsigned int index = 0;
   std::string temp;
   std::cout << "Buffer content: " << std::endl;
   while (index < context->get_string_offset()) {
@@ -447,92 +446,5 @@ TEST(CodegenTest, StringScanTest) {
     index+=temp.length()+1;
   }
 };
-
-TEST(CodegenTest, TestLexWrapper) {
-  Lexer* lexer = new Lexer();
-  std::string input("$c1");
-  lexer->set_source_string(input);
-
-  int token = lexer->get_next_token();
-
-  EXPECT_GE(token, 0);
-  EXPECT_EQ(token, TOKEN_CREGISTER);
-
-  std::string token_str = lexer->get_string_value();
-  EXPECT_STREQ("$c1", token_str.c_str());
-};
-
-TEST(CodegenTest, GetIntValFromLexer) {
-  std::string input("10");
-  Lexer* lexer = new Lexer(input);
-
-  int token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_INTEGER_CONSTANT);
-  EXPECT_EQ(10, lexer->get_int_value());
-}
-
-TEST(CodegenTest, GetFloatValFromLexer) {
-  std::string input("10.0f");
-  Lexer* lexer = new Lexer(input);
-
-  int token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_SINGLE_CONSTANT);
-  EXPECT_EQ(10.0, lexer->get_float_value());
-}
-
-TEST(CodegenTest, GetDoubleValFromLexer) {
-  std::string input("10.0l");
-  Lexer* lexer = new Lexer(input);
-
-  int token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_DOUBLE_CONSTANT);
-  EXPECT_EQ(10.0, lexer->get_double_value());
-}
-
-TEST(CodegenTest, ResetLexer) {
-  std::string input("$c1 10 10.5f");
-  Lexer* lexer = new Lexer(input);
-
-  int token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_CREGISTER);
-
-  token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_INTEGER_CONSTANT);
-  EXPECT_EQ(10, lexer->get_int_value());
-
-  token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_SINGLE_CONSTANT);
-  EXPECT_EQ(10.5, lexer->get_float_value());
-
-  // restart from begin
-  lexer->restart();
-  token = lexer->get_next_token();
-  EXPECT_EQ(token, TOKEN_CREGISTER);
-}
-
-TEST(CodegenTest, ScanSymbolsWithParser) {
-  std::string input("version 1:0:$large;\n");
-  input.append("global_f32 &x = 2;\n");
-  input.append("function &test()() {\n");
-  input.append("{arg_u32 %z;}\n");
-  input.append(" }; \n");
-  
-  Parser* parser = new Parser(input);
-  parser->scan_symbols();
-  
-  // read symbols
-  Context* context = parser->get_context();
-  
-  // Print out string buffer content:
-  int index = 0;
-  std::string temp;
-  std::cout << "Buffer content: " << std::endl;
-  while (index < context->get_string_offset()) {
-    temp = context->get_string(index);
-    std::cout << "Index " << index << ": " << temp << std::endl;
-    index+=temp.length()+1;
-  }
-}
-
 }  // namespace brig
 }  // namespace hsa

@@ -3,6 +3,7 @@
 #ifndef INCLUDE_CONTEXT_H_
 #define INCLUDE_CONTEXT_H_
 
+#include <string>
 #include "brig.h"
 #include "brig_buffer.h"
 
@@ -291,9 +292,9 @@ class Context {
       sbuf->clear();
     }
 
-   BrigcOffset32_t current_bdf_offset; 
-   bool arg_output;
+  bool arg_output;
 
+  BrigcOffset32_t current_bdf_offset;
 
   private:
     Buffer* cbuf;  // code buffer

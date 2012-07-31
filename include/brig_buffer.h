@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <cassert>
-#include <iostream>
 #include <vector>
 #include <string>
 
@@ -18,9 +17,9 @@ class Buffer {
     INVALID_OFFSET,
     EMPTY_BUFFER
     };
-    
+
   Buffer(void) {}
-  
+
   // append an item
   template <class T>
   void append(const T *item) {
@@ -31,7 +30,7 @@ class Buffer {
       buf_.push_back(*item_charp++);
     }
   }
-  
+
   // get the whole buffer as a vector
   const std::vector<unsigned char>& get(void) const {
     return buf_;
@@ -146,12 +145,9 @@ class StringBuffer: public Buffer {
         return index;
       else
         index+=temp.length()+1;
-      
     }
     return -1;
-  
   };
-  
 };
 
 }  // namespace brig

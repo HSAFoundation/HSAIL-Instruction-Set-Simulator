@@ -26,6 +26,13 @@ class Parser {
       rescan = false;
     }
 
+    explicit Parser(LexerInterface* lexer) {
+      this->lexer = lexer;
+      context = new Context();
+      prev_token = 0;
+      rescan = false;
+    }
+
     // get context
     Context* get_context(void) const { return context; }
 
@@ -35,18 +42,18 @@ class Parser {
     // scan source and put symbol into string buffer
     void scan_symbols(void);
 
-    // parse the string
+    // parse a string
     // return 0 if success
     // return 1 if fail
-    int parse();
+    int parse(const std::string& src);
 
     // set source string
     void set_source_string(const std::string& src);
 
   private:
-    int prev_token;
+    unsigned int prev_token;
     bool rescan;
-    Lexer* lexer;
+    LexerInterface* lexer;
     Context* context;
   };
 

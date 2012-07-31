@@ -14,7 +14,7 @@ namespace hsa {
 namespace brig {
 
 // scan the source code and add symbols to string buffer
-void ScanString(int first_token, Context* context) {
+void ScanString(unsigned int first_token, Context* context) {
   std::string temp;
   while (first_token) {
     if ((first_token == TOKEN_GLOBAL_IDENTIFIER) ||
@@ -30,7 +30,7 @@ void ScanString(int first_token, Context* context) {
   }
 }
 
-TerminalType GetTokenType(int token) {
+TerminalType GetTokenType(unsigned int token) {
   switch (token) {
     /* DataTypeId */
   case _U32:
@@ -339,7 +339,7 @@ BrigDataType GetDataType(int token) {
 }
 }
 
-int GetTargetInfo(int token,
+int GetTargetInfo(unsigned int token,
                    BrigMachine16_t* machine,
                    BrigProfile16_t* profile,
                    BrigSftz16_t* ftz) {
@@ -368,7 +368,7 @@ int GetTargetInfo(int token,
   return 0;
 };
 
-int Query(int QueryOp, Context* context) {
+int Query(unsigned int QueryOp, Context* context) {
   // next token should be a dataTypeId
   if (GetTokenType(yylex()) == DATA_TYPE_ID) {
     // next token should be an Operand
@@ -388,7 +388,7 @@ int Query(int QueryOp, Context* context) {
   return 1;
 }
 
-int Operand(int first_token, Context* context) {
+int Operand(unsigned int first_token, Context* context) {
   if (!Identifier(first_token, context)) {  // an Identifier
     if (GetTokenType(first_token) == REGISTER) {
       BrigOperandReg bor;
@@ -422,7 +422,7 @@ int Operand(int first_token, Context* context) {
   return 1;
 }
 
-int Identifier(int first_token, Context* context) {
+int Identifier(unsigned int first_token, Context* context) {
   if (first_token == TOKEN_GLOBAL_IDENTIFIER) {
     return 0;
   } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
@@ -434,7 +434,7 @@ int Identifier(int first_token, Context* context) {
   return 1;
 }
 
-int BaseOperand(int first_token, Context* context) {
+int BaseOperand(unsigned int first_token, Context* context) {
   int next;
   if (first_token == TOKEN_DOUBLE_CONSTANT) {
     BrigOperandImmed boi = {
@@ -570,7 +570,7 @@ int BaseOperand(int first_token, Context* context) {
   }
 }
 
-int AddressableOperand(int first_token, Context* context) {
+int AddressableOperand(unsigned int first_token, Context* context) {
   int next;
   if (first_token == '[') {
     // next should be a non register
@@ -607,7 +607,7 @@ int AddressableOperand(int first_token, Context* context) {
   return 1;
 }
 
-int ArrayOperandList(int first_token, Context* context) {
+int ArrayOperandList(unsigned int first_token, Context* context) {
   // assumed first_token is '('
   int next;
   while (1) {
@@ -626,7 +626,7 @@ int ArrayOperandList(int first_token, Context* context) {
   }
 }
 
-int CallTargets(int first_token, Context* context) {
+int CallTargets(unsigned int first_token, Context* context) {
   // assumed first_token is '['
   int next;
   while (1) {
@@ -645,7 +645,7 @@ int CallTargets(int first_token, Context* context) {
   }
 }
 
-int CallArgs(int first_token, Context* context) {
+int CallArgs(unsigned int first_token, Context* context) {
   // assumed first_token is '('
   int next;
   while (1) {
@@ -666,9 +666,9 @@ int CallArgs(int first_token, Context* context) {
   }
 }
 
-int RoundingMode(int first_token,
+int RoundingMode(unsigned int first_token,
                  bool* is_ftz,
-                 int* last_token,
+                 unsigned int* last_token,
                  Context* context) {
   *is_ftz = false;
   *last_token = first_token;
@@ -693,11 +693,11 @@ int RoundingMode(int first_token,
   }
 }
 
-int Instruction2(int first_token, Context* context) {
+int Instruction2(unsigned int first_token, Context* context) {
   // First token must be an Instruction2Opcode
-  int next = yylex();
+  unsigned int next = yylex();
   // to get last token returned by RoundingMode in case _ftz
-  int temp = 0;
+  unsigned int temp = 0;
   bool is_ftz = false;
 
   if (GetTokenType(first_token) == INSTRUCTION2_OPCODE) {
@@ -778,11 +778,11 @@ int Instruction2(int first_token, Context* context) {
   }
 }
 
-int Instruction3(int first_token, Context* context) {
+int Instruction3(unsigned int first_token, Context* context) {
   // First token must be an Instruction3Opcode
-  int next = yylex();
+  unsigned int next = yylex();
   // to get last token returned by RoundingMode in case _ftz
-  int temp = 0;
+  unsigned int temp = 0;
   bool is_ftz = false;
 
   if (GetTokenType(first_token) == INSTRUCTION3_OPCODE) {
@@ -852,7 +852,7 @@ int Instruction3(int first_token, Context* context) {
   return 1;
 }
 
-int Version(int first_token, Context* context) {
+int Version(unsigned int first_token, Context* context) {
   // first token must be version keyword
   // check for major
   BrigDirectiveVersion bdv;
@@ -904,7 +904,7 @@ int Version(int first_token, Context* context) {
   return 1;
 };
 
-int Alignment(int first_token, Context* context) {
+int Alignment(unsigned int first_token, Context* context) {
   // first token must be "align" keyword
   if (yylex() == TOKEN_INTEGER_CONSTANT)
     return 0;
@@ -916,12 +916,12 @@ int Alignment(int first_token, Context* context) {
 // since this function checks for one token lookahead
 // if the last token is not consumed by this,
 // it will notify the caller to recheck
-int DeclPrefix(int first_token,
+int DeclPrefix(unsigned int first_token,
                bool* recheck_last_token,
-               int* last_token,
+               unsigned int* last_token,
                Context* context) {
-  int last_align_token;
-  int next_token;
+  unsigned int last_align_token;
+  unsigned int next_token;
   *recheck_last_token = false;
   *last_token = 0;
 
@@ -1036,7 +1036,7 @@ int DeclPrefix(int first_token,
   return 0;
 }
 
-int FBar(int first_token, Context* context) {
+int FBar(unsigned int first_token, Context* context) {
   // first token must be _FBAR
   if (yylex() == '(' )
     if (yylex() == TOKEN_INTEGER_CONSTANT)
@@ -1047,13 +1047,13 @@ int FBar(int first_token, Context* context) {
 }
 
 
-int ArrayDimensionSet(int first_token,
+int ArrayDimensionSet(unsigned int first_token,
                       bool* rescan_last_token,
-                      int* last_token,
+                      unsigned int* last_token,
                       Context* context) {
   // first token must be '['
   *rescan_last_token = false;
-  int next_token = yylex();
+  unsigned int next_token = yylex();
   while (1) {
     if (next_token == ']') {
       next_token = yylex();  // check if there is more item
@@ -1073,13 +1073,13 @@ int ArrayDimensionSet(int first_token,
   }
 }
 
-int ArgumentDecl(int first_token,
+int ArgumentDecl(unsigned int first_token,
                  bool* rescan_last_token,
-                 int* last_token,
+                 unsigned int* last_token,
                  Context* context) {
   bool rescan_after_declPrefix;
-  int last_token_of_declPrefix;
-  int next;
+  unsigned int last_token_of_declPrefix;
+  unsigned int next;
   if (!DeclPrefix(first_token,
                   &rescan_after_declPrefix,
                   &last_token_of_declPrefix,
@@ -1127,17 +1127,19 @@ int ArgumentDecl(int first_token,
           arg_name_offset,
           data_type,
           1,
-          0, // d_init = 0 for arg
-          0 // reserved
+          0,               // d_init = 0 for arg
+          0                // reserved
           };
           // append the DirectiveSymbol to .directive section.
           context->append_directive_symbol<BrigDirectiveSymbol>(&sym_decl);
-          
+
           // update the current DirectiveFunction.
           // 1. update the directive offset.
           BrigDirectiveFunction bdf;
-          context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
-          if(bdf.d_firstScopedDirective == bdf.d_nextDirective){
+          context->get_directive<BrigDirectiveFunction>(
+                    context->current_bdf_offset,
+                    &bdf);
+          if (bdf.d_firstScopedDirective == bdf.d_nextDirective) {
             bdf.d_nextDirective += 36;
             bdf.d_firstScopedDirective = bdf.d_nextDirective;
           } else {
@@ -1146,17 +1148,21 @@ int ArgumentDecl(int first_token,
           // std::cout << bdf.d_nextDirective << std::endl;
           // update param count
           if (context->arg_output) {
-            bdf.outParamCount ++;
+            bdf.outParamCount++;
           } else {
-            if(!bdf.inParamCount)
+            if (!bdf.inParamCount)
               bdf.d_firstInParam = dsize;
-            bdf.inParamCount ++;
+            bdf.inParamCount++;
           }
           unsigned char * bdf_charp =
             reinterpret_cast<unsigned char*>(&bdf);
-          context->update_directive_bytes(bdf_charp,context->current_bdf_offset,40);
+          context->update_directive_bytes(bdf_charp,
+                                          context->current_bdf_offset,
+                                          40);
 
-          context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
+          context->get_directive<BrigDirectiveFunction>(
+                    context->current_bdf_offset,
+                    &bdf);
           // std::cout << bdf.size << std::endl;
 
 
@@ -1170,14 +1176,14 @@ int ArgumentDecl(int first_token,
   return 1;
 }
 
-int ArgumentListBody(int first_token,
+int ArgumentListBody(unsigned int first_token,
                      bool* rescan_last_token,
-                     int* last_token,
+                     unsigned int* last_token,
                      Context* context) {
   *last_token = 0;
   *rescan_last_token = false;
 
-  int prev_token = 0;
+  unsigned int prev_token = 0;
   bool rescan = false;
   while (1) {
     if (!ArgumentDecl(first_token, &rescan, &prev_token, context)) {
@@ -1196,14 +1202,14 @@ int ArgumentListBody(int first_token,
   }
 }
 
-int FunctionDefinition(int first_token,
+int FunctionDefinition(unsigned int first_token,
                        bool* rescan_last_token,
-                       int* last_token,
+                       unsigned int* last_token,
                        Context* context) {
   *last_token = 0;
   * rescan_last_token = false;
 
-  int token_to_scan;
+  unsigned int token_to_scan;
   bool rescan;
 
   if (!DeclPrefix(first_token, &rescan, &token_to_scan, context)) {
@@ -1211,22 +1217,20 @@ int FunctionDefinition(int first_token,
       token_to_scan = yylex();
 
     if (token_to_scan == FUNCTION) {
-
-
       // add default struct (Miao)
-  
+
       context->current_bdf_offset = context->get_directive_offset();
       BrigdOffset32_t bdf_offset = context->current_bdf_offset;
 
       BrigDirectiveFunction bdf = {
-      40, //size
-      BrigEDirectiveFunction, //kind
+      40,                      // size
+      BrigEDirectiveFunction,  // kind
       context->get_code_offset(),
       0,
       0,
-      bdf_offset+40,  // d_firstScopedDirective
+      bdf_offset+40,          // d_firstScopedDirective
       0,
-      bdf_offset+40,  // d_nextDirective
+      bdf_offset+40,          // d_nextDirective
       BrigNone,
       0,
       0,
@@ -1235,11 +1239,11 @@ int FunctionDefinition(int first_token,
 
       context->append_directive(&bdf);
 
-      // update it when necessary. 
-      // the later functions should have a entry point of bdf 
+      // update it when necessary.
+      // the later functions should have a entry point of bdf
       // just update it in time.
       //
-    
+
       if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
         // should have meaning of Global_Identifier,
         // and check if there is existing global identifier
@@ -1250,13 +1254,15 @@ int FunctionDefinition(int first_token,
         BrigsOffset32_t check_result = context->add_symbol(func_name);
 
         unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);
-        context->update_directive_bytes(value, context->current_bdf_offset + 8, bdf.size);
-        
+        context->update_directive_bytes(value,
+                                        context->current_bdf_offset + 8,
+                                        bdf.size);
+
         /* Debug */
         // BrigDirectiveFunction get;
         // context->get_d<BrigDirectiveFunction>(bdf_offset, &get);
         // std::cout << get.s_name << std::endl;
-      
+
         // check return argument list
         if (yylex() == '(') {
           context->arg_output = true;
@@ -1320,8 +1326,8 @@ int FunctionDefinition(int first_token,
   return 1;
 }
 
-int FunctionDecl(int first_token, Context* context) {
-  int token_to_scan;
+int FunctionDecl(unsigned int first_token, Context* context) {
+  unsigned int token_to_scan;
   bool rescan;
 
   if (!DeclPrefix(first_token, &rescan, &token_to_scan, context)) {
@@ -1393,11 +1399,11 @@ int FunctionDecl(int first_token, Context* context) {
   return 1;
 }
 
-int ArgBlock(int first_token, Context* context) {
+int ArgBlock(unsigned int first_token, Context* context) {
   // first token should be {
   bool rescan = false;
-  int last_token;
-  int next_token = 0;
+  unsigned int last_token;
+  unsigned int next_token = 0;
   // printf("In arg scope\n");
   while (1) {
     next_token = yylex();
@@ -1495,11 +1501,11 @@ int ArgBlock(int first_token, Context* context) {
   return 1;
 }
 
-int Codeblock(int first_token, Context* context) {
+int Codeblock(unsigned int first_token, Context* context) {
   // first token should be '{'
   bool rescan = false;
-  int last_token;
-  int next_token = 0;
+  unsigned int last_token;
+  unsigned int next_token = 0;
 
   while (1) {
     next_token = yylex();
@@ -1537,12 +1543,16 @@ int Codeblock(int first_token, Context* context) {
       // write to .code section
       context->append_code<BrigInstBase>(&op_ret);
       BrigDirectiveFunction bdf;
-      context->get_directive<BrigDirectiveFunction>(context->current_bdf_offset, &bdf);
+      context->get_directive<BrigDirectiveFunction>(
+                context->current_bdf_offset,
+                &bdf);
       bdf.operationCount++;
 
       unsigned char * bdf_charp =
         reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp,context->current_bdf_offset,bdf.size);
+      context->update_directive_bytes(bdf_charp,
+                                      context->current_bdf_offset,
+                                      bdf.size);
 
       } else {
         printf("Missing ';' at the end of ret operation\n");
@@ -1613,9 +1623,9 @@ int Codeblock(int first_token, Context* context) {
   return 1;
 }
 
-int Function(int first_token, Context* context) {
+int Function(unsigned int first_token, Context* context) {
   bool rescan = false;
-  int last_token = 0;
+  unsigned int last_token = 0;
   if (!FunctionDefinition(first_token, &rescan, &last_token, context)) {
     if (!rescan)
       last_token = yylex();
@@ -1629,9 +1639,9 @@ int Function(int first_token, Context* context) {
   return 1;
 }
 
-int Program(int first_token, Context* context) {
+int Program(unsigned int first_token, Context* context) {
   int result;
-  int last_token;
+  unsigned int last_token;
   bool rescan;
 
   if (first_token == VERSION) {
@@ -1753,9 +1763,9 @@ int Program(int first_token, Context* context) {
   return 1;
 }
 
-int OptionalWidth(int first_token, Context* context) {
+int OptionalWidth(unsigned int first_token, Context* context) {
   // first token must be _WIDTH
-  int next_token = yylex();
+  unsigned int next_token = yylex();
   if (next_token == '(') {
     next_token = yylex();
     if (next_token == ALL) {
@@ -1771,9 +1781,9 @@ int OptionalWidth(int first_token, Context* context) {
   return 1;
 }
 
-int Branch(int first_token, Context* context) {
-  int op = first_token;  // CBR or BRN
-  int current_token = yylex();
+int Branch(unsigned int first_token, Context* context) {
+  unsigned int op = first_token;  // CBR or BRN
+  unsigned int current_token = yylex();
 
 
   // check for optionalWidth
@@ -1863,9 +1873,9 @@ int Branch(int first_token, Context* context) {
   return 1;
 }
 
-int Call(int first_token, Context* context) {
+int Call(unsigned int first_token, Context* context) {
   // first token is "call"
-  int next = yylex();
+  unsigned int next = yylex();
 
   // optional width
   if (next == _WIDTH) {
@@ -1908,14 +1918,14 @@ int Call(int first_token, Context* context) {
   return 1;
 }
 
-int Initializer(int first_token,
+int Initializer(unsigned int first_token,
                 bool* rescan,
-                int* last_token,
+                unsigned int* last_token,
                 Context* context) {
   // first token should be '='
   *rescan = false;
   *last_token =0;
-  int next = yylex();
+  unsigned int next = yylex();
 
   if (next == TOKEN_LABEL) {
     printf("Label initializers must be inside '{' and '}'\n");
@@ -2010,11 +2020,11 @@ int Initializer(int first_token,
   return 0;
 }
 
-int InitializableDecl(int first_token, Context* context) {
+int InitializableDecl(unsigned int first_token, Context* context) {
   // first_token is READONLY or GLOBAL
   bool rescan;
-  int last_token;
-  int next = yylex();
+  unsigned int last_token;
+  unsigned int next = yylex();
 
   if (GetTokenType(next) == DATA_TYPE_ID) {
     next = yylex();
@@ -2045,11 +2055,11 @@ int InitializableDecl(int first_token, Context* context) {
   return 1;
 };
 
-int UninitializableDecl(int first_token, Context* context) {
+int UninitializableDecl(unsigned int first_token, Context* context) {
   // first_token is PRIVATE, GROUP or SPILL
   bool rescan;
-  int last_token;
-  int next = yylex();
+  unsigned int last_token;
+  unsigned int next = yylex();
   if (GetTokenType(next) == DATA_TYPE_ID) {
     // printf("DataTypeId\n");
     next = yylex();
@@ -2074,12 +2084,11 @@ int UninitializableDecl(int first_token, Context* context) {
   return 1;
 }
 
-
-int ArgUninitializableDecl(int first_token, Context* context) {
+int ArgUninitializableDecl(unsigned int first_token, Context* context) {
   // first token is ARG
   bool rescan;
-  int last_token;
-  int next = yylex();
+  unsigned int last_token;
+  unsigned int next = yylex();
   if (GetTokenType(next) == DATA_TYPE_ID) {
     // printf("DataTypeId\n");
     next = yylex();

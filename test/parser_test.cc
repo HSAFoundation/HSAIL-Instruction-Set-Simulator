@@ -196,7 +196,7 @@ TEST(ParserTest, Bug57) {
 
 TEST(ParserTest, RoundingMode) {
   bool is_ftz = false;
-  int current_token;
+  unsigned int current_token;
   std::string input("_upi");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, RoundingMode(yylex(), &is_ftz, &current_token, context));
@@ -327,7 +327,7 @@ TEST(ParserTest, AlignStatement) {
 
 TEST(ParserTest, DeclPrefix) {
   bool recheck;
-  int last_token;
+  unsigned int last_token;
   std::string input("align 8");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, DeclPrefix(yylex(), &recheck, &last_token, context));
@@ -361,7 +361,7 @@ TEST(ParserTest, FBar) {
 
 TEST(ParserTest, ArrayDimensionSet) {
   bool rescan = false;
-  int last_tok = 0;
+  unsigned int last_tok = 0;
   std::string input("[]");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, ArrayDimensionSet(yylex(), &rescan, &last_tok, context));
@@ -377,7 +377,7 @@ TEST(ParserTest, ArrayDimensionSet) {
 
 TEST(ParserTest, ArgumentDecl) {
   bool rescan = false;
-  int last_tok = 0;
+  unsigned int last_tok = 0;
 
   // test 1
   std::string input("const static arg_u32 %local_id[2][2] ");
@@ -428,7 +428,7 @@ TEST(ParserTest, ArgumentDecl) {
 
 TEST(ParserTest, ArgumentListBody) {
   bool rescan = false;
-  int last_tok = 0;
+  unsigned int last_tok = 0;
 
   // test 1
   std::string input("const static arg_u32 %local_id[2][2],");
@@ -439,7 +439,7 @@ TEST(ParserTest, ArgumentListBody) {
 
 TEST(ParserTest, FunctionDefinition) {
   bool rescan = false;
-  int last_tok = 0;
+  unsigned int last_tok = 0;
 
   // test 1
   std::string input("function &get_global_id(arg_u32 %ret_val)");
@@ -575,7 +575,7 @@ TEST(ParserTest, Call) {
 
 TEST(ParserTest, Initializers) {
   bool rescan = false;
-  int last_token = 0;
+  unsigned int last_token = 0;
   std::string input("= {12, 13,14, -13}");  // DecimalInitializer
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Initializer(yylex(), &rescan, &last_token, context));
