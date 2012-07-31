@@ -367,8 +367,10 @@ int Operand(unsigned int first_token, Context* context) {
       bor.reserved = 0;
       std::string name(string_val);
       bor.name = context->lookup_symbol(name);
-
-      context->append_operand(&bor);
+      if(!context->operand_map.count(name)) {
+        context->operand_map[name] = context->get_operand_offset();
+        context->append_operand(&bor);
+      }
     }
     return 0;
   } else if (!BaseOperand(first_token, context)) {    // a base Operand
@@ -655,6 +657,16 @@ int Instruction2(unsigned int first_token, Context* context) {
   unsigned int temp = 0;
   bool is_ftz = false;
 
+  //default value.
+  BrigInstBase inst_op = {
+    32,
+    BrigEInstBase,
+    GetOpCode(first_token),
+    0,
+    BrigNoPacking,
+    {0,0,0,0,0}
+  };
+
   if (GetTokenType(first_token) == INSTRUCTION2_OPCODE) {
     if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
@@ -666,17 +678,29 @@ int Instruction2(unsigned int first_token, Context* context) {
     }
 
     // check whether there is a Packing
-    if (GetTokenType(next) == PACKING)
+    if (GetTokenType(next) == PACKING) {
       // there is packing
+      inst_op.packing = GetPacking(next);
       next = yylex();
+    }
 
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
-      if (!Operand(yylex(), context)) {
+      inst_op.type = GetDataType(next);
+      next = yylex();
+      std::string oper_str = string_val;
+      if (!Operand(next, context)) {
+        inst_op.o_operands[0] = context->operand_map[oper_str];
         if (yylex() == ',') {
-          if (!Operand(yylex(), context)) {
+          next = yylex();
+          oper_str = string_val;
+          if (!Operand(next, context)) {
+            inst_op.o_operands[1] = context->operand_map[oper_str];
             if (yylex() == ';') {
+              context->append_code<BrigInstBase>(&inst_op); 
+              // if the rule is valid, just write to the .code section,
+              // may need to edit others, worry that later.
               return 0;
             }
           }
@@ -717,10 +741,20 @@ int Instruction2(unsigned int first_token, Context* context) {
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
-      if (!Operand(yylex(), context)) {
+      inst_op.type = GetDataType(next);
+      next = yylex();
+      std::string oper_str = string_val;
+      if (!Operand(next, context)) {
+        inst_op.o_operands[0] = context->operand_map[oper_str];
         if (yylex() == ',') {
-          if (!Operand(yylex(), context)) {
+          next = yylex();
+          oper_str = string_val;
+          if (!Operand(next, context)) {
+            inst_op.o_operands[1] = context->operand_map[oper_str];
             if (yylex() == ';') {
+              context->append_code<BrigInstBase>(&inst_op); 
+              // if the rule is valid, just write to the .code section,
+              // may need to edit others, worry that later.
               return 0;
             }
           }
@@ -1249,6 +1283,9 @@ int FunctionDefinition(unsigned int first_token,
 
         std::string func_name = string_val;
         BrigsOffset32_t check_result = context->add_symbol(func_name);
+        
+        // add the func_name to the func_map.
+        context->func_map[func_name] = context->current_bdf_offset;
 
         unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);
         context->update_directive_bytes(value,
@@ -1437,6 +1474,14 @@ int ArgBlock(unsigned int first_token, Context* context) {
         return 1;
       }
     } else if (next_token == TOKEN_LABEL) {  // label
+      // need to check the lable_map, and update when necessary.
+      // std::string label_name = string_val;
+      // context->lable_o_map[label_name] = context->get_operand_offset(); // set the lable_map
+      // add operand in .operand;
+      // check if any entry with the same key in label_c_map;
+      // update the corresponding instructions.
+      // 
+            // if no correlated instructions, then later instructions can directly use the label.
       if (yylex() == ':') {
       } else {
         return 1;

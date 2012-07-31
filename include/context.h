@@ -3,10 +3,12 @@
 #ifndef INCLUDE_CONTEXT_H_
 #define INCLUDE_CONTEXT_H_
 
+#include <map>
 #include <string>
 #include "brig.h"
 #include "brig_buffer.h"
 #include "error_reporter_interface.h"
+
 
 namespace hsa {
 namespace brig {
@@ -24,6 +26,9 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
+      BrigDirectivePad bdp = {0,0};
+      obuf->append(&bdp);
+      obuf->append(&bdp);
       sbuf = new StringBuffer();
       err_reporter = NULL;
     }
@@ -33,6 +38,9 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
+      BrigDirectivePad bdp = {0,0};  //add initial
+      obuf->append(&bdp);
+      obuf->append(&bdp);      
       sbuf = new StringBuffer();
     }
 
@@ -309,9 +317,18 @@ class Context {
       sbuf->clear();
     }
 
-  bool arg_output;
+   BrigoOffset32_t current_label_offset;
+   BrigcOffset32_t current_inst_offset;   
+   BrigdOffset32_t current_bdf_offset;
+   bool arg_output;
 
-  BrigcOffset32_t current_bdf_offset;
+   std::map<std::string, BrigdOffset32_t> func_map;
+   std::map<std::string, BrigoOffset32_t> operand_map;
+   std::map<std::string, BrigoOffset32_t> lable_o_map;
+   std::multimap<std::string, BrigcOffset32_t> lable_c_map;
+    // label_o_map contains the info for OperandLabelRef,
+    // label_d_map contains the label that needed in a instruction
+
 
   private:
     Buffer* cbuf;  // code buffer
