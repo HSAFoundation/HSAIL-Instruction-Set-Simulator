@@ -33,11 +33,14 @@ void GenLLVM::gen_GPU_states(void) {
     llvm::Type::getInt64Ty(llvm::getGlobalContext()), "d_regs",8);
   llvm::StructType *q_reg_type = create_soa_type(
     llvm::Type::getIntNTy(llvm::getGlobalContext(), 128), "q_regs",8);
+  llvm::StructType *pc_reg_type = create_soa_type(
+    llvm::Type::getIntNTy(llvm::getGlobalContext(), 32), "pc_regs",3);
   std::vector<llvm::Type *> tv1;
   tv1.push_back(c_reg_type);
   tv1.push_back(s_reg_type);
   tv1.push_back(d_reg_type);
   tv1.push_back(q_reg_type);
+  tv1.push_back(pc_reg_type);
   llvm::StructType *gpu_states_ty = llvm::StructType::create(
     llvm::getGlobalContext(), tv1, std::string("struct.regs"), false);
   gpu_states_type_ = gpu_states_ty;
@@ -71,7 +74,7 @@ size_t GenLLVM::gen_function(size_t index,
   llvm::Function *func = llvm::Function::Create(FT,
     llvm::Function::ExternalLinkage,
     strings_.at(directive->s_name+1), brig_frontend_);
-  
+
   // Set names for output arguments.
   unsigned idx = 0;
   for (llvm::Function::arg_iterator ai = func->arg_begin(); idx !=
@@ -92,7 +95,7 @@ size_t GenLLVM::gen_function(size_t index,
 }
 
 size_t GenLLVM::gen_directive(size_t index) {
-  const directive_header *dh = 
+  const directive_header *dh =
     reinterpret_cast<const directive_header *>(&(directives_.get()[index]));
   //std::cout << "Size = "<<dh->size<<"; kind = "<<dh->kind <<std::endl;
   enum BrigDirectiveKinds directive_kind =
