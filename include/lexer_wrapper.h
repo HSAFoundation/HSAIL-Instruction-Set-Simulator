@@ -5,7 +5,7 @@
 
 #include <string>
 #include "lexer.h"
-#include "lexer_interface.h"
+
 extern int int_val;
 extern char* string_val;
 extern float float_val;
@@ -15,12 +15,12 @@ namespace hsa {
 namespace brig {
 
 
-class Lexer: public LexerInterface {
+class Lexer {
   public:
     Lexer() {}
 
-    explicit Lexer(const std::string& s)
-    : LexerInterface(s) {
+    explicit Lexer(const std::string& s) {
+      set_source_string(s);
       yy_scan_string(reinterpret_cast<const char*>(src.c_str()));
     }
 
@@ -33,14 +33,19 @@ class Lexer: public LexerInterface {
     float get_float_value(void);
     std::string get_string_value(void);
 
-    // set source string - inherit from LexerInterface
+    // set source string
     void set_source_string(const std::string& src);
+
+    // get source string
+    std::string get_source_string(void) {
+      return this->src;
+    }
 
     // reset to begining of src
     void restart(void);
 
-  // private:
-  //  std::string src;  // local copy of source string - inherit
+  private:
+    std::string src;
   };
 
 }  // namespace brig

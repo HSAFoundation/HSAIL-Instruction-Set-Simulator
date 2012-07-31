@@ -1,13 +1,17 @@
 // Copyright 2012 MulticoreWare Inc.
 
+#include <string>
+#include <iostream>
 #include "gtest/gtest.h"
 #include "lexer.h"
 #include "parser.h"
+#include "parser_wrapper.h"
 
 namespace hsa {
 namespace brig {
 extern Context* context;
-// ------------------ Parser TESTS -----------------
+
+// ------------------  BASIC PARSER TEST -----------------
 
 TEST(ParserTest, OperandTest) {
   std::string input("&a_global_id123");  // global id
@@ -744,6 +748,32 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex(), context));
 };
+
+// ------------------  PARSER WRAPPER TEST -----------------
+TEST(ParserWrapperTest, ScanSymbolsWithParser) {
+  std::string input("version 1:0:$large;\n");
+  input.append("global_f32 &x = 2;\n");
+  input.append("function &test()() {\n");
+  input.append("{arg_u32 %z;}\n");
+  input.append(" }; \n");
+  
+  Parser* parser = new Parser(context);
+  parser->set_source_string(input);
+  parser->scan_symbols();
+
+  
+  // Print out string buffer content:
+  unsigned int index = 0;
+  std::string temp;
+  std::cout << "Buffer content: " << std::endl;
+  while (index < context->get_string_offset()) {
+    temp = context->get_string(index);
+    std::cout << "Index " << index << ": " << temp << std::endl;
+    index+=temp.length()+1;
+  }
+};
+
+
 
 }  // namespace brig
 }  // namespace hsa

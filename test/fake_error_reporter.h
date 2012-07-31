@@ -1,7 +1,7 @@
 /* Copyright 2012 <MulticorewareInc> */
 
-#ifndef INCLUDE_FAKE_ERROR_REPORTER_H_
-#define INCLUDE_FAKE_ERROR_REPORTER_H_
+#ifndef TEST_FAKE_ERROR_REPORTER_H_
+#define TEST_FAKE_ERROR_REPORTER_H_
 
 #include <vector>
 #include <string>
@@ -28,4 +28,4 @@ class FakeErrorReporter: public ErrorReporterInterface {
 };
 }  // namespace brig
 }  // namespace hsa
-#endif  // INCLUDE_FAKE_ERROR_REPORTER_H_
+#endif  // TEST_FAKE_ERROR_REPORTER_H_

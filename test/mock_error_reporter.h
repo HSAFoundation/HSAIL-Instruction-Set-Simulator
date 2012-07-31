@@ -1,6 +1,6 @@
 /* Copyright 2012 <MulticorewareInc> */
-#ifndef INCLUDE_MOCK_ERROR_REPORTER_H_
-#define INCLUDE_MOCK_ERROR_REPORTER_H_
+#ifndef TEST_MOCK_ERROR_REPORTER_H_
+#define TEST_MOCK_ERROR_REPORTER_H_
 #include <string>
 #include "gmock/gmock.h"
 #include "error_reporter_interface.h"
@@ -32,4 +32,4 @@ class MockErrorReporter: public ErrorReporterInterface {
 
 }  // namespace brig
 }  // namespace hsa
-#endif  // INCLUDE_MOCK_ERROR_REPORTER_H_
+#endif  // TEST_MOCK_ERROR_REPORTER_H_

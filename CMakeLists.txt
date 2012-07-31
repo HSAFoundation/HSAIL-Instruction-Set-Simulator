@@ -8,19 +8,15 @@ add_definitions(-DGTEST_HAS_PTHREAD=0)
 flex_target(lexer src/example.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
 set(hsail2brig_test_SOURCES
-    test/mock_lexer_test.cc
-    test/parser_wrapper_test.cc
-    test/lexer_wrapper_test.cc    
     test/codegen_test.cc
     test/parser_test.cc
-    test/hsail_test.cc
+    test/lexer_test.cc
 	  gmock/gmock_main.cc
 	  gmock/gmock-gtest-all.cc
 	  src/parser.cc
     src/brig_buffer.cc
     src/parser_wrapper.cc
     src/lexer_wrapper.cc
-    src/hsail2brig.cc
     src/error_reporter.cc
 	  ${FLEX_lexer_OUTPUTS}
 	  )

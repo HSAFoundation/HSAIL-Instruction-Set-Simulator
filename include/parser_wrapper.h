@@ -16,22 +16,16 @@ class Parser {
     Parser() {
       lexer = new Lexer();
       context = new Context();
-      prev_token = 0;
-      rescan = false;
     }
 
     explicit Parser(const std::string& src) {
       lexer = new Lexer(src);
       context = new Context();
-      prev_token = 0;
-      rescan = false;
     }
-
-    explicit Parser(LexerInterface* lexer) {
-      this->lexer = lexer;
-      context = new Context();
-      prev_token = 0;
-      rescan = false;
+    
+    explicit Parser(Context* context) {
+      this->context = context;
+      lexer = new Lexer();
     }
 
     // get context
@@ -52,9 +46,7 @@ class Parser {
     void set_source_string(const std::string& src);
 
   private:
-    unsigned int prev_token;
-    bool rescan;
-    LexerInterface* lexer;
+    Lexer* lexer;
     Context* context;
   };
 

@@ -14,23 +14,6 @@ extern double double_val;
 namespace hsa {
 namespace brig {
 
-// scan the source code and add symbols to string buffer
-void ScanString(unsigned int first_token, Context* context) {
-  std::string temp;
-  while (first_token) {
-    if ((first_token == TOKEN_GLOBAL_IDENTIFIER) ||
-        (first_token == TOKEN_LOCAL_IDENTIFIER) ||
-        (GetTokenType(first_token) == REGISTER) ||
-        (first_token == TOKEN_LABEL)) {
-      temp.assign(string_val);
-      int offset = context->add_symbol(temp);
-      // printf("Added: %s, at %d\n",temp.c_str(), offset);
-      temp.clear();
-    }
-    first_token = yylex();
-  }
-}
-
 TerminalType GetTokenType(unsigned int token) {
   switch (token) {
     /* DataTypeId */
@@ -339,35 +322,6 @@ BrigDataType GetDataType(int token) {
     break;
 }
 }
-
-int GetTargetInfo(unsigned int token,
-                   BrigMachine16_t* machine,
-                   BrigProfile16_t* profile,
-                   BrigSftz16_t* ftz) {
-    switch (token) {
-    case _SMALL:
-        *machine = BrigESmall;
-        break;
-    case _LARGE:
-        *machine = BrigELarge;
-        break;
-    case _FULL:
-        *profile = BrigEFull;
-        break;
-    case _REDUCED:
-        *profile = BrigEReduced;
-        break;
-    case _SFTZ:
-        *ftz = BrigESftz;
-        break;
-    case _NOSFTZ:
-        *ftz = BrigENosftz;
-        break;
-    default: return 1;
-        break;
-    }
-  return 0;
-};
 
 int Query(unsigned int QueryOp, Context* context) {
   // next token should be a dataTypeId
@@ -887,8 +841,27 @@ int Version(unsigned int first_token, Context* context) {
           next = yylex();
           while (next != ';') {
             if (GetTokenType(next) == TARGET) {
-              if (GetTargetInfo(next, &bdv.machine, &bdv.profile, &bdv.ftz))
-                return 1;
+              switch (next) {
+                case _SMALL:
+                  bdv.machine = BrigESmall;
+                  break;
+                case _LARGE:
+                  bdv.machine = BrigELarge;
+                  break;
+                case _FULL:
+                  bdv.profile = BrigEFull;
+                  break;
+                case _REDUCED:
+                  bdv.profile = BrigEReduced;
+                  break;               
+                case _SFTZ:
+                  bdv.ftz = BrigESftz;
+                  break;
+                case _NOSFTZ:
+                  bdv.ftz = BrigENosftz;
+                  break;    
+              }
+
               next = yylex();
               if (next == ',') {
                 next = yylex();      // next target
