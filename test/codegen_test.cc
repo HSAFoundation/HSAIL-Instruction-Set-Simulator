@@ -20,6 +20,38 @@ namespace brig {
 ErrorReporter* main_reporter = ErrorReporter::get_instance();
 Context* context = new Context(main_reporter);
 
+TEST(CodegenTest, Instrustion3Op_CodeGen) {
+  main_reporter->show_error(true);
+  // test error reporter
+  Context* context1 = new Context(main_reporter);
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAdd,
+    Brigu16x2,
+    BrigPackPPsat,
+    {8,20,32,0,0}
+  };
+
+  std::string input("add_pp_sat_u16x2 $s1, $s0, $s3;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Instruction3(yylex(), context1));
+
+  BrigInstBase get;
+  context1->get_code<BrigInstBase>(
+              0,
+              &get);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+  main_reporter->show_error(false);
+  delete context1;
+}
+
 TEST(CodegenTest, Instrustion2Op_CodeGen) {
   main_reporter->show_error(true);
   // test error reporter
