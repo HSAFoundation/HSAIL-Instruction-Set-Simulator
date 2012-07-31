@@ -323,6 +323,68 @@ BrigDataType GetDataType(int token) {
 }
 }
 
+BrigOpcode GetOpCode(int token) {
+  switch (token) {
+    /* opcode */
+  case ABS:
+    return BrigAbs;
+    break;
+  case ADD:
+    return BrigAdd;
+    break;
+  case CARRY:
+    return BrigCarry;
+    break;
+  case BORROW:
+    return BrigBorrow;
+    break;
+// TBD, need to add complete list of all operations.  
+  }
+}
+
+BrigPacking GetPacking(int token) {
+  switch (token) {
+   /* packing type */
+  case _PP:
+    return BrigPackPP;
+    break;
+  case _PS:
+    return BrigPackPS;
+    break;
+  case _SP:
+    return BrigPackSP;
+    break;
+  case _SS:
+    return BrigPackSS;
+    break;
+  case __S:
+    return BrigPackS;
+    break;
+  case __P:
+    return BrigPackP;
+    break;
+  case _PP_SAT:
+    return BrigPackPPsat;
+    break;
+  case _PS_SAT:
+    return BrigPackPSsat;
+    break;
+  case _SP_SAT:
+    return BrigPackSPsat;
+    break;
+  case _SS_SAT:
+    return BrigPackSSsat;
+    break;
+  case _S_SAT:
+    return BrigPackSsat;
+    break;
+  case _P_SAT:
+    return BrigPackPsat;
+    break;
+  }
+}
+ 
+
 int Query(unsigned int QueryOp, Context* context) {
   // next token should be a dataTypeId
   if (GetTokenType(yylex()) == DATA_TYPE_ID) {
@@ -774,6 +836,16 @@ int Instruction3(unsigned int first_token, Context* context) {
   unsigned int temp = 0;
   bool is_ftz = false;
 
+  //default value.
+  BrigInstBase inst_op = {
+    32,
+    BrigEInstBase,
+    GetOpCode(first_token),
+    0,
+    BrigNoPacking,
+    {0,0,0,0,0}
+  };
+
   if (GetTokenType(first_token) == INSTRUCTION3_OPCODE) {
     if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
@@ -785,19 +857,33 @@ int Instruction3(unsigned int first_token, Context* context) {
     }
 
     // check whether there is a Packing
-    if (GetTokenType(next) == PACKING)
+    if (GetTokenType(next) == PACKING) {
       // there is packing
+      inst_op.packing = GetPacking(next);
       next = yylex();
+    }
 
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
-      if (!Operand(yylex(), context)) {
+      inst_op.type = GetDataType(next);
+      next = yylex();
+      std::string oper_str = string_val;
+
+      if (!Operand(next, context)) {
+        inst_op.o_operands[0] = context->operand_map[oper_str];
         if (yylex() == ',') {
-          if (!Operand(yylex(), context)) {
+          next = yylex();
+          oper_str = string_val;
+          if (!Operand(next, context)) {
+            inst_op.o_operands[1] = context->operand_map[oper_str];
             if (yylex() == ',') {
-              if (!Operand(yylex(), context)) {
+              next = yylex();
+              oper_str = string_val;
+              if (!Operand(next, context)) {
+                inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (yylex() == ';')
+                  context->append_code<BrigInstBase>(&inst_op); 
                   return 0;
               }  // 3rd operand
             }  // 2nd comma
@@ -821,12 +907,24 @@ int Instruction3(unsigned int first_token, Context* context) {
     // now we must have a dataTypeId
     if (GetTokenType(next) == DATA_TYPE_ID) {
       // check the operands
-      if (!Operand(yylex(), context)) {
+      inst_op.type = GetDataType(next);
+      next = yylex();
+      std::string oper_str = string_val;
+
+      if (!Operand(next, context)) {
+        inst_op.o_operands[0] = context->operand_map[oper_str];
         if (yylex() == ',') {
-          if (!Operand(yylex(), context)) {
+          next = yylex();
+          oper_str = string_val;
+          if (!Operand(next, context)) {
+            inst_op.o_operands[1] = context->operand_map[oper_str];
             if (yylex() == ',') {
-              if (!Operand(yylex(), context)) {
+              next = yylex();
+              oper_str = string_val;
+              if (!Operand(next, context)) {
+                inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (yylex() == ';')
+                  context->append_code<BrigInstBase>(&inst_op); 
                   return 0;
               }  // 3rd operand
             }  // 2nd comma

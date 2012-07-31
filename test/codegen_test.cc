@@ -52,6 +52,7 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
   delete context1;
 }
 
+
 TEST(CodegenTest, Instrustion2Op_CodeGen) {
   main_reporter->show_error(true);
   // test error reporter
