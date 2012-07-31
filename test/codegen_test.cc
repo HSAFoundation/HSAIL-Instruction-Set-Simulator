@@ -94,6 +94,7 @@ TEST(CodegenTest, Example3_CodeGen) {
 }
 
 
+
 TEST(CodegenTest, Instrustion3Op_CodeGen) {
   main_reporter->show_error(true);
   // test error reporter

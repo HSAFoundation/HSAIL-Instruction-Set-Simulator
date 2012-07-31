@@ -428,7 +428,7 @@ int Operand(unsigned int first_token, Context* context) {
 
       bor.reserved = 0;
       std::string name(string_val);
-      bor.name = context->lookup_symbol(name);
+      bor.name = context->add_symbol(name);
       if(!context->operand_map.count(name)) {
         context->operand_map[name] = context->get_operand_offset();
         context->append_operand(&bor);
@@ -1654,6 +1654,19 @@ int Codeblock(unsigned int first_token, Context* context) {
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
       // Instruction 2 Operation
       if (!Instruction2(next_token, context)) {
+        //update the operationCount.
+        BrigDirectiveFunction bdf;
+        context->get_directive<BrigDirectiveFunction>(
+                  context->current_bdf_offset,
+                  &bdf);
+        bdf.operationCount++;
+
+        unsigned char * bdf_charp =
+          reinterpret_cast<unsigned char*>(&bdf);
+        context->update_directive_bytes(bdf_charp,
+                                        context->current_bdf_offset,
+                                        bdf.size);
+      
       } else {
         return 1;
       }
@@ -1661,6 +1674,18 @@ int Codeblock(unsigned int first_token, Context* context) {
                (GetTokenType(next_token) == INSTRUCTION3_OPCODE_FTZ)) {
       // Instruction 3 Operation
       if (!Instruction3(next_token, context)) {
+        //update the operationCount.
+        BrigDirectiveFunction bdf;
+        context->get_directive<BrigDirectiveFunction>(
+                  context->current_bdf_offset,
+                  &bdf);
+        bdf.operationCount++;
+
+        unsigned char * bdf_charp =
+          reinterpret_cast<unsigned char*>(&bdf);
+        context->update_directive_bytes(bdf_charp,
+                                        context->current_bdf_offset,
+                                        bdf.size);      
       } else {
         return 1;
       }
