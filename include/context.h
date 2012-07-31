@@ -366,13 +366,12 @@ class Context {
       HasDeclPrefix = false;
     }
 
-  bool arg_output;
-  BrigcOffset32_t current_bdf_offset;
-  BrigoOffset32_t current_label_offset;
-  BrigcOffset32_t current_inst_offset;   
-  BrigdOffset32_t current_bdf_offset;
-  bool arg_output;
 
+  BrigoOffset32_t current_label_offset;
+   BrigcOffset32_t current_inst_offset;   
+   BrigdOffset32_t current_bdf_offset;
+  bool arg_output;
+    
   std::map<std::string, BrigdOffset32_t> func_map;
   std::map<std::string, BrigoOffset32_t> operand_map;
   std::map<std::string, BrigoOffset32_t> lable_o_map;
