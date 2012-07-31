@@ -3,10 +3,12 @@
 #ifndef INCLUDE_CONTEXT_H_
 #define INCLUDE_CONTEXT_H_
 
+#include <map>
 #include <string>
 #include "brig.h"
 #include "brig_buffer.h"
 #include "error_reporter_interface.h"
+
 
 namespace hsa {
 namespace brig {
@@ -24,8 +26,13 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
+      BrigDirectivePad bdp = {0,0};
+      obuf->append(&bdp);
+      obuf->append(&bdp);
       sbuf = new StringBuffer();
+      temporary_buf = new Buffer();
       err_reporter = NULL;
+      clear_context();
     }
 
     explicit Context(ErrorReporterInterface* error_reporter) {
@@ -33,7 +40,12 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
+      BrigDirectivePad bdp = {0,0};  //add initial
+      obuf->append(&bdp);
+      obuf->append(&bdp);      
       sbuf = new StringBuffer();
+      temporary_buf = new Buffer();
+      clear_context();
     }
 
     void set_error_reporter(ErrorReporterInterface* error_reporter) {
@@ -78,12 +90,13 @@ class Context {
       dbuf->append(item);
     }
 
+    
+    // use to append a BrigDirectiveSymbol structs (does not contain a .kind field ? )
     template <class T>
     void append_directive_symbol(const T* item) {
       uint32_t directive_offset = dbuf->size();
       dbuf->append(item);
     }
-
 
     // append operand
     template <class T>
@@ -99,6 +112,12 @@ class Context {
         obuf->append(&bdp);
       }
       obuf->append(item);
+    }
+    
+    // append temporary structs
+    template <class T>
+    void append_temporary_struct(const T* item) {
+      temporary_buf -> append(item);
     }
 
     // add a new symbol to .strings section.
@@ -124,7 +143,23 @@ class Context {
     };
 
     /* code to get Brig structures from buffers */
+    // get temporary structs from temporary buffer
+    template <class T>
+    context_error_t get_temporary_struct(uint32_t offset, T* item) {
+      // check for valid pointer
+      if (item == NULL)
+        return INVALID_POINTER;
 
+      Buffer::error_t result = temporary_buf->get(offset, item);
+
+      if (result == Buffer::INVALID_OFFSET)
+        return INVALID_OFFSET;
+      else if (result == Buffer::EMPTY_BUFFER)
+        return EMPTY_BUFFER;
+      else if (result == Buffer::SUCCESS)
+        return CONTEXT_OK;
+    }
+    
     // get directive at a specific offset
     template <class T>
     context_error_t get_directive(uint32_t offset, T* item) {
@@ -192,6 +227,10 @@ class Context {
     }
     BrigsOffset32_t get_string_offset(void) const {
       return sbuf->size();
+    }
+    
+    uint32_t get_temporary_offset(void) const {
+      return temporary_buf->size();
     }
 
     // functions to get a sequence of values of a certain buffer
@@ -301,24 +340,110 @@ class Context {
     void clear_string_buffer(void) {
       sbuf->clear();
     }
+    
+    void clear_temporary_buffer(void) {
+      temporary_buf->clear();
+    }
 
     void clear_all_buffers(void) {
       cbuf->clear();
       dbuf->clear();
       obuf->clear();
       sbuf->clear();
+      temporary_buf->clear();
+    }
+
+    void clear_context(void) {
+      clear_temporary_context();
+      clear_all_buffers();
+    }
+    
+    void clear_temporary_context(void) {
+      clear_temporary_buffer();
+      IsConstant = false;
+      IsStatic = false;
+      IsExtern = false;
+      HasDeclPrefix = false;
     }
 
   bool arg_output;
-
   BrigcOffset32_t current_bdf_offset;
+  BrigoOffset32_t current_label_offset;
+  BrigcOffset32_t current_inst_offset;   
+  BrigdOffset32_t current_bdf_offset;
+  bool arg_output;
+
+  std::map<std::string, BrigdOffset32_t> func_map;
+  std::map<std::string, BrigoOffset32_t> operand_map;
+  std::map<std::string, BrigoOffset32_t> lable_o_map;
+  std::multimap<std::string, BrigcOffset32_t> lable_c_map;
+  // label_o_map contains the info for OperandLabelRef,
+  // label_d_map contains the label that needed in a instruction
+
+
+  
+  // check context
+  bool is_constant() const {
+    return IsConstant;
+  }
+  
+  bool has_decl_prefix() const {
+    return HasDeclPrefix;
+  }
+  
+  char get_alignment() const { 
+    return Alignment;
+  }
+  
+  bool is_extern() const {
+    return IsExtern;
+  }
+  
+  bool is_static() const {
+    return IsStatic;
+  }
+  
+  // set context
+  void set_is_constant(bool constant) {
+    this->IsConstant = constant;
+    this->HasDeclPrefix |= constant;
+  }
+  
+  void set_is_static(bool is_static) {
+    this->IsStatic = is_static;
+    this->HasDeclPrefix |= is_static;
+  }
+  
+  void set_is_extern(bool is_extern) {
+    this->IsExtern = is_extern;
+    this->HasDeclPrefix |= is_extern;
+  }
+  
+  void set_alignment(char align) {
+    this->Alignment = align;
+    this->HasDeclPrefix = true;
+  }
+  
+  void set_has_decl_prefix(bool has_decl_prefix) {
+    this->HasDeclPrefix = has_decl_prefix;
+  }
+    
+  
 
   private:
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
     Buffer* obuf;  // operand buffer
+    Buffer* temporary_buf;  // a buffer to put temporary structs
     StringBuffer* sbuf;  // string buffer
     ErrorReporterInterface* err_reporter;  // error reporter
+    
+    // context variables
+    bool HasDeclPrefix;
+    bool IsConstant;
+    char Alignment;
+    bool IsExtern;
+    bool IsStatic;
 };
 
 }  // namespace brig

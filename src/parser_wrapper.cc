@@ -39,11 +39,10 @@ namespace brig {
     
     while (token) {
       if (token == VERSION) {
-        if (!Program(token, context))
-          token = lexer->get_next_token();
-        else
+        if (Program(token, context))
           return 1;
       }
+      token = lexer->get_next_token();
     }   
     return 0;      
   }

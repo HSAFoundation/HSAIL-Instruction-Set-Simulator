@@ -788,6 +788,31 @@ TEST(ParserWrapperTest, ParseSimpleProgram) {
   EXPECT_EQ(0, result);
 };
 
+TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
+  // Example 3
+  std::string input("version 1:0:$small;");
+  input.append("function &packed_ops (arg_u8x4 %x)() {");
+  input.append(" abs_p_s8x4 $s1, $s2; ");
+  input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; ");
+  input.append(" }; ");
+  
+  // Example 4
+  input.append("version 1:1:$small;");
+  input.append("function &branch_ops (arg_u8x4 %x)() {");
+  input.append("cbr $c1, @then;");
+  input.append("abs_p_s8x4 $s1, $s2;");
+  input.append(" brn @outof_IF;");
+  input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;");
+  input.append(" @outof_IF: ret;");
+  input.append(" }; ");
+  
+  Parser* parser = new Parser(context);
+  parser->set_source_string(input);
+  int result =  parser->parse();
+  
+  EXPECT_EQ(0, result);
+};
+
 
 }  // namespace brig
 }  // namespace hsa
