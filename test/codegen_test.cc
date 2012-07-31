@@ -87,7 +87,6 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   delete context1;
 }
 
-
 TEST(CodegenTest, AlignmentCheck) {
   // Try the situation in PRM 20.2 (pg. 226)
 
@@ -135,7 +134,6 @@ TEST(CodegenTest, AlignmentCheck) {
 
   delete context1;
 }
-
 
 TEST(CodegenTest, VersionCodeGen) {
   MockErrorReporter mock_rpt;
@@ -225,7 +223,6 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.profile, get.profile);
   EXPECT_EQ(ref.ftz, get.ftz);
 }
-
 
 TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string name;
@@ -448,6 +445,11 @@ TEST(CodegenTest, LookupStringBugTest) {
   EXPECT_EQ(offset, loc);
 };
 
+TEST(CodegenTest, FunctionDeclaration) {
+  std::string input("function &get_global_id(arg_u32 %ret_val)(arg_u32 %arg_val0);");
+  
+  
+}
 
 }  // namespace brig
 }  // namespace hsa

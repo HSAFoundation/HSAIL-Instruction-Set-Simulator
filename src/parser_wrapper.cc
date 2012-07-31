@@ -35,10 +35,17 @@ namespace brig {
     lexer->restart();
     
     // begin parse src
-    while (lexer->get_next_token()) {
-    }
-     
-    return 1;
+    unsigned int token = lexer->get_next_token();
+    
+    while (token) {
+      if (token == VERSION) {
+        if (!Program(token, context))
+          token = lexer->get_next_token();
+        else
+          return 1;
+      }
+    }   
+    return 0;      
   }
 }  // namespace brig
 }  // namespace hsa

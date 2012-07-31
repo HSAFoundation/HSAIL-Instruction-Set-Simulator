@@ -1645,7 +1645,7 @@ int Program(unsigned int first_token, Context* context) {
     if (!Version(first_token, context)) {
       // parse topLevelStatement
       first_token = yylex();
-      while (first_token) {
+      while (first_token && (first_token != VERSION)) {
         if ( (first_token == ALIGN) ||
              (first_token == CONST) ||
              (first_token == EXTERN) ||
