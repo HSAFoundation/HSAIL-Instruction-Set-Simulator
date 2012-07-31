@@ -1,0 +1,3 @@
+syntax:glob
+*/.svn/*
+src/brig2llvm/compiler
