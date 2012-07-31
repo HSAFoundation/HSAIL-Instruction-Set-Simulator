@@ -7,6 +7,7 @@
 #include "lexer_wrapper.h"
 #include "context.h"
 
+
 namespace hsa {
 namespace brig {
 
@@ -42,10 +43,10 @@ class Parser {
     // scan source and put symbol into string buffer
     void scan_symbols(void);
 
-    // parse a string
+    // parse current source string
     // return 0 if success
     // return 1 if fail
-    int parse(const std::string& src);
+    int parse(void);
 
     // set source string
     void set_source_string(const std::string& src);

@@ -22,7 +22,7 @@ TEST(MockLexerTest, GetNewToken) {
   EXPECT_EQ(TOKEN_CREGISTER, token);
 
   token = lexer.get_next_token();
-  EXPECT_EQ(TOKEN_DREGISTER, token);  
+  EXPECT_EQ(TOKEN_DREGISTER, token);
 };
 }  // namespace brig
 }  // namespace hsa

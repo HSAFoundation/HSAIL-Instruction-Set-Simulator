@@ -26,6 +26,10 @@ namespace brig {
       token = lexer->get_next_token();
     }
   }
+
+  int Parser::parse(void) {
+    return 1;
+  }
 }  // namespace brig
 }  // namespace hsa
 

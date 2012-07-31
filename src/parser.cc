@@ -4,6 +4,7 @@
 #include <string>
 #include "tokens.h"
 #include "lexer.h"
+#include "error_reporter_interface.h"
 
 extern int int_val;
 extern char* string_val;
@@ -854,6 +855,14 @@ int Instruction3(unsigned int first_token, Context* context) {
 
 int Version(unsigned int first_token, Context* context) {
   // first token must be version keyword
+
+  if (context == NULL) {
+    printf("INVALID CONTEXT\n");
+    return 1;
+  }
+
+  ErrorReporterInterface* err_reporter = context->get_error_reporter();
+
   // check for major
   BrigDirectiveVersion bdv;
   bdv.kind = BrigEDirectiveVersion;
@@ -892,11 +901,8 @@ int Version(unsigned int first_token, Context* context) {
             }
           }
         }
-        if (context) {
-          context->append_directive(&bdv);
-        } else {
-          printf("Invalid context\n");
-        }
+        context->append_directive(&bdv);
+        err_reporter->report_error(ErrorReporterInterface::OK, 0);
         return 0;
       }
     }

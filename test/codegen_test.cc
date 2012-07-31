@@ -2,17 +2,27 @@
 
 #include <iostream>
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "tokens.h"
 #include "lexer.h"
 #include "parser.h"
 #include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "mock_error_reporter.h"
+
+using ::testing::_;
 
 namespace hsa {
 namespace brig {
-Context* context = new Context();
+
+ErrorReporter* main_reporter = ErrorReporter::get_instance();
+Context* context = new Context(main_reporter);
 
 TEST(CodegenTest, SimplestFunction_CodeGen) {
-  Context* context1 = new Context();
+  main_reporter->show_error(true);
+  // test error reporter
+  Context* context1 = new Context(main_reporter);
   BrigDirectiveFunction ref = {
     40,                       // size
     BrigEDirectiveFunction,   // kind
@@ -35,7 +45,6 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   // current directive offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context1));
-
 
   input.assign("function &return_true(arg_f32 %ret_val)(){ret;};");
 
@@ -73,6 +82,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   BrigcOffset32_t csize = context1->get_code_offset();
   EXPECT_EQ(32, csize);
 
+  main_reporter->show_error(false);
   delete context1;
 }
 
@@ -127,6 +137,8 @@ TEST(CodegenTest, AlignmentCheck) {
 
 
 TEST(CodegenTest, VersionCodeGen) {
+  MockErrorReporter mock_rpt;
+  Context* test_context = new Context(&mock_rpt);
   // reference struct
   BrigDirectiveVersion ref = {
     sizeof(ref),
@@ -146,14 +158,16 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // current directive offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Version(yylex(), context));
-
+  EXPECT_CALL(mock_rpt, report_error(ErrorReporter::OK, 0));
+  EXPECT_EQ(0, Version(yylex(), test_context));
   // after append BrigDirectiveVersion
-  uint32_t curr_d_offset = context->get_directive_offset();
+  uint32_t curr_d_offset = test_context->get_directive_offset();
 
   // get structure back
   BrigDirectiveVersion get;
-  context->get_directive<BrigDirectiveVersion>(curr_d_offset-sizeof(get), &get);
+  test_context->get_directive<BrigDirectiveVersion>(
+                  curr_d_offset-sizeof(get),
+                  &get);
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.major, get.major);

@@ -6,6 +6,7 @@
 #include <string>
 #include "brig.h"
 #include "brig_buffer.h"
+#include "error_reporter_interface.h"
 
 namespace hsa {
 namespace brig {
@@ -24,6 +25,23 @@ class Context {
       dbuf = new Buffer();
       obuf = new Buffer();
       sbuf = new StringBuffer();
+      err_reporter = NULL;
+    }
+
+    explicit Context(ErrorReporterInterface* error_reporter) {
+      this->err_reporter = error_reporter;
+      cbuf = new Buffer();
+      dbuf = new Buffer();
+      obuf = new Buffer();
+      sbuf = new StringBuffer();
+    }
+
+    void set_error_reporter(ErrorReporterInterface* error_reporter) {
+      this->err_reporter = error_reporter;
+    }
+
+    ErrorReporterInterface* get_error_reporter(void) {
+      return this->err_reporter;
     }
 
     /* code to append Brig structures to buffers */
@@ -300,6 +318,7 @@ class Context {
     Buffer* dbuf;  // directive buffer
     Buffer* obuf;  // operand buffer
     StringBuffer* sbuf;  // string buffer
+    ErrorReporterInterface* err_reporter;  // error reporter
 };
 
 }  // namespace brig
