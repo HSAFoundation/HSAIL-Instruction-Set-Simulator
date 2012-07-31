@@ -22,7 +22,7 @@ class Parser {
       lexer = new Lexer(src);
       context = new Context();
     }
-    
+
     explicit Parser(Context* context) {
       this->context = context;
       lexer = new Lexer();

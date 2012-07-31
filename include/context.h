@@ -26,7 +26,7 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
-      BrigDirectivePad bdp = {0,0};
+      BrigDirectivePad bdp = {0, 0};
       obuf->append(&bdp);
       obuf->append(&bdp);
       sbuf = new StringBuffer();
@@ -40,9 +40,9 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
-      BrigDirectivePad bdp = {0,0};  //add initial
+      BrigDirectivePad bdp = {0, 0};  // add initial
       obuf->append(&bdp);
-      obuf->append(&bdp);      
+      obuf->append(&bdp);
       sbuf = new StringBuffer();
       temporary_buf = new Buffer();
       clear_context();
@@ -90,8 +90,9 @@ class Context {
       dbuf->append(item);
     }
 
-    
-    // use to append a BrigDirectiveSymbol structs (does not contain a .kind field ? )
+
+    // use to append a BrigDirectiveSymbol structs
+    // (does not contain a .kind field ? )
     template <class T>
     void append_directive_symbol(const T* item) {
       uint32_t directive_offset = dbuf->size();
@@ -113,7 +114,7 @@ class Context {
       }
       obuf->append(item);
     }
-    
+
     // append temporary structs
     template <class T>
     void append_temporary_struct(const T* item) {
@@ -159,7 +160,7 @@ class Context {
       else if (result == Buffer::SUCCESS)
         return CONTEXT_OK;
     }
-    
+
     // get directive at a specific offset
     template <class T>
     context_error_t get_directive(uint32_t offset, T* item) {
@@ -228,7 +229,7 @@ class Context {
     BrigsOffset32_t get_string_offset(void) const {
       return sbuf->size();
     }
-    
+
     uint32_t get_temporary_offset(void) const {
       return temporary_buf->size();
     }
@@ -340,7 +341,7 @@ class Context {
     void clear_string_buffer(void) {
       sbuf->clear();
     }
-    
+
     void clear_temporary_buffer(void) {
       temporary_buf->clear();
     }
@@ -357,7 +358,7 @@ class Context {
       clear_temporary_context();
       clear_all_buffers();
     }
-    
+
     void clear_temporary_context(void) {
       clear_temporary_buffer();
       IsConstant = false;
@@ -368,10 +369,10 @@ class Context {
 
 
   BrigoOffset32_t current_label_offset;
-   BrigcOffset32_t current_inst_offset;   
-   BrigdOffset32_t current_bdf_offset;
+  BrigcOffset32_t current_inst_offset;
+  BrigdOffset32_t current_bdf_offset;
   bool arg_output;
-    
+
   std::map<std::string, BrigdOffset32_t> func_map;
   std::map<std::string, BrigoOffset32_t> operand_map;
   std::map<std::string, BrigoOffset32_t> lable_o_map;
@@ -380,54 +381,54 @@ class Context {
   // label_d_map contains the label that needed in a instruction
 
 
-  
+
   // check context
   bool is_constant() const {
     return IsConstant;
   }
-  
+
   bool has_decl_prefix() const {
     return HasDeclPrefix;
   }
-  
-  char get_alignment() const { 
+
+  char get_alignment() const {
     return Alignment;
   }
-  
+
   bool is_extern() const {
     return IsExtern;
   }
-  
+
   bool is_static() const {
     return IsStatic;
   }
-  
+
   // set context
   void set_is_constant(bool constant) {
     this->IsConstant = constant;
     this->HasDeclPrefix |= constant;
   }
-  
+
   void set_is_static(bool is_static) {
     this->IsStatic = is_static;
     this->HasDeclPrefix |= is_static;
   }
-  
+
   void set_is_extern(bool is_extern) {
     this->IsExtern = is_extern;
     this->HasDeclPrefix |= is_extern;
   }
-  
+
   void set_alignment(char align) {
     this->Alignment = align;
     this->HasDeclPrefix = true;
   }
-  
+
   void set_has_decl_prefix(bool has_decl_prefix) {
     this->HasDeclPrefix = has_decl_prefix;
   }
-    
-  
+
+
 
   private:
     Buffer* cbuf;  // code buffer
@@ -436,7 +437,7 @@ class Context {
     Buffer* temporary_buf;  // a buffer to put temporary structs
     StringBuffer* sbuf;  // string buffer
     ErrorReporterInterface* err_reporter;  // error reporter
-    
+
     // context variables
     bool HasDeclPrefix;
     bool IsConstant;

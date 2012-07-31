@@ -338,13 +338,13 @@ BrigOpcode GetOpCode(int token) {
   case BORROW:
     return BrigBorrow;
     break;
-// TBD, need to add complete list of all operations.  
+// TBD, need to add complete list of all operations.
   }
 }
 
 BrigPacking GetPacking(int token) {
   switch (token) {
-   /* packing type */
+  /* packing type */
   case _PP:
     return BrigPackPP;
     break;
@@ -383,7 +383,7 @@ BrigPacking GetPacking(int token) {
     break;
   }
 }
- 
+
 
 int Query(unsigned int QueryOp, Context* context) {
   // next token should be a dataTypeId
@@ -429,7 +429,7 @@ int Operand(unsigned int first_token, Context* context) {
       bor.reserved = 0;
       std::string name(string_val);
       bor.name = context->lookup_symbol(name);
-      if(!context->operand_map.count(name)) {
+      if (!context->operand_map.count(name)) {
         context->operand_map[name] = context->get_operand_offset();
         context->append_operand(&bor);
       }
@@ -719,14 +719,14 @@ int Instruction2(unsigned int first_token, Context* context) {
   unsigned int temp = 0;
   bool is_ftz = false;
 
-  //default value.
+  // default value.
   BrigInstBase inst_op = {
     32,
     BrigEInstBase,
     GetOpCode(first_token),
     0,
     BrigNoPacking,
-    {0,0,0,0,0}
+    {0, 0, 0, 0, 0}
   };
 
   if (GetTokenType(first_token) == INSTRUCTION2_OPCODE) {
@@ -760,7 +760,7 @@ int Instruction2(unsigned int first_token, Context* context) {
           if (!Operand(next, context)) {
             inst_op.o_operands[1] = context->operand_map[oper_str];
             if (yylex() == ';') {
-              context->append_code<BrigInstBase>(&inst_op); 
+              context->append_code<BrigInstBase>(&inst_op);
               // if the rule is valid, just write to the .code section,
               // may need to edit others, worry that later.
               return 0;
@@ -814,7 +814,7 @@ int Instruction2(unsigned int first_token, Context* context) {
           if (!Operand(next, context)) {
             inst_op.o_operands[1] = context->operand_map[oper_str];
             if (yylex() == ';') {
-              context->append_code<BrigInstBase>(&inst_op); 
+              context->append_code<BrigInstBase>(&inst_op);
               // if the rule is valid, just write to the .code section,
               // may need to edit others, worry that later.
               return 0;
@@ -836,14 +836,14 @@ int Instruction3(unsigned int first_token, Context* context) {
   unsigned int temp = 0;
   bool is_ftz = false;
 
-  //default value.
+  // default value.
   BrigInstBase inst_op = {
     32,
     BrigEInstBase,
     GetOpCode(first_token),
     0,
     BrigNoPacking,
-    {0,0,0,0,0}
+    {0, 0, 0, 0, 0}
   };
 
   if (GetTokenType(first_token) == INSTRUCTION3_OPCODE) {
@@ -883,7 +883,7 @@ int Instruction3(unsigned int first_token, Context* context) {
               if (!Operand(next, context)) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (yylex() == ';')
-                  context->append_code<BrigInstBase>(&inst_op); 
+                  context->append_code<BrigInstBase>(&inst_op);
                   return 0;
               }  // 3rd operand
             }  // 2nd comma
@@ -924,7 +924,7 @@ int Instruction3(unsigned int first_token, Context* context) {
               if (!Operand(next, context)) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (yylex() == ';')
-                  context->append_code<BrigInstBase>(&inst_op); 
+                  context->append_code<BrigInstBase>(&inst_op);
                   return 0;
               }  // 3rd operand
             }  // 2nd comma
@@ -985,13 +985,13 @@ int Version(unsigned int first_token, Context* context) {
                   break;
                 case _REDUCED:
                   bdv.profile = BrigEReduced;
-                  break;               
+                  break;
                 case _SFTZ:
                   bdv.ftz = BrigESftz;
                   break;
                 case _NOSFTZ:
                   bdv.ftz = BrigENosftz;
-                  break;    
+                  break;
               }
 
               next = yylex();
@@ -1381,7 +1381,7 @@ int FunctionDefinition(unsigned int first_token,
 
         std::string func_name = string_val;
         BrigsOffset32_t check_result = context->add_symbol(func_name);
-        
+
         // add the func_name to the func_map.
         context->func_map[func_name] = context->current_bdf_offset;
 
@@ -1574,12 +1574,16 @@ int ArgBlock(unsigned int first_token, Context* context) {
     } else if (next_token == TOKEN_LABEL) {  // label
       // need to check the lable_map, and update when necessary.
       // std::string label_name = string_val;
-      // context->lable_o_map[label_name] = context->get_operand_offset(); // set the lable_map
+      // context->lable_o_map[label_name]
+      // = context->get_operand_offset();
+
+      // set the lable_map
       // add operand in .operand;
       // check if any entry with the same key in label_c_map;
       // update the corresponding instructions.
-      // 
-            // if no correlated instructions, then later instructions can directly use the label.
+      //
+      // if no correlated instructions,
+      // then later instructions can directly use the label.
       if (yylex() == ':') {
       } else {
         return 1;

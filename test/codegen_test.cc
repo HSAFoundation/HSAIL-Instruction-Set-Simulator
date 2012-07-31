@@ -30,7 +30,7 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
     BrigAdd,
     Brigu16x2,
     BrigPackPPsat,
-    {8,20,32,0,0}
+    {8, 20, 32, 0, 0}
   };
 
   std::string input("add_pp_sat_u16x2 $s1, $s0, $s3;");
@@ -63,7 +63,7 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
     BrigAbs,
     Brigs8x4,
     BrigPackP,
-    {8,20,0,0,0}
+    {8, 20, 0, 0, 0}
   };
 
   std::string input("abs_p_s8x4 $s1, $s2;");
@@ -293,13 +293,13 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string name;
   std::string input("$d7");  // register
 
-  
+
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
-  
+
   // scan symbols
   parser->scan_symbols();
-  
+
   // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
@@ -327,10 +327,10 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   // second register
   input.assign("$q7");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  
+
   // scan symbols
   parser->scan_symbols();
-  
+
   // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
@@ -511,9 +511,8 @@ TEST(CodegenTest, LookupStringBugTest) {
 };
 
 TEST(CodegenTest, FunctionDeclaration) {
-  std::string input("function &get_global_id(arg_u32 %ret_val)(arg_u32 %arg_val0);");
-  
-  
+  std::string input("function &get_global_id(arg_u32 %ret_val)");
+  input.append("(arg_u32 %arg_val0);");
 }
 
 }  // namespace brig

@@ -756,12 +756,12 @@ TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   input.append("function &test()() {\n");
   input.append("{arg_u32 %z;}\n");
   input.append(" }; \n");
-  
+
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
   parser->scan_symbols();
 
-  
+
   // Print out string buffer content:
   unsigned int index = 0;
   std::string temp;
@@ -780,11 +780,11 @@ TEST(ParserWrapperTest, ParseSimpleProgram) {
   input.append(" abs_p_s8x4 $s1, $s2; ");
   input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; ");
   input.append(" }; ");
-  
+
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
   int result =  parser->parse();
-  
+
   EXPECT_EQ(0, result);
 };
 
@@ -795,7 +795,7 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   input.append(" abs_p_s8x4 $s1, $s2; ");
   input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; ");
   input.append(" }; ");
-  
+
   // Example 4
   input.append("version 1:1:$small;");
   input.append("function &branch_ops (arg_u8x4 %x)() {");
@@ -805,11 +805,11 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;");
   input.append(" @outof_IF: ret;");
   input.append(" }; ");
-  
+
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
   int result =  parser->parse();
-  
+
   EXPECT_EQ(0, result);
 };
 
