@@ -1,6 +1,6 @@
 /* Copyright 2012 <MulticorewareInc> */
 
-%option noyywrap 
+%option noyywrap yylineno
 %{
 #include <stdio.h>
 #include "tokens.h"

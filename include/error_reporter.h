@@ -24,6 +24,7 @@ class ErrorReporter: public ErrorReporterInterface {
     ErrorReporter();
     ~ErrorReporter();
     static ErrorReporter* er;
+    void show_all_error() {}
 };
 }  // namespace brig
 }  // namespace hsa

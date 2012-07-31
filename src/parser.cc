@@ -863,7 +863,6 @@ int Version(unsigned int first_token, Context* context) {
 
   ErrorReporterInterface* err_reporter = context->get_error_reporter();
 
-  // check for major
   BrigDirectiveVersion bdv;
   bdv.kind = BrigEDirectiveVersion;
   bdv.size = 20;
@@ -893,20 +892,39 @@ int Version(unsigned int first_token, Context* context) {
               next = yylex();
               if (next == ',') {
                 next = yylex();      // next target
-              } else if (next != ';') {
-                return 1;
+              } else {
+                if (next != ';') {
+                  err_reporter->report_error(
+                    ErrorReporterInterface::MISSING_SEMICOLON,
+                    yylineno);
+                  return 1;
+                }
               }
             } else {
+              err_reporter->report_error(
+                ErrorReporterInterface::INVALID_TARGET,
+                yylineno);
               return 1;
             }
           }
+        } else {
+          err_reporter->report_error(
+            ErrorReporterInterface::MISSING_SEMICOLON,
+            yylineno);
+          return 1;
         }
         context->append_directive(&bdv);
-        err_reporter->report_error(ErrorReporterInterface::OK, 0);
+        err_reporter->report_error(ErrorReporterInterface::OK, yylineno);
         return 0;
       }
+      err_reporter->report_error(
+        ErrorReporterInterface::MISSING_INTEGER_CONSTANT,
+        yylineno);
     }
+    err_reporter->report_error(ErrorReporterInterface::MISSING_COLON, yylineno);
   }
+  err_reporter->report_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT,
+                             yylineno);
   return 1;
 };
 

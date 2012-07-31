@@ -38,7 +38,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
     0,
   };
 
-  std::string input("version 1:0;$small");
+  std::string input("version 1:0:$small;");
 //  ref.major = 1;
 //  ref.minor = 0;
 
@@ -138,7 +138,10 @@ TEST(CodegenTest, AlignmentCheck) {
 
 TEST(CodegenTest, VersionCodeGen) {
   MockErrorReporter mock_rpt;
+  mock_rpt.DelegateToFake();
+
   Context* test_context = new Context(&mock_rpt);
+
   // reference struct
   BrigDirectiveVersion ref = {
     sizeof(ref),
@@ -158,7 +161,7 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // current directive offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_CALL(mock_rpt, report_error(ErrorReporter::OK, 0));
+  EXPECT_CALL(mock_rpt, report_error(ErrorReporter::OK, yylineno));
   EXPECT_EQ(0, Version(yylex(), test_context));
   // after append BrigDirectiveVersion
   uint32_t curr_d_offset = test_context->get_directive_offset();
@@ -176,6 +179,7 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.profile, get.profile);
   EXPECT_EQ(ref.ftz, get.ftz);
 
+  mock_rpt.show_all_error();
       /* TEST 2 */
   input.assign("version 2:0:$large;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));

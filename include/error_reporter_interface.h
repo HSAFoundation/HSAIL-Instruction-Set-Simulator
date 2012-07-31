@@ -10,10 +10,14 @@ namespace brig {
 
 class ErrorReporterInterface {
   public:
-    virtual ~ErrorReporterInterface();
+    virtual ~ErrorReporterInterface() {}
     // Error codes
-    enum error_t { OK = 0
-                    };
+    enum error_t { OK = 0,
+                   MISSING_INTEGER_CONSTANT,
+                   MISSING_COLON,
+                   MISSING_SEMICOLON,
+                   INVALID_TARGET
+                 };
 
     // report an error to error reporter
     virtual void report_error(error_t ErrorCode, unsigned int LineNo) = 0;
@@ -28,6 +32,7 @@ class ErrorReporterInterface {
 
   protected:
     bool display;
+    virtual void show_all_error() = 0;
 };
 }  // namespace brig
 }  // namespace hsa

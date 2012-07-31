@@ -19,7 +19,7 @@ namespace brig {
   void ErrorReporter::report_error(error_t ErrorCode, unsigned int LineNo) {
     if (display)
       fprintf(stderr,
-              "%d : Error %d : %s \n",
+              "Line %d : Error %d : %s \n",
               LineNo, ErrorCode,
               translate_error(ErrorCode).c_str());
   };
@@ -28,7 +28,14 @@ namespace brig {
     switch (ErrorCode) {
       case OK:
         return std::string("No error.\n");
-
+      case MISSING_INTEGER_CONSTANT:
+        return std::string("Missing integer constant.\n");
+      case MISSING_COLON:
+        return std::string("Missing a colon.\n");
+      case MISSING_SEMICOLON:
+        return std::string("Missing a semicolon.\n");
+      case INVALID_TARGET:
+        return std::string("Invalid target\n");
       default:
         return std::string("Unknown error. \n");
     }
