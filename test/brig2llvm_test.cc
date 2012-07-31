@@ -71,6 +71,8 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%q_regs = type { [8 x i128] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "%struct.regs = type { %c_regs, %s_regs, %d_regs, %q_regs }")));
+    "%pc_regs = type { [3 x i32] }")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%struct.regs = type { %c_regs, %s_regs, %d_regs, %q_regs, %pc_regs }")));
   }
 }
