@@ -749,6 +749,12 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   EXPECT_EQ(0, Program(yylex(), context));
 };
 
+TEST(ParserTest, FileDecl) {
+  std::string input("file 1 \"this is a file\";");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, FileDecl(yylex(), context));
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
