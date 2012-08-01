@@ -581,5 +581,44 @@ TEST(CodegenTest, FunctionDeclaration) {
   input.append("(arg_u32 %arg_val0);");
 }
 
+TEST(CodegenTest, BrigOperandAddressGeneration) {
+  std::string name;
+  std::string input("[$test]");  // [name]
+
+  Parser* parser = new Parser(context);
+  parser->set_source_string(input);
+
+  // scan symbols
+  parser->scan_symbols();
+
+  // rescan
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, AddressableOperand(yylex(), context));
+
+  name.assign(input.c_str());
+  BrigOperandAddress ref = {
+    sizeof(ref),          // size
+    BrigEOperandAddress,  // kind
+    Brigb32,              // Data Type
+    0,                    // reserved
+    context->operand_map[name], // directive
+    0,     // offset -> ??
+  };
+  
+    // get structure from context and compare
+  BrigOperandAddress get;
+  uint32_t curr_o_offset = context->get_operand_offset();
+  EXPECT_EQ(sizeof(ref), curr_o_offset);
+  context->get_operand<BrigOperandAddress>(curr_o_offset-sizeof(get), &get);
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.directive, get.directive);
+    
+    
+
+};
+
 }  // namespace brig
 }  // namespace hsa

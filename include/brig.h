@@ -463,6 +463,19 @@ typedef struct BrigOperandImmed {
   } bits;
 }BrigOperandImmed;
 
+// BrigOperandAddress
+// BrigOperandAddress is used for [name].
+// In the .operands section, BrigOperandAddress must start
+// on an offset divisible by 4.
+typedef struct BrigOperandAddress {
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigdOffset32_t directive;
+  int32_t offset;
+}BrigOperandAddress;
+
 typedef struct BrigInstBase {
   uint16_t size;
   uint16_t kind;

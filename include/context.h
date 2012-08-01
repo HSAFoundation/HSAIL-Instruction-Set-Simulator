@@ -397,6 +397,18 @@ class Context {
     bool is_static() const {
       return IsStatic;
     }
+    
+    BrigMachine16_t get_machine() const {
+      return machine;
+    }
+    
+    BrigProfile16_t get_profile() const {
+      return profile;
+    }
+    
+    BrigSftz16_t get_ftz() const {
+      return ftz;
+    }
 
     // set context
     void set_is_constant(bool constant) {
@@ -421,6 +433,18 @@ class Context {
 
     void set_has_decl_prefix(bool has_decl_prefix) {
       this->HasDeclPrefix = has_decl_prefix;
+    }
+    
+    void set_machine(BrigMachine16_t machine) {
+      this->machine = machine;
+    }
+    
+    void set_profile(BrigProfile16_t profile) {
+      this->profile = profile;
+    }
+    
+    void set_ftz(BrigSftz16_t ftz) {
+      this->ftz = ftz;
     }
 
   public:
@@ -450,6 +474,10 @@ class Context {
     char Alignment;
     bool IsExtern;
     bool IsStatic;
+    
+    BrigMachine16_t machine;
+    BrigProfile16_t profile;
+    BrigSftz16_t ftz;
 };
 
 }  // namespace brig

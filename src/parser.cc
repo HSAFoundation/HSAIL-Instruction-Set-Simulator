@@ -634,7 +634,7 @@ int AddressableOperand(unsigned int first_token, Context* context) {
     if ((next == TOKEN_GLOBAL_IDENTIFIER) ||
         (next == TOKEN_LOCAL_IDENTIFIER)) {
       next = yylex();
-      if (next == ']') {
+      if (next == ']') {      
         return 0;
       } else if (next == '<') {
         next = yylex();
