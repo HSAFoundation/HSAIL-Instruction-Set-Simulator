@@ -2279,6 +2279,22 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context) {
 }
 
 int FileDecl(unsigned int first_token, Context* context) {
+  // first token is _FILE "file"
+  unsigned int next_token = yylex();
+
+  if(next_token == TOKEN_INTEGER_CONSTANT) {
+    next_token = yylex();
+  
+    if(next_token == TOKEN_STRING) {
+      next_token = yylex();
+
+      if(next_token == ';') {
+        return 0;
+      } else {
+        printf("Missing ';' at the end of statement\n");
+      }
+    }
+  }    
   return 1;
 }
 
