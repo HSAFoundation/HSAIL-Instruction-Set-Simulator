@@ -2,6 +2,7 @@
 
 #include "parser.h"
 #include <string>
+#include <map>
 #include "tokens.h"
 #include "lexer.h"
 #include "error_reporter_interface.h"
@@ -1730,6 +1731,61 @@ int Codeblock(unsigned int first_token, Context* context) {
         return 1;
       }
     } else if (next_token == TOKEN_LABEL) {  // label
+      
+      // add to the .directive section
+      std::string label_name = string_val;
+      BrigDirectiveLabel label_directive = {
+        12,
+        BrigEDirectiveLabel,
+        context->get_code_offset(),
+        context->add_symbol(label_name)
+      };
+      
+      BrigdOffset32_t label_directive_offset = context->get_directive_offset();
+      // printf("label: %d", label_directive_offset);
+      context->append_directive<BrigDirectiveLabel>(&label_directive);
+
+      // add to the .operand section
+      BrigoOffset32_t label_operand_offset = context->get_operand_offset();
+      BrigOperandLabelRef label_operand = {
+      8,
+      BrigEOperandLabelRef,
+      label_directive_offset
+      };
+
+      context->append_operand<BrigOperandLabelRef>(&label_operand);
+      context->label_o_map[label_name] = label_operand_offset;
+
+      // update the d_nextDirective.
+      BrigDirectiveFunction bdf;
+      context->get_directive<BrigDirectiveFunction>(
+                                        context->current_bdf_offset, &bdf);
+      if(bdf.d_firstScopedDirective == bdf.d_nextDirective)
+        // check if the firstScopedDirective is modified before.
+        bdf.d_firstScopedDirective = label_directive_offset;
+      bdf.d_nextDirective = context->get_directive_offset();
+      unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+      context->update_directive_bytes(bdf_charp,
+                                      context->current_bdf_offset,
+                                      bdf.size);    
+
+      // check if there are any operation in .code need update
+      if(context->label_c_map.count(label_name)) {
+      // previously, there maybe brn, cbr need label.
+      // update all
+        typedef std::multimap<std::string, BrigcOffset32_t>::size_type sz_type;
+        sz_type entries = context->label_c_map.count(label_name);
+
+        std::multimap<std::string, BrigcOffset32_t>::iterator iter = 
+                                        context->label_c_map.find(label_name);
+        for (sz_type cnt = 0; cnt != entries; ++cnt, ++iter) {
+          BrigcOffset32_t offset = iter->second;
+          unsigned char* value = 
+                    reinterpret_cast<unsigned char*> (&label_operand_offset);
+          context->update_code_bytes(value, offset, 4);
+        }
+      }
+
       if (yylex() == ':') {
       } else {
         return 1;
@@ -1950,7 +2006,6 @@ int Branch(unsigned int first_token, Context* context) {
   unsigned int op = first_token;  // CBR or BRN
   unsigned int current_token = yylex();
 
-
   // check for optionalWidth
   if (current_token == _WIDTH) {
     if (!OptionalWidth(current_token, context)) {
@@ -1965,12 +2020,37 @@ int Branch(unsigned int first_token, Context* context) {
   if (current_token == __FBAR)
     current_token = yylex();
 
+  BrigdOffset32_t current_offset = context->get_directive_offset();
   // parse operands
   if (op == CBR) {
+    // add structures for CBR.
+    // default value.
+    BrigInstBase inst_op = {
+      32,
+      BrigEInstBase,
+      BrigCbr,
+      0, // no specification of datatype in Brn and Cbr.
+      BrigNoPacking,
+      {0,0,0,0,0}
+    };
+
+    std::string operand_name = string_val;
     if (!Operand(current_token, context)) {
+      inst_op.o_operands[1] = context->operand_map[operand_name];
       if (yylex() == ',') {
         current_token = yylex();
         if (current_token == TOKEN_LABEL) {
+          // if the next operand is label, which is the case in example4
+          // 1. check if the label is already defined,
+          // 2. if defined, just set it up
+          // 3. if not, add it to the multimap
+          std::string label_name = string_val;
+          if (context->label_o_map.count(label_name)) {
+            inst_op.o_operands[2] = context->label_o_map[label_name];
+          } else {
+            context->label_c_map.insert(make_pair(label_name, context->get_code_offset()+20));
+          }
+
           current_token = yylex();  // should be ';'
         } else if (!Identifier(current_token, context)) {
           current_token = yylex();  // should be ';'
@@ -2006,14 +2086,59 @@ int Branch(unsigned int first_token, Context* context) {
         } else {
           return 1;
         }
-        if (current_token == ';')
+        if (current_token == ';') {
+          context->append_code<BrigInstBase>(&inst_op);
+          // update the operationCount.
+          BrigDirectiveFunction bdf;
+          context->get_directive<BrigDirectiveFunction>(
+                                            context->current_bdf_offset, &bdf);
+          bdf.operationCount++;
+          unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+          context->update_directive_bytes(bdf_charp,
+                                          context->current_bdf_offset,
+                                          bdf.size);    
+        
           return 0;
+        }
       }  // yylex = ','
     }  // first operand
   } else if (op == BRN) {
+    // add structures for CBR.
+    // default value.
+    BrigInstBar inst_op = {
+      36,
+      BrigEInstBar,
+      BrigBrn,
+      0, // no specification of datatype in Brn and Cbr.
+      BrigNoPacking,
+      {0,0,0,0,0},
+      0
+    };
+    
     if (current_token == TOKEN_LABEL) {
-      if (yylex() == ';')
+      // if the next operand is label, which is the case in example4
+      // 1. check if the label is already defined,
+      // 2. if defined, just set it up
+      // 3. if not, add it to the multimap
+      std::string label_name = string_val;
+      if (context->label_o_map.count(label_name)) {
+        inst_op.o_operands[1] = context->label_o_map[label_name];
+      } else {
+        context->label_c_map.insert(make_pair(label_name, context->get_code_offset()+16));
+      }
+      if (yylex() == ';'){
+        context->append_code<BrigInstBar>(&inst_op);
+          // update the operationCount.
+          BrigDirectiveFunction bdf;
+          context->get_directive<BrigDirectiveFunction>(
+                                            context->current_bdf_offset, &bdf);
+          bdf.operationCount++;
+          unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+          context->update_directive_bytes(bdf_charp,
+                                          context->current_bdf_offset,
+                                          bdf.size);            
         return 0;
+      }
     } else if (!Identifier(current_token, context)) {
       current_token = yylex();
 
