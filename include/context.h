@@ -9,7 +9,8 @@
 #include "brig_buffer.h"
 #include "error_reporter_interface.h"
 
-
+extern int yycolno;
+extern int yylineno;
 namespace hsa {
 namespace brig {
 // context for code generation
@@ -26,13 +27,16 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
-      BrigDirectivePad bdp = {0, 0};
-      obuf->append(&bdp);
-      obuf->append(&bdp);
       sbuf = new StringBuffer();
       temporary_buf = new Buffer();
       err_reporter = NULL;
       clear_context();
+
+      BrigDirectivePad bdp = {0, 0};
+      obuf->append(&bdp);
+      obuf->append(&bdp);
+      yycolno = 0;
+      yylineno = 1;      
     }
 
     explicit Context(ErrorReporterInterface* error_reporter) {
@@ -40,12 +44,15 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
-      BrigDirectivePad bdp = {0, 0};  // add initial
-      obuf->append(&bdp);
-      obuf->append(&bdp);
       sbuf = new StringBuffer();
       temporary_buf = new Buffer();
       clear_context();
+
+      BrigDirectivePad bdp = {0, 0};  // add initial
+      obuf->append(&bdp);
+      obuf->append(&bdp);
+      yycolno = 0;
+      yylineno = 1;
     }
 
     void set_error_reporter(ErrorReporterInterface* error_reporter) {
@@ -93,8 +100,7 @@ class Context {
 
     // use to append a BrigDirectiveSymbol structs
     // (does not contain a .kind field ? )
-    template <class T>
-    void append_directive_symbol(const T* item) {
+    void append_directive_symbol(BrigDirectiveSymbol* item) {
       uint32_t directive_offset = dbuf->size();
       dbuf->append(item);
     }
