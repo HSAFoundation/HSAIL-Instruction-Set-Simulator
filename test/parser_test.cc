@@ -773,7 +773,17 @@ TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   }
 };
 
+TEST(ParserTest, VectorToken) {
+  std::string input("_v2") ;
+		
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str())) ;
+  EXPECT_EQ(0, VectorToken(yylex(), context)) ;
 
+  //input.clear() ;	
+  input.assign("_v4") ;
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str())) ;
+  EXPECT_EQ(0, VectorToken(yylex(), context));
+};
 
 }  // namespace brig
 }  // namespace hsa

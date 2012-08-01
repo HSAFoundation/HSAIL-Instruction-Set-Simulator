@@ -955,7 +955,7 @@ int Version(unsigned int first_token, Context* context) {
   bdv.reserved = 0;
 
   // set default values
-  bdv.machine = BrigESmall;
+  bdv.machine = BrigELarge;
   bdv.profile = BrigEFull;
   bdv.ftz = BrigENosftz;
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
@@ -2279,6 +2279,9 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context) {
 }
 
 int VectorToken(unsigned int first_token , Context *context){
+  if( _V2 == first_token || _V4 == first_token)
+    return 0 ;
+  else 
     return 1 ;
 }
 
