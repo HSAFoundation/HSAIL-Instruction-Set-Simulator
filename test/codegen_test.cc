@@ -21,8 +21,6 @@ ErrorReporter* main_reporter = ErrorReporter::get_instance();
 Context* context = new Context(main_reporter);
 
 TEST(CodegenTest, Example3_CodeGen) {
-  main_reporter->show_error(true);
-  // test error reporter
   Context* context1 = new Context(main_reporter);
   BrigDirectiveFunction ref = {
     40,                       // size
@@ -47,7 +45,8 @@ TEST(CodegenTest, Example3_CodeGen) {
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context1));
 
-  input.assign("function &packed_ops (arg_u8x4 %x)(){abs_p_s8x4 $s1, $s2;add_pp_sat_u16x2 $s1, $s0, $s3;};");
+  input.assign("function &packed_ops (arg_u8x4 %x)()");
+  input.append("{abs_p_s8x4 $s1, $s2;add_pp_sat_u16x2 $s1, $s0, $s3;};");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
@@ -85,19 +84,14 @@ TEST(CodegenTest, Example3_CodeGen) {
   EXPECT_EQ(BrigAdd, get_c.opcode);
   EXPECT_EQ(BrigPackPPsat, get_c.packing);
   EXPECT_EQ(Brigu16x2, get_c.type);
-  EXPECT_EQ(8, get_c.o_operands[0]);
-  EXPECT_EQ(32, get_c.o_operands[1]);
-  EXPECT_EQ(44, get_c.o_operands[2]);
+  EXPECT_EQ(0, get_c.o_operands[0]);
+  EXPECT_EQ(24, get_c.o_operands[1]);
+  EXPECT_EQ(36, get_c.o_operands[2]);
 
-  main_reporter->show_error(false);
   delete context1;
 }
 
-
-
 TEST(CodegenTest, Instrustion3Op_CodeGen) {
-  main_reporter->show_error(true);
-  // test error reporter
   Context* context1 = new Context(main_reporter);
   BrigInstBase ref = {
     32,
@@ -105,7 +99,7 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
     BrigAdd,
     Brigu16x2,
     BrigPackPPsat,
-    {8, 20, 32, 0, 0}
+    {0, 12, 24, 0, 0}
   };
 
   std::string input("add_pp_sat_u16x2 $s1, $s0, $s3;");
@@ -123,14 +117,10 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
 
-  main_reporter->show_error(false);
   delete context1;
 }
 
-
 TEST(CodegenTest, Instrustion2Op_CodeGen) {
-  main_reporter->show_error(true);
-  // test error reporter
   Context* context1 = new Context(main_reporter);
   BrigInstBase ref = {
     32,
@@ -138,7 +128,7 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
     BrigAbs,
     Brigs8x4,
     BrigPackP,
-    {8, 20, 0, 0, 0}
+    {0, 12, 0, 0, 0}
   };
 
   std::string input("abs_p_s8x4 $s1, $s2;");
@@ -156,13 +146,10 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
 
-  main_reporter->show_error(false);
   delete context1;
 }
 
 TEST(CodegenTest, SimplestFunction_CodeGen) {
-  main_reporter->show_error(true);
-  // test error reporter
   Context* context1 = new Context(main_reporter);
   BrigDirectiveFunction ref = {
     40,                       // size
@@ -223,7 +210,6 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   BrigcOffset32_t csize = context1->get_code_offset();
   EXPECT_EQ(32, csize);
 
-  main_reporter->show_error(false);
   delete context1;
 }
 
@@ -302,6 +288,7 @@ TEST(CodegenTest, VersionCodeGen) {
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_CALL(mock_rpt, report_error(ErrorReporter::OK, yylineno));
   EXPECT_EQ(0, Version(yylex(), test_context));
+
   // after append BrigDirectiveVersion
   uint32_t curr_d_offset = test_context->get_directive_offset();
 
@@ -319,7 +306,9 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.ftz, get.ftz);
 
   mock_rpt.show_all_error();
-      /* TEST 2 */
+
+
+  /* ---------- TEST 2 ---------*/
   input.assign("version 2:0:$large;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context));
@@ -379,6 +368,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
 
+
   // reference struct
   BrigOperandReg ref = {
     sizeof(ref),      // size
@@ -388,10 +378,12 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   };
   name.assign("$d7");
   ref.name = context->lookup_symbol(name);
+  EXPECT_EQ(0, ref.name);
 
   // get structure from context and compare
   BrigOperandReg get;
   uint32_t curr_o_offset = context->get_operand_offset();
+  EXPECT_EQ(sizeof(ref), curr_o_offset);
   context->get_operand<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);

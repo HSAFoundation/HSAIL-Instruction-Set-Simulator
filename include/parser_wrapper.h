@@ -25,6 +25,7 @@ class Parser {
 
     explicit Parser(Context* context) {
       this->context = context;
+      context->clear_context();
       lexer = new Lexer();
     }
 
@@ -32,7 +33,7 @@ class Parser {
     Context* get_context(void) const { return context; }
 
     // clear context
-    void clear_context(void) { context->clear_all_buffers(); }
+    void clear_context(void) { context->clear_context(); }
 
     // scan source and put symbol into string buffer
     void scan_symbols(void);

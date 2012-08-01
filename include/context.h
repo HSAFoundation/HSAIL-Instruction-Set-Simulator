@@ -357,6 +357,10 @@ class Context {
     void clear_context(void) {
       clear_temporary_context();
       clear_all_buffers();
+      func_map.clear();
+      operand_map.clear();
+      label_o_map.clear();
+      label_c_map.clear();
     }
 
     void clear_temporary_context(void) {
@@ -367,68 +371,64 @@ class Context {
       HasDeclPrefix = false;
     }
 
+    // check context
+    bool is_constant() const {
+      return IsConstant;
+    }
 
-  BrigoOffset32_t current_label_offset;
-  BrigcOffset32_t current_inst_offset;
-  BrigdOffset32_t current_bdf_offset;
-  bool arg_output;
+    bool has_decl_prefix() const {
+      return HasDeclPrefix;
+    }
 
-  std::map<std::string, BrigdOffset32_t> func_map;
-  std::map<std::string, BrigoOffset32_t> operand_map;
-  std::map<std::string, BrigoOffset32_t> lable_o_map;
-  std::multimap<std::string, BrigcOffset32_t> lable_c_map;
-  // label_o_map contains the info for OperandLabelRef,
-  // label_d_map contains the label that needed in a instruction
+    char get_alignment() const {
+      return Alignment;
+    }
 
+    bool is_extern() const {
+      return IsExtern;
+    }
 
+    bool is_static() const {
+      return IsStatic;
+    }
 
-  // check context
-  bool is_constant() const {
-    return IsConstant;
-  }
+    // set context
+    void set_is_constant(bool constant) {
+      this->IsConstant = constant;
+      this->HasDeclPrefix |= constant;
+    }
 
-  bool has_decl_prefix() const {
-    return HasDeclPrefix;
-  }
+    void set_is_static(bool is_static) {
+      this->IsStatic = is_static;
+      this->HasDeclPrefix |= is_static;
+    }
 
-  char get_alignment() const {
-    return Alignment;
-  }
+    void set_is_extern(bool is_extern) {
+      this->IsExtern = is_extern;
+      this->HasDeclPrefix |= is_extern;
+    }
 
-  bool is_extern() const {
-    return IsExtern;
-  }
+    void set_alignment(char align) {
+      this->Alignment = align;
+      this->HasDeclPrefix = true;
+    }
 
-  bool is_static() const {
-    return IsStatic;
-  }
+    void set_has_decl_prefix(bool has_decl_prefix) {
+      this->HasDeclPrefix = has_decl_prefix;
+    }
 
-  // set context
-  void set_is_constant(bool constant) {
-    this->IsConstant = constant;
-    this->HasDeclPrefix |= constant;
-  }
+  public:
+    BrigoOffset32_t current_label_offset;
+    BrigcOffset32_t current_inst_offset;
+    BrigdOffset32_t current_bdf_offset;
+    bool arg_output;
 
-  void set_is_static(bool is_static) {
-    this->IsStatic = is_static;
-    this->HasDeclPrefix |= is_static;
-  }
-
-  void set_is_extern(bool is_extern) {
-    this->IsExtern = is_extern;
-    this->HasDeclPrefix |= is_extern;
-  }
-
-  void set_alignment(char align) {
-    this->Alignment = align;
-    this->HasDeclPrefix = true;
-  }
-
-  void set_has_decl_prefix(bool has_decl_prefix) {
-    this->HasDeclPrefix = has_decl_prefix;
-  }
-
-
+    std::map<std::string, BrigdOffset32_t> func_map;
+    std::map<std::string, BrigoOffset32_t> operand_map;
+    std::map<std::string, BrigoOffset32_t> label_o_map;
+    std::multimap<std::string, BrigcOffset32_t> label_c_map;
+    // label_o_map contains the info for OperandLabelRef,
+    // label_d_map contains the label that needed in a instruction
 
   private:
     Buffer* cbuf;  // code buffer

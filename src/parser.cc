@@ -429,6 +429,7 @@ int Operand(unsigned int first_token, Context* context) {
       bor.reserved = 0;
       std::string name(string_val);
       bor.name = context->add_symbol(name);
+
       if (!context->operand_map.count(name)) {
         context->operand_map[name] = context->get_operand_offset();
         context->append_operand(&bor);
