@@ -628,13 +628,28 @@ int BaseOperand(unsigned int first_token, Context* context) {
 int AddressableOperand(unsigned int first_token, Context* context) {
   int next;
   ErrorReporterInterface* rpt = context->get_error_reporter();
+  
   if (first_token == '[') {
     // next should be a non register
     next = yylex();
     if ((next == TOKEN_GLOBAL_IDENTIFIER) ||
         (next == TOKEN_LOCAL_IDENTIFIER)) {
       next = yylex();
+      std::string name(string_val);
       if (next == ']') {      
+        BrigOperandAddress boa = {
+          sizeof(boa),            // size
+          BrigEOperandAddress,    // kind
+          Brigb32,                // type
+          0,                      // reserved
+          context->operand_map[name], // directive
+          0
+          };
+        if (context->get_machine() == BrigELarge)
+          boa.type = Brigb64;
+         
+        context->append_operand(&boa);
+
         return 0;
       } else if (next == '<') {
         next = yylex();
@@ -1198,6 +1213,11 @@ int Version(unsigned int first_token, Context* context) {
                   bdv.ftz = BrigENosftz;
                   break;
               }
+              
+              // update context              
+              context->set_machine(bdv.machine);
+              context->set_profile(bdv.profile);
+              context->set_ftz(bdv.ftz);
 
               next = yylex();
               if (next == ',') {

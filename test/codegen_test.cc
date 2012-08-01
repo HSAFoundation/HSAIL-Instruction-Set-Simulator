@@ -583,7 +583,7 @@ TEST(CodegenTest, FunctionDeclaration) {
 
 TEST(CodegenTest, BrigOperandAddressGeneration) {
   std::string name;
-  std::string input("[$test]");  // [name]
+  std::string input("[&test]");  // [name]
 
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
@@ -604,6 +604,10 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
     context->operand_map[name], // directive
     0,     // offset -> ??
   };
+  
+  if (context->get_machine() == BrigELarge)
+    ref.type = Brigb64;
+  
   
     // get structure from context and compare
   BrigOperandAddress get;
