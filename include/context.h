@@ -31,13 +31,8 @@ class Context {
       temporary_buf = new Buffer();
       err_reporter = NULL;
       clear_context();
-
-      BrigDirectivePad bdp = {0, 0};
-      obuf->append(&bdp);
-      obuf->append(&bdp);
       yycolno = 0;
       yylineno = 1;
-      set_default_values();
     }
 
     explicit Context(ErrorReporterInterface* error_reporter) {
@@ -49,12 +44,8 @@ class Context {
       temporary_buf = new Buffer();
       clear_context();
 
-      BrigDirectivePad bdp = {0, 0};  // add initial
-      obuf->append(&bdp);
-      obuf->append(&bdp);
       yycolno = 0;
       yylineno = 1;
-      set_default_values();
     }
 
     void set_error_reporter(ErrorReporterInterface* error_reporter) {
@@ -344,6 +335,10 @@ class Context {
 
     void clear_operand_buffer(void) {
       obuf->clear();
+      // pad the first 8 bytes with 0
+      BrigDirectivePad bdp = {0, 0};
+      obuf->append(&bdp);
+      obuf->append(&bdp);
     }
 
     void clear_string_buffer(void) {
@@ -355,11 +350,11 @@ class Context {
     }
 
     void clear_all_buffers(void) {
-      cbuf->clear();
-      dbuf->clear();
-      obuf->clear();
-      sbuf->clear();
-      temporary_buf->clear();
+      clear_code_buffer();
+      clear_directive_buffer();
+      clear_operand_buffer();
+      clear_string_buffer();
+      clear_temporary_buffer();      
     }
 
     void clear_context(void) {

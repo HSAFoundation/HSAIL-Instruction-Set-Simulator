@@ -383,7 +383,6 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   // get structure from context and compare
   BrigOperandReg get;
   uint32_t curr_o_offset = context->get_operand_offset();
-  EXPECT_EQ(sizeof(ref), curr_o_offset);
   context->get_operand<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
@@ -612,7 +611,6 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
     // get structure from context and compare
   BrigOperandAddress get;
   uint32_t curr_o_offset = context->get_operand_offset();
-  EXPECT_EQ(sizeof(ref), curr_o_offset);
   context->get_operand<BrigOperandAddress>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
