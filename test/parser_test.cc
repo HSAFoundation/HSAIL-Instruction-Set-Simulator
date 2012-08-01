@@ -63,13 +63,133 @@ TEST(ParserTest, AddressableOperandTest) {
 
 TEST(ParserTest, QueryTest) {
   // test the Query types;
-  std::string input("\n query_order_u32  $c1 , [&Test<$d7  + 100>];");
+  std::string input("   query_order_u32  $c1 , [&Test<$d7  + 100>];");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Query(yylex(), context));
 
-  input.assign("\n query_data_u32  $c1 , [&Test<$d7  + 100>];");
+  input.assign("    query_data_u32  $c1 , [&Test<$d7  + 100>];");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Query(yylex(), context));
+
+  input.assign("query_array_u32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_width_u32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_height_u32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_depth_u32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_normalized_u32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_filtering_u32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+
+  // test the dataTypes;
+  input.assign("query_order_s32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s64  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u64  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_b1  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_b32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f32  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f64  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_b64  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_b8  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_b16  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s8  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s16  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u8  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u16  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f16  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_b128  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u8x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s8x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u16x2  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s16x2  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f16x2  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f32x2  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u8x8  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s8x8  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u16x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s16x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f16x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u8x16  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s8x16  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u16x8  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s16x8  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f16x8  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f32x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s32x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u32x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f64x2  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s64x2  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u64x2  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+
+  // test for Operand
+  // 1. Identifier
+  input.assign("query_order_f32x4  $c1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s32x4  $d1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u32x4  $s1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f64x2  $q1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s64x2  %a1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u64x2  &a1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  // 2. BaseOperand
+
+
+  // test for AddressableOperand
+  input.assign("query_order_f32x4  $c1 , [%Test<100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s32x4  $d1 , [&Test<$d7  - 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_u32x4  $s1 , [&Test];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_f64x2  $q1 , [&Test<$d7  + 100>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  input.assign("query_order_s64x2  %a1 , [%Test<$d7>];");
+    yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
 }
 
 TEST(ParserTest, Bug57) {
@@ -627,6 +747,24 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
 
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, Program(yylex(), context));
+};
+
+TEST(ParserTest, FileDecl) {
+  std::string input("file 1 \"this is a file\";");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, FileDecl(yylex(), context));
+};
+
+TEST(ParserTest, VectorToken) {
+  std::string input("_v2") ;
+		
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str())) ;
+  EXPECT_EQ(0, VectorToken(yylex(), context)) ;
+
+  //input.clear() ;	
+  input.assign("_v4") ;
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str())) ;
+  EXPECT_EQ(0, VectorToken(yylex(), context));
 };
 
 // ------------------  PARSER WRAPPER TEST -----------------

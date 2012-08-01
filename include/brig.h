@@ -504,5 +504,33 @@ typedef struct BrigInstBase {
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
 }BrigInstBase;
+//BrigInstBar
+//The BrigInstBar format is used for the barrier and sync operations.
+typedef struct BrigInstBar {
+	uint16_t size;
+	uint16_t kind;
+	BrigOpcode32_t opcode;
+	BrigDataType16_t type;
+	BrigPacking16_t packing;
+	BrigoOffset32_t o_operands[5];
+	uint32_t syncFlags;
+}BrigInstBar;
+
+//BrigDirectiveLabel
+//BrigDirectiveLabel declares a label.
+typedef struct BrigDirectiveLabel {
+	uint16_t size;
+	uint16_t kind;
+	BrigcOffset32_t c_code;
+	BrigsOffset32_t s_name;
+}BrigDirectiveLabel;
+
+//BrigOperandLabelRef
+//BrigOperandLabelRef is used for a label.
+typedef struct BrigOperandLabelRef {
+	uint16_t size;
+	uint16_t kind;
+	uint32_t labeldirective;
+}BrigOperandLabelRef;
 
 #endif  // INCLUDE_BRIG_H_

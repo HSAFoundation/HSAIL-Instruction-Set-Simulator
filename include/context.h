@@ -90,10 +90,11 @@ class Context {
       dbuf->append(item);
     }
 
-
     // use to append a BrigDirectiveSymbol structs
     // (does not contain a .kind field ? )
-    void append_directive_symbol(BrigDirectiveSymbol* item) {
+
+    template <class T>
+    void append_directive_symbol(const T* item) {
       uint32_t directive_offset = dbuf->size();
       dbuf->append(item);
     }
@@ -356,7 +357,6 @@ class Context {
       clear_string_buffer();
       clear_temporary_buffer();      
     }
-
     void clear_context(void) {
       clear_temporary_context();
       clear_all_buffers();
@@ -380,6 +380,7 @@ class Context {
       fbar = 0;
     }
 
+
     // check context
     uint16_t get_alignment() const {
       return alignment;
@@ -400,6 +401,7 @@ class Context {
     BrigPacking16_t get_packing() const {
       return packing;
     }
+
 
     BrigMachine16_t get_machine() const {
       return machine;
@@ -446,6 +448,7 @@ class Context {
       this->alignment = align;
     }
 
+
     void set_machine(BrigMachine16_t machine) {
       this->machine = machine;
     }
@@ -473,7 +476,6 @@ class Context {
     void set_packing(BrigPacking16_t packing) {
       this->packing = packing;
     }
-    
     // let context know the location of current operand
     void set_operand_loc(char loc) {
       this->operand_loc = loc;
@@ -490,19 +492,21 @@ class Context {
     std::map<std::string, BrigoOffset32_t> label_o_map;
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
     // label_o_map contains the info for OperandLabelRef,
+    // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in a instruction
     int dim[3];  // to keep track of dimensions in declarations
+
   private:
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
     Buffer* obuf;  // operand buffer
     Buffer* temporary_buf;  // a buffer to put temporary structs
+    
     StringBuffer* sbuf;  // string buffer
     ErrorReporterInterface* err_reporter;  // error reporter
 
     // context variables
     uint16_t alignment;
-
     BrigSymbolModifier symModifier;
     BrigMachine16_t machine;
     BrigProfile16_t profile;

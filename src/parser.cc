@@ -2,6 +2,7 @@
 
 #include "parser.h"
 #include <string>
+#include <map>
 #include "tokens.h"
 #include "lexer.h"
 #include "error_reporter_interface.h"
@@ -384,6 +385,7 @@ BrigPacking16_t GetPacking(int token) {
     break;
   }
 }
+ 
 
 int Query(unsigned int QueryOp, Context* context) {
   // next token should be a dataTypeId
@@ -704,6 +706,7 @@ int AddressableOperand(unsigned int first_token, Context* context) {
       rpt->report_error(ErrorReporterInterface::MISSING_IDENTIFIER,
                         yylineno,
                         yycolno);
+                  
     }
   }
   return 1;
@@ -976,7 +979,6 @@ int Instruction2(unsigned int first_token, Context* context) {
                         yylineno,
                         yycolno);
     }
-
     return 1;
   } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_FTZ) {
     // Optional FTZ
@@ -1091,7 +1093,7 @@ int Instruction3(unsigned int first_token, Context* context) {
               if (!Operand(next, context)) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (yylex() == ';') {
-                  context->append_code<BrigInstBase>(&inst_op);
+                  context->append_code<BrigInstBase>(&inst_op); 
                   return 0;
                 } else {
                   rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -1162,7 +1164,7 @@ int Instruction3(unsigned int first_token, Context* context) {
               if (!Operand(next, context)) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (yylex() == ';') {
-                  context->append_code<BrigInstBase>(&inst_op);
+                  context->append_code<BrigInstBase>(&inst_op); 
                   return 0;
                 } else {
                   rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -1209,6 +1211,7 @@ int Version(unsigned int first_token, Context* context) {
   // first token must be version keyword
 
   if (context == NULL) {
+    printf("INVALID CONTEXT\n");
     return 1;
   }
 
@@ -1220,7 +1223,7 @@ int Version(unsigned int first_token, Context* context) {
   bdv.reserved = 0;
 
   // set default values
-  bdv.machine = BrigESmall;
+  bdv.machine = BrigELarge;
   bdv.profile = BrigEFull;
   bdv.ftz = BrigENosftz;
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
@@ -1292,6 +1295,7 @@ int Version(unsigned int first_token, Context* context) {
           return 1;
         }
         context->append_directive(&bdv);
+        rpt->report_error(ErrorReporterInterface::OK, yylineno, yycolno);
         return 0;
       }
       rpt->report_error(
@@ -1299,7 +1303,7 @@ int Version(unsigned int first_token, Context* context) {
         yylineno,
         yycolno);
     }
-    rpt->report_error(ErrorReporterInterface::MISSING_COLON, yylineno, yycolno);
+    rpt->report_error(ErrorReporterInterface::MISSING_COLON, yylineno,yycolno);
   }
   rpt->report_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT,
                              yylineno,
@@ -1320,7 +1324,6 @@ int Alignment(unsigned int first_token, Context* context) {
     return 1;
   }
 }
-
 // parse declaration prefix
 // since this function checks for one token lookahead
 // if the last token is not consumed by this,
@@ -1493,7 +1496,7 @@ int DeclPrefix(unsigned int first_token,
 int FBar(unsigned int first_token, Context* context) {
   // first token must be _FBAR
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  if (yylex() == '(') {
+  if (yylex() == '(' ) {
     if (yylex() == TOKEN_INTEGER_CONSTANT) {
       context->set_fbar(int_val);
       if (yylex() == ')')
@@ -1993,16 +1996,12 @@ int ArgBlock(unsigned int first_token, Context* context) {
     } else if (next_token == TOKEN_LABEL) {  // label
       // need to check the lable_map, and update when necessary.
       // std::string label_name = string_val;
-      // context->lable_o_map[label_name]
-      // = context->get_operand_offset();
-
-      // set the lable_map
+      // context->lable_o_map[label_name] = context->get_operand_offset(); // set the lable_map
       // add operand in .operand;
       // check if any entry with the same key in label_c_map;
       // update the corresponding instructions.
       //
-      // if no correlated instructions,
-      // then later instructions can directly use the label.
+      // if no correlated instructions, then later instructions can directly use the label.
       if (yylex() == ':') {
       } else {
         rpt->report_error(ErrorReporterInterface:: MISSING_COLON,
@@ -2094,6 +2093,7 @@ int Codeblock(unsigned int first_token, Context* context) {
         context->update_directive_bytes(bdf_charp,
                                         context->current_bdf_offset,
                                         bdf.size);
+      
       } else {
         return 1;
       }
@@ -2159,6 +2159,61 @@ int Codeblock(unsigned int first_token, Context* context) {
         return 1;
       }
     } else if (next_token == TOKEN_LABEL) {  // label
+      
+      // add to the .directive section
+      std::string label_name = string_val;
+      BrigDirectiveLabel label_directive = {
+        12,
+        BrigEDirectiveLabel,
+        context->get_code_offset(),
+        context->add_symbol(label_name)
+      };
+      
+      BrigdOffset32_t label_directive_offset = context->get_directive_offset();
+      // printf("label: %d", label_directive_offset);
+      context->append_directive<BrigDirectiveLabel>(&label_directive);
+
+      // add to the .operand section
+      BrigoOffset32_t label_operand_offset = context->get_operand_offset();
+      BrigOperandLabelRef label_operand = {
+      8,
+      BrigEOperandLabelRef,
+      label_directive_offset
+      };
+
+      context->append_operand<BrigOperandLabelRef>(&label_operand);
+      context->label_o_map[label_name] = label_operand_offset;
+
+      // update the d_nextDirective.
+      BrigDirectiveFunction bdf;
+      context->get_directive<BrigDirectiveFunction>(
+                                        context->current_bdf_offset, &bdf);
+      if(bdf.d_firstScopedDirective == bdf.d_nextDirective)
+        // check if the firstScopedDirective is modified before.
+        bdf.d_firstScopedDirective = label_directive_offset;
+      bdf.d_nextDirective = context->get_directive_offset();
+      unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+      context->update_directive_bytes(bdf_charp,
+                                      context->current_bdf_offset,
+                                      bdf.size);    
+
+      // check if there are any operation in .code need update
+      if(context->label_c_map.count(label_name)) {
+      // previously, there maybe brn, cbr need label.
+      // update all
+        typedef std::multimap<std::string, BrigcOffset32_t>::size_type sz_type;
+        sz_type entries = context->label_c_map.count(label_name);
+
+        std::multimap<std::string, BrigcOffset32_t>::iterator iter = 
+                                        context->label_c_map.find(label_name);
+        for (sz_type cnt = 0; cnt != entries; ++cnt, ++iter) {
+          BrigcOffset32_t offset = iter->second;
+          unsigned char* value = 
+                    reinterpret_cast<unsigned char*> (&label_operand_offset);
+          context->update_code_bytes(value, offset, 4);
+        }
+      }
+
       if (yylex() == ':') {
       } else {
         rpt->report_error(ErrorReporterInterface:: MISSING_COLON,
@@ -2168,6 +2223,7 @@ int Codeblock(unsigned int first_token, Context* context) {
       }
     } else if (next_token == '{') {  // argument scope -> inner codeblock
       if (!ArgBlock(next_token, context)) {
+        // printf("Out of arg scope \n");
       } else {
         return 1;
       }
@@ -2205,6 +2261,7 @@ int Codeblock(unsigned int first_token, Context* context) {
         return 1;
       }
     } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+      // printf("An unintializable address\n");
       if (!UninitializableDecl(next_token, context)) {
       } else {
         return 1;
@@ -2221,7 +2278,7 @@ int Codeblock(unsigned int first_token, Context* context) {
 int Function(unsigned int first_token, Context* context) {
   bool rescan = false;
   unsigned int last_token = 0;
-  ErrorReporterInterface* rpt = context->get_error_reporter();
+  ErrorReporterInterface* rpt = context->get_error_reporter();  
   if (!FunctionDefinition(first_token, &rescan, &last_token, context)) {
     if (!rescan)
       last_token = yylex();
@@ -2439,6 +2496,7 @@ int Branch(unsigned int first_token, Context* context) {
   if (current_token == _WIDTH) {
     if (!OptionalWidth(current_token, context)) {
     } else {
+      // printf("Invalid optional width.\n");
       return 1;
     }
     current_token = yylex();
@@ -2451,12 +2509,37 @@ int Branch(unsigned int first_token, Context* context) {
     current_token = yylex();
   }
 
+  BrigdOffset32_t current_offset = context->get_directive_offset();
   // parse operands
   if (op == CBR) {
+    // add structures for CBR.
+    // default value.
+    BrigInstBase inst_op = {
+      32,
+      BrigEInstBase,
+      BrigCbr,
+      0, // no specification of datatype in Brn and Cbr.
+      BrigNoPacking,
+      {0,0,0,0,0}
+    };
+
+    std::string operand_name = string_val;
     if (!Operand(current_token, context)) {
+      inst_op.o_operands[1] = context->operand_map[operand_name];
       if (yylex() == ',') {
         current_token = yylex();
         if (current_token == TOKEN_LABEL) {
+          // if the next operand is label, which is the case in example4
+          // 1. check if the label is already defined,
+          // 2. if defined, just set it up
+          // 3. if not, add it to the multimap
+          std::string label_name = string_val;
+          if (context->label_o_map.count(label_name)) {
+            inst_op.o_operands[2] = context->label_o_map[label_name];
+          } else {
+            context->label_c_map.insert(make_pair(label_name, context->get_code_offset()+20));
+          }
+
           current_token = yylex();  // should be ';'
         } else if (!Identifier(current_token, context)) {
           current_token = yylex();  // should be ';'
@@ -2502,7 +2585,7 @@ int Branch(unsigned int first_token, Context* context) {
                             yylineno,
                             yycolno);
             }
-          } else {  // yylex() = ','
+          }  else {  // yylex() = ','
             rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
                               yylineno,
                               yycolno);
@@ -2514,6 +2597,17 @@ int Branch(unsigned int first_token, Context* context) {
           return 1;
         }
         if (current_token == ';') {
+          context->append_code<BrigInstBase>(&inst_op);
+          // update the operationCount.
+          BrigDirectiveFunction bdf;
+          context->get_directive<BrigDirectiveFunction>(
+                                            context->current_bdf_offset, &bdf);
+          bdf.operationCount++;
+          unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+          context->update_directive_bytes(bdf_charp,
+                                          context->current_bdf_offset,
+                                          bdf.size);    
+        
           return 0;
         } else {
           rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -2532,8 +2626,40 @@ int Branch(unsigned int first_token, Context* context) {
     }
     return 1;
   } else if (op == BRN) {
+    // add structures for CBR.
+    // default value.
+    BrigInstBar inst_op = {
+      36,
+      BrigEInstBar,
+      BrigBrn,
+      0, // no specification of datatype in Brn and Cbr.
+      BrigNoPacking,
+      {0,0,0,0,0},
+      0
+    };
+    
     if (current_token == TOKEN_LABEL) {
-      if (yylex() == ';') {
+      // if the next operand is label, which is the case in example4
+      // 1. check if the label is already defined,
+      // 2. if defined, just set it up
+      // 3. if not, add it to the multimap
+      std::string label_name = string_val;
+      if (context->label_o_map.count(label_name)) {
+        inst_op.o_operands[1] = context->label_o_map[label_name];
+      } else {
+        context->label_c_map.insert(make_pair(label_name, context->get_code_offset()+16));
+      }
+      if (yylex() == ';'){
+        context->append_code<BrigInstBar>(&inst_op);
+          // update the operationCount.
+          BrigDirectiveFunction bdf;
+          context->get_directive<BrigDirectiveFunction>(
+                                            context->current_bdf_offset, &bdf);
+          bdf.operationCount++;
+          unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+          context->update_directive_bytes(bdf_charp,
+                                          context->current_bdf_offset,
+                                          bdf.size);            
         return 0;
       } else {
         rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -2593,6 +2719,7 @@ int Call(unsigned int first_token, Context* context) {
     if (!OptionalWidth(next, context)) {
       next = yylex();
     } else {
+      printf("Error in optionalwidth\n");
       return 1;
     }
   }
@@ -2651,6 +2778,7 @@ int Initializer(unsigned int first_token,
   unsigned int next = yylex();
   ErrorReporterInterface* rpt = context->get_error_reporter();
   if (next == TOKEN_LABEL) {
+    printf("Label initializers must be inside '{' and '}'\n");
     return 1;
   } else if (next == '{') {
     next = yylex();
@@ -2864,7 +2992,6 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context) {
             next = last_token;
         }
       }
-
       if (next == ';') {
         return 0;
       } else {
@@ -2883,6 +3010,48 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context) {
                       yycolno);
   }
   return 1;
+}
+
+int FileDecl(unsigned int first_token, Context* context) {
+  // first token is _FILE "file"
+  unsigned int next_token = yylex();
+
+  if(next_token == TOKEN_INTEGER_CONSTANT) {
+    next_token = yylex();
+  
+    if(next_token == TOKEN_STRING) {
+      next_token = yylex();
+
+      if(next_token == ';') {
+        return 0;
+      } else {
+        printf("Missing ';' at the end of statement\n");
+      }
+    }
+  }    
+  return 1;
+}
+
+int VectorToken(unsigned int first_token , Context *context){
+  if( _V2 == first_token || _V4 == first_token)
+    return 0 ;
+  else 
+    return 1 ;
+}
+
+int SignatureType(unsigned int first_token , Context *context){
+  //first token is ARG
+  unsigned int last_token ;
+  unsigned int next = yylex() ;
+
+  if(DATA_TYPE_ID == GetTokenType(next)){
+    return 0;
+  } else if(_ROIMG == next 
+           || _RWIMG == next
+           || _SAMP == next ){
+    return 0 ;
+  }
+  return 1 ;
 }
 
 }  // namespace brig
