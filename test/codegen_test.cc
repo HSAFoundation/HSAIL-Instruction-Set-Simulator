@@ -601,14 +601,13 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
     BrigEOperandAddress,  // kind
     Brigb32,              // Data Type
     0,                    // reserved
-    context->operand_map[name], // directive
+    context->operand_map[name],  // directive
     0,     // offset -> ??
   };
-  
+
   if (context->get_machine() == BrigELarge)
     ref.type = Brigb64;
-  
-  
+
     // get structure from context and compare
   BrigOperandAddress get;
   uint32_t curr_o_offset = context->get_operand_offset();
@@ -619,9 +618,6 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.directive, get.directive);
-    
-    
-
 };
 
 }  // namespace brig

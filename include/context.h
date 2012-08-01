@@ -36,7 +36,7 @@ class Context {
       obuf->append(&bdp);
       obuf->append(&bdp);
       yycolno = 0;
-      yylineno = 1;      
+      yylineno = 1;
     }
 
     explicit Context(ErrorReporterInterface* error_reporter) {
@@ -397,39 +397,39 @@ class Context {
     bool is_static() const {
       return IsStatic;
     }
-    
+
     BrigMachine16_t get_machine() const {
       return machine;
     }
-    
+
     BrigProfile16_t get_profile() const {
       return profile;
     }
-    
+
     BrigSftz16_t get_ftz() const {
       return ftz;
     }
-    
+
     int get_fbar() const {
       return fbar;
     }
-    
+
     BrigDataType16_t get_type() const {
       return type;
     }
-    
+
     BrigOpcode32_t get_opcode() const {
       return opcode;
     }
-    
+
     char get_operand_loc() const {
       return operand_loc;
     }
-    
+
     BrigAluModifier get_alu_modifier() const {
       return aluModifier;
     }
-    
+
     // set context
     void set_is_constant(bool constant) {
       this->IsConstant = constant;
@@ -454,40 +454,40 @@ class Context {
     void set_has_decl_prefix(bool has_decl_prefix) {
       this->HasDeclPrefix = has_decl_prefix;
     }
-    
+
     void set_machine(BrigMachine16_t machine) {
       this->machine = machine;
     }
-    
+
     void set_profile(BrigProfile16_t profile) {
       this->profile = profile;
     }
-    
+
     void set_ftz(BrigSftz16_t ftz) {
       this->ftz = ftz;
     }
-    
+
     void set_fbar(int fbar) {
       this->fbar = fbar;
     }
-    
+
     void set_type(BrigDataType16_t type) {
       this->type = type;
     }
-    
+
     void set_opcode(BrigOpcode32_t opcode) {
       this->opcode = opcode;
     }
-  
+
     // let context know the location of current operand
     void set_operand_loc(char loc) {
       this->operand_loc = loc;
     }
-    
+
     void set_alu_modifier(BrigAluModifier modifier) {
       this->aluModifier = modifier;
     }
-    
+
   public:
     BrigoOffset32_t current_label_offset;
     BrigcOffset32_t current_inst_offset;
@@ -515,7 +515,7 @@ class Context {
     char Alignment;
     bool IsExtern;
     bool IsStatic;
-    
+
     BrigMachine16_t machine;
     BrigProfile16_t profile;
     BrigSftz16_t ftz;

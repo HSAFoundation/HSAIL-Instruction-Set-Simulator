@@ -628,7 +628,7 @@ int BaseOperand(unsigned int first_token, Context* context) {
 int AddressableOperand(unsigned int first_token, Context* context) {
   int next;
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  
+
   if (first_token == '[') {
     // next should be a non register
     next = yylex();
@@ -636,18 +636,18 @@ int AddressableOperand(unsigned int first_token, Context* context) {
         (next == TOKEN_LOCAL_IDENTIFIER)) {
       next = yylex();
       std::string name(string_val);
-      if (next == ']') {      
+      if (next == ']') {
         BrigOperandAddress boa = {
           sizeof(boa),            // size
           BrigEOperandAddress,    // kind
           Brigb32,                // type
           0,                      // reserved
-          context->operand_map[name], // directive
+          context->operand_map[name],  // directive
           0
           };
         if (context->get_machine() == BrigELarge)
           boa.type = Brigb64;
-         
+
         context->append_operand(&boa);
 
         return 0;
@@ -796,10 +796,10 @@ int RoundingMode(unsigned int first_token,
   *is_ftz = false;
   *last_token = first_token;
   int next;
-  
+
   // get current alu modifier from context
   BrigAluModifier mod = context->get_alu_modifier();
-  
+
   if (first_token == _FTZ) {
     mod.ftz = 1;
     next = yylex();
@@ -817,11 +817,11 @@ int RoundingMode(unsigned int first_token,
           mod.rounding = 1;
         case _NEAR:
           mod.rounding = 0;
-      }     
+      }
     } else {
       *is_ftz = true;
     }
-    
+
     context->set_alu_modifier(mod);
     return 0;
   } else if (GetTokenType(first_token) == INT_ROUNDING) {
@@ -849,8 +849,8 @@ int RoundingMode(unsigned int first_token,
         mod.rounding = 1;
       case _NEAR:
         mod.rounding = 0;
-    }  
-    
+    }
+
     context->set_alu_modifier(mod);
     return 0;
   } else {
@@ -1255,8 +1255,8 @@ int Version(unsigned int first_token, Context* context) {
                   bdv.ftz = BrigENosftz;
                   break;
               }
-              
-              // update context              
+
+              // update context
               context->set_machine(bdv.machine);
               context->set_profile(bdv.profile);
               context->set_ftz(bdv.ftz);
@@ -1347,7 +1347,7 @@ int DeclPrefix(unsigned int first_token,
             context->set_is_extern(true);
           else
             context->set_is_static(true);
-        
+
           // alignment const externOrStatic
           *recheck_last_token = false;
         } else {
@@ -1410,7 +1410,7 @@ int DeclPrefix(unsigned int first_token,
       if (next_token == EXTERN)
         context->set_is_extern(true);
       else
-        context->set_is_static(true);      
+        context->set_is_static(true);
       next_token = yylex();
       *last_token = next_token;
 
@@ -1436,7 +1436,7 @@ int DeclPrefix(unsigned int first_token,
     if (next_token == EXTERN)
       context->set_is_extern(true);
     else
-      context->set_is_static(true);    
+      context->set_is_static(true);
     next_token = yylex();
     *last_token = next_token;
     if (next_token == ALIGN) {
@@ -2428,7 +2428,7 @@ int Branch(unsigned int first_token, Context* context) {
   unsigned int current_token = yylex();
   ErrorReporterInterface* rpt = context->get_error_reporter();
   BrigAluModifier mod = context->get_alu_modifier();
-  
+
   // check for optionalWidth
   if (current_token == _WIDTH) {
     if (!OptionalWidth(current_token, context)) {
