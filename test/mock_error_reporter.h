@@ -13,13 +13,15 @@ namespace hsa {
 namespace brig {
 class MockErrorReporter: public ErrorReporterInterface {
   public:
-    MOCK_METHOD2(report_error, void(error_t ErrorCode, unsigned int LineNo));
+    MOCK_METHOD3(report_error, void(error_t ErrorCode,
+                                    unsigned int LineNo,
+                                    unsigned int ColNo));
     MOCK_METHOD0(show_all_error, void());
 
 
 
     void DelegateToFake() {
-      ON_CALL(*this, report_error(_, _))
+      ON_CALL(*this, report_error(_, _, _))
         .WillByDefault(Invoke(&fake, &FakeErrorReporter::report_error));
       ON_CALL(*this, show_all_error())
         .WillByDefault(Invoke(&fake, &FakeErrorReporter::show_all_error));

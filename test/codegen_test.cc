@@ -84,9 +84,9 @@ TEST(CodegenTest, Example3_CodeGen) {
   EXPECT_EQ(BrigAdd, get_c.opcode);
   EXPECT_EQ(BrigPackPPsat, get_c.packing);
   EXPECT_EQ(Brigu16x2, get_c.type);
-  EXPECT_EQ(0, get_c.o_operands[0]);
-  EXPECT_EQ(24, get_c.o_operands[1]);
-  EXPECT_EQ(36, get_c.o_operands[2]);
+  EXPECT_EQ(8, get_c.o_operands[0]);
+  EXPECT_EQ(32, get_c.o_operands[1]);
+  EXPECT_EQ(44, get_c.o_operands[2]);
 
   delete context1;
 }
@@ -99,7 +99,7 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
     BrigAdd,
     Brigu16x2,
     BrigPackPPsat,
-    {0, 12, 24, 0, 0}
+    {8, 20, 32, 0, 0}
   };
 
   std::string input("add_pp_sat_u16x2 $s1, $s0, $s3;");
@@ -128,7 +128,7 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
     BrigAbs,
     Brigs8x4,
     BrigPackP,
-    {0, 12, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
   std::string input("abs_p_s8x4 $s1, $s2;");
@@ -286,7 +286,6 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // current directive offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_CALL(mock_rpt, report_error(ErrorReporter::OK, yylineno));
   EXPECT_EQ(0, Version(yylex(), test_context));
 
   // after append BrigDirectiveVersion
