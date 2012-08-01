@@ -10,6 +10,7 @@
 #include "error_reporter_interface.h"
 
 extern int yycolno;
+extern int yylineno;
 namespace hsa {
 namespace brig {
 // context for code generation
@@ -26,9 +27,6 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
-      BrigDirectivePad bdp = {0,0};
-      obuf->append(&bdp);
-      obuf->append(&bdp);
       sbuf = new StringBuffer();
       temporary_buf = new Buffer();
       err_reporter = NULL;
@@ -490,16 +488,6 @@ class Context {
       this->aluModifier = modifier;
     }
 
-  public:
-    BrigoOffset32_t current_label_offset;
-    BrigcOffset32_t current_inst_offset;
-    BrigdOffset32_t current_bdf_offset;
-    bool arg_output;
-
-    std::map<std::string, BrigdOffset32_t> func_map;
-    std::map<std::string, BrigoOffset32_t> operand_map;
-    std::map<std::string, BrigoOffset32_t> label_o_map;
-    std::multimap<std::string, BrigcOffset32_t> label_c_map;
  
    BrigoOffset32_t current_label_offset;
    BrigcOffset32_t current_inst_offset;   

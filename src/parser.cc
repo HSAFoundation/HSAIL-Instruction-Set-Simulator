@@ -1292,7 +1292,7 @@ int Version(unsigned int first_token, Context* context) {
           return 1;
         }
         context->append_directive(&bdv);
-        err_reporter->report_error(ErrorReporterInterface::OK, yylineno);
+        rpt->report_error(ErrorReporterInterface::OK, yylineno, yycolno);
         return 0;
       }
       rpt->report_error(
@@ -1319,8 +1319,8 @@ int Alignment(unsigned int first_token, Context* context) {
                                yylineno,
                                yycolno);
     return 1;
+  }
 }
-
 // parse declaration prefix
 // since this function checks for one token lookahead
 // if the last token is not consumed by this,
@@ -2272,6 +2272,7 @@ int Codeblock(unsigned int first_token, Context* context) {
 int Function(unsigned int first_token, Context* context) {
   bool rescan = false;
   unsigned int last_token = 0;
+  ErrorReporterInterface* rpt = context->get_error_reporter();  
   if (!FunctionDefinition(first_token, &rescan, &last_token, context)) {
     if (!rescan)
       last_token = yylex();
@@ -2558,6 +2559,7 @@ int Branch(unsigned int first_token, Context* context) {
                                         yylineno,
                                         yycolno);
                       return 1;
+                    }
                   } else {
                     rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
                                       yylineno,
