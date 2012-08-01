@@ -45,7 +45,7 @@ TEST(CodegenTest, Example3_CodeGen) {
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context1));
 
-  input.assign("function &packed_ops (arg_u8x4 %x)()");
+  input.assign("function &packed_ops (extern arg_u8x4 %x)()");
   input.append("{abs_p_s8x4 $s1, $s2;add_pp_sat_u16x2 $s1, $s0, $s3;};");
 
   // test the rule

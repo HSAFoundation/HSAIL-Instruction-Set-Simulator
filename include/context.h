@@ -37,6 +37,7 @@ class Context {
       obuf->append(&bdp);
       yycolno = 0;
       yylineno = 1;
+      set_default_values();
     }
 
     explicit Context(ErrorReporterInterface* error_reporter) {
@@ -53,6 +54,7 @@ class Context {
       obuf->append(&bdp);
       yycolno = 0;
       yylineno = 1;
+      set_default_values();
     }
 
     void set_error_reporter(ErrorReporterInterface* error_reporter) {
@@ -367,35 +369,37 @@ class Context {
       operand_map.clear();
       label_o_map.clear();
       label_c_map.clear();
+      set_default_values();
     }
 
     void clear_temporary_context(void) {
       clear_temporary_buffer();
-      IsConstant = false;
-      IsStatic = false;
-      IsExtern = false;
-      HasDeclPrefix = false;
+      set_default_values();
+    }
+
+    void set_default_values(void) {
+      machine = BrigESmall;
+      profile = BrigEFull;
+      ftz = BrigENosftz;
+      attribute = BrigNone;
+      fbar = 0;
     }
 
     // check context
-    bool is_constant() const {
-      return IsConstant;
+    uint16_t get_alignment() const {
+      return alignment;
     }
 
-    bool has_decl_prefix() const {
-      return HasDeclPrefix;
+    BrigAttribute16_t get_attribute() const {
+      return attribute;
     }
 
-    char get_alignment() const {
-      return Alignment;
+    BrigAluModifier get_alu_modifier() const {
+      return aluModifier;
     }
 
-    bool is_extern() const {
-      return IsExtern;
-    }
-
-    bool is_static() const {
-      return IsStatic;
+    BrigSymbolModifier get_symbol_modifier() const {
+      return symModifier;
     }
 
     BrigMachine16_t get_machine() const {
@@ -426,33 +430,21 @@ class Context {
       return operand_loc;
     }
 
-    BrigAluModifier get_alu_modifier() const {
-      return aluModifier;
-    }
-
     // set context
-    void set_is_constant(bool constant) {
-      this->IsConstant = constant;
-      this->HasDeclPrefix |= constant;
+    void set_alu_modifier(BrigAluModifier modifier) {
+      this->aluModifier = modifier;
     }
 
-    void set_is_static(bool is_static) {
-      this->IsStatic = is_static;
-      this->HasDeclPrefix |= is_static;
+    void set_symbol_modifier(BrigSymbolModifier modifier) {
+      this->symModifier = modifier;
+    };
+
+    void set_attribute(BrigAttribute16_t attrib) {
+      this->attribute = attrib;
     }
 
-    void set_is_extern(bool is_extern) {
-      this->IsExtern = is_extern;
-      this->HasDeclPrefix |= is_extern;
-    }
-
-    void set_alignment(char align) {
-      this->Alignment = align;
-      this->HasDeclPrefix = true;
-    }
-
-    void set_has_decl_prefix(bool has_decl_prefix) {
-      this->HasDeclPrefix = has_decl_prefix;
+    void set_alignment(uint16_t align) {
+      this->alignment = align;
     }
 
     void set_machine(BrigMachine16_t machine) {
@@ -484,10 +476,6 @@ class Context {
       this->operand_loc = loc;
     }
 
-    void set_alu_modifier(BrigAluModifier modifier) {
-      this->aluModifier = modifier;
-    }
-
   public:
     BrigoOffset32_t current_label_offset;
     BrigcOffset32_t current_inst_offset;
@@ -500,7 +488,7 @@ class Context {
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in a instruction
-
+    int dim[3];  // to keep track of dimensions in declarations
   private:
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
@@ -510,16 +498,14 @@ class Context {
     ErrorReporterInterface* err_reporter;  // error reporter
 
     // context variables
-    bool HasDeclPrefix;
-    bool IsConstant;
-    char Alignment;
-    bool IsExtern;
-    bool IsStatic;
+    uint16_t alignment;
 
+    BrigSymbolModifier symModifier;
     BrigMachine16_t machine;
     BrigProfile16_t profile;
     BrigSftz16_t ftz;
     int fbar;
+    BrigAttribute16_t attribute;
     BrigDataType16_t type;
     BrigOpcode32_t opcode;
     BrigAluModifier aluModifier;
