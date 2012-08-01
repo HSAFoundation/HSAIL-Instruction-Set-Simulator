@@ -401,6 +401,10 @@ class Context {
     BrigSymbolModifier get_symbol_modifier() const {
       return symModifier;
     }
+    
+    BrigPacking16_t get_packing() const {
+      return packing;
+    }
 
     BrigMachine16_t get_machine() const {
       return machine;
@@ -471,6 +475,10 @@ class Context {
       this->opcode = opcode;
     }
 
+    void set_packing(BrigPacking16_t packing) {
+      this->packing = packing;
+    }
+    
     // let context know the location of current operand
     void set_operand_loc(char loc) {
       this->operand_loc = loc;
@@ -509,6 +517,7 @@ class Context {
     BrigDataType16_t type;
     BrigOpcode32_t opcode;
     BrigAluModifier aluModifier;
+    BrigPacking16_t packing;
     char operand_loc;   // 1 -> 5
 };
 

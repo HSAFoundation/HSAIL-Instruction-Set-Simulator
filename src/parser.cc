@@ -343,7 +343,7 @@ BrigOpcode GetOpCode(int token) {
   }
 }
 
-BrigPacking GetPacking(int token) {
+BrigPacking16_t GetPacking(int token) {
   switch (token) {
   /* packing type */
   case _PP:
@@ -889,6 +889,7 @@ int Instruction2(unsigned int first_token, Context* context) {
     if (GetTokenType(next) == PACKING) {
       // there is packing
       inst_op.packing = GetPacking(next);
+      context->set_packing(inst_op.packing);
       next = yylex();
     }
 
@@ -1066,6 +1067,7 @@ int Instruction3(unsigned int first_token, Context* context) {
     if (GetTokenType(next) == PACKING) {
       // there is packing
       inst_op.packing = GetPacking(next);
+      context->set_packing(inst_op.packing);
       next = yylex();
     }
 
@@ -1137,6 +1139,7 @@ int Instruction3(unsigned int first_token, Context* context) {
     // check whether there is a Packing
     if (GetTokenType(next) == PACKING)
       // there is packing
+      context->set_packing(GetPacking(next));
       next = yylex();
 
     // now we must have a dataTypeId
@@ -1704,16 +1707,16 @@ int FunctionDefinition(unsigned int first_token,
       BrigDirectiveFunction bdf = {
       40,                      // size
       BrigEDirectiveFunction,  // kind
-      context->get_code_offset(),
-      0,
-      0,
+      context->get_code_offset(),   // c_code
+      0,  // name
+      0,  // in param count
       bdf_offset+40,          // d_firstScopedDirective
-      0,
+      0,  // operation count
       bdf_offset+40,          // d_nextDirective
-      BrigNone,
-      0,
-      0,
-      0,
+      context->get_attribute(),  // attribute
+      context->get_fbar(),   // fbar count
+      0,    // out param count
+      0     // d_firstInParam
       };
 
       context->append_directive(&bdf);
