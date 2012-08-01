@@ -2278,5 +2278,9 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context) {
   return 1;
 }
 
+int VectorToken(unsigned int first_token , Context *context){
+    return 1 ;
+}
+
 }  // namespace brig
 }  // namespace hsa
