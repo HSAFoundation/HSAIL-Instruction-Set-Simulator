@@ -796,20 +796,62 @@ int RoundingMode(unsigned int first_token,
   *is_ftz = false;
   *last_token = first_token;
   int next;
-
+  
+  // get current alu modifier from context
+  BrigAluModifier mod = context->get_alu_modifier();
+  
   if (first_token == _FTZ) {
+    mod.ftz = 1;
     next = yylex();
     *last_token = next;
 
     if (GetTokenType(next) == FLOAT_ROUNDING) {
       // next is floatRounding
+      mod.floatOrInt = 1;
+      switch (next) {
+        case _UP:
+          mod.rounding = 2;
+        case _DOWN:
+          mod.rounding = 3;
+        case _ZERO:
+          mod.rounding = 1;
+        case _NEAR:
+          mod.rounding = 0;
+      }     
     } else {
       *is_ftz = true;
     }
+    
+    context->set_alu_modifier(mod);
     return 0;
   } else if (GetTokenType(first_token) == INT_ROUNDING) {
+    mod.floatOrInt = 0;
+    switch (first_token) {
+      case _UPI:
+        mod.rounding = 2;
+      case _DOWNI:
+        mod.rounding = 3;
+      case _ZEROI:
+        mod.rounding = 1;
+      case _NEARI:
+        mod.rounding = 0;
+    }
+    context->set_alu_modifier(mod);
     return 0;
   } else if (GetTokenType(first_token) == FLOAT_ROUNDING) {
+    mod.floatOrInt = 1;
+    switch (first_token) {
+      case _UP:
+        mod.rounding = 2;
+      case _DOWN:
+        mod.rounding = 3;
+      case _ZERO:
+        mod.rounding = 1;
+      case _NEAR:
+        mod.rounding = 0;
+    }  
+    
+    context->set_alu_modifier(mod);
     return 0;
   } else {
     return 1;
@@ -1266,6 +1308,7 @@ int Alignment(unsigned int first_token, Context* context) {
   // first token must be "align" keyword
   ErrorReporterInterface* rpt = context->get_error_reporter();
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
+    context->set_alignment((char)int_val);
     return 0;
   } else {
     rpt->report_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT,
@@ -1294,11 +1337,17 @@ int DeclPrefix(unsigned int first_token,
       *last_token = next_token;
       // first is alignment
       if (next_token == CONST) {
+        context->set_is_constant(true);
         // alignment const
         next_token = yylex();
         *last_token = next_token;
 
         if ((next_token == EXTERN)||(next_token == STATIC)) {
+          if (next_token == EXTERN)
+            context->set_is_extern(true);
+          else
+            context->set_is_static(true);
+        
           // alignment const externOrStatic
           *recheck_last_token = false;
         } else {
@@ -1307,11 +1356,16 @@ int DeclPrefix(unsigned int first_token,
         }
       } else if ((next_token == EXTERN)||(next_token == STATIC)) {
         // alignment externOrStatic
+        if (next_token == EXTERN)
+          context->set_is_extern(true);
+        else
+          context->set_is_static(true);
         next_token = yylex();
         *last_token = next_token;
 
         if (next_token == CONST) {
           // alignmnet externOrStatic const
+          context->set_is_constant(true);
         } else {
           // alignment externOrStatic
           *recheck_last_token = true;
@@ -1327,6 +1381,7 @@ int DeclPrefix(unsigned int first_token,
     }
   } else if (first_token == CONST) {
     // first is const
+    context->set_is_constant(true);
     next_token = yylex();
     *last_token = next_token;
     if (next_token == ALIGN) {
@@ -1336,6 +1391,10 @@ int DeclPrefix(unsigned int first_token,
         *last_token = next_token;
 
         if ((next_token == EXTERN)||(next_token == STATIC)) {
+          if (next_token == EXTERN)
+            context->set_is_extern(true);
+          else
+            context->set_is_static(true);
           // const alignment externOrStatic
         } else {
           // const alignment
@@ -1348,6 +1407,10 @@ int DeclPrefix(unsigned int first_token,
       }
     } else if ((next_token == EXTERN)||(next_token == STATIC)) {
       // const externOrStatic
+      if (next_token == EXTERN)
+        context->set_is_extern(true);
+      else
+        context->set_is_static(true);      
       next_token = yylex();
       *last_token = next_token;
 
@@ -1370,6 +1433,10 @@ int DeclPrefix(unsigned int first_token,
     }
   } else if ((first_token == EXTERN)||(first_token == STATIC)) {
     // externOrStatic first
+    if (next_token == EXTERN)
+      context->set_is_extern(true);
+    else
+      context->set_is_static(true);    
     next_token = yylex();
     *last_token = next_token;
     if (next_token == ALIGN) {
@@ -1380,6 +1447,7 @@ int DeclPrefix(unsigned int first_token,
 
         if (next_token == CONST) {
           // externOrStatic alignment const
+          context->set_is_constant(true);
         } else {
           // externOrStatic alignment
           *recheck_last_token = true;
@@ -1391,6 +1459,7 @@ int DeclPrefix(unsigned int first_token,
       }
     } else if (next_token == CONST) {
       // externOrStatic const
+      context->set_is_constant(true);
       next_token = yylex();
       *last_token = next_token;
 
@@ -1422,6 +1491,7 @@ int FBar(unsigned int first_token, Context* context) {
   ErrorReporterInterface* rpt = context->get_error_reporter();
   if (yylex() == '(') {
     if (yylex() == TOKEN_INTEGER_CONSTANT) {
+      context->set_fbar(int_val);
       if (yylex() == ')')
         return 0;
       else
@@ -2357,7 +2427,8 @@ int Branch(unsigned int first_token, Context* context) {
   unsigned int op = first_token;  // CBR or BRN
   unsigned int current_token = yylex();
   ErrorReporterInterface* rpt = context->get_error_reporter();
-
+  BrigAluModifier mod = context->get_alu_modifier();
+  
   // check for optionalWidth
   if (current_token == _WIDTH) {
     if (!OptionalWidth(current_token, context)) {
@@ -2368,8 +2439,11 @@ int Branch(unsigned int first_token, Context* context) {
   }
 
   // check for optional _fbar modifier
-  if (current_token == __FBAR)
+  if (current_token == __FBAR) {
+    mod.fbar = 1;
+    context->set_alu_modifier(mod);
     current_token = yylex();
+  }
 
   // parse operands
   if (op == CBR) {

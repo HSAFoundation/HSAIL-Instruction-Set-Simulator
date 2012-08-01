@@ -409,7 +409,27 @@ class Context {
     BrigSftz16_t get_ftz() const {
       return ftz;
     }
-
+    
+    int get_fbar() const {
+      return fbar;
+    }
+    
+    BrigDataType16_t get_type() const {
+      return type;
+    }
+    
+    BrigOpcode32_t get_opcode() const {
+      return opcode;
+    }
+    
+    char get_operand_loc() const {
+      return operand_loc;
+    }
+    
+    BrigAluModifier get_alu_modifier() const {
+      return aluModifier;
+    }
+    
     // set context
     void set_is_constant(bool constant) {
       this->IsConstant = constant;
@@ -446,7 +466,28 @@ class Context {
     void set_ftz(BrigSftz16_t ftz) {
       this->ftz = ftz;
     }
-
+    
+    void set_fbar(int fbar) {
+      this->fbar = fbar;
+    }
+    
+    void set_type(BrigDataType16_t type) {
+      this->type = type;
+    }
+    
+    void set_opcode(BrigOpcode32_t opcode) {
+      this->opcode = opcode;
+    }
+  
+    // let context know the location of current operand
+    void set_operand_loc(char loc) {
+      this->operand_loc = loc;
+    }
+    
+    void set_alu_modifier(BrigAluModifier modifier) {
+      this->aluModifier = modifier;
+    }
+    
   public:
     BrigoOffset32_t current_label_offset;
     BrigcOffset32_t current_inst_offset;
@@ -478,6 +519,11 @@ class Context {
     BrigMachine16_t machine;
     BrigProfile16_t profile;
     BrigSftz16_t ftz;
+    int fbar;
+    BrigDataType16_t type;
+    BrigOpcode32_t opcode;
+    BrigAluModifier aluModifier;
+    char operand_loc;   // 1 -> 5
 };
 
 }  // namespace brig

@@ -339,6 +339,19 @@ enum BrigOpcode {
   BrigDebugtrap = 121,
   BrigBitselect = 122
 };
+
+// Brig Support Structures
+// BrigAluModifier specifies arithmetic logic unit controls:
+typedef struct BrigAluModifier {
+  uint32_t floatOrInt: 1;
+  uint32_t rounding: 2;
+  uint32_t hi: 1;
+  uint32_t ftz: 1;
+  uint32_t approx: 1;
+  uint32_t fbar: 1;
+  uint32_t reserved: 25;
+} BrigAluModifier;
+
 // Directive structures
 
 // 20.8.8
