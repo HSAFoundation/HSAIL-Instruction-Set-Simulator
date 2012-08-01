@@ -290,7 +290,7 @@ TEST(CodegenTest, VersionCodeGen) {
     0,            // unknown c_code
     1,            // major
     0,            // minor
-    BrigESmall,   // machine
+    BrigELarge,   // machine
     BrigEFull,    // profile
     BrigENosftz,  // ftz
     0             // reserved

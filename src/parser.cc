@@ -2286,7 +2286,19 @@ int VectorToken(unsigned int first_token , Context *context){
 }
 
 int SignatureType(unsigned int first_token , Context *context){
+  //first token is ARG
+  unsigned int last_token ;
+  unsigned int next = yylex() ;
+
+  if(DATA_TYPE_ID == GetTokenType(next)){
+    return 0;
+  } else if(_ROIMG == next 
+           || _RWIMG == next
+           || _SAMP == next ){
+    return 0 ;
+  }
   return 1 ;
-};
+}
+
 }  // namespace brig
 }  // namespace hsa
