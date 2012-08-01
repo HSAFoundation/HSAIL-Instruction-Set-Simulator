@@ -12,7 +12,9 @@ namespace brig {
 
 class FakeErrorReporter: public ErrorReporterInterface {
   public:
-    void report_error(error_t ErrorCode, unsigned int LineNo) {
+    void report_error(error_t ErrorCode,
+                      unsigned int LineNo,
+                      unsigned int ColNo) {
       error_buffer.push_back(ErrorCode);
     }
 

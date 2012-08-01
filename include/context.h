@@ -9,7 +9,7 @@
 #include "brig_buffer.h"
 #include "error_reporter_interface.h"
 
-
+extern int yycolno;
 namespace hsa {
 namespace brig {
 // context for code generation
@@ -30,7 +30,15 @@ class Context {
       obuf->append(&bdp);
       obuf->append(&bdp);
       sbuf = new StringBuffer();
+      temporary_buf = new Buffer();
       err_reporter = NULL;
+      clear_context();
+
+      BrigDirectivePad bdp = {0, 0};
+      obuf->append(&bdp);
+      obuf->append(&bdp);
+      yycolno = 0;
+      yylineno = 1;
     }
 
     explicit Context(ErrorReporterInterface* error_reporter) {
@@ -38,10 +46,15 @@ class Context {
       cbuf = new Buffer();
       dbuf = new Buffer();
       obuf = new Buffer();
-      BrigDirectivePad bdp = {0,0};  //add initial
-      obuf->append(&bdp);
-      obuf->append(&bdp);      
       sbuf = new StringBuffer();
+      temporary_buf = new Buffer();
+      clear_context();
+
+      BrigDirectivePad bdp = {0, 0};  // add initial
+      obuf->append(&bdp);
+      obuf->append(&bdp);
+      yycolno = 0;
+      yylineno = 1;
     }
 
     void set_error_reporter(ErrorReporterInterface* error_reporter) {
@@ -86,12 +99,14 @@ class Context {
       dbuf->append(item);
     }
 
+    // use to append a BrigDirectiveSymbol structs
+    // (does not contain a .kind field ? )
+
     template <class T>
     void append_directive_symbol(const T* item) {
       uint32_t directive_offset = dbuf->size();
       dbuf->append(item);
     }
-
 
     // append operand
     template <class T>
@@ -107,6 +122,12 @@ class Context {
         obuf->append(&bdp);
       }
       obuf->append(item);
+    }
+
+    // append temporary structs
+    template <class T>
+    void append_temporary_struct(const T* item) {
+      temporary_buf -> append(item);
     }
 
     // add a new symbol to .strings section.
@@ -132,6 +153,22 @@ class Context {
     };
 
     /* code to get Brig structures from buffers */
+    // get temporary structs from temporary buffer
+    template <class T>
+    context_error_t get_temporary_struct(uint32_t offset, T* item) {
+      // check for valid pointer
+      if (item == NULL)
+        return INVALID_POINTER;
+
+      Buffer::error_t result = temporary_buf->get(offset, item);
+
+      if (result == Buffer::INVALID_OFFSET)
+        return INVALID_OFFSET;
+      else if (result == Buffer::EMPTY_BUFFER)
+        return EMPTY_BUFFER;
+      else if (result == Buffer::SUCCESS)
+        return CONTEXT_OK;
+    }
 
     // get directive at a specific offset
     template <class T>
@@ -200,6 +237,10 @@ class Context {
     }
     BrigsOffset32_t get_string_offset(void) const {
       return sbuf->size();
+    }
+
+    uint32_t get_temporary_offset(void) const {
+      return temporary_buf->size();
     }
 
     // functions to get a sequence of values of a certain buffer
@@ -310,13 +351,156 @@ class Context {
       sbuf->clear();
     }
 
+    void clear_temporary_buffer(void) {
+      temporary_buf->clear();
+    }
+
     void clear_all_buffers(void) {
       cbuf->clear();
       dbuf->clear();
       obuf->clear();
       sbuf->clear();
+      temporary_buf->clear();
+    }
+    void clear_context(void) {
+      clear_temporary_context();
+      clear_all_buffers();
+      func_map.clear();
+      operand_map.clear();
+      label_o_map.clear();
+      label_c_map.clear();
     }
 
+    void clear_temporary_context(void) {
+      clear_temporary_buffer();
+      IsConstant = false;
+      IsStatic = false;
+      IsExtern = false;
+      HasDeclPrefix = false;
+    }
+
+    // check context
+    bool is_constant() const {
+      return IsConstant;
+    }
+
+    bool has_decl_prefix() const {
+      return HasDeclPrefix;
+    }
+
+    char get_alignment() const {
+      return Alignment;
+    }
+
+    bool is_extern() const {
+      return IsExtern;
+    }
+
+    bool is_static() const {
+      return IsStatic;
+    }
+
+    BrigMachine16_t get_machine() const {
+      return machine;
+    }
+
+    BrigProfile16_t get_profile() const {
+      return profile;
+    }
+
+    BrigSftz16_t get_ftz() const {
+      return ftz;
+    }
+
+    int get_fbar() const {
+      return fbar;
+    }
+
+    BrigDataType16_t get_type() const {
+      return type;
+    }
+
+    BrigOpcode32_t get_opcode() const {
+      return opcode;
+    }
+
+    char get_operand_loc() const {
+      return operand_loc;
+    }
+
+    BrigAluModifier get_alu_modifier() const {
+      return aluModifier;
+    }
+
+    // set context
+    void set_is_constant(bool constant) {
+      this->IsConstant = constant;
+      this->HasDeclPrefix |= constant;
+    }
+
+    void set_is_static(bool is_static) {
+      this->IsStatic = is_static;
+      this->HasDeclPrefix |= is_static;
+    }
+
+    void set_is_extern(bool is_extern) {
+      this->IsExtern = is_extern;
+      this->HasDeclPrefix |= is_extern;
+    }
+
+    void set_alignment(char align) {
+      this->Alignment = align;
+      this->HasDeclPrefix = true;
+    }
+
+    void set_has_decl_prefix(bool has_decl_prefix) {
+      this->HasDeclPrefix = has_decl_prefix;
+    }
+
+    void set_machine(BrigMachine16_t machine) {
+      this->machine = machine;
+    }
+
+    void set_profile(BrigProfile16_t profile) {
+      this->profile = profile;
+    }
+
+    void set_ftz(BrigSftz16_t ftz) {
+      this->ftz = ftz;
+    }
+
+    void set_fbar(int fbar) {
+      this->fbar = fbar;
+    }
+
+    void set_type(BrigDataType16_t type) {
+      this->type = type;
+    }
+
+    void set_opcode(BrigOpcode32_t opcode) {
+      this->opcode = opcode;
+    }
+
+    // let context know the location of current operand
+    void set_operand_loc(char loc) {
+      this->operand_loc = loc;
+    }
+
+    void set_alu_modifier(BrigAluModifier modifier) {
+      this->aluModifier = modifier;
+    }
+
+  public:
+    BrigoOffset32_t current_label_offset;
+    BrigcOffset32_t current_inst_offset;
+    BrigdOffset32_t current_bdf_offset;
+    bool arg_output;
+
+    std::map<std::string, BrigdOffset32_t> func_map;
+    std::map<std::string, BrigoOffset32_t> operand_map;
+    std::map<std::string, BrigoOffset32_t> label_o_map;
+    std::multimap<std::string, BrigcOffset32_t> label_c_map;
+ 
    BrigoOffset32_t current_label_offset;
    BrigcOffset32_t current_inst_offset;   
    BrigdOffset32_t current_bdf_offset;
@@ -334,8 +518,27 @@ class Context {
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
     Buffer* obuf;  // operand buffer
+    Buffer* temporary_buf;  // a buffer to put temporary structs
+    
     StringBuffer* sbuf;  // string buffer
     ErrorReporterInterface* err_reporter;  // error reporter
+
+    // context variables
+    bool HasDeclPrefix;
+    bool IsConstant;
+    char Alignment;
+    bool IsExtern;
+    bool IsStatic;
+
+    BrigMachine16_t machine;
+    BrigProfile16_t profile;
+    BrigSftz16_t ftz;
+    int fbar;
+    BrigDataType16_t type;
+    BrigOpcode32_t opcode;
+    BrigAluModifier aluModifier;
+    char operand_loc;   // 1 -> 5
+
 };
 
 }  // namespace brig

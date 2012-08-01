@@ -15,7 +15,9 @@ class ErrorReporter: public ErrorReporterInterface {
     static ErrorReporter* get_instance(void);
 
     // report an error to error reporter
-    void report_error(error_t ErrorCode, unsigned int LineNo);
+    void report_error(error_t ErrorCode,
+                      unsigned int LineNo,
+                      unsigned int ColNo);
 
     // get a description of error
     static std::string translate_error(error_t ErrorCode);

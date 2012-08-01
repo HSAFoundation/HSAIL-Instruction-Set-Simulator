@@ -114,8 +114,6 @@ TEST(CodegenTest, Example4_Branch) {
 }
 
 TEST(CodegenTest, Example3_CodeGen) {
-  main_reporter->show_error(true);
-  // test error reporter
   Context* context1 = new Context(main_reporter);
   BrigDirectiveFunction ref = {
     40,                       // size
@@ -140,7 +138,8 @@ TEST(CodegenTest, Example3_CodeGen) {
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context1));
 
-  input.assign("function &packed_ops (arg_u8x4 %x)(){abs_p_s8x4 $s1, $s2;add_pp_sat_u16x2 $s1, $s0, $s3;};");
+  input.assign("function &packed_ops (arg_u8x4 %x)()");
+  input.append("{abs_p_s8x4 $s1, $s2;add_pp_sat_u16x2 $s1, $s0, $s3;};");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
@@ -182,15 +181,10 @@ TEST(CodegenTest, Example3_CodeGen) {
   EXPECT_EQ(32, get_c.o_operands[1]);
   EXPECT_EQ(44, get_c.o_operands[2]);
 
-  main_reporter->show_error(false);
   delete context1;
 }
 
-
-
 TEST(CodegenTest, Instrustion3Op_CodeGen) {
-  main_reporter->show_error(true);
-  // test error reporter
   Context* context1 = new Context(main_reporter);
   BrigInstBase ref = {
     32,
@@ -198,7 +192,7 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
     BrigAdd,
     Brigu16x2,
     BrigPackPPsat,
-    {8,20,32,0,0}
+    {8, 20, 32, 0, 0}
   };
 
   std::string input("add_pp_sat_u16x2 $s1, $s0, $s3;");
@@ -216,14 +210,10 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
 
-  main_reporter->show_error(false);
   delete context1;
 }
 
-
 TEST(CodegenTest, Instrustion2Op_CodeGen) {
-  main_reporter->show_error(true);
-  // test error reporter
   Context* context1 = new Context(main_reporter);
   BrigInstBase ref = {
     32,
@@ -231,7 +221,7 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
     BrigAbs,
     Brigs8x4,
     BrigPackP,
-    {8,20,0,0,0}
+    {8, 20, 0, 0, 0}
   };
 
   std::string input("abs_p_s8x4 $s1, $s2;");
@@ -249,13 +239,10 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
 
-  main_reporter->show_error(false);
   delete context1;
 }
 
 TEST(CodegenTest, SimplestFunction_CodeGen) {
-  main_reporter->show_error(true);
-  // test error reporter
   Context* context1 = new Context(main_reporter);
   BrigDirectiveFunction ref = {
     40,                       // size
@@ -316,10 +303,8 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   BrigcOffset32_t csize = context1->get_code_offset();
   EXPECT_EQ(32, csize);
 
-  main_reporter->show_error(false);
   delete context1;
 }
-
 
 TEST(CodegenTest, AlignmentCheck) {
   // Try the situation in PRM 20.2 (pg. 226)
@@ -369,7 +354,6 @@ TEST(CodegenTest, AlignmentCheck) {
   delete context1;
 }
 
-
 TEST(CodegenTest, VersionCodeGen) {
   MockErrorReporter mock_rpt;
   mock_rpt.DelegateToFake();
@@ -395,8 +379,8 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // current directive offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_CALL(mock_rpt, report_error(ErrorReporter::OK, yylineno));
   EXPECT_EQ(0, Version(yylex(), test_context));
+
   // after append BrigDirectiveVersion
   uint32_t curr_d_offset = test_context->get_directive_offset();
 
@@ -414,7 +398,9 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.ftz, get.ftz);
 
   mock_rpt.show_all_error();
-      /* TEST 2 */
+
+
+  /* ---------- TEST 2 ---------*/
   input.assign("version 2:0:$large;");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context));
@@ -459,21 +445,21 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.ftz, get.ftz);
 }
 
-
 TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string name;
   std::string input("$d7");  // register
 
-  
+
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
-  
+
   // scan symbols
   parser->scan_symbols();
-  
+
   // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
+
 
   // reference struct
   BrigOperandReg ref = {
@@ -484,10 +470,12 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   };
   name.assign("$d7");
   ref.name = context->lookup_symbol(name);
+  EXPECT_EQ(0, ref.name);
 
   // get structure from context and compare
   BrigOperandReg get;
   uint32_t curr_o_offset = context->get_operand_offset();
+  EXPECT_EQ(sizeof(ref), curr_o_offset);
   context->get_operand<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
@@ -498,10 +486,10 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   // second register
   input.assign("$q7");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  
+
   // scan symbols
   parser->scan_symbols();
-  
+
   // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Operand(yylex(), context));
@@ -681,6 +669,49 @@ TEST(CodegenTest, LookupStringBugTest) {
   EXPECT_EQ(offset, loc);
 };
 
+TEST(CodegenTest, FunctionDeclaration) {
+  std::string input("function &get_global_id(arg_u32 %ret_val)");
+  input.append("(arg_u32 %arg_val0);");
+}
+
+TEST(CodegenTest, BrigOperandAddressGeneration) {
+  std::string name;
+  std::string input("[&test]");  // [name]
+
+  Parser* parser = new Parser(context);
+  parser->set_source_string(input);
+
+  // scan symbols
+  parser->scan_symbols();
+
+  // rescan
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, AddressableOperand(yylex(), context));
+
+  name.assign(input.c_str());
+  BrigOperandAddress ref = {
+    sizeof(ref),          // size
+    BrigEOperandAddress,  // kind
+    Brigb32,              // Data Type
+    0,                    // reserved
+    context->operand_map[name],  // directive
+    0,     // offset -> ??
+  };
+
+  if (context->get_machine() == BrigELarge)
+    ref.type = Brigb64;
+
+    // get structure from context and compare
+  BrigOperandAddress get;
+  uint32_t curr_o_offset = context->get_operand_offset();
+  EXPECT_EQ(sizeof(ref), curr_o_offset);
+  context->get_operand<BrigOperandAddress>(curr_o_offset-sizeof(get), &get);
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.directive, get.directive);
+};
 
 }  // namespace brig
 }  // namespace hsa

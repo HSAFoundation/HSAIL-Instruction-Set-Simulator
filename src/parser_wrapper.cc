@@ -30,15 +30,21 @@ namespace brig {
   int Parser::parse(void) {
     // first scan for all symbols in source
     scan_symbols();
-    
+
     // restart lexer
     lexer->restart();
-    
+
     // begin parse src
-    while (lexer->get_next_token()) {
+    unsigned int token = lexer->get_next_token();
+
+    while (token) {
+      if (token == VERSION) {
+        if (Program(token, context))
+          return 1;
+      }
+      token = lexer->get_next_token();
     }
-     
-    return 1;
+    return 0;
   }
 }  // namespace brig
 }  // namespace hsa
