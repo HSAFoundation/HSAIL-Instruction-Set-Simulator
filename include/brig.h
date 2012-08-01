@@ -28,7 +28,12 @@ enum BrigAlignment {
     BrigEAlignment_4,
     BrigEAlignment_8
 };
-
+// BrigSymbolModifier
+enum BrigSymbolModifier {
+  BrigConst = 1,  // set means constant; not set means read/write
+  BrigArray = 2,  // set means vector (size in dim); not set means scalar
+  BrigFlex = 4    // set means flexible array
+};
 // 20.5.3
 enum BrigAttribute {
     BrigExtern,
@@ -111,18 +116,7 @@ enum BrigDirectiveKinds {
   BrigEDirectiveBlockEnd,
   BrigEDirectivePad
 };
-// PRM 20.3.2
-struct BrigSymbolCommon {
-  BrigcOffset32_t c_code;
-  BrigStorageClass32_t storageClass;
-  BrigAttribute16_t attribute;
-  uint16_t reserved;
-  uint32_t symbolModifier;
-  uint32_t dim;
-  BrigsOffset32_t s_name;
-  BrigDataType16_t type;
-  uint16_t align;
-};
+
 // BrigMachine
 // BrigMachine is used to specify the type of machine model.
 enum BrigMachine {
@@ -368,6 +362,19 @@ struct BrigDirectiveFunction {
   uint16_t fbarCount;
   uint32_t outParamCount;
   BrigdOffset32_t d_firstInParam;
+};
+
+// PRM 20.3.2
+struct BrigSymbolCommon {
+  BrigcOffset32_t c_code;
+  BrigStorageClass32_t storageClass;
+  BrigAttribute16_t attribute;
+  uint16_t reserved;
+  uint32_t symbolModifier;
+  uint32_t dim;
+  BrigsOffset32_t s_name;
+  BrigDataType16_t type;
+  uint16_t align;
 };
 
 // 20.8.21

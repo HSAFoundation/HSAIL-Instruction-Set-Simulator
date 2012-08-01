@@ -124,7 +124,7 @@ TEST(CodegenTest, Example3_CodeGen) {
     96,  // d_firstScopedDirective
     2,   // operationCount
     96,  // d_nextDirective
-    BrigNone,
+    BrigStatic,
     0,
     1,   // outParamCount
     0,
@@ -138,7 +138,7 @@ TEST(CodegenTest, Example3_CodeGen) {
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context1));
 
-  input.assign("function &packed_ops (arg_u8x4 %x)()");
+  input.assign("static function &packed_ops (extern arg_u8x4 %x)()");
   input.append("{abs_p_s8x4 $s1, $s2;add_pp_sat_u16x2 $s1, $s0, $s3;};");
 
   // test the rule
@@ -161,6 +161,7 @@ TEST(CodegenTest, Example3_CodeGen) {
   EXPECT_EQ(ref.operationCount, get.operationCount);
   EXPECT_EQ(ref.d_nextDirective, get.d_nextDirective);
   EXPECT_EQ(ref.d_firstScopedDirective, get.d_firstScopedDirective);
+  EXPECT_EQ(ref.attribute, get.attribute);
 
   // test the .string size
   BrigsOffset32_t size = context1->get_string_offset();

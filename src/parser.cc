@@ -344,7 +344,7 @@ BrigOpcode GetOpCode(int token) {
   }
 }
 
-BrigPacking GetPacking(int token) {
+BrigPacking16_t GetPacking(int token) {
   switch (token) {
   /* packing type */
   case _PP:
@@ -892,6 +892,7 @@ int Instruction2(unsigned int first_token, Context* context) {
     if (GetTokenType(next) == PACKING) {
       // there is packing
       inst_op.packing = GetPacking(next);
+      context->set_packing(inst_op.packing);
       next = yylex();
     }
 
@@ -1068,6 +1069,7 @@ int Instruction3(unsigned int first_token, Context* context) {
     if (GetTokenType(next) == PACKING) {
       // there is packing
       inst_op.packing = GetPacking(next);
+      context->set_packing(inst_op.packing);
       next = yylex();
     }
 
@@ -1139,6 +1141,7 @@ int Instruction3(unsigned int first_token, Context* context) {
     // check whether there is a Packing
     if (GetTokenType(next) == PACKING)
       // there is packing
+      context->set_packing(GetPacking(next));
       next = yylex();
 
     // now we must have a dataTypeId
@@ -1312,7 +1315,7 @@ int Alignment(unsigned int first_token, Context* context) {
   // first token must be "align" keyword
   ErrorReporterInterface* rpt = context->get_error_reporter();
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
-    context->set_alignment((char)int_val);
+    context->set_alignment(int_val);
     return 0;
   } else {
     rpt->report_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT,
@@ -1340,16 +1343,16 @@ int DeclPrefix(unsigned int first_token,
       *last_token = next_token;
       // first is alignment
       if (next_token == CONST) {
-        context->set_is_constant(true);
+        context->set_symbol_modifier(BrigConst);
         // alignment const
         next_token = yylex();
         *last_token = next_token;
 
         if ((next_token == EXTERN)||(next_token == STATIC)) {
           if (next_token == EXTERN)
-            context->set_is_extern(true);
+            context->set_attribute(BrigExtern);
           else
-            context->set_is_static(true);
+            context->set_attribute(BrigStatic);
 
           // alignment const externOrStatic
           *recheck_last_token = false;
@@ -1360,15 +1363,15 @@ int DeclPrefix(unsigned int first_token,
       } else if ((next_token == EXTERN)||(next_token == STATIC)) {
         // alignment externOrStatic
         if (next_token == EXTERN)
-          context->set_is_extern(true);
+          context->set_attribute(BrigExtern);
         else
-          context->set_is_static(true);
+          context->set_attribute(BrigStatic);
         next_token = yylex();
         *last_token = next_token;
 
         if (next_token == CONST) {
           // alignmnet externOrStatic const
-          context->set_is_constant(true);
+          context->set_symbol_modifier(BrigConst);
         } else {
           // alignment externOrStatic
           *recheck_last_token = true;
@@ -1384,7 +1387,7 @@ int DeclPrefix(unsigned int first_token,
     }
   } else if (first_token == CONST) {
     // first is const
-    context->set_is_constant(true);
+    context->set_symbol_modifier(BrigConst);
     next_token = yylex();
     *last_token = next_token;
     if (next_token == ALIGN) {
@@ -1395,9 +1398,9 @@ int DeclPrefix(unsigned int first_token,
 
         if ((next_token == EXTERN)||(next_token == STATIC)) {
           if (next_token == EXTERN)
-            context->set_is_extern(true);
+            context->set_attribute(BrigExtern);
           else
-            context->set_is_static(true);
+            context->set_attribute(BrigStatic);
           // const alignment externOrStatic
         } else {
           // const alignment
@@ -1411,9 +1414,9 @@ int DeclPrefix(unsigned int first_token,
     } else if ((next_token == EXTERN)||(next_token == STATIC)) {
       // const externOrStatic
       if (next_token == EXTERN)
-        context->set_is_extern(true);
+        context->set_attribute(BrigExtern);
       else
-        context->set_is_static(true);
+        context->set_attribute(BrigStatic);
       next_token = yylex();
       *last_token = next_token;
 
@@ -1437,9 +1440,9 @@ int DeclPrefix(unsigned int first_token,
   } else if ((first_token == EXTERN)||(first_token == STATIC)) {
     // externOrStatic first
     if (next_token == EXTERN)
-      context->set_is_extern(true);
+      context->set_attribute(BrigExtern);
     else
-      context->set_is_static(true);
+      context->set_attribute(BrigStatic);
     next_token = yylex();
     *last_token = next_token;
     if (next_token == ALIGN) {
@@ -1450,7 +1453,7 @@ int DeclPrefix(unsigned int first_token,
 
         if (next_token == CONST) {
           // externOrStatic alignment const
-          context->set_is_constant(true);
+          context->set_symbol_modifier(BrigConst);
         } else {
           // externOrStatic alignment
           *recheck_last_token = true;
@@ -1462,7 +1465,7 @@ int DeclPrefix(unsigned int first_token,
       }
     } else if (next_token == CONST) {
       // externOrStatic const
-      context->set_is_constant(true);
+      context->set_symbol_modifier(BrigConst);
       next_token = yylex();
       *last_token = next_token;
 
@@ -1486,6 +1489,7 @@ int DeclPrefix(unsigned int first_token,
     *recheck_last_token = true;
     *last_token = first_token;
   }
+
   return 0;
 }
 
@@ -1519,6 +1523,7 @@ int ArrayDimensionSet(unsigned int first_token,
   ErrorReporterInterface* rpt = context->get_error_reporter();
   *rescan_last_token = false;
   unsigned int next_token = yylex();
+
   while (1) {
     if (next_token == ']') {
       next_token = yylex();  // check if there is more item
@@ -1564,6 +1569,7 @@ int ArgumentDecl(unsigned int first_token,
         (next == _SAMP) ||
         (next == _ROIMG)) {
       BrigDataType16_t data_type = GetDataType(next);
+      context->set_type(data_type);
       next = yylex();
       if (next == TOKEN_LOCAL_IDENTIFIER) {
         // should have a meaning for DATA_TYPE_ID.
@@ -1586,17 +1592,17 @@ int ArgumentDecl(unsigned int first_token,
           // no arrayDimensions
           BrigdOffset32_t dsize = context->get_directive_offset();
           BrigDirectiveSymbol sym_decl = {
-          context->get_code_offset(),
-          BrigArgSpace,
-          BrigNone,
-          0,
-          0,
-          0,
-          arg_name_offset,
-          data_type,
-          1,
-          0,               // d_init = 0 for arg
-          0                // reserved
+          context->get_code_offset(),       // c_code
+          BrigArgSpace,                     // storageClass
+          context->get_attribute(),         // attribute
+          0,                                // reserved
+          context->get_symbol_modifier(),   // symbol modifier
+          0,                                // dim
+          arg_name_offset,                  // s_name
+          data_type,                        // data_type
+          context->get_alignment(),         // alignment
+          0,                                // d_init = 0 for arg
+          0                                 // reserved
           };
           // append the DirectiveSymbol to .directive section.
           context->append_directive_symbol(&sym_decl);
@@ -1704,16 +1710,16 @@ int FunctionDefinition(unsigned int first_token,
       BrigDirectiveFunction bdf = {
       40,                      // size
       BrigEDirectiveFunction,  // kind
-      context->get_code_offset(),
-      0,
-      0,
+      context->get_code_offset(),   // c_code
+      0,  // name
+      0,  // in param count
       bdf_offset+40,          // d_firstScopedDirective
-      0,
+      0,  // operation count
       bdf_offset+40,          // d_nextDirective
-      BrigNone,
-      0,
-      0,
-      0,
+      context->get_attribute(),  // attribute
+      context->get_fbar(),   // fbar count
+      0,    // out param count
+      0     // d_firstInParam
       };
 
       context->append_directive(&bdf);
