@@ -3,7 +3,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "lexer.h"
 #include "tokens.h"
 #include "lexer_wrapper.h"
 
@@ -14,1442 +13,1443 @@ extern double double_val;
 namespace hsa {
 namespace brig {
 // ------------------ BASIC LEXER TESTS -----------------
-TEST(LexTest, Bug2) {
+TEST(LexTest, Bug2_DecIntegerConstant) {
   std::string input("12345");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(12345, int_val);
 }
 
-TEST(LexTest, Bug3) {
+TEST(LexTest, Bug3_OctIntegerConstant) {
   std::string input("030");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(24, int_val);
 }
 
-TEST(LexTest, Bug4) {
+TEST(LexTest, Bug4_CRegister) {
   std::string input("$c7");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_CREGISTER, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_CREGISTER, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug5) {
+TEST(LexTest, Bug5_DRegister) {
   std::string input("$d7");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_DREGISTER, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_DREGISTER, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug6) {
+TEST(LexTest, Bug6_SRegister) {
   std::string input("$s15");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_SREGISTER, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug7) {
+TEST(LexTest, Bug7_QRegister) {
   std::string input("$q5");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_QREGISTER, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_QREGISTER, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug8) {
+TEST(LexTest, Bug8_Label) {
   std::string input("@Go_to_this");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_LABEL, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_LABEL, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug9) {
+TEST(LexTest, Bug9_Comment) {
   std::string input("/* this is a comment */");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_COMMENT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_COMMENT, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug10) {
+TEST(LexTest, Bug10_Comment) {
   std::string input("//this is an inline comment\n");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_COMMENT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_COMMENT, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug11) {
+TEST(LexTest, Bug11_HexIntegerConstant) {
   std::string input("0x11");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(17, int_val);
 }
 
-TEST(LexTest, Bug12) {
+TEST(LexTest, Bug12_DecSingleConstant) {
   std::string input("0.5e3f");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_SINGLE_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(0.5e3f, float_val);
 }
 
-TEST(LexTest, Bug17) {
+TEST(LexTest, Bug17_LocalId) {
   std::string input("%Test_id_123");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_LOCAL_IDENTIFIER, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_LOCAL_IDENTIFIER, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug18) {
+TEST(LexTest, Bug18_GlobalId) {
   std::string input("&Test_global_id_123");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_GLOBAL_IDENTIFIER, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_GLOBAL_IDENTIFIER, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug19) {
+TEST(LexTest, Bug19_String) {
   std::string input("\" This is a string\"");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_STRING, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_STRING, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug20) {
+TEST(LexTest, Bug20_TokenProperty) {
   std::string input("snorm_int8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_PROPERTY, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_PROPERTY, lexer->get_next_token());
 
   input.assign("unorm_int16");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_PROPERTY, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_PROPERTY, lexer->get_next_token());
 
   input.assign("rx");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_PROPERTY, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_PROPERTY, lexer->get_next_token());
 
   input.assign("intensity");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_PROPERTY, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_PROPERTY, lexer->get_next_token());
 
   input.assign("wrap");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_PROPERTY, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_PROPERTY, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug21) {
+TEST(LexTest, Bug21_TokenWavesize) {
   std::string input("WAVESIZE");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_WAVESIZE, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_WAVESIZE, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug22) {          // common keywords
+TEST(LexTest, Bug22_CommonKeywords) {          // common keywords
   std::string input("workgroupid");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WORKGROUPID, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(WORKGROUPID, lexer->get_next_token());
 
   input.assign("version");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(VERSION, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(VERSION, lexer->get_next_token());
 
   input.assign("global");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(GLOBAL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(GLOBAL, lexer->get_next_token());
 
   input.assign("_Samp");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SAMP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SAMP, lexer->get_next_token());
 
   input.assign("_RWImg");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_RWIMG, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_RWIMG, lexer->get_next_token());
 
   input.assign("_ROImg");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_ROIMG, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_ROIMG, lexer->get_next_token());
 
   input.assign("align");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ALIGN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ALIGN, lexer->get_next_token());
 
   input.assign("file");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_FILE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_FILE, lexer->get_next_token());
 
   input.assign("arg");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ARG, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ARG, lexer->get_next_token());
 
   input.assign("kernarg");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(KERNARG, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(KERNARG, lexer->get_next_token());
 
   input.assign("function");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FUNCTION, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FUNCTION, lexer->get_next_token());
 
   input.assign(":fbar");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_FBAR, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_FBAR, lexer->get_next_token());
 
   input.assign("signature");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SIGNATURE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SIGNATURE, lexer->get_next_token());
 
   input.assign("block");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BLOCK, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BLOCK, lexer->get_next_token());
 
   input.assign("endblock");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ENDBLOCK, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ENDBLOCK, lexer->get_next_token());
 
   input.assign("blocknumeric");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BLOCKNUMERIC, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BLOCKNUMERIC, lexer->get_next_token());
 
   input.assign("blockstring");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BLOCKSTRING, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BLOCKSTRING, lexer->get_next_token());
 
   input.assign("kernel");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(KERNEL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(KERNEL, lexer->get_next_token());
 
   input.assign("pragma");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(PRAGMA, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(PRAGMA, lexer->get_next_token());
 
   input.assign("labeltargets");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LABELTARGETS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LABELTARGETS, lexer->get_next_token());
 
   input.assign("extension");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(EXTENSION, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(EXTENSION, lexer->get_next_token());
 
   input.assign("extern");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(EXTERN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(EXTERN, lexer->get_next_token());
 
   input.assign("static");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(STATIC, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(STATIC, lexer->get_next_token());
 
   input.assign("const");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(CONST, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(CONST, lexer->get_next_token());
 
   input.assign("private");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(PRIVATE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(PRIVATE, lexer->get_next_token());
 
   input.assign("spill");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SPILL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SPILL, lexer->get_next_token());
 
   input.assign("group");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(GROUP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(GROUP, lexer->get_next_token());
 
   input.assign("readonly");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(READONLY, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(READONLY, lexer->get_next_token());
 
   input.assign("loc");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LOC, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LOC, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug23) {
+TEST(LexTest, Bug23_HexSingleConstant) {
   std::string input("0x1.0p0f");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_SINGLE_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(1.0f, float_val);
 }
 
-TEST(LexTest, Bug24) {
+TEST(LexTest, Bug24_IEEESingleConstant) {
   std::string input("0f3F800000");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_SINGLE_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(1.0f, float_val);
 }
 
-TEST(LexTest, Bug25) {          // addressSpaceIdentifier keywords
+TEST(LexTest, Bug25_AddressSpaceId) {
+  // addressSpaceIdentifier keywords
   std::string input("_readonly");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_READONLY, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_READONLY, lexer->get_next_token());
 
   input.assign("_kernarg");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_KERNARG, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_KERNARG, lexer->get_next_token());
 
   input.assign("_global");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_GLOBAL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_GLOBAL, lexer->get_next_token());
 
   input.assign("_private");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_PRIVATE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_PRIVATE, lexer->get_next_token());
 
   input.assign("_arg");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_ARG, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_ARG, lexer->get_next_token());
 
   input.assign("_group");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_GROUP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_GROUP, lexer->get_next_token());
 
   input.assign("_spill");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SPILL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SPILL, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug26) {
+TEST(LexTest, Bug26_DecDoubleConstant) {
   std::string input("0.5e3l");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(0.5e3, double_val);
 }
 
-TEST(LexTest, Bug27) {              // keywords _v2 and _v4
+TEST(LexTest, Bug27_VectorKeywords) {              // keywords _v2 and _v4
   std::string input("_v2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_V2, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_V2, lexer->get_next_token());
 
   input.assign("_v4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_V4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_V4, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug28) {
+TEST(LexTest, Bug28_HexDoubleConstant) {
   std::string input("0x1.0l");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(1.0, double_val);
 }
 
-TEST(LexTest, Bug29) {
+TEST(LexTest, Bug29_IEEEDoubleConstant) {
   std::string input("0d3FF0000000000000");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(1.0, double_val);
 }
 
 // keywords format, order, coord, filter, boundaryU, boundaryV, boundaryW
-TEST(LexTest, Bug30) {
+TEST(LexTest, Bug30_CommonKeywords2) {
   std::string input("format");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FORMAT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(FORMAT, lexer->get_next_token());
 
   input.assign("order");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ORDER, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ORDER, lexer->get_next_token());
 
   input.assign("coord");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(COORD, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(COORD, lexer->get_next_token());
 
   input.assign("filter");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FILTER, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FILTER, lexer->get_next_token());
 
   input.assign("boundaryU");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BOUNDARYU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BOUNDARYU, lexer->get_next_token());
 
   input.assign("boundaryV");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BOUNDARYV, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BOUNDARYV, lexer->get_next_token());
 
   input.assign("boundaryW");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BOUNDARYW, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BOUNDARYW, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug33) {              // control keywords
+TEST(LexTest, Bug33_ControlKeywords) {              // control keywords
   std::string input("itemsperworkgroup");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ITEMS_PER_WORKGROUP, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(ITEMS_PER_WORKGROUP, lexer->get_next_token());
 
   input.assign("workgroupspercu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WORKGROUPS_PER_CU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(WORKGROUPS_PER_CU, lexer->get_next_token());
 
   input.assign("memopt_on");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MEMOPT_ON, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MEMOPT_ON, lexer->get_next_token());
 
   input.assign("memopt_off");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MEMOPT_OFF, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MEMOPT_OFF, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug34) {              // punctuations
+TEST(LexTest, Bug34_Puctuations) {              // punctuations
   std::string input("+");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('+', yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ('+', lexer->get_next_token());
 
   input.assign("-");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('-', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ('-', lexer->get_next_token());
 
   input.assign("=");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('=', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ('=', lexer->get_next_token());
 
   input.assign("<");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('<', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ('<', lexer->get_next_token());
 
 
   input.assign(">");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('>', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ('>', lexer->get_next_token());
 
   input.assign("[");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('[', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ('[', lexer->get_next_token());
 
   input.assign("]");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(']', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(']', lexer->get_next_token());
 
   input.assign("{");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('{', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ('{', lexer->get_next_token());
 
   input.assign("}");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('}', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ('}', lexer->get_next_token());
 
   input.assign("(");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ('(', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ('(', lexer->get_next_token());
 
   input.assign(")");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(')', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(')', lexer->get_next_token());
 
   input.assign(":");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(':', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(':', lexer->get_next_token());
 
   input.assign(";");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(';', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(';', lexer->get_next_token());
 
   input.assign(",");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(',', yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(',', lexer->get_next_token());
 }
 
-TEST(LexTest, Bug37) {              // opcodes
+TEST(LexTest, Bug37_Opcodes) {              // opcodes
   std::string input("fbar_initSizeWg");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FBAR_INITSIZEWG, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(FBAR_INITSIZEWG, lexer->get_next_token());
 
   input.assign("fbar_wait");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FBAR_WAIT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FBAR_WAIT, lexer->get_next_token());
 
   input.assign("fbar_arrive");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FBAR_ARRIVE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FBAR_ARRIVE, lexer->get_next_token());
 
   input.assign("fbar_skip");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FBAR_SKIP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FBAR_SKIP, lexer->get_next_token());
 
   input.assign("fbar_release");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FBAR_RELEASE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FBAR_RELEASE, lexer->get_next_token());
 
   input.assign("countup");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(COUNTUP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(COUNTUP, lexer->get_next_token());
 
   input.assign("laneid");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LANEID, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LANEID, lexer->get_next_token());
 
   input.assign("dynwaveid");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(DYNWAVEID, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(DYNWAVEID, lexer->get_next_token());
 
   input.assign("maxdynwaveid");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MAXDYNWAVEID, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MAXDYNWAVEID, lexer->get_next_token());
 
   input.assign("dispatchid");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(DISPATCHID, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(DISPATCHID, lexer->get_next_token());
 
   input.assign("cu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(CU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(CU, lexer->get_next_token());
 
   input.assign("workdim");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WORKDIM, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(WORKDIM, lexer->get_next_token());
 
   input.assign("workitemid_flat");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WORKITEMID_FLAT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(WORKITEMID_FLAT, lexer->get_next_token());
 
   input.assign("workitemaid_flat");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WORKITEMAID_FLAT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(WORKITEMAID_FLAT, lexer->get_next_token());
 
   input.assign("debugtrap");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(DEBUGTRAP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(DEBUGTRAP, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug38) {
+TEST(LexTest, Bug38_Instruction2Opcode) {
   std::string input("abs");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ABS, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(ABS, lexer->get_next_token());
 
   input.assign("neg");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(NEG, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(NEG, lexer->get_next_token());
 
   input.assign("not");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(NOT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(NOT, lexer->get_next_token());
 
   input.assign("popcount");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(POPCOUNT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(POPCOUNT, lexer->get_next_token());
 
   input.assign("firstbit");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FIRSTBIT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FIRSTBIT, lexer->get_next_token());
 
   input.assign("lastbit");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LASTBIT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LASTBIT, lexer->get_next_token());
 
   input.assign("bitrev");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BITREV, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BITREV, lexer->get_next_token());
 
   input.assign("movs_lo");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MOVS_LO, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MOVS_LO, lexer->get_next_token());
 
   input.assign("movs_hi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MOVS_HI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MOVS_HI, lexer->get_next_token());
 
   input.assign("fbar_initSize");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FBAR_INITSIZE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FBAR_INITSIZE, lexer->get_next_token());
 
   input.assign("fbar_releaseCF");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FBAR_RELEASECF, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FBAR_RELEASECF, lexer->get_next_token());
 
   input.assign("count");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(COUNT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(COUNT, lexer->get_next_token());
 
   input.assign("mask");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MASK, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MASK, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug39) {
+TEST(LexTest, Bug39_Instruction2OpcodeFTZ) {
   std::string input("sqrt");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SQRT, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(SQRT, lexer->get_next_token());
 
   input.assign("fract");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FRACT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FRACT, lexer->get_next_token());
 
   input.assign("fcos");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FCOS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FCOS, lexer->get_next_token());
 
   input.assign("fsin");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FSIN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FSIN, lexer->get_next_token());
 
   input.assign("flog2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FLOG2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FLOG2, lexer->get_next_token());
 
   input.assign("fexp2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FEXP2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FEXP2, lexer->get_next_token());
 
   input.assign("fsqrt");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FSQRT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FSQRT, lexer->get_next_token());
 
   input.assign("frsqrt");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FRSQRT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FRSQRT, lexer->get_next_token());
 
   input.assign("frcp");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FRCP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FRCP, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug40) {
+TEST(LexTest, Bug40_Instruction2OpcodeNoDT) {
   std::string input("unpack3");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(UNPACK3, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(UNPACK3, lexer->get_next_token());
 
   input.assign("unpack2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(UNPACK2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(UNPACK2, lexer->get_next_token());
 
   input.assign("unpack1");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(UNPACK1, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(UNPACK1, lexer->get_next_token());
 
   input.assign("unpack0");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(UNPACK0, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(UNPACK0, lexer->get_next_token());
 
 
   input.assign("alloca");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ALLOCA, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ALLOCA, lexer->get_next_token());
 
   input.assign("workitemid");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WORKITEMID, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(WORKITEMID, lexer->get_next_token());
 
   input.assign("workitemaid");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WORKITEMAID, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(WORKITEMAID, lexer->get_next_token());
 
   input.assign("workgroupsize");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WORKGROUPSIZE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(WORKGROUPSIZE, lexer->get_next_token());
 
   input.assign("NDRangesize");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(NDRANGESIZE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(NDRANGESIZE, lexer->get_next_token());
 
   input.assign("NDRangegroups");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(NDRANGEGROUPS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(NDRANGEGROUPS, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug41) {
+TEST(LexTest, Bug41_Instruction3Opcode) {
   std::string input("add");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ADD, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(ADD, lexer->get_next_token());
 
   input.assign("carry");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(CARRY, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(CARRY, lexer->get_next_token());
 
   input.assign("borrow");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BORROW, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BORROW, lexer->get_next_token());
 
   input.assign("div");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(DIV, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(DIV, lexer->get_next_token());
 
   input.assign("rem");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(REM, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(REM, lexer->get_next_token());
 
   input.assign("sub");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SUB, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SUB, lexer->get_next_token());
 
   input.assign("shl");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SHL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SHL, lexer->get_next_token());
 
   input.assign("shr");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SHR, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SHR, lexer->get_next_token());
 
   input.assign("and");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(AND, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(AND, lexer->get_next_token());
 
   input.assign("xor");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(XOR, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(XOR, lexer->get_next_token());
 
   input.assign("or");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(OR, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(OR, lexer->get_next_token());
 
   input.assign("unpacklo");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(UNPACKLO, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(UNPACKLO, lexer->get_next_token());
 
   input.assign("unpackhi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(UNPACKHI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(UNPACKHI, lexer->get_next_token());
 
   input.assign("movd_lo");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MOVD_LO, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MOVD_LO, lexer->get_next_token());
 
   input.assign("movd_hi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MOVD_HI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MOVD_HI, lexer->get_next_token());
 
   input.assign("copysign");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(COPYSIGN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(COPYSIGN, lexer->get_next_token());
 
   input.assign("class");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(CLASS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(CLASS, lexer->get_next_token());
 
   input.assign("send");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SEND, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SEND, lexer->get_next_token());
 
   input.assign("receive");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(RECEIVE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(RECEIVE, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug42) {
+TEST(LexTest, Bug42_Instruction3OpcodeFTZ_Instruction4Opcode) {
   std::string input("max");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MAX, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(MAX, lexer->get_next_token());
 
   input.assign("min");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MIN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MIN, lexer->get_next_token());
 
   input.assign("mad");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MAD, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MAD, lexer->get_next_token());
 
   input.assign("extract");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(EXTRACT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(EXTRACT, lexer->get_next_token());
 
   input.assign("insert");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(INSERT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(INSERT, lexer->get_next_token());
 
   input.assign("shuffle");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SHUFFLE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SHUFFLE, lexer->get_next_token());
 
   input.assign("cmov");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(CMOV, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(CMOV, lexer->get_next_token());
 
   input.assign("fma");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FMA, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FMA, lexer->get_next_token());
 
   input.assign("bitalign");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BITALIGN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BITALIGN, lexer->get_next_token());
 
   input.assign("bytealign");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BYTEALIGN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BYTEALIGN, lexer->get_next_token());
 
   input.assign("lerp");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LERP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LERP, lexer->get_next_token());
 
   input.assign("sad");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SAD, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SAD, lexer->get_next_token());
 
   input.assign("sad2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SAD2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SAD2, lexer->get_next_token());
 
   input.assign("sad4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SAD4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SAD4, lexer->get_next_token());
 
   input.assign("sad4hi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SAD4HI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SAD4HI, lexer->get_next_token());
 
   input.assign("bitselect");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BITSELECT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BITSELECT, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug43) {              // AtomicOperationId
+TEST(LexTest, Bug43_AtomicOperationId) {              // AtomicOperationId
   std::string input("_and");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_AND_, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_AND_, lexer->get_next_token());
 
   input.assign("_or");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_OR_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_OR_, lexer->get_next_token());
 
   input.assign("_xor");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_XOR_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_XOR_, lexer->get_next_token());
 
   input.assign("_exch");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_EXCH_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_EXCH_, lexer->get_next_token());
 
   input.assign("_add");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_ADD_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_ADD_, lexer->get_next_token());
 
   input.assign("_sub");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SUB_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SUB_, lexer->get_next_token());
 
   input.assign("_inc");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_INC_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_INC_, lexer->get_next_token());
 
   input.assign("_dec");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_DEC_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_DEC_, lexer->get_next_token());
 
   input.assign("_max");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_MAX_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_MAX_, lexer->get_next_token());
 
   input.assign("_min");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_MIN_, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_MIN_, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug44) {              // Comparison
+TEST(LexTest, Bug44_ComparisonId) {              // Comparison
   std::string input("_eq");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_EQ, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_EQ, lexer->get_next_token());
 
   input.assign("_ne");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_NE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_NE, lexer->get_next_token());
 
   input.assign("_lt");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_LT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_LT, lexer->get_next_token());
 
   input.assign("_le");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_LE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_LE, lexer->get_next_token());
 
   input.assign("_gt");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_GT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_GT, lexer->get_next_token());
 
   input.assign("_ge");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_GE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_GE, lexer->get_next_token());
 
   input.assign("_equ");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_EQU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_EQU, lexer->get_next_token());
 
   input.assign("_neu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_NEU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_NEU, lexer->get_next_token());
 
   input.assign("_ltu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_LTU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_LTU, lexer->get_next_token());
 
   input.assign("_leu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_LEU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_LEU, lexer->get_next_token());
 
   input.assign("_gtu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_GTU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_GTU, lexer->get_next_token());
 
   input.assign("_geu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_GEU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_GEU, lexer->get_next_token());
 
   input.assign("_num");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_NUM, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_NUM, lexer->get_next_token());
 
   input.assign("_nan");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_NAN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_NAN, lexer->get_next_token());
 
   input.assign("_seq");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SEQ, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SEQ, lexer->get_next_token());
 
   input.assign("_sne");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SNE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SNE, lexer->get_next_token());
 
   input.assign("_slt");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SLT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SLT, lexer->get_next_token());
 
   input.assign("_sle");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SLE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SLE, lexer->get_next_token());
 
   input.assign("_sgt");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SGT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SGT, lexer->get_next_token());
 
   input.assign("_sge");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SGE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SGE, lexer->get_next_token());
 
   input.assign("_snum");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SNUM, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SNUM, lexer->get_next_token());
 
   input.assign("_snan");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SNAN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SNAN, lexer->get_next_token());
 
   input.assign("_sequ");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SEQU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SEQU, lexer->get_next_token());
 
   input.assign("_sneu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SNEU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SNEU, lexer->get_next_token());
 
   input.assign("_sltu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SLTU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SLTU, lexer->get_next_token());
 
   input.assign("_sleu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SLEU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SLEU, lexer->get_next_token());
 
   input.assign("_sgtu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SGTU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SGTU, lexer->get_next_token());
 
   input.assign("_sgeu");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SGEU, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SGEU, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug45) {              // keywords for queryOp
+TEST(LexTest, Bug45_QueryOperation) {              // keywords for queryOp
   std::string input("query_order");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(QUERY_ORDER, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(QUERY_ORDER, lexer->get_next_token());
 
   input.assign("query_data");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(QUERY_DATA, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(QUERY_DATA, lexer->get_next_token());
 
   input.assign("query_array");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(QUERY_ARRAY, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(QUERY_ARRAY, lexer->get_next_token());
 
   input.assign("query_width");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(QUERY_WIDTH, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(QUERY_WIDTH, lexer->get_next_token());
 
   input.assign("query_depth");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(QUERY_DEPTH, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(QUERY_DEPTH, lexer->get_next_token());
 
   input.assign("query_height");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(QUERY_HEIGHT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(QUERY_HEIGHT, lexer->get_next_token());
 
   input.assign("query_normalized");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(QUERY_NORMALIZED, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(QUERY_NORMALIZED, lexer->get_next_token());
 
   input.assign("query_filtering");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(QUERY_FILTERING, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(QUERY_FILTERING, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug46) {              // Rounding modes
+TEST(LexTest, Bug46_RoundingModes) {              // Rounding modes
   std::string input("_upi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_UPI, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_UPI, lexer->get_next_token());
 
   input.assign("_downi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_DOWNI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_DOWNI, lexer->get_next_token());
 
   input.assign("_zeroi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_ZEROI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_ZEROI, lexer->get_next_token());
 
   input.assign("_neari");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_NEARI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_NEARI, lexer->get_next_token());
 
   input.assign("_up");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_UP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_UP, lexer->get_next_token());
 
   input.assign("_down");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_DOWN, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_DOWN, lexer->get_next_token());
 
   input.assign("_zero");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_ZERO, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_ZERO, lexer->get_next_token());
 
   input.assign("_near");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_NEAR, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_NEAR, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug47) {              // packing modes
+TEST(LexTest, Bug47_PackingModes) {              // packing modes
   std::string input("_pp");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_PP, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_PP, lexer->get_next_token());
 
   input.assign("_ps");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_PS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_PS, lexer->get_next_token());
 
   input.assign("_sp");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SP, lexer->get_next_token());
 
   input.assign("_ss");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SS, lexer->get_next_token());
 
   input.assign("_s");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(__S, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(__S, lexer->get_next_token());
 
   input.assign("_p");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(__P, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(__P, lexer->get_next_token());
 
   input.assign("_pp_sat");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_PP_SAT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_PP_SAT, lexer->get_next_token());
 
   input.assign("_ps_sat");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_PS_SAT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_PS_SAT, lexer->get_next_token());
 
   input.assign("_sp_sat");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SP_SAT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SP_SAT, lexer->get_next_token());
 
   input.assign("_ss_sat");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SS_SAT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SS_SAT, lexer->get_next_token());
 
   input.assign("_p_sat");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_P_SAT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_P_SAT, lexer->get_next_token());
 
   input.assign("_s_sat");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S_SAT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S_SAT, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug48) {              // keywords for geometry ID
+TEST(LexTest, Bug48_GeometryId) {              // keywords for geometry ID
   std::string input("_1d");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_1D, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_1D, lexer->get_next_token());
 
   input.assign("_2d");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_2D, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_2D, lexer->get_next_token());
 
   input.assign("_3d");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_3D, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_3D, lexer->get_next_token());
 
   input.assign("_1db");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_1DB, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_1DB, lexer->get_next_token());
 
   input.assign("_1da");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_1DA, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_1DA, lexer->get_next_token());
 
   input.assign("_2da");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_2DA, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_2DA, lexer->get_next_token());
 
   input.assign("rd_image");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(RD_IMAGE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(RD_IMAGE, lexer->get_next_token());
 
   input.assign("ld_image");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LD_IMAGE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LD_IMAGE, lexer->get_next_token());
 
   input.assign("st_image");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ST_IMAGE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ST_IMAGE, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug49) {              // targets
+TEST(LexTest, Bug49_Targets) {              // targets
   std::string input("$small");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SMALL, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_SMALL, lexer->get_next_token());
 
   input.assign("$large");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_LARGE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_LARGE, lexer->get_next_token());
 
   input.assign("$full");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_FULL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_FULL, lexer->get_next_token());
 
   input.assign("$reduced");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_REDUCED, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_REDUCED, lexer->get_next_token());
 
   input.assign("$sftz");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_SFTZ, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_SFTZ, lexer->get_next_token());
 
   input.assign("$nosftz");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_NOSFTZ, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_NOSFTZ, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug50) {
+TEST(LexTest, Bug50_WidthDepthHeight_Keywords) {
   std::string input("width");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(WIDTH, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(WIDTH, lexer->get_next_token());
 
   input.assign("height");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(HEIGHT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(HEIGHT, lexer->get_next_token());
 
   input.assign("depth");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(DEPTH, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(DEPTH, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug51) {              // keywords for Atom Modifiers
+TEST(LexTest, Bug51_AtomModifier) {              // keywords for Atom Modifiers
   std::string input("_ar");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_AR, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_AR, lexer->get_next_token());
 
   input.assign("_region");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_REGION, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_REGION, lexer->get_next_token());
 
   input.assign("atomic_cas");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ATOMIC_CAS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ATOMIC_CAS, lexer->get_next_token());
 
   input.assign("atomic");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ATOMIC, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ATOMIC, lexer->get_next_token());
 
   input.assign("atomicNoRet");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ATOMICNORET, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ATOMICNORET, lexer->get_next_token());
 
   input.assign("atomicNoRet_cas");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ATOMICNORET_CAS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ATOMICNORET_CAS, lexer->get_next_token());
 
   input.assign("atomic_image");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ATOMIC_IMAGE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ATOMIC_IMAGE, lexer->get_next_token());
 
   input.assign("atomicNoRet_image");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ATOMICNORET_IMAGE, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ATOMICNORET_IMAGE, lexer->get_next_token());
 
   input.assign("cvt");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(CVT, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(CVT, lexer->get_next_token());
 
   input.assign("_dep");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_DEP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_DEP, lexer->get_next_token());
 
   input.assign("_equiv");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_EQUIV, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_EQUIV, lexer->get_next_token());
 
   input.assign("_acq");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_ACQ, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_ACQ, lexer->get_next_token());
 
   input.assign("_rel");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_REL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_REL, lexer->get_next_token());
 
   input.assign("ld");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LD, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LD, lexer->get_next_token());
 
   input.assign("sync");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SYNC, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SYNC, lexer->get_next_token());
 
   input.assign("barrier");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(BARRIER, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(BARRIER, lexer->get_next_token());
 
   input.assign("segmentp");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SEGMENTP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SEGMENTP, lexer->get_next_token());
 
   input.assign("ftos");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(FTOS, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(FTOS, lexer->get_next_token());
 
   input.assign("stof");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(STOF, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(STOF, lexer->get_next_token());
 
   input.assign("mov");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MOV, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MOV, lexer->get_next_token());
 
   input.assign("lad");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LAD, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LAD, lexer->get_next_token());
 
   input.assign("ldc");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(LDC, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(LDC, lexer->get_next_token());
 
   input.assign("ret");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(RET, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(RET, lexer->get_next_token());
 
   input.assign("packedcmp");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(PACKEDCMP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(PACKEDCMP, lexer->get_next_token());
 
   input.assign("cmp");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(CMP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(CMP, lexer->get_next_token());
 
   input.assign("st");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(ST, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(ST, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug52) {              // keywords for mul
+TEST(LexTest, Bug52_Mul) {              // keywords for mul
   std::string input("mul");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MUL, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(MUL, lexer->get_next_token());
 
   input.assign("mul_hi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MUL_HI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MUL_HI, lexer->get_next_token());
 
   input.assign("mul24_hi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MUL24_HI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MUL24_HI, lexer->get_next_token());
 
   input.assign("mul24");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MUL24, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MUL24, lexer->get_next_token());
 
   input.assign("mad24");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MAD24, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MAD24, lexer->get_next_token());
 
   input.assign("mad24_hi");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(MAD24_HI, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(MAD24_HI, lexer->get_next_token());
 
   input.assign("f2u4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(F2U4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(F2U4, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug53) {          // dataTypeId
+TEST(LexTest, Bug53_DataTypes) {          // dataTypeId
   std::string input("_u8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U8, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_U8, lexer->get_next_token());
 
   input.assign("_u16");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U16, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U16, lexer->get_next_token());
 
   input.assign("_u32");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U32, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U32, lexer->get_next_token());
 
   input.assign("_u64");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U64, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U64, lexer->get_next_token());
 
   input.assign("_s8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S8, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S8, lexer->get_next_token());
 
   input.assign("_s16");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S16, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S16, lexer->get_next_token());
 
   input.assign("_s32");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S32, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S32, lexer->get_next_token());
 
   input.assign("_s64");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S64, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S64, lexer->get_next_token());
 
   input.assign("_f16");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F16, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F16, lexer->get_next_token());
 
   input.assign("_f32");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F32, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F32, lexer->get_next_token());
 
   input.assign("_f64");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F64, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F64, lexer->get_next_token());
 
   input.assign("_b1");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B1, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B1, lexer->get_next_token());
 
   input.assign("_b8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B8, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B8, lexer->get_next_token());
 
   input.assign("_b16");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B16, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B16, lexer->get_next_token());
 
   input.assign("_b32");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B32, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B32, lexer->get_next_token());
 
   input.assign("_b64");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B64, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B64, lexer->get_next_token());
 
   input.assign("_b128");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B128, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B128, lexer->get_next_token());
 
   input.assign("_b32");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B32, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B32, lexer->get_next_token());
 
   input.assign("_b8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B8, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B8, lexer->get_next_token());
 
   input.assign("_b16");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B16, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B16, lexer->get_next_token());
 
   input.assign("_b32");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_B32, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_B32, lexer->get_next_token());
 
   input.assign("_u8x4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U8X4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U8X4, lexer->get_next_token());
 
   input.assign("_s8x4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S8X4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S8X4, lexer->get_next_token());
 
   input.assign("_u16x2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U16X2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U16X2, lexer->get_next_token());
 
   input.assign("_s16x2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S16X2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S16X2, lexer->get_next_token());
 
   input.assign("_f16x2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F16X2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F16X2, lexer->get_next_token());
 
   input.assign("_f32x2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F32X2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F32X2, lexer->get_next_token());
 
   input.assign("_u8x8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U8X8, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U8X8, lexer->get_next_token());
 
   input.assign("_s8x8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S8X8, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S8X8, lexer->get_next_token());
 
   input.assign("_u16x4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U16X4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U16X4, lexer->get_next_token());
 
   input.assign("_s16x4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S16X4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S16X4, lexer->get_next_token());
 
   input.assign("_f16x4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F16X4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F16X4, lexer->get_next_token());
 
   input.assign("_u8x16");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U8X16, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U8X16, lexer->get_next_token());
 
   input.assign("_s8x16");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S8X16, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S8X16, lexer->get_next_token());
 
   input.assign("_u16x8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U16X8, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U16X8, lexer->get_next_token());
 
   input.assign("_s16x8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S16X8, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S16X8, lexer->get_next_token());
 
   input.assign("_f16x8");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F16X8, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F16X8, lexer->get_next_token());
 
   input.assign("_f32x4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F32X4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F32X4, lexer->get_next_token());
 
   input.assign("_s32x4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S32X4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S32X4, lexer->get_next_token());
 
   input.assign("_u32x4");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U32X4, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U32X4, lexer->get_next_token());
 
   input.assign("_f64x2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_F64X2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_F64X2, lexer->get_next_token());
 
   input.assign("_s64x2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_S64X2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_S64X2, lexer->get_next_token());
 
   input.assign("_u64x2");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_U64X2, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(_U64X2, lexer->get_next_token());
 }
 
-TEST(LexTest, Bug54) {
+TEST(LexTest, Bug54_SomeKeywords) {
   std::string input("_ftz");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(_FTZ, yylex());
+  Lexer* lexer = new Lexer(input);
+  EXPECT_EQ(_FTZ, lexer->get_next_token());
 
   input.assign("nop");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(NOP, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(NOP, lexer->get_next_token());
 
   input.assign("clock");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(CLOCK, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(CLOCK, lexer->get_next_token());
 
   input.assign("syscall");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(SYSCALL, yylex());
+  lexer->set_source_string(input);
+  EXPECT_EQ(SYSCALL, lexer->get_next_token());
 }
 
 // ------------------ LEXER WRAPPER TESTS -----------------

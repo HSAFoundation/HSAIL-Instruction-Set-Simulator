@@ -23,37 +23,41 @@ class Context {
       INVALID_OFFSET
     };
 
-    Context(void) {
-      cbuf = new Buffer();
-      dbuf = new Buffer();
-      obuf = new Buffer();
-      sbuf = new StringBuffer();
-      temporary_buf = new Buffer();
-      err_reporter = NULL;
-      clear_context();
-      yycolno = 0;
-      yylineno = 1;
+    /* Constructors */
+    Context();
+    explicit Context(ErrorReporterInterface* error_reporter);
+
+    /* Error reporter set/get */
+    void set_error_reporter(ErrorReporterInterface* error_reporter);
+    ErrorReporterInterface* get_error_reporter(void) const;
+
+    /* string buffer manipulators */
+    // add a new symbol to .strings section.
+    // return the offset to that symbol
+    int add_symbol(const std::string& s);
+
+    // lookup offset to a symbol
+    // if symbol does not exist, return -1
+    int lookup_symbol(const std::string& s);
+
+    // get string at an index
+    std::string get_string(uint32_t index) {
+      return sbuf->at(index);
     }
 
-    explicit Context(ErrorReporterInterface* error_reporter) {
-      this->err_reporter = error_reporter;
-      cbuf = new Buffer();
-      dbuf = new Buffer();
-      obuf = new Buffer();
-      sbuf = new StringBuffer();
-      temporary_buf = new Buffer();
-      clear_context();
-
-      yycolno = 0;
-      yylineno = 1;
-    }
-
-    void set_error_reporter(ErrorReporterInterface* error_reporter) {
-      this->err_reporter = error_reporter;
-    }
-
-    ErrorReporterInterface* get_error_reporter(void) {
-      return this->err_reporter;
+    /* helper function to check alignment requirement of each structure */
+    template<class T>
+    static BrigAlignment alignment_check(T item) {
+      switch (item.kind) {
+        // directive
+        case BrigEDirectiveBlockNumeric:
+        case BrigEDirectiveInit:
+        // operand
+        case BrigEOperandImmed:
+          return BrigEAlignment_8;
+        default:
+          return BrigEAlignment_4;
+      }
     }
 
     /* code to append Brig structures to buffers */
@@ -92,9 +96,7 @@ class Context {
 
     // use to append a BrigDirectiveSymbol structs
     // (does not contain a .kind field ? )
-
-    template <class T>
-    void append_directive_symbol(const T* item) {
+    void append_directive_symbol(const BrigDirectiveSymbol* item) {
       uint32_t directive_offset = dbuf->size();
       dbuf->append(item);
     }
@@ -120,28 +122,6 @@ class Context {
     void append_temporary_struct(const T* item) {
       temporary_buf -> append(item);
     }
-
-    // add a new symbol to .strings section.
-    // return the offset to that symbol
-    int add_symbol(const std::string& s) {
-      // check if symbol exists
-      int offset = sbuf->lookup(s);
-      if (offset < 0) {
-        // symbol does not exist. Add new
-        offset = sbuf->size();  // current offset
-        sbuf->append(s);
-        return offset;
-      } else {
-      // symbol already exists in buffer
-        return offset;
-      }
-    };
-
-    // lookup offset to a symbol
-    // if symbol does not exist, return -1
-    int lookup_symbol(const std::string& s) {
-      return sbuf->lookup(s);
-    };
 
     /* code to get Brig structures from buffers */
     // get temporary structs from temporary buffer
@@ -212,297 +192,115 @@ class Context {
         return CONTEXT_OK;
     }
 
-    // get string at an index
-    std::string get_string(uint32_t index) {
-      return sbuf->at(index);
-    }
-  // get current offset
-    BrigcOffset32_t get_code_offset(void) const {
-      return cbuf->size();
-    }
-    BrigdOffset32_t get_directive_offset(void) const {
-      return dbuf->size();
-    }
-    BrigoOffset32_t get_operand_offset(void) const {
-      return obuf->size();
-    }
-    BrigsOffset32_t get_string_offset(void) const {
-      return sbuf->size();
-    }
-
-    uint32_t get_temporary_offset(void) const {
-      return temporary_buf->size();
-    }
-
+    /* Byte-level manipulators */
     // functions to get a sequence of values of a certain buffer
     // at a specific offset.
     context_error_t get_directive_bytes(unsigned char* value,
                                         uint32_t offset,
-                                        uint32_t nBytes) {
-      Buffer::error_t err = dbuf->get_bytes(value, offset, nBytes);
-
-      if (err == Buffer::INVALID_OFFSET)
-        return INVALID_OFFSET;
-      else if (err == Buffer::EMPTY_BUFFER)
-        return EMPTY_BUFFER;
-      else
-        return CONTEXT_OK;
-    }
+                                        uint32_t nBytes);
 
     context_error_t get_code_bytes(unsigned char* value,
                                    uint32_t offset,
-                                   uint32_t nBytes) {
-      Buffer::error_t err = cbuf->get_bytes(value, offset, nBytes);
-
-      if (err == Buffer::INVALID_OFFSET)
-        return INVALID_OFFSET;
-      else if (err == Buffer::EMPTY_BUFFER)
-        return EMPTY_BUFFER;
-      else
-        return CONTEXT_OK;
-    }
+                                   uint32_t nBytes);
 
     context_error_t get_operand_bytes(unsigned char* value,
                                       uint32_t offset,
-                                      uint32_t nBytes) {
-      Buffer::error_t err = obuf->get_bytes(value, offset, nBytes);
-
-      if (err == Buffer::INVALID_OFFSET)
-        return INVALID_OFFSET;
-      else if (err == Buffer::EMPTY_BUFFER)
-        return EMPTY_BUFFER;
-      else
-        return CONTEXT_OK;
-    }
-
+                                      uint32_t nBytes);
 
     // Modify a number of bytes of a buffer at a specific offset
     context_error_t update_directive_bytes(unsigned char* value,
                                            uint32_t offset,
-                                           uint32_t nBytes) {
-      Buffer::error_t err = dbuf->modify(value, offset, nBytes);
-
-      if (err == Buffer::SUCCESS)
-        return CONTEXT_OK;
-      else if (err == Buffer::INVALID_OFFSET)
-        return INVALID_OFFSET;
-    }
+                                           uint32_t nBytes);
 
     context_error_t update_code_bytes(unsigned char* value,
                                       uint32_t offset,
-                                      uint32_t nBytes) {
-      Buffer::error_t err = cbuf->modify(value, offset, nBytes);
-
-      if (err == Buffer::SUCCESS)
-        return CONTEXT_OK;
-      else if (err == Buffer::INVALID_OFFSET)
-        return INVALID_OFFSET;
-    }
+                                      uint32_t nBytes);
 
     context_error_t update_operand_bytes(unsigned char* value,
                                          uint32_t offset,
-                                         uint32_t nBytes) {
-      Buffer::error_t err = cbuf->modify(value, offset, nBytes);
-
-      if (err == Buffer::SUCCESS)
-        return CONTEXT_OK;
-      else if (err == Buffer::INVALID_OFFSET)
-        return INVALID_OFFSET;
-    }
-
-    /* helper function to check alignment requirement of each structure */
-    template<class T>
-    static BrigAlignment alignment_check(T item) {
-      switch (item.kind) {
-        // directive
-        case BrigEDirectiveBlockNumeric:
-        case BrigEDirectiveInit:
-        // operand
-        case BrigEOperandImmed:
-          return BrigEAlignment_8;
-        default:
-          return BrigEAlignment_4;
-      }
-    }
-
-    // clear buffer
-    void clear_code_buffer(void) {
-      cbuf->clear();
-    }
-
-    void clear_directive_buffer(void) {
-      dbuf->clear();
-    }
-
-    void clear_operand_buffer(void) {
-      obuf->clear();
-      // pad the first 8 bytes with 0
-      BrigDirectivePad bdp = {0, 0};
-      obuf->append(&bdp);
-      obuf->append(&bdp);
-    }
-
-    void clear_string_buffer(void) {
-      sbuf->clear();
-    }
-
-    void clear_temporary_buffer(void) {
-      temporary_buf->clear();
-    }
-
-    void clear_all_buffers(void) {
-      clear_code_buffer();
-      clear_directive_buffer();
-      clear_operand_buffer();
-      clear_string_buffer();
-      clear_temporary_buffer();      
-    }
-    void clear_context(void) {
-      clear_temporary_context();
-      clear_all_buffers();
-      func_map.clear();
-      operand_map.clear();
-      label_o_map.clear();
-      label_c_map.clear();
-      set_default_values();
-    }
-
-    void clear_temporary_context(void) {
-      clear_temporary_buffer();
-      set_default_values();
-    }
-
-    void set_default_values(void) {
-      machine = BrigESmall;
-      profile = BrigEFull;
-      ftz = BrigENosftz;
-      attribute = BrigNone;
-      fbar = 0;
-    }
+                                         uint32_t nBytes);
 
 
+    // clear buffers
+    void clear_code_buffer(void);
+    void clear_directive_buffer(void);
+    void clear_operand_buffer(void);
+    void clear_string_buffer(void);
+    void clear_temporary_buffer(void);
+    void clear_all_buffers(void);
+    void clear_context(void);
+    void clear_temporary_context(void);
+    void set_default_values(void);
+
+    /* Temporary Context Manipulators */
     // check context
-    uint16_t get_alignment() const {
-      return alignment;
-    }
-
-    BrigAttribute16_t get_attribute() const {
-      return attribute;
-    }
-
-    BrigAluModifier get_alu_modifier() const {
-      return aluModifier;
-    }
-
-    BrigSymbolModifier get_symbol_modifier() const {
-      return symModifier;
-    }
-    
-    BrigPacking16_t get_packing() const {
-      return packing;
-    }
-
-
-    BrigMachine16_t get_machine() const {
-      return machine;
-    }
-
-    BrigProfile16_t get_profile() const {
-      return profile;
-    }
-
-    BrigSftz16_t get_ftz() const {
-      return ftz;
-    }
-
-    int get_fbar() const {
-      return fbar;
-    }
-
-    BrigDataType16_t get_type() const {
-      return type;
-    }
-
-    BrigOpcode32_t get_opcode() const {
-      return opcode;
-    }
-
-    char get_operand_loc() const {
-      return operand_loc;
-    }
+    uint16_t get_alignment() const;
+    BrigAttribute16_t get_attribute() const;
+    BrigAluModifier get_alu_modifier() const;
+    BrigSymbolModifier get_symbol_modifier() const;
+    BrigPacking16_t get_packing() const;
+    BrigMachine16_t get_machine() const;
+    BrigProfile16_t get_profile() const;
+    BrigSftz16_t get_ftz() const;
+    int get_fbar() const;
+    BrigDataType16_t get_type() const;
+    BrigOpcode32_t get_opcode() const;
+    char get_operand_loc() const;
 
     // set context
-    void set_alu_modifier(BrigAluModifier modifier) {
-      this->aluModifier = modifier;
-    }
-
-    void set_symbol_modifier(BrigSymbolModifier modifier) {
-      this->symModifier = modifier;
-    };
-
-    void set_attribute(BrigAttribute16_t attrib) {
-      this->attribute = attrib;
-    }
-
-    void set_alignment(uint16_t align) {
-      this->alignment = align;
-    }
-
-
-    void set_machine(BrigMachine16_t machine) {
-      this->machine = machine;
-    }
-
-    void set_profile(BrigProfile16_t profile) {
-      this->profile = profile;
-    }
-
-    void set_ftz(BrigSftz16_t ftz) {
-      this->ftz = ftz;
-    }
-
-    void set_fbar(int fbar) {
-      this->fbar = fbar;
-    }
-
-    void set_type(BrigDataType16_t type) {
-      this->type = type;
-    }
-
-    void set_opcode(BrigOpcode32_t opcode) {
-      this->opcode = opcode;
-    }
-
-    void set_packing(BrigPacking16_t packing) {
-      this->packing = packing;
-    }
+    void set_alu_modifier(BrigAluModifier modifier);
+    void set_symbol_modifier(BrigSymbolModifier modifier);
+    void set_attribute(BrigAttribute16_t attrib);
+    void set_alignment(uint16_t align);
+    void set_machine(BrigMachine16_t machine);
+    void set_profile(BrigProfile16_t profile);
+    void set_ftz(BrigSftz16_t ftz);
+    void set_fbar(int fbar);
+    void set_type(BrigDataType16_t type);
+    void set_opcode(BrigOpcode32_t opcode);
+    void set_packing(BrigPacking16_t packing);
     // let context know the location of current operand
-    void set_operand_loc(char loc) {
-      this->operand_loc = loc;
-    }
+    void set_operand_loc(char loc);
 
-  public:
-    BrigoOffset32_t current_label_offset;
-    BrigcOffset32_t current_inst_offset;
-    BrigdOffset32_t current_bdf_offset;
-    bool arg_output;
+    // get current offset
+    BrigcOffset32_t get_code_offset(void) const {return cbuf->size();}
+    BrigdOffset32_t get_directive_offset(void) const {return dbuf->size();}
+    BrigoOffset32_t get_operand_offset(void) const {return obuf->size();}
+    BrigsOffset32_t get_string_offset(void) const {return sbuf->size();}
+    uint32_t get_temporary_offset(void) const {return temporary_buf->size();}
 
-    std::map<std::string, BrigdOffset32_t> func_map;
-    std::map<std::string, BrigoOffset32_t> operand_map;
-    std::map<std::string, BrigoOffset32_t> label_o_map;
+    BrigoOffset32_t get_current_label_offset(void) const;
+    void set_current_label_offset(BrigoOffset32_t offset);
+    // get current instruction offset
+    BrigcOffset32_t get_current_inst_offset(void) const;
+    void set_current_inst_offset(BrigcOffset32_t offset);
+    // get current BrigDirectiveFunction offset
+    BrigdOffset32_t get_current_bdf_offset(void) const;
+    void set_current_bdf_offset(BrigdOffset32_t offset);
+
+    bool is_arg_output(void) const {return arg_output;}
+    void set_arg_output(bool output) { this->arg_output = output; }
+
+    void insert_to_function_map(std::string key, uint32_t value);
+    int lookup_function_map(std::string key);
+
+    void insert_to_operand_map(std::string key, uint32_t value);
+    int lookup_operand_map(std::string key);
+
+    void insert_to_label_o_map(std::string key, uint32_t value);
+    int lookup_label_o_map(std::string key);
+
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
-    // label_o_map contains the info for OperandLabelRef,
-    // label_o_map contains the info for OperandLabelRef,
-    // label_d_map contains the label that needed in a instruction
-    int dim[3];  // to keep track of dimensions in declarations
 
   private:
+    /* Buffers */
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
     Buffer* obuf;  // operand buffer
     Buffer* temporary_buf;  // a buffer to put temporary structs
-    
     StringBuffer* sbuf;  // string buffer
+
+    /* Error reporter */
     ErrorReporterInterface* err_reporter;  // error reporter
 
     // context variables
@@ -518,6 +316,17 @@ class Context {
     BrigAluModifier aluModifier;
     BrigPacking16_t packing;
     char operand_loc;   // 1 -> 5
+
+    BrigoOffset32_t current_label_offset;
+    BrigcOffset32_t current_inst_offset;
+    BrigdOffset32_t current_bdf_offset;
+    bool arg_output;
+
+    // label_o_map contains the info for OperandLabelRef,
+    // label_d_map contains the label that needed in a instruction
+    std::map<std::string, BrigdOffset32_t> func_map;
+    std::map<std::string, BrigoOffset32_t> operand_map;
+    std::map<std::string, BrigoOffset32_t> label_o_map;
 };
 
 }  // namespace brig

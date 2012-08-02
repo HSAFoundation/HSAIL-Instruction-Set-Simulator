@@ -193,7 +193,7 @@ TerminalType GetTokenType(unsigned int token) {
   }
 }
 
-BrigDataType GetDataType(int token) {
+BrigDataType16_t GetDataType(int token) {
   switch (token) {
     /* DataTypeId */
   case _U32:
@@ -325,7 +325,7 @@ BrigDataType GetDataType(int token) {
 }
 }
 
-BrigOpcode GetOpCode(int token) {
+BrigOpcode32_t GetOpCode(int token) {
   switch (token) {
     /* opcode */
   case ABS:
@@ -385,7 +385,6 @@ BrigPacking16_t GetPacking(int token) {
     break;
   }
 }
- 
 
 int Query(unsigned int QueryOp, Context* context) {
   // next token should be a dataTypeId
@@ -451,8 +450,8 @@ int Operand(unsigned int first_token, Context* context) {
       std::string name(string_val);
       bor.name = context->add_symbol(name);
 
-      if (!context->operand_map.count(name)) {
-        context->operand_map[name] = context->get_operand_offset();
+      if (context->lookup_operand_map(name) < 0) {
+        context->insert_to_operand_map(name, context->get_operand_offset());
         context->append_operand(&bor);
       }
     }
@@ -644,9 +643,10 @@ int AddressableOperand(unsigned int first_token, Context* context) {
           BrigEOperandAddress,    // kind
           Brigb32,                // type
           0,                      // reserved
-          context->operand_map[name],  // directive
+          0,                      // directive
           0
           };
+  // TODO(Huy): Fill in directive field with the offset to BrigDirectiveSymbol
         if (context->get_machine() == BrigELarge)
           boa.type = Brigb64;
 
@@ -706,7 +706,6 @@ int AddressableOperand(unsigned int first_token, Context* context) {
       rpt->report_error(ErrorReporterInterface::MISSING_IDENTIFIER,
                         yylineno,
                         yycolno);
-                  
     }
   }
   return 1;
@@ -903,12 +902,12 @@ int Instruction2(unsigned int first_token, Context* context) {
       next = yylex();
       std::string oper_str = string_val;
       if (!Operand(next, context)) {
-        inst_op.o_operands[0] = context->operand_map[oper_str];
+        inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
         if (yylex() == ',') {
           next = yylex();
           oper_str = string_val;
           if (!Operand(next, context)) {
-            inst_op.o_operands[1] = context->operand_map[oper_str];
+            inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
             if (yylex() == ';') {
               context->append_code<BrigInstBase>(&inst_op);
               // if the rule is valid, just write to the .code section,
@@ -995,12 +994,12 @@ int Instruction2(unsigned int first_token, Context* context) {
       next = yylex();
       std::string oper_str = string_val;
       if (!Operand(next, context)) {
-        inst_op.o_operands[0] = context->operand_map[oper_str];
+        inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
         if (yylex() == ',') {
           next = yylex();
           oper_str = string_val;
           if (!Operand(next, context)) {
-            inst_op.o_operands[1] = context->operand_map[oper_str];
+            inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
             if (yylex() == ';') {
               context->append_code<BrigInstBase>(&inst_op);
               // if the rule is valid, just write to the .code section,
@@ -1081,19 +1080,19 @@ int Instruction3(unsigned int first_token, Context* context) {
       std::string oper_str = string_val;
 
       if (!Operand(next, context)) {
-        inst_op.o_operands[0] = context->operand_map[oper_str];
+        inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
         if (yylex() == ',') {
           next = yylex();
           oper_str = string_val;
           if (!Operand(next, context)) {
-            inst_op.o_operands[1] = context->operand_map[oper_str];
+            inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
             if (yylex() == ',') {
               next = yylex();
               oper_str = string_val;
               if (!Operand(next, context)) {
-                inst_op.o_operands[2] = context->operand_map[oper_str];
+                inst_op.o_operands[2] = context->lookup_operand_map(oper_str);
                 if (yylex() == ';') {
-                  context->append_code<BrigInstBase>(&inst_op); 
+                  context->append_code<BrigInstBase>(&inst_op);
                   return 0;
                 } else {
                   rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -1152,19 +1151,19 @@ int Instruction3(unsigned int first_token, Context* context) {
       std::string oper_str = string_val;
 
       if (!Operand(next, context)) {
-        inst_op.o_operands[0] = context->operand_map[oper_str];
+        inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
         if (yylex() == ',') {
           next = yylex();
           oper_str = string_val;
           if (!Operand(next, context)) {
-            inst_op.o_operands[1] = context->operand_map[oper_str];
+            inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
             if (yylex() == ',') {
               next = yylex();
               oper_str = string_val;
               if (!Operand(next, context)) {
-                inst_op.o_operands[2] = context->operand_map[oper_str];
+                inst_op.o_operands[2] = context->lookup_operand_map(oper_str);
                 if (yylex() == ';') {
-                  context->append_code<BrigInstBase>(&inst_op); 
+                  context->append_code<BrigInstBase>(&inst_op);
                   return 0;
                 } else {
                   rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -1303,7 +1302,7 @@ int Version(unsigned int first_token, Context* context) {
         yylineno,
         yycolno);
     }
-    rpt->report_error(ErrorReporterInterface::MISSING_COLON, yylineno,yycolno);
+    rpt->report_error(ErrorReporterInterface::MISSING_COLON, yylineno, yycolno);
   }
   rpt->report_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT,
                              yylineno,
@@ -1496,7 +1495,7 @@ int DeclPrefix(unsigned int first_token,
 int FBar(unsigned int first_token, Context* context) {
   // first token must be _FBAR
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  if (yylex() == '(' ) {
+  if (yylex() == '(') {
     if (yylex() == TOKEN_INTEGER_CONSTANT) {
       context->set_fbar(int_val);
       if (yylex() == ')')
@@ -1611,7 +1610,7 @@ int ArgumentDecl(unsigned int first_token,
           // 1. update the directive offset.
           BrigDirectiveFunction bdf;
           context->get_directive<BrigDirectiveFunction>(
-                    context->current_bdf_offset,
+                    context->get_current_bdf_offset(),
                     &bdf);
           if (bdf.d_firstScopedDirective == bdf.d_nextDirective) {
             bdf.d_nextDirective += 36;
@@ -1621,7 +1620,7 @@ int ArgumentDecl(unsigned int first_token,
           }
           // std::cout << bdf.d_nextDirective << std::endl;
           // update param count
-          if (context->arg_output) {
+          if (context->is_arg_output()) {
             bdf.outParamCount++;
           } else {
             if (!bdf.inParamCount)
@@ -1631,11 +1630,11 @@ int ArgumentDecl(unsigned int first_token,
           unsigned char * bdf_charp =
             reinterpret_cast<unsigned char*>(&bdf);
           context->update_directive_bytes(bdf_charp,
-                                          context->current_bdf_offset,
+                                          context->get_current_bdf_offset(),
                                           40);
 
           context->get_directive<BrigDirectiveFunction>(
-                    context->current_bdf_offset,
+                    context->get_current_bdf_offset(),
                     &bdf);
           // std::cout << bdf.size << std::endl;
 
@@ -1704,8 +1703,8 @@ int FunctionDefinition(unsigned int first_token,
     if (token_to_scan == FUNCTION) {
       // add default struct (Miao)
 
-      context->current_bdf_offset = context->get_directive_offset();
-      BrigdOffset32_t bdf_offset = context->current_bdf_offset;
+      context->set_current_bdf_offset(context->get_directive_offset());
+      BrigdOffset32_t bdf_offset = context->get_current_bdf_offset();
 
       BrigDirectiveFunction bdf = {
       40,                      // size
@@ -1739,11 +1738,12 @@ int FunctionDefinition(unsigned int first_token,
         BrigsOffset32_t check_result = context->add_symbol(func_name);
 
         // add the func_name to the func_map.
-        context->func_map[func_name] = context->current_bdf_offset;
+        context->insert_to_function_map(func_name,
+                                        context->get_current_bdf_offset());
 
         unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);
         context->update_directive_bytes(value,
-                                        context->current_bdf_offset + 8,
+                                        context->get_current_bdf_offset() + 8,
                                         bdf.size);
 
         /* Debug */
@@ -1753,7 +1753,7 @@ int FunctionDefinition(unsigned int first_token,
 
         // check return argument list
         if (yylex() == '(') {
-          context->arg_output = true;
+          context->set_arg_output(true);
           token_to_scan = yylex();
 
           if (token_to_scan == ')') {   // empty argument list body
@@ -1788,7 +1788,7 @@ int FunctionDefinition(unsigned int first_token,
         }
         // check argument list
         if (token_to_scan == '(') {
-          context->arg_output = false;
+          context->set_arg_output(false);
           token_to_scan = yylex();
 
           if (token_to_scan == ')') {   // empty argument list body
@@ -1996,12 +1996,14 @@ int ArgBlock(unsigned int first_token, Context* context) {
     } else if (next_token == TOKEN_LABEL) {  // label
       // need to check the lable_map, and update when necessary.
       // std::string label_name = string_val;
-      // context->lable_o_map[label_name] = context->get_operand_offset(); // set the lable_map
+      // context->lable_o_map[label_name] = context->get_operand_offset();
+      // set the lable_map
       // add operand in .operand;
       // check if any entry with the same key in label_c_map;
       // update the corresponding instructions.
       //
-      // if no correlated instructions, then later instructions can directly use the label.
+      // if no correlated instructions, then later instructions
+      // can directly use the label.
       if (yylex() == ':') {
       } else {
         rpt->report_error(ErrorReporterInterface:: MISSING_COLON,
@@ -2084,16 +2086,16 @@ int Codeblock(unsigned int first_token, Context* context) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
-                  context->current_bdf_offset,
+                  context->get_current_bdf_offset(),
                   &bdf);
         bdf.operationCount++;
 
         unsigned char * bdf_charp =
           reinterpret_cast<unsigned char*>(&bdf);
         context->update_directive_bytes(bdf_charp,
-                                        context->current_bdf_offset,
+                                        context->get_current_bdf_offset(),
                                         bdf.size);
-      
+
       } else {
         return 1;
       }
@@ -2104,14 +2106,14 @@ int Codeblock(unsigned int first_token, Context* context) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
-                  context->current_bdf_offset,
+                  context->get_current_bdf_offset(),
                   &bdf);
         bdf.operationCount++;
 
         unsigned char * bdf_charp =
           reinterpret_cast<unsigned char*>(&bdf);
         context->update_directive_bytes(bdf_charp,
-                                        context->current_bdf_offset,
+                                        context->get_current_bdf_offset(),
                                         bdf.size);
       } else {
         return 1;
@@ -2136,14 +2138,14 @@ int Codeblock(unsigned int first_token, Context* context) {
       context->append_code<BrigInstBase>(&op_ret);
       BrigDirectiveFunction bdf;
       context->get_directive<BrigDirectiveFunction>(
-                context->current_bdf_offset,
+                context->get_current_bdf_offset(),
                 &bdf);
       bdf.operationCount++;
 
       unsigned char * bdf_charp =
         reinterpret_cast<unsigned char*>(&bdf);
       context->update_directive_bytes(bdf_charp,
-                                      context->current_bdf_offset,
+                                      context->get_current_bdf_offset(),
                                       bdf.size);
 
       } else {
@@ -2159,7 +2161,6 @@ int Codeblock(unsigned int first_token, Context* context) {
         return 1;
       }
     } else if (next_token == TOKEN_LABEL) {  // label
-      
       // add to the .directive section
       std::string label_name = string_val;
       BrigDirectiveLabel label_directive = {
@@ -2168,7 +2169,7 @@ int Codeblock(unsigned int first_token, Context* context) {
         context->get_code_offset(),
         context->add_symbol(label_name)
       };
-      
+
       BrigdOffset32_t label_directive_offset = context->get_directive_offset();
       // printf("label: %d", label_directive_offset);
       context->append_directive<BrigDirectiveLabel>(&label_directive);
@@ -2182,33 +2183,33 @@ int Codeblock(unsigned int first_token, Context* context) {
       };
 
       context->append_operand<BrigOperandLabelRef>(&label_operand);
-      context->label_o_map[label_name] = label_operand_offset;
+      context->insert_to_label_o_map(label_name, label_operand_offset);
 
       // update the d_nextDirective.
       BrigDirectiveFunction bdf;
       context->get_directive<BrigDirectiveFunction>(
-                                        context->current_bdf_offset, &bdf);
-      if(bdf.d_firstScopedDirective == bdf.d_nextDirective)
+                  context->get_current_bdf_offset(), &bdf);
+      if (bdf.d_firstScopedDirective == bdf.d_nextDirective)
         // check if the firstScopedDirective is modified before.
         bdf.d_firstScopedDirective = label_directive_offset;
       bdf.d_nextDirective = context->get_directive_offset();
       unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
       context->update_directive_bytes(bdf_charp,
-                                      context->current_bdf_offset,
-                                      bdf.size);    
+                                      context->get_current_bdf_offset(),
+                                      bdf.size);
 
       // check if there are any operation in .code need update
-      if(context->label_c_map.count(label_name)) {
+      if (context->label_c_map.count(label_name)) {
       // previously, there maybe brn, cbr need label.
       // update all
         typedef std::multimap<std::string, BrigcOffset32_t>::size_type sz_type;
         sz_type entries = context->label_c_map.count(label_name);
 
-        std::multimap<std::string, BrigcOffset32_t>::iterator iter = 
+        std::multimap<std::string, BrigcOffset32_t>::iterator iter =
                                         context->label_c_map.find(label_name);
         for (sz_type cnt = 0; cnt != entries; ++cnt, ++iter) {
           BrigcOffset32_t offset = iter->second;
-          unsigned char* value = 
+          unsigned char* value =
                     reinterpret_cast<unsigned char*> (&label_operand_offset);
           context->update_code_bytes(value, offset, 4);
         }
@@ -2278,7 +2279,7 @@ int Codeblock(unsigned int first_token, Context* context) {
 int Function(unsigned int first_token, Context* context) {
   bool rescan = false;
   unsigned int last_token = 0;
-  ErrorReporterInterface* rpt = context->get_error_reporter();  
+  ErrorReporterInterface* rpt = context->get_error_reporter();
   if (!FunctionDefinition(first_token, &rescan, &last_token, context)) {
     if (!rescan)
       last_token = yylex();
@@ -2518,14 +2519,14 @@ int Branch(unsigned int first_token, Context* context) {
       32,
       BrigEInstBase,
       BrigCbr,
-      0, // no specification of datatype in Brn and Cbr.
+      0,  // no specification of datatype in Brn and Cbr.
       BrigNoPacking,
-      {0,0,0,0,0}
+      {0, 0, 0, 0, 0}
     };
 
     std::string operand_name = string_val;
     if (!Operand(current_token, context)) {
-      inst_op.o_operands[1] = context->operand_map[operand_name];
+      inst_op.o_operands[1] = context->lookup_operand_map(operand_name);
       if (yylex() == ',') {
         current_token = yylex();
         if (current_token == TOKEN_LABEL) {
@@ -2534,10 +2535,12 @@ int Branch(unsigned int first_token, Context* context) {
           // 2. if defined, just set it up
           // 3. if not, add it to the multimap
           std::string label_name = string_val;
-          if (context->label_o_map.count(label_name)) {
-            inst_op.o_operands[2] = context->label_o_map[label_name];
+          if (context->lookup_label_o_map(label_name) >= 0) {
+            inst_op.o_operands[2] = context->lookup_label_o_map(label_name);
           } else {
-            context->label_c_map.insert(make_pair(label_name, context->get_code_offset()+20));
+            context->label_c_map.insert(make_pair(
+                                          label_name,
+                                          context->get_code_offset()+20));
           }
 
           current_token = yylex();  // should be ';'
@@ -2601,13 +2604,14 @@ int Branch(unsigned int first_token, Context* context) {
           // update the operationCount.
           BrigDirectiveFunction bdf;
           context->get_directive<BrigDirectiveFunction>(
-                                            context->current_bdf_offset, &bdf);
+                                            context->get_current_bdf_offset(),
+                                            &bdf);
           bdf.operationCount++;
           unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
           context->update_directive_bytes(bdf_charp,
-                                          context->current_bdf_offset,
-                                          bdf.size);    
-        
+                                          context->get_current_bdf_offset(),
+                                          bdf.size);
+
           return 0;
         } else {
           rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -2632,34 +2636,37 @@ int Branch(unsigned int first_token, Context* context) {
       36,
       BrigEInstBar,
       BrigBrn,
-      0, // no specification of datatype in Brn and Cbr.
+      0,  // no specification of datatype in Brn and Cbr.
       BrigNoPacking,
-      {0,0,0,0,0},
+      {0, 0, 0, 0, 0},
       0
     };
-    
+
     if (current_token == TOKEN_LABEL) {
       // if the next operand is label, which is the case in example4
       // 1. check if the label is already defined,
       // 2. if defined, just set it up
       // 3. if not, add it to the multimap
       std::string label_name = string_val;
-      if (context->label_o_map.count(label_name)) {
-        inst_op.o_operands[1] = context->label_o_map[label_name];
+      if (context->lookup_label_o_map(label_name) >= 0) {
+        inst_op.o_operands[1] = context->lookup_label_o_map(label_name);
       } else {
-        context->label_c_map.insert(make_pair(label_name, context->get_code_offset()+16));
+        context->label_c_map.insert(make_pair(
+                                      label_name,
+                                      context->get_code_offset()+16));
       }
-      if (yylex() == ';'){
+      if (yylex() == ';') {
         context->append_code<BrigInstBar>(&inst_op);
           // update the operationCount.
           BrigDirectiveFunction bdf;
           context->get_directive<BrigDirectiveFunction>(
-                                            context->current_bdf_offset, &bdf);
+                                            context->get_current_bdf_offset(),
+                                            &bdf);
           bdf.operationCount++;
           unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
           context->update_directive_bytes(bdf_charp,
-                                          context->current_bdf_offset,
-                                          bdf.size);            
+                                          context->get_current_bdf_offset(),
+                                          bdf.size);
         return 0;
       } else {
         rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -3016,42 +3023,42 @@ int FileDecl(unsigned int first_token, Context* context) {
   // first token is _FILE "file"
   unsigned int next_token = yylex();
 
-  if(next_token == TOKEN_INTEGER_CONSTANT) {
+  if (next_token == TOKEN_INTEGER_CONSTANT) {
     next_token = yylex();
-  
-    if(next_token == TOKEN_STRING) {
+
+    if (next_token == TOKEN_STRING) {
       next_token = yylex();
 
-      if(next_token == ';') {
+      if (next_token == ';') {
         return 0;
       } else {
         printf("Missing ';' at the end of statement\n");
       }
     }
-  }    
+  }
   return 1;
 }
 
-int VectorToken(unsigned int first_token , Context *context){
-  if( _V2 == first_token || _V4 == first_token)
-    return 0 ;
-  else 
-    return 1 ;
+int VectorToken(unsigned int first_token , Context *context) {
+  if ( _V2 == first_token || _V4 == first_token)
+    return 0;
+  else
+    return 1;
 }
 
-int SignatureType(unsigned int first_token , Context *context){
-  //first token is ARG
-  unsigned int last_token ;
-  unsigned int next = yylex() ;
+int SignatureType(unsigned int first_token , Context *context) {
+  // first token is ARG
+  unsigned int last_token;
+  unsigned int next = yylex();
 
-  if(DATA_TYPE_ID == GetTokenType(next)){
+  if (DATA_TYPE_ID == GetTokenType(next)) {
     return 0;
-  } else if(_ROIMG == next 
+  } else if (_ROIMG == next
            || _RWIMG == next
-           || _SAMP == next ){
-    return 0 ;
+           || _SAMP == next ) {
+    return 0;
   }
-  return 1 ;
+  return 1;
 }
 
 }  // namespace brig

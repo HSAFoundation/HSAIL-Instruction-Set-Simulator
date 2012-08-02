@@ -19,7 +19,7 @@ namespace brig {
   void ErrorReporter::report_error(error_t ErrorCode,
                                    unsigned int LineNo,
                                    unsigned int ColNo) {
-    if (display)
+    if (display && ErrorCode)
       fprintf(stderr,
               "Line %d, Column %d : Error %d : %s \n",
               LineNo,

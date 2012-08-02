@@ -18,6 +18,7 @@ set(hsail2brig_test_SOURCES
     src/parser_wrapper.cc
     src/lexer_wrapper.cc
     src/error_reporter.cc
+    src/context.cc
 	  ${FLEX_lexer_OUTPUTS}
 	  )
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
