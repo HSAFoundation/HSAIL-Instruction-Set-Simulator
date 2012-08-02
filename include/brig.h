@@ -533,4 +533,22 @@ typedef struct BrigOperandLabelRef {
   uint32_t labeldirective;
 }BrigOperandLabelRef;
 
+
+//BrigDirectiveScope
+//BrigDirectiveScope is used to start or end a scope.
+typedef struct BrigDirectiveScope {
+	uint16_t size;
+	uint16_t kind;
+	BrigcOffset32_t c_code;
+} BrigDirectiveScope;
+
+
+//BrigOperandFunctionRef
+//BrigOperandFunctionRef is used for a reference to a function or function signature.
+typedef struct BrigOperandFunctionRef {
+	uint16_t size;
+	uint16_t kind;
+	BrigdOffset32_t fn;
+}BrigOperandFunctionRef;
+
 #endif  // INCLUDE_BRIG_H_
