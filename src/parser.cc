@@ -340,6 +340,9 @@ BrigOpcode32_t GetOpCode(int token) {
   case BORROW:
     return BrigBorrow;
     break;
+  case SQRT:
+    return BrigSqrt;
+    break;    
 // TBD, need to add complete list of all operations.
   }
 }
@@ -867,80 +870,145 @@ int Instruction2(unsigned int first_token, Context* context) {
   unsigned int temp = 0;
   bool is_ftz = false;
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  // default value.
-  BrigInstBase inst_op = {
-    32,
-    BrigEInstBase,
-    GetOpCode(first_token),
-    0,
-    BrigNoPacking,
-    {0, 0, 0, 0, 0}
-  };
-
+  
   if (GetTokenType(first_token) == INSTRUCTION2_OPCODE) {
-    if (!RoundingMode(next, &is_ftz, &temp, context)) {
+    if (!RoundingMode(next, &is_ftz, &temp, context)) {  // need to use BrigInstMod
       // there is a rounding mode specified
       if (is_ftz)
         // need to check the token returned by rounding mode
         next = temp;
       else
         next = yylex();
-    }
+      
+      BrigInstMod inst_op = {
+        sizeof(inst_op),    // size
+        BrigEInstMod,       // kind
+        GetOpCode(first_token),  // opcode
+        0,  // type
+        BrigNoPacking,    // packing
+        {0, 0, 0, 0, 0},   // o_operands
+        context->get_alu_modifier()   // aluModifier;
+      };
 
-    // check whether there is a Packing
-    if (GetTokenType(next) == PACKING) {
-      // there is packing
-      inst_op.packing = GetPacking(next);
-      context->set_packing(inst_op.packing);
-      next = yylex();
-    }
+      // check whether there is a Packing
+      if (GetTokenType(next) == PACKING) {
+        // there is packing
+        inst_op.packing = GetPacking(next);
+        context->set_packing(inst_op.packing);
+        next = yylex();
+      }
 
-    // now we must have a dataTypeId
-    if (GetTokenType(next) == DATA_TYPE_ID) {
-      // check the operands
-      inst_op.type = GetDataType(next);
-      next = yylex();
-      std::string oper_str = string_val;
-      if (!Operand(next, context)) {
-        inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
-        if (yylex() == ',') {
-          next = yylex();
-          oper_str = string_val;
-          if (!Operand(next, context)) {
-            inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
-            if (yylex() == ';') {
-              context->append_code<BrigInstBase>(&inst_op);
-              // if the rule is valid, just write to the .code section,
-              // may need to edit others, worry that later.
-              return 0;
+      // now we must have a dataTypeId
+      if (GetTokenType(next) == DATA_TYPE_ID) {
+        // check the operands
+        inst_op.type = GetDataType(next);
+        next = yylex();
+        std::string oper_str = string_val;
+        if (!Operand(next, context)) {
+          inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+          if (yylex() == ',') {
+            next = yylex();
+            oper_str = string_val;
+            if (!Operand(next, context)) {
+              inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+              if (yylex() == ';') {
+                context->append_code(&inst_op);
+                // if the rule is valid, just write to the .code section,
+                // may need to edit others, worry that later.
+                return 0;
+              } else {
+                rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+                                  yylineno,
+                                  yycolno);
+              }
+
             } else {
-              rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+              rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
                                 yylineno,
                                 yycolno);
             }
 
           } else {
-            rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+            rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
                               yylineno,
                               yycolno);
           }
-
         } else {
-          rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
+          rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
                             yylineno,
                             yycolno);
         }
       } else {
-        rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+        rpt->report_error(ErrorReporterInterface::MISSING_DATA_TYPE,
                           yylineno,
                           yycolno);
       }
-    } else {
-      rpt->report_error(ErrorReporterInterface::MISSING_DATA_TYPE,
-                        yylineno,
-                        yycolno);
-    }
-    return 1;
+      return 1;      
+    } else {  // use BrigInstBase
+       // default value.
+      BrigInstBase inst_op = {
+      sizeof(inst_op),
+      BrigEInstBase,
+      GetOpCode(first_token),
+      0,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0}
+      };
+      // check whether there is a Packing
+      if (GetTokenType(next) == PACKING) {
+        // there is packing
+        inst_op.packing = GetPacking(next);
+        context->set_packing(inst_op.packing);
+        next = yylex();
+      }
+
+      // now we must have a dataTypeId
+      if (GetTokenType(next) == DATA_TYPE_ID) {
+        // check the operands
+        inst_op.type = GetDataType(next);
+        next = yylex();
+        std::string oper_str = string_val;
+        if (!Operand(next, context)) {
+          inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+          if (yylex() == ',') {
+            next = yylex();
+            oper_str = string_val;
+            if (!Operand(next, context)) {
+              inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+              if (yylex() == ';') {
+                context->append_code(&inst_op);
+                // if the rule is valid, just write to the .code section,
+                // may need to edit others, worry that later.
+                return 0;
+              } else {
+                rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+                                  yylineno,
+                                  yycolno);
+              }
+
+            } else {
+              rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+                                yylineno,
+                                yycolno);
+            }
+
+          } else {
+            rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
+                              yylineno,
+                              yycolno);
+          }
+        } else {
+          rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+                            yylineno,
+                            yycolno);
+        }
+      } else {
+        rpt->report_error(ErrorReporterInterface::MISSING_DATA_TYPE,
+                          yylineno,
+                          yycolno);
+      }
+      return 1;
+    }   
   } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_NODT) {
     if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
@@ -981,56 +1049,125 @@ int Instruction2(unsigned int first_token, Context* context) {
     return 1;
   } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_FTZ) {
     // Optional FTZ
-    if (next == _FTZ) {
+    if (next == _FTZ) { // use BrigInstMod
       // has a _ftz
+      BrigAluModifier bam;
+      bam.ftz = 1;
+      context->set_alu_modifier(bam);
+      
       next = yylex();
-    }
+      // default value.
+      BrigInstMod inst_op = {
+        sizeof(inst_op),    // size
+        BrigEInstMod,       // kind
+        GetOpCode(first_token),  // opcode
+        0,  // type
+        BrigNoPacking,    // packing
+        {0, 0, 0, 0, 0},   // o_operands
+        context->get_alu_modifier()   // aluModifier;
+      };
 
-
-    // now we must have a dataTypeId
-    if (GetTokenType(next) == DATA_TYPE_ID) {
-      // check the operands
-      inst_op.type = GetDataType(next);
-      next = yylex();
-      std::string oper_str = string_val;
-      if (!Operand(next, context)) {
-        inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
-        if (yylex() == ',') {
-          next = yylex();
-          oper_str = string_val;
-          if (!Operand(next, context)) {
-            inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
-            if (yylex() == ';') {
-              context->append_code<BrigInstBase>(&inst_op);
-              // if the rule is valid, just write to the .code section,
-              // may need to edit others, worry that later.
-              return 0;
+      // now we must have a dataTypeId
+      if (GetTokenType(next) == DATA_TYPE_ID) {
+        // check the operands
+        inst_op.type = GetDataType(next);
+        next = yylex();
+        std::string oper_str = string_val;
+        if (!Operand(next, context)) {
+          inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+          if (yylex() == ',') {
+            next = yylex();
+            oper_str = string_val;
+            if (!Operand(next, context)) {
+              inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+              if (yylex() == ';') {
+                context->append_code(&inst_op);
+                // if the rule is valid, just write to the .code section,
+                // may need to edit others, worry that later.
+                return 0;
+              } else {
+                rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+                                  yylineno,
+                                  yycolno);
+              }
             } else {
-              rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+              rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
                                 yylineno,
                                 yycolno);
             }
           } else {
-            rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+            rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
                               yylineno,
                               yycolno);
           }
         } else {
-          rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
+          rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
                             yylineno,
                             yycolno);
         }
       } else {
-        rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+        rpt->report_error(ErrorReporterInterface::MISSING_DATA_TYPE,
                           yylineno,
                           yycolno);
       }
-    } else {
-      rpt->report_error(ErrorReporterInterface::MISSING_DATA_TYPE,
-                        yylineno,
-                        yycolno);
+      return 1;      
+      
+    } else { // use BrigInstBase
+      // default value.
+      BrigInstBase inst_op = {
+      sizeof(inst_op),
+      BrigEInstBase,
+      GetOpCode(first_token),
+      0,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0}
+      };
+
+      // now we must have a dataTypeId
+      if (GetTokenType(next) == DATA_TYPE_ID) {
+        // check the operands
+        inst_op.type = GetDataType(next);
+        next = yylex();
+        std::string oper_str = string_val;
+        if (!Operand(next, context)) {
+          inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+          if (yylex() == ',') {
+            next = yylex();
+            oper_str = string_val;
+            if (!Operand(next, context)) {
+              inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+              if (yylex() == ';') {
+                context->append_code<BrigInstBase>(&inst_op);
+                // if the rule is valid, just write to the .code section,
+                // may need to edit others, worry that later.
+                return 0;
+              } else {
+                rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+                                  yylineno,
+                                  yycolno);
+              }
+            } else {
+              rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+                                yylineno,
+                                yycolno);
+            }
+          } else {
+            rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
+                              yylineno,
+                              yycolno);
+          }
+        } else {
+          rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+                            yylineno,
+                            yycolno);
+        }
+      } else {
+        rpt->report_error(ErrorReporterInterface::MISSING_DATA_TYPE,
+                          yylineno,
+                          yycolno);
+      }
+      return 1;
     }
-    return 1;
   } else {
     return 1;
   }
