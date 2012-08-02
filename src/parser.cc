@@ -1858,7 +1858,7 @@ int FunctionDefinition(unsigned int first_token,
       0     // d_firstInParam
       };
 
-      context->append_directive(&bdf);
+
 
       // update it when necessary.
       // the later functions should have a entry point of bdf
@@ -1878,10 +1878,8 @@ int FunctionDefinition(unsigned int first_token,
         context->insert_to_function_map(func_name,
                                         context->get_current_bdf_offset());
 
-        unsigned char* value = reinterpret_cast<unsigned char*>(&check_result);
-        context->update_directive_bytes(value,
-                                        context->get_current_bdf_offset() + 8,
-                                        bdf.size);
+        bdf.s_name = check_result;
+        context->append_directive(&bdf);
 
         /* Debug */
         // BrigDirectiveFunction get;
@@ -2093,6 +2091,29 @@ int ArgBlock(unsigned int first_token, Context* context) {
   bool rescan = false;
   unsigned int last_token;
   unsigned int next_token = 0;
+  // add BrigDirectiveScope
+  BrigDirectiveScope argblock_start = {
+    8,
+    BrigEDirectiveArgStart,
+    context->get_code_offset()
+  };
+  
+  // needed for update d_firstScopedDirective
+  BrigdOffset32_t arg_offset = context->get_directive_offset();
+  context->append_directive<BrigDirectiveScope>(&argblock_start);
+
+  // update the d_nextDirective.
+  BrigDirectiveFunction bdf;
+  context->get_directive<BrigDirectiveFunction>(
+                                    context->current_bdf_offset, &bdf);
+  if(bdf.d_firstScopedDirective == bdf.d_nextDirective)
+    // check if the firstScopedDirective is modified before.
+    bdf.d_firstScopedDirective = arg_offset;
+  unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+  context->update_directive_bytes(bdf_charp,
+                                  context->current_bdf_offset,
+                                  bdf.size); 
+
   ErrorReporterInterface* rpt = context->get_error_reporter();
   while (1) {
     next_token = yylex();
@@ -2101,6 +2122,18 @@ int ArgBlock(unsigned int first_token, Context* context) {
         (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
       // Instruction 2 Operation
       if (!Instruction2(next_token, context)) {
+        // update the operationCount.
+        BrigDirectiveFunction bdf;
+        context->get_directive<BrigDirectiveFunction>(
+                  context->current_bdf_offset,
+                  &bdf);
+        bdf.operationCount++;
+
+        unsigned char * bdf_charp =
+          reinterpret_cast<unsigned char*>(&bdf);
+        context->update_directive_bytes(bdf_charp,
+                                        context->current_bdf_offset,
+                                        bdf.size);      
       } else {
         return 1;
       }
@@ -2108,6 +2141,18 @@ int ArgBlock(unsigned int first_token, Context* context) {
                (GetTokenType(next_token) == INSTRUCTION3_OPCODE_FTZ)) {
       // Instruction 3 Operation
       if (!Instruction3(next_token, context)) {
+        // update the operationCount.
+        BrigDirectiveFunction bdf;
+        context->get_directive<BrigDirectiveFunction>(
+                  context->current_bdf_offset,
+                  &bdf);
+        bdf.operationCount++;
+
+        unsigned char * bdf_charp =
+          reinterpret_cast<unsigned char*>(&bdf);
+        context->update_directive_bytes(bdf_charp,
+                                        context->current_bdf_offset,
+                                        bdf.size);
       } else {
         return 1;
       }
@@ -2118,6 +2163,28 @@ int ArgBlock(unsigned int first_token, Context* context) {
       }
     } else if (next_token == RET) {  // ret operation
       if (yylex() == ';') {
+      BrigcOffset32_t csize = context->get_code_offset();
+      BrigInstBase op_ret = {
+        32,
+        BrigEInstBase,
+        BrigRet,
+        Brigf32,
+        BrigNoPacking,
+        {0, 0, 0, 0, 0}
+        };
+      // write to .code section
+      context->append_code<BrigInstBase>(&op_ret);
+      BrigDirectiveFunction bdf;
+      context->get_directive<BrigDirectiveFunction>(
+                context->current_bdf_offset,
+                &bdf);
+      bdf.operationCount++;
+
+      unsigned char * bdf_charp =
+        reinterpret_cast<unsigned char*>(&bdf);
+      context->update_directive_bytes(bdf_charp,
+                                      context->current_bdf_offset,
+                                      bdf.size);
       } else {
         rpt->report_error(ErrorReporterInterface:: MISSING_SEMICOLON,
                           yylineno,
@@ -2150,6 +2217,18 @@ int ArgBlock(unsigned int first_token, Context* context) {
       }
     } else if (next_token == CALL) {  // call (only inside argblock
       if (!Call(next_token, context)) {
+        // update the operationCount.
+        BrigDirectiveFunction bdf;
+        context->get_directive<BrigDirectiveFunction>(
+                  context->current_bdf_offset,
+                  &bdf);
+        bdf.operationCount++;
+
+        unsigned char * bdf_charp =
+          reinterpret_cast<unsigned char*>(&bdf);
+        context->update_directive_bytes(bdf_charp,
+                                        context->current_bdf_offset,
+                                        bdf.size);
       } else {
         return 1;
       }
@@ -2199,6 +2278,24 @@ int ArgBlock(unsigned int first_token, Context* context) {
                         yycolno);
       return 1;
     } else if (next_token == '}') {
+      // add BrigDirectiveScope
+      BrigDirectiveScope argblock_start = {
+        8,
+        BrigEDirectiveArgEnd,
+        context->get_code_offset()
+      };
+      context->append_directive<BrigDirectiveScope>(&argblock_start);
+
+      // update the d_nextDirective.
+      BrigDirectiveFunction bdf;
+      context->get_directive<BrigDirectiveFunction>(
+                                        context->current_bdf_offset, &bdf);
+      bdf.d_nextDirective = context->get_directive_offset();
+      unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+      context->update_directive_bytes(bdf_charp,
+                                      context->current_bdf_offset,
+                                      bdf.size); 
+    
       return 0;
     } else {
       break;
@@ -2868,7 +2965,37 @@ int Call(unsigned int first_token, Context* context) {
     }
   }
 
+  
   if (!Operand(next, context)) {
+    // the operand should be a register or a Func name.
+    // Assuming the function must be defined before the call.
+
+    // Default Structure
+    BrigInstBase call_op = {
+      32,
+      BrigEInstBase,
+      BrigCall,
+      0,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0}
+    };
+    
+    // If Call by its name.
+    if (next == TOKEN_GLOBAL_IDENTIFIER) {
+      std::string func_name = string_val;
+      if (context->func_o_map.count(func_name)) {
+        call_op.o_operands[2] = context->func_o_map[func_name];
+      } else {
+        BrigOperandFunctionRef func_o_ref = {
+          8,
+          BrigEOperandFunctionRef,
+          context->func_map[func_name]
+        };
+        context->func_o_map[func_name] = context->get_operand_offset();
+        context->append_operand<BrigOperandFunctionRef>(&func_o_ref);
+        call_op.o_operands[2] = context->func_o_map[func_name];
+      }
+    }
     next = yylex();
     // check for twoCallArgs
     if (next == '(') {
@@ -2887,6 +3014,7 @@ int Call(unsigned int first_token, Context* context) {
 
     // check for CallTarget
     if (next == ';') {
+      context->append_code<BrigInstBase>(&call_op);
       return 0;
     } else if (next == '[') {
       if (!CallTargets(next, context)) {
@@ -3024,7 +3152,6 @@ int Initializer(unsigned int first_token,
     *rescan = true;
     *last_token = next;
   }
-
 
   return 0;
 }

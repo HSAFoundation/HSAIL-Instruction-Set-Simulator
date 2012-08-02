@@ -290,6 +290,16 @@ class Context {
     void insert_to_label_o_map(std::string key, uint32_t value);
     int lookup_label_o_map(std::string key);
 
+
+    BrigoOffset32_t current_label_offset;
+    BrigcOffset32_t current_inst_offset;
+    BrigdOffset32_t current_bdf_offset;
+    // label_o_map contains the info for OperandLabelRef,
+    // label_d_map contains the label that needed in a instruction
+    std::map<std::string, BrigdOffset32_t> func_map;
+    std::map<std::string, BrigoOffset32_t> func_o_map;
+    std::map<std::string, BrigoOffset32_t> operand_map;
+    std::map<std::string, BrigoOffset32_t> label_o_map;
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
 
   private:
@@ -317,16 +327,10 @@ class Context {
     BrigPacking16_t packing;
     char operand_loc;   // 1 -> 5
 
-    BrigoOffset32_t current_label_offset;
-    BrigcOffset32_t current_inst_offset;
-    BrigdOffset32_t current_bdf_offset;
+
     bool arg_output;
 
-    // label_o_map contains the info for OperandLabelRef,
-    // label_d_map contains the label that needed in a instruction
-    std::map<std::string, BrigdOffset32_t> func_map;
-    std::map<std::string, BrigoOffset32_t> operand_map;
-    std::map<std::string, BrigoOffset32_t> label_o_map;
+
 };
 
 }  // namespace brig

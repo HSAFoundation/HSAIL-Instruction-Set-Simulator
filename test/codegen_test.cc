@@ -19,6 +19,96 @@ namespace brig {
 ErrorReporter* main_reporter = ErrorReporter::get_instance();
 Context* context = new Context(main_reporter);
 
+TEST(CodegenTest, Example5_SimpleCall) {
+  main_reporter->show_error(true);
+  // test error reporter
+  Context* context1 = new Context(main_reporter);
+  BrigDirectiveFunction ref = {
+    40,                       // size
+    BrigEDirectiveFunction,   // kind
+    32,   // c_code
+    8,   // s_name
+    0,   // inParamCount
+    100,  // d_firstScopedDirective
+    1,   // operationCount
+    116,  // d_nextDirective
+    BrigNone,
+    0,
+    0,   // outParamCount
+    0,
+  };
+
+  std::string input("version 1:0:$small;");
+//  ref.major = 1;
+//  ref.minor = 0;
+
+  // current directive offset value
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Version(yylex(), context1));
+
+  input.assign("function &callee()(){ret;}; function &caller()(){{call &callee; }};");
+
+  // test the rule
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Function(yylex(), context1));
+  EXPECT_EQ(0, Function(yylex(), context1));
+  
+  // test the sizes of each section
+  BrigdOffset32_t dsize = context1->get_directive_offset();
+  EXPECT_EQ(116, dsize);
+  BrigdOffset32_t csize = context1->get_code_offset();
+  EXPECT_EQ(64, csize);
+  BrigdOffset32_t osize = context1->get_operand_offset();
+  EXPECT_EQ(16, osize);
+  BrigdOffset32_t ssize = context1->get_string_offset();
+  EXPECT_EQ(16, ssize);
+
+  // test BrigDirectiveFunction, the caller function
+  BrigDirectiveFunction get;
+  context1->get_directive<BrigDirectiveFunction>(
+              context1->current_bdf_offset,
+              &get);
+  EXPECT_EQ(ref.s_name, get.s_name);
+  EXPECT_EQ(ref.c_code, get.c_code);
+  EXPECT_EQ(ref.outParamCount, get.outParamCount);
+  EXPECT_EQ(ref.inParamCount, get.inParamCount);
+  EXPECT_EQ(ref.operationCount, get.operationCount);
+  EXPECT_EQ(ref.d_nextDirective, get.d_nextDirective);
+  EXPECT_EQ(ref.d_firstScopedDirective, get.d_firstScopedDirective);
+
+  // test BrigDirectiveScope
+  BrigDirectiveScope arg_scope;
+  context1->get_directive<BrigDirectiveScope>(100,&arg_scope);
+  EXPECT_EQ(8,arg_scope.size);
+  EXPECT_EQ(BrigEDirectiveArgStart, arg_scope.kind);
+  EXPECT_EQ(32, arg_scope.c_code);
+
+  context1->get_directive<BrigDirectiveScope>(108,&arg_scope);
+  EXPECT_EQ(BrigEDirectiveArgEnd, arg_scope.kind);
+  EXPECT_EQ(64, arg_scope.c_code);
+
+  // test BrigCall
+  BrigInstBase cbr_op;
+  context1->get_code<BrigInstBase>(32,&cbr_op);
+  EXPECT_EQ(32,cbr_op.size);
+  EXPECT_EQ(BrigCall, cbr_op.opcode);
+  EXPECT_EQ(0, cbr_op.o_operands[0]);
+  EXPECT_EQ(0, cbr_op.o_operands[1]);
+  EXPECT_EQ(8, cbr_op.o_operands[2]);
+  EXPECT_EQ(0, cbr_op.o_operands[3]);
+  EXPECT_EQ(0, cbr_op.o_operands[4]);
+
+  // test BrigOperandFunctionRef
+  BrigOperandFunctionRef func_o;
+  context1->get_operand<BrigOperandFunctionRef>(8,&func_o);
+  EXPECT_EQ(8, func_o.size);
+  EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
+  EXPECT_EQ(20, func_o.fn);
+
+  main_reporter->show_error(false);
+  delete context1;
+}
+
 TEST(CodegenTest, Example4_Branch) {
   context->clear_context();
   BrigDirectiveFunction ref = {
