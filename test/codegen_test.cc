@@ -231,6 +231,40 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
 }
 
+
+TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
+  context->clear_context();
+  std::string input("abs_ftz_p_s8x4 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  EXPECT_EQ(0, Instruction2(yylex(), context));
+
+  BrigAluModifier bam;
+  bam.ftz = 1;
+  
+  BrigInstMod ref = {
+    sizeof(ref),      // size
+    BrigEInstMod,     // kind
+    BrigAbs,          // opcode
+    Brigs8x4,         // type
+    BrigPackP,        // packing
+    {8, 20, 0, 0, 0},  // operand
+    bam
+  };
+  
+  BrigInstMod get;
+  context->get_code<BrigInstMod>(
+              0,
+              &get);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.aluModifier.ftz, get.aluModifier.ftz);
+}
+
+
 TEST(CodegenTest, SimplestFunction_CodeGen) {
   context->clear_context();
   BrigDirectiveFunction ref = {

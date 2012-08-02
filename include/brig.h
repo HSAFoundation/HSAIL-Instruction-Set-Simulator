@@ -504,6 +504,19 @@ typedef struct BrigInstBase {
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
 }BrigInstBase;
+
+// BrigInstMod
+// The BrigInstMod format is used for ALU operations with a modifier.
+typedef struct BrigInstMod {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAluModifier aluModifier;
+} BrigInstMod;
+
 // BrigInstBar
 // The BrigInstBar format is used for the barrier and sync operations.
 typedef struct BrigInstBar {
