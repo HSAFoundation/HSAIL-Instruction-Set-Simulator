@@ -3032,7 +3032,7 @@ int FileDecl(unsigned int first_token, Context* context) {
       if (next_token == ';') {
         return 0;
       } else {
-        printf("Missing ';' at the end of statement\n");
+       // "Missing ';' at the end of statement\n"
       }
     }
   }
@@ -3058,6 +3058,49 @@ int SignatureType(unsigned int first_token , Context *context) {
            || _SAMP == next ) {
     return 0;
   }
+  return 1;
+}
+
+int SysCall(unsigned int first_token, Context* context) {
+  // frist token is _SYSCALL "syscall"
+  unsigned int token_next;
+  token_next = yylex();
+  if (!Operand(token_next, context) &&
+      token_next == TOKEN_SREGISTER &&
+      yylex() == ',') {
+    token_next = yylex();
+
+    if (!BaseOperand(token_next, context) &&
+        token_next == TOKEN_INTEGER_CONSTANT &&
+        yylex() == ',') {
+      token_next = yylex();
+
+      if (!Operand(token_next, context) &&
+         (token_next == TOKEN_SREGISTER ||
+          token_next == TOKEN_WAVESIZE ||
+          token_next == TOKEN_INTEGER_CONSTANT) &&
+         yylex() == ',') {
+        token_next = yylex();
+
+        if (!Operand(token_next, context) &&
+           (token_next == TOKEN_SREGISTER ||
+            token_next == TOKEN_WAVESIZE ||
+            token_next == TOKEN_INTEGER_CONSTANT) &&
+           yylex() == ',') {
+          token_next = yylex();
+
+          if (!Operand(token_next, context) &&
+             (token_next == TOKEN_SREGISTER ||
+              token_next == TOKEN_WAVESIZE ||
+              token_next == TOKEN_INTEGER_CONSTANT)) {
+            if (yylex() == ';') {
+              return 0;
+            }  // ';'
+          }  // 5 operand
+        }  // 4 operand
+      }  // 3 operand
+    }  // 2 base operand
+  }  // 1 operand
   return 1;
 }
 

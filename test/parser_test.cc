@@ -904,6 +904,51 @@ TEST(ParserTest, FileDecl) {
   std::string input("file 1 \"this is a file\";");
   lexer->set_source_string(input);
   EXPECT_EQ(0, FileDecl(lexer->get_next_token(), context));
+
+  // wrong case
+  input.assign("file 2 ;");  // lack of file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file \"this is a file\";");  // lack of file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file 2 \"this is a file\"");  // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file \"this is a file\" 2;");  // reverse order
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file 1 2;");  // two integer number
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file \"file1\" \"file2\";");  // two file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file 1 \"file1\" \"file2\";");  // redundant file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file 1 2 \"file\";");  // redundant integer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file 1.2 \"file\";");  // not integer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file;");  // lack of number , file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file $s1 \"file\";");  // register not allowed
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
 };
 
 TEST(ParserTest, VectorToken) {
@@ -917,6 +962,79 @@ TEST(ParserTest, VectorToken) {
   input.assign("_v4");
   lexer->set_source_string(input);
   EXPECT_EQ(0, VectorToken(lexer->get_next_token(), context));
+};
+
+TEST(ParserTest, SysCall) {
+  // syscall dest, n, src0, src1, src2;
+  // dest: must be a 32-bit register
+  // n: An integer literal
+  // src: must be a s reg, imm, WAVESIZE
+  std::string input("syscall $s1, 3, $s2, $s3, $s4;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s1, 0xff, 1, 2, 3;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s1, 0xff, 1, $s3, 2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s1, 0xff, 1, $s3, WAVESIZE;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s11, 0xff, WAVESIZE, $s3, WAVESIZE;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  // wrong case
+  input.assign("syscall $d2, 0xff, $s1, $s3, $s4;");  // d register is 64-bit
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $c2, 0xff, $s1, $s3, $s4;");  // c register is 1-bit
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $q2, 0xff, $s1, $s3, $s4;");  // q register is 128-bit
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s2, 0xff, $d1, $s3, $s4;");  // src must be s register
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s2, $s4, $s1, $s3, $s4;");
+  // n must be integer literal
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 1.1, $s1, $s3, $s4;");
+  // n must be integer literal
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 3, $s1, $s3, $s4");  // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3 3, $s1, $s3, $s4;");  // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 3 $s1, $s3, $s4;");  // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 3, $s1 $s3, $s4;");  // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 3, $s1, $s3 $s4;");  // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
 };
 
 // ------------------  PARSER WRAPPER TEST -----------------
