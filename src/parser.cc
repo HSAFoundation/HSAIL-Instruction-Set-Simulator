@@ -585,7 +585,7 @@ int Instruction2(unsigned int first_token, Context* context) {
       sizeof(inst_op),
       BrigEInstBase,
       opcode,
-      0,
+      Brigb32,
       BrigNoPacking,
       {0, 0, 0, 0, 0}
       };
@@ -755,7 +755,7 @@ int Instruction2(unsigned int first_token, Context* context) {
       sizeof(inst_op),
       BrigEInstBase,
       opcode,
-      0,
+      Brigb32,
       BrigNoPacking,
       {0, 0, 0, 0, 0}
       };
@@ -823,7 +823,7 @@ int Instruction3(unsigned int first_token, Context* context) {
     32,
     BrigEInstBase,
     opcode,
-    0,
+    Brigb32,
     BrigNoPacking,
     {0, 0, 0, 0, 0}
   };
@@ -1802,7 +1802,7 @@ int ArgBlock(unsigned int first_token, Context* context) {
         32,
         BrigEInstBase,
         BrigRet,
-        Brigf32,
+        Brigb32,
         BrigNoPacking,
         {0, 0, 0, 0, 0}
         };
@@ -1997,7 +1997,7 @@ int Codeblock(unsigned int first_token, Context* context) {
         32,
         BrigEInstBase,
         BrigRet,
-        Brigf32,
+        Brigb32,
         BrigNoPacking,
         {0, 0, 0, 0, 0}
         };
@@ -2382,7 +2382,7 @@ int Branch(unsigned int first_token, Context* context) {
       32,
       BrigEInstBase,
       BrigCbr,
-      0,  // no specification of datatype in Brn and Cbr.
+      Brigb32,  // no specification of datatype in Brn and Cbr.
       BrigNoPacking,
       {0, 0, 0, 0, 0}
     };
@@ -2603,7 +2603,7 @@ int Call(unsigned int first_token, Context* context) {
       32,
       BrigEInstBase,
       BrigCall,
-      0,
+      Brigb32,
       BrigNoPacking,
       {0, 0, 0, 0, 0}
     };
