@@ -85,6 +85,7 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context);
 int VectorToken(unsigned int first_token , Context *context);
 int SignatureType(unsigned int first_token , Context *context);
 int FileDecl(unsigned int first_token, Context* context);
+int SysCall(unsigned int first_token, Context* context);
 
 
 }  // namespace brig

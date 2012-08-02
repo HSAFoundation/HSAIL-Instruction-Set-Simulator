@@ -812,6 +812,78 @@ TEST(ParserTest, VectorToken) {
   EXPECT_EQ(0, VectorToken(yylex(), context));
 };
 
+TEST(ParserTest, SysCall) {
+  // syscall dest, n, src0, src1, src2;
+  // dest: must be a 32-bit register
+  // n: An integer literal
+  // src: must be a s reg, imm, WAVESIZE
+  std::string input("syscall $s1, 3, $s2, $s3, $s4;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s1, 0xff, 1, 2, 3;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+  
+  input.assign("syscall $s1, 0xff, 1, $s3, 2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s1, 0xff, 1, $s3, WAVESIZE;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s11, 0xff, WAVESIZE, $s3, WAVESIZE;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, SysCall(yylex(), context));
+
+  // wrong case
+  input.assign("syscall $d2, 0xff, $s1, $s3, $s4;"); // d register is 64-bit
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $c2, 0xff, $s1, $s3, $s4;"); // c register is 1-bit
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $q2, 0xff, $s1, $s3, $s4;"); // q register is 128-bit
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s2, 0xff, $d1, $s3, $s4;"); // src must be s register
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s2, $s4, $s1, $s3, $s4;"); // n must be integer literal
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 1.1, $s1, $s3, $s4;"); // n must be integer literal
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 3, $s1, $s3, $s4"); // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3 3, $s1, $s3, $s4;"); // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 3 $s1, $s3, $s4;"); // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 3, $s1 $s3, $s4;"); // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+  input.assign("syscall $s3, 3, $s1, $s3 $s4;"); // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, SysCall(yylex(), context));
+
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
