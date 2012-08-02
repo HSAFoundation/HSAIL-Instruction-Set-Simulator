@@ -753,6 +753,51 @@ TEST(ParserTest, FileDecl) {
   std::string input("file 1 \"this is a file\";");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, FileDecl(yylex(), context));
+
+  // wrong case
+  input.assign("file 2 ;");  // lack of file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+  
+  input.assign("file \"this is a file\";");  // lack of file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+  
+  input.assign("file 2 \"this is a file\"");  // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file \"this is a file\" 2;" );  // reverse order
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+  
+  input.assign("file 1 2;");  // two integer number
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file \"file1\" \"file2\";");  // two file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file 1 \"file1\" \"file2\";");  // redundant file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file 1 2 \"file\";");  // redundant integer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+  
+  input.assign("file 1.2 \"file\";");  // not integer
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+
+  input.assign("file;");  // lack of number , file string
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
+  
+  input.assign("file $s1 \"file\";");  // register not allowed
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, FileDecl(yylex(), context));
 };
 
 TEST(ParserTest, VectorToken) {
