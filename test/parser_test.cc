@@ -627,7 +627,7 @@ TEST(ParserTest, BranchOperation) {
   lexer->set_source_string(input);
   EXPECT_EQ(0, Branch(lexer->get_next_token(), context));
 
-  input.assign("cbr_width(all)_fbar $c1, 10 , [@first, @then];");
+  input.assign("\n cbr_width(all)_fbar $c1, 10 , [@first, @then];");
   lexer->set_source_string(input);
   EXPECT_EQ(0, Branch(lexer->get_next_token(), context));
 

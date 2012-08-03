@@ -1,3 +1,5 @@
+/* Copyright 2012 <MulticorewareInc> */
+
 #include <string>
 #include "brig.h"
 #include "brig_buffer.h"
@@ -215,11 +217,6 @@ BrigSymbolModifier Context::get_symbol_modifier() const {
   return symModifier;
 }
 
-BrigPacking16_t Context::get_packing() const {
-  return packing;
-}
-
-
 BrigMachine16_t Context::get_machine() const {
   return machine;
 }
@@ -290,9 +287,6 @@ void Context::set_opcode(BrigOpcode32_t opcode) {
   this->opcode = opcode;
 }
 
-void Context::set_packing(BrigPacking16_t packing) {
-  this->packing = packing;
-}
 // let context know the location of current operand
 void Context::set_operand_loc(char loc) {
   this->operand_loc = loc;
@@ -321,47 +315,6 @@ void Context::set_current_inst_offset(BrigcOffset32_t offset) {
 void Context::set_current_bdf_offset(BrigdOffset32_t offset) {
   this->current_bdf_offset = offset;
 }
-
-void Context::insert_to_function_map(std::string key, uint32_t value) {
-  if (!func_map.count(key)) {
-    func_map[key] = value;
-  }
-}
-
-int Context::lookup_function_map(std::string key) {
-  if (func_map.count(key))
-    return func_map[key];
-  else
-    return -1;
-}
-
-void Context::insert_to_operand_map(std::string key, uint32_t value) {
-  if (!operand_map.count(key)) {
-    operand_map[key] = value;
-  }
-}
-
-int Context::lookup_operand_map(std::string key) {
-  if (operand_map.count(key))
-    return operand_map[key];
-  else
-    return -1;
-}
-
-void Context::insert_to_label_o_map(std::string key, uint32_t value) {
-  if (!label_o_map.count(key)) {
-    label_o_map[key] = value;
-  }
-}
-
-int Context::lookup_label_o_map(std::string key) {
-  if (label_o_map.count(key))
-    return label_o_map[key];
-  else
-    return -1;
-}
-
-
 
 }  // namespace brig
 }  // namespace hsa

@@ -238,7 +238,6 @@ class Context {
     BrigAttribute16_t get_attribute() const;
     BrigAluModifier get_alu_modifier() const;
     BrigSymbolModifier get_symbol_modifier() const;
-    BrigPacking16_t get_packing() const;
     BrigMachine16_t get_machine() const;
     BrigProfile16_t get_profile() const;
     BrigSftz16_t get_ftz() const;
@@ -258,7 +257,6 @@ class Context {
     void set_fbar(int fbar);
     void set_type(BrigDataType16_t type);
     void set_opcode(BrigOpcode32_t opcode);
-    void set_packing(BrigPacking16_t packing);
     // let context know the location of current operand
     void set_operand_loc(char loc);
 
@@ -280,16 +278,6 @@ class Context {
 
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
-
-    void insert_to_function_map(std::string key, uint32_t value);
-    int lookup_function_map(std::string key);
-
-    void insert_to_operand_map(std::string key, uint32_t value);
-    int lookup_operand_map(std::string key);
-
-    void insert_to_label_o_map(std::string key, uint32_t value);
-    int lookup_label_o_map(std::string key);
-
 
     BrigoOffset32_t current_label_offset;
     BrigcOffset32_t current_inst_offset;
@@ -324,13 +312,9 @@ class Context {
     BrigDataType16_t type;
     BrigOpcode32_t opcode;
     BrigAluModifier aluModifier;
-    BrigPacking16_t packing;
     char operand_loc;   // 1 -> 5
 
-
     bool arg_output;
-
-
 };
 
 }  // namespace brig

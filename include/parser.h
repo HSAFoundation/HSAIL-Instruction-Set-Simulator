@@ -8,28 +8,10 @@
 
 namespace hsa {
 namespace brig {
-enum TerminalType { UNKNOWN_TERM = 0,
-                    REGISTER,
-                    DATA_TYPE_ID,
-                    QUERY_OP,
-                    INT_ROUNDING,
-                    FLOAT_ROUNDING,
-                    PACKING,
-                    INSTRUCTION2_OPCODE,
-                    INSTRUCTION2_OPCODE_NODT,
-                    INSTRUCTION2_OPCODE_FTZ,
-                    INSTRUCTION3_OPCODE,
-                    INSTRUCTION3_OPCODE_FTZ,
-                    TARGET,
-                    INITIALIZABLE_ADDRESS,
-                    UNINITIALIZABLE_ADDRESS
-                  };
 
 // scan the source code and add symbols to string buffer
 void ScanString(unsigned int first_token, Context* context);
 // classify token into different terminal type
-TerminalType GetTokenType(unsigned int token);
-
 int Query(unsigned int queryOp, Context* context);
 int Operand(unsigned int first_token, Context* context);
 int Identifier(unsigned int first_token, Context* context);

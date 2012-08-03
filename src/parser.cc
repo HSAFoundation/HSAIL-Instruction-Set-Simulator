@@ -7,392 +7,26 @@
 #include "lexer.h"
 #include "error_reporter_interface.h"
 
+
+// variables returned by lexer
 extern int int_val;
 extern char* string_val;
 extern float float_val;
 extern double double_val;
+extern TerminalType token_type;
+extern BrigDataType16_t data_type;
+extern BrigPacking16_t  packing;
+extern BrigOpcode32_t   opcode;
 extern int yycolno;
+
 
 namespace hsa {
 namespace brig {
-
-TerminalType GetTokenType(unsigned int token) {
-  switch (token) {
-    /* DataTypeId */
-  case _U32:
-  case _S32:
-  case _S64:
-  case _U64:
-  case _B1:
-  case _B32:
-  case _F64:
-  case _F32:
-  case _B64:
-  case _B8:
-  case _B16:
-  case _S8:
-  case _S16:
-  case _U8:
-  case _U16:
-  case _F16:
-  case _B128:
-  case _U8X4:
-  case _S8X4:
-  case _U16X2:
-  case _S16X2:
-  case _F16X2:
-  case _F32X2:
-  case _U8X8:
-  case _S8X8:
-  case _U16X4:
-  case _S16X4:
-  case _F16X4:
-  case _U8X16:
-  case _S8X16:
-  case _U16X8:
-  case _S16X8:
-  case _F16X8:
-  case _F32X4:
-  case _S32X4:
-  case _U32X4:
-  case _F64X2:
-  case _S64X2:
-  case _U64X2:
-    return DATA_TYPE_ID;
-
-    /* QueryOp */
-  case QUERY_ORDER:
-  case QUERY_DATA:
-  case QUERY_ARRAY:
-  case QUERY_WIDTH:
-  case QUERY_DEPTH:
-  case QUERY_HEIGHT:
-  case QUERY_NORMALIZED:
-  case QUERY_FILTERING:
-    return QUERY_OP;
-
-    /* Register */
-  case TOKEN_CREGISTER:
-  case TOKEN_DREGISTER:
-  case TOKEN_SREGISTER:
-  case TOKEN_QREGISTER:
-    return REGISTER;
-
-    /* IntRounding */
-  case _UPI:
-  case _DOWNI:
-  case _ZEROI:
-  case _NEARI:
-    return INT_ROUNDING;
-
-    /* FloatRounding */
-  case _UP:
-  case _DOWN:
-  case _ZERO:
-  case _NEAR:
-    return FLOAT_ROUNDING;
-    /* Packing */
-  case _PP:
-  case _PS:
-  case _SP:
-  case _SS:
-  case __S:
-  case __P:
-  case _PP_SAT:
-  case _PS_SAT:
-  case _SP_SAT:
-  case _SS_SAT:
-  case _S_SAT:
-  case _P_SAT:
-    return PACKING;
-
-  case _SMALL:
-  case _LARGE:
-  case _FULL:
-  case _REDUCED:
-  case _SFTZ:
-  case _NOSFTZ:
-    return TARGET;
-
-    /* Instruction2Opcode */
-  case ABS:
-  case NEG:
-  case NOT:
-  case POPCOUNT:
-  case FIRSTBIT:
-  case LASTBIT:
-  case BITREV:
-  case MOVS_LO:
-  case MOVS_HI:
-  case FBAR_INITSIZE:
-  case FBAR_INIT:
-  case FBAR_RELEASECF:
-  case COUNT:
-  case MASK:
-    return INSTRUCTION2_OPCODE;
-
-    /* Instruction2Opcode NoDT */
-  case UNPACK3:
-  case UNPACK2:
-  case UNPACK1:
-  case UNPACK0:
-  case ALLOCA:
-  case WORKITEMID:
-  case WORKITEMAID:
-  case WORKGROUPSIZE:
-  case NDRANGESIZE:
-  case NDRANGEGROUPS:
-    return INSTRUCTION2_OPCODE_NODT;
-
-    /* Instruction2OpcodeFTZ */
-  case SQRT:
-  case FRACT:
-  case FCOS:
-  case FSIN:
-  case FLOG2:
-  case FEXP2:
-  case FSQRT:
-  case FRSQRT:
-  case FRCP:
-    return INSTRUCTION2_OPCODE_FTZ;
-
-    /* Instruction3Opcode */
-  case ADD:
-  case CARRY:
-  case BORROW:
-  case DIV:
-  case REM:
-  case SUB:
-  case SHL:
-  case SHR:
-  case AND:
-  case XOR:
-  case OR:
-  case UNPACKLO:
-  case UNPACKHI:
-  case MOVD_LO:
-  case MOVD_HI:
-  case COPYSIGN:
-  case CLASS:
-  case SEND:
-  case RECEIVE:
-    return INSTRUCTION3_OPCODE;
-  case MAX:
-  case MIN:
-    return INSTRUCTION3_OPCODE_FTZ;
-    /* initializable address */
-  case READONLY:
-  case GLOBAL:
-    return INITIALIZABLE_ADDRESS;
-  case PRIVATE:
-  case GROUP:
-  case SPILL:
-    return UNINITIALIZABLE_ADDRESS;
-  default:
-    return UNKNOWN_TERM;  // unknown
-  }
-}
-
-BrigDataType16_t GetDataType(int token) {
-  switch (token) {
-    /* DataTypeId */
-  case _U32:
-    return Brigu32;
-    break;
-  case _S32:
-    return Brigs32;
-    break;
-  case _S64:
-    return Brigs64;
-    break;
-  case _U64:
-    return Brigu64;
-    break;
-  case _B1:
-    return Brigb1;
-    break;
-  case _B32:
-    return Brigb32;
-    break;
-  case _F64:
-    return Brigf64;
-    break;
-  case _F32:
-    return Brigf32;
-    break;
-  case _B64:
-    return Brigb64;
-    break;
-  case _B8:
-    return Brigb8;
-    break;
-  case _B16:
-    return Brigb16;
-    break;
-  case _S8:
-    return Brigs8;
-    break;
-  case _S16:
-    return Brigs16;
-    break;
-  case _U8:
-    return Brigu8;
-    break;
-  case _U16:
-    return Brigu16;
-    break;
-  case _F16:
-    return Brigf16;
-    break;
-  case _B128:
-    return Brigb128;
-    break;
-  case _U8X4:
-    return Brigu8x4;
-    break;
-  case _S8X4:
-    return Brigs8x4;
-    break;
-  case _U16X2:
-    return Brigu16x2;
-    break;
-  case _S16X2:
-    return Brigs16x2;
-    break;
-  case _F16X2:
-    return Brigf16x2;
-    break;
-  case _F32X2:
-    return Brigf32x2;
-    break;
-  case _U8X8:
-    return Brigu8x8;
-    break;
-  case _S8X8:
-    return Brigs8x8;
-    break;
-  case _U16X4:
-    return Brigu16x4;
-    break;
-  case _S16X4:
-    return Brigs16x4;
-    break;
-  case _F16X4:
-    return Brigf16x4;
-    break;
-  case _U8X16:
-    return Brigu8x16;
-    break;
-  case _S8X16:
-    return Brigs8x16;
-    break;
-  case _U16X8:
-    return Brigu16x8;
-    break;
-  case _S16X8:
-    return Brigs16x8;
-    break;
-  case _F16X8:
-    return Brigf16x8;
-    break;
-  case _F32X4:
-    return Brigf32x4;
-    break;
-  case _S32X4:
-    return Brigs32x4;
-    break;
-  case _U32X4:
-    return Brigu32x4;
-    break;
-  case _F64X2:
-    return Brigf64x2;
-    break;
-  case _S64X2:
-    return Brigs64x2;
-    break;
-  case _U64X2:
-    return Brigu64x2;
-    break;
-  case _ROIMG:
-    return BrigROImg;
-    break;
-  case _RWIMG:
-    return BrigRWImg;
-    break;
-  case _SAMP:
-    return BrigSamp;
-    break;
-}
-}
-
-BrigOpcode32_t GetOpCode(int token) {
-  switch (token) {
-    /* opcode */
-  case ABS:
-    return BrigAbs;
-    break;
-  case ADD:
-    return BrigAdd;
-    break;
-  case CARRY:
-    return BrigCarry;
-    break;
-  case BORROW:
-    return BrigBorrow;
-    break;
-  case SQRT:
-    return BrigSqrt;
-    break;    
-// TBD, need to add complete list of all operations.
-  }
-}
-
-BrigPacking16_t GetPacking(int token) {
-  switch (token) {
-  /* packing type */
-  case _PP:
-    return BrigPackPP;
-    break;
-  case _PS:
-    return BrigPackPS;
-    break;
-  case _SP:
-    return BrigPackSP;
-    break;
-  case _SS:
-    return BrigPackSS;
-    break;
-  case __S:
-    return BrigPackS;
-    break;
-  case __P:
-    return BrigPackP;
-    break;
-  case _PP_SAT:
-    return BrigPackPPsat;
-    break;
-  case _PS_SAT:
-    return BrigPackPSsat;
-    break;
-  case _SP_SAT:
-    return BrigPackSPsat;
-    break;
-  case _SS_SAT:
-    return BrigPackSSsat;
-    break;
-  case _S_SAT:
-    return BrigPackSsat;
-    break;
-  case _P_SAT:
-    return BrigPackPsat;
-    break;
-  }
-}
-
 int Query(unsigned int QueryOp, Context* context) {
   // next token should be a dataTypeId
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  if (GetTokenType(yylex()) == DATA_TYPE_ID) {
+  int next = yylex();
+  if (token_type == DATA_TYPE_ID) {
     // next token should be an Operand
     if (!Operand(yylex(), context)) {
       // next should be a comma
@@ -430,7 +64,7 @@ int Query(unsigned int QueryOp, Context* context) {
 
 int Operand(unsigned int first_token, Context* context) {
   if (!Identifier(first_token, context)) {  // an Identifier
-    if (GetTokenType(first_token) == REGISTER) {
+    if (token_type == REGISTER) {
       BrigOperandReg bor;
       bor.size = 12;
       bor.kind = BrigEOperandReg;
@@ -453,8 +87,8 @@ int Operand(unsigned int first_token, Context* context) {
       std::string name(string_val);
       bor.name = context->add_symbol(name);
 
-      if (context->lookup_operand_map(name) < 0) {
-        context->insert_to_operand_map(name, context->get_operand_offset());
+      if (!context->operand_map.count(name)) {
+        context->operand_map[name] = context->get_operand_offset();
         context->append_operand(&bor);
       }
     }
@@ -470,10 +104,9 @@ int Identifier(unsigned int first_token, Context* context) {
     return 0;
   } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
     return 0;
-  } else if (GetTokenType(first_token) == REGISTER) {
+  } else if (token_type == REGISTER) {
     return 0;
   }
-
   return 1;
 }
 
@@ -529,7 +162,7 @@ int BaseOperand(unsigned int first_token, Context* context) {
 
      return 0;
     }
-  } else if (GetTokenType(first_token) == DATA_TYPE_ID) {
+  } else if (token_type == DATA_TYPE_ID) {
     // scan next token
     if (yylex() == '(') {   // should be '('
       // check if we have a decimal list single or float list single
@@ -671,7 +304,7 @@ int AddressableOperand(unsigned int first_token, Context* context) {
                               yylineno,
                               yycolno);
           }
-        } else if (GetTokenType(next) == REGISTER) {
+        } else if (token_type == REGISTER) {
           next = yylex();
           if (next == '>') {
             if (yylex() == ']')
@@ -810,7 +443,7 @@ int RoundingMode(unsigned int first_token,
     next = yylex();
     *last_token = next;
 
-    if (GetTokenType(next) == FLOAT_ROUNDING) {
+    if (token_type == FLOAT_ROUNDING) {
       // next is floatRounding
       mod.floatOrInt = 1;
       switch (next) {
@@ -829,7 +462,7 @@ int RoundingMode(unsigned int first_token,
 
     context->set_alu_modifier(mod);
     return 0;
-  } else if (GetTokenType(first_token) == INT_ROUNDING) {
+  } else if (token_type == INT_ROUNDING) {
     mod.floatOrInt = 0;
     switch (first_token) {
       case _UPI:
@@ -843,7 +476,7 @@ int RoundingMode(unsigned int first_token,
     }
     context->set_alu_modifier(mod);
     return 0;
-  } else if (GetTokenType(first_token) == FLOAT_ROUNDING) {
+  } else if (token_type == FLOAT_ROUNDING) {
     mod.floatOrInt = 1;
     switch (first_token) {
       case _UP:
@@ -865,25 +498,28 @@ int RoundingMode(unsigned int first_token,
 
 int Instruction2(unsigned int first_token, Context* context) {
   // First token must be an Instruction2Opcode
-  unsigned int next = yylex();
+  unsigned int next;
   // to get last token returned by RoundingMode in case _ftz
   unsigned int temp = 0;
   bool is_ftz = false;
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  
-  if (GetTokenType(first_token) == INSTRUCTION2_OPCODE) {
-    if (!RoundingMode(next, &is_ftz, &temp, context)) {  // need to use BrigInstMod
+
+
+  if (token_type == INSTRUCTION2_OPCODE) {
+    next = yylex();
+    if (!RoundingMode(next, &is_ftz, &temp, context)) {
+      // need to use BrigInstMod
       // there is a rounding mode specified
       if (is_ftz)
         // need to check the token returned by rounding mode
         next = temp;
       else
         next = yylex();
-      
+
       BrigInstMod inst_op = {
         sizeof(inst_op),    // size
         BrigEInstMod,       // kind
-        GetOpCode(first_token),  // opcode
+        opcode,  // opcode
         0,  // type
         BrigNoPacking,    // packing
         {0, 0, 0, 0, 0},   // o_operands
@@ -891,90 +527,25 @@ int Instruction2(unsigned int first_token, Context* context) {
       };
 
       // check whether there is a Packing
-      if (GetTokenType(next) == PACKING) {
+      if (token_type == PACKING) {
         // there is packing
-        inst_op.packing = GetPacking(next);
-        context->set_packing(inst_op.packing);
+        inst_op.packing = packing;
         next = yylex();
       }
 
       // now we must have a dataTypeId
-      if (GetTokenType(next) == DATA_TYPE_ID) {
+      if (token_type == DATA_TYPE_ID) {
         // check the operands
-        inst_op.type = GetDataType(next);
+        inst_op.type = data_type;
         next = yylex();
         std::string oper_str = string_val;
         if (!Operand(next, context)) {
-          inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+          inst_op.o_operands[0] = context->operand_map[oper_str];
           if (yylex() == ',') {
             next = yylex();
             oper_str = string_val;
             if (!Operand(next, context)) {
-              inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
-              if (yylex() == ';') {
-                context->append_code(&inst_op);
-                // if the rule is valid, just write to the .code section,
-                // may need to edit others, worry that later.
-                return 0;
-              } else {
-                rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
-                                  yylineno,
-                                  yycolno);
-              }
-
-            } else {
-              rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
-                                yylineno,
-                                yycolno);
-            }
-
-          } else {
-            rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
-                              yylineno,
-                              yycolno);
-          }
-        } else {
-          rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
-                            yylineno,
-                            yycolno);
-        }
-      } else {
-        rpt->report_error(ErrorReporterInterface::MISSING_DATA_TYPE,
-                          yylineno,
-                          yycolno);
-      }
-      return 1;      
-    } else {  // use BrigInstBase
-       // default value.
-      BrigInstBase inst_op = {
-      sizeof(inst_op),
-      BrigEInstBase,
-      GetOpCode(first_token),
-      0,
-      BrigNoPacking,
-      {0, 0, 0, 0, 0}
-      };
-      // check whether there is a Packing
-      if (GetTokenType(next) == PACKING) {
-        // there is packing
-        inst_op.packing = GetPacking(next);
-        context->set_packing(inst_op.packing);
-        next = yylex();
-      }
-
-      // now we must have a dataTypeId
-      if (GetTokenType(next) == DATA_TYPE_ID) {
-        // check the operands
-        inst_op.type = GetDataType(next);
-        next = yylex();
-        std::string oper_str = string_val;
-        if (!Operand(next, context)) {
-          inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
-          if (yylex() == ',') {
-            next = yylex();
-            oper_str = string_val;
-            if (!Operand(next, context)) {
-              inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+              inst_op.o_operands[1] = context->operand_map[oper_str];
               if (yylex() == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
@@ -1008,8 +579,73 @@ int Instruction2(unsigned int first_token, Context* context) {
                           yycolno);
       }
       return 1;
-    }   
-  } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_NODT) {
+    } else {  // use BrigInstBase
+       // default value.
+      BrigInstBase inst_op = {
+      sizeof(inst_op),
+      BrigEInstBase,
+      opcode,
+      0,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0}
+      };
+
+      // check whether there is a Packing
+      if (token_type == PACKING) {
+        // there is packing
+        inst_op.packing = packing;
+        next = yylex();
+      }
+
+      // now we must have a dataTypeId
+      if (token_type == DATA_TYPE_ID) {
+        // check the operands
+        inst_op.type = data_type;
+        next = yylex();
+        std::string oper_str = string_val;
+        if (!Operand(next, context)) {
+          inst_op.o_operands[0] = context->operand_map[oper_str];
+          if (yylex() == ',') {
+            next = yylex();
+            oper_str = string_val;
+            if (!Operand(next, context)) {
+              inst_op.o_operands[1] = context->operand_map[oper_str];
+              if (yylex() == ';') {
+                context->append_code(&inst_op);
+                // if the rule is valid, just write to the .code section,
+                // may need to edit others, worry that later.
+                return 0;
+              } else {
+                rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+                                  yylineno,
+                                  yycolno);
+              }
+
+            } else {
+              rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+                                yylineno,
+                                yycolno);
+            }
+
+          } else {
+            rpt->report_error(ErrorReporterInterface::MISSING_COMMA,
+                              yylineno,
+                              yycolno);
+          }
+        } else {
+          rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+                            yylineno,
+                            yycolno);
+        }
+      } else {
+        rpt->report_error(ErrorReporterInterface::MISSING_DATA_TYPE,
+                          yylineno,
+                          yycolno);
+      }
+      return 1;
+    }
+  } else if (token_type == INSTRUCTION2_OPCODE_NODT) {
+    next = yylex();
     if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
       if (is_ftz)
@@ -1047,20 +683,21 @@ int Instruction2(unsigned int first_token, Context* context) {
                         yycolno);
     }
     return 1;
-  } else if (GetTokenType(first_token) == INSTRUCTION2_OPCODE_FTZ) {
+  } else if (token_type == INSTRUCTION2_OPCODE_FTZ) {
+    next = yylex();
     // Optional FTZ
-    if (next == _FTZ) { // use BrigInstMod
+    if (next == _FTZ) {  // use BrigInstMod
       // has a _ftz
       BrigAluModifier bam;
       bam.ftz = 1;
       context->set_alu_modifier(bam);
-      
+
       next = yylex();
       // default value.
       BrigInstMod inst_op = {
         sizeof(inst_op),    // size
         BrigEInstMod,       // kind
-        GetOpCode(first_token),  // opcode
+        opcode,  // opcode
         0,  // type
         BrigNoPacking,    // packing
         {0, 0, 0, 0, 0},   // o_operands
@@ -1068,18 +705,18 @@ int Instruction2(unsigned int first_token, Context* context) {
       };
 
       // now we must have a dataTypeId
-      if (GetTokenType(next) == DATA_TYPE_ID) {
+      if (token_type == DATA_TYPE_ID) {
         // check the operands
-        inst_op.type = GetDataType(next);
+        inst_op.type = data_type;
         next = yylex();
         std::string oper_str = string_val;
         if (!Operand(next, context)) {
-          inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+          inst_op.o_operands[0] = context->operand_map[oper_str];
           if (yylex() == ',') {
             next = yylex();
             oper_str = string_val;
             if (!Operand(next, context)) {
-              inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+              inst_op.o_operands[1] = context->operand_map[oper_str];
               if (yylex() == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
@@ -1110,32 +747,32 @@ int Instruction2(unsigned int first_token, Context* context) {
                           yylineno,
                           yycolno);
       }
-      return 1;      
-      
-    } else { // use BrigInstBase
+      return 1;
+
+    } else {  // use BrigInstBase
       // default value.
       BrigInstBase inst_op = {
       sizeof(inst_op),
       BrigEInstBase,
-      GetOpCode(first_token),
+      opcode,
       0,
       BrigNoPacking,
       {0, 0, 0, 0, 0}
       };
 
       // now we must have a dataTypeId
-      if (GetTokenType(next) == DATA_TYPE_ID) {
+      if (token_type == DATA_TYPE_ID) {
         // check the operands
-        inst_op.type = GetDataType(next);
+        inst_op.type = data_type;
         next = yylex();
         std::string oper_str = string_val;
         if (!Operand(next, context)) {
-          inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+          inst_op.o_operands[0] = context->operand_map[oper_str];
           if (yylex() == ',') {
             next = yylex();
             oper_str = string_val;
             if (!Operand(next, context)) {
-              inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+              inst_op.o_operands[1] = context->operand_map[oper_str];
               if (yylex() == ';') {
                 context->append_code<BrigInstBase>(&inst_op);
                 // if the rule is valid, just write to the .code section,
@@ -1176,7 +813,7 @@ int Instruction2(unsigned int first_token, Context* context) {
 int Instruction3(unsigned int first_token, Context* context) {
   ErrorReporterInterface* rpt = context->get_error_reporter();
   // First token must be an Instruction3Opcode
-  unsigned int next = yylex();
+  unsigned int next;
   // to get last token returned by RoundingMode in case _ftz
   unsigned int temp = 0;
   bool is_ftz = false;
@@ -1185,13 +822,14 @@ int Instruction3(unsigned int first_token, Context* context) {
   BrigInstBase inst_op = {
     32,
     BrigEInstBase,
-    GetOpCode(first_token),
+    opcode,
     0,
     BrigNoPacking,
     {0, 0, 0, 0, 0}
   };
 
-  if (GetTokenType(first_token) == INSTRUCTION3_OPCODE) {
+  if (token_type == INSTRUCTION3_OPCODE) {
+    next = yylex();
     if (!RoundingMode(next, &is_ftz, &temp, context)) {
       // there is a rounding mode specified
       if (is_ftz)
@@ -1202,32 +840,31 @@ int Instruction3(unsigned int first_token, Context* context) {
     }
 
     // check whether there is a Packing
-    if (GetTokenType(next) == PACKING) {
+    if (token_type == PACKING) {
       // there is packing
-      inst_op.packing = GetPacking(next);
-      context->set_packing(inst_op.packing);
+      inst_op.packing = packing;
       next = yylex();
     }
 
     // now we must have a dataTypeId
-    if (GetTokenType(next) == DATA_TYPE_ID) {
+    if (token_type == DATA_TYPE_ID) {
       // check the operands
-      inst_op.type = GetDataType(next);
+      inst_op.type = data_type;
       next = yylex();
       std::string oper_str = string_val;
 
       if (!Operand(next, context)) {
-        inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+        inst_op.o_operands[0] = context->operand_map[oper_str];
         if (yylex() == ',') {
           next = yylex();
           oper_str = string_val;
           if (!Operand(next, context)) {
-            inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+            inst_op.o_operands[1] = context->operand_map[oper_str];
             if (yylex() == ',') {
               next = yylex();
               oper_str = string_val;
               if (!Operand(next, context)) {
-                inst_op.o_operands[2] = context->lookup_operand_map(oper_str);
+                inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (yylex() == ';') {
                   context->append_code<BrigInstBase>(&inst_op);
                   return 0;
@@ -1267,7 +904,8 @@ int Instruction3(unsigned int first_token, Context* context) {
                         yycolno);
     }
     return 1;
-  } else if (GetTokenType(first_token) == INSTRUCTION3_OPCODE_FTZ) {
+  } else if (token_type == INSTRUCTION3_OPCODE_FTZ) {
+    next = yylex();
     // Optional FTZ
     if (next == _FTZ) {
       // has a _ftz
@@ -1275,30 +913,30 @@ int Instruction3(unsigned int first_token, Context* context) {
     }
 
     // check whether there is a Packing
-    if (GetTokenType(next) == PACKING)
+    if (token_type == PACKING)
       // there is packing
-      context->set_packing(GetPacking(next));
+      inst_op.packing = packing;
       next = yylex();
 
     // now we must have a dataTypeId
-    if (GetTokenType(next) == DATA_TYPE_ID) {
+    if (token_type == DATA_TYPE_ID) {
       // check the operands
-      inst_op.type = GetDataType(next);
+      inst_op.type = data_type;
       next = yylex();
       std::string oper_str = string_val;
 
       if (!Operand(next, context)) {
-        inst_op.o_operands[0] = context->lookup_operand_map(oper_str);
+        inst_op.o_operands[0] = context->operand_map[oper_str];
         if (yylex() == ',') {
           next = yylex();
           oper_str = string_val;
           if (!Operand(next, context)) {
-            inst_op.o_operands[1] = context->lookup_operand_map(oper_str);
+            inst_op.o_operands[1] = context->operand_map[oper_str];
             if (yylex() == ',') {
               next = yylex();
               oper_str = string_val;
               if (!Operand(next, context)) {
-                inst_op.o_operands[2] = context->lookup_operand_map(oper_str);
+                inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (yylex() == ';') {
                   context->append_code<BrigInstBase>(&inst_op);
                   return 0;
@@ -1364,19 +1002,17 @@ int Version(unsigned int first_token, Context* context) {
   bdv.ftz = BrigENosftz;
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
     bdv.major = int_val;
-    // printf("Major = %d\n",int_val);
     if (yylex() == ':') {
       // check for minor
       if (yylex() == TOKEN_INTEGER_CONSTANT) {
         bdv.minor = int_val;
-        // printf("Minor = %d\n",int_val);
         int next = yylex();
         if (next == ';') {
         } else if (next == ':') {
           // check for target
           next = yylex();
           while (next != ';') {
-            if (GetTokenType(next) == TARGET) {
+            if (token_type == TARGET) {
               switch (next) {
                 case _SMALL:
                   bdv.machine = BrigESmall;
@@ -1700,11 +1336,10 @@ int ArgumentDecl(unsigned int first_token,
     }
 
     next = yylex();  // skip over "arg"
-    if ((GetTokenType(next) == DATA_TYPE_ID)||
+    if ((token_type == DATA_TYPE_ID)||
         (next == _RWIMG) ||
         (next == _SAMP) ||
         (next == _ROIMG)) {
-      BrigDataType16_t data_type = GetDataType(next);
       context->set_type(data_type);
       next = yylex();
       if (next == TOKEN_LOCAL_IDENTIFIER) {
@@ -1875,8 +1510,7 @@ int FunctionDefinition(unsigned int first_token,
         BrigsOffset32_t check_result = context->add_symbol(func_name);
 
         // add the func_name to the func_map.
-        context->insert_to_function_map(func_name,
-                                        context->get_current_bdf_offset());
+        context->func_map[func_name] = context->get_current_bdf_offset();
 
         bdf.s_name = check_result;
         context->append_directive(&bdf);
@@ -2097,7 +1731,7 @@ int ArgBlock(unsigned int first_token, Context* context) {
     BrigEDirectiveArgStart,
     context->get_code_offset()
   };
-  
+
   // needed for update d_firstScopedDirective
   BrigdOffset32_t arg_offset = context->get_directive_offset();
   context->append_directive<BrigDirectiveScope>(&argblock_start);
@@ -2106,20 +1740,20 @@ int ArgBlock(unsigned int first_token, Context* context) {
   BrigDirectiveFunction bdf;
   context->get_directive<BrigDirectiveFunction>(
                                     context->current_bdf_offset, &bdf);
-  if(bdf.d_firstScopedDirective == bdf.d_nextDirective)
+  if (bdf.d_firstScopedDirective == bdf.d_nextDirective)
     // check if the firstScopedDirective is modified before.
     bdf.d_firstScopedDirective = arg_offset;
   unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
   context->update_directive_bytes(bdf_charp,
                                   context->current_bdf_offset,
-                                  bdf.size); 
+                                  bdf.size);
 
   ErrorReporterInterface* rpt = context->get_error_reporter();
   while (1) {
     next_token = yylex();
-    if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
-        (GetTokenType(next_token) == INSTRUCTION2_OPCODE_NODT) ||
-        (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
+    if ((token_type == INSTRUCTION2_OPCODE) ||
+        (token_type == INSTRUCTION2_OPCODE_NODT) ||
+        (token_type == INSTRUCTION2_OPCODE_FTZ)) {
       // Instruction 2 Operation
       if (!Instruction2(next_token, context)) {
         // update the operationCount.
@@ -2133,12 +1767,12 @@ int ArgBlock(unsigned int first_token, Context* context) {
           reinterpret_cast<unsigned char*>(&bdf);
         context->update_directive_bytes(bdf_charp,
                                         context->current_bdf_offset,
-                                        bdf.size);      
+                                        bdf.size);
       } else {
         return 1;
       }
-    } else if ((GetTokenType(next_token) == INSTRUCTION3_OPCODE) ||
-               (GetTokenType(next_token) == INSTRUCTION3_OPCODE_FTZ)) {
+    } else if ((token_type == INSTRUCTION3_OPCODE) ||
+               (token_type == INSTRUCTION3_OPCODE_FTZ)) {
       // Instruction 3 Operation
       if (!Instruction3(next_token, context)) {
         // update the operationCount.
@@ -2156,7 +1790,7 @@ int ArgBlock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if (GetTokenType(next_token) == QUERY_OP) {  // Query Operation
+    } else if (token_type == QUERY_OP) {  // Query Operation
       if (!Query(next_token, context)) {
       } else {
         return 1;
@@ -2242,11 +1876,11 @@ int ArgBlock(unsigned int first_token, Context* context) {
         else
           next_token = last_token;
 
-        if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+        if (token_type == INITIALIZABLE_ADDRESS) {
           // initializable decl
           if (!InitializableDecl(next_token, context)) {
           }
-        } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
+        } else if (token_type == UNINITIALIZABLE_ADDRESS) {
           // uninitializable decl
           if (!UninitializableDecl(next_token, context)) {
           }
@@ -2256,13 +1890,12 @@ int ArgBlock(unsigned int first_token, Context* context) {
           }
         }
       }
-    } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+    } else if (token_type == INITIALIZABLE_ADDRESS) {
       if (!InitializableDecl(next_token, context)) {
       } else {
         return 1;
       }
-    } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
-      // printf("An unintializable address\n");
+    } else if (token_type == UNINITIALIZABLE_ADDRESS) {
       if (!UninitializableDecl(next_token, context)) {
       } else {
         return 1;
@@ -2294,8 +1927,8 @@ int ArgBlock(unsigned int first_token, Context* context) {
       unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
       context->update_directive_bytes(bdf_charp,
                                       context->current_bdf_offset,
-                                      bdf.size); 
-    
+                                      bdf.size);
+
       return 0;
     } else {
       break;
@@ -2312,9 +1945,9 @@ int Codeblock(unsigned int first_token, Context* context) {
   ErrorReporterInterface* rpt = context->get_error_reporter();
   while (1) {
     next_token = yylex();
-    if ((GetTokenType(next_token) == INSTRUCTION2_OPCODE) ||
-        (GetTokenType(next_token) == INSTRUCTION2_OPCODE_NODT) ||
-        (GetTokenType(next_token) == INSTRUCTION2_OPCODE_FTZ)) {
+    if ((token_type == INSTRUCTION2_OPCODE) ||
+        (token_type == INSTRUCTION2_OPCODE_NODT) ||
+        (token_type == INSTRUCTION2_OPCODE_FTZ)) {
       // Instruction 2 Operation
       if (!Instruction2(next_token, context)) {
         // update the operationCount.
@@ -2333,8 +1966,8 @@ int Codeblock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if ((GetTokenType(next_token) == INSTRUCTION3_OPCODE) ||
-               (GetTokenType(next_token) == INSTRUCTION3_OPCODE_FTZ)) {
+    } else if ((token_type == INSTRUCTION3_OPCODE) ||
+               (token_type == INSTRUCTION3_OPCODE_FTZ)) {
       // Instruction 3 Operation
       if (!Instruction3(next_token, context)) {
         // update the operationCount.
@@ -2352,7 +1985,7 @@ int Codeblock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if (GetTokenType(next_token) == QUERY_OP) {  // Query Operation
+    } else if (token_type == QUERY_OP) {  // Query Operation
       if (!Query(next_token, context)) {
       } else {
         return 1;
@@ -2405,7 +2038,6 @@ int Codeblock(unsigned int first_token, Context* context) {
       };
 
       BrigdOffset32_t label_directive_offset = context->get_directive_offset();
-      // printf("label: %d", label_directive_offset);
       context->append_directive<BrigDirectiveLabel>(&label_directive);
 
       // add to the .operand section
@@ -2417,7 +2049,7 @@ int Codeblock(unsigned int first_token, Context* context) {
       };
 
       context->append_operand<BrigOperandLabelRef>(&label_operand);
-      context->insert_to_label_o_map(label_name, label_operand_offset);
+      context->label_o_map[label_name] = label_operand_offset;
 
       // update the d_nextDirective.
       BrigDirectiveFunction bdf;
@@ -2458,7 +2090,6 @@ int Codeblock(unsigned int first_token, Context* context) {
       }
     } else if (next_token == '{') {  // argument scope -> inner codeblock
       if (!ArgBlock(next_token, context)) {
-        // printf("Out of arg scope \n");
       } else {
         return 1;
       }
@@ -2472,13 +2103,13 @@ int Codeblock(unsigned int first_token, Context* context) {
         else
           next_token = last_token;
 
-        if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+        if (token_type == INITIALIZABLE_ADDRESS) {
           // initializable decl
           if (!InitializableDecl(next_token, context)) {
           } else {
             return 1;
           }
-        } else if (GetTokenType(first_token) == UNINITIALIZABLE_ADDRESS) {
+        } else if (token_type == UNINITIALIZABLE_ADDRESS) {
           // uninitializable decl
           if (!UninitializableDecl(first_token, context)) {
           } else {
@@ -2490,13 +2121,12 @@ int Codeblock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if (GetTokenType(next_token) == INITIALIZABLE_ADDRESS) {
+    } else if (token_type == INITIALIZABLE_ADDRESS) {
       if (!InitializableDecl(next_token, context)) {
       } else {
         return 1;
       }
-    } else if (GetTokenType(next_token) == UNINITIALIZABLE_ADDRESS) {
-      // printf("An unintializable address\n");
+    } else if (token_type == UNINITIALIZABLE_ADDRESS) {
       if (!UninitializableDecl(next_token, context)) {
       } else {
         return 1;
@@ -2659,7 +2289,6 @@ int Program(unsigned int first_token, Context* context) {
                   return 1;
                 }
               } else {
-                printf("Error in function's codeblock\n");
                 return 1;
               }
             } else {
@@ -2668,7 +2297,7 @@ int Program(unsigned int first_token, Context* context) {
                                 yycolno);
             }
           }       // if found TOKEN_GLOBAL_ID
-        } else if (GetTokenType(first_token) == INITIALIZABLE_ADDRESS) {
+        } else if (token_type == INITIALIZABLE_ADDRESS) {
           // global initializable
           // this is an initializable declaration
           if (!InitializableDecl(first_token, context)) {
@@ -2723,15 +2352,15 @@ int OptionalWidth(unsigned int first_token, Context* context) {
 
 int Branch(unsigned int first_token, Context* context) {
   unsigned int op = first_token;  // CBR or BRN
-  unsigned int current_token = yylex();
+  unsigned int current_token;
   ErrorReporterInterface* rpt = context->get_error_reporter();
   BrigAluModifier mod = context->get_alu_modifier();
 
+  current_token = yylex();
   // check for optionalWidth
   if (current_token == _WIDTH) {
     if (!OptionalWidth(current_token, context)) {
     } else {
-      // printf("Invalid optional width.\n");
       return 1;
     }
     current_token = yylex();
@@ -2760,7 +2389,7 @@ int Branch(unsigned int first_token, Context* context) {
 
     std::string operand_name = string_val;
     if (!Operand(current_token, context)) {
-      inst_op.o_operands[1] = context->lookup_operand_map(operand_name);
+      inst_op.o_operands[1] = context->operand_map[operand_name];
       if (yylex() == ',') {
         current_token = yylex();
         if (current_token == TOKEN_LABEL) {
@@ -2769,8 +2398,8 @@ int Branch(unsigned int first_token, Context* context) {
           // 2. if defined, just set it up
           // 3. if not, add it to the multimap
           std::string label_name = string_val;
-          if (context->lookup_label_o_map(label_name) >= 0) {
-            inst_op.o_operands[2] = context->lookup_label_o_map(label_name);
+          if (context->label_o_map.count(label_name)) {
+            inst_op.o_operands[2] = context->label_o_map[label_name];
           } else {
             context->label_c_map.insert(make_pair(
                                           label_name,
@@ -2780,7 +2409,6 @@ int Branch(unsigned int first_token, Context* context) {
           current_token = yylex();  // should be ';'
         } else if (!Identifier(current_token, context)) {
           current_token = yylex();  // should be ';'
-
         } else if (!Operand(current_token, context)) {
           if (yylex() == ',') {
             current_token = yylex();
@@ -2882,14 +2510,15 @@ int Branch(unsigned int first_token, Context* context) {
       // 2. if defined, just set it up
       // 3. if not, add it to the multimap
       std::string label_name = string_val;
-      if (context->lookup_label_o_map(label_name) >= 0) {
-        inst_op.o_operands[1] = context->lookup_label_o_map(label_name);
+      if (context->label_o_map.count(label_name)) {
+        inst_op.o_operands[1] = context->label_o_map[label_name];
       } else {
         context->label_c_map.insert(make_pair(
                                       label_name,
                                       context->get_code_offset()+16));
       }
-      if (yylex() == ';') {
+      current_token = yylex();
+      if (current_token == ';') {
         context->append_code<BrigInstBar>(&inst_op);
           // update the operationCount.
           BrigDirectiveFunction bdf;
@@ -2929,8 +2558,8 @@ int Branch(unsigned int first_token, Context* context) {
                             yycolno);
         }
 
-
-        if (yylex() == ';') {
+        current_token = yylex();
+        if (current_token == ';') {
           return 0;
         } else {
           rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
@@ -2960,12 +2589,11 @@ int Call(unsigned int first_token, Context* context) {
     if (!OptionalWidth(next, context)) {
       next = yylex();
     } else {
-      printf("Error in optionalwidth\n");
       return 1;
     }
   }
 
-  
+
   if (!Operand(next, context)) {
     // the operand should be a register or a Func name.
     // Assuming the function must be defined before the call.
@@ -2979,7 +2607,7 @@ int Call(unsigned int first_token, Context* context) {
       BrigNoPacking,
       {0, 0, 0, 0, 0}
     };
-    
+
     // If Call by its name.
     if (next == TOKEN_GLOBAL_IDENTIFIER) {
       std::string func_name = string_val;
@@ -3050,7 +2678,9 @@ int Initializer(unsigned int first_token,
   unsigned int next = yylex();
   ErrorReporterInterface* rpt = context->get_error_reporter();
   if (next == TOKEN_LABEL) {
-    printf("Label initializers must be inside '{' and '}'\n");
+    rpt->report_error(ErrorReporterInterface::INVALID_INITIALIZER,
+                      yylineno,
+                      yycolno);
     return 1;
   } else if (next == '{') {
     next = yylex();
@@ -3162,7 +2792,7 @@ int InitializableDecl(unsigned int first_token, Context* context) {
   unsigned int last_token;
   unsigned int next = yylex();
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  if (GetTokenType(next) == DATA_TYPE_ID) {
+  if (token_type == DATA_TYPE_ID) {
     next = yylex();
     if (!Identifier(next, context)) {
       // scan for arrayDimensions
@@ -3206,10 +2836,10 @@ int UninitializableDecl(unsigned int first_token, Context* context) {
   // first_token is PRIVATE, GROUP or SPILL
   bool rescan;
   unsigned int last_token;
-  unsigned int next = yylex();
+  unsigned int next;
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  if (GetTokenType(next) == DATA_TYPE_ID) {
-    // printf("DataTypeId\n");
+  next = yylex();
+  if (token_type == DATA_TYPE_ID) {
     next = yylex();
     if (!Identifier(next, context)) {
       // scan for arrayDimensions
@@ -3249,8 +2879,7 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context) {
   unsigned int last_token;
   unsigned int next = yylex();
   ErrorReporterInterface* rpt = context->get_error_reporter();
-  if (GetTokenType(next) == DATA_TYPE_ID) {
-    // printf("DataTypeId\n");
+  if (token_type == DATA_TYPE_ID) {
     next = yylex();
     if (!Identifier(next, context)) {
       // scan for arrayDimensions
@@ -3315,7 +2944,7 @@ int SignatureType(unsigned int first_token , Context *context) {
   unsigned int last_token;
   unsigned int next = yylex();
 
-  if (DATA_TYPE_ID == GetTokenType(next)) {
+  if (DATA_TYPE_ID == token_type) {
     return 0;
   } else if (_ROIMG == next
            || _RWIMG == next

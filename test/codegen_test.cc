@@ -46,13 +46,14 @@ TEST(CodegenTest, Example5_SimpleCall) {
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Version(yylex(), context1));
 
-  input.assign("function &callee()(){ret;}; function &caller()(){{call &callee; }};");
+  input.assign("function &callee()(){ret;};\n");
+  input.append("function &caller()(){{call &callee; }};");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   EXPECT_EQ(0, Function(yylex(), context1));
   EXPECT_EQ(0, Function(yylex(), context1));
-  
+
   // test the sizes of each section
   BrigdOffset32_t dsize = context1->get_directive_offset();
   EXPECT_EQ(116, dsize);
@@ -78,19 +79,19 @@ TEST(CodegenTest, Example5_SimpleCall) {
 
   // test BrigDirectiveScope
   BrigDirectiveScope arg_scope;
-  context1->get_directive<BrigDirectiveScope>(100,&arg_scope);
-  EXPECT_EQ(8,arg_scope.size);
+  context1->get_directive<BrigDirectiveScope>(100, &arg_scope);
+  EXPECT_EQ(8, arg_scope.size);
   EXPECT_EQ(BrigEDirectiveArgStart, arg_scope.kind);
   EXPECT_EQ(32, arg_scope.c_code);
 
-  context1->get_directive<BrigDirectiveScope>(108,&arg_scope);
+  context1->get_directive<BrigDirectiveScope>(108, &arg_scope);
   EXPECT_EQ(BrigEDirectiveArgEnd, arg_scope.kind);
   EXPECT_EQ(64, arg_scope.c_code);
 
   // test BrigCall
   BrigInstBase cbr_op;
-  context1->get_code<BrigInstBase>(32,&cbr_op);
-  EXPECT_EQ(32,cbr_op.size);
+  context1->get_code<BrigInstBase>(32, &cbr_op);
+  EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCall, cbr_op.opcode);
   EXPECT_EQ(0, cbr_op.o_operands[0]);
   EXPECT_EQ(0, cbr_op.o_operands[1]);
@@ -100,7 +101,7 @@ TEST(CodegenTest, Example5_SimpleCall) {
 
   // test BrigOperandFunctionRef
   BrigOperandFunctionRef func_o;
-  context1->get_operand<BrigOperandFunctionRef>(8,&func_o);
+  context1->get_operand<BrigOperandFunctionRef>(8, &func_o);
   EXPECT_EQ(8, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(20, func_o.fn);
@@ -335,8 +336,8 @@ TEST(CodegenTest, Instrustion2Op_FTZ_CodeGen) {
     Brigs8x4,
     BrigNoPacking,
     {8, 20, 0, 0, 0}
-  };  
-  
+  };
+
   BrigInstBase get;
   context->get_code<BrigInstBase>(
               0,
@@ -357,7 +358,7 @@ TEST(CodegenTest, Instrustion2Op_FTZ_With_Modifier_CodeGen) {
 
   BrigAluModifier bam;
   bam.ftz = 1;
-  
+
   BrigInstMod ref = {
     sizeof(ref),      // size
     BrigEInstMod,     // kind
@@ -367,7 +368,7 @@ TEST(CodegenTest, Instrustion2Op_FTZ_With_Modifier_CodeGen) {
     {8, 20, 0, 0, 0},  // operand
     bam
   };
-  
+
   BrigInstMod get;
   context->get_code<BrigInstMod>(
               0,
@@ -390,7 +391,7 @@ TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
 
   BrigAluModifier bam;
   bam.ftz = 1;
-  
+
   BrigInstMod ref = {
     sizeof(ref),      // size
     BrigEInstMod,     // kind
@@ -400,7 +401,7 @@ TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
     {8, 20, 0, 0, 0},  // operand
     bam
   };
-  
+
   BrigInstMod get;
   context->get_code<BrigInstMod>(
               0,
