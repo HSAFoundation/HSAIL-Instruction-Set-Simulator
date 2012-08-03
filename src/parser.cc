@@ -402,16 +402,33 @@ int CallTargets(unsigned int first_token, Context* context) {
 int CallArgs(unsigned int first_token, Context* context) {
   // assumed first_token is '('
   ErrorReporterInterface* rpt = context->get_error_reporter();
+  int n_elements = 0; // the size of the arglist.
+  BrigoOffset32_t arg_offset[256] = {0}; 
+  // [CAUTION] Assume the arg numbers cannot exceed 256
+  // Limited by the structure, we can only access one element.
+
   int next;
   while (1) {
     next = yylex();
     if (next == ')') {
       return 0;
     } else if (!Operand(next, context)) {
+      std::string arg_name = string_val;
+      arg_offset[n_elements] = context->arg_map[arg_name];
+      n_elements++;
       next = yylex();
-      if (next == ')')
+      if (next == ')'){
+        BrigOperandArgumentList arg_list = {
+          n_elements*4 + 8,
+          BrigEOperandArgumentList,
+          n_elements,
+          context->arg_map[arg_name]  // need to modify the structure.
+        };
+        context->current_argList_offset = context->get_operand_offset();
+        context->append_operand<BrigOperandArgumentList>(&arg_list);
+
         return 0;
-      else if (next == ',') {
+      } else if (next == ',') {
       } else {
         rpt->report_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS,
                           yylineno,
@@ -921,6 +938,7 @@ int Instruction3(unsigned int first_token, Context* context) {
     // now we must have a dataTypeId
     if (token_type == DATA_TYPE_ID) {
       // check the operands
+  // TODO(Huy): Fill in directive field with the offset to BrigDirectiveSymbol
       inst_op.type = data_type;
       next = yylex();
       std::string oper_str = string_val;
@@ -2627,17 +2645,21 @@ int Call(unsigned int first_token, Context* context) {
     next = yylex();
     // check for twoCallArgs
     if (next == '(') {
-      if (!CallArgs(next, context))
+      if (!CallArgs(next, context)) {
+        call_op.o_operands[1] = context->current_argList_offset;
         next = yylex();
-      else
+      } else {
         return 1;
+      }
     }
 
     if (next == '(') {
-      if (!CallArgs(next, context))
+      if (!CallArgs(next, context)) {
+        call_op.o_operands[3] = context->current_argList_offset;
         next = yylex();
-      else
+      } else {
         return 1;
+      }
     }
 
     // check for CallTarget
@@ -2877,11 +2899,44 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context) {
   // first token is ARG
   bool rescan;
   unsigned int last_token;
+
   unsigned int next = yylex();
   ErrorReporterInterface* rpt = context->get_error_reporter();
   if (token_type == DATA_TYPE_ID) {
     next = yylex();
     if (!Identifier(next, context)) {
+      // need to add to both .operand BrigOperandArgumentRef, 
+      // and .directive BrigDirectiveSymbol, 
+      // also should have a map, for BrigOperandArgumentList.
+
+      // default value for BrigDirectiveSymbol.
+      // for Now, assume this is a scalar. [CAUTION]
+      std::string arg_name = string_val;
+      BrigDirectiveSymbol arg_decl = {
+        context->get_code_offset(),       // c_code
+        BrigArgSpace,                     // storageClass
+        context->get_attribute(),         // attribute
+        0,                                // reserved
+        context->get_symbol_modifier(),   // symbol modifier
+        0,                                // dim
+        context->add_symbol(arg_name),    // s_name
+        data_type,                        // data_type
+        context->get_alignment(),         // alignment
+        0,                                // d_init = 0 for arg
+        0                                 // reserved
+      };
+      
+      BrigOperandArgumentRef arg_ref = {
+        8,
+        BrigEOperandArgumentRef,
+        context->get_directive_offset()
+      };
+
+      context->append_directive_symbol(&arg_decl);
+      // add the operand to the map.
+      context->arg_map[arg_name] = context->get_operand_offset();
+      context->append_operand<BrigOperandArgumentRef>(&arg_ref);
+
       // scan for arrayDimensions
       next = yylex();
       if (next == '[') {

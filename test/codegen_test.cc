@@ -133,6 +133,7 @@ TEST(CodegenTest, Example6_CallwArgs) {
   delete context1;
 }
 
+
 TEST(CodegenTest, Example5_SimpleCall) {
   main_reporter->show_error(true);
   // test error reporter
