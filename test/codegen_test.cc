@@ -617,7 +617,8 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
 
   // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Operand(yylex(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
 
   // reference struct
@@ -650,7 +651,8 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
 
   // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Operand(yylex(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   name.assign("$q7");
   ref.name = context->lookup_symbol(name);
@@ -668,7 +670,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   /* Integer */
   std::string input("5");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Operand(yylex(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   // reference struct
   BrigOperandImmed ref = {
@@ -693,7 +696,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
     /* Negative Integer */
   input.assign("-5");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Operand(yylex(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   // reference struct
   ref.type = Brigb32;
@@ -711,7 +715,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   /* float single */
   input.assign("5.0f");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Operand(yylex(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   // reference struct
   ref.type = Brigb32;
@@ -729,7 +734,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   /* double */
   input.assign("5.0l");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Operand(yylex(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   // reference struct
   ref.bits.d = 5;
@@ -747,7 +753,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   /* Integer List */
   input.assign("_b32(5,6,8)");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Operand(yylex(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   // reference struct
   ref.type = Brigb32;
@@ -839,7 +846,8 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
 
   // rescan
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, AddressableOperand(yylex(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AddressableOperand(context));
 
   name.assign(input.c_str());
   BrigOperandAddress ref = {

@@ -44,6 +44,10 @@ void Context::set_error_reporter(ErrorReporterInterface* error_reporter) {
   this->err_reporter = error_reporter;
 }
 
+void Context::set_error(ErrorReporterInterface::error_t error) {
+  err_reporter->report_error(error, yylineno, yycolno);
+}
+
 // add a new symbol to .strings section.
 // return the offset to that symbol
 int Context::add_symbol(const std::string& s) {

@@ -17,50 +17,61 @@ TEST(ParserTest, OperandTest) {
   Lexer* lexer = new Lexer();
   std::string input("&a_global_id123");  // global id
   lexer->set_source_string(input);
-  EXPECT_EQ(0, Operand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   input.assign("%a_local_id");  // local id
   lexer->set_source_string(input);
-  EXPECT_EQ(0, Operand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   input.assign("$d7");  // register
   lexer->set_source_string(input);
-  EXPECT_EQ(0, Operand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   input.assign("1352");  // Int constant
   lexer->set_source_string(input);
-  EXPECT_EQ(0, Operand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   input.assign("WAVESIZE");  // TOKEN_WAVE_SIZE
   lexer->set_source_string(input);
-  EXPECT_EQ(0, Operand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 
   input.assign("_u32(12, 13 ,14)");  // decimalListSingle
   lexer->set_source_string(input);
-  EXPECT_EQ(0, Operand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Operand(context));
 }
 
 TEST(ParserTest, AddressableOperandTest) {
   Lexer* lexer = new Lexer();
   std::string input("[%local_id]");  // Int constant
   lexer->set_source_string(input);
-  EXPECT_EQ(0, AddressableOperand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%local_id <100> ]");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, AddressableOperand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%local_id<$d7>]");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, AddressableOperand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%global_id<$q5 + 10 >]");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, AddressableOperand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%global_id<$d6 - 10 >]");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, AddressableOperand(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AddressableOperand(context));
 }
 
 TEST(ParserTest, QueryTest) {
@@ -68,131 +79,13 @@ TEST(ParserTest, QueryTest) {
   // test the Query types;
   std::string input("   query_order_u32  $c1 , [&Test<$d7  + 100>];");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, Query(lexer->get_next_token(), context));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Query(context));
 
   input.assign("    query_data_u32  $c1 , [&Test<$d7  + 100>];");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, Query(lexer->get_next_token(), context));
-
-  input.assign("query_array_u32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_width_u32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_height_u32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_depth_u32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_normalized_u32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_filtering_u32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-
-  // test the dataTypes;
-  input.assign("query_order_s32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s64  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u64  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_b1  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_b32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f32  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f64  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_b64  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_b8  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_b16  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s8  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s16  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u8  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u16  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f16  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_b128  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u8x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s8x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u16x2  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s16x2  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f16x2  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f32x2  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u8x8  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s8x8  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u16x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s16x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f16x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u8x16  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s8x16  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u16x8  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s16x8  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f16x8  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f32x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s32x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u32x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f64x2  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s64x2  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u64x2  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-
-  // test for Operand
-  // 1. Identifier
-  input.assign("query_order_f32x4  $c1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s32x4  $d1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u32x4  $s1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f64x2  $q1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s64x2  %a1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u64x2  &a1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  // 2. BaseOperand
-
-
-  // test for AddressableOperand
-  input.assign("query_order_f32x4  $c1 , [%Test<100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s32x4  $d1 , [&Test<$d7  - 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_u32x4  $s1 , [&Test];");
-  lexer->set_source_string(input);
-  input.assign("query_order_f64x2  $q1 , [&Test<$d7  + 100>];");
-  lexer->set_source_string(input);
-  input.assign("query_order_s64x2  %a1 , [%Test<$d7>];");
-  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Query(context));
 }
 
 TEST(ParserTest, ArrayOperandList) {
@@ -203,99 +96,71 @@ TEST(ParserTest, ArrayOperandList) {
 }
 
 TEST(ParserTest, RoundingMode) {
-  bool is_ftz = false;
-  unsigned int current_token;
   Lexer* lexer = new Lexer();
   std::string input("_upi");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_downi");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_zeroi");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_neari");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_up");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_down");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_zero");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_near");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_ftz_up");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_ftz_down");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_ftz_zero");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_ftz_near");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 
   input.assign("_ftz");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, RoundingMode(lexer->get_next_token(),
-                            &is_ftz,
-                            &current_token,
-                            context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RoundingMode(context));
 }
 
 TEST(ParserTest, Instruction2) {

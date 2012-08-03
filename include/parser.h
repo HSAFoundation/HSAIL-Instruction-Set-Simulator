@@ -5,23 +5,17 @@
 
 #include <string>
 #include "context.h"
-
 namespace hsa {
 namespace brig {
 
-// scan the source code and add symbols to string buffer
-void ScanString(unsigned int first_token, Context* context);
 // classify token into different terminal type
-int Query(unsigned int queryOp, Context* context);
-int Operand(unsigned int first_token, Context* context);
-int Identifier(unsigned int first_token, Context* context);
-int BaseOperand(unsigned int first_token, Context* context);
-int AddressableOperand(unsigned int first_token, Context* context);
+int Query(Context* context);
+int Operand(Context* context);
+int Identifier(Context* context);
+int BaseOperand(Context* context);
+int AddressableOperand(Context* context);
 int ArrayOperandList(unsigned int first_token, Context* context);
-int RoundingMode(unsigned int first_token,
-                 bool* is_ftz,
-                 unsigned int* last_token,
-                 Context* context);
+int RoundingMode(Context* context);
 
 int Instruction2(unsigned int first_token, Context* context);
 int Instruction3(unsigned int first_token, Context* context);

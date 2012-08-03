@@ -31,6 +31,7 @@ class Context {
     void set_error_reporter(ErrorReporterInterface* error_reporter);
     ErrorReporterInterface* get_error_reporter(void) const;
 
+    void set_error(ErrorReporterInterface::error_t error);
     /* string buffer manipulators */
     // add a new symbol to .strings section.
     // return the offset to that symbol
@@ -254,6 +255,8 @@ class Context {
     std::map<std::string, BrigoOffset32_t> label_o_map;
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
 
+
+    unsigned int token_to_scan;
   private:
     /* Buffers */
     Buffer* cbuf;  // code buffer
@@ -265,6 +268,9 @@ class Context {
     ErrorReporterInterface* err_reporter;  // error reporter
 
     // context variables
+
+
+
     uint16_t alignment;
     BrigSymbolModifier symModifier;
     BrigMachine16_t machine;
