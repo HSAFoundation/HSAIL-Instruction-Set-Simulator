@@ -17,7 +17,6 @@ Context::Context(void) {
   dbuf = new Buffer();
   obuf = new Buffer();
   sbuf = new StringBuffer();
-  temporary_buf = new Buffer();
   err_reporter = NULL;
   clear_context();
   yycolno = 0;
@@ -30,7 +29,6 @@ Context::Context(ErrorReporterInterface* error_reporter) {
   dbuf = new Buffer();
   obuf = new Buffer();
   sbuf = new StringBuffer();
-  temporary_buf = new Buffer();
   clear_context();
 
   yycolno = 0;
@@ -165,19 +163,13 @@ void Context::clear_string_buffer(void) {
   sbuf->clear();
 }
 
-void Context::clear_temporary_buffer(void) {
-  temporary_buf->clear();
-}
-
 void Context::clear_all_buffers(void) {
   clear_code_buffer();
   clear_directive_buffer();
   clear_operand_buffer();
   clear_string_buffer();
-  clear_temporary_buffer();
 }
 void Context::clear_context(void) {
-  clear_temporary_context();
   clear_all_buffers();
   func_map.clear();
   operand_map.clear();
@@ -186,10 +178,6 @@ void Context::clear_context(void) {
   set_default_values();
 }
 
-void Context::clear_temporary_context(void) {
-  clear_temporary_buffer();
-  set_default_values();
-}
 
 void Context::set_default_values(void) {
   machine = BrigESmall;
@@ -290,30 +278,6 @@ void Context::set_opcode(BrigOpcode32_t opcode) {
 // let context know the location of current operand
 void Context::set_operand_loc(char loc) {
   this->operand_loc = loc;
-}
-
-BrigoOffset32_t Context::get_current_label_offset(void) const {
-  return current_label_offset;
-}
-// get current instruction offset
-BrigcOffset32_t Context::get_current_inst_offset(void) const {
-  return current_inst_offset;
-}
-// get current BrigDirectiveFunction offset
-BrigdOffset32_t Context::get_current_bdf_offset(void) const {
-  return current_bdf_offset;
-}
-
-void Context::set_current_label_offset(BrigoOffset32_t offset) {
-  this->current_label_offset = offset;
-}
-
-void Context::set_current_inst_offset(BrigcOffset32_t offset) {
-  this->current_inst_offset = offset;
-}
-
-void Context::set_current_bdf_offset(BrigdOffset32_t offset) {
-  this->current_bdf_offset = offset;
 }
 
 }  // namespace brig

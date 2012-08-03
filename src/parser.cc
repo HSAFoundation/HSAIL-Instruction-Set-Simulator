@@ -1382,7 +1382,7 @@ int ArgumentDecl(unsigned int first_token,
           // 1. update the directive offset.
           BrigDirectiveFunction bdf;
           context->get_directive<BrigDirectiveFunction>(
-                    context->get_current_bdf_offset(),
+                    context->current_bdf_offset,
                     &bdf);
           if (bdf.d_firstScopedDirective == bdf.d_nextDirective) {
             bdf.d_nextDirective += 36;
@@ -1402,11 +1402,11 @@ int ArgumentDecl(unsigned int first_token,
           unsigned char * bdf_charp =
             reinterpret_cast<unsigned char*>(&bdf);
           context->update_directive_bytes(bdf_charp,
-                                          context->get_current_bdf_offset(),
+                                          context->current_bdf_offset,
                                           40);
 
           context->get_directive<BrigDirectiveFunction>(
-                    context->get_current_bdf_offset(),
+                    context->current_bdf_offset,
                     &bdf);
           // std::cout << bdf.size << std::endl;
 
@@ -1475,8 +1475,8 @@ int FunctionDefinition(unsigned int first_token,
     if (token_to_scan == FUNCTION) {
       // add default struct (Miao)
 
-      context->set_current_bdf_offset(context->get_directive_offset());
-      BrigdOffset32_t bdf_offset = context->get_current_bdf_offset();
+      context->current_bdf_offset = context->get_directive_offset();
+      BrigdOffset32_t bdf_offset = context->current_bdf_offset;
 
       BrigDirectiveFunction bdf = {
       40,                      // size
@@ -1510,7 +1510,7 @@ int FunctionDefinition(unsigned int first_token,
         BrigsOffset32_t check_result = context->add_symbol(func_name);
 
         // add the func_name to the func_map.
-        context->func_map[func_name] = context->get_current_bdf_offset();
+        context->func_map[func_name] = context->current_bdf_offset;
 
         bdf.s_name = check_result;
         context->append_directive(&bdf);
@@ -1953,14 +1953,14 @@ int Codeblock(unsigned int first_token, Context* context) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
-                  context->get_current_bdf_offset(),
+                  context->current_bdf_offset,
                   &bdf);
         bdf.operationCount++;
 
         unsigned char * bdf_charp =
           reinterpret_cast<unsigned char*>(&bdf);
         context->update_directive_bytes(bdf_charp,
-                                        context->get_current_bdf_offset(),
+                                        context->current_bdf_offset,
                                         bdf.size);
 
       } else {
@@ -1973,14 +1973,14 @@ int Codeblock(unsigned int first_token, Context* context) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
-                  context->get_current_bdf_offset(),
+                  context->current_bdf_offset,
                   &bdf);
         bdf.operationCount++;
 
         unsigned char * bdf_charp =
           reinterpret_cast<unsigned char*>(&bdf);
         context->update_directive_bytes(bdf_charp,
-                                        context->get_current_bdf_offset(),
+                                        context->current_bdf_offset,
                                         bdf.size);
       } else {
         return 1;
@@ -2005,14 +2005,14 @@ int Codeblock(unsigned int first_token, Context* context) {
       context->append_code<BrigInstBase>(&op_ret);
       BrigDirectiveFunction bdf;
       context->get_directive<BrigDirectiveFunction>(
-                context->get_current_bdf_offset(),
+                context->current_bdf_offset,
                 &bdf);
       bdf.operationCount++;
 
       unsigned char * bdf_charp =
         reinterpret_cast<unsigned char*>(&bdf);
       context->update_directive_bytes(bdf_charp,
-                                      context->get_current_bdf_offset(),
+                                      context->current_bdf_offset,
                                       bdf.size);
 
       } else {
@@ -2054,14 +2054,14 @@ int Codeblock(unsigned int first_token, Context* context) {
       // update the d_nextDirective.
       BrigDirectiveFunction bdf;
       context->get_directive<BrigDirectiveFunction>(
-                  context->get_current_bdf_offset(), &bdf);
+                  context->current_bdf_offset, &bdf);
       if (bdf.d_firstScopedDirective == bdf.d_nextDirective)
         // check if the firstScopedDirective is modified before.
         bdf.d_firstScopedDirective = label_directive_offset;
       bdf.d_nextDirective = context->get_directive_offset();
       unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
       context->update_directive_bytes(bdf_charp,
-                                      context->get_current_bdf_offset(),
+                                      context->current_bdf_offset,
                                       bdf.size);
 
       // check if there are any operation in .code need update
@@ -2466,12 +2466,12 @@ int Branch(unsigned int first_token, Context* context) {
           // update the operationCount.
           BrigDirectiveFunction bdf;
           context->get_directive<BrigDirectiveFunction>(
-                                            context->get_current_bdf_offset(),
+                                            context->current_bdf_offset,
                                             &bdf);
           bdf.operationCount++;
           unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
           context->update_directive_bytes(bdf_charp,
-                                          context->get_current_bdf_offset(),
+                                          context->current_bdf_offset,
                                           bdf.size);
 
           return 0;
@@ -2523,12 +2523,12 @@ int Branch(unsigned int first_token, Context* context) {
           // update the operationCount.
           BrigDirectiveFunction bdf;
           context->get_directive<BrigDirectiveFunction>(
-                                            context->get_current_bdf_offset(),
+                                            context->current_bdf_offset,
                                             &bdf);
           bdf.operationCount++;
           unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
           context->update_directive_bytes(bdf_charp,
-                                          context->get_current_bdf_offset(),
+                                          context->current_bdf_offset,
                                           bdf.size);
         return 0;
       } else {

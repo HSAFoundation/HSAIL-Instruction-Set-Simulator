@@ -154,7 +154,7 @@ TEST(CodegenTest, Example4_Branch) {
   // test BrigDirectiveFunction
   BrigDirectiveFunction get;
   context->get_directive<BrigDirectiveFunction>(
-              context->get_current_bdf_offset(),
+              context->current_bdf_offset,
               &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
@@ -237,7 +237,7 @@ TEST(CodegenTest, Example3_CodeGen) {
   // test the .directive section
   BrigDirectiveFunction get;
   context->get_directive<BrigDirectiveFunction>(
-              context->get_current_bdf_offset(),
+              context->current_bdf_offset,
               &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
@@ -450,7 +450,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   // test the offset to the .string section
   BrigDirectiveFunction get;
   context->get_directive<BrigDirectiveFunction>(
-              context->get_current_bdf_offset(),
+              context->current_bdf_offset,
               &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);

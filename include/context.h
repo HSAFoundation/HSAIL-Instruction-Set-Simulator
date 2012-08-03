@@ -117,30 +117,6 @@ class Context {
       obuf->append(item);
     }
 
-    // append temporary structs
-    template <class T>
-    void append_temporary_struct(const T* item) {
-      temporary_buf -> append(item);
-    }
-
-    /* code to get Brig structures from buffers */
-    // get temporary structs from temporary buffer
-    template <class T>
-    context_error_t get_temporary_struct(uint32_t offset, T* item) {
-      // check for valid pointer
-      if (item == NULL)
-        return INVALID_POINTER;
-
-      Buffer::error_t result = temporary_buf->get(offset, item);
-
-      if (result == Buffer::INVALID_OFFSET)
-        return INVALID_OFFSET;
-      else if (result == Buffer::EMPTY_BUFFER)
-        return EMPTY_BUFFER;
-      else if (result == Buffer::SUCCESS)
-        return CONTEXT_OK;
-    }
-
     // get directive at a specific offset
     template <class T>
     context_error_t get_directive(uint32_t offset, T* item) {
@@ -226,10 +202,8 @@ class Context {
     void clear_directive_buffer(void);
     void clear_operand_buffer(void);
     void clear_string_buffer(void);
-    void clear_temporary_buffer(void);
     void clear_all_buffers(void);
     void clear_context(void);
-    void clear_temporary_context(void);
     void set_default_values(void);
 
     /* Temporary Context Manipulators */
@@ -265,16 +239,6 @@ class Context {
     BrigdOffset32_t get_directive_offset(void) const {return dbuf->size();}
     BrigoOffset32_t get_operand_offset(void) const {return obuf->size();}
     BrigsOffset32_t get_string_offset(void) const {return sbuf->size();}
-    uint32_t get_temporary_offset(void) const {return temporary_buf->size();}
-
-    BrigoOffset32_t get_current_label_offset(void) const;
-    void set_current_label_offset(BrigoOffset32_t offset);
-    // get current instruction offset
-    BrigcOffset32_t get_current_inst_offset(void) const;
-    void set_current_inst_offset(BrigcOffset32_t offset);
-    // get current BrigDirectiveFunction offset
-    BrigdOffset32_t get_current_bdf_offset(void) const;
-    void set_current_bdf_offset(BrigdOffset32_t offset);
 
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
@@ -295,7 +259,6 @@ class Context {
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
     Buffer* obuf;  // operand buffer
-    Buffer* temporary_buf;  // a buffer to put temporary structs
     StringBuffer* sbuf;  // string buffer
 
     /* Error reporter */
