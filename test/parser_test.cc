@@ -1102,5 +1102,29 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
 };
 
 
+TEST(ParserTest, SignatureType){
+  Lexer* lexer = new Lexer();
+  std::string input("arg_u32");
+
+  lexer->set_source_string(input);
+
+  EXPECT_EQ(0, SignatureType(yylex(), context));
+
+  input.assign("arg_u32 %a");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, SignatureType(yylex(), context));
+
+  input.assign("arg_ROImg");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, SignatureType(yylex(), context));
+
+  input.assign("arg_RWImg");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, SignatureType(yylex(), context));
+
+  input.assign("arg_Samp");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, SignatureType(yylex(), context));
+};
 }  // namespace brig
 }  // namespace hsa
