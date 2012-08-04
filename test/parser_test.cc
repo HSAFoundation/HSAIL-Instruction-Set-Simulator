@@ -1126,5 +1126,35 @@ TEST(ParserTest, SignatureType){
   lexer->set_source_string(input);
   EXPECT_EQ(0, SignatureType(yylex(), context));
 };
+
+
+TEST(ParserTest, FunctionSignature){
+  Lexer* lexer = new Lexer();
+  std::string input("signature &test()();");
+  
+  lexer->set_source_string(input);
+  EXPECT_EQ(0,FunctionSignature(yylex(),context));
+  
+  input.assign("signature &test()(arg_u32) ;");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0,FunctionSignature(yylex(),context));
+
+  input.assign("signature &test()(arg_u32,arg_u32) ;");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0,FunctionSignature(yylex(),context));  
+
+  input.assign("signature &test()(arg_u32) :fbar(2) ;");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0,FunctionSignature(yylex(),context));
+  
+  input.assign("signature &test(arg_u32)(arg_u32,arg_u32) ;");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0,FunctionSignature(yylex(),context));
+
+  input.assign("signature &test(arg_u32)(arg_u32) :fbar(2) ;");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0,FunctionSignature(yylex(),context));
+};
+
 }  // namespace brig
 }  // namespace hsa
