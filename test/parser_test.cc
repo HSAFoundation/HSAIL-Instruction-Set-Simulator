@@ -1156,5 +1156,23 @@ TEST(ParserTest, FunctionSignature){
   EXPECT_EQ(0,FunctionSignature(yylex(),context));
 };
 
+
+TEST(ParserTest,SignatureArgumentList){
+  Lexer* lexer = new Lexer();
+
+  std::string input("arg_u32,arg_ROImg");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, SignatureArgumentList(yylex(),context));
+
+  input.assign("arg_u32,arg_RWImg");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, SignatureArgumentList(yylex(),context));
+  
+  input.assign("arg_u32,arg_Samp");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, SignatureArgumentList(yylex(),context));
+
+};
+
 }  // namespace brig
 }  // namespace hsa

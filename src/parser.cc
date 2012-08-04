@@ -3052,8 +3052,97 @@ int SysCall(unsigned int first_token, Context* context) {
   return 1;
 }
 
+int SignatureArgumentList(unsigned int first_token , Context *context){
+  ErrorReporterInterface *rpt = context->get_error_reporter();
+  unsigned int next = first_token;
+
+  while(1){
+    if(!SignatureType(next, context)){
+      next = yylex();
+      if(',' == next){
+        next = yylex();
+        continue ;
+      }else { //it maybe ')'
+	/* if(')' != next){
+          rpt->report_error(ErrorReporterInterface::MISSING_ARGUMENT_LIST,
+                        yylineno,
+                        yycolno);
+          return 1 ;
+	}
+        */
+        return 0 ;
+      }
+    }else {
+      rpt->report_error(ErrorReporterInterface::MISSING_ARGUMENT_LIST,
+                        yylineno,
+                        yycolno);
+      return 1 ;
+    }
+  }
+}
+
 int FunctionSignature(unsigned int first_token , Context *context){
-  return 1;
+  //first token is SIGNATURE
+  unsigned int next = yylex() ;
+  ErrorReporterInterface *rpt = context->get_error_reporter();
+
+  if(TOKEN_GLOBAL_IDENTIFIER == next){
+    next = yylex() ;
+
+    //check return argument list
+    if('(' == next){
+      next = yylex();
+      if(')' == next){ //empty signature Argument List
+        next = yylex();
+      }else if(!SignatureArgumentList(next,context)){
+	//TODO(xiaopeng) SignatureArgumentList read one more word
+        next = yylex();
+      }
+    }else{
+      rpt->report_error(ErrorReporterInterface::UNKNOWN_ERROR,
+                        yylineno,
+                        yycolno);
+      return 1 ;
+    }
+
+    // for input argument
+    if('(' == next){
+
+      next = yylex();
+      if(')' == next) //empty
+        next = yylex();
+      else if(!SignatureArgumentList(next,context)){
+	//TODO(xiaopeng) SignatureArgumentList read one more word
+        next = yylex();
+      }
+
+    }else{
+       rpt->report_error(ErrorReporterInterface::UNKNOWN_ERROR,
+                        yylineno,
+                        yycolno);
+       return 1;
+    }
+
+    if(_FBAR == next){
+      if(!FBar(next,context))
+	next = yylex();
+      else{
+        rpt->report_error(ErrorReporterInterface::INVALID_FBAR,
+                        yylineno,
+                        yycolno);
+        return 1;
+      }
+    }
+   
+    if(';' == next) //end with ;
+      return 0 ;
+    else {
+      rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+                        yylineno,
+                        yycolno);
+        return 1;
+    }
+  }
 }
 
 }  // namespace brig
