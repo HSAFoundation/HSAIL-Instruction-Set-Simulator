@@ -3153,6 +3153,27 @@ int Label(unsigned int first_token, Context* context) {
 }
 
 int LabelTargets(unsigned int first_token, Context* context) {
+  unsigned int next_token;
+  if (!Label(first_token, context)) {
+    if (yylex() == LABELTARGETS) {
+      while (1) {
+        if (yylex() == TOKEN_LABEL) {
+          next_token = yylex();
+          if (next_token == ',') {
+            continue;
+          } else if (next_token == ';') {
+            return 0;
+          } else {
+            // there is an illegal character behind TOKEN_LABEL
+            return 1;
+          }
+        } else {
+          // it isn't TOKEN_LABEL behind LABELTARGETS or ','
+          return 1;
+        }
+      }
+    }
+  }
   return 1;
 }
 
