@@ -1063,6 +1063,40 @@ TEST(ParserTest, Label) {
   
 };
 
+TEST(ParserTest, LabelTargets) {
+
+  std::string input("@tab: labeltargets @a1, @a2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: labeltargets @label;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: labeltargets @label1, @label2, @label3, @label4, \
+                @label5, @label6, @label7, @label8, @label9, @label10, @label11;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, LabelTargets(yylex(), context));
+
+  // wrong case
+  input.assign("@targets: labeltargets @label1, @label2, @label3, ;"); // redundant ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: ,labeltargets @label1, @label2, @label3;"); // redundant ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: labeltargets;"); // number of label is zero
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: labeltargets @label"); // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, LabelTargets(yylex(), context));
+  
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
