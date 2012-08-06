@@ -3178,7 +3178,35 @@ int LabelTargets(unsigned int first_token, Context* context) {
 }
 
 int Instruction4(unsigned int first_token, Context* context) {
+  unsigned int next_token;
+  bool is_ftz = false;
+  unsigned int rounding_last_token = 0;
 
+  if (token_type == INSTRUCTION4_OPCODE) {
+    next_token = yylex();
+    if (!RoundingMode(next_token, &is_ftz, &rounding_last_token, context)) {
+      if (is_ftz) {
+        next_token = rounding_last_token;
+      } else {
+        next_token = yylex();
+      }
+    } 
+    if (token_type == DATA_TYPE_ID) {
+      next_token = yylex();
+      if (!Operand(next_token, context) && yylex() == ',') {
+        next_token = yylex();
+        if(!Operand(next_token, context) && yylex() == ',') {
+          next_token = yylex();
+          if(!Operand(next_token, context) && yylex() == ',') {
+            next_token = yylex();
+            if(!Operand(next_token, context) && yylex() == ';') {
+              return 0;
+            } // 4 operand
+          } // 3 operand
+        } // 2 operand
+      } // 1 operand
+    } // DATA_TYPE_ID
+  } // INSTRUCTION4_OPCODE
   return 1;
 }
 
