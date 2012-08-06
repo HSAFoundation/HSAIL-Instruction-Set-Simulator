@@ -59,6 +59,16 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     directives.append(&bds);
 
     hsa::brig::Buffer code;
+    BrigInstBase ret = {
+      sizeof(ret),
+      BrigEInstBase,
+      BrigRet,
+      Brigb32,
+      BrigNoPacking,
+      { 0, 0, 0, 0, 0}
+    };
+    code.append(&ret);
+
     hsa::brig::Buffer operands;
 
     hsa::brig::GenLLVM codegen(strings, directives, code, operands);
@@ -79,5 +89,9 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     "%pc_regs = type { [3 x i32] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%struct.regs = type { %c_regs, %s_regs, %d_regs, %q_regs, %pc_regs }")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%gpu_reg_p = alloca %struct.regs")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "ret void")));
   }
 }
