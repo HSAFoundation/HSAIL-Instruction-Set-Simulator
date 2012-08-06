@@ -16,10 +16,11 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     EXPECT_EQ(bb.get().size(), sizeof(foo));
   }
   {
-    hsa::brig::Buffer directives;
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&return_true"));
     strings.append(std::string("%ret_val"));
+
+    hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
       BrigEDirectiveVersion
@@ -56,7 +57,11 @@ TEST(Brig2LLVMTest, AppendBuffer) {
       0,   // reserved
     };
     directives.append(&bds);
-    hsa::brig::GenLLVM codegen(directives, strings);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
     codegen();
     EXPECT_NE(0, codegen.str().size());
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(

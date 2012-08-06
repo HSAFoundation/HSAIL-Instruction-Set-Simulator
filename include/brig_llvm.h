@@ -13,7 +13,10 @@ namespace hsa {
 namespace brig {
 class GenLLVM {
  public:
-  explicit GenLLVM(const Buffer& directives, const StringBuffer&);
+  explicit GenLLVM(const StringBuffer&,
+                   const Buffer &directives,
+                   const Buffer &code,
+                   const Buffer &operands);
   void gen_proto(void);
   void gen_version(void);
   size_t gen_directive(size_t);

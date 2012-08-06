@@ -114,7 +114,10 @@ size_t GenLLVM::gen_directive(size_t index) {
   return index+dh->size;
 }
 
-GenLLVM::GenLLVM(const Buffer &directives, const StringBuffer &strings):
+GenLLVM::GenLLVM(const StringBuffer &strings,
+                 const Buffer &directives,
+                 const Buffer &code,
+                 const Buffer &operands) :
   directives_(directives), strings_(strings),
    brig_frontend_(NULL) {
 }
