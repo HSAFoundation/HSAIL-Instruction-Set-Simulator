@@ -3146,6 +3146,9 @@ int FunctionSignature(unsigned int first_token , Context *context){
 }
 
 int Label(unsigned int first_token, Context* context) {
+  if (first_token == TOKEN_LABEL && yylex() == ':') {
+    return 0;
+  }
   return 1;
 }
 
