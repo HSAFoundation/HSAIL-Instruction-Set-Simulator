@@ -348,6 +348,12 @@ typedef struct BrigAluModifier {
 
 // Directive structures
 
+// 20.8.3
+struct BrigDirectiveBase {
+  uint16_t size;
+  uint16_t kind;
+};
+
 // 20.8.8
 struct BrigDirectiveFunction {
   uint16_t size;
