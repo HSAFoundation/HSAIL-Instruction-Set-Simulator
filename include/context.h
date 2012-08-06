@@ -101,6 +101,11 @@ class Context {
       dbuf->append(item);
     }
 
+    void append_operand_argList(const BrigoOffset32_t* item) {
+      uint32_t operand_offset = obuf->size();
+      obuf->append(item);
+    }
+
     // append operand
     template <class T>
     void append_operand(const T* item) {
