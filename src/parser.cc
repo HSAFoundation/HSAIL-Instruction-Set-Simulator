@@ -3177,5 +3177,10 @@ int LabelTargets(unsigned int first_token, Context* context) {
   return 1;
 }
 
+int Instruction4(unsigned int first_token, Context* context) {
+
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa
