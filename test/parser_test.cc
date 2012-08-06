@@ -1037,6 +1037,32 @@ TEST(ParserTest, SysCall) {
   EXPECT_NE(0, SysCall(yylex(), context));
 };
 
+TEST(ParserTest, Label) {
+
+  std::string input("@_test_label_1:");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Label(yylex(), context));
+
+  input.assign("@_test_label_2   : ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Label(yylex(), context));
+
+  // wrong case
+
+  input.assign("@_test_label_3 @wrong  : ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Label(yylex(), context));
+
+  input.assign("@_test_label_4 "); // lack of colon ':'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Label(yylex(), context));
+
+  input.assign("$_test_label_5 :"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Label(yylex(), context));
+  
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");

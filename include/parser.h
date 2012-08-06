@@ -70,7 +70,7 @@ int FileDecl(unsigned int first_token, Context* context);
 int SysCall(unsigned int first_token, Context* context);
 int FunctionSignature(unsigned int first_token ,Context* context);
 int SignatureArgumentList(unsigned int first_token , Context *context) ;
-
+int Label(unsigned int first_token, Context* context);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

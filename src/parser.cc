@@ -3145,5 +3145,9 @@ int FunctionSignature(unsigned int first_token , Context *context){
   }
 }
 
+int Label(unsigned int first_token, Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa
