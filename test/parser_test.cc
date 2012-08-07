@@ -1364,5 +1364,76 @@ TEST(ParserTest, OperandList) {
 
 };
 
+TEST(ParserTest, Cmp) {
+  std::string input("cmp_eq_b1_b1 $c1, $c2, 0;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("cmp_eq_b32_b1 $s1, $c2, 0;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("cmp_eq_f32_b1 $s1, $c2, 0.0f;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("cmp_ne_b1_b1 $c1, $c2, 0;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("cmp_sltu_b1_f32 $c1, $s2, 0;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("cmp_gt_f32_b32 $s1, $s2, 0.0f;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("packedcmp_lt_f32x2 $d1, $d2, $d3;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("cmp_sltu_b1_f64 $c1, $d1, $d2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("cmp_lt_f32_f32 $s1, $s2, 0.0f;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+
+  input.assign("cmp_equ_b1_f64 $c1, $d1, $d2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Cmp(yylex(), context));
+  
+  // wrong case
+  input.assign("cmp_equ_b1 $c1, $d1, $d2;"); // lack of data type
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Cmp(yylex(), context));
+
+  input.assign("cmp_b1_f64 $c1, $d1, $d2;"); // lack of comparsionId
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Cmp(yylex(), context));
+
+  input.assign("packedcmp_lt $d1, $d2, $d3;"); // lack of data type
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Cmp(yylex(), context));
+
+  input.assign("packedcmp_f32x2 $d1, $d2, $d3;"); // lack of comparsionId
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Cmp(yylex(), context));
+
+  input.assign("cmp_eq_f32_b1 $s1, $c2;"); // lack of operands
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Cmp(yylex(), context));
+
+  input.assign("cmp_eq_f32_b1 $s1, $c2, 0.0f"); // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Cmp(yylex(), context));
+
+  input.assign("cmp_eq_f32_b1 $s1, $c2 0.0f;"); // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Cmp(yylex(), context));
+
+};
 }  // namespace brig
 }  // namespace hsa

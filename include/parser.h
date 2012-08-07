@@ -74,6 +74,7 @@ int Label(unsigned int first_token, Context* context);
 int LabelTargets(unsigned int first_token, Context* context);
 int Instruction4(unsigned int first_token, Context* context);
 int OperandList(unsigned int first_token, Context* context);
+int Cmp(unsigned int first_token, Context* context);
 
 }  // namespace brig
 }  // namespace hsa
