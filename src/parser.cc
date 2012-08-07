@@ -422,10 +422,14 @@ int CallArgs(unsigned int first_token, Context* context) {
           n_elements*4 + 8,
           BrigEOperandArgumentList,
           n_elements,
-          context->arg_map[arg_name]  // need to modify the structure.
+          arg_offset[0]  // need to modify the structure.
         };
         context->current_argList_offset = context->get_operand_offset();
         context->append_operand<BrigOperandArgumentList>(&arg_list);
+        for (int i = 1; i < n_elements; i++) {
+          BrigoOffset32_t *arg = &arg_offset[i];
+          context->append_operand_argList(arg);
+        }
 
         return 0;
       } else if (next == ',') {
