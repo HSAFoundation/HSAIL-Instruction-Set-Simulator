@@ -1055,12 +1055,7 @@ TEST(ParserTest, Label) {
 
   input.assign("@_test_label_4 "); // lack of colon ':'
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_NE(0, Label(yylex(), context));
-
-  input.assign("$_test_label_5 :"); 
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_NE(0, Label(yylex(), context));
-  
+  EXPECT_NE(0, Label(yylex(), context));  
 };
 
 TEST(ParserTest, LabelTargets) {
@@ -1335,6 +1330,43 @@ TEST(ParserTest, Instruction4) {
   
 };
 
+TEST(ParserTest, OperandList) {
+
+  std::string input("$s1, $c4, $d4,$q2 ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, OperandList(yylex(), context));
+  
+  input.assign("&g, %l, $s1"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, OperandList(yylex(), context));
+  
+  input.assign("&g"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, OperandList(yylex(), context));
+
+  input.assign("&g1, &g2, %l, $s1,$s1, $c4, $d4,$q2,-77, $c4, $d4,$q2, \
+               $s1, $c4, $d4,$q2,2343.2f, $c4, $d4,1.123,5, $c4, $d4,$q2"); 
+              // the number of operands is 24
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, OperandList(yylex(), context));
+
+  input.assign("$s5, $s0 $s6"); // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, OperandList(yylex(), context));
+  
+  input.assign(",$s5, $s0 ,$s6"); // redundent ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, OperandList(yylex(), context));
+
+  input.assign("$s5, $s0 ,$s6,"); // redundent ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, OperandList(yylex(), context));
+
+  input.assign(""); // NULL
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, OperandList(yylex(), context));
+
+};
 
 }  // namespace brig
 }  // namespace hsa
