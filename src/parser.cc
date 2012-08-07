@@ -259,8 +259,10 @@ int AddressableOperand(Context* context) {
           0,                      // reserved
           0,                      // directive
           0
-          };
-  // TODO(Huy): Fill in directive field with the offset to BrigDirectiveSymbol
+        };
+
+        boa.directive = context->symbol_map[name];
+
         if (context->get_machine() == BrigELarge)
           boa.type = Brigb64;
 
@@ -845,7 +847,6 @@ int Instruction3(Context* context) {
     if (context->token_type == DATA_TYPE_ID) {
       // check the operands
       inst_op.type = context->token_value.data_type;
-  // TODO(Huy): Fill in directive field with the offset to BrigDirectiveSymbol
 
       context->token_to_scan = yylex();
       std::string oper_str = context->token_value.string_val;
@@ -1223,6 +1224,7 @@ int ArgumentDecl(Context* context) {
           };
           // append the DirectiveSymbol to .directive section.
           context->append_directive_symbol(&sym_decl);
+          context->symbol_map[arg_name] = dsize;
 
           // update the current DirectiveFunction.
           // 1. update the directive offset.
@@ -2516,9 +2518,10 @@ int ArgUninitializableDecl(Context* context) {
         context->get_directive_offset()
       };
 
+      context->symbol_map[arg_name]= context->get_operand_offset();
       context->append_directive_symbol(&arg_decl);
       // add the operand to the map.
-      context->arg_map[arg_name] = context->get_operand_offset();
+      context->arg_map[arg_name] = context->get_operand_offset()          ;
       context->append_operand<BrigOperandArgumentRef>(&arg_ref);
 
       // scan for arrayDimensions

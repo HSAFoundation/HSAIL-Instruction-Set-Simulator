@@ -1422,14 +1422,16 @@ TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   parser->set_source_string(input);
   parser->scan_symbols();
 
-  // Print out string buffer content:
-  unsigned int index = 0;
-  std::string temp;
-  std::cout << "Buffer content: " << std::endl;
-  while (index < context->get_string_offset()) {
-    temp = context->get_string(index);
-    std::cout << "Index " << index << ": " << temp << std::endl;
-    index+=temp.length()+1;
+  if (0) {
+    // Print out string buffer content:
+    unsigned int index = 0;
+    std::string temp;
+    std::cout << "Buffer content: " << std::endl;
+    while (index < context->get_string_offset()) {
+      temp = context->get_string(index);
+      std::cout << "Index " << index << ": " << temp << std::endl;
+      index+=temp.length()+1;
+    }
   }
 };
 

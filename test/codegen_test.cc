@@ -1075,9 +1075,8 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
     BrigEOperandAddress,  // kind
     Brigb32,              // Data Type
     0,                    // reserved
-    // this should be the offset of the BrigDirectiveSymbol struct
-    0,  // directive
-    0,  // offset -> ??
+    context->symbol_map[name],                    // directive
+    0,                    // offset -> ??
   };
 
   if (context->get_machine() == BrigELarge)
@@ -1125,6 +1124,7 @@ TEST(ErrorReportingTest, UseMockErrorReporter) {
     0             // reserved
   };
 
+  EXPECT_CALL(mer, show_all_error());
   mer.show_all_error();
 
   // return the true reporter to context
