@@ -22,9 +22,9 @@ namespace brig {
     while (token) {
       if ((token == TOKEN_GLOBAL_IDENTIFIER) ||
           (token == TOKEN_LOCAL_IDENTIFIER) ||
-          (token_type == REGISTER) ||
+          (context->token_type == REGISTER) ||
           (token == TOKEN_LABEL)) {
-      int offset = context->add_symbol(lexer->get_string_value());
+        int offset = context->add_symbol(std::string(context->token_value.string_val));
       }
       token = lexer->get_next_token();
     }
@@ -32,20 +32,23 @@ namespace brig {
 
   int Parser::parse(void) {
     // first scan for all symbols in source
+    context->clear_context();
     scan_symbols();
 
     // restart lexer
     lexer->restart();
 
     // begin parse src
-    unsigned int token = lexer->get_next_token();
+    context->token_to_scan = lexer->get_next_token();
 
-    while (token) {
-      if (token == VERSION) {
-        if (Program(token, context))
+    while (context->token_to_scan != 0) {
+      if (context->token_to_scan == VERSION) {
+        if (Program(context)) {
           return 1;
+        }
       }
-      token = lexer->get_next_token();
+      context->token_to_scan = lexer->get_next_token();
+
     }
     return 0;
   }

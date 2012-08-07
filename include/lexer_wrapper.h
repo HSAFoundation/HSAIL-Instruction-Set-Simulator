@@ -5,11 +5,7 @@
 
 #include <string>
 #include "lexer.h"
-
-extern int int_val;
-extern char* string_val;
-extern float float_val;
-extern double double_val;
+#include "context.h"
 
 namespace hsa {
 namespace brig {
@@ -26,12 +22,6 @@ class Lexer {
 
     // get the next token
     unsigned int get_next_token(void);
-
-    // get the value of token
-    int get_int_value(void);
-    double get_double_value(void);
-    float get_float_value(void);
-    std::string get_string_value(void);
 
     // set source string
     void set_source_string(const std::string& src);

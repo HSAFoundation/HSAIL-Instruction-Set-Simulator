@@ -334,7 +334,8 @@ enum TokenType { TOKEN_CREGISTER= 258,
                  __FBAR,
                  CALL
                };
-enum TerminalType { COMMON_KEYWORD = 0,
+enum TerminalType { UNKNOWN = 0,
+                    COMMON_KEYWORD = 1,
                     REGISTER,
                     DATA_TYPE_ID,
                     QUERY_OP,

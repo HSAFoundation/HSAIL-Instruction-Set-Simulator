@@ -40,6 +40,9 @@ class ErrorReporterInterface {
                    // missing part
                    MISSING_VERSION_STATEMENT,
                    MISSING_WIDTH_INFO,
+                   MISSING_DECLPREFIX,
+                   INVALID_FUNCTION_DEFINITION,
+                   INVALID_CODEBLOCK,
                    UNKNOWN_ERROR
                  };
 

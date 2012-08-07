@@ -14,55 +14,37 @@ int Operand(Context* context);
 int Identifier(Context* context);
 int BaseOperand(Context* context);
 int AddressableOperand(Context* context);
-int ArrayOperandList(unsigned int first_token, Context* context);
+int ArrayOperandList(Context* context);
 int RoundingMode(Context* context);
 
-int Instruction2(unsigned int first_token, Context* context);
-int Instruction3(unsigned int first_token, Context* context);
-int Version(unsigned int first_token, Context* context);
-int Alignment(unsigned int first_token, Context* context);
-int DeclPrefix(unsigned int first_token,
-               bool* rescan_last_token,
-               unsigned int* last_token,
-               Context* context);
-int FBar(unsigned int first_token, Context* context);
-int ArrayDimensionSet(unsigned int first_token,
-                      bool* rescan_last_token,
-                      unsigned int* last_token,
-                      Context* context);
-int ArgumentDecl(unsigned int first_token,
-                 bool* rescan_last_token,
-                 unsigned int* last_token,
-                 Context* context);
-int ArgumentListBody(unsigned int first_token,
-                     bool* rescan_last_token,
-                     unsigned int* last_token,
-                     Context* context);
-int FunctionDefinition(unsigned int first_token,
-                       bool* rescan_last_token,
-                       unsigned int* last_token,
-                       Context* context);
-int FunctionDecl(unsigned int first_token, Context* context);
-int Codeblock(unsigned int first_token, Context* context);
-int Function(unsigned int first_token, Context* context);
-int OptionalWidth(unsigned int first_token, Context* context);
-int Program(unsigned int first_token, Context* context);
-int Branch(unsigned int first_token, Context* context);
-int CallTargets(unsigned int first_token, Context* context);
-int CallArgs(unsigned int first_token, Context* context);
-int Call(unsigned int first_token, Context* context);
-int Initializer(unsigned int first_token,
-                bool* rescan,
-                unsigned int* last_token,
-                Context* context);
-int InitializableDecl(unsigned int first_token, Context* context);
-int UninitializableDecl(unsigned int first_token, Context* context);
-int ArgUninitializableDecl(unsigned int first_token, Context* context);
-int VectorToken(unsigned int first_token , Context *context);
-int SignatureType(unsigned int first_token , Context *context);
-int FileDecl(unsigned int first_token, Context* context);
-int SysCall(unsigned int first_token, Context* context);
-
+int Instruction2(Context* context);
+int Instruction3(Context* context);
+int Version(Context* context);
+int Alignment(Context* context);
+int DeclPrefix(Context* context);
+int FBar(Context* context);
+int ArrayDimensionSet(Context* context);
+int ArgumentDecl(Context* context);
+int ArgumentListBody(Context* context);
+int FunctionDefinition(Context* context);
+int FunctionDecl(Context* context);
+int Codeblock(Context* context);
+int Function(Context* context);
+int OptionalWidth(Context* context);
+int Program(Context* context);
+int Branch(Context* context);
+int CallTargets(Context* context);
+int CallArgs(Context* context);
+int Call(Context* context);
+int Initializer(Context* context);
+int InitializableDecl(Context* context);
+int UninitializableDecl(Context* context);
+int ArgUninitializableDecl(Context* context);
+int VectorToken(Context *context);
+int SignatureType(Context *context);
+int FileDecl(Context* context);
+int SysCall(Context* context);
+int ArgBlock(Context* context);
 
 }  // namespace brig
 }  // namespace hsa

@@ -15,12 +15,12 @@ class Parser {
   public:
     Parser() {
       lexer = new Lexer();
-      context = new Context();
+      context = Context::get_instance();
     }
 
     explicit Parser(const std::string& src) {
       lexer = new Lexer(src);
-      context = new Context();
+      context = Context::get_instance();
     }
 
     explicit Parser(Context* context) {

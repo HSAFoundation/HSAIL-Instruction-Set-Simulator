@@ -6,10 +6,17 @@
 #include "error_reporter_interface.h"
 #include "context.h"
 
-extern int yycolno;
 extern int yylineno;
 namespace hsa {
 namespace brig {
+Context* Context::ctx = NULL;
+
+Context* Context::get_instance(void) {
+     if (ctx == NULL) {
+         ctx = new Context();
+     }
+     return ctx;
+}
 
 // default constructor
 Context::Context(void) {
@@ -23,18 +30,20 @@ Context::Context(void) {
   yylineno = 1;
 }
 
-Context::Context(ErrorReporterInterface* error_reporter) {
-  this->err_reporter = error_reporter;
-  cbuf = new Buffer();
-  dbuf = new Buffer();
-  obuf = new Buffer();
-  sbuf = new StringBuffer();
-  clear_context();
+// default destructor
+Context::~Context(void) {
+  delete cbuf;
+  delete dbuf;
+  delete sbuf;
+  delete err_reporter;
+  delete &func_map;
+  delete &func_o_map;
+  delete &operand_map;
+  delete &label_c_map;
+  delete &label_o_map;
 
-  yycolno = 0;
-  yylineno = 1;
+
 }
-
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
   return this->err_reporter;
@@ -176,10 +185,13 @@ void Context::clear_all_buffers(void) {
 void Context::clear_context(void) {
   clear_all_buffers();
   func_map.clear();
+  func_o_map.clear();
   operand_map.clear();
   label_o_map.clear();
   label_c_map.clear();
   set_default_values();
+
+
 }
 
 
@@ -189,6 +201,11 @@ void Context::set_default_values(void) {
   ftz = BrigENosftz;
   attribute = BrigNone;
   fbar = 0;
+  token_type = UNKNOWN;
+  token_to_scan = 0;
+  token_value.int_val = 0;
+  token_value.float_val = 0;
+  token_value.double_val = 0;
 }
 
 

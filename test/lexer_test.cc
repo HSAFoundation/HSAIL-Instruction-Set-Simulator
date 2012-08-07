@@ -5,105 +5,120 @@
 #include "gtest/gtest.h"
 #include "tokens.h"
 #include "lexer_wrapper.h"
-
-extern int int_val;
-extern float float_val;
-extern double double_val;
+#include "context.h"
 
 namespace hsa {
 namespace brig {
+
+Context* context = Context::get_instance();
+
 // ------------------ BASIC LEXER TESTS -----------------
 TEST(LexTest, Bug2_DecIntegerConstant) {
   std::string input("12345");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(12345, int_val);
+  EXPECT_EQ(12345, context->token_value.int_val);
 }
 
 TEST(LexTest, Bug3_OctIntegerConstant) {
   std::string input("030");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(24, int_val);
+  EXPECT_EQ(24, context->token_value.int_val);
 }
 
 TEST(LexTest, Bug4_CRegister) {
   std::string input("$c7");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_CREGISTER, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug5_DRegister) {
   std::string input("$d7");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_DREGISTER, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug6_SRegister) {
   std::string input("$s15");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug7_QRegister) {
   std::string input("$q5");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_QREGISTER, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug8_Label) {
   std::string input("@Go_to_this");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_LABEL, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug9_Comment) {
   std::string input("/* this is a comment */");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_COMMENT, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug10_Comment) {
   std::string input("//this is an inline comment\n");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_COMMENT, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug11_HexIntegerConstant) {
   std::string input("0x11");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(17, int_val);
+  EXPECT_EQ(17, context->token_value.int_val);
 }
 
 TEST(LexTest, Bug12_DecSingleConstant) {
   std::string input("0.5e3f");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(0.5e3f, float_val);
+  EXPECT_EQ(0.5e3f, context->token_value.float_val);
 }
 
 TEST(LexTest, Bug17_LocalId) {
   std::string input("%Test_id_123");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_LOCAL_IDENTIFIER, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug18_GlobalId) {
   std::string input("&Test_global_id_123");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_GLOBAL_IDENTIFIER, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug19_String) {
   std::string input("\" This is a string\"");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_STRING, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug20_TokenProperty) {
   std::string input("snorm_int8");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_PROPERTY, lexer->get_next_token());
 
   input.assign("unorm_int16");
@@ -126,12 +141,14 @@ TEST(LexTest, Bug20_TokenProperty) {
 TEST(LexTest, Bug21_TokenWavesize) {
   std::string input("WAVESIZE");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_WAVESIZE, lexer->get_next_token());
 }
 
 TEST(LexTest, Bug22_CommonKeywords) {          // common keywords
   std::string input("workgroupid");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(WORKGROUPID, lexer->get_next_token());
 
   input.assign("version");
@@ -250,21 +267,24 @@ TEST(LexTest, Bug22_CommonKeywords) {          // common keywords
 TEST(LexTest, Bug23_HexSingleConstant) {
   std::string input("0x1.0p0f");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(1.0f, float_val);
+  EXPECT_EQ(1.0f, context->token_value.float_val);
 }
 
 TEST(LexTest, Bug24_IEEESingleConstant) {
   std::string input("0f3F800000");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(1.0f, float_val);
+  EXPECT_EQ(1.0f, context->token_value.float_val);
 }
 
 TEST(LexTest, Bug25_AddressSpaceId) {
   // addressSpaceIdentifier keywords
   std::string input("_readonly");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_READONLY, lexer->get_next_token());
 
   input.assign("_kernarg");
@@ -295,13 +315,15 @@ TEST(LexTest, Bug25_AddressSpaceId) {
 TEST(LexTest, Bug26_DecDoubleConstant) {
   std::string input("0.5e3l");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(0.5e3, double_val);
+  EXPECT_EQ(0.5e3, context->token_value.double_val);
 }
 
 TEST(LexTest, Bug27_VectorKeywords) {              // keywords _v2 and _v4
   std::string input("_v2");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_V2, lexer->get_next_token());
 
   input.assign("_v4");
@@ -312,21 +334,24 @@ TEST(LexTest, Bug27_VectorKeywords) {              // keywords _v2 and _v4
 TEST(LexTest, Bug28_HexDoubleConstant) {
   std::string input("0x1.0l");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(1.0, double_val);
+  EXPECT_EQ(1.0, context->token_value.double_val);
 }
 
 TEST(LexTest, Bug29_IEEEDoubleConstant) {
   std::string input("0d3FF0000000000000");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(1.0, double_val);
+  EXPECT_EQ(1.0, context->token_value.double_val);
 }
 
 // keywords format, order, coord, filter, boundaryU, boundaryV, boundaryW
 TEST(LexTest, Bug30_CommonKeywords2) {
   std::string input("format");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(FORMAT, lexer->get_next_token());
 
   input.assign("order");
@@ -357,6 +382,7 @@ TEST(LexTest, Bug30_CommonKeywords2) {
 TEST(LexTest, Bug33_ControlKeywords) {              // control keywords
   std::string input("itemsperworkgroup");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(ITEMS_PER_WORKGROUP, lexer->get_next_token());
 
   input.assign("workgroupspercu");
@@ -375,6 +401,7 @@ TEST(LexTest, Bug33_ControlKeywords) {              // control keywords
 TEST(LexTest, Bug34_Puctuations) {              // punctuations
   std::string input("+");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ('+', lexer->get_next_token());
 
   input.assign("-");
@@ -434,6 +461,7 @@ TEST(LexTest, Bug34_Puctuations) {              // punctuations
 TEST(LexTest, Bug37_Opcodes) {              // opcodes
   std::string input("fbar_initSizeWg");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(FBAR_INITSIZEWG, lexer->get_next_token());
 
   input.assign("fbar_wait");
@@ -496,6 +524,7 @@ TEST(LexTest, Bug37_Opcodes) {              // opcodes
 TEST(LexTest, Bug38_Instruction2Opcode) {
   std::string input("abs");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(ABS, lexer->get_next_token());
 
   input.assign("neg");
@@ -550,6 +579,7 @@ TEST(LexTest, Bug38_Instruction2Opcode) {
 TEST(LexTest, Bug39_Instruction2OpcodeFTZ) {
   std::string input("sqrt");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(SQRT, lexer->get_next_token());
 
   input.assign("fract");
@@ -588,6 +618,7 @@ TEST(LexTest, Bug39_Instruction2OpcodeFTZ) {
 TEST(LexTest, Bug40_Instruction2OpcodeNoDT) {
   std::string input("unpack3");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(UNPACK3, lexer->get_next_token());
 
   input.assign("unpack2");
@@ -631,6 +662,7 @@ TEST(LexTest, Bug40_Instruction2OpcodeNoDT) {
 TEST(LexTest, Bug41_Instruction3Opcode) {
   std::string input("add");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(ADD, lexer->get_next_token());
 
   input.assign("carry");
@@ -709,6 +741,7 @@ TEST(LexTest, Bug41_Instruction3Opcode) {
 TEST(LexTest, Bug42_Instruction3OpcodeFTZ_Instruction4Opcode) {
   std::string input("max");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(MAX, lexer->get_next_token());
 
   input.assign("min");
@@ -775,6 +808,7 @@ TEST(LexTest, Bug42_Instruction3OpcodeFTZ_Instruction4Opcode) {
 TEST(LexTest, Bug43_AtomicOperationId) {              // AtomicOperationId
   std::string input("_and");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_AND_, lexer->get_next_token());
 
   input.assign("_or");
@@ -817,6 +851,7 @@ TEST(LexTest, Bug43_AtomicOperationId) {              // AtomicOperationId
 TEST(LexTest, Bug44_ComparisonId) {              // Comparison
   std::string input("_eq");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_EQ, lexer->get_next_token());
 
   input.assign("_ne");
@@ -931,6 +966,7 @@ TEST(LexTest, Bug44_ComparisonId) {              // Comparison
 TEST(LexTest, Bug45_QueryOperation) {              // keywords for queryOp
   std::string input("query_order");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(QUERY_ORDER, lexer->get_next_token());
 
   input.assign("query_data");
@@ -965,6 +1001,7 @@ TEST(LexTest, Bug45_QueryOperation) {              // keywords for queryOp
 TEST(LexTest, Bug46_RoundingModes) {              // Rounding modes
   std::string input("_upi");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_UPI, lexer->get_next_token());
 
   input.assign("_downi");
@@ -999,6 +1036,7 @@ TEST(LexTest, Bug46_RoundingModes) {              // Rounding modes
 TEST(LexTest, Bug47_PackingModes) {              // packing modes
   std::string input("_pp");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_PP, lexer->get_next_token());
 
   input.assign("_ps");
@@ -1049,6 +1087,7 @@ TEST(LexTest, Bug47_PackingModes) {              // packing modes
 TEST(LexTest, Bug48_GeometryId) {              // keywords for geometry ID
   std::string input("_1d");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_1D, lexer->get_next_token());
 
   input.assign("_2d");
@@ -1087,6 +1126,7 @@ TEST(LexTest, Bug48_GeometryId) {              // keywords for geometry ID
 TEST(LexTest, Bug49_Targets) {              // targets
   std::string input("$small");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_SMALL, lexer->get_next_token());
 
   input.assign("$large");
@@ -1113,6 +1153,7 @@ TEST(LexTest, Bug49_Targets) {              // targets
 TEST(LexTest, Bug50_WidthDepthHeight_Keywords) {
   std::string input("width");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(WIDTH, lexer->get_next_token());
 
   input.assign("height");
@@ -1127,6 +1168,7 @@ TEST(LexTest, Bug50_WidthDepthHeight_Keywords) {
 TEST(LexTest, Bug51_AtomModifier) {              // keywords for Atom Modifiers
   std::string input("_ar");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_AR, lexer->get_next_token());
 
   input.assign("_region");
@@ -1233,6 +1275,7 @@ TEST(LexTest, Bug51_AtomModifier) {              // keywords for Atom Modifiers
 TEST(LexTest, Bug52_Mul) {              // keywords for mul
   std::string input("mul");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(MUL, lexer->get_next_token());
 
   input.assign("mul_hi");
@@ -1263,6 +1306,7 @@ TEST(LexTest, Bug52_Mul) {              // keywords for mul
 TEST(LexTest, Bug53_DataTypes) {          // dataTypeId
   std::string input("_u8");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_U8, lexer->get_next_token());
 
   input.assign("_u16");
@@ -1437,6 +1481,7 @@ TEST(LexTest, Bug53_DataTypes) {          // dataTypeId
 TEST(LexTest, Bug54_SomeKeywords) {
   std::string input("_ftz");
   Lexer* lexer = new Lexer(input);
+
   EXPECT_EQ(_FTZ, lexer->get_next_token());
 
   input.assign("nop");
@@ -1455,6 +1500,7 @@ TEST(LexTest, Bug54_SomeKeywords) {
 // ------------------ LEXER WRAPPER TESTS -----------------
 TEST(LexerWrapperTest, TestLexWrapper) {
   Lexer* lexer = new Lexer();
+  Context* context1 = Context::get_instance();
   std::string input("$c1");
   lexer->set_source_string(input);
 
@@ -1463,51 +1509,55 @@ TEST(LexerWrapperTest, TestLexWrapper) {
   EXPECT_GE(token, 0);
   EXPECT_EQ(TOKEN_CREGISTER, token);
 
-  std::string token_str = lexer->get_string_value();
-  EXPECT_STREQ("$c1", token_str.c_str());
+  EXPECT_STREQ("$c1", context->token_value.string_val);
+
 };
 
 TEST(LexerWrapperTest, GetIntValFromLexer) {
   std::string input("10");
   Lexer* lexer = new Lexer(input);
 
+
   int token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_INTEGER_CONSTANT);
-  EXPECT_EQ(10, lexer->get_int_value());
+  EXPECT_EQ(10, context->token_value.int_val);
 }
 
 TEST(LexerWrapperTest, GetFloatValFromLexer) {
   std::string input("10.0f");
   Lexer* lexer = new Lexer(input);
 
+
   int token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_SINGLE_CONSTANT);
-  EXPECT_EQ(10.0, lexer->get_float_value());
+  EXPECT_EQ(10.0, context->token_value.float_val);
 }
 
 TEST(LexerWrapperTest, GetDoubleValFromLexer) {
   std::string input("10.0l");
   Lexer* lexer = new Lexer(input);
 
+
   int token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_DOUBLE_CONSTANT);
-  EXPECT_EQ(10.0, lexer->get_double_value());
+  EXPECT_EQ(10.0, context->token_value.double_val);
 }
 
 TEST(LexerWrapperTest, ResetLexer) {
   std::string input("$c1 10 10.5f");
   Lexer* lexer = new Lexer(input);
 
+
   int token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_CREGISTER);
 
   token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_INTEGER_CONSTANT);
-  EXPECT_EQ(10, lexer->get_int_value());
+  EXPECT_EQ(10, context->token_value.int_val);
 
   token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_SINGLE_CONSTANT);
-  EXPECT_EQ(10.5, lexer->get_float_value());
+  EXPECT_EQ(10.5, context->token_value.float_val);
 
   // restart from begin
   lexer->restart();

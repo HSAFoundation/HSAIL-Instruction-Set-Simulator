@@ -75,7 +75,13 @@ namespace brig {
       case MISSING_VERSION_STATEMENT:
         return std::string("Missing version statement.\n");
       case MISSING_WIDTH_INFO:
-        return std::string("Mission width information.\n");
+        return std::string("Missing width information.\n");
+      case MISSING_DECLPREFIX:
+        return std::string("Missing declPrefix\n" );
+      case INVALID_FUNCTION_DEFINITION:
+        return std::string("Invalid funcdtion definition\n");
+      case INVALID_CODEBLOCK:
+        return std::string("Something wrong in codeblock\n");
     case UNKNOWN_ERROR:
       default:
         return std::string("Unknown error. \n");

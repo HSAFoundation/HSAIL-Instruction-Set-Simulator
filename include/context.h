@@ -8,9 +8,10 @@
 #include "brig.h"
 #include "brig_buffer.h"
 #include "error_reporter_interface.h"
+#include "tokens.h"
 
-extern int yycolno;
 extern int yylineno;
+
 namespace hsa {
 namespace brig {
 // context for code generation
@@ -23,10 +24,7 @@ class Context {
       INVALID_OFFSET
     };
 
-    /* Constructors */
-    Context();
-    explicit Context(ErrorReporterInterface* error_reporter);
-
+    static Context* get_instance(void);
     /* Error reporter set/get */
     void set_error_reporter(ErrorReporterInterface* error_reporter);
     ErrorReporterInterface* get_error_reporter(void) const;
@@ -257,8 +255,24 @@ class Context {
 
 
     unsigned int token_to_scan;
+    int               yycolno;
+    TerminalType      token_type;
+
+    union token_val {
+      int int_val;
+      float             float_val;
+      double            double_val;
+      char*             string_val;
+      BrigDataType16_t  data_type;
+      BrigOpcode32_t    opcode;
+      BrigPacking16_t   packing;
+    } token_value;
+
   private:
     /* Buffers */
+    Context();
+    ~Context();
+    static Context* ctx;
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer
     Buffer* obuf;  // operand buffer
@@ -268,9 +282,6 @@ class Context {
     ErrorReporterInterface* err_reporter;  // error reporter
 
     // context variables
-
-
-
     uint16_t alignment;
     BrigSymbolModifier symModifier;
     BrigMachine16_t machine;

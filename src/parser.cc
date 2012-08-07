@@ -9,37 +9,27 @@
 
 
 // variables returned by lexer
-extern int int_val;
-extern char* string_val;
-extern float float_val;
-extern double double_val;
-extern TerminalType token_type;
-extern BrigDataType16_t data_type;
-extern BrigPacking16_t  packing;
-extern BrigOpcode32_t   opcode;
-extern int yycolno;
-
-
 namespace hsa {
 namespace brig {
 
 int Query(Context* context) {
   // next token should be a dataTypeId
-  int next = yylex();
-  if (token_type == DATA_TYPE_ID) {
+  yylex();
+  if (context->token_type == DATA_TYPE_ID) {
     // next token should be an Operand
-    context->token_to_scan = yylex();
+    context->token_to_scan = yylex();  // set token for Operand()
     if (!Operand(context)) {
       // next should be a comma
-      if (yylex() == ',') {
+      if (context->token_to_scan == ',') {
         // then finally an addressable Operand
-        next = yylex();
-        context->token_to_scan = next;
+        context->token_to_scan = yylex();  //set token for addressableOperand()
         if (!AddressableOperand(context)) {
-          if (yylex() == ';')
+          if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();  // set token for next function
             return 0;
-          else
+          } else {
             context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+          }
         } else {
           context->set_error(ErrorReporterInterface::MISSING_COMMA);
 
@@ -59,7 +49,7 @@ int Query(Context* context) {
 int Operand(Context* context) {
   unsigned int first_token = context->token_to_scan;
   if (!Identifier(context)) {  // an Identifier
-    if (token_type == REGISTER) {
+    if (context->token_type == REGISTER) {
       BrigOperandReg bor;
       bor.size = 12;
       bor.kind = BrigEOperandReg;
@@ -79,7 +69,7 @@ int Operand(Context* context) {
       }
 
       bor.reserved = 0;
-      std::string name(string_val);
+      std::string name(context->token_value.string_val);
       bor.name = context->add_symbol(name);
 
       if (!context->operand_map.count(name)) {
@@ -87,20 +77,22 @@ int Operand(Context* context) {
         context->append_operand(&bor);
       }
     }
+
+    context->token_to_scan = yylex();  // set token for next function
     return 0;
   } else if (!BaseOperand(context)) {    // a base Operand
+    context->token_to_scan = yylex();  // set token for next function
     return 0;
   }
   return 1;
 }
 
 int Identifier(Context* context) {
-  unsigned int first_token = context->token_to_scan;
-  if (first_token == TOKEN_GLOBAL_IDENTIFIER) {
+  if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
     return 0;
-  } else if (first_token == TOKEN_LOCAL_IDENTIFIER) {
+  } else if (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
     return 0;
-  } else if (token_type == REGISTER) {
+  } else if (context->token_type == REGISTER) {
     return 0;
   }
   return 1;
@@ -108,29 +100,28 @@ int Identifier(Context* context) {
 
 int BaseOperand(Context* context) {
   int next;
-  unsigned int first_token = context->token_to_scan;
-  if (first_token == TOKEN_DOUBLE_CONSTANT) {
+  if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
     BrigOperandImmed boi = {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
       Brigb64,            // type
       0                   // reserved
     };
-    boi.bits.d = double_val;
+    boi.bits.d = context->token_value.double_val;
     context->append_operand(&boi);
 
     return 0;
-  } else if (first_token == TOKEN_SINGLE_CONSTANT) {
+  } else if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
     BrigOperandImmed boi = {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
       Brigb32,            // type
       0                   // reserved
     };
-    boi.bits.f = float_val;
+    boi.bits.f = context->token_value.float_val;
     context->append_operand(&boi);
     return 0;
-  } else if (first_token == TOKEN_INTEGER_CONSTANT) {
+  } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     BrigOperandImmed boi = {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
@@ -138,13 +129,13 @@ int BaseOperand(Context* context) {
       0                   // reserved
     };
     // TODO(Huy): check context for operation type and decide the type
-    boi.bits.u = int_val;
+    boi.bits.u = context->token_value.int_val;
     context->append_operand(&boi);
 
     return 0;
-  } else if (first_token == TOKEN_WAVESIZE) {
-    return 0;
-  } else if (first_token == '-') {
+  } else if (context->token_to_scan == TOKEN_WAVESIZE) {
+    return 0;  // currently not supported
+  } else if (context->token_to_scan == '-') {
     if (yylex() == TOKEN_INTEGER_CONSTANT) {
       BrigOperandImmed boi = {
       sizeof(boi),        // size
@@ -153,12 +144,12 @@ int BaseOperand(Context* context) {
       0                   // reserved
       };
       // TODO(Huy): check context for operation type and decide the type
-      boi.bits.u = -int_val;
+      boi.bits.u = -context->token_value.int_val;
       context->append_operand(&boi);
 
      return 0;
     }
-  } else if (token_type == DATA_TYPE_ID) {
+  } else if (context->token_type == DATA_TYPE_ID) {
     // scan next token
     if (yylex() == '(') {   // should be '('
       // check if we have a decimal list single or float list single
@@ -171,7 +162,7 @@ int BaseOperand(Context* context) {
         0                   // reserved
         };
         // TODO(Huy): check context for operation type and decide the type
-        boi.bits.u = -int_val;
+        boi.bits.u = -context->token_value.int_val;
         context->append_operand(&boi);
 
         next = yylex();
@@ -188,7 +179,7 @@ int BaseOperand(Context* context) {
                 0                   // reserved
               };
   // TODO(Huy): check context for operation type and decide the type
-              boi.bits.u = int_val;
+              boi.bits.u = context->token_value.int_val;
               context->append_operand(&boi);
 
               next = yylex();
@@ -212,7 +203,7 @@ int BaseOperand(Context* context) {
         Brigb64,            // type
         0                   // reserved
         };
-        boi.bits.d = double_val;
+        boi.bits.d = context->token_value.double_val;
         context->append_operand(&boi);
 
         next = yylex();
@@ -228,7 +219,7 @@ int BaseOperand(Context* context) {
                 Brigb64,            // type
                 0                   // reserved
               };
-              boi.bits.d = double_val;
+              boi.bits.d = context->token_value.double_val;
               context->append_operand(&boi);
               next = yylex();
               if (next == ')') {
@@ -252,15 +243,14 @@ int BaseOperand(Context* context) {
 
 int AddressableOperand(Context* context) {
   int next;
-  unsigned int first_token = context->token_to_scan;
 
-  if (first_token == '[') {
+  if (context->token_to_scan == '[') {
     // next should be a non register
     next = yylex();
     if ((next == TOKEN_GLOBAL_IDENTIFIER) ||
         (next == TOKEN_LOCAL_IDENTIFIER)) {
+      std::string name(context->token_value.string_val);
       next = yylex();
-      std::string name(string_val);
       if (next == ']') {
         BrigOperandAddress boa = {
           sizeof(boa),            // size
@@ -275,32 +265,40 @@ int AddressableOperand(Context* context) {
           boa.type = Brigb64;
 
         context->append_operand(&boa);
-
+        context->token_to_scan = yylex();
         return 0;
       } else if (next == '<') {
         next = yylex();
         if (next == TOKEN_INTEGER_CONSTANT) {
           if (yylex() == '>') {
-            if (yylex() == ']')
+            if (yylex() == ']') {
+              context->token_to_scan = yylex();
               return 0;
-            else
+            } else {
               context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
+            }
           } else {
             context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
           }
-        } else if (token_type == REGISTER) {
+        } else if (context->token_type == REGISTER) {
           next = yylex();
           if (next == '>') {
-            if (yylex() == ']')
+            if (yylex() == ']') {
+              context->token_to_scan = yylex();
               return 0;
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
+            }
           } else if ((next == '+') || (next == '-')) {
             if (yylex() == TOKEN_INTEGER_CONSTANT) {
               if (yylex() == '>') {
-                if (yylex() == ']')
+                if (yylex() == ']') {
+                  context->token_to_scan = yylex();
                   return 0;
-                else
+                } else {
                   context->set_error(ErrorReporterInterface::
                                         MISSING_CLOSING_BRACKET);
+                }
               } else {
                 context->set_error(ErrorReporterInterface::
                                       MISSING_CLOSING_BRACKET);
@@ -321,15 +319,16 @@ int AddressableOperand(Context* context) {
   return 1;
 }
 
-int ArrayOperandList(unsigned int first_token, Context* context) {
+int ArrayOperandList(Context* context) {
   // assumed first_token is '('
   int next;
   while (1) {
     next = yylex();
-    context->token_to_scan = next;
+    context->token_to_scan = next;  // set context for Identifier()
     if (!Identifier(context)) {
       next = yylex();
       if (next == ')') {
+        context->token_to_scan = yylex();  // set context for following functions
         return 0;
       } else if (next == ',') {
       } else {
@@ -343,18 +342,19 @@ int ArrayOperandList(unsigned int first_token, Context* context) {
   }
 }
 
-int CallTargets(unsigned int first_token, Context* context) {
+int CallTargets(Context* context) {
   // assumed first_token is '['
 
   int next;
   while (1) {
     next = yylex();
-    context->token_to_scan = next;
+    context->token_to_scan = next;  // set context for Identifier()
     if (!Identifier(context)) {
       next = yylex();
-      if (next == ']')
+      if (next == ']') {
+        context->token_to_scan = yylex();  // set context for following function
         return 0;
-      else if (next == ',') {
+      } else if (next == ',') {
       } else {
         context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
         return 1;
@@ -366,20 +366,19 @@ int CallTargets(unsigned int first_token, Context* context) {
   }
 }
 
-int CallArgs(unsigned int first_token, Context* context) {
+int CallArgs(Context* context) {
   // assumed first_token is '('
 
-  int next;
   while (1) {
-    next = yylex();
-    context->token_to_scan = next;
-    if (next == ')') {
+    context->token_to_scan = yylex(); // set context for Operand()
+    if (context->token_to_scan == ')') {
+      context->token_to_scan = yylex();  // set context for following functions
       return 0;
     } else if (!Operand(context)) {
-      next = yylex();
-      if (next == ')')
+      if (context->token_to_scan == ')') {
+        context->token_to_scan = yylex();  // set context for following functions
         return 0;
-      else if (next == ',') {
+      } else if (context->token_to_scan == ',') {
       } else {
         context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
         return 1;
@@ -401,7 +400,7 @@ int RoundingMode(Context* context) {
     mod.ftz = 1;
     next = yylex();
 
-    if (token_type == FLOAT_ROUNDING) {
+    if (context->token_type == FLOAT_ROUNDING) {
       // next is floatRounding
       mod.floatOrInt = 1;
       switch (next) {
@@ -418,14 +417,14 @@ int RoundingMode(Context* context) {
           mod.rounding = 0;
           break;
       }
-      context->token_to_scan = yylex();
+      context->token_to_scan = yylex();  // set context for following functions
     } else {
       context->token_to_scan = next;
     }
 
     context->set_alu_modifier(mod);
     return 0;
-  } else if (token_type == INT_ROUNDING) {
+  } else if (context->token_type == INT_ROUNDING) {
     mod.floatOrInt = 0;
     switch (first_token) {
       case _UPI:
@@ -441,10 +440,10 @@ int RoundingMode(Context* context) {
         mod.rounding = 0;
         break;
     }
-    context->token_to_scan = yylex();
+    context->token_to_scan = yylex();  // set context for following functions
     context->set_alu_modifier(mod);
     return 0;
-  } else if (token_type == FLOAT_ROUNDING) {
+  } else if (context->token_type == FLOAT_ROUNDING) {
     mod.floatOrInt = 1;
     switch (first_token) {
       case _UP:
@@ -460,7 +459,7 @@ int RoundingMode(Context* context) {
         mod.rounding = 0;
         break;
     }
-    context->token_to_scan = yylex();
+    context->token_to_scan = yylex();  // set context for following functions
     context->set_alu_modifier(mod);
     return 0;
   } else {
@@ -468,18 +467,15 @@ int RoundingMode(Context* context) {
   }
 }
 
-int Instruction2(unsigned int first_token, Context* context) {
+int Instruction2(Context* context) {
   // First token must be an Instruction2Opcode
-  unsigned int next;
+  BrigOpcode32_t opcode = context->token_value.opcode;
 
-  if (token_type == INSTRUCTION2_OPCODE) {
-    next = yylex();
-    context->token_to_scan = next;
+  if (context->token_type == INSTRUCTION2_OPCODE) {
+    context->token_to_scan = yylex();  // set context for Rounding mode
     if (!RoundingMode(context)) {
       // need to use BrigInstMod
       // there is a rounding mode specified
-      next = context->token_to_scan;
-
       BrigInstMod inst_op = {
         sizeof(inst_op),    // size
         BrigEInstMod,       // kind
@@ -491,31 +487,31 @@ int Instruction2(unsigned int first_token, Context* context) {
       };
 
       // check whether there is a Packing
-      if (token_type == PACKING) {
+      if (context->token_type == PACKING) {
         // there is packing
-        inst_op.packing = packing;
-        next = yylex();
+        inst_op.packing = context->token_value.packing;
+        yylex();
       }
 
       // now we must have a dataTypeId
-      if (token_type == DATA_TYPE_ID) {
+      if (context->token_type == DATA_TYPE_ID) {
         // check the operands
-        inst_op.type = data_type;
-        next = yylex();
-        context->token_to_scan = next;
-        std::string oper_str = string_val;
+        inst_op.type = context->token_value.data_type;
+
+        context->token_to_scan = yylex(); // set context for Operand()
+        std::string oper_str = context->token_value.string_val;
         if (!Operand(context)) {
           inst_op.o_operands[0] = context->operand_map[oper_str];
-          if (yylex() == ',') {
-            next = yylex();
-            context->token_to_scan = next;
-            oper_str = string_val;
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();  // set context for Operand()
+            oper_str = context->token_value.string_val;
             if (!Operand(context)) {
               inst_op.o_operands[1] = context->operand_map[oper_str];
-              if (yylex() == ';') {
+              if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry that later.
+                context->token_to_scan = yylex();  // update context for later functions
                 return 0;
               } else {
                 context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -547,31 +543,31 @@ int Instruction2(unsigned int first_token, Context* context) {
       };
 
       // check whether there is a Packing
-      if (token_type == PACKING) {
+      if (context->token_type == PACKING) {
         // there is packing
-        inst_op.packing = packing;
-        next = yylex();
+        inst_op.packing = context->token_value.packing;
+        yylex();
       }
 
       // now we must have a dataTypeId
-      if (token_type == DATA_TYPE_ID) {
+      if (context->token_type == DATA_TYPE_ID) {
         // check the operands
-        inst_op.type = data_type;
-        next = yylex();
-        context->token_to_scan = next;
-        std::string oper_str = string_val;
+        inst_op.type = context->token_value.data_type;
+
+        context->token_to_scan = yylex();  // set context for Operand()
+        std::string oper_str = context->token_value.string_val;
         if (!Operand(context)) {
           inst_op.o_operands[0] = context->operand_map[oper_str];
-          if (yylex() == ',') {
-            next = yylex();
-            context->token_to_scan = next;
-            oper_str = string_val;
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();  // set context for Operand()
+            oper_str = context->token_value.string_val;
             if (!Operand(context)) {
               inst_op.o_operands[1] = context->operand_map[oper_str];
-              if (yylex() == ';') {
+              if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry that later.
+                context->token_to_scan = yylex();  // set context for later functions
                 return 0;
               } else {
                 context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -592,21 +588,18 @@ int Instruction2(unsigned int first_token, Context* context) {
       }
       return 1;
     }
-  } else if (token_type == INSTRUCTION2_OPCODE_NODT) {
-    next = yylex();
-    context->token_to_scan = next;
+  } else if (context->token_type == INSTRUCTION2_OPCODE_NODT) {
+    context->token_to_scan = yylex();  // set context for RoundingMode
     if (!RoundingMode(context)) {
-        next = context->token_to_scan;
     }
 
-
     // check the operands
-    context->token_to_scan = next;
     if (!Operand(context)) {
-      if (yylex() == ',') {
-          context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();  // set context for Operand()
         if (!Operand(context)) {
-          if (yylex() == ';') {
+          if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();  // set context for later functions
             return 0;
           } else {
             context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -621,16 +614,17 @@ int Instruction2(unsigned int first_token, Context* context) {
       context->set_error(ErrorReporterInterface::MISSING_OPERAND);
     }
     return 1;
-  } else if (token_type == INSTRUCTION2_OPCODE_FTZ) {
-    next = yylex();
+  } else if (context->token_type == INSTRUCTION2_OPCODE_FTZ) {
+    context->token_to_scan = yylex();
     // Optional FTZ
-    if (next == _FTZ) {  // use BrigInstMod
+    if (context->token_to_scan == _FTZ) {  // use BrigInstMod
       // has a _ftz
       BrigAluModifier bam;
       bam.ftz = 1;
       context->set_alu_modifier(bam);
 
-      next = yylex();
+      yylex();  // get next token
+
       // default value.
       BrigInstMod inst_op = {
         sizeof(inst_op),    // size
@@ -643,24 +637,25 @@ int Instruction2(unsigned int first_token, Context* context) {
       };
 
       // now we must have a dataTypeId
-      if (token_type == DATA_TYPE_ID) {
+      if (context->token_type == DATA_TYPE_ID) {
         // check the operands
-        inst_op.type = data_type;
-        next = yylex();
-        context->token_to_scan = next;
-        std::string oper_str = string_val;
+        inst_op.type = context->token_value.data_type;
+
+
+        context->token_to_scan = yylex();  // set context for Operand()
+        std::string oper_str = context->token_value.string_val;
         if (!Operand(context)) {
           inst_op.o_operands[0] = context->operand_map[oper_str];
-          if (yylex() == ',') {
-            next = yylex();
-            context->token_to_scan = next;
-            oper_str = string_val;
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();  // set context for Operand()
+            oper_str = context->token_value.string_val;
             if (!Operand(context)) {
               inst_op.o_operands[1] = context->operand_map[oper_str];
-              if (yylex() == ';') {
+              if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry that later.
+                context->token_to_scan = yylex();  // set context for later functions
                 return 0;
               } else {
                 context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -691,24 +686,24 @@ int Instruction2(unsigned int first_token, Context* context) {
       };
 
       // now we must have a dataTypeId
-      if (token_type == DATA_TYPE_ID) {
+      if (context->token_type == DATA_TYPE_ID) {
         // check the operands
-        inst_op.type = data_type;
-        next = yylex();
-        context->token_to_scan = next;
-        std::string oper_str = string_val;
+        inst_op.type = context->token_value.data_type;
+
+        context->token_to_scan = yylex();  // set context for Operand()
+        std::string oper_str = context->token_value.string_val;
         if (!Operand(context)) {
           inst_op.o_operands[0] = context->operand_map[oper_str];
-          if (yylex() == ',') {
-            next = yylex();
-            context->token_to_scan = next;
-            oper_str = string_val;
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();  // set context for Operand()
+            oper_str = context->token_value.string_val;
             if (!Operand(context)) {
               inst_op.o_operands[1] = context->operand_map[oper_str];
-              if (yylex() == ';') {
+              if (context->token_to_scan == ';') {
                 context->append_code<BrigInstBase>(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry that later.
+                context->token_to_scan = yylex();  // set context for later
                 return 0;
               } else {
                 context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -732,10 +727,9 @@ int Instruction2(unsigned int first_token, Context* context) {
   }
 }
 
-int Instruction3(unsigned int first_token, Context* context) {
-
+int Instruction3(Context* context) {
   // First token must be an Instruction3Opcode
-  unsigned int next;
+  BrigOpcode32_t opcode = context->token_value.opcode;
 
   // default value.
   BrigInstBase inst_op = {
@@ -747,45 +741,40 @@ int Instruction3(unsigned int first_token, Context* context) {
     {0, 0, 0, 0, 0}
   };
 
-  if (token_type == INSTRUCTION3_OPCODE) {
-    next = yylex();
-    context->token_to_scan= next;
+  if (context->token_type == INSTRUCTION3_OPCODE) {
+    context->token_to_scan= yylex();
     if (!RoundingMode(context)) {
-      // there is a rounding mode specified
-      next = context->token_to_scan;
     }
 
     // check whether there is a Packing
-    if (token_type == PACKING) {
+    if (context->token_type == PACKING) {
       // there is packing
-      inst_op.packing = packing;
-      next = yylex();
+      inst_op.packing = context->token_value.packing;
+      yylex();
     }
 
     // now we must have a dataTypeId
-    if (token_type == DATA_TYPE_ID) {
+    if (context->token_type == DATA_TYPE_ID) {
       // check the operands
-      inst_op.type = data_type;
-      next = yylex();
-      context->token_to_scan = next;
-      std::string oper_str = string_val;
+      inst_op.type = context->token_value.data_type;
+      context->token_to_scan = yylex();
+      std::string oper_str = context->token_value.string_val;
 
       if (!Operand(context)) {
         inst_op.o_operands[0] = context->operand_map[oper_str];
-        if (yylex() == ',') {
-          next = yylex();
-          context->token_to_scan = next;
-          oper_str = string_val;
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          oper_str = context->token_value.string_val;
           if (!Operand(context)) {
             inst_op.o_operands[1] = context->operand_map[oper_str];
-            if (yylex() == ',') {
-              next = yylex();
-              context->token_to_scan = next;
-              oper_str = string_val;
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              oper_str = context->token_value.string_val;
               if (!Operand(context)) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
-                if (yylex() == ';') {
+                if (context->token_to_scan == ';') {
                   context->append_code<BrigInstBase>(&inst_op);
+                  context->token_to_scan = yylex();
                   return 0;
                 } else {
                   context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -809,44 +798,43 @@ int Instruction3(unsigned int first_token, Context* context) {
       context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
     }
     return 1;
-  } else if (token_type == INSTRUCTION3_OPCODE_FTZ) {
-    next = yylex();
+  } else if (context->token_type == INSTRUCTION3_OPCODE_FTZ) {
+
     // Optional FTZ
-    if (next == _FTZ) {
+    if (yylex() == _FTZ) {
       // has a _ftz
-      next = yylex();
+      yylex();
     }
 
     // check whether there is a Packing
-    if (token_type == PACKING)
+    if (context->token_type == PACKING) {
       // there is packing
-      inst_op.packing = packing;
-      next = yylex();
-
+      inst_op.packing = context->token_value.packing;
+      yylex();
+    }
     // now we must have a dataTypeId
-    if (token_type == DATA_TYPE_ID) {
+    if (context->token_type == DATA_TYPE_ID) {
       // check the operands
-      inst_op.type = data_type;
-      next = yylex();
-      context->token_to_scan = next;
-      std::string oper_str = string_val;
+      inst_op.type = context->token_value.data_type;
+
+      context->token_to_scan = yylex();
+      std::string oper_str = context->token_value.string_val;
 
       if (!Operand(context)) {
         inst_op.o_operands[0] = context->operand_map[oper_str];
-        if (yylex() == ',') {
-          next = yylex();
-          context->token_to_scan = next;
-          oper_str = string_val;
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          oper_str = context->token_value.string_val;
           if (!Operand(context)) {
             inst_op.o_operands[1] = context->operand_map[oper_str];
-            if (yylex() == ',') {
-              next = yylex();
-              context->token_to_scan = next;
-              oper_str = string_val;
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              oper_str = context->token_value.string_val;
               if (!Operand(context)) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
-                if (yylex() == ';') {
+                if (context->token_to_scan == ';') {
                   context->append_code<BrigInstBase>(&inst_op);
+                  context->token_to_scan = yylex();
                   return 0;
                 } else {
                   context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -875,14 +863,9 @@ int Instruction3(unsigned int first_token, Context* context) {
   }
 }
 
-int Version(unsigned int first_token, Context* context) {
+int Version(Context* context) {
   // first token must be version keyword
-
-  if (context == NULL) {
-    printf("INVALID CONTEXT\n");
-    return 1;
-  }
-
+  assert(context != NULL);
 
 
   BrigDirectiveVersion bdv;
@@ -895,18 +878,19 @@ int Version(unsigned int first_token, Context* context) {
   bdv.profile = BrigEFull;
   bdv.ftz = BrigENosftz;
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
-    bdv.major = int_val;
+    bdv.major = context->token_value.int_val;
     if (yylex() == ':') {
       // check for minor
       if (yylex() == TOKEN_INTEGER_CONSTANT) {
-        bdv.minor = int_val;
+        bdv.minor = context->token_value.int_val;
         int next = yylex();
+
         if (next == ';') {
         } else if (next == ':') {
           // check for target
           next = yylex();
           while (next != ';') {
-            if (token_type == TARGET) {
+            if (context->token_type == TARGET) {
               switch (next) {
                 case _SMALL:
                   bdv.machine = BrigESmall;
@@ -955,52 +939,45 @@ int Version(unsigned int first_token, Context* context) {
           return 1;
         }
         context->append_directive(&bdv);
+        context->token_to_scan = yylex();
         context->set_error(ErrorReporterInterface::OK);
         return 0;
-      }
+      } else {
       context->set_error(
         ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
-    }
+      }
+    } else {
     context->set_error(ErrorReporterInterface::MISSING_COLON);
+    }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+    return 1;
   }
-  context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
-  return 1;
 };
 
-int Alignment(unsigned int first_token, Context* context) {
+int Alignment(Context* context) {
   // first token must be "align" keyword
-
   if (yylex() == TOKEN_INTEGER_CONSTANT) {
-    context->set_alignment(int_val);
+    context->set_alignment(context->token_value.int_val);
+    context->token_to_scan = yylex();
     return 0;
   } else {
     context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
     return 1;
   }
 }
-// parse declaration prefix
-// since this function checks for one token lookahead
-// if the last token is not consumed by this,
-// it will notify the caller to recheck
-int DeclPrefix(unsigned int first_token,
-               bool* recheck_last_token,
-               unsigned int* last_token,
-               Context* context) {
-  unsigned int last_align_token;
-  unsigned int next_token;
-  *recheck_last_token = false;
-  *last_token = 0;
 
+int DeclPrefix(Context* context) {
+  unsigned int first_token = context->token_to_scan;
+  unsigned int next_token;
   if (first_token == ALIGN) {
-    if (!Alignment(first_token, context)) {
-      next_token = yylex();  // need to go to next token
-      *last_token = next_token;
+    if (!Alignment(context)) {
+      next_token = context->token_to_scan; // need to go to next token
       // first is alignment
       if (next_token == CONST) {
         context->set_symbol_modifier(BrigConst);
         // alignment const
         next_token = yylex();
-        *last_token = next_token;
 
         if ((next_token == EXTERN)||(next_token == STATIC)) {
           if (next_token == EXTERN)
@@ -1009,10 +986,10 @@ int DeclPrefix(unsigned int first_token,
             context->set_attribute(BrigStatic);
 
           // alignment const externOrStatic
-          *recheck_last_token = false;
+          context->token_to_scan = yylex();
         } else {
           // alignment const
-          *recheck_last_token = true;
+          context->token_to_scan = next_token;
         }
       } else if ((next_token == EXTERN)||(next_token == STATIC)) {
         // alignment externOrStatic
@@ -1021,18 +998,18 @@ int DeclPrefix(unsigned int first_token,
         else
           context->set_attribute(BrigStatic);
         next_token = yylex();
-        *last_token = next_token;
 
         if (next_token == CONST) {
           // alignmnet externOrStatic const
           context->set_symbol_modifier(BrigConst);
+          context->token_to_scan = yylex();
         } else {
           // alignment externOrStatic
-          *recheck_last_token = true;
+          context->token_to_scan = next_token;
         }
       } else {
         // alignment
-        *recheck_last_token = true;
+        context->token_to_scan = next_token;
       }
     } else {
       context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
@@ -1041,12 +1018,11 @@ int DeclPrefix(unsigned int first_token,
     // first is const
     context->set_symbol_modifier(BrigConst);
     next_token = yylex();
-    *last_token = next_token;
+
     if (next_token == ALIGN) {
-      if (!Alignment(next_token, context)) {
+      if (!Alignment(context)) {
         // const alignment
-        next_token = yylex();
-        *last_token = next_token;
+        next_token = context->token_to_scan;
 
         if ((next_token == EXTERN)||(next_token == STATIC)) {
           if (next_token == EXTERN)
@@ -1054,9 +1030,10 @@ int DeclPrefix(unsigned int first_token,
           else
             context->set_attribute(BrigStatic);
           // const alignment externOrStatic
+          context->token_to_scan = yylex();
         } else {
           // const alignment
-          *recheck_last_token = true;
+          context->token_to_scan = next_token;
         }
       } else {
         context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
@@ -1068,10 +1045,9 @@ int DeclPrefix(unsigned int first_token,
       else
         context->set_attribute(BrigStatic);
       next_token = yylex();
-      *last_token = next_token;
 
       if (next_token == ALIGN) {
-        if (!Alignment(next_token, context)) {
+        if (!Alignment(context)) {
           // const externOrStatic alignment
         } else {
           context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
@@ -1079,10 +1055,10 @@ int DeclPrefix(unsigned int first_token,
         }
       } else {
         // const externOrStatic
-        *recheck_last_token = true;
+        context->token_to_scan = next_token;
       }
     } else {  // const does not stand alone
-      *recheck_last_token = true;
+      context->token_to_scan = next_token;
       return 1;
     }
   } else if ((first_token == EXTERN)||(first_token == STATIC)) {
@@ -1092,19 +1068,19 @@ int DeclPrefix(unsigned int first_token,
     else
       context->set_attribute(BrigStatic);
     next_token = yylex();
-    *last_token = next_token;
+
     if (next_token == ALIGN) {
-      if (!Alignment(next_token, context)) {
+      if (!Alignment(context)) {
         // externOrStatic alignment
-        next_token = yylex();
-        *last_token = next_token;
+        next_token = context->token_to_scan;
 
         if (next_token == CONST) {
           // externOrStatic alignment const
           context->set_symbol_modifier(BrigConst);
+          context->token_to_scan = yylex();
         } else {
           // externOrStatic alignment
-          *recheck_last_token = true;
+          context->token_to_scan = next_token;
         }
       } else {
         context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
@@ -1113,40 +1089,39 @@ int DeclPrefix(unsigned int first_token,
       // externOrStatic const
       context->set_symbol_modifier(BrigConst);
       next_token = yylex();
-      *last_token = next_token;
 
       if (next_token == ALIGN) {
-        if (!Alignment(next_token, context)) {
-          *last_token = next_token;
+        if (!Alignment(context)) {
         } else {
           context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
           return 1;
         }
         // externOrStatic const alignment
       } else {
-        *recheck_last_token = true;
+        context->token_to_scan = next_token;
       }
     } else {
-      *recheck_last_token = true;
+      context->token_to_scan = next_token;
     }
   } else {
-    *recheck_last_token = true;
-    *last_token = first_token;
+    context->token_to_scan = first_token;
   }
 
   return 0;
 }
 
-int FBar(unsigned int first_token, Context* context) {
+int FBar(Context* context) {
   // first token must be _FBAR
 
   if (yylex() == '(') {
     if (yylex() == TOKEN_INTEGER_CONSTANT) {
-      context->set_fbar(int_val);
-      if (yylex() == ')')
+      context->set_fbar(context->token_value.int_val);
+      if (yylex() == ')') {
+        context->token_to_scan = yylex();
         return 0;
-      else
+      } else {
         context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
+      }
     } else {
       context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
     }
@@ -1155,13 +1130,9 @@ int FBar(unsigned int first_token, Context* context) {
 }
 
 
-int ArrayDimensionSet(unsigned int first_token,
-                      bool* rescan_last_token,
-                      unsigned int* last_token,
-                      Context* context) {
+int ArrayDimensionSet(Context* context) {
   // first token must be '['
 
-  *rescan_last_token = false;
   unsigned int next_token = yylex();
 
   while (1) {
@@ -1170,8 +1141,7 @@ int ArrayDimensionSet(unsigned int first_token,
       if (next_token == '[') {  // more item
         next_token = yylex();
       } else {  // no more item
-        *last_token = next_token;
-        *rescan_last_token  = true;
+        context->token_to_scan = next_token;
         return 0;
       }
     } else if (next_token == TOKEN_INTEGER_CONSTANT) {
@@ -1183,30 +1153,16 @@ int ArrayDimensionSet(unsigned int first_token,
   }
 }
 
-int ArgumentDecl(unsigned int first_token,
-                 bool* rescan_last_token,
-                 unsigned int* last_token,
-                 Context* context) {
-  bool rescan_after_declPrefix;
-  unsigned int last_token_of_declPrefix;
+int ArgumentDecl(Context* context) {
   unsigned int next;
 
-  if (!DeclPrefix(first_token,
-                  &rescan_after_declPrefix,
-                  &last_token_of_declPrefix,
-                  context)) {
-    if (!rescan_after_declPrefix) {
-      next = yylex();
-    } else {
-      next = last_token_of_declPrefix;
-    }
-
-    next = yylex();  // skip over "arg"
-    if ((token_type == DATA_TYPE_ID)||
+  if (!DeclPrefix(context)) {
+    next = yylex();  // skip over "arg" in context->token_to_scan
+    if ((context->token_type == DATA_TYPE_ID)||
         (next == _RWIMG) ||
         (next == _SAMP) ||
         (next == _ROIMG)) {
-      context->set_type(data_type);
+      context->set_type(context->token_value.data_type);
       next = yylex();
       if (next == TOKEN_LOCAL_IDENTIFIER) {
         // should have a meaning for DATA_TYPE_ID.
@@ -1214,15 +1170,13 @@ int ArgumentDecl(unsigned int first_token,
         // and write the corresponding string into .string section.
 
 
-        std::string arg_name = string_val;
+        std::string arg_name = context->token_value.string_val;
         int arg_name_offset = context->add_symbol(arg_name);
         // scan for arrayDimensions
         next = yylex();
         if (next == '[') {
-          if (!ArrayDimensionSet(next,
-                                 rescan_last_token,
-                                 last_token,
-                                 context)) {
+          if (!ArrayDimensionSet(context)) {
+            // context->token_to_scan has been set in ArrayDimensionSet()
             return 0;
           }
         } else {
@@ -1236,7 +1190,7 @@ int ArgumentDecl(unsigned int first_token,
           context->get_symbol_modifier(),   // symbol modifier
           0,                                // dim
           arg_name_offset,                  // s_name
-          data_type,                        // data_type
+          context->token_value.data_type,                        // data type
           context->get_alignment(),         // alignment
           0,                                // d_init = 0 for arg
           0                                 // reserved
@@ -1277,8 +1231,7 @@ int ArgumentDecl(unsigned int first_token,
           // std::cout << bdf.size << std::endl;
 
 
-          *last_token = next;
-          *rescan_last_token = true;
+          context->token_to_scan = next;
           return 0;
         }
       } else {
@@ -1288,28 +1241,17 @@ int ArgumentDecl(unsigned int first_token,
       context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
     }
   }
+  context->set_error(ErrorReporterInterface::MISSING_DECLPREFIX);
   return 1;
 }
 
-int ArgumentListBody(unsigned int first_token,
-                     bool* rescan_last_token,
-                     unsigned int* last_token,
-                     Context* context) {
-  *last_token = 0;
-  *rescan_last_token = false;
-
-  unsigned int prev_token = 0;
-  bool rescan = false;
+int ArgumentListBody(Context* context) {
   while (1) {
-    if (!ArgumentDecl(first_token, &rescan, &prev_token, context)) {
-      if (!rescan)
-        prev_token = yylex();
-      if (prev_token == ',') {
-        first_token = yylex();
+    if (!ArgumentDecl(context)) {
+      if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
       } else {
-        *last_token = prev_token;
-        *rescan_last_token = true;
-        return 0;
+        return 0;  // context was set in ArgumentDecl
       }
     } else {
       context->set_error(ErrorReporterInterface:: MISSING_ARGUMENT);
@@ -1318,21 +1260,9 @@ int ArgumentListBody(unsigned int first_token,
   }
 }
 
-int FunctionDefinition(unsigned int first_token,
-                       bool* rescan_last_token,
-                       unsigned int* last_token,
-                       Context* context) {
-  *last_token = 0;
-  * rescan_last_token = false;
-
-  unsigned int token_to_scan;
-  bool rescan;
-
-  if (!DeclPrefix(first_token, &rescan, &token_to_scan, context)) {
-    if (!rescan)
-      token_to_scan = yylex();
-
-    if (token_to_scan == FUNCTION) {
+int FunctionDefinition(Context* context) {
+  if (!DeclPrefix(context)) {
+    if (context->token_to_scan == FUNCTION) {
       // add default struct (Miao)
 
       context->current_bdf_offset = context->get_directive_offset();
@@ -1354,7 +1284,6 @@ int FunctionDefinition(unsigned int first_token,
       };
 
 
-
       // update it when necessary.
       // the later functions should have a entry point of bdf
       // just update it in time.
@@ -1366,7 +1295,7 @@ int FunctionDefinition(unsigned int first_token,
         // if there is, just use the current string,
         // if not write into string.
 
-        std::string func_name = string_val;
+        std::string func_name = context->token_value.string_val;
         BrigsOffset32_t check_result = context->add_symbol(func_name);
 
         // add the func_name to the func_map.
@@ -1383,19 +1312,13 @@ int FunctionDefinition(unsigned int first_token,
         // check return argument list
         if (yylex() == '(') {
           context->set_arg_output(true);
-          token_to_scan = yylex();
+          context->token_to_scan = yylex();
 
-          if (token_to_scan == ')') {   // empty argument list body
-            token_to_scan = yylex();
-          } else if (!ArgumentListBody(token_to_scan,
-                                       &rescan,
-                                       &token_to_scan,
-                                       context)) {
-            if (!rescan)
-              token_to_scan = yylex();
-
-            if (token_to_scan == ')') {
-              token_to_scan = yylex();
+          if (context->token_to_scan == ')') {   // empty argument list body
+            context->token_to_scan = yylex();
+          } else if (!ArgumentListBody(context)) {
+            if (context->token_to_scan == ')') {
+              context->token_to_scan = yylex();
             } else {
               context->set_error(ErrorReporterInterface::
                                     MISSING_CLOSING_PARENTHESIS);
@@ -1410,20 +1333,15 @@ int FunctionDefinition(unsigned int first_token,
           return 1;
         }
         // check argument list
-        if (token_to_scan == '(') {
+        if (context->token_to_scan == '(') {
           context->set_arg_output(false);
-          token_to_scan = yylex();
+          context->token_to_scan = yylex();
 
-          if (token_to_scan == ')') {   // empty argument list body
-            token_to_scan = yylex();
-          } else if (!ArgumentListBody(token_to_scan,
-                                       &rescan,
-                                       &token_to_scan,
-                                       context)) {
-            if (!rescan)
-              token_to_scan = yylex();
-            if (token_to_scan == ')') {
-              token_to_scan = yylex();
+          if (context->token_to_scan == ')') {   // empty argument list body
+              context->token_to_scan = yylex();
+          } else if (!ArgumentListBody(context)) {
+            if (context->token_to_scan == ')') {
+              context->token_to_scan = yylex();
             } else {
               context->set_error(ErrorReporterInterface::
                                     MISSING_CLOSING_PARENTHESIS);
@@ -1438,15 +1356,14 @@ int FunctionDefinition(unsigned int first_token,
           return 1;
         }
         // check for optional FBar
-        if (token_to_scan == _FBAR) {
-          if (!FBar(token_to_scan, context)) {
+        if (context->token_to_scan == _FBAR) {
+          if (!FBar(context)) {
+            // context->token_to_scan = yylex();
             return 0;
           } else {
             context->set_error(ErrorReporterInterface:: INVALID_FBAR);
           }
         } else {
-          *rescan_last_token = true;
-          *last_token = token_to_scan;
           return 0;
         }
       } else {
@@ -1457,31 +1374,19 @@ int FunctionDefinition(unsigned int first_token,
   return 1;
 }
 
-int FunctionDecl(unsigned int first_token, Context* context) {
-  unsigned int token_to_scan;
-  bool rescan;
-
-  if (!DeclPrefix(first_token, &rescan, &token_to_scan, context)) {
-    if (!rescan)
-      token_to_scan = yylex();
-
-    if (token_to_scan == FUNCTION) {
+int FunctionDecl(Context* context) {
+  if (!DeclPrefix(context)) {
+    if (context->token_to_scan == FUNCTION) {
       if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
         // check return argument list
         if (yylex() == '(') {
-          token_to_scan = yylex();
+          context->token_to_scan = yylex();
 
-          if (token_to_scan == ')') {   // empty argument list body
-            token_to_scan = yylex();
-          } else if (!ArgumentListBody(token_to_scan,
-                                       &rescan,
-                                       &token_to_scan,
-                                       context)) {
-            if (!rescan)
-              token_to_scan = yylex();
-
-            if (token_to_scan == ')') {
-              token_to_scan = yylex();
+          if (context->token_to_scan == ')') {   // empty argument list body
+              context->token_to_scan = yylex();
+          } else if (!ArgumentListBody(context)) {
+            if (context->token_to_scan == ')') {
+                context->token_to_scan = yylex();
             } else {
               context->set_error(ErrorReporterInterface::
                                     MISSING_CLOSING_PARENTHESIS);
@@ -1496,19 +1401,14 @@ int FunctionDecl(unsigned int first_token, Context* context) {
           return 1;
         }
         // check argument list
-        if (token_to_scan == '(') {
-          token_to_scan = yylex();
+        if (context->token_to_scan == '(') {
+            context->token_to_scan = yylex();
 
-          if (token_to_scan == ')') {   // empty argument list body
-            token_to_scan = yylex();
-          } else if (!ArgumentListBody(token_to_scan,
-                                       &rescan,
-                                       &token_to_scan,
-                                       context)) {
-            if (!rescan)
-              token_to_scan = yylex();
-            if (token_to_scan == ')') {
-              token_to_scan = yylex();
+          if (context->token_to_scan == ')') {   // empty argument list body
+              context->token_to_scan = yylex();
+          } else if (!ArgumentListBody(context)) {
+            if (context->token_to_scan == ')') {
+                context->token_to_scan = yylex();
             } else {
               context->set_error(ErrorReporterInterface::
                                     MISSING_CLOSING_PARENTHESIS);
@@ -1525,32 +1425,33 @@ int FunctionDecl(unsigned int first_token, Context* context) {
 
 
         // check for optional FBar
-        if (token_to_scan == _FBAR) {
-          if (!FBar(token_to_scan, context)) {
-            token_to_scan = yylex();
+        if (context->token_to_scan == _FBAR) {
+          if (!FBar(context)) {
           } else {
             context->set_error(ErrorReporterInterface:: INVALID_FBAR);
           }
         }
-        if (token_to_scan == ';')
+        if (context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
           return 0;
-        else
+        } else {
           context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+        }
       } else {
         context->set_error(ErrorReporterInterface:: MISSING_IDENTIFIER);
       }
     }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DECLPREFIX);
+
   }
 
 
   return 1;
 }
 
-int ArgBlock(unsigned int first_token, Context* context) {
+int ArgBlock(Context* context) {
   // first token should be {
-  bool rescan = false;
-  unsigned int last_token;
-  unsigned int next_token = 0;
   // add BrigDirectiveScope
   BrigDirectiveScope argblock_start = {
     8,
@@ -1574,14 +1475,13 @@ int ArgBlock(unsigned int first_token, Context* context) {
                                   context->current_bdf_offset,
                                   bdf.size);
 
-
+  context->token_to_scan = yylex();
   while (1) {
-    next_token = yylex();
-    if ((token_type == INSTRUCTION2_OPCODE) ||
-        (token_type == INSTRUCTION2_OPCODE_NODT) ||
-        (token_type == INSTRUCTION2_OPCODE_FTZ)) {
+    if ((context->token_type == INSTRUCTION2_OPCODE) ||
+        (context->token_type == INSTRUCTION2_OPCODE_NODT) ||
+        (context->token_type == INSTRUCTION2_OPCODE_FTZ)) {
       // Instruction 2 Operation
-      if (!Instruction2(next_token, context)) {
+      if (!Instruction2(context)) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
@@ -1597,10 +1497,10 @@ int ArgBlock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if ((token_type == INSTRUCTION3_OPCODE) ||
-               (token_type == INSTRUCTION3_OPCODE_FTZ)) {
+    } else if ((context->token_type == INSTRUCTION3_OPCODE) ||
+               (context->token_type == INSTRUCTION3_OPCODE_FTZ)) {
       // Instruction 3 Operation
-      if (!Instruction3(next_token, context)) {
+      if (!Instruction3(context)) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
@@ -1616,48 +1516,49 @@ int ArgBlock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if (token_type == QUERY_OP) {  // Query Operation
+    } else if (context->token_type == QUERY_OP) {  // Query Operation
       if (!Query(context)) {
       } else {
         return 1;
       }
-    } else if (next_token == RET) {  // ret operation
+    } else if (context->token_to_scan == RET) {  // ret operation
       if (yylex() == ';') {
-      BrigcOffset32_t csize = context->get_code_offset();
-      BrigInstBase op_ret = {
-        32,
-        BrigEInstBase,
-        BrigRet,
-        Brigf32,
-        BrigNoPacking,
-        {0, 0, 0, 0, 0}
-        };
-      // write to .code section
-      context->append_code<BrigInstBase>(&op_ret);
-      BrigDirectiveFunction bdf;
-      context->get_directive<BrigDirectiveFunction>(
-                context->current_bdf_offset,
-                &bdf);
-      bdf.operationCount++;
+        BrigcOffset32_t csize = context->get_code_offset();
+        BrigInstBase op_ret = {
+          32,
+          BrigEInstBase,
+          BrigRet,
+          Brigf32,
+          BrigNoPacking,
+          {0, 0, 0, 0, 0}
+          };
+        // write to .code section
+        context->append_code<BrigInstBase>(&op_ret);
+        BrigDirectiveFunction bdf;
+        context->get_directive<BrigDirectiveFunction>(
+                  context->current_bdf_offset,
+                  &bdf);
+        bdf.operationCount++;
 
-      unsigned char * bdf_charp =
-        reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp,
-                                      context->current_bdf_offset,
-                                      bdf.size);
+        unsigned char * bdf_charp =
+          reinterpret_cast<unsigned char*>(&bdf);
+        context->update_directive_bytes(bdf_charp,
+                                        context->current_bdf_offset,
+                                        bdf.size);
+        context->token_to_scan = yylex();
       } else {
         context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
         return 1;
       }
-    } else if ((next_token == BRN) ||
-               (next_token == CBR)) {
-      if (!Branch(next_token, context)) {
+    } else if ((context->token_to_scan == BRN) ||
+               (context->token_to_scan == CBR)) {
+      if (!Branch(context)) {
       } else {
         return 1;
       }
-    } else if (next_token == TOKEN_LABEL) {  // label
+    } else if (context->token_to_scan == TOKEN_LABEL) {  // label
       // need to check the lable_map, and update when necessary.
-      // std::string label_name = string_val;
+      // std::string label_name = context->token_value.string_val;
       // context->lable_o_map[label_name] = context->get_operand_offset();
       // set the lable_map
       // add operand in .operand;
@@ -1666,13 +1567,14 @@ int ArgBlock(unsigned int first_token, Context* context) {
       //
       // if no correlated instructions, then later instructions
       // can directly use the label.
-      if (yylex() == ':') {
+      if (context->token_to_scan == ':') {
+        context->token_to_scan = yylex();
       } else {
         context->set_error(ErrorReporterInterface:: MISSING_COLON);
         return 1;
       }
-    } else if (next_token == CALL) {  // call (only inside argblock
-      if (!Call(next_token, context)) {
+    } else if (context->token_to_scan == CALL) {  // call (only inside argblock
+      if (!Call(context)) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
@@ -1688,49 +1590,45 @@ int ArgBlock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if ((next_token == ALIGN) ||
-               (next_token == CONST) ||
-               (next_token == STATIC) ||
-               (next_token == EXTERN)) {
-      if (!DeclPrefix(first_token, &rescan, &last_token, context)) {
-        if (!rescan)
-          next_token = yylex();
-        else
-          next_token = last_token;
-
-        if (token_type == INITIALIZABLE_ADDRESS) {
+    } else if ((context->token_to_scan == ALIGN) ||
+               (context->token_to_scan == CONST) ||
+               (context->token_to_scan == STATIC) ||
+               (context->token_to_scan == EXTERN)) {
+      if (!DeclPrefix(context)) {
+        if (context->token_type == INITIALIZABLE_ADDRESS) {
           // initializable decl
-          if (!InitializableDecl(next_token, context)) {
+          if (!InitializableDecl(context)) {
           }
-        } else if (token_type == UNINITIALIZABLE_ADDRESS) {
+        } else if (context->token_type == UNINITIALIZABLE_ADDRESS) {
           // uninitializable decl
-          if (!UninitializableDecl(next_token, context)) {
+          if (!UninitializableDecl(context)) {
           }
-        } else if (next_token == ARG) {
+        } else if (context->token_to_scan == ARG) {
           // arg uninitializable decl
-          if (!ArgUninitializableDecl(next_token, context)) {
+          if (!ArgUninitializableDecl(context)) {
           }
         }
       }
-    } else if (token_type == INITIALIZABLE_ADDRESS) {
-      if (!InitializableDecl(next_token, context)) {
+    } else if (context->token_type == INITIALIZABLE_ADDRESS) {
+      if (!InitializableDecl(context)) {
       } else {
         return 1;
       }
-    } else if (token_type == UNINITIALIZABLE_ADDRESS) {
-      if (!UninitializableDecl(next_token, context)) {
+    } else if (context->token_type == UNINITIALIZABLE_ADDRESS) {
+
+      if (!UninitializableDecl(context)) {
       } else {
         return 1;
       }
-    } else if (next_token == ARG) {
-      if (!ArgUninitializableDecl(next_token, context)) {
+    } else if (context->token_to_scan == ARG) {
+      if (!ArgUninitializableDecl(context)) {
       } else {
         return 1;
       }
-    } else if (next_token == '{') {
+    } else if (context->token_to_scan == '{') {
       context->set_error(ErrorReporterInterface:: INVALID_NESTED_ARGUMENT_SCOPE);
       return 1;
-    } else if (next_token == '}') {
+    } else if (context->token_to_scan == '}') {
       // add BrigDirectiveScope
       BrigDirectiveScope argblock_start = {
         8,
@@ -1748,7 +1646,7 @@ int ArgBlock(unsigned int first_token, Context* context) {
       context->update_directive_bytes(bdf_charp,
                                       context->current_bdf_offset,
                                       bdf.size);
-
+      context->token_to_scan = yylex();
       return 0;
     } else {
       break;
@@ -1757,19 +1655,15 @@ int ArgBlock(unsigned int first_token, Context* context) {
   return 1;
 }
 
-int Codeblock(unsigned int first_token, Context* context) {
+int Codeblock(Context* context) {
   // first token should be '{'
-  bool rescan = false;
-  unsigned int last_token;
-  unsigned int next_token = 0;
-
+  context->token_to_scan = yylex();
   while (1) {
-    next_token = yylex();
-    if ((token_type == INSTRUCTION2_OPCODE) ||
-        (token_type == INSTRUCTION2_OPCODE_NODT) ||
-        (token_type == INSTRUCTION2_OPCODE_FTZ)) {
+    if ((context->token_type == INSTRUCTION2_OPCODE) ||
+        (context->token_type == INSTRUCTION2_OPCODE_NODT) ||
+        (context->token_type == INSTRUCTION2_OPCODE_FTZ)) {
       // Instruction 2 Operation
-      if (!Instruction2(next_token, context)) {
+      if (!Instruction2(context)) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
@@ -1786,10 +1680,10 @@ int Codeblock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if ((token_type == INSTRUCTION3_OPCODE) ||
-               (token_type == INSTRUCTION3_OPCODE_FTZ)) {
+    } else if ((context->token_type == INSTRUCTION3_OPCODE) ||
+               (context->token_type == INSTRUCTION3_OPCODE_FTZ)) {
       // Instruction 3 Operation
-      if (!Instruction3(next_token, context)) {
+      if (!Instruction3(context)) {
         // update the operationCount.
         BrigDirectiveFunction bdf;
         context->get_directive<BrigDirectiveFunction>(
@@ -1805,12 +1699,12 @@ int Codeblock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if (token_type == QUERY_OP) {  // Query Operation
+    } else if (context->token_type == QUERY_OP) {  // Query Operation
       if (!Query(context)) {
       } else {
         return 1;
       }
-    } else if (next_token == RET) {  // ret operation
+    } else if (context->token_to_scan == RET) {  // ret operation
       if (yylex() == ';') {
       BrigcOffset32_t csize = context->get_code_offset();
       BrigInstBase op_ret = {
@@ -1835,19 +1729,20 @@ int Codeblock(unsigned int first_token, Context* context) {
                                       context->current_bdf_offset,
                                       bdf.size);
 
+      context->token_to_scan = yylex();
       } else {
         context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
         return 1;
       }
-    } else if ((next_token == BRN) ||
-               (next_token == CBR)) {
-      if (!Branch(next_token, context)) {
+    } else if ((context->token_to_scan == BRN) ||
+               (context->token_to_scan == CBR)) {
+      if (!Branch(context)) {
       } else {
         return 1;
       }
-    } else if (next_token == TOKEN_LABEL) {  // label
+    } else if (context->token_to_scan == TOKEN_LABEL) {  // label
       // add to the .directive section
-      std::string label_name = string_val;
+      std::string label_name = context->token_value.string_val;
       BrigDirectiveLabel label_directive = {
         12,
         BrigEDirectiveLabel,
@@ -1900,34 +1795,30 @@ int Codeblock(unsigned int first_token, Context* context) {
       }
 
       if (yylex() == ':') {
+        context->token_to_scan = yylex();
       } else {
         context->set_error(ErrorReporterInterface:: MISSING_COLON);
         return 1;
       }
-    } else if (next_token == '{') {  // argument scope -> inner codeblock
-      if (!ArgBlock(next_token, context)) {
+    } else if (context->token_to_scan == '{') {  // argument scope -> inner codeblock
+      if (!ArgBlock(context)) {
       } else {
         return 1;
       }
-    } else if ((next_token == ALIGN) ||
-               (next_token == CONST) ||
-               (next_token == STATIC) ||
-               (next_token == EXTERN)) {
-      if (!DeclPrefix(first_token, &rescan, &last_token, context)) {
-        if (!rescan)
-          next_token = yylex();
-        else
-          next_token = last_token;
-
-        if (token_type == INITIALIZABLE_ADDRESS) {
+    } else if ((context->token_to_scan == ALIGN) ||
+               (context->token_to_scan == CONST) ||
+               (context->token_to_scan == STATIC) ||
+               (context->token_to_scan == EXTERN)) {
+      if (!DeclPrefix(context)) {
+        if (context->token_type == INITIALIZABLE_ADDRESS) {
           // initializable decl
-          if (!InitializableDecl(next_token, context)) {
+          if (!InitializableDecl(context)) {
           } else {
             return 1;
           }
-        } else if (token_type == UNINITIALIZABLE_ADDRESS) {
+        } else if (context->token_type == UNINITIALIZABLE_ADDRESS) {
           // uninitializable decl
-          if (!UninitializableDecl(first_token, context)) {
+          if (!UninitializableDecl(context)) {
           } else {
             return 1;
           }
@@ -1937,17 +1828,18 @@ int Codeblock(unsigned int first_token, Context* context) {
       } else {
         return 1;
       }
-    } else if (token_type == INITIALIZABLE_ADDRESS) {
-      if (!InitializableDecl(next_token, context)) {
+    } else if (context->token_type == INITIALIZABLE_ADDRESS) {
+      if (!InitializableDecl(context)) {
       } else {
         return 1;
       }
-    } else if (token_type == UNINITIALIZABLE_ADDRESS) {
-      if (!UninitializableDecl(next_token, context)) {
+    } else if (context->token_type == UNINITIALIZABLE_ADDRESS) {
+      if (!UninitializableDecl(context)) {
       } else {
         return 1;
       }
-    } else if (next_token == '}') {
+    } else if (context->token_to_scan == '}') {
+      context->token_to_scan = yylex();
       return 0;
     } else {
       break;
@@ -1956,67 +1848,55 @@ int Codeblock(unsigned int first_token, Context* context) {
   return 1;
 }
 
-int Function(unsigned int first_token, Context* context) {
-  bool rescan = false;
-  unsigned int last_token = 0;
-
-  if (!FunctionDefinition(first_token, &rescan, &last_token, context)) {
-    if (!rescan)
-      last_token = yylex();
-    if (!Codeblock(last_token, context)) {
-      if (yylex() == ';') {
+int Function(Context* context) {
+  if (!FunctionDefinition(context)) {
+    if (!Codeblock(context)) {
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
       }
+    } else {
+      context->set_error(ErrorReporterInterface::INVALID_CODEBLOCK);
     }
+
+  } else {
+    context->set_error(ErrorReporterInterface::INVALID_FUNCTION_DEFINITION);
   }
   return 1;
 }
 
-int Program(unsigned int first_token, Context* context) {
+int Program(Context* context) {
   int result;
-  unsigned int last_token;
-  bool rescan;
 
-  if (first_token == VERSION) {
-    if (!Version(first_token, context)) {
+  if (context->token_to_scan == VERSION) {
+    if (!Version(context)) {
       // parse topLevelStatement
-      first_token = yylex();
-      while (first_token && (first_token != VERSION)) {
-        if ( (first_token == ALIGN) ||
-             (first_token == CONST) ||
-             (first_token == EXTERN) ||
-             (first_token == STATIC) ) {
-          result = DeclPrefix(first_token, &rescan, &last_token, context);
+      while (context->token_to_scan && (context->token_to_scan != VERSION)) {
+        if ( (context->token_to_scan == ALIGN) ||
+             (context->token_to_scan == CONST) ||
+             (context->token_to_scan == EXTERN) ||
+             (context->token_to_scan == STATIC) ) {
+          result = DeclPrefix(context);
           if (result)
             return 1;
 
-          if (!rescan)
-            first_token = yylex();
-          else
-            first_token = last_token;
         }
 
         // Found "function" keyword ------------------------
-        if (first_token == FUNCTION) {
+        if (context->token_to_scan == FUNCTION) {
           // look at next token
           if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
             // check return argument list
             if (yylex() == '(') {
-              first_token = yylex();
+                context->token_to_scan = yylex();
 
-              if (first_token == ')') {   // empty argument list body
-                first_token = yylex();
-              } else if (!ArgumentListBody(first_token,
-                                           &rescan,
-                                           &first_token,
-                                           context)) {
-                if (!rescan)
-                  first_token = yylex();
-
-                if (first_token == ')') {
-                  first_token = yylex();
+              if (context->token_to_scan == ')') {   // empty argument list body
+                context->token_to_scan = yylex();
+              } else if (!ArgumentListBody(context)) {
+                if (context->token_to_scan == ')') {
+                  context->token_to_scan = yylex();
                 } else {
                   context->set_error(ErrorReporterInterface::
                                         MISSING_CLOSING_PARENTHESIS);
@@ -2033,19 +1913,14 @@ int Program(unsigned int first_token, Context* context) {
             }          // if found '(' - returnArgList
 
             // check argument list
-            if (first_token == '(') {
-              first_token = yylex();
+            if (context->token_to_scan == '(') {
+                context->token_to_scan = yylex();
 
-              if (first_token == ')') {   // empty argument list body
-                first_token = yylex();
-              } else if (!ArgumentListBody(first_token,
-                                           &rescan,
-                                           &first_token,
-                                           context)) {
-                if (!rescan)
-                  first_token = yylex();
-                if (first_token == ')') {
-                  first_token = yylex();
+              if (context->token_to_scan == ')') {   // empty argument list body
+                  context->token_to_scan = yylex();
+              } else if (!ArgumentListBody(context)) {
+                if (context->token_to_scan == ')') {
+                  context->token_to_scan = yylex();
                 } else {
                   context->set_error(ErrorReporterInterface::
                                         MISSING_CLOSING_PARENTHESIS);
@@ -2062,25 +1937,23 @@ int Program(unsigned int first_token, Context* context) {
             }            // if found '(' - argList
 
             // check for optional FBar
-            if (first_token == _FBAR) {
-              if (!FBar(first_token, context)) {
-                first_token = yylex();
+            if (context->token_to_scan == _FBAR) {
+              if (!FBar(context)) {
               } else {
                 context->set_error(ErrorReporterInterface:: INVALID_FBAR);
                 return 1;
               }
             }
 
-            if (first_token == ';') {  // this is a functionDecl
-              first_token = yylex();
+            if (context->token_to_scan == ';') {  // this is a functionDecl
+              context->token_to_scan = yylex();
               continue;
-            } else if (first_token == '{') {
+            } else if (context->token_to_scan == '{') {
               // so this must be a functionDefinition
-              if (!Codeblock(first_token, context)) {
+              if (!Codeblock(context)) {
                 // check codeblock of function
-                first_token = yylex();
-                if (first_token == ';') {
-                  first_token = yylex();
+                if (context->token_to_scan == ';') {
+                    context->token_to_scan = yylex();
                   continue;
                 } else {
                   context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
@@ -2093,11 +1966,10 @@ int Program(unsigned int first_token, Context* context) {
               context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
             }
           }       // if found TOKEN_GLOBAL_ID
-        } else if (token_type == INITIALIZABLE_ADDRESS) {
+        } else if (context->token_type == INITIALIZABLE_ADDRESS) {
           // global initializable
           // this is an initializable declaration
-          if (!InitializableDecl(first_token, context)) {
-            first_token = yylex();
+          if (!InitializableDecl(context)) {
           } else {
             return 1;
           }
@@ -2113,7 +1985,7 @@ int Program(unsigned int first_token, Context* context) {
   return 1;
 }
 
-int OptionalWidth(unsigned int first_token, Context* context) {
+int OptionalWidth(Context* context) {
   // first token must be _WIDTH
 
   unsigned int next_token = yylex();
@@ -2128,6 +2000,7 @@ int OptionalWidth(unsigned int first_token, Context* context) {
       return 1;
     }
     if (next_token == ')') {
+      context->token_to_scan = yylex();
       return 0;
     } else {
       context->set_error(ErrorReporterInterface:: MISSING_CLOSING_PARENTHESIS);
@@ -2138,30 +2011,26 @@ int OptionalWidth(unsigned int first_token, Context* context) {
   return 1;
 }
 
-int Branch(unsigned int first_token, Context* context) {
-  unsigned int op = first_token;  // CBR or BRN
-  unsigned int current_token;
+int Branch(Context* context) {
+  unsigned int op = context->token_to_scan;  // CBR or BRN
 
   BrigAluModifier mod = context->get_alu_modifier();
 
-  current_token = yylex();
+  context->token_to_scan = yylex();
   // check for optionalWidth
-  if (current_token == _WIDTH) {
-    if (!OptionalWidth(current_token, context)) {
+  if (context->token_to_scan == _WIDTH) {
+    if (!OptionalWidth(context)) {
     } else {
       return 1;
     }
-    current_token = yylex();
   }
 
   // check for optional _fbar modifier
-  if (current_token == __FBAR) {
+  if (context->token_to_scan == __FBAR) {
     mod.fbar = 1;
     context->set_alu_modifier(mod);
-    current_token = yylex();
+    context->token_to_scan = yylex();
   }
-
-  context->token_to_scan = current_token;
 
   BrigdOffset32_t current_offset = context->get_directive_offset();
   // parse operands
@@ -2178,18 +2047,17 @@ int Branch(unsigned int first_token, Context* context) {
     };
 
 
-    std::string operand_name = string_val;
+    std::string operand_name = context->token_value.string_val;
     if (!Operand(context)) {
       inst_op.o_operands[1] = context->operand_map[operand_name];
-      if (yylex() == ',') {
-        current_token = yylex();
-        context->token_to_scan = current_token;
-        if (current_token == TOKEN_LABEL) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_LABEL) {
           // if the next operand is label, which is the case in example4
           // 1. check if the label is already defined,
           // 2. if defined, just set it up
           // 3. if not, add it to the multimap
-          std::string label_name = string_val;
+          std::string label_name = context->token_value.string_val;
           if (context->label_o_map.count(label_name)) {
             inst_op.o_operands[2] = context->label_o_map[label_name];
           } else {
@@ -2198,27 +2066,27 @@ int Branch(unsigned int first_token, Context* context) {
                                           context->get_code_offset()+20));
           }
 
-          current_token = yylex();  // should be ';'
+          context->token_to_scan = yylex();  // should be ';'
         } else if (!Identifier(context)) {
-          current_token = yylex();  // should be ';'
+            context->token_to_scan = yylex();  // should be ';'
         } else if (!Operand(context)) {
-          if (yylex() == ',') {
-            current_token = yylex();
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
 
-            if (current_token == TOKEN_LABEL) {  // LABEL
-              current_token = yylex();  // should be ';'
-            } else if (current_token == '[') {
-              current_token = yylex();
-              context->token_to_scan = current_token;
+            if (context->token_to_scan == TOKEN_LABEL) {  // LABEL
+                context->token_to_scan = yylex();  // should be ';'
+            } else if (context->token_to_scan == '[') {
+              context->token_to_scan = yylex();
+
               if (!Identifier(context)) {
-                current_token = yylex();  // should be ']'
-              } else if (current_token == TOKEN_LABEL) {
-                current_token = yylex();
+                context->token_to_scan = yylex();  // should be ']'
+              } else if (context->token_to_scan == TOKEN_LABEL) {
+                context->token_to_scan = yylex();
 
-                while (current_token != ']') {
-                  if (current_token == ',') {
+                while (context->token_to_scan != ']') {
+                  if (context->token_to_scan == ',') {
                     if (yylex() == TOKEN_LABEL) {
-                      current_token = yylex();  // scan next;
+                        context->token_to_scan = yylex();  // scan next;
                     } else {
                       context->set_error(ErrorReporterInterface::MISSING_OPERAND);
                       return 1;
@@ -2232,7 +2100,7 @@ int Branch(unsigned int first_token, Context* context) {
                 context->set_error(ErrorReporterInterface::MISSING_OPERAND);
               }
               // current token should be ']'
-              current_token = yylex();  // should be ';'
+              context->token_to_scan = yylex();  // should be ';'
             } else {
               context->set_error(ErrorReporterInterface::MISSING_OPERAND);
             }
@@ -2243,7 +2111,7 @@ int Branch(unsigned int first_token, Context* context) {
           context->set_error(ErrorReporterInterface::MISSING_OPERAND);
           return 1;
         }
-        if (current_token == ';') {
+        if (context->token_to_scan == ';') {
           context->append_code<BrigInstBase>(&inst_op);
           // update the operationCount.
           BrigDirectiveFunction bdf;
@@ -2255,7 +2123,7 @@ int Branch(unsigned int first_token, Context* context) {
           context->update_directive_bytes(bdf_charp,
                                           context->current_bdf_offset,
                                           bdf.size);
-
+          context->token_to_scan = yylex();
           return 0;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -2280,12 +2148,12 @@ int Branch(unsigned int first_token, Context* context) {
       0
     };
 
-    if (current_token == TOKEN_LABEL) {
+    if (context->token_to_scan == TOKEN_LABEL) {
       // if the next operand is label, which is the case in example4
       // 1. check if the label is already defined,
       // 2. if defined, just set it up
       // 3. if not, add it to the multimap
-      std::string label_name = string_val;
+      std::string label_name = context->token_value.string_val;
       if (context->label_o_map.count(label_name)) {
         inst_op.o_operands[1] = context->label_o_map[label_name];
       } else {
@@ -2293,8 +2161,8 @@ int Branch(unsigned int first_token, Context* context) {
                                       label_name,
                                       context->get_code_offset()+16));
       }
-      current_token = yylex();
-      if (current_token == ';') {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ';') {
         context->append_code<BrigInstBar>(&inst_op);
           // update the operationCount.
           BrigDirectiveFunction bdf;
@@ -2306,33 +2174,36 @@ int Branch(unsigned int first_token, Context* context) {
           context->update_directive_bytes(bdf_charp,
                                           context->current_bdf_offset,
                                           bdf.size);
+        context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
       }
     } else if (!Identifier(context)) {
-      current_token = yylex();
+        context->token_to_scan = yylex();
 
-      if (current_token == ';') {
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
         return 0;
-      } else if (current_token == ',') {
+      } else if (context->token_to_scan == ',') {
         if (yylex() == '[') {
-          current_token = yylex();
-          context->token_to_scan = current_token;
-          if (current_token == TOKEN_LABEL) {
-            current_token = yylex();    // should be ']'
+          context->token_to_scan = yylex();
+
+          if (context->token_to_scan == TOKEN_LABEL) {
+            context->token_to_scan = yylex();    // should be ']'
           } else if (!Identifier(context)) {
-            current_token = yylex();    // should be ']'
+            context->token_to_scan = yylex();    // should be ']'
           }
         }
 
-        if (current_token == ']') {
+        if (context->token_to_scan == ']') {
         } else {
           context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
         }
 
-        current_token = yylex();
-        if (current_token == ';') {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
           return 0;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -2347,20 +2218,24 @@ int Branch(unsigned int first_token, Context* context) {
   }
 }
 
-int Call(unsigned int first_token, Context* context) {
+int Call(Context* context) {
   // first token is "call"
-  unsigned int next = yylex();
 
+  context->token_to_scan = yylex();
   // optional width
-  if (next == _WIDTH) {
-    if (!OptionalWidth(next, context)) {
-      next = yylex();
+  if (context->token_to_scan == _WIDTH) {
+    if (!OptionalWidth(context)) {
     } else {
       return 1;
     }
   }
 
-  context->token_to_scan = next;
+  unsigned int temp = context->token_to_scan;
+  std::string func_name;
+  if (temp == TOKEN_GLOBAL_IDENTIFIER) {
+    func_name.assign(context->token_value.string_val);
+  }
+
   if (!Operand(context)) {
     // the operand should be a register or a Func name.
     // Assuming the function must be defined before the call.
@@ -2376,8 +2251,7 @@ int Call(unsigned int first_token, Context* context) {
     };
 
     // If Call by its name.
-    if (next == TOKEN_GLOBAL_IDENTIFIER) {
-      std::string func_name = string_val;
+    if (temp == TOKEN_GLOBAL_IDENTIFIER) {
       if (context->func_o_map.count(func_name)) {
         call_op.o_operands[2] = context->func_o_map[func_name];
       } else {
@@ -2391,29 +2265,30 @@ int Call(unsigned int first_token, Context* context) {
         call_op.o_operands[2] = context->func_o_map[func_name];
       }
     }
-    next = yylex();
     // check for twoCallArgs
-    if (next == '(') {
-      if (!CallArgs(next, context))
-        next = yylex();
-      else
+    if (context->token_to_scan == '(') {
+      if (!CallArgs(context)) {
+      } else {
         return 1;
+      }
     }
 
-    if (next == '(') {
-      if (!CallArgs(next, context))
-        next = yylex();
-      else
+    if (context->token_to_scan == '(') {
+      if (!CallArgs(context)) {
+      } else {
         return 1;
+      }
     }
 
     // check for CallTarget
-    if (next == ';') {
+    if (context->token_to_scan == ';') {
       context->append_code<BrigInstBase>(&call_op);
+      context->token_to_scan = yylex();
       return 0;
-    } else if (next == '[') {
-      if (!CallTargets(next, context)) {
-        if (yylex() == ';') {
+    } else if (context->token_to_scan == '[') {
+      if (!CallTargets(context)) {
+        if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
            return 0;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -2429,93 +2304,79 @@ int Call(unsigned int first_token, Context* context) {
   return 1;
 }
 
-int Initializer(unsigned int first_token,
-                bool* rescan,
-                unsigned int* last_token,
-                Context* context) {
+int Initializer(Context* context) {
   // first token should be '='
-  *rescan = false;
-  *last_token =0;
-  unsigned int next = yylex();
-
-  if (next == TOKEN_LABEL) {
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == TOKEN_LABEL) {
     context->set_error(ErrorReporterInterface::INVALID_INITIALIZER);
     return 1;
-  } else if (next == '{') {
-    next = yylex();
+  } else if (context->token_to_scan == '{') {
+    context->token_to_scan = yylex();
   }
 
   // check type of initializer
-  if (next == TOKEN_LABEL) {
+  if (context->token_to_scan == TOKEN_LABEL) {
     // label initializer
     while (1) {
-      next = yylex();
-      if (next == ',') {
-        next = yylex();
-        if (next == TOKEN_LABEL) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_LABEL) {
           continue;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_LABEL);
           return 1;
         }
       } else {
-        *last_token = next;
-        *rescan = true;
         break;
       }
     }  // while(1)
 
-  } else if (next == TOKEN_INTEGER_CONSTANT) {
+  } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     // decimal initializer
     while (1) {
-      next = yylex();
-      if (next == ',') {
-        next = yylex();
-        if (next == TOKEN_INTEGER_CONSTANT) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
           continue;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
           return 1;
         }
       } else {
-        *last_token = next;
-        *rescan = true;
         break;
       }
     }  // while(1)
-  } else if (next == TOKEN_SINGLE_CONSTANT) {
+  } else if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
     // single initializer
     while (1) {
-      next = yylex();
-      if (next == ',') {
-        next = yylex();
-        if (next == TOKEN_SINGLE_CONSTANT) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
           continue;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_SINGLE_CONSTANT);
           return 1;
         }
       } else {
-        *last_token = next;
-        *rescan = true;
         break;
       }
     }  // while(1)
-  } else if (next == TOKEN_DOUBLE_CONSTANT) {
+  } else if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
     // double initializer
     while (1) {
-      next = yylex();
-      if (next == ',') {
-        next = yylex();
-        if (next == TOKEN_DOUBLE_CONSTANT) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
           continue;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_DOUBLE_CONSTANT);
           return 1;
         }
       } else {
-        *last_token = next;
-        *rescan = true;
         break;
       }
     }  // while(1)
@@ -2523,45 +2384,30 @@ int Initializer(unsigned int first_token,
     context->set_error(ErrorReporterInterface::INVALID_INITIALIZER);
     return 1;
   }
-  if (!*rescan)
-    next = yylex();
-  if (next == '}') {
-    *rescan = false;
-  } else {
-    *rescan = true;
-    *last_token = next;
+  if (context->token_to_scan == '}') {
+    context->token_to_scan = yylex();
   }
-
   return 0;
 }
 
-int InitializableDecl(unsigned int first_token, Context* context) {
+int InitializableDecl(Context* context) {
   // first_token is READONLY or GLOBAL
-  bool rescan;
-  unsigned int last_token;
-  unsigned int next = yylex();
+  context->token_to_scan = yylex();
 
-  if (token_type == DATA_TYPE_ID) {
-    next = yylex();
-    context->token_to_scan =next;
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+
     if (!Identifier(context)) {
       // scan for arrayDimensions
-      next = yylex();
-      if (next == '[') {
-        if (!ArrayDimensionSet(next, &rescan, &last_token, context)) {
-          if (!rescan)
-            next = yylex();
-          else
-            next = last_token;
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == '[') {
+        if (!ArrayDimensionSet(context)) {
         }
       }
-      if (!Initializer(next, &rescan, &last_token, context)) {
-        if (rescan)
-          next = last_token;
-        else
-          next = yylex();
 
-        if (next == ';') {
+      if (!Initializer(context)) {
+        if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
           return 0;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -2576,29 +2422,23 @@ int InitializableDecl(unsigned int first_token, Context* context) {
   return 1;
 };
 
-int UninitializableDecl(unsigned int first_token, Context* context) {
+int UninitializableDecl(Context* context) {
   // first_token is PRIVATE, GROUP or SPILL
-  bool rescan;
-  unsigned int last_token;
-  unsigned int next;
 
-  next = yylex();
-  if (token_type == DATA_TYPE_ID) {
-    next = yylex();
-    context->token_to_scan =next;
+  context->token_to_scan = yylex();
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+
     if (!Identifier(context)) {
       // scan for arrayDimensions
-      next = yylex();
-      if (next == '[') {
-        if (!ArrayDimensionSet(next, &rescan, &last_token, context)) {
-          if (!rescan)
-            next = yylex();
-          else
-            next = last_token;
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == '[') {
+        if (!ArrayDimensionSet(context)) {
         }
       }
 
-      if (next == ';') {
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -2612,27 +2452,21 @@ int UninitializableDecl(unsigned int first_token, Context* context) {
   return 1;
 }
 
-int ArgUninitializableDecl(unsigned int first_token, Context* context) {
+int ArgUninitializableDecl(Context* context) {
   // first token is ARG
-  bool rescan;
-  unsigned int last_token;
-  unsigned int next = yylex();
+  context->token_to_scan = yylex();
 
-  if (token_type == DATA_TYPE_ID) {
-    next = yylex();
-    context->token_to_scan =next;
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
     if (!Identifier(context)) {
       // scan for arrayDimensions
-      next = yylex();
-      if (next == '[') {
-        if (!ArrayDimensionSet(next, &rescan, &last_token, context)) {
-          if (!rescan)
-            next = yylex();
-          else
-            next = last_token;
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == '[') {
+        if (!ArrayDimensionSet(context)) {
         }
       }
-      if (next == ';') {
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -2646,90 +2480,105 @@ int ArgUninitializableDecl(unsigned int first_token, Context* context) {
   return 1;
 }
 
-int FileDecl(unsigned int first_token, Context* context) {
+int FileDecl(Context* context) {
   // first token is _FILE "file"
-  unsigned int next_token = yylex();
+  context->token_to_scan = yylex();
 
-  if (next_token == TOKEN_INTEGER_CONSTANT) {
-    next_token = yylex();
+  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+    context->token_to_scan = yylex();
 
-    if (next_token == TOKEN_STRING) {
-      next_token = yylex();
+    if (context->token_to_scan == TOKEN_STRING) {
+      context->token_to_scan = yylex();
 
-      if (next_token == ';') {
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
         return 0;
       } else {
-       // "Missing ';' at the end of statement\n"
+        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
       }
     }
   }
   return 1;
 }
 
-int VectorToken(unsigned int first_token , Context *context) {
-  if ( _V2 == first_token || _V4 == first_token)
+int VectorToken(Context *context) {
+  if ( _V2 == context->token_to_scan || _V4 == context->token_to_scan) {
+    context->token_to_scan = yylex();
     return 0;
-  else
+  } else {
     return 1;
+  }
 }
 
-int SignatureType(unsigned int first_token , Context *context) {
+int SignatureType(Context *context) {
   // first token is ARG
-  unsigned int last_token;
-  unsigned int next = yylex();
+  context->token_to_scan = yylex();
 
-  if (DATA_TYPE_ID == token_type) {
+  if (DATA_TYPE_ID == context->token_type) {
+    context->token_to_scan = yylex();
     return 0;
-  } else if (_ROIMG == next
-           || _RWIMG == next
-           || _SAMP == next ) {
+  } else if (_ROIMG == context->token_to_scan
+           || _RWIMG == context->token_to_scan
+           || _SAMP == context->token_to_scan ) {
+    context->token_to_scan = yylex();
     return 0;
   }
   return 1;
 }
 
-int SysCall(unsigned int first_token, Context* context) {
-  // frist token is _SYSCALL "syscall"
-  unsigned int token_next;
-  token_next = yylex();
-  context->token_to_scan = token_next;
-  if (!Operand(context) &&
-      token_next == TOKEN_SREGISTER &&
-      yylex() == ',') {
-    token_next = yylex();
-    context->token_to_scan = token_next;
-    if (!BaseOperand(context) &&
-        token_next == TOKEN_INTEGER_CONSTANT &&
-        yylex() == ',') {
-      token_next = yylex();
-      context->token_to_scan = token_next;
+int SysCall(Context* context) {
+  // first token is _SYSCALL "syscall"
+  context->token_to_scan = yylex();
 
-      if (!Operand(context) &&
-         (token_next == TOKEN_SREGISTER ||
-          token_next == TOKEN_WAVESIZE ||
-          token_next == TOKEN_INTEGER_CONSTANT) &&
-         yylex() == ',') {
-        token_next = yylex();
-        context->token_to_scan = token_next;
-        if (!Operand(context) &&
-           (token_next == TOKEN_SREGISTER ||
-            token_next == TOKEN_WAVESIZE ||
-            token_next == TOKEN_INTEGER_CONSTANT) &&
-           yylex() == ',') {
-          token_next = yylex();
-          context->token_to_scan = token_next;
-          if (!Operand(context) &&
-             (token_next == TOKEN_SREGISTER ||
-              token_next == TOKEN_WAVESIZE ||
-              token_next == TOKEN_INTEGER_CONSTANT)) {
-            if (yylex() == ';') {
-              return 0;
-            }  // ';'
-          }  // 5 operand
-        }  // 4 operand
-      }  // 3 operand
-    }  // 2 base operand
-  }  // 1 operand
+  if (context->token_to_scan == TOKEN_SREGISTER) {
+    if (!Operand(context)) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!BaseOperand(context)) {
+          if (yylex() == ',') {
+            context->token_to_scan = yylex();
+            if (!Operand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if (!Operand(context)) {
+                  if (context->token_to_scan == ',') {
+                    context->token_to_scan = yylex();
+                    if (!Operand(context)) {
+                      if (context->token_to_scan == ';') {
+                        context->token_to_scan = yylex();
+                        return 0;
+                      } else {
+                        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                      }
+                    } else {
+                      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                    }
+                  } else {
+                    context->set_error(ErrorReporterInterface::MISSING_COMMA);
+                  }
+                } else {
+                  context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                }
+
+              } else {
+                context->set_error(ErrorReporterInterface::MISSING_COMMA);
+              }
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+            }
+          } else {
+            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          }
+        } else {
+            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        }
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+      }
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+    }
+  }
   return 1;
 }
 
