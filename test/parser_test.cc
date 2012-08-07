@@ -1097,6 +1097,25 @@ TEST(ParserTest, LabelTargets) {
   
 };
 
+// --------------- Test for extension rule  ----------------- 
+// format:
+// extension := "extension" TOKEN_STRING ) ";"
+// correct cases
+TEST(ParserTest, extension) {
+  std::string input("extension \"abc\" ;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, extension(yylex(), context));
+
+  input.assign("extension \"\t\nabcd\" ;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, extension(yylex(), context));
+
+// wrong cases
+  input.assign("extension \"\asdfjl\"");  // lack of ';'  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, extension(yylex(), context));
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
