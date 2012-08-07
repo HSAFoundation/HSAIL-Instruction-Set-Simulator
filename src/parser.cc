@@ -3149,5 +3149,70 @@ int FunctionSignature(unsigned int first_token , Context *context){
   }
 }
 
+int Label(unsigned int first_token, Context* context) {
+  if (first_token == TOKEN_LABEL && yylex() == ':') {
+    return 0;
+  }
+  return 1;
+}
+
+int LabelTargets(unsigned int first_token, Context* context) {
+  unsigned int next_token;
+  if (!Label(first_token, context)) {
+    if (yylex() == LABELTARGETS) {
+      while (1) {
+        if (yylex() == TOKEN_LABEL) {
+          next_token = yylex();
+          if (next_token == ',') {
+            continue;
+          } else if (next_token == ';') {
+            return 0;
+          } else {
+            // there is an illegal character behind TOKEN_LABEL
+            return 1;
+          }
+        } else {
+          // it isn't TOKEN_LABEL behind LABELTARGETS or ','
+          return 1;
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+int Instruction4(unsigned int first_token, Context* context) {
+  unsigned int next_token;
+  bool is_ftz = false;
+  unsigned int rounding_last_token = 0;
+
+  if (token_type == INSTRUCTION4_OPCODE) {
+    next_token = yylex();
+    if (!RoundingMode(next_token, &is_ftz, &rounding_last_token, context)) {
+      if (is_ftz) {
+        next_token = rounding_last_token;
+      } else {
+        next_token = yylex();
+      }
+    } 
+    if (token_type == DATA_TYPE_ID) {
+      next_token = yylex();
+      if (!Operand(next_token, context) && yylex() == ',') {
+        next_token = yylex();
+        if(!Operand(next_token, context) && yylex() == ',') {
+          next_token = yylex();
+          if(!Operand(next_token, context) && yylex() == ',') {
+            next_token = yylex();
+            if(!Operand(next_token, context) && yylex() == ';') {
+              return 0;
+            } // 4 operand
+          } // 3 operand
+        } // 2 operand
+      } // 1 operand
+    } // DATA_TYPE_ID
+  } // INSTRUCTION4_OPCODE
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

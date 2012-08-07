@@ -1037,6 +1037,66 @@ TEST(ParserTest, SysCall) {
   EXPECT_NE(0, SysCall(yylex(), context));
 };
 
+TEST(ParserTest, Label) {
+
+  std::string input("@_test_label_1:");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Label(yylex(), context));
+
+  input.assign("@_test_label_2   : ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Label(yylex(), context));
+
+  // wrong case
+
+  input.assign("@_test_label_3 @wrong  : ");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Label(yylex(), context));
+
+  input.assign("@_test_label_4 "); // lack of colon ':'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Label(yylex(), context));
+
+  input.assign("$_test_label_5 :"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Label(yylex(), context));
+  
+};
+
+TEST(ParserTest, LabelTargets) {
+
+  std::string input("@tab: labeltargets @a1, @a2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: labeltargets @label;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: labeltargets @label1, @label2, @label3, @label4, \
+                @label5, @label6, @label7, @label8, @label9, @label10, @label11;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, LabelTargets(yylex(), context));
+
+  // wrong case
+  input.assign("@targets: labeltargets @label1, @label2, @label3, ;"); // redundant ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: ,labeltargets @label1, @label2, @label3;"); // redundant ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: labeltargets;"); // number of label is zero
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, LabelTargets(yylex(), context));
+
+  input.assign("@targets: labeltargets @label"); // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, LabelTargets(yylex(), context));
+  
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
@@ -1173,6 +1233,108 @@ TEST(ParserTest,SignatureArgumentList){
   EXPECT_EQ(0, SignatureArgumentList(yylex(),context));
 
 };
+
+TEST(ParserTest, Instruction4) {
+
+  std::string input("mad_ftz_u64 $d1, $d2, $d3, $d4;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+
+  input.assign("extract_b32 $s1, $s1, 2, 3;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+
+  input.assign("insert_s32 $s1, $s1, 2, 3;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+
+  input.assign("shuffle_u8x4 $s10, $s12, $s12, 0x55;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));  
+
+  input.assign("cmov_u8x4 $s1, $s0, $s1, $s2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));  
+
+  input.assign("fma_ftz_up_f32 $s3, 1.0f, $s1, 23f;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));  
+
+  input.assign("bitalign_b32 $s5, $s0, $s1, $s2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+  
+  input.assign("bytealign_b32 $s5, $s0, $s1, $s2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+  
+  input.assign("lerp_b32 $s5, $s0, $s1, $s2;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+  
+  input.assign("sad_b32 $s5, $s0, $s1, $s6;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+  
+  input.assign("sad2_b32 $s5, $s0, $s1, $s6;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+  
+  input.assign("sad4_b32 $s5, $s0, $s1, $s6;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+  
+  input.assign("sad4hi_b32 $s5, $s0, $s1, $s6;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+ 
+  input.assign("bitselect_u32 $s5, $s0, $s1, $s6;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_EQ(0, Instruction4(yylex(), context));
+
+  // wrong case
+  input.assign("sad2_b32 ,$s5, $s0, $s1, $s6;"); // redundent ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));
+  
+  input.assign("sad4_b32 $s5, $s0 $s1, $s6;"); // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));
+  
+  input.assign("sad4hi_b32 $s5, $s0, $s1 $s6;"); // lack of ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));
+ 
+  input.assign("bitselect $s5, $s0, $s1, $s6"); // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));
+
+  input.assign("cmov_u8x4;"); // no one operand
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));  
+
+  input.assign("fma_f32 $s3;"); // only one operand
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));  
+
+  input.assign("bitalign_b32 $s5, $s0, $s1, $s2, $s3;"); // redundent operand
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));
+  
+  input.assign("bytealign_b32 $s5, $s0, $s1;"); // lack of one operand
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));
+  
+  input.assign("lerp_b32 $s5, , $s1, $s2;"); // lack of one operand
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));
+  
+  input.assign("sad $s5, $s0, $s1, $s6;"); // lack of data type
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  EXPECT_NE(0, Instruction4(yylex(), context));
+  
+};
+
 
 }  // namespace brig
 }  // namespace hsa
