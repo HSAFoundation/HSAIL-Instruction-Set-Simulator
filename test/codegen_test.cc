@@ -19,59 +19,57 @@ namespace brig {
 extern ErrorReporter* main_reporter;
 extern Context* context;
 
-
 TEST(CodegenTest, CallwMultiArgs) {
-  Context* context1 = Context::get_instance();
-  context1->set_error_reporter(main_reporter);
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("version 1:0:$small; \n");
+  input.append("function &callee(arg_f32 %output) ");
+  input.append("(arg_f32 %input1, arg_f32 %input2) { \n");
+  input.append("ret; \n");
+  input.append("};\n");
+  input.append("function &caller()(){ \n");
+  input.append(" { arg_f32 %an_input; \n");
+  input.append("   arg_f32 %an_output; \n");
+  input.append("   call &callee(%an_output)(%an_input, %an_input);\n");
+  input.append(" } \n");
+  input.append("}; \n");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+
+  EXPECT_EQ(0, Version(context));
+  EXPECT_EQ(0, Function(context));
+  EXPECT_EQ(0, Function(context));
+
+  // test the size of each section
+  BrigdOffset32_t dsize = context->get_directive_offset();
+  EXPECT_EQ(296, dsize);
+  BrigdOffset32_t csize = context->get_code_offset();
+  EXPECT_EQ(64, csize);
+  BrigdOffset32_t osize = context->get_operand_offset();
+  EXPECT_EQ(56+4, osize);
+  BrigdOffset32_t ssize = context->get_string_offset();
+  EXPECT_EQ(61, ssize);
+
   BrigDirectiveFunction ref = {
     40,                       // size
     BrigEDirectiveFunction,   // kind
-    32,   // c_code
-    32,   // s_name
-    0,   // inParamCount
-    208,  // d_firstScopedDirective
-    1,   // operationCount
-    296,  // d_nextDirective
+    32,                       // c_code
+    32,                       // s_name
+    0,                        // inParamCount
+    208,                      // d_firstScopedDirective
+    1,                        // operationCount
+    296,                      // d_nextDirective
     BrigNone,
     0,
-    0,   // outParamCount
+    0,                        // outParamCount
     0,
   };
-  std::string input("version 1:0:$small;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context1->clear_context();
-  context1->token_to_scan = yylex();
-  EXPECT_EQ(0, Version(context1));
-
-  input.assign("function &callee(arg_f32 %output) ");
-  input.append("(arg_f32 %input1, arg_f32 %input2) { \n");
-  input.append("ret;};\n");
-  input.append("function &caller()(){ \n");
-  input.append("{arg_f32 %an_input; \n");
-  input.append(" arg_f32 %an_output; \n");
-  input.append(" call &callee(%an_output)(%an_input, %an_input);\n");
-  input.append("  }};");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context1->token_to_scan = yylex();
-  EXPECT_EQ(0, Function(context1));
-  EXPECT_EQ(0, Function(context1));
-
-  printf("Test offsets.\n");
-  // test the sizes of each section
-  BrigdOffset32_t dsize = context1->get_directive_offset();
-  EXPECT_EQ(296, dsize);
-  BrigdOffset32_t csize = context1->get_code_offset();
-  EXPECT_EQ(64, csize);
-  BrigdOffset32_t osize = context1->get_operand_offset();
-  EXPECT_EQ(56+4, osize);
-  BrigdOffset32_t ssize = context1->get_string_offset();
-  EXPECT_EQ(61, ssize);
 
   // test BrigDirectiveFunction, the caller function
   BrigDirectiveFunction get;
-  context1->get_directive<BrigDirectiveFunction>(
-              context1->current_bdf_offset,
-              &get);
+  context->get_directive(context->current_bdf_offset, &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -82,18 +80,18 @@ TEST(CodegenTest, CallwMultiArgs) {
 
   // test BrigDirectiveScope
   BrigDirectiveScope arg_scope;
-  context1->get_directive<BrigDirectiveScope>(208, &arg_scope);
+  context->get_directive(208, &arg_scope);
   EXPECT_EQ(8, arg_scope.size);
   EXPECT_EQ(BrigEDirectiveArgStart, arg_scope.kind);
   EXPECT_EQ(32, arg_scope.c_code);
 
-  context1->get_directive<BrigDirectiveScope>(288, &arg_scope);
+  context->get_directive(288, &arg_scope);
   EXPECT_EQ(BrigEDirectiveArgEnd, arg_scope.kind);
   EXPECT_EQ(64, arg_scope.c_code);
 
   // test BrigCall
   BrigInstBase cbr_op;
-  context1->get_code<BrigInstBase>(32, &cbr_op);
+  context->get_code(32, &cbr_op);
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCall, cbr_op.opcode);
   EXPECT_EQ(0, cbr_op.o_operands[0]);
@@ -104,94 +102,91 @@ TEST(CodegenTest, CallwMultiArgs) {
 
   // test BrigOperandFunctionRef
   BrigOperandFunctionRef func_o;
-  context1->get_operand<BrigOperandFunctionRef>(24, &func_o);
+  context->get_operand(24, &func_o);
   EXPECT_EQ(8, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(20, func_o.fn);
 
   // test BrigOperandArgumentRef
   BrigOperandArgumentRef arg_o;
-  context1->get_operand<BrigOperandArgumentRef>(8, &arg_o);
+  context->get_operand(8, &arg_o);
   EXPECT_EQ(8, arg_o.size);
   EXPECT_EQ(BrigEOperandArgumentRef, arg_o.kind);
   EXPECT_EQ(180+36, arg_o.arg);
 
-  context1->get_operand<BrigOperandArgumentRef>(16, &arg_o);
+  context->get_operand(16, &arg_o);
   EXPECT_EQ(8, arg_o.size);
   EXPECT_EQ(BrigEOperandArgumentRef, arg_o.kind);
   EXPECT_EQ(216+36, arg_o.arg);
 
-
   // test BrigOperandArgumentList
   BrigOperandArgumentList arg_l;
-  context1->get_operand<BrigOperandArgumentList>(32, &arg_l);
+  context->get_operand(32, &arg_l);
   EXPECT_EQ(12, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(16, arg_l.o_args[0]);
 
-  context1->get_operand<BrigOperandArgumentList>(44, &arg_l);
+  context->get_operand(44, &arg_l);
   EXPECT_EQ(16, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(8, arg_l.o_args[0]);
 
   BrigoOffset32_t arg_test = 0;
-  context1->get_operand<BrigoOffset32_t>(56, &arg_test);
+  context->get_operand(56, &arg_test);
   EXPECT_EQ(8, arg_test);
 }
 
 TEST(CodegenTest, Example6_CallwArgs) {
-  Context* context1 = Context::get_instance();
-  context1->set_error_reporter(main_reporter);
-  context1->clear_context();
-  BrigDirectiveFunction ref = {
-    40,                       // size
-    BrigEDirectiveFunction,   // kind
-    32,   // c_code
-    23,   // s_name
-    0,   // inParamCount
-    172,  // d_firstScopedDirective
-    1,   // operationCount
-    260,  // d_nextDirective
-    BrigNone,
-    0,
-    0,   // outParamCount
-    0,
-  };
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
 
-  std::string input("version 1:0:$small;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context1->token_to_scan = yylex();
-  EXPECT_EQ(0, Version(context1));
+  std::string input("version 1:0:$small; \n");
+  input.append("function &callee(arg_f32 %output)(arg_f32 %input) { \n");
+  input.append(" ret; \n");
+  input.append("}; \n");
 
-  input.assign("function &callee(arg_f32 %output)(arg_f32 %input) {\n");
-  input.append(" ret;};\n");
-  input.append("function &caller()(){\n");
-  input.append("{arg_f32 %an_input; \n");
-  input.append(" arg_f32 %an_output; \n");
-  input.append(" call &callee(%an_output)(%an_input);\n");
-  input.append("}};");
+  input.append("function &caller()(){ \n");
+  input.append(" { arg_f32 %an_input; \n");
+  input.append("   arg_f32 %an_output; \n");
+  input.append("  call &callee(%an_output)(%an_input); \n");
+  input.append(" } \n");
+  input.append("}; \n");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context1->token_to_scan = yylex();
-  EXPECT_EQ(0, Function(context1));
-  EXPECT_EQ(0, Function(context1));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Version(context));
+  EXPECT_EQ(0, Function(context));
+  EXPECT_EQ(0, Function(context));
 
   // test the sizes of each section
-  BrigdOffset32_t dsize = context1->get_directive_offset();
+  BrigdOffset32_t dsize = context->get_directive_offset();
   EXPECT_EQ(260, dsize);
-  BrigdOffset32_t csize = context1->get_code_offset();
+  BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(64, csize);
-  BrigdOffset32_t osize = context1->get_operand_offset();
+  BrigdOffset32_t osize = context->get_operand_offset();
   EXPECT_EQ(56, osize);
-  BrigdOffset32_t ssize = context1->get_string_offset();
+  BrigdOffset32_t ssize = context->get_string_offset();
   EXPECT_EQ(52, ssize);
+
+  BrigDirectiveFunction ref = {
+    40,                       // size
+    BrigEDirectiveFunction,   // kind
+    32,                       // c_code
+    23,                       // s_name
+    0,                        // inParamCount
+    172,                      // d_firstScopedDirective
+    1,                        // operationCount
+    260,                      // d_nextDirective
+    BrigNone,
+    0,
+    0,                        // outParamCount
+    0,
+  };
 
   // test BrigDirectiveFunction, the caller function
   BrigDirectiveFunction get;
-  context1->get_directive<BrigDirectiveFunction>(
-              context1->current_bdf_offset,
-              &get);
+  context->get_directive(context->current_bdf_offset, &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -202,18 +197,18 @@ TEST(CodegenTest, Example6_CallwArgs) {
 
   // test BrigDirectiveScope
   BrigDirectiveScope arg_scope;
-  context1->get_directive<BrigDirectiveScope>(172, &arg_scope);
+  context->get_directive(172, &arg_scope);
   EXPECT_EQ(8, arg_scope.size);
   EXPECT_EQ(BrigEDirectiveArgStart, arg_scope.kind);
   EXPECT_EQ(32, arg_scope.c_code);
 
-  context1->get_directive<BrigDirectiveScope>(252, &arg_scope);
+  context->get_directive(252, &arg_scope);
   EXPECT_EQ(BrigEDirectiveArgEnd, arg_scope.kind);
   EXPECT_EQ(64, arg_scope.c_code);
 
   // test BrigCall
   BrigInstBase cbr_op;
-  context1->get_code<BrigInstBase>(32, &cbr_op);
+  context->get_code(32, &cbr_op);
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCall, cbr_op.opcode);
   EXPECT_EQ(0, cbr_op.o_operands[0]);
@@ -224,70 +219,56 @@ TEST(CodegenTest, Example6_CallwArgs) {
 
   // test BrigOperandFunctionRef
   BrigOperandFunctionRef func_o;
-  context1->get_operand<BrigOperandFunctionRef>(24, &func_o);
+  context->get_operand(24, &func_o);
   EXPECT_EQ(8, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(20, func_o.fn);
 
   // test BrigOperandArgumentRef
   BrigOperandArgumentRef arg_o;
-  context1->get_operand<BrigOperandArgumentRef>(8, &arg_o);
+  context->get_operand(8, &arg_o);
   EXPECT_EQ(8, arg_o.size);
   EXPECT_EQ(BrigEOperandArgumentRef, arg_o.kind);
   EXPECT_EQ(180, arg_o.arg);
 
-  context1->get_operand<BrigOperandArgumentRef>(16, &arg_o);
+  context->get_operand(16, &arg_o);
   EXPECT_EQ(8, arg_o.size);
   EXPECT_EQ(BrigEOperandArgumentRef, arg_o.kind);
   EXPECT_EQ(216, arg_o.arg);
 
-
   // test BrigOperandArgumentList
   BrigOperandArgumentList arg_l;
-  context1->get_operand<BrigOperandArgumentList>(32, &arg_l);
+  context->get_operand(32, &arg_l);
   EXPECT_EQ(12, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(16, arg_l.o_args[0]);
 
-  context1->get_operand<BrigOperandArgumentList>(44, &arg_l);
+  context->get_operand(44, &arg_l);
   EXPECT_EQ(12, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(8, arg_l.o_args[0]);
 }
 
-
 TEST(CodegenTest, Example5_SimpleCall) {
   context->set_error_reporter(main_reporter);
-  BrigDirectiveFunction ref = {
-    40,                       // size
-    BrigEDirectiveFunction,   // kind
-    32,   // c_code
-    8,   // s_name
-    0,   // inParamCount
-    100,  // d_firstScopedDirective
-    1,   // operationCount
-    116,  // d_nextDirective
-    BrigNone,
-    0,
-    0,   // outParamCount
-    0,
-  };
+  context->clear_context();
 
   std::string input("version 1:0:$small; \n");
-  input.append("function &callee()(){ret;}; \n");
-
+  input.append("function &callee()(){ \n");
+  input.append(" ret; \n");
+  input.append("}; \n");
+  input.append(" function &caller()(){ \n");
+  input.append(" { \n");
+  input.append("   call &callee; \n");
+  input.append(" } \n");
+  input.append("}; \n");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->clear_context();
   context->token_to_scan= yylex();
 
   EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
-
-  input.assign("function &caller()(){{call &callee; }};");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
-
   EXPECT_EQ(0, Function(context));
+
   // test the sizes of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
   EXPECT_EQ(116, dsize);
@@ -299,10 +280,23 @@ TEST(CodegenTest, Example5_SimpleCall) {
   EXPECT_EQ(16, ssize);
 
   // test BrigDirectiveFunction, the caller function
+  BrigDirectiveFunction ref = {
+    40,                       // size
+    BrigEDirectiveFunction,   // kind
+    32,                       // c_code
+    8,                        // s_name
+    0,                        // inParamCount
+    100,                      // d_firstScopedDirective
+    1,                        // operationCount
+    116,                      // d_nextDirective
+    BrigNone,
+    0,
+    0,                        // outParamCount
+    0,
+  };
+
   BrigDirectiveFunction get;
-  context->get_directive<BrigDirectiveFunction>(
-              context->current_bdf_offset,
-              &get);
+  context->get_directive(context->current_bdf_offset, &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -313,18 +307,18 @@ TEST(CodegenTest, Example5_SimpleCall) {
 
   // test BrigDirectiveScope
   BrigDirectiveScope arg_scope;
-  context->get_directive<BrigDirectiveScope>(100, &arg_scope);
+  context->get_directive(100, &arg_scope);
   EXPECT_EQ(8, arg_scope.size);
   EXPECT_EQ(BrigEDirectiveArgStart, arg_scope.kind);
   EXPECT_EQ(32, arg_scope.c_code);
 
-  context->get_directive<BrigDirectiveScope>(108, &arg_scope);
+  context->get_directive(108, &arg_scope);
   EXPECT_EQ(BrigEDirectiveArgEnd, arg_scope.kind);
   EXPECT_EQ(64, arg_scope.c_code);
 
   // test BrigCall
   BrigInstBase cbr_op;
-  context->get_code<BrigInstBase>(32, &cbr_op);
+  context->get_code(32, &cbr_op);
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCall, cbr_op.opcode);
   EXPECT_EQ(0, cbr_op.o_operands[0]);
@@ -335,43 +329,31 @@ TEST(CodegenTest, Example5_SimpleCall) {
 
   // test BrigOperandFunctionRef
   BrigOperandFunctionRef func_o;
-  context->get_operand<BrigOperandFunctionRef>(8, &func_o);
+  context->get_operand(8, &func_o);
   EXPECT_EQ(8, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(20, func_o.fn);
 }
 
 TEST(CodegenTest, Example4_Branch) {
+  context->set_error_reporter(main_reporter);
   context->clear_context();
-  BrigDirectiveFunction ref = {
-    40,                       // size
-    BrigEDirectiveFunction,   // kind
-    0,                        // c_code
-    0,                        // s_name
-    0,                        // inParamCount
-    96,                       // d_firstScopedDirective
-    5,                        // operationCount
-    120,                      // d_nextDirective
-    BrigNone,
-    0,
-    1,                        // outParamCount
-    0,
-  };
+
   std::string input("version 1:0:$small;\n");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, Version(context));
-  input.assign("function &branch_ops (arg_u8x4 %x)() \n");
-  input.append("{cbr $c1, @then; \n");
-  input.append("abs_p_s8x4 $s1, $s2; \n");
-  input.append("brn @outof_IF; \n");
-  input.append("@then: \n");
-  input.append("add_pp_sat_u16x2 $s1, $s0, $s3; \n");
-  input.append("@outof_IF: ret;};");
+  input.append("function &branch_ops (arg_u8x4 %x)() { \n");
+  input.append("  cbr $c1, @then; \n");
+  input.append("  abs_p_s8x4 $s1, $s2; \n");
+  input.append("  brn @outof_IF; \n");
+  input.append("  @then: \n");
+  input.append("  add_pp_sat_u16x2 $s1, $s0, $s3; \n");
+  input.append("  @outof_IF: \n");
+  input.append("  ret; \n");
+  input.append("}; \n");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   context->token_to_scan = yylex();
+  EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
 
   // test the sizes of each section
@@ -385,10 +367,23 @@ TEST(CodegenTest, Example4_Branch) {
   EXPECT_EQ(51, ssize);
 
   // test BrigDirectiveFunction
+  BrigDirectiveFunction ref = {
+      40,                       // size
+      BrigEDirectiveFunction,   // kind
+      0,                        // c_code
+      0,                        // s_name
+      0,                        // inParamCount
+      96,                       // d_firstScopedDirective
+      5,                        // operationCount
+      120,                      // d_nextDirective
+      BrigNone,
+      0,
+      1,                        // outParamCount
+      0,
+    };
+
   BrigDirectiveFunction get;
-  context->get_directive<BrigDirectiveFunction>(
-              context->current_bdf_offset,
-              &get);
+  context->get_directive(context->current_bdf_offset, &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -399,18 +394,18 @@ TEST(CodegenTest, Example4_Branch) {
 
   // test BrigDirectiveLabel
   BrigDirectiveLabel label1;
-  context->get_directive<BrigDirectiveLabel>(96, &label1);
+  context->get_directive(96, &label1);
   EXPECT_EQ(12, label1.size);
   EXPECT_EQ(100, label1.c_code);
   EXPECT_EQ(27, label1.s_name);
 
-  context->get_directive<BrigDirectiveLabel>(108, &label1);
+  context->get_directive(108, &label1);
   EXPECT_EQ(132, label1.c_code);
   EXPECT_EQ(41, label1.s_name);
 
   // test BrigCbr
   BrigInstBase cbr_op;
-  context->get_code<BrigInstBase>(0, &cbr_op);
+  context->get_code(0, &cbr_op);
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCbr, cbr_op.opcode);
   EXPECT_EQ(0, cbr_op.o_operands[0]);
@@ -421,7 +416,7 @@ TEST(CodegenTest, Example4_Branch) {
 
   // test BrigBrn
   BrigInstBar br_op;
-  context->get_code<BrigInstBar>(64, &br_op);
+  context->get_code(64, &br_op);
   EXPECT_EQ(36, br_op.size);
   EXPECT_EQ(BrigBrn, br_op.opcode);
   EXPECT_EQ(0, br_op.o_operands[0]);
@@ -432,35 +427,18 @@ TEST(CodegenTest, Example4_Branch) {
 }
 
 TEST(CodegenTest, Example3_CodeGen) {
+  context->set_error_reporter(main_reporter);
   context->clear_context();
 
-  BrigDirectiveFunction ref = {
-    40,                       // size
-    BrigEDirectiveFunction,   // kind
-    0,   // c_code
-    0,   // s_name
-    0,   // inParamCount
-    96,  // d_firstScopedDirective
-    2,   // operationCount
-    96,  // d_nextDirective
-    BrigStatic,
-    0,
-    1,   // outParamCount
-    0,
-  };
+  std::string input("version 1:0:$small; \n");
+  input.append("static function &packed_ops (extern arg_u8x4 %x)() {");
+  input.append("  abs_p_s8x4 $s1, $s2; \n");
+  input.append("  add_pp_sat_u16x2 $s1, $s0, $s3; \n");
+  input.append("}; \n");
 
-  std::string input("version 1:0:$small;");
-
-  // current directive offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Version(context));
-
-  input.assign("static function &packed_ops (extern arg_u8x4 %x)()");
-  input.append("{abs_p_s8x4 $s1, $s2;add_pp_sat_u16x2 $s1, $s0, $s3;};");
-
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
   EXPECT_EQ(0, Function(context));
 
   // test the .directive section size
@@ -468,10 +446,23 @@ TEST(CodegenTest, Example3_CodeGen) {
   EXPECT_EQ(96, dsize);
 
   // test the .directive section
+  BrigDirectiveFunction ref = {
+    40,                       // size
+    BrigEDirectiveFunction,   // kind
+    0,                        // c_code
+    0,                        // s_name
+    0,                        // inParamCount
+    96,                       // d_firstScopedDirective
+    2,                        // operationCount
+    96,                       // d_nextDirective
+    BrigStatic,
+    0,
+    1,                        // outParamCount
+    0,
+  };
+
   BrigDirectiveFunction get;
-  context->get_directive<BrigDirectiveFunction>(
-              context->current_bdf_offset,
-              &get);
+  context->get_directive(context->current_bdf_offset, &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -490,9 +481,7 @@ TEST(CodegenTest, Example3_CodeGen) {
   EXPECT_EQ(64, csize);
 
   BrigInstBase get_c;
-  context->get_code<BrigInstBase>(
-              32,
-              &get_c);
+  context->get_code(32, &get_c);
   EXPECT_EQ(BrigAdd, get_c.opcode);
   EXPECT_EQ(BrigPackPPsat, get_c.packing);
   EXPECT_EQ(Brigu16x2, get_c.type);
@@ -502,7 +491,15 @@ TEST(CodegenTest, Example3_CodeGen) {
 }
 
 TEST(CodegenTest, Instrustion3Op_CodeGen) {
+  context->set_error_reporter(main_reporter);
   context->clear_context();
+
+  std::string input("add_pp_sat_u16x2 $s1, $s0, $s3; \n");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction3(context));
+
   BrigInstBase ref = {
     32,
     BrigEInstBase,
@@ -512,16 +509,8 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
     {8, 20, 32, 0, 0}
   };
 
-  std::string input("add_pp_sat_u16x2 $s1, $s0, $s3;");
-
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, Instruction3(context));
-
   BrigInstBase get;
-  context->get_code<BrigInstBase>(
-              0,
-              &get);
+  context->get_code(0, &get);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.type, get.type);
@@ -530,7 +519,15 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
 }
 
 TEST(CodegenTest, Instrustion2Op_CodeGen) {
+  context->set_error_reporter(main_reporter);
   context->clear_context();
+
+  std::string input("abs_p_s8x4 $s1, $s2; \n");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+
   BrigInstBase ref = {
     32,
     BrigEInstBase,
@@ -540,16 +537,8 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
     {8, 20, 0, 0, 0}
   };
 
-  std::string input("abs_p_s8x4 $s1, $s2;");
-
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, Instruction2(context));
-
   BrigInstBase get;
-  context->get_code<BrigInstBase>(
-              0,
-              &get);
+  context->get_code(0, &get);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.type, get.type);
@@ -558,9 +547,10 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
 }
 
 TEST(CodegenTest, Instrustion2Op_FTZ_CodeGen) {
+  context->set_error_reporter(main_reporter);
   context->clear_context();
-  std::string input("sqrt_s8x4 $s1, $s2;");
 
+  std::string input("sqrt_s8x4 $s1, $s2; \n");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction2(context));
@@ -575,9 +565,7 @@ TEST(CodegenTest, Instrustion2Op_FTZ_CodeGen) {
   };
 
   BrigInstBase get;
-  context->get_code<BrigInstBase>(
-              0,
-              &get);
+  context->get_code(0, &get);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.type, get.type);
@@ -586,8 +574,10 @@ TEST(CodegenTest, Instrustion2Op_FTZ_CodeGen) {
 }
 
 TEST(CodegenTest, Instrustion2Op_FTZ_With_Modifier_CodeGen) {
+  context->set_error_reporter(main_reporter);
   context->clear_context();
-  std::string input("sqrt_ftz_s8x4 $s1, $s2;");
+
+  std::string input("sqrt_ftz_s8x4 $s1, $s2; \n");
 
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   context->token_to_scan = yylex();
@@ -597,19 +587,17 @@ TEST(CodegenTest, Instrustion2Op_FTZ_With_Modifier_CodeGen) {
   bam.ftz = 1;
 
   BrigInstMod ref = {
-    sizeof(ref),      // size
-    BrigEInstMod,     // kind
+    sizeof(ref),       // size
+    BrigEInstMod,      // kind
     BrigSqrt,          // opcode
-    Brigs8x4,         // type
-    BrigNoPacking,        // packing
+    Brigs8x4,          // type
+    BrigNoPacking,     // packing
     {8, 20, 0, 0, 0},  // operand
     bam
   };
 
   BrigInstMod get;
-  context->get_code<BrigInstMod>(
-              0,
-              &get);
+  context->get_code(0, &get);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.type, get.type);
@@ -617,11 +605,12 @@ TEST(CodegenTest, Instrustion2Op_FTZ_With_Modifier_CodeGen) {
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
   EXPECT_EQ(ref.aluModifier.ftz, get.aluModifier.ftz);
 }
-
 
 TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
+  context->set_error_reporter(main_reporter);
   context->clear_context();
-  std::string input("abs_ftz_p_s8x4 $s1, $s2;");
+
+  std::string input("abs_ftz_p_s8x4 $s1, $s2; \n");
 
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   context->token_to_scan = yylex();
@@ -631,19 +620,17 @@ TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
   bam.ftz = 1;
 
   BrigInstMod ref = {
-    sizeof(ref),      // size
-    BrigEInstMod,     // kind
-    BrigAbs,          // opcode
-    Brigs8x4,         // type
-    BrigPackP,        // packing
+    sizeof(ref),       // size
+    BrigEInstMod,      // kind
+    BrigAbs,           // opcode
+    Brigs8x4,          // type
+    BrigPackP,         // packing
     {8, 20, 0, 0, 0},  // operand
     bam
   };
 
   BrigInstMod get;
-  context->get_code<BrigInstMod>(
-              0,
-              &get);
+  context->get_code(0, &get);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.type, get.type);
@@ -652,35 +639,19 @@ TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
   EXPECT_EQ(ref.aluModifier.ftz, get.aluModifier.ftz);
 }
 
-
 TEST(CodegenTest, SimplestFunction_CodeGen) {
+  context->set_error_reporter(main_reporter);
   context->clear_context();
-  BrigDirectiveFunction ref = {
-    40,                       // size
-    BrigEDirectiveFunction,   // kind
-    0,   // c_code
-    0,   // s_name
-    0,   // inParamCount
-    96,  // d_firstScopedDirective
-    1,   // operationCount
-    96,  // d_nextDirective
-    BrigNone,
-    0,
-    1,   // outParamCount
-    0,
-  };
 
-  std::string input("version 1:0:$small;");
-
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, Version(context));
-
-  input.assign("function &return_true(arg_f32 %ret_val)(){ret;};");
+  std::string input("version 1:0:$small; \n");
+  input.append("function &return_true(arg_f32 %ret_val)(){ \n");
+  input.append(" ret; \n");
+  input.append("};");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   context->token_to_scan = yylex();
+  EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
 
   // test the .directive section size
@@ -688,10 +659,23 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   EXPECT_EQ(96, dsize);
 
   // test the offset to the .string section
+  BrigDirectiveFunction ref = {
+    40,                       // size
+    BrigEDirectiveFunction,   // kind
+    0,                        // c_code
+    0,                        // s_name
+    0,                        // inParamCount
+    96,                       // d_firstScopedDirective
+    1,                        // operationCount
+    96,                       // d_nextDirective
+    BrigNone,
+    0,
+    1,                        // outParamCount
+    0,
+  };
+
   BrigDirectiveFunction get;
-  context->get_directive<BrigDirectiveFunction>(
-              context->current_bdf_offset,
-              &get);
+  context->get_directive(context->current_bdf_offset, &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -720,6 +704,7 @@ TEST(CodegenTest, AlignmentCheck) {
   // since if at beginning the offset is a multiple of 4 but not a multiple of 8
   // then appending a 4-byte aligned item will lead to a multiple-of-8 offset
   context->clear_context();
+
   // First append a 4-byte aligned item BrigBlockStart
   uint32_t old_offset;
   uint32_t curr_offset = context->get_directive_offset();
@@ -758,8 +743,16 @@ TEST(CodegenTest, AlignmentCheck) {
 }
 
 TEST(CodegenTest, VersionCodeGen) {
-  // reference struct
+  context->set_error_reporter(main_reporter);
   context->clear_context();
+  std::string input("\n version 1:0; \n");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Version(context));
+
+  uint32_t curr_d_offset = context->get_directive_offset();
+
   BrigDirectiveVersion ref = {
     sizeof(ref),
     BrigEDirectiveVersion,
@@ -770,25 +763,13 @@ TEST(CodegenTest, VersionCodeGen) {
     BrigEFull,    // profile
     BrigENosftz,  // ftz
     0             // reserved
-    };
+  };
 
-  std::string input("version 1:0;");
-  ref.major = 1;
-  ref.minor = 0;
-
-  // current directive offset value
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, Version(context));
-
-  // after append BrigDirectiveVersion
-  uint32_t curr_d_offset = context->get_directive_offset();
 
   // get structure back
   BrigDirectiveVersion get;
-  context->get_directive<BrigDirectiveVersion>(
-                  curr_d_offset-sizeof(get),
-                  &get);
+  context->get_directive(curr_d_offset-sizeof(get), &get);
+
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.major, get.major);
@@ -797,10 +778,11 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.profile, get.profile);
   EXPECT_EQ(ref.ftz, get.ftz);
 
+  /* ---------- TEST 2 ---------*/
   context->clear_context();
 
-  /* ---------- TEST 2 ---------*/
   input.assign("version 2:0:$large;");
+
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Version(context));
@@ -821,9 +803,10 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.profile, get.profile);
   EXPECT_EQ(ref.ftz, get.ftz);
 
+        /* TEST 3, Multi Target */
   context->clear_context();
-      /* TEST 3, Multi Target */
   input.assign("version 2:0:$large, $reduced, $sftz;");
+
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Version(context));
@@ -836,7 +819,7 @@ TEST(CodegenTest, VersionCodeGen) {
 
   // get structure back
   curr_d_offset = context->get_directive_offset();
-  context->get_directive<BrigDirectiveVersion>(curr_d_offset-sizeof(get), &get);
+  context->get_directive(curr_d_offset-sizeof(get), &get);
 
   // compare two structs
   EXPECT_EQ(ref.kind, get.kind);
@@ -852,7 +835,6 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string name;
   std::string input("$d7");  // register
 
-
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
   parser->clear_context();
@@ -864,7 +846,6 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Operand(context));
 
-
   // reference struct
   BrigOperandReg ref = {
     sizeof(ref),      // size
@@ -872,6 +853,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
     Brigb64,          // type
     0                // reserved
   };
+
   name.assign("$d7");
   ref.name = context->lookup_symbol(name);
   EXPECT_EQ(0, ref.name);
@@ -879,7 +861,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   // get structure from context and compare
   BrigOperandReg get;
   uint32_t curr_o_offset = context->get_operand_offset();
-  context->get_operand<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
+  context->get_operand(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -888,8 +870,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
 
   // second register
   input.assign("$q7");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-
+  parser->set_source_string(input);
   // scan symbols
   parser->scan_symbols();
 
@@ -902,7 +883,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   ref.name = context->lookup_symbol(name);
   ref.type = Brigb128;
   curr_o_offset = context->get_operand_offset();
-  context->get_operand<BrigOperandReg>(curr_o_offset-sizeof(get), &get);
+  context->get_operand(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -948,8 +929,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   ref.bits.u = -5;
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
-  // to overcome padding
-  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -967,8 +947,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   ref.bits.f = 5;
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
-  // to overcome padding
-  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -986,8 +965,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   ref.type = Brigb64;
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
-  // to overcome padding
-  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -1005,8 +983,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   ref.bits.u = 8;
   // get last structure from context and compare
   curr_o_offset = context->get_operand_offset();
-  // to overcome padding
-  context->get_operand<BrigOperandImmed>(curr_o_offset-sizeof(get), &get);
+  context->get_operand(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -1084,7 +1061,6 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
 
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
-
   // scan symbols
   parser->scan_symbols();
 
@@ -1110,7 +1086,7 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
     // get structure from context and compare
   BrigOperandAddress get;
   uint32_t curr_o_offset = context->get_operand_offset();
-  context->get_operand<BrigOperandAddress>(curr_o_offset-sizeof(get), &get);
+  context->get_operand(curr_o_offset-sizeof(get), &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -1125,10 +1101,18 @@ TEST(ErrorReportingTest, UseMockErrorReporter) {
   // forward call to FakeErrorReporter
   // to record error history
   mer.DelegateToFake();
-  Context* context1 = Context::get_instance();
-  ErrorReporterInterface* old_rpt = context1->get_error_reporter();
-  context1->set_error_reporter(&mer);
-  context1->clear_context();
+
+  ErrorReporterInterface* old_rpt = context->get_error_reporter();
+
+  context->set_error_reporter(&mer);
+  context->clear_context();
+
+  std::string input("version 1:0;");
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_CALL(mer, report_error(ErrorReporterInterface::OK, _, _));
+  EXPECT_EQ(0, Version(context));
+
   BrigDirectiveVersion ref = {
     sizeof(ref),
     BrigEDirectiveVersion,
@@ -1139,21 +1123,13 @@ TEST(ErrorReportingTest, UseMockErrorReporter) {
     BrigEFull,    // profile
     BrigENosftz,  // ftz
     0             // reserved
-    };
-
-  std::string input("version 1:0;");
-  ref.major = 1;
-  ref.minor = 0;
-
-  // current directive offset value
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context1->token_to_scan = yylex();
-  EXPECT_CALL(mer, report_error(ErrorReporterInterface::OK, _, _));
-  EXPECT_EQ(0, Version(context1));
+  };
 
   mer.show_all_error();
-  context1->set_error_reporter(old_rpt);
-  context1->clear_context();
+
+  // return the true reporter to context
+  context->set_error_reporter(old_rpt);
 }
+
 }  // namespace brig
 }  // namespace hsa
