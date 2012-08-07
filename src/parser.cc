@@ -3215,7 +3215,21 @@ int Instruction4(unsigned int first_token, Context* context) {
 }
 
 int extension(unsigned int first_token, Context* context) {
- 
+  // first token is EXTENSION "extension"
+  unsigned int next_token = yylex();
+  ErrorReporterInterface *rpt = context->get_error_reporter();
+
+  if (next_token == TOKEN_STRING) {
+    next_token = yylex();
+
+    if (next_token == ';') {
+      return 0;
+    } else {   // missing ";"
+			      rpt->report_error(ErrorReporterInterface::MISSING_SEMICOLON,
+                        yylineno,
+                        yycolno);
+    }
+  }
   return 1;
 }
 
