@@ -13,17 +13,22 @@ namespace hsa {
 namespace brig {
 class GenLLVM {
  public:
-  explicit GenLLVM(const Buffer& directives, const StringBuffer&);
+  explicit GenLLVM(const StringBuffer&,
+                   const Buffer &directives,
+                   const Buffer &code,
+                   const Buffer &operands);
   void gen_proto(void);
   void gen_version(void);
   size_t gen_directive(size_t);
   size_t gen_function(size_t, const struct BrigDirectiveFunction *);
   void operator()(void);
-  const std::string& str(void) { return output_; }
+  const std::string &str(void) { return output_; }
  private:
   void gen_GPU_states(void);
-  const Buffer& directives_;
-  const StringBuffer& strings_;
+  const StringBuffer &strings_;
+  const Buffer &directives_;
+  const Buffer &code_;
+  const Buffer &operands_;
   llvm::Module *brig_frontend_;
   llvm::Type *gpu_states_type_;
   std::string output_;

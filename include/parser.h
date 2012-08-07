@@ -8,7 +8,6 @@
 namespace hsa {
 namespace brig {
 
-// classify token into different terminal type
 int Query(Context* context);
 int Operand(Context* context);
 int Identifier(Context* context);
@@ -16,11 +15,15 @@ int BaseOperand(Context* context);
 int AddressableOperand(Context* context);
 int ArrayOperandList(Context* context);
 int RoundingMode(Context* context);
-
+int FunctionSignature(unsigned int first_token ,Context* context);
 int Instruction2(Context* context);
 int Instruction3(Context* context);
 int Version(Context* context);
 int Alignment(Context* context);
+int SignatureArgumentList(unsigned int first_token , Context *context) ;
+int Label(unsigned int first_token, Context* context);
+int LabelTargets(unsigned int first_token, Context* context);
+int Instruction4(unsigned int first_token, Context* context);
 int DeclPrefix(Context* context);
 int FBar(Context* context);
 int ArrayDimensionSet(Context* context);

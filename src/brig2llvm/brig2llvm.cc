@@ -1,18 +1,16 @@
 #include "llvm/DerivedTypes.h"
+#include "llvm/IRBuilder.h"
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
+#include "llvm/Analysis/Verifier.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/IRBuilder.h"
 #include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
 #include <iostream>
 namespace hsa{
 namespace brig{
-struct directive_header {
-  uint16_t size;
-  uint16_t kind;
-};
+
 static llvm::StructType *create_soa_type(
   llvm::Type *t, std::string name, int nr) {
   // [nr x t]
@@ -89,14 +87,34 @@ size_t GenLLVM::gen_function(size_t index,
     // Create alloca of local GPU state
     llvm::IRBuilder<> TmpB(bb, bb->begin());
     TmpB.CreateAlloca(gpu_states_type_, 0, "gpu_reg_p");
+
+    uint32_t offset = directive->c_code;
+    // TODO: This code is not label aware, yet
+    for(uint32_t i = 0; i < directive->operationCount; ++i) {
+      const BrigInstBase *inst =
+        reinterpret_cast<const BrigInstBase *>(&code_.get()[offset]);
+
+      if(inst->kind == BrigEInstBase) {
+        if(inst->opcode == BrigRet) {
+          TmpB.CreateRetVoid();
+        } else {
+          assert(false && "Unimplemented base opcode");
+        }
+      } else {
+        assert(false && "Unimplemented instruction kind");
+      }
+
+      offset += inst->size;
+    }
   }
+
 //  std::cout << "A function\n";
   return index;
 }
 
 size_t GenLLVM::gen_directive(size_t index) {
-  const directive_header *dh =
-    reinterpret_cast<const directive_header *>(&(directives_.get()[index]));
+  const BrigDirectiveBase *dh =
+    reinterpret_cast<const BrigDirectiveBase *>(&(directives_.get()[index]));
   //std::cout << "Size = "<<dh->size<<"; kind = "<<dh->kind <<std::endl;
   enum BrigDirectiveKinds directive_kind =
     static_cast<enum BrigDirectiveKinds>(dh->kind);
@@ -114,8 +132,12 @@ size_t GenLLVM::gen_directive(size_t index) {
   return index+dh->size;
 }
 
-GenLLVM::GenLLVM(const Buffer &directives, const StringBuffer &strings):
+GenLLVM::GenLLVM(const StringBuffer &strings,
+                 const Buffer &directives,
+                 const Buffer &code,
+                 const Buffer &operands) :
   directives_(directives), strings_(strings),
+  code_(code), operands_(operands),
    brig_frontend_(NULL) {
 }
 void GenLLVM::operator()(void) {
@@ -129,6 +151,8 @@ void GenLLVM::operator()(void) {
   llvm::raw_string_ostream ros(output_);
   brig_frontend_->print(ros, NULL);
   brig_frontend_->dump();
+
+  llvm::verifyModule(*brig_frontend_);
 }
 
 }
