@@ -3239,6 +3239,31 @@ int OperandList(unsigned int first_token, Context* context) {
 }
 
 int Cmp(unsigned int first_token, Context* context) {
+  // first token is PACKEDCMP or CMP
+  unsigned int next_token;
+  next_token = yylex();
+  if (token_type == COMPARISON) {
+    next_token = yylex();
+    if (first_token == CMP) {
+      if (token_type == DATA_TYPE_ID) {
+        next_token = yylex();
+      } else {
+        return 1;
+      }
+    }
+    if (token_type == DATA_TYPE_ID) {
+      next_token = yylex();
+      if (!Operand(next_token, context) && yylex() == ',') {
+        next_token = yylex();
+        if (!Operand(next_token, context) && yylex() == ',') {
+          next_token = yylex();
+          if (!Operand(next_token, context) && yylex() == ';') {
+            return 0;
+          } // 3 operand
+        } // 2 operand
+      } // 1 operand      
+    }
+  }
   return 1;
 }
 
