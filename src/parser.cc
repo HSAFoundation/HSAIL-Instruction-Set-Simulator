@@ -3199,11 +3199,11 @@ int Instruction4(unsigned int first_token, Context* context) {
       next_token = yylex();
       if (!Operand(next_token, context) && yylex() == ',') {
         next_token = yylex();
-        if(!Operand(next_token, context) && yylex() == ',') {
+        if (!Operand(next_token, context) && yylex() == ',') {
           next_token = yylex();
-          if(!Operand(next_token, context) && yylex() == ',') {
+          if (!Operand(next_token, context) && yylex() == ',') {
             next_token = yylex();
-            if(!Operand(next_token, context) && yylex() == ';') {
+            if (!Operand(next_token, context) && yylex() == ';') {
               return 0;
             } // 4 operand
           } // 3 operand
@@ -3215,6 +3215,26 @@ int Instruction4(unsigned int first_token, Context* context) {
 }
 
 int OperandList(unsigned int first_token, Context* context) {
+  unsigned int next_token;
+  ErrorReporterInterface *rpt = context->get_error_reporter();
+
+  if (!Operand(first_token, context)) {
+    while (1) {
+      if (yylex() == ',') {
+        if (!Operand(yylex(), context)) {
+          continue;
+        } else {
+          rpt->report_error(ErrorReporterInterface::MISSING_OPERAND,
+                            yylineno, yycolno);
+          return 1;
+        }
+      } else {
+        return 0;
+      }
+    }
+  }
+  rpt->report_error(ErrorReporterInterface::UNKNOWN_ERROR,
+                    yylineno, yycolno);
   return 1;
 }
 

@@ -1349,11 +1349,7 @@ TEST(ParserTest, OperandList) {
               // the number of operands is 24
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_EQ(0, OperandList(yylex(), context));
-
-  input.assign("$s5, $s0 $s6"); // lack of ','
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
-  EXPECT_NE(0, OperandList(yylex(), context));
-  
+ 
   input.assign(",$s5, $s0 ,$s6"); // redundent ','
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
   EXPECT_NE(0, OperandList(yylex(), context));
