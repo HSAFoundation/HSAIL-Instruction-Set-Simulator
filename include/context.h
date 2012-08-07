@@ -300,7 +300,7 @@ class Context {
     BrigOpcode32_t opcode;
     BrigAluModifier aluModifier;
     char operand_loc;   // 1 -> 5
-
+    bool error_reporter_set;
     bool arg_output;
 };
 

@@ -21,9 +21,8 @@ extern Context* context;
 
 
 TEST(CodegenTest, CallwMultiArgs) {
-  main_reporter->show_error(true);
-  // test error reporter
-  Context* context1 = new Context(main_reporter);
+  Context* context1 = Context::get_instance();
+  context1->set_error_reporter(main_reporter);
   BrigDirectiveFunction ref = {
     40,                       // size
     BrigEDirectiveFunction,   // kind
@@ -38,21 +37,26 @@ TEST(CodegenTest, CallwMultiArgs) {
     0,   // outParamCount
     0,
   };
-
   std::string input("version 1:0:$small;");
-
-  // current directive offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Version(yylex(), context1));
+  context1->clear_context();
+  context1->token_to_scan = yylex();
+  EXPECT_EQ(0, Version(context1));
 
-  input.assign("function &callee(arg_f32 %output)(arg_f32 %input1, arg_f32 %input2) {ret;};\n");
-  input.append("function &caller()(){{arg_f32 %an_input; arg_f32 %an_output ; call &callee(%an_output)(%an_input, %an_input); }};");
-  //
-  // test the rule
+  input.assign("function &callee(arg_f32 %output) ");
+  input.append("(arg_f32 %input1, arg_f32 %input2) { \n");
+  input.append("ret;};\n");
+  input.append("function &caller()(){ \n");
+  input.append("{arg_f32 %an_input; \n");
+  input.append(" arg_f32 %an_output; \n");
+  input.append(" call &callee(%an_output)(%an_input, %an_input);\n");
+  input.append("  }};");
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Function(yylex(), context1));
-  EXPECT_EQ(0, Function(yylex(), context1));
+  context1->token_to_scan = yylex();
+  EXPECT_EQ(0, Function(context1));
+  EXPECT_EQ(0, Function(context1));
 
+  printf("Test offsets.\n");
   // test the sizes of each section
   BrigdOffset32_t dsize = context1->get_directive_offset();
   EXPECT_EQ(296, dsize);
@@ -133,15 +137,12 @@ TEST(CodegenTest, CallwMultiArgs) {
   BrigoOffset32_t arg_test = 0;
   context1->get_operand<BrigoOffset32_t>(56, &arg_test);
   EXPECT_EQ(8, arg_test);
-
-  main_reporter->show_error(false);
-  delete context1;
 }
 
 TEST(CodegenTest, Example6_CallwArgs) {
-  main_reporter->show_error(true);
-  // test error reporter
-  Context* context1 = new Context(main_reporter);
+  Context* context1 = Context::get_instance();
+  context1->set_error_reporter(main_reporter);
+  context1->clear_context();
   BrigDirectiveFunction ref = {
     40,                       // size
     BrigEDirectiveFunction,   // kind
@@ -158,18 +159,23 @@ TEST(CodegenTest, Example6_CallwArgs) {
   };
 
   std::string input("version 1:0:$small;");
-
-  // current directive offset value
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Version(yylex(), context1));
+  context1->token_to_scan = yylex();
+  EXPECT_EQ(0, Version(context1));
 
-  input.assign("function &callee(arg_f32 %output)(arg_f32 %input) {ret;};\n");
-  input.append("function &caller()(){{arg_f32 %an_input; arg_f32 %an_output ; call &callee(%an_output)(%an_input); }};");
+  input.assign("function &callee(arg_f32 %output)(arg_f32 %input) {\n");
+  input.append(" ret;};\n");
+  input.append("function &caller()(){\n");
+  input.append("{arg_f32 %an_input; \n");
+  input.append(" arg_f32 %an_output; \n");
+  input.append(" call &callee(%an_output)(%an_input);\n");
+  input.append("}};");
 
   // test the rule
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  EXPECT_EQ(0, Function(yylex(), context1));
-  EXPECT_EQ(0, Function(yylex(), context1));
+  context1->token_to_scan = yylex();
+  EXPECT_EQ(0, Function(context1));
+  EXPECT_EQ(0, Function(context1));
 
   // test the sizes of each section
   BrigdOffset32_t dsize = context1->get_directive_offset();
@@ -247,16 +253,11 @@ TEST(CodegenTest, Example6_CallwArgs) {
   EXPECT_EQ(12, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(8, arg_l.o_args[0]);
-
-  main_reporter->show_error(false);
-  delete context1;
 }
 
 
 TEST(CodegenTest, Example5_SimpleCall) {
-
   context->set_error_reporter(main_reporter);
-
   BrigDirectiveFunction ref = {
     40,                       // size
     BrigEDirectiveFunction,   // kind
@@ -280,8 +281,6 @@ TEST(CodegenTest, Example5_SimpleCall) {
   context->token_to_scan= yylex();
 
   EXPECT_EQ(0, Version(context));
-
-  printf("Directive offset after Version: %d\n", context->get_directive_offset());
   EXPECT_EQ(0, Function(context));
 
   input.assign("function &caller()(){{call &callee; }};");
@@ -340,7 +339,6 @@ TEST(CodegenTest, Example5_SimpleCall) {
   EXPECT_EQ(8, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(20, func_o.fn);
-
 }
 
 TEST(CodegenTest, Example4_Branch) {
@@ -1156,7 +1154,6 @@ TEST(ErrorReportingTest, UseMockErrorReporter) {
   mer.show_all_error();
   context1->set_error_reporter(old_rpt);
   context1->clear_context();
-
 }
 }  // namespace brig
 }  // namespace hsa

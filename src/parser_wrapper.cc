@@ -24,7 +24,8 @@ namespace brig {
           (token == TOKEN_LOCAL_IDENTIFIER) ||
           (context->token_type == REGISTER) ||
           (token == TOKEN_LABEL)) {
-        int offset = context->add_symbol(std::string(context->token_value.string_val));
+        int offset = context->add_symbol(
+                      std::string(context->token_value.string_val));
       }
       token = lexer->get_next_token();
     }
@@ -48,7 +49,6 @@ namespace brig {
         }
       }
       context->token_to_scan = lexer->get_next_token();
-
     }
     return 0;
   }

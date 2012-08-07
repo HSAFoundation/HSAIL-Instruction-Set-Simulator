@@ -1,6 +1,7 @@
 /* Copyright 2012 <MulticorewareInc> */
 
 #include <string>
+#include <stdio.h>
 #include "brig.h"
 #include "brig_buffer.h"
 #include "error_reporter_interface.h"
@@ -28,6 +29,7 @@ Context::Context(void) {
   clear_context();
   yycolno = 0;
   yylineno = 1;
+  error_reporter_set = false;
 }
 
 // default destructor
@@ -41,8 +43,6 @@ Context::~Context(void) {
   delete &operand_map;
   delete &label_c_map;
   delete &label_o_map;
-
-
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
@@ -51,10 +51,14 @@ ErrorReporterInterface* Context::get_error_reporter(void) const {
 
 void Context::set_error_reporter(ErrorReporterInterface* error_reporter) {
   this->err_reporter = error_reporter;
+  this->error_reporter_set = true;
 }
 
 void Context::set_error(ErrorReporterInterface::error_t error) {
-  err_reporter->report_error(error, yylineno, yycolno);
+  if (error_reporter_set)
+    err_reporter->report_error(error, yylineno, yycolno);
+  else
+    printf("Error reporter has not been set up\n");
 }
 
 // add a new symbol to .strings section.
@@ -190,8 +194,6 @@ void Context::clear_context(void) {
   label_o_map.clear();
   label_c_map.clear();
   set_default_values();
-
-
 }
 
 

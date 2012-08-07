@@ -564,29 +564,32 @@ typedef struct BrigDirectiveScope {
 
 
 // BrigOperandFunctionRef
-// BrigOperandFunctionRef is used for a reference to a function or function signature.
+// BrigOperandFunctionRef is used for a reference
+// to a function or function signature.
 typedef struct BrigOperandFunctionRef {
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t fn;
 }BrigOperandFunctionRef;
 
-//BrigOperandArgumentList
-//BrigOperandArgumentList is used for the list of arguments to a function or a list of
-//function names or function signatures. Lists of function names or function signatures
-//are needed when the call statement has a list of possible targets.
+// BrigOperandArgumentList
+// BrigOperandArgumentList is used for the list of
+// arguments to a function or a list of
+// function names or function signatures.
+// Lists of function names or function signatures
+// are needed when the call statement has a list of possible targets.
 typedef struct BrigOperandArgumentList {
-	uint16_t size;
-	uint16_t kind;
-	uint32_t elementCount;
-	BrigdOffset32_t o_args[1];
+  uint16_t size;
+  uint16_t kind;
+  uint32_t elementCount;
+  BrigdOffset32_t o_args[1];
 }BrigOperandArgumentList;
-//BrigOperandArgumentRef
-//BrigOperandArgumentRef is used for a single argument.
+// BrigOperandArgumentRef
+// BrigOperandArgumentRef is used for a single argument.
 typedef struct BrigOperandArgumentRef {
-	uint16_t size;
-	uint16_t kind;
-	BrigdOffset32_t arg;
+  uint16_t size;
+  uint16_t kind;
+  BrigdOffset32_t arg;
 }BrigOperandArgumentRef;
 
 
