@@ -1306,6 +1306,28 @@ TEST(ParserTest, LabelTargets) {
   EXPECT_NE(0, LabelTargets(context));
 };
 
+// --------------- Test for extension rule  -----------------
+// format:
+// extension := "extension" TOKEN_STRING ) ";"
+// correct cases
+TEST(ParserTest, Extension) {
+  std::string input("extension \"abc\" ;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Extension(context));
+
+  input.assign("extension \"\t\nabcd\" ;");
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Extension(context));
+
+// wrong cases
+  input.assign("extension \"\asdfjl\"");  // lack of ';'
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Extension(context));
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");

@@ -2773,5 +2773,21 @@ int Instruction4(Context* context) {
   return 1;
 }
 
+int Extension(Context* context) {
+  // first token is EXTENSION "extension"
+  context->token_to_scan = yylex();
+
+  if (context->token_to_scan == TOKEN_STRING) {
+    context->token_to_scan = yylex();
+
+    if (context->token_to_scan == ';') {
+      context->token_to_scan = yylex();
+      return 0;
+    } else {   // missing ";"
+			context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+    }
+  }
+  return 1;
+}
 }  // namespace brig
 }  // namespace hsa
