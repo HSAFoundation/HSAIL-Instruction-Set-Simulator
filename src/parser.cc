@@ -384,7 +384,7 @@ int CallArgs(Context* context) {
 
     if (context->token_to_scan == ')') {
       BrigOperandArgumentList arg_list = {
-        n_elements*4 + 8,
+        (n_elements-1)*sizeof(BrigoOffset32_t)+sizeof(BrigOperandArgumentList),
         BrigEOperandArgumentList,
         n_elements,
         arg_offset[0]  // need to modify the structure.
