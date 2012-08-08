@@ -2809,5 +2809,10 @@ int Ldc(Context* context) {
   } // datatypeid
   return 1;
 }
+
+int Instruction5(Context* context) {
+  
+  return 1;
+}
 }  // namespace brig
 }  // namespace hsa

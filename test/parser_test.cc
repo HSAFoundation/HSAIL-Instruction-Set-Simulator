@@ -1370,6 +1370,65 @@ TEST(ParserTest, Ldc) {
   EXPECT_NE(0, Ldc(context));
 };
 
+// -----------------  Test for Instruction5 rule -----------------
+// format:
+// Instruction5 ::= "f2u4" dataTypeId operand "," operand
+//                  "," operand "," operand "," operand ";"
+// correct cases
+TEST(ParserTest, Instruction5) {
+  std::string input("f2u4_u32 $s1, $s2, $s3, $s9, $s3;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
+ 
+  input.assign("f2u4_u64 $d4, $d6, $d3, $d1, $d5;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
+ 
+  input.assign("f2u4_u64 $s4, $s6, $s3, 364, 113;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
+
+  input.assign("f2u4_u32 $s1, $s2, $s3, 0xD41, 0xF4;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
+
+  input.assign("f2u4_u64 $d1, $d2, $d3, 1.0f, 2.0f;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
+
+// wrong cases
+  input.assign("f2u4_u64 $d4, $d6, $d3, $d1, $d5"); // lack of ';' 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+
+  input.assign("f2u4_u32 $s0, $s6, $s3, $s4 $s2;"); // lack of ',' 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+
+  input.assign("f2u4 $d1, $d2, $d3, 4.0f, 6.0f;"); // lack of datetypeId 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+
+  input.assign("f2u4_u64 $s1, $s2, $s3, 0xD41;"); // lack of operand
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+
+  input.assign("f2u4_u64 , $s1, $s2, $s3, $s4, 0xD41;"); // redundant ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+  
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
