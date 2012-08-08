@@ -416,6 +416,7 @@ TEST(CodegenTest, Example4_Branch) {
   context->get_code(0, &cbr_op);
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCbr, cbr_op.opcode);
+  EXPECT_EQ(Brigb1, cbr_op.type);
   EXPECT_EQ(0, cbr_op.o_operands[0]);
   EXPECT_EQ(8, cbr_op.o_operands[1]);
   EXPECT_EQ(44, cbr_op.o_operands[2]);
