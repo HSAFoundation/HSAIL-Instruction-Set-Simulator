@@ -2077,6 +2077,9 @@ int Branch(Context* context) {
       {0, 0, 0, 0, 0}
     };
 
+    if (context->token_to_scan == TOKEN_CREGISTER)
+      inst_op.type = Brigb1;
+
     std::string operand_name = context->token_value.string_val;
     if (!Operand(context)) {
       inst_op.o_operands[1] = context->operand_map[operand_name];
