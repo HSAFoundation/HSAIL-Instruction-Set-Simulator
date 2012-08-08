@@ -2883,5 +2883,143 @@ int Kernel(Context *context){
   //return 1 ;
 }
 
+int OperandList(Context* context) {
+
+  if (!Operand(context)) {
+    while (1) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          continue;
+        } else {
+          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          return 1;
+        }
+      } else {
+        context->token_to_scan = yylex();
+        return 0;
+      }
+    }
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+  return 1;
+}
+
+int Cmp(Context* context) {
+  // first token is PACKEDCMP or CMP
+  unsigned int first_token = context->token_to_scan;
+  context->token_to_scan = yylex(); 
+  if (context->token_type == COMPARISON) {
+    context->token_to_scan = yylex();
+    if (first_token == CMP) {
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+      } else {
+        return 1;
+      }
+    }
+    
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!Operand(context) && context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!Operand(context) && context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context) && context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
+            return 0;
+          } // 3 operand
+        } // 2 operand
+      } // 1 operand      
+    }
+  }
+  return 1;
+}
+
+int GlobalPrivateDecl(Context* context) {
+  // first token is PRIVATE
+  context->token_to_scan = yylex();
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+      context->token_to_scan = yylex();
+      if (!ArrayDimensionSet(context)) {
+      }
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+      }
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+    }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+  return 1;
+}
+
+int OffsetAddressableOperand(Context* context) {
+  // the first token is '['
+  context->token_to_scan = yylex();
+  if (context->token_type == REGISTER) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == '+' || context->token_to_scan == '-') {
+      if (yylex() == TOKEN_INTEGER_CONSTANT) {
+        context->token_to_scan = yylex();
+      } else {
+        return 1;
+      }
+    }
+    if (context->token_to_scan == ']') {
+      context->token_to_scan = yylex();
+      return 0;
+    }
+  } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ']') {
+      context->token_to_scan = yylex();
+      return 0;
+    }  
+  }
+  return 1;
+}
+
+int MemoryOperand(Context* context) {
+  // this judge(frist token == '[') is necessary in here
+  if (context->token_to_scan == '[') { 
+    if (!AddressableOperand(context)) {
+      if (!OffsetAddressableOperand(context)) {
+        context->token_to_scan = yylex();
+        return 0;
+      }
+      context->token_to_scan = yylex();
+      return 0;
+    } else if (context->token_type == REGISTER) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == '+' || context->token_to_scan == '-') {
+        if (yylex() == TOKEN_INTEGER_CONSTANT) {
+          context->token_to_scan = yylex();
+        } else {
+          return 1;
+        }
+      }
+      if (context->token_to_scan == ']') {
+        context->token_to_scan = yylex();
+        return 0;
+      }
+    } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ']') {
+        context->token_to_scan = yylex();
+        return 0;
+      }  
+    }
+  }
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

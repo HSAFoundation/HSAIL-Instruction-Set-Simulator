@@ -52,6 +52,11 @@ int Extension(Context* context);
 int KernelArgumentDecl(Context *context) ;
 int KernelArgumentListBody(Context *context) ;
 int Kernel(Context *context);
+int OperandList(Context* context);
+int Cmp(Context* context);
+int GlobalPrivateDecl(Context* context);
+int OffsetAddressableOperand(Context* context);
+int MemoryOperand(Context* context);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
