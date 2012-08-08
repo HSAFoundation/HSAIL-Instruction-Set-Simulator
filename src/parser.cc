@@ -1210,6 +1210,8 @@ int ArgumentDecl(Context* context) {
           // no arrayDimensions
           BrigdOffset32_t dsize = context->get_directive_offset();
           BrigDirectiveSymbol sym_decl = {
+          sizeof(sym_decl),                 // size
+          BrigEDirectiveSymbol,             // kind
           context->get_code_offset(),       // c_code
           BrigArgSpace,                     // storageClass
           context->get_attribute(),         // attribute
@@ -2499,6 +2501,8 @@ int ArgUninitializableDecl(Context* context) {
       // for Now, assume this is a scalar. [CAUTION]
       std::string arg_name = context->token_value.string_val;
       BrigDirectiveSymbol arg_decl = {
+        sizeof(arg_decl),                 // size
+        BrigEDirectiveSymbol,             // kind
         context->get_code_offset(),       // c_code
         BrigArgSpace,                     // storageClass
         context->get_attribute(),         // attribute

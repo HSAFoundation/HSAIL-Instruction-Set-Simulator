@@ -384,7 +384,13 @@ struct BrigSymbolCommon {
 };
 
 // 20.8.21
+// The documentation is in error. The BrigDirectiveSymbol needs size and kind
+// fields to be parsable. Otherwise, there is no way to tell if the second field
+// is a uint16_t kind or the second 16-bit word of BrigSymbolCommon's c_code
+// field. This view is supported by Table 20-3 in the HSA PRM.
 struct BrigDirectiveSymbol {
+  uint16_t size;
+  uint16_t kind;
   BrigSymbolCommon s;
   BrigdOffset32_t d_init;
   uint32_t reserved;
