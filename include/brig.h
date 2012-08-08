@@ -370,6 +370,24 @@ struct BrigDirectiveFunction {
   BrigdOffset32_t d_firstInParam;
 };
 
+// PRM 20.8.18
+struct BrigDirectiveProto {
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigsOffset32_t s_name;
+  uint16_t fbarCount;
+  uint16_t reserved;
+  uint32_t outCount;
+  uint32_t inCount;
+  struct BrigProtoType {
+    BrigDataType16_t type;
+    uint8_t align;
+    uint8_t hasDim;
+    uint32_t dim;
+  } types[1];
+};
+
 // PRM 20.3.2
 struct BrigSymbolCommon {
   BrigcOffset32_t c_code;

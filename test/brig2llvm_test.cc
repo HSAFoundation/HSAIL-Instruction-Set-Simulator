@@ -97,3 +97,76 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     "ret void")));
   }
 }
+
+// This method appends a BrigDirectiveProto to the buffer. BrigDirectiveProto is
+// a variable length structure. This means the last field of BrigDirectiveProto
+// is an array of unknown size. Unfortunately, variable length structures are
+// not well suppored in C++ 98. We work around this limitation by creating an
+// appropriately sized variable length array and then reinterpret casting the
+// array to a BrigDirectiveProto.
+//
+// This method takes input Iterators to the beginning and end of an object
+// containing the BrigDirectiveProto::BrigProtoTypes of the BrigDirectiveProto's
+// input and output types. Usually, it is convenient to use a pointer, but other
+// iterators can also be used. To prevent errors, the method checks that
+// outCount + inCount is equal to the distance between the B and E iterators.
+template<class Buffer, class Iterator>
+static void appendBrigDirectiveProto(Buffer &buffer,
+                                     BrigsOffset32_t c_code,
+                                     BrigsOffset32_t s_name,
+                                     uint16_t fbarCount,
+                                     uint16_t reserved,
+                                     uint32_t outCount,
+                                     uint32_t inCount,
+                                     const Iterator &B,
+                                     const Iterator &E) {
+
+  const size_t numArgs = E - B;
+  EXPECT_EQ(outCount + inCount, numArgs);
+
+  // Since the
+  uint8_t array[sizeof(BrigDirectiveProto) +
+                sizeof(BrigDirectiveProto::BrigProtoType[numArgs - 1])];
+
+  BrigDirectiveProto *bdp =
+    reinterpret_cast<BrigDirectiveProto *>(array);
+
+  bdp->size = sizeof(array);
+  bdp->kind = BrigEDirectiveProto;
+  bdp->c_code = c_code;
+  bdp->s_name = s_name;
+  bdp->fbarCount = fbarCount;
+  bdp->reserved = reserved;
+  bdp->outCount = outCount;
+  bdp->inCount = inCount;
+
+  Iterator it = B;
+  for(size_t i = 0; i < numArgs; ++i)
+    bdp->types[i] = *it++;
+
+  buffer.append(bdp);
+}
+
+TEST(Brig2LLVMTest, VarSizeDirective) {
+  {
+    hsa::brig::Buffer bb;
+    BrigDirectiveProto::BrigProtoType args[] = {
+      // type, align, hasDim, dim
+      {Brigu32, 1, 0, 0},
+      {Brigu32, 1, 0, 0}
+    };
+    appendBrigDirectiveProto(bb,
+                             0, // c_code
+                             0, // s_name
+                             0, // fbarCount
+                             0, // reserved
+                             1, // outCount
+                             1, // inCount
+                             &args[0],
+                             &args[2]);
+
+    EXPECT_EQ(sizeof(BrigDirectiveProto) +
+              sizeof(sizeof(BrigDirectiveProto::BrigProtoType)),
+              bb.size());
+  }
+}
