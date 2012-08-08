@@ -2894,7 +2894,36 @@ int OffsetAddressableOperand(Context* context) {
 }
 
 int MemoryOperand(Context* context) {
-  
+  // this judge(frist token == '[') is necessary in here
+  if (context->token_to_scan == '[') { 
+    if (!AddressableOperand(context)) {
+      if (!OffsetAddressableOperand(context)) {
+        context->token_to_scan = yylex();
+        return 0;
+      }
+      context->token_to_scan = yylex();
+      return 0;
+    } else if (context->token_type == REGISTER) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == '+' || context->token_to_scan == '-') {
+        if (yylex() == TOKEN_INTEGER_CONSTANT) {
+          context->token_to_scan = yylex();
+        } else {
+          return 1;
+        }
+      }
+      if (context->token_to_scan == ']') {
+        context->token_to_scan = yylex();
+        return 0;
+      }
+    } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ']') {
+        context->token_to_scan = yylex();
+        return 0;
+      }  
+    }
+  }
   return 1;
 }
 
