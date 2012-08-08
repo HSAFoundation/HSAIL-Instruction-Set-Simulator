@@ -2789,5 +2789,10 @@ int Extension(Context* context) {
   }
   return 1;
 }
+
+int Ldc(Context* context) {
+ 
+  return 1;
+}
 }  // namespace brig
 }  // namespace hsa

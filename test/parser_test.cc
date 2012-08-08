@@ -1328,6 +1328,48 @@ TEST(ParserTest, Extension) {
   EXPECT_NE(0, Extension(context));
 };
 
+// ------------------  Test for ldc rule -------------------
+// format:
+// ldc ::= "ldc" dataTypeId operand "," ( TOKEN_LABEL ";" | identifier ";" )
+// correct cases
+TEST(ParserTest, Ldc) {
+  std::string input("ldc_b32 $s1, &bar;"); // identifier
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Ldc(context));
+ 
+  input.assign("ldc_b64 $s2, @lab;"); // label
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Ldc(context));
+
+  input.assign("ldc_b64 $s2, %label;"); // identifier
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Ldc(context));
+
+// wrong cases
+  input.assign("ldc_b64 $s1, &some_function");  // lack of ';'  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Ldc(context));
+
+  input.assign("ldc $s1, &function;");  // lack of dataTypeId  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Ldc(context));
+
+  input.assign("ldc_b32 , $s1, &function;");  // redundant ','  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Ldc(context));
+
+  input.assign("ldc_b64 $s1, e123;");  // unrecognized identifier
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Ldc(context));
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
