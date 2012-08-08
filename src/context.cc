@@ -30,6 +30,7 @@ Context::Context(void) {
   yycolno = 0;
   yylineno = 1;
   error_reporter_set = false;
+  token_value.string_val = NULL;
 }
 
 // default destructor
@@ -192,7 +193,9 @@ void Context::clear_context(void) {
   operand_map.clear();
   label_o_map.clear();
   label_c_map.clear();
+  token_value.string_val = NULL;
   set_default_values();
+
 }
 
 

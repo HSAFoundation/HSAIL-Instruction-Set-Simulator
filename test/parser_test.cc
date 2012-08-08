@@ -20,7 +20,9 @@ TEST(ParserTest, OperandTest) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
+
 
   std::string input("&a_global_id123 \n");  // global id
   lexer->set_source_string(input);
@@ -46,13 +48,18 @@ TEST(ParserTest, OperandTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, AddressableOperandTest) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
+
 
   std::string input("[%local_id] \n");  // Int constant
   lexer->set_source_string(input);
@@ -78,13 +85,18 @@ TEST(ParserTest, AddressableOperandTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, QueryTest) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
+
 
   // test the Query types;
   std::string input("query_order_u32  $c1 , [&Test<$d7  + 100>]; \n");
@@ -98,24 +110,32 @@ TEST(ParserTest, QueryTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Query(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, ArrayOperandList) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("($d4, &global_id, %local_id) \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArrayOperandList(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, RoundingMode) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("_upi \n");
@@ -182,6 +202,9 @@ TEST(ParserTest, RoundingMode) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, RoundingMode(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, Instruction2) {
@@ -189,6 +212,7 @@ TEST(ParserTest, Instruction2) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("abs_p_s8x4 $s1, $s2;\n");
@@ -256,12 +280,16 @@ TEST(ParserTest, Instruction2) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction2(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, VersionStatement) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("version 1:0;\n");
@@ -274,18 +302,25 @@ TEST(ParserTest, VersionStatement) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Version(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, AlignStatement) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("align 8\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Alignment(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, DeclPrefix) {
@@ -293,7 +328,9 @@ TEST(ParserTest, DeclPrefix) {
   Lexer* lexer = new Lexer();
 
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
+
   std::string input("align 8\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -323,24 +360,32 @@ TEST(ParserTest, DeclPrefix) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, DeclPrefix(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, FBar) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input(":fbar(1)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FBar(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, ArrayDimensionSet) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("[]\n");
@@ -357,12 +402,16 @@ TEST(ParserTest, ArrayDimensionSet) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArrayDimensionSet(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, ArgumentDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   // test 1
@@ -418,26 +467,40 @@ TEST(ParserTest, ArgumentDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgumentDecl(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, ArgumentListBody) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   // test 1
   std::string input("const static arg_u32 %local_id[2][2],\n");
   input.append("static arg_f16 %local_id[], align 8 arg_u64 %test \n");
   lexer->set_source_string(input);
+
+  // initialize fake values
+  // which should be set in real case when parser parses a function def
+  context->current_bdf_offset = 0;
+  context->set_arg_output(false);
+
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgumentListBody(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, FunctionDefinition) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   // test 1
@@ -447,12 +510,16 @@ TEST(ParserTest, FunctionDefinition) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionDefinition(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, FunctionDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   // test 1
@@ -462,12 +529,16 @@ TEST(ParserTest, FunctionDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionDecl(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, Codeblock) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   // test 1
@@ -475,16 +546,26 @@ TEST(ParserTest, Codeblock) {
   input.append("abs_p_s8x4 $s1, $s2; \n");
   input.append("abs_s8x4 $s1, $s2; \n");
   input.append("}; \n");
-
   lexer->set_source_string(input);
+
   context->token_to_scan = lexer->get_next_token();
+
+  // initialize fake values
+  // which should be set in real case when parser parses a function def
+  context->current_bdf_offset = 0;
+  context->set_arg_output(false);
+
   EXPECT_EQ(0, Codeblock(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, Function) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("function &get_global_id(arg_u32 %ret_val) ");
@@ -496,12 +577,16 @@ TEST(ParserTest, Function) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Function(context));
+
+  input.clear();
+  delete lexer;
 }
 
 TEST(ParserTest, SimpleProg) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("version 1:0:$small;\n");
@@ -512,12 +597,16 @@ TEST(ParserTest, SimpleProg) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, Instruction3) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input(" add_pp_sat_u16x2 $s1, $s0, $s3;\n");
@@ -525,12 +614,16 @@ TEST(ParserTest, Instruction3) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction3(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, OptionalWidth) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("_width(all)\n");
@@ -543,13 +636,22 @@ TEST(ParserTest, OptionalWidth) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OptionalWidth(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, BranchOperation) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
+
+  // initialize fake values
+  // which should be set in real case when parser parses a function def
+  context->current_bdf_offset = 0;
+  context->set_arg_output(false);
 
   std::string input("cbr_width(all)_fbar $s1, @then;\n");
   lexer->set_source_string(input);
@@ -600,24 +702,32 @@ TEST(ParserTest, BranchOperation) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, ParseCallTargets) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("[&global, %local]\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallTargets(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, ParseCallArgs) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("()\n");
@@ -634,12 +744,16 @@ TEST(ParserTest, ParseCallArgs) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallArgs(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, Call) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("call &callee (%output)(%input);\n");
@@ -653,12 +767,16 @@ TEST(ParserTest, Call) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Call(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, Initializers) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("= {12, 13,14, -13}\n");  // DecimalInitializer
@@ -695,12 +813,16 @@ TEST(ParserTest, Initializers) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, InitializableDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   // DecimalInitializer
@@ -735,12 +857,16 @@ TEST(ParserTest, InitializableDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, ProgWithFunctionDefinition) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   // Example 3
@@ -812,15 +938,20 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" }; \n");
 
   context->clear_context();
+
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, ProgWithGlobalDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("version 1:0:$small;\n");
@@ -833,12 +964,16 @@ TEST(ParserTest, ProgWithGlobalDecl) {
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, ProgWithUninitializableDecl ) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   // Example 1 - PRM 20.8.2
@@ -852,12 +987,16 @@ TEST(ParserTest, ProgWithUninitializableDecl ) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, UninitializableDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("private_f32 %f[3];\n");
@@ -865,12 +1004,16 @@ TEST(ParserTest, UninitializableDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, UninitializableDecl(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, ArgUninitializableDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("arg_f32 %f[3];\n");
@@ -878,12 +1021,16 @@ TEST(ParserTest, ArgUninitializableDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgUninitializableDecl(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("version 1:0:$large;\n");
@@ -896,13 +1043,18 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, FileDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
+
 
   std::string input("file 1 \"this is a file\";\n");
   lexer->set_source_string(input);
@@ -965,12 +1117,16 @@ TEST(ParserTest, FileDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, VectorToken) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("_v2\n");
@@ -984,6 +1140,9 @@ TEST(ParserTest, VectorToken) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, VectorToken(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, SysCall) {
@@ -994,6 +1153,7 @@ TEST(ParserTest, SysCall) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("syscall $s1, 3, $s2, $s3, $s4;\n");
@@ -1080,12 +1240,16 @@ TEST(ParserTest, SysCall) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, Label) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("@_test_label_1:\n");
@@ -1113,12 +1277,16 @@ TEST(ParserTest, Label) {
   input.assign("$_test_label_5 :\n");
   context->token_to_scan = yylex();
   EXPECT_NE(0, Label(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, LabelTargets) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("@tab: labeltargets @a1, @a2;\n");
@@ -1160,6 +1328,9 @@ TEST(ParserTest, LabelTargets) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, Extension) {
@@ -1169,6 +1340,7 @@ TEST(ParserTest, Extension) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("extension \"abc\" ;\n");
@@ -1186,12 +1358,16 @@ TEST(ParserTest, Extension) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Extension(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, SignatureType) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("arg_u32\n");
@@ -1218,6 +1394,9 @@ TEST(ParserTest, SignatureType) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureType(context));
+
+  input.clear();
+  delete lexer;
 };
 
 
@@ -1225,6 +1404,7 @@ TEST(ParserTest, FunctionSignature) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("signature &test()();\n");
@@ -1256,6 +1436,9 @@ TEST(ParserTest, FunctionSignature) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
+
+  input.clear();
+  delete lexer;
 };
 
 
@@ -1263,6 +1446,7 @@ TEST(ParserTest, SignatureArgumentList) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("arg_u32,arg_ROImg\n");
@@ -1279,12 +1463,16 @@ TEST(ParserTest, SignatureArgumentList) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
+
+  input.clear();
+  delete lexer;
 };
 
 TEST(ParserTest, Instruction4) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
 
   std::string input("mad_ftz_u64 $d1, $d2, $d3, $d4;\n");
@@ -1407,10 +1595,14 @@ TEST(ParserTest, Instruction4) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+
+  input.clear();
+  delete lexer;
 };
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
+  context->clear_context();
   std::string input("version 1:0:$large;\n");
   input.append("global_f32 &x = 2;\n");
   input.append("function &test()() {\n");
@@ -1433,9 +1625,13 @@ TEST(ParserWrapperTest, ScanSymbolsWithParser) {
       index+=temp.length()+1;
     }
   }
+
+  input.clear();
+  delete parser;
 };
 
 TEST(ParserWrapperTest, ParseSimpleProgram) {
+  context->clear_context();
   // Example 3
   std::string input("\n version 1:0:$small; \n");
   input.append("function &packed_ops (arg_u8x4 %x)() { \n");
@@ -1446,9 +1642,13 @@ TEST(ParserWrapperTest, ParseSimpleProgram) {
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
   EXPECT_EQ(0, parser->parse());
+
+  input.clear();
+  delete parser;
 };
 
 TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
+  context->clear_context();
   // Example 3
   std::string input("version 1:0:$small;\n");
   input.append("function &packed_ops (arg_u8x4 %x)() {\n");
@@ -1470,6 +1670,9 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   parser->set_source_string(input);
 
   EXPECT_EQ(0, parser->parse());
+
+  input.clear();
+  delete parser;
 };
 
 }  // namespace brig
