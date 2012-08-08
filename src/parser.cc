@@ -2843,6 +2843,26 @@ int Cmp(Context* context) {
 }
 
 int GlobalPrivateDecl(Context* context) {
+  // frist token is PRIVATE
+  context->token_to_scan = yylex();
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+      context->token_to_scan = yylex();
+      if (!ArrayDimensionSet(context)) {
+      }
+      if(context->token_to_scan == ';') {
+        return 0;
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+      }
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+    }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
