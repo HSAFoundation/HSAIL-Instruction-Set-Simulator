@@ -1680,6 +1680,26 @@ TEST(ParserTest,KernelArgumentList){
                                   &last_token ,
                                   context));
 } ;
+TEST(ParserTest,KernelArgumentBodyList){
+  Lexer *lexer = new Lexer();
+  bool rescan_last_token = false;
+  unsigned int last_token = 0 ;
+
+  std::string input("kernarg_f32 %x");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0 , KernelArgumentListBody(lexer->get_next_token(),
+                                       &rescan_last_token,
+                                       &last_token ,
+                                       context));
+ 
+  input.assign("kernarg_u32 %y , kernarg_f32 %x");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0 , KernelArgumentListBody(lexer->get_next_token(),
+                                       &rescan_last_token ,
+                                       &last_token ,
+                                       context));
+
+}
 TEST(ParserTest , Kernel){
   Lexer *lexer = new Lexer();
 

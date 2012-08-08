@@ -2791,6 +2791,13 @@ int Extension(Context* context) {
 }
   return  ArgumentDecl(first_token ,rescan_last_token ,last_token ,context);
   //return 1;
+int KernelArgumentListBody(unsigned int first_token ,
+                           bool* rescan_last_token,
+                           unsigned int* last_token,
+                           Context *context) {
+  return 1;
+}
+
 int Kernel(unsigned int first_token , Context *context){
   return 1 ;
 }
