@@ -3041,11 +3041,17 @@ int GlobalPrivateDecl(Context* context) {
   // first token is PRIVATE
   context->token_to_scan = yylex();
   if (context->token_type == DATA_TYPE_ID) {
+    printf("data type \n");
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+      printf("global id \n");
+      free(context->token_value.string_val);
       context->token_to_scan = yylex();
-      if (!ArrayDimensionSet(context)) {
-      }
+      
+      if (context->token_to_scan == '[') {
+        if (!ArrayDimensionSet(context)) {}
+      } 
+
       if (context->token_to_scan == ';') {
         context->token_to_scan = yylex();
         return 0;

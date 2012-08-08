@@ -58,13 +58,6 @@ void Context::set_error_reporter(ErrorReporterInterface* error_reporter) {
 
 void Context::set_error(ErrorReporterInterface::error_t error) {
   // try to free string if the token contains string
-  if ((token_type == IDENTIFIER) ||
-      (token_to_scan == TOKEN_LABEL) ||
-      (token_to_scan == TOKEN_STRING) ||
-      (token_to_scan == TOKEN_COMMENT))
-    free(token_value.string_val);
-
-
   if (error_reporter_set)
     err_reporter->report_error(error, yylineno, yycolno);
   else
