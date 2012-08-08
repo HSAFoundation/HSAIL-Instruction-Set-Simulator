@@ -2866,5 +2866,11 @@ int GlobalPrivateDecl(Context* context) {
   return 1;
 }
 
+int OffsetAddressableOperand(Context* context) {
+  
+  return 1;
+}
+
+
 }  // namespace brig
 }  // namespace hsafront

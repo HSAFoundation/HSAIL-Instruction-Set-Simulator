@@ -1892,9 +1892,78 @@ TEST(ParserTest, GlobalPrivateDecl) {
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalPrivateDecl(context));
 
+  delete lexer;
+};
 
+TEST(ParserTest, OffsetAddressableOperand) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("[$s1 + 0xf7]");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex(); 
+  EXPECT_EQ(0, OffsetAddressableOperand(context));
+
+  input.assign("[$s1]");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, OffsetAddressableOperand(context));
+
+  input.assign("[$s2 - 0xf7]");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, OffsetAddressableOperand(context));
+
+  input.assign("[0xf7]");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, OffsetAddressableOperand(context));
+  
+  // wrong case
+  input.assign("[0xf7"); // lack of ']'
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, OffsetAddressableOperand(context));
+
+  input.assign("$s1]"); // lack of '['
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, OffsetAddressableOperand(context));
+
+  input.assign("[]"); // the content in square brackets is empty
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, OffsetAddressableOperand(context));
+
+  input.assign("[$s1 * 0xf7]"); // '*' is the illegal operation
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, OffsetAddressableOperand(context));
+
+  input.assign("[0xf7 + 0xf7]"); // the operation is illegal
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, OffsetAddressableOperand(context));
+
+  delete lexer;
 };
 
 
 }  // namespace brig
-}  // namespace hsa
+}  // namespace hsafront
+
+
+
