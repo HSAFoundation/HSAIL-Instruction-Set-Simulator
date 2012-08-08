@@ -136,7 +136,7 @@ GenLLVM::GenLLVM(const StringBuffer &strings,
                  const Buffer &directives,
                  const Buffer &code,
                  const Buffer &operands) :
-  directives_(directives), strings_(strings),
+  strings_(strings), directives_(directives),
   code_(code), operands_(operands),
    brig_frontend_(NULL) {
 }
