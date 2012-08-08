@@ -19,6 +19,8 @@ TEST(LexTest, Bug2_DecIntegerConstant) {
 
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(12345, context->token_value.int_val);
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug3_OctIntegerConstant) {
@@ -27,6 +29,8 @@ TEST(LexTest, Bug3_OctIntegerConstant) {
 
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(24, context->token_value.int_val);
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug4_CRegister) {
@@ -34,6 +38,10 @@ TEST(LexTest, Bug4_CRegister) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_CREGISTER, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug5_DRegister) {
@@ -41,6 +49,10 @@ TEST(LexTest, Bug5_DRegister) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_DREGISTER, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug6_SRegister) {
@@ -48,6 +60,10 @@ TEST(LexTest, Bug6_SRegister) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug7_QRegister) {
@@ -55,6 +71,10 @@ TEST(LexTest, Bug7_QRegister) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_QREGISTER, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug8_Label) {
@@ -62,6 +82,10 @@ TEST(LexTest, Bug8_Label) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_LABEL, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug9_Comment) {
@@ -69,6 +93,10 @@ TEST(LexTest, Bug9_Comment) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_COMMENT, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug10_Comment) {
@@ -76,6 +104,10 @@ TEST(LexTest, Bug10_Comment) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_COMMENT, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug11_HexIntegerConstant) {
@@ -84,6 +116,8 @@ TEST(LexTest, Bug11_HexIntegerConstant) {
 
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(17, context->token_value.int_val);
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug12_DecSingleConstant) {
@@ -92,6 +126,8 @@ TEST(LexTest, Bug12_DecSingleConstant) {
 
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(0.5e3f, context->token_value.float_val);
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug17_LocalId) {
@@ -99,6 +135,10 @@ TEST(LexTest, Bug17_LocalId) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_LOCAL_IDENTIFIER, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug18_GlobalId) {
@@ -106,6 +146,10 @@ TEST(LexTest, Bug18_GlobalId) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_GLOBAL_IDENTIFIER, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug19_String) {
@@ -113,6 +157,10 @@ TEST(LexTest, Bug19_String) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_STRING, lexer->get_next_token());
+
+  // free the string
+  free(context->token_value.string_val);
+  delete lexer;
 }
 
 TEST(LexTest, Bug20_TokenProperty) {
@@ -136,6 +184,8 @@ TEST(LexTest, Bug20_TokenProperty) {
   input.assign("wrap");
   lexer->set_source_string(input);
   EXPECT_EQ(TOKEN_PROPERTY, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug21_TokenWavesize) {
@@ -143,6 +193,8 @@ TEST(LexTest, Bug21_TokenWavesize) {
   Lexer* lexer = new Lexer(input);
 
   EXPECT_EQ(TOKEN_WAVESIZE, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug22_CommonKeywords) {          // common keywords
@@ -262,6 +314,8 @@ TEST(LexTest, Bug22_CommonKeywords) {          // common keywords
   input.assign("loc");
   lexer->set_source_string(input);
   EXPECT_EQ(LOC, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug23_HexSingleConstant) {
@@ -270,6 +324,8 @@ TEST(LexTest, Bug23_HexSingleConstant) {
 
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(1.0f, context->token_value.float_val);
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug24_IEEESingleConstant) {
@@ -278,6 +334,8 @@ TEST(LexTest, Bug24_IEEESingleConstant) {
 
   EXPECT_EQ(TOKEN_SINGLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(1.0f, context->token_value.float_val);
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug25_AddressSpaceId) {
@@ -310,6 +368,8 @@ TEST(LexTest, Bug25_AddressSpaceId) {
   input.assign("_spill");
   lexer->set_source_string(input);
   EXPECT_EQ(_SPILL, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug26_DecDoubleConstant) {
@@ -318,6 +378,8 @@ TEST(LexTest, Bug26_DecDoubleConstant) {
 
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(0.5e3, context->token_value.double_val);
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug27_VectorKeywords) {              // keywords _v2 and _v4
@@ -329,6 +391,8 @@ TEST(LexTest, Bug27_VectorKeywords) {              // keywords _v2 and _v4
   input.assign("_v4");
   lexer->set_source_string(input);
   EXPECT_EQ(_V4, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug28_HexDoubleConstant) {
@@ -337,6 +401,8 @@ TEST(LexTest, Bug28_HexDoubleConstant) {
 
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(1.0, context->token_value.double_val);
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug29_IEEEDoubleConstant) {
@@ -345,6 +411,8 @@ TEST(LexTest, Bug29_IEEEDoubleConstant) {
 
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(1.0, context->token_value.double_val);
+
+  delete lexer;
 }
 
 // keywords format, order, coord, filter, boundaryU, boundaryV, boundaryW
@@ -377,6 +445,8 @@ TEST(LexTest, Bug30_CommonKeywords2) {
   input.assign("boundaryW");
   lexer->set_source_string(input);
   EXPECT_EQ(BOUNDARYW, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug33_ControlKeywords) {              // control keywords
@@ -396,6 +466,8 @@ TEST(LexTest, Bug33_ControlKeywords) {              // control keywords
   input.assign("memopt_off");
   lexer->set_source_string(input);
   EXPECT_EQ(MEMOPT_OFF, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug34_Puctuations) {              // punctuations
@@ -456,6 +528,8 @@ TEST(LexTest, Bug34_Puctuations) {              // punctuations
   input.assign(",");
   lexer->set_source_string(input);
   EXPECT_EQ(',', lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug37_Opcodes) {              // opcodes
@@ -519,6 +593,8 @@ TEST(LexTest, Bug37_Opcodes) {              // opcodes
   input.assign("debugtrap");
   lexer->set_source_string(input);
   EXPECT_EQ(DEBUGTRAP, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug38_Instruction2Opcode) {
@@ -574,6 +650,8 @@ TEST(LexTest, Bug38_Instruction2Opcode) {
   input.assign("mask");
   lexer->set_source_string(input);
   EXPECT_EQ(MASK, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug39_Instruction2OpcodeFTZ) {
@@ -613,6 +691,8 @@ TEST(LexTest, Bug39_Instruction2OpcodeFTZ) {
   input.assign("frcp");
   lexer->set_source_string(input);
   EXPECT_EQ(FRCP, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug40_Instruction2OpcodeNoDT) {
@@ -657,6 +737,8 @@ TEST(LexTest, Bug40_Instruction2OpcodeNoDT) {
   input.assign("NDRangegroups");
   lexer->set_source_string(input);
   EXPECT_EQ(NDRANGEGROUPS, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug41_Instruction3Opcode) {
@@ -736,6 +818,8 @@ TEST(LexTest, Bug41_Instruction3Opcode) {
   input.assign("receive");
   lexer->set_source_string(input);
   EXPECT_EQ(RECEIVE, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug42_Instruction3OpcodeFTZ_Instruction4Opcode) {
@@ -803,6 +887,8 @@ TEST(LexTest, Bug42_Instruction3OpcodeFTZ_Instruction4Opcode) {
   input.assign("bitselect");
   lexer->set_source_string(input);
   EXPECT_EQ(BITSELECT, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug43_AtomicOperationId) {              // AtomicOperationId
@@ -846,6 +932,8 @@ TEST(LexTest, Bug43_AtomicOperationId) {              // AtomicOperationId
   input.assign("_min");
   lexer->set_source_string(input);
   EXPECT_EQ(_MIN_, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug44_ComparisonId) {              // Comparison
@@ -961,6 +1049,8 @@ TEST(LexTest, Bug44_ComparisonId) {              // Comparison
   input.assign("_sgeu");
   lexer->set_source_string(input);
   EXPECT_EQ(_SGEU, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug45_QueryOperation) {              // keywords for queryOp
@@ -996,6 +1086,8 @@ TEST(LexTest, Bug45_QueryOperation) {              // keywords for queryOp
   input.assign("query_filtering");
   lexer->set_source_string(input);
   EXPECT_EQ(QUERY_FILTERING, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug46_RoundingModes) {              // Rounding modes
@@ -1031,6 +1123,8 @@ TEST(LexTest, Bug46_RoundingModes) {              // Rounding modes
   input.assign("_near");
   lexer->set_source_string(input);
   EXPECT_EQ(_NEAR, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug47_PackingModes) {              // packing modes
@@ -1082,6 +1176,8 @@ TEST(LexTest, Bug47_PackingModes) {              // packing modes
   input.assign("_s_sat");
   lexer->set_source_string(input);
   EXPECT_EQ(_S_SAT, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug48_GeometryId) {              // keywords for geometry ID
@@ -1121,6 +1217,8 @@ TEST(LexTest, Bug48_GeometryId) {              // keywords for geometry ID
   input.assign("st_image");
   lexer->set_source_string(input);
   EXPECT_EQ(ST_IMAGE, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug49_Targets) {              // targets
@@ -1148,6 +1246,8 @@ TEST(LexTest, Bug49_Targets) {              // targets
   input.assign("$nosftz");
   lexer->set_source_string(input);
   EXPECT_EQ(_NOSFTZ, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug50_WidthDepthHeight_Keywords) {
@@ -1163,6 +1263,8 @@ TEST(LexTest, Bug50_WidthDepthHeight_Keywords) {
   input.assign("depth");
   lexer->set_source_string(input);
   EXPECT_EQ(DEPTH, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug51_AtomModifier) {              // keywords for Atom Modifiers
@@ -1270,6 +1372,8 @@ TEST(LexTest, Bug51_AtomModifier) {              // keywords for Atom Modifiers
   input.assign("st");
   lexer->set_source_string(input);
   EXPECT_EQ(ST, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug52_Mul) {              // keywords for mul
@@ -1301,6 +1405,8 @@ TEST(LexTest, Bug52_Mul) {              // keywords for mul
   input.assign("f2u4");
   lexer->set_source_string(input);
   EXPECT_EQ(F2U4, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug53_DataTypes) {          // dataTypeId
@@ -1476,6 +1582,8 @@ TEST(LexTest, Bug53_DataTypes) {          // dataTypeId
   input.assign("_u64x2");
   lexer->set_source_string(input);
   EXPECT_EQ(_U64X2, lexer->get_next_token());
+
+  delete lexer;
 }
 
 TEST(LexTest, Bug54_SomeKeywords) {
@@ -1495,6 +1603,8 @@ TEST(LexTest, Bug54_SomeKeywords) {
   input.assign("syscall");
   lexer->set_source_string(input);
   EXPECT_EQ(SYSCALL, lexer->get_next_token());
+
+  delete lexer;
 }
 
 // ------------------ LEXER WRAPPER TESTS -----------------
@@ -1510,8 +1620,11 @@ TEST(LexerWrapperTest, TestLexWrapper) {
   EXPECT_EQ(TOKEN_CREGISTER, token);
 
   EXPECT_STREQ("$c1", context->token_value.string_val);
+  // free the string
+  free(context->token_value.string_val);
 
-};
+  delete lexer;
+}
 
 TEST(LexerWrapperTest, GetIntValFromLexer) {
   std::string input("10");
@@ -1521,6 +1634,8 @@ TEST(LexerWrapperTest, GetIntValFromLexer) {
   int token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_INTEGER_CONSTANT);
   EXPECT_EQ(10, context->token_value.int_val);
+
+  delete lexer;
 }
 
 TEST(LexerWrapperTest, GetFloatValFromLexer) {
@@ -1531,6 +1646,8 @@ TEST(LexerWrapperTest, GetFloatValFromLexer) {
   int token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_SINGLE_CONSTANT);
   EXPECT_EQ(10.0, context->token_value.float_val);
+
+  delete lexer;
 }
 
 TEST(LexerWrapperTest, GetDoubleValFromLexer) {
@@ -1541,12 +1658,13 @@ TEST(LexerWrapperTest, GetDoubleValFromLexer) {
   int token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_DOUBLE_CONSTANT);
   EXPECT_EQ(10.0, context->token_value.double_val);
+
+  delete lexer;
 }
 
 TEST(LexerWrapperTest, ResetLexer) {
   std::string input("$c1 10 10.5f");
   Lexer* lexer = new Lexer(input);
-
 
   int token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_CREGISTER);
@@ -1563,6 +1681,8 @@ TEST(LexerWrapperTest, ResetLexer) {
   lexer->restart();
   token = lexer->get_next_token();
   EXPECT_EQ(token, TOKEN_CREGISTER);
+
+  delete lexer;
 }
 
 }  // namespace brig

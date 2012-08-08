@@ -171,7 +171,7 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 
 "/*"                          { BEGIN (COMMENT); }
 <COMMENT>"*/"                 { context->token_type = CODE_COMMENTS; 							  
-																context->token_value.string_val = strdup(yytext); 
+																context->token_value.string_val = strdup(yytext);
 																BEGIN (INITIAL); 
 																return TOKEN_COMMENT; }
 																

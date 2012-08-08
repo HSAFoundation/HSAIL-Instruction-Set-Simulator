@@ -13,11 +13,20 @@ namespace brig {
 
 class Lexer {
   public:
-    Lexer() {}
+    Lexer() {
+      bp = NULL;
+    }
+    ~Lexer() {
+      if (bp != NULL) {
+        yy_delete_buffer(bp);
+        bp = NULL;
+      }
+    }
 
     explicit Lexer(const std::string& s) {
-      set_source_string(s);
-      yy_scan_string(reinterpret_cast<const char*>(src.c_str()));
+      src.clear();
+      src.assign(s.c_str());
+      bp = yy_scan_string(reinterpret_cast<const char*>(src.c_str()));
     }
 
     // get the next token
@@ -36,6 +45,7 @@ class Lexer {
 
   private:
     std::string src;
+    YY_BUFFER_STATE bp;
   };
 
 }  // namespace brig

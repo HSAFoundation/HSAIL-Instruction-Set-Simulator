@@ -23,7 +23,6 @@ TEST(ParserTest, OperandTest) {
   context->clear_context();
   context->set_error_reporter(main_reporter);
 
-
   std::string input("&a_global_id123 \n");  // global id
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -1268,6 +1267,7 @@ TEST(ParserTest, Label) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
+  free(context->token_value.string_val);
 
   input.assign("@_test_label_4 \n");  // lack of colon ':'
   lexer->set_source_string(input);
@@ -1596,6 +1596,7 @@ TEST(ParserTest, Instruction4) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
 
+
   input.clear();
   delete lexer;
 };
@@ -1671,7 +1672,7 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
 
   EXPECT_EQ(0, parser->parse());
 
-  input.clear();
+   input.clear();
   delete parser;
 };
 
