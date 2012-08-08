@@ -11,28 +11,28 @@
 namespace hsa{
 namespace brig{
 
-static llvm::StructType *create_soa_type(
+llvm::StructType *GenLLVM::create_soa_type(
   llvm::Type *t, std::string name, int nr) {
   // [nr x t]
   llvm::ArrayType *tx8 = llvm::ArrayType::get(t, nr);
   std::vector<llvm::Type *> tv(1, tx8);
   // name = {[nr x t]}
   llvm::StructType *soa_type = llvm::StructType::create(
-    llvm::getGlobalContext(), tv, name, false);
+    *C_, tv, name, false);
   return soa_type;
 }
 
 void GenLLVM::gen_GPU_states(void) {
   llvm::StructType *c_reg_type = create_soa_type(
-    llvm::Type::getInt1Ty(llvm::getGlobalContext()), "c_regs",8);
+    llvm::Type::getInt1Ty(*C_), "c_regs",8);
   llvm::StructType *s_reg_type = create_soa_type(
-    llvm::Type::getInt32Ty(llvm::getGlobalContext()), "s_regs",8);
+    llvm::Type::getInt32Ty(*C_), "s_regs",8);
   llvm::StructType *d_reg_type = create_soa_type(
-    llvm::Type::getInt64Ty(llvm::getGlobalContext()), "d_regs",8);
+    llvm::Type::getInt64Ty(*C_), "d_regs",8);
   llvm::StructType *q_reg_type = create_soa_type(
-    llvm::Type::getIntNTy(llvm::getGlobalContext(), 128), "q_regs",8);
+    llvm::Type::getIntNTy(*C_, 128), "q_regs",8);
   llvm::StructType *pc_reg_type = create_soa_type(
-    llvm::Type::getIntNTy(llvm::getGlobalContext(), 32), "pc_regs",3);
+    llvm::Type::getIntNTy(*C_, 32), "pc_regs",3);
   std::vector<llvm::Type *> tv1;
   tv1.push_back(c_reg_type);
   tv1.push_back(s_reg_type);
@@ -40,35 +40,50 @@ void GenLLVM::gen_GPU_states(void) {
   tv1.push_back(q_reg_type);
   tv1.push_back(pc_reg_type);
   llvm::StructType *gpu_states_ty = llvm::StructType::create(
-    llvm::getGlobalContext(), tv1, std::string("struct.regs"), false);
+    *C_, tv1, std::string("struct.regs"), false);
   gpu_states_type_ = gpu_states_ty;
 }
 
-size_t GenLLVM::gen_function(size_t index,
+size_t GenLLVM::gen_function(
+  size_t index,
   const struct BrigDirectiveFunction *directive) {
-  assert(directive->inParamCount == 0);
   std::vector<llvm::Type *> args;
   std::vector<std::string> argnames;
-  if (directive->outParamCount) {
+
+  assert(directive->outParamCount < 2 && "Multiple out params not supported");
+  if(directive->outParamCount == 1) {
     const struct BrigDirectiveSymbol *out_arg =
-      reinterpret_cast<const struct BrigDirectiveSymbol*>(
-        &(directives_.get()[directive->d_firstScopedDirective]));
-    assert(out_arg->s.type == Brigf32);
+      reinterpret_cast<const struct BrigDirectiveSymbol*>
+      (&(directives_.get()[directive->d_firstScopedDirective]));
     std::string symbol_name = strings_.at(out_arg->s.s_name+1);
 
-    //std::cout << "Symbol name =  "<< symbol_name<<std::endl;
+    if(out_arg->s.type == Brigf32) {
+      args.push_back(llvm::Type::getFloatPtrTy(*C_));
+    } else if(out_arg->s.type == Brigu32) {
+      args.push_back(llvm::Type::getInt32PtrTy(*C_));
+    }
 
-    // Make the function type:  double(double,double) etc.
-    args.push_back(
-      llvm::Type::getFloatPtrTy(llvm::getGlobalContext()));
     argnames.push_back(symbol_name);
-    index += sizeof(*out_arg);
-  } else {
-    assert(0);
   }
+
+  for(unsigned i = 0; i < directive->inParamCount; ++i) {
+    const struct BrigDirectiveSymbol *in_arg =
+      reinterpret_cast<const struct BrigDirectiveSymbol*>
+      (&(directives_.get()[directive->d_firstInParam]));
+    std::string symbol_name = strings_.at(in_arg->s.s_name+1);
+
+    if(in_arg->s.type == Brigf32) {
+      args.push_back(llvm::Type::getFloatPtrTy(*C_));
+    } else if(in_arg->s.type == Brigu32) {
+      args.push_back(llvm::Type::getInt32PtrTy(*C_));
+    }
+
+    argnames.push_back(symbol_name);
+  }
+
   llvm::FunctionType *FT =
     llvm::FunctionType::get(llvm::Type::getVoidTy(
-      llvm::getGlobalContext()), args, false);
+      *C_), args, false);
   llvm::Function *func = llvm::Function::Create(FT,
     llvm::Function::ExternalLinkage,
     strings_.at(directive->s_name+1), brig_frontend_);
@@ -76,20 +91,20 @@ size_t GenLLVM::gen_function(size_t index,
   // Set names for output arguments.
   unsigned idx = 0;
   for (llvm::Function::arg_iterator ai = func->arg_begin(); idx !=
-      directive->outParamCount; ++ai, ++idx) {
+      directive->outParamCount + directive->inParamCount; ++ai, ++idx) {
     ai->setName(argnames[idx]);
   }
+
   if (directive->operationCount) {
     // Create a new basic block to start insertion into.
     llvm::BasicBlock *bb =
-      llvm::BasicBlock::Create(llvm::getGlobalContext(), "entry",
+      llvm::BasicBlock::Create(*C_, "entry",
         func);
     // Create alloca of local GPU state
     llvm::IRBuilder<> TmpB(bb, bb->begin());
     TmpB.CreateAlloca(gpu_states_type_, 0, "gpu_reg_p");
 
     uint32_t offset = directive->c_code;
-    // TODO: This code is not label aware, yet
     for(uint32_t i = 0; i < directive->operationCount; ++i) {
       const BrigInstBase *inst =
         reinterpret_cast<const BrigInstBase *>(&code_.get()[offset]);
@@ -108,8 +123,7 @@ size_t GenLLVM::gen_function(size_t index,
     }
   }
 
-//  std::cout << "A function\n";
-  return index;
+  return directive->d_nextDirective;
 }
 
 size_t GenLLVM::gen_directive(size_t index) {
@@ -120,29 +134,27 @@ size_t GenLLVM::gen_directive(size_t index) {
     static_cast<enum BrigDirectiveKinds>(dh->kind);
   switch(directive_kind) {
     case BrigEDirectiveFunction:
-      index = gen_function(index,
+      return gen_function(index,
         reinterpret_cast<const struct BrigDirectiveFunction*>(dh));
-      break;
     case BrigEDirectiveVersion:
+      return index + dh->size;
       //std::cout << "A version\n";
-      break;
     default:
       assert(0&&"Unknown directive type");
-  };
-  return index+dh->size;
+  }
 }
 
 GenLLVM::GenLLVM(const StringBuffer &strings,
                  const Buffer &directives,
                  const Buffer &code,
                  const Buffer &operands) :
-  directives_(directives), strings_(strings),
+  strings_(strings), directives_(directives),
   code_(code), operands_(operands),
    brig_frontend_(NULL) {
 }
 void GenLLVM::operator()(void) {
-   llvm::LLVMContext &context = llvm::getGlobalContext();
-  brig_frontend_ = new llvm::Module("BRIG", context);
+  C_ = new llvm::LLVMContext();
+  brig_frontend_ = new llvm::Module("BRIG", *C_);
   gen_GPU_states();
   size_t index = 0;
   while(index < directives_.size()) {

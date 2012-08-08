@@ -30,6 +30,7 @@ Context::Context(void) {
   yycolno = 0;
   yylineno = 1;
   error_reporter_set = false;
+  token_value.string_val = NULL;
 }
 
 // default destructor
@@ -171,9 +172,8 @@ void Context::clear_directive_buffer(void) {
 void Context::clear_operand_buffer(void) {
   obuf->clear();
   // pad the first 8 bytes with 0
-  BrigDirectivePad bdp = {0, 0};
-  obuf->append(&bdp);
-  obuf->append(&bdp);
+  for(unsigned i = 0; i < sizeof(uint64_t); ++i)
+    obuf->append_char(0);
 }
 
 void Context::clear_string_buffer(void) {
@@ -193,7 +193,9 @@ void Context::clear_context(void) {
   operand_map.clear();
   label_o_map.clear();
   label_c_map.clear();
+  token_value.string_val = NULL;
   set_default_values();
+
 }
 
 

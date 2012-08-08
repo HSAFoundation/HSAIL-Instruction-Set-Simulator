@@ -118,43 +118,118 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 ")" |
 ":" |
 ";" |
-","           { context->token_type = PUNCTUATION; context->yycolno+=yyleng; return yytext[0];}
+","           { context->token_type = PUNCTUATION;
+								context->yycolno+=yyleng;
+								return yytext[0];}
 
-{OCT_INT}     { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.int_val = strtol(yytext, NULL, 8); return TOKEN_INTEGER_CONSTANT; }
-{DEC_INT}     { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.int_val = strtol(yytext, NULL, 10); return TOKEN_INTEGER_CONSTANT; }
-{HEX_INT}     { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.int_val = strtol(yytext, NULL, 16); return TOKEN_INTEGER_CONSTANT; }
+{OCT_INT}     { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.int_val = strtol(yytext, NULL, 8);
+								return TOKEN_INTEGER_CONSTANT; }
+								
+{DEC_INT}     { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.int_val = strtol(yytext, NULL, 10);
+								return TOKEN_INTEGER_CONSTANT; }
+								
+{HEX_INT}     { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.int_val = strtol(yytext, NULL, 16);
+								return TOKEN_INTEGER_CONSTANT; }
 
-{DEC_SINGLE}  { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
-{HEX_SINGLE}  { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.float_val = strtof(yytext,NULL); return TOKEN_SINGLE_CONSTANT; }
-{IEEE_SINGLE} { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.float_val = ieee754tof(yytext); return TOKEN_SINGLE_CONSTANT; }
+{DEC_SINGLE}  { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.float_val = strtof(yytext,NULL);
+								return TOKEN_SINGLE_CONSTANT; }
+								
+{HEX_SINGLE}  { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.float_val = strtof(yytext,NULL);
+								return TOKEN_SINGLE_CONSTANT; }
+								
+{IEEE_SINGLE} { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.float_val = ieee754tof(yytext);
+								return TOKEN_SINGLE_CONSTANT; }
 
-{DEC_DOUBLE}  { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.double_val = strtod(yytext,NULL); return TOKEN_DOUBLE_CONSTANT; }
-{HEX_DOUBLE}  { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.double_val = strtod(yytext,NULL); return TOKEN_DOUBLE_CONSTANT; }
-{IEEE_DOUBLE} { context->token_type = CONSTANT; context->yycolno+=yyleng; context->token_value.double_val = ieee754tod(yytext); return TOKEN_DOUBLE_CONSTANT; }
+{DEC_DOUBLE}  { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.double_val = strtod(yytext,NULL);
+								return TOKEN_DOUBLE_CONSTANT; }
+								
+{HEX_DOUBLE}  { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.double_val = strtod(yytext,NULL);
+								return TOKEN_DOUBLE_CONSTANT; }
+								
+{IEEE_DOUBLE} { context->token_type = CONSTANT;
+								context->yycolno+=yyleng;
+								context->token_value.double_val = ieee754tod(yytext);
+								return TOKEN_DOUBLE_CONSTANT; }
 
 
 
 "/*"                          { BEGIN (COMMENT); }
-<COMMENT>"*/"                 { context->token_type = CODE_COMMENTS; context->token_value.string_val = strdup(yytext); BEGIN (INITIAL); return TOKEN_COMMENT; }
+<COMMENT>"*/"                 { context->token_type = CODE_COMMENTS; 							  
+																context->token_value.string_val = strdup(yytext); 
+																BEGIN (INITIAL); 
+																return TOKEN_COMMENT; }
+																
 <COMMENT>([^*]|\n)+|./"*/"    {}
-<COMMENT><<EOF>>              { printf("%d: Unterminated comment\n", yylineno); return 0; }
+<COMMENT><<EOF>>              { printf("%d: Unterminated comment\n", yylineno); 
+																return 0; }
 
 "//"                          { BEGIN(INLINE_COMMENT); }
+
 <INLINE_COMMENT>.             {}
-<INLINE_COMMENT>\n            { context->token_type = CODE_COMMENTS; context->token_value.string_val = strdup(yytext); BEGIN(INITIAL); return TOKEN_COMMENT;}
-<INLINE_COMMENT><<EOF>>       { printf("%d: Unterminated comment\n", yylineno); return 0; }
 
+<INLINE_COMMENT>\n            { context->token_type = CODE_COMMENTS; 
+																context->token_value.string_val = strdup(yytext); 
+																BEGIN(INITIAL); 
+																return TOKEN_COMMENT;}
+																
+<INLINE_COMMENT><<EOF>>       { printf("%d: Unterminated comment\n", yylineno); 
+																return 0; }
 
-\$c(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng; context->token_value.string_val = strdup(yytext); context->token_type = REGISTER; return TOKEN_CREGISTER;}
-\$d(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng; context->token_value.string_val = strdup(yytext); context->token_type = REGISTER; return TOKEN_DREGISTER;}
-\$s(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15)  { context->yycolno+=yyleng; context->token_value.string_val = strdup(yytext); context->token_type = REGISTER; return TOKEN_SREGISTER;}
-\$q(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng; context->token_value.string_val = strdup(yytext); context->token_type = REGISTER; return TOKEN_QREGISTER;}
+\$c(0|1|2|3|4|5|6|7)          { context->yycolno+=yyleng; 
+																context->token_value.string_val = strdup(yytext);
+																context->token_type = REGISTER; 
+																return TOKEN_CREGISTER;}
+																
+\$d(0|1|2|3|4|5|6|7)                     {  context->yycolno+=yyleng;
+																						context->token_value.string_val = strdup(yytext); 
+																						context->token_type = REGISTER; 
+																						return TOKEN_DREGISTER;}
+																						
+\$s(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15)  { context->yycolno+=yyleng; 
+																							context->token_value.string_val = strdup(yytext); 
+																							context->token_type = REGISTER; 
+																							return TOKEN_SREGISTER;}
+																							
+\$q(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng;																																	  
+																							context->token_value.string_val = strdup(yytext);
+																							context->token_type = REGISTER;
+																							return TOKEN_QREGISTER;}
 
-\%[_a-zA-Z]+[_a-zA-Z0-9]*      { context->token_type = IDENTIFIER; context->yycolno+=yyleng; context->token_value.string_val = strdup(yytext); return TOKEN_LOCAL_IDENTIFIER; }
-\&[_a-zA-Z]+[_a-zA-Z0-9]*      { context->token_type = IDENTIFIER; context->yycolno+=yyleng; context->token_value.string_val = strdup(yytext); return TOKEN_GLOBAL_IDENTIFIER; }
+\%[_a-zA-Z]+[_a-zA-Z0-9]*      { context->token_type = IDENTIFIER;
+																 context->yycolno+=yyleng;
+																 context->token_value.string_val = strdup(yytext);
+																 return TOKEN_LOCAL_IDENTIFIER; }
+																 
+\&[_a-zA-Z]+[_a-zA-Z0-9]*      { context->token_type = IDENTIFIER;
+																 context->yycolno+=yyleng;
+																 context->token_value.string_val = strdup(yytext);
+																 return TOKEN_GLOBAL_IDENTIFIER; }
 
-\@[_a-zA-Z]+[_a-zA-Z0-9]*      { context->token_type = LABEL; context->yycolno+=yyleng; context->token_value.string_val = strdup(yytext);  return TOKEN_LABEL; }
-\"(\\.|[^\\"])*\"              { context->token_type = STRING; context->yycolno+=yyleng; context->token_value.string_val = strdup(yytext);  return TOKEN_STRING; }
+\@[_a-zA-Z]+[_a-zA-Z0-9]*      { context->token_type = LABEL;
+																 context->yycolno+=yyleng;
+																 context->token_value.string_val = strdup(yytext);
+																 return TOKEN_LABEL; }
+																 
+\"(\\.|[^\\"])*\"              { context->token_type = STRING;
+																 context->yycolno+=yyleng;
+																 context->token_value.string_val = strdup(yytext);
+																 return TOKEN_STRING; }
 
 ((snorm_|unorm_)(((int)(8|16|32))|((short_)(565|555|101010)))) |
 ((signed_|unsigned_)(int)(8|16|32)) |

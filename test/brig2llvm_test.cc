@@ -15,6 +15,114 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     bb.append(&foo);
     EXPECT_EQ(bb.get().size(), sizeof(foo));
   }
+}
+
+TEST(Brig2LLVMTest, Example1) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+    strings.append(std::string("%ret_val"));
+    strings.append(std::string("%arg_val0"));
+    strings.append(std::string("&abort"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction get_global_id = {
+      sizeof(get_global_id), BrigEDirectiveFunction,
+      0,   // c_code
+      0,   // s_name
+      1,   // inParamCount
+      directives.size() + sizeof(get_global_id),  // d_firstScopedDirective
+      0,   // operationCount
+      directives.size() + sizeof(get_global_id) +
+      2 * sizeof(BrigDirectiveSymbol),  // d_nextDirective
+      0,   // attribute
+      0,   // fbarCount
+      1,   // outParamCount
+      directives.size() + sizeof(get_global_id) +
+      sizeof(BrigDirectiveSymbol)    // d_firstInParam
+    };
+    directives.append(&get_global_id);
+
+    BrigDirectiveSymbol ret_val = {
+      sizeof(ret_val),      // size
+      BrigEDirectiveSymbol, // kind
+      {
+        0,             // c_code
+        BrigArgSpace,  // storageClass
+        BrigNone,      // attribute
+        0,             // reserved
+        0,             // symbolModifier
+        0,             // dim
+        15,            // s_name
+        Brigu32,       // type
+        1,             // align
+      },
+      0,  // d_init
+      0,   // reserved
+    };
+    directives.append(&ret_val);
+
+    BrigDirectiveSymbol arg_val = {
+      sizeof(arg_val),      // size
+      BrigEDirectiveSymbol, // kind
+      {
+        0,             // c_code
+        BrigArgSpace,  // storageClass
+        BrigNone,      // attribute
+        0,             // reserved
+        0,             // symbolModifier
+        0,             // dim
+        24,            // s_name
+        Brigu32,       // type
+        1,             // align
+      },
+      0,  // d_init
+      0,   // reserved
+    };
+    directives.append(&arg_val);
+
+    BrigDirectiveFunction abort = {
+      sizeof(abort), BrigEDirectiveFunction,
+      0,   // c_code
+      34,  // s_name
+      0,   // inParamCount
+      directives.size() + sizeof(abort),  // d_firstScopedDirective
+      0,   // operationCount
+      directives.size() + sizeof(abort), // d_nextDirective
+      0,   // attribute
+      0,   // fbarCount
+      0,   // outParamCount
+      0    // d_firstInParam
+    };
+    directives.append(&abort);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare void @get_global_id(i32*, i32*)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare void @abort()")));
+  }
+}
+
+TEST(Brig2LLVMTest, Example2) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&return_true"));
@@ -23,7 +131,14 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
-      BrigEDirectiveVersion
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
     };
     directives.append(&bdv);
     BrigDirectiveFunction bdf = {
@@ -31,9 +146,10 @@ TEST(Brig2LLVMTest, AppendBuffer) {
       0,   // c_code
       0,   // s_name
       0,   // inParamCount
-      60,  // d_firstScopedDirective
+      directives.size() + sizeof(bdf),  // d_firstScopedDirective
       1,   // operationCount
-      96,  // d_nextDirective
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol),  // d_nextDirective
       0,   // attribute
       0,   // fbarCount
       1,   // outParamCount
@@ -52,8 +168,10 @@ TEST(Brig2LLVMTest, AppendBuffer) {
       1,            // align
     };
     BrigDirectiveSymbol bds = {
+      sizeof(bds),
+      BrigEDirectiveSymbol,
       s,
-      96,  // d_init
+      0,   // d_init
       0,   // reserved
     };
     directives.append(&bds);
@@ -93,5 +211,78 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     "%gpu_reg_p = alloca %struct.regs")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "ret void")));
+  }
+}
+
+// This method appends a BrigDirectiveProto to the buffer. BrigDirectiveProto is
+// a variable length structure. This means the last field of BrigDirectiveProto
+// is an array of unknown size. Unfortunately, variable length structures are
+// not well suppored in C++ 98. We work around this limitation by creating an
+// appropriately sized variable length array and then reinterpret casting the
+// array to a BrigDirectiveProto.
+//
+// This method takes input Iterators to the beginning and end of an object
+// containing the BrigDirectiveProto::BrigProtoTypes of the BrigDirectiveProto's
+// input and output types. Usually, it is convenient to use a pointer, but other
+// iterators can also be used. To prevent errors, the method checks that
+// outCount + inCount is equal to the distance between the B and E iterators.
+template<class Buffer, class Iterator>
+static void appendBrigDirectiveProto(Buffer &buffer,
+                                     BrigsOffset32_t c_code,
+                                     BrigsOffset32_t s_name,
+                                     uint16_t fbarCount,
+                                     uint16_t reserved,
+                                     uint32_t outCount,
+                                     uint32_t inCount,
+                                     const Iterator &B,
+                                     const Iterator &E) {
+
+  const size_t numArgs = E - B;
+  EXPECT_EQ(outCount + inCount, numArgs);
+
+  // Since the
+  uint8_t array[sizeof(BrigDirectiveProto) +
+                sizeof(BrigDirectiveProto::BrigProtoType[numArgs - 1])];
+
+  BrigDirectiveProto *bdp =
+    reinterpret_cast<BrigDirectiveProto *>(array);
+
+  bdp->size = sizeof(array);
+  bdp->kind = BrigEDirectiveProto;
+  bdp->c_code = c_code;
+  bdp->s_name = s_name;
+  bdp->fbarCount = fbarCount;
+  bdp->reserved = reserved;
+  bdp->outCount = outCount;
+  bdp->inCount = inCount;
+
+  Iterator it = B;
+  for(size_t i = 0; i < numArgs; ++i)
+    bdp->types[i] = *it++;
+
+  buffer.append(bdp);
+}
+
+TEST(Brig2LLVMTest, VarSizeDirective) {
+  {
+    hsa::brig::Buffer bb;
+    BrigDirectiveProto::BrigProtoType args[] = {
+      // type, align, hasDim, dim
+      {Brigu32, 1, 0, 0},
+      {Brigu32, 1, 0, 0}
+    };
+    appendBrigDirectiveProto(bb,
+                             0, // c_code
+                             0, // s_name
+                             0, // fbarCount
+                             0, // reserved
+                             1, // outCount
+                             1, // inCount
+                             &args[0],
+                             &args[2]);
+
+    EXPECT_EQ(sizeof(BrigDirectiveProto) +
+              sizeof(sizeof(BrigDirectiveProto::BrigProtoType)),
+              bb.size());
   }
 }
