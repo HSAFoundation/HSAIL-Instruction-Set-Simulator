@@ -5,6 +5,8 @@
 namespace llvm {
   class Module;
   class Type;
+  class StructType;
+  class LLVMContext;
 }
 #include "brig.h"
 #include "brig_buffer.h"
@@ -13,7 +15,7 @@ namespace hsa {
 namespace brig {
 class GenLLVM {
  public:
-  explicit GenLLVM(const StringBuffer&,
+  explicit GenLLVM(const StringBuffer &strings,
                    const Buffer &directives,
                    const Buffer &code,
                    const Buffer &operands);
@@ -24,11 +26,13 @@ class GenLLVM {
   void operator()(void);
   const std::string &str(void) { return output_; }
  private:
+  llvm::StructType *create_soa_type(llvm::Type *t, std::string name, int nr);
   void gen_GPU_states(void);
   const StringBuffer &strings_;
   const Buffer &directives_;
   const Buffer &code_;
   const Buffer &operands_;
+  llvm::LLVMContext *C_;
   llvm::Module *brig_frontend_;
   llvm::Type *gpu_states_type_;
   std::string output_;
