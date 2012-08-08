@@ -1721,81 +1721,106 @@ TEST(ParserTest, Instruction4) {
   input.clear();
   delete lexer;
 };
+// ------------------  Test for ldc rule -------------------
+// format:
+// ldc ::= "ldc" dataTypeId operand "," ( TOKEN_LABEL ";" | identifier ";" )
+// correct cases
+TEST(ParserTest, Ldc) {
+  std::string input("ldc_b32 $s1, &bar;"); // identifier
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Ldc(context));
+ 
+  input.assign("ldc_b64 $s2, @lab;"); // label
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Ldc(context));
 
-// ------------------  PARSER WRAPPER TEST -----------------
-TEST(ParserWrapperTest, ScanSymbolsWithParser) {
-  context->clear_context();
-  std::string input("version 1:0:$large;\n");
-  input.append("global_f32 &x = 2;\n");
-  input.append("function &test()() {\n");
-  input.append("{arg_u32 %z;}\n");
-  input.append(" }; \n");
+  input.assign("ldc_b64 $s2, %label;"); // identifier
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Ldc(context));
 
+// wrong cases
+  input.assign("ldc_b64 $s1, &some_function");  // lack of ';'  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Ldc(context));
 
-  Parser* parser = new Parser(context);
-  parser->set_source_string(input);
-  parser->scan_symbols();
+  input.assign("ldc $s1, &function;");  // lack of dataTypeId  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Ldc(context));
 
-  if (0) {
-    // Print out string buffer content:
-    unsigned int index = 0;
-    std::string temp;
-    std::cout << "Buffer content: " << std::endl;
-    while (index < context->get_string_offset()) {
-      temp = context->get_string(index);
-      std::cout << "Index " << index << ": " << temp << std::endl;
-      index+=temp.length()+1;
-    }
-  }
+  input.assign("ldc_b32 , $s1, &function;");  // redundant ','  
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Ldc(context));
 
-  input.clear();
-  delete parser;
+  input.assign("ldc_b64 $s1, e123;");  // unrecognized identifier
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Ldc(context));
 };
 
-TEST(ParserWrapperTest, ParseSimpleProgram) {
-  context->clear_context();
-  // Example 3
-  std::string input("\n version 1:0:$small; \n");
-  input.append("function &packed_ops (arg_u8x4 %x)() { \n");
-  input.append(" abs_p_s8x4 $s1, $s2; \n");
-  input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; \n");
-  input.append(" }; \n");
+// -----------------  Test for Instruction5 rule -----------------
+// format:
+// Instruction5 ::= "f2u4" dataTypeId operand "," operand
+//                  "," operand "," operand "," operand ";"
+// correct cases
+TEST(ParserTest, Instruction5) {
+  std::string input("f2u4_u32 $s1, $s2, $s3, $s9, $s3;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
+ 
+  input.assign("f2u4_u64 $d4, $d6, $d3, $d1, $d5;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
+ 
+  input.assign("f2u4_u64 $s4, $s6, $s3, 364, 113;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
 
-  Parser* parser = new Parser(context);
-  parser->set_source_string(input);
-  EXPECT_EQ(0, parser->parse());
+  input.assign("f2u4_u32 $s1, $s2, $s3, 0xD41, 0xF4;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
 
-  input.clear();
-  delete parser;
+  input.assign("f2u4_u64 $d1, $d2, $d3, 1.0f, 2.0f;"); 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction5(context));
+
+// wrong cases
+  input.assign("f2u4_u64 $d4, $d6, $d3, $d1, $d5"); // lack of ';' 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+
+  input.assign("f2u4_u32 $s0, $s6, $s3, $s4 $s2;"); // lack of ',' 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+
+  input.assign("f2u4 $d1, $d2, $d3, 4.0f, 6.0f;"); // lack of datetypeId 
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+
+  input.assign("f2u4_u64 $s1, $s2, $s3, 0xD41;"); // lack of operand
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+
+  input.assign("f2u4_u64 , $s1, $s2, $s3, $s4, 0xD41;"); // redundant ','
+  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Instruction5(context));
+  
 };
-
-TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
-  context->clear_context();
-  // Example 3
-  std::string input("version 1:0:$small;\n");
-  input.append("function &packed_ops (arg_u8x4 %x)() {\n");
-  input.append(" abs_p_s8x4 $s1, $s2; \n");
-  input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; \n");
-  input.append(" }; \n");
-
-  // Example 4
-  input.append("version 1:1:$small;\n");
-  input.append("function &branch_ops (arg_u8x4 %x)() {\n");
-  input.append("cbr $c1, @then;\n");
-  input.append("abs_p_s8x4 $s1, $s2;\n");
-  input.append(" brn @outof_IF;\n");
-  input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;\n");
-  input.append(" @outof_IF: ret;\n");
-  input.append(" }; \n");
-
-  Parser* parser = new Parser(context);
-  parser->set_source_string(input);
-
-  EXPECT_EQ(0, parser->parse());
-  input.clear();
-  delete parser;
-};
-
 TEST(ParserTest,KernelArgumentList){
   Lexer* lexer = new Lexer() ;
   bool rescan_last_token = false ;
@@ -2209,6 +2234,81 @@ TEST(ParserTest, MemoryOperand) {
   input.clear();
   delete lexer;
 };
+
+// ------------------  PARSER WRAPPER TEST -----------------
+TEST(ParserWrapperTest, ScanSymbolsWithParser) {
+  context->clear_context();
+  std::string input("version 1:0:$large;\n");
+  input.append("global_f32 &x = 2;\n");
+  input.append("function &test()() {\n");
+  input.append("{arg_u32 %z;}\n");
+  input.append(" }; \n");
+
+
+  Parser* parser = new Parser(context);
+  parser->set_source_string(input);
+  parser->scan_symbols();
+
+  if (0) {
+    // Print out string buffer content:
+    unsigned int index = 0;
+    std::string temp;
+    std::cout << "Buffer content: " << std::endl;
+    while (index < context->get_string_offset()) {
+      temp = context->get_string(index);
+      std::cout << "Index " << index << ": " << temp << std::endl;
+      index+=temp.length()+1;
+    }
+  }
+
+  input.clear();
+  delete parser;
+};
+
+TEST(ParserWrapperTest, ParseSimpleProgram) {
+  context->clear_context();
+  // Example 3
+  std::string input("\n version 1:0:$small; \n");
+  input.append("function &packed_ops (arg_u8x4 %x)() { \n");
+  input.append(" abs_p_s8x4 $s1, $s2; \n");
+  input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; \n");
+  input.append(" }; \n");
+
+  Parser* parser = new Parser(context);
+  parser->set_source_string(input);
+  EXPECT_EQ(0, parser->parse());
+
+  input.clear();
+  delete parser;
+};
+
+TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
+  context->clear_context();
+  // Example 3
+  std::string input("version 1:0:$small;\n");
+  input.append("function &packed_ops (arg_u8x4 %x)() {\n");
+  input.append(" abs_p_s8x4 $s1, $s2; \n");
+  input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; \n");
+  input.append(" }; \n");
+
+  // Example 4
+  input.append("version 1:1:$small;\n");
+  input.append("function &branch_ops (arg_u8x4 %x)() {\n");
+  input.append("cbr $c1, @then;\n");
+  input.append("abs_p_s8x4 $s1, $s2;\n");
+  input.append(" brn @outof_IF;\n");
+  input.append("@then: add_pp_sat_u16x2 $s1, $s0, $s3;\n");
+  input.append(" @outof_IF: ret;\n");
+  input.append(" }; \n");
+
+  Parser* parser = new Parser(context);
+  parser->set_source_string(input);
+
+  EXPECT_EQ(0, parser->parse());
+  input.clear();
+  delete parser;
+};
+
 
 
 }  // namespace brig

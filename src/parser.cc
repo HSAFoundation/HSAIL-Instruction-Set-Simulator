@@ -2779,22 +2779,6 @@ int Instruction4(Context* context) {
   return 1;
 }
 
-int Extension(Context* context) {
-  // first token is EXTENSION "extension"
-  context->token_to_scan = yylex();
-
-  if (context->token_to_scan == TOKEN_STRING) {
-    context->token_to_scan = yylex();
-
-    if (context->token_to_scan == ';') {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {   // missing ";"
-			context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
-    }
-  }
-  return 1;
-}
 int KernelArgumentDecl(Context *context){
   //maybe  change in the future
   return  ArgumentDecl(context);
@@ -3019,6 +3003,67 @@ int MemoryOperand(Context* context) {
       }  
     }
   }
+  return 1;
+}
+int Instruction5(Context* context) {
+  // first token is F2U4 "f2u4"
+  context->token_to_scan = yylex();
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (!Operand(context) && context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      if (!Operand(context) && context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!Operand(context) && context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context) && context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!Operand(context) && context->token_to_scan == ';') {
+            context->token_to_scan = yylex();  
+            return 0;
+            }  // 5 operand
+          }  // 4 operand
+        }  // 3 operand
+      }  // 2 operand
+     } // 1 operand
+    }  // DATA_TYPE_ID
+  return 1;
+}
+
+int Extension(Context* context) {
+  // first token is EXTENSION "extension"
+  context->token_to_scan = yylex();
+
+  if (context->token_to_scan == TOKEN_STRING) {
+    context->token_to_scan = yylex();
+
+    if (context->token_to_scan == ';') {
+      context->token_to_scan = yylex();
+      return 0;
+    } else {   // missing ";"
+			context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+    }
+  }
+  return 1;
+}
+
+int Ldc(Context* context) {
+  // first token is LDC "ldc"
+  context->token_to_scan = yylex();
+ 
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (!Operand(context) && context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == TOKEN_LABEL || 
+         !Identifier(context)) {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == ';') {
+          return 0;
+        } // ';'
+      } // label or identifier
+    } // operand
+  } // datatypeid
   return 1;
 }
 
