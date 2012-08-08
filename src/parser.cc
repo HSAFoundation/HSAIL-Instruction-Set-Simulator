@@ -2843,7 +2843,7 @@ int Cmp(Context* context) {
 }
 
 int GlobalPrivateDecl(Context* context) {
-  // frist token is PRIVATE
+  // first token is PRIVATE
   context->token_to_scan = yylex();
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
@@ -2851,7 +2851,8 @@ int GlobalPrivateDecl(Context* context) {
       context->token_to_scan = yylex();
       if (!ArrayDimensionSet(context)) {
       }
-      if(context->token_to_scan == ';') {
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -2867,7 +2868,28 @@ int GlobalPrivateDecl(Context* context) {
 }
 
 int OffsetAddressableOperand(Context* context) {
-  
+  // the first token is '['
+  context->token_to_scan = yylex();
+  if (context->token_type == REGISTER) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == '+' || context->token_to_scan == '-') {
+      if (yylex() == TOKEN_INTEGER_CONSTANT) {
+        context->token_to_scan = yylex();
+      } else {
+        return 1;
+      }
+    }
+    if (context->token_to_scan == ']') {
+      context->token_to_scan = yylex();
+      return 0;
+    }
+  } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ']') {
+      context->token_to_scan = yylex();
+      return 0;
+    }  
+  }
   return 1;
 }
 
