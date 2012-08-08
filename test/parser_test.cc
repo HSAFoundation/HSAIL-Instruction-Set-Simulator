@@ -1847,5 +1847,54 @@ TEST(ParserTest, Cmp) {
 };
 
 
+TEST(ParserTest, GlobalPrivateDecl) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("private_u32 &tmp[2][2];");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex(); 
+  EXPECT_EQ(0, GlobalPrivateDecl(context));
+
+  input.assign("private_s32 &tmp;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalPrivateDecl(context));
+
+  input.assign("private_b32 &tmp[2];");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalPrivateDecl(context));
+  
+  // wrong case
+  input.assign("private_s32 %tmp;"); // %tmp is not global identifier
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+
+  input.assign("private_u32 &tmp"); // lack of ';'
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+
+  input.assign("private_u32;"); // lack of identifier
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+
+
+};
+
+
 }  // namespace brig
 }  // namespace hsa

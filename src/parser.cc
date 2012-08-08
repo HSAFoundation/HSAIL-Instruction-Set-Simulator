@@ -2839,8 +2839,12 @@ int Cmp(Context* context) {
       } // 1 operand      
     }
   }
-
   return 1;
 }
+
+int GlobalPrivateDecl(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsafront
