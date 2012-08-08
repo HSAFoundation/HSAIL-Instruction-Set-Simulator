@@ -1000,145 +1000,117 @@ int Alignment(Context* context) {
 }
 
 int DeclPrefix(Context* context) {
-  unsigned int first_token = context->token_to_scan;
-  unsigned int next_token;
-  if (first_token == ALIGN) {
+  if (context->token_to_scan == ALIGN) {
     if (!Alignment(context)) {
-      next_token = context->token_to_scan;  // need to go to next token
       // first is alignment
-      if (next_token == CONST) {
+      if (context->token_to_scan == CONST) {
         context->set_symbol_modifier(BrigConst);
         // alignment const
-        next_token = yylex();
+        context->token_to_scan = yylex();
 
-        if ((next_token == EXTERN)||(next_token == STATIC)) {
-          if (next_token == EXTERN)
+        if ((context->token_to_scan == EXTERN)||(context->token_to_scan == STATIC)) {
+          if (context->token_to_scan == EXTERN)
             context->set_attribute(BrigExtern);
           else
             context->set_attribute(BrigStatic);
 
           // alignment const externOrStatic
           context->token_to_scan = yylex();
-        } else {
-          // alignment const
-          context->token_to_scan = next_token;
         }
-      } else if ((next_token == EXTERN)||(next_token == STATIC)) {
+      } else if ((context->token_to_scan == EXTERN)||(context->token_to_scan == STATIC)) {
         // alignment externOrStatic
-        if (next_token == EXTERN)
+        if (context->token_to_scan == EXTERN)
           context->set_attribute(BrigExtern);
         else
           context->set_attribute(BrigStatic);
-        next_token = yylex();
 
-        if (next_token == CONST) {
-          // alignmnet externOrStatic const
+        context->token_to_scan = yylex();
+
+        if (context->token_to_scan == CONST) {
+          // alignment externOrStatic const
           context->set_symbol_modifier(BrigConst);
           context->token_to_scan = yylex();
-        } else {
-          // alignment externOrStatic
-          context->token_to_scan = next_token;
         }
-      } else {
-        // alignment
-        context->token_to_scan = next_token;
       }
     } else {
       context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
     }
-  } else if (first_token == CONST) {
+  } else if (context->token_to_scan == CONST) {
     // first is const
     context->set_symbol_modifier(BrigConst);
-    next_token = yylex();
+    context->token_to_scan = yylex();
 
-    if (next_token == ALIGN) {
+    if (context->token_to_scan == ALIGN) {
       if (!Alignment(context)) {
         // const alignment
-        next_token = context->token_to_scan;
-
-        if ((next_token == EXTERN)||(next_token == STATIC)) {
-          if (next_token == EXTERN)
+       if ((context->token_to_scan == EXTERN)||(context->token_to_scan == STATIC)) {
+         // const alignment externOrStatic
+         if (context->token_to_scan == EXTERN)
             context->set_attribute(BrigExtern);
           else
             context->set_attribute(BrigStatic);
-          // const alignment externOrStatic
+
           context->token_to_scan = yylex();
-        } else {
-          // const alignment
-          context->token_to_scan = next_token;
         }
       } else {
         context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
       }
-    } else if ((next_token == EXTERN)||(next_token == STATIC)) {
+    } else if ((context->token_to_scan == EXTERN)||(context->token_to_scan == STATIC)) {
       // const externOrStatic
-      if (next_token == EXTERN)
+      if (context->token_to_scan == EXTERN)
         context->set_attribute(BrigExtern);
       else
         context->set_attribute(BrigStatic);
-      next_token = yylex();
 
-      if (next_token == ALIGN) {
+      context->token_to_scan = yylex();
+
+      if (context->token_to_scan == ALIGN) {
         if (!Alignment(context)) {
           // const externOrStatic alignment
         } else {
           context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
           return 1;
         }
-      } else {
-        // const externOrStatic
-        context->token_to_scan = next_token;
       }
     } else {  // const does not stand alone
-      context->token_to_scan = next_token;
       return 1;
     }
-  } else if ((first_token == EXTERN)||(first_token == STATIC)) {
+  } else if ((context->token_to_scan == EXTERN)||(context->token_to_scan == STATIC)) {
     // externOrStatic first
-    if (next_token == EXTERN)
+    if (context->token_to_scan == EXTERN)
       context->set_attribute(BrigExtern);
     else
       context->set_attribute(BrigStatic);
-    next_token = yylex();
 
-    if (next_token == ALIGN) {
+    context->token_to_scan = yylex();
+
+    if (context->token_to_scan == ALIGN) {
       if (!Alignment(context)) {
         // externOrStatic alignment
-        next_token = context->token_to_scan;
-
-        if (next_token == CONST) {
+        if (context->token_to_scan == CONST) {
           // externOrStatic alignment const
           context->set_symbol_modifier(BrigConst);
           context->token_to_scan = yylex();
-        } else {
-          // externOrStatic alignment
-          context->token_to_scan = next_token;
         }
       } else {
         context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
       }
-    } else if (next_token == CONST) {
+    } else if (context->token_to_scan == CONST) {
       // externOrStatic const
       context->set_symbol_modifier(BrigConst);
-      next_token = yylex();
 
-      if (next_token == ALIGN) {
+      context->token_to_scan = yylex();
+
+      if (context->token_to_scan == ALIGN) {
         if (!Alignment(context)) {
         } else {
           context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
           return 1;
         }
         // externOrStatic const alignment
-      } else {
-        context->token_to_scan = next_token;
       }
-    } else {
-      context->token_to_scan = next_token;
     }
-  } else {
-    context->token_to_scan = first_token;
   }
-
   return 0;
 }
 
@@ -1235,9 +1207,7 @@ int ArgumentDecl(Context* context) {
           // update the current DirectiveFunction.
           // 1. update the directive offset.
           BrigDirectiveFunction bdf;
-          context->get_directive<BrigDirectiveFunction>(
-                    context->current_bdf_offset,
-                    &bdf);
+          context->get_directive(context->current_bdf_offset, &bdf);
           if (bdf.d_firstScopedDirective == bdf.d_nextDirective) {
             bdf.d_nextDirective += 36;
             bdf.d_firstScopedDirective = bdf.d_nextDirective;
