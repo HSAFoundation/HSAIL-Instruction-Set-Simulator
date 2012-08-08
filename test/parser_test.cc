@@ -1443,7 +1443,7 @@ TEST(ParserTest, FunctionSignature) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
 
-  input.assign("signature &test()(arg_u32) :fbar(2) ;");
+  input.assign("signature &test()(arg_u32 %x) :fbar(2) ;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
@@ -1463,7 +1463,7 @@ TEST(ParserTest, FunctionSignature) {
 TEST(ParserTest, SignatureArgumentList) {
   Lexer* lexer = new Lexer();
 
-  std::string input("arg_u32,arg_ROImg");
+  std::string input("arg_u32 %x,arg_ROImg");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
@@ -1611,104 +1611,84 @@ TEST(ParserTest,KernelArgumentList){
   // test 1
   std::string input("const static kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
   // test 2
   input.assign("align 8 const static kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
   // test 3
   input.assign("align 8 kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
     // test 4
   input.assign("extern kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, ArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgumentDecl(context));
 
     // test 5
   input.assign("const align 8 kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
     // test 6
   input.assign("const static align 8 kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
   // test 7
   input.assign("const align 8 static kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
       // test 8
   input.assign("static const align 8 kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0,KernelArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0,KernelArgumentDecl(context));
 
       // test 9
   input.assign("static align 8 kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
-                                  &rescan_last_token,
-                                  &last_token ,
-                                  context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 } ;
-TEST(ParserTest,KernelArgumentBodyList){
+
+TEST(ParserTest,KernelArgumentListBody){
   Lexer *lexer = new Lexer();
-  bool rescan_last_token = false;
-  unsigned int last_token = 0 ;
 
   std::string input("kernarg_f32 %x");
   lexer->set_source_string(input);
-  EXPECT_EQ(0 , KernelArgumentListBody(lexer->get_next_token(),
-                                       &rescan_last_token,
-                                       &last_token ,
-                                       context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0 , KernelArgumentListBody(context));
  
   input.assign("kernarg_u32 %y , kernarg_f32 %x");
   lexer->set_source_string(input);
-  EXPECT_EQ(0 , KernelArgumentListBody(lexer->get_next_token(),
-                                       &rescan_last_token ,
-                                       &last_token ,
-                                       context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0 , KernelArgumentListBody(context));
 
-}
+} ;
+
 TEST(ParserTest , Kernel){
   Lexer *lexer = new Lexer();
 
   std::string input("kernel &demo (kernarg_f32 %x)");
   input.append("{private_u32 %z ;");
-  input.append("ret ;}"); 
+  input.append("ret ;} ;"); 
  
   lexer->set_source_string(input);
-  EXPECT_EQ(0 , Kernel(lexer->get_next_token(),context));
-}
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0 , Kernel(context));
+};
+
 }  // namespace brig
 }  // namespace hsa

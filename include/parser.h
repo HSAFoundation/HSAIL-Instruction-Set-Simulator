@@ -49,11 +49,9 @@ int FileDecl(Context* context);
 int SysCall(Context* context);
 int ArgBlock(Context* context);
 int Extension(Context* context);
-int KernelArgumentListBody(unsigned int first_token ,
-                            bool *rescan_last_token ,
-                            unsigned int *last_token ,
-                            Context *context) ;
-int Kernel(unsigned int first_token , Context *context);
+int KernelArgumentDecl(Context *context) ;
+int KernelArgumentListBody(Context *context) ;
+int Kernel(Context *context);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
