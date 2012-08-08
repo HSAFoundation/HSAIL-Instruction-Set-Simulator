@@ -49,6 +49,8 @@ int FileDecl(Context* context);
 int SysCall(Context* context);
 int ArgBlock(Context* context);
 int Extension(Context* context);
+int OperandList(Context* context);
+int Cmp(Context* context);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

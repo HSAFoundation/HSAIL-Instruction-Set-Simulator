@@ -2789,5 +2789,58 @@ int Extension(Context* context) {
   }
   return 1;
 }
+int OperandList(Context* context) {
+
+  if (!Operand(context)) {
+    while (1) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          continue;
+        } else {
+          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          return 1;
+        }
+      } else {
+        context->token_to_scan = yylex();
+        return 0;
+      }
+    }
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+  return 1;
+}
+
+int Cmp(Context* context) {
+  // first token is PACKEDCMP or CMP
+  unsigned int first_token = context->token_to_scan;
+  context->token_to_scan = yylex(); 
+  if (context->token_type == COMPARISON) {
+    context->token_to_scan = yylex();
+    if (first_token == CMP) {
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+      } else {
+        return 1;
+      }
+    }
+    
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!Operand(context) && context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!Operand(context) && context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context) && context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
+            return 0;
+          } // 3 operand
+        } // 2 operand
+      } // 1 operand      
+    }
+  }
+
+  return 1;
+}
 }  // namespace brig
-}  // namespace hsa
+}  // namespace hsafront

@@ -1104,6 +1104,8 @@ TEST(ParserTest, FileDecl) {
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+
+  delete lexer;
 };
 
 TEST(ParserTest, VectorToken) {
@@ -1134,8 +1136,15 @@ TEST(ParserTest, SysCall) {
   // dest: must be a 32-bit register
   // n: An integer literal
   // src: must be a s reg, imm, WAVESIZE
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
   std::string input("syscall $s1, 3, $s2, $s3, $s4;");
-  Lexer* lexer = new Lexer(input);
+  lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SysCall(context));
@@ -1233,45 +1242,69 @@ TEST(ParserTest, SysCall) {
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+ 
+  delete lexer;
 };
 
 TEST(ParserTest, Label) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
   std::string input("@_test_label_1:");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Label(context));
 
   input.assign("@_test_label_2   : ");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Label(context));
 
   // wrong case
 
   input.assign("@_test_label_3 @wrong  : ");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Label(context));
 
   input.assign("@_test_label_4 ");  // lack of colon ':'
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Label(context));
 
   input.assign("$_test_label_5 :");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Label(context));
+
+  delete lexer;
 };
 
 TEST(ParserTest, LabelTargets) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
   std::string input("@tab: labeltargets @a1, @a2;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, LabelTargets(context));
 
   input.assign("@targets: labeltargets @label;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, LabelTargets(context));
 
@@ -1279,6 +1312,7 @@ TEST(ParserTest, LabelTargets) {
   input.append("@label5, @label6, @label7, @label8, @label9,");
   input.append("@label10, @label11;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, LabelTargets(context));
 
@@ -1286,24 +1320,30 @@ TEST(ParserTest, LabelTargets) {
   // redundant ','
   input.assign("@targets: labeltargets @label1, @label2, @label3, ;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, LabelTargets(context));
 
   // redundant ','
   input.assign("@targets: ,labeltargets @label1, @label2, @label3;");
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, LabelTargets(context));
 
   input.assign("@targets: labeltargets;");  // number of label is zero
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, LabelTargets(context));
 
   input.assign("@targets: labeltargets @label");  // lack of ';'
   yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, LabelTargets(context));
+
+  delete lexer;
 };
 
 // --------------- Test for extension rule  -----------------
@@ -1480,126 +1520,330 @@ TEST(ParserTest, SignatureArgumentList) {
 };
 
 TEST(ParserTest, Instruction4) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
   std::string input("mad_ftz_u64 $d1, $d2, $d3, $d4;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("extract_b32 $s1, $s1, 2, 3;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("insert_s32 $s1, $s1, 2, 3;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("shuffle_u8x4 $s10, $s12, $s12, 0x55;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("cmov_u8x4 $s1, $s0, $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("fma_ftz_up_f32 $s3, 1.0f, $s1, 23f;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("bitalign_b32 $s5, $s0, $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("bytealign_b32 $s5, $s0, $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("lerp_b32 $s5, $s0, $s1, $s2;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("sad_b32 $s5, $s0, $s1, $s6;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("sad2_b32 $s5, $s0, $s1, $s6;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("sad4_b32 $s5, $s0, $s1, $s6;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("sad4hi_b32 $s5, $s0, $s1, $s6;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   input.assign("bitselect_u32 $s5, $s0, $s1, $s6;");
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Instruction4(context));
 
   // wrong case
   input.assign("sad2_b32 ,$s5, $s0, $s1, $s6;");  // redundant ','
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("sad4_b32 $s5, $s0 $s1, $s6;");  // lack of ','
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("sad4hi_b32 $s5, $s0, $s1 $s6;");  // lack of ','
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("bitselect $s5, $s0, $s1, $s6");  // lack of ';'
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("cmov_u8x4;");  // no one operand
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("fma_f32 $s3;");  // only one operand
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("bitalign_b32 $s5, $s0, $s1, $s2, $s3;");  // redundent operand
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("bytealign_b32 $s5, $s0, $s1;");  // lack of one operand
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("lerp_b32 $s5, , $s1, $s2;");  // lack of one operand
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
 
   input.assign("sad $s5, $s0, $s1, $s6;");  // lack of data type
-  yy_scan_string(reinterpret_cast<const char*>(input.c_str()));
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
   context->token_to_scan = yylex();
   EXPECT_NE(0, Instruction4(context));
+
+  delete lexer;
+};
+
+
+TEST(ParserTest, OperandList) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("$s1, $c4, $d4,$q2 ");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, OperandList(context));
+  
+  input.assign("&g, %l, $s1"); 
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, OperandList(context));
+  
+  input.assign("&g"); 
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, OperandList(context));
+
+  input.assign("&g1, &g2, %l, $s1,$s1, $c4, $d4,$q2,-77, $c4, $d4,$q2,");
+  input.append("$s1, $c4, $d4,$q2,2343.2f, $c4, $d4,1.123,5, $c4, $d4,$q2"); 
+  // the number of operands is 24
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, OperandList(context));
+ 
+  input.assign(",$s5, $s0 ,$s6"); // redundent ','
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, OperandList(context));
+
+  input.assign("$s5, $s0 ,$s6,"); // redundent ','
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, OperandList(context));
+
+  input.assign(""); // NULL
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, OperandList(context));
+
+  delete lexer;
+};
+
+TEST(ParserTest, Cmp) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("cmp_eq_b1_b1 $c1, $c2, 0;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("cmp_eq_b32_b1 $s1, $c2, 0;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("cmp_eq_f32_b1 $s1, $c2, 0.0f;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("cmp_ne_b1_b1 $c1, $c2, 0;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("cmp_sltu_b1_f32 $c1, $s2, 0;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("cmp_gt_f32_b32 $s1, $s2, 0.0f;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("packedcmp_lt_f32x2 $d1, $d2, $d3;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("cmp_sltu_b1_f64 $c1, $d1, $d2;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("cmp_lt_f32_f32 $s1, $s2, 0.0f;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+
+  input.assign("cmp_equ_b1_f64 $c1, $d1, $d2;");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cmp(context));
+  
+  // wrong case
+  input.assign("cmp_equ_b1 $c1, $d1, $d2;"); // lack of data type
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Cmp(context));
+
+  input.assign("cmp_b1_f64 $c1, $d1, $d2;"); // lack of comparsionId
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Cmp(context));
+
+  input.assign("packedcmp_lt $d1, $d2, $d3;"); // lack of data type
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Cmp(context));
+
+  input.assign("packedcmp_f32x2 $d1, $d2, $d3;"); // lack of comparsionId
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Cmp(context));
+
+  input.assign("cmp_eq_f32_b1 $s1, $c2;"); // lack of operands
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Cmp(context));
+
+  input.assign("cmp_eq_f32_b1 $s1, $c2, 0.0f"); // lack of ';'
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Cmp(context));
+
+  input.assign("cmp_eq_f32_b1 $s1, $c2 0.0f;"); // lack of ','
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Cmp(context));
+  
+  delete lexer;
+
 };
 
 
