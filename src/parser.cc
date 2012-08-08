@@ -2893,6 +2893,10 @@ int OffsetAddressableOperand(Context* context) {
   return 1;
 }
 
+int MemoryOperand(Context* context) {
+  
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsafront

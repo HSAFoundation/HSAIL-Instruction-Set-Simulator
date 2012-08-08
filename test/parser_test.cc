@@ -1961,6 +1961,35 @@ TEST(ParserTest, OffsetAddressableOperand) {
   delete lexer;
 };
 
+TEST(ParserTest, MemoryOperand) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("[%local_id]");  // Int constant
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, MemoryOperand(context));
+
+  input.assign("[$s2 - 0xf7]");
+  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
+  context->clear_context();
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, MemoryOperand(context));
+
+  input.assign("[%local_id<$d7>][$s1 + 0xf7]");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, MemoryOperand(context));
+
+  delete lexer;
+
+};
 
 }  // namespace brig
 }  // namespace hsafront
