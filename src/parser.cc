@@ -2077,7 +2077,6 @@ int Branch(Context* context) {
       {0, 0, 0, 0, 0}
     };
 
-
     std::string operand_name = context->token_value.string_val;
     if (!Operand(context)) {
       inst_op.o_operands[1] = context->operand_map[operand_name];
