@@ -2791,7 +2791,22 @@ int Extension(Context* context) {
 }
 
 int Ldc(Context* context) {
+  // first token is LDC "ldc"
+  context->token_to_scan = yylex();
  
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (!Operand(context) && context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == TOKEN_LABEL || 
+         !Identifier(context)) {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == ';') {
+          return 0;
+        } // ';'
+      } // label or identifier
+    } // operand
+  } // datatypeid
   return 1;
 }
 }  // namespace brig
