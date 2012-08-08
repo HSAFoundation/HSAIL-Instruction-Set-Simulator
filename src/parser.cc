@@ -385,18 +385,22 @@ int CallArgs(Context* context) {
     saved_token = context->token_to_scan;
 
     if (context->token_to_scan == ')') {
-      BrigOperandArgumentList arg_list = {
-        (n_elements-1)*sizeof(BrigoOffset32_t)+sizeof(BrigOperandArgumentList),
-        BrigEOperandArgumentList,
-        n_elements,
-        arg_offset[0]  // need to modify the structure.
-      };
+
+      size_t listSize = sizeof(BrigOperandArgumentList);
+      if(n_elements > 1)
+        listSize += sizeof(BrigoOffset32_t) * (n_elements - 1);
+
+      char array[listSize];
+      BrigOperandArgumentList &arg_list =
+        *reinterpret_cast<BrigOperandArgumentList *>(array);
+      arg_list.size = listSize;
+      arg_list.kind = BrigEOperandArgumentList;
+      arg_list.elementCount = n_elements;
+      for(uint32_t i = 0; i < n_elements; ++i) {
+        arg_list.o_args[i] = arg_offset[i];
+      }
       context->current_argList_offset = context->get_operand_offset();
       context->append_operand<BrigOperandArgumentList>(&arg_list);
-      for (int i = 1; i < n_elements; i++) {
-        BrigoOffset32_t *arg = &arg_offset[i];
-        context->append_operand_argList(arg);
-      }
       context->token_to_scan = yylex();
       return 0;
     } else if (!Operand(context)) {

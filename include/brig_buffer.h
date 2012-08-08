@@ -21,9 +21,9 @@ class Buffer {
   Buffer(void) {}
 
   // append an item
-  template <class T>
-  void append(const T *item) {
-    size_t item_sz = sizeof(T);
+  template <class T> void append(const T *item) {
+    size_t item_sz = item->size;
+    assert(item_sz && "Appending a zero size element?!");
     const unsigned char * item_charp =
       reinterpret_cast<const unsigned char*>(item);
     while (item_sz --) {
