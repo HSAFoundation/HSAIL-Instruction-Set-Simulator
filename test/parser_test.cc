@@ -1603,5 +1603,83 @@ TEST(ParserTest, Instruction4) {
 };
 
 
+TEST(ParserTest,KernelArgumentList){
+  Lexer* lexer = new Lexer() ;
+  bool rescan_last_token = false ;
+  unsigned int last_token = 0 ;
+
+  // test 1
+  std::string input("const static kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+
+  // test 2
+  input.assign("align 8 const static kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+
+  // test 3
+  input.assign("align 8 kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+
+    // test 4
+  input.assign("extern kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+
+    // test 5
+  input.assign("const align 8 kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+
+    // test 6
+  input.assign("const static align 8 kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+
+  // test 7
+  input.assign("const align 8 static kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+
+      // test 8
+  input.assign("static const align 8 kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+
+      // test 9
+  input.assign("static align 8 kernarg_u32 %local_id[2][2] ");
+  lexer->set_source_string(input);
+  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+                                  &rescan_last_token,
+                                  &last_token ,
+                                  context));
+} ;
+
 }  // namespace brig
 }  // namespace hsa
