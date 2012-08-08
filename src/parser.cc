@@ -2789,5 +2789,7 @@ int Extension(Context* context) {
   }
   return 1;
 }
+  return  ArgumentDecl(first_token ,rescan_last_token ,last_token ,context);
+  //return 1;
 }  // namespace brig
 }  // namespace hsa

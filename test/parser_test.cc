@@ -1635,7 +1635,7 @@ TEST(ParserTest,KernelArgumentList){
     // test 4
   input.assign("extern kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+  EXPECT_EQ(0, ArgumentDecl(lexer->get_next_token(),
                                   &rescan_last_token,
                                   &last_token ,
                                   context));
@@ -1667,7 +1667,7 @@ TEST(ParserTest,KernelArgumentList){
       // test 8
   input.assign("static const align 8 kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
-  EXPECT_EQ(0, KernelArgumentDecl(lexer->get_next_token(),
+  EXPECT_EQ(0,KernelArgumentDecl(lexer->get_next_token(),
                                   &rescan_last_token,
                                   &last_token ,
                                   context));
