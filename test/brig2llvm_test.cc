@@ -52,6 +52,8 @@ TEST(Brig2LLVMTest, AppendBuffer) {
       1,            // align
     };
     BrigDirectiveSymbol bds = {
+      sizeof(bds),
+      BrigEDirectiveSymbol,
       s,
       96,  // d_init
       0,   // reserved
