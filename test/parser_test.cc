@@ -1680,6 +1680,15 @@ TEST(ParserTest,KernelArgumentList){
                                   &last_token ,
                                   context));
 } ;
+TEST(ParserTest , Kernel){
+  Lexer *lexer = new Lexer();
 
+  std::string input("kernel &demo (kernarg_f32 %x)");
+  input.append("{private_u32 %z ;");
+  input.append("ret ;}"); 
+ 
+  lexer->set_source_string(input);
+  EXPECT_EQ(0 , Kernel(lexer->get_next_token(),context));
+}
 }  // namespace brig
 }  // namespace hsa
