@@ -15,6 +15,114 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     bb.append(&foo);
     EXPECT_EQ(bb.get().size(), sizeof(foo));
   }
+}
+
+TEST(Brig2LLVMTest, Example1) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+    strings.append(std::string("%ret_val"));
+    strings.append(std::string("%arg_val0"));
+    strings.append(std::string("&abort"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction get_global_id = {
+      sizeof(get_global_id), BrigEDirectiveFunction,
+      0,   // c_code
+      0,   // s_name
+      1,   // inParamCount
+      directives.size() + sizeof(get_global_id),  // d_firstScopedDirective
+      0,   // operationCount
+      directives.size() + sizeof(get_global_id) +
+      2 * sizeof(BrigDirectiveSymbol),  // d_nextDirective
+      0,   // attribute
+      0,   // fbarCount
+      1,   // outParamCount
+      directives.size() + sizeof(get_global_id) +
+      sizeof(BrigDirectiveSymbol)    // d_firstInParam
+    };
+    directives.append(&get_global_id);
+
+    BrigDirectiveSymbol ret_val = {
+      sizeof(ret_val),      // size
+      BrigEDirectiveSymbol, // kind
+      {
+        0,             // c_code
+        BrigArgSpace,  // storageClass
+        BrigNone,      // attribute
+        0,             // reserved
+        0,             // symbolModifier
+        0,             // dim
+        15,            // s_name
+        Brigu32,       // type
+        1,             // align
+      },
+      0,  // d_init
+      0,   // reserved
+    };
+    directives.append(&ret_val);
+
+    BrigDirectiveSymbol arg_val = {
+      sizeof(arg_val),      // size
+      BrigEDirectiveSymbol, // kind
+      {
+        0,             // c_code
+        BrigArgSpace,  // storageClass
+        BrigNone,      // attribute
+        0,             // reserved
+        0,             // symbolModifier
+        0,             // dim
+        24,            // s_name
+        Brigu32,       // type
+        1,             // align
+      },
+      0,  // d_init
+      0,   // reserved
+    };
+    directives.append(&arg_val);
+
+    BrigDirectiveFunction abort = {
+      sizeof(abort), BrigEDirectiveFunction,
+      0,   // c_code
+      34,  // s_name
+      0,   // inParamCount
+      directives.size() + sizeof(abort),  // d_firstScopedDirective
+      0,   // operationCount
+      directives.size() + sizeof(abort), // d_nextDirective
+      0,   // attribute
+      0,   // fbarCount
+      0,   // outParamCount
+      0    // d_firstInParam
+    };
+    directives.append(&abort);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare void @get_global_id(i32*, i32*)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare void @abort()")));
+  }
+}
+
+TEST(Brig2LLVMTest, Example2) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&return_true"));
@@ -23,7 +131,14 @@ TEST(Brig2LLVMTest, AppendBuffer) {
     hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
-      BrigEDirectiveVersion
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
     };
     directives.append(&bdv);
     BrigDirectiveFunction bdf = {
@@ -31,9 +146,10 @@ TEST(Brig2LLVMTest, AppendBuffer) {
       0,   // c_code
       0,   // s_name
       0,   // inParamCount
-      60,  // d_firstScopedDirective
+      directives.size() + sizeof(bdf),  // d_firstScopedDirective
       1,   // operationCount
-      96,  // d_nextDirective
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol),  // d_nextDirective
       0,   // attribute
       0,   // fbarCount
       1,   // outParamCount
@@ -55,7 +171,7 @@ TEST(Brig2LLVMTest, AppendBuffer) {
       sizeof(bds),
       BrigEDirectiveSymbol,
       s,
-      96,  // d_init
+      0,   // d_init
       0,   // reserved
     };
     directives.append(&bds);
