@@ -456,6 +456,25 @@ typedef struct BrigDirectiveLabel {
   BrigsOffset32_t s_name;
 }BrigDirectiveLabel;
 
+//BrigDirectiveKernel describes a kernel.
+//A BrigDirectiveKernel contains offsets to the code and the name of the kernel. A
+//BrigDirectiveKernel is laid out identically to a BrigDirectiveFunction, except that
+//a function can have return parameters.
+typedef struct BrigDirectiveKernel {
+	uint16_t size;
+	uint16_t kind;
+	BrigcOffset32_t c_code;
+	BrigsOffset32_t s_name;
+	uint32_t inParamCount;
+	BrigdOffset32_t d_firstScopedDirective;
+	uint32_t operationCount;
+	BrigdOffset32_t d_nextDirective;
+	BrigAttribute16_t attribute;
+	uint16_t fbarCount;
+	uint32_t outParamCount;
+	BrigdOffset32_t d_firstInParam;
+}BrigDirectiveKernel;
+
 // Code structures
 
 // 20.9.9

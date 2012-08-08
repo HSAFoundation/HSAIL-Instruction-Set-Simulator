@@ -2581,6 +2581,8 @@ int SignatureType(Context *context) {
 
   if (DATA_TYPE_ID == context->token_type) {
     context->token_to_scan = yylex();
+    if(TOKEN_LOCAL_IDENTIFIER == context->token_to_scan) //ignore the local identifier
+      context->token_to_scan = yylex() ;
     return 0;
   } else if (_ROIMG == context->token_to_scan
            || _RWIMG == context->token_to_scan
@@ -2792,5 +2794,94 @@ int Extension(Context* context) {
   }
   return 1;
 }
+int KernelArgumentDecl(Context *context){
+  //maybe  change in the future
+  return  ArgumentDecl(context);
+  //return 1;
+}
+int KernelArgumentListBody(Context *context) {
+  //maybe change int the future
+  return ArgumentListBody(context);
+  //return 1;
+}
+
+int Kernel(Context *context){
+  // first must be KERNEL  
+
+  context->token_to_scan = yylex() ;
+  if(TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan ){
+    context->current_bdf_offset = context->get_directive_offset();
+    BrigdOffset32_t bdf_offset = context->current_bdf_offset;
+    
+    BrigDirectiveKernel bdk = {
+      40,                         //size
+      BrigEDirectiveKernel,       //kind
+      context->get_code_offset(), //c_code
+      0,                          //name
+      0,  // in param count
+      bdf_offset+40,          // d_firstScopedDirective
+      0,  // operation count
+      bdf_offset+40,          // d_nextDirective
+      context->get_attribute(),  // attribute
+      context->get_fbar(),   // fbar count
+      0,    // out param count
+      0     // d_firstInParam
+    };
+
+
+    std::string func_name = context->token_value.string_val ;
+    BrigsOffset32_t check_result = context->add_symbol(func_name);
+    bdk.s_name = check_result ;
+    context->append_directive(&bdk);
+
+    //check the input argumentlist
+    context->token_to_scan = yylex() ;
+    if('(' == context->token_to_scan){
+      context->token_to_scan = yylex();
+
+      if(')' == context->token_to_scan){ //empty arguments
+        context->token_to_scan = yylex();
+      }else if(!KernelArgumentListBody(context)){ //not empty arguments
+        if(')' == context->token_to_scan)
+          context->token_to_scan = yylex();
+        else{
+          context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
+          return 1;
+        }
+      }else{
+        context->set_error(ErrorReporterInterface::INVALID_ARGUMENT_LIST);
+        return 1;
+      }
+    
+    }else {
+      context->set_error(ErrorReporterInterface::MISSING_ARGUMENT_LIST);
+      return 1;
+    }
+
+    if(_FBAR == context->token_to_scan){
+      if(!FBar(context)){
+        //context->token_to_scan = yylex();
+      }else{
+        context->set_error(ErrorReporterInterface:: INVALID_FBAR);
+        return 1;
+      }
+    }else{
+      printf("point to codeblock\n");
+      if(!Codeblock(context)){
+       // context->token_to_scan = yylex();
+        if(';' == context->token_to_scan){
+          context->token_to_scan = yylex();
+          return 0;
+        }else 
+          context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+      }
+    }
+  }else {
+    context->set_error(ErrorReporterInterface:: MISSING_IDENTIFIER);	
+    return 1;
+  }
+  //return 1 ;
+}
+
 }  // namespace brig
 }  // namespace hsa
