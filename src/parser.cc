@@ -2587,8 +2587,13 @@ int FileDecl(Context* context) {
       } else {
         context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
       }
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_STRING);
     }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
   }
+
   return 1;
 }
 
@@ -2658,12 +2663,25 @@ int SysCall(Context* context) {
             if (context->token_to_scan == ';') {
               context->token_to_scan = yylex();
               return 0;
-            }  // ';'
-          }  // 5 operand
-        }  // 4 operand
-      }  // 3 operand
-    }  // 2 base operand
-  }  // 1 operand
+            } else {  // ';'
+              context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+            }
+          } else {  // 5 operand
+            context->set_error(ErrorReporterInterface::INVALID_OPERAND);
+          }
+        } else {  // 4 operand
+          context->set_error(ErrorReporterInterface::INVALID_OPERAND);
+        }
+      } else { // 3 operand
+        context->set_error(ErrorReporterInterface::INVALID_OPERAND);
+      }
+    } else {  // 2 base operand
+      context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+    }
+
+  } else {  // 1 operand
+    context->set_error(ErrorReporterInterface::MISSING_SREGISTER);
+  }
   return 1;
 }
 
