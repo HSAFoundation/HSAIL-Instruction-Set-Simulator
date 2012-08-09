@@ -1917,6 +1917,92 @@ TEST(ParserTest, CvtModifier1) {
   delete lexer;
 };
 
+// -----------------  Test for mov rule -------------------
+// format:
+// mov ::= "mov" dataTypeId arrayOperand ","
+//         arrayOperand ";"
+TEST(ParserTest, Mov) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+// correct cases
+  std::string input("mov_b64 $d1, $d4;\n"); // D register
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Mov(context));
+
+  input.assign("mov_b128 $s5, $s6;\n"); // S register
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Mov(context));
+ 
+  input.assign("mov_b128 $c1, $c2;\n"); // C register
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Mov(context));
+ 
+  input.assign("mov_b128 $q3, $q5;\n"); // Q register
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Mov(context));
+ 
+  input.assign("mov_b32 $s1, 0;\n"); // Immediate
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Mov(context));
+
+  input.assign("mov_b32 $s4, (&global_id, %local_id);\n"); // Arrayoperandlist
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Mov(context));
+// wrong cases
+  input.assign("mov $q1, $q2;\n"); // lack of modifier
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+  
+  input.assign("mov_b32 $c7;\n"); // lack of operand
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+
+  input.assign("mov_b32 $s2, $s1\n"); // lack of ';'
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+
+  input.assign("mov_b128 $s6, &global_id, %local_id);\n"); // lack of '('
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+
+  input.assign("mov_b32 $s2, $s3, $s1;\n"); // redundant operand
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+
+  input.assign("mov_b32 , $q3, $q1;\n"); // redundant ','
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+ 
+  input.clear();
+  delete lexer;
+};
+
 TEST(ParserTest,KernelArgumentList){
   Lexer* lexer = new Lexer() ;
   bool rescan_last_token = false ;

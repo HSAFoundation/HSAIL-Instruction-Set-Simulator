@@ -3146,5 +3146,9 @@ int CvtModifier1(Context* context) {
   }
 }
 
+int Mov(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa
