@@ -5,7 +5,7 @@ include_directories(.)
 include_directories(include)
 include_directories(${CMAKE_BINARY_DIR})
 add_definitions(-DGTEST_HAS_PTHREAD=0)
-flex_target(lexer src/example.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
+flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
 set(hsail2brig_test_SOURCES
     test/lexer_test.cc
