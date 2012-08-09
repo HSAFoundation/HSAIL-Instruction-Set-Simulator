@@ -1,7 +1,7 @@
 /* Copyright 2012 <MulticorewareInc> */
 
-#include <string>
 #include <stdio.h>
+#include <string>
 #include "brig.h"
 #include "brig_buffer.h"
 #include "error_reporter_interface.h"
@@ -30,7 +30,6 @@ Context::Context(void) {
   yylineno = 1;
   error_reporter_set = false;
   set_default_values();
-
 }
 
 // default destructor
@@ -200,7 +199,7 @@ void Context::clear_directive_buffer(void) {
 void Context::clear_operand_buffer(void) {
   obuf->clear();
   // pad the first 8 bytes with 0
-  for(unsigned i = 0; i < sizeof(uint64_t); ++i)
+  for (unsigned i = 0; i < sizeof(uint64_t); ++i)
     obuf->append_char(0);
 }
 

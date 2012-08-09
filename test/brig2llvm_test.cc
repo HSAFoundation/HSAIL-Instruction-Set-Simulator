@@ -57,8 +57,8 @@ TEST(Brig2LLVMTest, Example1) {
     directives.append(&get_global_id);
 
     BrigDirectiveSymbol ret_val = {
-      sizeof(ret_val),      // size
-      BrigEDirectiveSymbol, // kind
+      sizeof(ret_val),       // size
+      BrigEDirectiveSymbol,  // kind
       {
         0,             // c_code
         BrigArgSpace,  // storageClass
@@ -76,8 +76,8 @@ TEST(Brig2LLVMTest, Example1) {
     directives.append(&ret_val);
 
     BrigDirectiveSymbol arg_val = {
-      sizeof(arg_val),      // size
-      BrigEDirectiveSymbol, // kind
+      sizeof(arg_val),       // size
+      BrigEDirectiveSymbol,  // kind
       {
         0,             // c_code
         BrigArgSpace,  // storageClass
@@ -101,7 +101,7 @@ TEST(Brig2LLVMTest, Example1) {
       0,   // inParamCount
       directives.size() + sizeof(abort),  // d_firstScopedDirective
       0,   // operationCount
-      directives.size() + sizeof(abort), // d_nextDirective
+      directives.size() + sizeof(abort),  // d_nextDirective
       0,   // attribute
       0,   // fbarCount
       0,   // outParamCount
@@ -236,7 +236,6 @@ static void appendBrigDirectiveProto(Buffer &buffer,
                                      uint32_t inCount,
                                      const Iterator &B,
                                      const Iterator &E) {
-
   const size_t numArgs = E - B;
   EXPECT_EQ(outCount + inCount, numArgs);
 
@@ -257,7 +256,7 @@ static void appendBrigDirectiveProto(Buffer &buffer,
   bdp->inCount = inCount;
 
   Iterator it = B;
-  for(size_t i = 0; i < numArgs; ++i)
+  for (size_t i = 0; i < numArgs; ++i)
     bdp->types[i] = *it++;
 
   buffer.append(bdp);
@@ -272,12 +271,12 @@ TEST(Brig2LLVMTest, VarSizeDirective) {
       {Brigu32, 1, 0, 0}
     };
     appendBrigDirectiveProto(bb,
-                             0, // c_code
-                             0, // s_name
-                             0, // fbarCount
-                             0, // reserved
-                             1, // outCount
-                             1, // inCount
+                             0,  // c_code
+                             0,  // s_name
+                             0,  // fbarCount
+                             0,  // reserved
+                             1,  // outCount
+                             1,  // inCount
                              &args[0],
                              &args[2]);
 
