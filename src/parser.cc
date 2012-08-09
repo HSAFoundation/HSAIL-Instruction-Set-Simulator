@@ -3147,6 +3147,22 @@ int CvtModifier1(Context* context) {
 }
 
 int Mov(Context* context) {
+// first token is MOV "mov"
+  context->token_to_scan = yylex();
+ 
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (!Operand(context) || !ArrayOperandList(context)) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();  
+        if (!Operand(context) || !ArrayOperandList(context)) {
+          if (context->token_to_scan == ';') {
+            return 0;
+          } // ';'
+        } // Operand or ArrayOperandList
+      } // ','
+    } // Operand or ArrayOperandList
+  } // datatypeId    
   return 1;
 }
 
