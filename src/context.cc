@@ -1,7 +1,7 @@
 /* Copyright 2012 <MulticorewareInc> */
 
-#include <string>
 #include <stdio.h>
+#include <string>
 #include "brig.h"
 #include "brig_buffer.h"
 #include "error_reporter_interface.h"
@@ -26,11 +26,10 @@ Context::Context(void) {
   obuf = new Buffer();
   sbuf = new StringBuffer();
   err_reporter = NULL;
-  clear_context();
   yycolno = 0;
   yylineno = 1;
   error_reporter_set = false;
-  token_value.string_val = NULL;
+  set_default_values();
 }
 
 // default destructor
@@ -44,6 +43,35 @@ Context::~Context(void) {
   delete &operand_map;
   delete &label_c_map;
   delete &label_o_map;
+  delete ctx;
+}
+
+void Context::clear_context(void) {
+  clear_all_buffers();
+  func_map.clear();
+  func_o_map.clear();
+  operand_map.clear();
+  label_o_map.clear();
+  label_c_map.clear();
+  if (valid_string) {
+    free(token_value.string_val);
+    valid_string = false;
+  }
+  set_default_values();
+}
+
+void Context::set_default_values(void) {
+  machine = BrigESmall;
+  profile = BrigEFull;
+  ftz = BrigENosftz;
+  attribute = BrigNone;
+  fbar = 0;
+  token_type = UNKNOWN;
+  token_to_scan = 0;
+  token_value.int_val = 0;
+  valid_string = false;
+  yycolno = 0;
+  yylineno = 1;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
@@ -56,6 +84,7 @@ void Context::set_error_reporter(ErrorReporterInterface* error_reporter) {
 }
 
 void Context::set_error(ErrorReporterInterface::error_t error) {
+  // try to free string if the token contains string
   if (error_reporter_set)
     err_reporter->report_error(error, yylineno, yycolno);
   else
@@ -136,6 +165,8 @@ Context::context_error_t Context::update_directive_bytes(unsigned char* value,
     return CONTEXT_OK;
   else if (err == Buffer::INVALID_OFFSET)
     return INVALID_OFFSET;
+  else
+    return UNKNOWN_ERROR;
 }
 
 Context::context_error_t Context::update_code_bytes(unsigned char* value,
@@ -147,6 +178,8 @@ Context::context_error_t Context::update_code_bytes(unsigned char* value,
     return CONTEXT_OK;
   else if (err == Buffer::INVALID_OFFSET)
     return INVALID_OFFSET;
+  else
+    return UNKNOWN_ERROR;
 }
 
 Context::context_error_t Context::update_operand_bytes(unsigned char* value,
@@ -158,6 +191,8 @@ Context::context_error_t Context::update_operand_bytes(unsigned char* value,
     return CONTEXT_OK;
   else if (err == Buffer::INVALID_OFFSET)
     return INVALID_OFFSET;
+  else
+    return UNKNOWN_ERROR;
 }
 
 // clear buffers
@@ -172,7 +207,7 @@ void Context::clear_directive_buffer(void) {
 void Context::clear_operand_buffer(void) {
   obuf->clear();
   // pad the first 8 bytes with 0
-  for(unsigned i = 0; i < sizeof(uint64_t); ++i)
+  for (unsigned i = 0; i < sizeof(uint64_t); ++i)
     obuf->append_char(0);
 }
 
@@ -186,31 +221,10 @@ void Context::clear_all_buffers(void) {
   clear_operand_buffer();
   clear_string_buffer();
 }
-void Context::clear_context(void) {
-  clear_all_buffers();
-  func_map.clear();
-  func_o_map.clear();
-  operand_map.clear();
-  label_o_map.clear();
-  label_c_map.clear();
-  token_value.string_val = NULL;
-  set_default_values();
-
-}
 
 
-void Context::set_default_values(void) {
-  machine = BrigESmall;
-  profile = BrigEFull;
-  ftz = BrigENosftz;
-  attribute = BrigNone;
-  fbar = 0;
-  token_type = UNKNOWN;
-  token_to_scan = 0;
-  token_value.int_val = 0;
-  token_value.float_val = 0;
-  token_value.double_val = 0;
-}
+
+
 
 
 // check context

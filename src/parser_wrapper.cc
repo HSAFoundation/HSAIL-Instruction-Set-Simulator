@@ -3,12 +3,10 @@
 #include "parser_wrapper.h"
 #include "parser.h"
 #include "tokens.h"
-extern TerminalType token_type;
+
 
 namespace hsa {
 namespace brig {
-
-
   void Parser::set_source_string(const std::string& src) {
     lexer->set_source_string(src);
   };
@@ -48,6 +46,7 @@ namespace brig {
           return 1;
         }
       }
+
       context->token_to_scan = lexer->get_next_token();
     }
     return 0;

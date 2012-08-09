@@ -29,6 +29,12 @@ class Parser {
       lexer = new Lexer();
     }
 
+    ~Parser() {
+      if (lexer)
+        delete lexer;
+    }
+
+
     // get context
     Context* get_context(void) const { return context; }
 

@@ -21,7 +21,8 @@ class Context {
       CONTEXT_OK = 0,
       INVALID_POINTER = 1,
       EMPTY_BUFFER,
-      INVALID_OFFSET
+      INVALID_OFFSET,
+      UNKNOWN_ERROR
     };
 
     static Context* get_instance(void);
@@ -247,7 +248,7 @@ class Context {
     BrigdOffset32_t current_bdf_offset;
     BrigoOffset32_t current_argList_offset;
     // label_o_map contains the info for OperandLabelRef,
-    // label_d_map contains the label that needed in a instruction
+    // label_d_map contains the label that needed in an instruction
     std::map<std::string, BrigoOffset32_t> arg_map;
     std::map<std::string, BrigdOffset32_t> func_map;
     std::map<std::string, BrigoOffset32_t> func_o_map;
@@ -259,6 +260,7 @@ class Context {
     unsigned int token_to_scan;
     int               yycolno;
     TerminalType      token_type;
+    bool  valid_string;
 
     union token_val {
       int int_val;

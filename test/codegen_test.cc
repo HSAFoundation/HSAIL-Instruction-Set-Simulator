@@ -35,8 +35,8 @@ TEST(CodegenTest, CallwMultiArgs) {
   input.append(" } \n");
   input.append("}; \n");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
@@ -134,6 +134,8 @@ TEST(CodegenTest, CallwMultiArgs) {
   BrigoOffset32_t arg_test = 0;
   context->get_operand(56, &arg_test);
   EXPECT_EQ(8, arg_test);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Example6_CallwArgs) {
@@ -153,8 +155,9 @@ TEST(CodegenTest, Example6_CallwArgs) {
   input.append("}; \n");
 
   // test the rule
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
   EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
   EXPECT_EQ(0, Function(context));
@@ -247,6 +250,8 @@ TEST(CodegenTest, Example6_CallwArgs) {
   EXPECT_EQ(12, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(8, arg_l.o_args[0]);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Example5_SimpleCall) {
@@ -262,8 +267,9 @@ TEST(CodegenTest, Example5_SimpleCall) {
   input.append("   call &callee; \n");
   input.append(" } \n");
   input.append("}; \n");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan= yylex();
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
@@ -333,6 +339,8 @@ TEST(CodegenTest, Example5_SimpleCall) {
   EXPECT_EQ(8, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(20, func_o.fn);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Example4_Branch) {
@@ -351,8 +359,8 @@ TEST(CodegenTest, Example4_Branch) {
   input.append("}; \n");
 
   // test the rule
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
 
@@ -425,6 +433,8 @@ TEST(CodegenTest, Example4_Branch) {
   EXPECT_EQ(0, br_op.o_operands[2]);
   EXPECT_EQ(0, br_op.o_operands[3]);
   EXPECT_EQ(0, br_op.o_operands[4]);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Example3_CodeGen) {
@@ -437,8 +447,9 @@ TEST(CodegenTest, Example3_CodeGen) {
   input.append("  add_pp_sat_u16x2 $s1, $s0, $s3; \n");
   input.append("}; \n");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
   EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
 
@@ -489,6 +500,8 @@ TEST(CodegenTest, Example3_CodeGen) {
   EXPECT_EQ(8, get_c.o_operands[0]);
   EXPECT_EQ(32, get_c.o_operands[1]);
   EXPECT_EQ(44, get_c.o_operands[2]);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Instrustion3Op_CodeGen) {
@@ -497,8 +510,9 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
 
   std::string input("add_pp_sat_u16x2 $s1, $s0, $s3; \n");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
   EXPECT_EQ(0, Instruction3(context));
 
   BrigInstBase ref = {
@@ -517,6 +531,8 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Instrustion2Op_CodeGen) {
@@ -525,8 +541,9 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
 
   std::string input("abs_p_s8x4 $s1, $s2; \n");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
   EXPECT_EQ(0, Instruction2(context));
 
   BrigInstBase ref = {
@@ -545,6 +562,8 @@ TEST(CodegenTest, Instrustion2Op_CodeGen) {
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Instrustion2Op_FTZ_CodeGen) {
@@ -552,8 +571,8 @@ TEST(CodegenTest, Instrustion2Op_FTZ_CodeGen) {
   context->clear_context();
 
   std::string input("sqrt_s8x4 $s1, $s2; \n");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction2(context));
 
   BrigInstBase ref = {
@@ -572,6 +591,8 @@ TEST(CodegenTest, Instrustion2Op_FTZ_CodeGen) {
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Instrustion2Op_FTZ_With_Modifier_CodeGen) {
@@ -580,8 +601,8 @@ TEST(CodegenTest, Instrustion2Op_FTZ_With_Modifier_CodeGen) {
 
   std::string input("sqrt_ftz_s8x4 $s1, $s2; \n");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction2(context));
 
   BrigAluModifier bam;
@@ -605,6 +626,8 @@ TEST(CodegenTest, Instrustion2Op_FTZ_With_Modifier_CodeGen) {
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
   EXPECT_EQ(ref.aluModifier.ftz, get.aluModifier.ftz);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
@@ -613,8 +636,9 @@ TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
 
   std::string input("abs_ftz_p_s8x4 $s1, $s2; \n");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
   EXPECT_EQ(0, Instruction2(context));
 
   BrigAluModifier bam;
@@ -638,6 +662,8 @@ TEST(CodegenTest, Instrustion2Op_with_Modifier_CodeGen) {
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
   EXPECT_EQ(ref.aluModifier.ftz, get.aluModifier.ftz);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, SimplestFunction_CodeGen) {
@@ -650,8 +676,8 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
   input.append("};");
 
   // test the rule
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Version(context));
   EXPECT_EQ(0, Function(context));
 
@@ -696,6 +722,8 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   BrigcOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(32, csize);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, AlignmentCheck) {
@@ -748,8 +776,8 @@ TEST(CodegenTest, VersionCodeGen) {
   context->clear_context();
   std::string input("\n version 1:0; \n");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Version(context));
 
   uint32_t curr_d_offset = context->get_directive_offset();
@@ -784,8 +812,8 @@ TEST(CodegenTest, VersionCodeGen) {
 
   input.assign("version 2:0:$large;");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Version(context));
 
   // reference struct
@@ -808,8 +836,8 @@ TEST(CodegenTest, VersionCodeGen) {
   context->clear_context();
   input.assign("version 2:0:$large, $reduced, $sftz;");
 
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Version(context));
 
   // reference struct
@@ -830,12 +858,15 @@ TEST(CodegenTest, VersionCodeGen) {
   EXPECT_EQ(ref.profile, get.profile);
   EXPECT_EQ(ref.ftz, get.ftz);
   context->clear_context();
+
+  delete lexer;
 }
 
 TEST(CodegenTest, RegisterOperandCodeGen) {
   std::string name;
   std::string input("$d7");  // register
 
+  Lexer* lexer = new Lexer();
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
   parser->clear_context();
@@ -843,8 +874,9 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   parser->scan_symbols();
 
   // rescan
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
   EXPECT_EQ(0, Operand(context));
 
   // reference struct
@@ -876,8 +908,8 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   parser->scan_symbols();
 
   // rescan
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
   name.assign("$q7");
@@ -890,13 +922,16 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.name, get.name);
+
+  delete lexer;
+  delete parser;
 }
 
 TEST(CodegenTest, NumericValueOperandCodeGen) {
   /* Integer */
   std::string input("5");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
   // reference struct
@@ -921,8 +956,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
 
     /* Negative Integer */
   input.assign("-5");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
   // reference struct
@@ -939,8 +974,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
 
   /* float single */
   input.assign("5.0f");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
   // reference struct
@@ -957,8 +992,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
 
   /* double */
   input.assign("5.0l");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
   // reference struct
@@ -975,8 +1010,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
 
   /* Integer List */
   input.assign("_b32(5,6,8)");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
   // reference struct
@@ -990,6 +1025,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.bits.u, get.bits.u);
+
+  delete lexer;
 }
 
 TEST(CodegenTest, LookupStringTest) {
@@ -1011,6 +1048,8 @@ TEST(CodegenTest, LookupStringTest) {
   input.assign("&test_string2");
   loc = strBuf->lookup(input);
   EXPECT_EQ(offset, loc);
+
+  delete strBuf;
 }
 
 TEST(CodegenTest, AddSymbolTest) {
@@ -1054,20 +1093,25 @@ TEST(CodegenTest, LookupStringBugTest) {
   input.assign("test_string1");
   int loc = strBuf->lookup(input);
   EXPECT_EQ(offset, loc);
+
+  delete strBuf;
 };
 
 TEST(CodegenTest, BrigOperandAddressGeneration) {
   std::string name;
   std::string input("[&test]");  // [name]
 
+  Lexer* lexer = new Lexer();
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
   // scan symbols
   parser->scan_symbols();
 
   // rescan
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
   EXPECT_EQ(0, AddressableOperand(context));
 
   name.assign(input.c_str());
@@ -1092,10 +1136,13 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.directive, get.directive);
+
+  delete lexer;
+  delete parser;
 };
 
 TEST(ErrorReportingTest, UseMockErrorReporter) {
-  // reference struct
+
   MockErrorReporter mer;
 
   // forward call to FakeErrorReporter
@@ -1108,8 +1155,8 @@ TEST(ErrorReportingTest, UseMockErrorReporter) {
   context->clear_context();
 
   std::string input("version 1:0;");
-  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
-  context->token_to_scan = yylex();
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_CALL(mer, report_error(ErrorReporterInterface::OK, _, _));
   EXPECT_EQ(0, Version(context));
 
@@ -1130,6 +1177,8 @@ TEST(ErrorReportingTest, UseMockErrorReporter) {
 
   // return the true reporter to context
   context->set_error_reporter(old_rpt);
+
+  delete lexer;
 }
 
 }  // namespace brig
