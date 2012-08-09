@@ -53,7 +53,6 @@ TEST(ParserTest, OperandTest) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -95,7 +94,6 @@ TEST(ParserTest, AddressableOperandTest) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -121,7 +119,6 @@ TEST(ParserTest, QueryTest) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Query(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -138,7 +135,6 @@ TEST(ParserTest, ArrayOperandList) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArrayOperandList(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -226,7 +222,6 @@ TEST(ParserTest, RoundingMode) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, RoundingMode(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -316,7 +311,6 @@ TEST(ParserTest, Instruction2) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction2(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -340,7 +334,6 @@ TEST(ParserTest, VersionStatement) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Version(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -357,7 +350,6 @@ TEST(ParserTest, AlignStatement) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Alignment(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -404,7 +396,6 @@ TEST(ParserTest, DeclPrefix) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, DeclPrefix(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -421,7 +412,6 @@ TEST(ParserTest, FBar) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FBar(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -452,7 +442,6 @@ TEST(ParserTest, ArrayDimensionSet) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArrayDimensionSet(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -527,7 +516,6 @@ TEST(ParserTest, ArgumentDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgumentDecl(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -535,25 +523,38 @@ TEST(ParserTest, ArgumentListBody) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
-
   context->set_error_reporter(main_reporter);
 
-  bool rescan = false;
-  unsigned int last_tok = 0;
   // test 1
   std::string input("const static arg_u32 %local_id[2][2],\n");
   input.append("static arg_f16 %local_id[], align 8 arg_u64 %test \n");
   lexer->set_source_string(input);
 
+  context->clear_context();
   // initialize fake values
   // which should be set in real case when parser parses a function def
   context->current_bdf_offset = 0;
   context->set_arg_output(false);
+  // append a fake BDF to directive buffer
+  BrigDirectiveFunction fake = {
+      40,                       // size
+      BrigEDirectiveFunction,   // kind
+      32,                       // c_code
+      32,                       // s_name
+      0,                        // inParamCount
+      220,                      // d_firstScopedDirective
+      1,                        // operationCount
+      316,                      // d_nextDirective
+      BrigNone,
+      0,
+      0,                        // outParamCount
+      0,
+  };
+  context->append_directive(&fake);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgumentListBody(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -572,7 +573,6 @@ TEST(ParserTest, FunctionDefinition) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionDefinition(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -591,7 +591,6 @@ TEST(ParserTest, FunctionDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionDecl(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -616,10 +615,25 @@ TEST(ParserTest, Codeblock) {
   // which should be set in real case when parser parses a function def
   context->current_bdf_offset = 0;
   context->set_arg_output(false);
+  // append a fake BDF to directive buffer
+  BrigDirectiveFunction fake = {
+      40,                       // size
+      BrigEDirectiveFunction,   // kind
+      32,                       // c_code
+      32,                       // s_name
+      0,                        // inParamCount
+      220,                      // d_firstScopedDirective
+      1,                        // operationCount
+      316,                      // d_nextDirective
+      BrigNone,
+      0,
+      0,                        // outParamCount
+      0,
+  };
+  context->append_directive(&fake);
 
   EXPECT_EQ(0, Codeblock(context));
 
-  input.clear();
   delete lexer;
 }
 
@@ -639,7 +653,7 @@ TEST(ParserTest, Function) {
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Function(context));
-  input.clear();
+
   delete lexer;
 }
 
@@ -660,7 +674,6 @@ TEST(ParserTest, SimpleProg) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -677,7 +690,6 @@ TEST(ParserTest, Instruction3) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction3(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -685,7 +697,6 @@ TEST(ParserTest, OptionalWidth) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
-
   context->set_error_reporter(main_reporter);
 
   std::string input("_width(all)\n");
@@ -700,7 +711,6 @@ TEST(ParserTest, OptionalWidth) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OptionalWidth(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -715,6 +725,23 @@ TEST(ParserTest, BranchOperation) {
   // which should be set in real case when parser parses a function def
   context->current_bdf_offset = 0;
   context->set_arg_output(false);
+  // append a fake BDF to directive buffer
+  BrigDirectiveFunction fake = {
+      40,                       // size
+      BrigEDirectiveFunction,   // kind
+      32,                       // c_code
+      32,                       // s_name
+      0,                        // inParamCount
+      220,                      // d_firstScopedDirective
+      1,                        // operationCount
+      316,                      // d_nextDirective
+      BrigNone,
+      0,
+      0,                        // outParamCount
+      0,
+  };
+  context->append_directive(&fake);
+
 
   std::string input("cbr_width(all)_fbar $s1, @then;\n");
   lexer->set_source_string(input);
@@ -776,7 +803,6 @@ TEST(ParserTest, BranchOperation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -793,7 +819,6 @@ TEST(ParserTest, ParseCallTargets) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallTargets(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -822,7 +847,6 @@ TEST(ParserTest, ParseCallArgs) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallArgs(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -847,7 +871,6 @@ TEST(ParserTest, Call) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Call(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -900,7 +923,6 @@ TEST(ParserTest, Initializers) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -950,7 +972,6 @@ TEST(ParserTest, InitializableDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -968,14 +989,12 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   input.append(" add_pp_sat_u16x2 $s1, $s0, $s3; \n");
   input.append(" }; \n");
 
-
   lexer->set_source_string(input);
-
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
   // Example 2
-  input.clear();
+
   input.assign("version 1:0:$small;\n");
   input.append("function &return_true(arg_f32 %ret_val) () {\n");
   input.append(" ret;\n");
@@ -987,7 +1006,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   EXPECT_EQ(0, Program(context));
 
   // Example 4
-  input.clear();
+
   input.assign(" version 1:1:$small; \n");
   input.append("function &branch_ops (arg_u8x4 %x)() { \n");
   input.append(" cbr $c1, @then; \n");
@@ -1003,7 +1022,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   EXPECT_EQ(0, Program(context));
 
   // Example 5 - Call to simple function
-  input.clear();
+
   input.assign("version 1:0:$small; \n");
   input.append("function &callee()() { \n");
   input.append("ret; \n");
@@ -1018,7 +1037,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   EXPECT_EQ(0, Program(context));
 
   // Example 6a - Call to a complex function
-  input.clear();
+
   input.assign("version 1:0:$small;\n");
   input.append("function &callee(arg_f32 %output)(arg_f32 %input) {\n");
   input.append("ret;\n");
@@ -1035,7 +1054,6 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1057,7 +1075,6 @@ TEST(ParserTest, ProgWithGlobalDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1080,7 +1097,6 @@ TEST(ParserTest, ProgWithUninitializableDecl ) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1098,7 +1114,6 @@ TEST(ParserTest, UninitializableDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, UninitializableDecl(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1116,7 +1131,6 @@ TEST(ParserTest, ArgUninitializableDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgUninitializableDecl(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1133,12 +1147,10 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   input.append("{arg_u32 %z;}\n");
   input.append(" }; \n");
 
-
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1222,7 +1234,6 @@ TEST(ParserTest, FileDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1246,7 +1257,6 @@ TEST(ParserTest, VectorToken) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, VectorToken(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1362,7 +1372,6 @@ TEST(ParserTest, SysCall) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1399,7 +1408,6 @@ TEST(ParserTest, Label) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1450,7 +1458,6 @@ TEST(ParserTest, LabelTargets) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1480,7 +1487,6 @@ TEST(ParserTest, Extension) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Extension(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1516,7 +1522,6 @@ TEST(ParserTest, SignatureType) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureType(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1558,7 +1563,6 @@ TEST(ParserTest, FunctionSignature) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1585,7 +1589,6 @@ TEST(ParserTest, SignatureArgumentList) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1717,8 +1720,6 @@ TEST(ParserTest, Instruction4) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
 
-
-  input.clear();
   delete lexer;
 };
 // ------------------  Test for ldc rule -------------------
@@ -1828,6 +1829,7 @@ TEST(ParserTest, Instruction5) {
 
   delete lexer;
 };
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 
@@ -1885,7 +1887,6 @@ TEST(ParserTest, KernelArgumentList) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, KernelArgumentDecl(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -1902,7 +1903,7 @@ TEST(ParserTest, KernelArgumentListBody) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0 , KernelArgumentListBody(context));
 
-  input.clear();
+
   delete lexer;
 };
 
@@ -1917,7 +1918,7 @@ TEST(ParserTest, Kernel) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0 , Kernel(context));
 
-  input.clear();
+
   delete lexer;
 };
 
@@ -1972,7 +1973,6 @@ TEST(ParserTest, OperandList) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -2086,7 +2086,6 @@ TEST(ParserTest, Cmp) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -2129,7 +2128,6 @@ TEST(ParserTest, GlobalPrivateDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -2193,7 +2191,6 @@ TEST(ParserTest, OffsetAddressableOperand) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
 
-  input.clear();
   delete lexer;
 };
 
@@ -2222,7 +2219,7 @@ TEST(ParserTest, MemoryOperand) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
 
-  input.clear();
+
   delete lexer;
 };
 
@@ -2251,7 +2248,6 @@ TEST(ParserWrapperTest, ScanSymbolsWithParser) {
     }
   }
 
-  input.clear();
   delete parser;
 };
 
@@ -2267,7 +2263,7 @@ TEST(ParserWrapperTest, ParseSimpleProgram) {
   parser->set_source_string(input);
   EXPECT_EQ(0, parser->parse());
 
-  input.clear();
+
   delete parser;
 };
 
@@ -2293,11 +2289,9 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   parser->set_source_string(input);
 
   EXPECT_EQ(0, parser->parse());
-  input.clear();
+
   delete parser;
 };
-
-
 
 }  // namespace brig
 }  // namespace hsa

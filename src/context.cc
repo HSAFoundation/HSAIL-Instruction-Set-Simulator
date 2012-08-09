@@ -163,6 +163,8 @@ Context::context_error_t Context::update_directive_bytes(unsigned char* value,
     return CONTEXT_OK;
   else if (err == Buffer::INVALID_OFFSET)
     return INVALID_OFFSET;
+  else
+    return UNKNOWN_ERROR;
 }
 
 Context::context_error_t Context::update_code_bytes(unsigned char* value,
@@ -174,6 +176,8 @@ Context::context_error_t Context::update_code_bytes(unsigned char* value,
     return CONTEXT_OK;
   else if (err == Buffer::INVALID_OFFSET)
     return INVALID_OFFSET;
+  else
+    return UNKNOWN_ERROR;
 }
 
 Context::context_error_t Context::update_operand_bytes(unsigned char* value,
@@ -185,6 +189,8 @@ Context::context_error_t Context::update_operand_bytes(unsigned char* value,
     return CONTEXT_OK;
   else if (err == Buffer::INVALID_OFFSET)
     return INVALID_OFFSET;
+  else
+    return UNKNOWN_ERROR;
 }
 
 // clear buffers

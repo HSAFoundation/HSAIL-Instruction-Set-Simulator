@@ -1856,6 +1856,6 @@ query_filtering   { free_string(context);
                     context->yycolno+=yyleng;  
                     return QUERY_FILTERING;}
 
-.   { fprintf(stderr, "unexpected char"); 
+.   { fprintf(stderr, "Unexpected char %s\n", yytext); 
       free_string(context); 
       return 0;}
