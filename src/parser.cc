@@ -2975,6 +2975,10 @@ int GlobalPrivateDecl(Context* context) {
 
 int OffsetAddressableOperand(Context* context) {
   // the first token is '['
+  if (context->token_to_scan != '[') {
+    context->set_error(ErrorReporterInterface::MISSING_OPENNING_BRACKET);
+    return 1;
+  }
   context->token_to_scan = yylex();
   if (context->token_type == REGISTER) {
     context->token_to_scan = yylex();
@@ -2995,6 +2999,8 @@ int OffsetAddressableOperand(Context* context) {
       context->token_to_scan = yylex();
       return 0;
     }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_OPERAND);
   }
   return 1;
 }

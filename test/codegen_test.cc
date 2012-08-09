@@ -1142,7 +1142,7 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
 };
 
 TEST(ErrorReportingTest, UseMockErrorReporter) {
-  // reference struct
+
   MockErrorReporter mer;
 
   // forward call to FakeErrorReporter

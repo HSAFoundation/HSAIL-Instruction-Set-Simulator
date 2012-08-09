@@ -7,12 +7,16 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "error_reporter.h"
+#include "gmock/gmock.h"
+#include "mock_error_reporter.h"
 namespace hsa {
 namespace brig {
 
 extern Context* context;
 ErrorReporter* main_reporter = ErrorReporter::get_instance();
 
+using ::testing::AtLeast;
+using ::testing::_;
 
 // ------------------  BASIC PARSER TEST -----------------
 
@@ -1158,8 +1162,8 @@ TEST(ParserTest, FileDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
-
   context->set_error_reporter(main_reporter);
+  context->clear_context();
 
   std::string input("file 1 \"this is a file\";\n");
   lexer->set_source_string(input);
@@ -1468,8 +1472,8 @@ TEST(ParserTest, Extension) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
-
   context->set_error_reporter(main_reporter);
+  context->clear_context();
 
   std::string input("extension \"abc\" ;\n");
   lexer->set_source_string(input);
@@ -1700,7 +1704,7 @@ TEST(ParserTest, Instruction4) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
 
-  input.assign("bitalign_b32 $s5, $s0, $s1, $s2, $s3;\n");  // redundent operand
+  input.assign("bitalign_b32 $s5, $s0, $s1, $s2, $s3;\n");  // redundant operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
@@ -1925,49 +1929,49 @@ TEST(ParserTest, Kernel) {
 TEST(ParserTest, OperandList) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->clear_context();
 
-  std::string input("$s1, $c4, $d4,$q2 ");
+  std::string input("$s1, $c4, $d4,$q2 \n");
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OperandList(context));
 
-  input.assign("&g, %l, $s1");
+  input.assign("&g, %l, $s1 \n");
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OperandList(context));
 
-  input.assign("&g");
+  input.assign("&g\n");
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OperandList(context));
 
-  input.assign("&g1, &g2, %l, $s1,$s1, $c4, $d4,$q2,-77, $c4, $d4,$q2,");
-  input.append("$s1, $c4, $d4,$q2,2343.2f, $c4, $d4,1.123,5, $c4, $d4,$q2");
+  input.assign("&g1, &g2, %l, $s1,$s1, $c4, $d4,$q2,-77, $c4, $d4,$q2,\n");
+  input.append("$s1, $c4, $d4,$q2,2343.2f, $c4, $d4,1.123,5, $c4, $d4,$q2\n");
   // the number of operands is 24
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OperandList(context));
 
-  input.assign(",$s5, $s0 ,$s6");  // redundent ','
+  input.assign(",$s5, $s0 ,$s6\n");  // redundant ','
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
 
-  input.assign("$s5, $s0 ,$s6,");  // redundent ','
+  input.assign("$s5, $s0 ,$s6,\n");  // redundant ','
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
 
-  input.assign("");  // NULL
+  input.assign("\n");  // NULL
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2093,41 +2097,54 @@ TEST(ParserTest, Cmp) {
 TEST(ParserTest, GlobalPrivateDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  ErrorReporterInterface* old_rpt = context->get_error_reporter();
+  MockErrorReporter mer;
+  // forward call to FakeErrorReporter
+  // to record error history
+  mer.DelegateToFake();
+
+  EXPECT_CALL(mer, report_error(_, _, _))
+      .Times(AtLeast(1));
+
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
 
-  std::string input("private_u32 &tmp[2][2];");
+  std::string input("private_u32 &tmp[2][2];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalPrivateDecl(context));
 
-  input.assign("private_s32 &tmp;");
+  input.assign("private_s32 &tmp;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalPrivateDecl(context));
 
-  input.assign("private_b32 &tmp[2];");
+  input.assign("private_b32 &tmp[2];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalPrivateDecl(context));
 
   // wrong case
-  input.assign("private_s32 %tmp;");  // %tmp is not global identifier
+  input.assign("private_s32 %tmp;\n");  // %tmp is not global identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
 
-  input.assign("private_u32 &tmp");  // lack of ';'
+  input.assign("private_u32 &tmp\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
 
-  printf("Error 3\n");
-  input.assign("private_u32;");  // lack of identifier
+  input.assign("private_u32;\n");  // lack of identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
 
+  EXPECT_CALL(mer, show_all_error());
+  mer.show_all_error();
+
+  context->set_error_reporter(old_rpt);
   delete lexer;
 };
 
@@ -2137,55 +2154,56 @@ TEST(ParserTest, OffsetAddressableOperand) {
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->clear_context();
 
-  std::string input("[$s1 + 0xf7]");
+  std::string input("[$s1 + 0xf7]\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
-  input.assign("[$s1]");
+  input.assign("[$s1]\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
-  input.assign("[$s2 - 0xf7]");
+  input.assign("[$s2 - 0xf7]\n");
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
-  input.assign("[0xf7]");
+  input.assign("[0xf7]\n");
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   // wrong case
-  input.assign("[0xf7");  // lack of ']'
+  input.assign("[0xf7\n");  // lack of ']'
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
 
-  input.assign("$s1]");  // lack of '['
+  input.assign("$s1]\n");  // lack of '['
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
 
-  input.assign("[]");  // the content in square brackets is empty
+  input.assign("[]\n");  // the content in square brackets is empty
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
 
-  input.assign("[$s1 * 0xf7]");  // '*' is the illegal operation
+  input.assign("[$s1 * 0xf7]\n");  // '*' is the illegal operation
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
 
-  input.assign("[0xf7 + 0xf7]");  // the operation is illegal
+  input.assign("[0xf7 + 0xf7]\n");  // the operation is illegal
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2197,23 +2215,22 @@ TEST(ParserTest, OffsetAddressableOperand) {
 TEST(ParserTest, MemoryOperand) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
   // register error reporter with context
   context->set_error_reporter(main_reporter);
-
-  std::string input("[%local_id]");  // Int constant
+  context->clear_context();
+  std::string input("[%local_id]\n");  // Int constant
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
 
-  input.assign("[$s2 - 0xf7]");
+  input.assign("[$s2 - 0xf7]\n");
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
 
-  input.assign("[%local_id<$d7>][$s1 + 0xf7]");
+  input.assign("[%local_id<$d7>][$s1 + 0xf7]\n");
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2288,7 +2305,22 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   Parser* parser = new Parser(context);
   parser->set_source_string(input);
 
+  context->clear_context();
+
+  // test size of various buffer
+  std::cout << "Directive buffer size before parsing = " << context->get_directive_offset() << std::endl;
+  std::cout << "Operand buffer size before parsing = " << context->get_operand_offset() << std::endl;
+  std::cout << "Code buffer size before parsing = " << context->get_code_offset() << std::endl;
+  std::cout << "String buffer size before parsing = " << context->get_string_offset() << std::endl;
+
   EXPECT_EQ(0, parser->parse());
+
+  // test size of various buffer
+  std::cout << "Directive buffer size after parsing = " << context->get_directive_offset() << std::endl;
+  std::cout << "Operand buffer size after parsing = " << context->get_operand_offset() << std::endl;
+  std::cout << "Code buffer size after parsing = " << context->get_code_offset() << std::endl;
+  std::cout << "String buffer size after parsing = " << context->get_string_offset() << std::endl;
+
 
   delete parser;
 };

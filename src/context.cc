@@ -70,6 +70,8 @@ void Context::set_default_values(void) {
   token_to_scan = 0;
   token_value.int_val = 0;
   valid_string = false;
+  yycolno = 0;
+  yylineno = 1;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {

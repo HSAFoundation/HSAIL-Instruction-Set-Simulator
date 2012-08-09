@@ -19,9 +19,6 @@ class ErrorReporter: public ErrorReporterInterface {
                       unsigned int LineNo,
                       unsigned int ColNo);
 
-    // get a description of error
-    static std::string translate_error(error_t ErrorCode);
-
   private:
     ErrorReporter();
     ~ErrorReporter();
