@@ -59,6 +59,7 @@ int OffsetAddressableOperand(Context* context);
 int MemoryOperand(Context* context);
 int Ldc(Context* context);
 int Instruction5(Context* context);
+int CvtModifier1(Context* context);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

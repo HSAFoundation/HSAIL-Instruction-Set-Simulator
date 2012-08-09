@@ -3069,5 +3069,11 @@ int Ldc(Context* context) {
   return 1;
 }
 
+int CvtModifier1(Context* context) {
+ 
+    return 1;
+  
+}
+
 }  // namespace brig
 }  // namespace hsa

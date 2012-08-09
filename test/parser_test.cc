@@ -1821,6 +1821,102 @@ TEST(ParserTest, Instruction5) {
   EXPECT_NE(0, Instruction5(context));
   
 };
+
+// -----------------  Test for cvtModifier1 rule -----------------
+// format:
+// cvtModifier1 ::= floatRounding
+//                 | "_ftz"
+//                 | "_ftz" floatRounding
+//                 | intRounding
+// correct cases
+TEST(ParserTest, CvtModifier1) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("_upi \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_downi \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_zeroi \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_neari \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_up \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_down \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_zero \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_near \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_ftz_up \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_ftz_down \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_ftz_zero \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_ftz_near \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.assign("_ftz \n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, CvtModifier1(context));
+
+  input.clear();
+  delete lexer;
+};
+
 TEST(ParserTest,KernelArgumentList){
   Lexer* lexer = new Lexer() ;
   bool rescan_last_token = false ;
