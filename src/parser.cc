@@ -79,8 +79,6 @@ int Operand(Context* context) {
       }
       name.clear();
     }
-    // free memory
-    free(context->token_value.string_val);
     context->token_to_scan = yylex();  // set token for next function
     return 0;
   } else if (!BaseOperand(context)) {    // a base Operand
@@ -254,8 +252,6 @@ int AddressableOperand(Context* context) {
     if ((next == TOKEN_GLOBAL_IDENTIFIER) ||
         (next == TOKEN_LOCAL_IDENTIFIER)) {
       std::string name(context->token_value.string_val);
-      // free memory
-      free(context->token_value.string_val);
 
       next = yylex();
       if (next == ']') {
@@ -337,8 +333,6 @@ int ArrayOperandList(Context* context) {
     next = yylex();
     context->token_to_scan = next;  // set context for Identifier()
     if (!Identifier(context)) {
-      // need to free string
-      free(context->token_value.string_val);
       next = yylex();
       if (next == ')') {
         // set context for following functions
@@ -364,8 +358,6 @@ int CallTargets(Context* context) {
     next = yylex();
     context->token_to_scan = next;  // set context for Identifier()
     if (!Identifier(context)) {
-      // need to free string
-      free(context->token_value.string_val);
       next = yylex();
       if (next == ']') {
         context->token_to_scan = yylex();  // set context for following function
@@ -397,7 +389,6 @@ int CallArgs(Context* context) {
     if ((saved_token == TOKEN_GLOBAL_IDENTIFIER)||
         (saved_token == TOKEN_LOCAL_IDENTIFIER)) {
       arg_name = context->token_value.string_val;
-      // string is freed in Operand()
     }
 
     if (context->token_to_scan == ')') {
@@ -548,14 +539,12 @@ int Instruction2(Context* context) {
 
         context->token_to_scan = yylex();  // set context for Operand()
         std::string oper_str = context->token_value.string_val;
-        // string_val will be freed in Operand()
 
         if (!Operand(context)) {
           inst_op.o_operands[0] = context->operand_map[oper_str];
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();  // set context for Operand()
             oper_str = context->token_value.string_val;
-            // string_val will be freed in Operand()
 
             if (!Operand(context)) {
               inst_op.o_operands[1] = context->operand_map[oper_str];
@@ -609,14 +598,13 @@ int Instruction2(Context* context) {
 
         context->token_to_scan = yylex();  // set context for Operand()
         std::string oper_str = context->token_value.string_val;
-        // string_val will be freed in Operand()
 
         if (!Operand(context)) {
           inst_op.o_operands[0] = context->operand_map[oper_str];
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();  // set context for Operand()
             oper_str = context->token_value.string_val;
-            // string_val will be freed in Operand()
+
             if (!Operand(context)) {
               inst_op.o_operands[1] = context->operand_map[oper_str];
               if (context->token_to_scan == ';') {
@@ -702,14 +690,13 @@ int Instruction2(Context* context) {
 
         context->token_to_scan = yylex();  // set context for Operand()
         std::string oper_str = context->token_value.string_val;
-        // string_val will be freed in Operand()
 
         if (!Operand(context)) {
           inst_op.o_operands[0] = context->operand_map[oper_str];
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();  // set context for Operand()
             oper_str = context->token_value.string_val;
-            // string_val will be freed in Operand()
+
             if (!Operand(context)) {
               inst_op.o_operands[1] = context->operand_map[oper_str];
               if (context->token_to_scan == ';') {
@@ -754,14 +741,12 @@ int Instruction2(Context* context) {
 
         context->token_to_scan = yylex();  // set context for Operand()
         std::string oper_str = context->token_value.string_val;
-        // string_val will be freed in Operand()
 
         if (!Operand(context)) {
           inst_op.o_operands[0] = context->operand_map[oper_str];
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();  // set context for Operand()
             oper_str = context->token_value.string_val;
-            // string_val will be freed in Operand()
 
             if (!Operand(context)) {
               inst_op.o_operands[1] = context->operand_map[oper_str];
@@ -825,19 +810,19 @@ int Instruction3(Context* context) {
       inst_op.type = context->token_value.data_type;
       context->token_to_scan = yylex();
       std::string oper_str = context->token_value.string_val;
-      // string_val will be freed in Operand()
+
       if (!Operand(context)) {
         inst_op.o_operands[0] = context->operand_map[oper_str];
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
           oper_str = context->token_value.string_val;
-          // string_val will be freed in Operand()
+
           if (!Operand(context)) {
             inst_op.o_operands[1] = context->operand_map[oper_str];
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
               oper_str = context->token_value.string_val;
-              // string_val will be freed in Operand()
+
               if (!Operand(context)) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (context->token_to_scan == ';') {
@@ -886,21 +871,19 @@ int Instruction3(Context* context) {
 
       context->token_to_scan = yylex();
       std::string oper_str = context->token_value.string_val;
-      // string_val will be freed in Operand()
 
       if (!Operand(context)) {
         inst_op.o_operands[0] = context->operand_map[oper_str];
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
           oper_str = context->token_value.string_val;
-          // string_val will be freed in Operand()
 
           if (!Operand(context)) {
             inst_op.o_operands[1] = context->operand_map[oper_str];
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
               oper_str = context->token_value.string_val;
-              // string_val will be freed in Operand()
+
               if (!Operand(context)) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (context->token_to_scan == ';') {
@@ -1210,9 +1193,6 @@ int ArgumentDecl(Context* context) {
 
 
         std::string arg_name = context->token_value.string_val;
-        // free memory
-        free(context->token_value.string_val);
-
 
         int arg_name_offset = context->add_symbol(arg_name);
         // scan for arrayDimensions
@@ -1340,9 +1320,6 @@ int FunctionDefinition(Context* context) {
         // if not write into string.
 
         std::string func_name = context->token_value.string_val;
-        // free memory
-        free(context->token_value.string_val);
-
 
         BrigsOffset32_t check_result = context->add_symbol(func_name);
 
@@ -1426,9 +1403,6 @@ int FunctionDecl(Context* context) {
   if (!DeclPrefix(context)) {
     if (context->token_to_scan == FUNCTION) {
       if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
-
-        // free string
-        free(context->token_value.string_val);
         // check return argument list
         if (yylex() == '(') {
           context->token_to_scan = yylex();
@@ -1614,9 +1588,6 @@ int ArgBlock(Context* context) {
       //
       // if no correlated instructions, then later instructions
       // can directly use the label.
-
-      // free string
-      free(context->token_value.string_val);
       if (context->token_to_scan == ':') {
         context->token_to_scan = yylex();
       } else {
@@ -1789,9 +1760,6 @@ int Codeblock(Context* context) {
     } else if (context->token_to_scan == TOKEN_LABEL) {  // label
       // add to the .directive section
       std::string label_name = context->token_value.string_val;
-      // free memory
-      free(context->token_value.string_val);
-
 
       BrigDirectiveLabel label_directive = {
         12,
@@ -1959,9 +1927,6 @@ int Program(Context* context) {
           // look at next token
           if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
             std::string func_name = context->token_value.string_val;
-            // free memory
-            free(context->token_value.string_val);
-
 
             BrigsOffset32_t check_result = context->add_symbol(func_name);
 
@@ -2138,7 +2103,6 @@ int Branch(Context* context) {
       inst_op.type = Brigb1;
 
     std::string operand_name = context->token_value.string_val;
-    // string_val will be freed in Operand()
 
     if (!Operand(context)) {
       inst_op.o_operands[1] = context->operand_map[operand_name];
@@ -2150,9 +2114,6 @@ int Branch(Context* context) {
           // 2. if defined, just set it up
           // 3. if not, add it to the multimap
           std::string label_name = context->token_value.string_val;
-          // free memory
-          free(context->token_value.string_val);
-
 
           if (context->label_o_map.count(label_name)) {
             inst_op.o_operands[2] = context->label_o_map[label_name];
@@ -2164,34 +2125,24 @@ int Branch(Context* context) {
 
           context->token_to_scan = yylex();  // should be ';'
         } else if (!Identifier(context)) {
-          // need to free string
-          free(context->token_value.string_val);
           context->token_to_scan = yylex();  // should be ';'
         } else if (!Operand(context)) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
 
             if (context->token_to_scan == TOKEN_LABEL) {  // LABEL
-                // free memory
-                free(context->token_value.string_val);
                 context->token_to_scan = yylex();  // should be ';'
             } else if (context->token_to_scan == '[') {
               context->token_to_scan = yylex();
 
               if (!Identifier(context)) {
-                // need to free string
-                free(context->token_value.string_val);
                 context->token_to_scan = yylex();  // should be ']'
               } else if (context->token_to_scan == TOKEN_LABEL) {
-                // free memory
-                free(context->token_value.string_val);
                 context->token_to_scan = yylex();
 
                 while (context->token_to_scan != ']') {
                   if (context->token_to_scan == ',') {
                     if (yylex() == TOKEN_LABEL) {
-                      // free memory
-                      free(context->token_value.string_val);
                       context->token_to_scan = yylex();  // scan next;
                     } else {
                       context->set_error(ErrorReporterInterface::
@@ -2259,9 +2210,6 @@ int Branch(Context* context) {
       // 2. if defined, just set it up
       // 3. if not, add it to the multimap
       std::string label_name = context->token_value.string_val;
-      // free memory
-      free(context->token_value.string_val);
-
 
       if (context->label_o_map.count(label_name)) {
         inst_op.o_operands[1] = context->label_o_map[label_name];
@@ -2287,8 +2235,6 @@ int Branch(Context* context) {
         context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
       }
     } else if (!Identifier(context)) {
-        // need to free string
-        free(context->token_value.string_val);
         context->token_to_scan = yylex();
 
       if (context->token_to_scan == ';') {
@@ -2299,12 +2245,8 @@ int Branch(Context* context) {
           context->token_to_scan = yylex();
 
         if (context->token_to_scan == TOKEN_LABEL) {
-          // free memory
-          free(context->token_value.string_val);
           context->token_to_scan = yylex();    // should be ']'
         } else if (!Identifier(context)) {
-          // need to free string
-          free(context->token_value.string_val);
           context->token_to_scan = yylex();    // should be ']'
           }
         }
@@ -2347,7 +2289,6 @@ int Call(Context* context) {
   std::string func_name;
   if (temp == TOKEN_GLOBAL_IDENTIFIER) {
     func_name.assign(context->token_value.string_val);
-    // string_val will be freed in Operand()
   }
 
   if (!Operand(context)) {
@@ -2424,8 +2365,6 @@ int Initializer(Context* context) {
   // first token should be '='
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_LABEL) {
-    // free memory
-    free(context->token_value.string_val);
     context->set_error(ErrorReporterInterface::INVALID_INITIALIZER);
     return 1;
   } else if (context->token_to_scan == '{') {
@@ -2434,16 +2373,12 @@ int Initializer(Context* context) {
 
   // check type of initializer
   if (context->token_to_scan == TOKEN_LABEL) {
-    // free memory
-    free(context->token_value.string_val);
     // label initializer
     while (1) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
         if (context->token_to_scan == TOKEN_LABEL) {
-          // free memory
-          free(context->token_value.string_val);
           continue;
         } else {
           context->set_error(ErrorReporterInterface::MISSING_LABEL);
@@ -2520,9 +2455,6 @@ int InitializableDecl(Context* context) {
     context->token_to_scan = yylex();
 
     if (!Identifier(context)) {
-      // need to free string
-      free(context->token_value.string_val);
-
       // scan for arrayDimensions
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
@@ -2555,9 +2487,6 @@ int UninitializableDecl(Context* context) {
     context->token_to_scan = yylex();
 
     if (!Identifier(context)) {
-      // need to free string
-      free(context->token_value.string_val);
-
       // scan for arrayDimensions
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
@@ -2595,9 +2524,6 @@ int ArgUninitializableDecl(Context* context) {
       // default value for BrigDirectiveSymbol.
       // for Now, assume this is a scalar. [CAUTION]
       std::string arg_name = context->token_value.string_val;
-      // free memory
-      free(context->token_value.string_val);
-
 
       BrigDirectiveSymbol arg_decl = {
         sizeof(arg_decl),                 // size
@@ -2657,8 +2583,6 @@ int FileDecl(Context* context) {
     context->token_to_scan = yylex();
 
     if (context->token_to_scan == TOKEN_STRING) {
-      // free string
-      free(context->token_value.string_val);
       context->token_to_scan = yylex();
 
       if (context->token_to_scan == ';') {
@@ -2771,8 +2695,6 @@ int FunctionSignature(Context *context) {
 
   if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
     context->token_to_scan = yylex();
-    // free memory
-    free(context->token_value.string_val);
     // check return argument list
     if ('(' == context->token_to_scan) {
       context->token_to_scan = yylex();
@@ -2829,9 +2751,6 @@ int FunctionSignature(Context *context) {
 
 int Label(Context* context) {
   if (context->token_to_scan == TOKEN_LABEL) {
-    // free memory
-    free(context->token_value.string_val);
-
     if (yylex() == ':') {
       context->token_to_scan = yylex();
       return 0;
@@ -2846,10 +2765,6 @@ int LabelTargets(Context* context) {
     if (context->token_to_scan == LABELTARGETS) {
       while (1) {
         if (yylex() == TOKEN_LABEL) {
-          // should get string_val here and free it
-          free(context->token_value.string_val);
-
-
           context->token_to_scan = yylex();
           if (context->token_to_scan == ',') {
             continue;
@@ -3041,11 +2956,8 @@ int GlobalPrivateDecl(Context* context) {
   // first token is PRIVATE
   context->token_to_scan = yylex();
   if (context->token_type == DATA_TYPE_ID) {
-    printf("data type \n");
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
-      printf("global id \n");
-      free(context->token_value.string_val);
       context->token_to_scan = yylex();
       
       if (context->token_to_scan == '[') {
@@ -3159,8 +3071,6 @@ int Extension(Context* context) {
   if (context->token_to_scan == TOKEN_STRING) {
     context->token_to_scan = yylex();
 
-    // free string
-    free(context->token_value.string_val);
     if (context->token_to_scan == ';') {
       context->token_to_scan = yylex();
       return 0;

@@ -26,13 +26,7 @@ namespace brig {
           (token == TOKEN_LABEL)) {
         int offset = context->add_symbol(
                       std::string(context->token_value.string_val));
-        // free memory
-        free(context->token_value.string_val);
       }
-
-      if ((token == TOKEN_COMMENT) || (token == TOKEN_STRING))
-        free(context->token_value.string_val);
-
       token = lexer->get_next_token();
     }
   }

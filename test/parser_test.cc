@@ -1390,7 +1390,6 @@ TEST(ParserTest, Label) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
-  free(context->token_value.string_val);
 
   input.assign("@_test_label_4 \n");  // lack of colon ':'
   lexer->set_source_string(input);

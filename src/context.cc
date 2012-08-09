@@ -26,11 +26,11 @@ Context::Context(void) {
   obuf = new Buffer();
   sbuf = new StringBuffer();
   err_reporter = NULL;
-  clear_context();
   yycolno = 0;
   yylineno = 1;
   error_reporter_set = false;
-  token_value.string_val = NULL;
+  set_default_values();
+
 }
 
 // default destructor
@@ -45,6 +45,32 @@ Context::~Context(void) {
   delete &label_c_map;
   delete &label_o_map;
   delete ctx;
+}
+
+void Context::clear_context(void) {
+  clear_all_buffers();
+  func_map.clear();
+  func_o_map.clear();
+  operand_map.clear();
+  label_o_map.clear();
+  label_c_map.clear();
+  if (valid_string) {
+    free(token_value.string_val);
+    valid_string = false;
+  }
+  set_default_values();
+}
+
+void Context::set_default_values(void) {
+  machine = BrigESmall;
+  profile = BrigEFull;
+  ftz = BrigENosftz;
+  attribute = BrigNone;
+  fbar = 0;
+  token_type = UNKNOWN;
+  token_to_scan = 0;
+  token_value.int_val = 0;
+  valid_string = false;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
@@ -188,30 +214,10 @@ void Context::clear_all_buffers(void) {
   clear_operand_buffer();
   clear_string_buffer();
 }
-void Context::clear_context(void) {
-  clear_all_buffers();
-  func_map.clear();
-  func_o_map.clear();
-  operand_map.clear();
-  label_o_map.clear();
-  label_c_map.clear();
-  set_default_values();
-
-}
 
 
-void Context::set_default_values(void) {
-  machine = BrigESmall;
-  profile = BrigEFull;
-  ftz = BrigENosftz;
-  attribute = BrigNone;
-  fbar = 0;
-  token_type = UNKNOWN;
-  token_to_scan = 0;
-  token_value.int_val = 0;
-  token_value.float_val = 0;
-  token_value.double_val = 0;
-}
+
+
 
 
 // check context

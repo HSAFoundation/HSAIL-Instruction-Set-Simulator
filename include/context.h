@@ -259,6 +259,7 @@ class Context {
     unsigned int token_to_scan;
     int               yycolno;
     TerminalType      token_type;
+    bool  valid_string;
 
     union token_val {
       int int_val;

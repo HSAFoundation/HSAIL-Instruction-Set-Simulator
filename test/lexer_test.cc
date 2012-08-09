@@ -39,8 +39,6 @@ TEST(LexTest, Bug4_CRegister) {
 
   EXPECT_EQ(TOKEN_CREGISTER, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -50,8 +48,6 @@ TEST(LexTest, Bug5_DRegister) {
 
   EXPECT_EQ(TOKEN_DREGISTER, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -61,8 +57,6 @@ TEST(LexTest, Bug6_SRegister) {
 
   EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -72,8 +66,6 @@ TEST(LexTest, Bug7_QRegister) {
 
   EXPECT_EQ(TOKEN_QREGISTER, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -83,8 +75,6 @@ TEST(LexTest, Bug8_Label) {
 
   EXPECT_EQ(TOKEN_LABEL, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -94,8 +84,6 @@ TEST(LexTest, Bug9_Comment) {
 
   EXPECT_EQ(TOKEN_COMMENT, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -105,8 +93,6 @@ TEST(LexTest, Bug10_Comment) {
 
   EXPECT_EQ(TOKEN_COMMENT, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -136,8 +122,6 @@ TEST(LexTest, Bug17_LocalId) {
 
   EXPECT_EQ(TOKEN_LOCAL_IDENTIFIER, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -147,8 +131,6 @@ TEST(LexTest, Bug18_GlobalId) {
 
   EXPECT_EQ(TOKEN_GLOBAL_IDENTIFIER, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -158,8 +140,6 @@ TEST(LexTest, Bug19_String) {
 
   EXPECT_EQ(TOKEN_STRING, lexer->get_next_token());
 
-  // free the string
-  free(context->token_value.string_val);
   delete lexer;
 }
 
@@ -1620,8 +1600,6 @@ TEST(LexerWrapperTest, TestLexWrapper) {
   EXPECT_EQ(TOKEN_CREGISTER, token);
 
   EXPECT_STREQ("$c1", context->token_value.string_val);
-  // free the string
-  free(context->token_value.string_val);
 
   delete lexer;
 }
