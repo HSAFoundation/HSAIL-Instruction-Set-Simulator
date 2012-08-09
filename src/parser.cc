@@ -2969,7 +2969,6 @@ int GlobalPrivateDecl(Context* context) {
   } else {
     context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
