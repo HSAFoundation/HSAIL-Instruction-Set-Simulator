@@ -447,7 +447,7 @@ typedef struct BrigBlockNumeric {
     uint32_t u32[2];
     uint64_t u64[1];
   };
-}BrigBlockNumeric;
+} BrigBlockNumeric;
 
 // 20.6.4
 // BrigBlockStart
@@ -478,7 +478,7 @@ typedef struct BrigDirectiveLabel {
   uint16_t kind;
   BrigcOffset32_t c_code;
   BrigsOffset32_t s_name;
-}BrigDirectiveLabel;
+} BrigDirectiveLabel;
 
 // BrigDirectiveKernel describes a kernel.
 // A BrigDirectiveKernel contains offsets to the code and the name of the
@@ -497,7 +497,7 @@ typedef struct BrigDirectiveKernel {
   uint16_t fbarCount;
   uint32_t outParamCount;
   BrigdOffset32_t d_firstInParam;
-}BrigDirectiveKernel;
+} BrigDirectiveKernel;
 
 // Code structures
 
@@ -521,7 +521,7 @@ typedef struct BrigInstBase {
   BrigDataType16_t type;
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
-}BrigInstBase;
+} BrigInstBase;
 
 // BrigInstMod
 // The BrigInstMod format is used for ALU operations with a modifier.
@@ -545,7 +545,7 @@ typedef struct BrigInstBar {
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
   uint32_t syncFlags;
-}BrigInstBar;
+} BrigInstBar;
 
 // Operand structures
 // BrigOperandReg
@@ -556,7 +556,7 @@ typedef struct BrigOperandReg {
   BrigDataType16_t type;
   uint16_t reserved;
   uint32_t name;
-}BrigOperandReg;
+} BrigOperandReg;
 
 // BrigOperandImmed
 // BrigOperandImmed is used for a numeric value.
@@ -573,7 +573,7 @@ typedef struct BrigOperandImmed {
     uint16_t h;
     uint8_t c;
   } bits;
-}BrigOperandImmed;
+} BrigOperandImmed;
 
 // BrigOperandAddress
 // BrigOperandAddress is used for [name].
@@ -586,7 +586,7 @@ typedef struct BrigOperandAddress {
   uint16_t reserved;
   BrigdOffset32_t directive;
   int32_t offset;
-}BrigOperandAddress;
+} BrigOperandAddress;
 
 // BrigOperandLabelRef
 // BrigOperandLabelRef is used for a label.
@@ -594,7 +594,7 @@ typedef struct BrigOperandLabelRef {
   uint16_t size;
   uint16_t kind;
   uint32_t labeldirective;
-}BrigOperandLabelRef;
+} BrigOperandLabelRef;
 
 
 // BrigDirectiveScope
@@ -613,7 +613,7 @@ typedef struct BrigOperandFunctionRef {
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t fn;
-}BrigOperandFunctionRef;
+} BrigOperandFunctionRef;
 
 // BrigOperandArgumentList
 // BrigOperandArgumentList is used for the list of
@@ -626,14 +626,14 @@ typedef struct BrigOperandArgumentList {
   uint16_t kind;
   uint32_t elementCount;
   BrigdOffset32_t o_args[1];
-}BrigOperandArgumentList;
+} BrigOperandArgumentList;
 // BrigOperandArgumentRef
 // BrigOperandArgumentRef is used for a single argument.
 typedef struct BrigOperandArgumentRef {
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t arg;
-}BrigOperandArgumentRef;
+} BrigOperandArgumentRef;
 
 
 #endif  // INCLUDE_BRIG_H_

@@ -1229,7 +1229,7 @@ int ArgumentDecl(Context* context) {
           0                                 // reserved
           };
           // append the DirectiveSymbol to .directive section.
-          context->append_directive_symbol(&sym_decl);
+          context->append_directive(&sym_decl);
           context->symbol_map[arg_name] = dsize;
 
           // update the current DirectiveFunction.
@@ -1239,10 +1239,10 @@ int ArgumentDecl(Context* context) {
           BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
           BrigdOffset32_t next_directive = bdf.d_nextDirective;
           if (first_scope == next_directive) {
-            bdf.d_nextDirective += 36;
+            bdf.d_nextDirective += sizeof(sym_decl);
             bdf.d_firstScopedDirective = bdf.d_nextDirective;
           } else {
-            bdf.d_nextDirective += 36;
+            bdf.d_nextDirective += sizeof(sym_decl);
           }
 
           // update param count
@@ -2545,7 +2545,7 @@ int ArgUninitializableDecl(Context* context) {
       };
 
       context->symbol_map[arg_name]= context->get_operand_offset();
-      context->append_directive_symbol(&arg_decl);
+      context->append_directive(&arg_decl);
       // add the operand to the map.
       context->arg_map[arg_name] = context->get_operand_offset();
       context->append_operand(&arg_ref);
@@ -3330,7 +3330,8 @@ int IntegerLiteral(Context* context) {
   int first_token = context->token_to_scan;
   int sign = 1;
   switch (first_token) {
-  case '-': sign = -1;
+  case '-':
+    sign = -1;
   case '+':
     context->token_to_scan = yylex();
     if (context->token_to_scan = TOKEN_INTEGER_CONSTANT) {

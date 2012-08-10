@@ -94,13 +94,6 @@ class Context {
       dbuf->append(item);
     }
 
-    // use to append a BrigDirectiveSymbol structs
-    // (does not contain a .kind field ? )
-    void append_directive_symbol(const BrigDirectiveSymbol* item) {
-      uint32_t directive_offset = dbuf->size();
-      dbuf->append(item);
-    }
-
     // append operand
     template <class T>
     void append_operand(const T* item) {
