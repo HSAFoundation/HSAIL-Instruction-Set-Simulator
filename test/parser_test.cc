@@ -1880,13 +1880,46 @@ TEST(ParserTest,KernelArgumentList){
 TEST(ParserTest,KernelArgumentListBody){
   Lexer *lexer = new Lexer();
 
+
   std::string input("kernarg_f32 %x");
+
   lexer->set_source_string(input);
+  context->clear_context();
+  // initialize fake values
+  // which should be set in real case when parser parses a function def
+  context->current_bdf_offset = 0;
+  context->set_arg_output(false);
+  // append a fake BDF to directive buffer
+  BrigDirectiveFunction fake = {
+      40,                       // size
+      BrigEDirectiveFunction,   // kind
+      32,                       // c_code
+      32,                       // s_name
+      0,                        // inParamCount
+      220,                      // d_firstScopedDirective
+      1,                        // operationCount
+      316,                      // d_nextDirective
+      BrigNone,
+      0,
+      0,                        // outParamCount
+      0,
+  };
+  context->append_directive(&fake);
+
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0 , KernelArgumentListBody(context));
 
+
+
   input.assign("kernarg_u32 %y , kernarg_f32 %x");
   lexer->set_source_string(input);
+
+  context->clear_context();
+  // initialize fake values
+  // which should be set in real case when parser parses a function def
+  context->current_bdf_offset = 0;
+  context->set_arg_output(false);
+  context->append_directive(&fake);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0 , KernelArgumentListBody(context));
 
