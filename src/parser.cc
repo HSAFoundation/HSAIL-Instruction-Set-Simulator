@@ -3373,9 +3373,118 @@ int GlobalGroupDecl(Context* context) {
   context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
-
+int MulInst(const unsigned int first_token, Context* context) {
+  if (context->token_type == PACKING) {
+    context->token_to_scan = yylex();
+  }
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    return 0;
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    return 1;
+  }
+  return 1;
+}
+int Mul24Inst(const unsigned int first_token, Context* context) {
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    return 0;
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    return 1;
+  }
+  return 1;
+}
+int Mad24Inst(const unsigned int first_token, Context* context) {
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (!Operand(context)) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        return 1;
+      }
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      return 1;
+    }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    return 1;
+  }
+  return 1;
+}
 int Mul(Context* context) {
-  
+  unsigned int first_token = context->token_to_scan;
+  context->token_to_scan = yylex();
+  switch (first_token) {
+    case MUL: {
+      if (!RoundingMode(context)) {
+      }
+    }
+    case MUL_HI: {
+      if (!MulInst(first_token, context)) {
+        break;
+      } else {
+        return 1;
+      }
+    }
+    case MUL24: 
+    case MUL24_HI: {
+      if (!Mul24Inst(first_token, context)) {
+        break;
+      } else {
+        return 1;
+      }
+    }
+    case MAD24: 
+    case MAD24_HI: {
+      if (!Mad24Inst(first_token, context)) {
+        break;
+      } else {
+        return 1;
+      }
+    }
+    default: {
+      return 1;
+    }
+  }
+  if (!Operand(context)) {
+    if (context->token_to_scan != ',') {
+      context->set_error(ErrorReporterInterface::MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (!Operand(context)) {
+      if (context->token_to_scan != ',') {
+        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+              
+      if (!Operand(context)) {
+        if (context->token_to_scan == ';') {
+          return 0;
+        } else { // ';'
+          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          return 1;
+        }
+      } else { // Operand 3 or 4
+        context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        return 1;
+      }
+    } else { // Operand 2 or 3
+      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      return 1;
+    }
+  } else { // Operand 1 or 2
+    context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+    return 1;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
