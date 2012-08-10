@@ -2223,6 +2223,127 @@ TEST(ParserTest, MemoryOperand) {
   delete lexer;
 };
 
+TEST(LexTest, IntegerLiteral) {
+
+  // Case 1 Start reg '+' int
+  std::string input("$s1+5");
+  Lexer* lexer = new Lexer(input);
+
+  EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
+  EXPECT_EQ('+', lexer->get_next_token());
+
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(5, context->token_value.int_val);
+  // Case 1 End
+
+  // Case 2 Start reg '+' int
+  input.assign("$s11+-11");
+  lexer->set_source_string(input);
+ 
+  EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
+  EXPECT_EQ('+', lexer->get_next_token());
+
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(-11, context->token_value.int_val);
+  // Case 2 End
+
+  // Case 3 Start  double
+  input.assign("-11.7777l");
+  lexer->set_source_string(input);
+
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(-11.7777, context->token_value.double_val);
+  // Case 3 End
+
+  // Case 4 Start int '-' int
+  input.assign("11-7");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(11, context->token_value.int_val);
+
+  EXPECT_EQ('-', lexer->get_next_token());
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(7, context->token_value.int_val);
+  // Case 4 End
+
+  // Case 5 Start int ',' int
+  input.assign("+11,-11");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context)); 
+  EXPECT_EQ(11, context->token_value.int_val);
+  EXPECT_EQ(',', lexer->get_next_token());
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(-11, context->token_value.int_val);
+  // Case 5 End
+  
+  // Case 6 Start int
+  input.assign("+7");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(7, context->token_value.int_val);
+  // Case 6 End
+
+  // Case 7 Start '(' int ')'
+  input.assign("(+7)");
+  lexer->set_source_string(input);
+  context->token_type = UNKNOWN;
+
+  EXPECT_EQ('(', lexer->get_next_token());
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(7, context->token_value.int_val);
+  EXPECT_EQ(')', lexer->get_next_token());
+  // Case 7 End
+
+  // Case 9 Start int + int
+  input.assign("5+-3");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(5, context->token_value.int_val);
+  EXPECT_EQ('+', lexer->get_next_token());
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(-3, context->token_value.int_val);
+  // Case 9 End
+
+  // Case 10 Start int '+' int
+  input.assign("-5++3");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(-5, context->token_value.int_val);
+  EXPECT_EQ('+', lexer->get_next_token());
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, IntegerLiteral(context));
+  EXPECT_EQ(3, context->token_value.int_val);
+  // Case 10 End
+  
+  delete lexer;
+
+}
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");

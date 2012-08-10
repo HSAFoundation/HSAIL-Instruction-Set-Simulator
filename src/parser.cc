@@ -3213,6 +3213,10 @@ int Mov(Context* context) {
   } // datatypeId    
   return 1;
 }
+int IntegerLiteral(Context* context) {
+  
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsa

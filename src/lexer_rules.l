@@ -94,12 +94,19 @@ void free_string(hsa::brig::Context* context) {
 
 %x INLINE_COMMENT
 %x COMMENT
+ 
+ // TODO(Chuang) ChangeSets as following:
+ //OCT_INT     ([+|-]?0[0-7]*)
+ //DEC_INT     ([+|-]?(0|([1-9]*[0-9]+)))
+ //HEX_INT     ([+|-]?0(x|X)[0-9a-fA-F]*)
+ //DEC_DOUBLE  ([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(l|L)?)
 
-OCT_INT     ([+|-]?0[0-7]*)
-DEC_INT     ([+|-]?(0|([1-9]*[0-9]+)))
-HEX_INT     ([+|-]?0(x|X)[0-9a-fA-F]*)
 
-DEC_DOUBLE  ([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(l|L)?)
+OCT_INT     (0[0-7]*)
+DEC_INT     (0|([1-9]*[0-9]+))
+HEX_INT     (0(x|X)[0-9a-fA-F]*)
+
+DEC_DOUBLE  ([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(l|L))
 HEX_DOUBLE  (0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(l|L)?)
 IEEE_DOUBLE (0(d|D)[0-9a-fA-F]{16})
 
