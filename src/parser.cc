@@ -3341,5 +3341,9 @@ int IntegerLiteral(Context* context) {
 }
 
 
+int GlobalGroupDecl(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa
