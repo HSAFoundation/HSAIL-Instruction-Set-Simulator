@@ -2302,7 +2302,7 @@ TEST(LexTest, IntegerLiteral) {
   // Case 7 Start '(' int ')'
   input.assign("(+7)");
   lexer->set_source_string(input);
-  context->token_type = UNKNOWN;
+
 
   EXPECT_EQ('(', lexer->get_next_token());
   context->token_to_scan = lexer->get_next_token();
@@ -2339,6 +2339,7 @@ TEST(LexTest, IntegerLiteral) {
   EXPECT_EQ(0, IntegerLiteral(context));
   EXPECT_EQ(3, context->token_value.int_val);
   // Case 10 End
+
   
   delete lexer;
 

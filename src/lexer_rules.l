@@ -95,11 +95,11 @@ void free_string(hsa::brig::Context* context) {
 %x INLINE_COMMENT
 %x COMMENT
  
- // TODO(Chuang) ChangeSets as following:
+ // TODO(Chuang) 08-10-2012 Source as following is changed by Chuang:
  //OCT_INT     ([+|-]?0[0-7]*)
  //DEC_INT     ([+|-]?(0|([1-9]*[0-9]+)))
  //HEX_INT     ([+|-]?0(x|X)[0-9a-fA-F]*)
- //DEC_DOUBLE  ([+|-]?(([0-9]*("."[0-9]*)?((e|E)[+|-]?[0-9]*)?)|([0-9]+(e|E)[+|-]?[0-9]*))(l|L)?)
+ //DEC_DOUBLE  (.......*))(l|L)?)
 
 
 OCT_INT     (0[0-7]*)
