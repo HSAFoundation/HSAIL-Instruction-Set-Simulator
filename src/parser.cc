@@ -1509,6 +1509,7 @@ int ArgBlock(Context* context) {
       // Instruction 2 Operation
       if (!Instruction2(context)) {
         // update the operationCount.
+        context->token_value.opcode = context->token_to_scan ;
         BrigDirectiveFunction bdf;
         context->get_directive(context->current_bdf_offset, &bdf);
         bdf.operationCount++;

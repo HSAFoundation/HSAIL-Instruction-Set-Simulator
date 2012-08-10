@@ -3398,7 +3398,6 @@ TEST(CodegenTest, Instruction2Op_CodeGen_firstbit_u64) {
 
   context->get_code(0, &get);
 
-
   EXPECT_EQ(ref.size,get.size);
 
   EXPECT_EQ(ref.kind,get.kind);
@@ -3830,7 +3829,7 @@ TEST(CodegenTest, Instruction2Op_CodeGen_fbar_initSizeKnown_b64) {
 
     BrigEInstBase,
 
-    BrigFbarInitSize,
+    BrigFbarInitSizeKnown,
 
     Brigb64,
 
@@ -3896,7 +3895,7 @@ TEST(CodegenTest, Instruction2Op_CodeGen_fbar_release_b64) {
 
   };
 
-  std::string input("fbar_release_b64 $d1, $d2;");
+  std::string input("fbar_releaseCF_b64 $d1, $d2;");
 
 
   yy_scan_string(reinterpret_cast<const char*> (input.c_str()));

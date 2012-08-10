@@ -331,7 +331,8 @@ enum BrigOpcode {
   Brigworkitemaidflat = 119,
   BrigNop = 120,
   BrigDebugtrap = 121,
-  BrigBitselect = 122
+  BrigBitselect = 122 ,
+  BrigFbarInitSizeKnown = 123
 };
 
 // Brig Support Structures
