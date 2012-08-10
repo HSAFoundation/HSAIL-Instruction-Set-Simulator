@@ -3374,5 +3374,10 @@ int GlobalGroupDecl(Context* context) {
   return 1;
 }
 
+int Mul(Context* context) {
+  
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

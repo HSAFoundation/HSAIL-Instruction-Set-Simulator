@@ -2393,6 +2393,62 @@ TEST(ParserTest, GlobalGroupDecl) {
   delete lexer;
 };
 
+TEST(ParserTest, Mul) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  // test mul_datatype case
+  std::string input("mul_u32 $s1, $s2, 0x23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex(); 
+  EXPECT_EQ(0, Mul(context));
+
+  input.assign("mul_pp_u16x4 $d1, $d0, $d3;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Mul(context));
+    
+  input.assign("mul_hi_u32 $s1, $s3, $s9;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Mul(context));
+
+  input.assign("mul24_u32 $s1, $s2, 12;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Mul(context));
+
+  input.assign("mul24_hi_s32 $s1, $s2, -12;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Mul(context));
+
+  input.assign("mad24_u64 $d1, $d2, 12, 2;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Mul(context));
+
+  input.assign("mad24_hi_s32 $s1, $s2, -12, 23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Mul(context));
+
+  input.assign("mul_ftz_s32 $s1, $s3, $s9;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Mul(context));
+
+  input.assign("mul_ftz_pp_s32 $s1, $s3, $s9;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Mul(context));
+
+  delete lexer;
+};
+
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
@@ -2477,6 +2533,9 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
 
   delete parser;
 };
+
+
+
 
 
 
