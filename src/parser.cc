@@ -2971,6 +2971,7 @@ int Cmp(Context* context) {
       if (context->token_type == DATA_TYPE_ID) {
         context->token_to_scan = yylex();
       } else {
+        context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
         return 1;
       }
     }
@@ -2981,14 +2982,32 @@ int Cmp(Context* context) {
         context->token_to_scan = yylex();
         if (!Operand(context) && context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          if (!Operand(context) && context->token_to_scan == ';') {
-            context->token_to_scan = yylex();
-            return 0;
-          }  // 3 operand
-        }  // 2 operand
-      }  // 1 operand
+          if (!Operand(context)) {
+            if (context->token_to_scan == ';') {
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+              return 1;
+            }
+          } else { // 3 operand
+            context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
+            return 1;
+          }
+        } else { // 2 operand
+          context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
+          return 1;
+        }
+      } else { // 1 operand
+        context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
+        return 1;
+      }
+    } else { // Data type
+      context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
+      return 1;
     }
   }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
