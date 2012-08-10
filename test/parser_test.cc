@@ -2253,8 +2253,7 @@ TEST(ParserTest, MemoryOperand) {
   delete lexer;
 };
 
-TEST(LexTest, IntegerLiteral) {
-
+TEST(ParserTest, IntegerLiteral) {
   // Case 1 Start reg '+' int
   std::string input("$s1+5");
   Lexer* lexer = new Lexer(input);
@@ -2271,7 +2270,7 @@ TEST(LexTest, IntegerLiteral) {
   // Case 2 Start reg '+' int
   input.assign("$s11+-11");
   lexer->set_source_string(input);
- 
+
   EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
   EXPECT_EQ('+', lexer->get_next_token());
 
@@ -2311,7 +2310,7 @@ TEST(LexTest, IntegerLiteral) {
 
   context->token_to_scan = lexer->get_next_token();
 
-  EXPECT_EQ(0, IntegerLiteral(context)); 
+  EXPECT_EQ(0, IntegerLiteral(context));
   EXPECT_EQ(11, context->token_value.int_val);
   EXPECT_EQ(',', lexer->get_next_token());
   context->token_to_scan = lexer->get_next_token();
@@ -2319,7 +2318,7 @@ TEST(LexTest, IntegerLiteral) {
   EXPECT_EQ(0, IntegerLiteral(context));
   EXPECT_EQ(-11, context->token_value.int_val);
   // Case 5 End
-  
+
   // Case 6 Start int
   input.assign("+7");
   lexer->set_source_string(input);
@@ -2369,14 +2368,10 @@ TEST(LexTest, IntegerLiteral) {
   EXPECT_EQ(0, IntegerLiteral(context));
   EXPECT_EQ(3, context->token_value.int_val);
   // Case 10 End
-
-  
   delete lexer;
-
 }
 
 TEST(ParserTest, GlobalGroupDecl) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
@@ -2386,7 +2381,7 @@ TEST(ParserTest, GlobalGroupDecl) {
   std::string input("group_u32 &tmp[2][2];");
   lexer->set_source_string(input);
 
-  context->token_to_scan = yylex(); 
+  context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalGroupDecl(context));
 
   input.assign("group_s32 &tmp;");
@@ -2400,21 +2395,21 @@ TEST(ParserTest, GlobalGroupDecl) {
 
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalGroupDecl(context));
-  
+
   // wrong case
-  input.assign("group_s32 %tmp;"); // %tmp is not global identifier
+  input.assign("group_s32 %tmp;");  // %tmp is not global identifier
   lexer->set_source_string(input);
 
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalGroupDecl(context));
 
-  input.assign("group_u32 &tmp"); // lack of ';'
+  input.assign("group_u32 &tmp");  // lack of ';'
   lexer->set_source_string(input);
 
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalGroupDecl(context));
 
-  input.assign("group_u32;"); // lack of identifier
+  input.assign("group_u32;");  // lack of identifier
   lexer->set_source_string(input);
 
   context->token_to_scan = yylex();
@@ -2424,7 +2419,6 @@ TEST(ParserTest, GlobalGroupDecl) {
 };
 
 TEST(ParserTest, Mul) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
@@ -2433,14 +2427,14 @@ TEST(ParserTest, Mul) {
   // test mul_datatype case
   std::string input("mul_u32 $s1, $s2, 0x23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex(); 
+  context->token_to_scan = yylex();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mul_pp_u16x4 $d1, $d0, $d3;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, Mul(context));
-    
+
   input.assign("mul_hi_u32 $s1, $s3, $s9;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();

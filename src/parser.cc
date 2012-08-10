@@ -2636,7 +2636,7 @@ int SysCall(Context* context) {
 
     if (!IntegerLiteral(context) && yylex() == ',') {
       context->token_to_scan = yylex();
-      
+
       if (((context->token_to_scan == TOKEN_SREGISTER) ||
            (context->token_to_scan == TOKEN_WAVESIZE) ||
            (!IntegerLiteral(context))) &&
@@ -2646,9 +2646,9 @@ int SysCall(Context* context) {
         if (((context->token_to_scan == TOKEN_SREGISTER) ||
              (context->token_to_scan == TOKEN_WAVESIZE) ||
              (!IntegerLiteral(context))) &&
-             (yylex() == ',')) {          
+             (yylex() == ',')) {
           context->token_to_scan = yylex();
-          
+
           if ((context->token_to_scan == TOKEN_SREGISTER) ||
               (context->token_to_scan == TOKEN_WAVESIZE) ||
               (!IntegerLiteral(context))) {
@@ -2824,30 +2824,30 @@ int Instruction4(Context* context) {
             }
             context->token_to_scan = yylex();
             if (!Operand(context)) {
-              if (context->token_to_scan == ';' ) {
+              if (context->token_to_scan == ';') {
                 context->token_to_scan = yylex();
                 return 0;
-              } else { 
+              } else {
                 context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
                 return 1;
-              } // ';'
-            } else { // 4 operand
+              }  // ';'
+            } else {  // 4 operand
               context->set_error(ErrorReporterInterface::MISSING_OPERAND);
               return 1;
             }
-          } else { // 3 operand
+          } else {  // 3 operand
             context->set_error(ErrorReporterInterface::MISSING_OPERAND);
             return 1;
           }
-        } else { // 2 operand 
+        } else {  // 2 operand
           context->set_error(ErrorReporterInterface::MISSING_OPERAND);
           return 1;
         }
-      } else { // 1 operand
+      } else {  // 1 operand
         context->set_error(ErrorReporterInterface::MISSING_OPERAND);
         return 1;
       }
-    } else { // DATA_TYPE_ID
+    } else {  // DATA_TYPE_ID
       context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
       return 1;
     }
@@ -2991,19 +2991,19 @@ int Cmp(Context* context) {
               context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
               return 1;
             }
-          } else { // 3 operand
+          } else {  // 3 operand
             context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
             return 1;
           }
-        } else { // 2 operand
+        } else {  // 2 operand
           context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
           return 1;
         }
-      } else { // 1 operand
+      } else {  // 1 operand
         context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
         return 1;
       }
-    } else { // Data type
+    } else {  // Data type
       context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
       return 1;
     }
@@ -3120,9 +3120,9 @@ int Instruction5(Context* context) {
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
     if (!Operand(context)) {
-      if(context->token_to_scan != ',') {
+      if (context->token_to_scan != ',') {
         context->set_error(ErrorReporterInterface::MISSING_COMMA);
-        return 1;  
+        return 1;
       }
       context->token_to_scan = yylex();
       if (!Operand(context)) {
@@ -3151,27 +3151,27 @@ int Instruction5(Context* context) {
                 context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
                 return 1;
               }
-            } else { // 5 operand
-              context->set_error(ErrorReporterInterface::MISSING_OPERAND); 
+            } else {  // 5 operand
+              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
               return 1;
             }
-          } else { // 4 operand
-            context->set_error(ErrorReporterInterface::MISSING_OPERAND); 
+          } else {  // 4 operand
+            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
             return 1;
           }
-        } else { // 3 operand
+        } else {  // 3 operand
           context->set_error(ErrorReporterInterface::MISSING_OPERAND);
           return 1;
         }
-      } else { // 2 operand
+      } else {  // 2 operand
         context->set_error(ErrorReporterInterface::MISSING_OPERAND);
         return 1;
       }
-    } else { // 1 operand
+    } else {  // 1 operand
       context->set_error(ErrorReporterInterface::MISSING_OPERAND);
       return 1;
     }
-  } else { // DATA_TYPE_ID
+  } else {  // DATA_TYPE_ID
     context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
     return 1;
   }
@@ -3209,20 +3209,20 @@ int Ldc(Context* context) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == ';') {
           return 0;
-        } else { // ';'
+        } else {  // ';'
           context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
           return 1;
         }
-      } else { // label or identifier
+      } else {  // label or identifier
         context->set_error(ErrorReporterInterface::MISSING_LABEL);
         context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
         return 1;
       }
-    } else { // operand
+    } else {  // operand
       context->set_error(ErrorReporterInterface::MISSING_OPERAND);
       return 1;
     }
-  } else { // datatypeid
+  } else {  // datatypeid
     context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
     return 1;
   }
@@ -3433,7 +3433,7 @@ int Mul(Context* context) {
         return 1;
       }
     }
-    case MUL24: 
+    case MUL24:
     case MUL24_HI: {
       if (!Mul24Inst(first_token, context)) {
         break;
@@ -3441,7 +3441,7 @@ int Mul(Context* context) {
         return 1;
       }
     }
-    case MAD24: 
+    case MAD24:
     case MAD24_HI: {
       if (!Mad24Inst(first_token, context)) {
         break;
@@ -3465,23 +3465,23 @@ int Mul(Context* context) {
         return 1;
       }
       context->token_to_scan = yylex();
-              
+
       if (!Operand(context)) {
         if (context->token_to_scan == ';') {
           return 0;
-        } else { // ';'
+        } else {  // ';'
           context->set_error(ErrorReporterInterface::MISSING_OPERAND);
           return 1;
         }
-      } else { // Operand 3 or 4
+      } else {  // Operand 3 or 4
         context->set_error(ErrorReporterInterface::MISSING_OPERAND);
         return 1;
       }
-    } else { // Operand 2 or 3
+    } else {  // Operand 2 or 3
       context->set_error(ErrorReporterInterface::MISSING_OPERAND);
       return 1;
     }
-  } else { // Operand 1 or 2
+  } else {  // Operand 1 or 2
     context->set_error(ErrorReporterInterface::MISSING_OPERAND);
     return 1;
   }
