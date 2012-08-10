@@ -1238,10 +1238,10 @@ int ArgumentDecl(Context* context) {
           BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
           BrigdOffset32_t next_directive = bdf.d_nextDirective;
           if (first_scope == next_directive) {
-            bdf.d_nextDirective += 36;
+            bdf.d_nextDirective += 40;
             bdf.d_firstScopedDirective = bdf.d_nextDirective;
           } else {
-            bdf.d_nextDirective += 36;
+            bdf.d_nextDirective += 40;
           }
 
           // update param count

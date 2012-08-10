@@ -18,6 +18,57 @@ namespace brig {
 
 extern ErrorReporter* main_reporter;
 extern Context* context;
+TEST(CodegenTest, ExampleWithKernel) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("version 1:0:$large ; \n");
+  //input.append("global_f32 &x = 2 ; \n");
+  input.append("kernel &demo(kernarg_f32 %x) { \n");
+  input.append("private_u32 %z ; \n");
+  input.append("ret; \n");
+  input.append("};\n");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+
+  EXPECT_EQ(0, Version(context));
+  //EXPECT_EQ(0, InitializableDecl(context));
+  EXPECT_EQ(0, Kernel(context));
+
+  // test the size of each section
+  BrigdOffset32_t dsize = context->get_directive_offset();
+  //  EXPECT_EQ(204, dsize);
+  EXPECT_EQ(216, dsize);
+  BrigdOffset32_t csize = context->get_code_offset();
+  EXPECT_EQ(32, csize);
+
+  BrigDirectiveKernel ref = {
+    40,                       // size
+    BrigEDirectiveKernel,   // kind
+    0,                       // c_code
+    3,                       // s_name
+    1,                        // inParamCount
+    216,                      // d_firstScopedDirective
+    1,                        // operationCount
+    216,                      // d_nextDirective
+    BrigNone,                  //attribute
+    0,                         //fbar
+    0,                        // outParamCount
+    136,                        //d_firstInParam
+  };
+
+  // test BrigDirectiveFunction, the caller function
+  BrigDirectiveFunction get;
+  context->get_directive(context->current_bdf_offset, &get);
+  EXPECT_EQ(ref.s_name, get.s_name);
+  EXPECT_EQ(ref.c_code, get.c_code);
+  EXPECT_EQ(ref.outParamCount, get.outParamCount);
+  EXPECT_EQ(ref.inParamCount, get.inParamCount);
+  EXPECT_EQ(ref.operationCount, get.operationCount);
+  EXPECT_EQ(ref.d_nextDirective, get.d_nextDirective);
+  EXPECT_EQ(ref.d_firstScopedDirective, get.d_firstScopedDirective);
+};
 
 TEST(CodegenTest, CallwMultiArgs) {
   context->set_error_reporter(main_reporter);
@@ -464,9 +515,9 @@ TEST(CodegenTest, Example3_CodeGen) {
     0,                        // c_code
     0,                        // s_name
     0,                        // inParamCount
-    96,                       // d_firstScopedDirective
+    100,                       // d_firstScopedDirective
     2,                        // operationCount
-    96,                       // d_nextDirective
+    100,                       // d_nextDirective
     BrigStatic,
     0,
     1,                        // outParamCount
@@ -692,9 +743,9 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
     0,                        // c_code
     0,                        // s_name
     0,                        // inParamCount
-    96,                       // d_firstScopedDirective
+    100,                       // d_firstScopedDirective
     1,                        // operationCount
-    96,                       // d_nextDirective
+    100,                       // d_nextDirective
     BrigNone,
     0,
     1,                        // outParamCount
