@@ -1865,4 +1865,6 @@ query_filtering   { free_string(context);
 
 .   { fprintf(stderr, "Unexpected char %s\n", yytext); 
       free_string(context); 
+      context->token_to_scan = 0;
+      context->token_type = UNKNOWN;
       return 0;}

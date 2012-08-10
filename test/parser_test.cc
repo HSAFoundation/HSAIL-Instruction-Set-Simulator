@@ -1948,7 +1948,7 @@ TEST(ParserTest, OperandList) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
-  std::string input("$s1, $c4, $d4,$q2 ");
+  std::string input("$s1, $c4, $d4, $q2 \n");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, OperandList(context));
@@ -1966,14 +1966,14 @@ TEST(ParserTest, OperandList) {
   EXPECT_EQ(0, OperandList(context));
 
   input.assign("&g1, &g2, %l, $s1,$s1, $c4, $d4,$q2,-77, $c4, $d4,$q2,\n");
-  input.append("$s1, $c4, $d4,$q2,2343.2f, $c4, $d4,1.123,5, $c4, $d4,$q2\n");
+  input.append("$s1, $c4, $d4,$q2, 1.2l, 2.33f , $c4, $d4, 5, $c4, $d4,$q2\n");
   // the number of operands is 24
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OperandList(context));
 
-  input.assign(",$s5, $s0 ,$s6\n");  // redundant ','
+  input.assign(", $s5, $s0 ,$s6\n");  // redundant ','
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();

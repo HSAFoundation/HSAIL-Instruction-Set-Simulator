@@ -394,14 +394,14 @@ int CallArgs(Context* context) {
     }
 
     if (context->token_to_scan == ')') {
-      size_t listSize = sizeof(BrigOperandArgumentList);
+      size_t kListSize = sizeof(BrigOperandArgumentList);
       if (n_elements > 1)
-        listSize += sizeof(BrigoOffset32_t) * (n_elements - 1);
+        kListSize += sizeof(BrigoOffset32_t) * (n_elements - 1);
 
-      char array[listSize];
+      char array[kListSize];
       BrigOperandArgumentList &arg_list =
         *reinterpret_cast<BrigOperandArgumentList *>(array);
-      arg_list.size = listSize;
+      arg_list.size = kListSize;
       arg_list.kind = BrigEOperandArgumentList;
       arg_list.elementCount = n_elements;
       for (uint32_t i = 0; i < n_elements; ++i) {
@@ -2781,7 +2781,6 @@ int LabelTargets(Context* context) {
           if (context->token_to_scan == ',') {
             continue;
           } else if (context->token_to_scan == ';') {
-            context->token_to_scan = yylex();
             return 0;
           } else {
             context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
@@ -2793,8 +2792,9 @@ int LabelTargets(Context* context) {
         }
       }
     }
+  } else {
+    context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
@@ -2957,8 +2957,9 @@ int OperandList(Context* context) {
         return 0;
       }
     }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_OPERAND);
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
@@ -3007,8 +3008,9 @@ int Cmp(Context* context) {
       context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
       return 1;
     }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_COMPARISON_TYPE);
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 

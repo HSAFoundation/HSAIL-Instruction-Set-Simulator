@@ -50,6 +50,7 @@ class ErrorReporterInterface {
                    MISSING_ARGUMENT,
                    MISSING_ARGUMENT_LIST,
                    MISSING_OPERAND,
+                   MISSING_COMPARISON_TYPE,
 
                    UNKNOWN_ERROR
                  };
@@ -84,7 +85,7 @@ class ErrorReporterInterface {
         case MISSING_LABEL:
           return std::string("Missing label.");
         case MISSING_SREGISTER:
-          return std::string("A S-register required");
+          return std::string("A S-register required.");
 
 
         case MISSING_COLON:
@@ -133,6 +134,8 @@ class ErrorReporterInterface {
           return std::string("Missing argument list.");
         case MISSING_OPERAND:
           return std::string("Missing operand.");
+        case MISSING_COMPARISON_TYPE:
+          return std::string("Missing type of comparison.");
 
       case UNKNOWN_ERROR:
         default:
