@@ -3145,10 +3145,24 @@ int Ldc(Context* context) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == ';') {
           return 0;
-        }  // ';'
-      }  // label or identifier
-    }  // operand
-  }  // datatypeid
+        } else { // ';'
+          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+          return 1;
+        }
+      } else { // label or identifier
+        context->set_error(ErrorReporterInterface::MISSING_LABEL);
+        context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+        return 1;
+      }
+    } else { // operand
+      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      return 1;
+    }
+  } else { // datatypeid
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
