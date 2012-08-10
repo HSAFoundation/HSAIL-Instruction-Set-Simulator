@@ -1155,5 +1155,1421 @@ TEST(ErrorReportingTest, UseMockErrorReporter) {
   context1->set_error_reporter(old_rpt);
   context1->clear_context();
 }
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_s32) {
+
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_s32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_s64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_s64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_u32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_u32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_u64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_u64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_p_s8x4) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs8x4,
+    BrigPackP,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_p_s8x4 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  
+}
+
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_p_s16x2) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs16x2,
+    BrigPackP,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_p_s16x2 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_p_s8x8) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs8x8,
+    BrigPackP,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_p_s8x8 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_p_s16x4) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs16x4,
+    BrigPackP,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_p_s16x4 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_s_s8x4) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs8x4,
+    BrigPackS,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_s_s8x4 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_s_s16x2) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs16x2,
+    BrigPackS,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_s_s16x2 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_s_s8x8) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs8x8,
+    BrigPackS,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_s_s8x8 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_abs_s_s16x4) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigAbs,
+    Brigs16x4,
+    BrigPackS,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("abs_s_s16x4 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_s32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_s32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_s64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_s64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_u32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_u32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_u64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_u64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_p_s8x4) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs8x4,
+    BrigPackP,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_p_s8x4 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_p_s16x2) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs16x2,
+    BrigPackP,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_p_s16x2 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_p_s8x8) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs8x8,
+    BrigPackP,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_p_s8x8 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_p_s16x4) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs16x4,
+    BrigPackP,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_p_s16x4 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_s_s8x4) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs8x4,
+    BrigPackS,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_s_s8x4 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_s_s16x2) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs16x2,
+    BrigPackS,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_s_s16x2 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_s_s8x8) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs8x8,
+    BrigPackS,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_s_s8x8 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_neg_s_s16x4) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNeg,
+    Brigs16x4,
+    BrigPackS,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("neg_s_s16x4 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_not_b1) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNot,
+    Brigb1,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("not_b1 $c1, $c2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_not_b32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNot,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("not_b32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_not_b64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNot,
+    Brigb64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("not_b64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+
+TEST(CodegenTest, Instruction2Op_CodeGen_popcount_b32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigPopcount,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("popcount_b32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_popcount_b64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigPopcount,
+    Brigb64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("popcount_b64 $s1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_bitrev_s32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigBitRev,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("bitrev_s32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_bitrev_s64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigBitRev,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("bitrev_s64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_bitrev_u32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigBitRev,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("bitrev_u32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+ 
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_bitrev_u64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigBitRev,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("bitrev_u64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_mask_b64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigMask,
+    Brigb64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("mask_b64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_firstbit_s32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFirstbit,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("firstbit_s32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_firstbit_s64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFirstbit,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("firstbit_s64 $s1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_firstbit_u32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFirstbit,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("firstbit_u32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_firstbit_u64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFirstbit,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("firstbit_u64 $s1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_lastbit_s32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigLastbit,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("lastbit_s32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_lastbit_s64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigLastbit,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("lastbit_s64 $s1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_lastbit_u32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigLastbit,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("lastbit_u32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_lastbit_u64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigLastbit,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("lastbit_u64 $s1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_count_u32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigCount,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("count_u32 $s1, $s2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_movs_lo_b32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    Brigmovslo,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("movs_lo_b32 $s1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_movs_hi_b32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    Brigmovshi,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("movs_hi_b32 $s1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_fbar_initSizeKnown_b64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFbarInitSize,
+    Brigb64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("fbar_initSizeKnown_b64 $d1, $s1;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+}
+TEST(CodegenTest, Instruction2Op_CodeGen_fbar_release_b64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFbarReleaseCF,
+    Brigb64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+  std::string input("fbar_release_b64 $d1, $d2;");
+
+  yy_scan_string(reinterpret_cast<const char*> (input.c_str()));
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Instruction2(context));
+   
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+}
 }  // namespace brig
 }  // namespace hsa
