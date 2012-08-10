@@ -1186,7 +1186,8 @@ int ArrayDimensionSet(Context* context) {
 
 int ArgumentDecl(Context* context) {
   if (!DeclPrefix(context)) {
-    context->token_to_scan = yylex();  // skip over "arg" in context->token_to_scan
+    // skip over "arg" in context->token_to_scan
+    context->token_to_scan = yylex();
     if ((context->token_type == DATA_TYPE_ID)||
         (context->token_to_scan == _RWIMG) ||
         (context->token_to_scan == _SAMP) ||
@@ -2672,7 +2673,7 @@ int SysCall(Context* context) {
         } else {  // 4 operand
           context->set_error(ErrorReporterInterface::INVALID_OPERAND);
         }
-      } else { // 3 operand
+      } else {  // 3 operand
         context->set_error(ErrorReporterInterface::INVALID_OPERAND);
       }
     } else {  // 2 base operand
@@ -2908,7 +2909,7 @@ int Kernel(Context *context) {
   } else {
     context->set_error(ErrorReporterInterface:: MISSING_IDENTIFIER);
   }
-  return 1 ;
+  return 1;
 }
 
 int OperandList(Context* context) {
@@ -3197,20 +3198,20 @@ int CvtModifier1(Context* context) {
 int Mov(Context* context) {
 // first token is MOV "mov"
   context->token_to_scan = yylex();
- 
+
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
     if (!Operand(context) || !ArrayOperandList(context)) {
       if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();  
+        context->token_to_scan = yylex();
         if (!Operand(context) || !ArrayOperandList(context)) {
           if (context->token_to_scan == ';') {
             return 0;
-          } // ';'
-        } // Operand or ArrayOperandList
-      } // ','
-    } // Operand or ArrayOperandList
-  } // datatypeId    
+          }  // ';'
+        }  // Operand or ArrayOperandList
+      }  // ','
+    }  // Operand or ArrayOperandList
+  }  // datatypeId
   return 1;
 }
 
