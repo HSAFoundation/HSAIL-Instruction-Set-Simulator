@@ -581,7 +581,6 @@ TEST(ParserTest, Function) {
   EXPECT_EQ(0, Function(context));
 
   delete lexer;
-
 }
 
 TEST(ParserTest, SimpleProg) {
@@ -1165,7 +1164,8 @@ TEST(ParserTest, SysCall) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
 
-  input.assign("syscall $s2, 0xff, $d1, $s3, $s4;\n");  // src must be s register
+  // src must be s register
+  input.assign("syscall $s2, 0xff, $d1, $s3, $s4;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
@@ -1751,74 +1751,74 @@ TEST(ParserTest, Mov) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
-// correct cases
-  std::string input("mov_b64 $d1, $d4;\n"); // D register
+  // correct cases
+  std::string input("mov_b64 $d1, $d4;\n");  // D register
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
 
-  input.assign("mov_b128 $s5, $s6;\n"); // S register
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Mov(context));
- 
-  input.assign("mov_b128 $c1, $c2;\n"); // C register
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Mov(context));
- 
-  input.assign("mov_b128 $q3, $q5;\n"); // Q register
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Mov(context));
- 
-  input.assign("mov_b32 $s1, 0;\n"); // Immediate
+  input.assign("mov_b128 $s5, $s6;\n");  // S register
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
 
-  input.assign("mov_b32 $s4, (&global_id, %local_id);\n"); // Arrayoperandlist
+  input.assign("mov_b128 $c1, $c2;\n");  // C register
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
-// wrong cases
-  input.assign("mov $q1, $q2;\n"); // lack of modifier
+
+  input.assign("mov_b128 $q3, $q5;\n");  // Q register
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, Mov(context));
-  
-  input.assign("mov_b32 $c7;\n"); // lack of operand
+  EXPECT_EQ(0, Mov(context));
+
+  input.assign("mov_b32 $s1, 0;\n");  // Immediate
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Mov(context));
+
+  input.assign("mov_b32 $s4, (&global_id, %local_id);\n");  // Arrayoperandlist
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Mov(context));
+  // wrong cases
+  input.assign("mov $q1, $q2;\n");  // lack of modifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
 
-  input.assign("mov_b32 $s2, $s1\n"); // lack of ';'
+  input.assign("mov_b32 $c7;\n");  // lack of operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
 
-  input.assign("mov_b128 $s6, &global_id, %local_id);\n"); // lack of '('
+  input.assign("mov_b32 $s2, $s1\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
 
-  input.assign("mov_b32 $s2, $s3, $s1;\n"); // redundant operand
+  input.assign("mov_b128 $s6, &global_id, %local_id);\n");  // lack of '('
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
 
-  input.assign("mov_b32 , $q3, $q1;\n"); // redundant ','
+  input.assign("mov_b32 $s2, $s3, $s1;\n");  // redundant operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
- 
+
+  input.assign("mov_b32 , $q3, $q1;\n");  // redundant ','
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+
   delete lexer;
 };
 
-TEST(ParserTest,KernelArgumentList){
-  Lexer* lexer = new Lexer() ;
-  bool rescan_last_token = false ;
-  unsigned int last_token = 0 ;
+TEST(ParserTest, KernelArgumentList) {
+  Lexer* lexer = new Lexer();
+  bool rescan_last_token = false;
+  unsigned int last_token = 0;
 
   // test 1
   std::string input("const static kernarg_u32 %local_id[2][2] ");
@@ -1877,24 +1877,56 @@ TEST(ParserTest,KernelArgumentList){
   delete lexer;
 };
 
-TEST(ParserTest,KernelArgumentListBody){
+TEST(ParserTest, KernelArgumentListBody) {
   Lexer *lexer = new Lexer();
 
+
   std::string input("kernarg_f32 %x");
+
   lexer->set_source_string(input);
+  context->clear_context();
+  // initialize fake values
+  // which should be set in real case when parser parses a function def
+  context->current_bdf_offset = 0;
+  context->set_arg_output(false);
+  // append a fake BDF to directive buffer
+  BrigDirectiveFunction fake = {
+      40,                       // size
+      BrigEDirectiveFunction,   // kind
+      32,                       // c_code
+      32,                       // s_name
+      0,                        // inParamCount
+      220,                      // d_firstScopedDirective
+      1,                        // operationCount
+      316,                      // d_nextDirective
+      BrigNone,
+      0,
+      0,                        // outParamCount
+      0,
+  };
+  context->append_directive(&fake);
+
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0 , KernelArgumentListBody(context));
 
+
+
   input.assign("kernarg_u32 %y , kernarg_f32 %x");
   lexer->set_source_string(input);
+
+  context->clear_context();
+  // initialize fake values
+  // which should be set in real case when parser parses a function def
+  context->current_bdf_offset = 0;
+  context->set_arg_output(false);
+  context->append_directive(&fake);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0 , KernelArgumentListBody(context));
 
   delete lexer;
-
 };
 
-TEST(ParserTest , Kernel){
+TEST(ParserTest, Kernel) {
   Lexer *lexer = new Lexer();
 
   std::string input("kernel &demo (kernarg_f32 %x)");
@@ -1963,7 +1995,6 @@ TEST(ParserTest, OperandList) {
 };
 
 TEST(ParserTest, Cmp) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
@@ -2196,7 +2227,6 @@ TEST(ParserTest, OffsetAddressableOperand) {
 };
 
 TEST(ParserTest, MemoryOperand) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
@@ -2517,18 +2547,26 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   context->clear_context();
 
   // test size of various buffer
-  std::cout << "Directive buffer size before parsing = " << context->get_directive_offset() << std::endl;
-  std::cout << "Operand buffer size before parsing = " << context->get_operand_offset() << std::endl;
-  std::cout << "Code buffer size before parsing = " << context->get_code_offset() << std::endl;
-  std::cout << "String buffer size before parsing = " << context->get_string_offset() << std::endl;
+  std::cout << "Directive buffer size before parsing = ";
+  std::cout << context->get_directive_offset() << std::endl;
+  std::cout << "Operand buffer size before parsing = ";
+  std::cout << context->get_operand_offset() << std::endl;
+  std::cout << "Code buffer size before parsing = ";
+  std::cout << context->get_code_offset() << std::endl;
+  std::cout << "String buffer size before parsing = ";
+  std::cout << context->get_string_offset() << std::endl;
 
   EXPECT_EQ(0, parser->parse());
 
   // test size of various buffer
-  std::cout << "Directive buffer size after parsing = " << context->get_directive_offset() << std::endl;
-  std::cout << "Operand buffer size after parsing = " << context->get_operand_offset() << std::endl;
-  std::cout << "Code buffer size after parsing = " << context->get_code_offset() << std::endl;
-  std::cout << "String buffer size after parsing = " << context->get_string_offset() << std::endl;
+  std::cout << "Directive buffer size after parsing = ";
+  std::cout << context->get_directive_offset() << std::endl;
+  std::cout << "Operand buffer size after parsing = ";
+  std::cout << context->get_operand_offset() << std::endl;
+  std::cout << "Code buffer size after parsing = ";
+  std::cout << context->get_code_offset() << std::endl;
+  std::cout << "String buffer size after parsing = ";
+  std::cout << context->get_string_offset() << std::endl;
 
 
   delete parser;

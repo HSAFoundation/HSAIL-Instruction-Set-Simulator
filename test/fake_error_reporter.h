@@ -39,12 +39,11 @@ class FakeErrorReporter: public ErrorReporterInterface {
         std::cout << " (" <<  it->line_no << ", " << it->col_no << ") : ";
         std::cout << translate_error(it->error_code) << std::endl;
       }
-
     }
+
   private:
     // std::vector<error_t> error_buffer;
     std::vector<struct ErrorInfo_t> error_buffer;
-
 };
 }  // namespace brig
 }  // namespace hsa
