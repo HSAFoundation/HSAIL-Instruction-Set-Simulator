@@ -2783,16 +2783,17 @@ int LabelTargets(Context* context) {
             context->token_to_scan = yylex();
             return 0;
           } else {
-            // there is an illegal character behind TOKEN_LABEL
+            context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
             return 1;
           }
         } else {
-          // it isn't TOKEN_LABEL behind LABELTARGETS or ','
+          context->set_error(ErrorReporterInterface::MISSING_LABEL);
           return 1;
         }
       }
     }
   }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
