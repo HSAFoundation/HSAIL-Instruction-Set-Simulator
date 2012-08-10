@@ -2345,6 +2345,55 @@ TEST(LexTest, IntegerLiteral) {
 
 }
 
+TEST(ParserTest, GlobalGroupDecl) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("group_u32 &tmp[2][2];");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = yylex(); 
+  EXPECT_EQ(0, GlobalGroupDecl(context));
+
+  input.assign("group_s32 &tmp;");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalGroupDecl(context));
+
+  input.assign("group_b32 &tmp[2];");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalGroupDecl(context));
+  
+  // wrong case
+  input.assign("group_s32 %tmp;"); // %tmp is not global identifier
+  lexer->set_source_string(input);
+
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalGroupDecl(context));
+
+  input.assign("group_u32 &tmp"); // lack of ';'
+  lexer->set_source_string(input);
+
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalGroupDecl(context));
+
+  input.assign("group_u32;"); // lack of identifier
+  lexer->set_source_string(input);
+
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalGroupDecl(context));
+
+  delete lexer;
+};
+
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
@@ -2429,56 +2478,6 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   delete parser;
 };
 
-
-
-
-TEST(ParserTest, GlobalGroupDecl) {
-
-  // Create a lexer
-  Lexer* lexer = new Lexer();
-
-  // register error reporter with context
-  context->set_error_reporter(main_reporter);
-
-  std::string input("group_u32 &tmp[2][2];");
-  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
-  context->clear_context();
-  context->token_to_scan = yylex(); 
-  EXPECT_EQ(0, GlobalGroupDecl(context));
-
-  input.assign("group_s32 &tmp;");
-  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
-  context->clear_context();
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalGroupDecl(context));
-
-  input.assign("group_b32 &tmp[2];");
-  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
-  context->clear_context();
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalGroupDecl(context));
-  
-  // wrong case
-  input.assign("group_s32 %tmp;"); // %tmp is not global identifier
-  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
-  context->clear_context();
-  context->token_to_scan = yylex();
-  EXPECT_NE(0, GlobalGroupDecl(context));
-
-  input.assign("group_u32 &tmp"); // lack of ';'
-  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
-  context->clear_context();
-  context->token_to_scan = yylex();
-  EXPECT_NE(0, GlobalGroupDecl(context));
-
-  input.assign("group_u32;"); // lack of identifier
-  lexer->set_source_string(reinterpret_cast<const char*>(input.c_str()));
-  context->clear_context();
-  context->token_to_scan = yylex();
-  EXPECT_NE(0, GlobalGroupDecl(context));
-
-  delete lexer;
-};
 
 
 }  // namespace brig

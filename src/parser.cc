@@ -3028,13 +3028,17 @@ int GlobalPrivateDecl(Context* context) {
         return 0;
       } else {
         context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        return 1;
       }
     } else {
       context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      return 1;
     }
   } else {
     context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    return 1;
   }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
@@ -3342,6 +3346,31 @@ int IntegerLiteral(Context* context) {
 
 
 int GlobalGroupDecl(Context* context) {
+  // first token is Group
+  context->token_to_scan = yylex();
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == '[') {
+        if (!ArrayDimensionSet(context)) {}
+      }
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        return 1;
+      }
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      return 1;
+    }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
