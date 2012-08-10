@@ -2762,9 +2762,12 @@ int Label(Context* context) {
     if (yylex() == ':') {
       context->token_to_scan = yylex();
       return 0;
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_COLON);
+      return 1;
     }
   }
-
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
