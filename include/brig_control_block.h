@@ -2,7 +2,6 @@
 #define _BRIG_CONTROL_BLOCK_H_
 
 #include "brig_util.h"
-#include "brig_inst.h"
 
 namespace hsa {
 namespace brig {
