@@ -68,7 +68,6 @@ int Mul(Context* context);
 int MulInst(Context* context);
 int Mul24Inst(Context* context);
 int Mad24Inst(Context* context);
-
 int Ld(Context* context);
 int LdModifier(Context* context);
 int St(Context* context);
