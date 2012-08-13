@@ -3072,16 +3072,19 @@ TEST(ErrorReporting, CheckErrorHistory) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, mer.get_last_error());
 
   input.assign("private_u32 &tmp\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(ErrorReporterInterface::MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("private_u32;\n");  // lack of identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, mer.get_last_error());
 
   EXPECT_CALL(mer, show_all_error());
 

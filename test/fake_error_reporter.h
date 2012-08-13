@@ -58,6 +58,10 @@ class FakeErrorReporter: public ErrorReporterInterface {
       }
     }
 
+    error_t get_last_error() {
+      return (error_buffer[no_errors-1].error_code);
+    }
+
 
 
   private:

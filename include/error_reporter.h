@@ -32,6 +32,10 @@ class ErrorReporter: public ErrorReporterInterface {
     error_t get_error_at(unsigned int index) {
       return OK;
     }
+
+    error_t get_last_error() {
+      return OK;
+    }
 };
 }  // namespace brig
 }  // namespace hsa
