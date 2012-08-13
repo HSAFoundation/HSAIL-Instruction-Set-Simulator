@@ -37,6 +37,8 @@ class GenLLVM {
   llvm::Type *gpu_states_type_;
   std::string output_;
 };
-}
-}
+
+} // namespace brig
+} // namespace hsa
+
 #endif  // INCLUDE_BRIG_LLVM_H_

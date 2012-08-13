@@ -9,6 +9,9 @@
 
 typedef uint16_t BrigPacking16_t;
 typedef uint16_t BrigDataType16_t;
+typedef uint32_t BrigGeom32_t;
+typedef uint32_t BrigImageFormat32_t;
+typedef uint32_t BrigDirectiveKinds32_t;
 typedef uint32_t BrigsOffset32_t;
 typedef uint32_t BrigcOffset32_t;
 typedef uint32_t BrigdOffset32_t;
@@ -16,10 +19,14 @@ typedef uint32_t BrigoOffset32_t;
 typedef uint16_t BrigMachine16_t;
 typedef uint16_t BrigProfile16_t;
 typedef uint16_t BrigSftz16_t;
+typedef uint32_t BrigControlType32_t;
 typedef uint16_t BrigAttribute16_t;
 typedef uint32_t BrigStorageClass32_t;
+typedef uint32_t BrigImageOrder32_t;
 typedef uint32_t BrigOpcode32_t;
+typedef uint32_t BrigAtomicOperation32_t;
 typedef uint32_t BrigMemorySemantic32_t;
+typedef uint32_t BrigCompareOperation32_t;
 
 // Enums
 
@@ -40,6 +47,14 @@ enum BrigAttribute {
     BrigStatic,
     BrigNone
 };
+
+// 20.5.6
+enum BrigControlType {
+  BrigEMaxTid,
+  BrigEMaxGperC,
+  BrigEMemOpt
+};
+
 // 20.5.7
 enum BrigDataType {
     Brigs8,            // signed integer 8 bits
@@ -95,7 +110,7 @@ enum BrigDirectiveKinds {
   BrigEDirectiveKernel,
   BrigEDirectiveSymbol,
   BrigEDirectiveImage,
-  BrigEDirectiveSamp,
+  BrigEDirectiveSampler,
   BrigEDirectiveLabel,
   BrigEDirectiveLabelList,
   BrigEDirectiveVersion,
@@ -336,7 +351,7 @@ enum BrigOpcode {
 
 // Brig Support Structures
 // BrigAluModifier specifies arithmetic logic unit controls:
-typedef struct BrigAluModifier {
+struct BrigAluModifier {
   uint32_t floatOrInt: 1;
   uint32_t rounding: 2;
   uint32_t hi: 1;
@@ -344,18 +359,71 @@ typedef struct BrigAluModifier {
   uint32_t approx: 1;
   uint32_t fbar: 1;
   uint32_t reserved: 25;
-} BrigAluModifier;
+};
+
+// PRM 20.3.2
+struct BrigSymbolCommon {
+  BrigcOffset32_t c_code;
+  BrigStorageClass32_t storageClass;
+  BrigAttribute16_t attribute;
+  uint16_t reserved;
+  uint32_t symbolModifier;
+  uint32_t dim;
+  BrigsOffset32_t s_name;
+  BrigDataType16_t type;
+  uint16_t align;
+};
 
 // Directive structures
 
-// 20.8.3
+// PRM 20.8.3
 struct BrigDirectiveBase {
   uint16_t size;
   uint16_t kind;
 };
 
-// 20.8.8
+// PRM 20.8.4
+struct BrigDirectiveComment {
+  static const uint16_t DIRKIND = BrigEDirectiveComment;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigsOffset32_t s_name;
+};
+
+// PRM 20.8.5
+struct BrigDirectiveControl {
+  static const uint16_t DIRKIND = BrigEDirectiveControl;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigControlType32_t controlType;
+  uint32_t values[3];
+};
+
+// PRM 20.8.6
+struct BrigDirectiveExtension {
+  static const uint16_t DIRKIND = BrigEDirectiveExtension;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigsOffset32_t s_name;
+};
+
+// PRM 20.8.7
+struct BrigDirectiveFile {
+  static const uint16_t DIRKIND = BrigEDirectiveFile;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  uint32_t fileid;
+  BrigsOffset32_t s_filename;
+};
+
+
+// PRM 20.8.8
 struct BrigDirectiveFunction {
+  static const uint16_t DIRKIND = BrigEDirectiveFunction;
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -370,8 +438,135 @@ struct BrigDirectiveFunction {
   BrigdOffset32_t d_firstInParam;
 };
 
+// PRM 20.8.9
+struct BrigDirectiveImage {
+  static const uint16_t DIRKIND = BrigEDirectiveImage;
+  uint16_t size;
+  uint16_t kind;
+  BrigSymbolCommon s;
+  uint32_t width;
+  uint32_t height;
+  uint32_t depth;
+  uint32_t array;
+  BrigImageOrder32_t order;
+  BrigImageFormat32_t format;
+};
+
+// PRM 20.8.10
+struct BrigDirectiveInit {
+  static const uint16_t DIRKIND = BrigEDirectiveInit;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  uint32_t elementCount;
+  BrigDataType16_t type;
+  uint16_t reserved;
+
+  union {
+    uint8_t u8[8];
+    uint16_t u16[4];
+    uint32_t u32[2];
+    uint64_t u64[1];
+  } initializationData;
+};
+
+
+// PRM 20.8.11
+struct BrigDirectiveKernel {
+  static const uint16_t DIRKIND = BrigEDirectiveKernel;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigsOffset32_t s_name;
+  uint32_t inParamCount;
+  BrigdOffset32_t d_firstScopedDirective;
+  uint32_t operationCount;
+  BrigdOffset32_t d_nextDirective;
+  BrigAttribute16_t attribute;
+  uint16_t fbarCount;
+  uint32_t outParamCount;
+  BrigdOffset32_t d_firstInParam;
+};
+
+struct BrigDirectiveMethod {
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigsOffset32_t s_name;
+  uint32_t inParamCount;
+  BrigdOffset32_t d_firstScopedDirective;
+  uint32_t operationCount;
+  BrigdOffset32_t d_nextDirective;
+  BrigAttribute16_t attribute;
+  uint16_t fbarCount;
+  uint32_t outParamCount;
+  BrigdOffset32_t d_firstInParam;
+};
+
+// PRM 20.8.12
+// BrigDirectiveLabel
+// BrigDirectiveLabel declares a label.
+struct BrigDirectiveLabel {
+  static const uint16_t DIRKIND = BrigEDirectiveLabel;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigsOffset32_t s_name;
+};
+
+// PRM 20.8.13
+struct BrigDirectiveLabelInit {
+  static const uint16_t DIRKIND = BrigEDirectiveLabelInit;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  uint32_t elementCount;
+  BrigdOffset32_t d_labels[1];
+};
+
+// PRM 20.8.14
+struct BrigDirectiveLabelList {
+  static const uint16_t DIRKIND = BrigEDirectiveLabelList;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  uint32_t elementCount;
+  BrigdOffset32_t d_labels[1];
+};
+
+// PRM 20.8.15
+struct BrigDirectiveLoc {
+  static const uint16_t DIRKIND = BrigEDirectiveLoc;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  uint32_t sourceFile;
+  uint32_t sourceLine;
+  uint32_t sourceColumn;
+};
+
+// PRM 20.8.16
+// BrigDirectivePad
+// BrigDirectivePad is used to pad out the
+// .directives stream to ensure alignment.
+struct BrigDirectivePad {
+  static const uint16_t DIRKIND = BrigEDirectivePad;
+  uint16_t size;
+  uint16_t kind;
+};
+
+// PRM 20.8.17
+struct BrigDirectivePragma {
+  static const uint16_t DIRKIND = BrigEDirectivePragma;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+  BrigsOffset32_t s_name;
+};
+
 // PRM 20.8.18
 struct BrigDirectiveProto {
+  static const uint16_t DIRKIND = BrigEDirectiveProto;
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -388,17 +583,42 @@ struct BrigDirectiveProto {
   } types[1];
 };
 
-// PRM 20.3.2
-struct BrigSymbolCommon {
+// PRM 20.8.19
+struct BrigDirectiveSampler {
+  static const uint16_t DIRKIND = BrigEDirectiveSampler;
+  uint16_t size;
+  uint16_t kind;
+  BrigSymbolCommon s;
+  uint8_t valid: 1;
+  uint8_t normalized: 1;
+  uint8_t filter:6;
+  uint8_t boundaryU;
+  uint8_t boundaryV;
+  uint8_t boundaryW;
+  uint32_t reserved1;
+};
+
+// PRM 20.8.20
+// BrigDirectiveScope
+// BrigDirectiveScope is used to start or end a scope.
+struct BrigDirectiveScope {
+  uint16_t size;
+  uint16_t kind;
   BrigcOffset32_t c_code;
-  BrigStorageClass32_t storageClass;
-  BrigAttribute16_t attribute;
-  uint16_t reserved;
-  uint32_t symbolModifier;
-  uint32_t dim;
-  BrigsOffset32_t s_name;
-  BrigDataType16_t type;
-  uint16_t align;
+};
+
+struct BrigDirectiveArgStart {
+  static const uint16_t DIRKIND = BrigEDirectiveArgStart;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
+};
+
+struct BrigDirectiveArgEnd {
+  static const uint16_t DIRKIND = BrigEDirectiveArgEnd;
+  uint16_t size;
+  uint16_t kind;
+  BrigcOffset32_t c_code;
 };
 
 // 20.8.21
@@ -407,6 +627,7 @@ struct BrigSymbolCommon {
 // is a uint16_t kind or the second 16-bit word of BrigSymbolCommon's c_code
 // field. This view is supported by Table 20-3 in the HSA PRM.
 struct BrigDirectiveSymbol {
+  static const uint16_t DIRKIND = BrigEDirectiveSymbol;
   uint16_t size;
   uint16_t kind;
   BrigSymbolCommon s;
@@ -414,8 +635,15 @@ struct BrigDirectiveSymbol {
   uint32_t reserved;
 };
 
+struct BrigDirectiveSymbolCommon {
+  uint16_t size;
+  uint16_t kind;
+  BrigSymbolCommon s;
+};
+
 // 20.8.22
 struct BrigDirectiveVersion {
+    static const uint16_t DIRKIND = BrigEDirectiveVersion;
     uint16_t size;
     uint16_t kind;
     BrigcOffset32_t c_code;
@@ -427,7 +655,14 @@ struct BrigDirectiveVersion {
     uint16_t reserved;
 };
 
-// 20.6.3
+// PRM 20.6.2
+struct BrigBlockEnd {
+  static const uint16_t DIRKIND = BrigEDirectiveBlockEnd;
+  uint16_t size;
+  uint16_t kind;
+};
+
+// PRM 20.6.3
 // BrigBlockNumeric
 // BrigBlockNumeric is a variable-size list of numeric values.
 // All the values should have
@@ -436,7 +671,8 @@ struct BrigDirectiveVersion {
 // in a single block section.
 // This structure must be aligned to an 8-byte boundary
 // (because of the uint64_t field).
-typedef struct BrigBlockNumeric {
+struct BrigBlockNumeric {
+  static const uint16_t DIRKIND = BrigEDirectiveBlockNumeric;
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -447,57 +683,29 @@ typedef struct BrigBlockNumeric {
     uint32_t u32[2];
     uint64_t u64[1];
   };
-} BrigBlockNumeric;
+};
 
-// 20.6.4
+// PRM 20.6.4
 // BrigBlockStart
 // BrigBlockStart starts a block section.
 // It provides a name that can be used to separate information used by different
 // debuggers or runtimes.
 // More than one BrigBlockStart can have the same name.
-typedef struct BrigBlockStart {
+struct BrigBlockStart {
+  static const uint16_t DIRKIND = BrigEDirectiveBlockStart;
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
   BrigsOffset32_t s_name;
-} BrigBlockStart;
+};
 
-// 20.8.16
-// BrigDirectivePad
-// BrigDirectivePad is used to pad out the
-// .directives stream to ensure alignment.
-typedef struct BrigDirectivePad {
+// PRM 20.6.5
+struct BrigBlockString {
+  static const uint16_t DIRKIND = BrigEDirectiveBlockString;
   uint16_t size;
   uint16_t kind;
-} BrigDirectivePad;
-
-// BrigDirectiveLabel
-// BrigDirectiveLabel declares a label.
-typedef struct BrigDirectiveLabel {
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
   BrigsOffset32_t s_name;
-} BrigDirectiveLabel;
-
-// BrigDirectiveKernel describes a kernel.
-// A BrigDirectiveKernel contains offsets to the code and the name of the
-// kernel. A BrigDirectiveKernel is laid out identically to a
-// BrigDirectiveFunction, except that a function can have return parameters.
-typedef struct BrigDirectiveKernel {
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
-  uint32_t inParamCount;
-  BrigdOffset32_t d_firstScopedDirective;
-  uint32_t operationCount;
-  BrigdOffset32_t d_nextDirective;
-  BrigAttribute16_t attribute;
-  uint16_t fbarCount;
-  uint32_t outParamCount;
-  BrigdOffset32_t d_firstInParam;
-} BrigDirectiveKernel;
+};
 
 // Code structures
 
@@ -514,18 +722,18 @@ struct BrigInstLdSt {
   uint32_t equivClass;
 };
 
-typedef struct BrigInstBase {
+struct BrigInstBase {
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
   BrigDataType16_t type;
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
-} BrigInstBase;
+};
 
 // BrigInstMod
 // The BrigInstMod format is used for ALU operations with a modifier.
-typedef struct BrigInstMod {
+struct BrigInstMod {
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -533,11 +741,11 @@ typedef struct BrigInstMod {
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
   BrigAluModifier aluModifier;
-} BrigInstMod;
+};
 
 // BrigInstBar
 // The BrigInstBar format is used for the barrier and sync operations.
-typedef struct BrigInstBar {
+struct BrigInstBar {
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -545,22 +753,22 @@ typedef struct BrigInstBar {
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
   uint32_t syncFlags;
-} BrigInstBar;
+};
 
 // Operand structures
 // BrigOperandReg
 // BrigOperandReg is used for a register (c, s, or d).
-typedef struct BrigOperandReg {
+struct BrigOperandReg {
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
   uint16_t reserved;
   uint32_t name;
-} BrigOperandReg;
+};
 
 // BrigOperandImmed
 // BrigOperandImmed is used for a numeric value.
-typedef struct BrigOperandImmed {
+struct BrigOperandImmed {
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -573,47 +781,38 @@ typedef struct BrigOperandImmed {
     uint16_t h;
     uint8_t c;
   } bits;
-} BrigOperandImmed;
+};
 
 // BrigOperandAddress
 // BrigOperandAddress is used for [name].
 // In the .operands section, BrigOperandAddress must start
 // on an offset divisible by 4.
-typedef struct BrigOperandAddress {
+struct BrigOperandAddress {
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
   uint16_t reserved;
   BrigdOffset32_t directive;
   int32_t offset;
-} BrigOperandAddress;
+};
 
 // BrigOperandLabelRef
 // BrigOperandLabelRef is used for a label.
-typedef struct BrigOperandLabelRef {
+struct BrigOperandLabelRef {
   uint16_t size;
   uint16_t kind;
   uint32_t labeldirective;
-} BrigOperandLabelRef;
-
-
-// BrigDirectiveScope
-// BrigDirectiveScope is used to start or end a scope.
-typedef struct BrigDirectiveScope {
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-} BrigDirectiveScope;
+};
 
 
 // BrigOperandFunctionRef
 // BrigOperandFunctionRef is used for a reference
 // to a function or function signature.
-typedef struct BrigOperandFunctionRef {
+struct BrigOperandFunctionRef {
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t fn;
-} BrigOperandFunctionRef;
+};
 
 // BrigOperandArgumentList
 // BrigOperandArgumentList is used for the list of
@@ -621,19 +820,20 @@ typedef struct BrigOperandFunctionRef {
 // function names or function signatures.
 // Lists of function names or function signatures
 // are needed when the call statement has a list of possible targets.
-typedef struct BrigOperandArgumentList {
+struct BrigOperandArgumentList {
   uint16_t size;
   uint16_t kind;
   uint32_t elementCount;
   BrigdOffset32_t o_args[1];
-} BrigOperandArgumentList;
+};
+
 // BrigOperandArgumentRef
 // BrigOperandArgumentRef is used for a single argument.
-typedef struct BrigOperandArgumentRef {
+struct BrigOperandArgumentRef {
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t arg;
-} BrigOperandArgumentRef;
+};
 
 
 #endif  // INCLUDE_BRIG_H_
