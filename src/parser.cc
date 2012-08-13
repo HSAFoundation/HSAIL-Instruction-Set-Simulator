@@ -4177,7 +4177,29 @@ int St_image(Context* context) {
 
 int SingleListSingle(Context * context)
 {
-	return 1;
+	if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+        while (1) {
+			context->token_to_scan = yylex();
+			if (context->token_to_scan == ',') {
+				context->token_to_scan = yylex();
+				if(context->token_to_scan == TOKEN_SINGLE_CONSTANT)
+					continue;
+				else {
+					context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+					return 1;
+				}	
+			}		
+			else { 
+				return 0;
+			}	
+        }
+    }
+	else {
+		context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+        return 1;
+    }
+	
+	return 0;
 }
 
 }  // namespace brig
