@@ -2862,9 +2862,11 @@ int LabelTargets(Context* context) {
           return 1;
         }
       }
+    } else {
+      context->set_error(UNKNOWN_ERROR);
     }
   } else {
-    context->set_error(UNKNOWN_ERROR);
+    context->set_error(INVALID_LABEL);
   }
   return 1;
 }
@@ -2914,7 +2916,7 @@ int Instruction4(Context* context) {
           context->set_error(MISSING_OPERAND);
           return 1;
         }
-      } else {  // 1 operand
+     } else {  // 1 operand
         context->set_error(MISSING_OPERAND);
         return 1;
       }

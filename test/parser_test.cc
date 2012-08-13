@@ -1336,7 +1336,7 @@ TEST(ParserTest, LabelTargets) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
-  EXPECT_EQ(INVALID_LABEL, mer.get_last_error());
+  EXPECT_EQ(MISSING_LABEL, mer.get_last_error());
 
 
   // redundant ','
@@ -1350,7 +1350,7 @@ TEST(ParserTest, LabelTargets) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
-  EXPECT_EQ(INVALID_LABEL, mer.get_last_error());
+  EXPECT_EQ(MISSING_LABEL, mer.get_last_error());
 
   input.assign("@targets: labeltargets @label\n");  // lack of ';'
   lexer->set_source_string(input);
