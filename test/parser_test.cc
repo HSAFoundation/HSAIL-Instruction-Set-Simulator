@@ -1249,10 +1249,6 @@ TEST(ParserTest, SysCall) {
   EXPECT_NE(0, SysCall(context));
   EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
-  EXPECT_CALL(mer,show_all_error())
-    .Times(AtLeast(1));
-  mer.show_all_error();
-
   delete lexer;
 };
 
@@ -1299,10 +1295,6 @@ TEST(ParserTest, Label) {
   EXPECT_NE(0, Label(context));
   EXPECT_EQ(INVALID_LABEL, mer.get_last_error());
 
-  EXPECT_CALL(mer,show_all_error())
-    .Times(AtLeast(1));
-  mer.show_all_error();
-
   delete lexer;
 };
 
@@ -1317,6 +1309,8 @@ TEST(ParserTest, LabelTargets) {
   mer.DelegateToFake();
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
      .Times(AtLeast(1));
 
   std::string input("@tab: labeltargets @a1, @a2;\n");
@@ -1342,22 +1336,27 @@ TEST(ParserTest, LabelTargets) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+  EXPECT_EQ(INVALID_LABEL, mer.get_last_error());
+
 
   // redundant ','
   input.assign("@targets: ,labeltargets @label1, @label2, @label3;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+  EXPECT_EQ(UNKNOWN_ERROR, mer.get_last_error());
 
   input.assign("@targets: labeltargets;\n");  // number of label is zero
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+  EXPECT_EQ(INVALID_LABEL, mer.get_last_error());
 
   input.assign("@targets: labeltargets @label\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   delete lexer;
 };
