@@ -2589,7 +2589,72 @@ TEST(ParserTest, Ld) {
   delete lexer;
 
 };
+TEST(ParserTest, St) {
 
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("st_f32 $s1, [&x];");  // Int constant
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+
+  input.assign("st_rel_f32 $s1, [&x];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+
+  input.assign("st_rel_equiv(2)_f32 $s1, [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+
+  input.assign("st_private_f32 $s1, [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+
+  input.assign("st_f32 $s1, [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+
+  input.assign("st_v4_f32 ($s1,$s1,$s6,$s2), [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+
+  input.assign("st_v2_equiv(9)_f32 ($s1,$s2), [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+
+  input.assign("st_group_equiv(0)_u32 $s0, [$s2];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+  
+  input.assign("st_equiv(1)_u64 $d3, [$s4+32];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+  
+  input.assign("st_v2_equiv(1)_u64 ($d1,$d2), [$s0+32];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+  
+  input.assign("st_equiv(1)_u64 $d6, [128];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, St(context));
+  
+  delete lexer;
+
+};
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {

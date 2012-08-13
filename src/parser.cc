@@ -3602,6 +3602,9 @@ int Ld(Context* context) {
   return 1;
 } 
 
+int St(Context* context) {
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsa
