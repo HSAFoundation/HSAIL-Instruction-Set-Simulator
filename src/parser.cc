@@ -3603,6 +3603,54 @@ int Ld(Context* context) {
 } 
 
 int St(Context* context) {
+  // first token is St
+  context->token_to_scan = yylex();
+ 
+  if (!LdModifier(context)) {
+  } else {
+    context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+    return 1;
+  }
+
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == '(') {
+      if (!ArrayOperandList(context)) {
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
+        return 1;
+      }
+    } else if (!Operand(context)) {
+    } else {
+      context->set_error(ErrorReporterInterface::INVALID_OPERAND);
+      return 1;
+    }
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+
+      if (!MemoryOperand(context)) {
+        
+        if(context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
+
+          return 0;
+        } else { // ';'
+          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+          return 1;
+        }
+      } else { // Memory Operand
+        context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+        return 1;
+      }
+    } else { // ','
+      context->set_error(ErrorReporterInterface::MISSING_COMMA);
+      return 1;
+    }
+  } else { // Data Type
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
