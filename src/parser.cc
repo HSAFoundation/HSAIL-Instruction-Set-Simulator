@@ -3938,6 +3938,10 @@ int Cvt(Context* context) {
   return 1;
 }
 
+int Ld_image(Context* context) {
+  return 1;
+}
+
 
 }  // namespace brig
 }  // namespace hsa
