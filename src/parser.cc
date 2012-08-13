@@ -3879,8 +3879,65 @@ int ImageNoRet(Context* context) {
 
   return 1;
 }
+
 int Cvt(Context* context) {
+// first token is CVT "cvt"
+  context->token_to_scan = yylex();
+  
+  if (!CvtModifier1(context)) {    
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex(); 
+            if (!Operand(context) && context->token_to_scan == ';') {
+              return 0;
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+            }
+          } else {
+            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          }
+        } else {
+          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        }
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+      }
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    }
+  }
+  else if (context->token_type == DATA_TYPE_ID) {
+  context->token_to_scan = yylex();
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (!Operand(context)) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex(); 
+        if (!Operand(context) && context->token_to_scan == ';') {
+          return 0;
+        } else {
+          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        }
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+      }
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+    }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+  }
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
+
+
 }  // namespace brig
 }  // namespace hsa
