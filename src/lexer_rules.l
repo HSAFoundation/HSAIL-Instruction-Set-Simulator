@@ -44,13 +44,13 @@ double ieee754tod(char* text) {
   for (i=0; i<4; i++)
     first4[i] = text[i+2];
 
-  first4[5] = '\0';
+  first4[4] = '\0';
   first_int = strtol(first4, NULL, 16);
 
   // get the next 2 bytes;
   for (i=0;i<4;i++)
     temp_str[i] = text[i+6];
-  temp_str[5] = '\0';
+  temp_str[4] = '\0';
   temp = strtol(temp_str,NULL,16);
   first_int <<= 16;
 
@@ -66,13 +66,13 @@ double ieee754tod(char* text) {
   for (i=0;i<4;i++)
     first4[i] = text[i+10];
 
-  first4[5] = '\0';
+  first4[4] = '\0';
   second_int = strtol(first4, NULL, 16);
 
   // get the last 2 bytes;
   for (i=0;i<4;i++)
     temp_str[i] = text[i+14];
-  temp_str[5] = '\0';
+  temp_str[4] = '\0';
   temp = strtol(temp_str,NULL,16);
   second_int <<= 16;
   temp += second_int;
