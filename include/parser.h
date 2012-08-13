@@ -72,6 +72,7 @@ int Mad24Inst(const unsigned int first_token, Context* context);
 int Ld(Context* context);
 int LdModifier(Context* context);
 int St(Context* context);
+int Lda(Context* context);
 
 }  // namespace brig
 }  // namespace hsa

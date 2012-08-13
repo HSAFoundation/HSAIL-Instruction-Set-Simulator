@@ -2481,7 +2481,7 @@ TEST(ParserTest, Ld) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("ld_f32 $s1, [&x];");  // Int constant
+  std::string input("ld_f32 $s1, [&x];");  
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld(context));
@@ -2597,7 +2597,7 @@ TEST(ParserTest, St) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("st_f32 $s1, [&x];");  // Int constant
+  std::string input("st_f32 $s1, [&x];");  
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St(context));
@@ -2652,6 +2652,33 @@ TEST(ParserTest, St) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St(context));
   
+  delete lexer;
+
+};
+
+TEST(ParserTest, Lda) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("lda_u64 $d2, [&z];");  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Lda(context));
+
+  input.assign("lda_u64 $d1, [$d0+10];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Lda(context));
+
+  input.assign("lda_group_b32 $s1, [%g];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Lda(context));
+
   delete lexer;
 
 };
