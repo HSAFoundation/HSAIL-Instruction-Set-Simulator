@@ -2689,50 +2689,62 @@ int SysCall(Context* context) {
   // first token is _SYSCALL "syscall"
   context->token_to_scan = yylex();
 
-  if (context->token_to_scan == TOKEN_SREGISTER &&
-      yylex() == ',') {
-    context->token_to_scan = yylex();
-
-    if (!IntegerLiteral(context) && yylex() == ',') {
+  if (context->token_to_scan == TOKEN_SREGISTER) {
+    if (yylex() == ',') {
       context->token_to_scan = yylex();
 
-      if (((context->token_to_scan == TOKEN_SREGISTER) ||
-           (context->token_to_scan == TOKEN_WAVESIZE) ||
-           (!IntegerLiteral(context))) &&
-           (yylex() == ',')) {
-        context->token_to_scan = yylex();
-
-        if (((context->token_to_scan == TOKEN_SREGISTER) ||
-             (context->token_to_scan == TOKEN_WAVESIZE) ||
-             (!IntegerLiteral(context))) &&
-             (yylex() == ',')) {
+      if (!IntegerLiteral(context)) {
+        if (yylex() == ',') {
           context->token_to_scan = yylex();
-
-          if ((context->token_to_scan == TOKEN_SREGISTER) ||
-              (context->token_to_scan == TOKEN_WAVESIZE) ||
-              (!IntegerLiteral(context))) {
-            context->token_to_scan = yylex();
-
-            if (context->token_to_scan == ';') {
+          if (((context->token_to_scan == TOKEN_SREGISTER) ||
+               (context->token_to_scan == TOKEN_WAVESIZE) ||
+               (!IntegerLiteral(context)))) {
+            if (yylex() == ',') {
               context->token_to_scan = yylex();
-              return 0;
-            } else {  // ';'
-              context->set_error(MISSING_SEMICOLON);
+
+              if ((context->token_to_scan == TOKEN_SREGISTER) ||
+                  (context->token_to_scan == TOKEN_WAVESIZE) ||
+                  (!IntegerLiteral(context))) {
+                if (yylex() == ',') {
+                  context->token_to_scan = yylex();
+
+                  if ((context->token_to_scan == TOKEN_SREGISTER) ||
+                      (context->token_to_scan == TOKEN_WAVESIZE) ||
+                      (!IntegerLiteral(context))) {
+                    context->token_to_scan = yylex();
+
+                    if (context->token_to_scan == ';') {
+                      context->token_to_scan = yylex();
+                      return 0;
+                    } else {  // ';'
+                      context->set_error(MISSING_SEMICOLON);
+                    }
+                  } else {  // 5 operand
+                    context->set_error(INVALID_FIFTH_OPERAND);
+                  }
+                } else {
+                  context->set_error(MISSING_COMMA);
+                }
+              } else {  // 4 operand
+                context->set_error(INVALID_FOURTH_OPERAND);
+              }
+            } else {
+              context->set_error(MISSING_COMMA);
             }
-          } else {  // 5 operand
-            context->set_error(INVALID_OPERAND);
+          } else {  // 3 operand
+            context->set_error(INVALID_THIRD_OPERAND);
           }
-        } else {  // 4 operand
-          context->set_error(INVALID_OPERAND);
+        } else {
+          context->set_error(MISSING_COMMA);
         }
-      } else {  // 3 operand
-        context->set_error(INVALID_OPERAND);
+      } else {  // 2 base operand
+        context->set_error(INVALID_SECOND_OPERAND);
       }
-    } else {  // 2 base operand
-      context->set_error(MISSING_INTEGER_CONSTANT);
+    } else {
+      context-> set_error(MISSING_COMMA);
     }
   } else {  // 1 operand
-    context->set_error(MISSING_SREGISTER);
+    context->set_error(INVALID_FIRST_OPERAND);
   }
   return 1;
 }

@@ -128,6 +128,18 @@ class ErrorReporterInterface {
           return std::string("Something wrong in codeblock.");
         case INVALID_OPERAND:
           return std::string("Invalid operand.");
+        case INVALID_FIRST_OPERAND:
+          return std::string("First operand is invalid.");
+        case INVALID_SECOND_OPERAND:
+          return std::string("Second operand is invalid.");
+        case INVALID_THIRD_OPERAND:
+          return std::string("Third operand is invalid.");
+        case INVALID_FOURTH_OPERAND:
+          return std::string("Fourth operand is invalid.");
+        case INVALID_FIFTH_OPERAND:
+          return std::string("Fifth operand is invalid.");
+
+
 
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");
