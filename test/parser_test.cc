@@ -1150,6 +1150,8 @@ TEST(ParserTest, SysCall) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("syscall $s1, 3, $s2, $s3, $s4;\n");
   lexer->set_source_string(input);
@@ -1181,62 +1183,71 @@ TEST(ParserTest, SysCall) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("syscall $c2, 0xff, $s1, $s3, $s4;\n");  // c register is 1-bit
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
-  EXPECT_EQ(MISSING_SREGISTER, mer.get_last_error());
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("syscall $q2, 0xff, $s1, $s3, $s4;\n");  // q register is 128-bit
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   // src must be s register
   input.assign("syscall $s2, 0xff, $d1, $s3, $s4;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_THIRD_OPERAND, mer.get_last_error());
 
   input.assign("syscall $s2, $s4, $s1, $s3, $s4;\n");
   // n must be integer literal
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
-  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
 
-  input.assign("syscall $s3, 1.1, $s1, $s3, $s4;\n");
+  input.assign("syscall $s3, 1.1l, $s1, $s3, $s4;\n");
   // n must be integer literal
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
   input.assign("syscall $s3, 3, $s1, $s3, $s4\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("syscall $s3 3, $s1, $s3, $s4;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("syscall $s3, 3 $s1, $s3, $s4;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("syscall $s3, 3, $s1 $s3, $s4;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("syscall $s3, 3, $s1, $s3 $s4;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   delete lexer;
 };
