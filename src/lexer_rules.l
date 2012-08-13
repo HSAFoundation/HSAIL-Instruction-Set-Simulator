@@ -1756,6 +1756,11 @@ ldc               { free_string(context);
                     context->yycolno+=yyleng;
                     return LDC;}
                     
+lda               { free_string(context);
+                    context->token_type = COMMON_KEYWORD;
+                    context->yycolno+=yyleng;
+                    return LDA;}
+
 ret               { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
