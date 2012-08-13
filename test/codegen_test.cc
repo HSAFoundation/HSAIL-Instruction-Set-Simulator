@@ -1239,7 +1239,6 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
 };
 
 TEST(ErrorReportingTest, UseMockErrorReporter) {
-
   MockErrorReporter mer;
 
   // forward call to FakeErrorReporter
