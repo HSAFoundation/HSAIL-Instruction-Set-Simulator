@@ -17,7 +17,7 @@ namespace brig {
     return er;
   };
 
-  void ErrorReporter::report_error(error_t ErrorCode,
+  void ErrorReporter::report_error(error_code_t ErrorCode,
                                    unsigned int LineNo,
                                    unsigned int ColNo) {
     if (display && ErrorCode) {

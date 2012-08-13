@@ -7,56 +7,56 @@
 
 namespace hsa {
 namespace brig {
+  // Error codes
+enum error_code_t { OK = 0,
+   // missing tokens
+   MISSING_INTEGER_CONSTANT = 1,
+   MISSING_SINGLE_CONSTANT = 2,
+   MISSING_DOUBLE_CONSTANT = 3,
+   MISSING_DATA_TYPE = 4,
 
+   MISSING_IDENTIFIER = 5,
+   MISSING_LABEL = 6,
+   MISSING_SREGISTER = 7,
+
+   // missing puctuations
+   MISSING_COLON = 8,
+   MISSING_SEMICOLON = 9,
+   MISSING_COMMA = 10,
+   MISSING_CLOSING_BRACKET = 11,
+   MISSING_CLOSING_PARENTHESIS = 12,
+   MISSING_OPENNING_BRACKET = 13,
+
+   // invalid non-terminals
+   INVALID_TARGET = 14,
+   INVALID_ROUNDING_MODE = 15,
+   INVALID_ALIGNMENT = 16,
+   INVALID_ARGUMENT_LIST = 17,
+   INVALID_FBAR = 18,
+   INVALID_NESTED_ARGUMENT_SCOPE = 19,
+   INVALID_INITIALIZER = 20,
+   INVALID_FUNCTION_DEFINITION = 21,
+   INVALID_CODEBLOCK = 22,
+   INVALID_OPERAND = 23,
+   // missing part
+   MISSING_VERSION_STATEMENT = 24,
+   MISSING_WIDTH_INFO = 25,
+   MISSING_DECLPREFIX = 26,
+   MISSING_STRING = 27,
+   MISSING_ARGUMENT = 28,
+   MISSING_ARGUMENT_LIST = 29,
+   MISSING_OPERAND = 30,
+   MISSING_COMPARISON_TYPE = 31,
+
+   UNKNOWN_ERROR
+ };
 class ErrorReporterInterface {
   public:
     virtual ~ErrorReporterInterface() {}
-    // Error codes
-    enum error_t { OK = 0,
-                   // missing tokens
-                   MISSING_INTEGER_CONSTANT,
-                   MISSING_SINGLE_CONSTANT,
-                   MISSING_DOUBLE_CONSTANT,
-                   MISSING_DATA_TYPE,
 
-                   MISSING_IDENTIFIER,
-                   MISSING_LABEL,
-                   MISSING_SREGISTER,
-
-                   // missing puctuations
-                   MISSING_COLON,
-                   MISSING_SEMICOLON,
-                   MISSING_COMMA,
-                   MISSING_CLOSING_BRACKET,
-                   MISSING_CLOSING_PARENTHESIS,
-                   MISSING_OPENNING_BRACKET,
-
-                   // invalid non-terminals
-                   INVALID_TARGET,
-                   INVALID_ROUNDING_MODE,
-                   INVALID_ALIGNMENT,
-                   INVALID_ARGUMENT_LIST,
-                   INVALID_FBAR,
-                   INVALID_NESTED_ARGUMENT_SCOPE,
-                   INVALID_INITIALIZER,
-                   INVALID_FUNCTION_DEFINITION,
-                   INVALID_CODEBLOCK,
-                   INVALID_OPERAND,
-                   // missing part
-                   MISSING_VERSION_STATEMENT,
-                   MISSING_WIDTH_INFO,
-                   MISSING_DECLPREFIX,
-                   MISSING_STRING,
-                   MISSING_ARGUMENT,
-                   MISSING_ARGUMENT_LIST,
-                   MISSING_OPERAND,
-                   MISSING_COMPARISON_TYPE,
-
-                   UNKNOWN_ERROR
-                 };
 
     // report an error to error reporter
-    virtual void report_error(error_t ErrorCode,
+    virtual void report_error(error_code_t ErrorCode,
                               unsigned int LineNo,
                               unsigned int ColNo) = 0;
 
@@ -66,7 +66,7 @@ class ErrorReporterInterface {
     }
 
     // get a description of error
-    static std::string translate_error(error_t ErrorCode) {
+    static std::string translate_error(error_code_t ErrorCode) {
       switch (ErrorCode) {
         case OK:
           return std::string("No error.");
@@ -147,8 +147,8 @@ class ErrorReporterInterface {
     bool display;
     virtual unsigned int get_number_of_errors() = 0;
     virtual void show_all_error() = 0;
-    virtual error_t get_error_at(unsigned int index) = 0;
-    virtual error_t get_last_error() = 0;
+    virtual error_code_t get_error_at(unsigned int index) = 0;
+    virtual error_code_t get_last_error() = 0;
 };
 }  // namespace brig
 }  // namespace hsa

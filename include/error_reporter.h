@@ -15,7 +15,7 @@ class ErrorReporter: public ErrorReporterInterface {
     static ErrorReporter* get_instance(void);
 
     // report an error to error reporter
-    void report_error(error_t ErrorCode,
+    void report_error(error_code_t ErrorCode,
                       unsigned int LineNo,
                       unsigned int ColNo);
 
@@ -29,11 +29,11 @@ class ErrorReporter: public ErrorReporterInterface {
       return 0;
     }
     void show_all_error() {}
-    error_t get_error_at(unsigned int index) {
+    error_code_t get_error_at(unsigned int index) {
       return OK;
     }
 
-    error_t get_last_error() {
+    error_code_t get_last_error() {
       return OK;
     }
 };

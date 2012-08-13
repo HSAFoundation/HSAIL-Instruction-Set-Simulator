@@ -1025,8 +1025,17 @@ TEST(ParserTest, FileDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
   context->clear_context();
+
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("file 1 \"this is a file\";\n");
   lexer->set_source_string(input);
@@ -1038,57 +1047,69 @@ TEST(ParserTest, FileDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_STRING, mer.get_last_error());
 
   input.assign("file \"this is a file\";\n");  // lack of file string
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file 2 \"this is a file\"\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("file \"this is a file\" 2;\n");  // reverse order
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file 1 2;\n");  // two integer number
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_STRING, mer.get_last_error());
 
   input.assign("file \"file1\" \"file2\";\n");  // two file string
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file 1 \"file1\" \"file2\";\n");  // redundant file string
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("file 1 2 \"file\";\n");  // redundant integer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_STRING, mer.get_last_error());
 
-  input.assign("file 1.2 \"file\";\n");  // not integer
+  input.assign("file 1.2l \"file\";\n");  // not integer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file;\n");  // lack of number , file string
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file $s1 \"file\";\n");  // register not allowed
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
+  context->set_error_reporter(main_reporter);
   delete lexer;
 };
 
@@ -1121,7 +1142,14 @@ TEST(ParserTest, SysCall) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
+
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("syscall $s1, 3, $s2, $s3, $s4;\n");
   lexer->set_source_string(input);
@@ -1158,6 +1186,7 @@ TEST(ParserTest, SysCall) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_SREGISTER, mer.get_last_error());
 
   input.assign("syscall $q2, 0xff, $s1, $s3, $s4;\n");  // q register is 128-bit
   lexer->set_source_string(input);
@@ -1175,6 +1204,7 @@ TEST(ParserTest, SysCall) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
 
   input.assign("syscall $s3, 1.1, $s1, $s3, $s4;\n");
@@ -1214,8 +1244,15 @@ TEST(ParserTest, SysCall) {
 TEST(ParserTest, Label) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("@_test_label_1:\n");
   lexer->set_source_string(input);
@@ -1249,8 +1286,15 @@ TEST(ParserTest, Label) {
 TEST(ParserTest, LabelTargets) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("@tab: labeltargets @a1, @a2;\n");
   lexer->set_source_string(input);
@@ -1301,9 +1345,15 @@ TEST(ParserTest, Extension) {
   // correct cases
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
   context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("extension \"abc\" ;\n");
   lexer->set_source_string(input);
@@ -1427,8 +1477,15 @@ TEST(ParserTest, SignatureArgumentList) {
 TEST(ParserTest, Instruction4) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("mad_ftz_u64 $d1, $d2, $d3, $d4;\n");
   lexer->set_source_string(input);
@@ -1559,6 +1616,15 @@ TEST(ParserTest, Instruction4) {
 // correct cases
 TEST(ParserTest, Ldc) {
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("ldc_b32 $s1, &bar;");  // identifier
   lexer->set_source_string(input);
@@ -1606,6 +1672,15 @@ TEST(ParserTest, Ldc) {
 // correct cases
 TEST(ParserTest, Instruction5) {
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("f2u4_u32 $s1, $s2, $s3, $s9, $s3;");
   lexer->set_source_string(input);
@@ -1749,8 +1824,16 @@ TEST(ParserTest, CvtModifier1) {
 TEST(ParserTest, Mov) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+
   // correct cases
   std::string input("mov_b64 $d1, $d4;\n");  // D register
   lexer->set_source_string(input);
@@ -1817,8 +1900,6 @@ TEST(ParserTest, Mov) {
 
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
-  bool rescan_last_token = false;
-  unsigned int last_token = 0;
 
   // test 1
   std::string input("const static kernarg_u32 %local_id[2][2] ");
@@ -1879,7 +1960,6 @@ TEST(ParserTest, KernelArgumentList) {
 
 TEST(ParserTest, KernelArgumentListBody) {
   Lexer *lexer = new Lexer();
-
 
   std::string input("kernarg_f32 %x");
 
@@ -1944,9 +2024,15 @@ TEST(ParserTest, Kernel) {
 TEST(ParserTest, OperandList) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
   context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("$s1, $c4, $d4, $q2 \n");
   lexer->set_source_string(input);
@@ -1997,9 +2083,15 @@ TEST(ParserTest, OperandList) {
 TEST(ParserTest, Cmp) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("cmp_eq_b1_b1 $c1, $c2, 0;");
   lexer->set_source_string(input);
@@ -2111,9 +2203,15 @@ TEST(ParserTest, Cmp) {
 TEST(ParserTest, GlobalPrivateDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
   context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("private_u32 &tmp[2][2];\n");
   lexer->set_source_string(input);
@@ -2152,10 +2250,15 @@ TEST(ParserTest, GlobalPrivateDecl) {
 TEST(ParserTest, OffsetAddressableOperand) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
   context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("[$s1 + 0xf7]\n");
   lexer->set_source_string(input);
@@ -2244,6 +2347,12 @@ TEST(ParserTest, IntegerLiteral) {
   // Case 1 Start reg '+' int
   std::string input("$s1+5");
   Lexer* lexer = new Lexer(input);
+  MockErrorReporter mer;
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
 
   EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
   EXPECT_EQ('+', lexer->get_next_token());
@@ -2370,9 +2479,15 @@ TEST(ParserTest, IntegerLiteral) {
 TEST(ParserTest, GlobalGroupDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
 
   std::string input("group_u32 &tmp[2][2];");
   lexer->set_source_string(input);
@@ -2802,9 +2917,17 @@ TEST(ParserTest, ImageNoRet) {
 TEST(ParserTest, Cvt) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
-// correct cases
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+
+  // correct cases
   std::string input("cvt_upi_u32_f32 $s1, $s2;\n");  // intRounding modifier
   lexer->set_source_string(input);
   context->clear_context();
@@ -3058,7 +3181,7 @@ TEST(ErrorReporting, UseMockErrorReporter) {
   std::string input("version 1:0;");
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_CALL(mer, report_error(ErrorReporterInterface::OK, _, _));
+  EXPECT_CALL(mer, report_error(OK, _, _));
   EXPECT_EQ(0, Version(context));
 
   EXPECT_CALL(mer, show_all_error());
@@ -3081,6 +3204,12 @@ TEST(ErrorReporting, CheckErrorHistory) {
 
   EXPECT_CALL(mer, report_error(_, _, _))
       .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_error_at(_))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_number_of_errors())
+       .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+       .Times(AtLeast(1));
 
   // register error reporter with context
   context->set_error_reporter(&mer);
@@ -3091,36 +3220,36 @@ TEST(ErrorReporting, CheckErrorHistory) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
-  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, mer.get_last_error());
+  EXPECT_EQ(MISSING_IDENTIFIER, mer.get_last_error());
 
   input.assign("private_u32 &tmp\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
-  EXPECT_EQ(ErrorReporterInterface::MISSING_SEMICOLON, mer.get_last_error());
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("private_u32;\n");  // lack of identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
-  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, mer.get_last_error());
+  EXPECT_EQ(MISSING_IDENTIFIER, mer.get_last_error());
 
   EXPECT_CALL(mer, show_all_error());
 
   // test reported error
-  ErrorReporterInterface::error_t error_code;
+  error_t error_code;
   unsigned int number_of_errors = mer.get_number_of_errors();
 
   EXPECT_EQ(3, number_of_errors);
 
   error_code = mer.get_error_at(0);
-  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, error_code);
+  EXPECT_EQ(MISSING_IDENTIFIER, error_code);
 
   error_code = mer.get_error_at(1);
-  EXPECT_EQ(ErrorReporterInterface::MISSING_SEMICOLON, error_code);
+  EXPECT_EQ(MISSING_SEMICOLON, error_code);
 
   error_code = mer.get_error_at(2);
-  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, error_code);
+  EXPECT_EQ(MISSING_IDENTIFIER, error_code);
 
   mer.show_all_error();
 

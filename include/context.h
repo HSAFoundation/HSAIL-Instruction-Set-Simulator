@@ -30,7 +30,7 @@ class Context {
     void set_error_reporter(ErrorReporterInterface* error_reporter);
     ErrorReporterInterface* get_error_reporter(void) const;
 
-    void set_error(ErrorReporterInterface::error_t error);
+    void set_error(error_code_t error);
     /* string buffer manipulators */
     // add a new symbol to .strings section.
     // return the offset to that symbol
