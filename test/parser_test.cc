@@ -2368,6 +2368,15 @@ TEST(ParserTest, IntegerLiteral) {
   EXPECT_EQ(0, IntegerLiteral(context));
   EXPECT_EQ(3, context->token_value.int_val);
   // Case 10 End
+
+
+  // Case 11
+  input.assign("+a");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_NE(0, IntegerLiteral(context));
+
   delete lexer;
 }
 

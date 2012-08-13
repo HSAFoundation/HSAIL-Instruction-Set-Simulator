@@ -394,14 +394,14 @@ int CallArgs(Context* context) {
     }
 
     if (context->token_to_scan == ')') {
-      size_t kListSize = sizeof(BrigOperandArgumentList);
+      size_t list_size = sizeof(BrigOperandArgumentList);
       if (n_elements > 1)
-        kListSize += sizeof(BrigoOffset32_t) * (n_elements - 1);
+        list_size += sizeof(BrigoOffset32_t) * (n_elements - 1);
 
-      char array[kListSize];
+      char array[list_size];
       BrigOperandArgumentList &arg_list =
         *reinterpret_cast<BrigOperandArgumentList *>(array);
-      arg_list.size = kListSize;
+      arg_list.size = list_size;
       arg_list.kind = BrigEOperandArgumentList;
       arg_list.elementCount = n_elements;
       for (uint32_t i = 0; i < n_elements; ++i) {
@@ -3419,7 +3419,7 @@ int IntegerLiteral(Context* context) {
     sign = -1;
   case '+':
     context->token_to_scan = yylex();
-    if (context->token_to_scan = TOKEN_INTEGER_CONSTANT) {
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       context->token_value.int_val *= sign;
     } else {
       return 1;
