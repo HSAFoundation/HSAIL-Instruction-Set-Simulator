@@ -320,6 +320,7 @@ version           { context->yycolno+=yyleng;
 global            { context->token_type = INITIALIZABLE_ADDRESS;
                     free_string(context);
                     context->yycolno+=yyleng;
+                    context->token_value.storage_class = BrigGlobalSpace ;
                     return GLOBAL; }
 
 _Samp             { context->token_type = COMMON_KEYWORD;
@@ -350,11 +351,13 @@ file              { free_string(context);
 arg               { free_string(context);  
                     context->token_type = COMMON_KEYWORD; 
                     context->yycolno+=yyleng;  
+                    context->token_value.storage_class = BrigArgSpace ;
                     return ARG; }
                     
 kernarg           { free_string(context);  
                     context->token_type = COMMON_KEYWORD; 
                     context->yycolno+=yyleng;  
+                    context->token_value.storage_class = BrigKernargSpace ;
                     return KERNARG; }
                     
 function          { free_string(context);  
@@ -429,22 +432,26 @@ const             { free_string(context);
                     
 private           { free_string(context);  
                     context->token_type = UNINITIALIZABLE_ADDRESS; 
-                    context->yycolno+=yyleng;  
+                    context->yycolno+=yyleng; 
+                    context->token_value.storage_class = BrigPrivateSpace ; 
                     return PRIVATE; }
                     
 spill             { free_string(context);  
                     context->token_type = UNINITIALIZABLE_ADDRESS; 
-                    context->yycolno+=yyleng;  
+                    context->yycolno+=yyleng; 
+                    context->token_value.storage_class = BrigSpillSpace ; 
                     return SPILL; }
                     
 group             { free_string(context);  
                     context->token_type = UNINITIALIZABLE_ADDRESS; 
                     context->yycolno+=yyleng;  
+                    context->token_value.storage_class = BrigGroupSpace ;
                     return GROUP; }
                     
 readonly          { free_string(context);  
                     context->token_type = INITIALIZABLE_ADDRESS; 
                     context->yycolno+=yyleng;  
+                    context->token_value.storage_class = BrigReadonlySpace ;
                     return READONLY; }
                     
 loc               { free_string(context);  
@@ -1892,4 +1899,6 @@ query_filtering   { free_string(context);
 
 .   { fprintf(stderr, "Unexpected char %s\n", yytext); 
       free_string(context); 
+      context->token_to_scan = 0;
+      context->token_type = UNKNOWN;
       return 0;}

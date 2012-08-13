@@ -38,8 +38,7 @@ TEST(CodegenTest, ExampleWithKernel) {
 
   // test the size of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
-  //  EXPECT_EQ(204, dsize);
-  EXPECT_EQ(216, dsize);
+  EXPECT_EQ(144, dsize);
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(32, csize);
 
@@ -47,19 +46,19 @@ TEST(CodegenTest, ExampleWithKernel) {
     40,                       // size
     BrigEDirectiveKernel,   // kind
     0,                       // c_code
-    3,                       // s_name
+    0,                       // s_name
     1,                        // inParamCount
-    216,                      // d_firstScopedDirective
+    140,                      // d_firstScopedDirective
     1,                        // operationCount
-    216,                      // d_nextDirective
+    140,                      // d_nextDirective
     BrigNone,                  //attribute
     0,                         //fbar
     0,                        // outParamCount
-    136,                        //d_firstInParam
+    60,                        //d_firstInParam
   };
 
   // test BrigDirectiveFunction, the caller function
-  BrigDirectiveFunction get;
+  BrigDirectiveKernel get;
   context->get_directive(context->current_bdf_offset, &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
@@ -68,6 +67,53 @@ TEST(CodegenTest, ExampleWithKernel) {
   EXPECT_EQ(ref.operationCount, get.operationCount);
   EXPECT_EQ(ref.d_nextDirective, get.d_nextDirective);
   EXPECT_EQ(ref.d_firstScopedDirective, get.d_firstScopedDirective);
+
+  BrigDirectiveSymbol kernarg = {
+  40,                       //size
+  BrigEDirectiveSymbol ,    //kind
+  0,                         //c_code
+  3,                        //storag class kernarg
+  BrigNone ,                //attribut
+  0,                        //reserved
+  0,                        //symbolModifier
+  0,                        //dim
+  6,                        //s_name
+  Brigf32,                  //type
+  1,                        //align
+  0,                        //d_init
+  0,                         //reserved  
+  };
+  
+  BrigDirectiveSymbol get_sym ;
+  context->get_directive(64,&get_sym);
+  EXPECT_EQ(kernarg.size, get_sym.size);
+  EXPECT_EQ(kernarg.kind, get_sym.kind);
+  EXPECT_EQ(kernarg.s.storageClass, get_sym.s.storageClass);
+  EXPECT_EQ(kernarg.s.s_name, get_sym.s.s_name);
+ // EXPECT_EQ(kernarg.s.type, get_sym.s.type);
+
+  BrigDirectiveSymbol private_var = {
+  40,                       //size
+  BrigEDirectiveSymbol ,    //kind
+  0,                         //c_code
+  2,                        //storag class kernarg
+  BrigNone ,                //attribut
+  0,                        //reserved
+  0,                        //symbolModifier
+  0,                        //dim
+  9,                        //s_name
+  Brigu32,                  //type
+  1,                        //align
+  0,                        //d_init
+  0,                         //reserved  
+  };
+  
+  context->get_directive(104,&get_sym);
+  EXPECT_EQ(private_var.size, get_sym.size);
+  EXPECT_EQ(private_var.kind, get_sym.kind);
+  EXPECT_EQ(private_var.s.storageClass, get_sym.s.storageClass);
+  EXPECT_EQ(private_var.s.s_name, get_sym.s.s_name);
+ // EXPECT_EQ(private_var.s.type, get_sym.s.type);
 };
 
 TEST(CodegenTest, CallwMultiArgs) {
@@ -95,7 +141,7 @@ TEST(CodegenTest, CallwMultiArgs) {
 
   // test the size of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(316, dsize);
+  EXPECT_EQ(320, dsize);
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(64, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
@@ -109,9 +155,9 @@ TEST(CodegenTest, CallwMultiArgs) {
     32,                       // c_code
     32,                       // s_name
     0,                        // inParamCount
-    220,                      // d_firstScopedDirective
+    224,                      // d_firstScopedDirective
     1,                        // operationCount
-    316,                      // d_nextDirective
+    320,                      // d_nextDirective
     BrigNone,
     0,
     0,                        // outParamCount
@@ -131,12 +177,12 @@ TEST(CodegenTest, CallwMultiArgs) {
 
   // test BrigDirectiveScope
   BrigDirectiveScope arg_scope;
-  context->get_directive(220, &arg_scope);
+  context->get_directive(224, &arg_scope);
   EXPECT_EQ(8, arg_scope.size);
   EXPECT_EQ(BrigEDirectiveArgStart, arg_scope.kind);
   EXPECT_EQ(32, arg_scope.c_code);
 
-  context->get_directive(308, &arg_scope);
+  context->get_directive(312, &arg_scope);
   EXPECT_EQ(BrigEDirectiveArgEnd, arg_scope.kind);
   EXPECT_EQ(64, arg_scope.c_code);
 
@@ -163,12 +209,12 @@ TEST(CodegenTest, CallwMultiArgs) {
   context->get_operand(8, &arg_o);
   EXPECT_EQ(8, arg_o.size);
   EXPECT_EQ(BrigEOperandArgumentRef, arg_o.kind);
-  EXPECT_EQ(192+36, arg_o.arg);
+  EXPECT_EQ(192+40, arg_o.arg);
 
   context->get_operand(16, &arg_o);
   EXPECT_EQ(8, arg_o.size);
   EXPECT_EQ(BrigEOperandArgumentRef, arg_o.kind);
-  EXPECT_EQ(232+36, arg_o.arg);
+  EXPECT_EQ(232+40, arg_o.arg);
 
   // test BrigOperandArgumentList
   BrigOperandArgumentList arg_l;
@@ -215,7 +261,7 @@ TEST(CodegenTest, Example6_CallwArgs) {
 
   // test the sizes of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(276, dsize);
+  EXPECT_EQ(276+4, dsize);
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(64, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
@@ -229,9 +275,9 @@ TEST(CodegenTest, Example6_CallwArgs) {
     32,                       // c_code
     23,                       // s_name
     0,                        // inParamCount
-    180,                      // d_firstScopedDirective
+    180+4,                      // d_firstScopedDirective
     1,                        // operationCount
-    276,                      // d_nextDirective
+    276+4,                      // d_nextDirective
     BrigNone,
     0,
     0,                        // outParamCount
@@ -251,12 +297,12 @@ TEST(CodegenTest, Example6_CallwArgs) {
 
   // test BrigDirectiveScope
   BrigDirectiveScope arg_scope;
-  context->get_directive(180, &arg_scope);
+  context->get_directive(184, &arg_scope);
   EXPECT_EQ(8, arg_scope.size);
   EXPECT_EQ(BrigEDirectiveArgStart, arg_scope.kind);
   EXPECT_EQ(32, arg_scope.c_code);
 
-  context->get_directive(268, &arg_scope);
+  context->get_directive(272, &arg_scope);
   EXPECT_EQ(BrigEDirectiveArgEnd, arg_scope.kind);
   EXPECT_EQ(64, arg_scope.c_code);
 
@@ -283,12 +329,12 @@ TEST(CodegenTest, Example6_CallwArgs) {
   context->get_operand(8, &arg_o);
   EXPECT_EQ(8, arg_o.size);
   EXPECT_EQ(BrigEOperandArgumentRef, arg_o.kind);
-  EXPECT_EQ(188, arg_o.arg);
+  EXPECT_EQ(188+4, arg_o.arg);
 
   context->get_operand(16, &arg_o);
   EXPECT_EQ(8, arg_o.size);
   EXPECT_EQ(BrigEOperandArgumentRef, arg_o.kind);
-  EXPECT_EQ(228, arg_o.arg);
+  EXPECT_EQ(228+4, arg_o.arg);
 
   // test BrigOperandArgumentList
   BrigOperandArgumentList arg_l;
@@ -417,7 +463,7 @@ TEST(CodegenTest, Example4_Branch) {
 
   // test the sizes of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(124, dsize);
+  EXPECT_EQ(124+4, dsize);
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(164, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
@@ -432,9 +478,9 @@ TEST(CodegenTest, Example4_Branch) {
       0,                        // c_code
       0,                        // s_name
       0,                        // inParamCount
-      100,                      // d_firstScopedDirective
+      100+4,                      // d_firstScopedDirective
       5,                        // operationCount
-      124,                      // d_nextDirective
+      124+4,                      // d_nextDirective
       BrigNone,
       0,
       1,                        // outParamCount
@@ -453,12 +499,12 @@ TEST(CodegenTest, Example4_Branch) {
 
   // test BrigDirectiveLabel
   BrigDirectiveLabel label1;
-  context->get_directive(100, &label1);
+  context->get_directive(104, &label1);
   EXPECT_EQ(12, label1.size);
   EXPECT_EQ(100, label1.c_code);
   EXPECT_EQ(27, label1.s_name);
 
-  context->get_directive(112, &label1);
+  context->get_directive(116, &label1);
   EXPECT_EQ(132, label1.c_code);
   EXPECT_EQ(41, label1.s_name);
 
@@ -506,7 +552,7 @@ TEST(CodegenTest, Example3_CodeGen) {
 
   // test the .directive section size
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(100, dsize);
+  EXPECT_EQ(100+4, dsize);
 
   // test the .directive section
   BrigDirectiveFunction ref = {
@@ -515,9 +561,9 @@ TEST(CodegenTest, Example3_CodeGen) {
     0,                        // c_code
     0,                        // s_name
     0,                        // inParamCount
-    100,                       // d_firstScopedDirective
+    96+4,                       // d_firstScopedDirective
     2,                        // operationCount
-    100,                       // d_nextDirective
+    96+4,                       // d_nextDirective
     BrigStatic,
     0,
     1,                        // outParamCount
@@ -734,7 +780,7 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .directive section size
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(100, dsize);
+  EXPECT_EQ(100+4, dsize);
 
   // test the offset to the .string section
   BrigDirectiveFunction ref = {
@@ -743,9 +789,9 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
     0,                        // c_code
     0,                        // s_name
     0,                        // inParamCount
-    100,                       // d_firstScopedDirective
+    96+4,                       // d_firstScopedDirective
     1,                        // operationCount
-    100,                       // d_nextDirective
+    96+4,                       // d_nextDirective
     BrigNone,
     0,
     1,                        // outParamCount

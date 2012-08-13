@@ -50,6 +50,7 @@ class ErrorReporterInterface {
                    MISSING_ARGUMENT,
                    MISSING_ARGUMENT_LIST,
                    MISSING_OPERAND,
+                   MISSING_COMPARISON_TYPE,
 
                    UNKNOWN_ERROR
                  };
@@ -68,75 +69,77 @@ class ErrorReporterInterface {
     static std::string translate_error(error_t ErrorCode) {
       switch (ErrorCode) {
         case OK:
-          return std::string("No error.\n");
+          return std::string("No error.");
         case MISSING_INTEGER_CONSTANT:
-          return std::string("Missing integer constant.\n");
+          return std::string("Missing integer constant.");
         case MISSING_SINGLE_CONSTANT:
-          return std::string("Missing single constant.\n");
+          return std::string("Missing single constant.");
         case MISSING_DOUBLE_CONSTANT:
-          return std::string("Missing double constant.\n");
+          return std::string("Missing double constant.");
         case MISSING_DATA_TYPE:
-          return std::string("Missing data type.\n");
+          return std::string("Missing data type.");
         case MISSING_IDENTIFIER:
-          return std::string("Missing identifier.\n");
+          return std::string("Missing identifier.");
         case MISSING_STRING:
-          return std::string("A string expected.\n");
+          return std::string("A string expected.");
         case MISSING_LABEL:
-          return std::string("Missing label.\n");
+          return std::string("Missing label.");
         case MISSING_SREGISTER:
-          return std::string("A S-register required\n");
+          return std::string("A S-register required.");
 
 
         case MISSING_COLON:
-          return std::string("Missing a colon.\n");
+          return std::string("Missing a colon.");
         case MISSING_SEMICOLON:
-          return std::string("Missing a semicolon.\n");
+          return std::string("Missing a semicolon.");
         case MISSING_COMMA:
-          return std::string("Missing a comma.\n");
+          return std::string("Missing a comma.");
         case MISSING_CLOSING_BRACKET:
-          return std::string("Missing a closing bracket.\n");
+          return std::string("Missing a closing bracket.");
         case MISSING_CLOSING_PARENTHESIS:
-          return std::string("Missing a closing parenthesis.\n");
+          return std::string("Missing a closing parenthesis.");
         case MISSING_OPENNING_BRACKET:
-          return std::string("Missing an openning bracket.\n");
+          return std::string("Missing an openning bracket.");
 
         case INVALID_TARGET:
-          return std::string("Invalid target.\n");
+          return std::string("Invalid target.");
         case INVALID_ROUNDING_MODE:
-          return std::string("Invalid rounding mode.\n");
+          return std::string("Invalid rounding mode.");
         case INVALID_ALIGNMENT:
-          return std::string("Invalid alignment.\n");
+          return std::string("Invalid alignment.");
         case INVALID_ARGUMENT_LIST:
-          return std::string("Invalid argument list.\n");
+          return std::string("Invalid argument list.");
         case INVALID_FBAR:
-          return std::string("Invalid fbar.\n");
+          return std::string("Invalid fbar.");
         case INVALID_NESTED_ARGUMENT_SCOPE:
-          return std::string("Argument scope cannot be nested.\n");
+          return std::string("Argument scope cannot be nested.");
         case INVALID_INITIALIZER:
-          return std::string("Invalid initializer.\n");
+          return std::string("Invalid initializer.");
         case INVALID_FUNCTION_DEFINITION:
-          return std::string("Invalid funcdtion definition\n");
+          return std::string("Invalid funcdtion definition.");
         case INVALID_CODEBLOCK:
-          return std::string("Something wrong in codeblock\n");
+          return std::string("Something wrong in codeblock.");
         case INVALID_OPERAND:
-          return std::string("Invalid operand\n");
+          return std::string("Invalid operand.");
 
         case MISSING_VERSION_STATEMENT:
-          return std::string("Missing version statement.\n");
+          return std::string("Missing version statement.");
         case MISSING_WIDTH_INFO:
-          return std::string("Missing width information.\n");
+          return std::string("Missing width information.");
         case MISSING_DECLPREFIX:
-          return std::string("Missing declPrefix\n" );
+          return std::string("Missing declPrefix." );
         case MISSING_ARGUMENT:
-          return std::string("Missing argument.\n");
+          return std::string("Missing argument.");
         case MISSING_ARGUMENT_LIST:
-          return std::string("Missing argument list.\n");
+          return std::string("Missing argument list.");
         case MISSING_OPERAND:
-          return std::string("Missing operand.\n");
+          return std::string("Missing operand.");
+        case MISSING_COMPARISON_TYPE:
+          return std::string("Missing type of comparison.");
 
       case UNKNOWN_ERROR:
         default:
-          return std::string("Unknown error. \n");
+          return std::string("Unknown error.");
       }
     }
 

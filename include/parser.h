@@ -62,6 +62,13 @@ int Instruction5(Context* context);
 int CvtModifier1(Context* context);
 int Mov(Context* context);
 int IntegerLiteral(Context* context);
+int GlobalGroupDecl(Context* context);
+/* MUL */
+int Mul(Context* context);
+int MulInst(const unsigned int first_token, Context* context);
+int Mul24Inst(const unsigned int first_token, Context* context);
+int Mad24Inst(const unsigned int first_token, Context* context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
