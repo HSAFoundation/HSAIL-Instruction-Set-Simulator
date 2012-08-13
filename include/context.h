@@ -256,14 +256,14 @@ class Context {
     bool  valid_string;
 
     union token_val {
-      int int_val;
+      int               int_val;
       float             float_val;
       double            double_val;
       char*             string_val;
       BrigDataType16_t  data_type;
       BrigOpcode32_t    opcode;
       BrigPacking16_t   packing;
-      BrigStorageClass32_t storage_class ;
+      BrigStorageClass32_t storage_class;
     } token_value;
 
   private:

@@ -1,5 +1,7 @@
-#ifndef _BRIG_UTIL_H_
-#define _BRIG_UTIL_H_
+// Copyright 2012 MulticoreWare Inc.
+
+#ifndef INCLUDE_BRIG_UTIL_H_
+#define INCLUDE_BRIG_UTIL_H_
 
 #include "brig.h"
 #include <cassert>
@@ -22,17 +24,17 @@ template<class T> inline T *dyn_cast(BrigInstBase *inst) {
 }
 
 template<> inline BrigDirectiveMethod *dyn_cast(BrigDirectiveBase *dir) {
-  if(dir->kind == BrigEDirectiveFunction ||
-     dir->kind == BrigEDirectiveKernel)
+  if (dir->kind == BrigEDirectiveFunction ||
+      dir->kind == BrigEDirectiveKernel)
     return reinterpret_cast<BrigDirectiveMethod *>(dir);
   return NULL;
 }
 
 template<> inline
 BrigDirectiveSymbolCommon *dyn_cast(BrigDirectiveBase *dir) {
-  if(dir->kind == BrigEDirectiveImage ||
-     dir->kind == BrigEDirectiveSampler ||
-     dir->kind == BrigEDirectiveSymbol)
+  if (dir->kind == BrigEDirectiveImage ||
+      dir->kind == BrigEDirectiveSampler ||
+      dir->kind == BrigEDirectiveSymbol)
     return reinterpret_cast<BrigDirectiveSymbolCommon *>(dir);
   return NULL;
 }
@@ -57,59 +59,58 @@ template<class T, class Base> inline bool isa(const Base *base) {
 }
 
 template<class Super> class brig_iterator : private Super {
-
   public:
+    typedef typename Super::Base Base;
+    typedef brig_iterator<Super> Self;
 
-  typedef typename Super::Base Base;
-  typedef brig_iterator<Super> Self;
+    explicit brig_iterator(const uint8_t *curr) : Super(), curr(curr) {}
+    explicit brig_iterator(const brig_iterator &other)
+    : Super(), curr(other.curr) {}
 
-  brig_iterator(const uint8_t *curr) : Super(), curr(curr) {}
-  brig_iterator(const brig_iterator &other) : Super(), curr(other.curr) {}
+    template<class T> brig_iterator(const T *t) :
+      Super(t), curr(reinterpret_cast<const uint8_t *>(t)) {}
 
-  template<class T> brig_iterator(const T *t) :
-    Super(t), curr(reinterpret_cast<const uint8_t *>(t)) {}
-
-  Self operator++(int) {
-    brig_iterator other = *this;
-    ++(*this);
-    return other;
-  }
-
-  Self &operator++() {
-    curr += (*this)->size;
-    return *this;
-  }
-
-  const Base &operator*() const {
-    return *reinterpret_cast<const Base *>(curr);
-  }
-
-  operator const Base *() const {
-    return reinterpret_cast<const Base *>(curr);
-  }
-
-  const Base *operator->() const {
-    return reinterpret_cast<const Base *>(curr);
-  }
-
-  bool operator==(const brig_iterator &other) const {
-    return this->curr == other.curr;
-  }
-
-  bool operator!=(const brig_iterator &other) const {
-    return this->curr != other.curr;
-  }
-
-  Self operator+(uint64_t addend) const {
-    brig_iterator other = *this;
-    for(unsigned i = 0; i < addend; ++i) {
-      ++other;
+    Self operator++(int) {
+      brig_iterator other = *this;
+      ++(*this);
+      return other;
     }
-    return other;
-  }
+
+    Self &operator++() {
+      curr += (*this)->size;
+      return *this;
+    }
+
+    const Base &operator*() const {
+      return *reinterpret_cast<const Base *>(curr);
+    }
+
+    operator const Base *() const {
+      return reinterpret_cast<const Base *>(curr);
+    }
+
+    const Base *operator->() const {
+      return reinterpret_cast<const Base *>(curr);
+    }
+
+    bool operator==(const brig_iterator &other) const {
+      return this->curr == other.curr;
+    }
+
+    bool operator!=(const brig_iterator &other) const {
+      return this->curr != other.curr;
+    }
+
+    Self operator+(uint64_t addend) const {
+      brig_iterator other = *this;
+      for (unsigned i = 0; i < addend; ++i) {
+        ++other;
+      }
+      return other;
+    }
 
   private:
-  const uint8_t *curr;
+    const uint8_t *curr;
 };
 
 class dir_super {
@@ -165,13 +166,16 @@ struct BrigSections {
     stringsSize(stringsSize), directivesSize(directivesSize),
     codeSize(codeSize), operandsSize(operandsSize) {}
 
-  dir_iterator begin() const { return dir_iterator(directives); };
+  dir_iterator begin() const {
+    return dir_iterator(directives);
+  }
+
   dir_iterator end() const {
     return dir_iterator(directives + directivesSize);
-  };
+  }
 };
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa
 
-#endif /* _BRIG_UTIL_H_ */
+#endif  // INCLUDE_BRIG_UTIL_H_

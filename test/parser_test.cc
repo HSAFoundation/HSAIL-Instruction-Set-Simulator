@@ -2111,17 +2111,8 @@ TEST(ParserTest, Cmp) {
 TEST(ParserTest, GlobalPrivateDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-  ErrorReporterInterface* old_rpt = context->get_error_reporter();
-  MockErrorReporter mer;
-  // forward call to FakeErrorReporter
-  // to record error history
-  mer.DelegateToFake();
-
-  EXPECT_CALL(mer, report_error(_, _, _))
-      .Times(AtLeast(1));
-
   // register error reporter with context
-  context->set_error_reporter(&mer);
+  context->set_error_reporter(main_reporter);
   context->clear_context();
 
   std::string input("private_u32 &tmp[2][2];\n");
@@ -2155,10 +2146,6 @@ TEST(ParserTest, GlobalPrivateDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
 
-  EXPECT_CALL(mer, show_all_error());
-  mer.show_all_error();
-
-  context->set_error_reporter(old_rpt);
   delete lexer;
 };
 
@@ -2483,14 +2470,13 @@ TEST(ParserTest, Mul) {
 };
 
 TEST(ParserTest, Ld) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("ld_f32 $s1, [&x];");  
+  std::string input("ld_f32 $s1, [&x];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld(context));
@@ -2596,17 +2582,16 @@ TEST(ParserTest, Ld) {
   EXPECT_EQ(0, Ld(context));
 
   delete lexer;
-
 };
-TEST(ParserTest, St) {
 
+TEST(ParserTest, St) {
   // Create a lexer
   Lexer* lexer = new Lexer();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("st_f32 $s1, [&x];");  
+  std::string input("st_f32 $s1, [&x];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St(context));
@@ -2645,35 +2630,33 @@ TEST(ParserTest, St) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St(context));
-  
+
   input.assign("st_equiv(1)_u64 $d3, [$s4+32];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St(context));
-  
+
   input.assign("st_v2_equiv(1)_u64 ($d1,$d2), [$s0+32];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St(context));
-  
+
   input.assign("st_equiv(1)_u64 $d6, [128];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St(context));
-  
-  delete lexer;
 
+  delete lexer;
 };
 
 TEST(ParserTest, Lda) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("lda_u64 $d2, [&z];");  
+  std::string input("lda_u64 $d2, [&z];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));
@@ -2689,18 +2672,17 @@ TEST(ParserTest, Lda) {
   EXPECT_EQ(0, Lda(context));
 
   delete lexer;
-
 };
 
 TEST(ParserTest, ImageRet) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("atomic_image_and_ar_3d_b32 $s1, [&namedRWImg2], ($s0,$s3,$s1,$s10), $s1;");
+  std::string input("atomic_image_and_ar_3d_b32 $s1, [&namedRWImg2],");
+  input.append("($s0,$s3,$s1,$s10), $s1;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRet(context));
@@ -2715,12 +2697,14 @@ TEST(ParserTest, ImageRet) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRet(context));
 
-  input.assign("atomic_image_and_3d_u32 $s4, [&namedRWImg2], ($s0,$s3,$s1,$s10), $s2;");
+  input.assign("atomic_image_and_3d_u32 $s4, [&namedRWImg2],");
+  input.append("($s0,$s3,$s1,$s10), $s2;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRet(context));
- 
-  input.assign("atomic_image_and_ar_2d_s32 $s1, [&namedRWImg1], ($s0,$s3), $s2;");
+
+  input.assign("atomic_image_and_ar_2d_s32 $s1, [&namedRWImg1],");
+  input.append("($s0,$s3), $s2;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRet(context));
@@ -2746,18 +2730,17 @@ TEST(ParserTest, ImageRet) {
   EXPECT_EQ(0, ImageRet(context));
 
   delete lexer;
-
 };
 
 TEST(ParserTest, ImageNoRet) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("atomicNoRet_image_and_ar_3d_b32 [&namedRWImg],($s1,$s2,$s3,$s10), $s12;");
+  std::string input("atomicNoRet_image_and_ar_3d_b32 [&namedRWImg],");
+  input.append("($s1,$s2,$s3,$s10), $s12;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageNoRet(context));
@@ -2767,12 +2750,14 @@ TEST(ParserTest, ImageNoRet) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageNoRet(context));
 
-  input.assign("atomicNoRet_image_and_3d_u32 [&namedRWImg], ($s0,$s3,$s1,$s10), $s2;");
+  input.assign("atomicNoRet_image_and_3d_u32 [&namedRWImg],");
+  input.append("($s0,$s3,$s1,$s10), $s2;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageNoRet(context));
 
-  input.assign("atomicNoRet_image_and_ar_2d_s32 [&namedRWImg], ($s0,$s3), $s2;");
+  input.assign("atomicNoRet_image_and_ar_2d_s32 [&namedRWImg],");
+  input.append("($s0,$s3), $s2;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageNoRet(context));
@@ -2808,8 +2793,8 @@ TEST(ParserTest, ImageNoRet) {
   EXPECT_EQ(0, ImageNoRet(context));
 
   delete lexer;
-
 };
+
 // -----------------  Test for cvt rule -------------------
 // format:
 // cvt ::= "cvt" optcvtModifier dataTypeId
@@ -2820,56 +2805,57 @@ TEST(ParserTest, Cvt) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 // correct cases
-  std::string input("cvt_upi_u32_f32 $s1, $s2;\n"); // intRounding modifier
-  lexer->set_source_string(input);
-  context->clear_context();
-  context->token_to_scan = lexer->get_next_token(); 
-  EXPECT_EQ(0, Cvt(context));
-
-  input.assign("cvt_near_f32_f32 $d1, $d2;\n"); // floatRounding modifier
+  std::string input("cvt_upi_u32_f32 $s1, $s2;\n");  // intRounding modifier
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Cvt(context));
 
-  input.assign("cvt_ftz_u32_f32 $s2, $d1;\n"); // ftz modifier
+  input.assign("cvt_near_f32_f32 $d1, $d2;\n");  // floatRounding modifier
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Cvt(context));
 
-  input.assign("cvt_ftz_up_u32_u32 $s1, $d1;\n"); // ftz floatingRounding modifier
+  input.assign("cvt_ftz_u32_f32 $s2, $d1;\n");  // ftz modifier
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Cvt(context));
 
-  input.assign("cvt_u32_f64 $d2, $d1;\n"); // without modifier
+  // ftz floatingRounding modifier
+  input.assign("cvt_ftz_up_u32_u32 $s1, $d1;\n");
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Cvt(context));
+
+  input.assign("cvt_u32_f64 $d2, $d1;\n");  // without modifier
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Cvt(context));
 
 // wrong cases
-  input.assign("cvt_f64 $s1, $d1;\n"); // lack of one datatypeId
+  input.assign("cvt_f64 $s1, $d1;\n");  // lack of one datatypeId
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cvt(context));
 
-  input.assign("cvt_f32_f64 $d1;\n"); // lack of operand
+  input.assign("cvt_f32_f64 $d1;\n");  // lack of operand
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cvt(context));
 
-  input.assign("cvt_up_f32_f64 $s1, $d1\n"); // lack of ';'
+  input.assign("cvt_up_f32_f64 $s1, $d1\n");  // lack of ';'
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, Cvt(context));  
+  EXPECT_NE(0, Cvt(context));
 
-  input.assign("cvt_f32_f64 , $s1, $d1;\n"); // redundant ','
+  input.assign("cvt_f32_f64 , $s1, $d1;\n");  // redundant ','
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
@@ -2881,19 +2867,20 @@ TEST(ParserTest, Cvt) {
 
 
 TEST(ParserTest, ImageLoad) {
-
   // Create a lexer
   Lexer* lexer = new Lexer();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("ld_image_v4_3d_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5,$s6,$s7);");
+  std::string input("ld_image_v4_3d_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],");
+  input.append("($s4,$s5,$s6,$s7);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld_image(context));
 
-  input.assign("ld_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5);");
+  input.assign("ld_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],");
+  input.append("($s4,$s5);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld_image(context));
@@ -2903,13 +2890,13 @@ TEST(ParserTest, ImageLoad) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld_image(context));
 
-  input.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s1,$s2,$s3);");
+  input.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],");
+  input.append("($s4,$s1,$s2,$s3);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld_image(context));
 
   delete lexer;
-
 };
 
 TEST(ParserTest, ImageStore) {
@@ -2919,17 +2906,20 @@ TEST(ParserTest, ImageStore) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("st_image_v4_3d_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5,$s6,$s7);");
+  std::string input("st_image_v4_3d_f32_u32 ($s1,$s2,$s3,$s4),");
+  input.append("[%RWImg3], ($s4,$s5,$s6,$s7);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St_image(context));
 
-  input.assign("st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5,$s6,$s7);");
+  input.assign("st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),");
+  input.append("[%RWImg3], ($s4,$s5,$s6,$s7);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St_image(context));
 
-  input.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5);");
+  input.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4),");
+  input.append("[%RWImg3], ($s4,$s5);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St_image(context));
@@ -2940,7 +2930,6 @@ TEST(ParserTest, ImageStore) {
   EXPECT_EQ(0, St_image(context));
 
   delete lexer;
-
 };
 
 TEST(ParserTest, SingleListSingleTest) {
@@ -3054,7 +3043,91 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   delete parser;
 };
 
+// Error reporting tests
 
+TEST(ErrorReporting, UseMockErrorReporter) {
+  MockErrorReporter mer;
+
+  // forward call to FakeErrorReporter
+  // to record error history
+  mer.DelegateToFake();
+  ErrorReporterInterface* old_rpt = context->get_error_reporter();
+  context->set_error_reporter(&mer);
+  context->clear_context();
+
+  std::string input("version 1:0;");
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_CALL(mer, report_error(ErrorReporterInterface::OK, _, _));
+  EXPECT_EQ(0, Version(context));
+
+  EXPECT_CALL(mer, show_all_error());
+  mer.show_all_error();
+
+  // return the true reporter to context
+  context->set_error_reporter(old_rpt);
+
+  delete lexer;
+}
+
+TEST(ErrorReporting, CheckErrorHistory) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  ErrorReporterInterface* old_rpt = context->get_error_reporter();
+  MockErrorReporter mer;
+  // forward call to FakeErrorReporter
+  // to record error history
+  mer.DelegateToFake();
+
+  EXPECT_CALL(mer, report_error(_, _, _))
+      .Times(AtLeast(1));
+
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+
+  // wrong case
+  std::string input("private_s32 %tmp;\n");  // %tmp is not global identifier
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, mer.get_last_error());
+
+  input.assign("private_u32 &tmp\n");  // lack of ';'
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(ErrorReporterInterface::MISSING_SEMICOLON, mer.get_last_error());
+
+  input.assign("private_u32;\n");  // lack of identifier
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, mer.get_last_error());
+
+  EXPECT_CALL(mer, show_all_error());
+
+  // test reported error
+  ErrorReporterInterface::error_t error_code;
+  unsigned int number_of_errors = mer.get_number_of_errors();
+
+  EXPECT_EQ(3, number_of_errors);
+
+  error_code = mer.get_error_at(0);
+  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, error_code);
+
+  error_code = mer.get_error_at(1);
+  EXPECT_EQ(ErrorReporterInterface::MISSING_SEMICOLON, error_code);
+
+  error_code = mer.get_error_at(2);
+  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, error_code);
+
+  mer.show_all_error();
+
+
+  context->set_error_reporter(old_rpt);
+  delete lexer;
+};
 
 }  // namespace brig
 }  // namespace hsa
