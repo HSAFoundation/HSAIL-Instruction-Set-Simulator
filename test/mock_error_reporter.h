@@ -31,7 +31,6 @@ class MockErrorReporter: public ErrorReporterInterface {
         .WillByDefault(Invoke(&fake, &FakeErrorReporter::get_number_of_errors));
       ON_CALL(*this, get_error_at(_))
         .WillByDefault(Invoke(&fake, &FakeErrorReporter::get_error_at));
-
     };
 
   private:

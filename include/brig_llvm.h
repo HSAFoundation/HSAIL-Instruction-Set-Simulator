@@ -38,7 +38,7 @@ class GenLLVM {
   std::string output_;
 };
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa
 
 #endif  // INCLUDE_BRIG_LLVM_H_
