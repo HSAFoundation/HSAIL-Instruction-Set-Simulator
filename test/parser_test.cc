@@ -2473,11 +2473,6 @@ TEST(ParserTest, Mul) {
   delete lexer;
 };
 
-
-
-
-
-
 TEST(ParserTest, Ld) {
 
   // Create a lexer
@@ -2594,6 +2589,7 @@ TEST(ParserTest, Ld) {
   delete lexer;
 
 };
+
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
