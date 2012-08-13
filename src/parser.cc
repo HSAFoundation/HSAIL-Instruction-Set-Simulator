@@ -4179,31 +4179,27 @@ int St_image(Context* context) {
   return 1;
 }
 
-int SingleListSingle(Context * context)
-{
-	if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
-        while (1) {
-			context->token_to_scan = yylex();
-			if (context->token_to_scan == ',') {
-				context->token_to_scan = yylex();
-				if(context->token_to_scan == TOKEN_SINGLE_CONSTANT)
-					continue;
-				else {
-					context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
-					return 1;
-				}	
-			}		
-			else { 
-				return 0;
-			}	
+int SingleListSingle(Context * context) {
+  if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+    while (1) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+          continue;
+        } else {
+          context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+          return 1;
         }
+      } else {
+        return 0;
+      }
     }
-	else {
-		context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
-        return 1;
-    }
-	
-	return 0;
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+  return 0;
 }
 
 }  // namespace brig
