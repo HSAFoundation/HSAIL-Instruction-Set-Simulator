@@ -3792,5 +3792,9 @@ int ImageRet(Context* context) {
   return 1;
 }
 
+int ImageNoRet(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

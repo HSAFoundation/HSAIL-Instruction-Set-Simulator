@@ -2740,6 +2740,67 @@ TEST(ParserTest, ImageRet) {
 
 };
 
+TEST(ParserTest, ImageNoRet) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("atomicNoRet_image_and_ar_3d_b32 [&namedRWImg],($s1,$s2,$s3,$s10), $s12;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_and_1d_b32 [&namedRWImg], $s10,$s1;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_and_3d_u32 [&namedRWImg], ($s0,$s3,$s1,$s10), $s2;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_and_ar_2d_s32 [&namedRWImg], ($s0,$s3), $s2;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_and_1d_b32 [&namedRWImg], $s1, $s3;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_or_1d_b32 [&namedRWImg], $s1, $s3;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_xor_1d_b32 [&namedRWImg], $s1, $s3;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_and_1da_b32 [&namedRWImg], ($s1,$s2), $s3;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_and_1d_b32 [&namedRWImg], ($s1), $s3;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  input.assign("atomicNoRet_image_cas_1d_b32 [&namedRWImg], $s1, $s3, $s4;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  delete lexer;
+
+};
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {

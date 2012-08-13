@@ -74,6 +74,7 @@ int LdModifier(Context* context);
 int St(Context* context);
 int Lda(Context* context);
 int ImageRet(Context* context);
+int ImageNoRet(Context* context);
 
 }  // namespace brig
 }  // namespace hsa
