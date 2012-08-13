@@ -274,6 +274,7 @@ enum TokenType { TOKEN_CREGISTER= 258,
                  /* Atom Modifiers */
                  _AR,
                  _REGION,
+                 _CAS,
                  ATOMIC_CAS,
                  ATOMIC,
                  ATOMICNORET,

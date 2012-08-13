@@ -1655,6 +1655,11 @@ _region           { free_string(context);
                     context->token_type = ATOM_MODIFIER;
                     context->yycolno+=yyleng;
                     return _REGION;}
+
+_cas              { free_string(context);
+                    context->token_type = ATOM_MODIFIER;
+                    context->yycolno+=yyleng;
+                    return _CAS;}
                     
 atomic_cas        { free_string(context);
                     context->token_type = ATOM_MODIFIER;
