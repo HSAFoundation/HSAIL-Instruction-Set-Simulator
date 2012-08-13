@@ -2934,6 +2934,25 @@ TEST(ParserTest, ImageStore) {
 
 };
 
+TEST(ParserTest, SingleListSingleTest) {
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  // test pairAddressableOperand case
+  std::string input("0.5e3f \n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SingleListSingle(context));
+  
+  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SingleListSingle(context));
+  
+  delete lexer;
+}
+
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
