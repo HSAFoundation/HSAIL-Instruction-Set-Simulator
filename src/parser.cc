@@ -3692,6 +3692,10 @@ int Lda(Context* context) {
   context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
+int ImageRet(Context* context) {
+  
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsa
