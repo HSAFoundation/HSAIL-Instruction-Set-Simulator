@@ -2801,6 +2801,75 @@ TEST(ParserTest, ImageNoRet) {
   delete lexer;
 
 };
+// -----------------  Test for cvt rule -------------------
+// format:
+// cvt ::= "cvt" optcvtModifier dataTypeId
+//         dataTypeId operand "," operand ";"
+TEST(ParserTest, Cvt) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+// correct cases
+  std::string input("cvt_upi_u32_f32 $s1, $s2;\n"); // intRounding modifier
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token(); 
+  EXPECT_EQ(0, Cvt(context));
+
+  input.assign("cvt_near_f32_f32 $d1, $d2;\n"); // floatRounding modifier
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Cvt(context));
+
+  input.assign("cvt_ftz_u32_f32 $s2, $d1;\n"); // ftz modifier
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Cvt(context));
+
+  input.assign("cvt_ftz_up_u32_u32 $s1, $d1;\n"); // ftz floatingRounding modifier
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Cvt(context));
+
+  input.assign("cvt_u32_f64 $d2, $d1;\n"); // without modifier
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Cvt(context));
+
+// wrong cases
+  input.assign("cvt_f64 $s1, $d1;\n"); // lack of one datatypeId
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Cvt(context));
+
+  input.assign("cvt_f32_f64 $d1;\n"); // lack of operand
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Cvt(context));
+
+  input.assign("cvt_up_f32_f64 $s1, $d1\n"); // lack of ';'
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Cvt(context));  
+
+  input.assign("cvt_f32_f64 , $s1, $d1;\n"); // redundant ','
+  lexer->set_source_string(input);
+  context->clear_context();
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Cvt(context));
+
+  input.clear();
+  delete lexer;
+};
+
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
