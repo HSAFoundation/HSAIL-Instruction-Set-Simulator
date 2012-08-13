@@ -4015,7 +4015,78 @@ int Ld_image(Context* context) {
 }
 
 int St_image(Context* context) {
-  
+  // first token is St_image
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == _V4) {
+    context->token_to_scan = yylex();
+    if (context->token_type == GEOMETRY_ID) {
+      context->token_to_scan = yylex();
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (context->token_type == DATA_TYPE_ID) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == '(') {
+            if (!ArrayOperandList(context)) {
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
+              return 1;
+            }
+          } else if (!Operand(context)) {
+          } else { // Array Operand
+            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+            return 1;
+          }
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!AddressableOperand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if (context->token_to_scan == '(') {
+                  if (!ArrayOperandList(context)) {
+                  } else {
+                    context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
+                    return 1;
+                  }
+                } else if (!Operand(context)) {
+                } else { // Array Operand
+                  context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                  return 1;
+                }
+                if (context->token_to_scan == ';') {
+                  context->token_to_scan = yylex();
+                  return 0;
+                } else { // ';'
+                  context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                  return 1;
+                }
+              } else { // ','
+                context->set_error(ErrorReporterInterface::MISSING_COMMA);
+                return 1;
+              }
+            } else { // Addressable Operand
+              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              return 1;
+            }
+          } else { // ','
+            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            return 1;
+          }
+        } else { // Data Type
+          context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+          return 1;
+        }
+      } else { // Data Type
+        context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+        return 1;
+      }
+    } else { // Geometry ID
+      context->set_error(ErrorReporterInterface::MISSING_DECLPREFIX);
+      return 1;
+    }
+  } else { // _V4
+    context->set_error(ErrorReporterInterface::MISSING_DECLPREFIX);
+    return 1;
+  }
   return 1;
 }
 
