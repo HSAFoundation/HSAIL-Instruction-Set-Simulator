@@ -2474,6 +2474,127 @@ TEST(ParserTest, Mul) {
 };
 
 
+
+
+
+
+TEST(ParserTest, Ld) {
+
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("ld_f32 $s1, [&x];");  // Int constant
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_width(64)_f16 $d1, [&x];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_acq_f32 $s1, [&x];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_acq_equiv(2)_f32 $s1, [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_acq_equiv(2)_f32 $s1, [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_arg_acq_equiv(2)_f32 $s1, [&y];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_arg_dep_equiv(2)_f32 $s1, [&y];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_private_f32 $s1, [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_spill_f32 $s1, [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_f32 $s1, [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_v4_f32 ($s1,$s1,$s6,$s2), [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_v2_equiv(9)_f32 ($s1,$s2), [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_group_equiv(0)_u32 $s0, [$s2];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_equiv(1)_u64 $d3, [$s4+32];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_v2_equiv(1)_u64 ($d1,$d2), [$s0+32];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_width(8)_v4_f32 ($s1,$s1,$s6,$s2), [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_equiv(1)_u64 $d6, [128];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_width(4)_v2_equiv(9)_f32 ($s1,$s2), [$s3+4];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_width(64)_u32 $s0, [$s2];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_width(1024)_equiv(1)_u64 $d6, [128];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  input.assign("ld_width(all)_equiv(1)_u64 $d6, [128];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+
+  delete lexer;
+
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
@@ -2565,9 +2686,6 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
 
   delete parser;
 };
-
-
-
 
 
 

@@ -3492,5 +3492,10 @@ int Mul(Context* context) {
   return 1;
 }
 
+int Ld(Context* context) {
+
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

@@ -69,6 +69,8 @@ int MulInst(const unsigned int first_token, Context* context);
 int Mul24Inst(const unsigned int first_token, Context* context);
 int Mad24Inst(const unsigned int first_token, Context* context);
 
+int Ld(Context* context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
