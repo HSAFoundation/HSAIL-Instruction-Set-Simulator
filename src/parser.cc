@@ -3336,7 +3336,7 @@ int IntegerLiteral(Context* context) {
     sign = -1;
   case '+':
     context->token_to_scan = yylex();
-    if (context->token_to_scan = TOKEN_INTEGER_CONSTANT) {
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       context->token_value.int_val *= sign;
     } else {
       return 1;
