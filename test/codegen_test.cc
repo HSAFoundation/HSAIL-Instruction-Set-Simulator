@@ -9,10 +9,7 @@
 #include "error_reporter.h"
 #include "context.h"
 #include "parser_wrapper.h"
-#include "gmock/gmock.h"
-#include "mock_error_reporter.h"
 
-using ::testing::_;
 namespace hsa {
 namespace brig {
 
@@ -1141,44 +1138,6 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
   delete parser;
 };
 
-TEST(ErrorReportingTest, UseMockErrorReporter) {
-  MockErrorReporter mer;
-
-  // forward call to FakeErrorReporter
-  // to record error history
-  mer.DelegateToFake();
-
-  ErrorReporterInterface* old_rpt = context->get_error_reporter();
-
-  context->set_error_reporter(&mer);
-  context->clear_context();
-
-  std::string input("version 1:0;");
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_CALL(mer, report_error(ErrorReporterInterface::OK, _, _));
-  EXPECT_EQ(0, Version(context));
-
-  BrigDirectiveVersion ref = {
-    sizeof(ref),
-    BrigEDirectiveVersion,
-    0,            // unknown c_code
-    1,            // major
-    0,            // minor
-    BrigELarge,   // machine
-    BrigEFull,    // profile
-    BrigENosftz,  // ftz
-    0             // reserved
-  };
-
-  EXPECT_CALL(mer, show_all_error());
-  mer.show_all_error();
-
-  // return the true reporter to context
-  context->set_error_reporter(old_rpt);
-
-  delete lexer;
-}
 
 }  // namespace brig
 }  // namespace hsa

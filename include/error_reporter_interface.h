@@ -145,7 +145,9 @@ class ErrorReporterInterface {
 
   protected:
     bool display;
+    virtual unsigned int get_number_of_errors() = 0;
     virtual void show_all_error() = 0;
+    virtual error_t get_error_at(unsigned int index) = 0;
 };
 }  // namespace brig
 }  // namespace hsa

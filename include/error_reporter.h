@@ -23,7 +23,16 @@ class ErrorReporter: public ErrorReporterInterface {
     ErrorReporter();
     ~ErrorReporter();
     static ErrorReporter* er;
+
+    // these methods are not implemented
+    unsigned int get_number_of_errors() {
+      return 0;
+    }
     void show_all_error() {}
+    error_t get_error_at(unsigned int index) {
+      return OK;
+    }
+
 };
 }  // namespace brig
 }  // namespace hsa

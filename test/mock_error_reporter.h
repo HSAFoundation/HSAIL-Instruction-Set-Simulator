@@ -18,6 +18,8 @@ class MockErrorReporter: public ErrorReporterInterface {
                                     unsigned int ColNo));
     MOCK_METHOD0(show_all_error, void());
 
+    MOCK_METHOD0(get_number_of_errors, unsigned int());
+    MOCK_METHOD1(get_error_at, error_t(unsigned int index));
 
 
     void DelegateToFake() {
@@ -25,6 +27,11 @@ class MockErrorReporter: public ErrorReporterInterface {
         .WillByDefault(Invoke(&fake, &FakeErrorReporter::report_error));
       ON_CALL(*this, show_all_error())
         .WillByDefault(Invoke(&fake, &FakeErrorReporter::show_all_error));
+      ON_CALL(*this, get_number_of_errors())
+        .WillByDefault(Invoke(&fake, &FakeErrorReporter::get_number_of_errors));
+      ON_CALL(*this, get_error_at(_))
+        .WillByDefault(Invoke(&fake, &FakeErrorReporter::get_error_at));
+
     };
 
   private:

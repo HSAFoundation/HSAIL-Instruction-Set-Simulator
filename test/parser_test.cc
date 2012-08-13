@@ -2111,17 +2111,8 @@ TEST(ParserTest, Cmp) {
 TEST(ParserTest, GlobalPrivateDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-  ErrorReporterInterface* old_rpt = context->get_error_reporter();
-  MockErrorReporter mer;
-  // forward call to FakeErrorReporter
-  // to record error history
-  mer.DelegateToFake();
-
-  EXPECT_CALL(mer, report_error(_, _, _))
-      .Times(AtLeast(1));
-
   // register error reporter with context
-  context->set_error_reporter(&mer);
+  context->set_error_reporter(main_reporter);
   context->clear_context();
 
   std::string input("private_u32 &tmp[2][2];\n");
@@ -2155,10 +2146,6 @@ TEST(ParserTest, GlobalPrivateDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
 
-  EXPECT_CALL(mer, show_all_error());
-  mer.show_all_error();
-
-  context->set_error_reporter(old_rpt);
   delete lexer;
 };
 
@@ -2575,7 +2562,88 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   delete parser;
 };
 
+// Error reporting tests
 
+TEST(ErrorReporting, UseMockErrorReporter) {
+  MockErrorReporter mer;
+
+  // forward call to FakeErrorReporter
+  // to record error history
+  mer.DelegateToFake();
+  ErrorReporterInterface* old_rpt = context->get_error_reporter();
+  context->set_error_reporter(&mer);
+  context->clear_context();
+
+  std::string input("version 1:0;");
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_CALL(mer, report_error(ErrorReporterInterface::OK, _, _));
+  EXPECT_EQ(0, Version(context));
+
+  EXPECT_CALL(mer, show_all_error());
+  mer.show_all_error();
+
+  // return the true reporter to context
+  context->set_error_reporter(old_rpt);
+
+  delete lexer;
+}
+
+TEST(ErrorReporting, CheckErrorHistory) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  ErrorReporterInterface* old_rpt = context->get_error_reporter();
+  MockErrorReporter mer;
+  // forward call to FakeErrorReporter
+  // to record error history
+  mer.DelegateToFake();
+
+  EXPECT_CALL(mer, report_error(_, _, _))
+      .Times(AtLeast(1));
+
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+
+  // wrong case
+  std::string input("private_s32 %tmp;\n");  // %tmp is not global identifier
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+
+  input.assign("private_u32 &tmp\n");  // lack of ';'
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+
+  input.assign("private_u32;\n");  // lack of identifier
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalPrivateDecl(context));
+
+  EXPECT_CALL(mer, show_all_error());
+
+  // test reported error
+  ErrorReporterInterface::error_t error_code;
+  unsigned int number_of_errors = mer.get_number_of_errors();
+
+  EXPECT_EQ(3, number_of_errors);
+
+  error_code = mer.get_error_at(0);
+  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, error_code);
+
+  error_code = mer.get_error_at(1);
+  EXPECT_EQ(ErrorReporterInterface::MISSING_SEMICOLON, error_code);
+
+  error_code = mer.get_error_at(2);
+  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, error_code);
+
+  mer.show_all_error();
+
+
+  context->set_error_reporter(old_rpt);
+  delete lexer;
+};
 
 
 
