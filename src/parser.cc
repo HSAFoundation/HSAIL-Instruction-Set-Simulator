@@ -3377,7 +3377,7 @@ int GlobalGroupDecl(Context* context) {
   context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
-int MulInst(const unsigned int first_token, Context* context) {
+int MulInst(Context* context) {
   if (context->token_type == PACKING) {
     context->token_to_scan = yylex();
   }
@@ -3390,7 +3390,7 @@ int MulInst(const unsigned int first_token, Context* context) {
   }
   return 1;
 }
-int Mul24Inst(const unsigned int first_token, Context* context) {
+int Mul24Inst(Context* context) {
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
     return 0;
@@ -3400,7 +3400,7 @@ int Mul24Inst(const unsigned int first_token, Context* context) {
   }
   return 1;
 }
-int Mad24Inst(const unsigned int first_token, Context* context) {
+int Mad24Inst(Context* context) {
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
     if (!Operand(context)) {
@@ -3421,6 +3421,7 @@ int Mad24Inst(const unsigned int first_token, Context* context) {
   }
   return 1;
 }
+
 int Mul(Context* context) {
   unsigned int first_token = context->token_to_scan;
   context->token_to_scan = yylex();
@@ -3430,7 +3431,7 @@ int Mul(Context* context) {
       }
     }
     case MUL_HI: {
-      if (!MulInst(first_token, context)) {
+      if (!MulInst(context)) {
         break;
       } else {
         return 1;
@@ -3438,7 +3439,7 @@ int Mul(Context* context) {
     }
     case MUL24:
     case MUL24_HI: {
-      if (!Mul24Inst(first_token, context)) {
+      if (!Mul24Inst(context)) {
         break;
       } else {
         return 1;
@@ -3446,7 +3447,7 @@ int Mul(Context* context) {
     }
     case MAD24:
     case MAD24_HI: {
-      if (!Mad24Inst(first_token, context)) {
+      if (!Mad24Inst(context)) {
         break;
       } else {
         return 1;

@@ -65,9 +65,9 @@ int IntegerLiteral(Context* context);
 int GlobalGroupDecl(Context* context);
 /* MUL */
 int Mul(Context* context);
-int MulInst(const unsigned int first_token, Context* context);
-int Mul24Inst(const unsigned int first_token, Context* context);
-int Mad24Inst(const unsigned int first_token, Context* context);
+int MulInst(Context* context);
+int Mul24Inst(Context* context);
+int Mad24Inst(Context* context);
 
 }  // namespace brig
 }  // namespace hsa
