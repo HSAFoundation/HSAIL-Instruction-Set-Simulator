@@ -263,6 +263,7 @@ class Context {
       BrigDataType16_t  data_type;
       BrigOpcode32_t    opcode;
       BrigPacking16_t   packing;
+      BrigStorageClass32_t storage_class ;
     } token_value;
 
   private:
