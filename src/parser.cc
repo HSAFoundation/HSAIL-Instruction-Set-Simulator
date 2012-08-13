@@ -2836,8 +2836,10 @@ int Label(Context* context) {
       context->set_error(MISSING_COLON);
       return 1;
     }
+  } else {
+    context->set_error(INVALID_LABEL);
   }
-  context->set_error(UNKNOWN_ERROR);
+
   return 1;
 }
 
