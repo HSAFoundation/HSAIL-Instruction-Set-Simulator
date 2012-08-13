@@ -1249,6 +1249,10 @@ TEST(ParserTest, SysCall) {
   EXPECT_NE(0, SysCall(context));
   EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
+  EXPECT_CALL(mer,show_all_error())
+    .Times(AtLeast(1));
+  mer.show_all_error();
+
   delete lexer;
 };
 
@@ -1264,6 +1268,8 @@ TEST(ParserTest, Label) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("@_test_label_1:\n");
   lexer->set_source_string(input);
@@ -1276,20 +1282,26 @@ TEST(ParserTest, Label) {
   EXPECT_EQ(0, Label(context));
 
   // wrong case
-
   input.assign("@_test_label_3 @wrong  : \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
+  EXPECT_EQ(MISSING_COLON, mer.get_last_error());
 
   input.assign("@_test_label_4 \n");  // lack of colon ':'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
+  EXPECT_EQ(MISSING_COLON, mer.get_last_error());
 
   input.assign("$_test_label_5 :\n");
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
+  EXPECT_EQ(INVALID_LABEL, mer.get_last_error());
+
+  EXPECT_CALL(mer,show_all_error())
+    .Times(AtLeast(1));
+  mer.show_all_error();
 
   delete lexer;
 };

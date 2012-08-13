@@ -44,16 +44,17 @@ enum error_code_t {
   INVALID_THIRD_OPERAND = 26,
   INVALID_FOURTH_OPERAND = 27,
   INVALID_FIFTH_OPERAND = 28,
+  INVALID_LABEL = 29,
 
   // missing part
-  MISSING_VERSION_STATEMENT = 29,
-  MISSING_WIDTH_INFO = 30,
-  MISSING_DECLPREFIX = 31,
-  MISSING_STRING = 32,
-  MISSING_ARGUMENT = 33,
-  MISSING_ARGUMENT_LIST = 34,
-  MISSING_OPERAND = 35,
-  MISSING_COMPARISON_TYPE = 36,
+  MISSING_VERSION_STATEMENT,
+  MISSING_WIDTH_INFO,
+  MISSING_DECLPREFIX,
+  MISSING_STRING,
+  MISSING_ARGUMENT,
+  MISSING_ARGUMENT_LIST,
+  MISSING_OPERAND,
+  MISSING_COMPARISON_TYPE,
 
   UNKNOWN_ERROR
 };
@@ -138,7 +139,8 @@ class ErrorReporterInterface {
           return std::string("Fourth operand is invalid.");
         case INVALID_FIFTH_OPERAND:
           return std::string("Fifth operand is invalid.");
-
+        case INVALID_LABEL:
+          return std::string("Invalid label.");
 
 
         case MISSING_VERSION_STATEMENT:
