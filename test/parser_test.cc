@@ -2993,8 +2993,83 @@ TEST(ParserTest, SingleListSingleTest) {
   EXPECT_EQ(0, SingleListSingle(context));
   
   delete lexer;
-}
+};
 
+TEST(ParserTest,GlobalImageDecl){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("global_RWImg &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalImageDecl(context));
+
+  input.assign("global_RWImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalImageDecl(context));
+  
+  input.assign("global_RWImg &demo[10]={format = normalized} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalImageDecl(context));
+  delete lexer ;
+};
+
+TEST(ParserTest,ImageInitializer){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("= {format = normalized}");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, ImageInitializer(context));
+
+  input.assign("= {format = normalized,order = linear}");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, ImageInitializer(context));
+  
+  delete lexer ;
+};
+
+TEST(ParserTest,ImageInit){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("format = normalized");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, ImageInit(context));
+
+  input.assign("order = linear");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, ImageInit(context));
+  
+  delete lexer ;
+};
+
+TEST(ParserTest,GlobalReadOnlyImageDecl){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("global_ROImg &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
+
+  input.assign("global_ROImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
+  
+  input.assign("global_ROImg &demo[10]={format = normalized} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
+  delete lexer ;
+};
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
