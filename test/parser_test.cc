@@ -3055,6 +3055,59 @@ TEST(ParserTest, BarTest) {
   delete lexer;
 };
 
+TEST(ParserTest, AtomicNoRetTest) {
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("atomicNoRet_and_global_ar_u32 [&x], 23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  input.assign("atomicNoRet_or_global_u64 [&x], 23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  input.assign("atomicNoRet_xor_global_b64 [&x], 23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  input.assign("atomicNoRet_cas_group_u64 [&x], 23, 9;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  input.assign("atomicNoRet_add_u64 [&x], 23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  input.assign("atomicNoRet_dec_global_ar_b64 [&x], 23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  input.assign("atomicNoRet_inc_global_b64 [&x], 23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  input.assign("atomicNoRet_max_global_ar_f64 [&x], 23.0;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  input.assign("atomicNoRet_min_u64 [&x], 23;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, AtomicNoRet(context));
+
+  delete lexer;
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
