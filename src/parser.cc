@@ -4316,6 +4316,53 @@ int ImageInitializer(Context *context){
 }
 
 int GlobalReadOnlyImageDecl(Context *context){
+  //first must be GLOBAL
+  context->token_to_scan = yylex();
+
+  if(_ROIMG == context->token_to_scan){ 
+    context->token_to_scan = yylex();
+    if(TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan){
+      context->token_to_scan = yylex();
+      if('[' == context->token_to_scan){
+         if(!ArrayDimensionSet(context)){
+           if('=' == context->token_to_scan){
+             if(!ImageInitializer(context)){
+               if(';' == context->token_to_scan){
+	         context->token_to_scan = yylex();
+                 return 0 ;
+	       }else{
+                 context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+	       }
+	     }else{
+	     }
+	   }else{//end for =
+             if(';' == context->token_to_scan){
+               context->token_to_scan = yylex();
+               return 0 ;
+	     }else{
+               context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+	     }
+	   }
+	 }
+      }else if('=' == context->token_to_scan){//end for [
+        if(!ImageInitializer(context)){       //no arraydimensions
+          if(';' == context->token_to_scan){
+	    context->token_to_scan = yylex();
+            return 0 ;
+	  }else{
+            context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+	  }
+	}
+      }else if(';' == context->token_to_scan){ //no arrayDimensions and imageInitializer
+        context->token_to_scan = yylex();
+        return 0 ;
+      }else{
+        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+      }
+    }
+  }else{
+    context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+  }
   return 1;
 }
 
