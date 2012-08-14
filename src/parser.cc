@@ -2838,6 +2838,8 @@ int Label(Context* context) {
       context->set_error(MISSING_COLON);
       return 1;
     }
+  } else {
+    context->set_error(INVALID_LABEL);
   }
   return 1;
 }
@@ -2861,6 +2863,8 @@ int LabelTargets(Context* context) {
           return 1;
         }
       }
+    } else {
+      context->set_error(UNKNOWN_ERROR);
     }
   } else {
     context->set_error(INVALID_LABEL);
@@ -3661,7 +3665,7 @@ int GlobalGroupDecl(Context* context) {
         return 1;
       }
     } else {
-      context->set_error(MISSING_IDENTIFIER);
+      context->set_error(MISSING_GLOBAL_IDENTIFIER);
       return 1;
     }
   } else {
@@ -4265,6 +4269,7 @@ int ImageLoad(Context* context) {
           }
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
+            context->token_to_scan = yylex();
             if (!AddressableOperand(context)) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
@@ -4340,6 +4345,7 @@ int ImageStore(Context* context) {
             return 1;
           }
           if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
             context->token_to_scan = yylex();
             if (!AddressableOperand(context)) {
               if (context->token_to_scan == ',') {
@@ -4625,10 +4631,12 @@ int ImageRead(Context *context) {
           }
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
+            context->token_to_scan = yylex();
             if (!AddressableOperand(context)) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
                 if (context->token_to_scan == '[') {
+                  context->token_to_scan = yylex();
                   if (!AddressableOperand(context)) {
                     if (context->token_to_scan == ',') {
                       context->token_to_scan = yylex();
@@ -4638,6 +4646,7 @@ int ImageRead(Context *context) {
                     }
                   } else {  // Addressable Operand
                     context->set_error(MISSING_OPERAND);
+                    printf("test1\n");
                     return 1;
                   }
                 }  // '['
@@ -4651,6 +4660,7 @@ int ImageRead(Context *context) {
                 } else if (!Operand(context)) {
                 } else {  // Array Operand
                   context->set_error(MISSING_OPERAND);
+                  printf("test2\n");
                   return 1;
                 }
                 if (context->token_to_scan == ';') {
@@ -4666,6 +4676,7 @@ int ImageRead(Context *context) {
               }
             } else {  // Addressable Operand
               context->set_error(MISSING_OPERAND);
+              printf("test3\n");
               return 1;
             }
           } else {  // ','
