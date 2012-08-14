@@ -319,10 +319,7 @@ int AddressableOperand(Context* context) {
         }
       }
     }
-  } else {
-    context->set_error(MISSING_IDENTIFIER);
   }
-
   return 1;
 }
 

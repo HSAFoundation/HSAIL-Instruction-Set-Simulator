@@ -2436,7 +2436,7 @@ TEST(ParserTest, MemoryOperand) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
 
-  input.assign("[$s2 - 0xf7]");
+  input.assign("[$s2-0xf7]");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
@@ -2594,6 +2594,8 @@ TEST(ParserTest, GlobalGroupDecl) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("group_u32 &tmp[2][2];");
   lexer->set_source_string(input);
@@ -2616,21 +2618,21 @@ TEST(ParserTest, GlobalGroupDecl) {
   // wrong case
   input.assign("group_s32 %tmp;");  // %tmp is not global identifier
   lexer->set_source_string(input);
-
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalGroupDecl(context));
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   input.assign("group_u32 &tmp");  // lack of ';'
   lexer->set_source_string(input);
-
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalGroupDecl(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("group_u32;");  // lack of identifier
   lexer->set_source_string(input);
-
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalGroupDecl(context));
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   delete lexer;
 };
