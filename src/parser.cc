@@ -3396,11 +3396,21 @@ int Mov(Context* context) {
         if (!Operand(context) || !ArrayOperandList(context)) {
           if (context->token_to_scan == ';') {
             return 0;
-          }  // ';'
-        }  // Operand or ArrayOperandList
-      }  // ','
-    }  // Operand or ArrayOperandList
-  }  // datatypeId
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+          }
+        } else {  // Operand or ArrayOperandList
+          context->set_error(INVALID_SECOND_OPERAND);
+        }
+      } else {  // ','
+        context->set_error(MISSING_COMMA);
+      }
+    } else { // Operand or ArrayOperandList
+      context->set_error(INVALID_FIRST_OPERAND);
+    }
+  } else {  // datatypeId
+    context->set_error(MISSING_DATA_TYPE);
+  }
   return 1;
 }
 int IntegerLiteral(Context* context) {
