@@ -4309,6 +4309,21 @@ int ImageRead(Context *context) {
 }
 
 int Sync(Context* context) {
+  // first token is SYNC
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == _GLOBAL) {
+    context->token_to_scan = yylex();
+  } else if (context->token_to_scan == _GROUP) {
+    context->token_to_scan = yylex();
+  }
+  if (context->token_to_scan == ';') {
+    context->token_to_scan = yylex();
+    return 0;
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+    return 1;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
