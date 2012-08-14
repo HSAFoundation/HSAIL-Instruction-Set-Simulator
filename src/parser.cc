@@ -3113,17 +3113,14 @@ int GlobalPrivateDecl(Context* context) {
         return 0;
       } else {
         context->set_error(MISSING_SEMICOLON);
-        return 1;
       }
     } else {
-      context->set_error(MISSING_IDENTIFIER);
-      return 1;
+      context->set_error(MISSING_GLOBAL_IDENTIFIER);
     }
   } else {
     context->set_error(MISSING_DATA_TYPE);
-    return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
+
   return 1;
 }
 

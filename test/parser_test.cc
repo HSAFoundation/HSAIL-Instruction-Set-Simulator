@@ -3305,7 +3305,7 @@ TEST(ErrorReporting, CheckErrorHistory) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
-  EXPECT_EQ(MISSING_IDENTIFIER, mer.get_last_error());
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   input.assign("private_u32 &tmp\n");  // lack of ';'
   lexer->set_source_string(input);
@@ -3317,7 +3317,7 @@ TEST(ErrorReporting, CheckErrorHistory) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
-  EXPECT_EQ(MISSING_IDENTIFIER, mer.get_last_error());
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   EXPECT_CALL(mer, show_all_error());
 
@@ -3328,13 +3328,13 @@ TEST(ErrorReporting, CheckErrorHistory) {
   EXPECT_EQ(3, number_of_errors);
 
   error_code = mer.get_error_at(0);
-  EXPECT_EQ(MISSING_IDENTIFIER, error_code);
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, error_code);
 
   error_code = mer.get_error_at(1);
   EXPECT_EQ(MISSING_SEMICOLON, error_code);
 
   error_code = mer.get_error_at(2);
-  EXPECT_EQ(MISSING_IDENTIFIER, error_code);
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, error_code);
 
   mer.show_all_error();
 

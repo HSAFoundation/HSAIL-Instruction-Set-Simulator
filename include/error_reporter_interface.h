@@ -19,7 +19,7 @@ enum error_code_t {
   MISSING_GLOBAL_IDENTIFIER = 6,
   MISSING_LOCAL_IDENTIFIER = 7,
   MISSING_LABEL = 8,
-  MISSING_SREGISTER = 9,
+  MISSING_REGISTER = 9,
 
   // missing puctuations
   MISSING_COLON = 10,
@@ -47,16 +47,17 @@ enum error_code_t {
   INVALID_FIFTH_OPERAND = 30,
   INVALID_LABEL = 31,
   INVALID_INSTRUCTION = 32,
+  INVALID_OPERATION = 33,
 
   // missing part
-  MISSING_VERSION_STATEMENT = 33,
-  MISSING_WIDTH_INFO = 34,
-  MISSING_DECLPREFIX = 35,
-  MISSING_STRING = 36,
-  MISSING_ARGUMENT = 37,
-  MISSING_ARGUMENT_LIST = 38,
-  MISSING_OPERAND = 39,
-  MISSING_COMPARISON_TYPE = 40,
+  MISSING_VERSION_STATEMENT = 34,
+  MISSING_WIDTH_INFO = 35,
+  MISSING_DECLPREFIX = 36,
+  MISSING_STRING = 37,
+  MISSING_ARGUMENT = 38,
+  MISSING_ARGUMENT_LIST = 39,
+  MISSING_OPERAND = 40,
+  MISSING_COMPARISON_TYPE = 41,
 
   UNKNOWN_ERROR
 };
@@ -98,8 +99,8 @@ class ErrorReporterInterface {
           return std::string("Missing a local identifier.");
         case MISSING_LABEL:
           return std::string("Missing label.");
-        case MISSING_SREGISTER:
-          return std::string("A S-register required.");
+        case MISSING_REGISTER:
+          return std::string("A register required.");
 
         // missing puctuations
         case MISSING_COLON:
