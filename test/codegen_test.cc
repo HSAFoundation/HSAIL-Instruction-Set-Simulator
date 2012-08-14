@@ -1203,6 +1203,8 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
   // rescan
 
   lexer->set_source_string(input);
+  // get 2 tokens pass '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0, AddressableOperand(context));

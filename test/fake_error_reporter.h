@@ -11,7 +11,7 @@
 namespace hsa {
 namespace brig {
 struct ErrorInfo_t {
-    ErrorReporterInterface::error_t error_code;
+    error_code_t error_code;
     unsigned int line_no;
     unsigned int col_no;
 };
@@ -21,7 +21,7 @@ class FakeErrorReporter: public ErrorReporterInterface {
     FakeErrorReporter() {
       no_errors = 0;
     }
-    void report_error(error_t ErrorCode,
+    void report_error(error_code_t ErrorCode,
                       unsigned int LineNo,
                       unsigned int ColNo) {
       struct ErrorInfo_t error = {
@@ -49,7 +49,7 @@ class FakeErrorReporter: public ErrorReporterInterface {
       return no_errors;
     }
 
-    error_t get_error_at(unsigned int index) {
+    error_code_t get_error_at(unsigned int index) {
       if ((index >= 0) && (index <= no_errors)) {
         return (error_buffer[index].error_code);
       } else {
@@ -58,8 +58,15 @@ class FakeErrorReporter: public ErrorReporterInterface {
       }
     }
 
-    error_t get_last_error() {
-      return (error_buffer[no_errors-1].error_code);
+    error_code_t get_last_error() {
+      if (no_errors > 0) {
+        return (error_buffer[no_errors-1].error_code);
+      } else {
+        std::cout << "No error to report" << std::endl;
+        return UNKNOWN_ERROR;
+      }
+
+
     }
 
 

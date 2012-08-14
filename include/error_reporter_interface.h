@@ -7,56 +7,67 @@
 
 namespace hsa {
 namespace brig {
+  // Error codes
+enum error_code_t {
+  OK = 0,
+  // missing tokens
+  MISSING_INTEGER_CONSTANT = 1,
+  MISSING_SINGLE_CONSTANT = 2,
+  MISSING_DOUBLE_CONSTANT = 3,
+  MISSING_DATA_TYPE = 4,
+  MISSING_IDENTIFIER = 5,
+  MISSING_GLOBAL_IDENTIFIER = 6,
+  MISSING_LOCAL_IDENTIFIER = 7,
+  MISSING_LABEL = 8,
+  MISSING_REGISTER = 9,
 
+  // missing puctuations
+  MISSING_COLON = 10,
+  MISSING_SEMICOLON = 11,
+  MISSING_COMMA = 12,
+  MISSING_CLOSING_BRACKET = 13,
+  MISSING_CLOSING_PARENTHESIS = 14,
+  MISSING_OPENNING_BRACKET = 15,
+
+  // invalid non-terminals
+  INVALID_TARGET = 16,
+  INVALID_ROUNDING_MODE = 17,
+  INVALID_ALIGNMENT = 18,
+  INVALID_ARGUMENT_LIST = 19,
+  INVALID_FBAR = 20,
+  INVALID_NESTED_ARGUMENT_SCOPE = 21,
+  INVALID_INITIALIZER = 22,
+  INVALID_FUNCTION_DEFINITION = 23,
+  INVALID_CODEBLOCK = 24,
+  INVALID_OPERAND = 25,
+  INVALID_FIRST_OPERAND = 26,
+  INVALID_SECOND_OPERAND = 27,
+  INVALID_THIRD_OPERAND = 28,
+  INVALID_FOURTH_OPERAND = 29,
+  INVALID_FIFTH_OPERAND = 30,
+  INVALID_LABEL = 31,
+  INVALID_INSTRUCTION = 32,
+  INVALID_OPERATION = 33,
+
+  // missing part
+  MISSING_VERSION_STATEMENT = 34,
+  MISSING_WIDTH_INFO = 35,
+  MISSING_DECLPREFIX = 36,
+  MISSING_STRING = 37,
+  MISSING_ARGUMENT = 38,
+  MISSING_ARGUMENT_LIST = 39,
+  MISSING_OPERAND = 40,
+  MISSING_COMPARISON_TYPE = 41,
+
+  UNKNOWN_ERROR
+};
 class ErrorReporterInterface {
   public:
     virtual ~ErrorReporterInterface() {}
-    // Error codes
-    enum error_t { OK = 0,
-                   // missing tokens
-                   MISSING_INTEGER_CONSTANT,
-                   MISSING_SINGLE_CONSTANT,
-                   MISSING_DOUBLE_CONSTANT,
-                   MISSING_DATA_TYPE,
 
-                   MISSING_IDENTIFIER,
-                   MISSING_LABEL,
-                   MISSING_SREGISTER,
-
-                   // missing puctuations
-                   MISSING_COLON,
-                   MISSING_SEMICOLON,
-                   MISSING_COMMA,
-                   MISSING_CLOSING_BRACKET,
-                   MISSING_CLOSING_PARENTHESIS,
-                   MISSING_OPENNING_BRACKET,
-
-                   // invalid non-terminals
-                   INVALID_TARGET,
-                   INVALID_ROUNDING_MODE,
-                   INVALID_ALIGNMENT,
-                   INVALID_ARGUMENT_LIST,
-                   INVALID_FBAR,
-                   INVALID_NESTED_ARGUMENT_SCOPE,
-                   INVALID_INITIALIZER,
-                   INVALID_FUNCTION_DEFINITION,
-                   INVALID_CODEBLOCK,
-                   INVALID_OPERAND,
-                   // missing part
-                   MISSING_VERSION_STATEMENT,
-                   MISSING_WIDTH_INFO,
-                   MISSING_DECLPREFIX,
-                   MISSING_STRING,
-                   MISSING_ARGUMENT,
-                   MISSING_ARGUMENT_LIST,
-                   MISSING_OPERAND,
-                   MISSING_COMPARISON_TYPE,
-
-                   UNKNOWN_ERROR
-                 };
 
     // report an error to error reporter
-    virtual void report_error(error_t ErrorCode,
+    virtual void report_error(error_code_t ErrorCode,
                               unsigned int LineNo,
                               unsigned int ColNo) = 0;
 
@@ -66,10 +77,12 @@ class ErrorReporterInterface {
     }
 
     // get a description of error
-    static std::string translate_error(error_t ErrorCode) {
+    static std::string translate_error(error_code_t ErrorCode) {
       switch (ErrorCode) {
         case OK:
           return std::string("No error.");
+
+        // missing tokens
         case MISSING_INTEGER_CONSTANT:
           return std::string("Missing integer constant.");
         case MISSING_SINGLE_CONSTANT:
@@ -80,14 +93,16 @@ class ErrorReporterInterface {
           return std::string("Missing data type.");
         case MISSING_IDENTIFIER:
           return std::string("Missing identifier.");
-        case MISSING_STRING:
-          return std::string("A string expected.");
+        case MISSING_GLOBAL_IDENTIFIER:
+          return std::string("Missing a global identifier.");
+        case MISSING_LOCAL_IDENTIFIER:
+          return std::string("Missing a local identifier.");
         case MISSING_LABEL:
           return std::string("Missing label.");
-        case MISSING_SREGISTER:
-          return std::string("A S-register required.");
+        case MISSING_REGISTER:
+          return std::string("A register required.");
 
-
+        // missing puctuations
         case MISSING_COLON:
           return std::string("Missing a colon.");
         case MISSING_SEMICOLON:
@@ -121,6 +136,21 @@ class ErrorReporterInterface {
           return std::string("Something wrong in codeblock.");
         case INVALID_OPERAND:
           return std::string("Invalid operand.");
+        case INVALID_FIRST_OPERAND:
+          return std::string("First operand is invalid.");
+        case INVALID_SECOND_OPERAND:
+          return std::string("Second operand is invalid.");
+        case INVALID_THIRD_OPERAND:
+          return std::string("Third operand is invalid.");
+        case INVALID_FOURTH_OPERAND:
+          return std::string("Fourth operand is invalid.");
+        case INVALID_FIFTH_OPERAND:
+          return std::string("Fifth operand is invalid.");
+        case INVALID_LABEL:
+          return std::string("Invalid label.");
+        case INVALID_INSTRUCTION:
+          return std::string("Invalid instruction.");
+
 
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");
@@ -128,6 +158,8 @@ class ErrorReporterInterface {
           return std::string("Missing width information.");
         case MISSING_DECLPREFIX:
           return std::string("Missing declPrefix." );
+        case MISSING_STRING:
+          return std::string("A string expected.");
         case MISSING_ARGUMENT:
           return std::string("Missing argument.");
         case MISSING_ARGUMENT_LIST:
@@ -137,7 +169,8 @@ class ErrorReporterInterface {
         case MISSING_COMPARISON_TYPE:
           return std::string("Missing type of comparison.");
 
-      case UNKNOWN_ERROR:
+
+        case UNKNOWN_ERROR:
         default:
           return std::string("Unknown error.");
       }
@@ -147,8 +180,8 @@ class ErrorReporterInterface {
     bool display;
     virtual unsigned int get_number_of_errors() = 0;
     virtual void show_all_error() = 0;
-    virtual error_t get_error_at(unsigned int index) = 0;
-    virtual error_t get_last_error() = 0;
+    virtual error_code_t get_error_at(unsigned int index) = 0;
+    virtual error_code_t get_last_error() = 0;
 };
 }  // namespace brig
 }  // namespace hsa

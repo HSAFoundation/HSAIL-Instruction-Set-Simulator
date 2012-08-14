@@ -83,7 +83,7 @@ void Context::set_error_reporter(ErrorReporterInterface* error_reporter) {
   this->error_reporter_set = true;
 }
 
-void Context::set_error(ErrorReporterInterface::error_t error) {
+void Context::set_error(error_code_t error) {
   // try to free string if the token contains string
   if (error_reporter_set)
     err_reporter->report_error(error, yylineno, yycolno);

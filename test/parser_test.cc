@@ -63,26 +63,36 @@ TEST(ParserTest, AddressableOperandTest) {
 
   std::string input("[%local_id] \n");  // Int constant
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%local_id<100>] \n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%local_id<$d7>] \n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%global_id<$q5 + 10>] \n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%global_id<$d6 - 10 >]\n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
@@ -1025,8 +1035,17 @@ TEST(ParserTest, FileDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
   context->clear_context();
+
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("file 1 \"this is a file\";\n");
   lexer->set_source_string(input);
@@ -1038,57 +1057,69 @@ TEST(ParserTest, FileDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_STRING, mer.get_last_error());
 
   input.assign("file \"this is a file\";\n");  // lack of file string
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file 2 \"this is a file\"\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("file \"this is a file\" 2;\n");  // reverse order
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file 1 2;\n");  // two integer number
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_STRING, mer.get_last_error());
 
   input.assign("file \"file1\" \"file2\";\n");  // two file string
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file 1 \"file1\" \"file2\";\n");  // redundant file string
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("file 1 2 \"file\";\n");  // redundant integer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_STRING, mer.get_last_error());
 
-  input.assign("file 1.2 \"file\";\n");  // not integer
+  input.assign("file 1.2l \"file\";\n");  // not integer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file;\n");  // lack of number , file string
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   input.assign("file $s1 \"file\";\n");  // register not allowed
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, FileDecl(context));
+  EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
+  context->set_error_reporter(main_reporter);
   delete lexer;
 };
 
@@ -1121,7 +1152,16 @@ TEST(ParserTest, SysCall) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
+
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("syscall $s1, 3, $s2, $s3, $s4;\n");
   lexer->set_source_string(input);
@@ -1153,60 +1193,71 @@ TEST(ParserTest, SysCall) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("syscall $c2, 0xff, $s1, $s3, $s4;\n");  // c register is 1-bit
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("syscall $q2, 0xff, $s1, $s3, $s4;\n");  // q register is 128-bit
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   // src must be s register
   input.assign("syscall $s2, 0xff, $d1, $s3, $s4;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_THIRD_OPERAND, mer.get_last_error());
 
   input.assign("syscall $s2, $s4, $s1, $s3, $s4;\n");
   // n must be integer literal
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
 
-  input.assign("syscall $s3, 1.1, $s1, $s3, $s4;\n");
+  input.assign("syscall $s3, 1.1l, $s1, $s3, $s4;\n");
   // n must be integer literal
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
   input.assign("syscall $s3, 3, $s1, $s3, $s4\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("syscall $s3 3, $s1, $s3, $s4;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("syscall $s3, 3 $s1, $s3, $s4;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("syscall $s3, 3, $s1 $s3, $s4;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("syscall $s3, 3, $s1, $s3 $s4;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, SysCall(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   delete lexer;
 };
@@ -1214,8 +1265,17 @@ TEST(ParserTest, SysCall) {
 TEST(ParserTest, Label) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("@_test_label_1:\n");
   lexer->set_source_string(input);
@@ -1228,20 +1288,22 @@ TEST(ParserTest, Label) {
   EXPECT_EQ(0, Label(context));
 
   // wrong case
-
   input.assign("@_test_label_3 @wrong  : \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
+  EXPECT_EQ(MISSING_COLON, mer.get_last_error());
 
   input.assign("@_test_label_4 \n");  // lack of colon ':'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
+  EXPECT_EQ(MISSING_COLON, mer.get_last_error());
 
   input.assign("$_test_label_5 :\n");
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Label(context));
+  EXPECT_EQ(INVALID_LABEL, mer.get_last_error());
 
   delete lexer;
 };
@@ -1249,8 +1311,17 @@ TEST(ParserTest, Label) {
 TEST(ParserTest, LabelTargets) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("@tab: labeltargets @a1, @a2;\n");
   lexer->set_source_string(input);
@@ -1275,22 +1346,27 @@ TEST(ParserTest, LabelTargets) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+  EXPECT_EQ(MISSING_LABEL, mer.get_last_error());
+
 
   // redundant ','
   input.assign("@targets: ,labeltargets @label1, @label2, @label3;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+  EXPECT_EQ(UNKNOWN_ERROR, mer.get_last_error());
 
   input.assign("@targets: labeltargets;\n");  // number of label is zero
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+  EXPECT_EQ(MISSING_LABEL, mer.get_last_error());
 
   input.assign("@targets: labeltargets @label\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   delete lexer;
 };
@@ -1301,9 +1377,17 @@ TEST(ParserTest, Extension) {
   // correct cases
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
   context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("extension \"abc\" ;\n");
   lexer->set_source_string(input);
@@ -1320,6 +1404,7 @@ TEST(ParserTest, Extension) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Extension(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   delete lexer;
 };
@@ -1427,8 +1512,17 @@ TEST(ParserTest, SignatureArgumentList) {
 TEST(ParserTest, Instruction4) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("mad_ftz_u64 $d1, $d2, $d3, $d4;\n");
   lexer->set_source_string(input);
@@ -1505,36 +1599,43 @@ TEST(ParserTest, Instruction4) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("sad4_b32 $s5, $s0 $s1, $s6;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("sad4hi_b32 $s5, $s0, $s1 $s6;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
-  input.assign("bitselect $s5, $s0, $s1, $s6\n");  // lack of ';'
+  input.assign("bitselect_b32 $s5, $s0, $s1, $s6\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("cmov_u8x4;\n");  // no one operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("fma_f32 $s3;\n");  // only one operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("bitalign_b32 $s5, $s0, $s1, $s2, $s3;\n");  // redundant operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("bytealign_b32 $s5, $s0, $s1;\n");  // lack of one operand
   lexer->set_source_string(input);
@@ -1545,11 +1646,13 @@ TEST(ParserTest, Instruction4) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
   input.assign("sad $s5, $s0, $s1, $s6;\n");  // lack of data type
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   delete lexer;
 };
@@ -1559,6 +1662,18 @@ TEST(ParserTest, Instruction4) {
 // correct cases
 TEST(ParserTest, Ldc) {
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
+
 
   std::string input("ldc_b32 $s1, &bar;");  // identifier
   lexer->set_source_string(input);
@@ -1580,21 +1695,37 @@ TEST(ParserTest, Ldc) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+
+  input.assign("ldc_b64 $s1 &some_function;");  // lack of ','
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+
+  input.assign("ldc_b64 $s1 &some_function;");  // lack of ','
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("ldc $s1, &function;");  // lack of dataTypeId
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("ldc_b32 , $s1, &function;");  // redundant ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("ldc_b64 $s1, e123;");  // unrecognized identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
@@ -1606,6 +1737,17 @@ TEST(ParserTest, Ldc) {
 // correct cases
 TEST(ParserTest, Instruction5) {
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("f2u4_u32 $s1, $s2, $s3, $s9, $s3;");
   lexer->set_source_string(input);
@@ -1637,26 +1779,31 @@ TEST(ParserTest, Instruction5) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("f2u4_u32 $s0, $s6, $s3, $s4 $s2;");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("f2u4 $d1, $d2, $d3, 4.0f, 6.0f;");  // lack of datetypeId
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("f2u4_u64 $s1, $s2, $s3, 0xD41;");  // lack of operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("f2u4_u64 , $s1, $s2, $s3, $s4, 0xD41;");  // redundant ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
@@ -1749,8 +1896,18 @@ TEST(ParserTest, CvtModifier1) {
 TEST(ParserTest, Mov) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
+
   // correct cases
   std::string input("mov_b64 $d1, $d4;\n");  // D register
   lexer->set_source_string(input);
@@ -1781,44 +1938,49 @@ TEST(ParserTest, Mov) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
+
   // wrong cases
   input.assign("mov $q1, $q2;\n");  // lack of modifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("mov_b32 $c7;\n");  // lack of operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("mov_b32 $s2, $s1\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("mov_b128 $s6, &global_id, %local_id);\n");  // lack of '('
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("mov_b32 $s2, $s3, $s1;\n");  // redundant operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("mov_b32 , $q3, $q1;\n");  // redundant ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
 
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
-  bool rescan_last_token = false;
-  unsigned int last_token = 0;
 
   // test 1
   std::string input("const static kernarg_u32 %local_id[2][2] ");
@@ -1879,7 +2041,6 @@ TEST(ParserTest, KernelArgumentList) {
 
 TEST(ParserTest, KernelArgumentListBody) {
   Lexer *lexer = new Lexer();
-
 
   std::string input("kernarg_f32 %x");
 
@@ -1944,9 +2105,17 @@ TEST(ParserTest, Kernel) {
 TEST(ParserTest, OperandList) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
   context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("$s1, $c4, $d4, $q2 \n");
   lexer->set_source_string(input);
@@ -1975,21 +2144,21 @@ TEST(ParserTest, OperandList) {
 
   input.assign(", $s5, $s0 ,$s6\n");  // redundant ','
   lexer->set_source_string(input);
-
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   input.assign("$s5, $s0 ,$s6,\n");  // redundant ','
   lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
+    context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   input.assign("\n");  // NULL
   lexer->set_source_string(input);
-
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
@@ -1997,9 +2166,17 @@ TEST(ParserTest, OperandList) {
 TEST(ParserTest, Cmp) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("cmp_eq_b1_b1 $c1, $c2, 0;");
   lexer->set_source_string(input);
@@ -2064,45 +2241,51 @@ TEST(ParserTest, Cmp) {
   // wrong case
   input.assign("cmp_equ_b1 $c1, $d1, $d2;");  // lack of data type
   lexer->set_source_string(input);
-
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("cmp_b1_f64 $c1, $d1, $d2;");  // lack of comparsionId
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_COMPARISON_TYPE, mer.get_last_error());
 
   input.assign("packedcmp_lt $d1, $d2, $d3;");  // lack of data type
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("packedcmp_f32x2 $d1, $d2, $d3;");  // lack of comparsionId
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_COMPARISON_TYPE, mer.get_last_error());
 
-  input.assign("cmp_eq_f32_b1 $s1, $c2;");  // lack of operands
+  input.assign("cmp_eq_f32_b1 $s1, $c2;");  // lack of , 3rd operands
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("cmp_eq_f32_b1 $s1, $c2, 0.0f");  // lack of ';'
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("cmp_eq_f32_b1 $s1, $c2 0.0f;");  // lack of ','
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   delete lexer;
 };
@@ -2111,9 +2294,17 @@ TEST(ParserTest, Cmp) {
 TEST(ParserTest, GlobalPrivateDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
   context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("private_u32 &tmp[2][2];\n");
   lexer->set_source_string(input);
@@ -2135,16 +2326,19 @@ TEST(ParserTest, GlobalPrivateDecl) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   input.assign("private_u32 &tmp\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("private_u32;\n");  // lack of identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   delete lexer;
 };
@@ -2152,63 +2346,78 @@ TEST(ParserTest, GlobalPrivateDecl) {
 TEST(ParserTest, OffsetAddressableOperand) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
   context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("[$s1 + 0xf7]\n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   input.assign("[$s1]\n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   input.assign("[$s2 - 0xf7]\n");
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   input.assign("[0xf7]\n");
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   // wrong case
   input.assign("[0xf7\n");  // lack of ']'
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
-
-  input.assign("$s1]\n");  // lack of '['
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, OffsetAddressableOperand(context));
+  EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   input.assign("[]\n");  // the content in square brackets is empty
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   input.assign("[$s1 * 0xf7]\n");  // '*' is the illegal operation
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
+  EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   input.assign("[0xf7 + 0xf7]\n");  // the operation is illegal
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
+  EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   delete lexer;
 };
@@ -2227,7 +2436,7 @@ TEST(ParserTest, MemoryOperand) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
 
-  input.assign("[$s2 - 0xf7]");
+  input.assign("[$s2-0xf7]");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
@@ -2244,6 +2453,12 @@ TEST(ParserTest, IntegerLiteral) {
   // Case 1 Start reg '+' int
   std::string input("$s1+5");
   Lexer* lexer = new Lexer(input);
+  MockErrorReporter mer;
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
 
   EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
   EXPECT_EQ('+', lexer->get_next_token());
@@ -2370,9 +2585,17 @@ TEST(ParserTest, IntegerLiteral) {
 TEST(ParserTest, GlobalGroupDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("group_u32 &tmp[2][2];");
   lexer->set_source_string(input);
@@ -2395,21 +2618,21 @@ TEST(ParserTest, GlobalGroupDecl) {
   // wrong case
   input.assign("group_s32 %tmp;");  // %tmp is not global identifier
   lexer->set_source_string(input);
-
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalGroupDecl(context));
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   input.assign("group_u32 &tmp");  // lack of ';'
   lexer->set_source_string(input);
-
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalGroupDecl(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("group_u32;");  // lack of identifier
   lexer->set_source_string(input);
-
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalGroupDecl(context));
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   delete lexer;
 };
@@ -2802,9 +3025,19 @@ TEST(ParserTest, ImageNoRet) {
 TEST(ParserTest, Cvt) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
-// correct cases
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
+
+  // correct cases
   std::string input("cvt_upi_u32_f32 $s1, $s2;\n");  // intRounding modifier
   lexer->set_source_string(input);
   context->clear_context();
@@ -2842,24 +3075,28 @@ TEST(ParserTest, Cvt) {
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cvt(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("cvt_f32_f64 $d1;\n");  // lack of operand
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cvt(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("cvt_up_f32_f64 $s1, $d1\n");  // lack of ';'
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cvt(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("cvt_f32_f64 , $s1, $d1;\n");  // redundant ','
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cvt(context));
+  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
   input.clear();
   delete lexer;
@@ -3341,7 +3578,6 @@ TEST(ParserTest, BlockTest) {
   delete lexer;
 };
 
-
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
@@ -3449,7 +3685,7 @@ TEST(ErrorReporting, UseMockErrorReporter) {
   std::string input("version 1:0;");
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_CALL(mer, report_error(ErrorReporterInterface::OK, _, _));
+  EXPECT_CALL(mer, report_error(OK, _, _));
   EXPECT_EQ(0, Version(context));
 
   EXPECT_CALL(mer, show_all_error());
@@ -3472,6 +3708,12 @@ TEST(ErrorReporting, CheckErrorHistory) {
 
   EXPECT_CALL(mer, report_error(_, _, _))
       .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_error_at(_))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_number_of_errors())
+       .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+       .Times(AtLeast(1));
 
   // register error reporter with context
   context->set_error_reporter(&mer);
@@ -3482,36 +3724,36 @@ TEST(ErrorReporting, CheckErrorHistory) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
-  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, mer.get_last_error());
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   input.assign("private_u32 &tmp\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
-  EXPECT_EQ(ErrorReporterInterface::MISSING_SEMICOLON, mer.get_last_error());
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("private_u32;\n");  // lack of identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalPrivateDecl(context));
-  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, mer.get_last_error());
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   EXPECT_CALL(mer, show_all_error());
 
   // test reported error
-  ErrorReporterInterface::error_t error_code;
+  error_t error_code;
   unsigned int number_of_errors = mer.get_number_of_errors();
 
   EXPECT_EQ(3, number_of_errors);
 
   error_code = mer.get_error_at(0);
-  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, error_code);
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, error_code);
 
   error_code = mer.get_error_at(1);
-  EXPECT_EQ(ErrorReporterInterface::MISSING_SEMICOLON, error_code);
+  EXPECT_EQ(MISSING_SEMICOLON, error_code);
 
   error_code = mer.get_error_at(2);
-  EXPECT_EQ(ErrorReporterInterface::MISSING_IDENTIFIER, error_code);
+  EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, error_code);
 
   mer.show_all_error();
 

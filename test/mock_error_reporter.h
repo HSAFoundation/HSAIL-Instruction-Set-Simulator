@@ -13,14 +13,14 @@ namespace hsa {
 namespace brig {
 class MockErrorReporter: public ErrorReporterInterface {
   public:
-    MOCK_METHOD3(report_error, void(error_t ErrorCode,
+    MOCK_METHOD3(report_error, void(error_code_t ErrorCode,
                                     unsigned int LineNo,
                                     unsigned int ColNo));
     MOCK_METHOD0(show_all_error, void());
 
     MOCK_METHOD0(get_number_of_errors, unsigned int());
-    MOCK_METHOD1(get_error_at, error_t(unsigned int index));
-    MOCK_METHOD0(get_last_error, error_t());
+    MOCK_METHOD1(get_error_at, error_code_t(unsigned int index));
+    MOCK_METHOD0(get_last_error, error_code_t());
 
     void DelegateToFake() {
       ON_CALL(*this, report_error(_, _, _))
