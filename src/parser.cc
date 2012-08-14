@@ -4476,6 +4476,60 @@ int Location(Context* context) {
   return 1;
 }
 int Control(Context* context) {
+  if (context->token_to_scan == MEMOPT_ON) {
+  } else if (context->token_to_scan == MEMOPT_OFF) {
+  } else if (context->token_to_scan == WORKGROUPS_PER_CU) {
+    context->token_to_scan = yylex();
+    if (!IntegerLiteral(context)) {
+    } else { // Integer Constant
+      context->set_error(ErrorReporterInterface::
+                         MISSING_INTEGER_CONSTANT);
+      return 1;
+    }
+  } else if (context->token_to_scan == ITEMS_PER_WORKGROUP) {
+    context->token_to_scan = yylex();
+    if (!IntegerLiteral(context)) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!IntegerLiteral(context)) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!IntegerLiteral(context)) {
+            } else { // Integer Constant 
+              context->set_error(ErrorReporterInterface::
+                                 MISSING_INTEGER_CONSTANT);
+              return 1;
+            }
+          } else { // ','
+             context->set_error(ErrorReporterInterface::MISSING_COMMA);
+             return 1;
+          }
+        } else { // Integer Constant
+          context->set_error(ErrorReporterInterface::
+                             MISSING_INTEGER_CONSTANT); 
+          return 1;
+        }
+      } else { // ','
+        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        return 1;
+      }
+    } else { // Integer Constant
+      context->set_error(ErrorReporterInterface::
+                         MISSING_INTEGER_CONSTANT);
+      return 1;
+    }
+  } else {
+    context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == ';') {
+    context->token_to_scan = yylex();
+    return 0;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
