@@ -4646,7 +4646,6 @@ int ImageRead(Context *context) {
                     }
                   } else {  // Addressable Operand
                     context->set_error(MISSING_OPERAND);
-                    printf("test1\n");
                     return 1;
                   }
                 }  // '['
@@ -4660,7 +4659,6 @@ int ImageRead(Context *context) {
                 } else if (!Operand(context)) {
                 } else {  // Array Operand
                   context->set_error(MISSING_OPERAND);
-                  printf("test2\n");
                   return 1;
                 }
                 if (context->token_to_scan == ';') {
@@ -4676,7 +4674,6 @@ int ImageRead(Context *context) {
               }
             } else {  // Addressable Operand
               context->set_error(MISSING_OPERAND);
-              printf("test3\n");
               return 1;
             }
           } else {  // ','
