@@ -76,14 +76,26 @@ int Lda(Context* context);
 int ImageRet(Context* context);
 int ImageNoRet(Context* context);
 int Cvt(Context* context);
-int Ld_image(Context* context);
-int St_image(Context* context);
+int ImageLoad(Context* context);
+int ImageStore(Context* context);
 
 int SingleListSingle(Context *context);
 int GlobalImageDecl(Context *context) ;
 int ImageInitializer(Context *context) ;
 int ImageInit(Context *context);
 int GlobalReadOnlyImageDecl(Context *context);
+int Ret(Context *context);
+int ImageRead(Context *context);
+int Sync(Context *context);
+int Bar(Context *context);
+int AtomicNoRet(Context *context);
+int AtomModifiers(Context *context);
+int Location(Context* context);
+int Control(Context* context);
+int Pragma(Context* context);
+int Block(Context* context);
+int DecimalListSingle(Context* context);
+int FloatListSingle(Context* context);
 
 }  // namespace brig
 }  // namespace hsa
