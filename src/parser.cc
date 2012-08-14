@@ -4442,5 +4442,9 @@ int AtomicNoRet(Context* context) {
   return 1;
 }
 
+int Location(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

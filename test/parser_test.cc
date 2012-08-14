@@ -3108,6 +3108,19 @@ TEST(ParserTest, AtomicNoRetTest) {
   delete lexer;
 };
 
+TEST(ParserTest, LocationTest) {
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("loc 1 20 0;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Location(context));
+
+  delete lexer;
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
