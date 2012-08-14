@@ -81,6 +81,7 @@ int ImageStore(Context* context);
 int SingleListSingle(Context *context);
 int Ret(Context *context);
 int ImageRead(Context *context);
+int Sync(Context *context);
 
 }  // namespace brig
 }  // namespace hsa

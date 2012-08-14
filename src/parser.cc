@@ -4308,5 +4308,9 @@ int ImageRead(Context *context) {
   return 1;
 }
 
+int Sync(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

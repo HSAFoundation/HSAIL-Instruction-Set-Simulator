@@ -3003,6 +3003,23 @@ TEST(ParserTest, ImageReadTest) {
   delete lexer;
 };
 
+TEST(ParserTest, SyncTest) {
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("sync;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Sync(context));
+
+  input.assign("sync_group;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Sync(context));
+  
+  delete lexer;
+};
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
