@@ -4475,6 +4475,9 @@ int Location(Context* context) {
   }
   return 1;
 }
+int Control(Context* context) {
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsa

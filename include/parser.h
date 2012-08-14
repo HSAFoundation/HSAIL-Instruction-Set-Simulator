@@ -86,6 +86,7 @@ int Bar(Context *context);
 int AtomicNoRet(Context *context);
 int AtomModifiers(Context *context);
 int Location(Context* context);
+int Control(Context* context);
 
 }  // namespace brig
 }  // namespace hsa
