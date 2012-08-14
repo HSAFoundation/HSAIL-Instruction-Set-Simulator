@@ -89,6 +89,8 @@ int Location(Context* context);
 int Control(Context* context);
 int Pragma(Context* context);
 int Block(Context* context);
+int DecimalListSingle(Context* context);
+int FloatListSingle(Context* context);
 
 }  // namespace brig
 }  // namespace hsa

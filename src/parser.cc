@@ -4552,8 +4552,100 @@ int Pragma(Context* context) {
   context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
+int FloatListSingle(Context* context) {
+  while (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      continue;
+    } else {
+      // Note: the token has been updated
+      return 0;
+    }
+  } // While
+  context->set_error(ErrorReporterInterface::
+                     MISSING_DOUBLE_CONSTANT);
+  return 1;
+}
+int DecimalListSingle(Context* context) {
+  while (!IntegerLiteral(context)) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      continue;
+    } else {
+      // Note: the token has been updated
+      return 0;
+    }
+  } // While
+  context->set_error(ErrorReporterInterface::
+                     MISSING_INTEGER_CONSTANT);
+  return 1;  
+}
 
 int Block(Context* context) {
+  // first token is BLOCK
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == TOKEN_STRING) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ENDBLOCK) {
+      context->set_error(ErrorReporterInterface::
+                         MISSING_ARGUMENT_LIST);
+      return 1;
+    }
+    while (context->token_to_scan != ENDBLOCK) {
+      if (context->token_to_scan == BLOCKSTRING) {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_STRING) {
+          context->token_to_scan = yylex();
+        } else { // String
+          context->set_error(ErrorReporterInterface::MISSING_STRING);
+          return 1;
+        } 
+      } else if (context->token_to_scan == BLOCKNUMERIC) {
+        context->token_to_scan = yylex();
+        if (context->token_type == DATA_TYPE_ID) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == TOKEN_LABEL) {
+            context->token_to_scan = yylex();
+          } else if (!DecimalListSingle(context)) {
+          } else if (!FloatListSingle(context)) {
+          } else {
+            context->set_error(ErrorReporterInterface::
+                               INVALID_ARGUMENT_LIST);
+            return 1;
+          }
+        } else { // Data Type
+          context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+          return 1;
+        }
+      } else { // Block Numeric or Block String
+        context->set_error(ErrorReporterInterface::INVALID_CODEBLOCK);
+        return 1;
+      }
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
+        continue;
+      } else { // ';'
+        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        return 1;
+      }
+      context->set_error(ErrorReporterInterface::INVALID_CODEBLOCK);
+      return 1;
+    } // While
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ';') {
+      context->token_to_scan = yylex();
+      return 0;
+    } else { // ';'
+      context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+      return 1;
+    }
+  } else { // String
+    context->set_error(ErrorReporterInterface::MISSING_STRING);
+    return 1;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
