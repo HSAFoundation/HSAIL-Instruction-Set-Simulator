@@ -79,6 +79,8 @@ int Ld_image(Context* context);
 int St_image(Context* context);
 
 int SingleListSingle(Context *context);
+int Ret(Context *context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

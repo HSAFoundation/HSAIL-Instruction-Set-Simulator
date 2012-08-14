@@ -4201,6 +4201,10 @@ int SingleListSingle(Context * context) {
   }
   return 0;
 }
+int Ret(Context* context) {
+
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsa
