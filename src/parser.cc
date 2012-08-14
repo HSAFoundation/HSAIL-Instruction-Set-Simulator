@@ -4202,7 +4202,16 @@ int SingleListSingle(Context * context) {
   return 0;
 }
 int Ret(Context* context) {
-
+  // first token is RET
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == ';') {
+    context->token_to_scan = yylex();
+    return 0;
+  } else {
+    context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+    return 1;
+  } 
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
