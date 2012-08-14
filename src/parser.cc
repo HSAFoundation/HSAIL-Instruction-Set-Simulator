@@ -3315,6 +3315,199 @@ int Ldc(Context* context) {
 }
 
 int Atom(Context* context) {
+  unsigned int first_token = context->token_to_scan;
+  context->token_to_scan = yylex();
+  if (first_token == ATOMIC) {   // atomic
+    if (context->token_type == ATOMIC_OP) {
+      context->token_to_scan = yylex();
+      if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||  // with AtomModifiers
+          context->token_to_scan == _AR || 
+          context->token_to_scan == _ACQ ||
+          context->token_to_scan == _REL ||
+          context->token_to_scan == _REGION) {
+        context->token_to_scan = yylex();
+        while (1) {  // AtomModifiers repetition
+          if (context->token_type == ADDRESS_SPACE_IDENTIFIER || 
+              context->token_to_scan == _AR || 
+              context->token_to_scan == _ACQ ||
+              context->token_to_scan == _REL ||
+              context->token_to_scan == _REGION) {
+            context->token_to_scan = yylex(); 
+          }
+          else {
+            break;
+          }
+        }
+        if (context->token_type == DATA_TYPE_ID) {
+          context->token_to_scan = yylex(); 
+          if (!Operand(context)) {
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              if (!MemoryOperand(context)) {
+                if (context->token_to_scan == ',') {
+                  context->token_to_scan = yylex();
+                  if(!Operand(context)) {
+                    if (context->token_to_scan == ';') {
+                      return 0;
+                    } else {
+                      context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                    }
+                  } else {
+                    context->set_error(ErrorReporterInterface::MISSING_OPERAND); 
+                  }       
+                } else {
+                  context->set_error(ErrorReporterInterface::MISSING_COMMA); 
+                }
+              } else {
+                context->set_error(ErrorReporterInterface::MISSING_OPERAND); 
+              }
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_COMMA); 
+            } 
+          } else {
+            context->set_error(ErrorReporterInterface::MISSING_OPERAND); 
+          }
+        } else {
+           context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
+        } 
+      } else if (context->token_type == DATA_TYPE_ID) { // without AtomModifiers
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if(context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!MemoryOperand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if (!Operand(context)) {
+                  if (context->token_to_scan == ';') {
+                    return 0;
+                  } else {
+                    context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                  }
+                } else {
+                   context->set_error(ErrorReporterInterface::MISSING_OPERAND); 
+                }
+              } else {
+                context->set_error(ErrorReporterInterface::MISSING_COMMA);
+              }
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_OPERAND); 
+            }
+          } else {
+             context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          }   
+        } else {
+          context->set_error(ErrorReporterInterface::MISSING_OPERAND); 
+        }   
+      }  else {
+        context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
+      }
+    } else {
+      context->set_error(ErrorReporterInterface:: UNKNOWN_ERROR);
+    }
+  } else if (first_token == ATOMIC_CAS) {   // atomic_cas
+    if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||  // with AtomModifiers
+        context->token_to_scan == _AR || 
+        context->token_to_scan == _ACQ ||
+        context->token_to_scan == _REL ||
+        context->token_to_scan == _REGION) {
+        context->token_to_scan = yylex();
+      while (1) {  // AtomModifiers repetition
+        if (context->token_type == ADDRESS_SPACE_IDENTIFIER || 
+            context->token_to_scan == _AR || 
+            context->token_to_scan == _ACQ ||
+            context->token_to_scan == _REL ||
+            context->token_to_scan == _REGION) {
+            context->token_to_scan = yylex(); 
+        }
+        else {
+          break;
+        }
+      }
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex(); 
+        if (!Operand(context)) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!MemoryOperand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if(!Operand(context)) {
+                  if (context->token_to_scan == ',') {
+                    context->token_to_scan = yylex();
+                    if (!Operand(context)) {
+                      if (context->token_to_scan == ';') {
+                        return 0;
+                      } else {
+                        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                      }
+                    } else {
+                      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                    }  
+                  } else {
+                    context->set_error(ErrorReporterInterface::MISSING_COMMA);
+                  }
+                } else {
+                  context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                }        
+              } else {
+                context->set_error(ErrorReporterInterface::MISSING_COMMA);
+              }
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+            }
+          } else {
+             context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          }
+        } else {
+           context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        }
+      } else {
+         context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
+      }
+    }
+    else if (context->token_type == DATA_TYPE_ID) { // without AtomModifiers
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if(context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!MemoryOperand(context)) {
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              if (!Operand(context)) {
+                if (context->token_to_scan == ',') {
+                  context->token_to_scan = yylex();
+                  if (!Operand(context)) {
+                    if (context->token_to_scan == ';') {
+                      return 0;
+                    } else {
+                      context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                    }
+                  } else {
+                    context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                  } 
+                } else {
+                  context->set_error(ErrorReporterInterface::MISSING_COMMA);
+                }
+              } else {
+                 context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              }
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            }
+          } else {
+            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          } 
+        } else {
+          context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        }
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      }    
+    } else {
+      context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
+    }    
+  }
   return 1;
 }
 
