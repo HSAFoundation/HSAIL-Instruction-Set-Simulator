@@ -4204,7 +4204,68 @@ int SingleListSingle(Context * context) {
 int GlobalImageDecl(Context *context){
   return 1;
 }
+
 int ImageInitializer(Context *context){
+  //first must be '='
+  context->token_to_scan = yylex();
+  if('{' == context->token_to_scan){
+    while(1){
+      if(!ImageInit(context)){
+        if(',' == context->token_to_scan){
+          context->token_to_scan() = yylex();
+          continue ;
+        }else {
+          break ;
+        }
+      }else {
+        context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+        return 1 ;
+      }
+    }//end for while
+
+    if('}' == context->token_to_scan){
+      context->token_to_scan() = yylex();
+      return 0 ;
+    }else{
+      context->set_error(ErrorReporterInterface::MISSIG_CLOSING_BRACKET);
+    }
+  }else{
+     context->set_error(ErrorReporterInterface::MISSING_OPENNING_BRACKET);
+  }
+   else if(WIDTH == context->token_to_scan 
+                 || HEIGHT == context->token_to_scan 
+                 || DEPTH == context->token_to_scan ){ //for tobNumeric "=" TOKEN_INTEGER_CONSTANT 
+	context->token_to_scan = yylex();
+        if('=' == context->token_to_scan){
+          context->token_to_scan = yylex();
+          if(TOKEN_INTEGER_CONSTANT == context->token_to_scan){
+            context->token_to_scan = yylex();
+            if(',' == context->token_to_scan){
+              context->token_to_scan = yylex();
+              continue;
+	    }else {
+              context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+              break ;              
+	    }
+	  }else{
+            context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+            break ;
+	  }
+	}else{
+          context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+          break ;
+	}        
+      }else if('}' == context->token_to_scan){
+        context->token_to_scan = yylex();
+        return 0 ;
+      }else{
+        context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
+        break ;
+      }
+    }//for while
+  }else{
+    context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+  }
   return 1;
 }
 }  // namespace brig
