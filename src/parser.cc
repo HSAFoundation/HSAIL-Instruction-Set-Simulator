@@ -3991,7 +3991,6 @@ int ImageNoRet(Context* context) {
 int Cvt(Context* context) {
   // first token is CVT "cvt"
   context->token_to_scan = yylex();
-
   if (!CvtModifier1(context)) {
     if (context->token_type == DATA_TYPE_ID) {
       context->token_to_scan = yylex();
@@ -4000,16 +3999,20 @@ int Cvt(Context* context) {
         if (!Operand(context)) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            if (!Operand(context) && context->token_to_scan == ';') {
-              return 0;
-            } else {
+            if (!Operand(context)) {
+              if (context->token_to_scan == ';') {
+                return 0;
+              } else {
               context->set_error(MISSING_SEMICOLON);
+              }
+            } else {
+              context->set_error(MISSING_OPERAND);
             }
           } else {
             context->set_error(MISSING_COMMA);
           }
         } else {
-          context->set_error(MISSING_OPERAND);
+          context->set_error(INVALID_OPERAND);
         }
       } else {
         context->set_error(MISSING_DATA_TYPE);
@@ -4024,16 +4027,20 @@ int Cvt(Context* context) {
     if (!Operand(context)) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (!Operand(context) && context->token_to_scan == ';') {
-          return 0;
+        if (!Operand(context)) {
+          if (context->token_to_scan == ';') {
+            return 0;
+          } else {
+            context->set_error(MISSING_SEMICOLON);
+          }
         } else {
-          context->set_error(MISSING_SEMICOLON);
+          context->set_error(MISSING_OPERAND);
         }
       } else {
         context->set_error(MISSING_COMMA);
       }
     } else {
-      context->set_error(MISSING_OPERAND);
+      context->set_error(INVALID_OPERAND);
     }
   } else {
     context->set_error(MISSING_DATA_TYPE);
@@ -4041,7 +4048,6 @@ int Cvt(Context* context) {
   } else {
     context->set_error(MISSING_DATA_TYPE);
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
