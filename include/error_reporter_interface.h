@@ -15,47 +15,48 @@ enum error_code_t {
   MISSING_SINGLE_CONSTANT = 2,
   MISSING_DOUBLE_CONSTANT = 3,
   MISSING_DATA_TYPE = 4,
-
   MISSING_IDENTIFIER = 5,
-  MISSING_LABEL = 6,
-  MISSING_SREGISTER = 7,
+  MISSING_GLOBAL_IDENTIFIER = 6,
+  MISSING_LOCAL_IDENTIFIER = 7,
+  MISSING_LABEL = 8,
+  MISSING_SREGISTER = 9,
 
   // missing puctuations
-  MISSING_COLON = 8,
-  MISSING_SEMICOLON = 9,
-  MISSING_COMMA = 10,
-  MISSING_CLOSING_BRACKET = 11,
-  MISSING_CLOSING_PARENTHESIS = 12,
-  MISSING_OPENNING_BRACKET = 13,
+  MISSING_COLON = 10,
+  MISSING_SEMICOLON = 11,
+  MISSING_COMMA = 12,
+  MISSING_CLOSING_BRACKET = 13,
+  MISSING_CLOSING_PARENTHESIS = 14,
+  MISSING_OPENNING_BRACKET = 15,
 
   // invalid non-terminals
-  INVALID_TARGET = 14,
-  INVALID_ROUNDING_MODE = 15,
-  INVALID_ALIGNMENT = 16,
-  INVALID_ARGUMENT_LIST = 17,
-  INVALID_FBAR = 18,
-  INVALID_NESTED_ARGUMENT_SCOPE = 19,
-  INVALID_INITIALIZER = 20,
-  INVALID_FUNCTION_DEFINITION = 21,
-  INVALID_CODEBLOCK = 22,
-  INVALID_OPERAND = 23,
-  INVALID_FIRST_OPERAND = 24,
-  INVALID_SECOND_OPERAND = 25,
-  INVALID_THIRD_OPERAND = 26,
-  INVALID_FOURTH_OPERAND = 27,
-  INVALID_FIFTH_OPERAND = 28,
-  INVALID_LABEL = 29,
-  INVALID_INSTRUCTION = 30,
+  INVALID_TARGET = 16,
+  INVALID_ROUNDING_MODE = 17,
+  INVALID_ALIGNMENT = 18,
+  INVALID_ARGUMENT_LIST = 19,
+  INVALID_FBAR = 20,
+  INVALID_NESTED_ARGUMENT_SCOPE = 21,
+  INVALID_INITIALIZER = 22,
+  INVALID_FUNCTION_DEFINITION = 23,
+  INVALID_CODEBLOCK = 24,
+  INVALID_OPERAND = 25,
+  INVALID_FIRST_OPERAND = 26,
+  INVALID_SECOND_OPERAND = 27,
+  INVALID_THIRD_OPERAND = 28,
+  INVALID_FOURTH_OPERAND = 29,
+  INVALID_FIFTH_OPERAND = 30,
+  INVALID_LABEL = 31,
+  INVALID_INSTRUCTION = 32,
 
   // missing part
-  MISSING_VERSION_STATEMENT,
-  MISSING_WIDTH_INFO,
-  MISSING_DECLPREFIX,
-  MISSING_STRING,
-  MISSING_ARGUMENT,
-  MISSING_ARGUMENT_LIST,
-  MISSING_OPERAND,
-  MISSING_COMPARISON_TYPE,
+  MISSING_VERSION_STATEMENT = 33,
+  MISSING_WIDTH_INFO = 34,
+  MISSING_DECLPREFIX = 35,
+  MISSING_STRING = 36,
+  MISSING_ARGUMENT = 37,
+  MISSING_ARGUMENT_LIST = 38,
+  MISSING_OPERAND = 39,
+  MISSING_COMPARISON_TYPE = 40,
 
   UNKNOWN_ERROR
 };
@@ -79,6 +80,8 @@ class ErrorReporterInterface {
       switch (ErrorCode) {
         case OK:
           return std::string("No error.");
+
+        // missing tokens
         case MISSING_INTEGER_CONSTANT:
           return std::string("Missing integer constant.");
         case MISSING_SINGLE_CONSTANT:
@@ -89,14 +92,16 @@ class ErrorReporterInterface {
           return std::string("Missing data type.");
         case MISSING_IDENTIFIER:
           return std::string("Missing identifier.");
-        case MISSING_STRING:
-          return std::string("A string expected.");
+        case MISSING_GLOBAL_IDENTIFIER:
+          return std::string("Missing a global identifier.");
+        case MISSING_LOCAL_IDENTIFIER:
+          return std::string("Missing a local identifier.");
         case MISSING_LABEL:
           return std::string("Missing label.");
         case MISSING_SREGISTER:
           return std::string("A S-register required.");
 
-
+        // missing puctuations
         case MISSING_COLON:
           return std::string("Missing a colon.");
         case MISSING_SEMICOLON:
@@ -142,6 +147,8 @@ class ErrorReporterInterface {
           return std::string("Fifth operand is invalid.");
         case INVALID_LABEL:
           return std::string("Invalid label.");
+        case INVALID_INSTRUCTION:
+          return std::string("Invalid instruction.");
 
 
         case MISSING_VERSION_STATEMENT:
@@ -150,6 +157,8 @@ class ErrorReporterInterface {
           return std::string("Missing width information.");
         case MISSING_DECLPREFIX:
           return std::string("Missing declPrefix." );
+        case MISSING_STRING:
+          return std::string("A string expected.");
         case MISSING_ARGUMENT:
           return std::string("Missing argument.");
         case MISSING_ARGUMENT_LIST:
@@ -159,7 +168,8 @@ class ErrorReporterInterface {
         case MISSING_COMPARISON_TYPE:
           return std::string("Missing type of comparison.");
 
-      case UNKNOWN_ERROR:
+
+        case UNKNOWN_ERROR:
         default:
           return std::string("Unknown error.");
       }
