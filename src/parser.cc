@@ -4204,5 +4204,8 @@ int SingleListSingle(Context * context) {
 int GlobalImageDecl(Context *context){
   return 1;
 }
+int ImageInitializer(Context *context){
+  return 1;
+}
 }  // namespace brig
 }  // namespace hsa
