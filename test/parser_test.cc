@@ -2865,6 +2865,51 @@ TEST(ParserTest, Cvt) {
   delete lexer;
 };
 
+// -----------------  Test for atom rule -------------------
+// format:
+// atom ::= ( "atomic" atomicOperationId
+//          AtomModifiers dataTypeId operand "," memoryOperand |
+//          atomcas AtomModifiers dataTypeId operand
+//          "," memoryOperand "," operand ) "," operand ";"
+TEST(ParserTest, Atom) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  // correct cases
+  std::string input("atomic_exch_ar_region_u32 $s4, [&a], 1;\n"); // atomic with AtomModifiers
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Atom(context));
+
+  input.assign("atomic_and_u32 $s4, [&b], 1;\n");  // atomic without AtomModifiers
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Atom(context));
+
+  input.assign("atomic_cas_u64 $d1, [%local_id], 23, 12;\n");  // atomic_cas without AtomModifiers
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Atom(context));
+
+  input.assign("atomic_cas_ar_u64 $d1, [%global_id], $s1, 12;\n");  // atomic_cas with AtomModifiers
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Atom(context));
+  // wrong cases
+  input.assign("atomic_cas_ar $d1, [%global_id], $s1, 12;\n");  // lack of datatypeId
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Atom(context));
+
+  input.assign("atomic_exch_ar_region_u32 [&a], 1;\n"); // lack of Operand
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Atom(context));
+
+  delete lexer;
+};
+
 
 TEST(ParserTest, ImageLoad) {
   // Create a lexer

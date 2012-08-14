@@ -3314,6 +3314,10 @@ int Ldc(Context* context) {
   return 1;
 }
 
+int Atom(Context* context) {
+  return 1;
+}
+
 int CvtModifier1(Context* context) {
   unsigned int next;
   unsigned int first_token = context->token_to_scan;
