@@ -2038,28 +2038,29 @@ int Program(Context* context) {
 
 int OptionalWidth(Context* context) {
   // first token must be _WIDTH
-
-  context->token_to_scan = yylex();
-  if (context->token_to_scan == '(') {
+  if (context->token_to_scan == _WIDTH) {
     context->token_to_scan = yylex();
-    if (context->token_to_scan == ALL) {
+    if (context->token_to_scan == '(') {
       context->token_to_scan = yylex();
-    } else if (!IntegerLiteral(context)) {
-      context->token_to_scan = yylex();
+      if (context->token_to_scan == ALL) {
+        context->token_to_scan = yylex();
+      } else if (!IntegerLiteral(context)) {
+        context->token_to_scan = yylex();
+      } else {
+        context->set_error(ErrorReporterInterface:: MISSING_WIDTH_INFO);
+        return 1;
+      }
+      if (context->token_to_scan == ')') {
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(ErrorReporterInterface:: MISSING_CLOSING_PARENTHESIS);
+      }
     } else {
       context->set_error(ErrorReporterInterface:: MISSING_WIDTH_INFO);
-      return 1;
     }
-    if (context->token_to_scan == ')') {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(ErrorReporterInterface:: MISSING_CLOSING_PARENTHESIS);
-    }
-  } else {
-    context->set_error(ErrorReporterInterface:: MISSING_WIDTH_INFO);
   }
-  return 1;
+  return 0;
 }
 
 int Branch(Context* context) {
