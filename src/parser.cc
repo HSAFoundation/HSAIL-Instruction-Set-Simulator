@@ -4534,6 +4534,22 @@ int Control(Context* context) {
 }
 
 int Pragma(Context* context) {
+  // first token is PRAGMA
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == TOKEN_STRING) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ';') {
+      context->token_to_scan = yylex(); 
+      return 0;
+    } else { // ';'
+      context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+      return 1;
+    }
+  } else { // String
+    context->set_error(ErrorReporterInterface::MISSING_STRING);
+    return 1;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
