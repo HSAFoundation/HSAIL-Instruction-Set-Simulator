@@ -75,8 +75,8 @@ int Lda(Context* context);
 int ImageRet(Context* context);
 int ImageNoRet(Context* context);
 int Cvt(Context* context);
-int Ld_image(Context* context);
-int St_image(Context* context);
+int ImageLoad(Context* context);
+int ImageStore(Context* context);
 
 int SingleListSingle(Context *context);
 int Ret(Context *context);

@@ -4023,7 +4023,7 @@ int Cvt(Context* context) {
   return 1;
 }
 
-int Ld_image(Context* context) {
+int ImageLoad(Context* context) {
   // first token is LD_IMAGE
   context->token_to_scan = yylex();
   if (context->token_to_scan == _V4) {
@@ -4101,7 +4101,7 @@ int Ld_image(Context* context) {
   return 1;
 }
 
-int St_image(Context* context) {
+int ImageStore(Context* context) {
   // first token is St_image
   context->token_to_scan = yylex();
   if (context->token_to_scan == _V4) {

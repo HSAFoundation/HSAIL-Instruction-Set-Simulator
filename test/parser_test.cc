@@ -2866,7 +2866,7 @@ TEST(ParserTest, Cvt) {
 };
 
 
-TEST(ParserTest, ImageLoad) {
+TEST(ParserTest, ImageLoadTest) {
   // Create a lexer
   Lexer* lexer = new Lexer();
 
@@ -2877,29 +2877,29 @@ TEST(ParserTest, ImageLoad) {
   input.append("($s4,$s5,$s6,$s7);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Ld_image(context));
+  EXPECT_EQ(0, ImageLoad(context));
 
   input.assign("ld_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],");
   input.append("($s4,$s5);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Ld_image(context));
+  EXPECT_EQ(0, ImageLoad(context));
 
   input.assign("ld_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Ld_image(context));
+  EXPECT_EQ(0, ImageLoad(context));
 
   input.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],");
   input.append("($s4,$s1,$s2,$s3);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Ld_image(context));
+  EXPECT_EQ(0, ImageLoad(context));
 
   delete lexer;
 };
 
-TEST(ParserTest, ImageStore) {
+TEST(ParserTest, ImageStoreTest) {
   // Create a lexer
   Lexer* lexer = new Lexer();
 
@@ -2910,24 +2910,24 @@ TEST(ParserTest, ImageStore) {
   input.append("[%RWImg3], ($s4,$s5,$s6,$s7);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, St_image(context));
+  EXPECT_EQ(0, ImageStore(context));
 
   input.assign("st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),");
   input.append("[%RWImg3], ($s4,$s5,$s6,$s7);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, St_image(context));
+  EXPECT_EQ(0, ImageStore(context));
 
   input.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4),");
   input.append("[%RWImg3], ($s4,$s5);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, St_image(context));
+  EXPECT_EQ(0, ImageStore(context));
 
   input.assign("st_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, St_image(context));
+  EXPECT_EQ(0, ImageStore(context));
 
   delete lexer;
 };
@@ -3002,6 +3002,8 @@ TEST(ParserTest, ImageReadTest) {
 
   delete lexer;
 };
+
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
