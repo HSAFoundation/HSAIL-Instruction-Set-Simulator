@@ -4214,6 +4214,9 @@ int Ret(Context* context) {
   context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
+int ImageRead(Context *context) {
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsa

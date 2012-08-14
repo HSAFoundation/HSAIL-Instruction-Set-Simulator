@@ -80,6 +80,7 @@ int St_image(Context* context);
 
 int SingleListSingle(Context *context);
 int Ret(Context *context);
+int ImageRead(Context *context);
 
 }  // namespace brig
 }  // namespace hsa
