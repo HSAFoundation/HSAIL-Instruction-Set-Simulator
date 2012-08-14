@@ -82,6 +82,7 @@ int SingleListSingle(Context *context);
 int GlobalImageDecl(Context *context) ;
 int ImageInitializer(Context *context) ;
 int ImageInit(Context *context);
+int GlobalReadOnlyImageDecl(Context *context);
 
 }  // namespace brig
 }  // namespace hsa

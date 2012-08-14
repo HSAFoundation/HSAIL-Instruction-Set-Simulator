@@ -3004,6 +3004,28 @@ TEST(ParserTest,ImageInit){
   
   delete lexer ;
 };
+
+TEST(ParserTest,GlobalReadOnlyImageDecl){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("global_ROImg &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
+
+  input.assign("global_ROImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
+  
+  input.assign("global_ROImg &demo[10]={format = normalized} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
+  delete lexer ;
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");

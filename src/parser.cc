@@ -4315,5 +4315,9 @@ int ImageInitializer(Context *context){
   return 1;
 }
 
+int GlobalReadOnlyImageDecl(Context *context){
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa
