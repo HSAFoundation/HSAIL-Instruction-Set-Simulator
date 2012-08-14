@@ -1693,6 +1693,12 @@ TEST(ParserTest, Ldc) {
   EXPECT_NE(0, Ldc(context));
   EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
+  input.assign("ldc_b64 $s1 &some_function;");  // lack of ','
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+
   input.assign("ldc $s1, &function;");  // lack of dataTypeId
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();

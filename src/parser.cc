@@ -3249,7 +3249,7 @@ int Instruction5(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
+
   return 1;
 }
 
@@ -3276,24 +3276,27 @@ int Ldc(Context* context) {
 
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
-    if (!Operand(context) && context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_LABEL ||
-         !Identifier(context)) {
+    if (!Operand(context)) {
+      if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (context->token_to_scan == ';') {
-          return 0;
-        } else {  // ';'
-          context->set_error(MISSING_SEMICOLON);
+        if (context->token_to_scan == TOKEN_LABEL ||
+           !Identifier(context)) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == ';') {
+            return 0;
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+            return 1;
+          }
+        } else {  // label or identifier
+          context->set_error(INVALID_SECOND_OPERAND);
           return 1;
         }
-      } else {  // label or identifier
-        context->set_error(MISSING_LABEL);
-        context->set_error(MISSING_IDENTIFIER);
-        return 1;
+      } else {
+        context->set_error(MISSING_COMMA);
       }
     } else {  // operand
-      context->set_error(MISSING_OPERAND);
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
   } else {  // datatypeid
