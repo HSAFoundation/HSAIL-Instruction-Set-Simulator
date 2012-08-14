@@ -3137,22 +3137,37 @@ int OffsetAddressableOperand(Context* context) {
       context->token_to_scan = yylex();
       if (!IntegerLiteral(context)) {
         context->token_to_scan = yylex();
+        if (context->token_to_scan == ']') {
+          context->token_to_scan = yylex();
+          return 0;
+        } else {
+          context->set_error(MISSING_CLOSING_BRACKET);
+          return 1;
+        }
       } else {
+        context->set_error(INVALID_SECOND_OPERAND);
         return 1;
       }
-    }
-    if (context->token_to_scan == ']') {
+    } else if (context->token_to_scan == ']')  {
       context->token_to_scan = yylex();
       return 0;
+    } else {
+      context->set_error(MISSING_CLOSING_BRACKET);
+      return 1;
     }
-  } else if (!IntegerLiteral(context)) {
+   } else if (!IntegerLiteral(context)) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == ']') {
       context->token_to_scan = yylex();
       return 0;
+    } else {
+      context->set_error(MISSING_CLOSING_BRACKET);
     }
-  } else {
+  } else if (context->token_to_scan == ']') {
+    // empty body
     context->set_error(MISSING_OPERAND);
+  } else {
+    context->set_error(INVALID_OPERAND);
   }
   return 1;
 }

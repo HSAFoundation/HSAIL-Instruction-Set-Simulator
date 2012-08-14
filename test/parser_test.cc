@@ -2397,14 +2397,14 @@ TEST(ParserTest, OffsetAddressableOperand) {
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
-  EXPECT_EQ(INVALID_OPERATION, mer.get_last_error());
+  EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   input.assign("[0xf7 + 0xf7]\n");  // the operation is illegal
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
-  EXPECT_EQ(MISSING_REGISTER, mer.get_last_error());
+  EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   delete lexer;
 };
