@@ -3226,23 +3226,23 @@ int Instruction5(Context* context) {
                 return 1;
               }
             } else {  // 5 operand
-              context->set_error(MISSING_OPERAND);
+              context->set_error(INVALID_FIFTH_OPERAND);
               return 1;
             }
           } else {  // 4 operand
-            context->set_error(MISSING_OPERAND);
+            context->set_error(INVALID_FOURTH_OPERAND);
             return 1;
           }
         } else {  // 3 operand
-          context->set_error(MISSING_OPERAND);
+          context->set_error(INVALID_THIRD_OPERAND);
           return 1;
         }
       } else {  // 2 operand
-        context->set_error(MISSING_OPERAND);
+        context->set_error(INVALID_SECOND_OPERAND);
         return 1;
       }
     } else {  // 1 operand
-      context->set_error(MISSING_OPERAND);
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
   } else {  // DATA_TYPE_ID
