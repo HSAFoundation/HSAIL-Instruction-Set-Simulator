@@ -2968,34 +2968,40 @@ TEST(ParserTest, ImageReadTest) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("rd_image_v4_3d_s32_f32 ($s0,$s1,$s5,$s3),[&images<2>], [&samplers<$s1+4>], ($s6,$s7,$s10,$s11);");
+  std::string input("rd_image_v4_3d_s32_f32 ($s0,$s1,$s5,$s3),[&images<2>], ");
+  input.append("[&samplers<$s1+4>], ($s6,$s7,$s10,$s11);");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, ImageRead(context));
 
-  input.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3), [%RWImg3], [%Samp3], ($s6);");
+  input.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3), [%RWImg3],");
+  input.append(" [%Samp3], ($s6);");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, ImageRead(context));
 
 
-  input.assign("rd_image_v4_1da_s32_f32 ($s0,$s1,$s2,$s3), [%RWImg3], [%Samp3],($s6, $s7);");
+  input.assign("rd_image_v4_1da_s32_f32 ($s0,$s1,$s2,$s3), [%RWImg3],");
+  input.append(" [%Samp3],($s6, $s7);");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, ImageRead(context));
 
 
-  input.assign("rd_image_v4_3d_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3], [%Samp3],($s6, $s9, $s2, $s2);");
+  input.assign("rd_image_v4_3d_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],");
+  input.append(" [%Samp3],($s6, $s9, $s2, $s2);");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, ImageRead(context));
   
-  input.assign("rd_image_v4_2d_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3], [%Samp3],($s6, $s9);");
+  input.assign("rd_image_v4_2d_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],");
+  input.append(" [%Samp3],($s6, $s9);");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, ImageRead(context));
 
-  input.assign("rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3], [%Samp3],($s6, $s9, $s12, $s13);");
+  input.assign("rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],");
+  input.append(" [%Samp3],($s6, $s9, $s12, $s13);");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, ImageRead(context));
