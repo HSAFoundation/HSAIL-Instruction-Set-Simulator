@@ -4443,6 +4443,36 @@ int AtomicNoRet(Context* context) {
 }
 
 int Location(Context* context) {
+  // first token is LOG
+  context->token_to_scan = yylex();
+  if (!IntegerLiteral(context)) {
+    context->token_to_scan = yylex();
+    if (!IntegerLiteral(context)) {
+      context->token_to_scan = yylex();
+      if (!IntegerLiteral(context)) {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
+          return 0;
+        } else { // ';'
+          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+          return 1;
+        }
+      } else { // Integer Constant
+        context->set_error(ErrorReporterInterface::
+                           MISSING_INTEGER_CONSTANT);
+        return 1;
+      }
+    } else { // Integer Constant
+      context->set_error(ErrorReporterInterface::
+                         MISSING_INTEGER_CONSTANT);
+      return 1;
+    }
+  } else { // Integer Constant
+    context->set_error(ErrorReporterInterface::
+                       MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
   return 1;
 }
 
