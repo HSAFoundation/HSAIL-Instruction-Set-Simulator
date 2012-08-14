@@ -2905,27 +2905,28 @@ int Instruction4(Context* context) {
                 return 1;
               }  // ';'
             } else {  // 4 operand
-              context->set_error(MISSING_OPERAND);
+              context->set_error(INVALID_FOURTH_OPERAND);
               return 1;
             }
           } else {  // 3 operand
-            context->set_error(MISSING_OPERAND);
+            context->set_error(INVALID_THIRD_OPERAND);
             return 1;
           }
         } else {  // 2 operand
-          context->set_error(MISSING_OPERAND);
+          context->set_error(INVALID_SECOND_OPERAND);
           return 1;
         }
      } else {  // 1 operand
-        context->set_error(MISSING_OPERAND);
+        context->set_error(INVALID_FIRST_OPERAND);
         return 1;
       }
     } else {  // DATA_TYPE_ID
       context->set_error(MISSING_DATA_TYPE);
       return 1;
     }
-  }  // INSTRUCTION4_OPCODE
-  context->set_error(UNKNOWN_ERROR);
+  } else { // INSTRUCTION4_OPCODE
+    context->set_error(INVALID_INSTRUCTION);
+  }
   return 1;
 }
 
