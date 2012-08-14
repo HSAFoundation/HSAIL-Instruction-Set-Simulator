@@ -3021,6 +3021,34 @@ TEST(ParserTest, SyncTest) {
   delete lexer;
 };
 
+TEST(ParserTest, BarTest) {
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("barrier;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Bar(context));
+
+  input.assign("barrier_width(64);");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Bar(context));
+  
+  input.assign("barrier_group;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Bar(context));
+  
+  input.assign("barrier_global;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Bar(context));
+
+  delete lexer;
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
