@@ -4350,7 +4350,95 @@ int Bar(Context* context) {
   context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
+
+int AtomModifiers(Context* context) {
+  while (1) {
+
+    if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _AR) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _REL || context->token_to_scan == _ACQ) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _REGION) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+    return 0;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+  return 1;
+}
 int AtomicNoRet(Context* context) {
+  // first token is ATOMICNORET or ATOMICNORET_CAS
+  const unsigned int first_token = context->token_to_scan;
+  context->token_to_scan = yylex();
+  if (first_token == ATOMICNORET) {
+    if (context->token_type == ATOMIC_OP) {
+      context->token_to_scan = yylex();
+    } else {
+      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      return 1;
+    }
+  }
+  
+  if (!AtomModifiers(context)) {
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!MemoryOperand(context)) {
+        if (first_token == ATOMICNORET_CAS) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!Operand(context)) { 
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              return 1;
+            }
+          } else { // ','
+            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            return 1;
+          }
+        } 
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context)) {
+            if (context->token_to_scan == ';') { 
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+              return 1;
+            }
+          } else { // Operand
+            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+            return 1;
+          }
+        } else { // ','
+          context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          return 1;
+        }
+      } else {
+        context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        return 1;
+      }
+    } else { // Data Type
+      context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+      return 1;
+    }
+  } else { // Atom Modifiers
+    context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+    return 1;
+  }
+  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 

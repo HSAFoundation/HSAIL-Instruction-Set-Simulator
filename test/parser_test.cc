@@ -3095,7 +3095,7 @@ TEST(ParserTest, AtomicNoRetTest) {
   context->token_to_scan = yylex();
   EXPECT_EQ(0, AtomicNoRet(context));
 
-  input.assign("atomicNoRet_max_global_ar_f64 [&x], 23.0;");
+  input.assign("atomicNoRet_max_global_ar_f64 [&x], 23.0l;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, AtomicNoRet(context));

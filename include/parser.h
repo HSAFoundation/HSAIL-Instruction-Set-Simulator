@@ -84,6 +84,7 @@ int ImageRead(Context *context);
 int Sync(Context *context);
 int Bar(Context *context);
 int AtomicNoRet(Context *context);
+int AtomModifiers(Context *context);
 
 }  // namespace brig
 }  // namespace hsa
