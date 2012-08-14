@@ -4202,6 +4202,36 @@ int SingleListSingle(Context * context) {
   return 0;
 }
 int ImageInit(Context *context){
+ if(FORMAT == context->token_to_scan             //for "format" = TOKEN_PROPERTY
+    || ORDER == context->token_to_scan ){        //"order" = TOKEN_PROPERTY
+    context->token_to_scan = yylex();
+     if('=' == context->token_to_scan){
+       context->token_to_scan = yylex();
+       if(TOKEN_PROPERTY == context->token_to_scan){
+         context->token_to_scan = yylex();
+         return 0;
+       }else{
+         context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+       }
+     }else{
+       context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+     }
+  }else if(WIDTH == context->token_to_scan 
+       || HEIGHT == context->token_to_scan 
+       || DEPTH == context->token_to_scan ){ //for tobNumeric "=" TOKEN_INTEGER_CONSTANT 
+    context->token_to_scan = yylex();
+    if('=' == context->token_to_scan){
+      context->token_to_scan = yylex();
+      if(TOKEN_INTEGER_CONSTANT == context->token_to_scan){
+        context->token_to_scan = yylex();
+        return 0;
+      }else{
+        context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      }
+    }else{
+      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+    }        
+  }
   return 1 ;
 }
 int GlobalImageDecl(Context *context){
@@ -4213,63 +4243,30 @@ int ImageInitializer(Context *context){
   context->token_to_scan = yylex();
   if('{' == context->token_to_scan){
     while(1){
+      context->token_to_scan = yylex();
       if(!ImageInit(context)){
         if(',' == context->token_to_scan){
-          context->token_to_scan() = yylex();
           continue ;
         }else {
           break ;
         }
       }else {
         context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
-        return 1 ;
+        return 1;
       }
     }//end for while
 
     if('}' == context->token_to_scan){
-      context->token_to_scan() = yylex();
+      context->token_to_scan = yylex();
       return 0 ;
     }else{
-      context->set_error(ErrorReporterInterface::MISSIG_CLOSING_BRACKET);
+      context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
     }
   }else{
      context->set_error(ErrorReporterInterface::MISSING_OPENNING_BRACKET);
   }
-   else if(WIDTH == context->token_to_scan 
-                 || HEIGHT == context->token_to_scan 
-                 || DEPTH == context->token_to_scan ){ //for tobNumeric "=" TOKEN_INTEGER_CONSTANT 
-	context->token_to_scan = yylex();
-        if('=' == context->token_to_scan){
-          context->token_to_scan = yylex();
-          if(TOKEN_INTEGER_CONSTANT == context->token_to_scan){
-            context->token_to_scan = yylex();
-            if(',' == context->token_to_scan){
-              context->token_to_scan = yylex();
-              continue;
-	    }else {
-              context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
-              break ;              
-	    }
-	  }else{
-            context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
-            break ;
-	  }
-	}else{
-          context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
-          break ;
-	}        
-      }else if('}' == context->token_to_scan){
-        context->token_to_scan = yylex();
-        return 0 ;
-      }else{
-        context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
-        break ;
-      }
-    }//for while
-  }else{
-    context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
-  }
   return 1;
 }
+
 }  // namespace brig
 }  // namespace hsa
