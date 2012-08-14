@@ -3054,28 +3054,36 @@ int Cmp(Context* context) {
 
     if (context->token_type == DATA_TYPE_ID) {
       context->token_to_scan = yylex();
-      if (!Operand(context) && context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        if (!Operand(context) && context->token_to_scan == ',') {
+      if (!Operand(context)) {
+        if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
           if (!Operand(context)) {
-            if (context->token_to_scan == ';') {
+            if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              return 0;
+              if (!Operand(context)) {
+                if (context->token_to_scan == ';') {
+                  context->token_to_scan = yylex();
+                  return 0;
+                } else {
+                  context->set_error(MISSING_SEMICOLON);
+                  return 1;
+                }
+              } else {  // 3 operand
+                context->set_error(INVALID_THIRD_OPERAND);
+                return 1;
+              }
             } else {
-              context->set_error(MISSING_SEMICOLON);
-              return 1;
+              context->set_error(MISSING_COMMA);
             }
-          } else {  // 3 operand
-            context->set_error(MISSING_OPERAND);
+          } else {  // 2 operand
+            context->set_error(INVALID_SECOND_OPERAND);
             return 1;
           }
-        } else {  // 2 operand
-          context->set_error(MISSING_OPERAND);
-          return 1;
+        } else {
+          context->set_error(MISSING_COMMA);
         }
       } else {  // 1 operand
-        context->set_error(MISSING_OPERAND);
+        context->set_error(INVALID_FIRST_OPERAND);
         return 1;
       }
     } else {  // Data type

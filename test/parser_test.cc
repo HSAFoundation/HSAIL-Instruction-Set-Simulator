@@ -2256,12 +2256,12 @@ TEST(ParserTest, Cmp) {
   EXPECT_NE(0, Cmp(context));
   EXPECT_EQ(MISSING_COMPARISON_TYPE, mer.get_last_error());
 
-  input.assign("cmp_eq_f32_b1 $s1, $c2;");  // lack of operands
+  input.assign("cmp_eq_f32_b1 $s1, $c2;");  // lack of , 3rd operands
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
-  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("cmp_eq_f32_b1 $s1, $c2, 0.0f");  // lack of ';'
   lexer->set_source_string(input);
