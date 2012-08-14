@@ -3121,6 +3121,19 @@ TEST(ParserTest, LocationTest) {
   delete lexer;
 };
 
+TEST(ParserTest, PragmaTest) {
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("pragma \"this is string!\";");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Pragma(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest, ControlTest) {
   Lexer* lexer = new Lexer();
   // register error reporter with context

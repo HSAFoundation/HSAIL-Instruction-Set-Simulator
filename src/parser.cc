@@ -4533,5 +4533,9 @@ int Control(Context* context) {
   return 1;
 }
 
+int Pragma(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa
