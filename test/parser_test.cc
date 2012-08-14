@@ -63,26 +63,36 @@ TEST(ParserTest, AddressableOperandTest) {
 
   std::string input("[%local_id] \n");  // Int constant
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%local_id<100>] \n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%local_id<$d7>] \n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%global_id<$q5 + 10>] \n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
   input.assign("[%global_id<$d6 - 10 >]\n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
@@ -2350,58 +2360,61 @@ TEST(ParserTest, OffsetAddressableOperand) {
 
   std::string input("[$s1 + 0xf7]\n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   input.assign("[$s1]\n");
   lexer->set_source_string(input);
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   input.assign("[$s2 - 0xf7]\n");
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   input.assign("[0xf7]\n");
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
   // wrong case
   input.assign("[0xf7\n");  // lack of ']'
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
   EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
-  input.assign("$s1]\n");  // lack of '['
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, OffsetAddressableOperand(context));
-  EXPECT_EQ(MISSING_OPENNING_BRACKET, mer.get_last_error());
-
   input.assign("[]\n");  // the content in square brackets is empty
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
   EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   input.assign("[$s1 * 0xf7]\n");  // '*' is the illegal operation
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
   EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   input.assign("[0xf7 + 0xf7]\n");  // the operation is illegal
   lexer->set_source_string(input);
-
+  // get 2 tokens to pass over '['
+  context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
   EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
