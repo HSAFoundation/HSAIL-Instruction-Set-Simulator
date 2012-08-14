@@ -1376,6 +1376,8 @@ TEST(ParserTest, Extension) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("extension \"abc\" ;\n");
   lexer->set_source_string(input);
@@ -1392,6 +1394,7 @@ TEST(ParserTest, Extension) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Extension(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   delete lexer;
 };
@@ -1508,6 +1511,8 @@ TEST(ParserTest, Instruction4) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("mad_ftz_u64 $d1, $d2, $d3, $d4;\n");
   lexer->set_source_string(input);
@@ -1584,36 +1589,43 @@ TEST(ParserTest, Instruction4) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("sad4_b32 $s5, $s0 $s1, $s6;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("sad4hi_b32 $s5, $s0, $s1 $s6;\n");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
-  input.assign("bitselect $s5, $s0, $s1, $s6\n");  // lack of ';'
+  input.assign("bitselect_b32 $s5, $s0, $s1, $s6\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("cmov_u8x4;\n");  // no one operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("fma_f32 $s3;\n");  // only one operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("bitalign_b32 $s5, $s0, $s1, $s2, $s3;\n");  // redundant operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("bytealign_b32 $s5, $s0, $s1;\n");  // lack of one operand
   lexer->set_source_string(input);
@@ -1624,11 +1636,13 @@ TEST(ParserTest, Instruction4) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
   input.assign("sad $s5, $s0, $s1, $s6;\n");  // lack of data type
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   delete lexer;
 };
