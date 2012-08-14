@@ -1736,6 +1736,8 @@ TEST(ParserTest, Instruction5) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("f2u4_u32 $s1, $s2, $s3, $s9, $s3;");
   lexer->set_source_string(input);
@@ -1767,26 +1769,31 @@ TEST(ParserTest, Instruction5) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("f2u4_u32 $s0, $s6, $s3, $s4 $s2;");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("f2u4 $d1, $d2, $d3, 4.0f, 6.0f;");  // lack of datetypeId
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("f2u4_u64 $s1, $s2, $s3, 0xD41;");  // lack of operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("f2u4_u64 , $s1, $s2, $s3, $s4, 0xD41;");  // redundant ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction5(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
