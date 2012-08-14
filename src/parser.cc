@@ -3470,7 +3470,7 @@ int GlobalGroupDecl(Context* context) {
         return 1;
       }
     } else {
-      context->set_error(MISSING_IDENTIFIER);
+      context->set_error(MISSING_GLOBAL_IDENTIFIER);
       return 1;
     }
   } else {
