@@ -4201,6 +4201,8 @@ int SingleListSingle(Context * context) {
   }
   return 0;
 }
-
+int GlobalImageDecl(Context *context){
+  return 1;
+}
 }  // namespace brig
 }  // namespace hsa

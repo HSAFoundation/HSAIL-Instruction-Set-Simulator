@@ -2950,6 +2950,21 @@ TEST(ParserTest, SingleListSingleTest) {
   delete lexer;
 }
 
+TEST(ParserTest,GlobalImageDecl){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("static global_RWImg &demo");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalImageDecl(context));
+
+  input.assign("static global_RWImg &demo[10]");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalImageDecl(context));
+
+}
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
