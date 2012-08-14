@@ -2948,7 +2948,7 @@ TEST(ParserTest, SingleListSingleTest) {
   EXPECT_EQ(0, SingleListSingle(context));
   
   delete lexer;
-}
+};
 
 TEST(ParserTest,GlobalImageDecl){
   Lexer* lexer = new Lexer();
@@ -2963,8 +2963,9 @@ TEST(ParserTest,GlobalImageDecl){
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalImageDecl(context));
-
-}
+  
+  delete lexer ;
+};
 
 TEST(ParserTest,ImageInitializer){
   Lexer* lexer = new Lexer();
@@ -2979,9 +2980,26 @@ TEST(ParserTest,ImageInitializer){
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, ImageInitializer(context));
+  
+  delete lexer ;
+};
 
+TEST(ParserTest,ImageInit){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("format = normalized");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, ImageInit(context));
+
+  input.assign("order = linear");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, ImageInit(context));
+  
+  delete lexer ;
 }
-
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");

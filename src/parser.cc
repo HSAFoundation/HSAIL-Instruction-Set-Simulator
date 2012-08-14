@@ -4201,6 +4201,9 @@ int SingleListSingle(Context * context) {
   }
   return 0;
 }
+int ImageInit(Context *context){
+  return 1 ;
+}
 int GlobalImageDecl(Context *context){
   return 1;
 }

@@ -81,6 +81,8 @@ int St_image(Context* context);
 int SingleListSingle(Context *context);
 int GlobalImageDecl(Context *context) ;
 int ImageInitializer(Context *context) ;
+int ImageInit(Context *context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
