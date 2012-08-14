@@ -2954,16 +2954,20 @@ TEST(ParserTest,GlobalImageDecl){
   Lexer* lexer = new Lexer();
   context->set_error_reporter(main_reporter);
   
-  std::string input("static global_RWImg &demo");
+  std::string input("global_RWImg &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalImageDecl(context));
 
-  input.assign("static global_RWImg &demo[10]");
+  input.assign("global_RWImg &demo[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalImageDecl(context));
   
+  input.assign("global_RWImg &demo[10]={format = normalized} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalImageDecl(context));
   delete lexer ;
 };
 
@@ -2999,7 +3003,7 @@ TEST(ParserTest,ImageInit){
   EXPECT_EQ(0, ImageInit(context));
   
   delete lexer ;
-}
+};
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
