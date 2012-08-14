@@ -2104,6 +2104,8 @@ TEST(ParserTest, OperandList) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
 
   std::string input("$s1, $c4, $d4, $q2 \n");
   lexer->set_source_string(input);
@@ -2132,21 +2134,21 @@ TEST(ParserTest, OperandList) {
 
   input.assign(", $s5, $s0 ,$s6\n");  // redundant ','
   lexer->set_source_string(input);
-
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   input.assign("$s5, $s0 ,$s6,\n");  // redundant ','
   lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
+    context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   input.assign("\n");  // NULL
   lexer->set_source_string(input);
-
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OperandList(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
@@ -2163,6 +2165,8 @@ TEST(ParserTest, Cmp) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("cmp_eq_b1_b1 $c1, $c2, 0;");
   lexer->set_source_string(input);
@@ -2227,45 +2231,51 @@ TEST(ParserTest, Cmp) {
   // wrong case
   input.assign("cmp_equ_b1 $c1, $d1, $d2;");  // lack of data type
   lexer->set_source_string(input);
-
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("cmp_b1_f64 $c1, $d1, $d2;");  // lack of comparsionId
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_COMPARISON_TYPE, mer.get_last_error());
 
   input.assign("packedcmp_lt $d1, $d2, $d3;");  // lack of data type
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("packedcmp_f32x2 $d1, $d2, $d3;");  // lack of comparsionId
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_COMPARISON_TYPE, mer.get_last_error());
 
   input.assign("cmp_eq_f32_b1 $s1, $c2;");  // lack of operands
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   input.assign("cmp_eq_f32_b1 $s1, $c2, 0.0f");  // lack of ';'
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("cmp_eq_f32_b1 $s1, $c2 0.0f;");  // lack of ','
   lexer->set_source_string(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Cmp(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   delete lexer;
 };
