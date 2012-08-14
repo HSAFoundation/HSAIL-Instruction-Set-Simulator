@@ -3162,6 +3162,60 @@ TEST(ParserTest, ControlTest) {
   delete lexer;
 };
 
+TEST(ParserTest, BlockTest) { 
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("block \"rti\"\n");
+  input.append("blockstring \"meta info about this function\";\n");
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Block(context));
+
+  input.assign("block \"debug\"\n");
+  input.append("blocknumeric_b8 255, 23, 10, 23;\n");
+  input.append("blocknumeric_b32 1255, 0x323, 10, 23;\n");
+  input.append("blocknumeric_b64 0x123456781, 0x323, 10, 23;\n");
+  input.append("blockstring \"this is a string\";\n");
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Block(context));
+
+  // wrong case
+  input.assign("block \"debug\"\n"); // lack of code
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Block(context));
+
+  input.assign("block \"debug\"\n"); // missing block numeric
+  input.append("_b32 1255, 0x323, 10, 23;\n");
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Block(context));
+
+  input.assign("block \"debug\"\n"); // missing block string
+  input.append("\"this is string\";\n");
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Block(context));
+
+  input.assign("block \"debug\"\n"); // missing token string
+  input.append("blockstring;\n");
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, Block(context));
+
+
+  delete lexer;
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");

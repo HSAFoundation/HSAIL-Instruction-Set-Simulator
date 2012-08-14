@@ -4553,5 +4553,9 @@ int Pragma(Context* context) {
   return 1;
 }
 
+int Block(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa
