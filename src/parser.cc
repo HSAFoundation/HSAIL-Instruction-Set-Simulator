@@ -3300,7 +3300,7 @@ int Ldc(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
+
   return 1;
 }
 

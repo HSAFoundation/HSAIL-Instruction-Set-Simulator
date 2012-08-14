@@ -1661,6 +1661,9 @@ TEST(ParserTest, Ldc) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+     .Times(AtLeast(1));
+
 
   std::string input("ldc_b32 $s1, &bar;");  // identifier
   lexer->set_source_string(input);
@@ -1682,21 +1685,31 @@ TEST(ParserTest, Ldc) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+
+  input.assign("ldc_b64 $s1 &some_function;");  // lack of ','
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("ldc $s1, &function;");  // lack of dataTypeId
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("ldc_b32 , $s1, &function;");  // redundant ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   input.assign("ldc_b64 $s1, e123;");  // unrecognized identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
