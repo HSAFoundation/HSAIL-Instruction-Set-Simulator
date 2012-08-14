@@ -59,7 +59,14 @@ class FakeErrorReporter: public ErrorReporterInterface {
     }
 
     error_code_t get_last_error() {
-      return (error_buffer[no_errors-1].error_code);
+      if (no_errors > 0) {
+        return (error_buffer[no_errors-1].error_code);
+      } else {
+        std::cout << "No error to report" << std::endl;
+        return UNKNOWN_ERROR;
+      }
+
+
     }
 
 

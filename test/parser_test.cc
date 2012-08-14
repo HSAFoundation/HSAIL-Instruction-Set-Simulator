@@ -1895,6 +1895,8 @@ TEST(ParserTest, Mov) {
   // expected method calls
   EXPECT_CALL(mer, report_error(_, _, _))
      .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   // correct cases
   std::string input("mov_b64 $d1, $d4;\n");  // D register
@@ -1926,36 +1928,43 @@ TEST(ParserTest, Mov) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
+
   // wrong cases
   input.assign("mov $q1, $q2;\n");  // lack of modifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("mov_b32 $c7;\n");  // lack of operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   input.assign("mov_b32 $s2, $s1\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("mov_b128 $s6, &global_id, %local_id);\n");  // lack of '('
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
   input.assign("mov_b32 $s2, $s3, $s1;\n");  // redundant operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("mov_b32 , $q3, $q1;\n");  // redundant ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
