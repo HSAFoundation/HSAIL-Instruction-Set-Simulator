@@ -4257,9 +4257,10 @@ int Instruction0(Context* context) {
 }
 
 int Instruction1(Context* context) {
-  if (context->token_type == INSTRUCTION1_OPCODE_NODT) { // Instruction1OpcodeNoDT
+  if (context->token_type == INSTRUCTION1_OPCODE_NODT) {
+    // Instruction1OpcodeNoDT
     context->token_to_scan = yylex();
-    if (!RoundingMode(context)) { // with RoundingMode 
+    if (!RoundingMode(context)) {  // with RoundingMode
       if (!Operand(context)) {
         if (context->token_to_scan == ';') {
           return 0;
@@ -4269,7 +4270,7 @@ int Instruction1(Context* context) {
       } else {
          context->set_error(MISSING_OPERAND);
       }
-    } else if (!Operand(context)) { // without RoundingMode
+    } else if (!Operand(context)) {  // without RoundingMode
       if (context->token_to_scan == ';') {
         return 0;
       } else {
@@ -4278,7 +4279,7 @@ int Instruction1(Context* context) {
     } else {
         context->set_error(MISSING_OPERAND);
     }
-  } else if (context->token_to_scan == CLOCK) { // clock
+  } else if (context->token_to_scan == CLOCK) {  // clock
     context->token_to_scan = yylex();
     if (!Operand(context)) {
       if (context->token_to_scan == ';') {
@@ -4289,9 +4290,9 @@ int Instruction1(Context* context) {
     } else {
       context->set_error(MISSING_OPERAND);
     }
-  } else if (context->token_type == INSTRUCTION1_OPCODE) { // Instruction1Opcode
+  } else if (context->token_type == INSTRUCTION1_OPCODE) {  // Instruction1Opcode
     context->token_to_scan = yylex();
-    if (!RoundingMode(context)) { // with RoundingMode
+    if (!RoundingMode(context)) {  // with RoundingMode
       if (context->token_type == DATA_TYPE_ID) {
         context->token_to_scan = yylex();
         if (!Operand(context)) {
@@ -4305,7 +4306,7 @@ int Instruction1(Context* context) {
         }
       } else {
         context->set_error(MISSING_DATA_TYPE);
-      }  
+      }
     } else if (context->token_type == DATA_TYPE_ID) { // without RoundingMode
       context->token_to_scan = yylex();
       if (!Operand(context)) {
@@ -4319,7 +4320,7 @@ int Instruction1(Context* context) {
       }
     } else {
       context->set_error(MISSING_DATA_TYPE);
-    }      
+    }
   }
   return 1;
 }
@@ -4551,7 +4552,6 @@ int ImageInit(Context *context) {
     context->set_error(INVALID_IMAGE_INIT);
     return 1;
   }
-
 }
 
 int GlobalImageDecl(Context *context) {

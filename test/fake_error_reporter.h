@@ -65,11 +65,7 @@ class FakeErrorReporter: public ErrorReporterInterface {
         std::cout << "No error to report" << std::endl;
         return UNKNOWN_ERROR;
       }
-
-
     }
-
-
 
   private:
     std::vector<struct ErrorInfo_t> error_buffer;

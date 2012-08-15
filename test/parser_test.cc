@@ -1988,7 +1988,7 @@ TEST(ParserTest, Instruction0) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
   // correct cases
-  std::string input("nop ;\n"); // atomic with AtomModifiers
+  std::string input("nop ;\n");  // atomic with AtomModifiers
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction0(context));
@@ -2008,27 +2008,32 @@ TEST(ParserTest, Instruction1) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
   // correct cases
-  std::string input("laneid_ftz $s1;\n"); //  Instruction1OpcodeNoDT with optRoundingMode
+  std::string input("laneid_ftz $s1;\n");
+  // Instruction1OpcodeNoDT with optRoundingMode
+
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("laneid $s1;\n"); // Instruction1OpcodeNoDT without optRoundingMode
+  input.assign("laneid $s1;\n");
+  // Instruction1OpcodeNoDT without optRoundingMode
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("clock $c2;\n"); // clock
+  input.assign("clock $c2;\n");  // clock
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("fbar_wait_upi_s8 $s1;\n"); // Instruction1Opcode with optRoundingMode
+  input.assign("fbar_wait_upi_s8 $s1;\n");
+  // Instruction1Opcode with optRoundingMode
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("fbar_wait_s8 $s1;\n"); // Instruction1Opcode without optRoundingMode
+  input.assign("fbar_wait_s8 $s1;\n");
+  // Instruction1Opcode without optRoundingMode
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
@@ -3588,8 +3593,17 @@ TEST(ParserTest, ControlTest) {
 
 TEST(ParserTest, BlockTest) {
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("block \"rti\"\n");
   input.append("blockstring \"meta info about this function\";\n");
@@ -3614,6 +3628,7 @@ TEST(ParserTest, BlockTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Block(context));
+  EXPECT_EQ(MISSING_SECTION_ITEM, mer.get_last_error());
 
   input.assign("block \"debug\"\n");  // missing block numeric
   input.append("_b32 1255, 0x323, 10, 23;\n");
@@ -3621,6 +3636,7 @@ TEST(ParserTest, BlockTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Block(context));
+  EXPECT_EQ(MISSING_BLOCK_TYPE, mer.get_last_error());
 
   input.assign("block \"debug\"\n");  // missing block string
   input.append("\"this is string\";\n");
@@ -3628,6 +3644,7 @@ TEST(ParserTest, BlockTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Block(context));
+  EXPECT_EQ(MISSING_BLOCK_TYPE, mer.get_last_error());
 
   input.assign("block \"debug\"\n");  // missing token string
   input.append("blockstring;\n");
@@ -3635,8 +3652,9 @@ TEST(ParserTest, BlockTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Block(context));
+  EXPECT_EQ(INVALID_SECTION_ITEM, mer.get_last_error());
 
-
+  context->set_error_reporter(main_reporter);
   delete lexer;
 };
 
