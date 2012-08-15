@@ -1979,6 +1979,21 @@ TEST(ParserTest, Mov) {
   delete lexer;
 };
 
+// -----------------  Test for Instruction0 rule -------------------
+// format:
+// Instruction0 ::= "nop" ";"
+TEST(ParserTest, Instruction0) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  // correct cases
+  std::string input("nop ;\n"); // atomic with AtomModifiers
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction0(context));
+};
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 

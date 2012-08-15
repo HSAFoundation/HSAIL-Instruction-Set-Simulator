@@ -62,6 +62,7 @@ int Instruction5(Context* context);
 int CvtModifier1(Context* context);
 int Mov(Context* context);
 int Atom(Context* context);
+int Instruction0(Context* context);
 int IntegerLiteral(Context* context);
 int GlobalGroupDecl(Context* context);
 /* MUL */
