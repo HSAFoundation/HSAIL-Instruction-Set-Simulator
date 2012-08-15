@@ -1992,6 +1992,48 @@ TEST(ParserTest, Instruction0) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction0(context));
+
+  delete lexer;
+};
+
+// -----------------  Test for Instruction1 rule -------------------
+// format:
+// Instruction1 ::= ( Instruction1OpcodeNoDT optRoundingMode
+//                  | "clock" | Instruction1Opcode
+//                  optRoundingMode dataTypeId ) operand ";"
+
+TEST(ParserTest, Instruction1) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  // correct cases
+  std::string input("laneid_ftz $s1;\n"); //  Instruction1OpcodeNoDT with optRoundingMode
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  input.assign("laneid $s1;\n"); // Instruction1OpcodeNoDT without optRoundingMode
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  input.assign("clock $c2;\n"); // clock
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  input.assign("fbar_wait_upi_s8 $s1;\n"); // Instruction1Opcode with optRoundingMode
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  input.assign("fbar_wait_s8 $s1;\n"); // Instruction1Opcode without optRoundingMode
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  delete lexer;
 };
 
 TEST(ParserTest, KernelArgumentList) {
