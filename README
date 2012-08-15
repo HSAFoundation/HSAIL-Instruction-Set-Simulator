@@ -28,7 +28,8 @@ On Linux with Eclipse Platform IDE with CDT4:
 - Build project with Eclipse CDT:
     + Run Eclipse
     + Choose File -> Import ... -> C/C++ -> Existing Code as Makefile Project
-    + In the new Window, click Browse... next to the field Existing Code Location. Browse to the build_eclipse directory above.  
+    + In the new Window, click Browse... next to the field Existing Code Location. Browse to the build_eclipse directory above. 
+    + Choose Linux GCC as Toolchain for Indexers.  
     + Click on Finish. The project has been imported to Eclipse.
     + It can be built now with Eclipse.
     

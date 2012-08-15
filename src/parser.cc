@@ -2925,7 +2925,7 @@ int Instruction4(Context* context) {
       context->set_error(MISSING_DATA_TYPE);
       return 1;
     }
-  } else { // INSTRUCTION4_OPCODE
+  } else {  // INSTRUCTION4_OPCODE
   context->set_error(INVALID_INSTRUCTION);
   }
   return 1;
@@ -3149,7 +3149,7 @@ int OffsetAddressableOperand(Context* context) {
       context->set_error(MISSING_CLOSING_BRACKET);
       return 1;
     }
-   } else if (!IntegerLiteral(context)) {
+  } else if (!IntegerLiteral(context)) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == ']') {
       context->token_to_scan = yylex();
@@ -3618,7 +3618,7 @@ int Mov(Context* context) {
       } else {  // ','
         context->set_error(MISSING_COMMA);
       }
-    } else { // Operand or ArrayOperandList
+    } else {  // Operand or ArrayOperandList
       context->set_error(INVALID_FIRST_OPERAND);
     }
   } else {  // datatypeId
