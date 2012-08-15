@@ -2119,7 +2119,7 @@ TEST(ParserTest, OperandList) {
 
   std::string input("$s1, $c4, $d4, $q2 \n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OperandList(context));
 
   input.assign("&g, %l, $s1 \n");
@@ -2600,37 +2600,37 @@ TEST(ParserTest, GlobalGroupDecl) {
   std::string input("group_u32 &tmp[2][2];");
   lexer->set_source_string(input);
 
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalGroupDecl(context));
 
   input.assign("group_s32 &tmp;");
   lexer->set_source_string(input);
 
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalGroupDecl(context));
 
   input.assign("group_b32 &tmp[2];");
   lexer->set_source_string(input);
 
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalGroupDecl(context));
 
   // wrong case
   input.assign("group_s32 %tmp;");  // %tmp is not global identifier
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalGroupDecl(context));
   EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   input.assign("group_u32 &tmp");  // lack of ';'
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalGroupDecl(context));
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   input.assign("group_u32;");  // lack of identifier
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalGroupDecl(context));
   EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
@@ -2646,47 +2646,47 @@ TEST(ParserTest, Mul) {
   // test mul_datatype case
   std::string input("mul_u32 $s1, $s2, 0x23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mul_pp_u16x4 $d1, $d0, $d3;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mul_hi_u32 $s1, $s3, $s9;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mul24_u32 $s1, $s2, 12;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mul24_hi_s32 $s1, $s2, -12;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mad24_u64 $d1, $d2, 12, 2;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mad24_hi_s32 $s1, $s2, -12, 23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mul_ftz_s32 $s1, $s3, $s9;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   input.assign("mul_ftz_pp_s32 $s1, $s3, $s9;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mul(context));
 
   delete lexer;
@@ -3227,12 +3227,12 @@ TEST(ParserTest, SingleListSingleTest) {
   // test pairAddressableOperand case
   std::string input("0.5e3f \n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SingleListSingle(context));
 
   input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SingleListSingle(context));
 
   delete lexer;
@@ -3244,17 +3244,17 @@ TEST(ParserTest, GlobalImageDecl) {
 
   std::string input("global_RWImg &demo ;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalImageDecl(context));
 
   input.assign("global_RWImg &demo[10] ;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalImageDecl(context));
 
   input.assign("global_RWImg &demo[10]={format = normalized} ;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalImageDecl(context));
   delete lexer;
 };
@@ -3265,12 +3265,12 @@ TEST(ParserTest, ImageInitializer) {
 
   std::string input("= {format = normalized}");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageInitializer(context));
 
   input.assign("= {format = normalized,order = linear}");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageInitializer(context));
 
   delete lexer;
@@ -3282,13 +3282,18 @@ TEST(ParserTest, ImageInit) {
 
   std::string input("format = normalized");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageInit(context));
 
   input.assign("order = linear");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageInit(context));
+
+  input.assign("order = bc");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, ImageInit(context));
 
   delete lexer;
 };
@@ -3299,17 +3304,17 @@ TEST(ParserTest, GlobalReadOnlyImageDecl) {
 
   std::string input("global_ROImg &demo ;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
 
   input.assign("global_ROImg &demo[10] ;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
 
   input.assign("global_ROImg &demo[10]={format = normalized} ;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
   delete lexer;
 };
@@ -3321,7 +3326,7 @@ TEST(ParserTest, RetTest) {
 
   std::string input("ret;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ret(context));
 
   delete lexer;
@@ -3335,37 +3340,37 @@ TEST(ParserTest, ImageReadTest) {
   std::string input("rd_image_v4_3d_s32_f32 ($s0,$s1,$s5,$s3),[&images<2>], ");
   input.append("[&samplers<$s1+4>], ($s6,$s7,$s10,$s11);");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRead(context));
 
   input.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3), [%RWImg3],");
   input.append(" [%Samp3], ($s6);");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRead(context));
 
   input.assign("rd_image_v4_1da_s32_f32 ($s0,$s1,$s2,$s3), [%RWImg3],");
   input.append(" [%Samp3],($s6, $s7);");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRead(context));
 
   input.assign("rd_image_v4_3d_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],");
   input.append(" [%Samp3],($s6, $s9, $s2, $s2);");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRead(context));
 
   input.assign("rd_image_v4_2d_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],");
   input.append(" [%Samp3],($s6, $s9);");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRead(context));
 
   input.assign("rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],");
   input.append(" [%Samp3],($s6, $s9, $s12, $s13);");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRead(context));
 
   delete lexer;
@@ -3378,12 +3383,12 @@ TEST(ParserTest, SyncTest) {
 
   std::string input("sync;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Sync(context));
 
   input.assign("sync_group;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Sync(context));
 
   delete lexer;
@@ -3396,22 +3401,22 @@ TEST(ParserTest, BarTest) {
 
   std::string input("barrier;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Bar(context));
 
   input.assign("barrier_width(64);");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Bar(context));
 
   input.assign("barrier_group;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Bar(context));
 
   input.assign("barrier_global;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Bar(context));
 
   delete lexer;
@@ -3424,47 +3429,47 @@ TEST(ParserTest, AtomicNoRetTest) {
 
   std::string input("atomicNoRet_and_global_ar_u32 [&x], 23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   input.assign("atomicNoRet_or_global_u64 [&x], 23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   input.assign("atomicNoRet_xor_global_b64 [&x], 23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   input.assign("atomicNoRet_cas_group_u64 [&x], 23, 9;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   input.assign("atomicNoRet_add_u64 [&x], 23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   input.assign("atomicNoRet_dec_global_ar_b64 [&x], 23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   input.assign("atomicNoRet_inc_global_b64 [&x], 23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   input.assign("atomicNoRet_max_global_ar_f64 [&x], 23.0l;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   input.assign("atomicNoRet_min_u64 [&x], 23;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AtomicNoRet(context));
 
   delete lexer;
@@ -3477,7 +3482,7 @@ TEST(ParserTest, LocationTest) {
 
   std::string input("loc 1 20 0;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Location(context));
 
   delete lexer;
@@ -3490,7 +3495,7 @@ TEST(ParserTest, PragmaTest) {
 
   std::string input("pragma \"this is string!\";");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Pragma(context));
 
   delete lexer;
@@ -3503,22 +3508,22 @@ TEST(ParserTest, ControlTest) {
 
   std::string input("itemsperworkgroup 8 ,8, 8;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Control(context));
 
   input.assign("memopt_off;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Control(context));
 
   input.assign("memopt_on;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Control(context));
 
   input.assign("workgroupspercu 128;");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Control(context));
 
   delete lexer;
@@ -3533,7 +3538,7 @@ TEST(ParserTest, BlockTest) {
   input.append("blockstring \"meta info about this function\";\n");
   input.append("endblock;\n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Block(context));
 
   input.assign("block \"debug\"\n");
@@ -3543,35 +3548,35 @@ TEST(ParserTest, BlockTest) {
   input.append("blockstring \"this is a string\";\n");
   input.append("endblock;\n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Block(context));
 
   // wrong case
   input.assign("block \"debug\"\n");  // lack of code
   input.append("endblock;\n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Block(context));
 
   input.assign("block \"debug\"\n");  // missing block numeric
   input.append("_b32 1255, 0x323, 10, 23;\n");
   input.append("endblock;\n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Block(context));
 
   input.assign("block \"debug\"\n");  // missing block string
   input.append("\"this is string\";\n");
   input.append("endblock;\n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Block(context));
 
   input.assign("block \"debug\"\n");  // missing token string
   input.append("blockstring;\n");
   input.append("endblock;\n");
   lexer->set_source_string(input);
-  context->token_to_scan = yylex();
+  context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Block(context));
 
 
