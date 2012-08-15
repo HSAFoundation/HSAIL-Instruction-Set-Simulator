@@ -417,7 +417,7 @@ TEST(Brig2LLVMTest, VarSizeDirective) {
   }
 }
 
-TEST(Brig2LLVMTest, BrigBlockMethodTest) {
+TEST(Brig2LLVMTest, BrigBlockMethodValidTest) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("rti"));
@@ -467,5 +467,150 @@ TEST(Brig2LLVMTest, BrigBlockMethodTest) {
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, &std::cerr);
     EXPECT_TRUE(mod.isValid());
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveBlockStart_invalid) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("wrong"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockStart bst = {
+      sizeof(bst),
+      BrigEDirectiveBlockStart,   // kind
+      0   // s_name
+    };
+    directives.append(&bst);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    std::ostringstream errMsgOut;
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    errorMsg = errMsgOut.str();
+    EXPECT_FALSE(mod.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid s_name, either be debug or rti")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockNumeric bnu = {
+      sizeof(bnu),
+      BrigEDirectiveBlockNumeric,   // kind
+      Brigb128,   //type
+      4,
+      {255, 23, 10, 23}
+    };
+    directives.append(&bnu);
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    std::ostringstream errMsgOut;
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    errorMsg = errMsgOut.str();
+    EXPECT_FALSE(mod.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type, must be b1, b8, b16, b32, or b64.")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveBlockString_invalid) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockString bstr = {
+      sizeof(bstr),
+      BrigEDirectiveBlockString,   // kind
+      4   // s_name
+    };
+    directives.append(&bstr);
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    std::ostringstream errMsgOut;
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    errorMsg = errMsgOut.str();
+    EXPECT_FALSE(mod.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "s_name past the strings section")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveBlockEnd_invalid) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockEnd bend = {
+      7,
+      BrigEDirectiveBlockEnd   // kind
+    };
+    directives.append(&bend);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    std::ostringstream errMsgOut;
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    errorMsg = errMsgOut.str();
+    EXPECT_FALSE(mod.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid size.")));
   }
 }
