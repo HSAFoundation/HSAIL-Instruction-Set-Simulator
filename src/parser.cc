@@ -4246,6 +4246,13 @@ int Cvt(Context* context) {
 }
 
 int Instruction0(Context* context) {
+  // first token is NOP "nop"
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == ';') {
+    return 0;
+  } else {
+    context->set_error(MISSING_SEMICOLON);
+  }
   return 1;
 }
 
