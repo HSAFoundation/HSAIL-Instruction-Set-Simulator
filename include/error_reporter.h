@@ -30,11 +30,11 @@ class ErrorReporter: public ErrorReporterInterface {
     }
     void show_all_error() {}
     error_code_t get_error_at(unsigned int index) {
-      return OK;
+      return UNKNOWN_ERROR;
     }
 
     error_code_t get_last_error() {
-      return OK;
+      return UNKNOWN_ERROR;
     }
 };
 }  // namespace brig

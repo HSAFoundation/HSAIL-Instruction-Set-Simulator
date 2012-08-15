@@ -3173,8 +3173,18 @@ TEST(ParserTest, Cvt) {
 TEST(ParserTest, Atom) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  MockErrorReporter mer;
   // register error reporter with context
-  context->set_error_reporter(main_reporter);
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
+
   // correct cases
   std::string input("atomic_exch_ar_region_u32 $s4, [&a], 1;\n");
   // atomic with AtomModifiers
@@ -3199,18 +3209,23 @@ TEST(ParserTest, Atom) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Atom(context));
+
   // wrong cases
   input.assign("atomic_cas_ar $d1, [%global_id], $s1, 12;\n");
+
   // lack of datatypeId
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Atom(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   input.assign("atomic_exch_ar_region_u32 [&a], 1;\n");
+
   // lack of Operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Atom(context));
+  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   delete lexer;
 };
@@ -3340,7 +3355,17 @@ TEST(ParserTest, ImageInitializer) {
 
 TEST(ParserTest, ImageInit) {
   Lexer* lexer = new Lexer();
-  context->set_error_reporter(main_reporter);
+  MockErrorReporter mer;
+  // register error reporter with context
+  context->set_error_reporter(&mer);
+  context->clear_context();
+  // delegate some calls to FakeErrorReporter
+  mer.DelegateToFake();
+  // expected method calls
+  EXPECT_CALL(mer, report_error(_, _, _))
+     .Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error())
+      .Times(AtLeast(1));
 
   std::string input("format = normalized");
   lexer->set_source_string(input);
@@ -3356,7 +3381,9 @@ TEST(ParserTest, ImageInit) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, ImageInit(context));
+  EXPECT_EQ(MISSING_PROPERTY, mer.get_last_error());
 
+  context->set_error_reporter(main_reporter);
   delete lexer;
 };
 
@@ -3724,6 +3751,8 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
 
   context->clear_context();
 
+  // display sizes of buffers
+  if (0) {
   // test size of various buffer
   std::cout << "Directive buffer size before parsing = ";
   std::cout << context->get_directive_offset() << std::endl;
@@ -3733,9 +3762,10 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   std::cout << context->get_code_offset() << std::endl;
   std::cout << "String buffer size before parsing = ";
   std::cout << context->get_string_offset() << std::endl;
-
+  }
   EXPECT_EQ(0, parser->parse());
 
+  if (0) {
   // test size of various buffer
   std::cout << "Directive buffer size after parsing = ";
   std::cout << context->get_directive_offset() << std::endl;
@@ -3745,7 +3775,7 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   std::cout << context->get_code_offset() << std::endl;
   std::cout << "String buffer size after parsing = ";
   std::cout << context->get_string_offset() << std::endl;
-
+  }
 
   delete parser;
 };

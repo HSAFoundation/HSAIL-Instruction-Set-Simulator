@@ -222,11 +222,6 @@ void Context::clear_all_buffers(void) {
   clear_string_buffer();
 }
 
-
-
-
-
-
 // check context
 uint16_t Context::get_alignment() const {
   return alignment;

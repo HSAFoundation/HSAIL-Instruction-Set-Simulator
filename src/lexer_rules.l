@@ -95,13 +95,6 @@ void free_string(hsa::brig::Context* context) {
 %x INLINE_COMMENT
 %x COMMENT
  
- // TODO(Chuang) 08-10-2012 Source as following is changed by Chuang:
- //OCT_INT     ([+|-]?0[0-7]*)
- //DEC_INT     ([+|-]?(0|([1-9]*[0-9]+)))
- //HEX_INT     ([+|-]?0(x|X)[0-9a-fA-F]*)
- //DEC_DOUBLE  (.......*))(l|L)?)
-
-
 OCT_INT     (0[0-7]*)
 DEC_INT     (0|([1-9]*[0-9]+))
 HEX_INT     (0(x|X)[0-9a-fA-F]*)
@@ -216,7 +209,7 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
                                 BEGIN(INITIAL);
                                 return TOKEN_COMMENT;}
 
-<INLINE_COMMENT><<EOF>>       { printf("%d: Unterminated comment\n", yylineno);
+<INLINE_COMMENT><<EOF>>       { printf("%d: Unterminated comment.\n", yylineno);
                                 return 0; }
 
 \$c(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng;

@@ -10,6 +10,7 @@ namespace brig {
   // Error codes
 enum error_code_t {
   OK = 0,
+
   // missing tokens
   MISSING_INTEGER_CONSTANT = 1,
   MISSING_SINGLE_CONSTANT = 2,
@@ -49,21 +50,20 @@ enum error_code_t {
   INVALID_INSTRUCTION = 32,
   INVALID_OPERATION = 33,
   INVALID_IMAGE_INIT = 34,
+  INVALID_SECTION_ITEM = 35,
 
   // missing part
-  MISSING_VERSION_STATEMENT = 35,
-  MISSING_WIDTH_INFO = 36,
-  MISSING_DECLPREFIX = 37,
-  MISSING_STRING = 38,
-  MISSING_ARGUMENT = 39,
-  MISSING_ARGUMENT_LIST = 40,
-  MISSING_OPERAND = 41,
-  MISSING_COMPARISON_TYPE = 42,
-
-  MISSING_PROPERTY,
-  MISSING_SECTION_ITEM,
-  MISSING_BLOCK_TYPE,
-  INVALID_SECTION_ITEM,
+  MISSING_VERSION_STATEMENT = 36,
+  MISSING_WIDTH_INFO = 37,
+  MISSING_DECLPREFIX = 38,
+  MISSING_STRING = 39,
+  MISSING_ARGUMENT = 40,
+  MISSING_ARGUMENT_LIST = 41,
+  MISSING_OPERAND = 42,
+  MISSING_COMPARISON_TYPE = 43,
+  MISSING_PROPERTY = 44,
+  MISSING_SECTION_ITEM = 45,
+  MISSING_BLOCK_TYPE = 46,
 
   UNKNOWN_ERROR
 };
@@ -156,8 +156,12 @@ class ErrorReporterInterface {
           return std::string("Invalid label.");
         case INVALID_INSTRUCTION:
           return std::string("Invalid instruction.");
+        case INVALID_OPERATION:
+          return std::string("Invalid operation.");
         case INVALID_IMAGE_INIT:
           return std::string("Invalid image initializer.");
+        case INVALID_SECTION_ITEM:
+          return std::string("Invalid item.");
 
 
         case MISSING_VERSION_STATEMENT:
@@ -178,7 +182,10 @@ class ErrorReporterInterface {
           return std::string("Missing type of comparison.");
         case MISSING_PROPERTY:
           return std::string("Missing property.");
-
+        case MISSING_SECTION_ITEM:
+          return std::string("Missing block items.");
+        case MISSING_BLOCK_TYPE:
+          return std::string("Missing block type.");
 
         case UNKNOWN_ERROR:
         default:

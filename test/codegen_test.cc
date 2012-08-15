@@ -29,7 +29,6 @@ TEST(CodegenTest, ExampleWithKernel) {
   context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0, Version(context));
-  // EXPECT_EQ(0, InitializableDecl(context));
   EXPECT_EQ(0, Kernel(context));
 
   // test the size of each section

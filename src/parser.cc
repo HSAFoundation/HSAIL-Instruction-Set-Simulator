@@ -521,7 +521,7 @@ int Instruction2(Context* context) {
       if (context->token_type == PACKING) {
         // there is packing
         inst_op.packing = context->token_value.packing;
-        yylex();
+        context->token_to_scan = yylex();
       }
 
       // now we must have a dataTypeId
@@ -544,6 +544,7 @@ int Instruction2(Context* context) {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry about that later.
+
                 // update context for later functions
                 context->token_to_scan = yylex();
                 return 0;
@@ -576,11 +577,11 @@ int Instruction2(Context* context) {
       {0, 0, 0, 0, 0}
       };
 
-      // check whether there is a Packing
+      // check whether there is a Packing (optional)
       if (context->token_type == PACKING) {
         // there is packing
         inst_op.packing = context->token_value.packing;
-        yylex();
+        context->token_to_scan = yylex();
       }
 
       // now we must have a dataTypeId
@@ -603,6 +604,7 @@ int Instruction2(Context* context) {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry about that later.
+
                 // set context for later functions
                 context->token_to_scan = yylex();
                 return 0;
@@ -695,6 +697,7 @@ int Instruction2(Context* context) {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry about that later.
+
                 // set context for later functions
                 context->token_to_scan = yylex();
                 return 0;
@@ -745,7 +748,8 @@ int Instruction2(Context* context) {
               if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
-                // may need to edit others, worry that later.
+                // may need to edit others, worry about that later.
+
                 context->token_to_scan = yylex();  // set context for later
                 return 0;
               } else {
@@ -854,7 +858,7 @@ int Instruction3(Context* context) {
     if (context->token_type == PACKING) {
       // there is packing
       inst_op.packing = context->token_value.packing;
-      yylex();
+      context->token_to_scan = yylex();
     }
     // now we must have a dataTypeId
     if (context->token_type == DATA_TYPE_ID) {
@@ -1187,14 +1191,12 @@ int ArgumentDecl(Context* context) {
       context->set_type(context->token_value.data_type);
       context->token_to_scan = yylex();
       if (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
-        // should have a meaning for DATA_TYPE_ID.
         // for argument, we need to set a BrigDirectiveSymbol
         // and write the corresponding string into .string section.
 
-
         std::string arg_name = context->token_value.string_val;
-
         int arg_name_offset = context->add_symbol(arg_name);
+
         // scan for arrayDimensions
         context->token_to_scan = yylex();
         if (context->token_to_scan == '[') {
@@ -1215,7 +1217,7 @@ int ArgumentDecl(Context* context) {
           context->get_symbol_modifier(),   // symbol modifier
           0,                                // dim
           arg_name_offset,                  // s_name
-          context->token_value.data_type,                        // data type
+          context->token_value.data_type,   // data type
           context->get_alignment(),         // alignment
           0,                                // d_init = 0 for arg
           0                                 // reserved
@@ -4290,7 +4292,7 @@ int Instruction1(Context* context) {
     } else {
       context->set_error(MISSING_OPERAND);
     }
-  } else if (context->token_type == INSTRUCTION1_OPCODE) {  // Instruction1Opcode
+  } else if (context->token_type == INSTRUCTION1_OPCODE) {
     context->token_to_scan = yylex();
     if (!RoundingMode(context)) {  // with RoundingMode
       if (context->token_type == DATA_TYPE_ID) {
@@ -4307,7 +4309,7 @@ int Instruction1(Context* context) {
       } else {
         context->set_error(MISSING_DATA_TYPE);
       }
-    } else if (context->token_type == DATA_TYPE_ID) { // without RoundingMode
+    } else if (context->token_type == DATA_TYPE_ID) {  // without RoundingMode
       context->token_to_scan = yylex();
       if (!Operand(context)) {
         if (context->token_to_scan == ';') {
