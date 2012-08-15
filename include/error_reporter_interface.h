@@ -48,16 +48,19 @@ enum error_code_t {
   INVALID_LABEL = 31,
   INVALID_INSTRUCTION = 32,
   INVALID_OPERATION = 33,
+  INVALID_IMAGE_INIT = 34,
 
   // missing part
-  MISSING_VERSION_STATEMENT = 34,
-  MISSING_WIDTH_INFO = 35,
-  MISSING_DECLPREFIX = 36,
-  MISSING_STRING = 37,
-  MISSING_ARGUMENT = 38,
-  MISSING_ARGUMENT_LIST = 39,
-  MISSING_OPERAND = 40,
-  MISSING_COMPARISON_TYPE = 41,
+  MISSING_VERSION_STATEMENT = 35,
+  MISSING_WIDTH_INFO = 36,
+  MISSING_DECLPREFIX = 37,
+  MISSING_STRING = 38,
+  MISSING_ARGUMENT = 39,
+  MISSING_ARGUMENT_LIST = 40,
+  MISSING_OPERAND = 41,
+  MISSING_COMPARISON_TYPE = 42,
+
+  MISSING_PROPERTY,
 
   UNKNOWN_ERROR
 };
@@ -150,6 +153,8 @@ class ErrorReporterInterface {
           return std::string("Invalid label.");
         case INVALID_INSTRUCTION:
           return std::string("Invalid instruction.");
+        case INVALID_IMAGE_INIT:
+          return std::string("Invalid image initializer.");
 
 
         case MISSING_VERSION_STATEMENT:
@@ -168,6 +173,8 @@ class ErrorReporterInterface {
           return std::string("Missing operand.");
         case MISSING_COMPARISON_TYPE:
           return std::string("Missing type of comparison.");
+        case MISSING_PROPERTY:
+          return std::string("Missing property.");
 
 
         case UNKNOWN_ERROR:

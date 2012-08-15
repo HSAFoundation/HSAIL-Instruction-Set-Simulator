@@ -82,8 +82,8 @@ int ImageLoad(Context* context);
 int ImageStore(Context* context);
 
 int SingleListSingle(Context *context);
-int GlobalImageDecl(Context *context) ;
-int ImageInitializer(Context *context) ;
+int GlobalImageDecl(Context *context);
+int ImageInitializer(Context *context);
 int ImageInit(Context *context);
 int GlobalReadOnlyImageDecl(Context *context);
 int Ret(Context *context);
