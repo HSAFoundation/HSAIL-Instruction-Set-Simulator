@@ -108,7 +108,44 @@ bool BrigModule::validate(const BrigDirectiveFunction *dir) {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveKernel *dir) { return true; }
+bool BrigModule::validate(const BrigDirectiveKernel *dir) { 
+  bool valid = true;
+
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  valid &= validateSName(dir->s_name);
+
+  const unsigned paramCount = dir->inParamCount + dir->outParamCount;
+  dir_iterator argIt = dir_iterator(dir) + 1;
+  for(unsigned i = 0; i < paramCount; ++i) {
+    const BrigDirectiveSymbol *bds = dyn_cast<BrigDirectiveSymbol>(argIt);
+    valid &= check(bds, "Too few argument symbols");
+    valid &= check(bds->s.storageClass == BrigArgSpace,
+                   "Argument not in arg space");
+    
+  }
+
+  const dir_iterator firstScopedDir(S_.directives +
+                                    dir->d_firstScopedDirective);
+  valid &= check(argIt <= firstScopedDir,
+                 "The first scoped directive is too early");
+  valid &= check(dir->d_firstScopedDirective <= dir->d_nextDirective,
+                 "The next directive is before the first scoped directive");
+  valid &= check(dir->attribute == BrigExtern ||
+                 dir->attribute == BrigStatic ||
+                 dir->attribute == BrigNone,
+                 "Invalid linkage type");
+
+  if(dir->inParamCount) {
+    const dir_iterator firstInParam1 =
+       dir_iterator(dir) + dir->outParamCount + 1;
+    const dir_iterator firstInParam2(S_.directives + dir->d_firstInParam);
+    valid &= check(firstInParam1 == firstInParam2,
+                   "d_firstInParam is wrong");
+  }
+
+  return valid;
+}
 
 bool BrigModule::validate(const BrigDirectiveSymbol *dir) {
   bool valid = true;
@@ -179,7 +216,11 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) {
 bool BrigModule::validate(const BrigDirectiveControl *dir) { return true; }
 bool BrigModule::validate(const BrigDirectivePragma *dir) { return true; }
 bool BrigModule::validate(const BrigDirectiveExtension *dir) {
-  return true;
+  bool valid = true;
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  valid &= validateSName(dir->s_name);
+  return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveArgStart *dir) { return true; }
