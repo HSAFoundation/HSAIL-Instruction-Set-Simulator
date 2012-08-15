@@ -4,6 +4,7 @@
 #include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
+#include "brig_module.h"
 // ------------------ Brig2LLVM TESTS -----------------
 
 TEST(Brig2LLVMTest, AppendBuffer) {
@@ -413,5 +414,58 @@ TEST(Brig2LLVMTest, VarSizeDirective) {
     EXPECT_EQ(sizeof(BrigDirectiveProto) +
               sizeof(sizeof(BrigDirectiveProto::BrigProtoType)),
               bb.size());
+  }
+}
+
+TEST(Brig2LLVMTest, BrigBlockMethodTest) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("rti"));
+    strings.append(std::string("this is a string"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockStart bst = {
+      sizeof(bst),
+      BrigEDirectiveBlockStart,   // kind
+      0   // s_name
+    };
+    directives.append(&bst);
+    BrigBlockString bstr = {
+      sizeof(bstr),
+      BrigEDirectiveBlockString,   // kind
+      4   // s_name
+    };
+    directives.append(&bstr);
+    BrigBlockNumeric bnu = {
+      sizeof(bnu),
+      BrigEDirectiveBlockNumeric,   // kind
+      Brigb16,   //type
+      4,
+      {255, 23, 10, 23}
+    };
+    directives.append(&bnu);
+    BrigBlockEnd bend = {
+      sizeof(bend),
+      BrigEDirectiveBlockEnd   // kind
+    };
+    directives.append(&bend);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &std::cerr);
+    EXPECT_TRUE(mod.isValid());
   }
 }

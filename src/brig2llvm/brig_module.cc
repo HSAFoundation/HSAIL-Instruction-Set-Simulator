@@ -185,18 +185,45 @@ bool BrigModule::validate(const BrigDirectiveExtension *dir) {
 bool BrigModule::validate(const BrigDirectiveArgStart *dir) { return true; }
 bool BrigModule::validate(const BrigDirectiveArgEnd *dir) { return true; }
 bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
-  return true;
+  bool valid = true;
+  valid &= check(dir->kind == BrigEDirectiveBlockStart,
+                 "Invalid kind, must be BrigEDirectiveBlockStart.");
+  validateSName(dir->s_name);
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  
+  return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) {
-  return true;
+  bool valid = true;
+  valid &= check(0 == dir->size % 8,
+                 "Invalid size, must be a multiple of 8.");
+  valid &= check(dir->kind == BrigEDirectiveBlockNumeric,
+                 "Invalid kind, must be BrigEDirectiveBlockNumeric.");
+  valid &= check(Brigb1 == dir->type || Brigb8 == dir->type || Brigb16 == dir->type ||
+                 Brigb32 == dir->type || Brigb64 == dir->type,
+                 "Invalid type, must be b1, b8, b16, b32, or b64.");
+  valid &= check(8 >= dir->elementCount,
+                 "Invalid elementCount, the largest number is 8.");
+  return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockString *dir) {
-  return true;
+  bool valid = true;
+  valid &= check(dir->kind == BrigEDirectiveBlockString, 
+                "Invalid kind, must be BrigEDirectiveBlockString.");
+  valid &= validateSName(dir->s_name);
+  return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) { return true; }
+bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) {
+  bool valid = true;
+  valid &= check(0 == dir->size % 4, "Invalid size.");
+  valid &= check(dir->kind == BrigEDirectiveBlockEnd,
+                 "Invalid kind, must be BrigEDirectiveBlockEnd,.");
+  return valid;
+}
 bool BrigModule::validate(const BrigDirectivePad *dir) { return true; }
 
 bool BrigModule::validate(const BrigSymbolCommon *s) {
