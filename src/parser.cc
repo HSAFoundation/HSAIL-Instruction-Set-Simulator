@@ -5076,7 +5076,7 @@ int Block(Context* context) {
   if (context->token_to_scan == TOKEN_STRING) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == ENDBLOCK) {
-      context->set_error(MISSING_ARGUMENT_LIST);
+      context->set_error(MISSING_SECTION_ITEM);
       return 1;
     }
     while (context->token_to_scan != ENDBLOCK) {
@@ -5085,7 +5085,7 @@ int Block(Context* context) {
         if (context->token_to_scan == TOKEN_STRING) {
           context->token_to_scan = yylex();
         } else {  // String
-          context->set_error(MISSING_STRING);
+          context->set_error(INVALID_SECTION_ITEM);
           return 1;
         }
       } else if (context->token_to_scan == BLOCKNUMERIC) {
@@ -5097,7 +5097,7 @@ int Block(Context* context) {
           } else if (!DecimalListSingle(context)) {
           } else if (!FloatListSingle(context)) {
           } else {
-            context->set_error(INVALID_ARGUMENT_LIST);
+            context->set_error(INVALID_SECTION_ITEM);
             return 1;
           }
         } else {  // Data Type
@@ -5105,7 +5105,7 @@ int Block(Context* context) {
           return 1;
         }
       } else {  // Block Numeric or Block String
-        context->set_error(INVALID_CODEBLOCK);
+        context->set_error(MISSING_BLOCK_TYPE);
         return 1;
       }
       if (context->token_to_scan == ';') {
@@ -5115,8 +5115,6 @@ int Block(Context* context) {
         context->set_error(MISSING_SEMICOLON);
         return 1;
       }
-      context->set_error(INVALID_CODEBLOCK);
-      return 1;
     }  // While
     context->token_to_scan = yylex();
     if (context->token_to_scan == ';') {
@@ -5130,8 +5128,6 @@ int Block(Context* context) {
     context->set_error(MISSING_STRING);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 }  // namespace brig
