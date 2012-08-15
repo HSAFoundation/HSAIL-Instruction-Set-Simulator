@@ -4257,6 +4257,70 @@ int Instruction0(Context* context) {
 }
 
 int Instruction1(Context* context) {
+  if (context->token_type == INSTRUCTION1_OPCODE_NODT) { // Instruction1OpcodeNoDT
+    context->token_to_scan = yylex();
+    if (!RoundingMode(context)) { // with RoundingMode 
+      if (!Operand(context)) {
+        if (context->token_to_scan == ';') {
+          return 0;
+        } else {
+           context->set_error(MISSING_SEMICOLON);
+        }
+      } else {
+         context->set_error(MISSING_OPERAND);
+      }
+    } else if (!Operand(context)) { // without RoundingMode
+      if (context->token_to_scan == ';') {
+        return 0;
+      } else {
+        context->set_error(MISSING_SEMICOLON);
+      }
+    } else {
+        context->set_error(MISSING_OPERAND);
+    }
+  } else if (context->token_to_scan == CLOCK) { // clock
+    context->token_to_scan = yylex();
+    if (!Operand(context)) {
+      if (context->token_to_scan == ';') {
+        return 0;
+      } else {
+        context->set_error(MISSING_SEMICOLON);
+      }
+    } else {
+      context->set_error(MISSING_OPERAND);
+    }
+  } else if (context->token_type == INSTRUCTION1_OPCODE) { // Instruction1Opcode
+    context->token_to_scan = yylex();
+    if (!RoundingMode(context)) { // with RoundingMode
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ';') {
+            return 0;
+          } else {
+            context->set_error(MISSING_SEMICOLON);
+          }
+        } else {
+          context->set_error(MISSING_OPERAND);
+        }
+      } else {
+        context->set_error(MISSING_DATA_TYPE);
+      }  
+    } else if (context->token_type == DATA_TYPE_ID) { // without RoundingMode
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if (context->token_to_scan == ';') {
+          return 0;
+        } else {
+          context->set_error(MISSING_SEMICOLON);
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+    }      
+  }
   return 1;
 }
 
