@@ -121,8 +121,7 @@ bool BrigModule::validate(const BrigDirectiveKernel *dir) {
     const BrigDirectiveSymbol *bds = dyn_cast<BrigDirectiveSymbol>(argIt);
     valid &= check(bds, "Too few argument symbols");
     valid &= check(bds->s.storageClass == BrigArgSpace,
-                   "Argument not in arg space");
-    
+                   "Argument not in arg space");  
   }
 
   const dir_iterator firstScopedDir(S_.directives +
