@@ -24,6 +24,16 @@ set(hsail2brig_test_SOURCES
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
 option(ENABLE_BRIG_FE "Build LLVM frontend for BRIG" OFF)
 if (ENABLE_BRIG_FE)
+
+   # obtain specific information about llvm setup
+   SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
+
+  SET(PROJ_SEARCH_PATH "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}" "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}" "${PROJECT_SOURCE_DIR}/compiler/utils/unittest/googletest/include")
+  include_directories( ${PROJ_SEARCH_PATH} )
+
+  include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
+  include(HandleLLVMOptions)
+
   add_subdirectory(src/brig2llvm)
   set(brig2llvm_test_SOURCES
       test/brig2llvm_test.cc
