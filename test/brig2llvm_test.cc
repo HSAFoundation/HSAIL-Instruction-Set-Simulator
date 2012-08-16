@@ -420,11 +420,11 @@ TEST(Brig2LLVMTest, VarSizeDirective) {
 TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
   //true case
   {
-    hsa::brig::StringBuffer strings_;
-    strings_.append(std::string("&get_global_id"));
-    hsa::brig::Buffer directives_;
-    hsa::brig::Buffer code_;
-    hsa::brig::Buffer operands_;
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+    hsa::brig::Buffer directives;
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -437,8 +437,7 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       BrigENosftz,
       0
     };
-
-    directives_.append(&bdv);
+    directives.append(&bdv);
  
     BrigDirectiveKernel bdk = {
       sizeof(bdk), 
@@ -454,9 +453,9 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       1,                                       // outParamCount
       0                                        // d_firstInParam
     };
-    directives_.append(&bdk);
+    directives.append(&bdk);
 
-      BrigSymbolCommon s = {
+    BrigSymbolCommon s = {
       0,                                      // c_code
       BrigArgSpace,                           // storageClass
       BrigNone,                               // attribute
@@ -474,17 +473,17 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       0,   // d_init
       0,   // reserved
     };
-    directives_.append(&bds);
+    directives.append(&bds);
 
-    hsa::brig::BrigModule mod(strings_, directives_, code_, operands_, &std::cerr);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &std::cerr);
     EXPECT_TRUE(mod.isValid());
    }
    //false case
    {
-    hsa::brig::StringBuffer strings_;
-    hsa::brig::Buffer directives_;
-    hsa::brig::Buffer code_;
-    hsa::brig::Buffer operands_;
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -497,33 +496,32 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       BrigENosftz,
       0
     };
-
-    directives_.append(&bdv);
+    directives.append(&bdv);
  
     BrigDirectiveKernel bdk = {
       sizeof(bdk), 
       BrigEDirectiveKernel,
-      0,                                       // c_code
-      1,                                       // s_name
+      1,                                       // c_code
+      13,                                      // s_name
       0,                                       // inParamCount
       96,                                      // d_firstScopedDirective
       1,                                       // operationCount
       96,                                      // d_nextDirective
-      0,                                       // attribute
+      10,                                      // attribute
       0,                                       // fbarCount
-      1,                                       // outParamCount
+      0,                                       // outParamCount
       0                                        // d_firstInParam
     };
-    directives_.append(&bdk);
+    directives.append(&bdk);
 
-      BrigSymbolCommon s = {
+    BrigSymbolCommon s = {
       0,                                      // c_code
       BrigArgSpace,                           // storageClass
       BrigNone,                               // attribute
       0,                                      // reserved
       0,                                      // symbolModifier
       0,                                      // dim
-      13,                                     // s_name
+      1,                                      // s_name
       Brigf32,                                // type
       1,                                      // align
     };
@@ -534,28 +532,28 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       0,   // d_init
       0,   // reserved
     };
-    directives_.append(&bds);
+    directives.append(&bds);
 
     std::string errorMsg;
     std::ostringstream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod_1(strings_, directives_, code_, operands_, &errMsgOut);
+    hsa::brig::BrigModule mod2(strings, directives, code, operands, &errMsgOut);
     errorMsg = errMsgOut.str();
-    EXPECT_FALSE(mod_1.isValid());
+    EXPECT_FALSE(mod2.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "c_code past the code section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "s_name past the strings section")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
     "Too few argument symbols")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
     "Argument not in arg spacen")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
     "The first scoped directive is too early")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
     "The next directive is before the first scoped directive")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid linkage type")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
     "d_firstInParam is wrong")));
    }
 }
@@ -563,11 +561,11 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
 TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
   //true case
   {
-    hsa::brig::StringBuffer strings_;
-    strings_.append(std::string("&get_global_id"));
-    hsa::brig::Buffer directives_;
-    hsa::brig::Buffer code_;
-    hsa::brig::Buffer operands_;
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+    hsa::brig::Buffer directives;
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -580,8 +578,7 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
       BrigENosftz,
       0
     };
-
-    directives_.append(&bdv);
+    directives.append(&bdv);
 
     BrigDirectiveExtension bde = {
     sizeof(bde),                         //size
@@ -589,17 +586,17 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
     0,                                   //c_code
     1                                    //s_name
     }; 
-    directives_.append(&bde);
+    directives.append(&bde);
 
-    hsa::brig::BrigModule mod(strings_, directives_, code_, operands_, &std::cerr);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &std::cerr);
     EXPECT_TRUE(mod.isValid());
   }
   //false case
   {
-    hsa::brig::StringBuffer strings_;
-    hsa::brig::Buffer directives_;
-    hsa::brig::Buffer code_;
-    hsa::brig::Buffer operands_;
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -612,22 +609,21 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
       BrigENosftz,
       0
     };
-
-    directives_.append(&bdv);
+    directives.append(&bdv);
 
     BrigDirectiveExtension bde = {
     sizeof(bde),                         //size
     BrigEDirectiveExtension,             //kind
-    10,                                   //c_code
+    10,                                  //c_code
     1                                    //s_name
     }; 
-    directives_.append(&bde);
+    directives.append(&bde);
+
     std::string errorMsg;
     std::ostringstream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod_1(strings_, directives_, code_, operands_, &errMsgOut);
+    hsa::brig::BrigModule mod1(strings, directives, code, operands, &errMsgOut);
     errorMsg = errMsgOut.str();
-    EXPECT_FALSE(mod_1.isValid());
-    std::cout << "00000" << errorMsg << std::endl;
+    EXPECT_FALSE(mod1.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "c_code past the code section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
