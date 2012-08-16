@@ -3823,6 +3823,31 @@ TEST(ParserTest ,SobInitializer){
 
 };
 
+TEST(ParserTest,GlobalSamplerDecl){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("global_Samp &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSamplerDecl(context));
+
+  input.assign("global_Samp &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSamplerDecl(context));
+  
+  input.assign("global_Samp &demo[10]={boundaryU = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSamplerDecl(context));
+
+  input.assign("global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSamplerDecl(context));
+  delete lexer ;
+};
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {

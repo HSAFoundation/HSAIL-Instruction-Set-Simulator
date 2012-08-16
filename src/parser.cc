@@ -5219,10 +5219,38 @@ int SobInit(Context *context){
 }
 
 int SobInitializer(Context *context){
+  //first must be '='
+  context->token_to_scan = yylex();
+  if('{' == context->token_to_scan){
+    while(1){
+      context->token_to_scan = yylex();
+      if(!SobInit(context)){
+        if(',' == context->token_to_scan){
+          continue ;
+        }else {
+          break ;
+        }
+      }else {
+        context->set_error(MISSING_IDENTIFIER);
+        return 1;
+      }
+    }//end for while
+
+    if('}' == context->token_to_scan){
+      context->token_to_scan = yylex();
+      return 0 ;
+    }else{
+      context->set_error(MISSING_CLOSING_BRACKET);
+    }
+  }else{
+     context->set_error(MISSING_OPENNING_BRACKET);
+  }
   return 1;
 }
 
-
+int GlobalSamplerDecl(Context *context){
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsa
