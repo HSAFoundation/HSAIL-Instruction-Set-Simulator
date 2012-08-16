@@ -77,6 +77,7 @@ class BrigModule {
 
   bool validate(const BrigSymbolCommon *s);
   bool validateSName(BrigsOffset32_t s_name);
+  bool validateAlignment(uint8_t *dir, uint8_t alignment);
 
   const BrigSections S_;
   std::ostream *out;

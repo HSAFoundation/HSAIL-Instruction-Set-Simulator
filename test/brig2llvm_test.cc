@@ -617,37 +617,3 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockString_invalid) {
   }
 }
 
-TEST(Brig2LLVMTest, BrigDirectiveBlockEnd_invalid) {
-  {
-    hsa::brig::StringBuffer strings;
-    hsa::brig::Buffer directives;
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-    BrigBlockEnd bend = {
-      7,
-      BrigEDirectiveBlockEnd   // kind
-    };
-    directives.append(&bend);
-
-    hsa::brig::Buffer code;
-    hsa::brig::Buffer operands;
-
-    std::string errorMsg;
-    std::ostringstream errMsgOut;
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
-    errorMsg = errMsgOut.str();
-    EXPECT_FALSE(mod.isValid());
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid size")));
-  }
-}

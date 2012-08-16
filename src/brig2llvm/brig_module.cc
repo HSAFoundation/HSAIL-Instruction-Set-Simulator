@@ -72,7 +72,7 @@ bool BrigModule::validate(void) {
 
 bool BrigModule::validate(const BrigDirectiveFunction *dir) {
   bool valid = true;
-
+  valid &= validateAlignment((uint8_t *)dir, 4);
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
   valid &= validateSName(dir->s_name);
@@ -112,7 +112,7 @@ bool BrigModule::validate(const BrigDirectiveKernel *dir) { return true; }
 
 bool BrigModule::validate(const BrigDirectiveSymbol *dir) {
   bool valid = true;
-
+  valid &= validateAlignment((uint8_t *)dir, 4);
   valid &= validate(&dir->s);
   valid &= check(!dir->reserved, "Reserved not zero");
 
@@ -152,6 +152,7 @@ bool BrigModule::validate(const BrigDirectiveLabelList *dir) {
 // 20.8.22
 bool BrigModule::validate(const BrigDirectiveVersion *dir) {
   bool valid = true;
+  valid &= validateAlignment((uint8_t *)dir, 4);
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
   valid &= check(dir->machine == BrigELarge ||
@@ -186,7 +187,7 @@ bool BrigModule::validate(const BrigDirectiveArgStart *dir) { return true; }
 bool BrigModule::validate(const BrigDirectiveArgEnd *dir) { return true; }
 bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
   bool valid = true;
-  validateSName(dir->s_name);
+  valid &= validateSName(dir->s_name);
   const char *string = S_.strings + dir->s_name;
   valid &= check(0 == strcmp(string, "debug") ||
                  0 == strcmp(string, "rti"),
@@ -233,7 +234,7 @@ bool BrigModule::validate(const BrigDirectiveBlockString *dir) {
 
 bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) {
   bool valid = true;
-  valid &= check(0 == dir->size % 4, "Invalid size");
+  valid &= validateAlignment((uint8_t *)dir, 4);
   return valid;
 }
 bool BrigModule::validate(const BrigDirectivePad *dir) { return true; }
@@ -278,6 +279,13 @@ bool BrigModule::validateSName(BrigsOffset32_t s_name) {
   size_t length = strnlen(S_.strings + s_name, maxlen);
   valid &= check(length != maxlen, "string not null terminated");
 
+  return valid;
+}
+
+bool BrigModule::validateAlignment(uint8_t *dir, uint8_t alignment) {
+  bool valid = true;
+  valid &= check((S_.directives - dir) % alignment == 0,
+                 "start offset wrong, can't divisible by alignment");
   return valid;
 }
 
