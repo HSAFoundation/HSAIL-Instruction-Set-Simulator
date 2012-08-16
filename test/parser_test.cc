@@ -3789,6 +3789,40 @@ TEST(ParserTest ,SobInit){
 
 };
 
+TEST(ParserTest ,SobInitializer){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("= {coord = linear,filter = normalized }");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInitializer(context));
+
+  input.assign("= {filter = normalized}");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInitializer(context));
+  
+  input.assign("= { boundaryU = linear}");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInitializer(context));
+
+  input.assign("={ boundaryU = linear ,boundaryV = linear}");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInitializer(context));
+
+
+  input.assign("={ boundaryU = linear ,boundaryV = linear ,boundaryW = linear}");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInitializer(context));
+
+  delete lexer ;
+
+};
+
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {

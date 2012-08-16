@@ -102,6 +102,7 @@ int GlobalSymbolDecl(Context* context);
 int Directive(Context* context);
 
 int SobInit(Context *context);
+int SobInitializer(Context *context);
 
 }  // namespace brig
 }  // namespace hsa

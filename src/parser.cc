@@ -5218,5 +5218,11 @@ int SobInit(Context *context){
   return 1;
 }
 
+int SobInitializer(Context *context){
+  return 1;
+}
+
+
+
 }  // namespace brig
 }  // namespace hsa
