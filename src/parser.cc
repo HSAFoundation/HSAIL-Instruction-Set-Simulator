@@ -5194,6 +5194,27 @@ int Directive(Context* context) {
 }
 
 int SobInit(Context *context){
+ if(COORD == context->token_to_scan  
+    ||FILTER == context->token_to_scan  
+    ||BOUNDARYU == context->token_to_scan  
+    ||BOUNDARYV == context->token_to_scan  
+    ||BOUNDARYW == context->token_to_scan){
+    context->token_to_scan = yylex();
+    if('=' == context->token_to_scan){
+      context->token_to_scan = yylex();
+      if(TOKEN_PROPERTY == context->token_to_scan){
+        context->token_to_scan = yylex();
+        return 0;
+      }else{
+	context->set_error(MISSING_PROPERTY);
+      }
+    }else{ //for '='
+      context->set_error(MISSING_IDENTIFIER);
+    }
+  }else{
+    context->set_error(MISSING_IDENTIFIER);
+  }  
+
   return 1;
 }
 
