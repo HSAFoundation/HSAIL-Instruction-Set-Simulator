@@ -3578,6 +3578,42 @@ TEST(ParserTest, BlockTest) {
   delete lexer;
 };
 
+
+TEST(ParserTest, GlobalSymbolDeclTest) {
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("align 8 private_u32 &tmp[2][2];\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSymbolDecl(context));
+
+  input.assign("align 8 const static private_s32 &tmp[2];\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSymbolDecl(context));
+ 
+  input.assign("group_b32 &tmp[2];\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSymbolDecl(context));
+
+  input.assign("private_u32 &tmp;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSymbolDecl(context));
+
+  input.assign("const extern group_b32 &tmp;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSymbolDecl(context));
+
+  delete lexer;
+
+};
+
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");

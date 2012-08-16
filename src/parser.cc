@@ -5028,5 +5028,9 @@ int Block(Context* context) {
   return 1;
 }
 
+int GlobalSymbolDecl(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

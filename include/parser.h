@@ -96,6 +96,7 @@ int Pragma(Context* context);
 int Block(Context* context);
 int DecimalListSingle(Context* context);
 int FloatListSingle(Context* context);
+int GlobalSymbolDecl(Context* context);
 
 }  // namespace brig
 }  // namespace hsa
