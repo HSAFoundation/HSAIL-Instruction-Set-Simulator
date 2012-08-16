@@ -5051,5 +5051,9 @@ int GlobalSymbolDecl(Context* context) {
   return 1;
 }
 
+int Directive(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

@@ -3613,6 +3613,40 @@ TEST(ParserTest, GlobalSymbolDeclTest) {
 
 };
 
+TEST(ParserTest, DirectiveTest) {
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("pragma \"this is string!\";\n"); // pragma
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Directive(context));
+
+  input.assign("extension \"abc\" ;\n"); // extension
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Directive(context));
+
+  input.assign("block \"rti\"\n"); // block
+  input.append("blockstring \"meta info about this function\";\n");
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Directive(context));
+
+  input.assign("workgroupspercu 128;"); // control
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Directive(context));
+
+  input.assign("file 1 \"this is a file\";\n"); // fileDecl
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Directive(context));
+
+  delete lexer;
+};
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
