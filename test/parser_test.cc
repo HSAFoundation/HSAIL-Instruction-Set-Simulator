@@ -2041,6 +2041,78 @@ TEST(ParserTest, Instruction1) {
   delete lexer;
 };
 
+// -----------------  Test for segp rule -------------------
+// format:
+// segp ::= segops addressSpaceIdentifier dataTypeId
+//          operand "," operand ";"
+
+// !!!!!!!!!!!! 
+//src should be operand instead of memoryoperand.
+// Manual here makes a mistake.
+
+TEST(ParserTest, Segp) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  // correct cases
+  std::string input("segmentp_private_b1 $c1, $s0;\n");  
+  // segmentp
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Segp(context));
+
+  input.assign("segmentp_group_b8 $c1, $d0;\n");  
+  // segmentp
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Segp(context));
+
+  input.assign("ftos_group_u64 $d1, $d2;\n");  // ftos
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Segp(context));
+
+  input.assign("ftos_arg_s16 $d3, $d4;\n");  // ftos
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Segp(context));
+
+  input.assign("stof_spill_u8 $d1, $d4;\n");  // stof
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Segp(context));
+
+  input.assign("stof_private_u64 $d2, $d1;\n");  // stof
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Segp(context));
+  // wrong cases
+  input.assign("stof_u64 $d2, $d1;\n");  
+  // lack of addressSpaceIdentifier
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Segp(context));
+
+  input.assign("ftos_spill $c0, $c1;\n");  
+  // lack of datatypeId
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Segp(context));
+
+  input.assign("stof_arg_u64 $d1;\n");  // lack of operand 
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Segp(context));
+
+  input.assign("segmentp_private_u64 $d2, $d1\n");  // lack of ';' 
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Segp(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 
