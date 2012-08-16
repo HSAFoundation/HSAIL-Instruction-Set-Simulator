@@ -199,7 +199,7 @@ bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
 
 int getTypeSize(BrigDataType16_t type) {
   if (Brigb1 == type) {
-    return 1/8;
+    return 1;
   } else if (Brigb8 == type) {
     return 1;
   } else if (Brigb16 == type) {
@@ -215,13 +215,13 @@ int getTypeSize(BrigDataType16_t type) {
 bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) {
   bool valid = true;
   valid &= check(0 == dir->size % 8,
-                 "Invalid size, must be a multiple of 8.");
+                 "Invalid size, must be a multiple of 8");
   valid &= check(Brigb1 == dir->type || Brigb8 == dir->type || Brigb16 == dir->type ||
                  Brigb32 == dir->type || Brigb64 == dir->type,
-                 "Invalid type, must be b1, b8, b16, b32, or b64.");
+                 "Invalid type, must be b1, b8, b16, b32, or b64");
   valid &= check(sizeof(BrigBlockNumeric) - sizeof(uint64_t) + 
                  dir->elementCount * getTypeSize(dir->type) <= dir->size,
-                 "Invalid elementCount, the elementCount is too large.");
+                 "Invalid elementCount, elementCount too large for directive size");
   return valid;
 }
 
@@ -233,7 +233,7 @@ bool BrigModule::validate(const BrigDirectiveBlockString *dir) {
 
 bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) {
   bool valid = true;
-  valid &= check(0 == dir->size % 4, "Invalid size.");
+  valid &= check(0 == dir->size % 4, "Invalid size");
   return valid;
 }
 bool BrigModule::validate(const BrigDirectivePad *dir) { return true; }
