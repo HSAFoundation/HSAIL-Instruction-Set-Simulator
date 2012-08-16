@@ -223,8 +223,20 @@ bool BrigModule::validate(const BrigDirectiveExtension *dir) {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveArgStart *dir) { return true; }
-bool BrigModule::validate(const BrigDirectiveArgEnd *dir) { return true; }
+bool BrigModule::validate(const BrigDirectiveArgStart *dir) { 
+  bool valid = true;
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  return valid;
+}
+
+bool BrigModule::validate(const BrigDirectiveArgEnd *dir) { 
+  bool valid = true;
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  return valid;
+}
+
 bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
   return true;
 }
