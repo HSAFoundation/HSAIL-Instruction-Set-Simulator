@@ -5249,6 +5249,53 @@ int SobInitializer(Context *context){
 }
 
 int GlobalSamplerDecl(Context *context){
+ //first must be GLOBAL
+  context->token_to_scan = yylex();
+
+  if(_SAMP == context->token_to_scan){ 
+    context->token_to_scan = yylex();
+    if(TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan){
+      context->token_to_scan = yylex();
+      if('[' == context->token_to_scan){
+         if(!ArrayDimensionSet(context)){
+           if('=' == context->token_to_scan){
+             if(!SobInitializer(context)){
+               if(';' == context->token_to_scan){
+	         context->token_to_scan = yylex();
+                 return 0 ;
+	       }else{
+                 context->set_error(MISSING_SEMICOLON);
+	       }
+	     }else{
+	     }
+	   }else{//end for =
+             if(';' == context->token_to_scan){
+               context->token_to_scan = yylex();
+               return 0 ;
+	     }else{
+               context->set_error(MISSING_SEMICOLON);
+	     }
+	   }
+	 }
+      }else if('=' == context->token_to_scan){//end for [
+        if(!SobInitializer(context)){       //no arraydimensions
+          if(';' == context->token_to_scan){
+	    context->token_to_scan = yylex();
+            return 0 ;
+	  }else{
+            context->set_error(MISSING_SEMICOLON);
+	  }
+	}
+      }else if(';' == context->token_to_scan){ //no arrayDimensions and imageInitializer
+        context->token_to_scan = yylex();
+        return 0 ;
+      }else{
+        context->set_error(MISSING_SEMICOLON);
+      }
+    }
+  }else{
+    context->set_error(MISSING_IDENTIFIER);
+  }
   return 1;
 }
 
