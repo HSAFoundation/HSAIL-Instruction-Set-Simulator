@@ -5132,5 +5132,67 @@ int Block(Context* context) {
   }
 }
 
+
+int GlobalSymbolDecl(Context* context) {
+  unsigned int first_token = context->token_to_scan;
+  if (!DeclPrefix(context)) {
+    if (first_token == GROUP) {
+      if (!GlobalGroupDecl(context)) { 
+        return 0;
+      } else {
+        return 1;
+      }
+    } else if (!GlobalPrivateDecl(context)) {
+      return 0;
+    } else {
+      return 1;
+    }
+  } else {
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int Directive(Context* context) {
+  switch (context->token_to_scan) {
+    case PRAGMA:
+      if (!Pragma(context)) {
+        return 0;
+      } 
+      return 1;
+    case EXTENSION:
+      if (!Extension(context)) {
+        return 0;
+      }
+      return 1;
+    case BLOCK:
+      if (!Block(context)) {
+        return 0;
+      }
+      return 1;
+    case ITEMS_PER_WORKGROUP:
+    case WORKGROUPS_PER_CU:
+    case MEMOPT_OFF:
+    case MEMOPT_ON:
+      if (!Control(context)) {
+        return 0;
+      }
+      return 1;
+    case _FILE:
+      if (!FileDecl(context)) {
+        return 0;
+      }
+      return 1;
+    default:
+      context->set_error(UNKNOWN_ERROR);
+      return 1;    
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+
 }  // namespace brig
 }  // namespace hsa
