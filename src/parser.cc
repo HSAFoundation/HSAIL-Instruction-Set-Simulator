@@ -4328,6 +4328,35 @@ int Instruction1(Context* context) {
 }
 
 int Segp(Context* context) {
+  // first token is SEGMENTP "segmentp" or FTOS "ftos" or STOF "stof"
+  context->token_to_scan = yylex();
+
+  if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+    context->token_to_scan = yylex();
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context)) {
+            if (context->token_to_scan == ';') {
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+            }
+          } else {
+            context->set_error(MISSING_OPERAND);
+          }
+        } else {
+          context->set_error(MISSING_COMMA);
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+    }
+  }
   return 1;
 }
 
