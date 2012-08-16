@@ -546,7 +546,7 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
     EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
     "Too few argument symbols")));
     EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
-    "Argument not in arg spacen")));
+    "Argument not in arg space")));
     EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
     "The first scoped directive is too early")));
     EXPECT_EQ(std::string::npos, errorMsg.find(std::string(
@@ -628,5 +628,145 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
     "c_code past the code section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "s_name past the strings section")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveArgStart_test) {
+  //true case
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+    hsa::brig::Buffer directives;
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveArgStart bdas = {
+      sizeof(bdas),                         //size
+      BrigEDirectiveArgStart,               //kind
+      0                                     //c_code
+    };
+    directives.append(&bdas);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &std::cerr);
+    EXPECT_TRUE(mod.isValid());
+  }
+  //false case
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+    hsa::brig::Buffer directives;
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveArgStart bdas = {
+      sizeof(bdas),                         //size
+      BrigEDirectiveArgStart,               //kind
+      10                                    //c_code
+    };
+    directives.append(&bdas);
+
+    std::string errorMsg;
+    std::ostringstream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod1(strings, directives, code, operands, &errMsgOut);
+    errorMsg = errMsgOut.str();
+    EXPECT_FALSE(mod1.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "c_code past the code section")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveArgEnd_test) {
+  //true case
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+    hsa::brig::Buffer directives;
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveArgEnd bdae = {
+      sizeof(bdae),                         //size
+      BrigEDirectiveArgEnd,                 //kind
+      0                                     //c_code
+    };
+    directives.append(&bdae);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &std::cerr);
+    EXPECT_TRUE(mod.isValid());
+  }
+  //false case
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+    hsa::brig::Buffer directives;
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveArgEnd bdae = {
+      sizeof(bdae),                         //size
+      BrigEDirectiveArgEnd,                 //kind
+      10                                    //c_code
+    };
+    directives.append(&bdae);
+
+    std::string errorMsg;
+    std::ostringstream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod1(strings, directives, code, operands, &errMsgOut);
+    errorMsg = errMsgOut.str();
+    EXPECT_FALSE(mod1.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "c_code past the code section")));
   }
 }
