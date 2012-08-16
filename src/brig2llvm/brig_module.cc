@@ -190,7 +190,7 @@ bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
   const char *string = S_.strings + dir->s_name;
   valid &= check(0 == strcmp(string, "debug") ||
                  0 == strcmp(string, "rti"),
-                 "Invalid s_name, either be debug or rti");
+                 "Invalid s_name, should be either debug or rti");
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
   

@@ -504,7 +504,7 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockStart_invalid) {
     errorMsg = errMsgOut.str();
     EXPECT_FALSE(mod.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid s_name, either be debug or rti")));
+    "Invalid s_name, should be either debug or rti")));
   }
 }
 
@@ -541,7 +541,7 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid) {
     errorMsg = errMsgOut.str();
     EXPECT_FALSE(mod.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid type, must be b1, b8, b16, b32, or b64.")));
+    "Invalid type, must be b1, b8, b16, b32, or b64")));
   }
 }
 
@@ -578,7 +578,7 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid2) {
     errorMsg = errMsgOut.str();
     EXPECT_FALSE(mod.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid elementCount, the elementCount is too large.")));
+    "Invalid elementCount, elementCount too large for directive size")));
   }
 }
 
@@ -648,6 +648,6 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockEnd_invalid) {
     errorMsg = errMsgOut.str();
     EXPECT_FALSE(mod.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid size.")));
+    "Invalid size")));
   }
 }
