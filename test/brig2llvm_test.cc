@@ -4,6 +4,7 @@
 #include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
+#include "brig_module.h"
 // ------------------ Brig2LLVM TESTS -----------------
 
 TEST(Brig2LLVMTest, AppendBuffer) {
@@ -341,6 +342,118 @@ TEST(Brig2LLVMTest, Example3){
     // "%gpu_reg_p = alloca %struct.regs")));
     // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     // "ret void")));
+  }
+}
+TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("// content of brig comment"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    
+    BrigDirectiveComment bdc = {
+      sizeof(bdc), //uint16_t size;
+      BrigEDirectiveComment, //uint16_t kind;
+      0, //BrigcOffset32_t c_code;
+      0 //BrigsOffset32_t s_name;
+    };
+    directives.append(&bdc);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &std::cerr);
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test 
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("// content of brig comment"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    
+    BrigDirectiveComment bdc = {
+      sizeof(bdc), //uint16_t size;
+      BrigEDirectiveComment, //uint16_t kind;
+      10, //BrigcOffset32_t c_code; correct: 0
+      0 //BrigsOffset32_t s_name; correct: 0
+    };
+    directives.append(&bdc);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    std::ostringstream errMsgOut; 
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errorMsg = errMsgOut.str();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "c_code past the code section")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("// content of brig comment"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    
+    BrigDirectiveComment bdc = {
+      sizeof(bdc), //uint16_t size;
+      BrigEDirectiveComment, //uint16_t kind;
+      0, //BrigcOffset32_t c_code; correct: 0
+      100 //BrigsOffset32_t s_name; correct: 0
+    };
+    directives.append(&bdc);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    std::ostringstream errMsgOut; 
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errorMsg = errMsgOut.str();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "s_name past the strings section")));    
   }
 }
 
