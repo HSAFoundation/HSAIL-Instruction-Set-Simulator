@@ -5028,7 +5028,26 @@ int Block(Context* context) {
   return 1;
 }
 
+
 int GlobalSymbolDecl(Context* context) {
+  unsigned int first_token = context->token_to_scan;
+  if (!DeclPrefix(context)) {
+    if (first_token == GROUP) {
+      if (!GlobalGroupDecl(context)) { 
+        return 0;
+      } else {
+        return 1;
+      }
+    } else if (!GlobalPrivateDecl(context)) {
+      return 0;
+    } else {
+      return 1;
+    }
+  } else {
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
