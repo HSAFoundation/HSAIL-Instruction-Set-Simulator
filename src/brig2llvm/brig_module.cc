@@ -1,6 +1,6 @@
 #include "brig_module.h"
 
-#include <ostream>
+#include "llvm/Support/raw_ostream.h"
 #include <cstring>
 
 namespace hsa {
@@ -12,8 +12,8 @@ template<class Message>
 bool (BrigModule::check)(bool test, const Message &msg,
                          const char *filename, unsigned lineno,
                          const char *cause) {
-  if(!test && out)
-     (*out) << filename << "." << lineno << ": " << msg
+  if(!test && out_)
+     (*out_) << filename << "." << lineno << ": " << msg
             << " (" << cause << ")\n";
   return test;
 }
@@ -173,7 +173,7 @@ bool BrigModule::validate(const BrigDirectiveComment *dir) {
   bool valid = true;
   valid &= check(dir->c_code <= S_.codeSize,
                    "c_code past the code section");
-  valid &= validateSName(dir->s_name);  
+  valid &= validateSName(dir->s_name);
   return valid;
 }
 bool BrigModule::validate(const BrigDirectiveLoc *dir) { return true; }

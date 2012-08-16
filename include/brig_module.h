@@ -8,6 +8,10 @@
 // Not included in C++98
 #include <stdint.h>
 
+namespace llvm {
+class raw_ostream;
+}
+
 namespace hsa {
 namespace brig {
 
@@ -21,7 +25,7 @@ class BrigModule {
              const Buffer &directives,
              const Buffer &code,
              const Buffer &operands,
-             std::ostream *out) :
+             llvm::raw_ostream *out) :
     S_(reinterpret_cast<const char *>(&strings.get()[0]),
        &directives.get()[0],
        &code.get()[0],
@@ -30,10 +34,10 @@ class BrigModule {
        directives.size(),
        code.size(),
        operands.size()),
-    out(out),
-    valid(validate()) {}
+    out_(out),
+    valid_(validate()) {}
 
-  bool isValid() { return valid; }
+  bool isValid() { return valid_; }
 
   BrigFunction begin() const;
   BrigFunction end() const;
@@ -79,8 +83,8 @@ class BrigModule {
   bool validateSName(BrigsOffset32_t s_name);
 
   const BrigSections S_;
-  std::ostream *out;
-  const bool valid;
+  llvm::raw_ostream *out_;
+  const bool valid_;
 
   friend class BrigFunction;
 };

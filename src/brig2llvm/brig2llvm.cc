@@ -154,7 +154,7 @@ void GenLLVM::operator()(void) {
   C_ = new llvm::LLVMContext();
   brig_frontend_ = new llvm::Module("BRIG", *C_);
 
-  BrigModule mod(strings_, directives_, code_, operands_, &std::cerr);
+  BrigModule mod(strings_, directives_, code_, operands_, &llvm::errs());
   assert(mod.isValid());
 
   gen_GPU_states();

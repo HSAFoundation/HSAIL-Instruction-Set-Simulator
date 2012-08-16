@@ -5,6 +5,11 @@
 #include <cassert>
 #include <cstdlib>
 
+namespace llvm {
+class raw_ostream;
+raw_ostream &errs();
+}
+
 namespace hsa {
 namespace brig {
 

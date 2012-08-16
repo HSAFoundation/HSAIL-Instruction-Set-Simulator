@@ -1,6 +1,7 @@
 // Copyright 2012 MulticoreWare Inc.
 
 #include "gtest/gtest.h"
+#include "llvm/Support/raw_ostream.h"
 #include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
@@ -10,7 +11,8 @@
 TEST(Brig2LLVMTest, AppendBuffer) {
   {
     BrigInstLdSt foo = {
-      sizeof(foo), BrigEInstLdSt,
+      sizeof(foo), BrigEInstLdSt, 0, 0, 0,
+      { 0, 0, 0, 0, 0 }, 0, 0, 0
     };
     hsa::brig::Buffer bb;
     bb.append(&foo);
@@ -362,7 +364,7 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
       0
     };
     directives.append(&bdv);
-    
+
     BrigDirectiveComment bdc = {
       sizeof(bdc), //uint16_t size;
       BrigEDirectiveComment, //uint16_t kind;
@@ -372,13 +374,14 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
     directives.append(&bdc);
 
     hsa::brig::Buffer code;
-   
+
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &std::cerr);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
-  //invalid test 
+  //invalid test
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("// content of brig comment"));
@@ -396,7 +399,7 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
       0
     };
     directives.append(&bdv);
-    
+
     BrigDirectiveComment bdc = {
       sizeof(bdc), //uint16_t size;
       BrigEDirectiveComment, //uint16_t kind;
@@ -406,14 +409,14 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
     directives.append(&bdc);
 
     hsa::brig::Buffer code;
-   
+
     hsa::brig::Buffer operands;
 
     std::string errorMsg;
-    std::ostringstream errMsgOut; 
+    llvm::raw_string_ostream errMsgOut(errorMsg);
     hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
-    errorMsg = errMsgOut.str();
+    errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "c_code past the code section")));
   }
@@ -434,7 +437,7 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
       0
     };
     directives.append(&bdv);
-    
+
     BrigDirectiveComment bdc = {
       sizeof(bdc), //uint16_t size;
       BrigEDirectiveComment, //uint16_t kind;
@@ -444,16 +447,16 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
     directives.append(&bdc);
 
     hsa::brig::Buffer code;
-   
+
     hsa::brig::Buffer operands;
 
     std::string errorMsg;
-    std::ostringstream errMsgOut; 
+    llvm::raw_string_ostream errMsgOut(errorMsg);
     hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
-    errorMsg = errMsgOut.str();
+    errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "s_name past the strings section")));    
+    "s_name past the strings section")));
   }
 }
 
