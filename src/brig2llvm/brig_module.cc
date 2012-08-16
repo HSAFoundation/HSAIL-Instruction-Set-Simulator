@@ -187,7 +187,7 @@ bool BrigModule::validate(const BrigDirectiveArgEnd *dir) { return true; }
 bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
   bool valid = true;
   validateSName(dir->s_name);
-  char *string = strdup(S_.strings + dir->s_name);
+  const char *string = S_.strings + dir->s_name;
   valid &= check(0 == strcmp(string, "debug") ||
                  0 == strcmp(string, "rti"),
                  "Invalid s_name, either be debug or rti");
@@ -197,6 +197,21 @@ bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
   return valid;
 }
 
+int getTypeSize(BrigDataType16_t type) {
+  if (Brigb1 == type) {
+    return 1/8;
+  } else if (Brigb8 == type) {
+    return 1;
+  } else if (Brigb16 == type) {
+    return 2;
+  } else if (Brigb32 == type) {
+    return 4;
+  } else if (Brigb64 == type) {
+    return 8;
+  }
+  return 0;
+}
+
 bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) {
   bool valid = true;
   valid &= check(0 == dir->size % 8,
@@ -204,22 +219,9 @@ bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) {
   valid &= check(Brigb1 == dir->type || Brigb8 == dir->type || Brigb16 == dir->type ||
                  Brigb32 == dir->type || Brigb64 == dir->type,
                  "Invalid type, must be b1, b8, b16, b32, or b64.");
-  if (Brigb1 == dir->type) {
-    valid &= check(64 >= dir->elementCount,
-                   "Invalid elementCount, the largest number is 64.");
-  } else if (Brigb8 == dir->type) {
-    valid &= check(8 >= dir->elementCount,
-                   "Invalid elementCount, the largest number is 8.");
-  } else if (Brigb16 == dir->type) {
-    valid &= check(4 >= dir->elementCount,
-                   "Invalid elementCount, the largest number is 4.");
-  } else if (Brigb32 == dir->type) {
-    valid &= check(2 >= dir->elementCount,
-                   "Invalid elementCount, the largest number is 2.");
-  } else if (Brigb64 == dir->type) {
-    valid &= check(1 >= dir->elementCount,
-                   "Invalid elementCount, the largest number is 1.");
-  }
+  valid &= check(sizeof(BrigBlockNumeric) - sizeof(uint64_t) + 
+                 dir->elementCount * getTypeSize(dir->type) <= dir->size,
+                 "Invalid elementCount, the elementCount is too large.");
   return valid;
 }
 
