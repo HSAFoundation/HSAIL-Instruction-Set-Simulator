@@ -101,6 +101,8 @@ int FloatListSingle(Context* context);
 int GlobalSymbolDecl(Context* context);
 int Directive(Context* context);
 
+int SobInit(Context *context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
