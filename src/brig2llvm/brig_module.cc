@@ -203,7 +203,10 @@ bool BrigModule::validate(const BrigDirectiveBlockString *dir) {
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) { return true; }
-bool BrigModule::validate(const BrigDirectivePad *dir) { return true; }
+bool BrigModule::validate(const BrigDirectivePad *dir) {
+  bool valid = true;
+  return valid;
+}
 
 bool BrigModule::validate(const BrigSymbolCommon *s) {
   bool valid = true;
