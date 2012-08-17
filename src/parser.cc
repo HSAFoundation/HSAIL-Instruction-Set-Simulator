@@ -4558,7 +4558,8 @@ int ImageInit(Context *context) {
 
 int GlobalImageDecl(Context *context) {
   // first must be GLOBAL
-  context->token_to_scan = yylex();
+  if(!context->had_yylex)
+    context->token_to_scan = yylex();
 
   if (_RWIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
@@ -4641,7 +4642,8 @@ int ImageInitializer(Context *context) {
 
 int GlobalReadOnlyImageDecl(Context *context) {
   // first must be GLOBAL
-  context->token_to_scan = yylex();
+  if(!context->had_yylex)
+   context->token_to_scan = yylex();
 
   if (_ROIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
@@ -5250,7 +5252,8 @@ int SobInitializer(Context *context){
 
 int GlobalSamplerDecl(Context *context){
  //first must be GLOBAL
-  context->token_to_scan = yylex();
+  if(!context->had_yylex)
+    context->token_to_scan = yylex();
 
   if(_SAMP == context->token_to_scan){ 
     context->token_to_scan = yylex();
@@ -5300,6 +5303,43 @@ int GlobalSamplerDecl(Context *context){
 }
 
 int GlobalDecl(Context *context){
+  
+  if(SIGNATURE == context->token_to_scan){ //functionSignature 
+    return FunctionSignature(context);
+  }else if(!DeclPrefix(context)){
+    //funcitonDecl 
+    if(FUNCTION == context->token_to_scan){
+      return FunctionDecl(context);
+    }else if(GLOBAL == context->token_to_scan){
+      context->token_to_scan = yylex();
+      context->had_yylex = 1 ;
+      if(!GlobalImageDecl(context)){
+        context->had_yylex = 0 ;
+        return 0 ;
+      }else if(!GlobalReadOnlyImageDecl(context)){
+        context->had_yylex = 0 ;
+        return 0;
+      }else if(!GlobalSamplerDecl(context)){
+        context->had_yylex = 0 ;
+        return 0;
+      }else if(!InitializableDecl(context)){
+        context->had_yylex = 0 ;
+        return 0;
+      }else{
+        context->had_yylex = 0 ;
+        context->set_error(MISSING_IDENTIFIER);
+      }
+    
+    }else if(GROUP == context->token_to_scan){
+      return GlobalGroupDecl(context) ;
+    }else if(PRIVATE == context->token_to_scan){
+      return GlobalPrivateDecl(context);
+    }else if(READONLY == context->token_to_scan){
+      return InitializableDecl(context);
+    }
+  }else {
+    context->set_error(MISSING_IDENTIFIER);
+  }
   return 1;
 }
 
