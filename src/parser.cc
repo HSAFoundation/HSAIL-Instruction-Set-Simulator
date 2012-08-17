@@ -5170,6 +5170,9 @@ int Directive(Context* context) {
   return 1;
 }
 
+int SobInit(Context *context){
+  return 1;
+}
 
 }  // namespace brig
 }  // namespace hsa

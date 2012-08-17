@@ -3622,6 +3622,41 @@ TEST(ParserTest, DirectiveTest) {
   delete lexer;
 };
 
+TEST(ParserTest ,SobInit){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("coord = linear");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInit(context));
+
+  input.assign("filter = normalized");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInit(context));
+  
+  input.assign("boundaryU = linear");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInit(context));
+
+  input.assign("boundaryV = linear");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInit(context));
+
+
+  input.assign("boundaryW = linear");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, SobInit(context));
+
+  delete lexer ;
+
+};
+
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
