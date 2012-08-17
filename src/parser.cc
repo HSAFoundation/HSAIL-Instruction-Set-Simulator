@@ -5266,6 +5266,11 @@ int SobInit(Context *context){
 
 int SobInitializer(Context *context){
   //first must be '='
+  if('=' != context->token_to_scan){
+     context->set_error(MISSING_IDENTIFIER);
+     return 1;
+  }
+
   context->token_to_scan = yylex();
   if('{' == context->token_to_scan){
     while(1){
