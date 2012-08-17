@@ -359,6 +359,126 @@ TEST(LexTest, Bug26_DecDoubleConstant) {
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(0.5e3, context->token_value.double_val);
 
+  input.assign("0101.L");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(101, context->token_value.double_val);
+
+  input.assign("0007L");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(7, context->token_value.double_val);
+
+  input.assign("000.77");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0.77, context->token_value.double_val);
+
+  input.assign(".007e0");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0.007, context->token_value.double_val);
+
+  input.assign("07L");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(7, context->token_value.double_val);
+
+  input.assign("7L");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(7, context->token_value.double_val);
+
+  input.assign("3.e3");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(3000, context->token_value.double_val);
+
+  input.assign("3.1e3");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(3100, context->token_value.double_val);
+
+  input.assign("1e-3");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0.001, context->token_value.double_val);
+
+  input.assign("2.333L");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(2.333, context->token_value.double_val);
+
+  input.assign("1e+1");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(10, context->token_value.double_val);
+
+  input.assign("2.3333");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(2.3333, context->token_value.double_val);
+
+  input.assign("1e3L");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(1000, context->token_value.double_val);
+
+  input.assign("2333.L");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(2333, context->token_value.double_val);
+
+  input.assign("2333.");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(2333, context->token_value.double_val);
+
+  // wrong case
+  input.assign("7");
+  lexer->set_source_string(input);
+  EXPECT_NE(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+
+  input.assign("1e-1.3");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0.1, context->token_value.double_val);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0.3, context->token_value.double_val);
+
+  input.assign("1e+1.3");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(10, context->token_value.double_val);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0.3, context->token_value.double_val);
+
+  input.assign("3.5e");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(3.5, context->token_value.double_val);
+  EXPECT_EQ(0, lexer->get_next_token());
+
+  input.assign("2.33.33L");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(2.33, context->token_value.double_val);
+  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0.33, context->token_value.double_val);
+
+  input.assign("L");
+  lexer->set_source_string(input);
+  EXPECT_NE(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+
+  input.assign("e");
+  lexer->set_source_string(input);
+  EXPECT_NE(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+
+  input.assign(".");
+  lexer->set_source_string(input);
+  EXPECT_NE(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
+
+
   delete lexer;
 }
 
