@@ -531,3 +531,33 @@ TEST(Brig2LLVMTest, VarSizeDirective) {
               bb.size());
   }
 }
+TEST(Brig2LLVMTest, validateBrigDirectivePad) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("// content of brig Pad"));
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    
+    BrigDirectivePad bdp = {
+      sizeof(bdp), //uint16_t size;
+      BrigEDirectivePad, //uint16_t kind;
+    };
+    directives.append(&bdp);
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+}
