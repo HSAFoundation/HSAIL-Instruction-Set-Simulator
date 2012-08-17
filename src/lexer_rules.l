@@ -302,10 +302,6 @@ WAVESIZE      { context->token_type = WAVESIZE;
                 return TOKEN_WAVESIZE; }
 
   /* keywords */
-workgroupid       { context->token_type = COMMON_KEYWORD;
-                    free_string(context);
-                    context->yycolno+=yyleng;
-                    return WORKGROUPID;}
 
 version           { context->yycolno+=yyleng;
                     free_string(context);
@@ -790,51 +786,67 @@ frcp                { free_string(context);
 unpack3             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigUnpack3;
                       return UNPACK3; }
                       
 unpack2             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT; 
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigUnpack2;
                       return  UNPACK2; }
                       
 unpack1             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT; 
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigUnpack1;
                       return UNPACK1; }
                       
 unpack0             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT; 
                       context->yycolno+=yyleng;  
+                      context->token_value.opcode = BrigUnpack0;
                       return UNPACK0; }
                       
 alloca              { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigAlloca;
                       return ALLOCA;}
                       
 workitemid          { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigWorkItemId;
                       return WORKITEMID; }
                       
 workitemaid         { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT; 
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigWorkItemAId;
                       return  WORKITEMAID;}
                       
 workgroupsize       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigWorkGroupSize;
                       return WORKGROUPSIZE;}
-                      
+
+workgroupid       { free_string(context);
+                    context->token_type = INSTRUCTION2_OPCODE_NODT;                    
+                    context->yycolno+=yyleng;
+                    context->token_value.opcode = BrigWorkGroupId ;
+                    return WORKGROUPID;}
+
 NDRangesize         { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigNDRangesize;
                       return NDRANGESIZE;}
                       
 NDRangegroups       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT; 
                       context->yycolno+=yyleng;  
+                      context->token_value.opcode = BrigNDRangegroups;
                       return NDRANGEGROUPS; }
 
 add                 { free_string(context);
