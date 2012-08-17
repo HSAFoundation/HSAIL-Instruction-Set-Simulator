@@ -5301,6 +5301,7 @@ int SobInitializer(Context *context){
 
 int GlobalSamplerDecl(Context *context){
  //first must be GLOBAL
+
   if(!context->had_yylex)
     context->token_to_scan = yylex();
 
@@ -5310,15 +5311,12 @@ int GlobalSamplerDecl(Context *context){
       context->token_to_scan = yylex();
       if('[' == context->token_to_scan){
          if(!ArrayDimensionSet(context)){
-           if('=' == context->token_to_scan){
-             if(!SobInitializer(context)){
-               if(';' == context->token_to_scan){
-	         context->token_to_scan = yylex();
-                 return 0 ;
-	       }else{
-                 context->set_error(MISSING_SEMICOLON);
-	       }
+           if(!SobInitializer(context)){
+             if(';' == context->token_to_scan){
+	       context->token_to_scan = yylex();
+               return 0 ;
 	     }else{
+               context->set_error(MISSING_SEMICOLON);
 	     }
 	   }else{//end for =
              if(';' == context->token_to_scan){
