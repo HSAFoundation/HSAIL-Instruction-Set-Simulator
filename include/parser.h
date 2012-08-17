@@ -61,13 +61,43 @@ int Ldc(Context* context);
 int Instruction5(Context* context);
 int CvtModifier1(Context* context);
 int Mov(Context* context);
+int Atom(Context* context);
+int Instruction0(Context* context);
+int Instruction1(Context* context);
 int IntegerLiteral(Context* context);
 int GlobalGroupDecl(Context* context);
 /* MUL */
 int Mul(Context* context);
-int MulInst(const unsigned int first_token, Context* context);
-int Mul24Inst(const unsigned int first_token, Context* context);
-int Mad24Inst(const unsigned int first_token, Context* context);
+int MulInst(Context* context);
+int Mul24Inst(Context* context);
+int Mad24Inst(Context* context);
+int Ld(Context* context);
+int LdModifier(Context* context);
+int St(Context* context);
+int Lda(Context* context);
+int ImageRet(Context* context);
+int ImageNoRet(Context* context);
+int Cvt(Context* context);
+int ImageLoad(Context* context);
+int ImageStore(Context* context);
+
+int SingleListSingle(Context *context);
+int GlobalImageDecl(Context *context);
+int ImageInitializer(Context *context);
+int ImageInit(Context *context);
+int GlobalReadOnlyImageDecl(Context *context);
+int Ret(Context *context);
+int ImageRead(Context *context);
+int Sync(Context *context);
+int Bar(Context *context);
+int AtomicNoRet(Context *context);
+int AtomModifiers(Context *context);
+int Location(Context* context);
+int Control(Context* context);
+int Pragma(Context* context);
+int Block(Context* context);
+int DecimalListSingle(Context* context);
+int FloatListSingle(Context* context);
 
 }  // namespace brig
 }  // namespace hsa

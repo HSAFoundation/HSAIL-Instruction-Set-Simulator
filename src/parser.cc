@@ -23,24 +23,30 @@ int Query(Context* context) {
       if (context->token_to_scan == ',') {
         // then finally an addressable Operand
         context->token_to_scan = yylex();  // set token for addressableOperand()
+        if (context->token_to_scan != '[') {
+          context->set_error(MISSING_OPERAND);
+        } else {
+          context->token_to_scan = yylex();
+        }
+
         if (!AddressableOperand(context)) {
           if (context->token_to_scan == ';') {
             context->token_to_scan = yylex();  // set token for next function
             return 0;
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+            context->set_error(MISSING_SEMICOLON);
           }
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          context->set_error(INVALID_OPERAND);
         }
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        context->set_error(MISSING_COMMA);
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      context->set_error(MISSING_OPERAND);
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
   }
   return 1;
 }
@@ -185,12 +191,11 @@ int BaseOperand(Context* context) {
               if (context->token_to_scan == ')') {
                 return 0;
               } else if (context->token_to_scan != ',') {
-                context->set_error(ErrorReporterInterface::MISSING_COMMA);
+                context->set_error(MISSING_COMMA);
                 return 1;
               }
             } else {
-              context->set_error(ErrorReporterInterface::
-                                    MISSING_INTEGER_CONSTANT);
+              context->set_error(MISSING_INTEGER_CONSTANT);
               return 1;
             }
           }  // while
@@ -224,12 +229,11 @@ int BaseOperand(Context* context) {
               if (context->token_to_scan == ')') {
                 return 0;
               } else if (context->token_to_scan != ',') {
-                context->set_error(ErrorReporterInterface::MISSING_COMMA);
+                context->set_error(MISSING_COMMA);
                 return 1;
               }
             } else {
-              context->set_error(ErrorReporterInterface::
-                                  MISSING_DOUBLE_CONSTANT);
+              context->set_error(MISSING_DOUBLE_CONSTANT);
               return 1;
             }
           }  // while
@@ -241,89 +245,79 @@ int BaseOperand(Context* context) {
 }
 
 int AddressableOperand(Context* context) {
-  if (context->token_to_scan == '[') {
-    // next should be a non register
+  // context->token_to_scan must be non register
+  if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
+      (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
+    std::string name(context->token_value.string_val);
+
     context->token_to_scan = yylex();
-    if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
-        (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
-      std::string name(context->token_value.string_val);
 
+    if (context->token_to_scan == ']') {
+      BrigOperandAddress boa = {
+        sizeof(boa),            // size
+        BrigEOperandAddress,    // kind
+        Brigb32,                // type
+        0,                      // reserved
+        0,                      // directive
+        0
+      };
+
+      boa.directive = context->symbol_map[name];
+
+      if (context->get_machine() == BrigELarge)
+        boa.type = Brigb64;
+
+      context->append_operand(&boa);
       context->token_to_scan = yylex();
-
-      if (context->token_to_scan == ']') {
-        BrigOperandAddress boa = {
-          sizeof(boa),            // size
-          BrigEOperandAddress,    // kind
-          Brigb32,                // type
-          0,                      // reserved
-          0,                      // directive
-          0
-        };
-
-        boa.directive = context->symbol_map[name];
-
-        if (context->get_machine() == BrigELarge)
-          boa.type = Brigb64;
-
-        context->append_operand(&boa);
+      return 0;
+    } else if (context->token_to_scan == '<') {
+      context->token_to_scan = yylex();
+      if (!IntegerLiteral(context)) {
         context->token_to_scan = yylex();
-        return 0;
-      } else if (context->token_to_scan == '<') {
-        context->token_to_scan = yylex();
-        if (!IntegerLiteral(context)) {
+        if (context->token_to_scan == '>') {
           context->token_to_scan = yylex();
-          if (context->token_to_scan == '>') {
+          if (context->token_to_scan == ']') {
             context->token_to_scan = yylex();
-            if (context->token_to_scan == ']') {
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(ErrorReporterInterface::
-                                  MISSING_CLOSING_BRACKET);
-            }
+            return 0;
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
+            context->set_error(MISSING_CLOSING_BRACKET);
           }
-        } else if (context->token_type == REGISTER) {
+        } else {
+          context->set_error(MISSING_CLOSING_BRACKET);
+        }
+      } else if (context->token_type == REGISTER) {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == '>') {
           context->token_to_scan = yylex();
-          if (context->token_to_scan == '>') {
+          if (context->token_to_scan == ']') {
             context->token_to_scan = yylex();
-            if (context->token_to_scan == ']') {
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(ErrorReporterInterface::
-                                  MISSING_CLOSING_BRACKET);
-            }
-          } else if ((context->token_to_scan == '+') ||
-                     (context->token_to_scan == '-')) {
+            return 0;
+          } else {
+            context->set_error(MISSING_CLOSING_BRACKET);
+          }
+        } else if ((context->token_to_scan == '+') ||
+                   (context->token_to_scan == '-')) {
+          context->token_to_scan = yylex();
+          if (!IntegerLiteral(context)) {
             context->token_to_scan = yylex();
-            if (!IntegerLiteral(context)) {
+            if (context->token_to_scan == '>') {
               context->token_to_scan = yylex();
-              if (context->token_to_scan == '>') {
+              if (context->token_to_scan == ']') {
                 context->token_to_scan = yylex();
-                if (context->token_to_scan == ']') {
-                  context->token_to_scan = yylex();
-                  return 0;
-                } else {
-                  context->set_error(ErrorReporterInterface::
-                                        MISSING_CLOSING_BRACKET);
-                }
+                return 0;
               } else {
-                context->set_error(ErrorReporterInterface::
-                                      MISSING_CLOSING_BRACKET);
+                context->set_error(MISSING_CLOSING_BRACKET);
               }
             } else {
-              context->set_error(ErrorReporterInterface::
-                                  MISSING_INTEGER_CONSTANT);
+              context->set_error(MISSING_CLOSING_BRACKET);
             }
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
+            context->set_error(MISSING_INTEGER_CONSTANT);
           }
+        } else {
+          context->set_error(MISSING_CLOSING_BRACKET);
         }
       }
-    } else {
-      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
     }
   }
   return 1;
@@ -342,11 +336,11 @@ int ArrayOperandList(Context* context) {
         break;
       } else if (context->token_to_scan == ',') {
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
+        context->set_error(MISSING_CLOSING_PARENTHESIS);
         return 1;
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      context->set_error(MISSING_IDENTIFIER);
       return 1;
     }
   }
@@ -364,11 +358,11 @@ int CallTargets(Context* context) {
         break;
       } else if (context->token_to_scan == ',') {
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
+        context->set_error(MISSING_CLOSING_BRACKET);
         return 1;
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      context->set_error(MISSING_IDENTIFIER);
       return 1;
     }
   }
@@ -394,14 +388,14 @@ int CallArgs(Context* context) {
     }
 
     if (context->token_to_scan == ')') {
-      size_t kListSize = sizeof(BrigOperandArgumentList);
+      size_t list_size = sizeof(BrigOperandArgumentList);
       if (n_elements > 1)
-        kListSize += sizeof(BrigoOffset32_t) * (n_elements - 1);
+        list_size += sizeof(BrigoOffset32_t) * (n_elements - 1);
 
-      char array[kListSize];
+      char array[list_size];
       BrigOperandArgumentList &arg_list =
         *reinterpret_cast<BrigOperandArgumentList *>(array);
-      arg_list.size = kListSize;
+      arg_list.size = list_size;
       arg_list.kind = BrigEOperandArgumentList;
       arg_list.elementCount = n_elements;
       for (uint32_t i = 0; i < n_elements; ++i) {
@@ -424,7 +418,7 @@ int CallArgs(Context* context) {
       context->token_to_scan = yylex();
       continue;
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
+      context->set_error(MISSING_CLOSING_PARENTHESIS);
       return 1;
     }
   }
@@ -527,7 +521,7 @@ int Instruction2(Context* context) {
       if (context->token_type == PACKING) {
         // there is packing
         inst_op.packing = context->token_value.packing;
-        yylex();
+        context->token_to_scan = yylex();
       }
 
       // now we must have a dataTypeId
@@ -550,25 +544,26 @@ int Instruction2(Context* context) {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry about that later.
+
                 // update context for later functions
                 context->token_to_scan = yylex();
                 return 0;
               } else {
-                context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                context->set_error(MISSING_SEMICOLON);
               }
 
             } else {
-              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              context->set_error(MISSING_OPERAND);
             }
 
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            context->set_error(MISSING_COMMA);
           }
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(MISSING_OPERAND);
         }
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+        context->set_error(MISSING_DATA_TYPE);
       }
       return 1;
     } else {  // use BrigInstBase
@@ -582,11 +577,11 @@ int Instruction2(Context* context) {
       {0, 0, 0, 0, 0}
       };
 
-      // check whether there is a Packing
+      // check whether there is a Packing (optional)
       if (context->token_type == PACKING) {
         // there is packing
         inst_op.packing = context->token_value.packing;
-        yylex();
+        context->token_to_scan = yylex();
       }
 
       // now we must have a dataTypeId
@@ -609,25 +604,26 @@ int Instruction2(Context* context) {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry about that later.
+
                 // set context for later functions
                 context->token_to_scan = yylex();
                 return 0;
               } else {
-                context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                context->set_error(MISSING_SEMICOLON);
               }
 
             } else {
-              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              context->set_error(MISSING_OPERAND);
             }
 
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            context->set_error(MISSING_COMMA);
           }
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(MISSING_OPERAND);
         }
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+        context->set_error(MISSING_DATA_TYPE);
       }
       return 1;
     }
@@ -646,16 +642,16 @@ int Instruction2(Context* context) {
             context->token_to_scan = yylex();
             return 0;
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+            context->set_error(MISSING_SEMICOLON);
           }
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(MISSING_OPERAND);
         }
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        context->set_error(MISSING_COMMA);
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      context->set_error(MISSING_OPERAND);
     }
     return 1;
   } else if (context->token_type == INSTRUCTION2_OPCODE_FTZ) {
@@ -701,23 +697,24 @@ int Instruction2(Context* context) {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry about that later.
+
                 // set context for later functions
                 context->token_to_scan = yylex();
                 return 0;
               } else {
-                context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                context->set_error(MISSING_SEMICOLON);
               }
             } else {
-              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              context->set_error(MISSING_OPERAND);
             }
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            context->set_error(MISSING_COMMA);
           }
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(MISSING_OPERAND);
         }
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+        context->set_error(MISSING_DATA_TYPE);
       }
       return 1;
 
@@ -751,23 +748,24 @@ int Instruction2(Context* context) {
               if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
-                // may need to edit others, worry that later.
+                // may need to edit others, worry about that later.
+
                 context->token_to_scan = yylex();  // set context for later
                 return 0;
               } else {
-                context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                context->set_error(MISSING_SEMICOLON);
               }
             } else {
-              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              context->set_error(MISSING_OPERAND);
             }
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            context->set_error(MISSING_COMMA);
           }
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(MISSING_OPERAND);
         }
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+        context->set_error(MISSING_DATA_TYPE);
       }
       return 1;
     }
@@ -828,25 +826,25 @@ int Instruction3(Context* context) {
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
-                  context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                  context->set_error(MISSING_SEMICOLON);
                 }
               } else {  // 3rd operand
-                context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                context->set_error(MISSING_OPERAND);
               }
             } else {  // 2nd comma
-              context->set_error(ErrorReporterInterface::MISSING_COMMA);
+              context->set_error(MISSING_COMMA);
             }
           } else {  // 2nd operand
-            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+            context->set_error(MISSING_OPERAND);
           }
         } else {  // 1st comma
-          context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          context->set_error(MISSING_COMMA);
         }
       } else {  // 1st operand
-        context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        context->set_error(MISSING_OPERAND);
       }
     } else {  // DATA_TYPE_ID
-      context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+      context->set_error(MISSING_DATA_TYPE);
     }
     return 1;
   } else if (context->token_type == INSTRUCTION3_OPCODE_FTZ) {
@@ -860,7 +858,7 @@ int Instruction3(Context* context) {
     if (context->token_type == PACKING) {
       // there is packing
       inst_op.packing = context->token_value.packing;
-      yylex();
+      context->token_to_scan = yylex();
     }
     // now we must have a dataTypeId
     if (context->token_type == DATA_TYPE_ID) {
@@ -889,25 +887,25 @@ int Instruction3(Context* context) {
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
-                  context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                  context->set_error(MISSING_SEMICOLON);
                 }
               } else {  // 3rd operand
-                context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                context->set_error(MISSING_OPERAND);
               }
             } else {  // 2nd comma
-              context->set_error(ErrorReporterInterface::MISSING_COMMA);
+              context->set_error(MISSING_COMMA);
             }
           } else {  // 2nd operand
-            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+            context->set_error(MISSING_OPERAND);
           }
         } else {  // 1st comma
-          context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          context->set_error(MISSING_COMMA);
         }
       } else {  // 1st operand
-        context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        context->set_error(MISSING_OPERAND);
       }
     } else {  // DATA_TYPE_ID
-      context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+      context->set_error(MISSING_DATA_TYPE);
     }
     return 1;
   } else {
@@ -974,35 +972,31 @@ int Version(Context* context) {
                 context->token_to_scan = yylex();      // next target
               } else {
                 if (context->token_to_scan != ';') {
-                  context->set_error(
-                    ErrorReporterInterface::MISSING_SEMICOLON);
+                  context->set_error(MISSING_SEMICOLON);
                   return 1;
                 }
               }
             } else {
-              context->set_error(
-                ErrorReporterInterface::INVALID_TARGET);
+              context->set_error(INVALID_TARGET);
               return 1;
             }
           }
         } else {
-          context->set_error(
-            ErrorReporterInterface::MISSING_SEMICOLON);
+          context->set_error(MISSING_SEMICOLON);
           return 1;
         }
         context->append_directive(&bdv);
         context->token_to_scan = yylex();
-        context->set_error(ErrorReporterInterface::OK);
+        context->set_error(OK);
         return 0;
       } else {
-      context->set_error(
-        ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+      context->set_error(MISSING_INTEGER_CONSTANT);
       }
     } else {
-    context->set_error(ErrorReporterInterface::MISSING_COLON);
+    context->set_error(MISSING_COLON);
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+    context->set_error(MISSING_INTEGER_CONSTANT);
   }
 
   return 1;
@@ -1016,7 +1010,7 @@ int Alignment(Context* context) {
     context->token_to_scan = yylex();
     return 0;
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+    context->set_error(MISSING_INTEGER_CONSTANT);
     return 1;
   }
 }
@@ -1057,7 +1051,7 @@ int DeclPrefix(Context* context) {
         }
       }
     } else {
-      context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
+      context->set_error(INVALID_ALIGNMENT);
     }
   } else if (context->token_to_scan == CONST) {
     // first is const
@@ -1078,7 +1072,7 @@ int DeclPrefix(Context* context) {
           context->token_to_scan = yylex();
         }
       } else {
-        context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
+        context->set_error(INVALID_ALIGNMENT);
       }
     } else if ((context->token_to_scan == EXTERN) ||
                (context->token_to_scan == STATIC)) {
@@ -1094,7 +1088,7 @@ int DeclPrefix(Context* context) {
         if (!Alignment(context)) {
           // const externOrStatic alignment
         } else {
-          context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
+          context->set_error(INVALID_ALIGNMENT);
           return 1;
         }
       }
@@ -1120,7 +1114,7 @@ int DeclPrefix(Context* context) {
           context->token_to_scan = yylex();
         }
       } else {
-        context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
+        context->set_error(INVALID_ALIGNMENT);
       }
     } else if (context->token_to_scan == CONST) {
       // externOrStatic const
@@ -1131,7 +1125,7 @@ int DeclPrefix(Context* context) {
       if (context->token_to_scan == ALIGN) {
         if (!Alignment(context)) {
         } else {
-          context->set_error(ErrorReporterInterface::INVALID_ALIGNMENT);
+          context->set_error(INVALID_ALIGNMENT);
           return 1;
         }
         // externOrStatic const alignment
@@ -1153,10 +1147,10 @@ int FBar(Context* context) {
         context->token_to_scan = yylex();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_CLOSING_PARENTHESIS);
+        context->set_error(MISSING_CLOSING_PARENTHESIS);
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+      context->set_error(MISSING_INTEGER_CONSTANT);
     }
   }
   return 1;
@@ -1177,7 +1171,7 @@ int ArrayDimensionSet(Context* context) {
     } else if (!IntegerLiteral(context)) {
       context->token_to_scan = yylex();  // scan next
     } else {
-      context->set_error(ErrorReporterInterface:: MISSING_CLOSING_BRACKET);
+      context->set_error(MISSING_CLOSING_BRACKET);
       return 1;
     }
   }
@@ -1186,6 +1180,8 @@ int ArrayDimensionSet(Context* context) {
 
 int ArgumentDecl(Context* context) {
   if (!DeclPrefix(context)) {
+    BrigStorageClass32_t storage_class = context->token_value.storage_class;
+
     // skip over "arg" in context->token_to_scan
     context->token_to_scan = yylex();
     if ((context->token_type == DATA_TYPE_ID)||
@@ -1195,14 +1191,12 @@ int ArgumentDecl(Context* context) {
       context->set_type(context->token_value.data_type);
       context->token_to_scan = yylex();
       if (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
-        // should have a meaning for DATA_TYPE_ID.
         // for argument, we need to set a BrigDirectiveSymbol
         // and write the corresponding string into .string section.
 
-
         std::string arg_name = context->token_value.string_val;
-
         int arg_name_offset = context->add_symbol(arg_name);
+
         // scan for arrayDimensions
         context->token_to_scan = yylex();
         if (context->token_to_scan == '[') {
@@ -1217,13 +1211,13 @@ int ArgumentDecl(Context* context) {
           sizeof(sym_decl),                 // size
           BrigEDirectiveSymbol,             // kind
           context->get_code_offset(),       // c_code
-          BrigArgSpace,                     // storageClass
+          storage_class,                    // storageClass
           context->get_attribute(),         // attribute
           0,                                // reserved
           context->get_symbol_modifier(),   // symbol modifier
           0,                                // dim
           arg_name_offset,                  // s_name
-          context->token_value.data_type,                        // data type
+          context->token_value.data_type,   // data type
           context->get_alignment(),         // alignment
           0,                                // d_init = 0 for arg
           0                                 // reserved
@@ -1263,13 +1257,13 @@ int ArgumentDecl(Context* context) {
           return 0;
         }
       } else {
-        context->set_error(ErrorReporterInterface:: MISSING_IDENTIFIER);
+        context->set_error(MISSING_IDENTIFIER);
       }
     } else {
-      context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
+      context->set_error(MISSING_DATA_TYPE);
     }
   }
-  context->set_error(ErrorReporterInterface::MISSING_DECLPREFIX);
+  context->set_error(MISSING_DECLPREFIX);
   return 1;
 }
 
@@ -1282,7 +1276,7 @@ int ArgumentListBody(Context* context) {
         break;  // context was set in ArgumentDecl
       }
     } else {
-      context->set_error(ErrorReporterInterface:: MISSING_ARGUMENT);
+      context->set_error(MISSING_ARGUMENT);
       return 1;
     }
   }
@@ -1349,16 +1343,15 @@ int FunctionDefinition(Context* context) {
             if (context->token_to_scan == ')') {
               context->token_to_scan = yylex();
             } else {
-              context->set_error(ErrorReporterInterface::
-                                    MISSING_CLOSING_PARENTHESIS);
+              context->set_error(MISSING_CLOSING_PARENTHESIS);
               return 1;
             }
           } else {
-            context->set_error(ErrorReporterInterface:: INVALID_ARGUMENT_LIST);
+            context->set_error(INVALID_ARGUMENT_LIST);
             return 1;
           }
         } else {
-          context->set_error(ErrorReporterInterface:: MISSING_ARGUMENT_LIST);
+          context->set_error(MISSING_ARGUMENT_LIST);
           return 1;
         }
         // check argument list
@@ -1372,16 +1365,15 @@ int FunctionDefinition(Context* context) {
             if (context->token_to_scan == ')') {
               context->token_to_scan = yylex();
             } else {
-              context->set_error(ErrorReporterInterface::
-                                    MISSING_CLOSING_PARENTHESIS);
+              context->set_error(MISSING_CLOSING_PARENTHESIS);
               return 1;
             }
           } else {
-            context->set_error(ErrorReporterInterface:: INVALID_ARGUMENT_LIST);
+            context->set_error(INVALID_ARGUMENT_LIST);
             return 1;
           }
         } else {
-          context->set_error(ErrorReporterInterface:: MISSING_ARGUMENT_LIST);
+          context->set_error(MISSING_ARGUMENT_LIST);
           return 1;
         }
         // check for optional FBar
@@ -1390,13 +1382,13 @@ int FunctionDefinition(Context* context) {
             // context->token_to_scan = yylex();
             return 0;
           } else {
-            context->set_error(ErrorReporterInterface:: INVALID_FBAR);
+            context->set_error(INVALID_FBAR);
           }
         } else {
           return 0;
         }
       } else {
-        context->set_error(ErrorReporterInterface:: MISSING_IDENTIFIER);
+        context->set_error(MISSING_IDENTIFIER);
       }
     }
   }
@@ -1419,16 +1411,15 @@ int FunctionDecl(Context* context) {
             if (context->token_to_scan == ')') {
                 context->token_to_scan = yylex();
             } else {
-              context->set_error(ErrorReporterInterface::
-                                    MISSING_CLOSING_PARENTHESIS);
+              context->set_error(MISSING_CLOSING_PARENTHESIS);
               return 1;
             }
           } else {
-            context->set_error(ErrorReporterInterface:: INVALID_ARGUMENT_LIST);
+            context->set_error(INVALID_ARGUMENT_LIST);
             return 1;
           }
         } else {
-          context->set_error(ErrorReporterInterface:: MISSING_ARGUMENT_LIST);
+          context->set_error(MISSING_ARGUMENT_LIST);
           return 1;
         }
         // check argument list
@@ -1441,16 +1432,15 @@ int FunctionDecl(Context* context) {
             if (context->token_to_scan == ')') {
                 context->token_to_scan = yylex();
             } else {
-              context->set_error(ErrorReporterInterface::
-                                    MISSING_CLOSING_PARENTHESIS);
+              context->set_error(MISSING_CLOSING_PARENTHESIS);
               return 1;
             }
           } else {
-            context->set_error(ErrorReporterInterface:: INVALID_ARGUMENT_LIST);
+            context->set_error(INVALID_ARGUMENT_LIST);
             return 1;
           }
         } else {
-          context->set_error(ErrorReporterInterface:: MISSING_ARGUMENT_LIST);
+          context->set_error(MISSING_ARGUMENT_LIST);
           return 1;
         }
 
@@ -1459,21 +1449,21 @@ int FunctionDecl(Context* context) {
         if (context->token_to_scan == _FBAR) {
           if (!FBar(context)) {
           } else {
-            context->set_error(ErrorReporterInterface:: INVALID_FBAR);
+            context->set_error(INVALID_FBAR);
           }
         }
         if (context->token_to_scan == ';') {
           context->token_to_scan = yylex();
           return 0;
         } else {
-          context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+          context->set_error(MISSING_SEMICOLON);
         }
       } else {
-        context->set_error(ErrorReporterInterface:: MISSING_IDENTIFIER);
+        context->set_error(MISSING_IDENTIFIER);
       }
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DECLPREFIX);
+    context->set_error(MISSING_DECLPREFIX);
   }
   return 1;
 }
@@ -1568,7 +1558,7 @@ int ArgBlock(Context* context) {
                                         bdf.size);
         context->token_to_scan = yylex();
       } else {
-        context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
         return 1;
       }
     } else if ((context->token_to_scan == BRN) ||
@@ -1591,7 +1581,7 @@ int ArgBlock(Context* context) {
       if (context->token_to_scan == ':') {
         context->token_to_scan = yylex();
       } else {
-        context->set_error(ErrorReporterInterface:: MISSING_COLON);
+        context->set_error(MISSING_COLON);
         return 1;
       }
     } else if (context->token_to_scan == CALL) {  // call (only inside argblock
@@ -1644,8 +1634,7 @@ int ArgBlock(Context* context) {
         return 1;
       }
     } else if (context->token_to_scan == '{') {
-      context->set_error(ErrorReporterInterface::
-                          INVALID_NESTED_ARGUMENT_SCOPE);
+      context->set_error(INVALID_NESTED_ARGUMENT_SCOPE);
       return 1;
     } else if (context->token_to_scan == '}') {
       // add BrigDirectiveScope
@@ -1743,7 +1732,7 @@ int Codeblock(Context* context) {
 
       context->token_to_scan = yylex();
       } else {
-        context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
         return 1;
       }
     } else if ((context->token_to_scan == BRN) ||
@@ -1810,7 +1799,7 @@ int Codeblock(Context* context) {
       if (context->token_to_scan == ':') {
         context->token_to_scan = yylex();
       } else {
-        context->set_error(ErrorReporterInterface:: MISSING_COLON);
+        context->set_error(MISSING_COLON);
         return 1;
       }
     } else if (context->token_to_scan == '{') {
@@ -1869,14 +1858,14 @@ int Function(Context* context) {
         context->token_to_scan = yylex();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
       }
     } else {
-      context->set_error(ErrorReporterInterface::INVALID_CODEBLOCK);
+      context->set_error(INVALID_CODEBLOCK);
     }
 
   } else {
-    context->set_error(ErrorReporterInterface::INVALID_FUNCTION_DEFINITION);
+    context->set_error(INVALID_FUNCTION_DEFINITION);
   }
   return 1;
 }
@@ -1943,18 +1932,15 @@ int Program(Context* context) {
                 if (context->token_to_scan == ')') {
                   context->token_to_scan = yylex();
                 } else {
-                  context->set_error(ErrorReporterInterface::
-                                        MISSING_CLOSING_PARENTHESIS);
+                  context->set_error(MISSING_CLOSING_PARENTHESIS);
                   return 1;  // missing closing )
                 }
               } else {
-                context->set_error(ErrorReporterInterface::
-                                      INVALID_ARGUMENT_LIST);
+                context->set_error(INVALID_ARGUMENT_LIST);
                 return 1;
               }
             } else {  // missing '('
-              context->set_error(ErrorReporterInterface::
-                                  MISSING_ARGUMENT_LIST);
+              context->set_error(MISSING_ARGUMENT_LIST);
               return 1;
             }          // if found '(' - returnArgList
 
@@ -1969,18 +1955,15 @@ int Program(Context* context) {
                 if (context->token_to_scan == ')') {
                   context->token_to_scan = yylex();
                 } else {
-                  context->set_error(ErrorReporterInterface::
-                                        MISSING_CLOSING_PARENTHESIS);
+                  context->set_error(MISSING_CLOSING_PARENTHESIS);
                   return 1;  // missing closing )
                 }
               } else {
-                context->set_error(ErrorReporterInterface::
-                                      INVALID_ARGUMENT_LIST);
+                context->set_error(INVALID_ARGUMENT_LIST);
                 return 1;
               }
             } else {  // missing '('
-              context->set_error(ErrorReporterInterface::
-                                  MISSING_ARGUMENT_LIST);
+              context->set_error(MISSING_ARGUMENT_LIST);
               return 1;
             }            // if found '(' - argList
 
@@ -1988,7 +1971,7 @@ int Program(Context* context) {
             if (context->token_to_scan == _FBAR) {
               if (!FBar(context)) {
               } else {
-                context->set_error(ErrorReporterInterface:: INVALID_FBAR);
+                context->set_error(INVALID_FBAR);
                 return 1;
               }
             }
@@ -2004,15 +1987,14 @@ int Program(Context* context) {
                     context->token_to_scan = yylex();
                   continue;
                 } else {
-                  context->set_error(ErrorReporterInterface::
-                                      MISSING_SEMICOLON);
+                  context->set_error(MISSING_SEMICOLON);
                   return 1;
                 }
               } else {
                 return 1;
               }
             } else {
-              context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+              context->set_error(MISSING_SEMICOLON);
             }
           }       // if found TOKEN_GLOBAL_ID
         } else if (context->token_type == INITIALIZABLE_ADDRESS) {
@@ -2029,35 +2011,36 @@ int Program(Context* context) {
       return 0;
     }   // if (!Version)
   } else {
-    context->set_error(ErrorReporterInterface:: MISSING_VERSION_STATEMENT);
+    context->set_error(MISSING_VERSION_STATEMENT);
   }
   return 1;
 }
 
 int OptionalWidth(Context* context) {
   // first token must be _WIDTH
-
-  context->token_to_scan = yylex();
-  if (context->token_to_scan == '(') {
+  if (context->token_to_scan == _WIDTH) {
     context->token_to_scan = yylex();
-    if (context->token_to_scan == ALL) {
+    if (context->token_to_scan == '(') {
       context->token_to_scan = yylex();
-    } else if (!IntegerLiteral(context)) {
-      context->token_to_scan = yylex();
+      if (context->token_to_scan == ALL) {
+        context->token_to_scan = yylex();
+      } else if (!IntegerLiteral(context)) {
+        context->token_to_scan = yylex();
+      } else {
+        context->set_error(MISSING_WIDTH_INFO);
+        return 1;
+      }
+      if (context->token_to_scan == ')') {
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(MISSING_CLOSING_PARENTHESIS);
+      }
     } else {
-      context->set_error(ErrorReporterInterface:: MISSING_WIDTH_INFO);
-      return 1;
+      context->set_error(MISSING_WIDTH_INFO);
     }
-    if (context->token_to_scan == ')') {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(ErrorReporterInterface:: MISSING_CLOSING_PARENTHESIS);
-    }
-  } else {
-    context->set_error(ErrorReporterInterface:: MISSING_WIDTH_INFO);
   }
-  return 1;
+  return 0;
 }
 
 int Branch(Context* context) {
@@ -2141,28 +2124,27 @@ int Branch(Context* context) {
                     if (yylex() == TOKEN_LABEL) {
                       context->token_to_scan = yylex();  // scan next;
                     } else {
-                      context->set_error(ErrorReporterInterface::
-                                          MISSING_OPERAND);
+                      context->set_error(MISSING_OPERAND);
                       return 1;
                     }
                   } else {
-                    context->set_error(ErrorReporterInterface::MISSING_COMMA);
+                    context->set_error(MISSING_COMMA);
                     return 1;
                   }
                 }   // while
               } else {
-                context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+                context->set_error(MISSING_OPERAND);
               }
               // current token should be ']'
               context->token_to_scan = yylex();  // should be ';'
             } else {
-              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              context->set_error(MISSING_OPERAND);
             }
           }  else {  // yylex() = ','
-            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            context->set_error(MISSING_COMMA);
           }
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(MISSING_OPERAND);
           return 1;
         }
         if (context->token_to_scan == ';') {
@@ -2178,13 +2160,13 @@ int Branch(Context* context) {
           context->token_to_scan = yylex();
           return 0;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+          context->set_error(MISSING_SEMICOLON);
         }
       } else {  // yylex = ','
-        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        context->set_error(MISSING_COMMA);
       }
     } else {  // first operand
-      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      context->set_error(MISSING_OPERAND);
     }
     return 1;
   } else if (op == BRN) {
@@ -2228,7 +2210,7 @@ int Branch(Context* context) {
         context->token_to_scan = yylex();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
       }
     } else if (!Identifier(context)) {
         context->token_to_scan = yylex();
@@ -2249,7 +2231,7 @@ int Branch(Context* context) {
 
         if (context->token_to_scan == ']') {
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_CLOSING_BRACKET);
+          context->set_error(MISSING_CLOSING_BRACKET);
         }
 
         context->token_to_scan = yylex();
@@ -2257,13 +2239,13 @@ int Branch(Context* context) {
           context->token_to_scan = yylex();
           return 0;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+          context->set_error(MISSING_SEMICOLON);
         }
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      context->set_error(MISSING_OPERAND);
     }
     return 1;
   }
@@ -2345,15 +2327,15 @@ int Call(Context* context) {
             context->token_to_scan = yylex();
            return 0;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+          context->set_error(MISSING_SEMICOLON);
         }
       }
       return 1;
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+      context->set_error(MISSING_SEMICOLON);
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+    context->set_error(MISSING_OPERAND);
   }
   return 1;
 }
@@ -2362,7 +2344,7 @@ int Initializer(Context* context) {
   // first token should be '='
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_LABEL) {
-    context->set_error(ErrorReporterInterface::INVALID_INITIALIZER);
+    context->set_error(INVALID_INITIALIZER);
     return 1;
   } else if (context->token_to_scan == '{') {
     context->token_to_scan = yylex();
@@ -2378,7 +2360,7 @@ int Initializer(Context* context) {
         if (context->token_to_scan == TOKEN_LABEL) {
           continue;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_LABEL);
+          context->set_error(MISSING_LABEL);
           return 1;
         }
       } else {
@@ -2395,7 +2377,7 @@ int Initializer(Context* context) {
         if (!IntegerLiteral(context)) {
           continue;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+          context->set_error(MISSING_INTEGER_CONSTANT);
           return 1;
         }
       } else {
@@ -2411,7 +2393,7 @@ int Initializer(Context* context) {
         if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
           continue;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_SINGLE_CONSTANT);
+          context->set_error(MISSING_SINGLE_CONSTANT);
           return 1;
         }
       } else {
@@ -2427,7 +2409,7 @@ int Initializer(Context* context) {
         if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
           continue;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_DOUBLE_CONSTANT);
+          context->set_error(MISSING_DOUBLE_CONSTANT);
           return 1;
         }
       } else {
@@ -2435,7 +2417,7 @@ int Initializer(Context* context) {
       }
     }  // while(1)
   } else {
-    context->set_error(ErrorReporterInterface::INVALID_INITIALIZER);
+    context->set_error(INVALID_INITIALIZER);
     return 1;
   }
   if (context->token_to_scan == '}') {
@@ -2446,17 +2428,57 @@ int Initializer(Context* context) {
 
 int InitializableDecl(Context* context) {
   // first_token is READONLY or GLOBAL
+  BrigStorageClass32_t storage_class = context->token_value.storage_class;
+
   context->token_to_scan = yylex();
 
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
 
     if (!Identifier(context)) {
+      std::string var_name = context->token_value.string_val;
+      int var_name_offset = context->add_symbol(var_name);
+
       // scan for arrayDimensions
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
+      } else {  // no arrayDimension
+          // add by fxiaopeng
+          BrigdOffset32_t dsize = context->get_directive_offset();
+          BrigDirectiveSymbol sym_decl = {
+            sizeof(sym_decl),                 // size
+            BrigEDirectiveSymbol,             // kind
+            context->get_code_offset(),       // c_code
+            storage_class,                    // storageClass ??
+            context->get_attribute(),         // attribute
+            0,                                // reserved
+            context->get_symbol_modifier(),   // symbol modifier
+            0,                                // dim
+            var_name_offset,                  // s_name
+            context->token_value.data_type,                        // data type
+            context->get_alignment(),         // alignment
+            0,                                // d_init = 0 for arg
+            0                                 // reserved
+          };
+
+          context->append_directive(&sym_decl);
+          BrigDirectiveFunction bdf;
+          context->get_directive(context->current_bdf_offset, &bdf);
+          BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
+          BrigdOffset32_t next_directive = bdf.d_nextDirective;
+          if (first_scope == next_directive) {
+            bdf.d_nextDirective += 40;
+            bdf.d_firstScopedDirective = bdf.d_nextDirective;
+          } else {
+            bdf.d_nextDirective += 40;
+          }
+
+          unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+          context->update_directive_bytes(bdf_charp ,
+                                          context->current_bdf_offset,
+                                          40);
       }
 
       if (!Initializer(context)) {
@@ -2464,14 +2486,14 @@ int InitializableDecl(Context* context) {
             context->token_to_scan = yylex();
           return 0;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+          context->set_error(MISSING_SEMICOLON);
         }
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      context->set_error(MISSING_IDENTIFIER);
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
   }
   return 1;
 };
@@ -2479,35 +2501,76 @@ int InitializableDecl(Context* context) {
 int UninitializableDecl(Context* context) {
   // first_token is PRIVATE, GROUP or SPILL
 
+  BrigStorageClass32_t storage_class = context->token_value.storage_class;
+
   context->token_to_scan = yylex();
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
 
     if (!Identifier(context)) {
+      std::string var_name = context->token_value.string_val;
+      int var_name_offset = context->add_symbol(var_name);
+
       // scan for arrayDimensions
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
+      } else {  // no arrayDimension
+          // add by fxiaopeng
+          BrigdOffset32_t dsize = context->get_directive_offset();
+          BrigDirectiveSymbol sym_decl = {
+            sizeof(sym_decl),                 // size
+            BrigEDirectiveSymbol,             // kind
+            context->get_code_offset(),       // c_code
+            storage_class,                    // storageClass ??
+            context->get_attribute(),           // attribute
+            0,                                // reserved
+            context->get_symbol_modifier(),   // symbol modifier
+            0,                                // dim
+            var_name_offset,                  // s_name
+            context->token_value.data_type,   // data type
+            context->get_alignment(),         // alignment
+            0,                                // d_init = 0 for arg
+            0                                 // reserved
+          };
+
+          context->append_directive(&sym_decl);
+          BrigDirectiveFunction bdf;
+          context->get_directive(context->current_bdf_offset, &bdf);
+          BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
+          BrigdOffset32_t next_directive = bdf.d_nextDirective;
+          if (first_scope == next_directive) {
+            bdf.d_nextDirective += 40;
+            bdf.d_firstScopedDirective = bdf.d_nextDirective;
+          } else {
+            bdf.d_nextDirective += 40;
+          }
+
+          unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+          context->update_directive_bytes(bdf_charp ,
+                                          context->current_bdf_offset,
+                                          40);
       }
 
       if (context->token_to_scan == ';') {
         context->token_to_scan = yylex();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      context->set_error(MISSING_IDENTIFIER);
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
   }
   return 1;
 }
 
 int ArgUninitializableDecl(Context* context) {
   // first token is ARG
+  BrigStorageClass32_t storage_class = context->token_value.storage_class;
   context->token_to_scan = yylex();
 
   if (context->token_type == DATA_TYPE_ID) {
@@ -2526,7 +2589,7 @@ int ArgUninitializableDecl(Context* context) {
         sizeof(arg_decl),                 // size
         BrigEDirectiveSymbol,             // kind
         context->get_code_offset(),       // c_code
-        BrigArgSpace,                     // storageClass
+        storage_class,                    // storageClass
         context->get_attribute(),         // attribute
         0,                                // reserved
         context->get_symbol_modifier(),   // symbol modifier
@@ -2561,13 +2624,13 @@ int ArgUninitializableDecl(Context* context) {
         arg_name.clear();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      context->set_error(MISSING_IDENTIFIER);
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
   }
   return 1;
 }
@@ -2586,13 +2649,13 @@ int FileDecl(Context* context) {
         context->token_to_scan = yylex();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_STRING);
+      context->set_error(MISSING_STRING);
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+    context->set_error(MISSING_INTEGER_CONSTANT);
   }
 
   return 1;
@@ -2630,50 +2693,62 @@ int SysCall(Context* context) {
   // first token is _SYSCALL "syscall"
   context->token_to_scan = yylex();
 
-  if (context->token_to_scan == TOKEN_SREGISTER &&
-      yylex() == ',') {
-    context->token_to_scan = yylex();
-
-    if (!IntegerLiteral(context) && yylex() == ',') {
+  if (context->token_to_scan == TOKEN_SREGISTER) {
+    if (yylex() == ',') {
       context->token_to_scan = yylex();
 
-      if (((context->token_to_scan == TOKEN_SREGISTER) ||
-           (context->token_to_scan == TOKEN_WAVESIZE) ||
-           (!IntegerLiteral(context))) &&
-           (yylex() == ',')) {
-        context->token_to_scan = yylex();
-
-        if (((context->token_to_scan == TOKEN_SREGISTER) ||
-             (context->token_to_scan == TOKEN_WAVESIZE) ||
-             (!IntegerLiteral(context))) &&
-             (yylex() == ',')) {
+      if (!IntegerLiteral(context)) {
+        if (yylex() == ',') {
           context->token_to_scan = yylex();
-
-          if ((context->token_to_scan == TOKEN_SREGISTER) ||
-              (context->token_to_scan == TOKEN_WAVESIZE) ||
-              (!IntegerLiteral(context))) {
-            context->token_to_scan = yylex();
-
-            if (context->token_to_scan == ';') {
+          if (((context->token_to_scan == TOKEN_SREGISTER) ||
+               (context->token_to_scan == TOKEN_WAVESIZE) ||
+               (!IntegerLiteral(context)))) {
+            if (yylex() == ',') {
               context->token_to_scan = yylex();
-              return 0;
-            } else {  // ';'
-              context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+
+              if ((context->token_to_scan == TOKEN_SREGISTER) ||
+                  (context->token_to_scan == TOKEN_WAVESIZE) ||
+                  (!IntegerLiteral(context))) {
+                if (yylex() == ',') {
+                  context->token_to_scan = yylex();
+
+                  if ((context->token_to_scan == TOKEN_SREGISTER) ||
+                      (context->token_to_scan == TOKEN_WAVESIZE) ||
+                      (!IntegerLiteral(context))) {
+                    context->token_to_scan = yylex();
+
+                    if (context->token_to_scan == ';') {
+                      context->token_to_scan = yylex();
+                      return 0;
+                    } else {  // ';'
+                      context->set_error(MISSING_SEMICOLON);
+                    }
+                  } else {  // 5 operand
+                    context->set_error(INVALID_FIFTH_OPERAND);
+                  }
+                } else {
+                  context->set_error(MISSING_COMMA);
+                }
+              } else {  // 4 operand
+                context->set_error(INVALID_FOURTH_OPERAND);
+              }
+            } else {
+              context->set_error(MISSING_COMMA);
             }
-          } else {  // 5 operand
-            context->set_error(ErrorReporterInterface::INVALID_OPERAND);
+          } else {  // 3 operand
+            context->set_error(INVALID_THIRD_OPERAND);
           }
-        } else {  // 4 operand
-          context->set_error(ErrorReporterInterface::INVALID_OPERAND);
+        } else {
+          context->set_error(MISSING_COMMA);
         }
-      } else {  // 3 operand
-        context->set_error(ErrorReporterInterface::INVALID_OPERAND);
+      } else {  // 2 base operand
+        context->set_error(INVALID_SECOND_OPERAND);
       }
-    } else {  // 2 base operand
-      context->set_error(ErrorReporterInterface::MISSING_INTEGER_CONSTANT);
+    } else {
+      context-> set_error(MISSING_COMMA);
     }
   } else {  // 1 operand
-    context->set_error(ErrorReporterInterface::MISSING_SREGISTER);
+    context->set_error(INVALID_FIRST_OPERAND);
   }
   return 1;
 }
@@ -2690,7 +2765,7 @@ int SignatureArgumentList(Context *context) {
         }
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_ARGUMENT_LIST);
+      context->set_error(MISSING_ARGUMENT_LIST);
       return 1;
     }
   }
@@ -2713,11 +2788,10 @@ int FunctionSignature(Context *context) {
         if (context->token_to_scan == ')')
           context->token_to_scan = yylex();
         else
-          context->set_error(ErrorReporterInterface::
-                              MISSING_CLOSING_PARENTHESIS);
+          context->set_error(MISSING_CLOSING_PARENTHESIS);
       }
     } else {
-      context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+      context->set_error(UNKNOWN_ERROR);
       return 1;
     }
 
@@ -2731,18 +2805,17 @@ int FunctionSignature(Context *context) {
         if (context->token_to_scan == ')')
           context->token_to_scan = yylex();
         else
-          context->set_error(ErrorReporterInterface::
-                              MISSING_CLOSING_PARENTHESIS);
+          context->set_error(MISSING_CLOSING_PARENTHESIS);
       }
     } else {
-      context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+      context->set_error(UNKNOWN_ERROR);
       return 1;
     }
 
     if (_FBAR == context->token_to_scan) {
       if (!FBar(context)) {
       } else {
-        context->set_error(ErrorReporterInterface::INVALID_FBAR);
+        context->set_error(INVALID_FBAR);
         return 1;
       }
     }
@@ -2751,7 +2824,7 @@ int FunctionSignature(Context *context) {
       context->token_to_scan = yylex();
       return 0;
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+      context->set_error(MISSING_SEMICOLON);
       return 1;
     }
   }
@@ -2764,11 +2837,12 @@ int Label(Context* context) {
       context->token_to_scan = yylex();
       return 0;
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_COLON);
+      context->set_error(MISSING_COLON);
       return 1;
     }
+  } else {
+    context->set_error(INVALID_LABEL);
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
@@ -2783,17 +2857,19 @@ int LabelTargets(Context* context) {
           } else if (context->token_to_scan == ';') {
             return 0;
           } else {
-            context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+            context->set_error(MISSING_SEMICOLON);
             return 1;
           }
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_LABEL);
+          context->set_error(MISSING_LABEL);
           return 1;
         }
       }
+    } else {
+      context->set_error(UNKNOWN_ERROR);
     }
   } else {
-    context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+    context->set_error(INVALID_LABEL);
   }
   return 1;
 }
@@ -2807,19 +2883,19 @@ int Instruction4(Context* context) {
       context->token_to_scan = yylex();
       if (!Operand(context)) {
         if (context->token_to_scan != ',') {
-          context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
         if (!Operand(context)) {
           if (context->token_to_scan != ',') {
-            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            context->set_error(MISSING_COMMA);
             return 1;
           }
           context->token_to_scan = yylex();
           if (!Operand(context)) {
             if (context->token_to_scan != ',') {
-              context->set_error(ErrorReporterInterface::MISSING_COMMA);
+              context->set_error(MISSING_COMMA);
               return 1;
             }
             context->token_to_scan = yylex();
@@ -2828,31 +2904,32 @@ int Instruction4(Context* context) {
                 context->token_to_scan = yylex();
                 return 0;
               } else {
-                context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                context->set_error(MISSING_SEMICOLON);
                 return 1;
               }  // ';'
             } else {  // 4 operand
-              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              context->set_error(INVALID_FOURTH_OPERAND);
               return 1;
             }
           } else {  // 3 operand
-            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+            context->set_error(INVALID_THIRD_OPERAND);
             return 1;
           }
         } else {  // 2 operand
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(INVALID_SECOND_OPERAND);
           return 1;
         }
       } else {  // 1 operand
-        context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        context->set_error(INVALID_FIRST_OPERAND);
         return 1;
       }
     } else {  // DATA_TYPE_ID
-      context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+      context->set_error(MISSING_DATA_TYPE);
       return 1;
     }
-  }  // INSTRUCTION4_OPCODE
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+  } else {  // INSTRUCTION4_OPCODE
+  context->set_error(INVALID_INSTRUCTION);
+  }
   return 1;
 }
 
@@ -2889,10 +2966,11 @@ int Kernel(Context *context) {
       0                            // d_firstInParam
     };
 
-    std::string func_name = context->token_value.string_val;
-    BrigsOffset32_t check_result = context->add_symbol(func_name);
+    std::string kern_name = context->token_value.string_val;
+    BrigsOffset32_t check_result = context->add_symbol(kern_name);
     bdk.s_name = check_result;
     context->append_directive(&bdk);
+    context->func_map[kern_name] = context->current_bdf_offset;
 
     // check the input argumentlist
     context->token_to_scan = yylex();
@@ -2905,24 +2983,23 @@ int Kernel(Context *context) {
         if (')' == context->token_to_scan) {
           context->token_to_scan = yylex();
         } else {
-          context->set_error(ErrorReporterInterface::
-                              MISSING_CLOSING_PARENTHESIS);
+          context->set_error(MISSING_CLOSING_PARENTHESIS);
           return 1;
         }
       } else {
-        context->set_error(ErrorReporterInterface::INVALID_ARGUMENT_LIST);
+        context->set_error(INVALID_ARGUMENT_LIST);
         return 1;
       }
 
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_ARGUMENT_LIST);
+      context->set_error(MISSING_ARGUMENT_LIST);
       return 1;
     }
 
     if (_FBAR == context->token_to_scan) {
       if (!FBar(context)) {
       } else {
-        context->set_error(ErrorReporterInterface:: INVALID_FBAR);
+        context->set_error(INVALID_FBAR);
         return 1;
       }
     } else {
@@ -2931,12 +3008,12 @@ int Kernel(Context *context) {
           context->token_to_scan = yylex();
           return 0;
         } else {
-          context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
+          context->set_error(MISSING_SEMICOLON);
         }
       }
     }
   } else {
-    context->set_error(ErrorReporterInterface:: MISSING_IDENTIFIER);
+    context->set_error(MISSING_IDENTIFIER);
   }
   return 1;
 }
@@ -2949,7 +3026,7 @@ int OperandList(Context* context) {
         if (!Operand(context)) {
           continue;
         } else {
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(MISSING_OPERAND);
           return 1;
         }
       } else {
@@ -2958,7 +3035,7 @@ int OperandList(Context* context) {
       }
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+    context->set_error(MISSING_OPERAND);
   }
   return 1;
 }
@@ -2973,47 +3050,54 @@ int Cmp(Context* context) {
       if (context->token_type == DATA_TYPE_ID) {
         context->token_to_scan = yylex();
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+        context->set_error(MISSING_DATA_TYPE);
         return 1;
       }
     }
 
     if (context->token_type == DATA_TYPE_ID) {
       context->token_to_scan = yylex();
-      if (!Operand(context) && context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        if (!Operand(context) && context->token_to_scan == ',') {
+      if (!Operand(context)) {
+        if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
           if (!Operand(context)) {
-            if (context->token_to_scan == ';') {
+            if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              return 0;
+              if (!Operand(context)) {
+                if (context->token_to_scan == ';') {
+                  context->token_to_scan = yylex();
+                  return 0;
+                } else {
+                  context->set_error(MISSING_SEMICOLON);
+                  return 1;
+                }
+              } else {  // 3 operand
+                context->set_error(INVALID_THIRD_OPERAND);
+                return 1;
+              }
             } else {
-              context->set_error(ErrorReporterInterface:: MISSING_SEMICOLON);
-              return 1;
+              context->set_error(MISSING_COMMA);
             }
-          } else {  // 3 operand
-            context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
+          } else {  // 2 operand
+            context->set_error(INVALID_SECOND_OPERAND);
             return 1;
           }
-        } else {  // 2 operand
-          context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
-          return 1;
+        } else {
+          context->set_error(MISSING_COMMA);
         }
       } else {  // 1 operand
-        context->set_error(ErrorReporterInterface:: MISSING_OPERAND);
+        context->set_error(INVALID_FIRST_OPERAND);
         return 1;
       }
     } else {  // Data type
-      context->set_error(ErrorReporterInterface:: MISSING_DATA_TYPE);
+      context->set_error(MISSING_DATA_TYPE);
       return 1;
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_COMPARISON_TYPE);
+    context->set_error(MISSING_COMPARISON_TYPE);
   }
   return 1;
 }
-
 int GlobalPrivateDecl(Context* context) {
   // first token is PRIVATE
   context->token_to_scan = yylex();
@@ -3030,67 +3114,73 @@ int GlobalPrivateDecl(Context* context) {
         context->token_to_scan = yylex();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
-        return 1;
+        context->set_error(MISSING_SEMICOLON);
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
-      return 1;
+      context->set_error(MISSING_GLOBAL_IDENTIFIER);
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
-    return 1;
+    context->set_error(MISSING_DATA_TYPE);
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
   return 1;
 }
 
 int OffsetAddressableOperand(Context* context) {
-  // the first token is '['
-  if (context->token_to_scan != '[') {
-    context->set_error(ErrorReporterInterface::MISSING_OPENNING_BRACKET);
-    return 1;
-  }
-  context->token_to_scan = yylex();
+  // the first token is after '['
   if (context->token_type == REGISTER) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == '+' || context->token_to_scan == '-') {
       context->token_to_scan = yylex();
       if (!IntegerLiteral(context)) {
         context->token_to_scan = yylex();
+        if (context->token_to_scan == ']') {
+          context->token_to_scan = yylex();
+          return 0;
+        } else {
+          context->set_error(MISSING_CLOSING_BRACKET);
+          return 1;
+        }
       } else {
+        context->set_error(INVALID_SECOND_OPERAND);
         return 1;
       }
-    }
-    if (context->token_to_scan == ']') {
+    } else if (context->token_to_scan == ']')  {
       context->token_to_scan = yylex();
       return 0;
+    } else {
+      context->set_error(MISSING_CLOSING_BRACKET);
+      return 1;
     }
   } else if (!IntegerLiteral(context)) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == ']') {
       context->token_to_scan = yylex();
       return 0;
+    } else {
+      context->set_error(MISSING_CLOSING_BRACKET);
     }
+  } else if (context->token_to_scan == ']') {
+    // empty body
+    context->set_error(MISSING_OPERAND);
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+    context->set_error(INVALID_OPERAND);
   }
   return 1;
 }
 
 int MemoryOperand(Context* context) {
-  // this judge(frist token == '[') is necessary in here
+  // this judge(first token == '[') is necessary in here
   if (context->token_to_scan == '[') {
+    context->token_to_scan = yylex();
     if (!AddressableOperand(context)) {
       if (context->token_to_scan == '[') {
+        context->token_to_scan = yylex();
         if (!OffsetAddressableOperand(context)) {
-          context->token_to_scan = yylex();
           return 0;
         } else {
           return 1;
         }
       }
-      context->token_to_scan = yylex();
       return 0;
     } else if (context->token_type == REGISTER) {
       context->token_to_scan = yylex();
@@ -3123,25 +3213,25 @@ int Instruction5(Context* context) {
     context->token_to_scan = yylex();
     if (!Operand(context)) {
       if (context->token_to_scan != ',') {
-        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
       if (!Operand(context)) {
         if (context->token_to_scan != ',') {
-          context->set_error(ErrorReporterInterface::MISSING_COMMA);
+          context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
         if (!Operand(context)) {
           if (context->token_to_scan != ',') {
-            context->set_error(ErrorReporterInterface::MISSING_COMMA);
+            context->set_error(MISSING_COMMA);
             return 1;
           }
           context->token_to_scan = yylex();
           if (!Operand(context)) {
             if (context->token_to_scan != ',') {
-              context->set_error(ErrorReporterInterface::MISSING_COMMA);
+              context->set_error(MISSING_COMMA);
               return 1;
             }
             context->token_to_scan = yylex();
@@ -3150,34 +3240,34 @@ int Instruction5(Context* context) {
                 context->token_to_scan = yylex();
                 return 0;
               } else {
-                context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+                context->set_error(MISSING_SEMICOLON);
                 return 1;
               }
             } else {  // 5 operand
-              context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+              context->set_error(INVALID_FIFTH_OPERAND);
               return 1;
             }
           } else {  // 4 operand
-            context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+            context->set_error(INVALID_FOURTH_OPERAND);
             return 1;
           }
         } else {  // 3 operand
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(INVALID_THIRD_OPERAND);
           return 1;
         }
       } else {  // 2 operand
-        context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        context->set_error(INVALID_SECOND_OPERAND);
         return 1;
       }
     } else {  // 1 operand
-      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
   } else {  // DATA_TYPE_ID
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+
   return 1;
 }
 
@@ -3192,7 +3282,7 @@ int Extension(Context* context) {
       context->token_to_scan = yylex();
       return 0;
     } else {   // missing ";"
-      context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+      context->set_error(MISSING_SEMICOLON);
     }
   }
   return 1;
@@ -3204,31 +3294,231 @@ int Ldc(Context* context) {
 
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
-    if (!Operand(context) && context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_LABEL ||
-         !Identifier(context)) {
+    if (!Operand(context)) {
+      if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (context->token_to_scan == ';') {
-          return 0;
-        } else {  // ';'
-          context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        if (context->token_to_scan == TOKEN_LABEL ||
+           !Identifier(context)) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == ';') {
+            return 0;
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+            return 1;
+          }
+        } else {  // label or identifier
+          context->set_error(INVALID_SECOND_OPERAND);
           return 1;
         }
-      } else {  // label or identifier
-        context->set_error(ErrorReporterInterface::MISSING_LABEL);
-        context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
-        return 1;
+      } else {
+        context->set_error(MISSING_COMMA);
       }
     } else {  // operand
-      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
   } else {  // datatypeid
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+
+  return 1;
+}
+
+int Atom(Context* context) {
+  unsigned int first_token = context->token_to_scan;
+  context->token_to_scan = yylex();
+  if (first_token == ATOMIC) {   // atomic
+    if (context->token_type == ATOMIC_OP) {
+      context->token_to_scan = yylex();
+      // with AtomModifiers
+      if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||
+          context->token_to_scan == _AR ||
+          context->token_to_scan == _ACQ ||
+          context->token_to_scan == _REL ||
+          context->token_to_scan == _REGION) {
+        context->token_to_scan = yylex();
+        while (1) {  // AtomModifiers repetition
+          if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||
+              context->token_to_scan == _AR ||
+              context->token_to_scan == _ACQ ||
+              context->token_to_scan == _REL ||
+              context->token_to_scan == _REGION) {
+            context->token_to_scan = yylex();
+          } else {
+            break;
+          }
+        }
+        if (context->token_type == DATA_TYPE_ID) {
+          context->token_to_scan = yylex();
+          if (!Operand(context)) {
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              if (!MemoryOperand(context)) {
+                if (context->token_to_scan == ',') {
+                  context->token_to_scan = yylex();
+                  if (!Operand(context)) {
+                    if (context->token_to_scan == ';') {
+                      return 0;
+                    } else {
+                      context->set_error(MISSING_SEMICOLON);
+                    }
+                  } else {
+                    context->set_error(MISSING_OPERAND);
+                  }
+                } else {
+                  context->set_error(MISSING_COMMA);
+                }
+              } else {
+                context->set_error(MISSING_OPERAND);
+              }
+            } else {
+              context->set_error(MISSING_COMMA);
+            }
+          } else {
+            context->set_error(MISSING_OPERAND);
+          }
+        } else {
+           context->set_error(MISSING_DATA_TYPE);
+        }
+      } else if (context->token_type == DATA_TYPE_ID) {
+        // without AtomModifiers
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!MemoryOperand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if (!Operand(context)) {
+                  if (context->token_to_scan == ';') {
+                    return 0;
+                  } else {
+                    context->set_error(MISSING_SEMICOLON);
+                  }
+                } else {
+                   context->set_error(MISSING_OPERAND);
+                }
+              } else {
+                context->set_error(MISSING_COMMA);
+              }
+            } else {
+              context->set_error(MISSING_OPERAND);
+            }
+          } else {
+             context->set_error(MISSING_COMMA);
+          }
+        } else {
+          context->set_error(MISSING_OPERAND);
+        }
+      }  else {
+        context->set_error(MISSING_DATA_TYPE);
+      }
+    } else {
+      context->set_error(UNKNOWN_ERROR);
+    }
+  } else if (first_token == ATOMIC_CAS) {   // atomic_cas
+    if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||
+        // with AtomModifiers
+        context->token_to_scan == _AR ||
+        context->token_to_scan == _ACQ ||
+        context->token_to_scan == _REL ||
+        context->token_to_scan == _REGION) {
+        context->token_to_scan = yylex();
+      while (1) {  // AtomModifiers repetition
+        if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||
+            context->token_to_scan == _AR ||
+            context->token_to_scan == _ACQ ||
+            context->token_to_scan == _REL ||
+            context->token_to_scan == _REGION) {
+            context->token_to_scan = yylex();
+        } else {
+          break;
+        }
+      }
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!MemoryOperand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if (!Operand(context)) {
+                  if (context->token_to_scan == ',') {
+                    context->token_to_scan = yylex();
+                    if (!Operand(context)) {
+                      if (context->token_to_scan == ';') {
+                        return 0;
+                      } else {
+                        context->set_error(MISSING_SEMICOLON);
+                      }
+                    } else {
+                      context->set_error(MISSING_OPERAND);
+                    }
+                  } else {
+                    context->set_error(MISSING_COMMA);
+                  }
+                } else {
+                  context->set_error(MISSING_OPERAND);
+                }
+              } else {
+                context->set_error(MISSING_COMMA);
+              }
+            } else {
+              context->set_error(MISSING_OPERAND);
+            }
+          } else {
+             context->set_error(MISSING_COMMA);
+          }
+        } else {
+           context->set_error(MISSING_OPERAND);
+        }
+      } else {
+         context->set_error(MISSING_DATA_TYPE);
+      }
+    } else if (context->token_type == DATA_TYPE_ID) {  // without AtomModifiers
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!MemoryOperand(context)) {
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              if (!Operand(context)) {
+                if (context->token_to_scan == ',') {
+                  context->token_to_scan = yylex();
+                  if (!Operand(context)) {
+                    if (context->token_to_scan == ';') {
+                      return 0;
+                    } else {
+                      context->set_error(MISSING_SEMICOLON);
+                    }
+                  } else {
+                    context->set_error(MISSING_OPERAND);
+                  }
+                } else {
+                  context->set_error(MISSING_COMMA);
+                }
+              } else {
+                 context->set_error(MISSING_OPERAND);
+              }
+            } else {
+              context->set_error(MISSING_COMMA);
+            }
+          } else {
+            context->set_error(MISSING_OPERAND);
+          }
+        } else {
+          context->set_error(MISSING_COMMA);
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+    }
+  }
   return 1;
 }
 
@@ -3321,11 +3611,21 @@ int Mov(Context* context) {
         if (!Operand(context) || !ArrayOperandList(context)) {
           if (context->token_to_scan == ';') {
             return 0;
-          }  // ';'
-        }  // Operand or ArrayOperandList
-      }  // ','
-    }  // Operand or ArrayOperandList
-  }  // datatypeId
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+          }
+        } else {  // Operand or ArrayOperandList
+          context->set_error(INVALID_SECOND_OPERAND);
+        }
+      } else {  // ','
+        context->set_error(MISSING_COMMA);
+      }
+    } else {  // Operand or ArrayOperandList
+      context->set_error(INVALID_FIRST_OPERAND);
+    }
+  } else {  // datatypeId
+    context->set_error(MISSING_DATA_TYPE);
+  }
   return 1;
 }
 int IntegerLiteral(Context* context) {
@@ -3336,7 +3636,7 @@ int IntegerLiteral(Context* context) {
     sign = -1;
   case '+':
     context->token_to_scan = yylex();
-    if (context->token_to_scan = TOKEN_INTEGER_CONSTANT) {
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       context->token_value.int_val *= sign;
     } else {
       return 1;
@@ -3363,21 +3663,21 @@ int GlobalGroupDecl(Context* context) {
         context->token_to_scan = yylex();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_SEMICOLON);
+        context->set_error(MISSING_SEMICOLON);
         return 1;
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_IDENTIFIER);
+      context->set_error(MISSING_GLOBAL_IDENTIFIER);
       return 1;
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
-int MulInst(const unsigned int first_token, Context* context) {
+int MulInst(Context* context) {
   if (context->token_type == PACKING) {
     context->token_to_scan = yylex();
   }
@@ -3385,22 +3685,22 @@ int MulInst(const unsigned int first_token, Context* context) {
     context->token_to_scan = yylex();
     return 0;
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
   return 1;
 }
-int Mul24Inst(const unsigned int first_token, Context* context) {
+int Mul24Inst(Context* context) {
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
     return 0;
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
   return 1;
 }
-int Mad24Inst(const unsigned int first_token, Context* context) {
+int Mad24Inst(Context* context) {
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
     if (!Operand(context)) {
@@ -3408,19 +3708,20 @@ int Mad24Inst(const unsigned int first_token, Context* context) {
         context->token_to_scan = yylex();
         return 0;
       } else {
-        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        context->set_error(MISSING_COMMA);
         return 1;
       }
     } else {
-      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      context->set_error(MISSING_OPERAND);
       return 1;
     }
   } else {
-    context->set_error(ErrorReporterInterface::MISSING_DATA_TYPE);
+    context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
   return 1;
 }
+
 int Mul(Context* context) {
   unsigned int first_token = context->token_to_scan;
   context->token_to_scan = yylex();
@@ -3430,7 +3731,7 @@ int Mul(Context* context) {
       }
     }
     case MUL_HI: {
-      if (!MulInst(first_token, context)) {
+      if (!MulInst(context)) {
         break;
       } else {
         return 1;
@@ -3438,7 +3739,7 @@ int Mul(Context* context) {
     }
     case MUL24:
     case MUL24_HI: {
-      if (!Mul24Inst(first_token, context)) {
+      if (!Mul24Inst(context)) {
         break;
       } else {
         return 1;
@@ -3446,7 +3747,7 @@ int Mul(Context* context) {
     }
     case MAD24:
     case MAD24_HI: {
-      if (!Mad24Inst(first_token, context)) {
+      if (!Mad24Inst(context)) {
         break;
       } else {
         return 1;
@@ -3458,13 +3759,13 @@ int Mul(Context* context) {
   }
   if (!Operand(context)) {
     if (context->token_to_scan != ',') {
-      context->set_error(ErrorReporterInterface::MISSING_COMMA);
+      context->set_error(MISSING_COMMA);
       return 1;
     }
     context->token_to_scan = yylex();
     if (!Operand(context)) {
       if (context->token_to_scan != ',') {
-        context->set_error(ErrorReporterInterface::MISSING_COMMA);
+        context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
@@ -3473,23 +3774,1362 @@ int Mul(Context* context) {
         if (context->token_to_scan == ';') {
           return 0;
         } else {  // ';'
-          context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+          context->set_error(MISSING_OPERAND);
           return 1;
         }
       } else {  // Operand 3 or 4
-        context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+        context->set_error(MISSING_OPERAND);
         return 1;
       }
     } else {  // Operand 2 or 3
-      context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+      context->set_error(MISSING_OPERAND);
       return 1;
     }
   } else {  // Operand 1 or 2
-    context->set_error(ErrorReporterInterface::MISSING_OPERAND);
+    context->set_error(MISSING_OPERAND);
     return 1;
   }
-  context->set_error(ErrorReporterInterface::UNKNOWN_ERROR);
+  context->set_error(UNKNOWN_ERROR);
   return 1;
+}
+
+int LdModifier(Context *context) {
+  while (1) {
+    if (context->token_type == VECTOR) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _REL || context->token_to_scan == _ACQ) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _DEP) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _EQUIV) {
+      context->token_to_scan = yylex();
+
+      if (context->token_to_scan == '(') {
+        context->token_to_scan = yylex();
+        if (!IntegerLiteral(context)) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == ')') {
+            context->token_to_scan = yylex();
+            continue;
+          } else {  // ')'
+            context->set_error(MISSING_CLOSING_PARENTHESIS);
+            return 1;
+          }
+        } else {  // Integer
+          context->set_error(MISSING_INTEGER_CONSTANT);
+          return 1;
+        }
+      } else {  // '('
+        // TODO(Chuang): Add error reporter of lack of '('
+        context->set_error(UNKNOWN_ERROR);
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int Ld(Context* context) {
+  // first token is LD
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == _WIDTH) {
+    if (!OptionalWidth(context)) {
+    } else {
+      context->set_error(UNKNOWN_ERROR);
+      return 1;
+    }
+  }
+  if (!LdModifier(context)) {
+  } else {
+    context->set_error(UNKNOWN_ERROR);
+    return 1;
+  }
+
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == '(') {
+      if (!ArrayOperandList(context)) {
+      } else {
+        context->set_error(MISSING_CLOSING_PARENTHESIS);
+        return 1;
+      }
+    } else if (!Operand(context)) {
+    } else {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+
+      if (!MemoryOperand(context)) {
+        if (context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
+          return 0;
+        } else {  // ';'
+          context->set_error(MISSING_SEMICOLON);
+          return 1;
+        }
+      } else {  // Memory Operand
+        context->set_error(UNKNOWN_ERROR);
+        return 1;
+      }
+    } else {  // ','
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+  } else {  // Data Type
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int St(Context* context) {
+  // first token is St
+  context->token_to_scan = yylex();
+
+  if (!LdModifier(context)) {
+  } else {
+    context->set_error(UNKNOWN_ERROR);
+    return 1;
+  }
+
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == '(') {
+      if (!ArrayOperandList(context)) {
+      } else {
+        context->set_error(MISSING_CLOSING_PARENTHESIS);
+        return 1;
+      }
+    } else if (!Operand(context)) {
+    } else {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+
+      if (!MemoryOperand(context)) {
+        if (context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
+          return 0;
+        } else {  // ';'
+          context->set_error(MISSING_SEMICOLON);
+          return 1;
+        }
+      } else {  // Memory Operand
+        context->set_error(UNKNOWN_ERROR);
+        return 1;
+      }
+    } else {  // ','
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+  } else {  // Data Type
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int Lda(Context* context) {
+  // first token is LDA
+  context->token_to_scan = yylex();
+
+  if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+    context->token_to_scan = yylex();
+  }
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (!Operand(context)) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!MemoryOperand(context)) {
+          if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
+            return 0;
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+            return 1;
+          }
+        } else {  // MemoryOperand
+          context->set_error(MISSING_OPERAND);
+          return 1;
+        }
+      } else {  // ','
+        context->set_error(MISSING_COMMA);
+        return 1;
+      }
+    } else {  // Operand
+      context->set_error(MISSING_OPERAND);
+      return 1;
+    }
+  } else {  // Data Type
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int ImageRet(Context* context) {
+  // first token is ATOMIC_IMAGE
+  unsigned second_token;
+  context->token_to_scan = yylex();
+  second_token = context->token_to_scan;
+
+  if (context->token_to_scan == _CAS) {
+    context->token_to_scan = yylex();
+  } else if (context->token_type == ATOMIC_OP) {
+    context->token_to_scan =yylex();
+  } else {
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  if (context->token_to_scan == _AR || context->token_to_scan == _REL ||
+      context->token_to_scan == _ACQ ) {
+    context->token_to_scan = yylex();
+  }
+
+  if (context->token_type == GEOMETRY_ID) {
+    context->token_to_scan = yylex();
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == '[') {
+            context->token_to_scan = yylex();
+            if (!AddressableOperand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if (context->token_to_scan == '(') {
+                  if (!ArrayOperandList(context)) {
+                  } else {
+                    context->set_error(MISSING_CLOSING_PARENTHESIS);
+                    return 1;
+                  }
+                } else if (!Operand(context)) {
+                } else {  // Array Operand
+                  context->set_error(MISSING_OPERAND);
+                  return 1;
+                }
+
+                if (context->token_to_scan == ',') {
+                  context->token_to_scan = yylex();
+                  if (!Operand(context)) {
+                    if (second_token == _CAS) {
+                      if (context->token_to_scan == ',') {
+                        context->token_to_scan = yylex();
+                        if (!Operand(context)) {
+                        } else {  // Operand
+                          context->set_error(MISSING_OPERAND);
+                          return 1;
+                        }
+                      } else {  // ','
+                        context->set_error(MISSING_COMMA);
+                        return 1;
+                      }
+                    }
+                    if (context->token_to_scan == ';') {
+                      context->token_to_scan = yylex();
+                      return 0;
+                    } else {  // ';'
+                      context->set_error(MISSING_SEMICOLON);
+                      return 1;
+                    }
+                  } else {  // Operand
+                    context->set_error(MISSING_OPERAND);
+                    return 1;
+                  }
+                } else {  // ','
+                  context->set_error(MISSING_COMMA);
+                  return 1;
+                }
+              } else {  // ','
+                context->set_error(MISSING_COMMA);
+                return 1;
+              }
+            } else {  // Addressable Operand
+              context->set_error(INVALID_OPERAND);
+              return 1;
+            }
+          } else {
+            context->set_error(MISSING_OPERAND);
+          }
+        } else {  // ','
+          context->set_error(MISSING_COMMA);
+        }
+      } else {  // Operand
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {  // Data Type
+      context->set_error(MISSING_DATA_TYPE);
+    }
+  } else {  // Geometry Id
+    context->set_error(MISSING_DECLPREFIX);
+  }
+  return 1;
+}
+int ImageNoRet(Context* context) {
+  // first token is ATOMICNORET_IMAGE
+  unsigned second_token;
+  context->token_to_scan = yylex();
+
+  second_token = context->token_to_scan;
+
+  if (context->token_to_scan == _CAS) {
+    context->token_to_scan = yylex();
+  } else if (context->token_type == ATOMIC_OP) {
+    context->token_to_scan =yylex();
+  } else {
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  if (context->token_to_scan == _AR || context->token_to_scan == _REL ||
+      context->token_to_scan == _ACQ ) {
+    context->token_to_scan = yylex();
+  }
+  if (context->token_type == GEOMETRY_ID) {
+    context->token_to_scan = yylex();
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == '[') {
+        context->token_to_scan = yylex();
+        if (!AddressableOperand(context)) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (context->token_to_scan == '(') {
+              if (!ArrayOperandList(context)) {
+              } else {
+                context->set_error(MISSING_CLOSING_PARENTHESIS);
+                return 1;
+              }
+            } else if (!Operand(context)) {
+            } else {  // Array Operand
+              context->set_error(MISSING_OPERAND);
+              return 1;
+            }
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              if (!Operand(context)) {
+                if (second_token == _CAS) {
+                  if (context->token_to_scan == ',') {
+                    context->token_to_scan = yylex();
+                    if (!Operand(context)) {
+                    } else {  // Operand
+                      context->set_error(MISSING_OPERAND);
+                      return 1;
+                    }
+                  } else {  // ','
+                    context->set_error(MISSING_COMMA);
+                    return 1;
+                  }
+                }
+                if (context->token_to_scan == ';') {
+                  context->token_to_scan = yylex();
+                  return 0;
+                } else {  // ';'
+                  context->set_error(MISSING_SEMICOLON);
+                  return 1;
+                }
+              } else {  // Operand
+                context->set_error(MISSING_OPERAND);
+                return 1;
+              }
+            } else {  // ','
+              context->set_error(MISSING_COMMA);
+              return 1;
+            }
+          } else {  // ','
+            context->set_error(MISSING_COMMA);
+            return 1;
+          }
+        } else {  // Addressable Operand
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {  // Data Type
+      context->set_error(MISSING_DATA_TYPE);
+      return 1;
+    }
+  } else {  // Geometry Id
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+
+  return 1;
+}
+
+int Cvt(Context* context) {
+  // first token is CVT "cvt"
+  context->token_to_scan = yylex();
+  if (!CvtModifier1(context)) {
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!Operand(context)) {
+              if (context->token_to_scan == ';') {
+                return 0;
+              } else {
+              context->set_error(MISSING_SEMICOLON);
+              }
+            } else {
+              context->set_error(MISSING_OPERAND);
+            }
+          } else {
+            context->set_error(MISSING_COMMA);
+          }
+        } else {
+          context->set_error(INVALID_OPERAND);
+        }
+      } else {
+        context->set_error(MISSING_DATA_TYPE);
+      }
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+    }
+  } else if (context->token_type == DATA_TYPE_ID) {
+  context->token_to_scan = yylex();
+  if (context->token_type == DATA_TYPE_ID) {
+    context->token_to_scan = yylex();
+    if (!Operand(context)) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ';') {
+            return 0;
+          } else {
+            context->set_error(MISSING_SEMICOLON);
+          }
+        } else {
+          context->set_error(MISSING_OPERAND);
+        }
+      } else {
+        context->set_error(MISSING_COMMA);
+      }
+    } else {
+      context->set_error(INVALID_OPERAND);
+    }
+  } else {
+    context->set_error(MISSING_DATA_TYPE);
+  }
+  } else {
+    context->set_error(MISSING_DATA_TYPE);
+  }
+  return 1;
+}
+
+int Instruction0(Context* context) {
+  // first token is NOP "nop"
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == ';') {
+    return 0;
+  } else {
+    context->set_error(MISSING_SEMICOLON);
+  }
+  return 1;
+}
+
+int Instruction1(Context* context) {
+  if (context->token_type == INSTRUCTION1_OPCODE_NODT) {
+    // Instruction1OpcodeNoDT
+    context->token_to_scan = yylex();
+    if (!RoundingMode(context)) {  // with RoundingMode
+      if (!Operand(context)) {
+        if (context->token_to_scan == ';') {
+          return 0;
+        } else {
+           context->set_error(MISSING_SEMICOLON);
+        }
+      } else {
+         context->set_error(MISSING_OPERAND);
+      }
+    } else if (!Operand(context)) {  // without RoundingMode
+      if (context->token_to_scan == ';') {
+        return 0;
+      } else {
+        context->set_error(MISSING_SEMICOLON);
+      }
+    } else {
+        context->set_error(MISSING_OPERAND);
+    }
+  } else if (context->token_to_scan == CLOCK) {  // clock
+    context->token_to_scan = yylex();
+    if (!Operand(context)) {
+      if (context->token_to_scan == ';') {
+        return 0;
+      } else {
+        context->set_error(MISSING_SEMICOLON);
+      }
+    } else {
+      context->set_error(MISSING_OPERAND);
+    }
+  } else if (context->token_type == INSTRUCTION1_OPCODE) {
+    context->token_to_scan = yylex();
+    if (!RoundingMode(context)) {  // with RoundingMode
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ';') {
+            return 0;
+          } else {
+            context->set_error(MISSING_SEMICOLON);
+          }
+        } else {
+          context->set_error(MISSING_OPERAND);
+        }
+      } else {
+        context->set_error(MISSING_DATA_TYPE);
+      }
+    } else if (context->token_type == DATA_TYPE_ID) {  // without RoundingMode
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if (context->token_to_scan == ';') {
+          return 0;
+        } else {
+          context->set_error(MISSING_SEMICOLON);
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+    }
+  }
+  return 1;
+}
+
+int ImageLoad(Context* context) {
+  // first token is LD_IMAGE
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == _V4) {
+    context->token_to_scan = yylex();
+    if (context->token_type == GEOMETRY_ID) {
+      context->token_to_scan = yylex();
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (context->token_type == DATA_TYPE_ID) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == '(') {
+            if (!ArrayOperandList(context)) {
+            } else {
+              context->set_error(MISSING_CLOSING_PARENTHESIS);
+              return 1;
+            }
+          } else if (!Operand(context)) {
+          } else {  // Array Operand
+            context->set_error(MISSING_OPERAND);
+            return 1;
+          }
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (context->token_to_scan == '[') {
+              context->token_to_scan = yylex();
+              if (!AddressableOperand(context)) {
+                if (context->token_to_scan == ',') {
+                  context->token_to_scan = yylex();
+                  if (context->token_to_scan == '(') {
+                    if (!ArrayOperandList(context)) {
+                    } else {
+                      context->set_error(MISSING_CLOSING_PARENTHESIS);
+                      return 1;
+                    }
+                  } else if (!Operand(context)) {
+                  } else {  // Array Operand
+                    context->set_error(MISSING_OPERAND);
+                    return 1;
+                  }
+                  if (context->token_to_scan == ';') {
+                    context->token_to_scan = yylex();
+                    return 0;
+                  } else {  // ';'
+                    context->set_error(MISSING_SEMICOLON);
+                    return 1;
+                  }
+                } else {  // ','
+                  context->set_error(MISSING_COMMA);
+                  return 1;
+                }
+              } else {  // Addressable Operand
+                context->set_error(INVALID_OPERAND);
+                return 1;
+              }
+            } else {
+              context->set_error(MISSING_OPERAND);
+              return 1;
+            }
+          } else {  // ','
+            context->set_error(MISSING_COMMA);
+            return 1;
+          }
+        } else {  // Data Type
+          context->set_error(MISSING_DATA_TYPE);
+          return 1;
+        }
+      } else {  // Data Type
+        context->set_error(MISSING_DATA_TYPE);
+        return 1;
+      }
+    } else {  // Geometry ID
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+    }
+  } else {  // _V4
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  return 1;
+}
+
+int ImageStore(Context* context) {
+  // first token is St_image
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == _V4) {
+    context->token_to_scan = yylex();
+    if (context->token_type == GEOMETRY_ID) {
+      context->token_to_scan = yylex();
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (context->token_type == DATA_TYPE_ID) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == '(') {
+            if (!ArrayOperandList(context)) {
+            } else {
+              context->set_error(MISSING_CLOSING_PARENTHESIS);
+              return 1;
+            }
+          } else if (!Operand(context)) {
+          } else {  // Array Operand
+            context->set_error(MISSING_OPERAND);
+            return 1;
+          }
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (context->token_to_scan == '[') {
+              context->token_to_scan = yylex();
+              if (!AddressableOperand(context)) {
+                if (context->token_to_scan == ',') {
+                  context->token_to_scan = yylex();
+                  if (context->token_to_scan == '(') {
+                    if (!ArrayOperandList(context)) {
+                    } else {
+                      context->set_error(MISSING_CLOSING_PARENTHESIS);
+                      return 1;
+                    }
+                  } else if (!Operand(context)) {
+                  } else {  // Array Operand
+                    context->set_error(MISSING_OPERAND);
+                    return 1;
+                  }
+                  if (context->token_to_scan == ';') {
+                    context->token_to_scan = yylex();
+                    return 0;
+                  } else {  // ';'
+                    context->set_error(MISSING_SEMICOLON);
+                    return 1;
+                  }
+                } else {  // ','
+                  context->set_error(MISSING_COMMA);
+                  return 1;
+                }
+              } else {  // Addressable Operand
+                context->set_error(INVALID_OPERAND);
+                return 1;
+              }
+            } else {
+              context->set_error(MISSING_OPERAND);
+              return 1;
+            }
+          } else {  // ','
+            context->set_error(MISSING_COMMA);
+            return 1;
+          }
+        } else {  // Data Type
+          context->set_error(MISSING_DATA_TYPE);
+          return 1;
+        }
+      } else {  // Data Type
+        context->set_error(MISSING_DATA_TYPE);
+        return 1;
+      }
+    } else {  // Geometry ID
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+    }
+  } else {  // _V4
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  return 1;
+}
+
+int SingleListSingle(Context * context) {
+  if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+    while (1) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+          continue;
+        } else {
+          context->set_error(MISSING_SINGLE_CONSTANT);
+          return 1;
+        }
+      } else {
+        return 0;
+      }
+    }
+  } else {
+    context->set_error(MISSING_SINGLE_CONSTANT);
+    return 1;
+  }
+  return 0;
+}
+
+int ImageInit(Context *context) {
+  if (FORMAT == context->token_to_scan
+    // for "format" = TOKEN_PROPERTY
+    || ORDER == context->token_to_scan) {        // "order" = TOKEN_PROPERTY
+    context->token_to_scan = yylex();
+     if ('=' == context->token_to_scan) {
+       context->token_to_scan = yylex();
+       if (TOKEN_PROPERTY == context->token_to_scan) {
+         context->token_to_scan = yylex();
+         return 0;
+       } else {
+         context->set_error(MISSING_PROPERTY);
+         return 1;
+       }
+     } else {
+       context->set_error(INVALID_IMAGE_INIT);
+       return 1;
+     }
+  } else if (WIDTH == context->token_to_scan
+       || HEIGHT == context->token_to_scan
+       || DEPTH == context->token_to_scan) {
+       // for tobNumeric "=" TOKEN_INTEGER_CONSTANT
+    context->token_to_scan = yylex();
+    if ('=' == context->token_to_scan) {
+      context->token_to_scan = yylex();
+      if (TOKEN_INTEGER_CONSTANT == context->token_to_scan) {
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(MISSING_PROPERTY);
+        return 1;
+      }
+    } else {
+      context->set_error(INVALID_IMAGE_INIT);
+      return 1;
+    }
+  } else {
+    context->set_error(INVALID_IMAGE_INIT);
+    return 1;
+  }
+}
+
+int GlobalImageDecl(Context *context) {
+  // first must be GLOBAL
+  context->token_to_scan = yylex();
+
+  if (_RWIMG == context->token_to_scan) {
+    context->token_to_scan = yylex();
+    if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
+      context->token_to_scan = yylex();
+      if ('[' == context->token_to_scan) {
+        if (!ArrayDimensionSet(context)) {
+          if ('=' == context->token_to_scan) {
+            if (!ImageInitializer(context)) {
+              if (';' == context->token_to_scan) {
+                context->token_to_scan = yylex();
+                return 0;
+              } else {
+                context->set_error(MISSING_SEMICOLON);
+              }
+            } else {
+              context->set_error(INVALID_IMAGE_INIT);
+            }
+          } else {  // end for =
+            if (';' == context->token_to_scan) {
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+            }
+          }
+        }
+      } else if ('=' == context->token_to_scan) {  // end for [
+        if (!ImageInitializer(context)) {       // no arraydimensions
+          if (';' == context->token_to_scan) {
+            context->token_to_scan = yylex();
+            return 0;
+          } else {
+            context->set_error(MISSING_SEMICOLON);
+          }
+        }
+      } else if (';' == context->token_to_scan) {
+        // no arrayDimensions and imageInitializer
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(MISSING_SEMICOLON);
+      }
+    } else {
+    context->set_error(MISSING_IDENTIFIER);
+    }
+  }
+  return 1;
+}
+
+int ImageInitializer(Context *context) {
+  // first must be '='
+  context->token_to_scan = yylex();
+  if ('{' == context->token_to_scan) {
+    while (1) {
+      context->token_to_scan = yylex();
+      if (!ImageInit(context)) {
+        if (',' == context->token_to_scan) {
+          continue;
+        } else {
+          break;
+        }
+      } else {
+        context->set_error(MISSING_IDENTIFIER);
+        return 1;
+      }
+    }  // end for while
+
+    if ('}' == context->token_to_scan) {
+      context->token_to_scan = yylex();
+      return 0;
+    } else {
+      context->set_error(MISSING_CLOSING_BRACKET);
+    }
+  } else {
+    context->set_error(MISSING_OPENNING_BRACKET);
+  }
+  return 1;
+}
+
+int GlobalReadOnlyImageDecl(Context *context) {
+  // first must be GLOBAL
+  context->token_to_scan = yylex();
+
+  if (_ROIMG == context->token_to_scan) {
+    context->token_to_scan = yylex();
+    if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
+      context->token_to_scan = yylex();
+      if ('[' == context->token_to_scan) {
+        if (!ArrayDimensionSet(context)) {
+          if ('=' == context->token_to_scan) {
+            if (!ImageInitializer(context)) {
+              if (';' == context->token_to_scan) {
+                context->token_to_scan = yylex();
+                return 0;
+              } else {
+                context->set_error(MISSING_SEMICOLON);
+              }
+            } else {
+            }
+          } else {  // end for =
+            if (';' == context->token_to_scan) {
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+            }
+          }
+        }
+      } else if ('=' == context->token_to_scan) {  // end for [
+        if (!ImageInitializer(context)) {       // no arraydimensions
+          if (';' == context->token_to_scan) {
+            context->token_to_scan = yylex();
+            return 0;
+          } else {
+            context->set_error(MISSING_SEMICOLON);
+          }
+        }
+      } else if (';' == context->token_to_scan) {
+        // no arrayDimensions and imageInitializer
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(MISSING_SEMICOLON);
+      }
+    }
+  } else {
+    context->set_error(MISSING_IDENTIFIER);
+  }
+  return 1;
+}
+
+int Ret(Context* context) {
+  // first token is RET
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == ';') {
+    context->token_to_scan = yylex();
+    return 0;
+  } else {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int ImageRead(Context *context) {
+  // first token is RD_IMAGE
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == _V4) {
+    context->token_to_scan = yylex();
+    if (context->token_type == GEOMETRY_ID) {
+      context->token_to_scan = yylex();
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (context->token_type == DATA_TYPE_ID) {
+          context->token_to_scan = yylex();
+
+          if (context->token_to_scan == '(') {
+            if (!ArrayOperandList(context)) {
+            } else {
+              context->set_error(MISSING_CLOSING_PARENTHESIS);
+              return 1;
+            }
+          } else if (!Operand(context)) {
+          } else {  // Array Operand
+            context->set_error(MISSING_OPERAND);
+            return 1;
+          }
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (context->token_to_scan == '[') {
+              context->token_to_scan = yylex();
+              if (!AddressableOperand(context)) {
+                if (context->token_to_scan == ',') {
+                  context->token_to_scan = yylex();
+                  if (context->token_to_scan == '[') {
+                    context->token_to_scan = yylex();
+                    if (!AddressableOperand(context)) {
+                      if (context->token_to_scan == ',') {
+                        context->token_to_scan = yylex();
+                      } else {  // ','
+                        context->set_error(MISSING_COMMA);
+                        return 1;
+                      }
+                    } else {  // Addressable Operand
+                      context->set_error(INVALID_OPERAND);
+                      return 1;
+                    }
+                  } else {  // '['
+                    context->set_error(MISSING_OPERAND);
+                    return 1;
+                  }
+
+                  if (context->token_to_scan == '(') {
+                    if (!ArrayOperandList(context)) {
+                    } else {
+                      context->set_error(MISSING_CLOSING_PARENTHESIS);
+                      return 1;
+                    }
+                  } else if (!Operand(context)) {
+                  } else {  // Array Operand
+                    context->set_error(MISSING_OPERAND);
+                    return 1;
+                  }
+                  if (context->token_to_scan == ';') {
+                    context->token_to_scan = yylex();
+                    return 0;
+                  } else {  // ';'
+                    context->set_error(MISSING_SEMICOLON);
+                    return 1;
+                  }
+                } else {  // ','
+                  context->set_error(MISSING_COMMA);
+                  return 1;
+                }
+              } else {  // Addressable Operand
+                context->set_error(INVALID_OPERAND);
+                return 1;
+              }
+            } else {
+              context->set_error(MISSING_OPERAND);
+              return 1;
+            }
+          } else {  // ','
+            context->set_error(MISSING_COMMA);
+            return 1;
+          }
+        } else {  // Data Type
+          context->set_error(MISSING_DATA_TYPE);
+          return 1;
+        }
+      } else {  // Data Type
+        context->set_error(MISSING_DATA_TYPE);
+        return 1;
+      }
+    } else {  // Geometry ID
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+    }
+  } else {  // _V4
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int Sync(Context* context) {
+  // first token is SYNC
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == _GLOBAL) {
+    context->token_to_scan = yylex();
+  } else if (context->token_to_scan == _GROUP) {
+    context->token_to_scan = yylex();
+  }
+  if (context->token_to_scan == ';') {
+    context->token_to_scan = yylex();
+    return 0;
+  } else {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+int Bar(Context* context) {
+  // first token is BARRIER
+  context->token_to_scan = yylex();
+  if (!OptionalWidth(context)) {
+    if (context->token_to_scan == _GLOBAL) {
+      context->token_to_scan = yylex();
+    } else if (context->token_to_scan == _GROUP) {
+      context->token_to_scan = yylex();
+    }
+    if (context->token_to_scan == ';') {
+      context->token_to_scan = yylex();
+      return 0;
+    } else {
+      context->set_error(MISSING_SEMICOLON);
+      return 1;
+    }
+  } else {  // Option Width
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int AtomModifiers(Context* context) {
+  while (1) {
+    if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _AR) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _REL || context->token_to_scan == _ACQ) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+
+    if (context->token_to_scan == _REGION) {
+      context->token_to_scan = yylex();
+      continue;
+    }
+    return 0;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+int AtomicNoRet(Context* context) {
+  // first token is ATOMICNORET or ATOMICNORET_CAS
+  const unsigned int first_token = context->token_to_scan;
+  context->token_to_scan = yylex();
+  if (first_token == ATOMICNORET) {
+    if (context->token_type == ATOMIC_OP) {
+      context->token_to_scan = yylex();
+    } else {
+      context->set_error(MISSING_OPERAND);
+      return 1;
+    }
+  }
+
+  if (!AtomModifiers(context)) {
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!MemoryOperand(context)) {
+        if (first_token == ATOMICNORET_CAS) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!Operand(context)) {
+            } else {
+              context->set_error(MISSING_OPERAND);
+              return 1;
+            }
+          } else {  // ','
+            context->set_error(MISSING_COMMA);
+            return 1;
+          }
+        }
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context)) {
+            if (context->token_to_scan == ';') {
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }
+          } else {  // Operand
+            context->set_error(MISSING_OPERAND);
+            return 1;
+          }
+        } else {  // ','
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
+        return 1;
+      }
+    } else {  // Data Type
+      context->set_error(MISSING_DATA_TYPE);
+      return 1;
+    }
+  } else {  // Atom Modifiers
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int Location(Context* context) {
+  // first token is LOG
+  context->token_to_scan = yylex();
+  if (!IntegerLiteral(context)) {
+    context->token_to_scan = yylex();
+    if (!IntegerLiteral(context)) {
+      context->token_to_scan = yylex();
+      if (!IntegerLiteral(context)) {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
+          return 0;
+        } else {  // ';'
+          context->set_error(MISSING_SEMICOLON);
+          return 1;
+        }
+      } else {  // Integer Constant
+        context->set_error(MISSING_INTEGER_CONSTANT);
+        return 1;
+      }
+    } else {  // Integer Constant
+      context->set_error(MISSING_INTEGER_CONSTANT);
+      return 1;
+    }
+  } else {  // Integer Constant
+    context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+  return 1;
+}
+int Control(Context* context) {
+  if (context->token_to_scan == MEMOPT_ON) {
+  } else if (context->token_to_scan == MEMOPT_OFF) {
+  } else if (context->token_to_scan == WORKGROUPS_PER_CU) {
+    context->token_to_scan = yylex();
+    if (!IntegerLiteral(context)) {
+    } else {  // Integer Constant
+      context->set_error(MISSING_INTEGER_CONSTANT);
+      return 1;
+    }
+  } else if (context->token_to_scan == ITEMS_PER_WORKGROUP) {
+    context->token_to_scan = yylex();
+    if (!IntegerLiteral(context)) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!IntegerLiteral(context)) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!IntegerLiteral(context)) {
+            } else {  // Integer Constant
+              context->set_error(MISSING_INTEGER_CONSTANT);
+              return 1;
+            }
+          } else {  // ','
+             context->set_error(MISSING_COMMA);
+             return 1;
+          }
+        } else {  // Integer Constant
+          context->set_error(MISSING_INTEGER_CONSTANT);
+          return 1;
+        }
+      } else {  // ','
+        context->set_error(MISSING_COMMA);
+        return 1;
+      }
+    } else {  // Integer Constant
+      context->set_error(MISSING_INTEGER_CONSTANT);
+      return 1;
+    }
+  } else {
+    context->set_error(UNKNOWN_ERROR);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == ';') {
+    context->token_to_scan = yylex();
+    return 0;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int Pragma(Context* context) {
+  // first token is PRAGMA
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == TOKEN_STRING) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ';') {
+      context->token_to_scan = yylex();
+      return 0;
+    } else {  // ';'
+      context->set_error(MISSING_SEMICOLON);
+      return 1;
+    }
+  } else {  // String
+    context->set_error(MISSING_STRING);
+    return 1;
+  }
+  context->set_error(UNKNOWN_ERROR);
+  return 1;
+}
+
+int FloatListSingle(Context* context) {
+  while (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      continue;
+    } else {
+      // Note: the token has been updated
+      return 0;
+    }
+  }  // While
+  context->set_error(MISSING_DOUBLE_CONSTANT);
+  return 1;
+}
+int DecimalListSingle(Context* context) {
+  while (!IntegerLiteral(context)) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      continue;
+    } else {
+      // Note: the token has been updated
+      return 0;
+    }
+  }  // While
+  context->set_error(MISSING_INTEGER_CONSTANT);
+  return 1;
+}
+
+int Block(Context* context) {
+  // first token is BLOCK
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == TOKEN_STRING) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ENDBLOCK) {
+      context->set_error(MISSING_SECTION_ITEM);
+      return 1;
+    }
+    while (context->token_to_scan != ENDBLOCK) {
+      if (context->token_to_scan == BLOCKSTRING) {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == TOKEN_STRING) {
+          context->token_to_scan = yylex();
+        } else {  // String
+          context->set_error(INVALID_SECTION_ITEM);
+          return 1;
+        }
+      } else if (context->token_to_scan == BLOCKNUMERIC) {
+        context->token_to_scan = yylex();
+        if (context->token_type == DATA_TYPE_ID) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == TOKEN_LABEL) {
+            context->token_to_scan = yylex();
+          } else if (!DecimalListSingle(context)) {
+          } else if (!FloatListSingle(context)) {
+          } else {
+            context->set_error(INVALID_SECTION_ITEM);
+            return 1;
+          }
+        } else {  // Data Type
+          context->set_error(MISSING_DATA_TYPE);
+          return 1;
+        }
+      } else {  // Block Numeric or Block String
+        context->set_error(MISSING_BLOCK_TYPE);
+        return 1;
+      }
+      if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
+        continue;
+      } else {  // ';'
+        context->set_error(MISSING_SEMICOLON);
+        return 1;
+      }
+    }  // While
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ';') {
+      context->token_to_scan = yylex();
+      return 0;
+    } else {  // ';'
+      context->set_error(MISSING_SEMICOLON);
+      return 1;
+    }
+  } else {  // String
+    context->set_error(MISSING_STRING);
+    return 1;
+  }
 }
 
 }  // namespace brig

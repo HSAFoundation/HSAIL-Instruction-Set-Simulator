@@ -11,14 +11,17 @@
 namespace hsa {
 namespace brig {
 struct ErrorInfo_t {
-    ErrorReporterInterface::error_t error_code;
+    error_code_t error_code;
     unsigned int line_no;
     unsigned int col_no;
 };
 
 class FakeErrorReporter: public ErrorReporterInterface {
   public:
-    void report_error(error_t ErrorCode,
+    FakeErrorReporter() {
+      no_errors = 0;
+    }
+    void report_error(error_code_t ErrorCode,
                       unsigned int LineNo,
                       unsigned int ColNo) {
       struct ErrorInfo_t error = {
@@ -27,6 +30,7 @@ class FakeErrorReporter: public ErrorReporterInterface {
           ColNo
       };
       error_buffer.push_back(error);
+      no_errors++;
     }
 
     void show_all_error() {
@@ -41,9 +45,31 @@ class FakeErrorReporter: public ErrorReporterInterface {
       }
     }
 
+    unsigned int get_number_of_errors() {
+      return no_errors;
+    }
+
+    error_code_t get_error_at(unsigned int index) {
+      if ((index >= 0) && (index <= no_errors)) {
+        return (error_buffer[index].error_code);
+      } else {
+        std::cout << "Index exceeded total number of errors." << std::endl;
+        return UNKNOWN_ERROR;
+      }
+    }
+
+    error_code_t get_last_error() {
+      if (no_errors > 0) {
+        return (error_buffer[no_errors-1].error_code);
+      } else {
+        std::cout << "No error to report" << std::endl;
+        return UNKNOWN_ERROR;
+      }
+    }
+
   private:
-    // std::vector<error_t> error_buffer;
     std::vector<struct ErrorInfo_t> error_buffer;
+    unsigned int no_errors;
 };
 }  // namespace brig
 }  // namespace hsa

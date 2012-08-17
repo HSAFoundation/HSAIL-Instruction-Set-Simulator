@@ -30,7 +30,7 @@ class Context {
     void set_error_reporter(ErrorReporterInterface* error_reporter);
     ErrorReporterInterface* get_error_reporter(void) const;
 
-    void set_error(ErrorReporterInterface::error_t error);
+    void set_error(error_code_t error);
     /* string buffer manipulators */
     // add a new symbol to .strings section.
     // return the offset to that symbol
@@ -256,13 +256,14 @@ class Context {
     bool  valid_string;
 
     union token_val {
-      int int_val;
+      int               int_val;
       float             float_val;
       double            double_val;
       char*             string_val;
       BrigDataType16_t  data_type;
       BrigOpcode32_t    opcode;
       BrigPacking16_t   packing;
+      BrigStorageClass32_t storage_class;
     } token_value;
 
   private:

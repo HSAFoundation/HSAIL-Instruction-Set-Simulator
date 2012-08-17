@@ -44,13 +44,13 @@ double ieee754tod(char* text) {
   for (i=0; i<4; i++)
     first4[i] = text[i+2];
 
-  first4[5] = '\0';
+  first4[4] = '\0';
   first_int = strtol(first4, NULL, 16);
 
   // get the next 2 bytes;
   for (i=0;i<4;i++)
     temp_str[i] = text[i+6];
-  temp_str[5] = '\0';
+  temp_str[4] = '\0';
   temp = strtol(temp_str,NULL,16);
   first_int <<= 16;
 
@@ -66,13 +66,13 @@ double ieee754tod(char* text) {
   for (i=0;i<4;i++)
     first4[i] = text[i+10];
 
-  first4[5] = '\0';
+  first4[4] = '\0';
   second_int = strtol(first4, NULL, 16);
 
   // get the last 2 bytes;
   for (i=0;i<4;i++)
     temp_str[i] = text[i+14];
-  temp_str[5] = '\0';
+  temp_str[4] = '\0';
   temp = strtol(temp_str,NULL,16);
   second_int <<= 16;
   temp += second_int;
@@ -95,13 +95,6 @@ void free_string(hsa::brig::Context* context) {
 %x INLINE_COMMENT
 %x COMMENT
  
- // TODO(Chuang) 08-10-2012 Source as following is changed by Chuang:
- //OCT_INT     ([+|-]?0[0-7]*)
- //DEC_INT     ([+|-]?(0|([1-9]*[0-9]+)))
- //HEX_INT     ([+|-]?0(x|X)[0-9a-fA-F]*)
- //DEC_DOUBLE  (.......*))(l|L)?)
-
-
 OCT_INT     (0[0-7]*)
 DEC_INT     (0|([1-9]*[0-9]+))
 HEX_INT     (0(x|X)[0-9a-fA-F]*)
@@ -216,7 +209,7 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
                                 BEGIN(INITIAL);
                                 return TOKEN_COMMENT;}
 
-<INLINE_COMMENT><<EOF>>       { printf("%d: Unterminated comment\n", yylineno);
+<INLINE_COMMENT><<EOF>>       { printf("%d: Unterminated comment.\n", yylineno);
                                 return 0; }
 
 \$c(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng;
@@ -320,6 +313,7 @@ version           { context->yycolno+=yyleng;
 global            { context->token_type = INITIALIZABLE_ADDRESS;
                     free_string(context);
                     context->yycolno+=yyleng;
+                    context->token_value.storage_class = BrigGlobalSpace ;
                     return GLOBAL; }
 
 _Samp             { context->token_type = COMMON_KEYWORD;
@@ -350,11 +344,13 @@ file              { free_string(context);
 arg               { free_string(context);  
                     context->token_type = COMMON_KEYWORD; 
                     context->yycolno+=yyleng;  
+                    context->token_value.storage_class = BrigArgSpace ;
                     return ARG; }
                     
 kernarg           { free_string(context);  
                     context->token_type = COMMON_KEYWORD; 
                     context->yycolno+=yyleng;  
+                    context->token_value.storage_class = BrigKernargSpace ;
                     return KERNARG; }
                     
 function          { free_string(context);  
@@ -429,22 +425,26 @@ const             { free_string(context);
                     
 private           { free_string(context);  
                     context->token_type = UNINITIALIZABLE_ADDRESS; 
-                    context->yycolno+=yyleng;  
+                    context->yycolno+=yyleng; 
+                    context->token_value.storage_class = BrigPrivateSpace ; 
                     return PRIVATE; }
                     
 spill             { free_string(context);  
                     context->token_type = UNINITIALIZABLE_ADDRESS; 
-                    context->yycolno+=yyleng;  
+                    context->yycolno+=yyleng; 
+                    context->token_value.storage_class = BrigSpillSpace ; 
                     return SPILL; }
                     
 group             { free_string(context);  
                     context->token_type = UNINITIALIZABLE_ADDRESS; 
                     context->yycolno+=yyleng;  
+                    context->token_value.storage_class = BrigGroupSpace ;
                     return GROUP; }
                     
 readonly          { free_string(context);  
                     context->token_type = INITIALIZABLE_ADDRESS; 
                     context->yycolno+=yyleng;  
+                    context->token_value.storage_class = BrigReadonlySpace ;
                     return READONLY; }
                     
 loc               { free_string(context);  
@@ -570,6 +570,7 @@ memopt_off          { free_string(context);
 fbar_initSizeWg     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE; 
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigFbarInitSizeWg;
                       return FBAR_INITSIZEWG; }
                       
 fbar_wait           { free_string(context);
@@ -589,7 +590,8 @@ fbar_skip           { free_string(context);
                       
 fbar_release        { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
-                      context->yycolno+=yyleng;  
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarRelease;  
                       return FBAR_RELEASE; }
                       
 countup             { free_string(context);
@@ -651,97 +653,122 @@ abs                 { free_string(context);
 neg                 { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE; 
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigNeg;
                       return NEG; }
                       
 not                 { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE; 
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigNot;
                       return NOT; }
                       
 popcount            { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigPopcount ;
                       return POPCOUNT; }
                       
 firstbit            { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE; 
                       context->yycolno+=yyleng;  
+                      context->token_value.opcode = BrigFirstbit ;
                       return FIRSTBIT; }
                       
 lastbit             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE; 
                       context->yycolno+=yyleng;  
+                      context->token_value.opcode = BrigLastbit ;
                       return LASTBIT; }
                       
 bitrev              { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE; 
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigBitRev ;
                       return BITREV; }
                       
 movs_lo             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = Brigmovslo ;
                       return MOVS_LO; }
                       
 movs_hi             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = Brigmovshi ;
                       return MOVS_HI; }
                       
 fbar_initSize       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE; 
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarInitSize ;
+                      return FBAR_INITSIZE; }
+
+fbar_initSizeKnown  { free_string(context);
+                      context->token_type = INSTRUCTION2_OPCODE; 
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarInitSizeKnown ;
                       return FBAR_INITSIZE; }
                       
 fbar_init           { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE; 
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigFbarInit ;
                       return FBAR_INIT; }
                       
 fbar_releaseCF      { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE; 
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigFbarReleaseCF;
                       return FBAR_RELEASECF; }
                       
 count               { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigCount ;
                       return COUNT; }
                       
 mask                { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigMask ;
                       return MASK; }
 
 sqrt                { free_string(context);
                       context->token_value.opcode = BrigSqrt;
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigSqrt ;
                       return SQRT; }
                       
 fract               { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFract ;
                       return FRACT; }
                       
 fcos                { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigFcos ;
                       return FCOS; }
                       
 fsin                { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFsin ;
                       return FSIN; }
                       
 flog2               { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ; 
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigFlog2 ;
                       return FLOG2; }
                       
 fexp2               { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ; 
                       context->yycolno+=yyleng; 
+                      context->token_value.opcode = BrigFexp2 ;
                       return FEXP2; }
                       
 fsqrt               { free_string(context);
@@ -1655,6 +1682,11 @@ _region           { free_string(context);
                     context->token_type = ATOM_MODIFIER;
                     context->yycolno+=yyleng;
                     return _REGION;}
+
+_cas              { free_string(context);
+                    context->token_type = ATOM_MODIFIER;
+                    context->yycolno+=yyleng;
+                    return _CAS;}
                     
 atomic_cas        { free_string(context);
                     context->token_type = ATOM_MODIFIER;
@@ -1756,6 +1788,11 @@ ldc               { free_string(context);
                     context->yycolno+=yyleng;
                     return LDC;}
                     
+lda               { free_string(context);
+                    context->token_type = COMMON_KEYWORD;
+                    context->yycolno+=yyleng;
+                    return LDA;}
+
 ret               { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
