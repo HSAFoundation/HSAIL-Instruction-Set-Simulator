@@ -64,7 +64,7 @@ int Mov(Context* context);
 int Atom(Context* context);
 int Instruction0(Context* context);
 int Instruction1(Context* context);
-int IntegerLiteral(Context* context);
+
 int GlobalGroupDecl(Context* context);
 /* MUL */
 int Mul(Context* context);
@@ -100,6 +100,7 @@ int DecimalListSingle(Context* context);
 int FloatListSingle(Context* context);
 int GlobalSymbolDecl(Context* context);
 int Directive(Context* context);
+int LabelList(Context* context);
 
 }  // namespace brig
 }  // namespace hsa
