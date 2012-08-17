@@ -2601,12 +2601,12 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack3) {
   context->clear_context();
 
   BrigInstBase ref = {
-         32,
+    32,
     BrigEInstBase,
     BrigUnpack3,
-    Brigf32,
+    Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
   std::string input("unpack3 $s1,$s2;");
@@ -2637,12 +2637,12 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack2) {
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+     32,
     BrigEInstBase,
     BrigUnpack2,
-    Brigf32,
+    Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
   std::string input("unpack2 $s1,$s2;");
@@ -2672,12 +2672,12 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack1) {
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+     32,
     BrigEInstBase,
     BrigUnpack1,
-    Brigf32,
+    Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
   std::string input("unpack1 $s1,$s2;");
@@ -2707,12 +2707,12 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack0) {
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+     32,
     BrigEInstBase,
     BrigUnpack0,
-    Brigf32,
+    Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
   std::string input("unpack0 $s1,$s2;");
@@ -2736,21 +2736,22 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack0) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-}
+};
+
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_alloca) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+     32,
     BrigEInstBase,
     BrigAlloca,
     Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
-  std::string input("alloca $s1,24;");
+  std::string input("alloca $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2771,21 +2772,22 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_alloca) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-}
+};
+
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemid) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+    32,
     BrigEInstBase,
     BrigWorkItemId,
     Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
-  std::string input("workitemid $s1,2;");
+  std::string input("workitemid $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2806,21 +2808,22 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-}
+};
+
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemaid) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+    32,
     BrigEInstBase,
     BrigWorkItemAId,
     Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
-  std::string input("workitemaid $s1,0;");
+  std::string input("workitemaid $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2841,21 +2844,22 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemaid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-}
+};
+
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupid) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+    32,
     BrigEInstBase,
     BrigWorkGroupId,
     Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
-  std::string input("workgroupid $s1,1;");
+  std::string input("workgroupid $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2876,21 +2880,22 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-}
+};
+
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupsize) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+    32,
     BrigEInstBase,
     BrigWorkGroupSize,
     Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
-  std::string input("workgroupsize $s1,1;");
+  std::string input("workgroupsize $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2911,21 +2916,22 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupsize) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-}
+};
+
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangesize) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+    32,
     BrigEInstBase,
     BrigNDRangesize,
     Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
-  std::string input("NDRangesize $s1,1;");
+  std::string input("NDRangesize $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2946,21 +2952,22 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangesize) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-}
+};
+
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
-          32,
+    32,
     BrigEInstBase,
     BrigNDRangegroups,
     Brigb32,
     BrigNoPacking,
-        {8, 20, 0, 0, 0}
+    {8, 20, 0, 0, 0}
   };
 
-  std::string input("NDRangegroups $s1,2;");
+  std::string input("NDRangegroups $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2981,6 +2988,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-}
+};
+
 }  // namespace brig
 }  // namespace hsa
