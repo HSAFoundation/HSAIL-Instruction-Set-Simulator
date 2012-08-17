@@ -104,6 +104,7 @@ int Directive(Context* context);
 int SobInit(Context *context);
 int SobInitializer(Context *context);
 int GlobalSamplerDecl(Context *context);
+int GlobalDecl(Context *context);
 
 }  // namespace brig
 }  // namespace hsa

@@ -5299,5 +5299,9 @@ int GlobalSamplerDecl(Context *context){
   return 1;
 }
 
+int GlobalDecl(Context *context){
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

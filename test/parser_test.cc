@@ -3849,6 +3849,139 @@ TEST(ParserTest,GlobalSamplerDecl){
   delete lexer ;
 };
 
+TEST(ParserTest,GlobalDecl){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  //for globalSamplerDecl
+  std::string input("const extern global_Samp &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const extern global_Samp &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+  
+  input.assign("const extern global_Samp &demo[10]={boundaryU = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+ 
+  //for globalReadOlnyImageDecl
+  input.assign("const  extern global_ROImg &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern global_ROImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+  
+  input.assign("const  extern global_ROImg &demo[10]={format = normalized } ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern global_ROImg &demo[10]={format = normalized ,order = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  //for globalImageDecl
+  input.assign("const  extern global_RWImg &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern global_RWImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+  
+  input.assign("const  extern global_RWImg &demo[10]={format = normalized} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  //for functionDecl
+  input.assign("const  extern function &get_global_id(arg_u32 %ret_val)");
+  input.append("(arg_u32 %arg_val0) :fbar(1);\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  //for functionSignature
+  input.assign("signature &test()();\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("signature &test()(arg_u32) ;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("signature &test()(arg_u32,arg_u32) ;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, FunctionSignature(context));
+
+  input.assign("signature &test()(arg_u32) :fbar(2) ;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("signature &test(arg_u32)(arg_u32,arg_u32) ;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("signature &test(arg_u32)(arg_u32) :fbar(2) ;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  //for globalSymbolDecl
+  input.assign("const  extern group_u32 &tmp[2][2];");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern group_s32 &tmp;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern group_b32 &tmp[2];");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern private_u32 &tmp[2][2];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern private_s32 &tmp;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+
+  input.assign("const  extern private_b32 &tmp[2];");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalDecl(context));
+  delete lexer ;
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
