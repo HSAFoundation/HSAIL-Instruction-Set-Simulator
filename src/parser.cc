@@ -4373,6 +4373,18 @@ int Instruction1(Context* context) {
 
 // this function specifies operand must be register,immediate value,or WAVESIZE 
 int RIW_Operand(Context* context) {
+  if (context->token_type == REGISTER) {
+    context->token_to_scan = yylex(); // set token for next function
+    return 0;
+  } else if (context->token_type == CONSTANT) {
+    context->token_to_scan = yylex(); 
+    return 0;
+  } else if (context->token_to_scan == TOKEN_WAVESIZE) {
+    context->token_to_scan = yylex(); 
+    return 0;
+  } else {
+    context->set_error(INVALID_OPERATION);
+  }
   return 1;
 }
 
