@@ -5367,5 +5367,17 @@ int GlobalDecl(Context *context){
   return 1;
 }
 
+int SequenceOfPrograms(Context *context){
+  while(VERSION == context->token_to_scan){
+    if(!Program(context)){
+      continue ;
+    }else{
+      context->set_error(INVALID_PROGRAM);
+      return 1;
+    }
+  }
+  return 0;
+}
+
 }  // namespace brig
 }  // namespace hsa
