@@ -2443,7 +2443,8 @@ int InitializableDecl(Context* context) {
   // first_token is READONLY or GLOBAL
   BrigStorageClass32_t storage_class = context->token_value.storage_class;
 
-  context->token_to_scan = yylex();
+  if(!context->had_yylex)
+    context->token_to_scan = yylex();
 
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
