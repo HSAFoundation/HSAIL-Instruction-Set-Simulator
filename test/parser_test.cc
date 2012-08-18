@@ -795,27 +795,27 @@ TEST(ParserTest, Initializers) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
 
-  input.assign("= 12, 13,14 \n");  // DecimalInitializer
+  input.assign("= 12, -13,14 \n");  // DecimalInitializer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
 
-  input.assign("={ 1.2f, 1.3f,-1.4f }\n");  // SingleInitializer
+  input.assign("={ 1.2f, 1.3f,1.4f }\n");  // SingleInitializer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
 
-  input.assign("= 1.2f, 1.3f,-1.4f \n");  // SingleInitializer
+  input.assign("= 1.2f, 1.3f,1.4f \n");  // SingleInitializer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
 
-  input.assign("={ 1.2L, 1.3L,-1.4L }\n");  // FloatInitializer
+  input.assign("={ 1.2L, 1.3L,1.4L }\n");  // FloatInitializer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
 
-  input.assign("= 1.2L, 1.3L,-1.4L \n");  // FloatInitializer
+  input.assign("= 1.2L, 1.3L,1.4L \n");  // FloatInitializer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
@@ -840,29 +840,29 @@ TEST(ParserTest, InitializableDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
 
-  input.assign("global_u32 &x[3] = 12, 13,14 ; \n");
+  input.assign("global_u32 &x[3] = 12, -13,14 ; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
 
   // SingleInitializer
-  input.assign("readonly_f32 %f[3] = { 1.2f, 1.3f,-1.4f };\n");
+  input.assign("readonly_f32 %f[3] = { 1.2f, 1.3f,1.4f };\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
 
-  input.assign("global_f32 &c[3] = 1.2f, 1.3f,-1.4f ;\n");
+  input.assign("global_f32 &c[3] = 1.2f, 1.3f,1.4f ;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
 
   // FloatInitializer
-  input.assign("readonly_f64 %d[3] ={ 1.2L, 1.3L,-1.4L; }\n");
+  input.assign("readonly_f64 %d[3] ={ 1.2L, 1.3L,1.4L };\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
 
-  input.assign("global_f64 %g[3] = 1.2L, 1.3L,-1.4L ;\n");
+  input.assign("global_f64 %g[3] = 1.2L, 1.3L,1.4L ;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
@@ -950,7 +950,7 @@ TEST(ParserTest, ProgWithGlobalDecl) {
   context->set_error_reporter(main_reporter);
 
   std::string input("version 1:0:$small;\n");
-  input.append("readonly_f32 %f[3] = { 1.2f, 1.3f,-1.4f };\n");
+  input.append("readonly_f32 %f[3] = { 1.2f, 1.3f,1.4f };\n");
   input.append("function &callee(arg_f32 %output)(arg_f32 %input) {\n");
   input.append("ret;\n");
   input.append("};\n");
@@ -2798,139 +2798,6 @@ TEST(ParserTest, MemoryOperand) {
 
   delete lexer;
 };
-
-TEST(ParserTest, IntegerLiteral) {
-  // Case 1 Start reg '+' int
-  std::string input("$s1+5");
-  Lexer* lexer = new Lexer(input);
-  MockErrorReporter mer;
-  // register error reporter with context
-  context->set_error_reporter(&mer);
-  context->clear_context();
-  // delegate some calls to FakeErrorReporter
-  mer.DelegateToFake();
-
-  EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
-  EXPECT_EQ('+', lexer->get_next_token());
-
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(5, context->token_value.int_val);
-  // Case 1 End
-
-  // Case 2 Start reg '+' int
-  input.assign("$s11+-11");
-  lexer->set_source_string(input);
-
-  EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
-  EXPECT_EQ('+', lexer->get_next_token());
-
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(-11, context->token_value.int_val);
-  // Case 2 End
-
-  // Case 3 Start  double
-  input.assign("-11.7777l");
-  lexer->set_source_string(input);
-
-  EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
-  EXPECT_EQ(-11.7777, context->token_value.double_val);
-  // Case 3 End
-
-  // Case 4 Start int '-' int
-  input.assign("11-7");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(11, context->token_value.int_val);
-
-  EXPECT_EQ('-', lexer->get_next_token());
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(7, context->token_value.int_val);
-  // Case 4 End
-
-  // Case 5 Start int ',' int
-  input.assign("+11,-11");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(11, context->token_value.int_val);
-  EXPECT_EQ(',', lexer->get_next_token());
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(-11, context->token_value.int_val);
-  // Case 5 End
-
-  // Case 6 Start int
-  input.assign("+7");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(7, context->token_value.int_val);
-  // Case 6 End
-
-  // Case 7 Start '(' int ')'
-  input.assign("(+7)");
-  lexer->set_source_string(input);
-
-
-  EXPECT_EQ('(', lexer->get_next_token());
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(7, context->token_value.int_val);
-  EXPECT_EQ(')', lexer->get_next_token());
-  // Case 7 End
-
-  // Case 9 Start int + int
-  input.assign("5+-3");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(5, context->token_value.int_val);
-  EXPECT_EQ('+', lexer->get_next_token());
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(-3, context->token_value.int_val);
-  // Case 9 End
-
-  // Case 10 Start int '+' int
-  input.assign("-5++3");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(-5, context->token_value.int_val);
-  EXPECT_EQ('+', lexer->get_next_token());
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, IntegerLiteral(context));
-  EXPECT_EQ(3, context->token_value.int_val);
-  // Case 10 End
-
-
-  // Case 11
-  input.assign("+a");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_NE(0, IntegerLiteral(context));
-
-  delete lexer;
-}
 
 TEST(ParserTest, GlobalGroupDecl) {
   // Create a lexer

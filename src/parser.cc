@@ -124,7 +124,7 @@ int BaseOperand(Context* context) {
     boi.bits.f = context->token_value.float_val;
     context->append_operand(&boi);
     return 0;
-  } else if (!IntegerLiteral(context)) {
+  } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     BrigOperandImmed boi = {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
@@ -140,7 +140,7 @@ int BaseOperand(Context* context) {
     return 0;  // currently not supported
   } else if (context->token_to_scan == '-') {
     context->token_to_scan = yylex();
-    if (!IntegerLiteral(context)) {
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       BrigOperandImmed boi = {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
@@ -159,7 +159,7 @@ int BaseOperand(Context* context) {
     if (context->token_to_scan == '(') {   // should be '('
       // check if we have a decimal list single or float list single
       context->token_to_scan = yylex();
-      if (!IntegerLiteral(context)) {
+      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         BrigOperandImmed boi = {
         sizeof(boi),        // size
         BrigEOperandImmed,  // kind
@@ -176,7 +176,7 @@ int BaseOperand(Context* context) {
         } else {
           while (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            if (!IntegerLiteral(context)) {
+            if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
               BrigOperandImmed boi = {
                 sizeof(boi),        // size
                 BrigEOperandImmed,  // kind
@@ -272,7 +272,7 @@ int AddressableOperand(Context* context) {
       return 0;
     } else if (context->token_to_scan == '<') {
       context->token_to_scan = yylex();
-      if (!IntegerLiteral(context)) {
+      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == '>') {
           context->token_to_scan = yylex();
@@ -298,7 +298,7 @@ int AddressableOperand(Context* context) {
         } else if ((context->token_to_scan == '+') ||
                    (context->token_to_scan == '-')) {
           context->token_to_scan = yylex();
-          if (!IntegerLiteral(context)) {
+          if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
             context->token_to_scan = yylex();
             if (context->token_to_scan == '>') {
               context->token_to_scan = yylex();
@@ -969,13 +969,13 @@ int Version(Context* context) {
   bdv.profile = BrigEFull;
   bdv.ftz = BrigENosftz;
   context->token_to_scan = yylex();
-  if (!IntegerLiteral(context)) {
+  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     bdv.major = context->token_value.int_val;
     context->token_to_scan = yylex();
     if (context->token_to_scan == ':') {
       context->token_to_scan = yylex();
       // check for minor
-      if (!IntegerLiteral(context)) {
+      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         bdv.minor = context->token_value.int_val;
         context->token_to_scan = yylex();
 
@@ -1049,7 +1049,7 @@ int Version(Context* context) {
 int Alignment(Context* context) {
   // first token must be "align" keyword
   context->token_to_scan = yylex();
-  if (!IntegerLiteral(context)) {
+  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     context->set_alignment(context->token_value.int_val);
     context->token_to_scan = yylex();
     return 0;
@@ -1184,7 +1184,7 @@ int FBar(Context* context) {
   context->token_to_scan = yylex();
   if (context->token_to_scan == '(') {
     context->token_to_scan = yylex();
-    if (!IntegerLiteral(context)) {
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       context->set_fbar(context->token_value.int_val);
       context->token_to_scan = yylex();
       if (context->token_to_scan == ')') {
@@ -1212,7 +1212,7 @@ int ArrayDimensionSet(Context* context) {
       } else {  // no more item
         break;
       }
-    } else if (!IntegerLiteral(context)) {
+    } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       context->token_to_scan = yylex();  // scan next
     } else {
       context->set_error(MISSING_CLOSING_BRACKET);
@@ -2068,7 +2068,7 @@ int OptionalWidth(Context* context) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ALL) {
         context->token_to_scan = yylex();
-      } else if (!IntegerLiteral(context)) {
+      } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         context->token_to_scan = yylex();
       } else {
         context->set_error(MISSING_WIDTH_INFO);
@@ -2386,87 +2386,56 @@ int Call(Context* context) {
 
 int Initializer(Context* context) {
   // first token should be '='
-  context->token_to_scan = yylex();
-  if (context->token_to_scan == TOKEN_LABEL) {
-    context->set_error(INVALID_INITIALIZER);
-    return 1;
-  } else if (context->token_to_scan == '{') {
+  if (context->token_to_scan == '=') {
+    bool hasCurlyBrackets = false;
     context->token_to_scan = yylex();
-  }
-
-  // check type of initializer
-  if (context->token_to_scan == TOKEN_LABEL) {
-    // label initializer
-    while (1) {
+    if (context->token_to_scan == '{') {
       context->token_to_scan = yylex();
-      if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_LABEL) {
-          continue;
+      hasCurlyBrackets = true;
+    }
+    switch (context->token_to_scan) {
+      case TOKEN_DOUBLE_CONSTANT:
+        if (!FloatListSingle(context)) {
+          break;
         } else {
-          context->set_error(MISSING_LABEL);
           return 1;
         }
-      } else {
-        break;
-      }
-    }  // while(1)
-
-  } else if (!IntegerLiteral(context)) {
-    // decimal initializer
-    while (1) {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ',') {
+      case TOKEN_INTEGER_CONSTANT:
+        if (!DecimalListSingle(context)) {
+          break;
+        } else {
+          return 1;
+        }
+      case TOKEN_SINGLE_CONSTANT: 
+        if (!SingleListSingle(context)) {
+          break;
+        } else {
+          return 1;
+        }
+      case TOKEN_LABEL: 
+        if (hasCurlyBrackets) {
+          if (!LabelList(context)) {
+            break;
+          }
+        } else {
+          return 1;
+        }
+      default:
+        context->set_error(INVALID_INITIALIZER);
+        return 1;
+    }
+    if (hasCurlyBrackets) {
+      if (context->token_to_scan == '}') {
         context->token_to_scan = yylex();
-        if (!IntegerLiteral(context)) {
-          continue;
-        } else {
-          context->set_error(MISSING_INTEGER_CONSTANT);
-          return 1;
-        }
+        return 0;
       } else {
-        break;
+        context->set_error(MISSING_CLOSING_BRACKET);
+        return 1;
       }
-    }  // while(1)
-  } else if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
-    // single initializer
-    while (1) {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
-          continue;
-        } else {
-          context->set_error(MISSING_SINGLE_CONSTANT);
-          return 1;
-        }
-      } else {
-        break;
-      }
-    }  // while(1)
-  } else if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
-    // double initializer
-    while (1) {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
-          continue;
-        } else {
-          context->set_error(MISSING_DOUBLE_CONSTANT);
-          return 1;
-        }
-      } else {
-        break;
-      }
-    }  // while(1)
-  } else {
-    context->set_error(INVALID_INITIALIZER);
-    return 1;
-  }
-  if (context->token_to_scan == '}') {
-    context->token_to_scan = yylex();
-  }
+    } else {
+      return 0;
+    }
+  } // '='
   return 0;
 }
 
@@ -2683,7 +2652,7 @@ int FileDecl(Context* context) {
   // first token is _FILE "file"
   context->token_to_scan = yylex();
 
-  if (!IntegerLiteral(context)) {
+  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     context->token_to_scan = yylex();
 
     if (context->token_to_scan == TOKEN_STRING) {
@@ -2741,24 +2710,24 @@ int SysCall(Context* context) {
     if (yylex() == ',') {
       context->token_to_scan = yylex();
 
-      if (!IntegerLiteral(context)) {
+      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         if (yylex() == ',') {
           context->token_to_scan = yylex();
           if (((context->token_to_scan == TOKEN_SREGISTER) ||
                (context->token_to_scan == TOKEN_WAVESIZE) ||
-               (!IntegerLiteral(context)))) {
+               (context->token_to_scan == TOKEN_INTEGER_CONSTANT))) {
             if (yylex() == ',') {
               context->token_to_scan = yylex();
 
               if ((context->token_to_scan == TOKEN_SREGISTER) ||
                   (context->token_to_scan == TOKEN_WAVESIZE) ||
-                  (!IntegerLiteral(context))) {
+                  (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
                 if (yylex() == ',') {
                   context->token_to_scan = yylex();
 
                   if ((context->token_to_scan == TOKEN_SREGISTER) ||
                       (context->token_to_scan == TOKEN_WAVESIZE) ||
-                      (!IntegerLiteral(context))) {
+                      (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
                     context->token_to_scan = yylex();
 
                     if (context->token_to_scan == ';') {
@@ -3175,7 +3144,7 @@ int OffsetAddressableOperand(Context* context) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == '+' || context->token_to_scan == '-') {
       context->token_to_scan = yylex();
-      if (!IntegerLiteral(context)) {
+      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == ']') {
           context->token_to_scan = yylex();
@@ -3195,7 +3164,7 @@ int OffsetAddressableOperand(Context* context) {
       context->set_error(MISSING_CLOSING_BRACKET);
       return 1;
     }
-  } else if (!IntegerLiteral(context)) {
+  } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == ']') {
       context->token_to_scan = yylex();
@@ -3230,7 +3199,7 @@ int MemoryOperand(Context* context) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == '+' || context->token_to_scan == '-') {
         context->token_to_scan = yylex();
-        if (!IntegerLiteral(context)) {
+        if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
           context->token_to_scan = yylex();
         } else {
           return 1;
@@ -3240,7 +3209,7 @@ int MemoryOperand(Context* context) {
         context->token_to_scan = yylex();
         return 0;
       }
-    } else if (!IntegerLiteral(context)) {
+    } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ']') {
         context->token_to_scan = yylex();
@@ -3672,26 +3641,6 @@ int Mov(Context* context) {
   }
   return 1;
 }
-int IntegerLiteral(Context* context) {
-  int first_token = context->token_to_scan;
-  int sign = 1;
-  switch (first_token) {
-  case '-':
-    sign = -1;
-  case '+':
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      context->token_value.int_val *= sign;
-    } else {
-      return 1;
-    }
-  case TOKEN_INTEGER_CONSTANT:
-    // Note: Here doesn't update token
-    return 0;
-  }
-  return 1;
-}
-
 
 int GlobalGroupDecl(Context* context) {
   // first token is Group
@@ -3864,7 +3813,7 @@ int LdModifier(Context *context) {
 
       if (context->token_to_scan == '(') {
         context->token_to_scan = yylex();
-        if (!IntegerLiteral(context)) {
+        if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
           context->token_to_scan = yylex();
           if (context->token_to_scan == ')') {
             context->token_to_scan = yylex();
@@ -5142,11 +5091,11 @@ int AtomicNoRet(Context* context) {
 int Location(Context* context) {
   // first token is LOG
   context->token_to_scan = yylex();
-  if (!IntegerLiteral(context)) {
+  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     context->token_to_scan = yylex();
-    if (!IntegerLiteral(context)) {
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       context->token_to_scan = yylex();
-      if (!IntegerLiteral(context)) {
+      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == ';') {
           context->token_to_scan = yylex();
@@ -5174,22 +5123,22 @@ int Control(Context* context) {
   } else if (context->token_to_scan == MEMOPT_OFF) {
   } else if (context->token_to_scan == WORKGROUPS_PER_CU) {
     context->token_to_scan = yylex();
-    if (!IntegerLiteral(context)) {
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     } else {  // Integer Constant
       context->set_error(MISSING_INTEGER_CONSTANT);
       return 1;
     }
   } else if (context->token_to_scan == ITEMS_PER_WORKGROUP) {
     context->token_to_scan = yylex();
-    if (!IntegerLiteral(context)) {
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (!IntegerLiteral(context)) {
+        if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
           context->token_to_scan = yylex();
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            if (!IntegerLiteral(context)) {
+            if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
             } else {  // Integer Constant
               context->set_error(MISSING_INTEGER_CONSTANT);
               return 1;
@@ -5242,7 +5191,20 @@ int Pragma(Context* context) {
   context->set_error(UNKNOWN_ERROR);
   return 1;
 }
-
+int LabelList(Context* context) {
+  while (context->token_to_scan == TOKEN_LABEL) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      continue;
+    } else {
+      // Note: the token has been updated
+      return 0;
+    }
+  }  // While
+  context->set_error(MISSING_DOUBLE_CONSTANT);
+  return 1;
+}
 int FloatListSingle(Context* context) {
   while (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
     context->token_to_scan = yylex();
@@ -5257,20 +5219,35 @@ int FloatListSingle(Context* context) {
   context->set_error(MISSING_DOUBLE_CONSTANT);
   return 1;
 }
+
 int DecimalListSingle(Context* context) {
-  while (!IntegerLiteral(context)) {
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ',') {
+
+  while (1) {
+    if (context->token_to_scan == '-') {
       context->token_to_scan = yylex();
-      continue;
-    } else {
-      // Note: the token has been updated
-      return 0;
+      if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+        context->set_error(MISSING_INTEGER_CONSTANT);
+        return 1;
+      } else {
+        context->token_value.int_val *= (-1);
+      }
     }
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        continue;
+      } else {
+        // Note: the token has been updated
+        return 0;
+      }  // ','
+    }  // integer constant
+    return 0;
   }  // While
   context->set_error(MISSING_INTEGER_CONSTANT);
   return 1;
 }
+
 
 int Block(Context* context) {
   // first token is BLOCK
