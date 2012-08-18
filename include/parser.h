@@ -66,6 +66,7 @@ int Instruction0(Context* context);
 int Instruction1(Context* context);
 int RIW_Operand(Context* context);
 int Segp(Context* context);
+int Operation(Context* context);
 int IntegerLiteral(Context* context);
 int GlobalGroupDecl(Context* context);
 /* MUL */

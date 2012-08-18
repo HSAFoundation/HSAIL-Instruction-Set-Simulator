@@ -2147,6 +2147,188 @@ TEST(ParserTest, Segp) {
   delete lexer;
 };
 
+// -----------------  Test for Operation rule -------------------
+// format:
+// Operation ::= Instruction1
+//               | Instruction0
+//               | Instruction2
+//               | Instruction3
+//               | Instruction4
+//               | cmp
+//               | mul
+//               | Instruction5
+//               | mov
+//               | segp
+//               | lda
+//               | ldc
+//               | atom
+//               | imageread
+//               | ld
+//               | st
+//               | cvt
+//               | atomicNoRet
+//               | imageNoRet
+//               | imageRet
+//               | sync
+//               | bar
+//               | syscall
+//               | ret
+//               | branch
+//               | query
+//               | imagestore
+//               | imageload
+
+TEST(ParserTest, Operation) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input("laneid_ftz $s1;\n"); // Instruction1
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("nop;\n"); // Instruction0
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("frsqrt_ftz_f32 $s1, $s0;\n"); // Instruction2
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign(" add_pp_sat_u16x2 $s1, $s0, $s3;\n"); 
+  // Instruction3
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("lerp_b32 $s5, $s0, $s1, $s2;\n"); // Instruction4
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("cmp_lt_f32_f32 $s1, $s2, 0.0f;"); // cmp
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("mul_ftz_pp_s32 $s1, $s3, $s9;"); // mul
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("f2u4_u64 , $s1, $s2, $s3, $s4, 0xD41;"); 
+  // Instruction5
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("mov_b32 $s1, 0;\n"); // mov
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("ftos_arg_s16 $d3, $d4;\n"); // segp
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("lda_group_b32 $s1, [%g];\n"); // lda
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("ldc_b64 $s1, e123;\n"); // ldc
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("atomic_exch_ar_region_u32 $s4, [&a], 1;\n"); // atom
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],"); 
+  // imageread
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("ld_equiv(1)_u64 $d6, [128];"); // ld
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("st_f32 $s1, [$s3+4];"); // st
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("cvt_u32_f64 $d2, $d1;\n"); // cvt
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("atomicNoRet_min_u64 [&x], 23;"); // atomicNoRet
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("atomic_image_and_3d_u32 $s4, [&namedRWImg2],"); 
+  // imageRet
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("sync_group;"); // sync
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("barrier_global;"); // bar
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("syscall $s1, 0xff, 1, $s3, 2;\n"); // syscall
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("ret;"); // ret
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("cbr $s1, @then; \n"); // branch
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("query_data_u32  $c1 , [&Test<$d7  + 100>]; \n"); 
+  // query
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4),"); 
+  // imagestore
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  input.assign("ld_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],"); 
+  input.append("($s4,$s1,$s2,$s3);");
+  // imageload
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Operation(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 
