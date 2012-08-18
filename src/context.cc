@@ -73,6 +73,7 @@ void Context::set_default_values(void) {
   valid_string = false;
   yycolno = 0;
   yylineno = 1;
+  arg_output = false ;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {

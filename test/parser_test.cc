@@ -3842,7 +3842,7 @@ TEST(ParserTest,GlobalDecl){
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
-  input.assign("");
+  input.assign("const  extern private_b32 &tmp[2];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
@@ -3858,7 +3858,7 @@ TEST(ParserTest, Program) {
 
   std::string input("version 1:0:$small;\n");
 
-  input.assign("block \"rti\"\n"); // block
+  input.append("block \"rti\"\n"); // block
   input.append("blockstring \"meta info about this function\";\n");
   input.append("endblock;\n");
 

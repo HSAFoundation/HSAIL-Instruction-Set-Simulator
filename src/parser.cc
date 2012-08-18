@@ -1921,59 +1921,35 @@ int Program(Context* context) {
     if (!Version(context)) {
       // parse topLevelStatement
       while (context->token_to_scan && (context->token_to_scan != VERSION)) {
-        if ( (context->token_to_scan == ALIGN) ||
+        if(!Directive(context)) {
+          continue ;
+        }else if(KERNEL == context->token_to_scan) {
+          if(!Kernel(context))
+            continue ;
+          return 1 ;
+        }else if(SIGNATURE == context->token_to_scan){
+          if(!FunctionSignature(context))
+            continue ;
+           return 1;
+        }else if ( (context->token_to_scan == ALIGN) ||
              (context->token_to_scan == CONST) ||
              (context->token_to_scan == EXTERN) ||
              (context->token_to_scan == STATIC) ) {
-          result = DeclPrefix(context);
-          if (result)
-            return 1;
+          if(DeclPrefix(context)){
+              return 1;
+          }
         }
-
-        // Found "function" keyword ------------------------
-        if (context->token_to_scan == FUNCTION) {
-            // add default struct (Miao)
-
-          context->current_bdf_offset = context->get_directive_offset();
-          BrigdOffset32_t bdf_offset = context->current_bdf_offset;
-
-          BrigDirectiveFunction bdf = {
-          40,                      // size
-          BrigEDirectiveFunction,  // kind
-          context->get_code_offset(),   // c_code
-          0,  // name
-          0,  // in param count
-          bdf_offset+40,          // d_firstScopedDirective
-          0,  // operation count
-          bdf_offset+40,          // d_nextDirective
-          context->get_attribute(),  // attribute
-          context->get_fbar(),   // fbar count
-          0,    // out param count
-          0     // d_firstInParam
-          };
-
-
-          // look at next token
-          if (yylex() == TOKEN_GLOBAL_IDENTIFIER) {
-            std::string func_name = context->token_value.string_val;
-
-            BrigsOffset32_t check_result = context->add_symbol(func_name);
-
-            // add the func_name to the func_map.
-            context->func_map[func_name] = context->current_bdf_offset;
-
-            bdf.s_name = check_result;
-            context->append_directive(&bdf);
-
+        if(context->token_to_scan == FUNCTION){//functionDecl or functionDefinition
+          if(TOKEN_GLOBAL_IDENTIFIER == yylex()){
             // check return argument list
-            if (yylex() == '(') {
-                context->set_arg_output(true);
-                context->token_to_scan = yylex();
+            if ('(' == yylex()) {
+            // context->set_arg_output(true);
+              context->token_to_scan = yylex();
 
-              if (context->token_to_scan == ')') {   // empty argument list body
+              if (')' == context->token_to_scan) {   // empty argument list body
                 context->token_to_scan = yylex();
               } else if (!ArgumentListBody(context)) {
-                if (context->token_to_scan == ')') {
+                if (')' == context->token_to_scan) {
                   context->token_to_scan = yylex();
                 } else {
                   context->set_error(MISSING_CLOSING_PARENTHESIS);
@@ -1984,19 +1960,19 @@ int Program(Context* context) {
                 return 1;
               }
             } else {  // missing '('
-              context->set_error(MISSING_ARGUMENT_LIST);
-              return 1;
+               context->set_error(MISSING_ARGUMENT_LIST);
+                return 1;
             }          // if found '(' - returnArgList
 
             // check argument list
-            if (context->token_to_scan == '(') {
-              context->set_arg_output(false);
+            if ('(' == context->token_to_scan) {
+              //context->set_arg_output(true);
               context->token_to_scan = yylex();
 
-              if (context->token_to_scan == ')') {   // empty argument list body
-                  context->token_to_scan = yylex();
+              if (')' == context->token_to_scan) {   // empty argument list body
+                context->token_to_scan = yylex();
               } else if (!ArgumentListBody(context)) {
-                if (context->token_to_scan == ')') {
+                if (')' == context->token_to_scan) {
                   context->token_to_scan = yylex();
                 } else {
                   context->set_error(MISSING_CLOSING_PARENTHESIS);
@@ -2007,9 +1983,9 @@ int Program(Context* context) {
                 return 1;
               }
             } else {  // missing '('
-              context->set_error(MISSING_ARGUMENT_LIST);
-              return 1;
-            }            // if found '(' - argList
+               context->set_error(MISSING_ARGUMENT_LIST);
+               return 1;
+            }          // if found '(' - returnArgList
 
             // check for optional FBar
             if (context->token_to_scan == _FBAR) {
@@ -2026,9 +2002,9 @@ int Program(Context* context) {
             } else if (context->token_to_scan == '{') {
               // so this must be a functionDefinition
               if (!Codeblock(context)) {
-                // check codeblock of function
+                 // check codeblock of function
                 if (context->token_to_scan == ';') {
-                    context->token_to_scan = yylex();
+                  context->token_to_scan = yylex();
                   continue;
                 } else {
                   context->set_error(MISSING_SEMICOLON);
@@ -2040,19 +2016,42 @@ int Program(Context* context) {
             } else {
               context->set_error(MISSING_SEMICOLON);
             }
-          }       // if found TOKEN_GLOBAL_ID
-        } else if (context->token_type == INITIALIZABLE_ADDRESS) {
-          // global initializable
-          // this is an initializable declaration
-          if (!InitializableDecl(context)) {
-          } else {
+          }else{ //TOKEN_GLOBAL_IDENTIFIER
+             return 1;
+          }
+        }else if(GLOBAL == context->token_to_scan){
+          context->token_to_scan = yylex();
+          context->had_yylex = 1 ;
+          if(!GlobalImageDecl(context)){
+            context->had_yylex = 0 ;
+          }else if(!GlobalReadOnlyImageDecl(context)){
+            context->had_yylex = 0 ;
+          }else if(!GlobalSamplerDecl(context)){
+            context->had_yylex = 0 ;
+          }else if(!InitializableDecl(context)){
+            context->had_yylex = 0 ;
+          }else{
+            context->had_yylex = 0 ;
+            context->set_error(MISSING_IDENTIFIER);
             return 1;
           }
-        } else  {
-          return 1;  // currently only support functions
-        }
-      }    // while (first_token)
-      return 0;
+        }else if(GROUP == context->token_to_scan){
+          if(!GlobalGroupDecl(context))
+           continue ;
+           return 1;
+        }else if(PRIVATE == context->token_to_scan){
+          if(!GlobalPrivateDecl(context))
+            continue;
+            return 1;
+        }else if(READONLY == context->token_to_scan){
+          if(!InitializableDecl(context))
+            continue;
+            return 1;
+          }else{ 
+            return  1;
+          }
+       }    // while (first_token)
+       return 0;
     }   // if (!Version)
   } else {
     context->set_error(MISSING_VERSION_STATEMENT);
