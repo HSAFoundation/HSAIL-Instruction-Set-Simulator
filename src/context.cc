@@ -30,6 +30,7 @@ Context::Context(void) {
   yylineno = 1;
   error_reporter_set = false;
   set_default_values();
+  had_yylex = 0 ;
 }
 
 // default destructor
