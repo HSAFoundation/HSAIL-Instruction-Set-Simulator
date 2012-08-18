@@ -64,6 +64,9 @@ int Mov(Context* context);
 int Atom(Context* context);
 int Instruction0(Context* context);
 int Instruction1(Context* context);
+int Operation(Context* context);
+int Segp(Context* context);
+int RIW_Operand(Context* context);
 
 int GlobalGroupDecl(Context* context);
 /* MUL */
