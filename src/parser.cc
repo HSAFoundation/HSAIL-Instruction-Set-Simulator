@@ -4371,6 +4371,11 @@ int Instruction1(Context* context) {
   return 1;
 }
 
+// this function specifies operand must be register,immediate value,or WAVESIZE 
+int RIW_Operand(Context* context) {
+  return 1;
+}
+
 int Segp(Context* context) {
   // first token is SEGMENTP "segmentp" or FTOS "ftos" or STOF "stof"
   context->token_to_scan = yylex();
@@ -4382,7 +4387,7 @@ int Segp(Context* context) {
       if (!Operand(context)) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          if (!Operand(context)) {
+          if (!RIW_Operand(context)) {
             if (context->token_to_scan == ';') {
               return 0;
             } else {

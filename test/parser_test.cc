@@ -2041,6 +2041,40 @@ TEST(ParserTest, Instruction1) {
   delete lexer;
 };
 
+// -------------- Test for RIW_Operand rule ---------------
+// this rule specifies operand must be register,immediate value,or WAVESIZE
+TEST(ParserTest, RIW_Operand) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input("$s0;\n"); // register  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RIW_Operand(context));
+
+  input.assign("$c5;\n"); // register  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RIW_Operand(context));
+
+  input.assign("3424;\n"); // Imm  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RIW_Operand(context));
+
+  input.assign("23.58L;\n"); // Imm  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RIW_Operand(context));
+
+  input.assign("WAVESIZE;\n"); // wavesize  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, RIW_Operand(context));
+
+  delete lexer;
+};
 // -----------------  Test for segp rule -------------------
 // format:
 // segp ::= segops addressSpaceIdentifier dataTypeId
@@ -2056,19 +2090,19 @@ TEST(ParserTest, Segp) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
   // correct cases
-  std::string input("segmentp_private_b1 $c1, $s0;\n");  
+  std::string input("segmentp_private_b1 $c1, 1;\n");  
   // segmentp
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
 
-  input.assign("segmentp_group_b8 $c1, $d0;\n");  
+  input.assign("segmentp_group_b8 $c1, 24.87L;\n");  
   // segmentp
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
 
-  input.assign("ftos_group_u64 $d1, $d2;\n");  // ftos
+  input.assign("ftos_group_u64 $d1, WAVESIZE;\n");  // ftos
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
