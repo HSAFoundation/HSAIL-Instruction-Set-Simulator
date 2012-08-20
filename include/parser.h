@@ -110,6 +110,8 @@ int SobInitializer(Context *context);
 int GlobalSamplerDecl(Context *context);
 int GlobalDecl(Context *context);
 
+int SequenceOfPrograms(Context *context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
