@@ -4338,34 +4338,74 @@ int RIW_Operand(Context* context) {
 }
 
 int Segp(Context* context) {
-  // first token is SEGMENTP "segmentp" or FTOS "ftos" or STOF "stof"
-  context->token_to_scan = yylex();
-
-  if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+  if (context->token_to_scan == SEGMENTP) { //segmentp
     context->token_to_scan = yylex();
-    if (context->token_type == DATA_TYPE_ID) {
+    if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
       context->token_to_scan = yylex();
-      if (!Operand(context)) {
-        if (context->token_to_scan == ',') {
+      if (context->token_to_scan == _B1) { //datatypeId must be b1
+        context->token_to_scan = yylex();
+        //dest must be c register
+        if (context->token_to_scan == TOKEN_CREGISTER) { 
           context->token_to_scan = yylex();
-          if (!RIW_Operand(context)) {
-            if (context->token_to_scan == ';') {
-              return 0;
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!RIW_Operand(context)) {
+              if (context->token_to_scan == ';') {
+                return 0;
+              } else {
+                context->set_error(MISSING_SEMICOLON);
+              }
             } else {
-              context->set_error(MISSING_SEMICOLON);
+              context->set_error(MISSING_OPERAND);
             }
           } else {
-            context->set_error(MISSING_OPERAND);
+            context->set_error(MISSING_COMMA);
           }
         } else {
-          context->set_error(MISSING_COMMA);
+          context->set_error(MISSING_OPERAND);
         }
       } else {
-        context->set_error(MISSING_OPERAND);
+        context->set_error(MISSING_DATA_TYPE);
       }
     } else {
-      context->set_error(MISSING_DATA_TYPE);
+      // should be missing ADDRESS_SPACE_IDENTIFIER
+      context->set_error(UNKNOWN_ERROR);  
     }
+  } else if (context->token_to_scan == STOF || // stof or ftos
+             context->token_to_scan == FTOS) {
+    context->token_to_scan = yylex();
+    if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == _U32 ||
+          context->token_to_scan == _U64) { //datatypeId must be u32 or u64
+        context->token_to_scan = yylex();
+        //dest must be d register
+        if (context->token_to_scan == TOKEN_DREGISTER) { 
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!RIW_Operand(context)) {
+              if (context->token_to_scan == ';') {
+                return 0;
+              } else {
+                context->set_error(MISSING_SEMICOLON);
+              }
+            } else {
+              context->set_error(MISSING_OPERAND);
+            }
+          } else {
+            context->set_error(MISSING_COMMA);
+          }
+        } else {
+          context->set_error(MISSING_OPERAND);
+        }
+      } else {
+        context->set_error(MISSING_DATA_TYPE);
+      }
+    } else {
+      // should be missing ADDRESS_SPACE_IDENTIFIER
+      context->set_error(UNKNOWN_ERROR);  
+    }  
   }
   return 1;
 }

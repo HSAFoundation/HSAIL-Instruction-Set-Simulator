@@ -2075,15 +2075,11 @@ TEST(ParserTest, RIW_Operand) {
 
   delete lexer;
 };
+
 // -----------------  Test for segp rule -------------------
 // format:
 // segp ::= segops addressSpaceIdentifier dataTypeId
 //          operand "," operand ";"
-
-// !!!!!!!!!!!! 
-//src should be operand instead of memoryoperand.
-// Manual here makes a mistake.
-
 TEST(ParserTest, Segp) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -2096,7 +2092,7 @@ TEST(ParserTest, Segp) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
 
-  input.assign("segmentp_group_b8 $c1, 24.87L;\n");  
+  input.assign("segmentp_group_b1 $c1, 24.87L;\n");  
   // segmentp
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2107,12 +2103,12 @@ TEST(ParserTest, Segp) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
 
-  input.assign("ftos_arg_s16 $d3, $d4;\n");  // ftos
+  input.assign("ftos_arg_u32 $d3, $d4;\n");  // ftos
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
 
-  input.assign("stof_spill_u8 $d1, $d4;\n");  // stof
+  input.assign("stof_spill_u32 $d2, 235;\n");  // stof
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
@@ -2128,7 +2124,7 @@ TEST(ParserTest, Segp) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Segp(context));
 
-  input.assign("ftos_spill $c0, $c1;\n");  
+  input.assign("ftos_spill $d0, $c1;\n");  
   // lack of datatypeId
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2139,7 +2135,7 @@ TEST(ParserTest, Segp) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Segp(context));
 
-  input.assign("segmentp_private_u64 $d2, $d1\n");  // lack of ';' 
+  input.assign("segmentp_private_b1 $c2, $d1\n");  // lack of ';' 
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Segp(context));
