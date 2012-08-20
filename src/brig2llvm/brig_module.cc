@@ -23,7 +23,7 @@ bool BrigModule::validate(void) {
   dir_iterator it = S_.begin();
   const dir_iterator E = S_.end();
 
-  if(!check(it != E, "Empty directive section?")) return false;
+  if(!check(it != E, "Empty directive section")) return false;
 
   // 20.8.22: The BrigDirectiveVersion directive must be the first directive
   // in the .directives section.
@@ -72,7 +72,7 @@ bool BrigModule::validate(void) {
 
 bool BrigModule::validate(const BrigDirectiveFunction *dir) {
   bool valid = true;
-
+  valid &= validateAlignment(dir, 4);
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
   valid &= validateSName(dir->s_name);
@@ -108,7 +108,7 @@ bool BrigModule::validate(const BrigDirectiveFunction *dir) {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveKernel *dir) { 
+bool BrigModule::validate(const BrigDirectiveKernel *dir) {
   bool valid = true;
 
   valid &= check(dir->c_code <= S_.codeSize,
@@ -149,7 +149,7 @@ bool BrigModule::validate(const BrigDirectiveKernel *dir) {
 
 bool BrigModule::validate(const BrigDirectiveSymbol *dir) {
   bool valid = true;
-
+  valid &= validateAlignment(dir, 4);
   valid &= validate(&dir->s);
   valid &= check(!dir->reserved, "Reserved not zero");
 
@@ -189,6 +189,7 @@ bool BrigModule::validate(const BrigDirectiveLabelList *dir) {
 // 20.8.22
 bool BrigModule::validate(const BrigDirectiveVersion *dir) {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
   valid &= check(dir->machine == BrigELarge ||
@@ -229,14 +230,14 @@ bool BrigModule::validate(const BrigDirectiveExtension *dir) {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveArgStart *dir) { 
+bool BrigModule::validate(const BrigDirectiveArgStart *dir) {
   bool valid = true;
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveArgEnd *dir) { 
+bool BrigModule::validate(const BrigDirectiveArgEnd *dir) {
   bool valid = true;
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
@@ -244,18 +245,58 @@ bool BrigModule::validate(const BrigDirectiveArgEnd *dir) {
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
-  return true;
+  bool valid = true;
+  valid &= validateSName(dir->s_name);
+  const char *string = S_.strings + dir->s_name;
+  valid &= check(0 == strcmp(string, "debug") ||
+                 0 == strcmp(string, "rti"),
+                 "Invalid s_name, should be either debug or rti");
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+
+  return valid;
+}
+
+int getTypeSize(BrigDataType16_t type) {
+  if (Brigb1 == type) {
+    return 1;
+  } else if (Brigb8 == type) {
+    return 1;
+  } else if (Brigb16 == type) {
+    return 2;
+  } else if (Brigb32 == type) {
+    return 4;
+  } else if (Brigb64 == type) {
+    return 8;
+  }
+  return 0;
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) {
-  return true;
+  bool valid = true;
+  valid &= check(0 == dir->size % 8,
+                 "Invalid size, must be a multiple of 8");
+  valid &= check(Brigb1 == dir->type  || Brigb8 == dir->type  ||
+                 Brigb16 == dir->type || Brigb32 == dir->type ||
+                 Brigb64 == dir->type,
+                 "Invalid type, must be b1, b8, b16, b32, or b64");
+  valid &= check(sizeof(BrigBlockNumeric) - sizeof(uint64_t) +
+                 dir->elementCount * getTypeSize(dir->type) <= dir->size,
+                 "Directive size too small for elementCount");
+  return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockString *dir) {
-  return true;
+  bool valid = true;
+  valid &= validateSName(dir->s_name);
+  return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) { return true; }
+bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) {
+  bool valid = true;
+  valid &= validateAlignment(dir, 4);
+  return valid;
+}
 bool BrigModule::validate(const BrigDirectivePad *dir) { return true; }
 
 bool BrigModule::validate(const BrigSymbolCommon *s) {
@@ -296,8 +337,16 @@ bool BrigModule::validateSName(BrigsOffset32_t s_name) {
 
   size_t maxlen = S_.stringsSize - s_name;
   size_t length = strnlen(S_.strings + s_name, maxlen);
-  valid &= check(length != maxlen, "string not null terminated");
+  valid &= check(length != maxlen, "String not null terminated");
 
+  return valid;
+}
+
+bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) {
+  bool valid = true;
+  const uint8_t *dirOffset = reinterpret_cast<const uint8_t *>(dir);
+  valid &= check((S_.directives - dirOffset) % alignment == 0,
+                 "Improperly aligned directive");
   return valid;
 }
 

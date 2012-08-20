@@ -117,7 +117,7 @@ TEST(Brig2LLVMTest, Example1) {
 
     hsa::brig::GenLLVM codegen(strings, directives, code, operands);
     codegen();
-    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(0U, codegen.str().size());
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "declare void @get_global_id(i32*, i32*)")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -194,7 +194,7 @@ TEST(Brig2LLVMTest, Example2) {
 
     hsa::brig::GenLLVM codegen(strings, directives, code, operands);
     codegen();
-    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(0U, codegen.str().size());
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "define void @return_true(float* %ret_val)")));
     // HSA-48
@@ -485,14 +485,14 @@ static void appendBrigDirectiveProto(Buffer &buffer,
   const size_t numArgs = E - B;
   EXPECT_EQ(outCount + inCount, numArgs);
 
-  // Since the
-  uint8_t array[sizeof(BrigDirectiveProto) +
-                sizeof(BrigDirectiveProto::BrigProtoType[numArgs - 1])];
+  size_t arraySize = sizeof(BrigDirectiveProto) +
+    sizeof(BrigDirectiveProto::BrigProtoType) * (numArgs - 1);
+  uint8_t *array = new uint8_t[arraySize];
 
   BrigDirectiveProto *bdp =
     reinterpret_cast<BrigDirectiveProto *>(array);
 
-  bdp->size = sizeof(array);
+  bdp->size = arraySize;
   bdp->kind = BrigEDirectiveProto;
   bdp->c_code = c_code;
   bdp->s_name = s_name;
@@ -506,6 +506,8 @@ static void appendBrigDirectiveProto(Buffer &buffer,
     bdp->types[i] = *it++;
 
   buffer.append(bdp);
+
+  delete[] array;
 }
 
 TEST(Brig2LLVMTest, VarSizeDirective) {
@@ -888,5 +890,212 @@ TEST(Brig2LLVMTest, BrigDirectiveArgEnd_test) {
     EXPECT_FALSE(mod1.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "c_code past the code section")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigBlockMethodValidTest) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("rti"));
+    strings.append(std::string("this is a string"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockStart bst = {
+      sizeof(bst),
+      BrigEDirectiveBlockStart,   // kind
+      0,  // c_code
+      0   // s_name
+    };
+    directives.append(&bst);
+    BrigBlockString bstr = {
+      sizeof(bstr),
+      BrigEDirectiveBlockString,   // kind
+      4   // s_name
+    };
+    directives.append(&bstr);
+    BrigBlockNumeric bnu = {
+      sizeof(bnu),
+      BrigEDirectiveBlockNumeric,   // kind
+      Brigb16,   //type
+      4,
+      { { 0 } }
+    };
+    bnu.u16[0] = 255;
+    bnu.u16[1] = 23;
+    bnu.u16[2] = 10;
+    bnu.u16[3] = 23;
+    directives.append(&bnu);
+    BrigBlockEnd bend = {
+      sizeof(bend),
+      BrigEDirectiveBlockEnd   // kind
+    };
+    directives.append(&bend);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveBlockStart_invalid) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("wrong"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockStart bst = {
+      sizeof(bst),
+      BrigEDirectiveBlockStart,   // kind
+      0,  // c_code
+      0   // s_name
+    };
+    directives.append(&bst);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    errMsgOut.flush();
+    EXPECT_FALSE(mod.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid s_name, should be either debug or rti")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockNumeric bnu = {
+      sizeof(bnu),
+      BrigEDirectiveBlockNumeric,   // kind
+      Brigb128,   //type
+      4,
+      { { 0 } }
+    };
+    directives.append(&bnu);
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    errMsgOut.flush();
+    EXPECT_FALSE(mod.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type, must be b1, b8, b16, b32, or b64")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid2) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockNumeric bnu = {
+      sizeof(bnu),
+      BrigEDirectiveBlockNumeric,   // kind
+      Brigb64,   //type
+      4,
+      { { 0 } }
+    };
+    directives.append(&bnu);
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    errMsgOut.flush();
+    EXPECT_FALSE(mod.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Directive size too small for elementCount")));
+  }
+}
+
+TEST(Brig2LLVMTest, BrigDirectiveBlockString_invalid) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigBlockString bstr = {
+      sizeof(bstr),
+      BrigEDirectiveBlockString,   // kind
+      4   // s_name
+    };
+    directives.append(&bstr);
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    errMsgOut.flush();
+    EXPECT_FALSE(mod.isValid());
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "s_name past the strings section")));
   }
 }
