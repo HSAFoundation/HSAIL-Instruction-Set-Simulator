@@ -54,8 +54,7 @@ class BrigModule {
                  unsigned lineno);
 
   bool validate(void);
-  bool validate(const BrigDirectiveFunction *dir);
-  bool validate(const BrigDirectiveKernel *dir);
+  bool validate(const BrigDirectiveMethod *dir);
   bool validate(const BrigDirectiveSymbol *dir);
   bool validate(const BrigDirectiveImage *dir);
   bool validate(const BrigDirectiveSampler *dir);

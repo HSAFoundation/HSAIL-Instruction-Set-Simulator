@@ -490,6 +490,7 @@ struct BrigDirectiveKernel {
 };
 
 struct BrigDirectiveMethod {
+  static const uint16_t DIRKIND = ~0;
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
