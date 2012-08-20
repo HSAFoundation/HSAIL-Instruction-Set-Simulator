@@ -221,6 +221,17 @@ enum BrigPacking {
   BrigPackSsat,
   BrigPackPsat
 };
+// BrigMemorySemantic
+// BrigMemorySemantic is used to specify the semantics for a memory operation.
+enum BrigMemorySemantic {
+  BrigRegular,
+  BrigAcquire,
+  BrigRelease,
+  BrigAcquireRelease,
+  BrigDep,
+  BrigBin
+};
+
 
 // BrigOpcode
 // BrigOpcode is used to specify the opcode for the HSAIL operation.
@@ -835,6 +846,5 @@ struct BrigOperandArgumentRef {
   uint16_t kind;
   BrigdOffset32_t arg;
 };
-
 
 #endif  // INCLUDE_BRIG_H_

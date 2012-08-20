@@ -2990,5 +2990,76 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
   delete lexer;
 };
 
+TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstLdSt ref = {
+    44,                // size
+    BrigEInstLdSt,     // kind
+    BrigLd,            // opcode
+    Brigf32,           // type
+    BrigNoPacking,     // packing
+    {0, 8, 20, 0, 0},  // operand[5]
+    BrigArgSpace,      // storageClass
+    BrigRegular,       // memorySemantic
+    0                  // equivClass
+  };
+  BrigInstLdSt get;  
+
+  std::string input("ld_arg_f32 $s0, [%input];\n");
+  input.append("st_arg_f32 $s0, [%output];\n");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ld(context));
+  EXPECT_EQ(0, St(context));
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+  EXPECT_EQ(ref.storageClass, get.storageClass);
+  EXPECT_EQ(ref.memorySemantic, get.memorySemantic);
+  EXPECT_EQ(ref.equivClass, get.equivClass);
+
+  BrigInstLdSt tmp = {
+    44,                // size
+    BrigEInstLdSt,     // kind
+    BrigSt,            // opcode
+    Brigf32,           // type
+    BrigNoPacking,     // packing
+    {8, 36, 0, 0, 0},  // operand[5]
+    BrigArgSpace,      // storageClass
+    BrigRegular,       // memorySemantic
+    0                  // equivClass
+  };
+  ref = tmp;  
+
+  context->get_code(44, &get);
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+  EXPECT_EQ(ref.storageClass, get.storageClass);
+  EXPECT_EQ(ref.memorySemantic, get.memorySemantic);
+  EXPECT_EQ(ref.equivClass, get.equivClass);
+
+  delete lexer;
+};
+
 }  // namespace brig
 }  // namespace hsa
