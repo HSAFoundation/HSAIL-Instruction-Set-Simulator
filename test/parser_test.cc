@@ -3993,6 +3993,11 @@ TEST(ParserTest,GlobalSamplerDecl){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalSamplerDecl(context));
 
+  input.assign("global _Samp &demo = { boundaryU = linear, boundaryV = linear};");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalSamplerDecl(context));
+  
   input.assign("global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
