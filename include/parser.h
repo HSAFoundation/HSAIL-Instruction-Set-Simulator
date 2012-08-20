@@ -75,7 +75,7 @@ int MulInst(Context* context);
 int Mul24Inst(Context* context);
 int Mad24Inst(Context* context);
 int Ld(Context* context);
-int LdModifier(Context* context);
+int LdModifier(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int St(Context* context);
 int Lda(Context* context);
 int ImageRet(Context* context);
