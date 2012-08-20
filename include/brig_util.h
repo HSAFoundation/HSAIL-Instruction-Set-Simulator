@@ -68,10 +68,10 @@ template<class Super> class brig_iterator : private Super {
   typedef typename Super::Base Base;
   typedef brig_iterator<Super> Self;
 
-  brig_iterator(const uint8_t *curr) : Super(), curr(curr) {}
-  brig_iterator(const brig_iterator &other) : Super(), curr(other.curr) {}
+  explicit brig_iterator(const uint8_t *curr) : Super(), curr(curr) {}
+  brig_iterator(const Self &other) : Super(), curr(other.curr) {}
 
-  template<class T> brig_iterator(const T *t) :
+  template<class T> explicit brig_iterator(const T *t) :
     Super(t), curr(reinterpret_cast<const uint8_t *>(t)) {}
 
   Self operator++(int) {
