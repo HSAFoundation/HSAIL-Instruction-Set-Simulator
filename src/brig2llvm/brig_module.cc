@@ -197,11 +197,12 @@ bool BrigModule::validate(const BrigDirectiveLoc *dir) {
 }
 
 bool BrigModule::validate(const BrigDirectiveInit *dir) { return true; }
+
 bool BrigModule::validate(const BrigDirectiveLabelInit *dir) {
   bool valid = true;
-  valid &= validateAlignment(dir, 4); 
+  valid &= validateAlignment(dir, 4);
   valid &= check(dir->c_code <= S_.codeSize,
-                   "c_code past the code section");
+                 "c_code past the code section");
   for (unsigned i = 0; i < dir->elementCount; i++) {
     valid &= check(dir->d_labels[i] <= S_.directivesSize,
                    "d_labels past the directives section");
