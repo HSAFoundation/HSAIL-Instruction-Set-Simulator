@@ -47,40 +47,44 @@ class BrigModule {
   template<class Message>
   bool check(bool test, const Message &msg,
              const char *filename, unsigned lineno,
-             const char *cause);
+             const char *cause) const;
 
-  template<class Directive>
-  bool checkSize(const Directive *dir, const char *filename,
-                 unsigned lineno);
+  bool validate(void) const;
+  bool validateDirectives(void) const;
+  bool validateStrings(void) const;
 
-  bool validate(void);
-  bool validate(const BrigDirectiveMethod *dir);
-  bool validate(const BrigDirectiveSymbol *dir);
-  bool validate(const BrigDirectiveImage *dir);
-  bool validate(const BrigDirectiveSampler *dir);
-  bool validate(const BrigDirectiveLabel *dir);
-  bool validate(const BrigDirectiveLabelList *dir);
-  bool validate(const BrigDirectiveVersion *dir);
-  bool validate(const BrigDirectiveProto *dir);
-  bool validate(const BrigDirectiveFile *dir);
-  bool validate(const BrigDirectiveComment *dir);
-  bool validate(const BrigDirectiveLoc *dir);
-  bool validate(const BrigDirectiveInit *dir);
-  bool validate(const BrigDirectiveLabelInit *dir);
-  bool validate(const BrigDirectiveControl *dir);
-  bool validate(const BrigDirectivePragma *dir);
-  bool validate(const BrigDirectiveExtension *dir);
-  bool validate(const BrigDirectiveArgStart *dir);
-  bool validate(const BrigDirectiveArgEnd *dir);
-  bool validate(const BrigDirectiveBlockStart *dir);
-  bool validate(const BrigDirectiveBlockNumeric *dir);
-  bool validate(const BrigDirectiveBlockString *dir);
-  bool validate(const BrigDirectiveBlockEnd *dir);
-  bool validate(const BrigDirectivePad *dir);
+  bool validate(const BrigDirectiveMethod *dir) const;
+  bool validate(const BrigDirectiveSymbol *dir) const;
+  bool validate(const BrigDirectiveImage *dir) const;
+  bool validate(const BrigDirectiveSampler *dir) const;
+  bool validate(const BrigDirectiveLabel *dir) const;
+  bool validate(const BrigDirectiveLabelList *dir) const;
+  bool validate(const BrigDirectiveVersion *dir) const;
+  bool validate(const BrigDirectiveProto *dir) const;
+  bool validate(const BrigDirectiveFile *dir) const;
+  bool validate(const BrigDirectiveComment *dir) const;
+  bool validate(const BrigDirectiveLoc *dir) const;
+  bool validate(const BrigDirectiveInit *dir) const;
+  bool validate(const BrigDirectiveLabelInit *dir) const;
+  bool validate(const BrigDirectiveControl *dir) const;
+  bool validate(const BrigDirectivePragma *dir) const;
+  bool validate(const BrigDirectiveExtension *dir) const;
+  bool validate(const BrigDirectiveArgStart *dir) const;
+  bool validate(const BrigDirectiveArgEnd *dir) const;
+  bool validate(const BrigDirectiveBlockStart *dir) const;
+  bool validate(const BrigDirectiveBlockNumeric *dir) const;
+  bool validate(const BrigDirectiveBlockString *dir) const;
+  bool validate(const BrigDirectiveBlockEnd *dir) const;
+  bool validate(const BrigDirectivePad *dir) const;
 
-  bool validate(const BrigSymbolCommon *s);
-  bool validateSName(BrigsOffset32_t s_name);
-  bool validateAlignment(const void *dir, uint8_t alignment);
+  bool validate(const BrigSymbolCommon *s) const;
+
+  bool validOrEnd(const dir_iterator dir) const;
+  bool validate(const dir_iterator dir) const;
+
+  bool validateCCode(BrigcOffset32_t c_code) const;
+  bool validateSName(BrigsOffset32_t s_name) const;
+  bool validateAlignment(const void *dir, uint8_t alignment) const;
 
   const BrigSections S_;
   llvm::raw_ostream *out_;

@@ -2,6 +2,7 @@
 
 #include "llvm/Support/raw_ostream.h"
 #include <cstring>
+#include <set>
 
 namespace hsa {
 namespace brig {
@@ -11,18 +12,26 @@ namespace brig {
 template<class Message>
 bool (BrigModule::check)(bool test, const Message &msg,
                          const char *filename, unsigned lineno,
-                         const char *cause) {
+                         const char *cause) const {
   if(!test && out_)
      (*out_) << filename << "." << lineno << ": " << msg
             << " (" << cause << ")\n";
   return test;
 }
 
-bool BrigModule::validate(void) {
+bool BrigModule::validate(void) const {
+  bool valid = true;
+  valid &= validateDirectives();
+  valid &= validateStrings();
+  return valid;
+}
+
+bool BrigModule::validateDirectives(void) const {
 
   dir_iterator it = S_.begin();
   const dir_iterator E = S_.end();
 
+  if(!validate(it)) return false;
   if(!check(it != E, "Empty directive section")) return false;
 
   // 20.8.22: The BrigDirectiveVersion directive must be the first directive
@@ -36,6 +45,7 @@ bool BrigModule::validate(void) {
     break
 
   for(; it != E; ++it) {
+    if(!validate(it)) return false;
     switch(it->kind) {
       case BrigEDirectiveFunction:
       case BrigEDirectiveKernel:
@@ -72,17 +82,41 @@ bool BrigModule::validate(void) {
   return true;
 }
 
-bool BrigModule::validate(const BrigDirectiveMethod *dir) {
+bool BrigModule::validateStrings(void) const {
+
+  bool valid = true;
+
+  std::set<std::string> stringSet;
+
+  const char *curr = S_.strings;
+  size_t maxLen = S_.stringsSize;
+
+  while(maxLen) {
+    size_t len = strnlen(curr, maxLen);
+    if(!check(len != maxLen, "String not null terminated"))
+      return false;
+
+    valid &= check(stringSet.insert(curr).second, "Duplicate string detected");
+
+    // Account for the null terminator
+    maxLen -= (len + 1);
+    curr += (len + 1);
+  }
+
+  return valid;
+}
+
+bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
   bool valid = true;
 
   valid &= validateAlignment(dir, 4);
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
 
   const unsigned paramCount = dir->inParamCount + dir->outParamCount;
   dir_iterator argIt = dir_iterator(dir) + 1;
-  for(unsigned i = 0; i < paramCount; ++i) {
+  for(unsigned i = 0; i < paramCount; ++i, ++argIt) {
+    if(!validate(argIt)) return false;
     const BrigDirectiveSymbol *bds = dyn_cast<BrigDirectiveSymbol>(argIt);
     valid &= check(bds, "Too few argument symbols");
     valid &= check(bds->s.storageClass == BrigArgSpace,
@@ -91,6 +125,7 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) {
 
   const dir_iterator firstScopedDir(S_.directives +
                                     dir->d_firstScopedDirective);
+  if(!validOrEnd(firstScopedDir)) return false;
   valid &= check(argIt <= firstScopedDir,
                  "The first scoped directive is too early");
   valid &= check(dir->d_firstScopedDirective <= dir->d_nextDirective,
@@ -101,17 +136,21 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) {
                  "Invalid linkage type");
 
   if(dir->inParamCount) {
-    const dir_iterator firstInParam1 =
-      dir_iterator(dir) + dir->outParamCount + 1;
+    dir_iterator firstInParam1(dir);
+    for(unsigned i = 0; i < dir->outParamCount + 1; ++i) {
+      ++firstInParam1;
+      if(!validate(firstInParam1)) return false;
+    }
+
     const dir_iterator firstInParam2(S_.directives + dir->d_firstInParam);
-    valid &= check(firstInParam1 == firstInParam2,
-                   "d_firstInParam is wrong");
+    if(!validate(firstInParam2)) return false;
+    valid &= check(firstInParam1 == firstInParam2, "d_firstInParam is wrong");
   }
 
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveSymbol *dir) {
+bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
   bool valid = true;
 
   valid &= validateAlignment(dir, 4);
@@ -126,6 +165,7 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) {
                    "Only global and readonly spaces can be initialized");
 
     const dir_iterator init(S_.directives + dir->d_init);
+    if(!validate(init)) return false;
     const BrigDirectiveInit *bdi =
       dyn_cast<BrigDirectiveInit>(init);
     const BrigDirectiveLabelInit *bdli =
@@ -144,20 +184,21 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveImage *dir) { return true; }
-bool BrigModule::validate(const BrigDirectiveSampler *dir) { return true; }
-bool BrigModule::validate(const BrigDirectiveLabel *dir) { return true; }
-bool BrigModule::validate(const BrigDirectiveLabelList *dir) {
+bool BrigModule::validate(const BrigDirectiveImage *dir) const { return true; }
+bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
+  return true;
+}
+bool BrigModule::validate(const BrigDirectiveLabel *dir) const { return true; }
+bool BrigModule::validate(const BrigDirectiveLabelList *dir) const {
   return true;
 }
 
 // 20.8.22
-bool BrigModule::validate(const BrigDirectiveVersion *dir) {
+bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
   bool valid = true;
 
   valid &= validateAlignment(dir, 4);
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   valid &= check(dir->machine == BrigELarge ||
                  dir->machine == BrigESmall,
                  "Invalid machine");
@@ -171,94 +212,86 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveProto *dir) { return true; }
+bool BrigModule::validate(const BrigDirectiveProto *dir) const { return true; }
 
-bool BrigModule::validate(const BrigDirectiveFile *dir) {
+bool BrigModule::validate(const BrigDirectiveFile *dir) const {
   bool valid = true;
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_filename);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveComment *dir) {
+bool BrigModule::validate(const BrigDirectiveComment *dir) const {
   bool valid = true;
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveLoc *dir) {
+bool BrigModule::validate(const BrigDirectiveLoc *dir) const {
   bool valid = true;
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveInit *dir) { return true; }
+bool BrigModule::validate(const BrigDirectiveInit *dir) const { return true; }
 
-bool BrigModule::validate(const BrigDirectiveLabelInit *dir) {
+bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
   bool valid = true;
   valid &= validateAlignment(dir, 4);
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   for (unsigned i = 0; i < dir->elementCount; i++) {
-    valid &= check(dir->d_labels[i] <= S_.directivesSize,
+    valid &= check(dir->d_labels[i] < S_.directivesSize,
                    "d_labels past the directives section");
+
     const dir_iterator init(S_.directives + dir->d_labels[i]);
+    if(!validate(init)) return false;
     const BrigDirectiveLabel *bcl = dyn_cast<BrigDirectiveLabel>(init);
     valid &= check(bcl, "d_labels offset is wrong, not a BrigDirectiveLabel");
   }
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveControl *dir) {
+bool BrigModule::validate(const BrigDirectiveControl *dir) const {
   bool valid = true;
-  valid &= check(dir->c_code <= S_.codeSize,
-                   "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectivePragma *dir) {
+bool BrigModule::validate(const BrigDirectivePragma *dir) const {
   bool valid = true;
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveExtension *dir) {
+bool BrigModule::validate(const BrigDirectiveExtension *dir) const {
   bool valid = true;
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveArgStart *dir) {
+bool BrigModule::validate(const BrigDirectiveArgStart *dir) const {
   bool valid = true;
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveArgEnd *dir) {
+bool BrigModule::validate(const BrigDirectiveArgEnd *dir) const {
   bool valid = true;
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveBlockStart *dir) {
+bool BrigModule::validate(const BrigDirectiveBlockStart *dir) const {
   bool valid = true;
   valid &= validateSName(dir->s_name);
   const char *string = S_.strings + dir->s_name;
   valid &= check(0 == strcmp(string, "debug") ||
                  0 == strcmp(string, "rti"),
                  "Invalid s_name, should be either debug or rti");
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
 
   return valid;
 }
@@ -278,7 +311,7 @@ int getTypeSize(BrigDataType16_t type) {
   return 0;
 }
 
-bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) {
+bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) const {
   bool valid = true;
   valid &= check(0 == dir->size % 8,
                  "Invalid size, must be a multiple of 8");
@@ -292,28 +325,28 @@ bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveBlockString *dir) {
+bool BrigModule::validate(const BrigDirectiveBlockString *dir) const {
   bool valid = true;
   valid &= validateSName(dir->s_name);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) {
+bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) const {
   bool valid = true;
   valid &= validateAlignment(dir, 4);
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectivePad *dir) {
+bool BrigModule::validate(const BrigDirectivePad *dir) const {
   bool valid = true;
   return valid;
 }
 
-bool BrigModule::validate(const BrigSymbolCommon *s) {
+bool BrigModule::validate(const BrigSymbolCommon *s) const {
   bool valid = true;
 
   // RPM 20.5.20: 8-16 reserved for extensions
-  valid &= check(s->c_code <= S_.codeSize, "c_code past the code section");
+  valid &= validateCCode(s->c_code);
   valid &= check(s->storageClass <= BrigFlatSpace + 8,
                  "Invalid storage class");
   valid &= check(s->attribute <= BrigNone,
@@ -334,7 +367,47 @@ bool BrigModule::validate(const BrigSymbolCommon *s) {
   return valid;
 }
 
-bool BrigModule::validateSName(BrigsOffset32_t s_name) {
+bool BrigModule::validOrEnd(const dir_iterator dir) const {
+
+  // Exit early to avoid segmentation faults.
+  dir_iterator firstValidDir(S_.directives);
+  if(!check(firstValidDir <= dir, "dir before the directives section"))
+    return false;
+
+  dir_iterator E(S_.directives + S_.directivesSize);
+  if(!check(dir <= E, "dir past the directives section"))
+    return false;
+
+  return true;
+}
+
+bool BrigModule::validate(const dir_iterator dir) const {
+
+  // Exit early to avoid segmentation faults.
+  if(!validOrEnd(dir)) return false;
+
+  dir_iterator lastValidDir(S_.directives + S_.directivesSize -
+                            sizeof(BrigDirectiveBase));
+  if(!check(dir <= lastValidDir, "dir spans the directives section"))
+    return false;
+
+  dir_iterator E(S_.directives + S_.directivesSize);
+  if(!check(dir + 1 <= E, "dir spans the directives section"))
+    return false;
+
+  return true;
+}
+
+bool BrigModule::validateCCode(BrigcOffset32_t c_code) const {
+  bool valid = true;
+  valid &= check(c_code + sizeof(BrigInstBase) > c_code,
+                 "c_code overflows");
+  valid &= check(!c_code || c_code + sizeof(BrigInstBase) <= S_.codeSize,
+                 "c_code past the code section");
+  return valid;
+}
+
+bool BrigModule::validateSName(BrigsOffset32_t s_name) const {
 
   bool valid = true;
 
@@ -352,7 +425,7 @@ bool BrigModule::validateSName(BrigsOffset32_t s_name) {
   return valid;
 }
 
-bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) {
+bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) const {
   bool valid = true;
   const uint8_t *dirOffset = reinterpret_cast<const uint8_t *>(dir);
   valid &= check((S_.directives - dirOffset) % alignment == 0,
