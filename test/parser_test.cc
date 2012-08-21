@@ -4066,7 +4066,18 @@ TEST(ParserTest,GlobalInitializable){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalInitializable(context));
 
-   delete lexer;
+  input.assign("static global_f32 %c[3] = {1.2, 1.3, 1.4 };\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  // FloatInitializer
+  input.assign("extern readonly_f64 %d[3] ={ 1.2L, 1.3L,1.4L };\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  delete lexer;
 };
 
 TEST(ParserTest,GlobalDecl){

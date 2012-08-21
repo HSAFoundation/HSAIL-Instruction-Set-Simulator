@@ -5572,9 +5572,11 @@ int GlobalSamplerDeclPart2(Context *context){
 
 int GlobalInitializable(Context* context){
 	if(!DeclPrefix(context)){
+		printf("Token1: %d\n", context->token_to_scan);
 		if(GLOBAL == context->token_to_scan){
 			BrigStorageClass32_t storage_class = context->token_value.storage_class;
 			context->token_to_scan = yylex();
+			printf("Token2: %d\n", context->token_to_scan);
 			switch(context->token_to_scan){
 				case _RWIMG: 
 							return(GlobalImageDeclPart2(context));
@@ -5582,11 +5584,13 @@ int GlobalInitializable(Context* context){
 							return(GlobalReadOnlyImageDeclPart2(context));
 				case _SAMP : 	
 							return(GlobalSamplerDeclPart2(context));
-				case DATA_TYPE_ID: 	
-							return(InitializableDeclPart2(context, storage_class));
 				default:
-							context->set_error(MISSING_IDENTIFIER);
-							return 1;
+							if(context->token_type==DATA_TYPE_ID)
+								return (InitializableDeclPart2(context, storage_class));
+							else{	
+								context->set_error(MISSING_IDENTIFIER);
+								return 1;
+							}
 			}
 		} else if(READONLY == context->token_to_scan){
 			return InitializableDecl(context);
@@ -5598,6 +5602,7 @@ int GlobalInitializable(Context* context){
 		context->set_error(MISSING_DECLPREFIX);
 		return 1;
 		}
+	return 0;
 }
 
 int GlobalDecl(Context *context){
