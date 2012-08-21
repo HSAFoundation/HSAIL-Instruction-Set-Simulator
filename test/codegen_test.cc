@@ -3101,5 +3101,36 @@ TEST(CodegenTest, BarCodeGen) {
 
   delete lexer;
 }
+
+TEST(CodegenTest, OptionalWidthCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigOperandImmed ref = {
+    24,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    2
+  };
+
+  std::string input("_width(2);");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, OptionalWidth(context));
+
+  BrigOperandImmed get;
+  context->get_operand(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.reserved, get.reserved);
+  EXPECT_EQ(ref.bits.u, get.bits.u);
+
+  delete lexer;
+}
+
 }  // namespace brig
 }  // namespace hsa
