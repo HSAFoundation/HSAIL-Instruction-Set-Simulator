@@ -266,9 +266,6 @@ class Context {
       BrigStorageClass32_t storage_class;
     } token_value;
 
-   //flat whether flex continue to scan next token
-   unsigned int prev_token ;
-
   private:
     /* Buffers */
     Context();
