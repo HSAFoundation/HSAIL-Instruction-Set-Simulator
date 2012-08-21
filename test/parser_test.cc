@@ -3850,7 +3850,7 @@ TEST(ErrorReporting, CheckErrorHistory) {
   error_t error_code;
   unsigned int number_of_errors = mer.get_number_of_errors();
 
-  EXPECT_EQ(3, number_of_errors);
+  EXPECT_EQ(3U, number_of_errors);
 
   error_code = mer.get_error_at(0);
   EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, error_code);
