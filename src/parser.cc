@@ -3149,8 +3149,36 @@ int MemoryOperand(Context* context) {
     std::string operand_name;
     int CurrentoOffset = 0;
     context->token_to_scan = yylex();
-    CurrentoOffset = context->get_operand_offset(); 
-    if (!AddressableOperand(context)) {
+    CurrentoOffset = context->get_operand_offset();
+    // AddressableOperand
+    if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
+        (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
+      std::string name(context->token_value.string_val);
+
+      context->token_to_scan = yylex();
+
+      if (context->token_to_scan == ']') {
+        BrigOperandAddress boa = {
+          sizeof(boa),            // size
+          BrigEOperandAddress,    // kind
+          Brigb32,                // type
+          0,                      // reserved
+          0,                      // directive
+          0
+        };
+  
+        boa.directive = context->symbol_map[name];
+  
+        if (context->get_machine() == BrigELarge) {
+          boa.type = Brigb64;
+        }
+        context->append_operand(&boa);
+        context->token_to_scan = yylex();
+        
+      } else {
+        context->set_error(MISSING_CLOSING_BRACKET);
+        return 1;
+      }
       // OffsetAddressableOperand
       if (context->token_to_scan == '[') {
         BrigOperandCompound compound_op = {
@@ -3233,6 +3261,7 @@ int MemoryOperand(Context* context) {
           return 1;
         }
       }  // AddressableOperand '[' offsetAddressable ']'
+      // 
       return 0;
     } else {
       // offsetAddressableOperand
@@ -3307,6 +3336,7 @@ int MemoryOperand(Context* context) {
   }  // '['
   return 1;
 }
+
 int Instruction5(Context* context) {
   // first token is F2U4 "f2u4"
   context->token_to_scan = yylex();

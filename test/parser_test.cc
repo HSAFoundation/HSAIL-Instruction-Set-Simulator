@@ -2767,7 +2767,7 @@ TEST(ParserTest, MemoryOperand) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
 
-  input.assign("[%local_id<$d7>][$s1 + 0xf7]");
+  input.assign("[%local_id][$s1 + 0xf7]");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
