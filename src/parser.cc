@@ -5079,14 +5079,31 @@ int Bar(Context* context) {
   if(BARRIER != context->token_to_scan)
     return 1;
   
+  BrigOpcode32_t opcode = context->token_value.opcode;
+  uint32_t syncFlags = BrigPartialLevel; //default
+
   context->token_to_scan = yylex();
   if (!OptionalWidth(context)) {
     if (context->token_to_scan == _GLOBAL) {
+      syncFlags = BrigGlobalLevel;
       context->token_to_scan = yylex();
     } else if (context->token_to_scan == _GROUP) {
+      syncFlags = BrigGroupLevel;
       context->token_to_scan = yylex();
     }
     if (context->token_to_scan == ';') {
+      BrigInstBar op_bar = {
+        36,
+        BrigEInstBar,
+        opcode ,
+        Brigb32 ,
+        BrigNoPacking,
+        {0,0,0,0,0},
+        syncFlags
+      };
+      context->append_code(&op_bar);
+      context->update_bdf_operation_count();
+
       context->token_to_scan = yylex();
       return 0;
     } else {
