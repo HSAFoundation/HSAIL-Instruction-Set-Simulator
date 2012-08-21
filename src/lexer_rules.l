@@ -1764,6 +1764,7 @@ ld                { free_string(context);
 sync              { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.opcode = BrigSync;
                     return SYNC;}
                     
 barrier           { free_string(context);

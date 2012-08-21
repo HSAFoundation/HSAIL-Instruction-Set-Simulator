@@ -3031,22 +3031,22 @@ TEST(CodegenTest, SyncCodeGen) {
   context->clear_context();
 
   BrigInstBar ref = {
-    32,
-    BrigEInstBase,
+    36,
+    BrigEInstBar,
     BrigSync,
     Brigb32,
     BrigNoPacking,
     {0, 0, 0, 0, 0},
-    BrigGroupLevel
+    BrigGlobalLevel
   };
 
   std::string input("sync_global ;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Ret(context));
+  EXPECT_EQ(0, Sync(context));
 
-  BrigInstBase get;
+  BrigInstBar get;
   context->get_code(0, &get);
 
   EXPECT_EQ(ref.size,get.size);

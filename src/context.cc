@@ -315,6 +315,17 @@ void Context::set_opcode(BrigOpcode32_t opcode) {
 void Context::set_operand_loc(char loc) {
   this->operand_loc = loc;
 }
+// the operationCount of BrigDirectiveFunction add by 1
+void Context::update_operation_count(){
+  BrigDirectiveFunction bdf;
+  this->get_directive(this->current_bdf_offset, &bdf);
+  bdf.operationCount++;
 
+  unsigned char * bdf_charp =
+      reinterpret_cast<unsigned char*>(&bdf);
+  this->update_directive_bytes(bdf_charp,
+                                 this->current_bdf_offset,
+                                 sizeof(bdf));
+}
 }  // namespace brig
 }  // namespace hsa

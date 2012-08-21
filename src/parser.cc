@@ -5045,22 +5045,48 @@ int ImageRead(Context *context) {
 
 int Sync(Context* context) {
   // first token is SYNC
+  if(SYNC != context->token_to_scan)
+    return 1;
+  
+  BrigOpcode32_t opcode = context->token_value.opcode;
+  uint32_t syncFlags = BrigPartialLevel; //default
 
   context->token_to_scan = yylex();
   if (context->token_to_scan == _GLOBAL) {
+    syncFlags = BrigGlobalLevel;
     context->token_to_scan = yylex();
   } else if (context->token_to_scan == _GROUP) {
+    syncFlags = BrigGroupLevel;
     context->token_to_scan = yylex();
   }
   if (context->token_to_scan == ';') {
+    BrigcOffset32_t csize = context->get_code_offset();
+    
+    BrigInstBar op_sync = {
+      36,
+      BrigEInstBar,
+      opcode ,
+      Brigb32 ,
+      BrigNoPacking,
+      {0,0,0,0,0},
+      syncFlags
+    };
+    context->append_code(&op_sync);
+    BrigDirectiveFunction bdf ;
+    context->get_directive(context->current_bdf_offset ,&bdf);
+    bdf.operationCount ++ ;
+  
+    unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+    context->update_directive_bytes(bdf_charp ,
+                                    context->current_bdf_offset,
+                                    sizeof(bdf));
     context->token_to_scan = yylex();
     return 0;
   } else {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
+
 }
 int Bar(Context* context) {
   // first token is BARRIER
