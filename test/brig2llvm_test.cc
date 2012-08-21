@@ -1630,3 +1630,38 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
     "d_labels past the directives section")));
   }
 }
+
+TEST(Brig2LLVMTest, UniqueString) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("Foo"));
+    strings.append(std::string("Foo"));
+    strings.append_char('a');
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Duplicate string detected")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "String not null terminated")));
+  }
+}
