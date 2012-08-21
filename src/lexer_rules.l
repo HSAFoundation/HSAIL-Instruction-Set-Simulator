@@ -1809,6 +1809,7 @@ lda               { free_string(context);
 ret               { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.opcode = BrigRet;
                     return RET;}
                     
 packedcmp         { free_string(context);

@@ -2998,7 +2998,7 @@ TEST(CodegenTest, RetCodeGen) {
     32,
     BrigEInstBase,
     BrigRet,
-    BrigRet,
+    Brigb32,
     BrigNoPacking,
     {0, 0, 0, 0, 0}
   };
