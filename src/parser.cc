@@ -4882,6 +4882,7 @@ int GlobalReadOnlyImageDecl(Context *context) {
 
 int Ret(Context* context) {
   // first token is RET
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
     context->token_to_scan = yylex();
