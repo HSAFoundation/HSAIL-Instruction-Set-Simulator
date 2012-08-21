@@ -2062,18 +2062,31 @@ int Program(Context* context) {
 int OptionalWidth(Context* context) {
   // first token must be _WIDTH
   if (context->token_to_scan == _WIDTH) {
+    BrigOperandImmed op_width = {
+      24,
+      BrigEOperandImmed,
+      Brigb32,
+      0,
+      0
+    } ;
     context->token_to_scan = yylex();
     if (context->token_to_scan == '(') {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ALL) {
+        op_width.bits.u = 0 ;
+
         context->token_to_scan = yylex();
       } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+        op_width.bits.u  = context->token_value.int_val;
+
         context->token_to_scan = yylex();
       } else {
         context->set_error(MISSING_WIDTH_INFO);
         return 1;
       }
       if (context->token_to_scan == ')') {
+        context->append_operand(&op_width);
+
         context->token_to_scan = yylex();
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);

@@ -3121,7 +3121,7 @@ TEST(CodegenTest, OptionalWidthCodeGen) {
   EXPECT_EQ(0, OptionalWidth(context));
 
   BrigOperandImmed get;
-  context->get_operand(0, &get);
+  context->get_operand(8, &get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
