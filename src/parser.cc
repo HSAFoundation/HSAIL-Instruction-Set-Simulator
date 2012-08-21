@@ -2020,22 +2020,38 @@ int Program(Context* context) {
              return 1;
           }
         }else if(GLOBAL == context->token_to_scan){
-          context->prev_token = context->token_to_scan;
-		  context->token_to_scan = yylex();
-          if(!GlobalImageDecl(context)){
-            context->prev_token = 0 ;
-          }else if(!GlobalReadOnlyImageDecl(context)){
-            context->prev_token = 0 ;
-          }else if(!GlobalSamplerDecl(context)){
-            context->prev_token = 0 ;
-          }else if(!InitializableDecl(context)){
-            context->prev_token = 0 ;
-          }else{
-            context->prev_token = 0 ;
-            context->set_error(MISSING_IDENTIFIER);
-            return 1;
-          }
-        }else if(GROUP == context->token_to_scan){
+			BrigStorageClass32_t storage_class = context->token_value.storage_class;
+			context->token_to_scan = yylex();
+			switch(context->token_to_scan){
+				case _RWIMG: 
+							if(!GlobalImageDeclPart2(context))
+								break;
+							else{
+								return 1;
+							}
+				case _ROIMG: 
+							if(!GlobalReadOnlyImageDeclPart2(context))
+								break;
+							else{
+								return 1;
+							}
+				case _SAMP : 	
+							if(!GlobalSamplerDeclPart2(context))
+								break;
+							else{
+								return 1;
+							}
+				case DATA_TYPE_ID: 	
+							if(!InitializableDeclPart2(context, storage_class))
+								break;
+							else{
+								return 1;
+							}
+				default:
+							context->set_error(MISSING_IDENTIFIER);
+							return 1;
+			}
+		}else if(GROUP == context->token_to_scan){
           if(!GlobalGroupDecl(context))
            continue ;
            return 1;
@@ -2047,9 +2063,9 @@ int Program(Context* context) {
           if(!InitializableDecl(context))
             continue;
             return 1;
-          }else{ 
+        }else{ 
             return  1;
-          }
+        }
        }    // while (first_token)
        return 0;
     }   // if (!Version)
@@ -2439,20 +2455,21 @@ int Initializer(Context* context) {
 }
 
 int InitializableDecl(Context* context) {
-  // first_token is READONLY or GLOBAL
-  BrigStorageClass32_t storage_class = context->token_value.storage_class;
-  unsigned int earlier_token;
+
+	if((context->token_to_scan==GLOBAL) || (context->token_to_scan == READONLY)){
+		context->token_to_scan = yylex();
+		BrigStorageClass32_t storage_class = context->token_value.storage_class;
+		return (InitializableDeclPart2(context, storage_class));
+	} else{
+		context->set_error(MISSING_GLOBAL_IDENTIFIER);
+		return 1;
+	}
+}
+
+int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
+{
   
-  if(context->prev_token){
-	earlier_token = context->prev_token;
-  } else{
-	earlier_token = context->token_to_scan;
-	context->token_to_scan = yylex();
-  }
-  
-  if(!((earlier_token==GLOBAL) || (earlier_token==READONLY)))
-	return 1;
-	
+  //First token already verified as GLOBAL/READONLY
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
 
@@ -4752,17 +4769,18 @@ int ImageInit(Context *context) {
 }
 
 int GlobalImageDecl(Context *context) {
-  
-	int earlier_token;
-	if(context->prev_token){
-		earlier_token = context->prev_token;
-	} else{
-		earlier_token = context->token_to_scan;
+	if(context->token_to_scan == GLOBAL){
 		context->token_to_scan = yylex();
+	  	return (GlobalImageDeclPart2(context));
+	}else{
+		context->set_error(MISSING_GLOBAL_IDENTIFIER);
+		return 1;
 	}
-if(earlier_token == GLOBAL)
-{		
+}
+
+int GlobalImageDeclPart2(Context *context){	
   //First token has been scanned and verified as global. Read next token.
+  
   if (_RWIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
@@ -4809,7 +4827,7 @@ if(earlier_token == GLOBAL)
     context->set_error(MISSING_IDENTIFIER);
     }
   }
-}
+
   return 1;
 }
 
@@ -4844,16 +4862,18 @@ int ImageInitializer(Context *context) {
 }
 
 int GlobalReadOnlyImageDecl(Context *context) {
- 
-	int earlier_token;
-	if(context->prev_token){
-		earlier_token = context->prev_token;
-	} else {
-		earlier_token = context->token_to_scan;
+	if(GLOBAL == context->token_to_scan){
 		context->token_to_scan = yylex();
-	}
+		return GlobalReadOnlyImageDeclPart2(context);
+	}else{
+		context->set_error(MISSING_GLOBAL_IDENTIFIER);
+		return 1;
+	}	
+}
+
+int GlobalReadOnlyImageDeclPart2(Context *context){
   //First token has been scanned and verified as global. Scan next token.		
-if(earlier_token == GLOBAL){
+  
   if (_ROIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
@@ -4899,7 +4919,6 @@ if(earlier_token == GLOBAL){
   } else {
     context->set_error(MISSING_IDENTIFIER);
   }
- }
   return 1;
 }
 
@@ -5494,16 +5513,18 @@ int SobInitializer(Context *context){
 }
 
 int GlobalSamplerDecl(Context *context){
- 
-	int earlier_token;
-	if(context->prev_token){
-		earlier_token = context->prev_token;
-	} else {
-		earlier_token = context->token_to_scan;
+ 	if(GLOBAL == context->token_to_scan){
 		context->token_to_scan = yylex();
-	}	
-	//Assumption: First token has already been verified as GLOBAL	
-if(earlier_token == GLOBAL){	
+		return (GlobalSamplerDeclPart2(context));
+	}else{
+		context->set_error(MISSING_GLOBAL_IDENTIFIER);
+		return 1;
+	}
+}	
+
+int GlobalSamplerDeclPart2(Context *context){	
+	//First token has already been verified as GLOBAL
+	
 	if(_SAMP == context->token_to_scan){ 
 		context->token_to_scan = yylex();
 		if(TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan){
@@ -5545,7 +5566,7 @@ if(earlier_token == GLOBAL){
 	}else{
 		context->set_error(MISSING_IDENTIFIER);
 	}
-}	
+	
 	return 1;
 }
 
@@ -5558,22 +5579,20 @@ int GlobalDecl(Context *context){
 		if(FUNCTION == context->token_to_scan){
 			return FunctionDecl(context);
 		}else if(GLOBAL == context->token_to_scan){
-			context->prev_token = context->token_to_scan;
+			BrigStorageClass32_t storage_class = context->token_value.storage_class;
 			context->token_to_scan = yylex();
-			if(!GlobalImageDecl(context)){
-				context->prev_token = 0;
-				return 0 ;
-			}else if(!GlobalReadOnlyImageDecl(context)){
-				context->prev_token = 0;
-				return 0;
-			}else if(!GlobalSamplerDecl(context)){
-				context->prev_token = 0;
-				return 0;
-			}else if(!InitializableDecl(context)){
-				context->prev_token = 0;
-				return 0;
-			}else{
-				context->set_error(MISSING_IDENTIFIER);
+			switch(context->token_to_scan){
+				case _RWIMG: 
+							return(GlobalImageDeclPart2(context));
+				case _ROIMG: 
+							return(GlobalReadOnlyImageDeclPart2(context));
+				case _SAMP : 	
+							return(GlobalSamplerDeclPart2(context));
+				case DATA_TYPE_ID: 	
+							return(InitializableDeclPart2(context, storage_class));
+				default:
+							context->set_error(MISSING_IDENTIFIER);
+							return 1;
 			}
 		}else if(GROUP == context->token_to_scan){
 				return GlobalGroupDecl(context) ;
