@@ -198,7 +198,18 @@ bool BrigModule::validate(const BrigDirectiveLoc *dir) {
 
 bool BrigModule::validate(const BrigDirectiveInit *dir) { return true; }
 bool BrigModule::validate(const BrigDirectiveLabelInit *dir) {
-  return true;
+  bool valid = true;
+  valid &= validateAlignment(dir, 4); 
+  valid &= check(dir->c_code <= S_.codeSize,
+                   "c_code past the code section");
+  for (unsigned i = 0; i < dir->elementCount; i++) {
+    valid &= check(dir->d_labels[i] <= S_.directivesSize,
+                   "d_labels past the directives section");
+    const dir_iterator init(S_.directives + dir->d_labels[i]);
+    const BrigDirectiveLabel *bcl = dyn_cast<BrigDirectiveLabel>(init);
+    valid &= check(bcl, "d_labels offset is wrong, not a BrigDirectiveLabel");
+  }
+  return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveControl *dir) {
