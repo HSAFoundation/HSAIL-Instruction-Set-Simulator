@@ -3983,11 +3983,6 @@ TEST(ParserTest,GlobalSamplerDecl){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalSamplerDecl(context));
 
-  input.assign("global_Samp &demo[10] ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalSamplerDecl(context));
-  
   input.assign("global_Samp &demo[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
@@ -4014,11 +4009,6 @@ TEST(ParserTest,GlobalInitializable){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalInitializable(context));
 
-  input.assign("extern align 8 global_Samp &demo[10] ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalInitializable(context));
-  
   input.assign("const static align 4 global_Samp &demo[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
@@ -4089,12 +4079,7 @@ TEST(ParserTest,GlobalDecl){
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
-
-  input.assign("const extern global_Samp &demo[10] ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalDecl(context));
-  
+ 
   input.assign("const extern global_Samp &demo[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
@@ -4137,13 +4122,13 @@ TEST(ParserTest,GlobalDecl){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
   
-  input.assign("const  extern global_RWImg &demo[10]={format = normalized} ;");
+  input.assign("const extern global_RWImg &demo[10]={format = normalized} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for functionDecl
-  input.assign("const  extern function &get_global_id(arg_u32 %ret_val)");
+  input.assign("const extern function &get_global_id(arg_u32 %ret_val)");
   input.append("(arg_u32 %arg_val0) :fbar(1);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();

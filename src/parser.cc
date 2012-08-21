@@ -5566,13 +5566,11 @@ int GlobalSamplerDeclPart2(Context *context){
 	return 1;
 }
 
-int GlobalInitializable(Context* context){
-	if(!DeclPrefix(context)){
-		printf("Token1: %d\n", context->token_to_scan);
+int GlobalInitializablePart2(Context* context){
+	
 		if(GLOBAL == context->token_to_scan){
 			BrigStorageClass32_t storage_class = context->token_value.storage_class;
 			context->token_to_scan = yylex();
-			printf("Token2: %d\n", context->token_to_scan);
 			switch(context->token_to_scan){
 				case _RWIMG: 
 							return(GlobalImageDeclPart2(context));
@@ -5591,14 +5589,18 @@ int GlobalInitializable(Context* context){
 		} else if(READONLY == context->token_to_scan){
 			return InitializableDecl(context);
 		} else{
-			context->set_error(MISSING_IDENTIFIER);
 			return 1;
 		}
-	}else{
+		return 0;
+}
+
+int GlobalInitializable(Context* context){
+	if(!DeclPrefix(context)){
+		return GlobalInitializablePart2(context);
+	} else{
 		context->set_error(MISSING_DECLPREFIX);
 		return 1;
-		}
-	return 0;
+	}
 }
 
 int GlobalDecl(Context *context){
@@ -5606,27 +5608,10 @@ int GlobalDecl(Context *context){
 	if(SIGNATURE == context->token_to_scan){ //functionSignature 
 		return FunctionSignature(context);
 	}else if(!DeclPrefix(context)){
-    //FunctionDecl 
-		if(FUNCTION == context->token_to_scan){
+   		if(FUNCTION == context->token_to_scan){
 			return FunctionDecl(context);
-		}else if(GLOBAL == context->token_to_scan){
-			BrigStorageClass32_t storage_class = context->token_value.storage_class;
-			context->token_to_scan = yylex();
-			switch(context->token_to_scan){
-				case _RWIMG: 
-							return(GlobalImageDeclPart2(context));
-				case _ROIMG: 
-							return(GlobalReadOnlyImageDeclPart2(context));
-				case _SAMP : 	
-							return(GlobalSamplerDeclPart2(context));
-				case DATA_TYPE_ID: 	
-							return(InitializableDeclPart2(context, storage_class));
-				default:
-							context->set_error(MISSING_IDENTIFIER);
-							return 1;
-			}
-		}else if(READONLY == context->token_to_scan){
-				return InitializableDecl(context);
+		}else if(!GlobalInitializablePart2(context)){
+			return 0;
 		}else if(!GlobalSymbolDecl(context)){
 			return 0;
 		}

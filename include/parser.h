@@ -113,6 +113,7 @@ int SobInitializer(Context *context);
 int GlobalSamplerDecl(Context *context);
 int GlobalSamplerDeclPart2(Context *context);
 int GlobalDecl(Context *context);
+int GlobalInitializablePart2(Context* context);
 int GlobalInitializable(Context* context);
 
 int SequenceOfPrograms(Context *context);
