@@ -19,11 +19,11 @@ typedef BrigBlockString BrigDirectiveBlockString;
 typedef BrigBlockEnd BrigDirectiveBlockEnd;
 
 template<class T> inline T *dyn_cast(BrigDirectiveBase *dir) {
-  return dir->kind == T::DIRKIND ? reinterpret_cast<T *>(dir) : NULL;
+  return dir->kind == T::DirKind ? reinterpret_cast<T *>(dir) : NULL;
 }
 
 template<class T> inline T *dyn_cast(BrigInstBase *inst) {
-  return inst->kind == T::INSTKIND ? reinterpret_cast<T *>(inst) : NULL;
+  return inst->kind == T::InstKind ? reinterpret_cast<T *>(inst) : NULL;
 }
 
 template<> inline BrigDirectiveMethod *dyn_cast(BrigDirectiveBase *dir) {
@@ -68,6 +68,7 @@ template<class Super> class brig_iterator : private Super {
   typedef typename Super::Base Base;
   typedef brig_iterator<Super> Self;
 
+  explicit brig_iterator() : Super(), curr(NULL) {}
   explicit brig_iterator(const uint8_t *curr) : Super(), curr(curr) {}
   brig_iterator(const Self &other) : Super(), curr(other.curr) {}
 
@@ -105,7 +106,7 @@ template<class Super> class brig_iterator : private Super {
     return this->curr != other.curr;
   }
 
-  Self operator+(uint64_t addend) const {
+  Self operator+(intptr_t addend) const {
     brig_iterator other = *this;
     for(unsigned i = 0; i < addend; ++i) {
       ++other;
@@ -121,18 +122,26 @@ class dir_super {
   protected:
   typedef BrigDirectiveBase Base;
   dir_super() {}
-  template<class T> dir_super(const T *t) { (void) T::DIRKIND; }
+  template<class T> dir_super(const T *t) { (void) T::DirKind; }
 };
 
 class inst_super {
   protected:
   typedef BrigInstBase Base;
   inst_super() {}
-  template<class T> inst_super(const T *t) { (void) T::INSTKIND; }
+  template<class T> inst_super(const T *t) { (void) T::InstKind; }
+};
+
+class oper_super {
+  protected:
+  typedef BrigOperandBase Base;
+  oper_super() {}
+  template<class T> oper_super(const T *t) { (void) T::OperKind; }
 };
 
 typedef brig_iterator<dir_super> dir_iterator;
 typedef brig_iterator<inst_super> inst_iterator;
+typedef brig_iterator<oper_super> oper_iterator;
 
 // The dir_iterator versions of dyn_cast, cast, and isa
 template<class T> inline const T *dyn_cast(const dir_iterator it) {
