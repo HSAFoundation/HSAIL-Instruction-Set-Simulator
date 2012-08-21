@@ -5571,8 +5571,33 @@ int GlobalSamplerDeclPart2(Context *context){
 }
 
 int GlobalInitializable(Context* context){
-	return 1;
-		
+	if(!DeclPrefix(context)){
+		if(GLOBAL == context->token_to_scan){
+			BrigStorageClass32_t storage_class = context->token_value.storage_class;
+			context->token_to_scan = yylex();
+			switch(context->token_to_scan){
+				case _RWIMG: 
+							return(GlobalImageDeclPart2(context));
+				case _ROIMG: 
+							return(GlobalReadOnlyImageDeclPart2(context));
+				case _SAMP : 	
+							return(GlobalSamplerDeclPart2(context));
+				case DATA_TYPE_ID: 	
+							return(InitializableDeclPart2(context, storage_class));
+				default:
+							context->set_error(MISSING_IDENTIFIER);
+							return 1;
+			}
+		} else if(READONLY == context->token_to_scan){
+			return InitializableDecl(context);
+		} else{
+			context->set_error(MISSING_IDENTIFIER);
+			return 1;
+		}
+	}else{
+		context->set_error(MISSING_DECLPREFIX);
+		return 1;
+		}
 }
 
 int GlobalDecl(Context *context){
