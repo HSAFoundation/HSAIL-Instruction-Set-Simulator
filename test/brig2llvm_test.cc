@@ -47,7 +47,8 @@ TEST(Brig2LLVMTest, Example1) {
       0,   // c_code
       0,   // s_name
       1,   // inParamCount
-      directives.size() + sizeof(get_global_id),  // d_firstScopedDirective
+      directives.size() + sizeof(get_global_id) +
+      2 * sizeof(BrigDirectiveSymbol),  // d_firstScopedDirective
       0,   // operationCount
       directives.size() + sizeof(get_global_id) +
       2 * sizeof(BrigDirectiveSymbol),  // d_nextDirective
@@ -149,7 +150,8 @@ TEST(Brig2LLVMTest, Example2) {
       0,   // c_code
       0,   // s_name
       0,   // inParamCount
-      directives.size() + sizeof(bdf),  // d_firstScopedDirective
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol),  // d_firstScopedDirective
       1,   // operationCount
       directives.size() + sizeof(bdf) +
       sizeof(BrigDirectiveSymbol),  // d_nextDirective
@@ -220,7 +222,7 @@ TEST(Brig2LLVMTest, Example2) {
 TEST(Brig2LLVMTest, Example3){
   {
     hsa::brig::StringBuffer strings;
-    strings.append(std::string("&packeed_ops"));
+    strings.append(std::string("&packed_ops"));
     strings.append(std::string("%x"));
     strings.append(std::string("$s1"));
     strings.append(std::string("$s2"));
@@ -262,8 +264,8 @@ TEST(Brig2LLVMTest, Example3){
       0,             // reserved
       0,             // symbolModifier
       0,             // dim
-      13,            // s_name
-      Brigf32,       // type
+      12,            // s_name
+      Brigu8x4,      // type
       1,            // align
     };
     BrigDirectiveSymbol bds = {
@@ -279,7 +281,7 @@ TEST(Brig2LLVMTest, Example3){
     BrigInstBase abs = {
       sizeof(abs),
       BrigEInstBase,
-      BrigRet,
+      BrigAbs,
       Brigb32,
       BrigNoPacking,
       { 0, 0, 0, 0, 0}
@@ -288,12 +290,21 @@ TEST(Brig2LLVMTest, Example3){
     BrigInstBase add = {
       sizeof(add),
       BrigEInstBase,
-      BrigRet,
+      BrigAdd,
       Brigb32,
       BrigNoPacking,
       { 0, 0, 0, 0, 0}
     };
     code.append(&add);
+    BrigInstBase ret = {
+      sizeof(add),
+      BrigEInstBase,
+      BrigRet,
+      Brigb32,
+      BrigNoPacking,
+      { 0, 0, 0, 0, 0}
+    };
+    code.append(&ret);
 
     hsa::brig::Buffer operands;
     BrigOperandReg bor_1 = {
@@ -337,7 +348,7 @@ TEST(Brig2LLVMTest, Example3){
     // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     // "declare void @add_pp_sat_u16x2(%struct.regs*, i32, i32, i32)")));
     // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "define void @pack_ops(<4 x i8> * %x)")));
+    // "define void @packed_ops(<4 x i8> * %x)")));
     // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     // "%struct.regs = type { %c_regs, %s_regs, %d_regs, %q_regs, %pc_regs }")));
     // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -826,9 +837,11 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       0,                                       // c_code
       1,                                       // s_name
       0,                                       // inParamCount
-      96,                                      // d_firstScopedDirective
+      directives.size() + sizeof(bdk) +
+      sizeof(BrigDirectiveSymbol),             // d_firstScopedDirective
       1,                                       // operationCount
-      96,                                      // d_nextDirective
+      directives.size() + sizeof(bdk) +
+      sizeof(BrigDirectiveSymbol),             // d_nextDirective
       0,                                       // attribute
       0,                                       // fbarCount
       1,                                       // outParamCount
@@ -1509,8 +1522,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("Label1"));
-    strings.append(std::string("Lable2"));
-    strings.append(std::string("Lable3"));
+    strings.append(std::string("Label2"));
+    strings.append(std::string("Label3"));
 
     hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {
@@ -1593,8 +1606,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
     bdli->kind = BrigEDirectiveLabelInit;
     bdli->c_code = 0;
     bdli->elementCount = 2;
-    bdli->d_labels[0] = 44;
-    bdli->d_labels[1] = 56;
+    bdli->d_labels[0] = directives.size() + arraySize;
+    bdli->d_labels[1] = bdli->d_labels[0] + sizeof(BrigDirectivePad);
     directives.append(bdli);
     delete[] array;
     BrigDirectivePad bdp = {
