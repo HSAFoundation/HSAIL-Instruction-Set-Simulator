@@ -1504,3 +1504,112 @@ TEST(Brig2LLVMTest, validateBrigDirectivePragma) {
     "s_name past the strings section")));
   }
 }
+
+TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("Label1"));
+    strings.append(std::string("Lable2"));
+    strings.append(std::string("Lable3"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    size_t arraySize = sizeof(BrigDirectiveLabelInit) + (3 - 1) * sizeof(uint32_t);
+    uint8_t *array = new uint8_t[arraySize];
+    BrigDirectiveLabelInit *bdli =reinterpret_cast<BrigDirectiveLabelInit *>(array);
+    bdli->size = arraySize;
+    bdli->kind = BrigEDirectiveLabelInit;
+    bdli->c_code = 0;
+    bdli->elementCount = 3;
+    bdli->d_labels[0] = 44;
+    bdli->d_labels[1] = 56;
+    bdli->d_labels[2] = 68;
+    directives.append(bdli);
+    delete[] array;
+    BrigDirectiveLabel bdl1 = {
+      sizeof(bdl1), //uint16_t size;
+      BrigEDirectiveLabel, //uint16_t kind;
+      0,
+      0,
+    };
+    directives.append(&bdl1);
+    BrigDirectiveLabel bdl2 = {
+      sizeof(bdl2), //uint16_t size;
+      BrigEDirectiveLabel, //uint16_t kind;
+      0,
+      7,
+    };
+    directives.append(&bdl2);
+    BrigDirectiveLabel bdl3 = {
+      sizeof(bdl3), //uint16_t size;
+      BrigEDirectiveLabel, //uint16_t kind;
+      0,
+      14,
+    };
+    directives.append(&bdl3);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    size_t arraySize = sizeof(BrigDirectiveLabelInit) + (2 - 1) * sizeof(uint32_t);
+    uint8_t *array = new uint8_t[arraySize];
+    BrigDirectiveLabelInit *bdli =reinterpret_cast<BrigDirectiveLabelInit *>(array);
+    bdli->size = arraySize;
+    bdli->kind = BrigEDirectiveLabelInit;
+    bdli->c_code = 0;
+    bdli->elementCount = 2;
+    bdli->d_labels[0] = 44;
+    bdli->d_labels[0] = 56;
+    directives.append(bdli);
+    delete[] array;
+    BrigDirectivePad bdp = {
+      sizeof(bdp), //uint16_t size;
+      BrigEDirectivePad, //uint16_t kind;
+    };
+    directives.append(&bdp);    
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "d_labels offset is wrong, not a BrigDirectiveLabel")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "d_labels past the directives section")));
+  }
+}
