@@ -3061,5 +3061,77 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   delete lexer;
 };
 
+TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigOperandIndirect ref = {
+    16,                    // size
+    BrigEOperandIndirect,  // kind
+    8,                     // reg
+    Brigb32,               // type
+    0,                     // reserved
+    8                      // offset
+  };
+  BrigOperandIndirect get;
+  std::string input("[$s1+8]\n");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, MemoryOperand(context));
+  context->get_operand(0, &get);
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.reg, get.reg);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.reserved, get.reserved);
+  EXPECT_EQ(ref.offset, get.offset);
+
+  context->clear_context();
+  input.assign("[0x7f]\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, MemoryOperand(context));
+  context->get_operand(0, &get);
+ 
+  ref.reg = 0;
+  ref.offset = 0x7f;
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.reg, get.reg);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.reserved, get.reserved);
+  EXPECT_EQ(ref.offset, get.offset);
+
+  BrigOperandCompound ref2 = {
+    20,                    // size
+    BrigEOperandCompound,  // kind
+    Brigb32,               // type
+    0,                     // reserved
+    8,                     // name
+    24,                    // reg
+    -16                    // offset
+  };
+   
+  BrigOperandCompound get2;
+
+  input.assign("[&array][$s1-16]\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, MemoryOperand(context));
+  context->get_operand(0, &get2);
+
+  EXPECT_EQ(ref2.size, get2.size);
+  EXPECT_EQ(ref2.kind, get2.kind);
+  EXPECT_EQ(ref2.type, get2.type);
+  EXPECT_EQ(ref2.reserved, get2.reserved);
+  EXPECT_EQ(ref2.name, get2.name);
+  EXPECT_EQ(ref2.reg, get2.reg);
+  EXPECT_EQ(ref2.offset, get2.offset);
+
+  delete lexer;
+};
+
 }  // namespace brig
 }  // namespace hsa

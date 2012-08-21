@@ -847,4 +847,25 @@ struct BrigOperandArgumentRef {
   BrigdOffset32_t arg;
 };
 
+struct BrigOperandIndirect {
+  uint16_t size;
+  uint16_t kind;
+  BrigoOffset32_t reg;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  int32_t offset;
+};
+
+struct BrigOperandCompound {
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t name;
+  BrigoOffset32_t reg;
+  int32_t offset;
+};
+
+
+
 #endif  // INCLUDE_BRIG_H_
