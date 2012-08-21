@@ -201,7 +201,12 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) {
   return true;
 }
 
-bool BrigModule::validate(const BrigDirectiveControl *dir) { return true; }
+bool BrigModule::validate(const BrigDirectiveControl *dir) {
+  bool valid = true;
+  valid &= check(dir->c_code <= S_.codeSize,
+                   "c_code past the code section");
+  return valid;
+}
 
 bool BrigModule::validate(const BrigDirectivePragma *dir) {
   bool valid = true;

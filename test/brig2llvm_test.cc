@@ -649,6 +649,81 @@ TEST(Brig2LLVMTest, validateBrigDirectiveLoc) {
     "c_code past the code section")));
   }
 }
+
+TEST(Brig2LLVMTest, validateBrigDirectiveControl) {
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveControl bdc = {
+      sizeof(bdc), //uint16_t size;
+      BrigEDirectiveControl, //uint16_t kind;
+      0,
+      0,
+      {0, 0, 0}
+    };
+    directives.append(&bdc);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveControl bdc = {
+      sizeof(bdc), //uint16_t size;
+      BrigEDirectiveControl, //uint16_t kind;
+      10, //BrigcOffset32_t c_code; correct: 0
+      0,
+      {0, 0, 0}
+    };
+    directives.append(&bdc);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "c_code past the code section")));
+  }
+}
+
 // This method appends a BrigDirectiveProto to the buffer. BrigDirectiveProto is
 // a variable length structure. This means the last field of BrigDirectiveProto
 // is an array of unknown size. Unfortunately, variable length structures are
