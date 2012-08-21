@@ -2075,12 +2075,13 @@ int OptionalWidth(Context* context) {
       }
       if (context->token_to_scan == ')') {
         context->token_to_scan = yylex();
-        return 0;
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
+        return 1;
       }
     } else {
       context->set_error(MISSING_WIDTH_INFO);
+      return 1;
     }
   }
   return 0;
@@ -4909,9 +4910,10 @@ int Ret(Context* context) {
     return 1;
 
   BrigOpcode32_t opcode = context->token_value.opcode ;
+  uint32_t syncFlag = BrigPartialLevel ;
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
-     BrigcOffset32_t csize = context->get_code_offset();
      BrigInstBase op_ret = {
       32,
       BrigEInstBase,
@@ -5051,9 +5053,7 @@ int Sync(Context* context) {
     syncFlags = BrigGroupLevel;
     context->token_to_scan = yylex();
   }
-  if (context->token_to_scan == ';') {
-    BrigcOffset32_t csize = context->get_code_offset();
-    
+  if (context->token_to_scan == ';') {    
     BrigInstBar op_sync = {
       36,
       BrigEInstBar,
