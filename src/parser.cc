@@ -406,7 +406,7 @@ int CallArgs(Context* context) {
       arg_list.size = list_size;
       arg_list.kind = BrigEOperandArgumentList;
       arg_list.elementCount = n_elements;
-      for (uint32_t i = 0; i < n_elements; ++i) {
+      for (int32_t i = 0; i < n_elements; ++i) {
         arg_list.o_args[i] = arg_offset[i];
       }
       context->current_argList_offset = context->get_operand_offset();
