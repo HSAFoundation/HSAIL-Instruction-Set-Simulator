@@ -5570,6 +5570,11 @@ int GlobalSamplerDeclPart2(Context *context){
 	return 1;
 }
 
+int GlobalInitializable(Context* context){
+	return 1;
+		
+}
+
 int GlobalDecl(Context *context){
   
 	if(SIGNATURE == context->token_to_scan){ //functionSignature 
