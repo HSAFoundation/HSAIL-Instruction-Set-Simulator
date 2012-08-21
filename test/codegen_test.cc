@@ -3074,12 +3074,24 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
     8                      // offset
   };
   BrigOperandIndirect get;
+  BrigOperandReg getReg;
+  BrigOperandAddress getAddr;
   std::string input("[$s1+8]\n");
+
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
-  context->get_operand(0, &get);
+  context->get_operand(8, &getReg);
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);
+
+  context->get_operand(20, &get);
+  // BrigOperandIndirect
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.reg, get.reg);
@@ -3092,7 +3104,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
-  context->get_operand(0, &get);
+  context->get_operand(8, &get);
  
   ref.reg = 0;
   ref.offset = 0x7f;
@@ -3113,15 +3125,36 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
     24,                    // reg
     -16                    // offset
   };
-   
-  BrigOperandCompound get2;
 
+  BrigOperandCompound get2;
+  memset(&getAddr, 0, sizeof(getAddr));
+  memset(&getReg, 0, sizeof(getReg));
+
+  context->clear_context();
   input.assign("[&array][$s1-16]\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
+  context->add_symbol("&array");
   EXPECT_EQ(0, MemoryOperand(context));
-  context->get_operand(0, &get2);
-
+  
+  context->get_operand(8, &getAddr);
+  context->get_operand(24, &getReg);
+  context->get_operand(36, &get2);
+  
+  // BrigOperandAddress
+  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
+  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getAddr.directive);
+  EXPECT_EQ(0, getAddr.offset);
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(7, getReg.name);
+  // BrigOperandCompoud
   EXPECT_EQ(ref2.size, get2.size);
   EXPECT_EQ(ref2.kind, get2.kind);
   EXPECT_EQ(ref2.type, get2.type);
@@ -3129,6 +3162,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(ref2.name, get2.name);
   EXPECT_EQ(ref2.reg, get2.reg);
   EXPECT_EQ(ref2.offset, get2.offset);
+
 
   delete lexer;
 };

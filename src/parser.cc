@@ -3142,85 +3142,169 @@ int GlobalPrivateDecl(Context* context) {
   return 1;
 }
 
-int OffsetAddressableOperand(Context* context) {
-  // the first token is after '['
-  if (context->token_type == REGISTER) {
+
+int MemoryOperand(Context* context) {
+  // this judge(first token == '[') is necessary in here
+  if (context->token_to_scan == '[') {
+    std::string operand_name;
+    int CurrentoOffset = 0;
     context->token_to_scan = yylex();
-    if (context->token_to_scan == '+' || context->token_to_scan == '-') {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+    CurrentoOffset = context->get_operand_offset(); 
+    if (!AddressableOperand(context)) {
+      // OffsetAddressableOperand
+      if (context->token_to_scan == '[') {
+        BrigOperandCompound compound_op = {
+          sizeof(BrigOperandCompound),     // size
+          BrigEOperandCompound,            // kind
+          Brigb32,                         // type
+          0,                               // reserved
+          0,                               // name
+          0,                               // reg
+          0                                // offset
+        };
+        if (context->get_machine() == BrigELarge) {
+          compound_op.type = Brigb64;
+        }
+        compound_op.name = CurrentoOffset;
         context->token_to_scan = yylex();
+        if (context->token_type == REGISTER) {
+          // The register must be an s or d register (c registers are not allowed). 
+          switch (context->token_to_scan) {
+            case TOKEN_DREGISTER:
+            case TOKEN_SREGISTER:
+              break;
+            default:
+              context->set_error(INVALID_OPERAND);
+              return 1;
+          }
+          operand_name = context->token_value.string_val;
+          // the token must be Register.
+          // generate BrigOperandReg code.
+          if(Identifier(context)) {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
+          compound_op.reg = context->operand_map[operand_name];
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == '+' || context->token_to_scan == '-') {
+            int imm_sign = 1;
+            if (context->token_to_scan == '-') {
+              imm_sign = -1;
+            }
+            context->token_to_scan = yylex();
+            if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+              compound_op.offset = context->token_value.int_val * imm_sign;
+              context->token_to_scan = yylex();
+              if (context->token_to_scan == ']') {
+                context->append_operand(&compound_op);
+                context->token_to_scan = yylex();
+                return 0;
+              } else {
+                context->set_error(MISSING_CLOSING_BRACKET);
+                return 1;
+              }
+            } else {
+              context->set_error(INVALID_SECOND_OPERAND);
+              return 1;
+            }
+          } else if (context->token_to_scan == ']') {
+            context->append_operand(&compound_op);
+            context->token_to_scan = yylex();
+            return 0;
+          } else {
+            context->set_error(MISSING_CLOSING_BRACKET);
+            return 1;
+          }        
+        } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == ']') {
+            context->token_to_scan = yylex();
+            return 0;
+          } else {
+            context->set_error(MISSING_CLOSING_BRACKET);
+            return 1;
+          }
+        } else if (context->token_to_scan == ']') {
+          // empty body
+          context->set_error(MISSING_OPERAND);
+          return 1;
+        } else {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+      }  // AddressableOperand '[' offsetAddressable ']'
+      return 0;
+    } else {
+      // offsetAddressableOperand
+      BrigOperandIndirect indirect_op = {
+        sizeof(BrigOperandIndirect),    // size
+        BrigEOperandIndirect,           // kind
+        0,                              // reg
+        Brigb32,                        // type
+        0,                              // reserved
+        0                               // offset
+      };
+      if (context->get_machine() == BrigELarge) {
+        indirect_op.type = Brigb64;
+      }
+      if (context->token_type == REGISTER) {
+        // The register must be an s or d register (c registers are not allowed). 
+        switch (context->token_to_scan) {
+          case TOKEN_DREGISTER:
+          case TOKEN_SREGISTER:
+            break;
+          default:
+            context->set_error(INVALID_OPERAND);
+            return 1;
+        }
+        operand_name = context->token_value.string_val;
+        // the token must be Register.
+        // generate BrigOperandReg code.
+        if(Identifier(context)) {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+        indirect_op.reg = context->operand_map[operand_name];
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == '+' || context->token_to_scan == '-') {
+          int imm_sign = 1;
+          if (context->token_to_scan == '-') {
+            imm_sign = -1;
+          }
+          context->token_to_scan = yylex();
+          if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+            indirect_op.offset = context->token_value.int_val * imm_sign;
+            context->token_to_scan = yylex();
+          } else {
+            return 1;
+          }
+        }
         if (context->token_to_scan == ']') {
+          context->append_operand(&indirect_op);
           context->token_to_scan = yylex();
           return 0;
         } else {
           context->set_error(MISSING_CLOSING_BRACKET);
           return 1;
         }
-      } else {
-        context->set_error(INVALID_SECOND_OPERAND);
-        return 1;
-      }
-    } else if (context->token_to_scan == ']')  {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_CLOSING_BRACKET);
-      return 1;
-    }
-  } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ']') {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_CLOSING_BRACKET);
-    }
-  } else if (context->token_to_scan == ']') {
-    // empty body
-    context->set_error(MISSING_OPERAND);
-  } else {
-    context->set_error(INVALID_OPERAND);
-  }
-  return 1;
-}
-
-int MemoryOperand(Context* context) {
-  // this judge(first token == '[') is necessary in here
-  if (context->token_to_scan == '[') {
-    context->token_to_scan = yylex();
-    if (!AddressableOperand(context)) {
-      if (context->token_to_scan == '[') {
+      } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+        indirect_op.offset = context->token_value.int_val;
         context->token_to_scan = yylex();
-        if (!OffsetAddressableOperand(context)) {
+        if (context->token_to_scan == ']') {
+          context->append_operand(&indirect_op);
+          context->token_to_scan = yylex();
           return 0;
         } else {
+          context->set_error(MISSING_CLOSING_BRACKET);
           return 1;
         }
+      } else if (context->token_to_scan == ']') {
+        // empty body
+        context->set_error(MISSING_OPERAND);
+        return 1;
       }
-      return 0;
-    } else if (context->token_type == REGISTER) {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == '+' || context->token_to_scan == '-') {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-          context->token_to_scan = yylex();
-        } else {
-          return 1;
-        }
-      }
-      if (context->token_to_scan == ']') {
-        context->token_to_scan = yylex();
-        return 0;
-      }
-    } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ']') {
-        context->token_to_scan = yylex();
-        return 0;
-      }
-    }
-  }
+    }  // offsetAddressableOperand
+  }  // '['
   return 1;
 }
 int Instruction5(Context* context) {
