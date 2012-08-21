@@ -3064,5 +3064,42 @@ TEST(CodegenTest, SyncCodeGen) {
   delete lexer;
 }
 
+TEST(CodegenTest, BarCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBar ref = {
+    36,
+    BrigEInstBar,
+    BrigBarrier,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0},
+    BrigGroupLevel
+  };
+
+  std::string input("barrier_group ;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Bar(context));
+
+  BrigInstBar get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+  EXPECT_EQ(ref.syncFlags, get.syncFlags);
+
+  delete lexer;
+}
 }  // namespace brig
 }  // namespace hsa

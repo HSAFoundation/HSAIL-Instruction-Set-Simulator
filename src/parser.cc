@@ -4922,7 +4922,7 @@ int Ret(Context* context) {
     };
     // write to .code section
     context->append_code(&op_ret);
-    context->update_bdf_opration_count();
+    context->update_bdf_operation_count();
 
     context->token_to_scan = yylex();
     return 0;
@@ -5076,6 +5076,9 @@ int Sync(Context* context) {
 }
 int Bar(Context* context) {
   // first token is BARRIER
+  if(BARRIER != context->token_to_scan)
+    return 1;
+  
   context->token_to_scan = yylex();
   if (!OptionalWidth(context)) {
     if (context->token_to_scan == _GLOBAL) {
