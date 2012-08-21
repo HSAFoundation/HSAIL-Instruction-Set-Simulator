@@ -2041,16 +2041,18 @@ int Program(Context* context) {
 							else{
 								return 1;
 							}
-				case DATA_TYPE_ID: 	
-							if(!InitializableDeclPart2(context, storage_class))
-								break;
+				default: 	
+							if(context->token_type==DATA_TYPE_ID){
+								if(!InitializableDeclPart2(context, storage_class))
+									break;
+								else 
+									return 1;
+							}
 							else{
+								context->set_error(MISSING_IDENTIFIER);
 								return 1;
 							}
-				default:
-							context->set_error(MISSING_IDENTIFIER);
-							return 1;
-			}
+				}
 		}else if(GROUP == context->token_to_scan){
           if(!GlobalGroupDecl(context))
            continue ;
@@ -5623,13 +5625,11 @@ int GlobalDecl(Context *context){
 							context->set_error(MISSING_IDENTIFIER);
 							return 1;
 			}
-		}else if(GROUP == context->token_to_scan){
-				return GlobalGroupDecl(context) ;
-			}else if(PRIVATE == context->token_to_scan){
-				return GlobalPrivateDecl(context);
-			}else if(READONLY == context->token_to_scan){
+		}else if(READONLY == context->token_to_scan){
 				return InitializableDecl(context);
-			}
+		}else if(!GlobalSymbolDecl(context)){
+			return 0;
+		}
 	}else {
 		context->set_error(MISSING_IDENTIFIER);
 	}
