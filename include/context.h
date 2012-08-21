@@ -189,6 +189,8 @@ class Context {
                                          uint32_t offset,
                                          uint32_t nBytes);
 
+    //modify the BrigDirectiveFunction filed
+    void update_bdf_operation_count() ;
 
     // clear buffers
     void clear_code_buffer(void);

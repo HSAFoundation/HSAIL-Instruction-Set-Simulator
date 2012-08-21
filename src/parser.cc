@@ -2080,28 +2080,43 @@ int Program(Context* context) {
 int OptionalWidth(Context* context) {
   // first token must be _WIDTH
   if (context->token_to_scan == _WIDTH) {
+    BrigOperandImmed op_width = {
+      24,
+      BrigEOperandImmed,
+      Brigb32,
+      0,
+      0
+    } ;
     context->token_to_scan = yylex();
     if (context->token_to_scan == '(') {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ALL) {
+        op_width.bits.u = 0 ;
+
         context->token_to_scan = yylex();
       } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+        op_width.bits.u  = context->token_value.int_val;
+
         context->token_to_scan = yylex();
       } else {
         context->set_error(MISSING_WIDTH_INFO);
         return 1;
       }
       if (context->token_to_scan == ')') {
+        context->append_operand(&op_width);
+
         context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
+        return 1;
       }
     } else {
       context->set_error(MISSING_WIDTH_INFO);
+      return 1;
     }
   }
-  return 0;
+  return 1;
 }
 
 int Branch(Context* context) {
@@ -4926,16 +4941,33 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
 
 int Ret(Context* context) {
   // first token is RET
+  if(RET != context->token_to_scan)
+    return 1;
+
+  BrigOpcode32_t opcode = context->token_value.opcode ;
+  uint32_t syncFlag = BrigPartialLevel ;
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
+     BrigInstBase op_ret = {
+      32,
+      BrigEInstBase,
+      opcode,
+      Brigb32,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0}
+    };
+    // write to .code section
+    context->append_code(&op_ret);
+    context->update_bdf_operation_count();
+
     context->token_to_scan = yylex();
     return 0;
   } else {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
+
 }
 
 int ImageRead(Context *context) {
@@ -5042,44 +5074,81 @@ int ImageRead(Context *context) {
 
 int Sync(Context* context) {
   // first token is SYNC
+  if(SYNC != context->token_to_scan)
+    return 1;
+  
+  BrigOpcode32_t opcode = context->token_value.opcode;
+  uint32_t syncFlags = BrigPartialLevel; //default
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == _GLOBAL) {
+    syncFlags = BrigGlobalLevel;
     context->token_to_scan = yylex();
   } else if (context->token_to_scan == _GROUP) {
+    syncFlags = BrigGroupLevel;
     context->token_to_scan = yylex();
   }
-  if (context->token_to_scan == ';') {
+  if (context->token_to_scan == ';') {    
+    BrigInstBar op_sync = {
+      36,
+      BrigEInstBar,
+      opcode ,
+      Brigb32 ,
+      BrigNoPacking,
+      {0,0,0,0,0},
+      syncFlags
+    };
+    context->append_code(&op_sync);
+    context->update_bdf_operation_count();
+
     context->token_to_scan = yylex();
     return 0;
   } else {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
+
 }
 int Bar(Context* context) {
   // first token is BARRIER
+  if(BARRIER != context->token_to_scan)
+    return 1;
+  
+  BrigOpcode32_t opcode = context->token_value.opcode;
+  uint32_t syncFlags = BrigPartialLevel; //default
+
   context->token_to_scan = yylex();
-  if (!OptionalWidth(context)) {
+  BrigoOffset32_t offset = context->get_operand_offset();
+
+  if (OptionalWidth(context)) { // no width
+    offset = 0;
+  }
     if (context->token_to_scan == _GLOBAL) {
+      syncFlags = BrigGlobalLevel;
       context->token_to_scan = yylex();
     } else if (context->token_to_scan == _GROUP) {
+      syncFlags = BrigGroupLevel;
       context->token_to_scan = yylex();
     }
     if (context->token_to_scan == ';') {
+      BrigInstBar op_bar = {
+        36,
+        BrigEInstBar,
+        opcode ,
+        Brigb32 ,
+        BrigNoPacking,
+        {offset,0,0,0,0},
+        syncFlags
+      };
+      context->append_code(&op_bar);
+      context->update_bdf_operation_count();
+
       context->token_to_scan = yylex();
       return 0;
     } else {
       context->set_error(MISSING_SEMICOLON);
       return 1;
     }
-  } else {  // Option Width
-    context->set_error(MISSING_DECLPREFIX);
-    return 1;
-  }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 int AtomModifiers(Context* context) {

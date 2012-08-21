@@ -1764,11 +1764,13 @@ ld                { free_string(context);
 sync              { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.opcode = BrigSync;
                     return SYNC;}
                     
 barrier           { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.opcode = BrigBarrier;
                     return BARRIER;}
                     
 segmentp          { free_string(context);
@@ -1809,6 +1811,7 @@ lda               { free_string(context);
 ret               { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.opcode = BrigRet;
                     return RET;}
                     
 packedcmp         { free_string(context);
