@@ -267,7 +267,7 @@ class Context {
     } token_value;
 
    //flat whether flex continue to scan next token
-   unsigned int had_yylex ;
+   unsigned int prev_token ;
 
   private:
     /* Buffers */
