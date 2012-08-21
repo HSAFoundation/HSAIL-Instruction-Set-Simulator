@@ -3099,6 +3099,48 @@ TEST(CodegenTest, BarCodeGen) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
   EXPECT_EQ(ref.syncFlags, get.syncFlags);
 
+  //case 2
+  context->clear_context();
+  input.assign("barrier_width(all)_group ;");
+  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Bar(context));
+
+  ref.o_operands[0] = 8 ;//update
+
+  BrigInstBar get_bib;
+  context->get_code(0, &get_bib);
+
+  EXPECT_EQ(ref.size,get_bib.size);
+  EXPECT_EQ(ref.kind,get_bib.kind);
+  EXPECT_EQ(ref.opcode, get_bib.opcode);
+  EXPECT_EQ(ref.packing, get_bib.packing);
+  EXPECT_EQ(ref.type, get_bib.type);
+  EXPECT_EQ(ref.o_operands[0], get_bib.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get_bib.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get_bib.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get_bib.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get_bib.o_operands[4]);
+  EXPECT_EQ(ref.syncFlags, get_bib.syncFlags);
+
+  BrigOperandImmed boi = {
+    24,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    0
+  };
+
+  BrigOperandImmed get_boi;
+  context->get_operand(8, &get_boi);
+
+  EXPECT_EQ(boi.size,get_boi.size);
+  EXPECT_EQ(boi.kind,get_boi.kind);
+  EXPECT_EQ(boi.type, get_boi.type);
+  EXPECT_EQ(boi.reserved, get_boi.reserved);
+  EXPECT_EQ(boi.bits.u, get_boi.bits.u);
+
   delete lexer;
 }
 

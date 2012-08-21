@@ -2088,6 +2088,7 @@ int OptionalWidth(Context* context) {
         context->append_operand(&op_width);
 
         context->token_to_scan = yylex();
+        return 0;
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
         return 1;
@@ -2097,7 +2098,7 @@ int OptionalWidth(Context* context) {
       return 1;
     }
   }
-  return 0;
+  return 1;
 }
 
 int Branch(Context* context) {
@@ -5096,7 +5097,11 @@ int Bar(Context* context) {
   uint32_t syncFlags = BrigPartialLevel; //default
 
   context->token_to_scan = yylex();
-  if (!OptionalWidth(context)) {
+  BrigoOffset32_t offset = context->get_operand_offset();
+
+  if (OptionalWidth(context)) { // no width
+    offset = 0;
+  }
     if (context->token_to_scan == _GLOBAL) {
       syncFlags = BrigGlobalLevel;
       context->token_to_scan = yylex();
@@ -5111,7 +5116,7 @@ int Bar(Context* context) {
         opcode ,
         Brigb32 ,
         BrigNoPacking,
-        {0,0,0,0,0},
+        {offset,0,0,0,0},
         syncFlags
       };
       context->append_code(&op_bar);
@@ -5123,12 +5128,6 @@ int Bar(Context* context) {
       context->set_error(MISSING_SEMICOLON);
       return 1;
     }
-  } else {  // Option Width
-    context->set_error(MISSING_DECLPREFIX);
-    return 1;
-  }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 int AtomModifiers(Context* context) {
