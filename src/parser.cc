@@ -4922,15 +4922,7 @@ int Ret(Context* context) {
     };
     // write to .code section
     context->append_code(&op_ret);
-    BrigDirectiveFunction bdf;
-    context->get_directive(context->current_bdf_offset, &bdf);
-    bdf.operationCount++;
-
-    unsigned char * bdf_charp =
-      reinterpret_cast<unsigned char*>(&bdf);
-    context->update_directive_bytes(bdf_charp,
-                                    context->current_bdf_offset,
-                                    sizeof(bdf));
+    context->update_bdf_opration_count();
 
     context->token_to_scan = yylex();
     return 0;
@@ -5072,14 +5064,8 @@ int Sync(Context* context) {
       syncFlags
     };
     context->append_code(&op_sync);
-    BrigDirectiveFunction bdf ;
-    context->get_directive(context->current_bdf_offset ,&bdf);
-    bdf.operationCount ++ ;
-  
-    unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-    context->update_directive_bytes(bdf_charp ,
-                                    context->current_bdf_offset,
-                                    sizeof(bdf));
+    context->update_bdf_operation_count();
+
     context->token_to_scan = yylex();
     return 0;
   } else {
