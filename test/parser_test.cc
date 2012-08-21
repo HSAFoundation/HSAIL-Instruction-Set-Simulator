@@ -378,8 +378,6 @@ TEST(ParserTest, ArrayDimensionSet) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  bool rescan = false;
-  unsigned int last_tok = 0;
   std::string input("[]\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -404,8 +402,6 @@ TEST(ParserTest, ArgumentDecl) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  bool rescan = false;
-  unsigned int last_tok = 0;
   // test 1
   std::string input("const static arg_u32 %local_id[2][2] \n");
   lexer->set_source_string(input);
@@ -609,7 +605,7 @@ TEST(ParserTest, SimpleProg) {
   EXPECT_EQ(0, Program(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Instruction3) {
   // Create a lexer
@@ -623,7 +619,7 @@ TEST(ParserTest, Instruction3) {
   EXPECT_EQ(0, Instruction3(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, OptionalWidth) {
   // Create a lexer
@@ -642,7 +638,7 @@ TEST(ParserTest, OptionalWidth) {
   EXPECT_EQ(0, OptionalWidth(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, BranchOperation) {
   // Create a lexer
@@ -723,7 +719,7 @@ TEST(ParserTest, BranchOperation) {
   EXPECT_EQ(0, Branch(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ParseCallTargets) {
   // Create a lexer
@@ -737,7 +733,7 @@ TEST(ParserTest, ParseCallTargets) {
   EXPECT_EQ(0, CallTargets(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ParseCallArgs) {
   // Create a lexer
@@ -761,7 +757,7 @@ TEST(ParserTest, ParseCallArgs) {
   EXPECT_EQ(0, CallArgs(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Call) {
   // Create a lexer
@@ -782,7 +778,7 @@ TEST(ParserTest, Call) {
   EXPECT_EQ(0, Call(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Initializers) {
   // Create a lexer
@@ -826,7 +822,7 @@ TEST(ParserTest, Initializers) {
   EXPECT_EQ(0, Initializer(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, InitializableDecl) {
   // Create a lexer
@@ -868,7 +864,7 @@ TEST(ParserTest, InitializableDecl) {
   EXPECT_EQ(0, InitializableDecl(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ProgWithFunctionDefinition) {
   // Create a lexer
@@ -941,7 +937,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   EXPECT_EQ(0, Program(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ProgWithGlobalDecl) {
   // Create a lexer
@@ -960,7 +956,7 @@ TEST(ParserTest, ProgWithGlobalDecl) {
   EXPECT_EQ(0, Program(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ProgWithUninitializableDecl ) {
   // Create a lexer
@@ -980,7 +976,7 @@ TEST(ParserTest, ProgWithUninitializableDecl ) {
   EXPECT_EQ(0, Program(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, UninitializableDecl) {
   // Create a lexer
@@ -995,7 +991,7 @@ TEST(ParserTest, UninitializableDecl) {
   EXPECT_EQ(0, UninitializableDecl(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ArgUninitializableDecl) {
   // Create a lexer
@@ -1010,7 +1006,7 @@ TEST(ParserTest, ArgUninitializableDecl) {
   EXPECT_EQ(0, ArgUninitializableDecl(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   // Create a lexer
@@ -1029,7 +1025,7 @@ TEST(ParserTest, ProgWithArgUninitializableDecl ) {
   EXPECT_EQ(0, Program(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, FileDecl) {
   // Create a lexer
@@ -1121,7 +1117,7 @@ TEST(ParserTest, FileDecl) {
 
   context->set_error_reporter(main_reporter);
   delete lexer;
-};
+}
 
 TEST(ParserTest, VectorToken) {
   // Create a lexer
@@ -1142,7 +1138,7 @@ TEST(ParserTest, VectorToken) {
   EXPECT_EQ(0, VectorToken(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, SysCall) {
   // syscall dest, n, src0, src1, src2;
@@ -1260,7 +1256,7 @@ TEST(ParserTest, SysCall) {
   EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Label) {
   // Create a lexer
@@ -1306,7 +1302,7 @@ TEST(ParserTest, Label) {
   EXPECT_EQ(INVALID_LABEL, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, LabelTargets) {
   // Create a lexer
@@ -1369,7 +1365,7 @@ TEST(ParserTest, LabelTargets) {
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Extension) {
   // format:
@@ -1407,7 +1403,7 @@ TEST(ParserTest, Extension) {
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, SignatureType) {
   // Create a lexer
@@ -1442,7 +1438,7 @@ TEST(ParserTest, SignatureType) {
 
   input.clear();
   delete lexer;
-};
+}
 
 
 TEST(ParserTest, FunctionSignature) {
@@ -1482,7 +1478,7 @@ TEST(ParserTest, FunctionSignature) {
   EXPECT_EQ(0, FunctionSignature(context));
 
   delete lexer;
-};
+}
 
 
 TEST(ParserTest, SignatureArgumentList) {
@@ -1507,7 +1503,7 @@ TEST(ParserTest, SignatureArgumentList) {
   EXPECT_EQ(0, SignatureArgumentList(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Instruction4) {
   // Create a lexer
@@ -1655,7 +1651,7 @@ TEST(ParserTest, Instruction4) {
   EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
   delete lexer;
-};
+}
 // ------------------  Test for ldc rule -------------------
 // format:
 // ldc ::= "ldc" dataTypeId operand "," ( TOKEN_LABEL ";" | identifier ";" )
@@ -1728,7 +1724,7 @@ TEST(ParserTest, Ldc) {
   EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 // -----------------  Test for Instruction5 rule -----------------
 // format:
@@ -1806,7 +1802,7 @@ TEST(ParserTest, Instruction5) {
   EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 // -----------------  Test for cvtModifier1 rule -----------------
 // format:
@@ -1887,7 +1883,7 @@ TEST(ParserTest, CvtModifier1) {
   EXPECT_EQ(0, CvtModifier1(context));
 
   delete lexer;
-};
+}
 
 // -----------------  Test for mov rule -------------------
 // format:
@@ -1977,7 +1973,7 @@ TEST(ParserTest, Mov) {
   EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 // -----------------  Test for Instruction0 rule -------------------
 // format:
@@ -1994,7 +1990,7 @@ TEST(ParserTest, Instruction0) {
   EXPECT_EQ(0, Instruction0(context));
 
   delete lexer;
-};
+}
 
 // -----------------  Test for Instruction1 rule -------------------
 // format:
@@ -2039,7 +2035,7 @@ TEST(ParserTest, Instruction1) {
   EXPECT_EQ(0, Instruction1(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
@@ -2099,7 +2095,7 @@ TEST(ParserTest, KernelArgumentList) {
   EXPECT_EQ(0, KernelArgumentDecl(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, KernelArgumentListBody) {
   Lexer *lexer = new Lexer();
@@ -2147,7 +2143,7 @@ TEST(ParserTest, KernelArgumentListBody) {
   EXPECT_EQ(0 , KernelArgumentListBody(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Kernel) {
   Lexer *lexer = new Lexer();
@@ -2162,7 +2158,7 @@ TEST(ParserTest, Kernel) {
 
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, OperandList) {
   // Create a lexer
@@ -2223,7 +2219,7 @@ TEST(ParserTest, OperandList) {
   EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Cmp) {
   // Create a lexer
@@ -2350,7 +2346,7 @@ TEST(ParserTest, Cmp) {
   EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 
 TEST(ParserTest, GlobalPrivateDecl) {
@@ -2403,7 +2399,7 @@ TEST(ParserTest, GlobalPrivateDecl) {
   EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, OffsetAddressableOperand) {
   // Create a lexer
@@ -2482,7 +2478,7 @@ TEST(ParserTest, OffsetAddressableOperand) {
   EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, MemoryOperand) {
   // Create a lexer
@@ -2509,7 +2505,7 @@ TEST(ParserTest, MemoryOperand) {
   EXPECT_EQ(0, MemoryOperand(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, IntegerLiteral) {
   // Case 1 Start reg '+' int
@@ -2697,7 +2693,7 @@ TEST(ParserTest, GlobalGroupDecl) {
   EXPECT_EQ(MISSING_GLOBAL_IDENTIFIER, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Mul) {
   // Create a lexer
@@ -2752,7 +2748,7 @@ TEST(ParserTest, Mul) {
   EXPECT_EQ(0, Mul(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Ld) {
   // Create a lexer
@@ -2867,7 +2863,7 @@ TEST(ParserTest, Ld) {
   EXPECT_EQ(0, Ld(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, St) {
   // Create a lexer
@@ -2932,7 +2928,7 @@ TEST(ParserTest, St) {
   EXPECT_EQ(0, St(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, Lda) {
   // Create a lexer
@@ -2957,7 +2953,7 @@ TEST(ParserTest, Lda) {
   EXPECT_EQ(0, Lda(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ImageRet) {
   // Create a lexer
@@ -3015,7 +3011,7 @@ TEST(ParserTest, ImageRet) {
   EXPECT_EQ(0, ImageRet(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ImageNoRet) {
   // Create a lexer
@@ -3078,7 +3074,7 @@ TEST(ParserTest, ImageNoRet) {
   EXPECT_EQ(0, ImageNoRet(context));
 
   delete lexer;
-};
+}
 
 // -----------------  Test for cvt rule -------------------
 // format:
@@ -3162,7 +3158,7 @@ TEST(ParserTest, Cvt) {
 
   input.clear();
   delete lexer;
-};
+}
 
 // -----------------  Test for atom rule -------------------
 // format:
@@ -3228,7 +3224,7 @@ TEST(ParserTest, Atom) {
   EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   delete lexer;
-};
+}
 
 
 TEST(ParserTest, ImageLoadTest) {
@@ -3262,7 +3258,7 @@ TEST(ParserTest, ImageLoadTest) {
   EXPECT_EQ(0, ImageLoad(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ImageStoreTest) {
   // Create a lexer
@@ -3295,7 +3291,7 @@ TEST(ParserTest, ImageStoreTest) {
   EXPECT_EQ(0, ImageStore(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, SingleListSingleTest) {
   Lexer* lexer = new Lexer();
@@ -3313,7 +3309,7 @@ TEST(ParserTest, SingleListSingleTest) {
   EXPECT_EQ(0, SingleListSingle(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, GlobalImageDecl) {
   Lexer* lexer = new Lexer();
@@ -3334,7 +3330,7 @@ TEST(ParserTest, GlobalImageDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalImageDecl(context));
   delete lexer;
-};
+}
 
 TEST(ParserTest, ImageInitializer) {
   Lexer* lexer = new Lexer();
@@ -3351,7 +3347,7 @@ TEST(ParserTest, ImageInitializer) {
   EXPECT_EQ(0, ImageInitializer(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ImageInit) {
   Lexer* lexer = new Lexer();
@@ -3385,7 +3381,7 @@ TEST(ParserTest, ImageInit) {
 
   context->set_error_reporter(main_reporter);
   delete lexer;
-};
+}
 
 TEST(ParserTest, GlobalReadOnlyImageDecl) {
   Lexer* lexer = new Lexer();
@@ -3406,7 +3402,7 @@ TEST(ParserTest, GlobalReadOnlyImageDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
   delete lexer;
-};
+}
 
 TEST(ParserTest, RetTest) {
   Lexer* lexer = new Lexer();
@@ -3419,7 +3415,7 @@ TEST(ParserTest, RetTest) {
   EXPECT_EQ(0, Ret(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ImageReadTest) {
   Lexer* lexer = new Lexer();
@@ -3463,7 +3459,7 @@ TEST(ParserTest, ImageReadTest) {
   EXPECT_EQ(0, ImageRead(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, SyncTest) {
   Lexer* lexer = new Lexer();
@@ -3481,7 +3477,7 @@ TEST(ParserTest, SyncTest) {
   EXPECT_EQ(0, Sync(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, BarTest) {
   Lexer* lexer = new Lexer();
@@ -3509,7 +3505,7 @@ TEST(ParserTest, BarTest) {
   EXPECT_EQ(0, Bar(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, AtomicNoRetTest) {
   Lexer* lexer = new Lexer();
@@ -3562,7 +3558,7 @@ TEST(ParserTest, AtomicNoRetTest) {
   EXPECT_EQ(0, AtomicNoRet(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, LocationTest) {
   Lexer* lexer = new Lexer();
@@ -3575,7 +3571,7 @@ TEST(ParserTest, LocationTest) {
   EXPECT_EQ(0, Location(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, PragmaTest) {
   Lexer* lexer = new Lexer();
@@ -3588,7 +3584,7 @@ TEST(ParserTest, PragmaTest) {
   EXPECT_EQ(0, Pragma(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, ControlTest) {
   Lexer* lexer = new Lexer();
@@ -3616,7 +3612,7 @@ TEST(ParserTest, ControlTest) {
   EXPECT_EQ(0, Control(context));
 
   delete lexer;
-};
+}
 
 TEST(ParserTest, BlockTest) {
   Lexer* lexer = new Lexer();
@@ -3683,7 +3679,7 @@ TEST(ParserTest, BlockTest) {
 
   context->set_error_reporter(main_reporter);
   delete lexer;
-};
+}
 
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
@@ -3711,7 +3707,7 @@ TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   }
 
   delete parser;
-};
+}
 
 TEST(ParserWrapperTest, ParseSimpleProgram) {
   // Example 3
@@ -3726,7 +3722,7 @@ TEST(ParserWrapperTest, ParseSimpleProgram) {
   EXPECT_EQ(0, parser->parse());
 
   delete parser;
-};
+}
 
 TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   // Example 3
@@ -3778,7 +3774,7 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   }
 
   delete parser;
-};
+}
 
 // Error reporting tests
 
@@ -3870,7 +3866,7 @@ TEST(ErrorReporting, CheckErrorHistory) {
 
   context->set_error_reporter(old_rpt);
   delete lexer;
-};
+}
 
 }  // namespace brig
 }  // namespace hsa

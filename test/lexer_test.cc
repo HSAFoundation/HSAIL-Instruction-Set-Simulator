@@ -1590,7 +1590,6 @@ TEST(LexTest, Bug54_SomeKeywords) {
 // ------------------ LEXER WRAPPER TESTS -----------------
 TEST(LexerWrapperTest, TestLexWrapper) {
   Lexer* lexer = new Lexer();
-  Context* context1 = Context::get_instance();
   std::string input("$c1");
   lexer->set_source_string(input);
 

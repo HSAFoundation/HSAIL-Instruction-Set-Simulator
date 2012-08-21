@@ -66,15 +66,17 @@ TEST(CodegenTest, ExampleWithKernel) {
   BrigDirectiveSymbol kernarg = {
   40,                       // size
   BrigEDirectiveSymbol ,    // kind
-  0,                         // c_code
-  3,                        // storag class kernarg
-  BrigNone ,                // attribut
-  0,                        // reserved
-  0,                        // symbolModifier
-  0,                        // dim
-  6,                        // s_name
-  Brigf32,                  // type
-  1,                        // align
+  {
+    0,                         // c_code
+    3,                        // storag class kernarg
+    BrigNone ,                // attribut
+    0,                        // reserved
+    0,                        // symbolModifier
+    0,                        // dim
+    6,                        // s_name
+    Brigf32,                  // type
+    1,                        // align
+  },
   0,                        // d_init
   0,                         // reserved
   };
@@ -89,15 +91,17 @@ TEST(CodegenTest, ExampleWithKernel) {
   BrigDirectiveSymbol private_var = {
   40,                       // size
   BrigEDirectiveSymbol ,    // kind
-  0,                         // c_code
-  2,                        // storag class kernarg
-  BrigNone ,                // attribut
-  0,                        // reserved
-  0,                        // symbolModifier
-  0,                        // dim
-  9,                        // s_name
-  Brigu32,                  // type
-  1,                        // align
+  {
+    0,                         // c_code
+    2,                        // storag class kernarg
+    BrigNone ,                // attribut
+    0,                        // reserved
+    0,                        // symbolModifier
+    0,                        // dim
+    9,                        // s_name
+    Brigu32,                  // type
+    1,                        // align
+  },
   0,                        // d_init
   0,                         // reserved
   };
@@ -109,7 +113,7 @@ TEST(CodegenTest, ExampleWithKernel) {
   EXPECT_EQ(private_var.s.s_name, get_sym.s.s_name);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, CallwMultiArgs) {
   context->set_error_reporter(main_reporter);
@@ -827,7 +831,6 @@ TEST(CodegenTest, AlignmentCheck) {
   context->clear_context();
 
   // First append a 4-byte aligned item BrigBlockStart
-  uint32_t old_offset;
   uint32_t curr_offset = context->get_directive_offset();
 
   BrigBlockStart bbs = {
@@ -838,7 +841,6 @@ TEST(CodegenTest, AlignmentCheck) {
   };
 
   context->append_directive(&bbs);    // append_directiveirective
-  old_offset = curr_offset;
   curr_offset = context->get_directive_offset();
 
   EXPECT_EQ(0, curr_offset%4);
@@ -850,11 +852,11 @@ TEST(CodegenTest, AlignmentCheck) {
     BrigEDirectiveBlockNumeric,  // kind
     Brigb64,                     // type
     1,                           // elementCount
-    1,                           // u64
+    { { 0 } },                   // u64
   };
+  bbn.u64[0] = 1;
 
   context->append_directive(&bbn);
-  old_offset = curr_offset;
   curr_offset = context->get_directive_offset();
 
   EXPECT_EQ(BrigEAlignment_8, Context::alignment_check(bbn));
@@ -976,7 +978,8 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
     sizeof(ref),      // size
     BrigEOperandReg,  // kind
     Brigb64,          // type
-    0                // reserved
+    0,                // reserved
+    0                 // name
   };
 
   name.assign("$d7");
@@ -1031,7 +1034,8 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
     sizeof(ref),        // size
     BrigEOperandImmed,  // kind
     Brigb32,            // type
-    0                   // reserved
+    0,                  // reserved
+    { 0 }
   };
 
   ref.bits.u = 5;
@@ -1187,7 +1191,7 @@ TEST(CodegenTest, LookupStringBugTest) {
   EXPECT_EQ(offset, loc);
 
   delete strBuf;
-};
+}
 
 TEST(CodegenTest, BrigOperandAddressGeneration) {
   std::string name;
@@ -1233,7 +1237,7 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
 
   delete lexer;
   delete parser;
-};
+}
 
 
 TEST(CodegenTest, Instruction2Op_CodeGen_abs_s32) {
