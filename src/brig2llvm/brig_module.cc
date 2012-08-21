@@ -102,7 +102,7 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) {
 
   if(dir->inParamCount) {
     const dir_iterator firstInParam1 =
-       dir_iterator(dir) + dir->outParamCount + 1;
+      dir_iterator(dir) + dir->outParamCount + 1;
     const dir_iterator firstInParam2(S_.directives + dir->d_firstInParam);
     valid &= check(firstInParam1 == firstInParam2,
                    "d_firstInParam is wrong");
@@ -127,9 +127,9 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) {
 
     const dir_iterator init(S_.directives + dir->d_init);
     const BrigDirectiveInit *bdi =
-       dyn_cast<BrigDirectiveInit>(init);
+      dyn_cast<BrigDirectiveInit>(init);
     const BrigDirectiveLabelInit *bdli =
-       dyn_cast<BrigDirectiveLabelInit>(init);
+      dyn_cast<BrigDirectiveLabelInit>(init);
     valid &= check(bdi || bdli, "Missing initializer");
 
     uint32_t elementCount = bdi ? bdi->elementCount : bdli->elementCount;
@@ -137,8 +137,8 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) {
                    "Inconsistent array dimensions");
 
     if(bdi)
-       valid &= check(bdi->type == dir->s.type,
-                      "Inconsistent array element type");
+      valid &= check(bdi->type == dir->s.type,
+                     "Inconsistent array element type");
   }
 
   return valid;
@@ -172,15 +172,30 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) {
 }
 
 bool BrigModule::validate(const BrigDirectiveProto *dir) { return true; }
-bool BrigModule::validate(const BrigDirectiveFile *dir) { return true; }
+
+bool BrigModule::validate(const BrigDirectiveFile *dir) {
+  bool valid = true;
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  valid &= validateSName(dir->s_filename);
+  return valid;
+}
+
 bool BrigModule::validate(const BrigDirectiveComment *dir) {
   bool valid = true;
   valid &= check(dir->c_code <= S_.codeSize,
-                   "c_code past the code section");
+                 "c_code past the code section");
   valid &= validateSName(dir->s_name);
   return valid;
 }
-bool BrigModule::validate(const BrigDirectiveLoc *dir) { return true; }
+
+bool BrigModule::validate(const BrigDirectiveLoc *dir) {
+  bool valid = true;
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  return valid;
+}
+
 bool BrigModule::validate(const BrigDirectiveInit *dir) { return true; }
 bool BrigModule::validate(const BrigDirectiveLabelInit *dir) {
   return true;
@@ -291,7 +306,7 @@ bool BrigModule::validate(const BrigSymbolCommon *s) {
                  "Invalid symbol modifier");
   // PRM 4.24
   if(!(s->symbolModifier & BrigArray))
-     valid &= check(!s->dim, "Non-array type with non-zero dimension");
+    valid &= check(!s->dim, "Non-array type with non-zero dimension");
   valid &= validateSName(s->s_name);
   valid &= check(s->type <= Brigf64x2,
                  "Invalid type");

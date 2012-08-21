@@ -459,7 +459,196 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
     "s_name past the strings section")));
   }
 }
+TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("filename"));
 
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigDirectiveFile bdf = {
+      sizeof(bdf), //uint16_t size;
+      BrigEDirectiveFile, //uint16_t kind;
+      0, //BrigcOffset32_t c_code;
+      1, //uint32_t fileid;
+      0 //BrigsOffset32_t s_filename;
+    };
+    directives.append(&bdf);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test 
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("filename"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFile bdf = {
+      sizeof(bdf), //uint16_t size;
+      BrigEDirectiveFile, //uint16_t kind;
+      10, //BrigcOffset32_t c_code; correct: 0
+      1, //uint32_t fileid;
+      0 //BrigsOffset32_t s_filename; correct: 0
+    };
+    directives.append(&bdf);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "c_code past the code section")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("filename"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFile bdf = {
+      sizeof(bdf), //uint16_t size;
+      BrigEDirectiveFile, //uint16_t kind;
+      0, //BrigcOffset32_t c_code; correct: 0
+      1, //uint32_t fileid;
+      100 //BrigsOffset32_t s_filename; correct: 0
+    };
+    directives.append(&bdf);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "s_name past the strings section")));    
+  }
+}
+TEST(Brig2LLVMTest, validateBrigDirectiveLoc) {
+  {
+    hsa::brig::StringBuffer strings;
+    
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveLoc bdl =  {
+      sizeof(bdl), //uint16_t size;
+      BrigEDirectiveLoc, //uint16_t kind;
+      0, //BrigcOffset32_t c_code;
+      0, //uint32_t sourceFile;
+      0, //uint32_t sourceLine;
+      0, //uint32_t sourceColumn;
+    };
+    directives.append(&bdl);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test 
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    
+    BrigDirectiveLoc bdl =  {
+      sizeof(bdl), //uint16_t size;
+      BrigEDirectiveLoc, //uint16_t kind;
+      10, //BrigcOffset32_t c_code;  correct: 0
+      0, //uint32_t sourceFile;
+      0, //uint32_t sourceLine;
+      0, //uint32_t sourceColumn;
+    };
+    directives.append(&bdl);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush(); 
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "c_code past the code section")));
+  }
+}
 // This method appends a BrigDirectiveProto to the buffer. BrigDirectiveProto is
 // a variable length structure. This means the last field of BrigDirectiveProto
 // is an array of unknown size. Unfortunately, variable length structures are
