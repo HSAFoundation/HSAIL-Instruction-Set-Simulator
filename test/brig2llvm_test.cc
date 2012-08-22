@@ -203,7 +203,7 @@ TEST(Brig2LLVMTest, Example2) {
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%c_regs = type { [8 x i1] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "%s_regs = type { [8 x i32] }")));
+    "%s_regs = type { [16 x i32] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%d_regs = type { [8 x i64] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -247,7 +247,8 @@ TEST(Brig2LLVMTest, Example3){
       0,   // c_code
       0,   // s_name
       0,   // inParamCount
-      directives.size() + sizeof(bdf),  // d_firstScopedDirective
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol),  // d_firstScopedDirective
       1,   // operationCount
       directives.size() + sizeof(bdf) +
       sizeof(BrigDirectiveSymbol),  // d_nextDirective
@@ -282,18 +283,18 @@ TEST(Brig2LLVMTest, Example3){
       sizeof(abs),
       BrigEInstBase,
       BrigAbs,
-      Brigb32,
-      BrigNoPacking,
-      { 0, 0, 0, 0, 0}
+      Brigu8x4,
+      BrigPackP,
+      { 8, 20, 0, 0, 0}
     };
     code.append(&abs);
     BrigInstBase add = {
       sizeof(add),
       BrigEInstBase,
       BrigAdd,
-      Brigb32,
-      BrigNoPacking,
-      { 0, 0, 0, 0, 0}
+      Brigu16x2,
+      BrigPackPPsat,
+      { 8, 32, 44, 0, 0}
     };
     code.append(&add);
     BrigInstBase ret = {
@@ -307,6 +308,7 @@ TEST(Brig2LLVMTest, Example3){
     code.append(&ret);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
     BrigOperandReg bor_1 = {
       sizeof(bor_1),
       BrigEOperandReg,
@@ -340,21 +342,28 @@ TEST(Brig2LLVMTest, Example3){
     };
     operands.append(&bor_4);
 
-    // hsa::brig::GenLLVM codegen(strings, directives, code, operands);
-    // codegen();
-    // EXPECT_NE(0, codegen.str().size());
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "declare void @abs_p_s8x4(%struct.regs*, i32, i32)")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "declare void @add_pp_sat_u16x2(%struct.regs*, i32, i32, i32)")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "define void @packed_ops(<4 x i8> * %x)")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "%struct.regs = type { %c_regs, %s_regs, %d_regs, %q_regs, %pc_regs }")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "%gpu_reg_p = alloca %struct.regs")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "ret void")));
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare <4 x i8> @Abs_P_u8x4(<4 x i8>)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare <2 x i16> @Add_PPsat_u16x2(<2 x i16>, <2 x i16>)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @packed_ops(<4 x i8>* %x)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 2")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 3")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "call <4 x i8> @Abs_P_u8x4")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "call <2 x i16> @Add_PPsat_u16x2")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%gpu_reg_p = alloca %struct.regs")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "ret void")));
   }
 }
 TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
@@ -1669,7 +1678,7 @@ TEST(Brig2LLVMTest, UniqueString) {
 TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
   {
     hsa::brig::StringBuffer strings;
-    
+
     hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -1686,7 +1695,7 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
 
     //BrigDirectiveInit::initializationData type:uint8_t
     uint8_t values[16] = {
-      //elementCount = 9, allocate 16 byte memory 
+      //elementCount = 9, allocate 16 byte memory
         1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
     };
     uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
@@ -1704,13 +1713,13 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
     directives.append(bdi);
 
     hsa::brig::Buffer code;
-   
+
     hsa::brig::Buffer operands;
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
-  //invalid test 
+  //invalid test
   {
     hsa::brig::StringBuffer strings;
 
@@ -1727,10 +1736,10 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0
     };
     directives.append(&bdv);
-    
+
     //BrigDirectiveInit::initializationData type:uint8_t
     uint8_t values[16] = {
-      //elementCount = 9, allocate 16 byte memory 
+      //elementCount = 9, allocate 16 byte memory
         1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
     };
     uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
@@ -1748,14 +1757,14 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
     directives.append(bdi);
 
     hsa::brig::Buffer code;
-   
+
     hsa::brig::Buffer operands;
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
     hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush(); 
+    errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Reserved not zero")));
   }
@@ -1775,10 +1784,10 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0
     };
     directives.append(&bdv);
-    
+
     //BrigDirectiveInit::initializationData type:uint8_t
     uint8_t values[16] = {
-      //elementCount = 9, allocate 16 byte memory 
+      //elementCount = 9, allocate 16 byte memory
         1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
     };
     uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
@@ -1796,14 +1805,14 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
     directives.append(bdi);
 
     hsa::brig::Buffer code;
-   
+
     hsa::brig::Buffer operands;
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
     hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush(); 
+    errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid type, must be b1, b8, b16, b32, b64, or b128")));
   }
@@ -1823,10 +1832,10 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0
     };
     directives.append(&bdv);
-    
+
     //BrigDirectiveInit::initializationData type:uint8_t
     uint8_t values[16] = {
-      //elementCount = 9, allocate 16 byte memory 
+      //elementCount = 9, allocate 16 byte memory
         1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
     };
     uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
@@ -1844,14 +1853,14 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
     directives.append(bdi);
 
     hsa::brig::Buffer code;
-   
+
     hsa::brig::Buffer operands;
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
     hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush(); 
+    errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Directive size too small for elementCount")));
   }
