@@ -386,6 +386,12 @@ struct BrigSymbolCommon {
   uint16_t align;
 };
 
+enum BrigSyncFlags {
+  BrigGroupLevel = 1,
+  BrigGlobalLevel = 2,
+  BrigPartialLevel = 4
+};
+
 // Directive structures
 
 // PRM 20.8.3

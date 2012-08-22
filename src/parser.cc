@@ -2015,22 +2015,40 @@ int Program(Context* context) {
              return 1;
           }
         }else if(GLOBAL == context->token_to_scan){
-          context->prev_token = context->token_to_scan;
-		  context->token_to_scan = yylex();
-          if(!GlobalImageDecl(context)){
-            context->prev_token = 0 ;
-          }else if(!GlobalReadOnlyImageDecl(context)){
-            context->prev_token = 0 ;
-          }else if(!GlobalSamplerDecl(context)){
-            context->prev_token = 0 ;
-          }else if(!InitializableDecl(context)){
-            context->prev_token = 0 ;
-          }else{
-            context->prev_token = 0 ;
-            context->set_error(MISSING_IDENTIFIER);
-            return 1;
-          }
-        }else if(GROUP == context->token_to_scan){
+			BrigStorageClass32_t storage_class = context->token_value.storage_class;
+			context->token_to_scan = yylex();
+			switch(context->token_to_scan){
+				case _RWIMG: 
+							if(!GlobalImageDeclPart2(context))
+								break;
+							else{
+								return 1;
+							}
+				case _ROIMG: 
+							if(!GlobalReadOnlyImageDeclPart2(context))
+								break;
+							else{
+								return 1;
+							}
+				case _SAMP : 	
+							if(!GlobalSamplerDeclPart2(context))
+								break;
+							else{
+								return 1;
+							}
+				default: 	
+							if(context->token_type==DATA_TYPE_ID){
+								if(!InitializableDeclPart2(context, storage_class))
+									break;
+								else 
+									return 1;
+							}
+							else{
+								context->set_error(MISSING_IDENTIFIER);
+								return 1;
+							}
+				}
+		}else if(GROUP == context->token_to_scan){
           if(!GlobalGroupDecl(context))
            continue ;
            return 1;
@@ -2042,9 +2060,9 @@ int Program(Context* context) {
           if(!InitializableDecl(context))
             continue;
             return 1;
-          }else{ 
+        }else{ 
             return  1;
-          }
+        }
        }    // while (first_token)
        return 0;
     }   // if (!Version)
@@ -2058,28 +2076,43 @@ int OptionalWidth(Context* context) {
   // first token must be _WIDTH
 
   if (context->token_to_scan == _WIDTH) {
+    BrigOperandImmed op_width = {
+      24,
+      BrigEOperandImmed,
+      Brigb32,
+      0,
+      0
+    } ;
     context->token_to_scan = yylex();
     if (context->token_to_scan == '(') {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ALL) {
+        op_width.bits.u = 0 ;
+
         context->token_to_scan = yylex();
       } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+        op_width.bits.u  = context->token_value.int_val;
+
         context->token_to_scan = yylex();
       } else {
         context->set_error(MISSING_WIDTH_INFO);
         return 1;
       }
       if (context->token_to_scan == ')') {
+        context->append_operand(&op_width);
+
         context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
+        return 1;
       }
     } else {
       context->set_error(MISSING_WIDTH_INFO);
+      return 1;
     }
   }
-  return 0;
+  return 1;
 }
 
 int Branch(Context* context) {
@@ -2435,20 +2468,21 @@ int Initializer(Context* context) {
 }
 
 int InitializableDecl(Context* context) {
-  // first_token is READONLY or GLOBAL
-  BrigStorageClass32_t storage_class = context->token_value.storage_class;
-  unsigned int earlier_token;
+
+	if((context->token_to_scan==GLOBAL) || (context->token_to_scan == READONLY)){
+		context->token_to_scan = yylex();
+		BrigStorageClass32_t storage_class = context->token_value.storage_class;
+		return (InitializableDeclPart2(context, storage_class));
+	} else{
+		context->set_error(MISSING_GLOBAL_IDENTIFIER);
+		return 1;
+	}
+}
+
+int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
+{
   
-  if(context->prev_token){
-	earlier_token = context->prev_token;
-  } else{
-	earlier_token = context->token_to_scan;
-	context->token_to_scan = yylex();
-  }
-  
-  if(!((earlier_token==GLOBAL) || (earlier_token==READONLY)))
-	return 1;
-	
+  //First token already verified as GLOBAL/READONLY
   if (context->token_type == DATA_TYPE_ID) {
     context->token_to_scan = yylex();
 
@@ -3432,6 +3466,7 @@ int Ldc(Context* context) {
            !Identifier(context)) {
           context->token_to_scan = yylex();
           if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
             context->set_error(MISSING_SEMICOLON);
@@ -3490,6 +3525,7 @@ int Atom(Context* context) {
                   context->token_to_scan = yylex();
                   if (!Operand(context)) {
                     if (context->token_to_scan == ';') {
+                      context->token_to_scan = yylex();
                       return 0;
                     } else {
                       context->set_error(MISSING_SEMICOLON);
@@ -3523,6 +3559,7 @@ int Atom(Context* context) {
                 context->token_to_scan = yylex();
                 if (!Operand(context)) {
                   if (context->token_to_scan == ';') {
+                    context->token_to_scan = yylex();
                     return 0;
                   } else {
                     context->set_error(MISSING_SEMICOLON);
@@ -3580,6 +3617,7 @@ int Atom(Context* context) {
                     context->token_to_scan = yylex();
                     if (!Operand(context)) {
                       if (context->token_to_scan == ';') {
+                        context->token_to_scan = yylex();
                         return 0;
                       } else {
                         context->set_error(MISSING_SEMICOLON);
@@ -3621,6 +3659,7 @@ int Atom(Context* context) {
                   context->token_to_scan = yylex();
                   if (!Operand(context)) {
                     if (context->token_to_scan == ';') {
+                      context->token_to_scan = yylex();
                       return 0;
                     } else {
                       context->set_error(MISSING_SEMICOLON);
@@ -3741,6 +3780,7 @@ int Mov(Context* context) {
         context->token_to_scan = yylex();
         if (!Operand(context) || !ArrayOperandList(context)) {
           if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
             context->set_error(MISSING_SEMICOLON);
@@ -4399,6 +4439,7 @@ int Cvt(Context* context) {
             context->token_to_scan = yylex();
             if (!Operand(context)) {
               if (context->token_to_scan == ';') {
+                context->token_to_scan = yylex();
                 return 0;
               } else {
               context->set_error(MISSING_SEMICOLON);
@@ -4453,6 +4494,7 @@ int Instruction0(Context* context) {
   // first token is NOP "nop"
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
+    context->token_to_scan = yylex();
     return 0;
   } else {
     context->set_error(MISSING_SEMICOLON);
@@ -4467,6 +4509,7 @@ int Instruction1(Context* context) {
     if (!RoundingMode(context)) {  // with RoundingMode
       if (!Operand(context)) {
         if (context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
           return 0;
         } else {
            context->set_error(MISSING_SEMICOLON);
@@ -4476,6 +4519,7 @@ int Instruction1(Context* context) {
       }
     } else if (!Operand(context)) {  // without RoundingMode
       if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(MISSING_SEMICOLON);
@@ -4487,6 +4531,7 @@ int Instruction1(Context* context) {
     context->token_to_scan = yylex();
     if (!Operand(context)) {
       if (context->token_to_scan == ';') {
+        context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(MISSING_SEMICOLON);
@@ -4501,6 +4546,7 @@ int Instruction1(Context* context) {
         context->token_to_scan = yylex();
         if (!Operand(context)) {
           if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
             return 0;
           } else {
             context->set_error(MISSING_SEMICOLON);
@@ -4515,6 +4561,7 @@ int Instruction1(Context* context) {
       context->token_to_scan = yylex();
       if (!Operand(context)) {
         if (context->token_to_scan == ';') {
+          context->token_to_scan = yylex();
           return 0;
         } else {
           context->set_error(MISSING_SEMICOLON);
@@ -4560,6 +4607,7 @@ int Segp(Context* context) {
             context->token_to_scan = yylex();
             if (!RIW_Operand(context)) {
               if (context->token_to_scan == ';') {
+                context->token_to_scan = yylex();
                 return 0;
               } else {
                 context->set_error(MISSING_SEMICOLON);
@@ -4595,6 +4643,7 @@ int Segp(Context* context) {
             context->token_to_scan = yylex();
             if (!RIW_Operand(context)) {
               if (context->token_to_scan == ';') {
+                context->token_to_scan = yylex();
                 return 0;
               } else {
                 context->set_error(MISSING_SEMICOLON);
@@ -4623,105 +4672,158 @@ int Operation(Context* context) {
   if (context->token_type == INSTRUCTION1_OPCODE_NODT ||
       context->token_to_scan == CLOCK || 
       context->token_type == INSTRUCTION1_OPCODE) {
-    Instruction1(context);
-    return 0; 
+    if (!Instruction1(context)) {
+      context->token_to_scan = yylex();
+      return 0; 
+    }
   } else if (context->token_to_scan == NOP) {
-    Instruction0(context);
-    return 0;
+    if (!Instruction0(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_type == INSTRUCTION2_OPCODE_FTZ ||
              context->token_type == INSTRUCTION2_OPCODE ||
              context->token_type == INSTRUCTION2_OPCODE_NODT) {
-    Instruction2(context);
-    return 0;
+    if (!Instruction2(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_type == INSTRUCTION3_OPCODE ||
              context->token_type == INSTRUCTION3_OPCODE_FTZ) {
-    Instruction3(context);
-    return 0;
+    if (!Instruction3(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_type == INSTRUCTION4_OPCODE) {
-    Instruction4(context);
-    return 0;
+    if (!Instruction4(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == PACKEDCMP ||
              context->token_to_scan == CMP) {
-    Cmp(context);
-    return 0;
+    if (!Cmp(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == MUL ||
              context->token_to_scan == MUL_HI ||
              context->token_to_scan == MUL24_HI ||
              context->token_to_scan == MUL24 ||
              context->token_to_scan == MAD24 ||
              context->token_to_scan == MAD24_HI) {
-    Mul(context);
-    return 0;
+    if (!Mul(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == F2U4) {
-    Instruction5(context);
-    return 0;
+    if (!Instruction5(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == MOV) {
-    Mov(context);
-    return 0;
+    if (!Mov(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == SEGMENTP ||
              context->token_to_scan == FTOS ||
              context->token_to_scan == STOF) {
-    Segp(context);
-    return 0;
+    if (!Segp(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == LDA) {
-    Lda(context);
-    return 0;
+    if (!Lda(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == LDC) {
-    Ldc(context);
-    return 0;
+    if (!Ldc(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == ATOMIC ||
              context->token_to_scan == ATOMIC_CAS) {
-    Atom(context);
-    return 0;
+    if (!Atom(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == RD_IMAGE) {
-    ImageRead(context);
-    return 0;
+    if (!ImageRead(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
+  } else if (context->token_to_scan == LD_IMAGE) {
+    if (!ImageLoad(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
+  } else if (context->token_to_scan == ST_IMAGE) {
+    if (!ImageStore(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == LD) {
-    Ld(context);
-    return 0;
+    if (!Ld(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == ST) {
-    St(context);
-    return 0;
+    if (!St(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == CVT) {
-    Cvt(context);
-    return 0;
+    if (!Cvt(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == ATOMICNORET ||
              context->token_to_scan == ATOMICNORET_CAS) {
-    AtomicNoRet(context);
-    return 0;
+    if (!AtomicNoRet(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == ATOMIC_IMAGE) {
-    ImageRet(context);
-    return 0;
+    if (!ImageRet(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == SYNC) {
-    Sync(context);
-    return 0;
+    if (!Sync(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == BARRIER) {
-    Bar(context);
-    return 0;
+    if (!Bar(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == SYSCALL) {
-    SysCall(context);
-    return 0;
+    if (!SysCall(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   }  else if (context->token_to_scan == RET) {
-    Ret(context);
-    return 0;
+    if (!Ret(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_to_scan == CBR ||
              context->token_to_scan == BRN) {
-    Branch(context);
-    return 0;
+    if (!Branch(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   } else if (context->token_type = QUERY_OP) {
-    Query(context);
-    return 0;
-  } else if (context->token_to_scan == ST_IMAGE) {
-    ImageStore(context);
-    return 0;
-  } else if (context->token_to_scan == LD_IMAGE) {
-    ImageLoad(context);
-    return 0;
-  } else {
-    context->set_error(UNKNOWN_ERROR);
-  }
+    if (!Query(context)) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
+  } 
   return 1;
 }
+
 
 int ImageLoad(Context* context) {
   // first token is LD_IMAGE
@@ -4953,17 +5055,18 @@ int ImageInit(Context *context) {
 }
 
 int GlobalImageDecl(Context *context) {
-  
-	int earlier_token;
-	if(context->prev_token){
-		earlier_token = context->prev_token;
-	} else{
-		earlier_token = context->token_to_scan;
+	if(context->token_to_scan == GLOBAL){
 		context->token_to_scan = yylex();
+	  	return (GlobalImageDeclPart2(context));
+	}else{
+		context->set_error(MISSING_GLOBAL_IDENTIFIER);
+		return 1;
 	}
-if(earlier_token == GLOBAL)
-{		
+}
+
+int GlobalImageDeclPart2(Context *context){	
   //First token has been scanned and verified as global. Read next token.
+  
   if (_RWIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
@@ -5010,7 +5113,7 @@ if(earlier_token == GLOBAL)
     context->set_error(MISSING_IDENTIFIER);
     }
   }
-}
+
   return 1;
 }
 
@@ -5045,16 +5148,18 @@ int ImageInitializer(Context *context) {
 }
 
 int GlobalReadOnlyImageDecl(Context *context) {
- 
-	int earlier_token;
-	if(context->prev_token){
-		earlier_token = context->prev_token;
-	} else {
-		earlier_token = context->token_to_scan;
+	if(GLOBAL == context->token_to_scan){
 		context->token_to_scan = yylex();
-	}
+		return GlobalReadOnlyImageDeclPart2(context);
+	}else{
+		context->set_error(MISSING_GLOBAL_IDENTIFIER);
+		return 1;
+	}	
+}
+
+int GlobalReadOnlyImageDeclPart2(Context *context){
   //First token has been scanned and verified as global. Scan next token.		
-if(earlier_token == GLOBAL){
+  
   if (_ROIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
@@ -5100,22 +5205,38 @@ if(earlier_token == GLOBAL){
   } else {
     context->set_error(MISSING_IDENTIFIER);
   }
- }
   return 1;
 }
 
 int Ret(Context* context) {
   // first token is RET
+  if(RET != context->token_to_scan)
+    return 1;
+
+  BrigOpcode32_t opcode = context->token_value.opcode ;
+  uint32_t syncFlag = BrigPartialLevel ;
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
+     BrigInstBase op_ret = {
+      32,
+      BrigEInstBase,
+      opcode,
+      Brigb32,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0}
+    };
+    // write to .code section
+    context->append_code(&op_ret);
+    context->update_bdf_operation_count();
+
     context->token_to_scan = yylex();
     return 0;
   } else {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
+
 }
 
 int ImageRead(Context *context) {
@@ -5222,44 +5343,81 @@ int ImageRead(Context *context) {
 
 int Sync(Context* context) {
   // first token is SYNC
+  if(SYNC != context->token_to_scan)
+    return 1;
+  
+  BrigOpcode32_t opcode = context->token_value.opcode;
+  uint32_t syncFlags = BrigPartialLevel; //default
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == _GLOBAL) {
+    syncFlags = BrigGlobalLevel;
     context->token_to_scan = yylex();
   } else if (context->token_to_scan == _GROUP) {
+    syncFlags = BrigGroupLevel;
     context->token_to_scan = yylex();
   }
-  if (context->token_to_scan == ';') {
+  if (context->token_to_scan == ';') {    
+    BrigInstBar op_sync = {
+      36,
+      BrigEInstBar,
+      opcode ,
+      Brigb32 ,
+      BrigNoPacking,
+      {0,0,0,0,0},
+      syncFlags
+    };
+    context->append_code(&op_sync);
+    context->update_bdf_operation_count();
+
     context->token_to_scan = yylex();
     return 0;
   } else {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
+
 }
 int Bar(Context* context) {
   // first token is BARRIER
+  if(BARRIER != context->token_to_scan)
+    return 1;
+  
+  BrigOpcode32_t opcode = context->token_value.opcode;
+  uint32_t syncFlags = BrigPartialLevel; //default
+
   context->token_to_scan = yylex();
-  if (!OptionalWidth(context)) {
+  BrigoOffset32_t offset = context->get_operand_offset();
+
+  if (OptionalWidth(context)) { // no width
+    offset = 0;
+  }
     if (context->token_to_scan == _GLOBAL) {
+      syncFlags = BrigGlobalLevel;
       context->token_to_scan = yylex();
     } else if (context->token_to_scan == _GROUP) {
+      syncFlags = BrigGroupLevel;
       context->token_to_scan = yylex();
     }
     if (context->token_to_scan == ';') {
+      BrigInstBar op_bar = {
+        36,
+        BrigEInstBar,
+        opcode ,
+        Brigb32 ,
+        BrigNoPacking,
+        {offset,0,0,0,0},
+        syncFlags
+      };
+      context->append_code(&op_bar);
+      context->update_bdf_operation_count();
+
       context->token_to_scan = yylex();
       return 0;
     } else {
       context->set_error(MISSING_SEMICOLON);
       return 1;
     }
-  } else {  // Option Width
-    context->set_error(MISSING_DECLPREFIX);
-    return 1;
-  }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 int AtomModifiers(Context* context) {
@@ -5575,25 +5733,19 @@ int Block(Context* context) {
 
 
 int GlobalSymbolDecl(Context* context) {
-  unsigned int first_token = context->token_to_scan;
   if (!DeclPrefix(context)) {
-    if (first_token == GROUP) {
-      if (!GlobalGroupDecl(context)) { 
-        return 0;
-      } else {
-        return 1;
-      }
-    } else if (!GlobalPrivateDecl(context)) {
-      return 0;
-    } else {
-      return 1;
-    }
-  } else {
-    context->set_error(MISSING_DECLPREFIX);
-    return 1;
+    if (context->token_to_scan == GROUP) 
+      return (GlobalGroupDecl(context));
+    else if (context->token_to_scan == PRIVATE) 
+      return(GlobalPrivateDecl(context));
+	else {
+		context->set_error(MISSING_IDENTIFIER);
+		return 1;
+	}
+  } else{
+	context->set_error(MISSING_DECLPREFIX);
+	return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 int Directive(Context* context) {
@@ -5695,16 +5847,18 @@ int SobInitializer(Context *context){
 }
 
 int GlobalSamplerDecl(Context *context){
- 
-	int earlier_token;
-	if(context->prev_token){
-		earlier_token = context->prev_token;
-	} else {
-		earlier_token = context->token_to_scan;
+ 	if(GLOBAL == context->token_to_scan){
 		context->token_to_scan = yylex();
-	}	
-	//Assumption: First token has already been verified as GLOBAL	
-if(earlier_token == GLOBAL){	
+		return (GlobalSamplerDeclPart2(context));
+	}else{
+		context->set_error(MISSING_GLOBAL_IDENTIFIER);
+		return 1;
+	}
+}	
+
+int GlobalSamplerDeclPart2(Context *context){	
+	//First token has already been verified as GLOBAL
+	
 	if(_SAMP == context->token_to_scan){ 
 		context->token_to_scan = yylex();
 		if(TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan){
@@ -5746,8 +5900,45 @@ if(earlier_token == GLOBAL){
 	}else{
 		context->set_error(MISSING_IDENTIFIER);
 	}
-}	
+	
 	return 1;
+}
+
+int GlobalInitializablePart2(Context* context){
+	
+		if(GLOBAL == context->token_to_scan){
+			BrigStorageClass32_t storage_class = context->token_value.storage_class;
+			context->token_to_scan = yylex();
+			switch(context->token_to_scan){
+				case _RWIMG: 
+							return(GlobalImageDeclPart2(context));
+				case _ROIMG: 
+							return(GlobalReadOnlyImageDeclPart2(context));
+				case _SAMP : 	
+							return(GlobalSamplerDeclPart2(context));
+				default:
+							if(context->token_type==DATA_TYPE_ID)
+								return (InitializableDeclPart2(context, storage_class));
+							else{	
+								context->set_error(MISSING_IDENTIFIER);
+								return 1;
+							}
+			}
+		} else if(READONLY == context->token_to_scan){
+			return InitializableDecl(context);
+		} else{
+			return 1;
+		}
+		return 0;
+}
+
+int GlobalInitializable(Context* context){
+	if(!DeclPrefix(context)){
+		return GlobalInitializablePart2(context);
+	} else{
+		context->set_error(MISSING_DECLPREFIX);
+		return 1;
+	}
 }
 
 int GlobalDecl(Context *context){
@@ -5755,34 +5946,13 @@ int GlobalDecl(Context *context){
 	if(SIGNATURE == context->token_to_scan){ //functionSignature 
 		return FunctionSignature(context);
 	}else if(!DeclPrefix(context)){
-    //FunctionDecl 
-		if(FUNCTION == context->token_to_scan){
+   		if(FUNCTION == context->token_to_scan){
 			return FunctionDecl(context);
-		}else if(GLOBAL == context->token_to_scan){
-			context->prev_token = context->token_to_scan;
-			context->token_to_scan = yylex();
-			if(!GlobalImageDecl(context)){
-				context->prev_token = 0;
-				return 0 ;
-			}else if(!GlobalReadOnlyImageDecl(context)){
-				context->prev_token = 0;
-				return 0;
-			}else if(!GlobalSamplerDecl(context)){
-				context->prev_token = 0;
-				return 0;
-			}else if(!InitializableDecl(context)){
-				context->prev_token = 0;
-				return 0;
-			}else{
-				context->set_error(MISSING_IDENTIFIER);
-			}
-		}else if(GROUP == context->token_to_scan){
-				return GlobalGroupDecl(context) ;
-			}else if(PRIVATE == context->token_to_scan){
-				return GlobalPrivateDecl(context);
-			}else if(READONLY == context->token_to_scan){
-				return InitializableDecl(context);
-			}
+		}else if(!GlobalInitializablePart2(context)){
+			return 0;
+		}else if(!GlobalSymbolDecl(context)){
+			return 0;
+		}
 	}else {
 		context->set_error(MISSING_IDENTIFIER);
 	}

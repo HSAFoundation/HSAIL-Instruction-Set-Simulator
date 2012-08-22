@@ -2173,7 +2173,6 @@ TEST(ParserTest, Segp) {
 //               | query
 //               | imagestore
 //               | imageload
-
 TEST(ParserTest, Operation) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -2215,7 +2214,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("f2u4_u64 , $s1, $s2, $s3, $s4, 0xD41;"); 
+  input.assign("f2u4_u64 $s1, $s2, $s3, $s4, 0xD41;"); 
   // Instruction5
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2226,7 +2225,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("ftos_arg_s16 $d3, $d4;\n"); // segp
+  input.assign("ftos_arg_u32 $d3, $d4;\n"); // segp
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
@@ -2236,7 +2235,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("ldc_b64 $s1, e123;\n"); // ldc
+  input.assign("ldc_b32 $s1, &bar;"); // ldc
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
@@ -2246,8 +2245,9 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],"); 
-  // imageread
+  input.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3), [%RWImg3],");
+  input.append(" [%Samp3], ($s6);");
+  //imageread
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
@@ -2272,7 +2272,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("atomic_image_and_3d_u32 $s4, [&namedRWImg2],"); 
+  input.assign("atomic_image_and_1d_b32 $s2, [&namedRWImg2], $s1, $s3;"); 
   // imageRet
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2309,19 +2309,20 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4),"); 
+  input.assign("st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),");
+  input.append("[%RWImg3], ($s4,$s5,$s6,$s7);"); 
   // imagestore
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("ld_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],"); 
+  input.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],");
   input.append("($s4,$s1,$s2,$s3);");
-  // imageload
+  //imageload
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
-
+ 
   delete lexer;
 };
 
@@ -3964,11 +3965,6 @@ TEST(ParserTest,GlobalSamplerDecl){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalSamplerDecl(context));
 
-  input.assign("global_Samp &demo[10] ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalSamplerDecl(context));
-  
   input.assign("global_Samp &demo[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
@@ -3986,6 +3982,76 @@ TEST(ParserTest,GlobalSamplerDecl){
   delete lexer ;
 };
 
+TEST(ParserTest,GlobalInitializable){
+  Lexer* lexer = new Lexer();
+  context->set_error_reporter(main_reporter);
+  
+  std::string input("extern global_Samp &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  input.assign("const static align 4 global_Samp &demo[10]={boundaryU = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  input.assign("align 8 global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+    //for globalImageDecl
+  input.assign("const extern global_RWImg &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  input.assign("static align 4 const global_RWImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+  
+  input.assign("align 4 global_RWImg &demo[10]={format = normalized} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+  
+  //for globalReadOlnyImageDecl
+  input.assign("const  extern global_ROImg &demo ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  input.assign("static align 8 global_ROImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+  
+  input.assign("const extern align 8 global_ROImg &demo[10]={format = normalized } ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  input.assign("extern global_ROImg &demo[10]={format = normalized ,order = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  input.assign("static global_f32 %c[3] = {1.2, 1.3, 1.4 };\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  // FloatInitializer
+  input.assign("extern readonly_f64 %d[3] ={ 1.2L, 1.3L,1.4L };\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalInitializable(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest,GlobalDecl){
   Lexer* lexer = new Lexer();
   context->set_error_reporter(main_reporter);
@@ -3995,12 +4061,7 @@ TEST(ParserTest,GlobalDecl){
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
-
-  input.assign("const extern global_Samp &demo[10] ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalDecl(context));
-  
+ 
   input.assign("const extern global_Samp &demo[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
@@ -4043,13 +4104,13 @@ TEST(ParserTest,GlobalDecl){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
   
-  input.assign("const  extern global_RWImg &demo[10]={format = normalized} ;");
+  input.assign("const extern global_RWImg &demo[10]={format = normalized} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for functionDecl
-  input.assign("const  extern function &get_global_id(arg_u32 %ret_val)");
+  input.assign("const extern function &get_global_id(arg_u32 %ret_val)");
   input.append("(arg_u32 %arg_val0) :fbar(1);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();

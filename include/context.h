@@ -189,6 +189,8 @@ class Context {
                                          uint32_t offset,
                                          uint32_t nBytes);
 
+    //modify the BrigDirectiveFunction filed
+    void update_bdf_operation_count() ;
 
     // clear buffers
     void clear_code_buffer(void);
@@ -265,9 +267,6 @@ class Context {
       BrigPacking16_t   packing;
       BrigStorageClass32_t storage_class;
     } token_value;
-
-   //flat whether flex continue to scan next token
-   unsigned int prev_token ;
 
   private:
     /* Buffers */
