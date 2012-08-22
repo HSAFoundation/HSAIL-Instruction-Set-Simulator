@@ -184,13 +184,43 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveImage *dir) const { return true; }
-bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
-  return true;
+bool BrigModule::validate(const BrigDirectiveImage *dir) const { 
+  bool valid = true;
+  valid &= check(dir->width != 0,"The image width is not specified");
+  valid &= check(dir->height != 0,"The image height is not specified");
+  valid &= check(dir->depth != 0,"The image depth is not specified");
+  valid &= check(dir->array != 1,"The image types is not 1DA or 2DA");
+  return valid;
 }
-bool BrigModule::validate(const BrigDirectiveLabel *dir) const { return true; }
+
+bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
+  bool valid = true;
+  valid &= check(dir->valid == 0,"The following field have valid data");
+  valid &= check(dir->filter <= BrigSamplerFilterNearest,
+                 "Invalid filter");
+  valid &= check(dir->boundaryU <= BrigSamplerBorder, 
+                 "Invalid boundaryU");
+  valid &= check(dir->boundaryV <= BrigSamplerBorder, 
+                 "Invalid boundaryV");
+  valid &= check(dir->boundaryW <= BrigSamplerBorder, 
+                 "Invalid boundaryW");
+  valid &= check(dir->reserved1 == 0 ,"The value of reserved1 must be zero");
+  return valid; 
+}
+
+bool BrigModule::validate(const BrigDirectiveLabel *dir) const { 
+  bool valid = true;
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  valid &= validateSName(dir->s_name);
+  return valid; 
+}
+
 bool BrigModule::validate(const BrigDirectiveLabelList *dir) const {
-  return true;
+  bool valid = true;
+  valid &= check(dir->c_code <= S_.codeSize,
+                 "c_code past the code section");
+  return valid;
 }
 
 // 20.8.22
