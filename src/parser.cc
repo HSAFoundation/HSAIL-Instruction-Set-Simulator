@@ -4092,8 +4092,6 @@ int Ld(Context* context) {
       context->token_to_scan = yylex();
       
       ld_op.o_operands[2] = context->get_operand_offset();
-      // TODO(Chuang): When the operand is a operation.
-      // MemoryOperand generate the .Operand brig.
       if (!MemoryOperand(context)) {
         if (context->token_to_scan == ';') {
           context->append_code(&ld_op);
