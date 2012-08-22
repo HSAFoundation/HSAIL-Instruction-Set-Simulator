@@ -596,8 +596,15 @@ static llvm::FunctionType *getInstFunType(const inst_iterator inst,
 }
 
 static bool hasDest(const inst_iterator inst) {
-  (void) inst;
-  return true;
+  // Most instruction have a destination. Check for each of the special cases.
+  BrigOpcode opcode = BrigOpcode(inst->opcode);
+  return
+    opcode != BrigSt        && opcode != BrigAtomicNoRet      &&
+    opcode != BrigStImage   && opcode != BrigAtomicNoRetImage &&
+    opcode != BrigBrn       && opcode != BrigCbr              &&
+    opcode != BrigSync      && opcode != BrigBarrier          &&
+    opcode != BrigRet       && opcode != BrigCall             &&
+    opcode != BrigDebugtrap && opcode != BrigNop;
 }
 
 static void runOnComplexInst(llvm::BasicBlock &B,
