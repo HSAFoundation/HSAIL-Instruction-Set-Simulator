@@ -26,6 +26,10 @@ template<class T> inline T *dyn_cast(BrigInstBase *inst) {
   return inst->kind == T::InstKind ? reinterpret_cast<T *>(inst) : NULL;
 }
 
+template<class T> inline T *dyn_cast(BrigOperandBase *inst) {
+  return inst->kind == T::OperKind ? reinterpret_cast<T *>(inst) : NULL;
+}
+
 template<> inline BrigDirectiveMethod *dyn_cast(BrigDirectiveBase *dir) {
   if(dir->kind == BrigEDirectiveFunction ||
      dir->kind == BrigEDirectiveKernel)

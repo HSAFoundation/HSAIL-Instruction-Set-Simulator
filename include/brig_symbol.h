@@ -60,7 +60,7 @@ class BrigSymbol {
     return cast<BrigDirectiveSymbolCommon>(it_);
   }
 
-  const BrigSections S_;
+  const BrigSections &S_;
   dir_iterator it_;
 };
 

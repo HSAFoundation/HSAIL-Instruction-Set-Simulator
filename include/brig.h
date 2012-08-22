@@ -766,6 +766,7 @@ struct BrigOperandBase {
 // BrigOperandReg
 // BrigOperandReg is used for a register (c, s, or d).
 struct BrigOperandReg {
+  static const uint16_t OperKind = BrigEOperandReg;
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -776,6 +777,7 @@ struct BrigOperandReg {
 // BrigOperandImmed
 // BrigOperandImmed is used for a numeric value.
 struct BrigOperandImmed {
+  static const uint16_t OperKind = BrigEOperandImmed;
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -795,6 +797,7 @@ struct BrigOperandImmed {
 // In the .operands section, BrigOperandAddress must start
 // on an offset divisible by 4.
 struct BrigOperandAddress {
+  static const uint16_t OperKind = BrigEOperandAddress;
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -806,6 +809,7 @@ struct BrigOperandAddress {
 // BrigOperandLabelRef
 // BrigOperandLabelRef is used for a label.
 struct BrigOperandLabelRef {
+  static const uint16_t OperKind = BrigEOperandLabelRef;
   uint16_t size;
   uint16_t kind;
   uint32_t labeldirective;
@@ -816,6 +820,7 @@ struct BrigOperandLabelRef {
 // BrigOperandFunctionRef is used for a reference
 // to a function or function signature.
 struct BrigOperandFunctionRef {
+  static const uint16_t OperKind = BrigEOperandFunctionRef;
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t fn;
@@ -828,6 +833,7 @@ struct BrigOperandFunctionRef {
 // Lists of function names or function signatures
 // are needed when the call statement has a list of possible targets.
 struct BrigOperandArgumentList {
+  static const uint16_t OperKind = BrigEOperandArgumentList;
   uint16_t size;
   uint16_t kind;
   uint32_t elementCount;
@@ -837,6 +843,7 @@ struct BrigOperandArgumentList {
 // BrigOperandArgumentRef
 // BrigOperandArgumentRef is used for a single argument.
 struct BrigOperandArgumentRef {
+  static const uint16_t OperKind = BrigEOperandArgumentRef;
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t arg;

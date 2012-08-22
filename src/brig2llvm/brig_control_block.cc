@@ -1,5 +1,6 @@
 #include "brig_control_block.h"
 #include "brig_function.h"
+#include "brig_inst_helper.h"
 
 namespace hsa {
 namespace brig {
@@ -12,6 +13,10 @@ BrigControlBlock &BrigControlBlock::operator++() {
      if(isa<BrigDirectiveLabel>(it_)) return *this;
 
   return *this;
+}
+
+BrigInstHelper BrigControlBlock::getInstHelper() const {
+  return BrigInstHelper(S_);
 }
 
 BrigControlBlock cb_begin(const BrigFunction &F) {

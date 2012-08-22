@@ -7,6 +7,7 @@ namespace hsa {
 namespace brig {
 
 class BrigFunction;
+class BrigInstHelper;
 
 class BrigControlBlock {
 
@@ -35,6 +36,8 @@ class BrigControlBlock {
     return other.begin();
   }
 
+  BrigInstHelper getInstHelper() const;
+
   friend BrigControlBlock cb_begin(const BrigFunction &F);
   friend BrigControlBlock cb_end(const BrigFunction &F);
 
@@ -52,7 +55,7 @@ class BrigControlBlock {
     else assert(false && "Bad control block");
   }
 
-  const BrigSections S_;
+  const BrigSections &S_;
   dir_iterator it_;
 };
 
