@@ -842,5 +842,16 @@ struct BrigOperandArgumentRef {
   BrigdOffset32_t arg;
 };
 
+enum BrigAddrFilter {
+	BrigSamplerFilterLinear,
+	BrigSamplerFilterNearest
+};
 
+enum BrigBoundaryMode {
+	BrigSamplerClamp,
+	BrigSamplerWrap,
+	BrigSamplerMirror,
+	BrigSamplerMirrorOnce,
+	BrigSamplerBorder
+};
 #endif  // INCLUDE_BRIG_H_
