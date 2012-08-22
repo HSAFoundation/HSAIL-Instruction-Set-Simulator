@@ -9,6 +9,23 @@ namespace brig {
 
 #define check(X,Y) check(X, Y, __FILE__, __LINE__, #X)
 
+int getTypeSize(BrigDataType16_t type) {
+  if (Brigb1 == type) {
+    return 1;
+  } else if (Brigb8 == type) {
+    return 1;
+  } else if (Brigb16 == type) {
+    return 2;
+  } else if (Brigb32 == type) {
+    return 4;
+  } else if (Brigb64 == type) {
+    return 8;
+  } else if (Brigb128 == type) {
+    return 16;
+  }
+  return 0;
+}
+
 template<class Message>
 bool (BrigModule::check)(bool test, const Message &msg,
                          const char *filename, unsigned lineno,
@@ -234,7 +251,19 @@ bool BrigModule::validate(const BrigDirectiveLoc *dir) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveInit *dir) const { return true; }
+bool BrigModule::validate(const BrigDirectiveInit *dir) const {
+  bool valid = true;
+  valid &= check(!dir->reserved, "Reserved not zero");
+  valid &= check(Brigb1 == dir->type  || Brigb8 == dir->type  ||
+                 Brigb16 == dir->type || Brigb32 == dir->type ||
+                 Brigb64 == dir->type || Brigb128 == dir->type,
+                 "Invalid type, must be b1, b8, b16, b32, b64, or b128");
+  valid &= check(sizeof(BrigDirectiveInit) - sizeof(uint64_t) +
+                 dir->elementCount * getTypeSize(dir->type) <= dir->size,
+                 "Directive size too small for elementCount");
+  
+  return valid;
+}
 
 bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
   bool valid = true;
@@ -294,21 +323,6 @@ bool BrigModule::validate(const BrigDirectiveBlockStart *dir) const {
   valid &= validateCCode(dir->c_code);
 
   return valid;
-}
-
-int getTypeSize(BrigDataType16_t type) {
-  if (Brigb1 == type) {
-    return 1;
-  } else if (Brigb8 == type) {
-    return 1;
-  } else if (Brigb16 == type) {
-    return 2;
-  } else if (Brigb32 == type) {
-    return 4;
-  } else if (Brigb64 == type) {
-    return 8;
-  }
-  return 0;
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) const {
