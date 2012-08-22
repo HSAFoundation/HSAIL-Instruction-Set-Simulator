@@ -1665,3 +1665,194 @@ TEST(Brig2LLVMTest, UniqueString) {
     "String not null terminated")));
   }
 }
+
+TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
+  {
+    hsa::brig::StringBuffer strings;
+    
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    //BrigDirectiveInit::initializationData type:uint8_t
+    uint8_t values[16] = {
+      //elementCount = 9, allocate 16 byte memory 
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
+    };
+    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+    bdi->size = sizeof(array);
+    bdi->kind = BrigEDirectiveInit;
+    bdi->c_code = 0;
+    bdi->elementCount = 9;
+    bdi->type = Brigb8;
+    bdi->reserved = 0;
+
+    for (size_t i = 0; i < sizeof(values) / sizeof(uint8_t); ++i)
+        bdi->initializationData.u8[i] = values[i];
+    directives.append(bdi);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test 
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    
+    //BrigDirectiveInit::initializationData type:uint8_t
+    uint8_t values[16] = {
+      //elementCount = 9, allocate 16 byte memory 
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
+    };
+    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+    bdi->size = sizeof(array);
+    bdi->kind = BrigEDirectiveInit;
+    bdi->c_code = 0;
+    bdi->elementCount = 9;
+    bdi->type = Brigb8;
+    bdi->reserved = 1;
+
+    for (size_t i = 0; i < sizeof(values) / sizeof(uint8_t); ++i)
+        bdi->initializationData.u8[i] = values[i];
+    directives.append(bdi);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush(); 
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Reserved not zero")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    
+    //BrigDirectiveInit::initializationData type:uint8_t
+    uint8_t values[16] = {
+      //elementCount = 9, allocate 16 byte memory 
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
+    };
+    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+    bdi->size = sizeof(array);
+    bdi->kind = BrigEDirectiveInit;
+    bdi->c_code = 0;
+    bdi->elementCount = 9;
+    bdi->type = Brigf32;
+    bdi->reserved = 0;
+
+    for (size_t i = 0; i < sizeof(values) / sizeof(uint8_t); ++i)
+        bdi->initializationData.u8[i] = values[i];
+    directives.append(bdi);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush(); 
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type, must be b1, b8, b16, b32, b64, or b128")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    
+    //BrigDirectiveInit::initializationData type:uint8_t
+    uint8_t values[16] = {
+      //elementCount = 9, allocate 16 byte memory 
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
+    };
+    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+    bdi->size = sizeof(array);
+    bdi->kind = BrigEDirectiveInit;
+    bdi->c_code = 0;
+    bdi->elementCount = 100;
+    bdi->type = Brigb8;
+    bdi->reserved = 0;
+
+    for (size_t i = 0; i < sizeof(values) / sizeof(uint8_t); ++i)
+        bdi->initializationData.u8[i] = values[i];
+    directives.append(bdi);
+
+    hsa::brig::Buffer code;
+   
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush(); 
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Directive size too small for elementCount")));
+  }
+}
