@@ -49,33 +49,12 @@ void GenLLVM::gen_GPU_states(void) {
   gpu_states_type_ = gpu_states_ty;
 }
 
-static bool isFloatTy(BrigDataType type) {
-  return
-    type == Brigf16   || type == Brigf32   || type == Brigf64   ||
-    type == Brigf16x2 || type == Brigf16x4 ||
-    type == Brigf32x2 || type == Brigf32x4 ||
-    type == Brigf64x2;
-}
-
-static bool isVectorTy(BrigDataType type) {
-  return type >= Brigu8x4 && type <= Brigf64x2;
-}
-
-static bool isSignedTy(BrigDataType type) {
-  return
-    type == Brigs8    || type == Brigs16   || type == Brigs32   ||
-    type == Brigs64   ||
-    type == Brigs8x4  || type == Brigs8x8  || type == Brigs8x16 ||
-    type == Brigs16x2 || type == Brigs16x4 || type == Brigs16x8 ||
-    type == Brigs32x2 || type == Brigs32x4 ||
-    type == Brigs64x2;
-}
-
 static llvm::Type *getElementTy(llvm::LLVMContext &C, BrigDataType type) {
 
-  assert(isVectorTy(type) && "Cannot get element of non-vector types");
+  assert(BrigInstHelper::isVectorTy(type) &&
+         "Cannot get element of non-vector types");
 
-  const bool isFloat = isFloatTy(type);
+  const bool isFloat = BrigInstHelper::isFloatTy(type);
 
   if(type >= Brigu8x4 && type <= Brigs8x16) {
     return llvm::Type::getInt8Ty(C);
@@ -89,29 +68,6 @@ static llvm::Type *getElementTy(llvm::LLVMContext &C, BrigDataType type) {
     if(isFloat) return llvm::Type::getDoubleTy(C);
     else return llvm::Type::getInt64Ty(C);
   } else {
-    assert(false && "Unknown type");
-  }
-}
-
-static unsigned getVectorLength(BrigDataType type) {
-
-  assert(isVectorTy(type) && "Cannot get element of non-vector types");
-
-  switch(type) {
-  case Brigu16x2: case Brigs16x2: case Brigf16x2:
-  case Brigu32x2: case Brigs32x2: case Brigf32x2:
-  case Brigu64x2: case Brigs64x2: case Brigf64x2:
-    return 2;
-  case Brigu8x4:  case Brigs8x4:
-  case Brigu16x4: case Brigs16x4: case Brigf16x4:
-  case Brigu32x4: case Brigs32x4: case Brigf32x4:
-    return 4;
-  case Brigu8x8:  case Brigs8x8:  case Brigu16x8:
-  case Brigs16x8: case Brigf16x8:
-    return 8;
-  case Brigu8x16: case Brigs8x16:
-    return 16;
-  default:
     assert(false && "Unknown type");
   }
 }
@@ -133,8 +89,9 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
     return llvm::Type::getDoubleTy(C);
   } else if(type == Brigb128) {
     return llvm::Type::getIntNTy(C, 128);
-  } else if(isVectorTy(type)) {
-    return llvm::VectorType::get(getElementTy(C, type), getVectorLength(type));
+  } else if(BrigInstHelper::isVectorTy(type)) {
+    unsigned length = BrigInstHelper::getVectorLength(type);
+    return llvm::VectorType::get(getElementTy(C, type), length);
   } else {
     assert(false && "Unimplemented type");
   }
@@ -169,8 +126,8 @@ static bool isSimpleBinop(const inst_iterator inst) {
 
 static llvm::Instruction::BinaryOps getBinop(const inst_iterator inst) {
   BrigOpcode opcode = BrigOpcode(inst->opcode);
-  bool isFloat = isFloatTy(BrigDataType(inst->type));
-  bool isSigned = isSignedTy(BrigDataType(inst->type));
+  bool isFloat = BrigInstHelper::isFloatTy(BrigDataType(inst->type));
+  bool isSigned = BrigInstHelper::isSignedTy(BrigDataType(inst->type));
 
   if(opcode == BrigAdd) {
     if(isFloat) return llvm::Instruction::FAdd;
@@ -312,53 +269,14 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
   assert(false && "Unimplemented");
 }
 
-static bool isPacked(BrigPacking packing, unsigned opnum) {
-  if(opnum == 1) {
-    return
-      packing == BrigPackPP    || packing == BrigPackPS    ||
-      packing == BrigPackP     ||
-      packing == BrigPackPPsat || packing == BrigPackPSsat ||
-      packing == BrigPackPsat;
-  } else if(opnum == 2) {
-    return
-      packing == BrigPackPP    || packing == BrigPackSP    ||
-      packing == BrigPackPPsat || packing == BrigPackSPsat;
-  }
-
-  assert(false && "Illegal opnum for arithmetic operation");
-}
-
-static bool isBroadcast(BrigPacking packing, unsigned opnum) {
-  if(opnum == 1) {
-    return
-      packing == BrigPackSS    || packing == BrigPackSP    ||
-      packing == BrigPackS     ||
-      packing == BrigPackSSsat || packing == BrigPackSPsat ||
-      packing == BrigPackSsat;
-  } else if(opnum == 2) {
-    return
-      packing == BrigPackSS    || packing == BrigPackPS    ||
-      packing == BrigPackSSsat || packing == BrigPackPSsat;
-  }
-
-  assert(false && "Illegal opnum for arithmetic operation");
-}
-
-static bool isSaturated(BrigPacking packing) {
-  return
-    packing == BrigPackPPsat || packing == BrigPackPSsat ||
-    packing == BrigPackSPsat || packing == BrigPackSSsat ||
-    packing == BrigPackPsat  || packing == BrigPackSsat;
-}
-
 static llvm::Value *decodePacking(llvm::BasicBlock &B,
                                   llvm::Value *value,
                                   unsigned opnum,
                                   const inst_iterator inst) {
 
   BrigPacking packing = BrigPacking(inst->packing);
-  bool packed = isPacked(packing, opnum);
-  bool broadcast = isBroadcast(packing, opnum);
+  bool packed = BrigInstHelper::isPacked(packing, opnum);
+  bool broadcast = BrigInstHelper::isBroadcast(packing, opnum);
 
   assert((!packed || !broadcast) && "Illegal packing combination!?");
 
@@ -380,7 +298,7 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
                                   const inst_iterator inst) {
 
   BrigDataType type = BrigDataType(inst->type);
-  if(isVectorTy(type)) {
+  if(BrigInstHelper::isVectorTy(type)) {
     llvm::LLVMContext &C = B.getContext();
     llvm::Type *encodedType = runOnType(C, type);
     unsigned bitsize =  encodedType->getPrimitiveSizeInBits();
@@ -417,231 +335,6 @@ static void runOnSimpleBinopInst(llvm::BasicBlock &B,
   new llvm::StoreInst(resultVal, destAddr, &B);
 }
 
-static const char *getBaseName(const inst_iterator inst) {
-
-#define caseOper(X)                             \
-  case Brig ## X:                               \
-    return #X
-
-  switch(inst->opcode) {
-    caseOper(Abs);
-    caseOper(Add);
-    caseOper(Carry);
-    caseOper(Borrow);
-    caseOper(Div);
-    caseOper(Max);
-    caseOper(Min);
-    caseOper(Mul);
-    caseOper(Neg);
-    caseOper(Rem);
-    caseOper(Sub);
-    caseOper(Mad);
-    caseOper(Mul24);
-    caseOper(Mad24);
-    caseOper(Shl);
-    caseOper(Shr);
-    caseOper(And);
-    caseOper(Or);
-    caseOper(Xor);
-    caseOper(Not);
-    caseOper(Popcount);
-    caseOper(Firstbit);
-    caseOper(Lastbit);
-    caseOper(BitRev);
-    caseOper(Extract);
-    caseOper(Insert);
-    caseOper(Mov);
-    caseOper(Unpacklo);
-    caseOper(Unpackhi);
-    caseOper(Shuffle);
-    caseOper(movslo);
-    caseOper(movshi);
-    caseOper(movdlo);
-    caseOper(movdhi);
-    caseOper(Lda);
-    caseOper(Ldc);
-    caseOper(Cmov);
-    caseOper(PackedCmp);
-    caseOper(CopySign);
-    caseOper(Fma);
-    caseOper(Class);
-    caseOper(Sqrt);
-    caseOper(Fract);
-    caseOper(Fcos);
-    caseOper(Fsin);
-    caseOper(Flog2);
-    caseOper(Fexp2);
-    caseOper(Frsqrt);
-    caseOper(Frcp);
-    caseOper(Cmp);
-    caseOper(Segmentp);
-    caseOper(FtoS);
-    caseOper(StoF);
-    caseOper(Cvt);
-    caseOper(F2u4);
-    caseOper(Unpack3);
-    caseOper(Unpack2);
-    caseOper(Unpack1);
-    caseOper(Unpack0);
-    caseOper(BitAlign);
-    caseOper(ByteAlign);
-    caseOper(Lerp);
-    caseOper(Sad);
-    caseOper(Sad2);
-    caseOper(Sad4);
-    caseOper(Sad4hi);
-    caseOper(Ld);
-    caseOper(St);
-    caseOper(Atomic);
-    caseOper(AtomicNoRet);
-    caseOper(RdImage);
-    caseOper(LdImage);
-    caseOper(StImage);
-    caseOper(AtomicNoRetImage);
-    caseOper(AtomicImage);
-    caseOper(QueryWidth);
-    caseOper(QueryHeight);
-    caseOper(QueryDepth);
-    caseOper(QueryOrder);
-    caseOper(QueryFiltering);
-    caseOper(QueryData);
-    caseOper(QueryArray);
-    caseOper(QueryNormalized);
-    caseOper(Cbr);
-    caseOper(Brn);
-    caseOper(Sync);
-    caseOper(Barrier);
-    caseOper(FbarInitSize);
-    caseOper(FbarInitSizeWg);
-    caseOper(FbarInit);
-    caseOper(FbarWait);
-    caseOper(FbarArrive);
-    caseOper(FbarSkip);
-    caseOper(FbarRelease);
-    caseOper(FbarReleaseCF);
-    caseOper(Count);
-    caseOper(Countup);
-    caseOper(Mask);
-    caseOper(Send);
-    caseOper(Receive);
-    caseOper(Ret);
-    caseOper(Syscall);
-    caseOper(Alloca);
-    caseOper(Call);
-    caseOper(WorkItemId);
-    caseOper(WorkItemAId);
-    caseOper(WorkGroupId);
-    caseOper(WorkGroupSize);
-    caseOper(NDRangesize);
-    caseOper(NDRangegroups);
-    caseOper(LaneId);
-    caseOper(DynWaveId);
-    caseOper(MaxDynWaveId);
-    caseOper(DispatchId);
-    caseOper(CU);
-    caseOper(WorkDim);
-    caseOper(Clock);
-    caseOper(workitemidflat);
-    caseOper(workitemaidflat);
-    caseOper(Nop);
-    caseOper(Debugtrap);
-  default:
-    assert(false && "Unknown instruction");
-  }
-#undef castOper
-}
-
-static const char *getPackingName(const inst_iterator inst) {
-#define casePacking(X)                          \
-case BrigPack ## X:                             \
-    return "_" #X
-
-  switch(inst->packing) {
-    casePacking(PP);
-    casePacking(PS);
-    casePacking(SP);
-    casePacking(SS);
-    casePacking(S);
-    casePacking(P);
-    casePacking(PPsat);
-    casePacking(PSsat);
-    casePacking(SPsat);
-    casePacking(SSsat);
-    casePacking(Ssat);
-    casePacking(Psat);
-  case BrigNoPacking:
-    return "";
-  default:
-    assert(false && "Unknown packing");
-  }
-#undef castPacking
-}
-
-static const char *getTypeName(const inst_iterator inst) {
-#define caseDataType(X)                          \
-  case Brig ## X:                                \
-  return #X
-
-  switch(inst->type) {
-    caseDataType(s8);
-    caseDataType(s16);
-    caseDataType(s32);
-    caseDataType(s64);
-    caseDataType(u8);
-    caseDataType(u16);
-    caseDataType(u32);
-    caseDataType(u64);
-    caseDataType(f16);
-    caseDataType(f32);
-    caseDataType(f64);
-    caseDataType(b1);
-    caseDataType(b8);
-    caseDataType(b16);
-    caseDataType(b32);
-    caseDataType(b64);
-    caseDataType(b128);
-    caseDataType(ROImg);
-    caseDataType(RWImg);
-    caseDataType(Samp);
-    caseDataType(u8x4);
-    caseDataType(s8x4);
-    caseDataType(u8x8);
-    caseDataType(s8x8);
-    caseDataType(u8x16);
-    caseDataType(s8x16);
-    caseDataType(u16x2);
-    caseDataType(s16x2);
-    caseDataType(f16x2);
-    caseDataType(u16x4);
-    caseDataType(s16x4);
-    caseDataType(f16x4);
-    caseDataType(u16x8);
-    caseDataType(s16x8);
-    caseDataType(f16x8);
-    caseDataType(u32x2);
-    caseDataType(s32x2);
-    caseDataType(f32x2);
-    caseDataType(u32x4);
-    caseDataType(s32x4);
-    caseDataType(f32x4);
-    caseDataType(u64x2);
-    caseDataType(s64x2);
-    caseDataType(f64x2);
-  default:
-    assert(false && "Unknown type");
-  }
-
-#undef caseDataType
-}
-
-static std::string getName(const inst_iterator inst) {
-  const char *base = getBaseName(inst);
-  const char *packing = getPackingName(inst);
-  const char *type = getTypeName(inst);
-
-  return std::string(base) + packing + "_" + type;
-}
-
 static llvm::FunctionType *getInstFunType(const inst_iterator inst,
                                           llvm::LLVMContext &C) {
 
@@ -653,18 +346,6 @@ static llvm::FunctionType *getInstFunType(const inst_iterator inst,
   return llvm::FunctionType::get(result, params, false);
 }
 
-static bool hasDest(const inst_iterator inst) {
-  // Most instruction have a destination. Check for each of the special cases.
-  BrigOpcode opcode = BrigOpcode(inst->opcode);
-  return
-    opcode != BrigSt        && opcode != BrigAtomicNoRet      &&
-    opcode != BrigStImage   && opcode != BrigAtomicNoRetImage &&
-    opcode != BrigBrn       && opcode != BrigCbr              &&
-    opcode != BrigSync      && opcode != BrigBarrier          &&
-    opcode != BrigRet       && opcode != BrigCall             &&
-    opcode != BrigDebugtrap && opcode != BrigNop;
-}
-
 static void runOnComplexInst(llvm::BasicBlock &B,
                              const inst_iterator inst,
                              const BrigInstHelper &helper,
@@ -672,7 +353,7 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 
   unsigned operand = 0;
   const BrigOperandBase *brigDest = NULL;
-  if(hasDest(inst))
+  if(BrigInstHelper::hasDest(inst))
     brigDest = helper.getOperand(inst, operand++);
 
   std::vector<llvm::Value *> sources;
@@ -684,7 +365,7 @@ static void runOnComplexInst(llvm::BasicBlock &B,
   }
 
   llvm::Module *M = B.getParent()->getParent();
-  std::string name = getName(inst);
+  std::string name = BrigInstHelper::getInstName(inst);
   llvm::FunctionType *funTy = getInstFunType(inst, B.getContext());
   llvm::Function *instFun =
     llvm::cast<llvm::Function>(M->getOrInsertFunction(name, funTy));
@@ -742,7 +423,7 @@ static void runOnInstruction(llvm::BasicBlock &B,
 
   if(inst->opcode == BrigAbs) {
     runOnComplexInst(B, inst, helper, state);
-  } else if(isSaturated(BrigPacking(inst->packing))) {
+  } else if(BrigInstHelper::isSaturated(BrigPacking(inst->packing))) {
     runOnComplexInst(B, inst, helper, state);
   } else if(isSimpleBinop(inst)) {
     runOnSimpleBinopInst(B, inst, helper, state);

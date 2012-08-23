@@ -24,5 +24,6 @@ add_llvm_library(brig2llvm
   brig_module.cc
   brig_function.cc
   brig_symbol.cc
-  brig_control_block.cc)
+  brig_control_block.cc
+  brig_inst_helper.cc)
 llvm_config(brig2llvm ${LLVM_LINK_COMPONENTS})
