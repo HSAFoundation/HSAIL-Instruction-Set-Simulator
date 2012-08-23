@@ -158,7 +158,7 @@ static llvm::GlobalValue::LinkageTypes runOnLinkage(BrigAttribute link) {
   assert(false && "Invalid attribute");
 }
 
-static bool isSimpleBinop(const inst_iterator &inst) {
+static bool isSimpleBinop(const inst_iterator inst) {
   BrigOpcode opcode = BrigOpcode(inst->opcode);
   return
     opcode == BrigAdd || opcode == BrigDiv ||
@@ -167,7 +167,7 @@ static bool isSimpleBinop(const inst_iterator &inst) {
     opcode == BrigOr  || opcode == BrigXor;
 }
 
-static llvm::Instruction::BinaryOps getBinop(const inst_iterator &inst) {
+static llvm::Instruction::BinaryOps getBinop(const inst_iterator inst) {
   BrigOpcode opcode = BrigOpcode(inst->opcode);
   bool isFloat = isFloatTy(BrigDataType(inst->type));
   bool isSigned = isSignedTy(BrigDataType(inst->type));
@@ -224,10 +224,39 @@ static unsigned getRegOffset(const char *name) {
   return offset;
 }
 
+struct FunState {
+  typedef std::map<uint32_t, llvm::BasicBlock *> CBMap ;
+  typedef CBMap::iterator CBIt;
+
+  llvm::Value *regs;
+  CBMap cbMap;
+
+  FunState(const BrigFunction &brigFun, llvm::Function *llvmFun) {
+
+    llvm::LLVMContext &C = llvmFun->getContext();
+    const BrigControlBlock E = brigFun.end();
+    for(BrigControlBlock cb = brigFun.begin(); cb != E; ++cb) {
+
+      const char *name = cb.getName();
+      llvm::BasicBlock *bb = llvm::BasicBlock::Create(C, name, llvmFun);
+
+      typedef std::pair<uint32_t, llvm::BasicBlock *> Pair;
+      bool unique = cbMap.insert(Pair(cb.getOffset(), bb)).second;
+      assert(unique && "Labels should be unique in functions");
+
+      if(cbMap.size() == 1) {
+        llvm::Module *M = llvmFun->getParent();
+        llvm::Type *regsType = M->getTypeByName("struct.regs");
+        regs = new llvm::AllocaInst(regsType, "gpu_reg_p", bb);
+      }
+    }
+  }
+};
+
 static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
                                    const BrigOperandBase *op,
                                    const BrigInstHelper &helper,
-                                   llvm::Value *regState) {
+                                   FunState &state) {
 
   llvm::LLVMContext &C = B.getContext();
 
@@ -244,11 +273,43 @@ static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
                              llvm::ConstantInt::get(int32Ty, offset) };
     llvm::ArrayRef<llvm::Value *> arrayRef(array, 4);
 
-    return llvm::GetElementPtrInst::Create(regState, arrayRef, "", &B);
+    return llvm::GetElementPtrInst::Create(state.regs, arrayRef, "", &B);
 
   } else {
     assert(false && "Unimplemented operand");
   }
+}
+
+static bool hasAddr(const BrigOperandBase *op) {
+  BrigOperandKinds kind = BrigOperandKinds(op->kind);
+  switch(kind) {
+  case BrigEOperandImmed:
+  case BrigEOperandLabelRef:
+    return false;
+  case BrigEOperandAddress:
+  case BrigEOperandReg:
+    return true;
+  default:
+    assert(false && "Unimplemented");
+  }
+}
+
+static llvm::Value *getOperand(llvm::BasicBlock &B,
+                               const BrigOperandBase *op,
+                               const BrigInstHelper &helper,
+                               FunState &state) {
+
+  if(hasAddr(op)) {
+    llvm::Value *valAddr = getOperandAddr(B, op, helper, state);
+    llvm::Value *val = new llvm::LoadInst(valAddr, "", false, &B);
+    return val;
+  }
+
+  if(const BrigOperandLabelRef *label = dyn_cast<BrigOperandLabelRef>(op)) {
+    return state.cbMap[label->labeldirective];
+  }
+
+  assert(false && "Unimplemented");
 }
 
 static bool isPacked(BrigPacking packing, unsigned opnum) {
@@ -334,18 +395,15 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
 static void runOnSimpleBinopInst(llvm::BasicBlock &B,
                                  const inst_iterator inst,
                                  const BrigInstHelper &helper,
-                                 llvm::Value *regState) {
+                                 FunState &state) {
 
 
   const BrigOperandBase *brigDest = helper.getOperand(inst, 0);
   const BrigOperandBase *brigSrc0 = helper.getOperand(inst, 1);
   const BrigOperandBase *brigSrc1 = helper.getOperand(inst, 2);
 
-  llvm::Value *src0Addr = getOperandAddr(B, brigSrc0, helper, regState);
-  llvm::Value *src1Addr = getOperandAddr(B, brigSrc1, helper, regState);
-
-  llvm::Value *src0Raw = new llvm::LoadInst(src0Addr, "", false, &B);
-  llvm::Value *src1Raw = new llvm::LoadInst(src1Addr, "", false, &B);
+  llvm::Value *src0Raw = getOperand(B, brigSrc0, helper, state);
+  llvm::Value *src1Raw = getOperand(B, brigSrc1, helper, state);
 
   llvm::Value *src0Val = decodePacking(B, src0Raw, 1, inst);
   llvm::Value *src1Val = decodePacking(B, src1Raw, 2, inst);
@@ -355,7 +413,7 @@ static void runOnSimpleBinopInst(llvm::BasicBlock &B,
     llvm::BinaryOperator::Create(binop, src0Val, src1Val, "", &B);
   llvm::Value *resultVal = encodePacking(B, resultRaw, inst);
 
-  llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, regState);
+  llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
   new llvm::StoreInst(resultVal, destAddr, &B);
 }
 
@@ -610,7 +668,7 @@ static bool hasDest(const inst_iterator inst) {
 static void runOnComplexInst(llvm::BasicBlock &B,
                              const inst_iterator inst,
                              const BrigInstHelper &helper,
-                             llvm::Value *regState) {
+                             FunState &state) {
 
   unsigned operand = 0;
   const BrigOperandBase *brigDest = NULL;
@@ -620,13 +678,8 @@ static void runOnComplexInst(llvm::BasicBlock &B,
   std::vector<llvm::Value *> sources;
   for(; inst->o_operands[operand] && operand < 5; ++operand) {
     const BrigOperandBase *brigSrc = helper.getOperand(inst, operand);
-
-    llvm::Value *srcAddr = getOperandAddr(B, brigSrc, helper, regState);
-
-    llvm::Value *srcRaw = new llvm::LoadInst(srcAddr, "", false, &B);
-
+    llvm::Value *srcRaw = getOperand(B, brigSrc, helper, state);
     llvm::Value *srcVal = decodePacking(B, srcRaw, operand, inst);
-
     sources.push_back(srcVal);
   }
 
@@ -640,47 +693,94 @@ static void runOnComplexInst(llvm::BasicBlock &B,
   if(brigDest) {
     llvm::Value *resultVal = encodePacking(B, resultRaw, inst);
 
-    llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, regState);
+    llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
     new llvm::StoreInst(resultVal, destAddr, &B);
   }
 }
 
+static bool isBranchInst(const inst_iterator inst) {
+  BrigOpcode opcode = BrigOpcode(inst->opcode);
+  return opcode == BrigBrn || opcode == BrigCbr;
+}
+
+static void runOnBranchInst(llvm::BasicBlock &B,
+                            const inst_iterator inst,
+                            const BrigInstHelper &helper,
+                            FunState &state) {
+
+  // The width of the branch is not necessary for a functional simulator.
+  // Similarly, we can ignore the list of possible branch targets for an
+  // indirect branch. In debug mode, we should check for and log branchs outside
+  // the target width and branch divergence beyond the limit given by width.
+
+  unsigned targetOpNum = inst->opcode == BrigBrn ? 1 : 2;
+
+  const BrigOperandBase *target = helper.getOperand(inst, targetOpNum);
+  llvm::BasicBlock *targetBB =
+    llvm::cast<llvm::BasicBlock>(getOperand(B, target, helper, state));
+
+  if(inst->opcode == BrigCbr) {
+    const BrigOperandBase *pred = helper.getOperand(inst, 1);
+    llvm::Value *predVal = getOperand(B, pred, helper, state);
+    llvm::BranchInst::Create(targetBB, NULL, predVal, &B);
+    return;
+  }
+
+  if(inst->opcode == BrigBrn) {
+    llvm::BranchInst::Create(targetBB, &B);
+    return;
+  }
+
+  assert(false && "Unknown branch opcode");
+}
+
 static void runOnInstruction(llvm::BasicBlock &B,
-                             const inst_iterator &inst,
+                             const inst_iterator inst,
                              const BrigInstHelper &helper,
-                             llvm::Value *regState) {
+                             FunState &state) {
   llvm::LLVMContext &C = B.getContext();
 
   if(inst->opcode == BrigAbs) {
-    runOnComplexInst(B, inst, helper, regState);
+    runOnComplexInst(B, inst, helper, state);
   } else if(isSaturated(BrigPacking(inst->packing))) {
-    runOnComplexInst(B, inst, helper, regState);
+    runOnComplexInst(B, inst, helper, state);
   } else if(isSimpleBinop(inst)) {
-    runOnSimpleBinopInst(B, inst, helper, regState);
+    runOnSimpleBinopInst(B, inst, helper, state);
   } else if(inst->opcode == BrigRet) {
     llvm::ReturnInst::Create(C, &B);
+  } else if(isBranchInst(inst)) {
+    runOnBranchInst(B, inst, helper, state);
   } else {
     assert(false && "Unimplemented instruction");
   }
 }
 
 static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
-                    llvm::Value **regState) {
+                    FunState &state) {
+
   llvm::LLVMContext &C = F.getContext();
-  llvm::Twine name(CB.getName());
-  llvm::BasicBlock *bb = llvm::BasicBlock::Create(C, name, &F);
-
-  if(F.size() == 1) {
-    assert(!*regState && "regState should be uninitialized");
-    llvm::Module *M = F.getParent();
-    *regState =
-      new llvm::AllocaInst(M->getTypeByName("struct.regs"), "gpu_reg_p", bb);
-  }
-
   BrigInstHelper helper = CB.getInstHelper();
+  FunState::CBIt it = state.cbMap.find(CB.getOffset());
+  assert(it != state.cbMap.end() && "Missing CB");
+  llvm::BasicBlock *bb = it->second;
 
   for(inst_iterator inst = CB.begin(), E = CB.end(); inst != E; ++inst) {
-    runOnInstruction(*bb, inst, helper, *regState);
+    runOnInstruction(*bb, inst, helper, state);
+
+    // Create a new basic block after every conditional branch to handle the
+    // fall-through path
+    llvm::BranchInst *branch = llvm::dyn_cast<llvm::BranchInst>(&bb->back());
+    if(branch && branch->isConditional()) {
+      bb = llvm::BasicBlock::Create(C, bb->getName() + ".succ", &F);
+      branch->setSuccessor(1, bb);
+    }
+  }
+
+  // Fall through to the next control block
+  if(!llvm::isa<llvm::TerminatorInst>(&bb->back())) {
+    ++it;
+    if(it != state.cbMap.end()) llvm::BranchInst::Create(it->second, bb);
+    else llvm::ReturnInst::Create(C, bb);
   }
 }
 
@@ -710,9 +810,9 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F) {
 
   if(F.isDeclaration()) return;
 
-  llvm::Value *regState = NULL;
+  FunState state(F, fun);
   for(BrigControlBlock cb = F.begin(), E = F.end(); cb != E; ++cb) {
-    runOnCB(*fun, cb, &regState);
+    runOnCB(*fun, cb, state);
   }
 }
 

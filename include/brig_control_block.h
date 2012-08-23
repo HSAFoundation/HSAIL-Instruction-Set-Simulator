@@ -16,7 +16,7 @@ class BrigControlBlock {
   const char *getName() const {
     if(const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_))
       return S_.strings + label->s_name + 1;
-    return "";
+    return "brig.init";
   }
 
   bool operator!=(const BrigControlBlock &other) const {
@@ -37,6 +37,10 @@ class BrigControlBlock {
   }
 
   BrigInstHelper getInstHelper() const;
+
+  uint32_t getOffset() const {
+    return reinterpret_cast<const uint8_t *>(&*it_) - S_.directives;
+  }
 
   friend BrigControlBlock cb_begin(const BrigFunction &F);
   friend BrigControlBlock cb_end(const BrigFunction &F);
