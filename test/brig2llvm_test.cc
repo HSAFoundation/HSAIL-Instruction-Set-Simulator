@@ -219,7 +219,7 @@ TEST(Brig2LLVMTest, Example2) {
   }
 }
 
-TEST(Brig2LLVMTest, Example3){
+TEST(Brig2LLVMTest, Example3) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&packed_ops"));
@@ -309,38 +309,38 @@ TEST(Brig2LLVMTest, Example3){
 
     hsa::brig::Buffer operands;
     for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
-    BrigOperandReg bor_1 = {
-      sizeof(bor_1),
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
       BrigEOperandReg,
       Brigb32,
       0,
       15
     };
-    operands.append(&bor_1);
-    BrigOperandReg bor_2 = {
-      sizeof(bor_2),
+    operands.append(&bor1);
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
       BrigEOperandReg,
       Brigb32,
       0,
       19
     };
-    operands.append(&bor_2);
-    BrigOperandReg bor_3 = {
-      sizeof(bor_3),
+    operands.append(&bor2);
+    BrigOperandReg bor3 = {
+      sizeof(bor3),
       BrigEOperandReg,
       Brigb32,
       0,
       23
     };
-    operands.append(&bor_3);
-    BrigOperandReg bor_4 = {
-      sizeof(bor_4),
+    operands.append(&bor3);
+    BrigOperandReg bor4 = {
+      sizeof(bor4),
       BrigEOperandReg,
       Brigb32,
       0,
       27
     };
-    operands.append(&bor_4);
+    operands.append(&bor4);
 
     hsa::brig::GenLLVM codegen(strings, directives, code, operands);
     codegen();
@@ -366,6 +366,234 @@ TEST(Brig2LLVMTest, Example3){
     "ret void")));
   }
 }
+
+TEST(Brig2LLVMTest, Example4) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("&branch_ops");
+    strings.append("%x");
+    strings.append("$c1");
+    strings.append("$s1");
+    strings.append("$s2");
+    strings.append("@then");
+    strings.append("$s0");
+    strings.append("$s3");
+    strings.append("@outof_IF");
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction bdf = {
+      sizeof(bdf),                    // size
+      BrigEDirectiveFunction,         // kind
+      0,                              // c_code
+      0,                              // s_name
+      0,                              // inParamCount
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol),    // d_firstSCopedDirective
+      5,                              // operationCount
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol) +
+      2 * sizeof(BrigDirectiveLabel), // d_nextDirectivef
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      1,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&bdf);
+
+    BrigDirectiveSymbol bds = {
+      sizeof(bds),          // size
+      BrigEDirectiveSymbol, // kind
+      {
+        0,                    // c_code
+        BrigArgSpace,         // storageClass
+        BrigNone,             // attribute
+        0,                    // reserved
+        0,                    // symbolModifier
+        0,                    // dim
+        12,                   // s_name
+        Brigs8x4,             // type
+        1                     // align
+      },
+      0,                    // d_init
+      0                     // reserved
+    };
+    directives.append(&bds);
+
+    BrigDirectiveLabel bdl1 = {
+      sizeof(bdl1),         // size
+      BrigEDirectiveLabel, // kind
+      100,                 // c_code
+      27                   // s_name
+    };
+    directives.append(&bdl1);
+
+    BrigDirectiveLabel bdl2 = {
+      sizeof(bdl2),         // size
+      BrigEDirectiveLabel, // kind
+      132,                 // c_code
+      41                   // s_name
+    };
+    directives.append(&bdl2);
+
+    hsa::brig::Buffer code;
+    BrigInstBase cbr = {
+      sizeof(cbr),       // size
+      BrigEInstBase,     // kind
+      BrigCbr,           // opcode
+      Brigb1,            // type
+      BrigNoPacking,     // packing
+      { 84, 8, 44, 0, 0 } // o_operand
+    };
+    code.append(&cbr);
+
+    BrigInstBase abs = {
+      sizeof(abs),        // size
+      BrigEInstBase,      // kind
+      BrigAbs,            // opcode
+      Brigs8x4,           // type
+      BrigPackP,          // packing
+      { 20, 32, 0, 0, 0 } // o_operand
+    };
+    code.append(&abs);
+
+    BrigInstBar brn = {
+      sizeof(brn),         // size
+      BrigEInstBar,        // kind
+      BrigBrn,             // opcode
+      Brigb32,             // type
+      BrigNoPacking,       // type
+      { 84, 76, 0, 0, 0 }, // o_operand
+      0                    // syncFlags
+    };
+    code.append(&brn);
+
+    BrigInstBase add = {
+      sizeof(add),         // size
+      BrigEInstBase,       // kind
+      BrigAdd,             // opcode
+      Brigu16x2,           // type
+      BrigPackPPsat,       // packing
+      { 20, 52, 64, 0, 0 } // o_operand
+    };
+    code.append(&add);
+
+    BrigInstBase ret = {
+      sizeof(ret),         // size
+      BrigEInstBase,       // kind
+      BrigRet,             // opcode
+      Brigb32,             // type
+      BrigNoPacking,       // packing
+      { 0, 0, 0, 0, 0 }    // o_operand
+    };
+    code.append(&ret);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandReg c1 = {
+      sizeof(c1),      // size
+      BrigEOperandReg, // kind
+      Brigb1,          // type
+      0,               // reserved
+      15               // name
+    };
+    operands.append(&c1);
+
+    BrigOperandReg s1 = {
+      sizeof(s1),      // size
+      BrigEOperandReg, // kind
+      Brigb32,         // type
+      0,               // reserved
+      19               // name
+    };
+    operands.append(&s1);
+
+    BrigOperandReg s2 = {
+      sizeof(s2),      // size
+      BrigEOperandReg, // kind
+      Brigb32,         // type
+      0,               // reserved
+      23               // name
+    };
+    operands.append(&s2);
+
+    BrigOperandLabelRef then = {
+      sizeof(then),         // size
+      BrigEOperandLabelRef, // kind
+      100                   // labeldirective
+    };
+    operands.append(&then);
+
+    BrigOperandReg s0 = {
+      sizeof(s0),      // size
+      BrigEOperandReg, // kind
+      Brigb32,         // type
+      0,               // reserved
+      33               // name
+    };
+    operands.append(&s0);
+
+    BrigOperandReg s3 = {
+      sizeof(s3),      // size
+      BrigEOperandReg, // kind
+      Brigb32,         // type
+      0,               // reserved
+      37               // name
+    };
+    operands.append(&s3);
+
+    BrigOperandLabelRef outOfIf = {
+      sizeof(outOfIf),      // size
+      BrigEOperandLabelRef, // kind
+      112                   // labeldirective
+    };
+    operands.append(&outOfIf);
+
+    BrigOperandImmed zero = {
+      sizeof(zero),      // size
+      BrigEOperandImmed, // kind
+      Brigb32,           // type
+      0,                 // reserved
+      { 0 }              // bits
+    };
+    zero.bits.u = 0;
+    operands.append(&zero);
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare <2 x i16> @Add_PPsat_u16x2(<2 x i16>, <2 x i16>)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "outof_IF:")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "then:")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "brig.init.succ:")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    ", label %then, label %brig.init.succ")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "br label %outof_IF")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "; preds = %then, %brig.init.succ")));
+  }
+}
+
 TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
   {
     hsa::brig::StringBuffer strings;
