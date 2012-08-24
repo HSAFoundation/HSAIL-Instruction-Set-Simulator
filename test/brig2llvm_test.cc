@@ -594,6 +594,138 @@ TEST(Brig2LLVMTest, Example4) {
   }
 }
 
+TEST(Brig2LLVMTest, Example5) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("&callee");
+    strings.append("&caller");
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction callee = {
+      sizeof(callee),                 // size
+      BrigEDirectiveFunction,         // kind
+      0,                              // c_code
+      0,                              // s_name
+      0,                              // inParamCount
+      directives.size() +
+      sizeof(callee),                 // d_firstSCopedDirective
+      1,                              // operationCount
+      directives.size() +
+      sizeof(callee),                 // d_nextDirective
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      0,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&callee);
+
+    BrigDirectiveFunction caller = {
+      sizeof(caller),                 // size
+      BrigEDirectiveFunction,         // kind
+      32,                             // c_code
+      8,                              // s_name
+      0,                              // inParamCount
+      directives.size() +
+      sizeof(caller),                 // d_firstSCopedDirective
+      2,                              // operationCount
+      directives.size() + sizeof(callee) +
+      2 * sizeof(BrigDirectiveScope), // d_nextDirective
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      0,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&caller);
+
+    BrigDirectiveScope bds1 = {
+      sizeof(bds1),           // size
+      BrigEDirectiveArgStart, // kind
+      32                      // c_code
+    };
+    directives.append(&bds1);
+
+    BrigDirectiveScope bds2 = {
+      sizeof(bds2),           // size
+      BrigEDirectiveArgEnd,   // kind
+      64                      // c_code
+    };
+    directives.append(&bds2);
+
+    hsa::brig::Buffer code;
+    BrigInstBase ret = {
+      sizeof(ret),         // size
+      BrigEInstBase,       // kind
+      BrigRet,             // opcode
+      Brigb32,             // type
+      BrigNoPacking,       // packing
+      { 0, 0, 0, 0, 0 }    // o_operand
+    };
+    code.append(&ret);
+
+    BrigInstBase call = {
+      sizeof(call),        // size
+      BrigEInstBase,       // kind
+      BrigCall,            // opcode
+      Brigb32,             // type
+      BrigNoPacking,       // packing
+      { 16, 40, 8, 40, 0 }  // o_operand
+    };
+    code.append(&call);
+    code.append(&ret);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandFunctionRef calleeFunc = {
+      sizeof(BrigOperandFunctionRef), // size
+      BrigEOperandFunctionRef,        // kind
+      20                              // fn
+    };
+    operands.append(&calleeFunc);
+
+    BrigOperandImmed zero = {
+      sizeof(zero),      // size
+      BrigEOperandImmed, // kind
+      Brigb32,           // type
+      0,                 // reserved
+      { 0 }              // bits
+    };
+    zero.bits.u = 0;
+    operands.append(&zero);
+
+    BrigOperandArgumentList args = {
+      sizeof(args),             // size
+      BrigEOperandArgumentList, // kind
+      0,                        // elementCount
+      { 0 }                     // o_args
+    };
+    operands.append(&args);
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @callee() {")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @caller() {")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "call void @callee()")));
+  }
+}
+
 TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
   {
     hsa::brig::StringBuffer strings;
