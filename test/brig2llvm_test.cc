@@ -1,11 +1,13 @@
 // Copyright 2012 MulticoreWare Inc.
 
 #include "gtest/gtest.h"
+#include "llvm/Module.h"
 #include "llvm/Support/raw_ostream.h"
 #include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
 #include "brig_module.h"
+#include "brig_engine.h"
 // ------------------ Brig2LLVM TESTS -----------------
 
 TEST(Brig2LLVMTest, AppendBuffer) {
@@ -723,6 +725,10 @@ TEST(Brig2LLVMTest, Example5) {
     "define void @caller() {")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "call void @callee()")));
+
+    llvm::Module *mod = codegen.getModule();
+
+    hsa::brig::launchBrig(mod, mod->getFunction("caller"));
   }
 }
 
