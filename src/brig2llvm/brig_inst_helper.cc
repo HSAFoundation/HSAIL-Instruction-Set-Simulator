@@ -1,7 +1,28 @@
 #include "brig_inst_helper.h"
+#include "brig_symbol.h"
 
 namespace hsa {
 namespace brig {
+
+const BrigSymbol getArgument(const BrigInstHelper &helper,
+                             const BrigOperandArgumentList *argList,
+                             unsigned argNo) {
+
+  assert(argNo < argList->elementCount && "Index beyond argument list");
+  BrigoOffset32_t operandOffset = argList->o_args[argNo];
+  oper_iterator argRef(helper.S_.operands + operandOffset);
+  BrigdOffset32_t dirOffset = cast<BrigOperandArgumentRef>(argRef)->arg;
+  dir_iterator symbolDirIt(helper.S_.directives + dirOffset);
+  assert(isa<BrigDirectiveSymbol>(symbolDirIt) &&
+         "Arguments must reference symbols");
+  return BrigSymbol(helper.S_, symbolDirIt);
+}
+
+const BrigSymbol
+BrigInstHelper::getArgument(const BrigOperandArgumentList *argList,
+                            unsigned argNo) const {
+  return hsa::brig::getArgument(*this, argList, argNo);
+}
 
 static const char *getBaseName(const inst_iterator inst) {
 

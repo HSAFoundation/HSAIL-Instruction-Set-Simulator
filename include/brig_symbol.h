@@ -7,6 +7,7 @@ namespace hsa {
 namespace brig {
 
 class BrigFunction;
+class BrigInstHelper;
 
 class BrigSymbol {
 
@@ -50,6 +51,9 @@ class BrigSymbol {
 
   friend BrigSymbol arg_begin(const BrigFunction &F);
   friend BrigSymbol arg_end(const BrigFunction &F);
+  friend const BrigSymbol getArgument(const BrigInstHelper &helper,
+                                      const BrigOperandArgumentList *argList,
+                                      unsigned argNo);
 
   private:
 

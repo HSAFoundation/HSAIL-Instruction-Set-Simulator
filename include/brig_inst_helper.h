@@ -7,6 +7,8 @@
 namespace hsa {
 namespace brig {
 
+class BrigSymbol;
+
 class BrigInstHelper {
 
  public:
@@ -24,6 +26,13 @@ class BrigInstHelper {
     assert(o_operand && "Missing operand?!");
     return reinterpret_cast<const BrigOperandBase *>(S_.operands + o_operand);
   }
+
+  const BrigSymbol getArgument(const BrigOperandArgumentList *argList,
+                               unsigned argNo) const;
+
+  friend const BrigSymbol getArgument(const BrigInstHelper &helper,
+                                      const BrigOperandArgumentList *argList,
+                                      unsigned argNo);
 
   // Instruction methods
   static std::string getInstName(const inst_iterator inst);
