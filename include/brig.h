@@ -840,6 +840,14 @@ struct BrigOperandArgumentList {
   BrigdOffset32_t o_args[1];
 };
 
+struct BrigOperandFunctionList {
+  static const uint16_t OperKind = BrigEOperandFunctionList;
+  uint16_t size;
+  uint16_t kind;
+  uint32_t elementCount;
+  BrigdOffset32_t o_args[1];
+};
+
 // BrigOperandArgumentRef
 // BrigOperandArgumentRef is used for a single argument.
 struct BrigOperandArgumentRef {
