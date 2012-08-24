@@ -261,7 +261,7 @@ bool BrigModule::validate(const BrigDirectiveInit *dir) const {
   valid &= check(sizeof(BrigDirectiveInit) - sizeof(uint64_t) +
                  dir->elementCount * getTypeSize(dir->type) <= dir->size,
                  "Directive size too small for elementCount");
-  
+
   return valid;
 }
 
@@ -416,7 +416,7 @@ bool BrigModule::validateCCode(BrigcOffset32_t c_code) const {
   bool valid = true;
   valid &= check(c_code + sizeof(BrigInstBase) > c_code,
                  "c_code overflows");
-  valid &= check(!c_code || c_code + sizeof(BrigInstBase) <= S_.codeSize,
+  valid &= check(!c_code || c_code <= S_.codeSize,
                  "c_code past the code section");
   return valid;
 }
