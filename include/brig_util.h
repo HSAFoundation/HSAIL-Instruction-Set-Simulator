@@ -118,6 +118,8 @@ template<class Super> class brig_iterator : private Super {
     return other;
   }
 
+  uintptr_t operator-(const uint8_t *start) const { return curr - start; }
+
   private:
   const uint8_t *curr;
 };

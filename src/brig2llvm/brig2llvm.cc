@@ -181,14 +181,18 @@ static unsigned getRegOffset(const char *name) {
   return offset;
 }
 
+typedef std::map<uint32_t, llvm::Function *> FunMap;
+
 struct FunState {
   typedef std::map<uint32_t, llvm::BasicBlock *> CBMap ;
   typedef CBMap::iterator CBIt;
 
+  const FunMap &funMap;
   llvm::Value *regs;
   CBMap cbMap;
 
-  FunState(const BrigFunction &brigFun, llvm::Function *llvmFun) {
+  FunState(const FunMap &funMap, const BrigFunction &brigFun,
+           llvm::Function *llvmFun) : funMap(funMap) {
 
     llvm::LLVMContext &C = llvmFun->getContext();
     const BrigControlBlock E = brigFun.end();
@@ -242,6 +246,7 @@ static bool hasAddr(const BrigOperandBase *op) {
   switch(kind) {
   case BrigEOperandImmed:
   case BrigEOperandLabelRef:
+  case BrigEOperandFunctionRef:
     return false;
   case BrigEOperandAddress:
   case BrigEOperandReg:
@@ -264,6 +269,11 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
 
   if(const BrigOperandLabelRef *label = dyn_cast<BrigOperandLabelRef>(op)) {
     return state.cbMap[label->labeldirective];
+  }
+
+  const BrigOperandFunctionRef *func = dyn_cast<BrigOperandFunctionRef>(op);
+  if(func) {
+    return state.funMap.find(func->fn)->second;
   }
 
   assert(false && "Unimplemented");
@@ -415,6 +425,36 @@ static void runOnBranchInst(llvm::BasicBlock &B,
   assert(false && "Unknown branch opcode");
 }
 
+static llvm::Value *getSymbolAddr(const BrigSymbol &symbol) {
+  assert(false && "Unimplemented");
+}
+
+static void runOnCallInst(llvm::BasicBlock &B,
+                          const inst_iterator inst,
+                          const BrigInstHelper &helper,
+                          FunState &state) {
+
+  std::vector<llvm::Value *> args;
+
+  const BrigOperandArgumentList *oArgList =
+    cast<BrigOperandArgumentList>(helper.getOperand(inst, 1));
+  for(unsigned i = 0; i < oArgList->elementCount; ++i) {
+    const BrigSymbol symbol = helper.getArgument(oArgList, i);
+    args.push_back(getSymbolAddr(symbol));
+  }
+
+  const BrigOperandArgumentList *iArgList =
+    cast<BrigOperandArgumentList>(helper.getOperand(inst, 3));
+  for(unsigned i = 0; i < iArgList->elementCount; ++i) {
+    const BrigSymbol symbol = helper.getArgument(iArgList, i);
+    args.push_back(getSymbolAddr(symbol));
+  }
+
+  const BrigOperandBase *brigFun = helper.getOperand(inst, 2);
+  llvm::Value *func = getOperand(B, brigFun, helper, state);
+  llvm::CallInst::Create(func, args, "", &B);
+}
+
 static void runOnInstruction(llvm::BasicBlock &B,
                              const inst_iterator inst,
                              const BrigInstHelper &helper,
@@ -431,6 +471,8 @@ static void runOnInstruction(llvm::BasicBlock &B,
     llvm::ReturnInst::Create(C, &B);
   } else if(isBranchInst(inst)) {
     runOnBranchInst(B, inst, helper, state);
+  } else if(inst->opcode == BrigCall) {
+    runOnCallInst(B, inst, helper, state);
   } else {
     assert(false && "Unimplemented instruction");
   }
@@ -465,7 +507,8 @@ static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
   }
 }
 
-static void runOnFunction(llvm::Module &M, const BrigFunction &F) {
+static void runOnFunction(llvm::Module &M, const BrigFunction &F,
+                          FunMap &funMap) {
 
   llvm::LLVMContext &C = M.getContext();
 
@@ -481,6 +524,7 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F) {
   llvm::Twine name(F.getName());
 
   llvm::Function *fun = llvm::Function::Create(funTy, linkage, name, &M);
+  funMap[F.getOffset()] = fun;
 
   BrigSymbol brigArg = F.arg_begin();
   llvm::Function::arg_iterator llvmArg = fun->arg_begin();
@@ -491,7 +535,7 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F) {
 
   if(F.isDeclaration()) return;
 
-  FunState state(F, fun);
+  FunState state(funMap, F, fun);
   for(BrigControlBlock cb = F.begin(), E = F.end(); cb != E; ++cb) {
     runOnCB(*fun, cb, state);
   }
@@ -515,8 +559,9 @@ void GenLLVM::operator()(void) {
 
   gen_GPU_states();
 
+  FunMap funMap;
   for(BrigFunction fun = mod.begin(), E = mod.end(); fun != E; ++fun) {
-    runOnFunction(*brig_frontend_, fun);
+    runOnFunction(*brig_frontend_, fun, funMap);
   }
 
   llvm::raw_string_ostream ros(output_);

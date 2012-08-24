@@ -38,9 +38,7 @@ class BrigControlBlock {
 
   BrigInstHelper getInstHelper() const;
 
-  uint32_t getOffset() const {
-    return reinterpret_cast<const uint8_t *>(&*it_) - S_.directives;
-  }
+  uint32_t getOffset() const { return it_ - S_.directives; }
 
   friend BrigControlBlock cb_begin(const BrigFunction &F);
   friend BrigControlBlock cb_end(const BrigFunction &F);
