@@ -1,7 +1,5 @@
-// Copyright 2012 MulticoreWare Inc.
-
-#ifndef INCLUDE_BRIG_FUNCTION_H_
-#define INCLUDE_BRIG_FUNCTION_H_
+#ifndef _BRIG_FUNCTION_H_
+#define _BRIG_FUNCTION_H_
 
 #include "brig.h"
 #include "brig_util.h"
@@ -13,52 +11,56 @@ class BrigSymbol;
 class BrigControlBlock;
 
 class BrigFunction {
+
   public:
-    const char *getName() const {
-      return S_.strings + getMethod()->s_name + 1;
-    }
 
-    uint32_t getNumArgs() const {
-      const BrigDirectiveMethod *method = getMethod();
-      return method->inParamCount + method->outParamCount;
-    }
+  const char *getName() const {
+    return S_.strings + getMethod()->s_name + 1;
+  }
 
-    bool isDeclaration() const { return !getMethod()->operationCount; }
+  uint32_t getNumArgs() const {
+    const BrigDirectiveMethod *method = getMethod();
+    return method->inParamCount + method->outParamCount;
+  }
 
-    BrigAttribute getLinkage() const {
-      return BrigAttribute(getMethod()->attribute);
-    }
+  bool isDeclaration() const { return !getMethod()->operationCount; }
 
-    bool isKernel() const { return isa<BrigDirectiveKernel>(it_); }
-    bool isFunction() const { return isa<BrigDirectiveFunction>(it_); }
+  BrigAttribute getLinkage() const {
+    return BrigAttribute(getMethod()->attribute);
+  }
 
-    uint16_t getFBarCount() const { return getMethod()->fbarCount; }
+  bool isKernel() const { return isa<BrigDirectiveKernel>(it_); }
+  bool isFunction() const { return isa<BrigDirectiveFunction>(it_); }
 
-    BrigSymbol arg_begin() const;
-    BrigSymbol arg_end() const;
+  uint16_t getFBarCount() const { return getMethod()->fbarCount; }
 
-    BrigControlBlock begin() const;
-    BrigControlBlock end() const;
+  uint32_t getOffset() const { return it_ - S_.directives; }
 
-    bool operator!=(const BrigFunction &other) const {
-      return it_ != other.it_;
-    }
+  BrigSymbol arg_begin() const;
+  BrigSymbol arg_end() const;
 
-    BrigFunction &operator++();
+  BrigControlBlock begin() const;
+  BrigControlBlock end() const;
 
-    friend BrigFunction fun_begin(const BrigSections &S);
-    friend BrigFunction fun_end(const BrigSections &S);
-    friend BrigSymbol arg_begin(const BrigFunction &F);
-    friend BrigSymbol arg_end(const BrigFunction &F);
-    friend BrigControlBlock cb_begin(const BrigFunction &F);
-    friend BrigControlBlock cb_end(const BrigFunction &F);
+  bool operator!=(const BrigFunction &other) const {
+    return it_ != other.it_;
+  }
+
+  BrigFunction &operator++();
+
+  friend BrigFunction fun_begin(const BrigSections &S);
+  friend BrigFunction fun_end(const BrigSections &S);
+  friend BrigSymbol arg_begin(const BrigFunction &F);
+  friend BrigSymbol arg_end(const BrigFunction &F);
+  friend BrigControlBlock cb_begin(const BrigFunction &F);
+  friend BrigControlBlock cb_end(const BrigFunction &F);
 
   private:
-    BrigFunction(const BrigSections &S, const dir_iterator it) :
-      S_(S), it_(it), ver_(NULL), maxTID_(0), maxGPerC_(0), memOpt_(true) {}
+  BrigFunction(const BrigSections &S, const dir_iterator it) :
+    S_(S), it_(it), ver_(NULL), maxTID_(0), maxGPerC_(0), memOpt_(true) {}
 
-    const BrigDirectiveMethod *getMethod() const {
-      return cast<BrigDirectiveMethod>(it_);
+  const BrigDirectiveMethod *getMethod() const {
+    return cast<BrigDirectiveMethod>(it_);
   }
 
   void updateVersion(const BrigDirectiveVersion *ver);
@@ -87,7 +89,7 @@ inline BrigFunction fun_end(const BrigSections &S) {
   return BrigFunction(S, S.end());
 }
 
-}  // namespace brig
-}  // namespace hsa
+} // namespace brig
+} // namespace hsa
 
-#endif  // INCLUDE_BRIG_FUNCTION_H_
+#endif /* _BRIG_FUNCTION_H_ */

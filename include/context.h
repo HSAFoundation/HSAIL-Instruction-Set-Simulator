@@ -125,6 +125,8 @@ class Context {
         return EMPTY_BUFFER;
       else if (result == Buffer::SUCCESS)
         return CONTEXT_OK;
+
+      assert(false && "Unreachable");
     }
 
     // get code at a specific offset
@@ -142,6 +144,8 @@ class Context {
         return EMPTY_BUFFER;
       else if (result == Buffer::SUCCESS)
         return CONTEXT_OK;
+
+      assert(false && "Unreachable");
     }
 
     // get operand at a specific offset
@@ -159,6 +163,8 @@ class Context {
         return EMPTY_BUFFER;
       else if (result == Buffer::SUCCESS)
         return CONTEXT_OK;
+
+      assert(false && "Unreachable");
     }
 
     /* Byte-level manipulators */

@@ -50,7 +50,7 @@ class FakeErrorReporter: public ErrorReporterInterface {
     }
 
     error_code_t get_error_at(unsigned int index) {
-      if ((index >= 0) && (index <= no_errors)) {
+      if ((index <= no_errors)) {
         return (error_buffer[index].error_code);
       } else {
         std::cout << "Index exceeded total number of errors." << std::endl;
