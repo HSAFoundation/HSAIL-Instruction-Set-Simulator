@@ -2740,7 +2740,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack0) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_alloca) {
   context->set_error_reporter(main_reporter);
@@ -2776,7 +2776,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_alloca) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemid) {
   context->set_error_reporter(main_reporter);
@@ -2812,7 +2812,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemaid) {
   context->set_error_reporter(main_reporter);
@@ -2848,7 +2848,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemaid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupid) {
   context->set_error_reporter(main_reporter);
@@ -2884,7 +2884,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupsize) {
   context->set_error_reporter(main_reporter);
@@ -2920,7 +2920,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupsize) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangesize) {
   context->set_error_reporter(main_reporter);
@@ -2956,7 +2956,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangesize) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
   context->set_error_reporter(main_reporter);
@@ -2992,7 +2992,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, RetCodeGen) {
   context->set_error_reporter(main_reporter);
@@ -3106,7 +3106,7 @@ TEST(CodegenTest, BarCodeGen) {
   //case 2
   context->clear_context();
   input.assign("barrier_width(all)_group ;");
-  
+
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Bar(context));
@@ -3133,7 +3133,7 @@ TEST(CodegenTest, BarCodeGen) {
     BrigEOperandImmed,
     Brigb32,
     0,
-    0
+    { 0 }
   };
 
   BrigOperandImmed get_boi;
@@ -3157,7 +3157,7 @@ TEST(CodegenTest, OptionalWidthCodeGen) {
     BrigEOperandImmed,
     Brigb32,
     0,
-    2
+    { 2 }
   };
 
   std::string input("_width(2);");
