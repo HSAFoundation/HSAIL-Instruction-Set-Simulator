@@ -56,7 +56,7 @@ int Kernel(Context *context);
 int OperandList(Context* context);
 int Cmp(Context* context);
 int GlobalPrivateDecl(Context* context);
-int OffsetAddressableOperand(Context* context);
+int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset);
 int MemoryOperand(Context* context);
 int Ldc(Context* context);
 int Instruction5(Context* context);

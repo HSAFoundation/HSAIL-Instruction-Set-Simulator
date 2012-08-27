@@ -2706,28 +2706,28 @@ TEST(ParserTest, OffsetAddressableOperand) {
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, OffsetAddressableOperand(context));
+  EXPECT_EQ(0, OffsetAddressableOperand(context, 0));
 
   input.assign("[$s1]\n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, OffsetAddressableOperand(context));
+  EXPECT_EQ(0, OffsetAddressableOperand(context, 0));
 
   input.assign("[$s2 - 0xf7]\n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, OffsetAddressableOperand(context));
+  EXPECT_EQ(0, OffsetAddressableOperand(context, 0));
 
   input.assign("[0xf7]\n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, OffsetAddressableOperand(context));
+  EXPECT_EQ(0, OffsetAddressableOperand(context, 0));
 
   // wrong case
   input.assign("[0xf7\n");  // lack of ']'
@@ -2735,7 +2735,7 @@ TEST(ParserTest, OffsetAddressableOperand) {
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, OffsetAddressableOperand(context));
+  EXPECT_NE(0, OffsetAddressableOperand(context, 0));
   EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   input.assign("[]\n");  // the content in square brackets is empty
@@ -2743,7 +2743,7 @@ TEST(ParserTest, OffsetAddressableOperand) {
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, OffsetAddressableOperand(context));
+  EXPECT_NE(0, OffsetAddressableOperand(context, 0));
   EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
 
   input.assign("[$s1 * 0xf7]\n");  // '*' is the illegal operation
@@ -2751,7 +2751,7 @@ TEST(ParserTest, OffsetAddressableOperand) {
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, OffsetAddressableOperand(context));
+  EXPECT_NE(0, OffsetAddressableOperand(context, 0));
   EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   input.assign("[0xf7 + 0xf7]\n");  // the operation is illegal
@@ -2759,7 +2759,7 @@ TEST(ParserTest, OffsetAddressableOperand) {
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, OffsetAddressableOperand(context));
+  EXPECT_NE(0, OffsetAddressableOperand(context, 0));
   EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
 
   delete lexer;

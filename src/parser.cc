@@ -3259,47 +3259,12 @@ int GlobalPrivateDecl(Context* context) {
   return 1;
 }
 
-int OffsetAddressableOperand(Context* context) {
-  return 1;
-}
-int MemoryOperand(Context* context) {
-  // this judge(first token == '[') is necessary in here
-  if (context->token_to_scan == '[') {
+int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset) {
+
     std::string operand_name;
-    int CurrentoOffset = 0;
-    context->token_to_scan = yylex();
-    CurrentoOffset = context->get_operand_offset();
-    // AddressableOperand
-    if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
-        (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
-      std::string name(context->token_value.string_val);
-
-      context->token_to_scan = yylex();
-
-      if (context->token_to_scan == ']') {
-        BrigOperandAddress boa = {
-          sizeof(boa),            // size
-          BrigEOperandAddress,    // kind
-          Brigb32,                // type
-          0,                      // reserved
-          0,                      // directive
-          0
-        };
-  
-        boa.directive = context->symbol_map[name];
-  
-        if (context->get_machine() == BrigELarge) {
-          boa.type = Brigb64;
-        }
-        context->append_operand(&boa);
-        context->token_to_scan = yylex();
-        
-      } else {
-        context->set_error(MISSING_CLOSING_BRACKET);
-        return 1;
-      }
-      // OffsetAddressableOperand
-      if (context->token_to_scan == '[') {
+    // if the value of addrOpOffset is ZERO,
+    // there won't be an NonRegister in the front of OffsetAddresssOperand rule.
+    if (addrOpOffset) { 
         BrigOperandCompound compound_op = {
           sizeof(BrigOperandCompound),     // size
           BrigEOperandCompound,            // kind
@@ -3312,8 +3277,7 @@ int MemoryOperand(Context* context) {
         if (context->get_machine() == BrigELarge) {
           compound_op.type = Brigb64;
         }
-        compound_op.name = CurrentoOffset;
-        context->token_to_scan = yylex();
+        compound_op.name = addrOpOffset;
         if (context->token_type == REGISTER) {
           // The register must be an s or d register (c registers are not allowed). 
           switch (context->token_to_scan) {
@@ -3327,6 +3291,7 @@ int MemoryOperand(Context* context) {
           operand_name = context->token_value.string_val;
           // the token must be Register.
           // generate BrigOperandReg code.
+          
           if(Identifier(context)) {
             context->set_error(INVALID_OPERAND);
             return 1;
@@ -3379,11 +3344,7 @@ int MemoryOperand(Context* context) {
           context->set_error(INVALID_OPERAND);
           return 1;
         }
-      }  // AddressableOperand '[' offsetAddressable ']'
-      // 
-      return 0;
-    } else {
-      // offsetAddressableOperand
+    } else {  // addrOpOffset
       BrigOperandIndirect indirect_op = {
         sizeof(BrigOperandIndirect),    // size
         BrigEOperandIndirect,           // kind
@@ -3451,7 +3412,58 @@ int MemoryOperand(Context* context) {
         context->set_error(MISSING_OPERAND);
         return 1;
       }
-    }  // offsetAddressableOperand
+  }  // addrOpOffset
+  
+  return 1;
+}
+int MemoryOperand(Context* context) {
+  // this judge(first token == '[') is necessary in here
+  if (context->token_to_scan == '[') {
+    int CurrentoOffset = 0;
+    context->token_to_scan = yylex();
+    CurrentoOffset = context->get_operand_offset();
+    // AddressableOperand
+    if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
+        (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
+      std::string name(context->token_value.string_val);
+
+      context->token_to_scan = yylex();
+
+      if (context->token_to_scan == ']') {
+        BrigOperandAddress boa = {
+          sizeof(boa),            // size
+          BrigEOperandAddress,    // kind
+          Brigb32,                // type
+          0,                      // reserved
+          0,                      // directive
+          0
+        };
+  
+        boa.directive = context->symbol_map[name];
+  
+        if (context->get_machine() == BrigELarge) {
+          boa.type = Brigb64;
+        }
+        context->append_operand(&boa);
+        context->token_to_scan = yylex();
+      } else {
+        context->set_error(MISSING_CLOSING_BRACKET);
+        return 1;
+      }
+      if (context->token_to_scan == '[') {
+        context->token_to_scan = yylex();
+        if (!OffsetAddressableOperand(context, CurrentoOffset)) {
+          // Global/Local Identifier with offsetAddressOperand.
+          return 0;
+        }
+      }
+      // only Global/Local Identifier without offsetAddressOperand.
+      return 0;
+    } else if (!AddressableOperand(context)) {
+      return 0;
+    } else if (!OffsetAddressableOperand(context, 0)) {
+      return 0;
+    }  // Global/Local Identifier/AddressableOperand/offsetAddressableOperand 
   }  // '['
   return 1;
 }
