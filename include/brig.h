@@ -864,15 +864,15 @@ struct BrigOperandArgumentRef {
 };
 
 enum BrigAddrFilter {
-	BrigSamplerFilterLinear,
-	BrigSamplerFilterNearest
+  BrigSamplerFilterLinear,
+  BrigSamplerFilterNearest
 };
 
 enum BrigBoundaryMode {
-	BrigSamplerClamp,
-	BrigSamplerWrap,
-	BrigSamplerMirror,
-	BrigSamplerMirrorOnce,
-	BrigSamplerBorder
+  BrigSamplerClamp,
+  BrigSamplerWrap,
+  BrigSamplerMirror,
+  BrigSamplerMirrorOnce,
+  BrigSamplerBorder
 };
 #endif  // INCLUDE_BRIG_H_

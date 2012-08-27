@@ -1934,7 +1934,7 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
     };
     directives.append(&bdi);
 
-    hsa::brig::BrigModule mod(strings,directives,code,operands,&llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -1983,7 +1983,7 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "The image width is not specified")));	
+    "The image width is not specified")));	
   }
   {
     hsa::brig::Buffer strings;
@@ -2031,7 +2031,7 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "The image height is not specified")));	
+    "The image height is not specified")));	
   }
   {
     hsa::brig::Buffer strings;
@@ -2079,7 +2079,7 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "The image depth is not specified")));	
+    "The image depth is not specified")));	
   }
   {
     hsa::brig::Buffer strings;
@@ -2127,7 +2127,7 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "The image types is not 1DA or 2DA")));	
+    "The image types is not 1DA or 2DA")));	
   }
 }
 
@@ -2227,7 +2227,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "The following field have valid data")));	
+    "The following field have valid data")));	
   }
   {
     hsa::brig::Buffer strings;
@@ -2329,7 +2329,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "Invalid boundaryU")));	
+    "Invalid boundaryU")));	
   }
   {
     hsa::brig::Buffer strings;
@@ -2380,7 +2380,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "Invalid boundaryV")));	
+    "Invalid boundaryV")));	
   }
   {
     hsa::brig::Buffer strings;
@@ -2431,7 +2431,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "Invalid boundaryW")));	
+    "Invalid boundaryW")));	
   }
   {
     hsa::brig::Buffer strings;
@@ -2482,7 +2482,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "The value of reserved1 must be zero")));	
+    "The value of reserved1 must be zero")));	
   }
 }
 
@@ -2549,7 +2549,7 @@ TEST(Brig2LLVMTest,BrigDirectiveLabel_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "c_code past the code section")));
+    "c_code past the code section")));
   }
   {
     hsa::brig::StringBuffer strings;
@@ -2584,7 +2584,7 @@ TEST(Brig2LLVMTest,BrigDirectiveLabel_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "s_name past the strings section")));
+    "s_name past the strings section")));
   }
 }
 TEST(Brig2LLVMTest,BrigDirectiveLabelList_test) {	
@@ -2649,7 +2649,7 @@ TEST(Brig2LLVMTest,BrigDirectiveLabelList_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-      "c_code past the code section")));	
+    "c_code past the code section")));	
   }
 }
 
