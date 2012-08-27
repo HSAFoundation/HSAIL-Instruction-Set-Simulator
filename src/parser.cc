@@ -6067,7 +6067,42 @@ int SequenceOfPrograms(Context *context){
 }
 
 int PairAddressableOperand(Context* context) {
+  // this judge(first token == '[') is necessary in here
+  if (context->token_to_scan == '[') {
+    context->token_to_scan = yylex();
+    // AddressableOperand
+    if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
+        (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
+      
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ']') {
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == '[') {
+          context->token_to_scan = yylex();
+          if (!OffsetAddressableOperand(context, 0)) {
+            // Global/Local Identifier with offsetAddressOperand.
+            return 0;
+          } else {
+            return 1;
+          }
+        } else {  // '['
+          context->set_error(MISSING_OPENNING_BRACKET);
+          return 1;
+        }
+      } else {
+        context->set_error(MISSING_CLOSING_BRACKET);
+        return 1;
+      }
+    } else {  // Global/Local Identifier
+      context->set_error(MISSING_IDENTIFIER);
+      return 1;
+    }
+  } else {  // '['
+    context->set_error(MISSING_OPENNING_BRACKET);
+    return 1;     
+  }
   return 1;
 }
+
 }  // namespace brig
 }  // namespace hsa
