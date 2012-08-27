@@ -4433,7 +4433,7 @@ TEST(ErrorReporting, CheckErrorHistory) {
   EXPECT_CALL(mer, show_all_error());
 
   // test reported error
-  error_t error_code;
+  error_code_t error_code;
   unsigned int number_of_errors = mer.get_number_of_errors();
 
   EXPECT_EQ(3U, number_of_errors);
