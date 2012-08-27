@@ -3432,6 +3432,64 @@ TEST(CodegenTest, ArrayOperandList_CodeGen_SimpleTest) {
   delete lexer;
 };
 
+TEST(CodegenTest, PairAddressableOperand_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("[&array][$s1-16]\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  BrigOperandCompound ref = {
+    20,                    // size
+    BrigEOperandCompound,  // kind
+    Brigb32,               // type
+    0,                     // reserved
+    8,                     // name
+    24,                    // reg
+    -16                    // offset
+  };
+
+  BrigOperandReg getReg;
+  BrigOperandAddress getAddr;
+  BrigOperandCompound getComp;
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  context->add_symbol("&array");
+
+  EXPECT_EQ(0, PairAddressableOperand(context));
+  
+  context->get_operand(8, &getAddr);
+  context->get_operand(24, &getReg);
+  context->get_operand(36, &getComp);
+  
+  // BrigOperandAddress
+  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
+  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getAddr.directive);
+  EXPECT_EQ(0, getAddr.offset);
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(7, getReg.name);
+  // BrigOperandCompoud
+  EXPECT_EQ(ref.size, getComp.size);
+  EXPECT_EQ(ref.kind, getComp.kind);
+  EXPECT_EQ(ref.type, getComp.type);
+  EXPECT_EQ(ref.reserved, getComp.reserved);
+  EXPECT_EQ(ref.name, getComp.name);
+  EXPECT_EQ(ref.reg, getComp.reg);
+  EXPECT_EQ(ref.offset, getComp.offset);
+
+  delete lexer;
+};
+
+
 
 }  // namespace brig
 }  // namespace hsa
