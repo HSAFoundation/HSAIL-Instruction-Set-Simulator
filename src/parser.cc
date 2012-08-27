@@ -74,15 +74,20 @@ int Identifier(Context* context) {
     switch (context->token_to_scan) {
       case TOKEN_CREGISTER:
         bor.type = Brigb1;
+        // refresh context type.
+        context->set_type(Brigb1);
         break;
       case TOKEN_DREGISTER:
         bor.type = Brigb64;
+        context->set_type(Brigb64);
         break;
       case TOKEN_SREGISTER:
         bor.type = Brigb32;
+        context->set_type(Brigb32);
         break;
       case TOKEN_QREGISTER:
         bor.type = Brigb128;
+        context->set_type(Brigb128);
         break;
     }
     bor.reserved = 0;
@@ -328,16 +333,34 @@ int AddressableOperand(Context* context) {
 
 int ArrayOperandList(Context* context) {
   // assumed first_token is '('
+  unsigned int count_op = 0;
+  BrigoOffset32_t regs[4] = {0};
+  BrigDataType16_t type = Brigb32;
+  std::string iden_name;
   while (1) {
     context->token_to_scan = yylex();
     // set context for Identifier()
+    iden_name = context->token_value.string_val;
     if (!Identifier(context)) {
+      if (count_op <= 3) {
+        regs[count_op] = context->operand_map[iden_name];        
+      } else {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }
+      if (count_op == 0) {
+        type = context->get_type();
+      } else if (type != context->get_type()) {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }
+
+      ++count_op;
       context->token_to_scan = yylex();
       if (context->token_to_scan == ')') {
-        // set context for following functions
-        context->token_to_scan = yylex();
         break;
       } else if (context->token_to_scan == ',') {
+        continue;
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
         return 1;
@@ -347,9 +370,57 @@ int ArrayOperandList(Context* context) {
       return 1;
     }
   }
-  return 0;
-}
+  switch (count_op) {
+    case 0:
+    case 3: {
+      context->set_error(MISSING_IDENTIFIER);
+      return 1;
+    }
+    case 1: {
+      break;
+    }
+    case 2: {
+      BrigOperandRegV2 oper_regV2 = {
+        16,                    // size
+        BrigEOperandRegV2,     // kind
+        Brigb32,               // type
+        0,                     // reserved
+        {0, 0}                 // regs
+      };
+      oper_regV2.regs[0] = regs[0];
+      oper_regV2.regs[1] = regs[1];
+      oper_regV2.type = type;
+      context->append_operand(&oper_regV2);
+      
+      break;
+    }
+    case 4: {
+      BrigOperandRegV4 oper_regV4 = {
+        24,                    // size
+        BrigEOperandRegV4,     // kind
+        Brigb32,               // type
+        0,                     // reserved
+        {0, 0, 0, 0}           // regs
+      };
 
+      oper_regV4.regs[0] = regs[0];
+      oper_regV4.regs[1] = regs[1];
+      oper_regV4.regs[2] = regs[2];
+      oper_regV4.regs[3] = regs[3];
+      oper_regV4.type = type;
+      context->append_operand(&oper_regV4);
+      
+      break;
+    }
+    default: {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+  }
+  // set context for following functions
+  context->token_to_scan = yylex();   
+  return 0;
+}    
 int CallTargets(Context* context) {
   // assumed first_token is '['
   while (1) {

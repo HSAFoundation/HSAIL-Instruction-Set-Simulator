@@ -832,7 +832,6 @@ struct BrigOperandLabelRef {
   uint32_t labeldirective;
 };
 
-
 // BrigOperandFunctionRef
 // BrigOperandFunctionRef is used for a reference
 // to a function or function signature.
