@@ -6069,17 +6069,36 @@ int SequenceOfPrograms(Context *context){
 int PairAddressableOperand(Context* context) {
   // this judge(first token == '[') is necessary in here
   if (context->token_to_scan == '[') {
+    int CurrentoOffset = 0;
     context->token_to_scan = yylex();
+    CurrentoOffset = context->get_operand_offset();
     // AddressableOperand
     if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
         (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
-      
+      std::string name(context->token_value.string_val);
+
       context->token_to_scan = yylex();
+
       if (context->token_to_scan == ']') {
+        BrigOperandAddress boa = {
+          sizeof(boa),            // size
+          BrigEOperandAddress,    // kind
+          Brigb32,                // type
+          0,                      // reserved
+          0,                      // directive
+          0
+        };
+  
+        boa.directive = context->symbol_map[name];
+  
+        if (context->get_machine() == BrigELarge) {
+          boa.type = Brigb64;
+        }
+        context->append_operand(&boa);
         context->token_to_scan = yylex();
         if (context->token_to_scan == '[') {
           context->token_to_scan = yylex();
-          if (!OffsetAddressableOperand(context, 0)) {
+          if (!OffsetAddressableOperand(context, CurrentoOffset)) {
             // Global/Local Identifier with offsetAddressOperand.
             return 0;
           } else {
