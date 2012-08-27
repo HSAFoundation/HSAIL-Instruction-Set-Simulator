@@ -2426,6 +2426,37 @@ TEST(ParserTest, ArgStatement) {
   delete lexer;
 };
 
+// -----------------  Test for argStatements rule -------------------
+// argStatements := { argStatement } argStatement
+TEST(ParserTest, ArgStatements) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input("pragma \"this is string!\";\n"); // one argStatement
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgStatements(context));
+
+  input.assign("extern const"); // two argStatements 
+  input.append("arg_f32 %f[3];\n");
+  input.append("pragma \"this is string!\";\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgStatements(context));
+
+  input.assign("extern const"); // three argStatements 
+  input.append("arg_f32 %f[3];\n");
+  input.append("pragma \"this is string!\";\n");
+  input.append("pragma \"this is string!\";\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgStatements(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 

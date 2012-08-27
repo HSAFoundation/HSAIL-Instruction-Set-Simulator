@@ -70,6 +70,7 @@ int Segp(Context* context);
 int RIW_Operand(Context* context);
 int BodyStatementNested(Context* context);
 int ArgStatement(Context* context);
+int ArgStatements(Context* context);
 
 int GlobalGroupDecl(Context* context);
 /* MUL */
