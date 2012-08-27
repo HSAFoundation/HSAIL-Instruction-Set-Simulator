@@ -77,6 +77,8 @@ void launchBrig(llvm::Module *Mod,
                         ? llvm::EngineKind::Interpreter
                         : llvm::EngineKind::JIT);
 
+  builder.setUseMCJIT(true);
+
   if(!forceInterpreter)
     builder.setJITMemoryManager(
       llvm::JITMemoryManager::CreateDefaultMemManager());
