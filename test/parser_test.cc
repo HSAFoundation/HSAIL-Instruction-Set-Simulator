@@ -2398,6 +2398,34 @@ TEST(ParserTest, BodyStatementNested) {
   delete lexer;
 };
 
+// -----------------  Test for argStatement rule -------------------
+// argStatement := bodyStatementNested
+//                 | declprefix argUnitializableDecl
+//                 | call
+TEST(ParserTest, ArgStatement) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input("pragma \"this is string!\";\n"); // bodyStatementNested
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgStatement(context));
+
+  input.assign("extern const"); // declprefix argUnitializableDecl 
+  input.append("arg_f32 %f[3];\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgStatement(context));
+
+  input.assign("call &callee (%output)(%input);\n"); // call
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgStatement(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 
