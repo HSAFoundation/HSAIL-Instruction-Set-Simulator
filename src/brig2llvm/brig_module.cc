@@ -229,7 +229,24 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveProto *dir) const { return true; }
+bool BrigModule::validate(const BrigDirectiveProto *dir) const {
+  bool valid = true;
+  valid &= validateAlignment(dir, 4);
+  valid &= validateCCode(dir->c_code);
+  valid &= validateSName(dir->s_name);
+  valid &= check(!dir->reserved, "Reserved not zero");
+  valid &= check(sizeof(BrigDirectiveProto) + sizeof(BrigDirectiveProto::BrigProtoType) *
+                 (dir->outCount + dir->inCount - 1) <= dir->size,
+                 "BrigDirectiveProto size too small for outCount + inCount");
+  for (unsigned i = 0; i < dir->outCount + dir->inCount; i++) {
+     valid &= check(dir->types[i].type <= Brigf64x2,
+                 "Invalid type");
+     if (dir->types[i].hasDim == 1) {
+       valid &= check(dir->types[i].dim, "dimension not set when hasDim is 1");
+     }
+  }
+  return valid;
+}
 
 bool BrigModule::validate(const BrigDirectiveFile *dir) const {
   bool valid = true;
