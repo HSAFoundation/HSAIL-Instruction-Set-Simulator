@@ -3188,7 +3188,9 @@ int GlobalPrivateDecl(Context* context) {
   return 1;
 }
 
-
+int OffsetAddressableOperand(Context* context) {
+  return 1;
+}
 int MemoryOperand(Context* context) {
   // this judge(first token == '[') is necessary in here
   if (context->token_to_scan == '[') {
