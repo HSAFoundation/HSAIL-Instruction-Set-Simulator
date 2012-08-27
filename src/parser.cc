@@ -4645,6 +4645,22 @@ int BodyStatementNested(Context* context) {
 }
 
 int ArgStatement(Context* context) {
+  if (context->token_to_scan == CALL) {
+    if (!Call(context)) {
+      return 0;
+    }
+  } else if (!BodyStatementNested(context)) {
+    return 0;
+  } else if (context->token_to_scan == ALIGN ||
+             context->token_to_scan == CONST ||
+             context->token_to_scan == EXTERN ||
+             context->token_to_scan == STATIC) {
+    if (!DeclPrefix(context)) {
+      if (!ArgUninitializableDecl(context)) {
+        return 0;
+      }
+    }
+  } 
   return 1;
 }
 
