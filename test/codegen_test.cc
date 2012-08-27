@@ -1306,72 +1306,6 @@ TEST(CodegenTest, Instruction2Op_CodeGen_abs_s64) {
   delete lexer;
 }
 
-TEST(CodegenTest, Instruction2Op_CodeGen_abs_u32) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstBase ref = {
-    32,
-    BrigEInstBase,
-    BrigAbs,
-    Brigu32,
-    BrigNoPacking,
-    {8, 20, 0, 0, 0}
-  };
-
-  std::string input("abs_u32 $s1, $s2;");
-  Lexer* lexer = new Lexer(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Instruction2(context));
-
-  BrigInstBase get;
-  context->get_code(0, &get);
-
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-
-  delete lexer;
-}
-
-TEST(CodegenTest, Instruction2Op_CodeGen_abs_u64) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstBase ref = {
-    32,
-    BrigEInstBase,
-    BrigAbs,
-    Brigu64,
-    BrigNoPacking,
-    {8, 20, 0, 0, 0}
-  };
-
-  std::string input("abs_u64 $d1, $d2;");
-  Lexer* lexer = new Lexer(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Instruction2(context));
-
-  BrigInstBase get;
-  context->get_code(0, &get);
-
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-
-  delete lexer;
-}
-
 TEST(CodegenTest, Instruction2Op_CodeGen_abs_p_s8x4) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -1689,72 +1623,6 @@ TEST(CodegenTest, Instruction2Op_CodeGen_neg_s64) {
   };
 
   std::string input("neg_s64 $d1, $d2;");
-  Lexer* lexer = new Lexer(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Instruction2(context));
-
-  BrigInstBase get;
-  context->get_code(0, &get);
-
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-
-  delete lexer;
-}
-
-TEST(CodegenTest, Instruction2Op_CodeGen_neg_u32) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstBase ref = {
-    32,
-    BrigEInstBase,
-    BrigNeg,
-    Brigu32,
-    BrigNoPacking,
-    {8, 20, 0, 0, 0}
-  };
-
-  std::string input("neg_u32 $s1, $s2;");
-  Lexer* lexer = new Lexer(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Instruction2(context));
-
-  BrigInstBase get;
-  context->get_code(0, &get);
-
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-
-  delete lexer;
-}
-
-TEST(CodegenTest, Instruction2Op_CodeGen_neg_u64) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstBase ref = {
-    32,
-    BrigEInstBase,
-    BrigNeg,
-    Brigu64,
-    BrigNoPacking,
-    {8, 20, 0, 0, 0}
-  };
-
-  std::string input("neg_u64 $d1, $d2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2732,21 +2600,20 @@ TEST(CodegenTest, Instruction2Op_CodeGen_movs_hi_b32) {
 
   delete lexer;
 }
-
-TEST(CodegenTest, Instruction2Op_CodeGen_fbar_initSizeKnown_b64) {
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack3) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
     32,
     BrigEInstBase,
-    BrigFbarInitSizeKnown,
-    Brigb64,
+    BrigUnpack3,
+    Brigb32,
     BrigNoPacking,
     {8, 20, 0, 0, 0}
   };
 
-  std::string input("fbar_initSizeKnown_b64 $d1, $s1;");
+  std::string input("unpack3 $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2755,31 +2622,34 @@ TEST(CodegenTest, Instruction2Op_CodeGen_fbar_initSizeKnown_b64) {
   BrigInstBase get;
   context->get_code(0, &get);
 
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
 }
 
-TEST(CodegenTest, Instruction2Op_CodeGen_fbar_release_b64) {
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack2) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   BrigInstBase ref = {
-    32,
+     32,
     BrigEInstBase,
-    BrigFbarReleaseCF,
-    Brigb64,
+    BrigUnpack2,
+    Brigb32,
     BrigNoPacking,
     {8, 20, 0, 0, 0}
   };
 
-  std::string input("fbar_releaseCF_b64 $d1, $d2;");
+  std::string input("unpack2 $s1,$s2;");
   Lexer* lexer = new Lexer(input);
 
   context->token_to_scan = lexer->get_next_token();
@@ -2788,13 +2658,522 @@ TEST(CodegenTest, Instruction2Op_CodeGen_fbar_release_b64) {
   BrigInstBase get;
   context->get_code(0, &get);
 
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.type, get.type);
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack1) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+     32,
+    BrigEInstBase,
+    BrigUnpack1,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("unpack1 $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack0) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+     32,
+    BrigEInstBase,
+    BrigUnpack0,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("unpack0 $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_alloca) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+     32,
+    BrigEInstBase,
+    BrigAlloca,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("alloca $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigWorkItemId,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("workitemid $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemaid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigWorkItemAId,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("workitemaid $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigWorkGroupId,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("workgroupid $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupsize) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigWorkGroupSize,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("workgroupsize $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangesize) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNDRangesize,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("NDRangesize $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigNDRangegroups,
+    Brigb32,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  std::string input("NDRangegroups $s1,$s2;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, RetCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigRet,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0}
+  };
+
+  std::string input("ret ;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ret(context));
+
+  BrigInstBase get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, SyncCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBar ref = {
+    36,
+    BrigEInstBar,
+    BrigSync,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0},
+    BrigGlobalLevel
+  };
+
+  std::string input("sync_global ;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Sync(context));
+
+  BrigInstBar get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+  EXPECT_EQ(ref.syncFlags, get.syncFlags);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, BarCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBar ref = {
+    36,
+    BrigEInstBar,
+    BrigBarrier,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0},
+    BrigGroupLevel
+  };
+
+  std::string input("barrier_group ;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Bar(context));
+
+  BrigInstBar get;
+  context->get_code(0, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+  EXPECT_EQ(ref.syncFlags, get.syncFlags);
+
+  //case 2
+  context->clear_context();
+  input.assign("barrier_width(all)_group ;");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Bar(context));
+
+  ref.o_operands[0] = 8 ;//update
+
+  BrigInstBar get_bib;
+  context->get_code(0, &get_bib);
+
+  EXPECT_EQ(ref.size,get_bib.size);
+  EXPECT_EQ(ref.kind,get_bib.kind);
+  EXPECT_EQ(ref.opcode, get_bib.opcode);
+  EXPECT_EQ(ref.packing, get_bib.packing);
+  EXPECT_EQ(ref.type, get_bib.type);
+  EXPECT_EQ(ref.o_operands[0], get_bib.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get_bib.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get_bib.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get_bib.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get_bib.o_operands[4]);
+  EXPECT_EQ(ref.syncFlags, get_bib.syncFlags);
+
+  BrigOperandImmed boi = {
+    24,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    { 0 }
+  };
+
+  BrigOperandImmed get_boi;
+  context->get_operand(8, &get_boi);
+
+  EXPECT_EQ(boi.size,get_boi.size);
+  EXPECT_EQ(boi.kind,get_boi.kind);
+  EXPECT_EQ(boi.type, get_boi.type);
+  EXPECT_EQ(boi.reserved, get_boi.reserved);
+  EXPECT_EQ(boi.bits.u, get_boi.bits.u);
+
+  delete lexer;
+}
+
+TEST(CodegenTest, OptionalWidthCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigOperandImmed ref = {
+    24,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    { 2 }
+  };
+
+  std::string input("_width(2);");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, OptionalWidth(context));
+
+  BrigOperandImmed get;
+  context->get_operand(8, &get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.reserved, get.reserved);
+  EXPECT_EQ(ref.bits.u, get.bits.u);
 
   delete lexer;
 }

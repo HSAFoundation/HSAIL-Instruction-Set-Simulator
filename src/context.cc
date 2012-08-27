@@ -72,6 +72,7 @@ void Context::set_default_values(void) {
   valid_string = false;
   yycolno = 0;
   yylineno = 1;
+  arg_output = false ;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
@@ -312,6 +313,18 @@ void Context::set_opcode(BrigOpcode32_t opcode) {
 // let context know the location of current operand
 void Context::set_operand_loc(char loc) {
   this->operand_loc = loc;
+}
+// the operationCount of BrigDirectiveFunction add by 1
+void Context::update_bdf_operation_count(){
+  BrigDirectiveFunction bdf;
+  this->get_directive(this->current_bdf_offset, &bdf);
+  bdf.operationCount++;
+
+  unsigned char * bdf_charp =
+      reinterpret_cast<unsigned char*>(&bdf);
+  this->update_directive_bytes(bdf_charp,
+                                 this->current_bdf_offset,
+                                 sizeof(bdf));
 }
 
 }  // namespace brig

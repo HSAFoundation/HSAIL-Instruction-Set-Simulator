@@ -19,11 +19,8 @@ class GenLLVM {
                    const Buffer &directives,
                    const Buffer &code,
                    const Buffer &operands);
-  void gen_proto(void);
-  void gen_version(void);
-  size_t gen_directive(size_t);
-  size_t gen_function(size_t, const struct BrigDirectiveFunction *);
   void operator()(void);
+  llvm::Module *getModule() { return brig_frontend_; }
   const std::string &str(void) { return output_; }
  private:
   llvm::StructType *create_soa_type(llvm::Type *t, std::string name, int nr);

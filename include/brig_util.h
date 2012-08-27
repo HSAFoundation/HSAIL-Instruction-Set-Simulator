@@ -26,6 +26,10 @@ template<class T> inline T *dyn_cast(BrigInstBase *inst) {
   return inst->kind == T::InstKind ? reinterpret_cast<T *>(inst) : NULL;
 }
 
+template<class T> inline T *dyn_cast(BrigOperandBase *inst) {
+  return inst->kind == T::OperKind ? reinterpret_cast<T *>(inst) : NULL;
+}
+
 template<> inline BrigDirectiveMethod *dyn_cast(BrigDirectiveBase *dir) {
   if(dir->kind == BrigEDirectiveFunction ||
      dir->kind == BrigEDirectiveKernel)
@@ -114,6 +118,8 @@ template<class Super> class brig_iterator : private Super {
     return other;
   }
 
+  uintptr_t operator-(const uint8_t *start) const { return curr - start; }
+
   private:
   const uint8_t *curr;
 };
@@ -144,15 +150,15 @@ typedef brig_iterator<inst_super> inst_iterator;
 typedef brig_iterator<oper_super> oper_iterator;
 
 // The dir_iterator versions of dyn_cast, cast, and isa
-template<class T> inline const T *dyn_cast(const dir_iterator it) {
+template<class T, class It> inline const T *dyn_cast(const It it) {
   return dyn_cast<T>(&*it);
 }
 
-template<class T> inline const T *cast(const dir_iterator it) {
+template<class T, class It> inline const T *cast(const It it) {
   return cast<T>(&*it);
 }
 
-template<class T> inline bool isa(const dir_iterator it) {
+template<class T, class It> inline bool isa(const It it) {
   return isa<T>(&*it);
 }
 

@@ -7,6 +7,7 @@ namespace hsa {
 namespace brig {
 
 class BrigFunction;
+class BrigInstHelper;
 
 class BrigControlBlock {
 
@@ -15,7 +16,7 @@ class BrigControlBlock {
   const char *getName() const {
     if(const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_))
       return S_.strings + label->s_name + 1;
-    return "";
+    return "brig.init";
   }
 
   bool operator!=(const BrigControlBlock &other) const {
@@ -35,6 +36,10 @@ class BrigControlBlock {
     return other.begin();
   }
 
+  BrigInstHelper getInstHelper() const;
+
+  uint32_t getOffset() const { return it_ - S_.directives; }
+
   friend BrigControlBlock cb_begin(const BrigFunction &F);
   friend BrigControlBlock cb_end(const BrigFunction &F);
 
@@ -52,7 +57,7 @@ class BrigControlBlock {
     else assert(false && "Bad control block");
   }
 
-  const BrigSections S_;
+  const BrigSections &S_;
   dir_iterator it_;
 };
 

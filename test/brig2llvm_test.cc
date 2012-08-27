@@ -1,11 +1,13 @@
 // Copyright 2012 MulticoreWare Inc.
 
 #include "gtest/gtest.h"
+#include "llvm/Module.h"
 #include "llvm/Support/raw_ostream.h"
 #include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
 #include "brig_module.h"
+#include "brig_engine.h"
 // ------------------ Brig2LLVM TESTS -----------------
 
 TEST(Brig2LLVMTest, AppendBuffer) {
@@ -203,7 +205,7 @@ TEST(Brig2LLVMTest, Example2) {
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%c_regs = type { [8 x i1] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "%s_regs = type { [8 x i32] }")));
+    "%s_regs = type { [16 x i32] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%d_regs = type { [8 x i64] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -219,7 +221,7 @@ TEST(Brig2LLVMTest, Example2) {
   }
 }
 
-TEST(Brig2LLVMTest, Example3){
+TEST(Brig2LLVMTest, Example3) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&packed_ops"));
@@ -247,7 +249,8 @@ TEST(Brig2LLVMTest, Example3){
       0,   // c_code
       0,   // s_name
       0,   // inParamCount
-      directives.size() + sizeof(bdf),  // d_firstScopedDirective
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol),  // d_firstScopedDirective
       1,   // operationCount
       directives.size() + sizeof(bdf) +
       sizeof(BrigDirectiveSymbol),  // d_nextDirective
@@ -282,18 +285,18 @@ TEST(Brig2LLVMTest, Example3){
       sizeof(abs),
       BrigEInstBase,
       BrigAbs,
-      Brigb32,
-      BrigNoPacking,
-      { 0, 0, 0, 0, 0}
+      Brigu8x4,
+      BrigPackP,
+      { 8, 20, 0, 0, 0}
     };
     code.append(&abs);
     BrigInstBase add = {
       sizeof(add),
       BrigEInstBase,
       BrigAdd,
-      Brigb32,
-      BrigNoPacking,
-      { 0, 0, 0, 0, 0}
+      Brigu16x2,
+      BrigPackPPsat,
+      { 8, 32, 44, 0, 0}
     };
     code.append(&add);
     BrigInstBase ret = {
@@ -307,56 +310,428 @@ TEST(Brig2LLVMTest, Example3){
     code.append(&ret);
 
     hsa::brig::Buffer operands;
-    BrigOperandReg bor_1 = {
-      sizeof(bor_1),
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
       BrigEOperandReg,
       Brigb32,
       0,
       15
     };
-    operands.append(&bor_1);
-    BrigOperandReg bor_2 = {
-      sizeof(bor_2),
+    operands.append(&bor1);
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
       BrigEOperandReg,
       Brigb32,
       0,
       19
     };
-    operands.append(&bor_2);
-    BrigOperandReg bor_3 = {
-      sizeof(bor_3),
+    operands.append(&bor2);
+    BrigOperandReg bor3 = {
+      sizeof(bor3),
       BrigEOperandReg,
       Brigb32,
       0,
       23
     };
-    operands.append(&bor_3);
-    BrigOperandReg bor_4 = {
-      sizeof(bor_4),
+    operands.append(&bor3);
+    BrigOperandReg bor4 = {
+      sizeof(bor4),
       BrigEOperandReg,
       Brigb32,
       0,
       27
     };
-    operands.append(&bor_4);
+    operands.append(&bor4);
 
-    // hsa::brig::GenLLVM codegen(strings, directives, code, operands);
-    // codegen();
-    // EXPECT_NE(0, codegen.str().size());
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "declare void @abs_p_s8x4(%struct.regs*, i32, i32)")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "declare void @add_pp_sat_u16x2(%struct.regs*, i32, i32, i32)")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "define void @packed_ops(<4 x i8> * %x)")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "%struct.regs = type { %c_regs, %s_regs, %d_regs, %q_regs, %pc_regs }")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "%gpu_reg_p = alloca %struct.regs")));
-    // EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    // "ret void")));
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare <4 x i8> @Abs_P_u8x4(<4 x i8>)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare <2 x i16> @Add_PPsat_u16x2(<2 x i16>, <2 x i16>)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @packed_ops(<4 x i8>* %x)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 2")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 3")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "call <4 x i8> @Abs_P_u8x4")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "call <2 x i16> @Add_PPsat_u16x2")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "%gpu_reg_p = alloca %struct.regs")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "ret void")));
   }
 }
+
+TEST(Brig2LLVMTest, Example4) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("&branch_ops");
+    strings.append("%x");
+    strings.append("$c1");
+    strings.append("$s1");
+    strings.append("$s2");
+    strings.append("@then");
+    strings.append("$s0");
+    strings.append("$s3");
+    strings.append("@outof_IF");
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction bdf = {
+      sizeof(bdf),                    // size
+      BrigEDirectiveFunction,         // kind
+      0,                              // c_code
+      0,                              // s_name
+      0,                              // inParamCount
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol),    // d_firstSCopedDirective
+      5,                              // operationCount
+      directives.size() + sizeof(bdf) +
+      sizeof(BrigDirectiveSymbol) +
+      2 * sizeof(BrigDirectiveLabel), // d_nextDirectivef
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      1,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&bdf);
+
+    BrigDirectiveSymbol bds = {
+      sizeof(bds),          // size
+      BrigEDirectiveSymbol, // kind
+      {
+        0,                    // c_code
+        BrigArgSpace,         // storageClass
+        BrigNone,             // attribute
+        0,                    // reserved
+        0,                    // symbolModifier
+        0,                    // dim
+        12,                   // s_name
+        Brigs8x4,             // type
+        1                     // align
+      },
+      0,                    // d_init
+      0                     // reserved
+    };
+    directives.append(&bds);
+
+    BrigDirectiveLabel bdl1 = {
+      sizeof(bdl1),         // size
+      BrigEDirectiveLabel, // kind
+      100,                 // c_code
+      27                   // s_name
+    };
+    directives.append(&bdl1);
+
+    BrigDirectiveLabel bdl2 = {
+      sizeof(bdl2),         // size
+      BrigEDirectiveLabel, // kind
+      132,                 // c_code
+      41                   // s_name
+    };
+    directives.append(&bdl2);
+
+    hsa::brig::Buffer code;
+    BrigInstBase cbr = {
+      sizeof(cbr),       // size
+      BrigEInstBase,     // kind
+      BrigCbr,           // opcode
+      Brigb1,            // type
+      BrigNoPacking,     // packing
+      { 84, 8, 44, 0, 0 } // o_operand
+    };
+    code.append(&cbr);
+
+    BrigInstBase abs = {
+      sizeof(abs),        // size
+      BrigEInstBase,      // kind
+      BrigAbs,            // opcode
+      Brigs8x4,           // type
+      BrigPackP,          // packing
+      { 20, 32, 0, 0, 0 } // o_operand
+    };
+    code.append(&abs);
+
+    BrigInstBar brn = {
+      sizeof(brn),         // size
+      BrigEInstBar,        // kind
+      BrigBrn,             // opcode
+      Brigb32,             // type
+      BrigNoPacking,       // type
+      { 84, 76, 0, 0, 0 }, // o_operand
+      0                    // syncFlags
+    };
+    code.append(&brn);
+
+    BrigInstBase add = {
+      sizeof(add),         // size
+      BrigEInstBase,       // kind
+      BrigAdd,             // opcode
+      Brigu16x2,           // type
+      BrigPackPPsat,       // packing
+      { 20, 52, 64, 0, 0 } // o_operand
+    };
+    code.append(&add);
+
+    BrigInstBase ret = {
+      sizeof(ret),         // size
+      BrigEInstBase,       // kind
+      BrigRet,             // opcode
+      Brigb32,             // type
+      BrigNoPacking,       // packing
+      { 0, 0, 0, 0, 0 }    // o_operand
+    };
+    code.append(&ret);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandReg c1 = {
+      sizeof(c1),      // size
+      BrigEOperandReg, // kind
+      Brigb1,          // type
+      0,               // reserved
+      15               // name
+    };
+    operands.append(&c1);
+
+    BrigOperandReg s1 = {
+      sizeof(s1),      // size
+      BrigEOperandReg, // kind
+      Brigb32,         // type
+      0,               // reserved
+      19               // name
+    };
+    operands.append(&s1);
+
+    BrigOperandReg s2 = {
+      sizeof(s2),      // size
+      BrigEOperandReg, // kind
+      Brigb32,         // type
+      0,               // reserved
+      23               // name
+    };
+    operands.append(&s2);
+
+    BrigOperandLabelRef then = {
+      sizeof(then),         // size
+      BrigEOperandLabelRef, // kind
+      100                   // labeldirective
+    };
+    operands.append(&then);
+
+    BrigOperandReg s0 = {
+      sizeof(s0),      // size
+      BrigEOperandReg, // kind
+      Brigb32,         // type
+      0,               // reserved
+      33               // name
+    };
+    operands.append(&s0);
+
+    BrigOperandReg s3 = {
+      sizeof(s3),      // size
+      BrigEOperandReg, // kind
+      Brigb32,         // type
+      0,               // reserved
+      37               // name
+    };
+    operands.append(&s3);
+
+    BrigOperandLabelRef outOfIf = {
+      sizeof(outOfIf),      // size
+      BrigEOperandLabelRef, // kind
+      112                   // labeldirective
+    };
+    operands.append(&outOfIf);
+
+    BrigOperandImmed zero = {
+      sizeof(zero),      // size
+      BrigEOperandImmed, // kind
+      Brigb32,           // type
+      0,                 // reserved
+      { 0 }              // bits
+    };
+    zero.bits.u = 0;
+    operands.append(&zero);
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "declare <2 x i16> @Add_PPsat_u16x2(<2 x i16>, <2 x i16>)")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "outof_IF:")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "then:")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "brig.init.succ:")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    ", label %then, label %brig.init.succ")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "br label %outof_IF")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "; preds = %then, %brig.init.succ")));
+  }
+}
+
+TEST(Brig2LLVMTest, Example5) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("&callee");
+    strings.append("&caller");
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction callee = {
+      sizeof(callee),                 // size
+      BrigEDirectiveFunction,         // kind
+      0,                              // c_code
+      0,                              // s_name
+      0,                              // inParamCount
+      directives.size() +
+      sizeof(callee),                 // d_firstSCopedDirective
+      1,                              // operationCount
+      directives.size() +
+      sizeof(callee),                 // d_nextDirective
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      0,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&callee);
+
+    BrigDirectiveFunction caller = {
+      sizeof(caller),                 // size
+      BrigEDirectiveFunction,         // kind
+      32,                             // c_code
+      8,                              // s_name
+      0,                              // inParamCount
+      directives.size() +
+      sizeof(caller),                 // d_firstSCopedDirective
+      2,                              // operationCount
+      directives.size() + sizeof(callee) +
+      2 * sizeof(BrigDirectiveScope), // d_nextDirective
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      0,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&caller);
+
+    BrigDirectiveScope bds1 = {
+      sizeof(bds1),           // size
+      BrigEDirectiveArgStart, // kind
+      32                      // c_code
+    };
+    directives.append(&bds1);
+
+    BrigDirectiveScope bds2 = {
+      sizeof(bds2),           // size
+      BrigEDirectiveArgEnd,   // kind
+      64                      // c_code
+    };
+    directives.append(&bds2);
+
+    hsa::brig::Buffer code;
+    BrigInstBase ret = {
+      sizeof(ret),         // size
+      BrigEInstBase,       // kind
+      BrigRet,             // opcode
+      Brigb32,             // type
+      BrigNoPacking,       // packing
+      { 0, 0, 0, 0, 0 }    // o_operand
+    };
+    code.append(&ret);
+
+    BrigInstBase call = {
+      sizeof(call),        // size
+      BrigEInstBase,       // kind
+      BrigCall,            // opcode
+      Brigb32,             // type
+      BrigNoPacking,       // packing
+      { 16, 40, 8, 40, 0 }  // o_operand
+    };
+    code.append(&call);
+    code.append(&ret);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandFunctionRef calleeFunc = {
+      sizeof(BrigOperandFunctionRef), // size
+      BrigEOperandFunctionRef,        // kind
+      20                              // fn
+    };
+    operands.append(&calleeFunc);
+
+    BrigOperandImmed zero = {
+      sizeof(zero),      // size
+      BrigEOperandImmed, // kind
+      Brigb32,           // type
+      0,                 // reserved
+      { 0 }              // bits
+    };
+    zero.bits.u = 0;
+    operands.append(&zero);
+
+    BrigOperandArgumentList args = {
+      sizeof(args),             // size
+      BrigEOperandArgumentList, // kind
+      0,                        // elementCount
+      { 0 }                     // o_args
+    };
+    operands.append(&args);
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @callee() {")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @caller() {")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "call void @callee()")));
+
+    llvm::Module *mod = codegen.getModule();
+
+    hsa::brig::launchBrig(mod, mod->getFunction("caller"));
+  }
+}
+
 TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
   {
     hsa::brig::StringBuffer strings;
@@ -2423,5 +2798,196 @@ TEST(Brig2LLVMTest, UniqueString) {
     "Duplicate string detected")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "String not null terminated")));
+  }
+}
+
+TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    //BrigDirectiveInit::initializationData type:uint8_t
+    uint8_t values[16] = {
+      //elementCount = 9, allocate 16 byte memory
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
+    };
+    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+    bdi->size = sizeof(array);
+    bdi->kind = BrigEDirectiveInit;
+    bdi->c_code = 0;
+    bdi->elementCount = 9;
+    bdi->type = Brigb8;
+    bdi->reserved = 0;
+
+    for (size_t i = 0; i < sizeof(values) / sizeof(uint8_t); ++i)
+        bdi->initializationData.u8[i] = values[i];
+    directives.append(bdi);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    //BrigDirectiveInit::initializationData type:uint8_t
+    uint8_t values[16] = {
+      //elementCount = 9, allocate 16 byte memory
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
+    };
+    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+    bdi->size = sizeof(array);
+    bdi->kind = BrigEDirectiveInit;
+    bdi->c_code = 0;
+    bdi->elementCount = 9;
+    bdi->type = Brigb8;
+    bdi->reserved = 1;
+
+    for (size_t i = 0; i < sizeof(values) / sizeof(uint8_t); ++i)
+        bdi->initializationData.u8[i] = values[i];
+    directives.append(bdi);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Reserved not zero")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    //BrigDirectiveInit::initializationData type:uint8_t
+    uint8_t values[16] = {
+      //elementCount = 9, allocate 16 byte memory
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
+    };
+    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+    bdi->size = sizeof(array);
+    bdi->kind = BrigEDirectiveInit;
+    bdi->c_code = 0;
+    bdi->elementCount = 9;
+    bdi->type = Brigf32;
+    bdi->reserved = 0;
+
+    for (size_t i = 0; i < sizeof(values) / sizeof(uint8_t); ++i)
+        bdi->initializationData.u8[i] = values[i];
+    directives.append(bdi);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type, must be b1, b8, b16, b32, b64, or b128")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    //BrigDirectiveInit::initializationData type:uint8_t
+    uint8_t values[16] = {
+      //elementCount = 9, allocate 16 byte memory
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
+    };
+    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+    bdi->size = sizeof(array);
+    bdi->kind = BrigEDirectiveInit;
+    bdi->c_code = 0;
+    bdi->elementCount = 100;
+    bdi->type = Brigb8;
+    bdi->reserved = 0;
+
+    for (size_t i = 0; i < sizeof(values) / sizeof(uint8_t); ++i)
+        bdi->initializationData.u8[i] = values[i];
+    directives.append(bdi);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Directive size too small for elementCount")));
   }
 }
