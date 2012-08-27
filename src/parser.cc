@@ -4768,36 +4768,30 @@ int Operation(Context* context) {
       context->token_to_scan == CLOCK || 
       context->token_type == INSTRUCTION1_OPCODE) {
     if (!Instruction1(context)) {
-      context->token_to_scan = yylex();
       return 0; 
     }
   } else if (context->token_to_scan == NOP) {
     if (!Instruction0(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_type == INSTRUCTION2_OPCODE_FTZ ||
              context->token_type == INSTRUCTION2_OPCODE ||
              context->token_type == INSTRUCTION2_OPCODE_NODT) {
     if (!Instruction2(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_type == INSTRUCTION3_OPCODE ||
              context->token_type == INSTRUCTION3_OPCODE_FTZ) {
     if (!Instruction3(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_type == INSTRUCTION4_OPCODE) {
     if (!Instruction4(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == PACKEDCMP ||
              context->token_to_scan == CMP) {
     if (!Cmp(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == MUL ||
@@ -4807,118 +4801,132 @@ int Operation(Context* context) {
              context->token_to_scan == MAD24 ||
              context->token_to_scan == MAD24_HI) {
     if (!Mul(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == F2U4) {
     if (!Instruction5(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == MOV) {
     if (!Mov(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == SEGMENTP ||
              context->token_to_scan == FTOS ||
              context->token_to_scan == STOF) {
     if (!Segp(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == LDA) {
     if (!Lda(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == LDC) {
     if (!Ldc(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == ATOMIC ||
              context->token_to_scan == ATOMIC_CAS) {
     if (!Atom(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == RD_IMAGE) {
     if (!ImageRead(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == LD_IMAGE) {
     if (!ImageLoad(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == ST_IMAGE) {
     if (!ImageStore(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == LD) {
     if (!Ld(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == ST) {
     if (!St(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == CVT) {
     if (!Cvt(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == ATOMICNORET ||
              context->token_to_scan == ATOMICNORET_CAS) {
     if (!AtomicNoRet(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == ATOMIC_IMAGE) {
     if (!ImageRet(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == SYNC) {
     if (!Sync(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == BARRIER) {
     if (!Bar(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == SYSCALL) {
     if (!SysCall(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   }  else if (context->token_to_scan == RET) {
     if (!Ret(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_to_scan == CBR ||
              context->token_to_scan == BRN) {
     if (!Branch(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } else if (context->token_type = QUERY_OP) {
     if (!Query(context)) {
-      context->token_to_scan = yylex();
       return 0;
     }
   } 
   return 1;
 }
 
+int BodyStatementNested(Context* context) {
+  if (context->token_to_scan == TOKEN_COMMENT) {
+    return 0;
+  } else if (context->token_to_scan == PRAGMA) {
+    if (!Pragma(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == BLOCK) {
+    if (!Block(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == ALIGN ||
+             context->token_to_scan == CONST ||
+             context->token_to_scan == EXTERN ||
+             context->token_to_scan == STATIC) {
+    if (!DeclPrefix(context)) {
+      if (!InitializableDecl(context)) {
+        return 0;
+      } else if (!UninitializableDecl(context)) {
+        return 0;
+      }     
+    }  
+  } else if (context->token_to_scan == LOC) {
+    if (!Location(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == TOKEN_LABEL) {
+    return 0;
+  } else if (!LabelTargets(context)) {
+    return 0;
+  } else if (!Operation(context)) {
+    return 0;
+  }  
+  return 1;
+}
 
 int ImageLoad(Context* context) {
   // first token is LD_IMAGE

@@ -2322,6 +2322,82 @@ TEST(ParserTest, Operation) {
   delete lexer;
 };
 
+// -----------------  Test for BodyStatementNested rule -------------------
+// bodyStatementNested := TOKEN_COMMENT
+//                        | pragma
+//                        | block
+//                        | declprefix initializableDecl
+//                        | declprefix uninitializableDecl
+//                        | location
+//                        | label
+//                        | labeltarget
+//                        | operation
+//                          ;
+TEST(ParserTest, BodyStatementNested) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input("//Hello World\n"); //comment
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("/*This is Comment*/\n"); // comment  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("block \"debug\"\n"); // block
+  input.append("blocknumeric_b8 255, 23, 10, 23;\n");
+  input.append("blocknumeric_b32 1255, 0x323, 10, 23;\n");
+  input.append("blocknumeric_b64 0x123456781, 0x323, 10, 23;\n");
+  input.append("blockstring \"this is a string\";\n");
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("pragma \"this is string!\";"); // pragma
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("align 8 static "); // declprefix initializableDecl
+  input.append("readonly_f64 %d[3] ={ 1.2L, 1.3L,1.4L };\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("align 8 static "); // declprefix uninitializableDecl
+  input.append("private_f32 %f[3];\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("loc 1 20 0;"); // location
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("@_test_label_2: \n"); // label
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("@tab: labeltargets @a1, @a2;\n"); // labeltarget
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  input.assign("ret;"); // operation
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatementNested(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 
