@@ -275,7 +275,7 @@ void Context::set_alu_modifier(BrigAluModifier modifier) {
 
 void Context::set_symbol_modifier(BrigSymbolModifier modifier) {
   this->symModifier = modifier;
-};
+}
 
 void Context::set_attribute(BrigAttribute16_t attrib) {
   this->attribute = attrib;

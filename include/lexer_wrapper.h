@@ -30,7 +30,7 @@ class Lexer {
     }
 
     // get the next token
-    unsigned int get_next_token(void);
+    int get_next_token(void);
 
     // set source string
     void set_source_string(const std::string& src);

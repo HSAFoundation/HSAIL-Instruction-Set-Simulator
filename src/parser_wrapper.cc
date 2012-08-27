@@ -9,7 +9,7 @@ namespace hsa {
 namespace brig {
   void Parser::set_source_string(const std::string& src) {
     lexer->set_source_string(src);
-  };
+  }
 
   // scan source for symbols
   void Parser::scan_symbols(void) {
@@ -22,8 +22,7 @@ namespace brig {
           (token == TOKEN_LOCAL_IDENTIFIER) ||
           (context->token_type == REGISTER) ||
           (token == TOKEN_LABEL)) {
-        int offset = context->add_symbol(
-                      std::string(context->token_value.string_val));
+        context->add_symbol(std::string(context->token_value.string_val));
       }
       token = lexer->get_next_token();
     }

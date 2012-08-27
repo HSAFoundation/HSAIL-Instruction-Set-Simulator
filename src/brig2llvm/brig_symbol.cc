@@ -24,7 +24,9 @@ BrigSymbol &BrigSymbol::operator++() {
 }
 
 BrigSymbol arg_begin(const BrigFunction &fun) {
-  return BrigSymbol(fun.S_, fun.it_ + 1);
+  BrigSymbol symbol(fun.S_, fun.it_ + 1);
+  if(!isa<BrigDirectiveSymbolCommon>(symbol.it_)) ++symbol;
+  return symbol;
 }
 
 BrigSymbol arg_end(const BrigFunction &fun) {

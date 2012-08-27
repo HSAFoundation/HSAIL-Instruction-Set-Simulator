@@ -103,7 +103,8 @@ int BaseOperand(Context* context) {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
       Brigb64,            // type
-      0                   // reserved
+      0,                  // reserved
+      { 0 }
     };
     boi.bits.d = context->token_value.double_val;
     context->append_operand(&boi);
@@ -114,7 +115,8 @@ int BaseOperand(Context* context) {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
       Brigb32,            // type
-      0                   // reserved
+      0,                  // reserved
+      { 0 }
     };
     boi.bits.f = context->token_value.float_val;
     context->append_operand(&boi);
@@ -124,7 +126,8 @@ int BaseOperand(Context* context) {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
       Brigb32,            // type
-      0                   // reserved
+      0,                  // reserved
+      { 0 }
     };
     // TODO(Huy): check context for operation type and decide the type
     boi.bits.u = context->token_value.int_val;
@@ -140,7 +143,8 @@ int BaseOperand(Context* context) {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
       Brigb32,            // type
-      0                   // reserved
+      0,                  // reserved
+      { 0 }
       };
       // TODO(Huy): check context for operation type and decide the type
       boi.bits.u = -context->token_value.int_val;
@@ -159,7 +163,8 @@ int BaseOperand(Context* context) {
         sizeof(boi),        // size
         BrigEOperandImmed,  // kind
         Brigb32,            // type
-        0                   // reserved
+        0,                  // reserved
+        { 0 }
         };
         // TODO(Huy): check context for operation type and decide the type
         boi.bits.u = -context->token_value.int_val;
@@ -176,7 +181,8 @@ int BaseOperand(Context* context) {
                 sizeof(boi),        // size
                 BrigEOperandImmed,  // kind
                 Brigb32,            // type
-                0                   // reserved
+                0,                  // reserved
+                { 0 }
               };
   // TODO(Huy): check context for operation type and decide the type
               boi.bits.u = context->token_value.int_val;
@@ -200,7 +206,8 @@ int BaseOperand(Context* context) {
         sizeof(boi),        // size
         BrigEOperandImmed,  // kind
         Brigb64,            // type
-        0                   // reserved
+        0,                  // reserved
+        { 0 }
         };
         boi.bits.d = context->token_value.double_val;
         context->append_operand(&boi);
@@ -216,7 +223,8 @@ int BaseOperand(Context* context) {
                 sizeof(boi),        // size
                 BrigEOperandImmed,  // kind
                 Brigb64,            // type
-                0                   // reserved
+                0,                  // reserved
+                { 0 }
               };
               boi.bits.d = context->token_value.double_val;
               context->append_operand(&boi);
@@ -387,19 +395,20 @@ int CallArgs(Context* context) {
       if (n_elements > 1)
         list_size += sizeof(BrigoOffset32_t) * (n_elements - 1);
 
-      char array[list_size];
+      char *array = new char[list_size];
       BrigOperandArgumentList &arg_list =
         *reinterpret_cast<BrigOperandArgumentList *>(array);
       arg_list.size = list_size;
       arg_list.kind = BrigEOperandArgumentList;
       arg_list.elementCount = n_elements;
-      for (uint32_t i = 0; i < n_elements; ++i) {
+      for (int32_t i = 0; i < n_elements; ++i) {
         arg_list.o_args[i] = arg_offset[i];
       }
       context->current_argList_offset = context->get_operand_offset();
       context->append_operand(&arg_list);
       context->token_to_scan = yylex();
 
+      delete[] array;
       break;
     } else if (!Operand(context)) {
       if ((saved_token == TOKEN_GLOBAL_IDENTIFIER)||
@@ -1039,7 +1048,7 @@ int Version(Context* context) {
   }
 
   return 1;
-};
+}
 
 int Alignment(Context* context) {
   // first token must be "align" keyword
@@ -1249,15 +1258,17 @@ int ArgumentDecl(Context* context) {
           BrigDirectiveSymbol sym_decl = {
           sizeof(sym_decl),                 // size
           BrigEDirectiveSymbol,             // kind
-          context->get_code_offset(),       // c_code
-          storage_class,                    // storageClass
-          context->get_attribute(),         // attribute
-          0,                                // reserved
-          context->get_symbol_modifier(),   // symbol modifier
-          0,                                // dim
-          arg_name_offset,                  // s_name
-          context->token_value.data_type,   // data type
-          context->get_alignment(),         // alignment
+          {
+            context->get_code_offset(),       // c_code
+            storage_class,                    // storageClass
+            context->get_attribute(),         // attribute
+            0,                                // reserved
+            context->get_symbol_modifier(),   // symbol modifier
+            0,                                // dim
+            arg_name_offset,                  // s_name
+            context->token_value.data_type,   // data type
+            context->get_alignment(),         // alignment
+          },
           0,                                // d_init = 0 for arg
           0                                 // reserved
           };
@@ -1575,7 +1586,6 @@ int ArgBlock(Context* context) {
       }
     } else if (context->token_to_scan == RET) {  // ret operation
       if (yylex() == ';') {
-        BrigcOffset32_t csize = context->get_code_offset();
         BrigInstBase op_ret = {
           32,
           BrigEInstBase,
@@ -1748,7 +1758,6 @@ int Codeblock(Context* context) {
       }
     } else if (context->token_to_scan == RET) {  // ret operation
       if (yylex() == ';') {
-      BrigcOffset32_t csize = context->get_code_offset();
       BrigInstBase op_ret = {
         32,
         BrigEInstBase,
@@ -2136,7 +2145,6 @@ int Branch(Context* context) {
     context->token_to_scan = yylex();
   }
 
-  BrigdOffset32_t current_offset = context->get_directive_offset();
   // parse operands
   if (op == CBR) {
     // add structures for CBR.
@@ -2497,19 +2505,20 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
         }
       } else {  // no arrayDimension
           // add by fxiaopeng
-          BrigdOffset32_t dsize = context->get_directive_offset();
           BrigDirectiveSymbol sym_decl = {
             sizeof(sym_decl),                 // size
             BrigEDirectiveSymbol,             // kind
-            context->get_code_offset(),       // c_code
-            storage_class,                    // storageClass ??
-            context->get_attribute(),         // attribute
-            0,                                // reserved
-            context->get_symbol_modifier(),   // symbol modifier
-            0,                                // dim
-            var_name_offset,                  // s_name
-            context->token_value.data_type,                        // data type
-            context->get_alignment(),         // alignment
+            {
+              context->get_code_offset(),       // c_code
+              storage_class,                    // storageClass ??
+              context->get_attribute(),         // attribute
+              0,                                // reserved
+              context->get_symbol_modifier(),   // symbol modifier
+              0,                                // dim
+              var_name_offset,                  // s_name
+              context->token_value.data_type,                        // data type
+              context->get_alignment(),         // alignment
+            },
             0,                                // d_init = 0 for arg
             0                                 // reserved
           };
@@ -2547,7 +2556,7 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
     context->set_error(MISSING_DATA_TYPE);
   }
   return 1;
-};
+}
 
 int UninitializableDecl(Context* context) {
   // first_token is PRIVATE, GROUP or SPILL
@@ -2569,19 +2578,20 @@ int UninitializableDecl(Context* context) {
         }
       } else {  // no arrayDimension
           // add by fxiaopeng
-          BrigdOffset32_t dsize = context->get_directive_offset();
           BrigDirectiveSymbol sym_decl = {
             sizeof(sym_decl),                 // size
             BrigEDirectiveSymbol,             // kind
-            context->get_code_offset(),       // c_code
-            storage_class,                    // storageClass ??
-            context->get_attribute(),           // attribute
-            0,                                // reserved
-            context->get_symbol_modifier(),   // symbol modifier
-            0,                                // dim
-            var_name_offset,                  // s_name
-            context->token_value.data_type,   // data type
-            context->get_alignment(),         // alignment
+            {
+              context->get_code_offset(),       // c_code
+              storage_class,                    // storageClass ??
+              context->get_attribute(),           // attribute
+              0,                                // reserved
+              context->get_symbol_modifier(),   // symbol modifier
+              0,                                // dim
+              var_name_offset,                  // s_name
+              context->token_value.data_type,   // data type
+              context->get_alignment(),         // alignment
+            },
             0,                                // d_init = 0 for arg
             0                                 // reserved
           };
@@ -2639,15 +2649,17 @@ int ArgUninitializableDecl(Context* context) {
       BrigDirectiveSymbol arg_decl = {
         sizeof(arg_decl),                 // size
         BrigEDirectiveSymbol,             // kind
-        context->get_code_offset(),       // c_code
-        storage_class,                    // storageClass
-        context->get_attribute(),         // attribute
-        0,                                // reserved
-        context->get_symbol_modifier(),   // symbol modifier
-        0,                                // dim
-        context->add_symbol(arg_name),    // s_name
-        data_type,   // data_type
-        context->get_alignment(),         // alignment
+        {
+          context->get_code_offset(),       // c_code
+          storage_class,                    // storageClass
+          context->get_attribute(),         // attribute
+          0,                                // reserved
+          context->get_symbol_modifier(),   // symbol modifier
+          0,                                // dim
+          context->add_symbol(arg_name),    // s_name
+          data_type,   // data_type
+          context->get_alignment(),         // alignment
+        },
         0,                                // d_init = 0 for arg
         0                                 // reserved
       };
