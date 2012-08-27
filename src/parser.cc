@@ -4665,6 +4665,12 @@ int ArgStatement(Context* context) {
 }
 
 int ArgStatements(Context* context) {
+  if (!ArgStatement(context)) {
+    while (!ArgStatement(context)) {
+      ;
+    }
+    return 0;
+  }
   return 1;
 }
 
