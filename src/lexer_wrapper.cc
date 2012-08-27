@@ -5,7 +5,7 @@
 namespace hsa {
 namespace brig {
 
-  unsigned int Lexer::get_next_token(void) {
+  int Lexer::get_next_token(void) {
     return yylex();
   }
 

@@ -1,7 +1,5 @@
-/* Copyright 2012 <MulticorewareInc> */
-
-#ifndef INCLUDE_BRIG_MODULE_H_
-#define INCLUDE_BRIG_MODULE_H_
+#ifndef _BRIG_MODULE_H_
+#define _BRIG_MODULE_H_
 
 #include "brig.h"
 #include "brig_buffer.h"
@@ -10,81 +8,92 @@
 // Not included in C++98
 #include <stdint.h>
 
+namespace llvm {
+class raw_ostream;
+}
+
 namespace hsa {
 namespace brig {
 
 class BrigFunction;
 
 class BrigModule {
+
   public:
-    BrigModule(const Buffer &strings,
-               const Buffer &directives,
-               const Buffer &code,
-               const Buffer &operands,
-               std::ostream *out) :
-      S_(reinterpret_cast<const char *>(&strings.get()[0]),
-         &directives.get()[0],
-         &code.get()[0],
-         &operands.get()[0],
-         strings.size(),
-         directives.size(),
-         code.size(),
-         operands.size()),
-      out(out),
-      valid(validate()) {}
 
-    bool isValid() { return valid; }
+  BrigModule(const Buffer &strings,
+             const Buffer &directives,
+             const Buffer &code,
+             const Buffer &operands,
+             llvm::raw_ostream *out) :
+    S_(reinterpret_cast<const char *>(&strings.get()[0]),
+       &directives.get()[0],
+       &code.get()[0],
+       &operands.get()[0],
+       strings.size(),
+       directives.size(),
+       code.size(),
+       operands.size()),
+    out_(out),
+    valid_(validate()) {}
 
-    BrigFunction begin() const;
-    BrigFunction end() const;
+  bool isValid() { return valid_; }
+
+  BrigFunction begin() const;
+  BrigFunction end() const;
 
   private:
-    template<class Message>
-    bool check(bool test, const Message &msg,
-               const char *filename, unsigned lineno,
-               const char *cause);
 
-    template<class Directive>
-    bool checkSize(const Directive *dir, const char *filename,
-                   unsigned lineno);
+  template<class Message>
+  bool check(bool test, const Message &msg,
+             const char *filename, unsigned lineno,
+             const char *cause) const;
 
-    bool validate(void);
-    bool validate(const BrigDirectiveFunction *dir);
-    bool validate(const BrigDirectiveKernel *dir);
-    bool validate(const BrigDirectiveSymbol *dir);
-    bool validate(const BrigDirectiveImage *dir);
-    bool validate(const BrigDirectiveSampler *dir);
-    bool validate(const BrigDirectiveLabel *dir);
-    bool validate(const BrigDirectiveLabelList *dir);
-    bool validate(const BrigDirectiveVersion *dir);
-    bool validate(const BrigDirectiveProto *dir);
-    bool validate(const BrigDirectiveFile *dir);
-    bool validate(const BrigDirectiveComment *dir);
-    bool validate(const BrigDirectiveLoc *dir);
-    bool validate(const BrigDirectiveInit *dir);
-    bool validate(const BrigDirectiveLabelInit *dir);
-    bool validate(const BrigDirectiveControl *dir);
-    bool validate(const BrigDirectivePragma *dir);
-    bool validate(const BrigDirectiveExtension *dir);
-    bool validate(const BrigDirectiveArgStart *dir);
-    bool validate(const BrigDirectiveArgEnd *dir);
-    bool validate(const BrigDirectiveBlockStart *dir);
-    bool validate(const BrigDirectiveBlockNumeric *dir);
-    bool validate(const BrigDirectiveBlockString *dir);
-    bool validate(const BrigDirectiveBlockEnd *dir);
-    bool validate(const BrigDirectivePad *dir);
+  bool validate(void) const;
+  bool validateDirectives(void) const;
+  bool validateStrings(void) const;
 
-    bool validate(const BrigSymbolCommon *s);
-    bool validateSName(BrigsOffset32_t s_name);
+  bool validate(const BrigDirectiveMethod *dir) const;
+  bool validate(const BrigDirectiveSymbol *dir) const;
+  bool validate(const BrigDirectiveImage *dir) const;
+  bool validate(const BrigDirectiveSampler *dir) const;
+  bool validate(const BrigDirectiveLabel *dir) const;
+  bool validate(const BrigDirectiveLabelList *dir) const;
+  bool validate(const BrigDirectiveVersion *dir) const;
+  bool validate(const BrigDirectiveProto *dir) const;
+  bool validate(const BrigDirectiveFile *dir) const;
+  bool validate(const BrigDirectiveComment *dir) const;
+  bool validate(const BrigDirectiveLoc *dir) const;
+  bool validate(const BrigDirectiveInit *dir) const;
+  bool validate(const BrigDirectiveLabelInit *dir) const;
+  bool validate(const BrigDirectiveControl *dir) const;
+  bool validate(const BrigDirectivePragma *dir) const;
+  bool validate(const BrigDirectiveExtension *dir) const;
+  bool validate(const BrigDirectiveArgStart *dir) const;
+  bool validate(const BrigDirectiveArgEnd *dir) const;
+  bool validate(const BrigDirectiveBlockStart *dir) const;
+  bool validate(const BrigDirectiveBlockNumeric *dir) const;
+  bool validate(const BrigDirectiveBlockString *dir) const;
+  bool validate(const BrigDirectiveBlockEnd *dir) const;
+  bool validate(const BrigDirectivePad *dir) const;
 
-    const BrigSections S_;
-    std::ostream *out;
-    const bool valid;
+  bool validate(const BrigSymbolCommon *s) const;
 
-    friend class BrigFunction;
+  bool validOrEnd(const dir_iterator dir) const;
+  bool validate(const dir_iterator dir) const;
+
+  bool validateCCode(BrigcOffset32_t c_code) const;
+  bool validateSName(BrigsOffset32_t s_name) const;
+  bool validateAlignment(const void *dir, uint8_t alignment) const;
+
+  const BrigSections S_;
+  llvm::raw_ostream *out_;
+  const bool valid_;
+
+  friend class BrigFunction;
 };
 
-}  // namespace brig
-}  // namespace hsa
+} // namespace brig
+} // namespace hsa
 
-#endif  // INCLUDE_BRIG_MODULE_H_
+#endif /* _BRIG_MODULE_H_ */

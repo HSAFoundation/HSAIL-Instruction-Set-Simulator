@@ -1,7 +1,5 @@
-// Copyright 2012 MulticoreWare Inc.
-
-#ifndef INCLUDE_BRIG_CONTROL_BLOCK_H_
-#define INCLUDE_BRIG_CONTROL_BLOCK_H_
+#ifndef _BRIG_CONTROL_BLOCK_H_
+#define _BRIG_CONTROL_BLOCK_H_
 
 #include "brig_util.h"
 
@@ -9,13 +7,16 @@ namespace hsa {
 namespace brig {
 
 class BrigFunction;
+class BrigInstHelper;
 
 class BrigControlBlock {
+
   public:
-    const char *getName() const {
-      if (const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_))
-        return S_.strings + label->s_name + 1;
-      return "";
+
+  const char *getName() const {
+    if(const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_))
+      return S_.strings + label->s_name + 1;
+    return "brig.init";
   }
 
   bool operator!=(const BrigControlBlock &other) const {
@@ -35,6 +36,10 @@ class BrigControlBlock {
     return other.begin();
   }
 
+  BrigInstHelper getInstHelper() const;
+
+  uint32_t getOffset() const { return it_ - S_.directives; }
+
   friend BrigControlBlock cb_begin(const BrigFunction &F);
   friend BrigControlBlock cb_end(const BrigFunction &F);
 
@@ -46,21 +51,17 @@ class BrigControlBlock {
     const BrigDirectiveFunction *fun = dyn_cast<BrigDirectiveFunction>(it_);
     const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_);
 
-    if (it_ == S_.end())
-      return S_.codeSize;
-    else if (fun)
-      return fun->c_code;
-    else if (label)
-      return label->c_code;
-    else
-      assert(false && "Bad control block");
+    if(it_ == S_.end()) return S_.codeSize;
+    else if(fun) return fun->c_code;
+    else if(label) return label->c_code;
+    else assert(false && "Bad control block");
   }
 
-  const BrigSections S_;
+  const BrigSections &S_;
   dir_iterator it_;
 };
 
-}  // namespace brig
-}  // namespace hsa
+} // namespace brig
+} // namespace hsa
 
-#endif  // INCLUDE_BRIG_CONTROL_BLOCK_H_
+#endif /* _BRIG_CONTROL_BLOCK_H_ */

@@ -15,7 +15,7 @@ namespace brig {
       er = new ErrorReporter();
 
     return er;
-  };
+  }
 
   void ErrorReporter::report_error(error_code_t ErrorCode,
                                    unsigned int LineNo,
@@ -25,7 +25,7 @@ namespace brig {
       std::cerr << " (" <<  LineNo << ", " << ColNo << ") : ";
       std::cerr << translate_error(ErrorCode) << std::endl;
     }
-  };
+  }
 
   ErrorReporter::ErrorReporter() {
     display = true;
