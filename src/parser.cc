@@ -6066,5 +6066,8 @@ int SequenceOfPrograms(Context *context){
   return 0;
 }
 
+int PairAddressableOperand(Context* context) {
+  return 1;
+}
 }  // namespace brig
 }  // namespace hsa
