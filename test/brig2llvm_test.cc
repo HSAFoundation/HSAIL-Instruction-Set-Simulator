@@ -2231,3 +2231,136 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
     "Directive size too small for elementCount")));
   }
 }
+
+TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigDirectiveProto::BrigProtoType args[] = {
+      // type, align, hasDim, dim
+      {Brigu32, 1, 0, 0},
+      {Brigu32, 1, 0, 0}
+    };
+    appendBrigDirectiveProto(directives,
+                             0,  // c_code
+                             0,  // s_name
+                             0,  // fbarCount
+                             0,  // reserved
+                             1,  // outCount
+                             1,  // inCount
+                             &args[0],
+                             &args[2]);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigDirectiveProto::BrigProtoType args[] = {
+      // type, align, hasDim, dim
+      {Brigu32, 1, 0, 0},
+      {Brigu32, 1, 0, 0}
+    };
+    appendBrigDirectiveProto(directives,
+                             20,  // c_code
+                             0,  // s_name
+                             0,  // fbarCount
+                             1,  // reserved
+                             1,  // outCount
+                             1,  // inCount
+                             &args[0],
+                             &args[2]);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "c_code past the code section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "s_name past the strings section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Reserved not zero")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&get_global_id"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigDirectiveProto::BrigProtoType args[] = {
+      // type, align, hasDim, dim
+      {Brigf64x2 + 1, 1, 0, 0},
+      {Brigf64x2, 1, 1, 0}
+    };
+    appendBrigDirectiveProto(directives,
+                             0,  // c_code
+                             0,  // s_name
+                             0,  // fbarCount
+                             0,  // reserved
+                             1,  // outCount
+                             1,  // inCount
+                             &args[0],
+                             &args[2]);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "dimension not set when hasDim is 1")));
+  }
+}
