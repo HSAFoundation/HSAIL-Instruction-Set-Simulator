@@ -126,7 +126,7 @@ TEST(ParserTest, ArrayOperandList) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("($d4, &global_id, %local_id) \n");
+  std::string input("($d4, $d3, $d2,$d1) \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArrayOperandList(context));
@@ -2784,7 +2784,7 @@ TEST(ParserTest, MemoryOperand) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
 
-  input.assign("[%local_id<$d7>][$s1 + 0xf7]");
+  input.assign("[%local_id][$s1 + 0xf7]");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
