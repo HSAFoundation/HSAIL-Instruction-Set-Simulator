@@ -893,6 +893,27 @@ struct BrigOperandCompound {
   int32_t offset;
 };
 
+// BrigOperandRegV2
+// BrigOperandRegV2 is used for certain memory operations 
+// to allow vector register forms.
+struct BrigOperandRegV2 {
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t regs[2];
+};
+
+// BrigOperandRegV4
+// BrigOperandRegV4 is used for certain memory operations 
+// to allow vector register forms.
+struct BrigOperandRegV4 {
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t regs[4];
+};
 
 
 #endif  // INCLUDE_BRIG_H_
