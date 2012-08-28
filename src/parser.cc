@@ -6215,7 +6215,7 @@ int TopLevelStatement(Context *context){
 
 int TopLevelStatements(Context *context){
  while (context->token_to_scan &&
-        (context->token_to_scan != VERSION)){
+         (context->token_to_scan != VERSION)){
     if (!TopLevelStatement(context))
       continue ;
     else
