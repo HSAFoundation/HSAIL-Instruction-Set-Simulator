@@ -39,6 +39,7 @@ bool (BrigModule::check)(bool test, const Message &msg,
 bool BrigModule::validate(void) const {
   bool valid = true;
   valid &= validateDirectives();
+  valid &= validateCode();
   valid &= validateStrings();
   return valid;
 }
@@ -92,6 +93,32 @@ bool BrigModule::validateDirectives(void) const {
       caseBrig(DirectivePad);
     default: check(false, "Unrecognized directive");
     }
+  }
+
+  return true;
+}
+
+bool BrigModule::validateCode(void) const {
+
+  inst_iterator it = S_.code_begin();
+  const inst_iterator E = S_.code_end();
+  
+  for(; it != E; it++) {
+    if(!validate(it)) return false;
+    switch(it->kind) {
+      caseBrig(InstAtomic);
+      caseBrig(InstAtomicImage);
+      caseBrig(InstBar);
+      caseBrig(InstBase);
+      caseBrig(InstCmp);
+      caseBrig(InstImage);
+      caseBrig(InstCvt);
+      caseBrig(InstLdSt);
+      caseBrig(InstMem);
+      caseBrig(InstMod);
+      caseBrig(InstRead);
+      default: check(false, "Unrecognized code");
+    } 
   }
 
 #undef caseBrig
@@ -471,6 +498,36 @@ bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) const {
                  "Improperly aligned directive");
   return valid;
 }
+
+// validating the code section
+bool BrigModule::validate(const BrigInstAtomic *code) const { return true; }
+bool BrigModule::validate(const BrigInstAtomicImage *code) const { return true; }
+bool BrigModule::validate(const BrigInstBar *code) const { return true; }
+
+bool BrigModule::validate(const BrigInstBase *code) const {
+  bool valid = true;
+  valid &= check(code->opcode <= BrigFbarInitSizeKnown,
+                 "Invalid opcode");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  valid &= check(code->packing <= BrigPackPsat,
+                 "Invalid packing control");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                   "o_operands past the operands section");
+    }
+  }
+  return valid;
+}
+
+bool BrigModule::validate(const BrigInstCmp *code) const { return true; }
+bool BrigModule::validate(const BrigInstImage *code) const { return true; }
+bool BrigModule::validate(const BrigInstCvt *code) const { return true; }
+bool BrigModule::validate(const BrigInstLdSt *code) const { return true; }
+bool BrigModule::validate(const BrigInstMem *code) const { return true; }
+bool BrigModule::validate(const BrigInstMod *code) const { return true; }
+bool BrigModule::validate(const BrigInstRead *code) const { return true; }
 
 } // namespace brig
 } // namespace hsa

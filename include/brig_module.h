@@ -51,6 +51,7 @@ class BrigModule {
 
   bool validate(void) const;
   bool validateDirectives(void) const;
+  bool validateCode(void) const;
   bool validateStrings(void) const;
 
   bool validate(const BrigDirectiveMethod *dir) const;
@@ -78,6 +79,18 @@ class BrigModule {
   bool validate(const BrigDirectivePad *dir) const;
 
   bool validate(const BrigSymbolCommon *s) const;
+
+  bool validate(const BrigInstAtomic *code) const;
+  bool validate(const BrigInstAtomicImage *code) const;
+  bool validate(const BrigInstBar *code) const;
+  bool validate(const BrigInstBase *code) const;
+  bool validate(const BrigInstCmp *code) const;
+  bool validate(const BrigInstImage *code) const;
+  bool validate(const BrigInstCvt *code) const;
+  bool validate(const BrigInstLdSt *code) const;
+  bool validate(const BrigInstMem *code) const;
+  bool validate(const BrigInstMod *code) const;
+  bool validate(const BrigInstRead *code) const;
 
   bool validOrEnd(const dir_iterator dir) const;
   bool validate(const dir_iterator dir) const;

@@ -189,6 +189,8 @@ struct BrigSections {
   dir_iterator end() const {
     return dir_iterator(directives + directivesSize);
   };
+  inst_iterator code_begin() const { return inst_iterator(code); };
+  inst_iterator code_end() const { return inst_iterator(code + codeSize); };
 };
 
 } // namespace brig
