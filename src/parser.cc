@@ -3259,7 +3259,7 @@ int GlobalPrivateDecl(Context* context) {
   return 1;
 }
 
-int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset) {
+int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset) {
 
     std::string operand_name;
     // if the value of addrOpOffset is ZERO,
@@ -3416,6 +3416,12 @@ int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset) {
   
   return 1;
 }
+
+int OffsetAddressableOperand(Context* context){
+
+	return OffsetAddressableOperandPart2(context, 0);
+}
+
 int MemoryOperand(Context* context) {
   // this judge(first token == '[') is necessary in here
   if (context->token_to_scan == '[') {
@@ -3452,7 +3458,7 @@ int MemoryOperand(Context* context) {
       }
       if (context->token_to_scan == '[') {
         context->token_to_scan = yylex();
-        if (!OffsetAddressableOperand(context, CurrentoOffset)) {
+        if (!OffsetAddressableOperandPart2(context, CurrentoOffset)) {
           // Global/Local Identifier with offsetAddressOperand.
           return 0;
         }
@@ -3461,7 +3467,7 @@ int MemoryOperand(Context* context) {
       return 0;
     } else if (!AddressableOperand(context)) {
       return 0;
-    } else if (!OffsetAddressableOperand(context, 0)) {
+    } else if (!OffsetAddressableOperandPart2(context, 0)) {
       return 0;
     }  // Global/Local Identifier/AddressableOperand/offsetAddressableOperand 
   }  // '['
@@ -4057,7 +4063,7 @@ int Mul(Context* context) {
   return 1;
 }
 
-int LdModifier(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
+int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
   while (1) {
     if (context->token_type == VECTOR) {
       switch (context->token_to_scan) {
@@ -4150,6 +4156,22 @@ int LdModifier(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
   return 1;
 }
 
+int LdModifier(Context *context){
+ BrigInstLdSt ld_op = {
+    sizeof(BrigInstLdSt),     // size
+    BrigEInstLdSt,            // kind
+    BrigLd,                   // opcode
+    Brigb32,                  // type
+    BrigNoPacking,            // packing
+    {0, 0, 0, 0, 0},          // operand[5]
+    BrigFlatSpace,            // storageClass
+    BrigRegular,              // memorySemantic
+    0                         // equivClass
+  };
+  int vector_size = 0;
+  return LdModifierPart2(context, &ld_op, &vector_size);
+}
+
 int Ld(Context* context) {
   // first token is LD
   BrigInstLdSt ld_op = {
@@ -4173,7 +4195,7 @@ int Ld(Context* context) {
       return 1;
     }
   }
-  if (!LdModifier(context, &ld_op, &vector_size)) {
+  if (!LdModifierPart2(context, &ld_op, &vector_size)) {
   } else {
     context->set_error(UNKNOWN_ERROR);
     return 1;
@@ -4244,7 +4266,7 @@ int St(Context* context) {
   int vector_size = 0;
   context->token_to_scan = yylex();
 
-  if (!LdModifier(context, &st_op, &vector_size)) {
+  if (!LdModifierPart2(context, &st_op, &vector_size)) {
   } else {
     context->set_error(UNKNOWN_ERROR);
     return 1;
@@ -6187,7 +6209,7 @@ int PairAddressableOperand(Context* context) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == '[') {
           context->token_to_scan = yylex();
-          if (!OffsetAddressableOperand(context, CurrentoOffset)) {
+          if (!OffsetAddressableOperandPart2(context, CurrentoOffset)) {
             // Global/Local Identifier with offsetAddressOperand.
             return 0;
           } else {

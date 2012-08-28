@@ -41,7 +41,6 @@ int CallArgs(Context* context);
 int Call(Context* context);
 int Initializer(Context* context);
 int InitializableDecl(Context* context);
-int InitializableDeclPart2(Context* context, BrigStorageClass32_t storage_class);
 int UninitializableDecl(Context* context);
 int ArgUninitializableDecl(Context* context);
 int VectorToken(Context *context);
@@ -56,7 +55,6 @@ int Kernel(Context *context);
 int OperandList(Context* context);
 int Cmp(Context* context);
 int GlobalPrivateDecl(Context* context);
-int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset);
 int MemoryOperand(Context* context);
 int Ldc(Context* context);
 int Instruction5(Context* context);
@@ -71,15 +69,14 @@ int RIW_Operand(Context* context);
 int BodyStatementNested(Context* context);
 int ArgStatement(Context* context);
 int ArgStatements(Context* context);
-
 int GlobalGroupDecl(Context* context);
+
 /* MUL */
 int Mul(Context* context);
 int MulInst(Context* context);
 int Mul24Inst(Context* context);
 int Mad24Inst(Context* context);
 int Ld(Context* context);
-int LdModifier(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int St(Context* context);
 int Lda(Context* context);
 int ImageRet(Context* context);
@@ -90,11 +87,9 @@ int ImageStore(Context* context);
 
 int SingleListSingle(Context *context);
 int GlobalImageDecl(Context *context);
-int GlobalImageDeclPart2(Context *context);
 int ImageInitializer(Context *context);
 int ImageInit(Context *context);
 int GlobalReadOnlyImageDecl(Context *context);
-int GlobalReadOnlyImageDeclPart2(Context *context);
 int Ret(Context *context);
 int ImageRead(Context *context);
 int Sync(Context *context);
@@ -110,19 +105,25 @@ int FloatListSingle(Context* context);
 int GlobalSymbolDecl(Context* context);
 int Directive(Context* context);
 int LabelList(Context* context);
-
 int SobInit(Context *context);
 int SobInitializer(Context *context);
 int GlobalSamplerDecl(Context *context);
-int GlobalSamplerDeclPart2(Context *context);
 int GlobalDecl(Context *context);
-int GlobalInitializablePart2(Context* context);
 int GlobalInitializable(Context* context);
-
 int SequenceOfPrograms(Context *context);
 int PairAddressableOperand(Context *context);
 int LdaMod(Context *context);
+int OffsetAddressableOperand(Context* context);
+int LdModifier(Context* context);
 
+//Declarations of Helper Functions 
+int GlobalImageDeclPart2(Context *context);
+int GlobalReadOnlyImageDeclPart2(Context *context);
+int GlobalInitializablePart2(Context* context);
+int GlobalSamplerDeclPart2(Context *context);
+int InitializableDeclPart2(Context* context, BrigStorageClass32_t storage_class);
+int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset);
+int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
