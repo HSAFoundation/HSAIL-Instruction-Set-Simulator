@@ -6177,6 +6177,8 @@ int PairAddressableOperand(Context* context) {
   }
   return 1;
 }
-
+int TopLevelStatement(Context *context){
+  return 1;
+}
 }  // namespace brig
 }  // namespace hsa
