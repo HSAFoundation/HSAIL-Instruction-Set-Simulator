@@ -4185,8 +4185,6 @@ int Ld(Context* context) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == '(') {
       ld_op.o_operands[1] = context->get_operand_offset();
-      // TODO(Chuang): When the operand is a list.
-      // ArrayOperandList generate the .Operand brig.
       if (!ArrayOperandList(context)) {
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
@@ -4258,8 +4256,6 @@ int St(Context* context) {
     if (context->token_to_scan == '(') {  
       st_op.o_operands[0] = context->get_operand_offset();
 
-      // TODO(Chuang): When the operand is a list.
-      // ArrayOperandList generate the .Operand brig.
       if (!ArrayOperandList(context)) {
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
@@ -4277,9 +4273,6 @@ int St(Context* context) {
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
       st_op.o_operands[1] = context->get_operand_offset();
-
-      // TODO(Chuang): When the operand is a operation.
-      // MemoryOperand generate the .Operand brig.
       if (!MemoryOperand(context)) {
         if (context->token_to_scan == ';') {
           context->token_to_scan = yylex();

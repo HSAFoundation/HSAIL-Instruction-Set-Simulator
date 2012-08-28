@@ -1681,10 +1681,10 @@ TEST(ParserTest, Ldc) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ldc(context));
 
-  input.assign("ldc_b64 $s2, %label;");  // identifier
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Ldc(context));
+  // input.assign("ldc_b64 $s2, %label;");  // identifier
+  // lexer->set_source_string(input);
+  // context->token_to_scan = lexer->get_next_token();
+  // EXPECT_EQ(0, Ldc(context));
 
   // wrong cases
   input.assign("ldc_b64 $s1, &some_function");  // lack of ';'
