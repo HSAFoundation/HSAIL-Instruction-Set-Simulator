@@ -6178,6 +6178,33 @@ int PairAddressableOperand(Context* context) {
   return 1;
 }
 int TopLevelStatement(Context *context){
+  if(!Directive(context)) {
+    return 0 ;
+  }else if(KERNEL == context->token_to_scan) {
+    return Kernel(context) ;
+  }else if(SIGNATURE == context->token_to_scan){
+    return GlobalDecl(context) ;
+  }else if ( (context->token_to_scan == ALIGN) ||
+             (context->token_to_scan == CONST) ||
+             (context->token_to_scan == EXTERN) ||
+             (context->token_to_scan == STATIC) ) {
+    if(DeclPrefix(context)){
+        return 1;
+    }
+  }
+  
+  if (FUNCTION != context->token_to_scan){
+    return  GlobalDecl(context);
+  } else {
+    if (!FunctionDefinition(context)){
+      if (';' == context->token_to_scan){
+        context->token_to_scan = yylex();
+        return 0;
+      }else if('{' == context->token_to_scan){
+        return Functionpart2(context);
+      }
+    }
+  }
   return 1;
 }
 }  // namespace brig
