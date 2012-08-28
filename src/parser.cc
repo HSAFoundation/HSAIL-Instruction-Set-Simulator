@@ -6214,7 +6214,13 @@ int TopLevelStatement(Context *context){
 }
 
 int TopLevelStatements(Context *context){
-  return 1;
+ while (context->token_to_scan &&
+        (context->token_to_scan != VERSION)){
+    if (!TopLevelStatement(context))
+      continue ;
+    else
+      return 1;
+  }
 }  
 
 }  // namespace brig
