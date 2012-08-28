@@ -51,7 +51,9 @@ enum error_code_t {
   INVALID_OPERATION = 33,
   INVALID_IMAGE_INIT = 34,
   INVALID_SECTION_ITEM = 35,
-  INVALID_PROGRAM = 47,
+  INVALID_PROGRAM = 48,
+  INVALID_WIDTH_NUMBER = 49,
+
   // missing part
   MISSING_VERSION_STATEMENT = 36,
   MISSING_WIDTH_INFO = 37,
@@ -162,7 +164,10 @@ class ErrorReporterInterface {
           return std::string("Invalid image initializer.");
         case INVALID_SECTION_ITEM:
           return std::string("Invalid item.");
-
+        case INVALID_PROGRAM:
+          return std::string("Invalid program.");
+        case INVALID_WIDTH_NUMBER:
+          return std::string("Invalid width number(1<= n <=1024 and n being a power of 2).");
 
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");

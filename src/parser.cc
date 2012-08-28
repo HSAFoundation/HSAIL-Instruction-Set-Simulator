@@ -2171,7 +2171,11 @@ int OptionalWidth(Context* context) {
 
         context->token_to_scan = yylex();
       } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        op_width.bits.u  = context->token_value.int_val;
+        uint32_t n = context->token_value.int_val;
+        if((1<= n <= 1024) && ((n&0x01) == 0))
+          op_width.bits.u  = n ;
+        else
+          context->set_error(INVALID_WIDTH_NUMBER);
 
         context->token_to_scan = yylex();
       } else {
