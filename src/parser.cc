@@ -1982,16 +1982,21 @@ int Codeblock(Context* context) {
   }
   return 1;
 }
-
+int Functionpart2(Context *context){
+  if (!Codeblock(context)){
+    if (';' == context->token_to_scan){
+      context->token_to_scan = yylex();
+      return 0;
+    } else {
+      context->set_error(MISSING_SEMICOLON);
+    }
+  }
+  return 1;
+}
 int Function(Context* context) {
   if (!FunctionDefinition(context)) {
-    if (!Codeblock(context)) {
-      if (context->token_to_scan == ';') {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
+    if (!Functionpart2(context)) {
+      return 0;
     } else {
       context->set_error(INVALID_CODEBLOCK);
     }
@@ -6177,6 +6182,7 @@ int PairAddressableOperand(Context* context) {
   }
   return 1;
 }
+
 int TopLevelStatement(Context *context){
   if(!Directive(context)) {
     return 0 ;
