@@ -6162,7 +6162,10 @@ int PairAddressableOperand(Context* context) {
 }
 
 int LdaMod(Context* context) {
-  return 1;
+  if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+    return 0;
+  }
+  return 0;
 }
 
 }  // namespace brig
