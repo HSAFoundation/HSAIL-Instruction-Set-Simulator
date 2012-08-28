@@ -5737,20 +5737,24 @@ int Block(Context* context) {
   }
 }
 
+int GlobalSymbolDeclpart2(Context* context) {
+  if (context->token_to_scan == GROUP) 
+    return (GlobalGroupDecl(context));
+  else if (context->token_to_scan == PRIVATE) 
+    return(GlobalPrivateDecl(context));
+  else {
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  return 1;
+}
 
 int GlobalSymbolDecl(Context* context) {
   if (!DeclPrefix(context)) {
-    if (context->token_to_scan == GROUP) 
-      return (GlobalGroupDecl(context));
-    else if (context->token_to_scan == PRIVATE) 
-      return(GlobalPrivateDecl(context));
-	else {
-		context->set_error(MISSING_IDENTIFIER);
-		return 1;
-	}
+    return GlobalSymbolDeclpart2(context);
   } else{
-	context->set_error(MISSING_DECLPREFIX);
-	return 1;
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
   }
 }
 
@@ -5863,7 +5867,7 @@ int GlobalSamplerDecl(Context *context){
 }	
 
 int GlobalSamplerDeclPart2(Context *context){	
-  //First token has already been verified as GLOBAL
+  // First token has already been verified as GLOBAL
 	
   if (_SAMP == context->token_to_scan){ 
     context->token_to_scan = yylex();
@@ -5878,7 +5882,7 @@ int GlobalSamplerDeclPart2(Context *context){
             } else {
               context->set_error(MISSING_SEMICOLON);
             }
-          } else {//end for =
+          } else {// end for =
             if (';' == context->token_to_scan){
               context->token_to_scan = yylex();
               return 0 ;
@@ -5887,8 +5891,8 @@ int GlobalSamplerDeclPart2(Context *context){
             }
           }
         }
-      } else if ('=' == context->token_to_scan){//end for [
-        if (!SobInitializer(context)){       //no arraydimensions
+      } else if ('=' == context->token_to_scan){// end for [
+        if (!SobInitializer(context)){       // no arraydimensions
           if (';' == context->token_to_scan){
             context->token_to_scan = yylex();
             return 0 ;
@@ -5896,7 +5900,7 @@ int GlobalSamplerDeclPart2(Context *context){
             context->set_error(MISSING_SEMICOLON);
           }
         } 
-      } else if (';' == context->token_to_scan){ //no arrayDimensions and imageInitializer
+      } else if (';' == context->token_to_scan){ // no arrayDimensions and imageInitializer
         context->token_to_scan = yylex();
         return 0 ;
       } else{
@@ -5924,7 +5928,7 @@ int GlobalInitializablePart2(Context* context){
       default:
         if (context->token_type==DATA_TYPE_ID)
           return (InitializableDeclPart2(context, storage_class));
-        else{	
+        else {	
           context->set_error(MISSING_IDENTIFIER);
           return 1;
         }
@@ -5946,18 +5950,24 @@ int GlobalInitializable(Context* context){
   }
 }
 
+int GlobalDeclpart2(Context *context){
+  // the header is declPrefix
+  if(FUNCTION == context->token_to_scan){
+    return FunctionDecl(context);
+  } else if (!GlobalInitializablePart2(context)){
+    return 0;
+  } else if (!GlobalSymbolDeclpart2(context)){
+    return 0;
+  }
+  return 1;
+} 
+
 int GlobalDecl(Context *context){
   
-  if (SIGNATURE == context->token_to_scan){ //functionSignature 
+  if (SIGNATURE == context->token_to_scan){ // functionSignature 
     return FunctionSignature(context);
   } else if (!DeclPrefix(context)){
-    if(FUNCTION == context->token_to_scan){
-      return FunctionDecl(context);
-    } else if (!GlobalInitializablePart2(context)){
-    return 0;
-    } else if (!GlobalSymbolDecl(context)){
-      return 0;
-    }
+    return GlobalDeclpart2(context);
   } else {
     context->set_error(MISSING_IDENTIFIER);
   }
@@ -6050,9 +6060,11 @@ int TopLevelStatement(Context *context){
   }
   
   if (FUNCTION != context->token_to_scan){
-    return  GlobalDecl(context);
+    return  GlobalDeclpart2(context);
   } else {
     if (!FunctionDefinition(context)){
+     // TODO bug(xiaopeng) always call functionDefinition
+     // functionDecl will be not called 
       if (';' == context->token_to_scan){
         context->token_to_scan = yylex();
         return 0;
