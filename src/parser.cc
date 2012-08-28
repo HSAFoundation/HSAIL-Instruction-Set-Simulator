@@ -4293,16 +4293,58 @@ int Lda(Context* context) {
   // first token is LDA
   context->token_to_scan = yylex();
 
+  BrigInstMem lda_op = {
+    36,                    // size
+    BrigEInstMem,          // kind
+    BrigLda,               // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0},       // o_operands[5]
+    BrigFlatSpace          // storageClass
+  };
+
   if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+    switch (context->token_to_scan) {
+      case _GLOBAL:
+        lda_op.storageClass = BrigGlobalSpace;
+        break;
+      case _GROUP:
+        lda_op.storageClass = BrigGroupSpace;
+        break;
+      case _PRIVATE:
+        lda_op.storageClass = BrigPrivateSpace;
+        break;
+      case _KERNARG:
+        lda_op.storageClass = BrigKernargSpace;
+        break;
+      case _READONLY:
+        lda_op.storageClass = BrigReadonlySpace;
+        break;
+      case _SPILL:
+        lda_op.storageClass = BrigSpillSpace;
+        break;
+      case _ARG:
+        lda_op.storageClass = BrigArgSpace;
+        break;
+      default:
+        lda_op.storageClass = BrigFlatSpace;
+    }
     context->token_to_scan = yylex();
   }
   if (context->token_type == DATA_TYPE_ID) {
+    lda_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
+    
+    std::string oper_name = context->token_value.string_val;
+    
     if (!Operand(context)) {
+      lda_op.o_operands[0] = context->operand_map[oper_name];
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
+        lda_op.o_operands[1] = context->get_operand_offset();
         if (!MemoryOperand(context)) {
           if (context->token_to_scan == ';') {
+            context->append_code(&lda_op);
             context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
