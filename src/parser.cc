@@ -1516,7 +1516,7 @@ int FunctionDefinition(Context* context) {
   return 1;
 }
 
-int FunctionDecl(Context* context) {
+int FunctionDeclpart1(Context* context) {
   if (!DeclPrefix(context)) {
     if (context->token_to_scan == FUNCTION) {
       context->token_to_scan = yylex();
@@ -1569,22 +1569,35 @@ int FunctionDecl(Context* context) {
         // check for optional FBar
         if (context->token_to_scan == _FBAR) {
           if (!FBar(context)) {
+            return 0;
           } else {
             context->set_error(INVALID_FBAR);
           }
         }
-        if (context->token_to_scan == ';') {
+	/* if (context->token_to_scan == ';') {
           context->token_to_scan = yylex();
           return 0;
         } else {
           context->set_error(MISSING_SEMICOLON);
-        }
+	}
+       */
       } else {
         context->set_error(MISSING_IDENTIFIER);
       }
     }
   } else {
     context->set_error(MISSING_DECLPREFIX);
+  }
+  return 1;
+}
+int FunctionDecl(Context *context){
+  if (!FunctionDeclpart1(context)){
+    if (';' == context->token_to_scan){
+      context->token_to_scan = yylex();
+      return 0 ;
+    } else {
+      context->set_error(MISSING_IDENTIFIER);
+    }
   }
   return 1;
 }
