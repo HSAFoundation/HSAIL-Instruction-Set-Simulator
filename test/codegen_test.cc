@@ -3333,7 +3333,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb32, getAddr.type);
-  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
   // BrigOperandReg
@@ -3468,7 +3468,7 @@ TEST(CodegenTest, PairAddressableOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb32, getAddr.type);
-  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
   // BrigOperandReg
@@ -3489,6 +3489,67 @@ TEST(CodegenTest, PairAddressableOperand_CodeGen_SimpleTest) {
   delete lexer;
 };
 
+TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("lda_group_b32 $s1, [%loc];\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  BrigInstMem ref = {
+    36,                    // size
+    BrigEInstMem,           // kind
+    BrigLda,               // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {8, 20, 0, 0, 0},      // o_operands[5]
+    BrigGroupSpace         // storageClass
+  };
+  BrigInstMem getMem;
+  BrigOperandReg getReg;
+  BrigOperandAddress getAddr;
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  context->add_symbol("%loc");
+
+  EXPECT_EQ(0, Lda(context)); 
+
+  context->get_operand(8, &getReg);
+  context->get_operand(20, &getAddr);
+  context->get_code(0, &getMem);
+  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(5, getReg.name);  
+  // BrigOperandAddress
+  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
+  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(0, getAddr.reserved);
+  EXPECT_EQ(0, getAddr.directive);
+  EXPECT_EQ(0, getAddr.offset);
+
+  // BrigInstMem
+  EXPECT_EQ(ref.size, getMem.size);
+  EXPECT_EQ(ref.kind, getMem.kind);
+  EXPECT_EQ(ref.opcode, getMem.opcode);
+  EXPECT_EQ(ref.type, getMem.type);
+  EXPECT_EQ(ref.packing, getMem.packing);
+
+  EXPECT_EQ(ref.o_operands[0], getMem.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getMem.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getMem.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getMem.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getMem.o_operands[4]);
+  EXPECT_EQ(ref.storageClass, getMem.storageClass);
+
+  delete lexer;
+};
 
 
 }  // namespace brig

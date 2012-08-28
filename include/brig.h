@@ -914,5 +914,19 @@ struct BrigOperandRegV4 {
   BrigoOffset32_t regs[4];
 };
 
+// BrigInstMem
+// The BrigInstMem format is used for operations 
+// that take a space modifier. 
+struct BrigInstMem {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigStorageClass32_t storageClass;
+};
+
+
 
 #endif  // INCLUDE_BRIG_H_
