@@ -3554,15 +3554,31 @@ int Ldc(Context* context) {
   // first token is LDC "ldc"
   context->token_to_scan = yylex();
 
+  BrigInstBase ldc_op = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigLdc,               // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}       // o_operands[5]
+  };
+
   if (context->token_type == DATA_TYPE_ID) {
+    ldc_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
+    std::string oper_name = context->token_value.string_val;
     if (!Operand(context)) {
+      ldc_op.o_operands[0] = context->operand_map[oper_name];
       if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
+        context->token_to_scan = yylex();        
+        // op[1] must be BrigEOperandLabelRef or BrigEOperandFunctionRef
         if (context->token_to_scan == TOKEN_LABEL ||
-           !Identifier(context)) {
+            context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+          oper_name = context->token_value.string_val;
+          ldc_op.o_operands[1] = context->operand_map[oper_name];
           context->token_to_scan = yylex();
           if (context->token_to_scan == ';') {
+            context->append_code(&ldc_op);
             context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
