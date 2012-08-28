@@ -6213,5 +6213,9 @@ int TopLevelStatement(Context *context){
   return 1;
 }
 
+int TopLevelStatements(Context *context){
+  return 1;
+}  
+
 }  // namespace brig
 }  // namespace hsa

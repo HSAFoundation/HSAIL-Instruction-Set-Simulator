@@ -122,6 +122,7 @@ int GlobalInitializable(Context* context);
 int SequenceOfPrograms(Context *context);
 int PairAddressableOperand(Context *context);
 int TopLevelStatement(Context *context);
+int TopLevelStatements(Context *context);
 
 }  // namespace brig
 }  // namespace hsa

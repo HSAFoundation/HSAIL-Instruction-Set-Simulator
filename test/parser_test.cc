@@ -4431,6 +4431,7 @@ TEST(ParserTest, PairAddressableOperandTest) {
 
   delete lexer;
 }
+
 TEST(ParserTest, TopLevelStatement) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -4463,7 +4464,47 @@ TEST(ParserTest, TopLevelStatement) {
   EXPECT_EQ(0, TopLevelStatement(context));
 
   delete lexer;
-}
+};
+
+TEST(ParserTest, TopLevelStatements) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("block \"rti\"\n"); // block
+  input.append("blockstring \"meta info about this function\";\n");
+  input.append("endblock;\n");
+
+  input.append("function &abort() (); \n");
+  input.append("const  extern private_b32 &tmp[2];\n");
+  input.append("function &get_global_id(arg_u32 %ret_val)\n");
+  input.append(" (arg_u32 %arg_val0){\n");
+  input.append("private_u32 %x ; \n");
+  input.append(" ret ;}; \n");
+
+  input.append("kernel &demo(kernarg_f32 %x) { \n");
+  input.append("private_u32 %z; \n");
+  input.append("ret; \n");
+  input.append("};\n");
+  input.append("\n");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, TopLevelStatements(context));
+
+  input.assign("kernel &demo(kernarg_f32 %x) { \n");
+  input.append("private_u32 %z; \n");
+  input.append("ret; \n");
+  input.append("};\n");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, TopLevelStatements(context));
+
+  delete lexer;
+};
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
