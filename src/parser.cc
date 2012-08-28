@@ -6161,5 +6161,9 @@ int PairAddressableOperand(Context* context) {
   return 1;
 }
 
+int LdaMod(Context* context) {
+  return 1;
+}
+
 }  // namespace brig
 }  // namespace hsa

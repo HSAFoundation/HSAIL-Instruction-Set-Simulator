@@ -4432,6 +4432,24 @@ TEST(ParserTest, PairAddressableOperandTest) {
   delete lexer;
 }
 
+TEST(ParserTest, LdaModTest) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input(" ");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, LdaMod(context));
+
+  input.assign("_spill\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, LdaMod(context));
+  delete lexer;
+}
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
