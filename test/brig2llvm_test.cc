@@ -2058,6 +2058,11 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0
     };
     directives.append(&bdv);
+    BrigDirectivePad bdp = {
+      sizeof(bdp),
+      BrigEDirectivePad
+    };
+    directives.append(&bdp);
 
     //BrigDirectiveInit::initializationData type:uint8_t
     uint8_t values[16] = {
@@ -2132,6 +2137,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Improperly aligned directive")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Reserved not zero")));
   }
   {
@@ -2150,6 +2157,11 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0
     };
     directives.append(&bdv);
+    BrigDirectivePad bdp = {
+      sizeof(bdp),
+      BrigEDirectivePad
+    };
+    directives.append(&bdp);
 
     //BrigDirectiveInit::initializationData type:uint8_t
     uint8_t values[16] = {
@@ -2198,6 +2210,11 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0
     };
     directives.append(&bdv);
+    BrigDirectivePad bdp = {
+      sizeof(bdp),
+      BrigEDirectivePad
+    };
+    directives.append(&bdp);
 
     //BrigDirectiveInit::initializationData type:uint8_t
     uint8_t values[16] = {

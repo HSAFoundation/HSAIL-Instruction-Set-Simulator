@@ -257,6 +257,7 @@ bool BrigModule::validate(const BrigDirectiveFile *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveComment *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
@@ -264,12 +265,14 @@ bool BrigModule::validate(const BrigDirectiveComment *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveLoc *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveInit *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 8);
   valid &= check(!dir->reserved, "Reserved not zero");
   valid &= check(Brigb1 == dir->type  || Brigb8 == dir->type  ||
                  Brigb16 == dir->type || Brigb32 == dir->type ||
@@ -300,12 +303,14 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveControl *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectivePragma *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
@@ -313,6 +318,7 @@ bool BrigModule::validate(const BrigDirectivePragma *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveExtension *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
@@ -320,12 +326,14 @@ bool BrigModule::validate(const BrigDirectiveExtension *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveArgStart *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveArgEnd *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
 }
