@@ -4041,17 +4041,25 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
       continue;
     }
 
-    if (context->token_to_scan == _REL ||
-        context->token_to_scan == _ACQ ||
-        context->token_to_scan == _DEP) {
+    if (context->token_to_scan == _REL) {
+      pLdSt_op->memorySemantic = BrigRelease;
+      context->token_to_scan = yylex();
+      continue;
+    }
+    if (context->token_to_scan == _ACQ) {
+      pLdSt_op->memorySemantic = BrigAcquire;
+      context->token_to_scan = yylex();
+      continue;
+    }
+    if (context->token_to_scan == _DEP) {
+      pLdSt_op->memorySemantic = BrigDep;
+      context->token_to_scan = yylex();
+      continue;
+    }
 
-      if (pLdSt_op->memorySemantic == _ACQ && 
-          context->token_to_scan == _REL) {
-        pLdSt_op->memorySemantic = BrigAcquireRelease;
-      } else {
-        pLdSt_op->memorySemantic = context->token_to_scan;
-      }
-
+    if (context->token_to_scan == _REGION) {
+      // TODO(Chuang) need to check "_region" out again.
+      pLdSt_op->memorySemantic = BrigRegular;
       context->token_to_scan = yylex();
       continue;
     }

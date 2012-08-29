@@ -3508,7 +3508,7 @@ TEST(ParserTest, Atom) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Atom(context));
-  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   delete lexer;
 }
