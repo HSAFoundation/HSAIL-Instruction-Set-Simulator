@@ -1579,8 +1579,8 @@ int FunctionDeclpart1(Context* context) {
           return 0;
         } else {
           context->set_error(MISSING_SEMICOLON);
-	}
-       */
+	    }
+   */
       } else {
         context->set_error(MISSING_IDENTIFIER);
       }
@@ -3132,7 +3132,7 @@ int GlobalPrivateDecl(Context* context) {
   return 1;
 }
 
-int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset) {
+int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset) {
 
     std::string operand_name;
     // if the value of addrOpOffset is ZERO,
@@ -3289,6 +3289,12 @@ int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset) {
   
   return 1;
 }
+
+int OffsetAddressableOperand(Context* context){
+
+	return OffsetAddressableOperandPart2(context, 0);
+}
+
 int MemoryOperand(Context* context) {
   // this judge(first token == '[') is necessary in here
   if (context->token_to_scan == '[') {
@@ -3325,7 +3331,7 @@ int MemoryOperand(Context* context) {
       }
       if (context->token_to_scan == '[') {
         context->token_to_scan = yylex();
-        if (!OffsetAddressableOperand(context, CurrentoOffset)) {
+        if (!OffsetAddressableOperandPart2(context, CurrentoOffset)) {
           // Global/Local Identifier with offsetAddressOperand.
           return 0;
         }
@@ -3334,7 +3340,7 @@ int MemoryOperand(Context* context) {
       return 0;
     } else if (!AddressableOperand(context)) {
       return 0;
-    } else if (!OffsetAddressableOperand(context, 0)) {
+    } else if (!OffsetAddressableOperandPart2(context, 0)) {
       return 0;
     }  // Global/Local Identifier/AddressableOperand/offsetAddressableOperand 
   }  // '['
@@ -3427,15 +3433,31 @@ int Ldc(Context* context) {
   // first token is LDC "ldc"
   context->token_to_scan = yylex();
 
+  BrigInstBase ldc_op = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigLdc,               // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}       // o_operands[5]
+  };
+
   if (context->token_type == DATA_TYPE_ID) {
+    ldc_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
+    std::string oper_name = context->token_value.string_val;
     if (!Operand(context)) {
+      ldc_op.o_operands[0] = context->operand_map[oper_name];
       if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
+        context->token_to_scan = yylex();        
+        // op[1] must be BrigEOperandLabelRef or BrigEOperandFunctionRef
         if (context->token_to_scan == TOKEN_LABEL ||
-           !Identifier(context)) {
+            context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+          oper_name = context->token_value.string_val;
+          ldc_op.o_operands[1] = context->operand_map[oper_name];
           context->token_to_scan = yylex();
           if (context->token_to_scan == ';') {
+            context->append_code(&ldc_op);
             context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
@@ -3914,7 +3936,7 @@ int Mul(Context* context) {
   return 1;
 }
 
-int LdModifier(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
+int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
   while (1) {
     if (context->token_type == VECTOR) {
       switch (context->token_to_scan) {
@@ -4007,6 +4029,22 @@ int LdModifier(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
   return 1;
 }
 
+int LdModifier(Context *context){
+ BrigInstLdSt ld_op = {
+    sizeof(BrigInstLdSt),     // size
+    BrigEInstLdSt,            // kind
+    BrigLd,                   // opcode
+    Brigb32,                  // type
+    BrigNoPacking,            // packing
+    {0, 0, 0, 0, 0},          // operand[5]
+    BrigFlatSpace,            // storageClass
+    BrigRegular,              // memorySemantic
+    0                         // equivClass
+  };
+  int vector_size = 0;
+  return LdModifierPart2(context, &ld_op, &vector_size);
+}
+
 int Ld(Context* context) {
   // first token is LD
   BrigInstLdSt ld_op = {
@@ -4030,7 +4068,7 @@ int Ld(Context* context) {
       return 1;
     }
   }
-  if (!LdModifier(context, &ld_op, &vector_size)) {
+  if (!LdModifierPart2(context, &ld_op, &vector_size)) {
   } else {
     context->set_error(UNKNOWN_ERROR);
     return 1;
@@ -4042,8 +4080,6 @@ int Ld(Context* context) {
     context->token_to_scan = yylex();
     if (context->token_to_scan == '(') {
       ld_op.o_operands[1] = context->get_operand_offset();
-      // TODO(Chuang): When the operand is a list.
-      // ArrayOperandList generate the .Operand brig.
       if (!ArrayOperandList(context)) {
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
@@ -4103,7 +4139,7 @@ int St(Context* context) {
   int vector_size = 0;
   context->token_to_scan = yylex();
 
-  if (!LdModifier(context, &st_op, &vector_size)) {
+  if (!LdModifierPart2(context, &st_op, &vector_size)) {
   } else {
     context->set_error(UNKNOWN_ERROR);
     return 1;
@@ -4115,8 +4151,6 @@ int St(Context* context) {
     if (context->token_to_scan == '(') {  
       st_op.o_operands[0] = context->get_operand_offset();
 
-      // TODO(Chuang): When the operand is a list.
-      // ArrayOperandList generate the .Operand brig.
       if (!ArrayOperandList(context)) {
       } else {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
@@ -4134,9 +4168,6 @@ int St(Context* context) {
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
       st_op.o_operands[1] = context->get_operand_offset();
-
-      // TODO(Chuang): When the operand is a operation.
-      // MemoryOperand generate the .Operand brig.
       if (!MemoryOperand(context)) {
         if (context->token_to_scan == ';') {
           context->token_to_scan = yylex();
@@ -4166,16 +4197,58 @@ int Lda(Context* context) {
   // first token is LDA
   context->token_to_scan = yylex();
 
+  BrigInstMem lda_op = {
+    36,                    // size
+    BrigEInstMem,          // kind
+    BrigLda,               // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0},       // o_operands[5]
+    BrigFlatSpace          // storageClass
+  };
+
   if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+    switch (context->token_to_scan) {
+      case _GLOBAL:
+        lda_op.storageClass = BrigGlobalSpace;
+        break;
+      case _GROUP:
+        lda_op.storageClass = BrigGroupSpace;
+        break;
+      case _PRIVATE:
+        lda_op.storageClass = BrigPrivateSpace;
+        break;
+      case _KERNARG:
+        lda_op.storageClass = BrigKernargSpace;
+        break;
+      case _READONLY:
+        lda_op.storageClass = BrigReadonlySpace;
+        break;
+      case _SPILL:
+        lda_op.storageClass = BrigSpillSpace;
+        break;
+      case _ARG:
+        lda_op.storageClass = BrigArgSpace;
+        break;
+      default:
+        lda_op.storageClass = BrigFlatSpace;
+    }
     context->token_to_scan = yylex();
   }
   if (context->token_type == DATA_TYPE_ID) {
+    lda_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
+    
+    std::string oper_name = context->token_value.string_val;
+    
     if (!Operand(context)) {
+      lda_op.o_operands[0] = context->operand_map[oper_name];
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
+        lda_op.o_operands[1] = context->get_operand_offset();
         if (!MemoryOperand(context)) {
           if (context->token_to_scan == ';') {
+            context->append_code(&lda_op);
             context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
@@ -6018,7 +6091,7 @@ int PairAddressableOperand(Context* context) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == '[') {
           context->token_to_scan = yylex();
-          if (!OffsetAddressableOperand(context, CurrentoOffset)) {
+          if (!OffsetAddressableOperandPart2(context, CurrentoOffset)) {
             // Global/Local Identifier with offsetAddressOperand.
             return 0;
           } else {
@@ -6041,6 +6114,13 @@ int PairAddressableOperand(Context* context) {
     return 1;     
   }
   return 1;
+}
+
+int LdaMod(Context* context) {
+  if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+    return 0;
+  }
+  return 0;
 }
 
 int TopLevelStatement(Context *context){
