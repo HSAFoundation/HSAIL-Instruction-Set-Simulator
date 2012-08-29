@@ -1919,7 +1919,7 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
       0,             // reserved
       0,             // symbolModifier
       0,             // dim
-      13,            // s_name
+      0,            // s_name
       Brigf32,       // type
       1,            // align
     };
@@ -1931,6 +1931,8 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
       1,
       1,
       0,
+      0,
+      0
     };
     directives.append(&bdi);
 
@@ -1956,150 +1958,6 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
     };
     directives.append(&bdv);
     BrigSymbolCommon s = {
-      0,           // c_code
-      BrigArgSpace,  // storageClass
-      BrigNone,      // attribute
-      0,             // reserved
-      0,             // symbolModifier
-      0,             // dim
-      13,            // s_name
-      Brigf32,       // type
-      1,            // align
-    };
-    BrigDirectiveImage bdi = {
-      sizeof(bdi),
-      BrigEDirectiveImage,
-      s,
-      0,
-      1,
-      1,
-      0,
-    };
-    directives.append(&bdi);
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "The image width is not specified")));	
-  }
-  {
-    hsa::brig::Buffer strings;
-    hsa::brig::Buffer directives;
-    hsa::brig::Buffer code;
-    hsa::brig::Buffer operands;
-	
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-    BrigSymbolCommon s = {
-      0,             // c_code
-      BrigArgSpace,  // storageClass
-      BrigNone,      // attribute
-      0,             // reserved
-      0,             // symbolModifier
-      0,             // dim
-      13,            // s_name
-      Brigf32,       // type
-      1,            // align
-    };
-    BrigDirectiveImage bdi = {
-      sizeof(bdi),
-      BrigEDirectiveImage,
-      s,
-      1,
-      0,
-      1,
-      0
-    };
-    directives.append(&bdi);
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "The image height is not specified")));	
-  }
-  {
-    hsa::brig::Buffer strings;
-    hsa::brig::Buffer directives;
-    hsa::brig::Buffer code;
-    hsa::brig::Buffer operands;
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-    BrigSymbolCommon s = {
-      0,             // c_code
-      BrigArgSpace,  // storageClass
-      BrigNone,      // attribute
-      0,             // reserved
-      0,             // symbolModifier
-      0,             // dim
-      13,            // s_name
-      Brigf32,       // type
-      1,            // align
-    };
-    BrigDirectiveImage bdi = {
-      sizeof(bdi),
-      BrigEDirectiveImage,
-      s,
-      1,
-      1,
-      0,
-      0,
-    };
-    directives.append(&bdi);
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "The image depth is not specified")));	
-  }
-  {
-    hsa::brig::Buffer strings;
-    hsa::brig::Buffer directives;
-    hsa::brig::Buffer code;
-    hsa::brig::Buffer operands;
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-    BrigSymbolCommon s = {
       0,             // c_code
       BrigArgSpace,  // storageClass
       BrigNone,      // attribute
@@ -2117,7 +1975,9 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
       1,
       1,
       1,
-      1,
+      2,
+      0,
+      0
     };
     directives.append(&bdi);
 
@@ -2127,7 +1987,7 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "The image types is not 1DA or 2DA")));	
+    "depth value is wrong for 1DA and 2DA images")));	
   }
 }
 
@@ -2165,7 +2025,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
       sizeof(bds),
       BrigEDirectiveSampler,
       s,
-      0,
+      1,
       0,
       0,
       0,
@@ -2211,58 +2071,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
       sizeof(bds),
       BrigEDirectiveSampler,
       s,
-      9,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    };
-    directives.append(&bds);
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "The following field have valid data")));	
-  }
-  {
-    hsa::brig::Buffer strings;
-    hsa::brig::Buffer directives;
-    hsa::brig::Buffer code;
-    hsa::brig::Buffer operands;
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
       1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-    BrigSymbolCommon s = {
-      0,             // c_code
-      BrigArgSpace,  // storageClass
-      BrigNone,      // attribute
-      0,             // reserved
-      0,             // symbolModifier
-      0,             // dim
-      13,            // s_name
-      Brigf32,       // type
-      1,            // align
-    };
-    BrigDirectiveSampler bds = {
-      sizeof(bds),
-      BrigEDirectiveSampler,
-      s,
-      0,
       0,
       20,
       0,
@@ -2313,7 +2122,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
       sizeof(bds),
       BrigEDirectiveSampler,
       s,
-      0,
+      1,
       0,
       0,
       20,
@@ -2364,7 +2173,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
       sizeof(bds),
       BrigEDirectiveSampler,
       s,
-      0,
+      1,
       0,
       0,
       0,
@@ -2415,7 +2224,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
       sizeof(bds),
       BrigEDirectiveSampler,
       s,
-      0,
+      1,
       0,
       0,
       0,
@@ -2466,7 +2275,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
       sizeof(bds),
       BrigEDirectiveSampler,
       s,
-      0,
+      1,
       0,
       0,
       0,
