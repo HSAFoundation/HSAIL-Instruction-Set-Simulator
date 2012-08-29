@@ -5032,6 +5032,44 @@ int ArgStatements(Context* context) {
 }
 
 int BodyStatement(Context* context) {
+  if (context->token_to_scan == TOKEN_COMMENT) {
+    context->token_to_scan = yylex();
+    return 0;
+  } else if (context->token_to_scan == PRAGMA) {
+    if (!Pragma(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == BLOCK) {
+    if (!Block(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == ALIGN ||
+             context->token_to_scan == CONST ||
+             context->token_to_scan == EXTERN ||
+             context->token_to_scan == STATIC) {
+    if (!DeclPrefix(context)) {
+      if (!InitializableDecl(context)) {
+        return 0;
+      } else if (!UninitializableDecl(context)) {
+        return 0;
+      }     
+    }  
+  } else if (context->token_to_scan == '{') {
+    if (!ArgBlock(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == LOC) {
+    if (!Location(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == TOKEN_LABEL) {
+    context->token_to_scan = yylex();
+    return 0;
+  } else if (!LabelTargets(context)) {
+    return 0;
+  } else if (!Operation(context)) {
+    return 0;
+  }  
   return 1;
 }
 
