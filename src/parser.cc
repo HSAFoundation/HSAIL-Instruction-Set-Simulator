@@ -4967,6 +4967,7 @@ int Operation(Context* context) {
 
 int BodyStatementNested(Context* context) {
   if (context->token_to_scan == TOKEN_COMMENT) {
+    context->token_to_scan = yylex();
     return 0;
   } else if (context->token_to_scan == PRAGMA) {
     if (!Pragma(context)) {
@@ -4992,6 +4993,7 @@ int BodyStatementNested(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
+    context->token_to_scan = yylex();
     return 0;
   } else if (!LabelTargets(context)) {
     return 0;
