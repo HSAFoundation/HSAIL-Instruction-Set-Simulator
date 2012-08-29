@@ -39,6 +39,7 @@ bool (BrigModule::check)(bool test, const Message &msg,
 bool BrigModule::validate(void) const {
   bool valid = true;
   valid &= validateDirectives();
+  valid &= validateCode();
   valid &= validateStrings();
   return valid;
 }
@@ -92,6 +93,32 @@ bool BrigModule::validateDirectives(void) const {
       caseBrig(DirectivePad);
     default: check(false, "Unrecognized directive");
     }
+  }
+
+  return true;
+}
+
+bool BrigModule::validateCode(void) const {
+
+  inst_iterator it = S_.code_begin();
+  const inst_iterator E = S_.code_end();
+  
+  for(; it != E; it++) {
+    if(!validate(it)) return false;
+    switch(it->kind) {
+      caseBrig(InstAtomic);
+      caseBrig(InstAtomicImage);
+      caseBrig(InstBar);
+      caseBrig(InstBase);
+      caseBrig(InstCmp);
+      caseBrig(InstImage);
+      caseBrig(InstCvt);
+      caseBrig(InstLdSt);
+      caseBrig(InstMem);
+      caseBrig(InstMod);
+      caseBrig(InstRead);
+      default: check(false, "Unrecognized code");
+    } 
   }
 
 #undef caseBrig
@@ -265,7 +292,24 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveProto *dir) const { return true; }
+bool BrigModule::validate(const BrigDirectiveProto *dir) const {
+  bool valid = true;
+  valid &= validateAlignment(dir, 4);
+  valid &= validateCCode(dir->c_code);
+  valid &= validateSName(dir->s_name);
+  valid &= check(!dir->reserved, "Reserved not zero");
+  valid &= check(sizeof(BrigDirectiveProto) + sizeof(BrigDirectiveProto::BrigProtoType) *
+                 (dir->outCount + dir->inCount - 1) <= dir->size,
+                 "BrigDirectiveProto size too small for outCount + inCount");
+  for (unsigned i = 0; i < dir->outCount + dir->inCount; i++) {
+     valid &= check(dir->types[i].type <= Brigf64x2,
+                 "Invalid type");
+     if (dir->types[i].hasDim == 1) {
+       valid &= check(dir->types[i].dim, "dimension not set when hasDim is 1");
+     }
+  }
+  return valid;
+}
 
 bool BrigModule::validate(const BrigDirectiveFile *dir) const {
   bool valid = true;
@@ -276,6 +320,7 @@ bool BrigModule::validate(const BrigDirectiveFile *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveComment *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
@@ -283,12 +328,14 @@ bool BrigModule::validate(const BrigDirectiveComment *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveLoc *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveInit *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 8);
   valid &= check(!dir->reserved, "Reserved not zero");
   valid &= check(Brigb1 == dir->type  || Brigb8 == dir->type  ||
                  Brigb16 == dir->type || Brigb32 == dir->type ||
@@ -319,12 +366,14 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveControl *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectivePragma *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
@@ -332,6 +381,7 @@ bool BrigModule::validate(const BrigDirectivePragma *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveExtension *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
@@ -339,12 +389,14 @@ bool BrigModule::validate(const BrigDirectiveExtension *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveArgStart *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveArgEnd *dir) const {
   bool valid = true;
+  valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
 }
@@ -482,6 +534,36 @@ bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) const {
                  "Improperly aligned directive");
   return valid;
 }
+
+// validating the code section
+bool BrigModule::validate(const BrigInstAtomic *code) const { return true; }
+bool BrigModule::validate(const BrigInstAtomicImage *code) const { return true; }
+bool BrigModule::validate(const BrigInstBar *code) const { return true; }
+
+bool BrigModule::validate(const BrigInstBase *code) const {
+  bool valid = true;
+  valid &= check(code->opcode <= BrigFbarInitSizeKnown,
+                 "Invalid opcode");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  valid &= check(code->packing <= BrigPackPsat,
+                 "Invalid packing control");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                   "o_operands past the operands section");
+    }
+  }
+  return valid;
+}
+
+bool BrigModule::validate(const BrigInstCmp *code) const { return true; }
+bool BrigModule::validate(const BrigInstImage *code) const { return true; }
+bool BrigModule::validate(const BrigInstCvt *code) const { return true; }
+bool BrigModule::validate(const BrigInstLdSt *code) const { return true; }
+bool BrigModule::validate(const BrigInstMem *code) const { return true; }
+bool BrigModule::validate(const BrigInstMod *code) const { return true; }
+bool BrigModule::validate(const BrigInstRead *code) const { return true; }
 
 } // namespace brig
 } // namespace hsa
