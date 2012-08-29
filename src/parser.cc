@@ -5074,6 +5074,12 @@ int BodyStatement(Context* context) {
 }
 
 int BodyStatements(Context* context) {
+  if (!BodyStatement(context)) {
+    while (!BodyStatement(context)) {
+      ;
+    }
+    return 0;
+  }
   return 1;
 }
 
