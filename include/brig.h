@@ -232,6 +232,21 @@ enum BrigMemorySemantic {
   BrigBin
 };
 
+// BrigAtomicOperation
+// BrigAtomicOperation is used to specify the type of atomic operation.
+enum BrigAtomicOperation {
+  BrigAtomicAnd,
+  BrigAtomicOr,
+  BrigAtomicXor,
+  BrigAtomicCas,
+  BrigAtomicExch,
+  BrigAtomicAdd,
+  BrigAtomicInc,
+  BrigAtomicDec,
+  BrigAtomicMin,
+  BrigAtomicMax,
+  BrigAtomicSub
+};
 
 // BrigOpcode
 // BrigOpcode is used to specify the opcode for the HSAIL operation.
@@ -925,6 +940,21 @@ struct BrigInstMem {
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
   BrigStorageClass32_t storageClass;
+};
+
+// BrigInstAtomic
+// The BrigInstAtomic format is used for atomic operations: atomicReturn and
+// atomicNoReturn.
+struct BrigInstAtomic {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAtomicOperation32_t atomicOperation;
+  BrigStorageClass32_t storageClass;
+  BrigMemorySemantic32_t memorySemantic;
 };
 
 

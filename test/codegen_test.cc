@@ -3650,6 +3650,145 @@ TEST(CodegenTest, Ldc_CodeGen_SimpleTest) {
   delete lexer;
 };
 
+TEST(CodegenTest, Atom_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("atomic_cas_global_ar_b64 $d1, [&x1], 23, 12;\n");
+  input.append("atomic_and_global_ar_u32 $s1, [&x2], 24;\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  BrigInstAtomic ref1 = {
+    44,                    // size
+    BrigEInstAtomic,       // kind
+    BrigAtomic,            // opcode
+    Brigb64,               // type
+    BrigNoPacking,         // packing
+    {8, 20, 40, 64, 0},    // o_operands[5]
+    BrigAtomicCas,         // atomicOperation;
+    BrigGlobalSpace,       // storageClass;
+    BrigAcquireRelease     // memorySemantic;
+  };
+
+  BrigInstAtomic ref2 = {
+    44,                    // size
+    BrigEInstAtomic,       // kind
+    BrigAtomic,            // opcode
+    Brigu32,               // type
+    BrigNoPacking,         // packing
+    {88, 100, 120, 0, 0},   // o_operands[5]
+    BrigAtomicAnd,         // atomicOperation;
+    BrigGlobalSpace,       // storageClass;
+    BrigAcquireRelease     // memorySemantic;
+  };
+  
+  BrigInstAtomic getAtom;
+  BrigOperandReg getReg;
+  BrigOperandAddress getAddr;
+  BrigOperandImmed getImm;
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  
+  context->add_symbol("&x1");
+  context->add_symbol("&x2");
+  
+  EXPECT_EQ(0, Atom(context));
+  EXPECT_EQ(0, Atom(context));
+
+  context->get_operand(8, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb64, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name);  
+
+  context->get_operand(20, &getAddr);  
+  // BrigOperandAddress
+  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
+  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(0, getAddr.reserved);
+  EXPECT_EQ(0, getAddr.directive);
+  EXPECT_EQ(0, getAddr.offset); 
+
+  context->get_operand(40, &getImm);
+  // BrigOperandImmed
+  EXPECT_EQ(24, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(23, getImm.bits.u);
+
+  context->get_operand(64, &getImm);
+  // BrigOperandImmed
+  EXPECT_EQ(24, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(12, getImm.bits.u);
+
+  context->get_code(0, &getAtom);
+  // BrigInstAtomic
+  EXPECT_EQ(ref1.size, getAtom.size);
+  EXPECT_EQ(ref1.kind, getAtom.kind);
+  EXPECT_EQ(ref1.opcode, getAtom.opcode);
+  EXPECT_EQ(ref1.type, getAtom.type);
+  EXPECT_EQ(ref1.packing, getAtom.packing);
+
+  EXPECT_EQ(ref1.o_operands[0], getAtom.o_operands[0]);
+  EXPECT_EQ(ref1.o_operands[1], getAtom.o_operands[1]);
+  EXPECT_EQ(ref1.o_operands[2], getAtom.o_operands[2]);
+  EXPECT_EQ(ref1.o_operands[3], getAtom.o_operands[3]);
+  EXPECT_EQ(ref1.o_operands[4], getAtom.o_operands[4]);
+  EXPECT_EQ(ref1.atomicOperation, getAtom.atomicOperation);
+  EXPECT_EQ(ref1.storageClass, getAtom.storageClass);
+  EXPECT_EQ(ref1.memorySemantic, getAtom.memorySemantic);
+
+  context->get_operand(88, &getReg);
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(12, getReg.name);
+
+  context->get_operand(100, &getAddr);  
+  // BrigOperandAddress
+  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
+  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(0, getAddr.reserved);
+  EXPECT_EQ(0, getAddr.directive);
+  EXPECT_EQ(0, getAddr.offset); 
+
+  context->get_operand(120, &getImm);
+  // BrigOperandImmed
+  EXPECT_EQ(24, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(24, getImm.bits.u);
+
+  context->get_code(44, &getAtom);
+  // BrigInstAtomic
+  EXPECT_EQ(ref2.size, getAtom.size);
+  EXPECT_EQ(ref2.kind, getAtom.kind);
+  EXPECT_EQ(ref2.opcode, getAtom.opcode);
+  EXPECT_EQ(ref2.type, getAtom.type);
+  EXPECT_EQ(ref2.packing, getAtom.packing);
+
+  EXPECT_EQ(ref2.o_operands[0], getAtom.o_operands[0]);
+  EXPECT_EQ(ref2.o_operands[1], getAtom.o_operands[1]);
+  EXPECT_EQ(ref2.o_operands[2], getAtom.o_operands[2]);
+  EXPECT_EQ(ref2.o_operands[3], getAtom.o_operands[3]);
+  EXPECT_EQ(ref2.o_operands[4], getAtom.o_operands[4]);
+  EXPECT_EQ(ref2.atomicOperation, getAtom.atomicOperation);
+  EXPECT_EQ(ref2.storageClass, getAtom.storageClass);
+  EXPECT_EQ(ref2.memorySemantic, getAtom.memorySemantic);
+
+  delete lexer;
+};
+
 
 }  // namespace brig
 }  // namespace hsa
