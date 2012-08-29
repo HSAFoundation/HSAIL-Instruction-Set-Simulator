@@ -2538,6 +2538,36 @@ TEST(ParserTest, BodyStatement) {
   delete lexer;
 };
 
+// -----------------  Test for bodyStatements rule -------------------
+// bodyStatements := { bodyStatement } bodyStatement
+TEST(ParserTest, BodyStatements) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input("/*This is Comment*/\n"); // one bodyStatement
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatements(context));
+
+  input.assign("pragma \"this is string!\";"); // two bodyStatements 
+  input.append("@tab: labeltargets @a1, @a2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatements(context));
+
+  input.assign("extern const"); // three bodyStatements 
+  input.append("arg_f32 %f[3];\n");
+  input.append("pragma \"this is string!\";\n");
+  input.append("pragma \"this is string!\";\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatements(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 

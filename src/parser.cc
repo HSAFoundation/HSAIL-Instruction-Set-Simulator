@@ -5073,6 +5073,10 @@ int BodyStatement(Context* context) {
   return 1;
 }
 
+int BodyStatements(Context* context) {
+  return 1;
+}
+
 int ImageLoad(Context* context) {
   // first token is LD_IMAGE
   context->token_to_scan = yylex();
