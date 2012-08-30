@@ -373,6 +373,54 @@ struct BrigAluModifier {
   uint32_t reserved: 25;
 };
 
+//PRM 	20.5.9
+enum BrigGeom { 
+  Briggeom_1d,  //1D image (1 coordinate needed)
+  Briggeom_2d,  //2D image (2 coordinate needed)
+  Briggeom_3d,  //3D image (3 coordinate needed)
+  Briggeom_1da, //1DA image array (2 coordinates needed)
+  Briggeom_1db, //1DB image  buffer (1 coordinates needed)
+  Briggeom_2da  //2DA image array (3 coordinates needed)
+};
+
+//PRM 	20.5.10
+enum BrigImageFormat {
+  BrigSNORM_INT8,
+  BrigSNORM_INT16,
+  BrigUNORM_INT8,
+  BrigUNORM_INT16,
+  BrigUNORM_SHORT_565,
+  BrigUNORM_SHORT_555,
+  BrigUNORM_SHORT_101010,
+  BrigSIGNED_INT8,
+  BrigSIGNED_INT16,
+  BrigSIGNED_INT32,
+  BrigUNSIGNED_INT8,
+  BrigUNSIGNED_INT16,
+  BrigUNSIGNED_INT32,
+  BrigHALF_FLOAT,
+  BrigFLOAT,
+  BrigImageFormatUnknown
+};
+
+enum BrigImageOrder {
+  BrigImage_R,
+  BrigImage_A,
+  BrigImage_RX,
+  BrigImage_RG,
+  BrigImage_RGX,
+  BrigImage_RA,
+  BrigImage_RGB,
+  BrigImage_RGBA,
+  BrigImage_RGBX,
+  BrigImage_BGRA,
+  BrigImage_ARGB,
+  BrigImage_INTENSITY,
+  BrigImage_LUMINANCE,
+  BrigImageOrderUnknown // used when no order is specified
+};
+
+
 // PRM 20.3.2
 struct BrigSymbolCommon {
   BrigcOffset32_t c_code;

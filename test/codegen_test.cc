@@ -68,7 +68,7 @@ TEST(CodegenTest, ExampleWithKernel) {
   BrigEDirectiveSymbol ,    // kind
   {
     0,                         // c_code
-    3,                        // storag class kernarg
+    BrigKernargSpace,         // storag class kernarg
     BrigNone ,                // attribut
     0,                        // reserved
     0,                        // symbolModifier
@@ -93,7 +93,7 @@ TEST(CodegenTest, ExampleWithKernel) {
   BrigEDirectiveSymbol ,    // kind
   {
     0,                         // c_code
-    2,                        // storag class kernarg
+    BrigPrivateSpace,         // storag class kernarg
     BrigNone ,                // attribut
     0,                        // reserved
     0,                        // symbolModifier
@@ -3650,6 +3650,50 @@ TEST(CodegenTest, Ldc_CodeGen_SimpleTest) {
   delete lexer;
 };
 
+TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("global_ROImg &demo={format = signed_int32 ,order = r,width = 4,height = 5,depth = 6 }");
+  
+  Lexer *lexer = new Lexer(input);
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigDirectiveImage ref = {
+    56,                     //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class 
+      BrigNone ,                // attribut
+      0,                        // reserved
+      0,                        // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      Brigb32,                  // type
+      1,                        // align
+    },
+    4,                      //width
+    5,                      //height
+    6,                      //depth
+    1,                      //array
+    BrigImageOrderUnknown,  //order
+    BrigImageFormatUnknown  //format
+  };
+  EXPECT_EQ(0,GlobalReadOnlyImageDecl(context));
+
+  BrigDirectiveImage get ;
+  context->get_directive(0,&get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.width, get.width);
+  EXPECT_EQ(ref.height, get.height);
+  EXPECT_EQ(ref.depth, get.depth);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+}
 
 }  // namespace brig
 }  // namespace hsa
