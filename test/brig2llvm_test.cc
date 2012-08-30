@@ -8,6 +8,7 @@
 #include "brig_llvm.h"
 #include "brig_module.h"
 #include "brig_engine.h"
+#include "brig_runtime.h"
 // ------------------ Brig2LLVM TESTS -----------------
 
 TEST(Brig2LLVMTest, AppendBuffer) {
@@ -373,8 +374,7 @@ TEST(Brig2LLVMTest, Example3) {
     "ret void")));
 
     llvm::Module *mod = codegen.getModule();
-    typedef unsigned char u8x4 __attribute__((vector_size(4)));
-    u8x4 x;
+    hsa::brig::u8x4 x;
     void *args[] = { &x };
     hsa::brig::launchBrig(mod, mod->getFunction("packed_ops"), args);
   }
@@ -604,6 +604,11 @@ TEST(Brig2LLVMTest, Example4) {
     "br label %outof_IF")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "; preds = %then, %brig.init.succ")));
+
+    llvm::Module *mod = codegen.getModule();
+    hsa::brig::u8x4 x;
+    void *args[] = { &x };
+    hsa::brig::launchBrig(mod, mod->getFunction("branch_ops"), args);
   }
 }
 
