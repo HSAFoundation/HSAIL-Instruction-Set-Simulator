@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#25 - edit change 811487 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#26 - edit change 811758 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -88,29 +88,67 @@ class DispatchDescriptor;
  * exception occurs, there are three choices
  */
 typedef enum {
-    WAVE_ACTION_HALT=1, /*!< The wave is not killed just suspended. This is the
-                    default behavior. Halt the wave on an exception. */
+    WAVE_ACTION_HALT  =1, /*!< The wave is not killed just suspended. This is the
+                               default behavior. Halt the wave on an exception. */
     WAVE_ACTION_RESUME=2, /*!< Resume the wave on an exception The PC is
-                    incremented to the next instruction and execution is
-                    resumed. This choice is for advanced users. */
-    WAVE_ACTION_KILL=3, /*!< Kill the wave on an exception The wave is killed at
-                    the point of exception. If not all the wavefronts in the
-                    wave take a fault, the place in the code where the
-                    non-faulty waves get killed is non-deterministic. This is
-                    usually before the next barrier. */
-    WAVE_ACTION_DEBUG=4, /*!< Cause the wave into the debug mode */
-    WAVE_ACTION_TRAP,  /*!< Cause the wave to take a trap */
+                               incremented to the next instruction and execution is
+                               resumed. This choice is for advanced users. */
+    WAVE_ACTION_KILL=3,   /*!< Kill the wave on an exception The wave is killed at
+                               the point of exception. If not all the wavefronts in the
+                               wave take a fault, the place in the code where the
+                               non-faulty waves get killed is non-deterministic. This is
+                               usually before the next barrier. */
+    WAVE_ACTION_DEBUG=4,  /*!< Cause the wave into the debug mode */
+    WAVE_ACTION_TRAP=5,   /*!< Cause the wave to take a trap */
     WAVE_ACTION_MAX
 } WaveAction;
+
+/**
+ * @ingroup message used by the KFD wave control
+ * This structure indicates the various information used
+ * by the wave control function. Currnetly, only the
+ * WaveID and SIMD item is used.
+ */
+typedef struct _DbgWaveMsgAMDGen1
+{
+    union
+    {
+        struct
+        {
+            unsigned int  UserData     : 8; // User data
+            unsigned int  Reserved1    : 6; // This field is reserved, should be 0
+            unsigned int  WaveId       : 4; // Wave id
+            unsigned int  SIMD         : 2; // SIMD id
+            unsigned int  HSACU        : 4; // Compute unit
+            unsigned int  ShaderArray  : 1; // Shader array
+            unsigned int  ShaderEngine : 1; // Shader engine
+            unsigned int  MessageType  : 2; // see HSA_DBG_WAVEMSG_TYPE
+            unsigned int  Reserved2    : 4; // This field is reserved, should be 0
+        } ui32;
+        uint32_t      Value;
+    } ui32;
+    uint32_t          Reserved3;
+
+} DbgWaveMsgAMDGen1;
+    
+typedef struct _DbgWaveMessage
+{
+    void*                 MemoryVA;         // ptr to associated host-accessible data
+    union
+    {
+        DbgWaveMsgAMDGen1  WaveMsgInfoGen1;
+        //for future HW specific "HsaDbgWaveMsgAMDGen2"
+    };
+} DbgWaveMessage;
 
 /**
  * @ingroup Dispatch, Debugger
  * The wave mode lets the user chose how many waves the message affects
  */
 typedef enum {
-    WAVEMODE_SINGLE=1, /*!< send command to a single wave */
+    WAVEMODE_SINGLE=0,                /*!< send command to a single wave */
     /* broadcast to all wavefronts of all processes is not supported for HSA user mode */
-    WAVEMODE_BROADCAST_PROCESS=2, /*!< send to waves within current process */
+    WAVEMODE_BROADCAST_PROCESS=2,     /*!< send to waves within current process */
     WAVEMODE_BROADCAST_PROCESS_CU=3,  /*!< send to waves within current process */
     MAX_WAVEMODE
 } HSAWaveMode;
@@ -137,11 +175,11 @@ typedef enum {
  * the data it uses. There are three choices
  * */
 typedef enum {
-    CACHE_POLICY_FLUSH_ALL=1, /*!< Flush all caches that can be flushed. */
+    CACHE_POLICY_FLUSH_ALL=1,          /*!< Flush all caches that can be flushed. */
     CACHE_POLICY_FLUSH_COMPUTE_UNIT=2, /*!< Flush the private device compute
-                    unit caches. */
-    CACHE_POLICY_FLUSH_SHARED=4 /*!< Flush the shared device compute unit
-                    caches. */
+                                            unit caches. */
+    CACHE_POLICY_FLUSH_SHARED=4        /*!< Flush the shared device compute unit
+                                            caches. */
 } CachePolicy;
 
 
@@ -158,8 +196,9 @@ typedef void (*HSATrapHandle)(void *,int);
  */
 typedef struct HSAExceptionPolicy {
     int enableException;       /*!< default is to enable them */
-    WaveAction waveAction;  /*!< default wave action is to halt it */
-    HostAction hostAction;  /*!< default host action is to ignore the
+    uint32_t exceptionType;    /*!< exception types enabled */
+    WaveAction waveAction;     /*!< default wave action is to halt it */
+    HostAction hostAction;     /*!< default host action is to ignore the
                                  event when it occurs it but inform the
                                  host when it does wait on this kernel */
     HSATrapHandle trapHandle;  /*!< if host action is to interrupt, this
@@ -167,7 +206,8 @@ typedef struct HSAExceptionPolicy {
 
     HSAExceptionPolicy()
     {
-        int enableException = 1;
+        enableException = 0;
+        exceptionType = 0x0; 
         waveAction = WAVE_ACTION_HALT;
         hostAction = HOST_ACTION_IGNORE;
         trapHandle = NULL;
@@ -192,6 +232,36 @@ typedef enum {
     BLOCKING_POLICY_COMPLETED=8  /*!< The dispatch interface will block until
                     the kernel has completed executing. */
 } BlockingPolicy;
+
+/** 
+ * index of each type of trap handler 
+ */
+typedef enum {
+    RUNTIME_TRAP   = 0, /*!< level-1, runtime trap handler index */
+    DEBUG_TRAP     = 1, /*!< level-2, debug trap handler index */
+    SYSCALL_TRAP   = 2, /*!< level-2, syscall trap handler index */
+    EXCEPTION_TRAP = 3, /*!< level-2, exception trap handler index */
+    MAX_TRAP_NUM        /*!< the number of trap handlers */
+} TrapType; 
+
+
+/** 
+ * trap handler and the trap handler buffer info 
+ */
+typedef struct TrapHandlerInfo_ {
+    void *trapHandler;
+    void *trapHandlerBuffer;
+    size_t trapHandlerSize;
+    size_t trapHandlerBufferSize;
+
+    TrapHandlerInfo_()
+    {
+        trapHandler = NULL;
+        trapHandlerBuffer = NULL;
+        trapHandlerSize = 0;
+        trapHandlerBufferSize = 0;
+    }
+} TrapHandlerInfo;
 
 /** 
  * attributes of a launch include, exception policy, launch policy and cache
@@ -335,35 +405,101 @@ public:
     //Temp hack to get the asicinfo
     virtual void* getASICInfo()=0;
 
-    //setup trap handler
-    virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
+    /**
+     * @brief Set up trap handler in the current device
+     *
+     * @param trapHandler pointer to the trap handler, this address needs
+     * to be 256-byte aligned.
+     *
+     * @param trapHandlerSizeByte size of the trap handler in bytes
+     *
+     * @param trapType different types of trap handler, currently, support runtime,  
+     *  debugger, exception, system call.
+     */
+    virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte, uint32_t trapType) = 0;
 
-    //setup trap handler buffer
-    virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+    /**
+     * @brief Set up trap handler buffer in the current device
+     *
+     * @param trapHandlerBuffer pointer to the trap handler buffer, this 
+     * address needs to be 256-byte aligned.
+     *
+     * @param trapHandlerBufferSizeByte size of the trap handler buffer in bytes
+     *
+     * @param trapType different types of trap handler, currently, support runtime,  
+     *  debugger, exception, system call.
+     */
+    virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte, uint32_t trapType) = 0;
 
-    //setup trap handler buffer
+    /**
+     * @brief Set up trap handler and buffer in the current device
+     *
+     * @param trapHandler pointer to the trap handler, this address needs
+     * to be 256-byte aligned.
+     *
+     * @param trapHandlerSizeByte size of the trap handler in bytes
+     *
+     * @param trapHandlerBuffer pointer to the trap handler buffer, this 
+     * address needs to be 256-byte aligned.
+     *
+     * @param trapHandlerBufferSizeByte size of the trap handler buffer in bytes
+     *
+     * @param trapType different types of trap handler, currently, support runtime,  
+     *  debugger, exception, system call.
+     */
     virtual void setupTrapHandlerAndBuffer(void *trapHandler, size_t trapHandlerSizebyte, 
-                                           void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+                                           void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte, uint32_t trapType) = 0;
 
-    //get trap handler and its size
-    virtual void getTrapHandler(void* &trapHandler, size_t &trapHandlerSizeByte) = 0;
+    /**
+     * @brief retrieve all the trap handler information in the device
+     *
+     * @param trapHandlerInfo pointer to the trap handler info buffer
+     */
+    virtual void getTrapHandlerInfo(TrapHandlerInfo * trapHandlerInfo) = 0;
 
-    //get the trap handler buffer and its size
-    virtual void getTrapHandlerBuffer(void* &trapHandlerBuffer, size_t &trapHandlerBufferSizeByte) = 0;
-
-    //add queue to list
+    /**
+     * @brief Each device has a list to store all the queues created on
+     *  the device. When a queue is created, this function is called
+     *  to add the queue to the list.
+     *
+     * @param queue pointer to the queue created on the device
+     */
     virtual void addQueueToList(hsa::Queue *queue) = 0;
 
-    //find dispatch descriptor from dispatch ID
+    /**
+     * @brief Each dispatch has a dispatch ID, this function is to
+     *  get the dispatch descriptor based on the dispatch ID.
+     *
+     * @param dispatchID dispatch ID
+     *
+     * @return DispatchDescriptor return the pointer to the dispatch descriptor
+     */
     virtual DispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
 
-    //flush caches on the device
+    /**
+     * @brief Invalidate all cache on the GPU.
+     *
+     * @param dev pointer to device
+     *
+     * @param cachePolicy indicate how the cache should be invalidated.
+     */
     virtual void flushCaches(hsa::Device *dev, CachePolicy cachePolicy) = 0;
 
-    //wave control on the device
-    virtual void waveControl(uint32_t deviceID, 
-                             WaveAction action, 
-                             HSAWaveMode mode, 
+    /**
+     * @brief control the wave front.
+     *
+     * @param action actions to be taken on the wavefront
+     *
+     * @param mode how the actions are taken, single wave, broadcast, etc.
+     *
+     * @param trapID, this is used for just the action of h_trap, in which
+     *  a trap ID is needed.
+     * 
+     * @param msgPtr, pointer to a message indicate various information. 
+     *  see the KFD design for specific information.
+     */
+    virtual void waveControl(uint32_t action, 
+                             uint32_t mode, 
                              uint32_t trapID, 
                              void *msgPtr) = 0;
 
@@ -477,12 +613,53 @@ public:
     
     virtual void flush()=0;
 
-    virtual void setupTrapHandler(void *pTrapHandler, size_t trapHandlerSizeByte) = 0;
+    /**
+     * @brief Set up trap handler in the current device
+     *
+     * @param trapHandler pointer to the trap handler, this address needs
+     * to be 256-byte aligned.
+     *
+     * @param trapHandlerSizeByte size of the trap handler in bytes
+     *
+     * @param trapType different types of trap handler, currently, support runtime,  
+     *  debugger, exception, system call.
+     */
+    virtual void setupTrapHandler(void *pTrapHandler, size_t trapHandlerSizeByte, uint32_t trapType) = 0;
 
-    virtual void setupTrapHandlerBuffer(void *pTrapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
-    
+    /**
+     * @brief Set up trap handler buffer in the current device
+     *
+     * @param trapHandlerBuffer pointer to the trap handler buffer, this 
+     * address needs to be 256-byte aligned.
+     *
+     * @param trapHandlerBufferSizeByte size of the trap handler buffer in bytes
+     *
+     * @param trapType different types of trap handler, currently, support runtime,  
+     *  debugger, exception, system call.
+     */
+    virtual void setupTrapHandlerBuffer(void *pTrapHandlerBuffer, size_t trapHandlerBufferSizeByte, uint32_t trapType) = 0;
+
+    /**
+     * @brief create a dispatch descriptor
+     *
+     * @param kernel pointer to the kernel to be dispatched
+     *
+     * @param launchAttr pointer to a structure containing various kernel execution info
+     *
+     * @param numArgs number of arguments for the kernel
+     *
+     * @return DispatchDescriptor return the pointer to the dispatch descriptor
+     */
     virtual hsa::DispatchDescriptor * createDispatchDescriptor(hsa::Kernel * kernel, LaunchAttributes *launchAttr, uint32_t numArgs, ...)=0;
     
+    /**
+     * @brief Each dispatch has a dispatch ID, this function is to
+     *  get the dispatch descriptor based on the dispatch ID.
+     *
+     * @param dispatchID dispatch ID
+     *
+     * @return DispatchDescriptor return the pointer to the dispatch descriptor
+     */
     virtual hsa::DispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
 
 };
@@ -723,44 +900,100 @@ public:
      */
     virtual void getScratchMemoryDescriptor(uint32_t *scratchDescr) = 0;
     
-    /*! setup trap handler*/
-    virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
+    /**
+     * @brief Set up trap handler in the current device
+     *
+     * @param trapHandler pointer to the trap handler, this address needs
+     * to be 256-byte aligned.
+     *
+     * @param trapHandlerSizeByte size of the trap handler in bytes
+     *
+     * @param trapType different types of trap handler, currently, support runtime,  
+     *  debugger, exception, system call.
+     */
+    virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte, uint32_t trapType) = 0;
     
-    /*! associate buffer with trap handler */
-    virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+    /**
+     * @brief Set up trap handler buffer in the current device
+     *
+     * @param trapHandlerBuffer pointer to the trap handler buffer, this 
+     * address needs to be 256-byte aligned.
+     *
+     * @param trapHandlerBufferSizeByte size of the trap handler buffer in bytes
+     *
+     * @param trapType different types of trap handler, currently, support runtime,  
+     *  debugger, exception, system call.
+     */
+    virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte, uint32_t trapType) = 0;
+
+    /**
+     * @brief retrieve all the trap handler information in the device
+     *
+     * @param trapHandlerInfo pointer to the trap handler info buffer
+     */
+    virtual void setupTrapHandlerInfo(TrapHandlerInfo *pTrapHandlerInfo) = 0;
+
+    /**
+     * @brief retrieve the ISA pointer and size that are dispatched to the kernel
+     *
+     * @param ptr pointer to the ISA in the dispatch descriptor
+     *
+     * @param size size of the ISA
+     */
+    virtual void getISA(void * &ptr, size_t &size) = 0;
 
 	/**
      * @brief, allows the query of the index of the SGPR containing the scratch 
      * the scratch bufffer offset for each wave
      */
-    //virtual uint32_t getScratchBufferWaveOffsetSgprIndex() = 0;
+    virtual uint32_t getScratchBufferWaveOffsetSgprIndex() = 0;
 
     /**
      * @brief, DXX will reserve 4 consecutive VGPRs for use by the trap handler
      * for debugger shaders. The ELF section will consist of a 32-bit unsigned
      * interger in little endian oder specifying the index of the first VGPR
      */
-    //virtual uint32_t getTrapReservedVgprIndex() = 0;
+    virtual uint32_t getTrapReservedVgprIndex() = 0;
 
     /**
      * @brief returns the pointer to ELF so debugger or other tools that
      * received asynchronous notification about this dispatch can do
      * deep-dives
      */
-    //virtual void * getBoundShaderBinary() = 0;
-    
+    virtual void * getBoundShaderBinary() = 0;
+
     /**
-     * @brief API to give the user an ability to control the wave
-     *
-     * The entire dispatch (entire "grid") can be controlled via WaveAction
-     * choices
-     * @param waveID the ID of a wave
-     * @param waveAct the response
+     * @brief set the kernel to execute in the debug mode
      */
-    //wave control on the device
-    virtual void waveControl(uint32_t deviceID, 
-                             WaveAction action, 
-                             HSAWaveMode mode, 
+    virtual void enableDebugMode() = 0;
+
+    /**
+     * @brief disable the debug mode
+     */
+    virtual void disableDebugMode() = 0;
+
+    /**
+     * @brief enable the exception types
+     *
+     * @param excp_en types of exception to be enabled
+     */
+    virtual void enableExceptionTypes(uint32_t excp_en) = 0;
+
+    /**
+     * @brief control the wave front.
+     *
+     * @param action actions to be taken on the wavefront
+     *
+     * @param mode how the actions are taken, single wave, broadcast, etc.
+     *
+     * @param trapID, this is used for just the action of h_trap, in which
+     *  a trap ID is needed.
+     * 
+     * @param msgPtr, pointer to a message indicate various information. 
+     *  see the KFD design for specific information.
+     */
+    virtual void waveControl(uint32_t action, 
+                             uint32_t mode, 
                              uint32_t trapID, 
                              void *msgPtr) = 0;
 };
@@ -798,7 +1031,20 @@ public:
      * @throws a derivative of std::exception if event is not valid
      */
     virtual void set() = 0;
-	
+
+    /**
+     * @brief Updates output parameters witht Hsa Kernel Module - HKM
+     * provided values. These values are needed to trigger an interrupt
+     * via End Of Pipe (EOP) packet.
+     *
+     * @param eventID event ID to be written to a specific location.
+     *
+     * @param eventAddr address where the eventID is written to.
+     *
+     * @return void
+     */
+    virtual void getTriggerInfo(uint32_t &eventID, uint64_t &eventAddr) = 0;
+
     /**
      * @brief explicitly set the event, forcefully. Useful in graceful
      * recovery
@@ -818,15 +1064,6 @@ public:
     virtual void queryState() = 0;
      
     /**
-     * @brief get the actual ID of the wave that caused this event in the
-     * first place
-     *
-     * @there may be scenarious where this cannot be obtained. One example is
-     * when the wave gets killed
-     */ 
-    virtual uint32_t getActiveWaveID() = 0;
-
-    /**
      * @brief get the dispatch descriptor (a runtime structure) of the
      * dispatch that caused the creation of the wave that caused this event to
      * occur
@@ -839,15 +1076,6 @@ public:
      *
      */ 
     virtual DispatchDescriptor * getDispatchDescriptor() = 0;
-    
-    /*
-     * @brief API to get the PC at which debug activity occured
-     *
-     * THIS API will be modified to return array of PCs and a corresponding
-     * array of group IDs of the wavefronts to which these PCs belong to
-     */
-    virtual void getPC(uint32_t waveID, uint32_t &pc_hi, uint32_t &pc_lo) = 0;
-
 };
 
 /**
