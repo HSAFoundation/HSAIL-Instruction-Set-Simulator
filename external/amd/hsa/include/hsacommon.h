@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#2 - edit change 775354 (text)
+//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#3 - edit change 775440 (text)
 #ifndef _HSACOMMON_H_
 #define _HSACOMMON_H_
 
@@ -26,15 +26,32 @@
 	#endif
 #endif
 
+//////////////////////////////////////////////////////////////////
+/////////////THESE MUST BE DELETED ONCE REMOVED FROM CODE/////////
 #define AMDRC_SUCCESS          0	
-#define AMDRC_DEVICE_ERROR    -8
+#define AMDRC_NOT_INITIALIZED -2
 #define AMDRC_NOT_IMPLEMENTED -3
+#define AMDRC_NULL_ARG        -4
+#define AMDRC_DEVICE_ERROR    -8
+#define AMDRC_EVENT_ERROR     -9
+#define AMDRC_QUEUE_ERROR     -10
+#define AMD_DEVCAP_DBL_PRECISION  (1 << 0)
+#define AMDFAILED(rc) (((int)(rc)) != 0)
+#define AMDSUCCEDED(rc) (((int)(rc)) == 0)
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 
 namespace hsa
 {
 
-template<typename T>
-class vector: public hsacore::vector<T> { };	
+using hsacore::vector;
+//class vector: public hsacore::vector<T> { };	
+using hsacore::TEXTURE_MEMORY;
+using hsacore::SYSTEM_MEMORY;
+using hsacore::LOCAL_MEMORY;
+using hsacore::LDS_MEMORY;
+using hsacore::GDS_MEMORY;
+using hsacore::SCRATCH;
 
 typedef hsacore::ASICType ASICType;
 
@@ -43,6 +60,9 @@ typedef hsacore::ASICInfo ASICInfo;
 typedef hsacore::KernelArgs RTKernelArgs;
 
 typedef hsacore::DeviceType DeviceType;
+using hsacore::CPU;
+using hsacore::GPU;
+using hsacore::INVALID;
 
 typedef hsacore::MemoryDescriptor MemoryDescriptor;
 
