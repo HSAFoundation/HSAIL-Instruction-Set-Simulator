@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#6 - edit change 780511 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#7 - edit change 783545 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -523,16 +523,6 @@ class DLL_PUBLIC Queue
 public:
 
     /**
-     * @brief API to configure the Queue object.
-     *
-     * @note: This api is a temporary hack and would go away.
-     *
-     * @return uint32_t value of virtual memory id used to map
-     * Queue buffer in the kernel.
-     */
-    virtual uint32_t getVmId(void) = 0;
-
-    /**
      * Default destructor
      */
 	virtual ~Queue(){};
@@ -546,6 +536,16 @@ public:
      * @return bool true if it is valid, false otherwise.
      */
     virtual bool isValid() = 0;
+
+    /**
+     * @brief API to configure the Queue object.
+     *
+     * @note: This api is a temporary hack and would go away.
+     *
+     * @return uint32_t value of virtual memory id used to map
+     * Queue buffer in the kernel.
+     */
+    virtual uint32_t getVmId(void) = 0;
 
     /**
      * @brief Location in Queue at which a new command packet could be written.
@@ -846,13 +846,19 @@ Queue * createUserModeQueue(Device *devObj,
                             uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
                             int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK);
 
+/**
+ * @brief Event interface of Hsacore namespace. Objects which implement this
+ * interface allow users to synchronize over kernel execution.
+ *
+ */
+class DLL_PUBLIC Event {
 
-///////////////////////////////////////////////////////////////////////////////
-//Exported Event class
-///////////////////////////////////////////////////////////////////////////////
-class DLL_PUBLIC Event
-{
 public:
+
+    /**
+     * @brief destructor. Calls the KMD function to destroy the event
+     */
+    virtual ~Event(){};
 
     /**
      * @brief Ensures that the event is generated atleast once after this
@@ -860,9 +866,20 @@ public:
      *
      * @param time in milliseconds, 0 for time means blocking wait
      *
-     * @return - signal reason for return, (SIGTIMEOUT/SIGSUCCESS/SIGFAILURE) 
+     * @return HsaEventWaitReturn return value indicating success or timeout.
      */
-    virtual HSA_UNBLOCK_SIGNAL wait(const unsigned int timeOut) = 0;
+    virtual HsaEventWaitReturn wait(uint32_t timeOut) = 0;
+
+    /**
+     * @brief Returns the status of event i.e. it is signaled or not. If the
+     * event object was created with autoReset policy this will reset the
+     * event.
+     *
+     * @return bool true if event object is signaled, false otherwise.
+     *
+     * @throws HsaException if an error occurs in runtime
+     */
+    virtual bool getEventState(void) = 0;
 
     /**
      * @bried Signals the event object.
@@ -872,7 +889,7 @@ public:
      *
      * @return bool true if successful in signalling, false otherwise.
      */
-    virtual bool setEvent(void) = 0;
+    virtual bool setEventState(void) = 0;
 
     /**
      * @brief Resets the event data if the object is valid. A request to reset
@@ -898,22 +915,18 @@ public:
     virtual void setUserHandle(void *usrHandle) = 0;
 
     /**
-     * @brief information that is to be used in EOP (3rd word and 5th word,
-     * count starting at 1)
+     * @brief Returns information that is to be used in End Of Pipe packet (EOP)
+     * construction as the 5th and 3rd words respectivley, counting starts @ 1.
      *
-     * @param value value to be passed to the eop as the 3rd word 
+     * @param evntValue value to be passed to End Of Pipe (EOP) as the
+     * 5th word.
      *
-     * @param location location to be passed to the eop as the 5th word
+     * @param evntAddress address to be passed to End Of Pipe (EOP) as the
+     * 3rd word.
      *
      * @throws HsaException when either of the arguments is null
-     *
      */
-    virtual void getDeviceTriggerInfo(uint32_t &value, uint64_t &location) const = 0;
-
-    /**
-     * @brief destructor. Calls the KMD function to destroy the event
-     */
-    virtual ~Event(){};
+    virtual void getDeviceTriggerInfo(uint32_t &eventValue, uint64_t &eventAddress) const = 0;
 };
 
 
