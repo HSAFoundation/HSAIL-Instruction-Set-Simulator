@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#4 - edit change 777794 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#5 - edit change 779990 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -861,6 +861,16 @@ public:
      * @return - signal reason for return, (SIGTIMEOUT/SIGSUCCESS/SIGFAILURE) 
      */
     virtual HSA_UNBLOCK_SIGNAL wait(const unsigned int i)=0;
+
+    /**
+     * @bried Signals the event object.
+     *
+     * If a thread is waiting on this event object it will unblock
+     * that thread.
+     *
+     * @return bool true if successful in signalling, false otherwise.
+     */
+    virtual bool setEvent(void) = 0;
 
     /**
      * @brief Resets the event data if the object is valid. A request to reset
