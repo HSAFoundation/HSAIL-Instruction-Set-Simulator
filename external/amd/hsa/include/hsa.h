@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#12 - edit change 793390 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#13 - edit change 793923 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -256,50 +256,6 @@ DLL_PUBLIC void mapMemory(void* ptr, const size_t size);
  */
 DLL_PUBLIC void unmapMemory(void* ptr);
 
-
-/**
- * @ingroup Debugger
- * @brief installs the trap handler
- * This method takes note of the trap handler to be installed for a particular
- * device. The method requires that the trapHandler be located in HSA memory
- * (i.e. memory allocated throught HSA memory allocation API). Once a trap
- * handler is specified for a device, all the dispatches on all the queues
- * created from that device use the trap handler. SQ Debug mode is NOT enabled
- * by merely setting a trap handler. An ENV, indicating AMD tools are present
- * and active (ENV TBD), must be set for SQ Debug mode to be set for every
- * dispatch
- *
- * @param dev the HSA device
- * @param trapHandler the location of the finalized trapHandler
- * @param trapHandlerSizeByte size of the trap handler in bytes
- *
- */
-DLL_PUBLIC void 
-setupDbgTrapHandler(
-                hsa::IDevice * dev, 
-                void *         trapHandler,
-                size_t         trapHandlerSizeByte
-                );
-
-/**
- * @ingroup Debugger
- * @brief installs the trap handler buffer
- * The trap handler buffer must be allocated with-in the context of the
- * process that launches the kernel. A protection mechanism (based on PASSID
- * and VIMDs) in the HSA Driver ensures that pages corresponding to a trap
- * handler buffer are locked-in. 
- *
- * @param dev the HSA device
- * @param trapHandlerBuffer the location of the trap handler buffer
- * @param trapHandlerBufferSizeByte the size of this buffer in bytes
- */
-DLL_PUBLIC void 
-setupDbgTrapHandlerBuffer(
-                hsa::IDevice * dev, 
-                void *   trapHandlerBuffer,
-                size_t   trapHandlerBufferSizeByte
-                );
-
 /**
  * @ingroup Debugger
  * @brief flush device caches 
@@ -350,6 +306,10 @@ public:
 
     //setup trap handler buffer
     virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+
+    //setup trap handler buffer
+    virtual void setupTrapHandlerAndBuffer(void *trapHandler, size_t trapHandlerSizebyte, 
+                                           void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
 
     //get trap handler and its size
     virtual void getTrapHandler(void* &trapHandler, size_t &trapHandlerSizeByte) = 0;
