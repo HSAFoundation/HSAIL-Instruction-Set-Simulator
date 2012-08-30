@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#10 - edit change 793267 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#11 - edit change 793355 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -94,7 +94,7 @@ DLL_PUBLIC const vector<hsacore::Device*>& getDevices();
  * @param autoReset if the event object should be reset automatically or
  * manually. True indicates auto reset, false indicates manual reset. 
  *
- * @param initState initial state of event object if it is SET or not SET.
+ * @param initState initial state of event if it is SET or not SET.
  *
  * @return a pointer to a new Event class object
  */
@@ -114,7 +114,7 @@ DLL_PUBLIC Event* createCoreEvent(Queue*  queObj,
  * @param autoReset if the event object should be reset automatically
  * or manually. True indicates manual reset, false otherwise.
  *
- * @param initState initial state of event object if it is SET or not SET.
+ * @param initState initial state of event if it is SET or not SET.
  *
  * @return a pointer to a new Event class object
  */
@@ -132,7 +132,7 @@ DLL_PUBLIC Event* createCoreEvent(uint32_t devId,
  * @param autoReset if the event object should be reset automatically
  * or manually. True indicates manual reset, false otherwise.
  *
- * @param initState initial state of event object if it is SET or not SET.
+ * @param initState initial state of event if it is SET or not SET.
  *
  * @throws HsaExeption if input parameters are illegal or invalid.
  *
@@ -936,7 +936,8 @@ public:
      * @brief Ensures that the event is generated atleast once after this
      * call was invoked
      *
-     * @param time in milliseconds, 0 for time means blocking wait
+     * @param timeOut in milliseconds, 0 means non-blocking wait while
+     * 0xFFFFFFFF means blocking wait.
      *
      * @return HsaEventWaitReturn return value indicating success or timeout.
      */
@@ -977,14 +978,14 @@ public:
      *
      * @return the current value of user handle
      */
-    virtual void * getUserHandle(void) const = 0;
+    virtual void * getUsrHandle(void) = 0;
 
     /**
      * @brief set a new value for the user handle
      *
      * @return success if set, users burden to ensure MT races are dealt with
      */
-    virtual void setUserHandle(void *usrHandle) = 0;
+    virtual void setUsrHandle(void *usrHandle) = 0;
 
     /**
      * @brief Returns information that is to be used in End Of Pipe packet (EOP)
@@ -998,7 +999,35 @@ public:
      *
      * @throws HsaException when either of the arguments is null
      */
-    virtual void getDeviceTriggerInfo(uint32_t &eventValue, uint64_t &eventAddress) const = 0;
+    virtual void getDeviceTriggerInfo(uint32_t &eventValue, uint64_t &eventAddress) = 0;
+
+    /**
+     * @brief Waits on the list of input events. The method will return when
+     * one or all of the events in the list has been signalled or the timeout
+     * specified for wait has expired.
+     *
+     * @param waitOnAll boolean specifies if the call should wait on all events
+     * in the dependent list to be signalled or any one of them is sufficient.
+     *
+     * @param timeOut in milliseconds, 0 means non-blocking wait while 0xFFFFFFFF
+     * means a blocking wait.
+     *
+     * @param eventCnt number of events in the events list on which this call
+     * would suspend.
+     *
+     * @param eventList list of events to wait on.
+     *
+     * @param waitOnAll specifies if the wait should wait on all dependent events.
+     * TRUE means wait on all events, FALSE means call will return when any one
+     * of the events is signalled.
+     *
+     * @throws HsaException when either of the arguments is invalid or an errors
+     * occurs in the runtime.
+     *
+     * @return uint32_t specifies if the kFD call has succeeded.
+     */
+    virtual uint32_t waitOnEvents(bool waitOnAll, uint32_t timeOut,
+                                  uint32_t eventCnt, hsacore::Event **eventList) = 0;
 };
 
 
