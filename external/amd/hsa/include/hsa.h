@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#24 - edit change 809937 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#25 - edit change 811487 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -22,32 +22,6 @@
 
 #include "hsacommon.h"
 #include "hsacorecommon.h"
-//Debug information of hsa kernels
-//This is temporary. 
-//This will be moved to another file
-
-typedef struct _debugInfo
-{
-    //Are the values valid
-    bool isValid;
-
-    //Pointer to the ISA
-    const void* ptrToISA;
-
-    //Pointer to the BRIG
-    const void *ptrToBRIG;
-
-    //Size of the ISA
-    size_t sizeOfISA;
-
-    //Number of SPGRS
-    int noOfSGPR;
-
-    //Number of VGPRS
-    int noOfVGPR;
-
-    
-} debugInfo;
 
 
 namespace hsa
@@ -61,6 +35,7 @@ namespace hsa
  */
 
 #define MAX_INFO_STRING_LEN 0x40
+
 enum HSAIL_ADDRESS_QUALIFIER{
 HSAIL_ADDRESS_ERROR=0,
 HSAIL_ADDRESS_GLOBAL,
@@ -522,19 +497,6 @@ public:
 
     virtual ~Kernel(){};
 
-    /* @ brief sets the argument for kernel. Not implemented
-    * @param index - index in the argument list
-    * @param arg - argument data
-    */
-
-    virtual void setArg(int index, RTKernelArgs arg)=0;
-
-    /*! @brief Get debug information for the particular device
-    * @return The pointer to the debug info - Might have to be void*
-    */
-
-    virtual debugInfo* getDebugInfo()=0;
-   
 };
 
 class RuntimeApi;
@@ -558,12 +520,15 @@ public:
     virtual uint32_t getDeviceCount()=0;
     virtual const hsa::vector<hsa::Device*>& getDevices()=0;
     virtual hsa::Queue* createDeviceQueue(hsa::Device *d, unsigned int size)=0;
-    virtual hsa::Program* createProgram(char *charElf, size_t elfSize, Device_list_ptr pDevices)=0;
+    virtual hsa::Program* createProgram(char *charElf, 
+                                        size_t elfSize,
+                                        Device_list_ptr pDevices)=0;
+
     virtual hsa::Program* createProgramFromFile(const char* fileName,
         Device_list_ptr pDevices)=0;
     virtual void destroyProgram(hsa::Program*)=0;
 
-    virtual hsa::Program* createProgramFromHSAIL(char *charHSAIL, Device_list_ptr pDevices)=0;
+ 
 
 
     virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
@@ -942,6 +907,34 @@ createDebuggerEvent(
                 bool manualReset, 
                 bool state
                 );
+
+
+/* @ brief Creates a Program object from an ELF
+ * @param charElf - Pointer to an ELF
+ * @param elfSize - size of the ELF
+ * @param pDevices - pointer to a list of devices
+*/
+
+DLL_PUBLIC hsa::Program* createProgram(char *charElf, 
+                                        size_t elfSize,
+                                        Device_list_ptr pDevices);
+
+/* @ brief Creates a Program object from a File
+ * @param fileName - Name of the file
+ * @param pDevices - pointer to a list of devices
+*/
+
+DLL_PUBLIC hsa::Program* createProgramFromFile(
+                                const char* fileName,
+                                Device_list_ptr pDevices);
+
+/* @ brief Destroys a a program
+ * @param prog pointer to the program
+ * @param pDevices - pointer to a list of devices
+*/
+
+DLL_PUBLIC void destroyProgram(hsa::Program* prog);
+
 
 /**
  * @}
