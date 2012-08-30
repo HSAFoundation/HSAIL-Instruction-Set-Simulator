@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#23 - edit change 805434 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#24 - edit change 809937 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -11,7 +11,7 @@
 #include <string>
 #endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 
-#include "hsailutil.h"
+//#include "hsailutil.h"
 // lhowes: Temporary workaround for tool chain issues
 // Once headers finalized we can come up with a cleaner 
 // solution if system includes are still necessary
@@ -21,7 +21,7 @@
 #endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 
 #include "hsacommon.h"
-
+#include "hsacorecommon.h"
 //Debug information of hsa kernels
 //This is temporary. 
 //This will be moved to another file
@@ -41,7 +41,11 @@ typedef struct _debugInfo
     size_t sizeOfISA;
 
     //Number of SPGRS
-    size_t noOfSPGRs;
+    int noOfSGPR;
+
+    //Number of VGPRS
+    int noOfVGPR;
+
     
 } debugInfo;
 
@@ -327,6 +331,11 @@ class DLL_PUBLIC Device
 public:
     virtual hsa::DeviceType getType() const = 0;
 
+    virtual hsa::Kernel* compile(
+                    hsa::Program* prog,
+                    const char* kernelName,
+                    const char* options)=0;
+
     virtual unsigned int getComputeUnitsCount()=0;
 
     virtual uint32_t getCapabilities()=0;
@@ -342,6 +351,8 @@ public:
     virtual bool isDebug()=0;
 
     virtual bool isDedicatedCompute()=0;
+
+
 
     // Get the device information in bulk.
     //virtual const Info& info()=0;
@@ -470,13 +481,24 @@ public:
      */
     virtual hsa::Device *getDevice(void) = 0;
 
-    virtual hsa::Event *dispatch(Kernel * kernel, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::Event *dispatch(Kernel * kernel, 
+                        hsa::Event * depEvent, 
+                        uint32_t numArgs, ...)=0;
 
-    virtual hsa::Event *dispatch(DispatchDescriptor * dispDescriptor, LaunchAttributes *launchAttr, hsa::Event * depEvent)=0;
+    virtual hsa::Event *dispatch(DispatchDescriptor * dispDescriptor, 
+                        LaunchAttributes *launchAttr, 
+                        hsa::Event * depEvent)=0;
     
-    virtual hsa::Event *dispatch(Kernel * kernel, LaunchAttributes *launchAttr, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::Event *dispatch(Kernel * kernel, 
+                        LaunchAttributes *launchAttr, 
+                        hsa::Event * depEvent, 
+                        uint32_t numArgs, 
+                        ...)=0;
     
-    virtual hsa::Event *dispatch(Kernel* kernel, LaunchAttributes *launchAttr, hsa::Event* depEvent, hsacore::vector<RTKernelArgs>& args)=0;
+    virtual hsa::Event *dispatch(Kernel* kernel, 
+                        LaunchAttributes *launchAttr,
+                        hsa::Event* depEvent, 
+                        hsacore::vector<RTKernelArgs>& args)=0;
     
     virtual void flush()=0;
 
@@ -494,39 +516,25 @@ public:
 class DLL_PUBLIC Kernel
 {
 public:
-    virtual ~Kernel(){};
-    virtual void setArg(int index, RTKernelArgs arg)=0;
-    virtual debugInfo* getDebugInfo(hsa::Device *d)=0;
-    /* This needs to go - should not pass the metadata
-    through an interface*/
-    //virtual void initArgs(char* argList)=0;
-
-    /*! Returns the number of arguments
-    * @return - The number of arguments
-    * */
-    //virtual int getArgCount()=0;
     
-    /*! Returns the offset in the parameter stack
-    * @param index - index of the argument
-    * @return - The offset in the parameter stack
-    * */
-    //virtual int getArgOffset(int index)=0;
+    /*! @brief destructor
+    */
+
+    virtual ~Kernel(){};
+
+    /* @ brief sets the argument for kernel. Not implemented
+    * @param index - index in the argument list
+    * @param arg - argument data
+    */
+
+    virtual void setArg(int index, RTKernelArgs arg)=0;
+
+    /*! @brief Get debug information for the particular device
+    * @return The pointer to the debug info - Might have to be void*
+    */
+
+    virtual debugInfo* getDebugInfo()=0;
    
-    /* Returns the size of the argument
-    * @param index - index of the argument
-    * @return - The size of the argument
-    * */
-    //virtual int getArgSize(int index)=0;
-    /*! Returns the type of the argument
-    * @param index - index of the argument
-    * @return - The type of the argument as a HSAIL_ARG_TYPE enum
-    * */
-    //virtual HSAIL_ARG_TYPE getArgType(int index)=0;
-	/*! Returns the Address Qualifier - global, local etc.
-    * @param index - index of the argument
-    * @return - The type of the argument as a HSAIL_ADDRESS_QUALIFIER enum
-    * */
-    //virtual HSAIL_ADDRESS_QUALIFIER getArgAddrQualifier(int index)=0;
 };
 
 class RuntimeApi;
@@ -553,9 +561,13 @@ public:
     virtual hsa::Program* createProgram(char *charElf, size_t elfSize, Device_list_ptr pDevices)=0;
     virtual hsa::Program* createProgramFromFile(const char* fileName,
         Device_list_ptr pDevices)=0;
+    virtual void destroyProgram(hsa::Program*)=0;
+
     virtual hsa::Program* createProgramFromHSAIL(char *charHSAIL, Device_list_ptr pDevices)=0;
+
+
     virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
-    virtual Kernel *createKernel(Program * k, hsa::KernelId & kid)=0;
+//    virtual Kernel *createKernel(Program * k, hsa::KernelId & kid)=0;
 
     /**
      * @copydoc hsa::allocateMemory(const size_t size, const size_t alignment = 0)
@@ -594,31 +606,49 @@ class DLL_PUBLIC Program
 {
 public:
 
-    /*! Builds and returns a kernel for the list of devices owned 
+    /*! @brief Builds and returns a kernel for the list of devices owned 
     * @param kernelName the name of the kernel to build 
     * @param size length of kernel name 
     * @return returns a built kernel for execution
     */
 
     virtual hsa::Kernel *compileKernel(const char* kernelName,
-        const char* options) = 0;
-    /*! Add a device to the list of devices a kernel is built against.
+                               const char* options) = 0;
+    /*! @brief Add a device to the list of devices a kernel is built against.
     * @param device The device to add.
     */
 
     virtual void addDevice(hsa::Device * device)  = 0;
-    /*! Get metadata associated with a kernel 
-    * @param d The device the kernel will run on 
-    * @param kid the KernelID identiying the kernel
+
+    /*! @brief Get debug information for the particular device
+    * @param d The device 
+    * @param kid kernel name
+    * @return The pointer to the debug info - Might have to be void*
     */
 
-    virtual hsacore::HsailKernel* getMetaData(Device *d, KernelId &kid) = 0;
+    /*! @brief Return a pointer to the elf
+    *  @return elf pointer
+    */
 
-    virtual debugInfo* getDebugInfo(Device *d, KernelId &kid) = 0;
+    virtual char* getElf()=0;
 
+    /*! @brief Returns size of the elf
+    *  @return The size of the elf
+    */
 
-    /*! standard destructor */
+    virtual size_t getElfSize()=0;
+
+    /*! @brief Returns the base address for all
+     *  globals associated with this memory
+     *  @return The size of the elf
+     */
+
+    virtual void* getGlobalBase()=0;
+    
+    /*! @brief standard destructor */
+
     virtual ~Program(){};
+
 };
 
 /**
