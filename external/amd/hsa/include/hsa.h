@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#15 - edit change 794751 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#16 - edit change 796045 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -359,7 +359,7 @@ public:
      *
      * @return void
      */
-    virtual void getDeviceTriggerInfo(uint32_t &krnlValue, uint64_t &krnlAddr) = 0;
+    virtual void getTriggerInfo(uint32_t &krnlValue, uint64_t &krnlAddr) = 0;
 
     /**
      * @brief Waits on the list of input events. The method will return when
@@ -400,6 +400,17 @@ public:
      * @brief Default destructor of Queue interface.
      */
     virtual ~Queue(){};
+
+    /**
+     * @brief Returns the compute device with which the Queue object
+     * is associated with.
+     *
+     * @note: The Api will throw an exception if the Queue object is
+     * invalid i.e. it has been destroyed.
+     *
+     * @return hsa::Device * pointer to the compute device
+     */
+    virtual hsa::Device *getDevice(void) = 0;
 
     virtual hsa::Event *dispatch(Kernel * kernel, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
 
