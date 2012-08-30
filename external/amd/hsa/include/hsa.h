@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#9 - edit change 793186 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#10 - edit change 793267 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -209,13 +209,14 @@ typedef hsa::vector<hsa::IDevice*>* Idevice_list_ptr;
 typedef std::string KernelId;
 
 /**
- * @copydoc hsacore::allocateMemory
+ * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment = 0)
  */
-DLL_PUBLIC void*
-allocateMemory(
-    const size_t size,
-    const uint32_t memtype,
-    const IDevice& dev);
+DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment = 0);
+
+/**
+ * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev)
+ */
+DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev);
 
 /**
  * @copydoc hsacore::freeMemory
@@ -478,13 +479,16 @@ public:
     virtual IKernel *createKernel(IProgram * k, hsa::KernelId & kid)=0;
 
     /**
-     * @copydoc hsa::allocateMemory
+     * @copydoc hsa::allocateMemory(const size_t size, const size_t alignment = 0)
      */
-    virtual void*
-    allocateMemory(
-        const size_t size,
-        const uint32_t memtype,
-        const IDevice& dev) = 0;
+    virtual void* 
+    allocateMemory(const size_t size, const size_t alignment = 0) = 0;
+
+    /**
+     * @copydoc hsa::allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev)
+     */
+    virtual void* 
+    allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev) = 0;
 
     /**
      * @copydoc hsa::freeMemory
