@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#7 - edit change 788268 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#8 - edit change 792820 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -74,6 +74,7 @@ HSAIL_DATATYPE_MAX_TYPES
 class IQueue;
 class IKernel;
 class Event;
+class DebuggerEvent;
 class IDevice;
 class IProgram;
 class IDispatchDescriptor;
@@ -129,21 +130,21 @@ typedef void (*HSATrapHandle)(void *,int);
  * location of trap handle
  */
 typedef struct HSAExceptionPolicy {
-        int enableException;       /*!< default is to enable them */
-        HSAWaveAction waveAction;  /*!< default wave action is to halt it */
+    int enableException;       /*!< default is to enable them */
+    HSAWaveAction waveAction;  /*!< default wave action is to halt it */
 	HSAHostAction hostAction;  /*!< default host action is to ignore the
 				     event when it occurs it but inform the
 				     host when it does wait on this kernel */
 	HSATrapHandle trapHandle;  /*!< if host action is to interrupt, this
 				     trap handle gets executed */
 
-        HSAExceptionPolicy()
-        {
-            int enableException = 1;
-            waveAction = HALT_WAVE;
-            hostAction = IGNORE_HOST;
-            trapHandle = NULL;
-        }
+    HSAExceptionPolicy()
+    {
+        int enableException = 1;
+        waveAction = HALT_WAVE;
+        hostAction = IGNORE_HOST;
+        trapHandle = NULL;
+    }
 }HSAExceptionPolicy;
 
 /**
@@ -170,6 +171,14 @@ typedef struct LaunchAttributes {
 						policy*/
 	HSAExceptionPolicy exceptionPolicy; /*!< default is to generate
 					      exceptions*/
+	
+	/* trap handler used for GPU exeception and HW debugger */
+	void *trapHandler;  
+	/* trap handler buffer, accessed by trap handler */
+	void *trapHandlerBuffer;
+	/* trap handler buffer size */
+	void *trapHandlerBufferSize;
+
 	HSACachePolicy cachePolicy; /*!< default is to flush everything */
         int gridX; /*!< default is 1*/
         int gridY; /*!< default is 1*/
@@ -234,6 +243,45 @@ DLL_PUBLIC void mapMemory(void* ptr, const size_t size);
  */
 DLL_PUBLIC void unmapMemory(void* ptr);
 
+
+/**
+ * @brief APIs for creating debug event
+ */
+DLL_PUBLIC hsa::DebuggerEvent * 
+createDebuggerEvent(
+	hsa::IDevice *dev, 
+	bool manulRest, 
+	bool state
+	);
+
+DLL_PUBLIC hsa::DebuggerEvent * 
+createDebuggerEvent(
+	hsa::IDevice *dev, 
+    void *userBuffer, 
+    bool manulRest, 
+    bool state
+	);
+
+/**
+ * @brief installs the trap handler
+ */
+DLL_PUBLIC hsa::AMDRETCODE 
+setupDbgTrapHandler(
+	hsa::IDevice * dev, 
+	void *         trapHandler,
+	size_t         trapHandlerSizeByte
+	);
+
+/**
+ * @brief installs the trap handler buffer
+ */
+DLL_PUBLIC hsa::AMDRETCODE 
+setupDbgTrapHandlerBuffer(
+	hsa::IDevice * dev, 
+	void *   trapHandlerBuffer,
+	size_t   trapHandlerBufferSizeByte
+	);
+
 /**
  * @brief Device class, public interface in the device layer.
  */
@@ -264,6 +312,24 @@ public:
 	//Temp hack to get the asicinfo
 	virtual void* getASICInfo()=0;
 
+	//setup trap handler
+	virtual hsa::AMDRETCODE setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
+
+	//setup trap handler buffer
+	virtual hsa::AMDRETCODE setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+
+	//get trap handler and its size
+	virtual hsa::AMDRETCODE getTrapHandler(void* &trapHandler, size_t &trapHandlerSizeByte) = 0;
+
+	//get the trap handler buffer and its size
+	virtual hsa::AMDRETCODE getTrapHandlerBuffer(void* &trapHandlerBuffer, size_t &trapHandlerBufferSizeByte) = 0;
+
+	//add queue to the list
+	virtual hsa::AMDRETCODE addQueueToList(hsa::IQueue *queue) = 0;
+
+	//get dispatch descriptor from dispatch ID
+    virtual IDispatchDescriptor * getDispatchDescriptor(uint32_t dispatchID) = 0;
+
     virtual ~IDevice(){};
 };
 
@@ -291,6 +357,29 @@ public:
 
 };
 
+class DLL_PUBLIC DebuggerEvent
+{
+public:
+    /**
+     * @brief Default destructor of Event interface.
+     */
+    virtual ~DebuggerEvent(){};
+
+    /**
+     * @brief Ensures that the event is generated atleast once after this
+     * call was invoked
+     *
+     * @param time in milliseconds, 0 for time means blocking wait
+     *
+     * @return HsaEventWaitReturn return value indicating success or timeout.
+     */
+    virtual HsaEventWaitReturn wait() = 0;
+    virtual HsaEventWaitReturn wait(uint32_t timeOut) = 0;
+	virtual hsa::AMDRETCODE set() = 0;
+	virtual hsa::AMDRETCODE reset() = 0;
+	virtual hsa::AMDRETCODE queryState() = 0;
+};
+
 class DLL_PUBLIC IQueue
 {
 
@@ -311,6 +400,7 @@ public:
     virtual hsa::AMDRETCODE getScratchSize(unsigned int *scrsize)=0;
     virtual hsa::AMDRETCODE flush()=0;
     virtual IDispatchDescriptor * createDispatchDescriptor(IKernel * kernel, LaunchAttributes *launchAttr, uint32_t numArgs, ...)=0;
+    virtual IDispatchDescriptor * getDispatchDescriptor(uint32_t dispatchID) = 0;
 
 };
 
@@ -447,8 +537,15 @@ public:
     virtual void execCommandPkt() = 0;
     /*! Wait for notification that the kernel has executed */
     virtual void waitForEndOfKernel() = 0;
+	/*! Get the dispatch ID */
+	virtual uint32_t getDispatchID() = 0;
     /*! Deallocates memory as necessary */
     virtual ~IDispatchDescriptor(){};
+    /*! Deallocates memory as necessary */
+	virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
+    /*! Deallocates memory as necessary */
+	virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+
 };
 
 /**
