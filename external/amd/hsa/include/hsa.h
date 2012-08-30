@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#16 - edit change 796045 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#17 - edit change 797002 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -494,6 +494,7 @@ public:
     virtual hsa::Queue* createDeviceQueue(hsa::Device *d, unsigned int size)=0;
     virtual _Program* createProgram(char *charElf, size_t elfSize, Device_list_ptr pDevices)=0;
     virtual _Program* createProgramFromELF(void *charElf, Device_list_ptr pDevices)=0;
+   // virtual _Program* createProgramFromHSAIL(void *charHSAIL, Device_list_ptr pDevices)=0;
     virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
     virtual Kernel *createKernel(_Program * k, hsa::KernelId & kid)=0;
 
@@ -540,7 +541,8 @@ public:
     * @return returns a built kernel for execution
     */
 
-    virtual hsa::Kernel * build(const char* kernelName,size_t size) = 0;
+    virtual hsa::Kernel *compileKernel(const char* kernelName,
+        const char* options) = 0;
     /*! Add a device to the list of devices a kernel is built against.
     * @param device The device to add.
     */
