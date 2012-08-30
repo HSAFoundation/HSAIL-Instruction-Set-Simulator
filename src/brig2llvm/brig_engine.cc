@@ -7,6 +7,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "brig_engine.h"
+#include "brig_runtime.h"
+
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
 #include "llvm/Type.h"
@@ -14,11 +17,9 @@
 #include "llvm/Bitcode/ReaderWriter.h"
 #include "llvm/CodeGen/LinkAllCodegenComponents.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
-#include "llvm/ExecutionEngine/Interpreter.h"
 #include "llvm/ExecutionEngine/JIT.h"
 #include "llvm/ExecutionEngine/JITEventListener.h"
 #include "llvm/ExecutionEngine/JITMemoryManager.h"
-#include "llvm/ExecutionEngine/MCJIT.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/IRReader.h"
 #include "llvm/Support/ManagedStatic.h"
@@ -53,8 +54,11 @@
 namespace hsa {
 namespace brig {
 
+static ForceBrigRuntimeLinkage runtime;
+
 void launchBrig(llvm::Module *Mod,
                 llvm::Function *EntryFn,
+                llvm::ArrayRef<void *> args,
                 bool forceInterpreter,
                 char optLevel) {
 
@@ -76,8 +80,6 @@ void launchBrig(llvm::Module *Mod,
   builder.setEngineKind(forceInterpreter
                         ? llvm::EngineKind::Interpreter
                         : llvm::EngineKind::JIT);
-
-  builder.setUseMCJIT(true);
 
   if(!forceInterpreter)
     builder.setJITMemoryManager(
@@ -120,6 +122,9 @@ void launchBrig(llvm::Module *Mod,
   }
 
   std::vector<llvm::GenericValue> GVArgs;
+  for(unsigned i = 0; i < args.size(); ++i)
+    GVArgs.push_back(llvm::GenericValue(args[i]));
+
   EE->runFunction(EntryFn, GVArgs);
 
   // Run static destructors.
