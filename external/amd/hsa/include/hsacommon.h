@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#3 - edit change 775440 (text)
+//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#4 - edit change 783545 (text)
 #ifndef _HSACOMMON_H_
 #define _HSACOMMON_H_
 
@@ -52,6 +52,18 @@ using hsacore::LOCAL_MEMORY;
 using hsacore::LDS_MEMORY;
 using hsacore::GDS_MEMORY;
 using hsacore::SCRATCH;
+
+/**
+ * @brief Maps Hsacore Event Wait timeouts to corresponding
+ * Hsa Runtime construct.
+ */
+typedef hsacore::HsaEventWaitTime HsaEventWaitTime;
+
+/**
+ * @brief Maps Hsacore Event Wait return codes to corresponding
+ * Hsa Runtime construct.
+ */
+typedef hsacore::HsaEventWaitReturn HsaEventWaitReturn;
 
 typedef hsacore::ASICType ASICType;
 
