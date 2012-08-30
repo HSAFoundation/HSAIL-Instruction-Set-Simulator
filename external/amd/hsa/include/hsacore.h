@@ -1,14 +1,16 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#1 - add change 772986 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#2 - edit change 775106 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
 #include <vector>
 #include <iostream>
+#include "hsacorecommon.h"
 
 namespace hsacore
 {
 /**
- * @addtogroup HSACORE_PUBLIC Public HSA core interfaces
+ * @addtogroup HSACoreRuntime 
+ * Core Runtime Interace Documentation
  * @{
  */
 
@@ -68,7 +70,7 @@ class Event;
 // HsaCoreApi class.
 
 DLL_PUBLIC unsigned getDeviceCount();
-DLL_PUBLIC const hsa::vector<hsacore::Device*>& getDevices();
+DLL_PUBLIC const vector<hsacore::Device*>& getDevices();
 
 /**
  * @brief factory API for abstracting the creation of an event class
@@ -147,34 +149,34 @@ DLL_PUBLIC void destroyCoreEvent(Event *e);
  *
  * The memory allocated is automatically registered by the affected device(s).
  *
- * If the hsa::SYSTEM_MEMORY flag is set, the runtime will try to allocate
+ * If the SYSTEM_MEMORY flag is set, the runtime will try to allocate
  * system memory close to \c device. In any case, system memory will
  * be registered and be available to all the devices in the platform.
  * All the other memory types require that a valid device is specified.
  *
- * The type of memory is one of hsa::MemoryType. Further options might be
+ * The type of memory is one of MemoryType. Further options might be
  * indicated using a mask.
- * @li If the type is hsa::SYSTEM_MEMORY, further options can be indicated by creating a
- *     mask using the values in hsa::SystemMemoryOptions. For instance, to allocate
+ * @li If the type is SYSTEM_MEMORY, further options can be indicated by creating a
+ *     mask using the values in SystemMemoryOptions. For instance, to allocate
  *     pinned, read only system memory we would specify the type as
  *     <tt>SYSTEM_MEMORY | PINNED |  READ_ONLY</tt>.
  *     If no option are specified, the runtime assumes the mask
  *     <tt>SYSTEM_MEMORY | PAGEABLE | CACHED</tt>.
  * @li If the type is LOCAL_MEMORY, further options can be indicated by creating a
- * 	   mask using the values in hsa::LocalMemoryOptions. If no options are
+ * 	   mask using the values in LocalMemoryOptions. If no options are
  * 	   specified, the runtime assumes the mask <tt>LOCAL_MEMORY | CPU_ACCESSIBLE</tt>.
  * @li All the other memory types do not support further options.
  *
  * @param dev Device where the allocated memory will be available.
  * @param size Requested allocation size in bytes.
  * @param type Type of memory to be allocated.
- * @exception hsa::HsaException if the input is invalid, or if the runtime is
+ * @exception HsaException if the input is invalid, or if the runtime is
  *            unable to allocate enough memory to perform the requested operation.
  * @return Pointer to allocated memory.
  *
- * @see hsa::MemoryType
- * @see hsa::SystemMemoryOptions
- * @see hsa::LocalMemoryOptions
+ * @see MemoryType
+ * @see SystemMemoryOptions
+ * @see LocalMemoryOptions
  */
 DLL_PUBLIC void* allocateMemory(const Device& dev, const size_t size,
 		const uint32_t type);
@@ -190,7 +192,7 @@ DLL_PUBLIC void* allocateMemory(const Device& dev, const size_t size,
  * devices.
  *
  * @param ptr Pointer to memory to free.
- * @exception hsa::HsaException if the the runtime is
+ * @exception HsaException if the the runtime is
  *            unable to deallocate the specified memory region.
  */
 DLL_PUBLIC void freeMemory(void* ptr);
@@ -235,9 +237,9 @@ DLL_PUBLIC void deregisterMemory(void* ptr);
  * Indicates that the memory region passed as parameter will be used by the
  * available device(s).
  * \li In the case of HSA devices, this invocation is optional if the memory
- *     type of the region is hsa::SYSTEM_MEMORY, and might speed up accesses to
+ *     type of the region is SYSTEM_MEMORY, and might speed up accesses to
  *     that memory
- *     region. If the type is hsa::LOCAL_MEMORY, it is mandatory for the device
+ *     region. If the type is LOCAL_MEMORY, it is mandatory for the device
  *     to map the region before accessing it.
  * \li In case of near-HSA devices, it is mandatory for the device to map
  *     the region before accessing it, independently of the type of the region.
@@ -246,7 +248,7 @@ DLL_PUBLIC void deregisterMemory(void* ptr);
  *
  * @param ptr Pointer to memory.
  * @param size Requested mapping size in bytes.
- * @exception hsa::HsaException if the runtime is unable to map enough memory to
+ * @exception HsaException if the runtime is unable to map enough memory to
  *            perform the requested operation.
  *
  */
@@ -262,7 +264,7 @@ DLL_PUBLIC void mapMemory(void* ptr, const size_t size);
  * accessible by the device even after unmapping it.
  *
  * @param ptr Pointer to memory to unmap.
- * @exception hsa::HsaException if the runtime is unable to unmap the specified
+ * @exception HsaException if the runtime is unable to unmap the specified
  *            memory region.
  *
  */
@@ -290,7 +292,7 @@ public:
      *       INVALID
      *   };
      */
-    virtual hsa::DeviceType getType()=0;
+    virtual DeviceType getType()=0;
     
     /**
      * @brief Get a unique identifier for this device.
@@ -312,7 +314,7 @@ public:
      *
      * @return reference to a vector of memory descriptor pointers.
      */
-    virtual const hsa::vector<hsa::MemoryDescriptor*>& getMemoryDescriptors()=0;
+    virtual const vector<MemoryDescriptor*>& getMemoryDescriptors()=0;
 
        /**
      * @brief Get the cache descriptors associated with the device. Cache descriptor is the
@@ -320,7 +322,7 @@ public:
      *
      * @return reference to a vector of cache descriptor pointers.
      */
-    virtual const hsa::vector<hsa::CacheDescriptor*>& getCacheDescriptors()=0;
+    virtual const vector<CacheDescriptor*>& getCacheDescriptors()=0;
 
     /**
      * @brief API to check if double precision is supported on the device.
@@ -829,7 +831,7 @@ public:
      *
      * @return - signal reason for return, (SIGTIMEOUT/SIGSUCCESS/SIGFAILURE) 
      */
-    virtual HSA_UNBLOCK_SIGNAL wait(const uint i)=0;
+    virtual HSA_UNBLOCK_SIGNAL wait(const unsigned int i)=0;
 
     /**
      * @brief Resets the event data if the object is valid. A request to reset
@@ -907,7 +909,7 @@ public:
         // interface class.
         unsigned getDeviceCount();
 
-        const hsa::vector<hsacore::Device*>& getDevices();
+        const vector<hsacore::Device*>& getDevices();
 
         /**
          * @copydoc hsacore::allocateMemory
