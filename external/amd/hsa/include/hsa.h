@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#4 - edit change 778914 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#5 - edit change 779232 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -282,6 +282,7 @@ public:
     virtual hsa::IEvent * dispatch(IKernel * kernel, IEvent * depEvent, uint32_t numArgs, ...)=0;
     virtual hsa::IEvent *dispatch(IDispatchDescriptor * dispDescriptor, LaunchAttributes *launchAttr, IEvent * depEvent)=0;
     virtual hsa::IEvent *dispatch(IKernel * kernel, LaunchAttributes *launchAttr, IEvent * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::IEvent *dispatch(IKernel* kernel, LaunchAttributes *launchAttr, IEvent* depEvent, hsacore::vector<RTKernelArg>& args)=0;
     virtual hsa::AMDRETCODE getScratchUserPtr(void **ptr)=0;
     virtual hsa::AMDRETCODE getScratchSize(unsigned int *scrsize)=0;
     virtual hsa::AMDRETCODE flush()=0;
