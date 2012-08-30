@@ -114,7 +114,7 @@ enum BrigDirectiveKinds {
   BrigEDirectiveLabel,
   BrigEDirectiveLabelList,
   BrigEDirectiveVersion,
-  BrigEDirectiveProto,
+  BrigEDirectiveSignature,
   BrigEDirectiveFile,
   BrigEDirectiveComment,
   BrigEDirectiveLoc,
@@ -573,8 +573,8 @@ struct BrigDirectivePragma {
 };
 
 // PRM 20.8.18
-struct BrigDirectiveProto {
-  static const uint16_t DirKind = BrigEDirectiveProto;
+struct BrigDirectiveSignature {
+  static const uint16_t DirKind = BrigEDirectiveSignature;
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;

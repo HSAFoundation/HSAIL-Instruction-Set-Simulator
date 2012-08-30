@@ -75,7 +75,7 @@ bool BrigModule::validateDirectives(void) const {
       caseBrig(DirectiveLabel);
       caseBrig(DirectiveLabelList);
       caseBrig(DirectiveVersion);
-      caseBrig(DirectiveProto);
+      caseBrig(DirectiveSignature);
       caseBrig(DirectiveFile);
       caseBrig(DirectiveComment);
       caseBrig(DirectiveLoc);
@@ -102,7 +102,7 @@ bool BrigModule::validateCode(void) const {
 
   inst_iterator it = S_.code_begin();
   const inst_iterator E = S_.code_end();
-  
+
   for(; it != E; it++) {
     if(!validate(it)) return false;
     switch(it->kind) {
@@ -118,7 +118,7 @@ bool BrigModule::validateCode(void) const {
       caseBrig(InstMod);
       caseBrig(InstRead);
       default: check(false, "Unrecognized code");
-    } 
+    }
   }
 
 #undef caseBrig
@@ -228,7 +228,7 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveImage *dir) const { 
+bool BrigModule::validate(const BrigDirectiveImage *dir) const {
   bool valid = true;
   valid &= validateAlignment(dir, 4);
   valid &= validate(&dir->s);
@@ -244,25 +244,25 @@ bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
   if(dir->valid == 1) {
     valid &= check(dir->filter <= BrigSamplerFilterNearest,
                    "Invalid filter");
-    valid &= check(dir->boundaryU <= BrigSamplerBorder, 
+    valid &= check(dir->boundaryU <= BrigSamplerBorder,
                    "Invalid boundaryU");
-    valid &= check(dir->boundaryV <= BrigSamplerBorder, 
+    valid &= check(dir->boundaryV <= BrigSamplerBorder,
                    "Invalid boundaryV");
-    valid &= check(dir->boundaryW <= BrigSamplerBorder, 
+    valid &= check(dir->boundaryW <= BrigSamplerBorder,
                    "Invalid boundaryW");
     valid &= check(dir->reserved1 == 0 ,
                    "The value of reserved1 must be zero");
   }
-  return valid; 
+  return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveLabel *dir) const { 
+bool BrigModule::validate(const BrigDirectiveLabel *dir) const {
   bool valid = true;
   valid &= validateAlignment(dir, 4);
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
   valid &= validateSName(dir->s_name);
-  return valid; 
+  return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveLabelList *dir) const {
@@ -292,13 +292,14 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveProto *dir) const {
+bool BrigModule::validate(const BrigDirectiveSignature *dir) const {
   bool valid = true;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   valid &= check(!dir->reserved, "Reserved not zero");
-  valid &= check(sizeof(BrigDirectiveProto) + sizeof(BrigDirectiveProto::BrigProtoType) *
+  valid &= check(sizeof(BrigDirectiveSignature) +
+                 sizeof(BrigDirectiveSignature::BrigProtoType) *
                  (dir->outCount + dir->inCount - 1) <= dir->size,
                  "BrigDirectiveProto size too small for outCount + inCount");
   for (unsigned i = 0; i < dir->outCount + dir->inCount; i++) {

@@ -1146,15 +1146,15 @@ static void appendBrigDirectiveProto(Buffer &buffer,
   const size_t numArgs = E - B;
   EXPECT_EQ(outCount + inCount, numArgs);
 
-  size_t arraySize = sizeof(BrigDirectiveProto) +
-    sizeof(BrigDirectiveProto::BrigProtoType) * (numArgs - 1);
+  size_t arraySize = sizeof(BrigDirectiveSignature) +
+    sizeof(BrigDirectiveSignature::BrigProtoType) * (numArgs - 1);
   uint8_t *array = new uint8_t[arraySize];
 
-  BrigDirectiveProto *bdp =
-    reinterpret_cast<BrigDirectiveProto *>(array);
+  BrigDirectiveSignature *bdp =
+    reinterpret_cast<BrigDirectiveSignature *>(array);
 
   bdp->size = arraySize;
-  bdp->kind = BrigEDirectiveProto;
+  bdp->kind = BrigEDirectiveSignature;
   bdp->c_code = c_code;
   bdp->s_name = s_name;
   bdp->fbarCount = fbarCount;
@@ -1174,7 +1174,7 @@ static void appendBrigDirectiveProto(Buffer &buffer,
 TEST(Brig2LLVMTest, VarSizeDirective) {
   {
     hsa::brig::Buffer bb;
-    BrigDirectiveProto::BrigProtoType args[] = {
+    BrigDirectiveSignature::BrigProtoType args[] = {
       // type, align, hasDim, dim
       {Brigu32, 1, 0, 0},
       {Brigu32, 1, 0, 0}
@@ -1189,8 +1189,8 @@ TEST(Brig2LLVMTest, VarSizeDirective) {
                              &args[0],
                              &args[2]);
 
-    EXPECT_EQ(sizeof(BrigDirectiveProto) +
-              sizeof(sizeof(BrigDirectiveProto::BrigProtoType)),
+    EXPECT_EQ(sizeof(BrigDirectiveSignature) +
+              sizeof(sizeof(BrigDirectiveSignature::BrigProtoType)),
               bb.size());
   }
 }
@@ -2847,7 +2847,7 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
       0
     };
     directives.append(&bdv);
-    BrigDirectiveProto::BrigProtoType args[] = {
+    BrigDirectiveSignature::BrigProtoType args[] = {
       // type, align, hasDim, dim
       {Brigu32, 1, 0, 0},
       {Brigu32, 1, 0, 0}
@@ -2885,7 +2885,7 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
       0
     };
     directives.append(&bdv);
-    BrigDirectiveProto::BrigProtoType args[] = {
+    BrigDirectiveSignature::BrigProtoType args[] = {
       // type, align, hasDim, dim
       {Brigu32, 1, 0, 0},
       {Brigu32, 1, 0, 0}
@@ -2932,7 +2932,7 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
       0
     };
     directives.append(&bdv);
-    BrigDirectiveProto::BrigProtoType args[] = {
+    BrigDirectiveSignature::BrigProtoType args[] = {
       // type, align, hasDim, dim
       {Brigf64x2 + 1, 1, 0, 0},
       {Brigf64x2, 1, 1, 0}
