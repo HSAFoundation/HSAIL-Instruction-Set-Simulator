@@ -270,17 +270,175 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
                                   context->valid_string = true;
                                   return TOKEN_STRING; }
 
-((snorm_|unorm_)(((int)(8|16|32))|((short_)(565|555|101010)))) |
-((signed_|unsigned_)(int)(8|16|32)) |
-((half_)?(float))                                                           { context->token_type = PROPERTY;
-                                                                              free_string(context);
-                                                                              context->yycolno+=yyleng;
-                                                                              return TOKEN_PROPERTY; }
+/* image format*/
+snorm_int8                                     { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigSNORM_INT8;
+                                                 return TOKEN_PROPERTY; }
 
-(r|rx|a|rg|rgx|ra|rgb|rgbx|ra|rgb|rgbx|rgba|bgra|argb|intensity|luminance)  { context->token_type = PROPERTY;
-                                                                              free_string(context);
-                                                                              context->yycolno+=yyleng;
-                                                                              return TOKEN_PROPERTY; }
+snorm_int16                                    { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigSNORM_INT16;
+                                                 return TOKEN_PROPERTY; }
+
+unorm_int8                                     { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigUNORM_INT8;
+                                                 return TOKEN_PROPERTY; }
+
+unorm_int16                                    { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigUNORM_INT16;
+                                                 return TOKEN_PROPERTY; }
+
+unorm_short_565                                { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigUNORM_SHORT_565;
+                                                 return TOKEN_PROPERTY; }
+
+unorm_short_555                                { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigUNORM_SHORT_555;
+                                                 return TOKEN_PROPERTY; }
+
+unorm_short_101010                             { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigUNORM_SHORT_101010;
+                                                 return TOKEN_PROPERTY; }
+
+signed_int8                                    { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigSIGNED_INT8;
+                                                 return TOKEN_PROPERTY; }
+
+signed_int16                                   { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigSIGNED_INT16;
+                                                 return TOKEN_PROPERTY; }
+
+signed_int32                                   { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigSIGNED_INT32;
+                                                 return TOKEN_PROPERTY; }
+
+unsigned_int8                                  { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigUNSIGNED_INT8;
+                                                 return TOKEN_PROPERTY; }
+
+unsigned_int16                                 { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigUNSIGNED_INT16;
+                                                 return TOKEN_PROPERTY; }
+
+unsigned_int32                                 { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigUNSIGNED_INT32;
+                                                 return TOKEN_PROPERTY; } 
+
+half_float                                     { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigHALF_FLOAT;
+                                                 return TOKEN_PROPERTY; }
+
+float                                          { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.format = BrigFLOAT;
+                                                 return TOKEN_PROPERTY; }
+
+/* image order*/
+r                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_R;
+                                                 return TOKEN_PROPERTY; }
+
+a                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_A;
+                                                 return TOKEN_PROPERTY; }
+
+rx                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_RX;
+                                                 return TOKEN_PROPERTY; }
+
+rg                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_RG;
+                                                 return TOKEN_PROPERTY; }
+
+rgx                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_RGX;
+                                                 return TOKEN_PROPERTY; }
+
+ra                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_RA;
+                                                 return TOKEN_PROPERTY; }
+
+rgb                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_RGB;
+                                                 return TOKEN_PROPERTY; }
+
+rgba                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_RGBA;
+                                                 return TOKEN_PROPERTY; }
+
+rgbx                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_RGBX;
+                                                 return TOKEN_PROPERTY; }
+
+bgra                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_BGRA;
+                                                 return TOKEN_PROPERTY; }
+
+argb                                              { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_ARGB;
+                                                 return TOKEN_PROPERTY; }
+
+intensity                                      { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_INTENSITY;
+                                                 return TOKEN_PROPERTY; }
+
+luminance                                      { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.order = BrigImage_LUMINANCE;
+                                                 return TOKEN_PROPERTY; }
 
 (normalized|unnormalized)                                                   { context->token_type = PROPERTY;
                                                                               free_string(context);

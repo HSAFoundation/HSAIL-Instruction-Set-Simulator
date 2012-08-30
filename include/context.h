@@ -272,6 +272,8 @@ class Context {
       BrigOpcode32_t    opcode;
       BrigPacking16_t   packing;
       BrigStorageClass32_t storage_class;
+      BrigImageOrder32_t order;
+      BrigImageFormat32_t format;
     } token_value;
 
   private:
