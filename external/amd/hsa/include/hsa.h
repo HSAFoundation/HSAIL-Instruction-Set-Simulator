@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#18 - edit change 798600 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#19 - edit change 798711 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -109,17 +109,31 @@ class DispatchDescriptor;
  * exception occurs, there are three choices
  */
 typedef enum {
-    HALT_WAVE=1, /*!< Halt the wave, usually this is what happens, 
-                   wave is not killed, just halted */
-    KILL_WAVE=2, /*!< Kill the wave, wave is killed at the point of
-                   exception, if not all the wavefronts in the wave take a
-                   fault, the place in the code where the non-faulty waves
-                   get killed is not deterministic. It usually happens
-                   before the next barrier */
-    RESUME_WAVE=4 /*!< increment the PC to the next instruction and
-                    continue running, this choice is for advanced users */
+    HALT_WAVE=1,  /*!< Halt the wave, usually this is what happens, 
+                       wave is not killed, just halted */
+    RESUME_WAVE=2, /*!< increment the PC to the next instruction and
+                       continue running, this choice is for advanced users */
+    KILL_WAVE=3,  /*!< Kill the wave, wave is killed at the point of
+                       exception, if not all the wavefronts in the wave take a
+                       fault, the place in the code where the non-faulty waves
+                       get killed is not deterministic. It usually happens
+                       before the next barrier */
+    DEBUG_WAVE=4, /*!< Cause the wave into the debug mode */
+    TRAP_WAVE=5,  /*!< Cause the wave to take a trap */
+    MAX_WAVEACTION
 } HSAWaveAction;
 
+/**
+ * @ingroup Dispatch, Debugger
+ * The wave mode lets the user chose how many waves the message affects
+ */
+typedef enum {
+    WAVEMODE_SINGLE=1, /*!< send command to a single wave */
+    /* broadcast to all wavefronts of all processes is not supported for HSA user mode */
+    WAVEMODE_BROADCAST_PROCESS=2, /*!< send to waves within current process */
+    WAVEMODE_BROADCAST_PROCESS_CU=3,  /*!< send to waves within current process */
+    MAX_WAVEMODE
+} HSAWaveMode;
 
 /**
  * @ingroup Dispatch
@@ -346,6 +360,16 @@ public:
 
     //find dispatch descriptor from dispatch ID
     virtual DispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
+
+    //flush caches on the device
+    virtual void flushCaches(hsa::Device *dev, HSACachePolicy cachePolicy) = 0;
+
+    //wave control on the device
+    virtual void waveControl(uint32_t deviceID, 
+                             HSAWaveAction action, 
+                             HSAWaveMode mode, 
+                             uint32_t trapID, 
+                             void *msgPtr) = 0;
 
     virtual ~Device(){};
 };
@@ -617,22 +641,6 @@ public:
     /*! associate buffer with trap handler */
     virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
 
-    /**
-     * @brief function to get the location of the current ISA as used in the
-     * dispatch
-     * This function flushes the device caches before returning and hence is
-     * not a simple getter. The debugger has the ability to query the
-     * descriptor of a dispatch from any debug event to lead it to the actual
-     * dispatch in the runtime that caused the debug event. Once debugger has
-     * this dispatch descriptor, it may query the pointer and size of the ISA,
-     * modify the ISA if need be and return the control to the user. The SIZE
-     * of the ISA or the relative location of non-nop and nop instructions
-     * MUST NOT BE CHANGED! The debugger is only allowed to replace NOPs with
-     * S_TRAP. SIMM16 must have 11111111 in relevent bits (0:7). 
-     * @param ptr the location of the ISA
-     * @param size the size of the ISA
-     */
-    virtual void getISA(void * &ptr, uint32_t &size) = 0;
     
     /**
      * @brief the debugger needs to know the scratch address that was given to
@@ -646,20 +654,36 @@ public:
     virtual void getScratchAddress(uint32_t &addr_hi, uint32_t &addr_lo) = 0;
     
     /**
-     * @brief, allows the query of the scratch offset within the scratch space
-     * allocated for each kernel by each thread
-     * @param waveid ID of the wave
-     * @param groupID the groupID (global)
-     * @param threadID the thread ID within a group
+     * @brief the debugger needs to know the scratch memory descriptor used
+     * for debugger trap handler.
+     * A memory description consists of four registers, which are:
+     * SQ_BUF_RSRC_WORD0, SQ_BUF_RSRC_WORD1, SQ_BUF_RSRC_WORD2, SQ_BUF_RSRC_WORD3
+     *
+     * Note that When in debug model _ONLY_ SYSTEM_MEMORY may be used for any dispatch
+     * resources. 
+     * @param pointer to the four coponents of the memory descriptor 
      */
-    virtual uint32_t getScratchWaveOffset(uint32_t waveID, uint32_t groupID, uint32_t threadID) = 0;
-    
+    virtual void getScratchMemoryDescriptor(uint32_t *memDesp) = 0;
+
+	/**
+     * @brief, allows the query of the index of the SGPR containing the scratch 
+     * the scratch bufffer offset for each wave
+     */
+    //virtual uint32_t getScratchBufferWaveOffsetSgprIndex() = 0;
+
+    /**
+     * @brief, DXX will reserve 4 consecutive VGPRs for use by the trap handler
+     * for debugger shaders. The ELF section will consist of a 32-bit unsigned
+     * interger in little endian oder specifying the index of the first VGPR
+     */
+    //virtual uint32_t getTrapReservedVgprIndex() = 0;
+
     /**
      * @brief returns the pointer to ELF so debugger or other tools that
      * received asynchronous notification about this dispatch can do
      * deep-dives
      */
-    virtual void * getELF() = 0;
+    //virtual void * getBoundShaderBinary() = 0;
     
     /**
      * @brief API to give the user an ability to control the wave
@@ -669,8 +693,12 @@ public:
      * @param waveID the ID of a wave
      * @param waveAct the response
      */
-    virtual void waveControl(uint32_t waveID,HSAWaveAction waveAct) = 0;
-
+    //wave control on the device
+    virtual void waveControl(uint32_t deviceID, 
+                             HSAWaveAction action, 
+                             HSAWaveMode mode, 
+                             uint32_t trapID, 
+                             void *msgPtr) = 0;
 };
 
 /**
