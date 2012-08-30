@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#5 - edit change 779232 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#6 - edit change 783545 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -73,7 +73,7 @@ HSAIL_DATATYPE_MAX_TYPES
 
 class IQueue;
 class IKernel;
-class IEvent;
+class Event;
 class IDevice;
 class IProgram;
 class IDispatchDescriptor;
@@ -264,30 +264,51 @@ public:
     virtual ~IDevice(){};
 };
 
-
-class DLL_PUBLIC IEvent
+class DLL_PUBLIC Event
 {
+
 public:
-    virtual AMDRETCODE wait()=0;
+
+    /**
+     * @brief Default destructor of Event interface.
+     */
+    virtual ~Event(){};
+
+    /**
+     * @brief Ensures that the event is generated atleast once after this
+     * call was invoked
+     *
+     * @param time in milliseconds, 0 for time means blocking wait
+     *
+     * @return HsaEventWaitReturn return value indicating success or timeout.
+     */
+    virtual HsaEventWaitReturn wait(uint32_t timeOut) = 0;
+
     virtual void getDeviceTriggerInfo(uint32_t &value,uint64_t &location)=0;
-    virtual ~IEvent(){};
-private:
+
 };
 
 class DLL_PUBLIC IQueue
 {
+
 public:
-    virtual hsa::AMDRETCODE dispatch(void *kinfo, void *prgmptr, unsigned int prgmsize, IEvent *eventptr)=0;
-    virtual hsa::IEvent * dispatch(IKernel *k, RTKernelArg arg1, hsa::IEvent *ievp)=0;
-    virtual hsa::IEvent * dispatch(IKernel * kernel, IEvent * depEvent, uint32_t numArgs, ...)=0;
-    virtual hsa::IEvent *dispatch(IDispatchDescriptor * dispDescriptor, LaunchAttributes *launchAttr, IEvent * depEvent)=0;
-    virtual hsa::IEvent *dispatch(IKernel * kernel, LaunchAttributes *launchAttr, IEvent * depEvent, uint32_t numArgs, ...)=0;
-    virtual hsa::IEvent *dispatch(IKernel* kernel, LaunchAttributes *launchAttr, IEvent* depEvent, hsacore::vector<RTKernelArg>& args)=0;
+
+    /**
+     * @brief Default destructor of Queue interface.
+     */
+    virtual ~IQueue(){};
+
+    virtual hsa::AMDRETCODE dispatch(void *kinfo, void *prgmptr, unsigned int prgmsize, hsa::Event *eventptr)=0;
+    virtual hsa::Event * dispatch(IKernel *k, RTKernelArg arg1, hsa::Event *ievp)=0;
+    virtual hsa::Event * dispatch(IKernel * kernel, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::Event *dispatch(IDispatchDescriptor * dispDescriptor, LaunchAttributes *launchAttr, hsa::Event * depEvent)=0;
+    virtual hsa::Event *dispatch(IKernel * kernel, LaunchAttributes *launchAttr, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::Event *dispatch(IKernel* kernel, LaunchAttributes *launchAttr, hsa::Event* depEvent, hsacore::vector<RTKernelArg>& args)=0;
     virtual hsa::AMDRETCODE getScratchUserPtr(void **ptr)=0;
     virtual hsa::AMDRETCODE getScratchSize(unsigned int *scrsize)=0;
     virtual hsa::AMDRETCODE flush()=0;
     virtual IDispatchDescriptor * createDispatchDescriptor(IKernel * kernel, LaunchAttributes *launchAttr, uint32_t numArgs, ...)=0;
-    virtual ~IQueue(){};
+
 };
 
 
@@ -356,7 +377,7 @@ public:
     virtual hsa::AMDRETCODE createProgramFromELF(void *charElf, Idevice_list_ptr pDevices, IProgram* &p){
         return 1;
     }
-    virtual hsa::AMDRETCODE createDeviceEvent(hsa::IDevice *d, hsa::IEvent* &e)=0;
+    virtual hsa::AMDRETCODE createDeviceEvent(hsa::IDevice *d, hsa::Event* &e)=0;
     virtual IKernel *createKernel(IProgram * k, hsa::KernelId & kid)=0;
 
     /**
