@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#21 - edit change 799290 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#22 - edit change 801053 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -219,7 +219,7 @@ typedef enum {
  * policy 
  */
 typedef struct LaunchAttributes {
-    BlockingPolicy completionPolicy; /*!< default has none of the
+    BlockingPolicy blockingPolicy; /*!< default has none of the
                                             guarantees listed in the
                                             policy*/
     HSAExceptionPolicy exceptionPolicy; /*!< default is to generate
@@ -243,6 +243,7 @@ typedef struct LaunchAttributes {
 
     LaunchAttributes()
     {
+        blockingPolicy = BLOCKING_POLICY_NONE;
         cachePolicy = CACHE_POLICY_FLUSH_ALL;
         gridX = 1;
         gridY = 1;
