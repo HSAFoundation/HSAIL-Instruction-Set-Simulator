@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#10 - edit change 793267 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#11 - edit change 793355 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -348,13 +348,55 @@ public:
      * @brief Ensures that the event is generated atleast once after this
      * call was invoked
      *
-     * @param time in milliseconds, 0 for time means blocking wait
+     * @param timeOut in milliseconds, 0 means non-blocking wait while
+     * 0xFFFFFFFF means blocking wait.
      *
      * @return HsaEventWaitReturn return value indicating success or timeout.
      */
     virtual HsaEventWaitReturn wait(uint32_t timeOut) = 0;
 
-    virtual void getDeviceTriggerInfo(uint32_t &value,uint64_t &location)=0;
+    /**
+     * @brief Updates output parameters witht Hsa Kernel Module - HKM
+     * provided values. These values are needed to trigger an interrupt
+     * via End Of Pipe (EOP) packet.
+     *
+     * @param krnlValue Kernel value used by HKM to map an EOP based
+     * interrupt to a specific event object.
+     *
+     * @param krnlAddr Kernel address used by HKM to map an EOP based
+     * interrupt to a specific event object.
+     *
+     * @return void
+     */
+    virtual void getDeviceTriggerInfo(uint32_t &krnlValue, uint64_t &krnlAddr) = 0;
+
+    /**
+     * @brief Waits on the list of input events. The method will return when
+     * one or all of the events in the list has been signalled or the timeout
+     * specified for wait has expired.
+     *
+     * @param waitOnAll boolean specifies if the call should wait on all events
+     * in the dependent list to be signalled or any one of them is sufficient.
+     *
+     * @param timeOut in milliseconds, 0 means non-blocking wait while 0xFFFFFFFF
+     * means a blocking wait.
+     *
+     * @param eventCnt number of events in the events list on which this call
+     * would suspend.
+     *
+     * @param eventList list of events to wait on.
+     *
+     * @param waitOnAll specifies if the wait should wait on all dependent events.
+     * TRUE means wait on all events, FALSE means call will return when any one
+     * of the events is signalled.
+     *
+     * @throws HsaException when either of the arguments is invalid or an errors
+     * occurs in the runtime.
+     *
+     * @return uint32_t specifies if the kFD call has succeeded.
+     */
+    virtual uint32_t waitOnEvents(bool waitOnAll, uint32_t timeOut,
+                                  uint32_t eventCnt, hsa::Event **eventList) = 0;
 
 };
 
@@ -411,9 +453,6 @@ class DLL_PUBLIC IKernel
 public:
     virtual ~IKernel(){};
     virtual void setArg(int index, RTKernelArg arg)=0;
-
-
-
 
     /* This needs to go - should not pass the metadata
     through an interface*/
