@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#14 - edit change 794372 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#15 - edit change 794751 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -555,10 +555,10 @@ public:
     virtual void initDispatch () = 0;
     
     /*! Gives the user the command packet built by the command writer */
-    virtual uint32_t GetCommandPkt(uint32_t * buf) = 0;
+    virtual uint32_t GetCommand(uint32_t * buf) = 0;
     
     /*! Hand off the command to the core queue for execution */
-    virtual void execCommandPkt() = 0;
+    virtual void execCommand() = 0;
     
     /*! Wait for notification that the kernel has executed */
     virtual void waitForEndOfKernel() = 0;
