@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#2 - edit change 773172 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#3 - edit change 775106 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -26,22 +26,11 @@
 #include <cstdint>
 #endif
 
-typedef enum {
-        INVALID_ARG=1,
-        OUTOFBOUNDS_ARG=2,
-        QUEUE_ERROR=4,
-	QUEUE_INVALID=8,
-        EVENT_ERROR=16,
-	EVENT_INVALID=32,
-        ALLOCATION_FAILURE=64,
-	PROGRAM_ERROR=128,
-	CORE_ERROR=256,
-	MEMORY_ERROR=512,
-        HSAILPROGRAM_ERROR=1024
-	
-} HsaExceptionType;
-
-
+/** 
+ * @addtogroup HSACoreCommonTyps 
+ * Cross-Core-Module common Types
+ *  @{
+ */
 namespace hsacore
 {
 
@@ -91,6 +80,12 @@ public:
     virtual ~ASICInfo() {};
 };
 
+/* @}*/
+
+/** 
+ * @addtogroup HSACoreHSAILUtility 
+ * @{
+ */
 class DLL_PUBLIC HsailKernel
 {
     protected:
@@ -154,8 +149,13 @@ class DLL_PUBLIC HsailKernel
           virtual int getSGPR() = 0;
           virtual ~HsailKernel(){}
 };
+/* @}*/
 
-
+/**
+ * @addtogroup HSACoreCommonTyps 
+ * Cross-Core-Module common Types
+ * @{
+ */
 typedef enum {
         INVALID_ARG=1,
         OUTOFBOUNDS_ARG=2,
@@ -169,14 +169,14 @@ typedef enum {
 	MEMORY_ERROR=512,
         HSAILPROGRAM_ERROR=1024
 	
-} HsaExceptionType;
+} HSACoreExceptionType;
 
 
 
-class HsaException:public std::exception
+class exception:public std::exception
 {
 public:
-    ~HsaException() throw(){}
+    ~exception() throw(){}
 
     /**
      * @brief append info to an exception, this version doesn't require type
@@ -184,7 +184,13 @@ public:
      * @param fname name of the function
      * @param info detail, probably better to keep it under 40 chars 
      */
-    void appendInfo(const char *fname,const char *info);
+    void appendInfo(const char *fname,const char *erinfo)
+    {
+        info_.append("<-");
+        info_.append(fname);
+        info_.append(":");
+        info_.append(erinfo);
+    }
 
     /**
      * @brief append info to an exception, this version requires a type
@@ -193,47 +199,128 @@ public:
      * @param info detail, probably better to keep it under 40 chars 
      * @param et exception type
      */
-    void appendInfo(const char *fname,const char *info, HsaExceptionType et);
+    void appendInfo(const char *fname,const char *erinfo, HSACoreExceptionType et)
+    {
+        info_.append("<-");
+        info_.append(fname);
+        info_.append(":");
+        info_.append(erinfo);
+        excepttype_ &= et;
+    }
 
     /**
      * @brief the virtual function in std::exception implemented here
      *
      * @return string in info
      */
-    const char* what() const throw();
+    const char* what() const throw()
+    {
+        const char * c = info_.c_str(); 
+        return c;
+    }
 
 private:
-    //HsaException(const HsaException&);     
-    HsaException& operator = (const HsaException&);
-    //HsaExceptionType ty;
+    exception& operator = (const exception&);
     std::string info_; ///< place to "append" and carry along an exception
     int excepttype_;
 };
 
-void 
-HsaException::appendInfo(const char *fname, const char *erinfo)
-{
-    info_.append("<-");
-    info_.append(fname);
-    info_.append(":");
-    info_.append(erinfo);
-}
+#define ERR_THROW_EX(errVal, errMsg, expVal)                        \
+    if (errVal){                                                    \
+        exception exObj;                                            \
+        exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
+        throw (exObj);                                              \
+    }
 
-void
-HsaException::appendInfo(const char *fname, const char *erinfo, HsaExceptionType et)
-{
-    info_.append("<-");
-    info_.append(fname);
-    info_.append(":");
-    info_.append(erinfo);
-    excepttype_ &= et;
-}
+#define AMD_DEVICE_TYPE_UNKNOWN                      0
+#define AMD_DEVICE_TYPE_DEFAULT                      (1 << 0)
+#define AMD_DEVICE_TYPE_CPU                          (1 << 1)
+#define AMD_DEVICE_TYPE_GPU                          (1 << 2)
+#define AMD_DEVICE_TYPE_ACCELERATOR                  (1 << 3)
+#define AMD_DEVICE_TYPE_HSA                          (1 << 4)
+#define AMD_DEVICE_TYPE_ALL                          0xFFFFFFFF
 
-const char* 
-HsaException::what() const throw()
+class DLL_PUBLIC MemoryDescriptor
 {
-    const char * c = info_.c_str(); 
-    return c;
+public:
+	enum MemoryType { HOT_PLUGGABLE, NON_VOLATILE };
+	enum HeapType { SYSTEM, PUBLIC, PRIVATE };
+	virtual MemoryType	 getMemoryType()=0 ;
+	virtual HeapType	 getHeapType()=0;
+	virtual uint32_t getSizeLow()=0;
+	virtual uint32_t getSizeHigh()=0;
+	virtual uint64_t	 getSize()=0;
+	virtual uint32_t getWidth()=0;
+	virtual uint32_t getMaxMemoryClock()=0;
+    virtual ~MemoryDescriptor() {};
+};
+
+class DLL_PUBLIC CacheDescriptor
+{
+public:
+	enum CacheType { DATA=1, INSTRUCTION, CPU, SIMD };
+	virtual uint32_t    getProcessorId()=0;
+	virtual uint32_t    getCacheLevel()=0;
+    virtual uint32_t    getCacheSize()=0;
+    virtual uint32_t    getCacheLineSize()=0;
+    virtual uint32_t    getCacheLinesPerTag()=0;
+    virtual uint32_t    getCacheAssociativity()=0;
+    virtual uint32_t    getCacheLatency()=0;
+    virtual CacheType    getCacheType()=0;
+    virtual uint32_t    getSiblingMap()=0;
+    virtual ~CacheDescriptor() {};
+};
+
+class DLL_PUBLIC IOLinkDescriptor
+{
+public:
+	enum IOLinkType { UNDEFINED=0, HYPERTRANSPORT, PCIEXPRESS, AMBA, OTHER };
+	virtual IOLinkType getIoLinkType()=0;
+    virtual uint32_t getMajorVersion()=0;
+    virtual uint32_t getMinorVersion()=0;
+	virtual uint32_t getFromNode()=0;
+    virtual uint32_t getToNode()=0;
+	virtual uint32_t getWeight()=0;
+	virtual uint32_t getMinimumLatency()=0;
+    virtual uint32_t getMaximumLatency()=0;
+    virtual uint32_t getMinimumBandwidth()=0;
+    virtual uint32_t getMaximumBandwidth()=0;
+    virtual uint32_t getRecommendedTransferSize()=0;
+    virtual ~IOLinkDescriptor() {} ;
+};
+
+enum MemoryTypes
+{
+    SYSTEM_MEMORY =  (1U << 0),
+    LOCAL_MEMORY =   (1U << 1),
+    LDS_MEMORY   =   (1U << 2),
+    GDS_MEMORY   =   (1U << 3),
+    TEXTURE_MEMORY = (1U << 4),
+    SCRATCH =        (1U << 5)
+};
+
+enum SystemMemoryOptions
+{
+    //page properties
+    PAGEABLE =       (1U <<  7),
+    PINNED =         (1U <<  8),
+    // cache properties
+    CACHED =         (1U << 12),
+    NON_CACHED =     (1U << 13),
+    WRITE_COMBINED = (1U << 14),
+    // access properties
+    READ_WRITE =     (1U << 17),
+    READ_ONLY =      (1U << 18),
+};
+
+enum DeviceType 
+{ 
+	CPU=AMD_DEVICE_TYPE_CPU, 
+	GPU=AMD_DEVICE_TYPE_GPU, 
+	INVALID=AMD_DEVICE_TYPE_UNKNOWN 
+};
+
+
 }
-}
+/* @}*/
 #endif
