@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#19 - edit change 798711 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#20 - edit change 799174 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -100,7 +100,7 @@ class Kernel;
 class Event;
 class DebuggerEvent;
 class Device;
-class _Program;
+class Program;
 class DispatchDescriptor;
 
 /**
@@ -540,12 +540,12 @@ public:
     virtual uint32_t getDeviceCount()=0;
     virtual const hsa::vector<hsa::Device*>& getDevices()=0;
     virtual hsa::Queue* createDeviceQueue(hsa::Device *d, unsigned int size)=0;
-    virtual _Program* createProgram(char *charElf, size_t elfSize, Device_list_ptr pDevices)=0;
-    virtual _Program* createProgramFromFile(const char* fileName,
+    virtual hsa::Program* createProgram(char *charElf, size_t elfSize, Device_list_ptr pDevices)=0;
+    virtual hsa::Program* createProgramFromFile(const char* fileName,
         Device_list_ptr pDevices)=0;
-    virtual _Program* createProgramFromHSAIL(char *charHSAIL, Device_list_ptr pDevices)=0;
+    virtual hsa::Program* createProgramFromHSAIL(char *charHSAIL, Device_list_ptr pDevices)=0;
     virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
-    virtual Kernel *createKernel(_Program * k, hsa::KernelId & kid)=0;
+    virtual Kernel *createKernel(Program * k, hsa::KernelId & kid)=0;
 
     /**
      * @copydoc hsa::allocateMemory(const size_t size, const size_t alignment = 0)
@@ -580,7 +580,7 @@ public:
     virtual ~RuntimeApi(){};
 };
 
-class DLL_PUBLIC _Program
+class DLL_PUBLIC Program
 {
 public:
 
@@ -608,7 +608,7 @@ public:
 
 
     /*! standard destructor */
-    virtual ~_Program(){};
+    virtual ~Program(){};
 };
 
 /**
