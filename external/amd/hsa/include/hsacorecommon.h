@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#5 - edit change 775639 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#6 - edit change 777346 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -23,7 +23,16 @@
 #if !defined(AMD_AMP_HSA_INCLUDES)
 #include <vector>
 #include <exception>
-#include <cstdint>
+#include <string>
+
+    #ifdef ATI_OS_WIN
+        #include <cstdint>
+    #endif
+    
+    #ifdef ATI_OS_LINUX
+        #include <unistd.h>
+    #endif
+
 #endif
 
 /** 
@@ -185,6 +194,17 @@ typedef enum {
 
 class exception:public std::exception
 {
+
+protected:
+    
+    int excepttype_;
+    
+    std::string info_; ///< place to "append" and carry along an exception
+
+private:
+
+    exception& operator = (const exception&);
+
 public:
     ~exception() throw(){}
 
@@ -228,12 +248,6 @@ public:
         const char * c = info_.c_str(); 
         return c;
     }
-protected:
-    std::string info_; ///< place to "append" and carry along an exception
-    int excepttype_;
-
-private:
-    exception& operator = (const exception&);
 
 };
 
