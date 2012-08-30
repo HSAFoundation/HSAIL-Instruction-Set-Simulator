@@ -218,6 +218,11 @@ TEST(Brig2LLVMTest, Example2) {
     "%gpu_reg_p = alloca %struct.regs")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "ret void")));
+
+    llvm::Module *mod = codegen.getModule();
+    bool ret_val;
+    void *args[] = { &ret_val };
+    hsa::brig::launchBrig(mod, mod->getFunction("return_true"), args);
   }
 }
 
@@ -285,7 +290,7 @@ TEST(Brig2LLVMTest, Example3) {
       sizeof(abs),
       BrigEInstBase,
       BrigAbs,
-      Brigu8x4,
+      Brigs8x4,
       BrigPackP,
       { 8, 20, 0, 0, 0}
     };
@@ -349,9 +354,9 @@ TEST(Brig2LLVMTest, Example3) {
     EXPECT_NE(0, codegen.str().size());
 
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "declare <4 x i8> @Abs_P_u8x4(<4 x i8>)")));
+    "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "declare <2 x i16> @Add_PPsat_u16x2(<2 x i16>, <2 x i16>)")));
+    "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "define void @packed_ops(<4 x i8>* %x)")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -359,13 +364,19 @@ TEST(Brig2LLVMTest, Example3) {
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 3")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "call <4 x i8> @Abs_P_u8x4")));
+    "call <4 x i8> @Abs_P_s8x4")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "call <2 x i16> @Add_PPsat_u16x2")));
+    "call <2 x i16> @AddSat_PP_u16x2")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%gpu_reg_p = alloca %struct.regs")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "ret void")));
+
+    llvm::Module *mod = codegen.getModule();
+    typedef unsigned char u8x4 __attribute__((vector_size(4)));
+    u8x4 x;
+    void *args[] = { &x };
+    hsa::brig::launchBrig(mod, mod->getFunction("packed_ops"), args);
   }
 }
 
@@ -580,7 +591,7 @@ TEST(Brig2LLVMTest, Example4) {
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "declare <2 x i16> @Add_PPsat_u16x2(<2 x i16>, <2 x i16>)")));
+    "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "outof_IF:")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -708,13 +719,13 @@ TEST(Brig2LLVMTest, Example5) {
     zero.bits.u = 0;
     operands.append(&zero);
 
-    BrigOperandArgumentList args = {
-      sizeof(args),             // size
+    BrigOperandArgumentList argList = {
+      sizeof(argList),          // size
       BrigEOperandArgumentList, // kind
       0,                        // elementCount
       { 0 }                     // o_args
     };
-    operands.append(&args);
+    operands.append(&argList);
 
     hsa::brig::GenLLVM codegen(strings, directives, code, operands);
     codegen();
@@ -727,8 +738,8 @@ TEST(Brig2LLVMTest, Example5) {
     "call void @callee()")));
 
     llvm::Module *mod = codegen.getModule();
-
-    hsa::brig::launchBrig(mod, mod->getFunction("caller"));
+    llvm::ArrayRef<void *> args;
+    hsa::brig::launchBrig(mod, mod->getFunction("caller"), args);
   }
 }
 

@@ -170,14 +170,13 @@ case BrigPack ## X:                             \
     casePacking(SS);
     casePacking(S);
     casePacking(P);
-    casePacking(PPsat);
-    casePacking(PSsat);
-    casePacking(SPsat);
-    casePacking(SSsat);
-    casePacking(Ssat);
-    casePacking(Psat);
-  case BrigNoPacking:
-    return "";
+  case BrigPackPPsat: return "Sat_PP";
+  case BrigPackPSsat: return "Sat_PS";
+  case BrigPackSPsat: return "Sat_SP";
+  case BrigPackSSsat: return "Sat_SS";
+  case BrigPackSsat:  return "Sat_S";
+  case BrigPackPsat:  return "Sat_P";
+  case BrigNoPacking: return "";
   default:
     assert(false && "Unknown packing");
   }
