@@ -104,31 +104,22 @@ defineVec(f64, 2)
 
 #define declareSignedVectorInst(INST,NARY)      \
   declare ## NARY ## Vector(INST, s8x4)         \
-  declare ## NARY ## Vector(INST, s8x16)        \
+  declare ## NARY ## Vector(INST, s8x8)         \
   declare ## NARY ## Vector(INST, s16x2)        \
   declare ## NARY ## Vector(INST, s16x4)        \
-  declare ## NARY ## Vector(INST, s16x8)        \
-  declare ## NARY ## Vector(INST, s32x2)        \
-  declare ## NARY ## Vector(INST, s32x4)        \
-  declare ## NARY ## Vector(INST, s64x2)        \
+  declare ## NARY ## Vector(INST, s32x2)
 
 #define declareUnsignedVectorInst(INST,NARY)    \
   declare ## NARY ## Vector(INST, u8x4)         \
-  declare ## NARY ## Vector(INST, u8x16)        \
+  declare ## NARY ## Vector(INST, u8x8)         \
   declare ## NARY ## Vector(INST, u16x2)        \
   declare ## NARY ## Vector(INST, u16x4)        \
-  declare ## NARY ## Vector(INST, u16x8)        \
-  declare ## NARY ## Vector(INST, u32x2)        \
-  declare ## NARY ## Vector(INST, u32x4)        \
-  declare ## NARY ## Vector(INST, u64x2)        \
+  declare ## NARY ## Vector(INST, u32x2)
 
 #define declareFloatVectorInst(INST,NARY)       \
   /* declare ## NARY ## Vector(INST, f16x2) */  \
   /* declare ## NARY ## Vector(INST, f16x4) */  \
-  /* declare ## NARY ## Vector(INST, f16x8) */  \
-  declare ## NARY ## Vector(INST, f32x2)        \
-  declare ## NARY ## Vector(INST, f32x4)        \
-  declare ## NARY ## Vector(INST, f64x2)        \
+  declare ## NARY ## Vector(INST, f32x2)
 
 #define declareUnary(FUNC,TYPE)                 \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t) {  \
