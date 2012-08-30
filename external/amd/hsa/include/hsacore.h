@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#14 - edit change 796045 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#15 - edit change 811758 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -29,16 +29,17 @@ namespace hsacore
 typedef enum _EVENTID
 {
     USER_GEN_DEVICE_INTERRUPT  = 0, ///< user-mode generated interrupt
-    NODE_CHANGE                = 1, ///< "H-NUMA" node change
-    DEVICE_STATE_CHANGE        = 2, ///< device state change ( start/stop )
-	HSA_EVENTTYPE_DEBUG_EVENT  = 5,
-
+    NODE_CHANGE_EVENT          = 1, ///< "H-NUMA" node change
+    DEVICE_STATE_CHANGE_EVENT  = 2, ///< device state change ( start/stop )
+    HW_EXCEPTION_EVENT         = 3, ///< GPU shader exception event
+    SYSTEM_EVENT               = 4, ///< GPU SYSCALL with parameter info
+    DEBUG_EVENT                = 5, ///< debugger event
+    PROFILE_EVENT              = 6, ///< GPU signal for profiling
     /*
      * Specifies type as Gpu Memory Write event.
      */
-    HSA_MEM_WRITE_EVENT = 6,
-
-	//...
+    HSA_MEM_WRITE_EVENT = 7,
+    //...
     MAX_EVENTS
 } EVENTID;
 
@@ -856,11 +857,23 @@ public:
                                         int32_t schedPrior = hsacore::Queue::DEFAULT_SCHED_RANK) = 0;
 
     /**
-    * API to retrieve counter information from devices.
-    * The PMU structure contains all the counters and groups specific to this device.
-    *
-    * @return a hardware specific PMU structure.
-    */
+     * API to control the wave execution on this device.
+     *
+     * @param action actions to be taken on the wavefront
+     *
+     * @param mode how the actions are taken, single wave, broadcast, etc.
+     *
+     * @param trapID, this is used for just the action of h_trap, in which
+     *  a trap ID is needed.
+     * 
+     * @param msgPtr, pointer to a message indicate various information. 
+     *  see the KFD design for specific information.
+     * @return a hardware specific PMU structure.
+     */
+    virtual void waveControl(uint32_t       Operand,
+                        uint32_t       Mode,
+                        uint32_t       TrapId,
+                        void*          msgPtr) = 0;
 
 	virtual ~Device(){};
 };
