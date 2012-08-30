@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#8 - edit change 792820 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#9 - edit change 793186 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -410,36 +410,40 @@ class DLL_PUBLIC IKernel
 public:
     virtual ~IKernel(){};
     virtual void setArg(int index, RTKernelArg arg)=0;
+
+
+
+
     /* This needs to go - should not pass the metadata
     through an interface*/
-    virtual void initArgs(char* argList)=0;
+    //virtual void initArgs(char* argList)=0;
 
     /*! Returns the number of arguments
     * @return - The number of arguments
     * */
-    virtual int getArgCount()=0;
+    //virtual int getArgCount()=0;
     
     /*! Returns the offset in the parameter stack
     * @param index - index of the argument
     * @return - The offset in the parameter stack
     * */
-    virtual int getArgOffset(int index)=0;
+    //virtual int getArgOffset(int index)=0;
    
     /* Returns the size of the argument
     * @param index - index of the argument
     * @return - The size of the argument
     * */
-    virtual int getArgSize(int index)=0;
+    //virtual int getArgSize(int index)=0;
     /*! Returns the type of the argument
     * @param index - index of the argument
     * @return - The type of the argument as a HSAIL_ARG_TYPE enum
     * */
-    virtual HSAIL_ARG_TYPE getArgType(int index)=0;
+    //virtual HSAIL_ARG_TYPE getArgType(int index)=0;
 	/*! Returns the Address Qualifier - global, local etc.
     * @param index - index of the argument
     * @return - The type of the argument as a HSAIL_ADDRESS_QUALIFIER enum
     * */
-	virtual HSAIL_ADDRESS_QUALIFIER getArgAddrQualifier(int index)=0;
+	//virtual HSAIL_ADDRESS_QUALIFIER getArgAddrQualifier(int index)=0;
 };
 
 class IRuntimeApi;
