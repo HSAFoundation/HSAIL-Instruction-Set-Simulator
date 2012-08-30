@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#13 - edit change 793923 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#14 - edit change 794372 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -71,13 +71,13 @@ HSAIL_DATATYPE_MAX_TYPES
 };
 
 
-class IQueue;
-class IKernel;
+class Queue;
+class Kernel;
 class Event;
 class DebuggerEvent;
-class IDevice;
-class IProgram;
-class IDispatchDescriptor;
+class Device;
+class _Program;
+class DispatchDescriptor;
 
 /**
  * @ingroup Dispatch, Debugger
@@ -209,9 +209,9 @@ typedef struct LaunchAttributes {
     }
 }LaunchAttributes;
 
-typedef hsa::vector<hsa::IDevice*>::const_iterator Idevice_itr;
-typedef hsa::vector<hsa::IDevice*> Idevice_list;
-typedef hsa::vector<hsa::IDevice*>* Idevice_list_ptr;
+typedef hsa::vector<hsa::Device*>::const_iterator Device_itr;
+typedef hsa::vector<hsa::Device*> Device_list;
+typedef hsa::vector<hsa::Device*>* Device_list_ptr;
 typedef std::string KernelId;
 
 /**
@@ -221,9 +221,9 @@ typedef std::string KernelId;
 DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment = 0);
 
 /**
- * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev)
+ * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev)
  */
-DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev);
+DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev);
 
 /**
  * @ingroup Memory
@@ -269,12 +269,12 @@ DLL_PUBLIC void unmapMemory(void* ptr);
  *
  */
 DLL_PUBLIC void
-flushDeviceCaches(hsa::IDevice *dev, HSACachePolicy cachePolicy);
+flushDeviceCaches(hsa::Device *dev, HSACachePolicy cachePolicy);
 
 /**
  * @brief Device class, public interface in the device layer.
  */
-class DLL_PUBLIC IDevice
+class DLL_PUBLIC Device
 {
 public:
     virtual hsa::DeviceType getType() const = 0;
@@ -318,12 +318,12 @@ public:
     virtual void getTrapHandlerBuffer(void* &trapHandlerBuffer, size_t &trapHandlerBufferSizeByte) = 0;
 
     //add queue to list
-    virtual void addQueueToList(IQueue *queue) = 0;
+    virtual void addQueueToList(hsa::Queue *queue) = 0;
 
     //find dispatch descriptor from dispatch ID
-    virtual IDispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
+    virtual DispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
 
-    virtual ~IDevice(){};
+    virtual ~Device(){};
 };
 
 class DLL_PUBLIC Event
@@ -391,7 +391,7 @@ public:
 };
 
 
-class DLL_PUBLIC IQueue
+class DLL_PUBLIC Queue
 {
 
 public:
@@ -399,34 +399,34 @@ public:
     /**
      * @brief Default destructor of Queue interface.
      */
-    virtual ~IQueue(){};
+    virtual ~Queue(){};
 
-    virtual hsa::Event *dispatch(IKernel * kernel, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::Event *dispatch(Kernel * kernel, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
 
-    virtual hsa::Event *dispatch(IDispatchDescriptor * dispDescriptor, LaunchAttributes *launchAttr, hsa::Event * depEvent)=0;
+    virtual hsa::Event *dispatch(DispatchDescriptor * dispDescriptor, LaunchAttributes *launchAttr, hsa::Event * depEvent)=0;
     
-    virtual hsa::Event *dispatch(IKernel * kernel, LaunchAttributes *launchAttr, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::Event *dispatch(Kernel * kernel, LaunchAttributes *launchAttr, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
     
-    virtual hsa::Event *dispatch(IKernel* kernel, LaunchAttributes *launchAttr, hsa::Event* depEvent, hsacore::vector<RTKernelArg>& args)=0;
+    virtual hsa::Event *dispatch(Kernel* kernel, LaunchAttributes *launchAttr, hsa::Event* depEvent, hsacore::vector<RTKernelArgs>& args)=0;
     
-    virtual hsa::AMDRETCODE flush()=0;
+    virtual void flush()=0;
 
     virtual void setupTrapHandler(void *pTrapHandler, size_t trapHandlerSizeByte) = 0;
 
     virtual void setupTrapHandlerBuffer(void *pTrapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
     
-    virtual IDispatchDescriptor * createDispatchDescriptor(IKernel * kernel, LaunchAttributes *launchAttr, uint32_t numArgs, ...)=0;
+    virtual hsa::DispatchDescriptor * createDispatchDescriptor(hsa::Kernel * kernel, LaunchAttributes *launchAttr, uint32_t numArgs, ...)=0;
     
-    virtual IDispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
+    virtual hsa::DispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
 
 };
 
 
-class DLL_PUBLIC IKernel
+class DLL_PUBLIC Kernel
 {
 public:
-    virtual ~IKernel(){};
-    virtual void setArg(int index, RTKernelArg arg)=0;
+    virtual ~Kernel(){};
+    virtual void setArg(int index, RTKernelArgs arg)=0;
 
     /* This needs to go - should not pass the metadata
     through an interface*/
@@ -460,41 +460,31 @@ public:
     //virtual HSAIL_ADDRESS_QUALIFIER getArgAddrQualifier(int index)=0;
 };
 
-class IRuntimeApi;
+class RuntimeApi;
 
 extern "C" {
 
 // getRuntime() function:
 // When the HSA Runtime device DLL is explicitly loaded, this will be the only function called using GetProcAddress().
 // All other global exported functions will be called via HsaRuntimeApi singleton instance returned by this function.
-DLL_PUBLIC hsa::IRuntimeApi* getRuntime();
+DLL_PUBLIC hsa::RuntimeApi* getRuntime();
 
 // typedef comes handy when GetProcAddress() returns the func pointer which needs to be cast.
-typedef hsa::IRuntimeApi* (*fptr_getRuntime)();
+typedef hsa::RuntimeApi* (*fptr_getRuntime)();
  
 }
 
-class DLL_PUBLIC IRuntimeApi  
+class DLL_PUBLIC RuntimeApi  
 {
 public:
     // All the exported global functions must have corresponding pure virtual public method declared in this interface class.
-    virtual hsa::AMDRETCODE getDeviceCount( uint32_t* count )=0;
-
-    virtual const hsa::vector<hsa::IDevice*>& getDevices()=0;
-
-    virtual hsa::AMDRETCODE createDeviceQueue(hsa::IDevice *d, unsigned int size, hsa::IQueue* &q)=0;
-
-    virtual hsa::AMDRETCODE createProgram(char *charElf, size_t elfSize, Idevice_list_ptr pDevices, IProgram* &p){
-	return 1;
-    };
-
-    virtual hsa::AMDRETCODE createProgramFromELF(void *charElf, Idevice_list_ptr pDevices, IProgram* &p){
-        return 1;
-    }
-
-    virtual hsa::AMDRETCODE createDeviceEvent(hsa::IDevice *d, hsa::Event* &e)=0;
-
-    virtual IKernel *createKernel(IProgram * k, hsa::KernelId & kid)=0;
+    virtual uint32_t getDeviceCount()=0;
+    virtual const hsa::vector<hsa::Device*>& getDevices()=0;
+    virtual hsa::Queue* createDeviceQueue(hsa::Device *d, unsigned int size)=0;
+    virtual _Program* createProgram(char *charElf, size_t elfSize, Device_list_ptr pDevices)=0;
+    virtual _Program* createProgramFromELF(void *charElf, Device_list_ptr pDevices)=0;
+    virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
+    virtual Kernel *createKernel(_Program * k, hsa::KernelId & kid)=0;
 
     /**
      * @copydoc hsa::allocateMemory(const size_t size, const size_t alignment = 0)
@@ -503,10 +493,10 @@ public:
     allocateMemory(const size_t size, const size_t alignment = 0) = 0;
 
     /**
-     * @copydoc hsa::allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev)
+     * @copydoc hsa::allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev)
      */
     virtual void* 
-    allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev) = 0;
+    allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const hsa::Device& dev) = 0;
 
     /**
      * @copydoc hsa::freeMemory
@@ -526,10 +516,10 @@ public:
     virtual void
     unmapMemory(void* ptr) = 0;
 
-    virtual ~IRuntimeApi(){};
+    virtual ~RuntimeApi(){};
 };
 
-class DLL_PUBLIC IProgram
+class DLL_PUBLIC _Program
 {
 public:
 
@@ -539,26 +529,26 @@ public:
     * @return returns a built kernel for execution
     */
 
-    virtual hsa::IKernel * build(const char* kernelName,size_t size) = 0;
+    virtual hsa::Kernel * build(const char* kernelName,size_t size) = 0;
     /*! Add a device to the list of devices a kernel is built against.
     * @param device The device to add.
     */
 
-    virtual void addDevice(hsa::IDevice * device)  = 0;
+    virtual void addDevice(hsa::Device * device)  = 0;
     /*! Get metadata associated with a kernel 
     * @param d The device the kernel will run on 
     * @param kid the KernelID identiying the kernel
     */
 
-    virtual hsacore::HsailKernel* getMetaData(IDevice *d, KernelId &kid) = 0;
+    virtual hsacore::HsailKernel* getMetaData(Device *d, KernelId &kid) = 0;
     /*! standard destructor */
-    virtual ~IProgram(){};
+    virtual ~_Program(){};
 };
 
 /**
 * @ingroup Debugger, Dispatch
 */
-class DLL_PUBLIC IDispatchDescriptor
+class DLL_PUBLIC DispatchDescriptor
 {
 public:
     /*! Allocates the memory for dispatch  */
@@ -577,7 +567,7 @@ public:
     virtual uint32_t getDispatchID() = 0;
     
     /*! Deallocates memory as necessary */
-    virtual ~IDispatchDescriptor(){};
+    virtual ~DispatchDescriptor(){};
     
     /*! setup trap handler*/
     virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
@@ -714,7 +704,7 @@ public:
      * argument buffers, global variables, etc., may also be obtained
      *
      */ 
-    virtual IDispatchDescriptor * getDispatchDescriptor() = 0;
+    virtual DispatchDescriptor * getDispatchDescriptor() = 0;
     
     /*
      * @brief API to get the PC at which debug activity occured
@@ -741,7 +731,7 @@ public:
  */
 DLL_PUBLIC hsa::DebuggerEvent * 
 createDebuggerEvent(
-                hsa::IDevice *dev, 
+                hsa::Device *dev, 
                 bool manualReset, 
                 bool state
                 );
@@ -776,7 +766,7 @@ createDebuggerEvent(
  */
 DLL_PUBLIC hsa::DebuggerEvent * 
 createDebuggerEvent(
-                hsa::IDevice *dev, 
+                hsa::Device *dev, 
                 void *userBuffer, 
                 uint32_t writeBackLoc,
                 uint32_t writeBackValue,
