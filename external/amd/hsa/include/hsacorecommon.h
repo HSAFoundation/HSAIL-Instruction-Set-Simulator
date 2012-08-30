@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#4 - edit change 775354 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#5 - edit change 775639 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -74,8 +74,17 @@ enum ASICType
 class DLL_PUBLIC ASICInfo
 {
 public:
+    /*! Getter function to check for image support.
+     * @return bool indicating image support.
+    */
     virtual bool isImageSupport()=0;
+    /*! Getter function to check for double precision support.
+     * @return bool indicating double support.
+    */
     virtual bool isDoublePrecision()=0;
+    /*! Getter function to check the ASIC Type.
+     * @return returns an ASICType enumeration.
+    */
     virtual ASICType getASICType()=0;
     virtual ~ASICInfo() {};
 };
@@ -243,51 +252,174 @@ private:
 #define AMD_DEVICE_TYPE_HSA                          (1 << 4)
 #define AMD_DEVICE_TYPE_ALL                          0xFFFFFFFF
 
+/**
+ * @brief MemoryDescriptor class, each descriptor
+ * provides interfaces to get different memory properties.
+ */
 class DLL_PUBLIC MemoryDescriptor
 {
 public:
     enum MemoryType { HOT_PLUGGABLE, NON_VOLATILE };
     enum HeapType { SYSTEM, PUBLIC, PRIVATE };
+    /**
+     * @brief Getter function for MemoryType
+     * @return returns a MemoryType enumeration.
+     */
     virtual MemoryType getMemoryType()=0 ;
+    /**
+     * @brief Getter function for HeapType
+     * @return returns a HeapType enumeration.
+     */
     virtual HeapType getHeapType()=0;
+    /**
+     * @brief Getter function for lower 32 bits of memory size.
+     * @return returns the lower 32 bits of memory size. 
+     * (example: if memory size = 4GB (2^32), getSizeLow() will 
+     *  return 0 since 2^32 = 0x1 00 00 00 00 
+     */
     virtual uint32_t getSizeLow()=0;
+    /**
+     * @brief Getter function for higher 32 bits of memory size.
+     * @return returns the higher 32 bits of memory size. 
+     * (example: if memory size = 4GB (2^32), getSizeHigh() will 
+     *  return 1 since 2^32 = 0x1 00 00 00 00 
+     */
     virtual uint32_t getSizeHigh()=0;
+    /**
+     * @brief Getter function for memory size.
+     * @return returns 64 bit integer representing memory size. 
+     */
     virtual uint64_t getSize()=0;
+    /**
+     * @brief Getter function for memory width (the number of parallel bits to
+     *        the memory interface)
+     * @return returns memory width.
+     */
     virtual uint32_t getWidth()=0;
+    /**
+     * @brief Getter function for maximum memory clock which allows for
+     *        computation of available bandwidth.
+     * @return returns max memory clock.
+     */
     virtual uint32_t getMaxMemoryClock()=0;
     virtual ~MemoryDescriptor() {};
 };
 
+/**
+ * @brief CacheDescriptor class, each descriptor
+ * provides interfaces to get different cache properties.
+ */
 class DLL_PUBLIC CacheDescriptor
 {
 public:
     enum CacheType { DATA=1, INSTRUCTION, CPU, SIMD };
+     /**
+     * @brief Getter function for ProcessorId
+     * @return returns a processor number
+     */
     virtual uint32_t    getProcessorId()=0;
+    /**
+     * @brief Getter function to query the cache level.
+     * @return returns a number (1,2,3.. etc) representing the
+     *         L1,L2,L3... cache levels.
+     */
     virtual uint32_t    getCacheLevel()=0;
+    /**
+     * @brief Getter function for cache size
+     * @return returns the size of the cache.
+     */
     virtual uint32_t    getCacheSize()=0;
+    /**
+     * @brief Getter function for cache line size
+     * @return returns the size of the cache line in bytes.
+     */
     virtual uint32_t    getCacheLineSize()=0;
+    /**
+     * @brief Getter function for cache lines per tag.
+     * @return returns the number of cache lines per tag.
+     */
     virtual uint32_t    getCacheLinesPerTag()=0;
+    /**
+     * @brief Getter function for cache associativity.
+     * @return returns the associativity of the cache.
+     */
     virtual uint32_t    getCacheAssociativity()=0;
+    /**
+     * @brief Getter function for cache latency.
+     * @return returns the cache latency in nano seconds.
+     */
     virtual uint32_t    getCacheLatency()=0;
+    /**
+     * @brief Getter function for cache type
+     * @return returns a CacheType enumeration
+     */
     virtual CacheType    getCacheType()=0;
     virtual uint32_t    getSiblingMap()=0;
     virtual ~CacheDescriptor() {};
 };
 
+/**
+ * @brief IOLinkDescriptor class, each descriptor
+ * provides interfaces to get different iolink properties.
+ */
 class DLL_PUBLIC IOLinkDescriptor
 {
 public:
     enum IOLinkType { UNDEFINED=0, HYPERTRANSPORT, PCIEXPRESS, AMBA, OTHER };
+    /**
+     * @brief Getter function for IO Link Type.
+     * @return returns a IoLinkType enumeration
+     */
     virtual IOLinkType getIoLinkType()=0;
+    /**
+     * @brief Getter function for IO Bus interface Major version.
+     * @return returns the major version of IO bus interface.
+     */
     virtual uint32_t getMajorVersion()=0;
+    /**
+     * @brief Getter function for IO Bus interface Minor version.
+     * @return returns the minor version of IO bus interface.
+     */
     virtual uint32_t getMinorVersion()=0;
+    /**
+     * @brief Getter function for source node of an IOLink.
+     * @return returns the source node Id of an IOLink.
+     */
     virtual uint32_t getFromNode()=0;
+    /**
+     * @brief Getter function for destination node of an IOLink.
+     * @return returns the destination node Id of an IOLink.
+     */
     virtual uint32_t getToNode()=0;
+     /**
+     * @brief Getter function for weight associated with a link.
+     * @return returns the weight associated to an IOLink.
+     */
     virtual uint32_t getWeight()=0;
+     /**
+     * @brief Getter function for minimum transfer time.
+     * @return returns the minimum cost of time to transfer in nano seconds.
+     */
     virtual uint32_t getMinimumLatency()=0;
+    /**
+     * @brief Getter function for maximum transfer time.
+     * @return returns the maximum cost of time to transfer in nano seconds.
+     */
     virtual uint32_t getMaximumLatency()=0;
+    /**
+     * @brief Getter function for minimum IO interface bandwidth.
+     * @return returns the minimum interface bandwidth in MB/s
+     */
     virtual uint32_t getMinimumBandwidth()=0;
+    /**
+     * @brief Getter function for maximum IO interface bandwidth.
+     * @return returns the maximum interface bandwidth in MB/s
+     */
     virtual uint32_t getMaximumBandwidth()=0;
+    /**
+     * @brief Getter function for recommendedTxfrSize to achieve peak bandwidth.
+     * @return returns the recommended transfer size in bytes.
+     */
     virtual uint32_t getRecommendedTransferSize()=0;
     virtual ~IOLinkDescriptor() {} ;
 };
