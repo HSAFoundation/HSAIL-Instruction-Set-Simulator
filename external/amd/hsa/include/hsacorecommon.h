@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#6 - edit change 777346 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#7 - edit change 783545 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -49,6 +49,50 @@ class vector : public std::vector<T>
 
 };
 
+/**
+ * @brief Specifies the different timeout periods supported
+ * by Hsa Runtime for event wait
+ *
+ * @note: The values of this enum must match corresponding
+ * values defined in HsaThk layer interface.
+ */
+typedef enum {
+    
+    /*
+     * Specifies Zero milliseconds timeout. The caller
+     * will return immediately if the underlying event
+     * is not signalled.
+     */
+    HSA_EVENT_TIMEOUT_IMMEDIATE = 0,
+
+    /*
+     * Specifies a blocking call to wait. The caller will
+     * return only upon the signalling of the underlying
+     * event object.
+     */
+    HSA_EVENT_TIMEOUT_INFINITE = 0xFFFFFFFF
+
+} HsaEventWaitTime;
+
+/**
+ * @brief Specifies the different return values possible from
+ * a call to Event Wait.
+ */
+typedef enum {
+    
+    /*
+     * Indicates return from wait due to timeout i.e.
+     * event object did not get signalled.
+     */
+    HSA_EVENT_WAIT_SUCCESS = 0,
+
+    /*
+     * Indicates return from wait due to event object
+     * being signalled.
+     */
+    HSA_EVENT_WAIT_TIMEOUT = 1,
+
+} HsaEventWaitReturn;
 
 /**
 *******************************************************************************
