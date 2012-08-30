@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#3 - edit change 775440 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#4 - edit change 778914 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -391,19 +391,38 @@ public:
 class DLL_PUBLIC IProgram
 {
 public:
+
+    /*! Builds and returns a kernel for the list of devices owned 
+    * @param kernelName the name of the kernel to build 
+    * @param size length of kernel name 
+    * @return returns a built kernel for execution
+    */
     virtual hsa::IKernel * build(const char* kernelName,size_t size) = 0;
+    /*! Add a device to the list of devices a kernel is built against.
+    * @param device The device to add.
+    */
     virtual void addDevice(hsa::IDevice * device)  = 0;
+    /*! Get metadata associated with a kernel 
+    * @param d The device the kernel will run on 
+    * @param kid the KernelID identiying the kernel
+    */
     virtual hsacore::HsailKernel* getMetaData(IDevice *d, KernelId &kid) = 0;
+    /*! standard destructor */
     virtual ~IProgram(){};
 };
 
 class DLL_PUBLIC IDispatchDescriptor
 {
 public:
+    /*! Allocates the memory for dispatch  */
     virtual void initDispatch () = 0;
+    /*! Gives the user the command packet built by the command writer */
     virtual uint32_t GetCommandPkt(uint32_t * buf) = 0;
+    /*! Hand off the command to the core queue for execution */
     virtual void execCommandPkt() = 0;
+    /*! Wait for notification that the kernel has executed */
     virtual void waitForEndOfKernel() = 0;
+    /*! Deallocates memory as necessary */
     virtual ~IDispatchDescriptor(){};
 };
 
