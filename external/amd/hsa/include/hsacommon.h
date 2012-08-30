@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#6 - edit change 794720 (text)
+//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#7 - edit change 799290 (text)
 #ifndef _HSACOMMON_H_
 #define _HSACOMMON_H_
 
@@ -426,33 +426,58 @@ typedef enum {
 
 } HsaEventWaitReturn;
 
-enum MemoryTypes
+typedef enum
 {
-    SYSTEM_MEMORY =  (1U << 0),
-    LOCAL_MEMORY =   (1U << 1),
-    LDS_MEMORY   =   (1U << 2),
-    GDS_MEMORY   =   (1U << 3),
-    TEXTURE_MEMORY = (1U << 4),
-    SCRATCH =        (1U << 5)
-};
+	/**
+	 * Conventional system/host memory.
+	 */
+    MEMORY_TYPE_SYSTEM  = (1U << 0),
+
+	/**
+	 * Device on-board memory. For some devices, MEMORY_TYPE_DEVICE and
+	 * MEMORY_TYPE_SYSTEM are the same.
+	 */
+    MEMORY_TYPE_DEVICE  = (1U << 1),
+
+	/**
+	 * Device group memory visible across all work-items in a single work-group.
+	 */
+    MEMORY_TYPE_GROUP   = (1U << 2),
+
+	/**
+	 * Device global memory visible across all work-items in all work-groups.
+	 */
+    MEMORY_TYPE_GLOBAL  = (1U << 3),
+
+	/**
+	 *
+	 */
+    MEMORY_TYPE_TEXTURE = (1U << 4),
+
+	/**
+	 *
+	 */
+    MEMORY_TYPE_SCRATCH = (1U << 5)
+} MemoryType;
 
 /**
  * @brief hsacommon ASICInfo class, represents ASIC specific information of a GPU device.
  */
 enum ASICType 
 { 
-    HSA_SI_TAHITI, 
-    HSA_SI_PITCAIRN,
-    HSA_CI_SKU1,
-    HSA_CI_SKU2
+    ASIC_TYPE_SI_TAHITI, 
+    ASIC_TYPE_SI_PITCAIRN,
+    ASIC_TYPE_CI_SKU1,
+    ASIC_TYPE_CI_SKU2
 };
 
-enum DeviceType 
+typedef enum
 { 
-    CPU=AMD_DEVICE_TYPE_CPU, 
-    GPU=AMD_DEVICE_TYPE_GPU, 
-    INVALID=AMD_DEVICE_TYPE_UNKNOWN 
-};
+    DEVICE_TYPE_CPU=AMD_DEVICE_TYPE_CPU, 
+    DEVICE_TYPE_GPU=AMD_DEVICE_TYPE_GPU, 
+    DEVICE_TYPE_INVALID=AMD_DEVICE_TYPE_UNKNOWN 
+} DeviceType;
+
 class Exception;
 static void *malloc_check(size_t n)
 {
