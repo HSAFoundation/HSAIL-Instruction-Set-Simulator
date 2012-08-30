@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#8 - edit change 787740 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#9 - edit change 792820 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -62,7 +62,8 @@ typedef enum _EVENTID
     USER_GEN_DEVICE_INTERRUPT  = 0, ///< user-mode generated interrupt
     NODE_CHANGE                = 1, ///< "H-NUMA" node change
     DEVICE_STATE_CHANGE        = 2, ///< device state change ( start/stop )
-    //...
+	HSA_EVENTTYPE_DEBUG_EVENT  = 5,
+	//...
     MAX_EVENTS
 } EVENTID;
 
@@ -486,6 +487,41 @@ public:
                                         uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
                                         int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK) = 0;
 
+    /**
+     * API to setup trap handler on the core device
+     *
+     * @param trapHandler pointer to trap handler
+     *
+     * @param trapHandlerSizeByte size of the trap handler
+     */
+	virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
+
+    /**
+     * API to setup trap handler on the core device
+     *
+     * @param trapHandlerBuffer pointer to trap handler buffer
+     *
+     * @param trapHandlerBufferSizeByte size of the trap handler buffer
+     */
+	virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+
+    /**
+     * API to setup trap handler on the core device
+     *
+     * @param trapHandler pointer to trap handler
+     *
+     * @param trapHandlerSizeByte size of the trap handler
+     */
+	virtual void getTrapHandler(void* &trapHandler, size_t &trapHandlerSizeByte) = 0;
+
+    /**
+     * API to setup trap handler on the core device
+     *
+     * @param trapHandlerBuffer pointer to trap handler buffer
+     *
+     * @param trapHandlerBufferSizeByte size of the trap handler buffer
+     */
+	virtual void getTrapHandlerBuffer(void* &trapHandlerBuffer, size_t &trapHandlerBufferSizeByte) = 0;
 
     /**
     * API to retrieve counter information from devices.
