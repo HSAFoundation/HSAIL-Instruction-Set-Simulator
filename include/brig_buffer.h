@@ -31,6 +31,15 @@ class Buffer {
     }
   }
 
+  // pop an item
+  template <class T> void pop(const T *item) {
+    size_t item_sz = item->size;
+    assert(item_sz && "pop a zero size element?!");
+    while (item_sz --) {
+      buf_.pop_back();
+    }
+  }
+
   // get the whole buffer as a vector
   const std::vector<unsigned char>& get(void) const {
     return buf_;

@@ -4468,12 +4468,12 @@ TEST(ParserTest, TopLevelStatement) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, TopLevelStatement(context));
 
-  input.append("const  extern private_b32 &tmp[2];\n");
+  input.assign("const  extern private_b32 &tmp[2];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, TopLevelStatement(context));
 
-  input.append("function &get_global_id(arg_u32 %ret_val)\n");
+  input.assign("function &get_global_id(arg_u32 %ret_val)\n");
   input.append(" (arg_u32 %arg_val0){\n");
   input.append("private_u32 %x ; \n");
   input.append(" ret ;}; \n");

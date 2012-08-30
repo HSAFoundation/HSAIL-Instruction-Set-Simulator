@@ -1517,7 +1517,7 @@ int FunctionDefinition(Context* context) {
 }
 
 int FunctionDeclpart1(Context* context) {
-  if (!DeclPrefix(context)) {
+  //if (!DeclPrefix(context)) {
     if (context->token_to_scan == FUNCTION) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
@@ -1573,30 +1573,35 @@ int FunctionDeclpart1(Context* context) {
           } else {
             context->set_error(INVALID_FBAR);
           }
-        }
-	/* if (context->token_to_scan == ';') {
-          context->token_to_scan = yylex();
-          return 0;
         } else {
-          context->set_error(MISSING_SEMICOLON);
-	    }
-   */
+          return 0;
+        }
       } else {
         context->set_error(MISSING_IDENTIFIER);
       }
     }
-  } else {
-    context->set_error(MISSING_DECLPREFIX);
-  }
+ // } else {
+ //   context->set_error(MISSING_DECLPREFIX);
+ // }
+  return 1;
+}
+
+int FunctionDeclpart2(Context *context){
+  if (';' == context->token_to_scan){
+    context->token_to_scan = yylex();
+    return 0 ;
+  } 
+
   return 1;
 }
 int FunctionDecl(Context *context){
-  if (!FunctionDeclpart1(context)){
-    if (';' == context->token_to_scan){
-      context->token_to_scan = yylex();
-      return 0 ;
-    } else {
-      context->set_error(MISSING_IDENTIFIER);
+  if (!DeclPrefix(context)) {
+    if (!FunctionDeclpart1(context)){
+      if (';' == context->token_to_scan){
+        return FunctionDeclpart2(context) ;
+      } else {
+        context->set_error(MISSING_IDENTIFIER);
+      }
     }
   }
   return 1;
@@ -1995,12 +2000,7 @@ int Functionpart2(Context *context){
 }
 int Function(Context* context) {
   if (!FunctionDefinition(context)) {
-    if (!Functionpart2(context)) {
-      return 0;
-    } else {
-      context->set_error(INVALID_CODEBLOCK);
-    }
-
+    return Functionpart2(context);
   } else {
     context->set_error(INVALID_FUNCTION_DEFINITION);
   }
@@ -5851,11 +5851,8 @@ int GlobalSymbolDeclpart2(Context* context) {
   if (context->token_to_scan == GROUP) 
     return (GlobalGroupDecl(context));
   else if (context->token_to_scan == PRIVATE) 
-    return(GlobalPrivateDecl(context));
-  else {
-    context->set_error(MISSING_IDENTIFIER);
-    return 1;
-  }
+    return (GlobalPrivateDecl(context));
+
   return 1;
 }
 
@@ -6063,7 +6060,7 @@ int GlobalInitializable(Context* context){
 int GlobalDeclpart2(Context *context){
   // the header is declPrefix
   if(FUNCTION == context->token_to_scan){
-    return FunctionDecl(context);
+    return FunctionDeclpart1(context);
   } else if (!GlobalInitializablePart2(context)){
     return 0;
   } else if (!GlobalSymbolDeclpart2(context)){
@@ -6176,18 +6173,13 @@ int TopLevelStatement(Context *context){
     }
   }
   
-  if (FUNCTION != context->token_to_scan){
-    return  GlobalDeclpart2(context);
-  } else {
-    if (!FunctionDefinition(context)){
-     // TODO bug(xiaopeng) always call functionDefinition
-     // functionDecl will be not called 
-      if (';' == context->token_to_scan){
-        context->token_to_scan = yylex();
-        return 0;
-      }else if('{' == context->token_to_scan){
-        return Functionpart2(context);
-      }
+  if (!GlobalDeclpart2(context)){
+    if (';' == context->token_to_scan){
+      return FunctionDeclpart2(context);
+    } else if('{' == context->token_to_scan){
+      return Functionpart2(context);
+    } else {
+      return 0;
     }
   }
   return 1;
