@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#1 - add change 772986 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#2 - edit change 773172 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -18,6 +18,29 @@
 		#define DLL_LOCAL
 	#endif
 #endif
+
+
+#if !defined(AMD_AMP_HSA_INCLUDES)
+#include <vector>
+#include <exception>
+#include <cstdint>
+#endif
+
+typedef enum {
+        INVALID_ARG=1,
+        OUTOFBOUNDS_ARG=2,
+        QUEUE_ERROR=4,
+	QUEUE_INVALID=8,
+        EVENT_ERROR=16,
+	EVENT_INVALID=32,
+        ALLOCATION_FAILURE=64,
+	PROGRAM_ERROR=128,
+	CORE_ERROR=256,
+	MEMORY_ERROR=512,
+        HSAILPROGRAM_ERROR=1024
+	
+} HsaExceptionType;
+
 
 namespace hsacore
 {
@@ -132,5 +155,85 @@ class DLL_PUBLIC HsailKernel
           virtual ~HsailKernel(){}
 };
 
+
+typedef enum {
+        INVALID_ARG=1,
+        OUTOFBOUNDS_ARG=2,
+        QUEUE_ERROR=4,
+	QUEUE_INVALID=8,
+        EVENT_ERROR=16,
+	EVENT_INVALID=32,
+        ALLOCATION_FAILURE=64,
+	PROGRAM_ERROR=128,
+	CORE_ERROR=256,
+	MEMORY_ERROR=512,
+        HSAILPROGRAM_ERROR=1024
+	
+} HsaExceptionType;
+
+
+
+class HsaException:public std::exception
+{
+public:
+    ~HsaException() throw(){}
+
+    /**
+     * @brief append info to an exception, this version doesn't require type
+     *
+     * @param fname name of the function
+     * @param info detail, probably better to keep it under 40 chars 
+     */
+    void appendInfo(const char *fname,const char *info);
+
+    /**
+     * @brief append info to an exception, this version requires a type
+     *
+     * @param fname name of the function
+     * @param info detail, probably better to keep it under 40 chars 
+     * @param et exception type
+     */
+    void appendInfo(const char *fname,const char *info, HsaExceptionType et);
+
+    /**
+     * @brief the virtual function in std::exception implemented here
+     *
+     * @return string in info
+     */
+    const char* what() const throw();
+
+private:
+    //HsaException(const HsaException&);     
+    HsaException& operator = (const HsaException&);
+    //HsaExceptionType ty;
+    std::string info_; ///< place to "append" and carry along an exception
+    int excepttype_;
+};
+
+void 
+HsaException::appendInfo(const char *fname, const char *erinfo)
+{
+    info_.append("<-");
+    info_.append(fname);
+    info_.append(":");
+    info_.append(erinfo);
+}
+
+void
+HsaException::appendInfo(const char *fname, const char *erinfo, HsaExceptionType et)
+{
+    info_.append("<-");
+    info_.append(fname);
+    info_.append(":");
+    info_.append(erinfo);
+    excepttype_ &= et;
+}
+
+const char* 
+HsaException::what() const throw()
+{
+    const char * c = info_.c_str(); 
+    return c;
+}
 }
 #endif
