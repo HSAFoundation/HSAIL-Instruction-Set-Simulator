@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#7 - edit change 799290 (text)
+//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#8 - edit change 803839 (text)
 #ifndef _HSACOMMON_H_
 #define _HSACOMMON_H_
 
@@ -37,7 +37,7 @@
 #define AMD_DEVICE_TYPE_HSA                          (1 << 4)
 #define AMD_DEVICE_TYPE_ALL                          0xFFFFFFFF
 
-// all the items shared between namespace hsacore and namespace hsa go to this namespace 
+// all the items shared between namespace hsacore and namespace hsa go to this namespace
 namespace hsacommon
 {
 
@@ -57,7 +57,7 @@ public:
      * @brief Default constructor, initializes member variables to 0.
      */
     vector() : items_(0), data_(0), capacity_(0), size_(0) { }
-   
+
     /**
      * @brief Destructor, destroys vector.
      */
@@ -87,7 +87,7 @@ public:
     }
 
     /**
-     * @brief Copy Operator function, assigns a copy of 
+     * @brief Copy Operator function, assigns a copy of
      *        rhs as content of vector object.
      * @return returns *this, vector object with copied content.
      * @param rhs Vector to be copied to current memory
@@ -108,11 +108,11 @@ public:
     }
 
     /**
-     * @brief Function pushes all elements between start and 
+     * @brief Function pushes all elements between start and
      *        end locations onto the vector.
      * @tparam Iterator Type of iterator
      * @param start Iterator representing start of source.
-     *        Must be at least a forward iterator. 
+     *        Must be at least a forward iterator.
      * @param end Iterator representing end of source.
      */
     template <class Iterator> void assign(Iterator start, Iterator end)
@@ -134,7 +134,7 @@ public:
     }
 
     /**
-     * @brief Function returns the number of items worth of 
+     * @brief Function returns the number of items worth of
      *        memory allocated for the vector.
      * @return returns the number of items worth of memory
      *        allocated for the vector.
@@ -151,13 +151,13 @@ public:
      */
     bool empty() const
     {
-        return (size_ == 0); 
+        return (size_ == 0);
     }
 
     /**
      * @brief Function empties the vector and destructs each element
      *        as it is removed.
-     * @note Memory is not freed by clear. Only destruction of 
+     * @note Memory is not freed by clear. Only destruction of
      *        the vector will deallocate memory.
      * @note Capacity will be >= the size of the vector.
      */
@@ -165,11 +165,11 @@ public:
     {
         while(size_ > 0){
             pop_back();
-        } 
+        }
     }
 
     /**
-     * @brief Function removes and destructs the last element of a 
+     * @brief Function removes and destructs the last element of a
      *        non-empty vector.
      * @note Capacity will not be changed.
      */
@@ -188,8 +188,8 @@ public:
      * @param item The item to be added to the end of the vector.
      */
     void push_back(const T& item)
-    {        
-        ptrdiff_t itemSize = reinterpret_cast<char*>(&items_[1]) - reinterpret_cast<char*>(&items_[0]);
+    {
+        size_t itemSize = sizeof(T);
 
         if(capacity_ == 0){
             capacity_ = 1;
@@ -209,7 +209,7 @@ public:
             // TODO: memory leak in case of exceptions. Make RAII.
             delete[] prevData;
         }
-        new(&items_[size_]) T(item);  
+        new(&items_[size_]) T(item);
         size_++;
     }
 
@@ -272,15 +272,15 @@ public:
     }
 
     /**
-     * @brief Function returns the reference to the element 
+     * @brief Function returns the reference to the element
      *        at index n in the vector
-     * @return returns the reference to the element at 
+     * @return returns the reference to the element at
      *        index n in the vector
-     * @throw Throw out_of_range exception when index n is 
+     * @throw Throw out_of_range exception when index n is
      *        less than 0 or greater than the vector size.
-     * @param n The index of the element being returned. 
+     * @param n The index of the element being returned.
      */
-    T& at(size_t n) 
+    T& at(size_t n)
     {
         if(n >= size_){
             throw std::out_of_range("vector::at() called on element outside hsa::vector.");
@@ -289,9 +289,9 @@ public:
     }
 
     /**
-     * @brief Constant function returns a constant reference to the 
+     * @brief Constant function returns a constant reference to the
      *        element at index n in the vector
-     * @return returns a constant reference to the element at 
+     * @return returns a constant reference to the element at
      *        index n in the vector
      * @throw Throw out_of_range exception when index n is less
      *        than 0 or greater than the vector size.
@@ -306,7 +306,7 @@ public:
     }
 
     /**
-     * @brief Function returns an iterator referring to 
+     * @brief Function returns an iterator referring to
      *        the first element in the vector.
      * @return returns an iterator referring to the first
      *        element in the vector.
@@ -317,7 +317,7 @@ public:
     }
 
     /**
-     * @brief Constant function returns a constant iterator referring to 
+     * @brief Constant function returns a constant iterator referring to
      *        the first element in the vector.
      *  @return returns a constant iterator referring to the first
      *        element in the vector.
@@ -328,7 +328,7 @@ public:
     }
 
     /**
-     * @brief Constant function returns a constant iterator referring to 
+     * @brief Constant function returns a constant iterator referring to
      *        the first element in the vector.
      * @return returns a constant iterator referring to the first
      *        element in the vector.
@@ -339,9 +339,9 @@ public:
     }
 
     /**
-     * @brief Function returns an iterator referring to the 
+     * @brief Function returns an iterator referring to the
      *        element following the last element in the vector.
-     * @return returns an iterator referring to the element 
+     * @return returns an iterator referring to the element
      *        following the last element in the vector.
      */
     iterator end()
@@ -350,10 +350,10 @@ public:
     }
 
     /**
-     * @brief Constant function returns a constant iterator referring 
+     * @brief Constant function returns a constant iterator referring
      *        to the element following the last element in the
      *        vector.
-     * @return returns a constant iterator referring to the element 
+     * @return returns a constant iterator referring to the element
      *        following the last element in the vector.
      */
     const_iterator end() const
@@ -362,10 +362,10 @@ public:
     }
 
     /**
-     * @brief Constant function returns a constant iterator referring 
+     * @brief Constant function returns a constant iterator referring
      *        to the element following the last element in the
      *        vector.
-     * @return returns a constant iterator referring to the element 
+     * @return returns a constant iterator referring to the element
      *        following the last element in the vector.
      */
     const_iterator cend() const
@@ -378,7 +378,7 @@ private:
     char* data_; ///< Pointer to buffer of items of type char
     size_t    capacity_; ///< Capacity of the vector
     size_t    size_; ///< Number of items contained in the vector
-    
+
 };//end Vector
 
 /**
@@ -389,7 +389,7 @@ private:
  * values defined in HsaThk layer interface.
  */
 typedef enum {
-    
+
     /*
      * Specifies Zero milliseconds timeout. The caller
      * will return immediately if the underlying event
@@ -411,7 +411,7 @@ typedef enum {
  * a call to Event Wait.
  */
 typedef enum {
-    
+
     /*
      * Indicates return from wait due to timeout i.e.
      * event object did not get signalled.
@@ -428,54 +428,54 @@ typedef enum {
 
 typedef enum
 {
-	/**
-	 * Conventional system/host memory.
-	 */
+    /**
+     * Conventional system/host memory.
+     */
     MEMORY_TYPE_SYSTEM  = (1U << 0),
 
-	/**
-	 * Device on-board memory. For some devices, MEMORY_TYPE_DEVICE and
-	 * MEMORY_TYPE_SYSTEM are the same.
-	 */
+    /**
+     * Device on-board memory. For some devices, MEMORY_TYPE_DEVICE and
+     * MEMORY_TYPE_SYSTEM are the same.
+     */
     MEMORY_TYPE_DEVICE  = (1U << 1),
 
-	/**
-	 * Device group memory visible across all work-items in a single work-group.
-	 */
+    /**
+     * Device group memory visible across all work-items in a single work-group.
+     */
     MEMORY_TYPE_GROUP   = (1U << 2),
 
-	/**
-	 * Device global memory visible across all work-items in all work-groups.
-	 */
+    /**
+     * Device global memory visible across all work-items in all work-groups.
+     */
     MEMORY_TYPE_GLOBAL  = (1U << 3),
 
-	/**
-	 *
-	 */
+    /**
+     *
+     */
     MEMORY_TYPE_TEXTURE = (1U << 4),
 
-	/**
-	 *
-	 */
+    /**
+     *
+     */
     MEMORY_TYPE_SCRATCH = (1U << 5)
 } MemoryType;
 
 /**
  * @brief hsacommon ASICInfo class, represents ASIC specific information of a GPU device.
  */
-enum ASICType 
-{ 
-    ASIC_TYPE_SI_TAHITI, 
+enum ASICType
+{
+    ASIC_TYPE_SI_TAHITI,
     ASIC_TYPE_SI_PITCAIRN,
     ASIC_TYPE_CI_SKU1,
     ASIC_TYPE_CI_SKU2
 };
 
 typedef enum
-{ 
-    DEVICE_TYPE_CPU=AMD_DEVICE_TYPE_CPU, 
-    DEVICE_TYPE_GPU=AMD_DEVICE_TYPE_GPU, 
-    DEVICE_TYPE_INVALID=AMD_DEVICE_TYPE_UNKNOWN 
+{
+    DEVICE_TYPE_CPU=AMD_DEVICE_TYPE_CPU,
+    DEVICE_TYPE_GPU=AMD_DEVICE_TYPE_GPU,
+    DEVICE_TYPE_INVALID=AMD_DEVICE_TYPE_UNKNOWN
 } DeviceType;
 
 class Exception;
@@ -526,12 +526,12 @@ public:
      */
     string (const string& str)
         :cptr(str_dup(str.c_str()))
-    {   
+    {
     }
 
     /**
      * @brief Copy constructor
-     * @param s a null-terminated character sequence (C string) 
+     * @param s a null-terminated character sequence (C string)
      *        to be copied for the new object
      */
     string (const char *s)
@@ -556,12 +556,12 @@ public:
             cptr = str_dup(s);
         }
     }
-   
+
     /**
-     * @brief assignment operator function, assigns a copy of 
+     * @brief assignment operator function, assigns a copy of
      *        s as content of string object
      * @return returns *this, string object with copied content.
-     * @param s a pointer to an array containing ac string, 
+     * @param s a pointer to an array containing ac string,
      *          which is copied as the new content for the object.
      */
     string& operator= (const char* s)
@@ -575,7 +575,7 @@ public:
     }
 
     /**
-     * @brief assignment operator function, assigns a copy of 
+     * @brief assignment operator function, assigns a copy of
      *        str as content of string object
      * @return returns *this, string object with copied content.
      * @param str a string to be copied  as the new content for the object.
@@ -586,7 +586,7 @@ public:
     }
 
     /**
-     * @brief assignment operator function, assigns a copy of 
+     * @brief assignment operator function, assigns a copy of
      *        c as content of string object
      * @return returns *this, string object with copied content.
      * @param c a character to be copied  as the new content for the object.
@@ -620,7 +620,7 @@ public:
     }
 
     /**
-     * @brief Function empties the string 
+     * @brief Function empties the string
      */
     void clear()
     {
@@ -668,7 +668,7 @@ public:
         memmove(cptr + ori_len , s, cpy_len);
         return *this;
     }
-    
+
     /**
      * @brief Appends a copy of the argument to the string.
      * @return  returns *this, string object with appended content.
@@ -770,8 +770,8 @@ public:
 
     /**
      * @brief Compares the content of this object to the content of argument
-     * @return 0 if the compared characters sequences are equal,positive sign 
-     *         if considered greater than the comparing string passed as parameter 
+     * @return 0 if the compared characters sequences are equal,positive sign
+     *         if considered greater than the comparing string passed as parameter
      *         or negative sign if considered smaller than the comparing string passed as parameter
      * @param str string object with the content to be used as comparing string.
      */
@@ -782,8 +782,8 @@ public:
 
     /**
      * @brief Compares the content of this object to the content of argument
-     * @return 0 if the compared characters sequences are equal,positive sign 
-     *         if considered greater than the comparing string passed as parameter 
+     * @return 0 if the compared characters sequences are equal,positive sign
+     *         if considered greater than the comparing string passed as parameter
      *         or negative sign if considered smaller than the comparing string passed as parameter
      * @param s c-string with the content to be used as comparing string.
      */
@@ -879,7 +879,7 @@ inline bool operator!= (const string& lhs, const char* rhs)
 /**
  * @brief Perform the comparison operation, between lhs and rhs.
  * @return comparison results
- */    
+ */
 inline bool operator< (const string& lhs, const string& rhs)
 {
     return lhs.compare(rhs) < 0;
@@ -906,7 +906,7 @@ inline bool operator< (const string& lhs, const char* rhs)
 /**
  * @brief Perform the comparison operation, between lhs and rhs.
  * @return comparison results
- */    
+ */
 inline bool operator> (const string& lhs, const string& rhs)
 {
     return lhs.compare(rhs) > 0;
@@ -1054,13 +1054,13 @@ inline void swap (string& lhs, string& rhs){
  *******************************************************************************
  * @brief HSA status codes
  *
- * @details This enumeration defines the possible status values returned by 
+ * @details This enumeration defines the possible status values returned by
  * HSA runtime interfaces and exceptions.
  *******************************************************************************
  */
 typedef enum {
     /// Operation completed successfully
-    STATUS_SUCCESS = 0,            
+    STATUS_SUCCESS = 0,
 
     /// Operation timed out
     STATUS_TIMEDOUT = 1,
@@ -1103,7 +1103,7 @@ class Exception:public std::exception
         int errCode;
     }errInfo;
 protected:
-    
+
     vector< errInfo > info_;
 
 private:
@@ -1117,7 +1117,7 @@ public:
      * @brief append info to an exception, this version requires a type
      *
      * @param fname name of the function
-     * @param erinfo detail, probably better to keep it under 40 chars 
+     * @param erinfo detail, probably better to keep it under 40 chars
      * @param status exception Status
      */
     virtual void appendInfo(const char *fname, const char *erinfo, Status status)
@@ -1148,7 +1148,7 @@ public:
      */
     const char* what() const throw()
     {
-        const char * c = info_.back().msg.c_str(); 
+        const char * c = info_.back().msg.c_str();
         return c;
     }
 
@@ -1181,7 +1181,7 @@ public:
         }
         return exStack;
     }
-    
+
 };
 
 /**
@@ -1289,21 +1289,21 @@ public:
     virtual HeapType getHeapType()=0;
     /**
      * @brief Getter function for lower 32 bits of memory size.
-     * @return returns the lower 32 bits of memory size. 
-     * (example: if memory size = 4GB (2^32), getSizeLow() will 
-     *  return 0 since 2^32 = 0x1 00 00 00 00 
+     * @return returns the lower 32 bits of memory size.
+     * (example: if memory size = 4GB (2^32), getSizeLow() will
+     *  return 0 since 2^32 = 0x1 00 00 00 00
      */
     virtual uint32_t getSizeLow()=0;
     /**
      * @brief Getter function for higher 32 bits of memory size.
-     * @return returns the higher 32 bits of memory size. 
-     * (example: if memory size = 4GB (2^32), getSizeHigh() will 
-     *  return 1 since 2^32 = 0x1 00 00 00 00 
+     * @return returns the higher 32 bits of memory size.
+     * (example: if memory size = 4GB (2^32), getSizeHigh() will
+     *  return 1 since 2^32 = 0x1 00 00 00 00
      */
     virtual uint32_t getSizeHigh()=0;
     /**
      * @brief Getter function for memory size.
-     * @return returns 64 bit integer representing memory size. 
+     * @return returns 64 bit integer representing memory size.
      */
     virtual uint64_t getSize()=0;
     /**
@@ -1440,7 +1440,7 @@ public:
     virtual ~IOLinkDescriptor() {} ;
 };
 
-} // end namespace hsacommon 
+} // end namespace hsacommon
 
 namespace hsa
 {
