@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#22 - edit change 801053 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#23 - edit change 805434 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -622,58 +622,117 @@ public:
 };
 
 /**
-* @ingroup Debugger, Dispatch
-*/
+ * @ingroup Debugger, Dispatch
+ */
 class DLL_PUBLIC DispatchDescriptor
 {
+
 public:
-    /*! Allocates the memory for dispatch  */
-    virtual void initDispatch () = 0;
-    
-    /*! Gives the user the command packet built by the command writer */
-    virtual uint32_t GetCommand(uint32_t * buf) = 0;
-    
-    /*! Hand off the command to the core queue for execution */
-    virtual void execCommand() = 0;
-    
-    /*! Wait for notification that the kernel has executed */
-    virtual void waitForEndOfKernel() = 0;
+
+    /**
+     * @brief Destructor for the kernel dispatch info descriptor.
+     * The implmentation will release all resources, memory
+     * devices, queues, etc that have been acquired in support
+     * of kernel dispatch.
+     */
+    virtual ~DispatchDescriptor() {};
+
+    /**
+     * @brief Returns the unique Id of HsaRt kernel dispatch.
+     *
+     * @return uint32_t Id of kernel dispatch.
+     */
+    virtual uint32_t getDispatchID(void) = 0;
+
+    /**
+     * @brief Initializes the various entities, memory, command
+     * writer, etc that are needed to launch and execute a HsaRt
+     * kernel.
+     */
+    virtual bool initDispatch (void) = 0;
+
+    /**
+     * @brief Executes the various steps to submit and execute a
+     * HsaRt kernel object. It is necessary that the descriptor
+     * be initialized prior to this call.
+     *
+     * @return bool true if kernel is submitted to compute engine
+     * successfully, false otherwise.
+     */
+    virtual bool launchDispatch(void) = 0;
+
+    /**
+     * @brief Returns a boolean flag to indicate if the kernel has
+     * completed or not.
+     *
+     * @return bool true if the kernel has completed, false otherwise.
+     */
+    virtual bool hasKrnlCompleted(void) = 0;
 	
-    /*! Get the dispatch ID */
-    virtual uint32_t getDispatchID() = 0;
+    /**
+     * @brief Blocking api that waits for the kernel to complete.
+     */
+    virtual void waitForEndOfKernel(void) = 0;
     
-    /*! Deallocates memory as necessary */
-    virtual ~DispatchDescriptor(){};
+    /**
+     * @brief Returns address and size of Kernel Launch packet. This is
+     * provided as convenience to allow users to execute this packet
+     * directly.
+     *
+     * @note: It is possible that the memory block associated with
+     * launch packet could be released. Also users could modify the
+     * packet with invalid instructions.
+     *
+     * @param launchAddr output parameter updated with address of kernel
+     * launch packet.
+     *
+     * @return uint32_t size of kernel launch packet in 32-bit word size.
+     */ 
+    virtual uint32_t getLaunchAddr(uint32_t *launchAddr) = 0;
+    
+    /**
+     * @brief Returns the memory block used by HsaRt kernel for temporary
+     * computation results. Debugger uses this info to support the querying
+     * of kernel parameters.
+     *
+     * @note: In Debug mode the memory used by kernel for various entities
+     * should be of type SYSTEM_MEMORY since it should be accessible to
+     * both Cpu and Gpu.
+     *
+     * @param hiAddr the upper 32 bits of the scratch memory block
+     *
+     * @param lowAddr the lower 32 bits of the scratch memory block
+     *
+     * @return void
+     */
+    virtual void getScratchAddress(uint32_t &hiAddr, uint32_t &lowAddr) = 0;
+    
+    /**
+     * @brief The debugger needs to know the scratch memory descriptor
+     * used for debugger trap handler. A memory description consists
+     * of four registers, which are:
+     *  
+     *      SQ_BUF_RSRC_WORD0,
+     *      SQ_BUF_RSRC_WORD1,
+     *      SQ_BUF_RSRC_WORD2,
+     *      SQ_BUF_RSRC_WORD3
+     *
+     * @note: In Debug mode the memory used by kernel for various entities
+     * should be of type SYSTEM_MEMORY since it should be accessible to
+     * both Cpu and Gpu.
+     *
+     * @param scratchDescr pointer to the four components of scratch memory
+     * descriptor
+     *
+     * @return void
+     */
+    virtual void getScratchMemoryDescriptor(uint32_t *scratchDescr) = 0;
     
     /*! setup trap handler*/
     virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
     
     /*! associate buffer with trap handler */
     virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
-
-    
-    /**
-     * @brief the debugger needs to know the scratch address that was given to
-     * this kernel for this dispatch. 
-     * When in debug model _ONLY_ SYSTEM_MEMORY may be used for any dispatch
-     * resources. This API points debugger to the starting location of the
-     * scratch used for this dispatch.  
-     * @param addr_hi the high 32 bits of the address 
-     * @param addr_lo the low 32 bits of the address
-     */
-    virtual void getScratchAddress(uint32_t &addr_hi, uint32_t &addr_lo) = 0;
-    
-    /**
-     * @brief the debugger needs to know the scratch memory descriptor used
-     * for debugger trap handler.
-     * A memory description consists of four registers, which are:
-     * SQ_BUF_RSRC_WORD0, SQ_BUF_RSRC_WORD1, SQ_BUF_RSRC_WORD2, SQ_BUF_RSRC_WORD3
-     *
-     * Note that When in debug model _ONLY_ SYSTEM_MEMORY may be used for any dispatch
-     * resources. 
-     * @param pointer to the four coponents of the memory descriptor 
-     */
-    virtual void getScratchMemoryDescriptor(uint32_t *memDesp) = 0;
 
 	/**
      * @brief, allows the query of the index of the SGPR containing the scratch 
@@ -709,7 +768,6 @@ public:
                              HSAWaveMode mode, 
                              uint32_t trapID, 
                              void *msgPtr) = 0;
-
 };
 
 /**
