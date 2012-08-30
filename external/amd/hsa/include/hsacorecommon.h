@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#11 - edit change 794787 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#12 - edit change 799290 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -111,19 +111,103 @@ class DLL_PUBLIC HsailKernel
 };
 /* @}*/
 
-enum SystemMemoryOptions
+typedef enum
 {
-    //page properties
-    PAGEABLE =       (1U <<  7),
-    PINNED =         (1U <<  8),
-    // cache properties
-    CACHED =         (1U << 12),
-    NON_CACHED =     (1U << 13),
-    WRITE_COMBINED = (1U << 14),
-    // access properties
-    READ_WRITE =     (1U << 17),
-    READ_ONLY =      (1U << 18),
-};
+
+    /**
+     * Memory option used for requesting memory with caching enabled. This
+     * option is mutually exclusive with the MEMORY_OPTION_UNCACHED option. 
+     */
+    MEMORY_OPTION_CACHED = (1U << 12),
+
+    /**
+     * Memory option used for requesting memory with caching disabled. This
+     * option is mutually exclusive with the MEMORY_OPTION_CACHED option. 
+     */
+    MEMORY_OPTION_UNCACHED = (1U << 13),
+
+    /**
+     * Memory option used for requesting memory capable of being paged-out to
+     * disk. This option is mutually exclusive with the
+     * MEMORY_OPTION_NONPAGEABLE option.
+     */
+    MEMORY_OPTION_PAGEABLE = (1U <<  7),
+
+    /**
+     * Memory option used for requesting memory that won't be paged-out to disk.
+     * This option is mutually exclusive with the MEMORY_OPTION_PAGEABLE option. 
+     */
+    MEMORY_OPTION_NONPAGEABLE = (1U <<  8),
+
+    /**
+     * Memory option used for requesting memory that is write combined. 
+     */
+    MEMORY_OPTION_WRITE_COMBINED = (1U << 14),
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * accessed by the host. This option is mutually exclusive with the 
+     * MEMORY_OPTION_DEVICE_READ_WRITE, MEMORY_OPTION_DEVICE_READ_ONLY, and
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_DEVICE_NO_ACCESS,
+
+    /**
+     * Memory option used for declaring that the requested memory will be both
+     * read and written by the device. This option is mutually exclusive with
+     * the MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_ONLY, and
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_DEVICE_READ_WRITE = (1U << 17),
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * both read by the device. This option is mutually exclusive with the
+     * MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_WRITE, and
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_DEVICE_READ_ONLY = (1U << 18),
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * both written by the device. This option is mutually exclusive with the
+     * MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_WRITE, and
+     * MEMORY_OPTION_DEVICE_READ_ONLY options. 
+     */
+    MEMORY_OPTION_DEVICE_WRITE_ONLY,
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * accessed by the host. This option is mutually exclusive with the
+     * MEMORY_OPTION_HOST_READ_WRITE, MEMORY_OPTION_HOST_READ_ONLY, and
+     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_HOST_NO_ACCESS,
+
+    /**
+     * Memory option used for declaring that the requested memory will be both
+     * read and written by the host. This option is mutually exclusive with the
+     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_ONLY, and
+     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_HOST_READ_WRITE,
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * both read by the host. This option is mutually exclusive with the
+     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_WRITE, and
+     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_HOST_READ_ONLY,
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * both written by the host. This option is mutually exclusive with the
+     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_WRITE, and
+     * MEMORY_OPTION_HOST_READ_ONLY options. 
+     */
+    MEMORY_OPTION_HOST_WRITE_ONLY
+} MemoryOption;
 
 }
 /* @}*/
