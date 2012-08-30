@@ -3654,7 +3654,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
-  std::string input("global_ROImg &demo={format = signed_int32 ,order = r,width = 4,height = 5,depth = 6 }");
+  std::string input("global_ROImg &demo={format = signed_int32 ,order = r,width = 4,height = 5,depth = 6 } ;");
   
   Lexer *lexer = new Lexer(input);
   lexer->set_source_string(input);
@@ -3671,7 +3671,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
       0,                        // symbolModifier
       0,                        // dim
       0,                        // s_name
-      Brigb32,                  // type
+      Brigb64,                  // type
       1,                        // align
     },
     4,                      //width

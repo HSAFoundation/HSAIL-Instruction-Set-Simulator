@@ -270,7 +270,7 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
                                   context->valid_string = true;
                                   return TOKEN_STRING; }
 
-/* image format*/
+      /* image format */
 snorm_int8                                     { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
@@ -361,7 +361,7 @@ float                                          { context->token_type = PROPERTY;
                                                  context->token_value.format = BrigFLOAT;
                                                  return TOKEN_PROPERTY; }
 
-/* image order*/
+      /* image order */
 r                                              { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
