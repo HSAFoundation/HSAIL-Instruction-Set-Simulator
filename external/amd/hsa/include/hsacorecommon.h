@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#10 - edit change 794372 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#11 - edit change 794787 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -53,14 +53,13 @@ class DLL_PUBLIC HsailKernel
         char* argListInfo;
     public:
         HsailKernel(){};
-        virtual void* getMetaDataHack()=0;	        
+
         /*! Getter function for the ISA (Pure Virtual function) 
          *  @param ISA - The starting address of the ISA is 
          *               assigned to this pointer
          *  @param size - the size of the ISA blob is stored here
          *  @return The ISA and the size are stored in the parameters
          */
-
         virtual void getISA(const void* &isa,
                             size_t &size)=0;
         
