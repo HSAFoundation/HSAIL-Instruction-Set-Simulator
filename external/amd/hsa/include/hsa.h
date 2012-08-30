@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#1 - add change 772986 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#2 - edit change 775354 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -12,8 +12,6 @@
 #endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 
 #include "hsailutil.h"
-#include "hsacommon.h"
-//#include "acl.h"
 // lhowes: Temporary workaround for tool chain issues
 // Once headers finalized we can come up with a cleaner 
 // solution if system includes are still necessary
@@ -22,6 +20,7 @@
 #include <assert.h>
 #endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 
+#include "hsacommon.h"
 
 namespace hsa
 {
@@ -71,12 +70,80 @@ HSAIL_DATATYPE_STRUCT,
 HSAIL_DATATYPE_MAX_TYPES
 };
 
+
 class IQueue;
 class IKernel;
 class IEvent;
 class IDevice;
-
 class IProgram;
+class IDispatchDescriptor;
+
+typedef enum {
+        HALT_WAVE=1,
+        KILL_WAVE=2,
+        RESUME_WAVE=4
+} HSAWaveAction;
+
+typedef enum {
+        IGNORE_HOST=1,
+        EXIT_HOST=2,
+        INTERRUPT_HOST=4
+} HSAHostAction;
+
+typedef enum {
+        FLUSH_ALL=1,
+        FLUSH_BOTTOM_LEVEL =2,
+        FLUSH_TOP_LEVEL=4
+} HSACachePolicy;
+
+typedef void (*HSATrapHandle)(void *,int);
+
+typedef struct HSAExceptionPolicy {
+        int enableException;
+        HSAWaveAction waveAction;
+        HSAHostAction hostAction;
+        HSATrapHandle trapHandle;
+
+        HSAExceptionPolicy()
+        {
+            int enableException = 1;
+            waveAction = HALT_WAVE;
+            hostAction = IGNORE_HOST;
+            trapHandle = NULL;
+        }
+}HSAExceptionPolicy;
+
+typedef enum {
+        WAIT_DEPENDENCY=1,
+        WAIT_ENQUEUE=2,
+        WAIT_LAUNCH=4,
+        WAIT_COMPLETION=8
+}HSACompletionPolicy;
+
+typedef struct LaunchAttributes {
+	HSACompletionPolicy completionPolicy;
+        HSAExceptionPolicy exceptionPolicy;
+        HSACachePolicy cachePolicy;
+        int gridX;
+        int gridY;
+        int gridZ;
+        int groupX;
+        int groupY;
+        int groupZ;
+
+        LaunchAttributes()
+        {
+            cachePolicy = FLUSH_ALL;
+            gridX = 1;
+            gridY = 1;
+            gridZ = 1;
+            groupX = 1;
+            groupY = 1;
+            groupZ = 1;
+
+        }
+}LaunchAttributes;
+
 typedef hsa::vector<hsa::IDevice*>::const_iterator Idevice_itr;
 typedef hsa::vector<hsa::IDevice*> Idevice_list;
 typedef hsa::vector<hsa::IDevice*>* Idevice_list_ptr;
@@ -85,8 +152,11 @@ typedef std::string KernelId;
 /**
  * @copydoc hsacore::allocateMemory
  */
-DLL_PUBLIC void* allocateMemory(const IDevice& dev, const size_t size,
-		const uint32_t type);
+DLL_PUBLIC void*
+allocateMemory(
+    const size_t size,
+    const uint32_t memtype,
+    const IDevice& dev);
 
 /**
  * @copydoc hsacore::freeMemory
@@ -120,7 +190,7 @@ DLL_PUBLIC void unmapMemory(void* ptr);
 class DLL_PUBLIC IDevice
 {
 public:
-    virtual hsa::DeviceType getType()=0;
+    virtual hsa::DeviceType getType() const = 0;
 
     virtual unsigned int getComputeUnitsCount()=0;
 
@@ -133,6 +203,10 @@ public:
     virtual const hsa::vector<hsa::CacheDescriptor*>& getCacheDescriptors()=0;
 
     virtual bool isDoublePrecision()=0;
+
+    virtual bool isDebug()=0;
+
+    virtual bool isDedicatedCompute()=0;
 
     // Get the device information in bulk.
     //virtual const Info& info()=0;
@@ -153,29 +227,19 @@ public:
 private:
 };
 
-/*how do we share this structure?*/
-/* VT TODO this could be extern in command writer, or in a common header*/
-union RTKernelArg
-{
-    void* addr;             ///< pointer to a buffer
-    int32_t s32value;       ///< signed 32 bit value
-    uint32_t u32value;      ///< unsigned 32 bit value
-    float fvalue;           ///< float value
-    double dvalue;          ///< double value
-    int64_t s64value;       ///< signed 64 bit value
-    uint64_t u64value;      ///< unsigned 64 bit value
-};
-
 class DLL_PUBLIC IQueue
 {
 public:
-    virtual ~IQueue(){};
-    virtual hsa::AMDRETCODE dispatch(void *kinfo, void *prgmptr, uint prgmsize, IEvent *eventptr)=0;
+    virtual hsa::AMDRETCODE dispatch(void *kinfo, void *prgmptr, unsigned int prgmsize, IEvent *eventptr)=0;
     virtual hsa::IEvent * dispatch(IKernel *k, RTKernelArg arg1, hsa::IEvent *ievp)=0;
-    //virtual hsa::IEvent * dispatch(IKernel *k, RTKernelArg arg1, RTKernelArg arg2, RTKernelArg arg3, hsa::IEvent *ievp)=0;
+    virtual hsa::IEvent * dispatch(IKernel * kernel, IEvent * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::IEvent *dispatch(IDispatchDescriptor * dispDescriptor, LaunchAttributes *launchAttr, IEvent * depEvent)=0;
+    virtual hsa::IEvent *dispatch(IKernel * kernel, LaunchAttributes *launchAttr, IEvent * depEvent, uint32_t numArgs, ...)=0;
     virtual hsa::AMDRETCODE getScratchUserPtr(void **ptr)=0;
-    virtual hsa::AMDRETCODE getScratchSize(uint *scrsize)=0;
+    virtual hsa::AMDRETCODE getScratchSize(unsigned int *scrsize)=0;
     virtual hsa::AMDRETCODE flush()=0;
+    virtual IDispatchDescriptor * createDispatchDescriptor(IKernel * kernel, LaunchAttributes *launchAttr, uint32_t numArgs, ...)=0;
+    virtual ~IQueue(){};
 };
 
 
@@ -237,9 +301,9 @@ public:
     virtual hsa::AMDRETCODE getDeviceCount( uint32_t* count )=0;
     virtual const hsa::vector<hsa::IDevice*>& getDevices()=0;
 
-    virtual hsa::AMDRETCODE createDeviceQueue(hsa::IDevice *d, uint size, hsa::IQueue* &q)=0;
+    virtual hsa::AMDRETCODE createDeviceQueue(hsa::IDevice *d, unsigned int size, hsa::IQueue* &q)=0;
     virtual hsa::AMDRETCODE createProgram(char *charElf, size_t elfSize, Idevice_list_ptr pDevices, IProgram* &p){
-	    return 1;
+	return 1;
     };
     virtual hsa::AMDRETCODE createProgramFromELF(void *charElf, Idevice_list_ptr pDevices, IProgram* &p){
         return 1;
@@ -250,33 +314,29 @@ public:
     /**
      * @copydoc hsa::allocateMemory
      */
-    virtual void* allocateMemory(const IDevice& dev, const size_t size,
-    		const uint32_t memtype) = 0;
+    virtual void*
+    allocateMemory(
+        const size_t size,
+        const uint32_t memtype,
+        const IDevice& dev) = 0;
 
     /**
      * @copydoc hsa::freeMemory
      */
-    virtual void freeMemory(void* ptr) = 0;
-
-    /**
-     * @copydoc hsa::registerMemory
-     */
-    virtual void registerMemory(void* ptr, const size_t size, const uint32_t type) = 0;
-
-    /**
-     * @copydoc hsa::deregisterMemory
-     */
-    virtual void deregisterMemory(void* ptr) = 0;
+    virtual void
+    freeMemory(void* ptr) = 0;
 
     /**
      * @copydoc hsa::mapMemory
      */
-    virtual void mapMemory(void* ptr, const size_t size) = 0;
+    virtual void
+    mapMemory(void* ptr, const size_t size) = 0;
 
     /**
      * @copydoc hsa::unmapMemory
      */
-    virtual void unmapMemory(void* ptr) = 0;
+    virtual void
+    unmapMemory(void* ptr) = 0;
 
     virtual ~IRuntimeApi(){};
 };
@@ -288,6 +348,16 @@ public:
     virtual void addDevice(hsa::IDevice * device)  = 0;
     virtual hsacore::HsailKernel* getMetaData(IDevice *d, KernelId &kid) = 0;
     virtual ~IProgram(){};
+};
+
+class DLL_PUBLIC IDispatchDescriptor
+{
+public:
+    virtual void initDispatch () = 0;
+    virtual uint32_t GetCommandPkt(uint32_t * buf) = 0;
+    virtual void execCommandPkt() = 0;
+    virtual void waitForEndOfKernel() = 0;
+    virtual ~IDispatchDescriptor(){};
 };
 
 /**
