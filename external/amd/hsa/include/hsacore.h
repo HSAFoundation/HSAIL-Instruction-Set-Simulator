@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#9 - edit change 792820 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#10 - edit change 793267 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -153,6 +153,30 @@ DLL_PUBLIC void destroyCoreEvent(Event *eventObj);
 
 
 /**
+ * @brief Allocate system memory.
+ *
+ * Allocates \c size bytes of linear memory in the
+ * system and returns a pointer to the allocated memory. The memory is
+ * not initialized. If \c size is 0, then allocateMemory() returns NULL.
+ *
+ * The allocated system memory will be registered and be available to 
+ * all the devices in the platform.
+ *
+ * The type of the allocated memory is by default pageable and cache coherent.
+ *
+ * @param size Requested allocation size in bytes.
+ * @param alignment The alignment size in bytes for the address of resulting 
+ *                  allocation. The value of this parameter needs to be a power 
+ *                  of two. The default value is zero, where no particular 
+ *                  alignment will be applied.
+ * @exception HsaException if the input is invalid, or if the runtime is
+ *            unable to allocate enough memory to perform the requested operation.
+ * @return Pointer to allocated memory.
+ *
+ */
+DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment = 0);
+
+/**
  * @brief Allocate system or device memory.
  *
  * Allocates \c size bytes of linear memory in the specified device or in the
@@ -179,9 +203,13 @@ DLL_PUBLIC void destroyCoreEvent(Event *eventObj);
  * 	   specified, the runtime assumes the mask <tt>LOCAL_MEMORY | CPU_ACCESSIBLE</tt>.
  * @li All the other memory types do not support further options.
  *
- * @param dev Device where the allocated memory will be available.
  * @param size Requested allocation size in bytes.
+ * @param alignment The alignment size in bytes for the address of resulting 
+ *                  allocation. The value of this parameter needs to be a power 
+ *                  of two. The default value is zero, where no particular 
+ *                  alignment will be applied.
  * @param type Type of memory to be allocated.
+ * @param dev Device where the allocated memory will be available.
  * @exception HsaException if the input is invalid, or if the runtime is
  *            unable to allocate enough memory to perform the requested operation.
  * @return Pointer to allocated memory.
@@ -190,7 +218,7 @@ DLL_PUBLIC void destroyCoreEvent(Event *eventObj);
  * @see SystemMemoryOptions
  * @see LocalMemoryOptions
  */
-DLL_PUBLIC void* allocateMemory(const Device& dev, const size_t size, const uint32_t type);
+DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev);
 
 /**
  * @brief Frees system or device memory.
@@ -1010,10 +1038,16 @@ public:
     const vector<hsacore::Device*>& getDevices();
 
     /**
-     * @copydoc hsacore::allocateMemory
+     * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment = 0)
      */
-    void*
-    allocateMemory(const Device& dev, const size_t size, const uint32_t type);
+    void* 
+    allocateMemory(const size_t size, const size_t alignment = 0);
+
+     /**
+     * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev)
+     */
+    void* 
+    allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev);
 
     /**
      * @copydoc hsacore::freeMemory
