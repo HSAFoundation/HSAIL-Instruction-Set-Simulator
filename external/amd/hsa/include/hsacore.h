@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#12 - edit change 793923 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#13 - edit change 794751 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -22,37 +22,6 @@ namespace hsacore
  * Core Runtime Interace Documentation
  * @{
  */
-
-/**
- * @brief enum to capture the result of a wait. 
- */
-typedef enum{
-    SIGFAILURE=-1,                  ///< wait returned due to failure
-    SIGSUCCESS=0,                   ///< wait succeeded
-    SIGTIMEOUT=1,                   ///< wait timedout
-} HSA_UNBLOCK_SIGNAL;
-
-/**
- * Default values to use in creating Core Queue objects.
- *
- * @note: For now the value of default priority is hard coded
- * to ZERO which is equal to HSA_QUEUE_PRIORITY_NORMAL. This
- * must be changed in future such that we bind to symbolic
- * names. A new interface unit, e.g. hsacoretypes.h could be
- * created to host these entities.
- */
-#define HSA_QUE_DEFAULT_DEV_IDX         (0)
-#define HSA_QUE_DEFAULT_PRCNT_SIMD      (100)
-#define HSA_QUE_DEFAULT_SCHED_RANK      (0)
-#define HSA_DEFAULT_QUEUE_PRIORITY      (0)
-
-
-/*
-DLL_PUBLIC extern const uint32_t HSA_QUE_DEFAULT_DEV_IDX;
-DLL_PUBLIC extern const uint32_t HSA_QUE_DEFAULT_PRCNT_SIMD;
-DLL_PUBLIC extern const uint32_t HSA_QUE_DEFAULT_SCHED_RANK;
-DLL_PUBLIC extern const uint32_t HSA_DEFAULT_QUEUE_PRIORITY;
-*/
 
 /**
  * @brief enum for the event type to be utilized in one of the constructors
@@ -312,6 +281,371 @@ mapMemory(void* ptr, const size_t size);
 DLL_PUBLIC void 
 unmapMemory(void* ptr);
 
+///////////////////////////////////////////////////////////////////////////////
+//Exported Queue interface class
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief the packet type for generation of packet
+ */
+enum PacketType{
+    ISAKERNEL=1,
+    CLOCK,
+    NULL_EVENT,
+    SYNC,
+    INDIRECT,
+    DMA,
+    EOS
+};
+
+/**
+ * Public interface of HSA Core Queue objects. The Queue
+ * interface allows users to get a queue object and submit
+ * via this various forms of command packets (PM4).
+ *
+ * The interface provides two modes of access - Raw and
+ * Synchronized. Users choosing Raw mode API should be aware
+ * that implementation won't force synchronized access to the
+ * underlying queue object. Synchronized access API's are provided
+ * to support multi-threaded scenarios.
+ */
+class DLL_PUBLIC Queue
+{
+	
+public:
+
+    /**
+     * Specifies the default device used in building a Hsa Queue.
+     */
+    static const uint32_t DEFAULT_DEV_IDX = 0;
+
+    /**
+     * Specifies the default scheduling rank of a Hsa Queue.
+     */
+    static const int32_t DEFAULT_SCHED_RANK = 0;
+
+    /**
+     * Specifies the default priority of a Hsa Queue.
+     */
+    static const uint32_t DEFAULT_PRIORITY = 0;
+
+    /**
+     * Specifies the default percent of SIMD's used by a Hsa Queue.
+     */
+    static const uint32_t DEFAULT_PRCNT_SIMD = 100;
+
+    /**
+     * API to determine the maximum number of queues that can actually
+     * be created for this platform, including all devices.
+     *
+     * @return the number of queues allowed by the platform including
+     * all devices.
+     *
+     * @note will always return 2 for now.
+     */ 
+    virtual uint32_t getMaxQueues(void) = 0;
+
+    /**
+     * Default destructor
+     */
+	virtual ~Queue(){};
+
+    /**
+     * @brief API to determine if Queue object is valid for access.
+     *
+     * @note: Accessing Queue api once it has been marked as
+     * invalid will lead to exception.
+     *
+     * @return bool true if it is valid, false otherwise.
+     */
+    virtual bool isValid() = 0;
+
+    /**
+     * @brief API to configure the Queue object.
+     *
+     * @note: This api is a temporary hack and would go away.
+     *
+     * @return uint32_t value of virtual memory id used to map
+     * Queue buffer in the kernel.
+     */
+    virtual uint32_t getVmId(void) = 0;
+
+    /**
+     * Returns the address at which a new command packet could be written
+     * into the queue buffer. This api is provided for users who wish to
+     * access Queue buffer in a RAW form. Accessing Queue in this fashion
+     * assumes User is knowledgeable and responsible about the correct use
+     * of Queue object. For example users should know the end of queue buffer
+     * and not try to write past this.
+     *
+     * @note: Users should write Command (PM4) packets such that they are in
+     * multiples of a word size (sizeof(uint32_t), else it will lead to runtime
+     * errors.
+     *
+     * @return uint32_t * address into the queue buffer at which a new Command
+     * (PM4) packet should be written.
+     */
+    virtual uint32_t * getWriteAddr(void) = 0;
+
+    /**
+     * Updates the memory mapped Write Register of compute device to indicate
+     * availability of a new PM4 packet for execution. The implementation will
+     * check if the input parameter is invalid/illegal i.e. causes the address
+     * to go past end of queue buffer or is less than current address.
+     *
+     * @note: Implementation will throw an exception if input parameter is
+     * determined to be invalid/illegal.
+     *
+     * @param pktSize number of words (sizeof(uint32_t) by which current
+     * address of execution front end must be updated. Users must specify
+     * the number of words used to write into queue buffer and not number
+     * of bytes.
+     *
+     * @return void
+     */
+    virtual void setWriteAddr(uint32_t pktSize) = 0;
+
+    /**
+     * Acquires the address into queue buffer where a new command packet
+     * of specified size could be written. The address that is returned
+     * is guaranteed to be unique even in a multi-threaded access scenario.
+     * The API throws an exception in case not enough space is available in
+     * queue buffer or that the requested size is invalid.
+     *
+     * @note: Implementation will throw an exception if input parameter is
+     * determined to be invalid/illegal.
+     *
+     * @param pktSize number of words (sizeof(uint32_t) used by the Command
+     * (PM4) packet. Users must specify the number of words occupied by PM4
+     * packet and not number of bytes.
+     *
+     * @return uint32_t * pointer into the queue buffer where a PM4 packet
+     * of specified size could be written.
+     */
+    virtual uint32_t * acquireWriteAddr(uint32_t pktSize) = 0;
+
+    /**
+     * Updates the Write Register of compute device to the end of PM4 packet
+     * written into queue buffer. An exception will be thrown if either of
+     * the input parameters are invalid/illegal. The update to Write Register
+     * will be safe under multi-threaded usage scenario. Furthermore, updates
+     * to Write Register are blocking until all prior updates are completed
+     * i.e. if two threads T1 & T2 were to call release, then updates by T2
+     * will block until T1 has completed its update (assumes T1 acquired the
+     * write address first).
+     *
+     * @param writeAddr pointer into the queue buffer where a PM4 packet was
+     * written.
+     *
+     * @param pktSize number of words in PM4 packet. Size is defined in terms
+     * of number of sizeof(uint32_t) words and not in terms of bytes.
+     *
+     * @return void
+     */
+    virtual void releaseWriteAddr(uint32_t *writeAddr, uint32_t pktSize) = 0;
+
+    /**
+     * This convenience API does three things: Acquires an address into queue
+     * buffer, Writes the PM4 packet into buffer and then updates Write
+     * Register of compute device to execute the PM4 packet. An exception
+     * will be thrown if input parameters are invalid/illegal.
+     *
+     * @param pktBuffer pointer to the buffer containing PM4 command data.
+     *
+     * @param pktSize size of the command packet in terms of number of words.
+     *
+     * @return void
+     */
+    virtual void execCommand(uint32_t *pktBuffer, uint32_t pktSize) = 0;
+
+    /**
+     * @brief Indicates if the Queue has executed all command packets or some
+     * are still pending execution.
+     *
+     * An exception will be thrown in case of: illegal access (queue object
+     * is invalid) or an error has occured in the runtime.
+     *
+     * @return bool true if all packets have been executed, false otherwise.
+     */
+    virtual bool isEmpty(void) = 0;
+
+    /**
+     * @brief Waits upon the Queue object until all outstanding command packets
+     * have been executed.
+     *
+     * API to wait until all outstanding command packets have been executed.
+     * An exception will be thrown in case of: illegal access (queue object
+     * is invalid) or an error has occured in the runtime.
+     *
+     * @return void
+     */
+    virtual void waitEmpty(void) = 0;
+
+    /**
+     * @brief Alters the parameters of Queue object that affect its behaviour.
+     *
+     * Modifies a queue object with regards to its properties: queue buffer
+     * address, queue buffer size, its percent use and scheduling priority.
+     * Execution of all outstanding PM4 packets of queue must be completed
+     * prior to altering the queue's properties.
+     *
+     * In case any one of the input parameters is invalid/illegal, the old
+     * properties will continue to be used.
+     *
+     * @note: This API is not available until support for user supplied
+     * queue buffers is in place.
+     *
+     * @param buffAddr reference to the new buffer to use for queue.
+     *
+     * @param buffSize size of the new buffer in terms of words sizeof(uint32_t).
+     *
+     * @param prcntSimd Percentage of SIMD units on compute device that are
+     * allowed for use by a queue object. Users can choose the default value
+     * of 100 percent or something else between [10, 100] in increments of 10.
+     *
+     * @param schedPrior Priority of queue object in scheduling its command
+     * packets. Users can choose to provide a default rank.
+     *
+     * @return void
+     */
+    virtual void alter(uint32_t *buffAddr, uint32_t buffSize,
+                       uint32_t prcntSimd, int32_t schedPrior) = 0;
+
+    /**
+     * @brief Destroys a Queue object such that it becomes invalid for
+     * further usage.
+     *
+     * Marks the queue object as invalid and uncouples its link with
+     * the underlying compute device's control block. An exception is
+     * thrown if queue object has already been marked as invalid or
+     * an error occurs while uncoupling it from the underlying device.
+     *
+     * @note: What happens to command packets that have not yet been
+     * executed. Will the call block until all packets have been
+     * executed or will it decouple it right away.
+     *
+     * @return void
+     */
+    virtual void destroy(void) = 0;
+
+    /**
+     * @brief Detaches the command packets of Queue from run list of
+     * associated device.
+     *
+     * Detaches the queue and its command packets from the run list
+     * of attached compute device. An exception is thrown if queue
+     * object has already been marked as invalid or an error occurs
+     * while detaching it from the underlying device.
+     *
+     * @note: What happens to command packets that have not yet been
+     * executed. Will the call block until all packets have been
+     * executed or will it detach it right away.
+     *
+     * @return void 
+     */
+    virtual void detach(void) = 0;
+
+    /**
+     * @brief Reengages the command packets of Queue object with the
+     * run list of associated device.
+     *
+     * Reattaches the queue and its command packets to the run list
+     * of attached compute device. An exception is thrown if queue
+     * object has already been marked as invalid or an error occurs
+     * while reattaching it to the underlying device.
+     *
+     * @return void
+     */
+    virtual void reattach(void) = 0;
+
+};
+
+/**
+ * @brief API to release a HSA Core queue object. All resources
+ * held by the queue object will be released and queue marked as
+ * invalid. Use of queue objects once destroyed is illegal.
+ *
+ * @note: Currently users cannot find out if an error has
+ * occured while executing this API. This may be changed
+ * to throw an exception.
+ *
+ * @param queObj reference to queue object being destroyed.
+ *
+ * @return void
+ */
+void destroyUserModeQueue(Queue *queObj);
+
+/**
+ * API to create a User Mode Queue object. Input parameters specify
+ * properties of queue being created.
+ *
+ * @param buffAddr handle of the buffer for use by queue object.
+ *
+ * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
+ * Do not confuse it as number of bytes.
+ *
+ * @param prcntSimd Percentage of SIMD units on compute device that are
+ * allowed for use by a queue object. Users can choose the default value
+ * of 100 percent or something else between [10, 100] in increments of 10.
+ *
+ * @param schedPrior Priority of queue object in scheduling its command
+ * packets. Users can choose to provide a default rank.
+ *
+ * @return Queue * handle to a queue object, NULL in case of error.
+ */
+Queue * createUserModeQueue(uint32_t *&buffAddr, uint32_t &buffSize,
+                            uint32_t prcntSimd = hsacore::Queue::DEFAULT_PRCNT_SIMD,
+                            int32_t schedPrior = hsacore::Queue::DEFAULT_SCHED_RANK);
+
+/**
+ * API to create a User Mode Queue object. Input parameters specify
+ * properties of queue being created.
+ *
+ * @param devIdx index of the device in device list to which the queue
+ * object is mapped.
+ *
+ * @param buffAddr handle of the buffer for use by queue object.
+ *
+ * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
+ * Do not confuse it as number of bytes.
+ *
+ * @param prcntSimd Percentage of SIMD units on compute device that are
+ * allowed for use by a queue object. Users can choose the default value
+ * of 100 percent or something else between [10, 100] in increments of 10.
+ *
+ * @param schedPrior Priority of queue object in scheduling its command
+ * packets. Users can choose to provide a default rank.
+ *
+ * @return Queue * handle to a queue object, NULL in case of error.
+ */
+Queue * createUserModeQueue(uint32_t devIdx,
+                            uint32_t *&buffAddr, uint32_t &buffSize,
+                            uint32_t prcntSimd = hsacore::Queue::DEFAULT_PRCNT_SIMD,
+                            int32_t schedPrior = hsacore::Queue::DEFAULT_SCHED_RANK);
+
+/**
+ * API to create a User Mode Queue object.
+ *
+ * @param devObj reference to a compute device to which the queue
+ * object is mapped.
+ *
+ * @param buffAddr handle of the buffer for use by queue object.
+ *
+ * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
+ *
+ * @param prcntSimd Percentage of SIMD units on compute device that are
+ * allowed for use by a queue object. Users can choose the default value
+ * of 100 percent or something else between [10, 100] in increments of 10.
+ *
+ * @param schedPrior Priority of queue object in scheduling its command
+ * packets. Users can choose to provide a default rank.
+ *
+ * @return Queue * handle to a queue object, NULL in case of error.
+ */
+Queue * createUserModeQueue(Device *devObj,
+                            uint32_t *&buffAddr, uint32_t &buffSize,
+                            uint32_t prcntSimd = hsacore::Queue::DEFAULT_PRCNT_SIMD,
+                            int32_t schedPrior = hsacore::Queue::DEFAULT_SCHED_RANK);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///Exported Device interface class
@@ -452,18 +786,18 @@ public:
      * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
      * Do not confuse it as number of bytes.
      *
-     * @param prcntSimd Percentage of SIMD units on computed device that are
+     * @param prcntSimd Percentage of SIMD units on compute device that are
      * allowed for use by a queue object. Users can choose the default value
      * of 100 percent or something else between [10, 100] in increments of 10.
      *
      * @param schedPrior Priority of queue object in scheduling its command
      * packets. Users can choose to provide a default rank.
      *
-     * @return IQueue * handle to a queue object, NULL in case of error.
+     * @return Queue * handle to a queue object, NULL in case of error.
      */
     virtual Queue * createUserModeQueue(uint32_t *&buffAddr, uint32_t &buffSize,
-                                        uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
-                                        int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK) = 0;
+                                        uint32_t prcntSimd = hsacore::Queue::DEFAULT_PRCNT_SIMD,
+                                        int32_t schedPrior = hsacore::Queue::DEFAULT_SCHED_RANK) = 0;
 
     /**
      * API to create a User Mode Queue object. Input parameters specify
@@ -477,19 +811,19 @@ public:
      * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
      * Do not confuse it as number of bytes.
      *
-     * @param prcntSimd Percentage of SIMD units on computed device that are
+     * @param prcntSimd Percentage of SIMD units on compute device that are
      * allowed for use by a queue object. Users can choose the default value
      * of 100 percent or something else between [10, 100] in increments of 10.
      *
      * @param schedPrior Priority of queue object in scheduling its command
      * packets. Users can choose to provide a default rank.
      *
-     * @return IQueue * handle to a queue object, NULL in case of error.
+     * @return Queue * handle to a queue object, NULL in case of error.
      */
     virtual Queue * createUserModeQueue(uint32_t devIdx,
                                         uint32_t *&buffAddr, uint32_t &buffSize,
-                                        uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
-                                        int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK) = 0;
+                                        uint32_t prcntSimd = hsacore::Queue::DEFAULT_PRCNT_SIMD,
+                                        int32_t schedPrior = hsacore::Queue::DEFAULT_SCHED_RANK) = 0;
 
     /**
      * API to create a User Mode Queue object.
@@ -501,19 +835,19 @@ public:
      *
      * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
      *
-     * @param prcntSimd Percentage of SIMD units on computed device that are
+     * @param prcntSimd Percentage of SIMD units on compute device that are
      * allowed for use by a queue object. Users can choose the default value
      * of 100 percent or something else between [10, 100] in increments of 10.
      *
      * @param schedPrior Priority of queue object in scheduling its command
      * packets. Users can choose to provide a default rank.
      *
-     * @return IQueue * handle to a queue object, NULL in case of error.
+     * @return Queue * handle to a queue object, NULL in case of error.
      */
     virtual Queue * createUserModeQueue(Device *devObj,
                                         uint32_t *&buffAddr, uint32_t &buffSize,
-                                        uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
-                                        int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK) = 0;
+                                        uint32_t prcntSimd = hsacore::Queue::DEFAULT_PRCNT_SIMD,
+                                        int32_t schedPrior = hsacore::Queue::DEFAULT_SCHED_RANK) = 0;
 
     /**
     * API to retrieve counter information from devices.
@@ -525,362 +859,6 @@ public:
 	virtual ~Device(){};
 };
 
-///////////////////////////////////////////////////////////////////////////////
-//Exported Queue interface class
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief the packet type for generation of packet
- */
-enum PacketType{
-    ISAKERNEL=1,
-    CLOCK,
-    NULL_EVENT,
-    SYNC,
-    INDIRECT,
-    DMA,
-    EOS
-};
-
-/**
- * Public interface of HSA Core Queue objects. The IQueue
- * interface allows users to get a queue object and submit
- * via this various forms of command packets (PM4).
- *
- * The interface provides two modes of access - Raw and
- * Synchronized. Users choosing Raw mode API should be aware
- * that implementation won't force synchronized access to the
- * underlying queue object. Synchronized access API's are provided
- * to support multi-threaded scenarios.
- */
-class DLL_PUBLIC Queue
-{
-	
-public:
-
-    /**
-     * Default destructor
-     */
-	virtual ~Queue(){};
-
-    /**
-     * @brief API to determine if Queue object is valid for access.
-     *
-     * @note: Accessing Queue api once it has been marked as
-     * invalid will lead to exception.
-     *
-     * @return bool true if it is valid, false otherwise.
-     */
-    virtual bool isValid() = 0;
-
-    /**
-     * @brief API to configure the Queue object.
-     *
-     * @note: This api is a temporary hack and would go away.
-     *
-     * @return uint32_t value of virtual memory id used to map
-     * Queue buffer in the kernel.
-     */
-    virtual uint32_t getVmId(void) = 0;
-
-    /**
-     * @brief Location in Queue at which a new command packet could be written.
-     *
-     * Returns the address at which a new command packet could be written
-     * into the queue buffer. This api is provided for users who wish to
-     * access Queue buffer in a Raw form. Accessing Queue in this fashion
-     * assumes User is knowledgeable and responsible about the correct use
-     * of Queue object. For example users should know the end of queue buffer
-     * and not try to write past this.
-     *
-     * @note: Users should write PM4 packets such that they are in multiples
-     * of a word size (sizeof(uint32_t), else it will lead to runtime errors.
-     *
-     * @return uint32_t * address into the queue buffer at which a new PM4
-     * packet should be written.
-     */
-    virtual uint32_t * getWriteIdx(void) = 0;
-
-    /**
-     * @brief Indicates Queue object upon the writing of a new command packet
-     * by client.
-     *
-     * Updates the memory mapped Write Register of compute device to indicate
-     * availability of a new PM4 packet for execution. The implementation will
-     * check if the input parameter is invalid/illegal i.e. causes the index
-     * to go past end of queue buffer or is less than current index.
-     *
-     * @note: Implementation can throw an exception if input parameter is
-     * determined to be invalid/illegal.
-     *
-     * @param pktSize number of words (sizeof(uint32_t) by which current
-     * index of execution front end must be updated. Users must specify
-     * the number of words used to write into queue buffer and not number
-     * of bytes.
-     *
-     * @return void
-     */
-    virtual void setWriteIdx(uint32_t pktSize) = 0;
-
-    /**
-     * @brief Acquires location in Queue where a new command packet of
-     * specified size could be written.
-     *
-     * Acquires the index into queue buffer where a command packet of
-     * specified size could be written. The index is guaranteed to
-     * be unique even in a multi-threaded access scenario. The API
-     * throws an exception in case not enough space is available in
-     * queue buffer or that the requested size is invalid.
-     *
-     * @note: Implementation can throw an exception if input parameter is
-     * determined to be invalid/illegal.
-     *
-     * @param pktSize number of words (sizeof(uint32_t) used by the PM4
-     * packet. Users must specify the number of words occupied by PM4
-     * packet and not number of bytes.
-     *
-     * @return uint32_t * pointer into the queue buffer where a PM4 packet
-     * of specified size could be written.
-     */
-    virtual uint32_t * acquireWriteIdx(uint32_t pktSize) = 0;
-
-    /**
-     * @brief Indicates Queue object upon the writing of a new command packet.
-     *
-     * Updates the Write Register of compute device to the end of PM4 packet
-     * written into queue buffer. An exception will be thrown if either of
-     * the input parameters are invalid/illegal. The update to Write Register
-     * will be safe under multi-threaded usage scenario. Furthermore, updates
-     * to Write Register are blocking until all prior updates are completed
-     * i.e. if two threads T1 & T2 were to call release, then updates by T2
-     * will block until T1 has completed its update (assumes T1 acquired the
-     * write index first).
-     *
-     * @param writeIdx pointer into the queue buffer where a PM4 packet was
-     * written.
-     *
-     * @param pktSize number of words in PM4 packet. Size is defined in terms
-     * of number of sizeof(uint32_t) words and not in terms of bytes.
-     *
-     * @return void
-     */
-    virtual void releaseWriteIdx(uint32_t *writeIdx, uint32_t pktSize) = 0;
-
-    /**
-     * @brief Acquires space for a new command packet and writes into it the
-     * user specified command packet, atomically.
-     *
-     * This convenience API does three things: Acquires an index into queue
-     * buffer, Writes the PM4 packet into buffer and then updates Write
-     * Register of compute device to executed the PM4 packet. An exception
-     * will be thrown if input parameters are invalid/illegal.
-     *
-     * @param pktBuffer reference to the buffer containing PM4 command data.
-     *
-     * @param pktSize size of the command packet in terms of number of words.
-     *
-     * @return void
-     */
-    virtual void execCommandPkt(uint32_t *pktBuffer, uint32_t pktSize) = 0;
-
-    /**
-     * @brief Indicates if the Queue has executed all command packets or some
-     * are still pending execution.
-     *
-     * An exception will be thrown in case of: illegal access (queue object
-     * is invalid) or an error has occured in the runtime.
-     *
-     * @return bool true if all packets have been executed, false otherwise.
-     */
-    virtual bool isEmpty(void) = 0;
-
-    /**
-     * @brief Waits upon the Queue object until all outstanding command packets
-     * have been executed.
-     *
-     * API to wait until all outstanding command packets have been executed.
-     * An exception will be thrown in case of: illegal access (queue object
-     * is invalid) or an error has occured in the runtime.
-     *
-     * @return void
-     */
-    virtual void waitEmpty(void) = 0;
-
-    /**
-     * @brief Alters the parameters of Queue object that affect its behaviour.
-     *
-     * Modifies a queue object with regards to its properties: queue buffer
-     * address, queue buffer size, its percent use and scheduling priority.
-     * Execution of all outstanding PM4 packets of queue must be completed
-     * prior to altering the queue's properties.
-     *
-     * In case any one of the input parameters is invalid/illegal, the old
-     * properties will continue to be used.
-     *
-     * @note: This API is not available until support for user supplied
-     * queue buffers is in place.
-     *
-     * @param buffAddr reference to the new buffer to use for queue.
-     *
-     * @param buffSize size of the new buffer in terms of words sizeof(uint32_t).
-     *
-     * @param prcntSimd Percentage of SIMD units on computed device that are
-     * allowed for use by a queue object. Users can choose the default value
-     * of 100 percent or something else between [10, 100] in increments of 10.
-     *
-     * @param schedPrior Priority of queue object in scheduling its command
-     * packets. Users can choose to provide a default rank.
-     *
-     * @return void
-     */
-    virtual void alter(uint32_t *buffAddr, uint32_t buffSize,
-                       uint32_t prcntSimd, int32_t schedPrior) = 0;
-
-    /**
-     * @brief Destroys a Queue object such that it becomes invalid for
-     * further usage.
-     *
-     * Marks the queue object as invalid and uncouples its link with
-     * the underlying compute device's control block. An exception is
-     * thrown if queue object has already been marked as invalid or
-     * an error occurs while uncoupling it from the underlying device.
-     *
-     * @note: What happens to command packets that have not yet been
-     * executed. Will the call block until all packets have been
-     * executed or will it decouple it right away.
-     *
-     * @return void
-     */
-    virtual void destroy(void) = 0;
-
-    /**
-     * @brief Detaches the command packets of Queue from run list of
-     * associated device.
-     *
-     * Detaches the queue and its command packets from the run list
-     * of attached compute device. An exception is thrown if queue
-     * object has already been marked as invalid or an error occurs
-     * while detaching it from the underlying device.
-     *
-     * @note: What happens to command packets that have not yet been
-     * executed. Will the call block until all packets have been
-     * executed or will it detach it right away.
-     *
-     * @return void 
-     */
-    virtual void detach(void) = 0;
-
-    /**
-     * @brief Reengages the command packets of Queue object with the
-     * run list of associated device.
-     *
-     * Reattaches the queue and its command packets to the run list
-     * of attached compute device. An exception is thrown if queue
-     * object has already been marked as invalid or an error occurs
-     * while reattaching it to the underlying device.
-     *
-     * @return void
-     */
-    virtual void reattach(void) = 0;
-
-};
-
-///////////////////////////////////////////////////////////////////////////////
-///
-///     Exported Global Functions Of IQueue class.
-///
-///     Add all of the exported global functions of IQueue class
-///     to HsaCoreApi class so as to allow access to these API for
-///     processes that load HSA Core DLL explicitly.
-///
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * API to release a HSA Core queue object. All resources held
- * by the queue object will be released and queue marked as
- * invalid. Use of queue objects once destroyed is illegal.
- *
- * @note: Currently users cannot find out if an error has
- * occured while executing this API. This may be changed
- * to throw an exception.
- *
- * @param queObj reference to queue object being destroyed.
- *
- * @return void
- */
-void destroyUserModeQueue(Queue *queObj);
-
-/**
- * API to create a User Mode Queue object. Input parameters specify
- * properties of queue being created.
- *
- * @param buffAddr handle of the buffer for use by queue object.
- *
- * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
- * Do not confuse it as number of bytes.
- *
- * @param prcntSimd Percentage of SIMD units on computed device that are
- * allowed for use by a queue object. Users can choose the default value
- * of 100 percent or something else between [10, 100] in increments of 10.
- *
- * @param schedPrior Priority of queue object in scheduling its command
- * packets. Users can choose to provide a default rank.
- *
- * @return IQueue * handle to a queue object, NULL in case of error.
- */
-Queue * createUserModeQueue(uint32_t *&buffAddr, uint32_t &buffSize,
-                            uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
-                            int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK);
-
-/**
- * API to create a User Mode Queue object. Input parameters specify
- * properties of queue being created.
- *
- * @param devIdx index of the device in device list to which the queue
- * object is mapped.
- *
- * @param buffAddr handle of the buffer for use by queue object.
- *
- * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
- * Do not confuse it as number of bytes.
- *
- * @param prcntSimd Percentage of SIMD units on computed device that are
- * allowed for use by a queue object. Users can choose the default value
- * of 100 percent or something else between [10, 100] in increments of 10.
- *
- * @param schedPrior Priority of queue object in scheduling its command
- * packets. Users can choose to provide a default rank.
- *
- * @return IQueue * handle to a queue object, NULL in case of error.
- */
-Queue * createUserModeQueue(uint32_t devIdx,
-                            uint32_t *&buffAddr, uint32_t &buffSize,
-                            uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
-                            int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK);
-
-/**
- * API to create a User Mode Queue object.
- *
- * @param devObj reference to a compute device to which the queue
- * object is mapped.
- *
- * @param buffAddr handle of the buffer for use by queue object.
- *
- * @param buffSize number of words (sizeof(uint32_t)) in queue buffer.
- *
- * @param prcntSimd Percentage of SIMD units on computed device that are
- * allowed for use by a queue object. Users can choose the default value
- * of 100 percent or something else between [10, 100] in increments of 10.
- *
- * @param schedPrior Priority of queue object in scheduling its command
- * packets. Users can choose to provide a default rank.
- *
- * @return IQueue * handle to a queue object, NULL in case of error.
- */
-Queue * createUserModeQueue(Device *devObj,
-                            uint32_t *&buffAddr, uint32_t &buffSize,
-                            uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
-                            int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK);
 
 /**
  * @brief Event interface of Hsacore namespace. Objects which implement this
