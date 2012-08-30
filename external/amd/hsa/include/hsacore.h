@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#3 - edit change 775440 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#4 - edit change 777794 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -78,7 +78,7 @@ class Event;
 // Add all the global function which are exported from this DLL to the
 // HsaCoreApi class.
 
-DLL_PUBLIC unsigned getDeviceCount();
+DLL_PUBLIC unsigned int getDeviceCount();
 DLL_PUBLIC const vector<hsacore::Device*>& getDevices();
 
 /**
@@ -97,8 +97,8 @@ DLL_PUBLIC const vector<hsacore::Device*>& getDevices();
  *
  * @return a pointer to a new Event class object
  */
-DLL_PUBLIC Event* createCoreEvent(Queue*  q, void *user_handle, int
-		autoReset, int state);
+DLL_PUBLIC Event* createCoreEvent(Queue*  q, void *user_handle, bool 
+		autoReset, bool state);
 
 /**
  * @brief factory API for abstracting the creation of an event class
@@ -117,8 +117,8 @@ DLL_PUBLIC Event* createCoreEvent(Queue*  q, void *user_handle, int
  *
  * @return a pointer to a new Event class object
  */
-DLL_PUBLIC Event* createCoreEvent(int nodeid, void *user_handle, 
-        int autoReset, int state);
+DLL_PUBLIC Event* createCoreEvent(int nodeid, void *user_handle, bool 
+		autoReset, bool state);
 
 /**
  *
@@ -136,7 +136,7 @@ DLL_PUBLIC Event* createCoreEvent(int nodeid, void *user_handle,
  *
  * @return a pointer to a new Event class object
  */
-DLL_PUBLIC Event* createCoreEvent(EVENTID eid, int autoReset, int state);
+DLL_PUBLIC Event* createCoreEvent(EVENTID eid, bool autoReset, bool state);
 
 /**
  * @brief event destruction API provided, primarily for uniformity. delete e
@@ -203,8 +203,7 @@ DLL_PUBLIC void* allocateMemory(const Device& dev, const size_t size, const uint
  * @exception HsaException if the the runtime is
  *            unable to deallocate the specified memory region.
  */
-DLL_PUBLIC void 
-freeMemory(void* ptr);
+DLL_PUBLIC void freeMemory(void* ptr);
 
 /**
  * @deprecated This method will probably not be part of the final API. Be aware
@@ -520,6 +519,16 @@ class DLL_PUBLIC Queue
 {
 	
 public:
+
+    /**
+     * @brief API to configure the Queue object.
+     *
+     * @note: This api is a temporary hack and would go away.
+     *
+     * @return uint32_t value of virtual memory id used to map
+     * Queue buffer in the kernel.
+     */
+    virtual uint32_t getVmId(void) = 0;
 
     /**
      * Default destructor
