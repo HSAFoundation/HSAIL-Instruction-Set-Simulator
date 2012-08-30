@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#13 - edit change 794751 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#14 - edit change 796045 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -32,6 +32,12 @@ typedef enum _EVENTID
     NODE_CHANGE                = 1, ///< "H-NUMA" node change
     DEVICE_STATE_CHANGE        = 2, ///< device state change ( start/stop )
 	HSA_EVENTTYPE_DEBUG_EVENT  = 5,
+
+    /*
+     * Specifies type as Gpu Memory Write event.
+     */
+    HSA_MEM_WRITE_EVENT = 6,
+
 	//...
     MAX_EVENTS
 } EVENTID;
@@ -941,7 +947,7 @@ public:
      *
      * @throws HsaException when either of the arguments is null
      */
-    virtual void getDeviceTriggerInfo(uint32_t &eventValue, uint64_t &eventAddress) = 0;
+    virtual void getTriggerInfo(uint32_t &eventValue, uint64_t &eventAddress) = 0;
 
     /**
      * @brief Waits on the list of input events. The method will return when
