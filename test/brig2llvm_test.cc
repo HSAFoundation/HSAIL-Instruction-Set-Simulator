@@ -205,9 +205,9 @@ TEST(Brig2LLVMTest, Example2) {
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%c_regs = type { [8 x i1] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "%s_regs = type { [16 x i32] }")));
+    "%s_regs = type { [32 x i32] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
-    "%d_regs = type { [8 x i64] }")));
+    "%d_regs = type { [32 x i64] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "%q_regs = type { [8 x i128] }")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
