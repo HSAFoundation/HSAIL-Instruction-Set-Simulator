@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#17 - edit change 797002 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#18 - edit change 798600 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -21,6 +21,30 @@
 #endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 
 #include "hsacommon.h"
+
+//Debug information of hsa kernels
+//This is temporary. 
+//This will be moved to another file
+
+typedef struct _debugInfo
+{
+    //Are the values valid
+    bool isValid;
+
+    //Pointer to the ISA
+    const void* ptrToISA;
+
+    //Pointer to the BRIG
+    const void *ptrToBRIG;
+
+    //Size of the ISA
+    size_t sizeOfISA;
+
+    //Number of SPGRS
+    size_t noOfSPGRs;
+    
+} debugInfo;
+
 
 namespace hsa
 {
@@ -438,7 +462,7 @@ class DLL_PUBLIC Kernel
 public:
     virtual ~Kernel(){};
     virtual void setArg(int index, RTKernelArgs arg)=0;
-
+    virtual debugInfo* getDebugInfo(hsa::Device *d)=0;
     /* This needs to go - should not pass the metadata
     through an interface*/
     //virtual void initArgs(char* argList)=0;
@@ -493,8 +517,9 @@ public:
     virtual const hsa::vector<hsa::Device*>& getDevices()=0;
     virtual hsa::Queue* createDeviceQueue(hsa::Device *d, unsigned int size)=0;
     virtual _Program* createProgram(char *charElf, size_t elfSize, Device_list_ptr pDevices)=0;
-    virtual _Program* createProgramFromELF(void *charElf, Device_list_ptr pDevices)=0;
-   // virtual _Program* createProgramFromHSAIL(void *charHSAIL, Device_list_ptr pDevices)=0;
+    virtual _Program* createProgramFromFile(const char* fileName,
+        Device_list_ptr pDevices)=0;
+    virtual _Program* createProgramFromHSAIL(char *charHSAIL, Device_list_ptr pDevices)=0;
     virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
     virtual Kernel *createKernel(_Program * k, hsa::KernelId & kid)=0;
 
@@ -554,6 +579,10 @@ public:
     */
 
     virtual hsacore::HsailKernel* getMetaData(Device *d, KernelId &kid) = 0;
+
+    virtual debugInfo* getDebugInfo(Device *d, KernelId &kid) = 0;
+
+
     /*! standard destructor */
     virtual ~_Program(){};
 };
