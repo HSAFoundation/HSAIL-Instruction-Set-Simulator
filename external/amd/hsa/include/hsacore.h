@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#11 - edit change 793355 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#12 - edit change 793923 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -514,42 +514,6 @@ public:
                                         uint32_t *&buffAddr, uint32_t &buffSize,
                                         uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
                                         int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK) = 0;
-
-    /**
-     * API to setup trap handler on the core device
-     *
-     * @param trapHandler pointer to trap handler
-     *
-     * @param trapHandlerSizeByte size of the trap handler
-     */
-	virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
-
-    /**
-     * API to setup trap handler on the core device
-     *
-     * @param trapHandlerBuffer pointer to trap handler buffer
-     *
-     * @param trapHandlerBufferSizeByte size of the trap handler buffer
-     */
-	virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
-
-    /**
-     * API to setup trap handler on the core device
-     *
-     * @param trapHandler pointer to trap handler
-     *
-     * @param trapHandlerSizeByte size of the trap handler
-     */
-	virtual void getTrapHandler(void* &trapHandler, size_t &trapHandlerSizeByte) = 0;
-
-    /**
-     * API to setup trap handler on the core device
-     *
-     * @param trapHandlerBuffer pointer to trap handler buffer
-     *
-     * @param trapHandlerBufferSizeByte size of the trap handler buffer
-     */
-	virtual void getTrapHandlerBuffer(void* &trapHandlerBuffer, size_t &trapHandlerBufferSizeByte) = 0;
 
     /**
     * API to retrieve counter information from devices.
