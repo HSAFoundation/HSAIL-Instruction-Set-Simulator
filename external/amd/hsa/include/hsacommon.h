@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#5 - edit change 794372 (text)
+//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#6 - edit change 794720 (text)
 #ifndef _HSACOMMON_H_
 #define _HSACOMMON_H_
 
@@ -11,7 +11,6 @@
 #include <stdexcept>
 #include <string>
 #include <iostream>
-#include <sstream>
 #endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 #if defined _WIN32 || defined __CYGWIN__
     #ifdef __GNUC__
@@ -488,37 +487,40 @@ private:
     char *cptr;
 public:
 
-    /*
-        * Content is initialized to an empty string.
-        */
+    /**
+     * @brief Default constructor, initializes empty string.
+     */
     string()
         :cptr(str_dup(""))
     {
     }
 
-    /*
-        * Content is initialized to a copy of the string object str.
-        */
+    /**
+     * @brief Copy constructor
+     * @param str string to be copied for the new object
+     */
     string (const string& str)
         :cptr(str_dup(str.c_str()))
     {   
     }
 
-    /*
-        * Content is initialized to a copy of the string formed by the 
-        * null-terminated character sequence (C string) pointed by s. 
-        * The length of the character sequence is determined by the first 
-        * occurrence of a null character
-        */
+    /**
+     * @brief Copy constructor
+     * @param s a null-terminated character sequence (C string) 
+     *        to be copied for the new object
+     */
     string (const char *s)
         :cptr(str_dup(s))
     {
     }
 
-    /*
-        * Content is initialized to a copy of the string formed by 
-        * the first n characters in the array of characters pointed by s.
-        */
+    /**
+     * @brief Copy constructor
+     * @param s array of characters to be copied
+     * @param n first n characters in the array will be copied
+     * @note if s is null terminated and shorter then n,
+     *       it's the same as string (const char *s)
+     */
     string (const char *s, size_t n)
     {
         if (n <= strlen(s)){
@@ -529,11 +531,14 @@ public:
             cptr = str_dup(s);
         }
     }
-
-    /*
-        * Sets a copy of the argument as the new content for the string object.
-        * s: A pointer to an array containing a null-terminated character sequence (C string), which is copied as the new content for the object.
-        */
+   
+    /**
+     * @brief assignment operator function, assigns a copy of 
+     *        s as content of string object
+     * @return returns *this, string object with copied content.
+     * @param s a pointer to an array containing ac string, 
+     *          which is copied as the new content for the object.
+     */
     string& operator= (const char* s)
     {
         if (cptr != s){
@@ -544,19 +549,23 @@ public:
         return *this;
     }
 
-    /*
-        * Sets a copy of the argument as the new content for the string object.
-        * str: string object. A copy of the content of this object is used as the new content for the object.
-        */
+    /**
+     * @brief assignment operator function, assigns a copy of 
+     *        str as content of string object
+     * @return returns *this, string object with copied content.
+     * @param str a string to be copied  as the new content for the object.
+     */
     string& operator= (const string& str)
     {
         return operator=(str.c_str());
     }
 
-    /*
-        * Sets a copy of the argument as the new content for the string object.
-        * c: Character. The content is set to a single character.
-        */
+    /**
+     * @brief assignment operator function, assigns a copy of 
+     *        c as content of string object
+     * @return returns *this, string object with copied content.
+     * @param c a character to be copied  as the new content for the object.
+     */
     string& operator= (char c)
     {
         char * np = (char *)malloc_check(sizeof(char)*2);
@@ -567,57 +576,65 @@ public:
         return *this;
     }
 
-    /*
-        * Returns a count of the number of characters in the string.
-        */
+    /**
+     * @brief Function returns the number of characters in the string.
+     * @return returns the number of characters contained in the string.
+     */
     size_t size() const
     {
         return strlen(cptr);
     }
 
-    /*
-        * Returns a count of the number of characters in the string.
-        */
+    /**
+     * @brief Function returns the number of characters in the string.
+     * @return returns the number of characters contained in the string.
+     */
     size_t length() const
     {
         return size();
     }
 
-    /*
-        * The string content is set to an empty string.
-        */
+    /**
+     * @brief Function empties the string 
+     */
     void clear()
     {
         cptr[0] = '\0';
     }
 
-    /*
-        * Returns whether the string is empty
-        */
+    /**
+     * @brief Function returns true if the string is empty.
+     * @return returns true only if the string is empty.
+     */
     bool empty() const
     {
         return *cptr == '\0';
     }
-    /*
-        * Generates a null-terminated sequence of characters (c-string) with the same content 
-        * as the string object and returns it as a pointer to an array of characters.
-        */
+
+    /**
+     * @brief Function returns a c-string with the same content as the string object
+     * @return a c-string with the same content as the string object
+     */
     const char* c_str() const
     {
         return cptr;
     }
 
-    /*
-        * Appends a copy of the argument to the string.
-        */
+    /**
+     * @brief Appends a copy of the argument to the string.
+     * @return  returns *this, string object with appended content.
+     * @param str a string to be appended to the string object
+     */
     string& operator+= (const string& str)
     {
         return operator+=(str.c_str());
     }
 
-    /*
-        * Appends a copy of the argument to the string.
-        */
+    /**
+     * @brief Appends a copy of the argument to the string.
+     * @return  returns *this, string object with appended content.
+     * @param s a c-string appended to the string object
+     */
     string& operator+= (const char* s)
     {
         size_t cpy_len = strlen(s) + 1;
@@ -627,9 +644,11 @@ public:
         return *this;
     }
     
-    /*
-        * Appends a copy of the argument to the string.
-        */
+    /**
+     * @brief Appends a copy of the argument to the string.
+     * @return  returns *this, string object with appended content.
+     * @param c a charactor to be appended to the string object
+     */
     string& operator+= (char c)
     {
         size_t ori_len = strlen(cptr);
@@ -638,51 +657,68 @@ public:
         cptr[ori_len + 1] = '\0';
         return *this;
     }
-    /*
-        * Appends a single character to the string content, increasing its size by one.
-        */
+
+    /**
+     * @brief Appends a copy of the argument to the string.
+     * @param c a charactor to be appended to the string object
+     */
     void push_back (char c)
     {
         operator+= (c);
     }
 
-    /*
-        * Appends a copy of the argument to the string.
-        */
+    /**
+     * @brief Appends a copy of the argument to the string.
+     * @return  returns *this, string object with appended content.
+     * @param str a string to be appended to the string object
+     */
     string& append (const string& str)
     {
         return operator+=(str);
     }
 
-    /*
-        * Appends a copy of the argument to the string.
-        */
+    /**
+     * @brief Appends a copy of the argument to the string.
+     * @return  returns *this, string object with appended content.
+     * @param s a c-string appended to the string object
+     */
     string& append (const char* s)
     {
         return operator+=(s);
     }
 
-    /*
-        * Returns a reference the character at position pos in the string.
-        */
+    /**
+     * @brief Constant function returns a constant reference to the character
+     *        at index pos in the string.
+     * @return returns a constant reference to the charactor at index
+     *        pos in the string.
+     * @param pos The index of the charactor being returned.
+     */
     const char& operator[] (size_t pos) const
     {
         return cptr[pos];
     }
 
-    /*
-        * Returns a reference the character at position pos in the string.
-        */
+    /**
+     * @brief Function returns the reference to the character
+     *        at index pos in the string.
+     * @return returns the reference to the charactor at index
+     *        pos in the string.
+     * @param pos The index of the charactor being returned.
+     */
     char& operator[] (size_t pos)
     {
         return cptr[pos];
     }
 
-    /*
-        * Returns the character at position pos in the string.
-        * Also performs a range check, throwing an exception of type out_of_range 
-        * in case that pos is not an actual position in the string.
-        */
+    /**
+     * @brief Constant function returns a constant reference to the character
+     *        at index pos in the string.
+     * @return returns a constant reference to the charactor at index
+     *        pos in the string.
+     * @throw Throw out_of_range exception when index pos is greater than the string size.
+     * @param pos The index of the charactor being returned.
+     */
     const char& at (size_t pos) const
     {
         if (pos >= size()){
@@ -691,11 +727,14 @@ public:
         return cptr[pos];
     }
 
-    /*
-        * Returns the character at position pos in the string.
-        * Also performs a range check, throwing an exception of type out_of_range 
-        * in case that pos is not an actual position in the string.
-        */
+    /**
+     * @brief Function returns a reference to the character
+     *        at index pos in the string.
+     * @return returns a reference to the charactor at index
+     *        pos in the string.
+     * @throw Throw out_of_range exception when index pos is greater than the string size.
+     * @param pos The index of the charactor being returned.
+     */
     char& at (size_t pos)
     {
         if (pos >= size()){
@@ -704,35 +743,42 @@ public:
         return cptr[pos];
     }
 
-    /*
-        * Compares the content of this object to the content of a comparing string, 
-        * which is formed according to the arguments passed.
-        */
+    /**
+     * @brief Compares the content of this object to the content of argument
+     * @return 0 if the compared characters sequences are equal,positive sign 
+     *         if considered greater than the comparing string passed as parameter 
+     *         or negative sign if considered smaller than the comparing string passed as parameter
+     * @param str string object with the content to be used as comparing string.
+     */
     int compare (const string& str) const
     {
         return compare(str.c_str());
     }
 
-    /*
-        * Compares the content of this object to the content of a comparing string, 
-        * which is formed according to the arguments passed.
-        */
+    /**
+     * @brief Compares the content of this object to the content of argument
+     * @return 0 if the compared characters sequences are equal,positive sign 
+     *         if considered greater than the comparing string passed as parameter 
+     *         or negative sign if considered smaller than the comparing string passed as parameter
+     * @param s c-string with the content to be used as comparing string.
+     */
     int compare (const char* s) const
     {
         return strcmp(cptr, s);
     }
 
-    /*
-        * Swaps the contents of the string with those of string object str.
-        */
+    /**
+     * @brief Swaps the contents of the string with those of string object str
+     * @param str a string object to swap its contents with those of the object.
+     */
     void swap (string& str)
     {
         std::swap(cptr, str.cptr);
     }
 
-    /*
-        * dtor
-        */
+    /**
+     * @brief Destructor, free memory.
+     */
     ~string()
     {
         free(cptr);
@@ -740,104 +786,205 @@ public:
 
 };
 
-// global functions
-
-inline std::ostream & operator<<(std::ostream & out, const string & str)
+/**
+ * @brief Inserts the string object str into the output stream os.
+ * @param os ostream object on which the insertion operation is performed.
+ * @param str string object output by the operation.
+ * @return The same output stream as parameter os.
+ */
+inline std::ostream & operator<<(std::ostream & os, const string & str)
 {
-    return out << str.c_str();
+    return os << str.c_str();
 }
 
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator== (const string& lhs, const string& rhs)
 {
     return lhs.compare(rhs) == 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator== (const char* lhs, const string& rhs)
 {
     return rhs.compare(lhs) == 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator== (const string& lhs, const char* rhs)
 {
     return lhs.compare(rhs) == 0;
 }
 
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator!= (const string& lhs, const string& rhs)
 {
     return lhs.compare(rhs) != 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator!= (const char* lhs, const string& rhs)
 {
     return rhs.compare(lhs) != 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator!= (const string& lhs, const char* rhs)
 {
     return lhs.compare(rhs) != 0;
 }
-    
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */    
 inline bool operator< (const string& lhs, const string& rhs)
 {
     return lhs.compare(rhs) < 0;
 }
 
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator< (const char* lhs, const string& rhs)
 {
     return rhs.compare(lhs) > 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator< (const string& lhs, const char* rhs)
 {
     return lhs.compare(rhs) < 0;
 }
-    
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */    
 inline bool operator> (const string& lhs, const string& rhs)
 {
     return lhs.compare(rhs) > 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator> (const char* lhs, const string& rhs)
 {
     return rhs.compare(lhs) < 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator> (const string& lhs, const char* rhs)
 {
     return lhs.compare(rhs) > 0;
 }
 
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator<= (const string& lhs, const string& rhs)
 {
     return lhs.compare(rhs) <= 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator<= (const char* lhs, const string& rhs)
 {
     return rhs.compare(lhs) >= 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator<= (const string& lhs, const char* rhs)
 {
     return lhs.compare(rhs) <= 0;
 }
 
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator>= (const string& lhs, const string& rhs)
 {
     return lhs.compare(rhs) >= 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator>= (const char* lhs, const string& rhs)
 {
     return rhs.compare(lhs) <= 0;
 }
+
+/**
+ * @brief Perform the comparison operation, between lhs and rhs.
+ * @return comparison results
+ */
 inline bool operator>= (const string& lhs, const char* rhs)
 {
     return lhs.compare(rhs) >= 0;
 }
 
+/**
+ * @brief Combine the content of lhs and those of rhs.
+ * @return A string object with the content of both lhs and rhs.
+ */
 inline string operator+ (const string& lhs, const string& rhs)
 {
     string result(lhs);
     result += rhs;
     return result;
 }
+
+/**
+ * @brief Combine the content of lhs and those of rhs.
+ * @return A string object with the content of both lhs and rhs.
+ */
 inline string operator+ (const char* lhs, const string& rhs)
 {
     string result(lhs);
     result += rhs;
     return result;
 }
+
+/**
+ * @brief Combine the content of lhs and those of rhs.
+ * @return A string object with the content of both lhs and rhs.
+ */
 inline string operator+ (char lhs, const string& rhs)
 {
     string result;
@@ -845,12 +992,22 @@ inline string operator+ (char lhs, const string& rhs)
     result += rhs;
     return result;
 }
+
+/**
+ * @brief Combine the content of lhs and those of rhs.
+ * @return A string object with the content of both lhs and rhs.
+ */
 inline string operator+ (const string& lhs, const char* rhs)
 {
     string result(lhs);
     result += rhs;
     return result;
 }
+
+/**
+ * @brief Combine the content of lhs and those of rhs.
+ * @return A string object with the content of both lhs and rhs.
+ */
 inline string operator+ (const string& lhs, char rhs)
 {
     string result(lhs);
@@ -858,6 +1015,11 @@ inline string operator+ (const string& lhs, char rhs)
     return result;
 }
 
+/**
+ * @brief Swaps the contents of the string objects lhs and rhs
+ * @param lhs a string object to be swapped.
+ * @param rhs the other string object to be swapped.
+ */
 inline void swap (string& lhs, string& rhs){
     lhs.swap(rhs);
 }
