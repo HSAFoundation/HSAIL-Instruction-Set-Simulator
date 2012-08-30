@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#8 - edit change 786230 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#9 - edit change 787886 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -43,8 +43,18 @@
  */
 namespace hsacore
 {
-    
+   
+/** 
+ * @addtogroup HSACoreCommonTyps 
+ * Cross-Core-Module common Types
+ *  @{
+ */
+  
 // TODO: Replace out_of_range with an HSART exception
+/**
+ * @brief Class hsa::vector replaces std::vector container.
+ * @tparam T Type of object
+ */
 template<typename T>
 class vector
 {
@@ -52,8 +62,14 @@ public:
     typedef T* iterator;
     typedef T* const_iterator;
 
+    /**
+     * @brief Default constructor, initializes member variables to 0.
+     */
     vector() : items_(0), data_(0), capacity_(0), size_(0) { }
 
+    /**
+     * @brief Destructor, destroys vector.
+     */
     ~vector()
     {
         try
@@ -66,6 +82,11 @@ public:
         }
     }
 
+    /**
+     * @brief Copy constructor
+     * @param rhs Vector to be copied to current memory
+     *        location.
+     */
     vector(const vector& rhs) :
         items_(0), data_(0), capacity_(0), size_(0)
     {
@@ -74,6 +95,13 @@ public:
         }
     }
 
+    /**
+     * @brief Copy Operator function, assigns a copy of 
+     *        rhs as content of vector object.
+     * @return returns *this, vector object with copied content.
+     * @param rhs Vector to be copied to current memory
+     *        location.
+     */
     const vector& operator=(const vector& rhs)
     {
         if(this == &rhs){
@@ -88,8 +116,15 @@ public:
         return *this;
     }
 
-    //Replaces memcpy in &operator()
-    template <class I> void assign(I start, I end)
+    /**
+     * @brief Function pushes all elements between start and 
+     *        end locations onto the vector.
+     * @tparam Iterator Type of iterator
+     * @param start Iterator representing start of source.
+     *        Must be at least a forward iterator. 
+     * @param end Iterator representing end of source.
+     */
+    template <class Iterator> void assign(Iterator start, Iterator end)
     {
         clear();
         while(start != end){
@@ -98,26 +133,43 @@ public:
         }
     }
 
-
-    //return size of vector
+    /**
+     * @brief Function returns the number of elements in the vector.
+     * @return returns the number of elements contained in the vector.
+     */
     size_t size() const
     {
         return size_;
     }
 
-    //return capacity (max possible size) of vector
+    /**
+     * @brief Function returns the number of items worth of 
+     *        memory allocated for the vector.
+     * @return returns the number of items worth of memory
+     *        allocated for the vector.
+     * @note Capacity will be >=the size of the vector.
+     */
     size_t capacity() const
     {
         return capacity_;
     }
 
-    //return true only if vector is empty
+    /**
+     * @brief Function returns true if the vector is empty.
+     * @return returns true only if the vector is empty.
+     */
     bool empty() const
     {
         return (size_ == 0); 
     }
 
-    //Empty the vector, set size = 0, reset capacity to default
+    /**
+     * @brief Function empties the vector and destructs each element
+     *        as it is removed.
+     * @note Memory is not freed by clear. Only destruction of 
+     *        the vector will deallocate memory.
+     * @note Capacity will be >= the size of the vector.
+     */
     void clear()
     {
         while(size_ > 0){
@@ -125,7 +177,11 @@ public:
         } 
     }
 
-    //Removes last element of non-empty vector.  Empty vector -> no action
+    /**
+     * @brief Function removes and destructs the last element of a 
+     *        non-empty vector.
+     * @note Capacity will not be changed.
+     */
     void pop_back()
     {
         if(size_ > 0) {
@@ -134,8 +190,12 @@ public:
         }
     }
 
-    // Item is inserted at end of vector - if vector is full, capacity is doubled
-    // before item is added
+    /*
+     * @brief Function adds a new element at the end of the vector.
+     *        If the vector is full, the capacity is doubled before
+     *        the element is added.
+     * @param item The item to be added to the end of the vector.
+     */
     void push_back(const T& item)
     {        
         ptrdiff_t itemSize = reinterpret_cast<char*>(&items_[1]) - reinterpret_cast<char*>(&items_[0]);
@@ -147,10 +207,9 @@ public:
             items_ = reinterpret_cast<T*>(data_);
         }
         if(size_ == capacity_) {
-            size_t prevCapacity = capacity_;
             capacity_ *= 2;
-            T* prevItems( items_ ); //prevItems and items_ point to same location
-            char *prevData( data_ );
+            T* prevItems( items_ ); ///< Pointer to current buffer of items to be copied to a new location
+            char *prevData( data_ ); ///< Point to previous location of data_ char buffer
             data_ = new char[capacity_ * itemSize];
             items_ = reinterpret_cast<T*>(data_);
             for(size_t cpyCount=0; cpyCount < size_; cpyCount++){
@@ -163,7 +222,14 @@ public:
         size_++;
     }
 
-    // return ref to last item in vector
+    /**
+     * @brief Function returns the reference to the last
+     *        element in the vector.
+     * @return returns the reference to the last element
+     *        in the vector.
+     * @throw Throw out_of_range exception when the vector is
+     *        empty.
+     */
     T& back()
     {
         if(size_ <= 0) {
@@ -172,6 +238,14 @@ public:
         return (items_[size_-1]);
     }
 
+    /**
+     * @brief Constant function returns a constant reference to the
+     *        last element in the vector.
+     * @return returns a constant reference to the last element
+     *        in the vector.
+     * @throw Throw out_of_range exception when the vector is
+     *        empty.
+     */
     const T& back() const
     {
         if(size_ <= 0) {
@@ -180,75 +254,139 @@ public:
         return (items_[size_-1]);
     }
 
-    //return value of nth item (first position is 0)
-    const T& operator[] (size_t n) const
-    {
-        return items_[n];
-    }
-
+    /**
+     * @brief Function returns the reference to the element
+     *        at index n in the vector.
+     * @return returns the reference to the element at index
+     *        n in the vector.
+     * @param n The index of the element being returned.
+     */
     T& operator[] (size_t n)
     {
+        //TODO Assert for out_of_range
         return items_[n];
     }
 
-    const T& at(size_t n) const
+    /**
+     * @brief Constant function returns a constant reference to the
+     *        element at index n in the vector.
+     * @return returns a constant reference to the element at index
+     *        n in the vector.
+     * @param n The index of the element being returned.
+     */
+    const T& operator[] (size_t n) const
     {
-        if(n > size_){
-            throw std::out_of_range("vector::at() called on element outside hsa::vector.");
-        }
+        //TODO Assert for out_of_range
         return items_[n];
     }
 
+    /**
+     * @brief Function returns the reference to the element 
+     *        at index n in the vector
+     * @return returns the reference to the element at 
+     *        index n in the vector
+     * @throw Throw out_of_range exception when index n is 
+     *        less than 0 or greater than the vector size.
+     * @param n The index of the element being returned. 
+     */
     T& at(size_t n) 
     {
-        if(n > size_){
+        if(n >= size_){
             throw std::out_of_range("vector::at() called on element outside hsa::vector.");
         }
         return items_[n];
     }
 
-    //return ref to vector start
+    /**
+     * @brief Constant function returns a constant reference to the 
+     *        element at index n in the vector
+     * @return returns a constant reference to the element at 
+     *        index n in the vector
+     * @throw Throw out_of_range exception when index n is less
+     *        than 0 or greater than the vector size.
+     * @param n The index of the element being returned.
+     */
+    const T& at(size_t n) const
+    {
+        if(n >= size_){
+            throw std::out_of_range("vector::at() called on element outside hsa::vector.");
+        }
+        return items_[n];
+    }
+
+    /**
+     * @brief Function returns an iterator referring to 
+     *        the first element in the vector.
+     * @return returns an iterator referring to the first
+     *        element in the vector.
+     */
     iterator begin()
     {
         return items_;
     }
 
-    //return ref to vector end
-    iterator end()
-    {
-        return items_ + size_;
-    }
-
-    //return ref to vector start
-
+    /**
+     * @brief Constant function returns a constant iterator referring to 
+     *        the first element in the vector.
+     *  @return returns a constant iterator referring to the first
+     *        element in the vector.
+     */
     const_iterator begin() const
     {
         return cbegin();
     }
 
-    //return ref to vector end
-    const_iterator end() const
-    {
-        return cend();
-    }
-
-    //return ref to vector start
+    /**
+     * @brief Constant function returns a constant iterator referring to 
+     *        the first element in the vector.
+     * @return returns a constant iterator referring to the first
+     *        element in the vector.
+     */
     const_iterator cbegin() const
     {
         return items_;
     }
 
-    //return ref to vector end
+    /**
+     * @brief Function returns an iterator referring to the 
+     *        element following the last element in the vector.
+     * @return returns an iterator referring to the element 
+     *        following the last element in the vector.
+     */
+    iterator end()
+    {
+        return items_ + size_;
+    }
+
+    /**
+     * @brief Constant function returns a constant iterator referring 
+     *        to the element following the last element in the
+     *        vector.
+     * @return returns a constant iterator referring to the element 
+     *        following the last element in the vector.
+     */
+    const_iterator end() const
+    {
+        return cend();
+    }
+
+    /**
+     * @brief Constant function returns a constant iterator referring 
+     *        to the element following the last element in the
+     *        vector.
+     * @return returns a constant iterator referring to the element 
+     *        following the last element in the vector.
+     */
     const_iterator cend() const
     {
         return items_ + size_;
     }
 
 private:
-    T*    items_; //items contained in vector
-    char* data_;
-    size_t    capacity_;
-    size_t    size_; //total size
+    T*    items_; ///< Pointer to buffer of items of type T, is an alias of data_
+    char* data_; ///< Pointer to buffer of items of type char
+    size_t    capacity_; ///< Capacity of the vector
+    size_t    size_; ///< Number of items contained in the vector
     
 };//end Vector
 
