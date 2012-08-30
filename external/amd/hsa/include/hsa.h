@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#2 - edit change 775354 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#3 - edit change 775440 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -78,31 +78,64 @@ class IDevice;
 class IProgram;
 class IDispatchDescriptor;
 
+/**
+ * The wave action lets the user chose what happens to a wave when an
+ * exception occurs, there are three choices
+ */
 typedef enum {
-        HALT_WAVE=1,
-        KILL_WAVE=2,
-        RESUME_WAVE=4
+	HALT_WAVE=1, /*!< Halt the wave, usually this is what happens, wave is
+		       not killed, just halted */
+	KILL_WAVE=2, /*!< Kill the wave, wave is killed at the point of
+		       exception, if not all the wavefronts in the wave take a
+		       fault, the place in the code where the non-faulty waves
+		       get killed is not deterministic. It usually happens
+		       before the next barrier */
+	RESUME_WAVE=4 /*!< increment the PC to the next instruction and
+			continue running, this choice is for advanced users */
 } HSAWaveAction;
 
+
+/**
+ * This is to chose what should happen to the application program, there are
+ * three choices
+ */
 typedef enum {
-        IGNORE_HOST=1,
-        EXIT_HOST=2,
-        INTERRUPT_HOST=4
+	IGNORE_HOST=1, /*!< the application doesn't want to know about the
+			 exception */
+        EXIT_HOST=2,   /*!< the application wants runtime to call exit() */
+	INTERRUPT_HOST=4 /*!< the host is expecing it be interrupted, host has
+			   registered a call back for this via events */
 } HSAHostAction;
 
+/**
+ * This is to chose what should happen to the application program in terms of
+ * the data it uses. There are three choices
+ * */
 typedef enum {
-        FLUSH_ALL=1,
-        FLUSH_BOTTOM_LEVEL =2,
-        FLUSH_TOP_LEVEL=4
+        FLUSH_ALL=1, /*!< flush all the caches the runtime can flush*/
+	FLUSH_BOTTOM_LEVEL =2,/*!< flush flushable caches closer to the vector
+				arrays*/
+        FLUSH_TOP_LEVEL=4  /*!< flush top-level GPU cache */
 } HSACachePolicy;
 
+
+/**
+ * the function pointer for registering handlers associated with events in HSA
+ */
 typedef void (*HSATrapHandle)(void *,int);
 
+/**
+ * the exception policy is comprised of wave action, host action and the
+ * location of trap handle
+ */
 typedef struct HSAExceptionPolicy {
-        int enableException;
-        HSAWaveAction waveAction;
-        HSAHostAction hostAction;
-        HSATrapHandle trapHandle;
+        int enableException;       /*!< default is to enable them */
+        HSAWaveAction waveAction;  /*!< default wave action is to halt it */
+	HSAHostAction hostAction;  /*!< default host action is to ignore the
+				     event when it occurs it but inform the
+				     host when it does wait on this kernel */
+	HSATrapHandle trapHandle;  /*!< if host action is to interrupt, this
+				     trap handle gets executed */
 
         HSAExceptionPolicy()
         {
@@ -113,23 +146,37 @@ typedef struct HSAExceptionPolicy {
         }
 }HSAExceptionPolicy;
 
+/**
+ * completion policy defined the following
+ */
 typedef enum {
-        WAIT_DEPENDENCY=1,
-        WAIT_ENQUEUE=2,
-        WAIT_LAUNCH=4,
-        WAIT_COMPLETION=8
+	WAIT_DEPENDENCY=1,  /*!< return from launch only after waiting for all
+			      dependencies */
+        WAIT_ENQUEUE=2,  /*!< return from launch only after enqueue is intiated */
+	WAIT_LAUNCH=4,  /*!< return from launch after the kernel launch is
+			  actually copied on to the queue*/
+	WAIT_COMPLETION=8  /*!< return after the kernel is completed execution,
+			     event is still returned if this kernel takes an
+			     exception */
 }HSACompletionPolicy;
 
+/** 
+ * attributes of a launch include, exception policy, launch policy and cache
+ * policy 
+ */
 typedef struct LaunchAttributes {
-	HSACompletionPolicy completionPolicy;
-        HSAExceptionPolicy exceptionPolicy;
-        HSACachePolicy cachePolicy;
-        int gridX;
-        int gridY;
-        int gridZ;
-        int groupX;
-        int groupY;
-        int groupZ;
+	HSACompletionPolicy completionPolicy; /*!< default has none of the
+						guarantees listed in the
+						policy*/
+	HSAExceptionPolicy exceptionPolicy; /*!< default is to generate
+					      exceptions*/
+	HSACachePolicy cachePolicy; /*!< default is to flush everything */
+        int gridX; /*!< default is 1*/
+        int gridY; /*!< default is 1*/
+        int gridZ; /*!< default is 1*/
+        int groupX; /*!< default is 1*/
+        int groupY; /*!< default is 1*/
+        int groupZ; /*!< default is 1*/
 
         LaunchAttributes()
         {
