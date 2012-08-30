@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#7 - edit change 783545 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#8 - edit change 787740 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -485,6 +485,14 @@ public:
                                         uint32_t *&buffAddr, uint32_t &buffSize,
                                         uint32_t prcntSimd = HSA_QUE_DEFAULT_PRCNT_SIMD,
                                         int32_t schedPrior = HSA_QUE_DEFAULT_SCHED_RANK) = 0;
+
+
+    /**
+    * API to retrieve counter information from devices.
+    * The PMU structure contains all the counters and groups specific to this device.
+    *
+    * @return a hardware specific PMU structure.
+    */
 
 	virtual ~Device(){};
 };
