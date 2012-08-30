@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#20 - edit change 799174 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#21 - edit change 799290 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -109,19 +109,20 @@ class DispatchDescriptor;
  * exception occurs, there are three choices
  */
 typedef enum {
-    HALT_WAVE=1,  /*!< Halt the wave, usually this is what happens, 
-                       wave is not killed, just halted */
-    RESUME_WAVE=2, /*!< increment the PC to the next instruction and
-                       continue running, this choice is for advanced users */
-    KILL_WAVE=3,  /*!< Kill the wave, wave is killed at the point of
-                       exception, if not all the wavefronts in the wave take a
-                       fault, the place in the code where the non-faulty waves
-                       get killed is not deterministic. It usually happens
-                       before the next barrier */
-    DEBUG_WAVE=4, /*!< Cause the wave into the debug mode */
-    TRAP_WAVE=5,  /*!< Cause the wave to take a trap */
-    MAX_WAVEACTION
-} HSAWaveAction;
+    WAVE_ACTION_HALT=1, /*!< The wave is not killed just suspended. This is the
+                    default behavior. Halt the wave on an exception. */
+    WAVE_ACTION_RESUME=2, /*!< Resume the wave on an exception The PC is
+                    incremented to the next instruction and execution is
+                    resumed. This choice is for advanced users. */
+    WAVE_ACTION_KILL=3, /*!< Kill the wave on an exception The wave is killed at
+                    the point of exception. If not all the wavefronts in the
+                    wave take a fault, the place in the code where the
+                    non-faulty waves get killed is non-deterministic. This is
+                    usually before the next barrier. */
+    WAVE_ACTION_DEBUG=4, /*!< Cause the wave into the debug mode */
+    WAVE_ACTION_TRAP,  /*!< Cause the wave to take a trap */
+    WAVE_ACTION_MAX
+} WaveAction;
 
 /**
  * @ingroup Dispatch, Debugger
@@ -141,12 +142,15 @@ typedef enum {
  * three choices
  */
 typedef enum {
-    IGNORE_HOST = 1,   /*!< the application doesn't want to know about the
-                        exception */
-    EXIT_HOST = 2,     /*!< the application wants runtime to call exit() */
-    INTERRUPT_HOST = 4 /*!< the host is expecing it be interrupted, host has
-                        registered a call back for this via events */
-} HSAHostAction;
+    HOST_ACTION_IGNORE = 1, /*!< Ignore the kernel exception. The host
+                    application will ignore any kernel exceptions. */
+    HOST_ACTION_EXIT = 2, /*!< Exit the host application on a kernel exception.
+                    The host application will call exit() in the event of a
+                    kernel exception. */
+    HOST_ACTION_NOTIFY = 4 /*!< Interrupt the host application on a kernel
+                    exception. The host application has registered an event to be
+                    signaled in the event of a kernel exception. */
+} HostAction;
 
 /**
  * @ingroup Dispatch, Debugger
@@ -154,11 +158,12 @@ typedef enum {
  * the data it uses. There are three choices
  * */
 typedef enum {
-    FLUSH_ALL=1,         /*!< flush all the caches the runtime can flush*/
-    FLUSH_BOTTOM_LEVEL=2,/*!< flush flushable caches closer to the processing
-                            units */
-    FLUSH_TOP_LEVEL=4    /*!< flush top-level cache */
-} HSACachePolicy;
+    CACHE_POLICY_FLUSH_ALL=1, /*!< Flush all caches that can be flushed. */
+    CACHE_POLICY_FLUSH_COMPUTE_UNIT=2, /*!< Flush the private device compute
+                    unit caches. */
+    CACHE_POLICY_FLUSH_SHARED=4 /*!< Flush the shared device compute unit
+                    caches. */
+} CachePolicy;
 
 
 /**
@@ -174,8 +179,8 @@ typedef void (*HSATrapHandle)(void *,int);
  */
 typedef struct HSAExceptionPolicy {
     int enableException;       /*!< default is to enable them */
-    HSAWaveAction waveAction;  /*!< default wave action is to halt it */
-    HSAHostAction hostAction;  /*!< default host action is to ignore the
+    WaveAction waveAction;  /*!< default wave action is to halt it */
+    HostAction hostAction;  /*!< default host action is to ignore the
                                  event when it occurs it but inform the
                                  host when it does wait on this kernel */
     HSATrapHandle trapHandle;  /*!< if host action is to interrupt, this
@@ -184,8 +189,8 @@ typedef struct HSAExceptionPolicy {
     HSAExceptionPolicy()
     {
         int enableException = 1;
-        waveAction = HALT_WAVE;
-        hostAction = IGNORE_HOST;
+        waveAction = WAVE_ACTION_HALT;
+        hostAction = HOST_ACTION_IGNORE;
         trapHandle = NULL;
     }
 }HSAExceptionPolicy;
@@ -195,22 +200,26 @@ typedef struct HSAExceptionPolicy {
  * completion policy defined the following
  */
 typedef enum {
-    WAIT_DEPENDENCY=1, /*!< return from launch only after waiting for all
-                          dependencies */
-    WAIT_ENQUEUE=2,    /*!< return from launch only after enqueue is intiated */
-    WAIT_LAUNCH=4,     /*!< return from launch after the kernel launch is
-                         actually copied on to the queue*/
-    WAIT_COMPLETION=8  /*!< return after the kernel is completed execution,
-                            event is still returned if this kernel takes an
-                            exception */
-}HSACompletionPolicy;
+    BLOCKING_POLICY_NONE, /*!< The dispatch interface returns immediately. */
+    BLOCKING_POLICY_DEPENDENCY=1, /*!< The dispatch interface will block until
+                    all dependencies have succeeded before returning from the
+                    kernel launch. */
+    BLOCKING_POLICY_ENQUEUED=2, /*!< The dispatch interface will block until the
+                    kernel has been enqueued to the device queue for
+                    execution. */
+    BLOCKING_POLICY_EXECUTING=4, /*!< The dispatch interface will block until
+                    the kernel dispatch command has been processed and the
+                    kernel is running. */
+    BLOCKING_POLICY_COMPLETED=8  /*!< The dispatch interface will block until
+                    the kernel has completed executing. */
+} BlockingPolicy;
 
 /** 
  * attributes of a launch include, exception policy, launch policy and cache
  * policy 
  */
 typedef struct LaunchAttributes {
-    HSACompletionPolicy completionPolicy; /*!< default has none of the
+    BlockingPolicy completionPolicy; /*!< default has none of the
                                             guarantees listed in the
                                             policy*/
     HSAExceptionPolicy exceptionPolicy; /*!< default is to generate
@@ -222,7 +231,7 @@ typedef struct LaunchAttributes {
     
     size_t trapHandlerBufferSizeByte; /*!< trap handler buffer size */
 
-    HSACachePolicy cachePolicy; /*!< default is to flush everything */
+    CachePolicy cachePolicy; /*!< default is to flush everything */
 
     int gridX; /*!< default is 1*/
     int gridY; /*!< default is 1*/
@@ -234,7 +243,7 @@ typedef struct LaunchAttributes {
 
     LaunchAttributes()
     {
-        cachePolicy = FLUSH_ALL;
+        cachePolicy = CACHE_POLICY_FLUSH_ALL;
         gridX = 1;
         gridY = 1;
         gridZ = 1;
@@ -307,7 +316,7 @@ DLL_PUBLIC void unmapMemory(void* ptr);
  *
  */
 DLL_PUBLIC void
-flushDeviceCaches(hsa::Device *dev, HSACachePolicy cachePolicy);
+flushDeviceCaches(hsa::Device *dev, CachePolicy cachePolicy);
 
 /**
  * @brief Device class, public interface in the device layer.
@@ -362,11 +371,11 @@ public:
     virtual DispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
 
     //flush caches on the device
-    virtual void flushCaches(hsa::Device *dev, HSACachePolicy cachePolicy) = 0;
+    virtual void flushCaches(hsa::Device *dev, CachePolicy cachePolicy) = 0;
 
     //wave control on the device
     virtual void waveControl(uint32_t deviceID, 
-                             HSAWaveAction action, 
+                             WaveAction action, 
                              HSAWaveMode mode, 
                              uint32_t trapID, 
                              void *msgPtr) = 0;
@@ -695,10 +704,11 @@ public:
      */
     //wave control on the device
     virtual void waveControl(uint32_t deviceID, 
-                             HSAWaveAction action, 
+                             WaveAction action, 
                              HSAWaveMode mode, 
                              uint32_t trapID, 
                              void *msgPtr) = 0;
+
 };
 
 /**
