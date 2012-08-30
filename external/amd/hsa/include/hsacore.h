@@ -1,9 +1,18 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#2 - edit change 775106 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#3 - edit change 775440 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
+#if defined(__WIN32)
+#pragma comment( lib, "hsacore" )
+#elif defined(__WIN64)
+#pragma comment( lib, "hsacore64" )
+#endif // #if defined(__WIN32)
+
+
+#if !defined(AMD_AMP_HSA_INCLUDES)
 #include <vector>
 #include <iostream>
+#endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 #include "hsacorecommon.h"
 
 namespace hsacore
@@ -108,8 +117,8 @@ DLL_PUBLIC Event* createCoreEvent(Queue*  q, void *user_handle, int
  *
  * @return a pointer to a new Event class object
  */
-DLL_PUBLIC Event* createCoreEvent(int nodeid, void *user_handle, int
-		autoReset, int state);
+DLL_PUBLIC Event* createCoreEvent(int nodeid, void *user_handle, 
+        int autoReset, int state);
 
 /**
  *
@@ -178,8 +187,7 @@ DLL_PUBLIC void destroyCoreEvent(Event *e);
  * @see SystemMemoryOptions
  * @see LocalMemoryOptions
  */
-DLL_PUBLIC void* allocateMemory(const Device& dev, const size_t size,
-		const uint32_t type);
+DLL_PUBLIC void* allocateMemory(const Device& dev, const size_t size, const uint32_t type);
 
 /**
  * @brief Frees system or device memory.
@@ -195,7 +203,8 @@ DLL_PUBLIC void* allocateMemory(const Device& dev, const size_t size,
  * @exception HsaException if the the runtime is
  *            unable to deallocate the specified memory region.
  */
-DLL_PUBLIC void freeMemory(void* ptr);
+DLL_PUBLIC void 
+freeMemory(void* ptr);
 
 /**
  * @deprecated This method will probably not be part of the final API. Be aware
@@ -213,8 +222,8 @@ DLL_PUBLIC void freeMemory(void* ptr);
  * @param size Requested registration size in bytes.
  * @param type Deprecated, to be removed.
  */
-DLL_PUBLIC void registerMemory(void* ptr, const size_t size,
-		const uint32_t type);
+DLL_PUBLIC void 
+registerMemory(void* ptr, const size_t size, const uint32_t type);
 
 /**
  * @deprecated This method will probably not be part of the final API. Be aware
@@ -229,7 +238,8 @@ DLL_PUBLIC void registerMemory(void* ptr, const size_t size,
  *
  * @param ptr Pointer to memory to deregister.
  */
-DLL_PUBLIC void deregisterMemory(void* ptr);
+DLL_PUBLIC void 
+deregisterMemory(void* ptr);
 
 /**
  * @brief Indicate that a memory region will be used by the device(s).
@@ -252,7 +262,8 @@ DLL_PUBLIC void deregisterMemory(void* ptr);
  *            perform the requested operation.
  *
  */
-DLL_PUBLIC void mapMemory(void* ptr, const size_t size);
+DLL_PUBLIC void 
+mapMemory(void* ptr, const size_t size);
 
 /**
  * @brief Indicate that a memory regions will not longer be used by the device(s).
@@ -268,7 +279,8 @@ DLL_PUBLIC void mapMemory(void* ptr, const size_t size);
  *            memory region.
  *
  */
-DLL_PUBLIC void unmapMemory(void* ptr);
+DLL_PUBLIC void 
+unmapMemory(void* ptr);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -332,6 +344,14 @@ public:
     virtual bool isDoublePrecision()=0;
 
       /**
+  * @brief API to check if device is being used for anything else
+     * such as driving a monitor.
+     *
+     * @return returns true if no external display is attached to the device.
+     */
+    virtual bool isDedicatedCompute()=0;
+
+    /**
      * @brief Get the size of the LDS in KB
      *
      * @return returns the size of the local data store in KB.
@@ -904,44 +924,47 @@ class DLL_PUBLIC HsaCoreApi
 // functions of the DLL when it(DLL) is explicitly loaded.
 
 public:
-        // For each function in exported global functions above (hsacore.h) add
-        // the same function here as a public method of this(IHsaCoreApi)
-        // interface class.
-        unsigned getDeviceCount();
+    // For each function in exported global functions above (hsacore.h) add
+    // the same function here as a public method of this(IHsaCoreApi)
+    // interface class.
+    unsigned getDeviceCount();
 
-        const vector<hsacore::Device*>& getDevices();
+    const vector<hsacore::Device*>& getDevices();
 
-        /**
-         * @copydoc hsacore::allocateMemory
-         */
-        void* allocateMemory(const Device& dev, const size_t size,
-        		const uint32_t type);
+    /**
+     * @copydoc hsacore::allocateMemory
+     */
+    void*
+    allocateMemory(const Device& dev, const size_t size, const uint32_t type);
 
-        /**
-         * @copydoc hsacore::freeMemory
-         */
-        void freeMemory(void* ptr);
+    /**
+     * @copydoc hsacore::freeMemory
+     */
+    void freeMemory(void* ptr);
 
-        /**
-         * @copydoc hsacore::registerMemory
-         */
-        void registerMemory(void* ptr, const size_t size,
-        		const uint32_t type);
+    /**
+     * @copydoc hsacore::registerMemory
+     */
+    void
+    registerMemory(void* ptr, const size_t size, const uint32_t type);
 
-        /**
-         * @copydoc hsacore::deregisterMemory
-         */
-        void deregisterMemory(void* ptr);
+    /**
+     * @copydoc hsacore::deregisterMemory
+     */
+    void
+    deregisterMemory(void* ptr);
 
-        /**
-         * @copydoc hsacore::mapMemory
-         */
-        void mapMemory(void* ptr, const size_t size);
+    /**
+     * @copydoc hsacore::mapMemory
+     */
+    void
+    mapMemory(void* ptr, const size_t size);
 
-        /**
-         * @copydoc hsacore::unmapMemory
-         */
-        void unmapMemory(void* ptr);
+    /**
+     * @copydoc hsacore::unmapMemory
+     */
+    void
+    unmapMemory(void* ptr);
 
 };
 
