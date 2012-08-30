@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#5 - edit change 779990 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#6 - edit change 780511 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -84,69 +84,71 @@ DLL_PUBLIC const vector<hsacore::Device*>& getDevices();
 /**
  * @brief factory API for abstracting the creation of an event class
  *
- * @param q queue object whose compute device is used for events.
+ * @param queObj queue object whose compute device is used for events.
  *
- * @param user_handle reference to the data provided by user. It is upto the
+ * @param usrHandle reference to the data provided by user. It is upto the
  * user to provide valid user data. The class does not impose any
  * constraints nor does it perform any checks
  *
  * @param autoReset if the event object should be reset automatically or
  * manually. True indicates auto reset, false indicates manual reset. 
  *
- * @param state State of event object if it is SET or not SET.
+ * @param initState initial state of event object if it is SET or not SET.
  *
  * @return a pointer to a new Event class object
  */
-DLL_PUBLIC Event* createCoreEvent(Queue*  q, void *user_handle, bool 
-		autoReset, bool state);
+DLL_PUBLIC Event* createCoreEvent(Queue*  queObj,
+                                  void *usrHandle,
+                                  bool autoReset, bool initState);
 
 /**
  * @brief factory API for abstracting the creation of an event class
  *
- * @param nodeid Id of the compute node.
+ * @param devId Id of the compute device.
  *
- * @param user_handle reference to the data provided by user. It is upto
+ * @param usrHandle reference to the data provided by user. It is upto
  * the user to provide valid user data. The class does not impose any
  * constraints.
  *
  * @param autoReset if the event object should be reset automatically
  * or manually. True indicates manual reset, false otherwise.
  *
- * @param state State of event object if it is SET or not SET.
- *
+ * @param initState initial state of event object if it is SET or not SET.
  *
  * @return a pointer to a new Event class object
  */
-DLL_PUBLIC Event* createCoreEvent(int nodeid, void *user_handle, bool 
-		autoReset, bool state);
+DLL_PUBLIC Event* createCoreEvent(uint32_t devId,
+                                  void *usrHandle,
+                                  bool autoReset, bool initState);
 
 /**
  *
  * @brief factory API for abstracting the creation of an event class
  *
- * @param eid for now the class throws and exception event ID is not 
+ * @param eventId for now the class throws and exception event ID is not 
  * recognized (! (NODE_CHANGE | DEVICE_STATE_CHANGE) )
  *
  * @param autoReset if the event object should be reset automatically
  * or manually. True indicates manual reset, false otherwise.
  *
- * @param state State of event object if it is SET or not SET.
+ * @param initState initial state of event object if it is SET or not SET.
  *
  * @throws HsaExeption if input parameters are illegal or invalid.
  *
  * @return a pointer to a new Event class object
  */
-DLL_PUBLIC Event* createCoreEvent(EVENTID eid, bool autoReset, bool state);
+DLL_PUBLIC Event* createCoreEvent(EVENTID eventId, bool autoReset, bool initState);
 
 /**
- * @brief event destruction API provided, primarily for uniformity. delete e
+ * @brief eventObj destruction API provided, primarily for uniformity. delete e
  * also accomplishes the same thing.
  *
- * @param e the event to be destroyed.
+ * @param eventObj the event to be destroyed.
+ *
  * @throws HsaExeption if input parameters are illegal or invalid.
  *
  */
-DLL_PUBLIC void destroyCoreEvent(Event *e);
+DLL_PUBLIC void destroyCoreEvent(Event *eventObj);
 
 
 /**
@@ -856,11 +858,11 @@ public:
      * @brief Ensures that the event is generated atleast once after this
      * call was invoked
      *
-     * @param time in microseconds, 0 for time means blocking wait
+     * @param time in milliseconds, 0 for time means blocking wait
      *
      * @return - signal reason for return, (SIGTIMEOUT/SIGSUCCESS/SIGFAILURE) 
      */
-    virtual HSA_UNBLOCK_SIGNAL wait(const unsigned int i)=0;
+    virtual HSA_UNBLOCK_SIGNAL wait(const unsigned int timeOut) = 0;
 
     /**
      * @bried Signals the event object.
@@ -879,21 +881,21 @@ public:
      * @note: is reset valid when event is created with autoreset flag?
      *
      */
-    virtual void reset()=0;
+    virtual void reset(void) = 0;
 
     /**
      * @brief Returns the current value of user handle
      *
      * @return the current value of user handle
      */
-    virtual void * getUserHandle() const =0;
+    virtual void * getUserHandle(void) const = 0;
 
     /**
      * @brief set a new value for the user handle
      *
      * @return success if set, users burden to ensure MT races are dealt with
      */
-    virtual void setUserHandle(void *uh)=0;
+    virtual void setUserHandle(void *usrHandle) = 0;
 
     /**
      * @brief information that is to be used in EOP (3rd word and 5th word,
