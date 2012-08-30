@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#6 - edit change 783545 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#7 - edit change 788268 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -177,6 +177,7 @@ typedef struct LaunchAttributes {
         int groupX; /*!< default is 1*/
         int groupY; /*!< default is 1*/
         int groupZ; /*!< default is 1*/
+        int groupOffsets[3];
 
         LaunchAttributes()
         {
@@ -187,7 +188,9 @@ typedef struct LaunchAttributes {
             groupX = 1;
             groupY = 1;
             groupZ = 1;
-
+            groupOffsets[0]=0;
+            groupOffsets[1]=0;
+            groupOffsets[2]=0;
         }
 }LaunchAttributes;
 
