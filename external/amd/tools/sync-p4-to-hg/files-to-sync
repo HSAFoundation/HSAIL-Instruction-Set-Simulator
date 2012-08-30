@@ -1,0 +1,4 @@
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h hsa/include/hsa.h
+//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h hsa/include/hsacommon.h
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h hsa/include/hsacorecommon.h
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h hsa/include/hsacore.h
