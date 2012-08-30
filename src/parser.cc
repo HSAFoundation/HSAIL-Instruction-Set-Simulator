@@ -3484,203 +3484,134 @@ int Ldc(Context* context) {
 }
 
 int Atom(Context* context) {
-  unsigned int first_token = context->token_to_scan;
+  const unsigned int first_token = context->token_to_scan;
   context->token_to_scan = yylex();
-  if (first_token == ATOMIC) {   // atomic
+  BrigInstAtomic atom_op = {
+    44,                    // size
+    BrigEInstAtomic,       // kind
+    BrigAtomic,            // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0},       // o_operands[5]
+    BrigAtomicCas,         // atomicOperation;
+    BrigFlatSpace,         // storageClass;
+    BrigRegular            // memorySemantic;
+  };
+  if (first_token == ATOMIC) {  // atomic
     if (context->token_type == ATOMIC_OP) {
-      context->token_to_scan = yylex();
-      // with AtomModifiers
-      if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||
-          context->token_to_scan == _AR ||
-          context->token_to_scan == _ACQ ||
-          context->token_to_scan == _REL ||
-          context->token_to_scan == _REGION) {
-        context->token_to_scan = yylex();
-        while (1) {  // AtomModifiers repetition
-          if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||
-              context->token_to_scan == _AR ||
-              context->token_to_scan == _ACQ ||
-              context->token_to_scan == _REL ||
-              context->token_to_scan == _REGION) {
-            context->token_to_scan = yylex();
-          } else {
-            break;
-          }
-        }
-        if (context->token_type == DATA_TYPE_ID) {
-          context->token_to_scan = yylex();
-          if (!Operand(context)) {
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-              if (!MemoryOperand(context)) {
-                if (context->token_to_scan == ',') {
-                  context->token_to_scan = yylex();
-                  if (!Operand(context)) {
-                    if (context->token_to_scan == ';') {
-                      context->token_to_scan = yylex();
-                      return 0;
-                    } else {
-                      context->set_error(MISSING_SEMICOLON);
-                    }
-                  } else {
-                    context->set_error(MISSING_OPERAND);
-                  }
-                } else {
-                  context->set_error(MISSING_COMMA);
-                }
-              } else {
-                context->set_error(MISSING_OPERAND);
-              }
-            } else {
-              context->set_error(MISSING_COMMA);
-            }
-          } else {
-            context->set_error(MISSING_OPERAND);
-          }
-        } else {
-           context->set_error(MISSING_DATA_TYPE);
-        }
-      } else if (context->token_type == DATA_TYPE_ID) {
-        // without AtomModifiers
-        context->token_to_scan = yylex();
-        if (!Operand(context)) {
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if (!MemoryOperand(context)) {
-              if (context->token_to_scan == ',') {
-                context->token_to_scan = yylex();
-                if (!Operand(context)) {
-                  if (context->token_to_scan == ';') {
-                    context->token_to_scan = yylex();
-                    return 0;
-                  } else {
-                    context->set_error(MISSING_SEMICOLON);
-                  }
-                } else {
-                   context->set_error(MISSING_OPERAND);
-                }
-              } else {
-                context->set_error(MISSING_COMMA);
-              }
-            } else {
-              context->set_error(MISSING_OPERAND);
-            }
-          } else {
-             context->set_error(MISSING_COMMA);
-          }
-        } else {
-          context->set_error(MISSING_OPERAND);
-        }
-      }  else {
-        context->set_error(MISSING_DATA_TYPE);
-      }
-    } else {
-      context->set_error(UNKNOWN_ERROR);
-    }
-  } else if (first_token == ATOMIC_CAS) {   // atomic_cas
-    if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||
-        // with AtomModifiers
-        context->token_to_scan == _AR ||
-        context->token_to_scan == _ACQ ||
-        context->token_to_scan == _REL ||
-        context->token_to_scan == _REGION) {
-        context->token_to_scan = yylex();
-      while (1) {  // AtomModifiers repetition
-        if (context->token_type == ADDRESS_SPACE_IDENTIFIER ||
-            context->token_to_scan == _AR ||
-            context->token_to_scan == _ACQ ||
-            context->token_to_scan == _REL ||
-            context->token_to_scan == _REGION) {
-            context->token_to_scan = yylex();
-        } else {
+      switch (context->token_to_scan) {  // without _CAS_
+        case _AND_:
+          atom_op.atomicOperation = BrigAtomicAnd;
           break;
-        }
+        case _OR_:
+          atom_op.atomicOperation = BrigAtomicOr;
+          break;
+        case _XOR_:
+          atom_op.atomicOperation = BrigAtomicXor;
+          break;
+        case _EXCH_:
+          atom_op.atomicOperation = BrigAtomicExch;
+          break;
+        case _ADD_:
+          atom_op.atomicOperation = BrigAtomicAdd;
+          break;
+        case _INC_:
+          atom_op.atomicOperation = BrigAtomicInc;
+          break;
+        case _DEC_:
+          atom_op.atomicOperation = BrigAtomicDec;
+          break;
+        case _MIN_:
+          atom_op.atomicOperation = BrigAtomicMin;
+          break;
+        case _MAX_:
+          atom_op.atomicOperation = BrigAtomicMax;
+          break;
+        case _SUB_:
+          atom_op.atomicOperation = BrigAtomicSub;
+          break;
+        default:
+          context->set_error(MISSING_DECLPREFIX);
+          return 1;
       }
-      if (context->token_type == DATA_TYPE_ID) {
-        context->token_to_scan = yylex();
-        if (!Operand(context)) {
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if (!MemoryOperand(context)) {
-              if (context->token_to_scan == ',') {
-                context->token_to_scan = yylex();
-                if (!Operand(context)) {
-                  if (context->token_to_scan == ',') {
-                    context->token_to_scan = yylex();
-                    if (!Operand(context)) {
-                      if (context->token_to_scan == ';') {
-                        context->token_to_scan = yylex();
-                        return 0;
-                      } else {
-                        context->set_error(MISSING_SEMICOLON);
-                      }
-                    } else {
-                      context->set_error(MISSING_OPERAND);
-                    }
-                  } else {
-                    context->set_error(MISSING_COMMA);
-                  }
-                } else {
-                  context->set_error(MISSING_OPERAND);
-                }
-              } else {
-                context->set_error(MISSING_COMMA);
-              }
-            } else {
-              context->set_error(MISSING_OPERAND);
-            }
-          } else {
-             context->set_error(MISSING_COMMA);
-          }
-        } else {
-           context->set_error(MISSING_OPERAND);
-        }
-      } else {
-         context->set_error(MISSING_DATA_TYPE);
-      }
-    } else if (context->token_type == DATA_TYPE_ID) {  // without AtomModifiers
       context->token_to_scan = yylex();
+    } else {
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+    }
+  }
+  std::string oper_name;
+  // with AtomModifiers
+  if (!AtomModifiersPart2(context, &atom_op.storageClass, &atom_op.memorySemantic)) {
+    if (context->token_type == DATA_TYPE_ID) {
+      atom_op.type = context->token_value.data_type;
+      context->token_to_scan = yylex();
+      if (context->valid_string) {
+        oper_name = context->token_value.string_val;
+      }
       if (!Operand(context)) {
+        atom_op.o_operands[0] = context->operand_map[oper_name];
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
+          atom_op.o_operands[1] = context->get_operand_offset();
           if (!MemoryOperand(context)) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              if (!Operand(context)) {
-                if (context->token_to_scan == ',') {
-                  context->token_to_scan = yylex();
-                  if (!Operand(context)) {
-                    if (context->token_to_scan == ';') {
-                      context->token_to_scan = yylex();
-                      return 0;
-                    } else {
-                      context->set_error(MISSING_SEMICOLON);
-                    }
-                  } else {
-                    context->set_error(MISSING_OPERAND);
-                  }
-                } else {
-                  context->set_error(MISSING_COMMA);
-                }
-              } else {
-                 context->set_error(MISSING_OPERAND);
+              if (context->valid_string) {
+                oper_name = context->token_value.string_val;
               }
-            } else {
+              unsigned int cur_op_offset = context->get_operand_offset();
+              if (cur_op_offset & 0x7) {
+                cur_op_offset += 4;
+              }
+              atom_op.o_operands[2] = cur_op_offset;
+              if (!Operand(context)) {
+
+                // atom_op.o_operands[2] = context->operand_map[oper_name];
+                if (first_token == ATOMIC_CAS) {
+                  if (context->token_to_scan == ',') {
+                    context->token_to_scan = yylex();
+                    if (context->valid_string) {
+                      oper_name = context->token_value.string_val;
+                    }
+                    atom_op.o_operands[3] = context->get_operand_offset();
+                    if (!Operand(context)) {                    
+                    // atom_op.o_operands[3] = context->operand_map[oper_name];
+                    } else {  // 4 Operand
+                      context->set_error(INVALID_FOURTH_OPERAND);
+                      return 1;
+                    }
+                  } else {  // ','
+                    context->set_error(MISSING_COMMA);
+                    return 1;
+                  }
+                }
+                if (context->token_to_scan == ';') {
+                  context->append_code(&atom_op);
+                  context->token_to_scan = yylex();
+                  return 0;
+                } else {  // ';'
+                  context->set_error(MISSING_SEMICOLON);
+                }
+              } else {  // 3 Operand
+                context->set_error(INVALID_THIRD_OPERAND);
+              }
+            } else {  // ','
               context->set_error(MISSING_COMMA);
             }
-          } else {
-            context->set_error(MISSING_OPERAND);
-          }
-        } else {
+          } else {  // 2 MemoryOperand
+            context->set_error(INVALID_SECOND_OPERAND);
+          }  
+        } else {  // ','
           context->set_error(MISSING_COMMA);
         }
-      } else {
-        context->set_error(MISSING_OPERAND);
+      } else {  // 1 Operand
+        context->set_error(INVALID_FIRST_OPERAND);
       }
-    } else {
+    } else {  // Data Type
       context->set_error(MISSING_DATA_TYPE);
     }
-  }
+  }  // AtomModifiers 
   return 1;
 }
 
@@ -3983,17 +3914,25 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
       continue;
     }
 
-    if (context->token_to_scan == _REL ||
-        context->token_to_scan == _ACQ ||
-        context->token_to_scan == _DEP) {
+    if (context->token_to_scan == _REL) {
+      pLdSt_op->memorySemantic = BrigRelease;
+      context->token_to_scan = yylex();
+      continue;
+    }
+    if (context->token_to_scan == _ACQ) {
+      pLdSt_op->memorySemantic = BrigAcquire;
+      context->token_to_scan = yylex();
+      continue;
+    }
+    if (context->token_to_scan == _DEP) {
+      pLdSt_op->memorySemantic = BrigDep;
+      context->token_to_scan = yylex();
+      continue;
+    }
 
-      if (pLdSt_op->memorySemantic == _ACQ && 
-          context->token_to_scan == _REL) {
-        pLdSt_op->memorySemantic = BrigAcquireRelease;
-      } else {
-        pLdSt_op->memorySemantic = context->token_to_scan;
-      }
-
+    if (context->token_to_scan == _REGION) {
+      // TODO(Chuang) need to check "_region" out again.
+      pLdSt_op->memorySemantic = BrigRegular;
       context->token_to_scan = yylex();
       continue;
     }
@@ -4840,6 +4779,7 @@ int Operation(Context* context) {
 
 int BodyStatementNested(Context* context) {
   if (context->token_to_scan == TOKEN_COMMENT) {
+    context->token_to_scan = yylex();
     return 0;
   } else if (context->token_to_scan == PRAGMA) {
     if (!Pragma(context)) {
@@ -4865,6 +4805,7 @@ int BodyStatementNested(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
+    context->token_to_scan = yylex();
     return 0;
   } else if (!LabelTargets(context)) {
     return 0;
@@ -4897,6 +4838,58 @@ int ArgStatement(Context* context) {
 int ArgStatements(Context* context) {
   if (!ArgStatement(context)) {
     while (!ArgStatement(context)) {
+      ;
+    }
+    return 0;
+  }
+  return 1;
+}
+
+int BodyStatement(Context* context) {
+  if (context->token_to_scan == TOKEN_COMMENT) {
+    context->token_to_scan = yylex();
+    return 0;
+  } else if (context->token_to_scan == PRAGMA) {
+    if (!Pragma(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == BLOCK) {
+    if (!Block(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == ALIGN ||
+             context->token_to_scan == CONST ||
+             context->token_to_scan == EXTERN ||
+             context->token_to_scan == STATIC) {
+    if (!DeclPrefix(context)) {
+      if (!InitializableDecl(context)) {
+        return 0;
+      } else if (!UninitializableDecl(context)) {
+        return 0;
+      }     
+    }  
+  } else if (context->token_to_scan == '{') {
+    if (!ArgBlock(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == LOC) {
+    if (!Location(context)) {
+      return 0;
+    }
+  } else if (context->token_to_scan == TOKEN_LABEL) {
+    context->token_to_scan = yylex();
+    return 0;
+  } else if (!LabelTargets(context)) {
+    return 0;
+  } else if (!Operation(context)) {
+    return 0;
+  }  
+  return 1;
+}
+
+int BodyStatements(Context* context) {
+  if (!BodyStatement(context)) {
+    while (!BodyStatement(context)) {
       ;
     }
     return 0;
@@ -5536,24 +5529,67 @@ int Bar(Context* context) {
     }
 }
 
+
+
 int AtomModifiers(Context* context) {
+  BrigMemorySemantic32_t memorySemantic;
+  BrigStorageClass32_t storageClass;
+  return AtomModifiersPart2(context, &storageClass, &memorySemantic );
+}
+
+int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass,
+                       BrigMemorySemantic32_t* pMemorySemantic) {
   while (1) {
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+      switch (context->token_to_scan) {
+        case _GLOBAL:
+          *pStorageClass = BrigGlobalSpace;
+          break;
+        case _GROUP:
+          *pStorageClass = BrigGroupSpace;
+          break;
+        case _PRIVATE:
+          *pStorageClass = BrigPrivateSpace;
+          break;
+        case _KERNARG:
+          *pStorageClass = BrigKernargSpace;
+          break;
+        case _READONLY:
+          *pStorageClass = BrigReadonlySpace;
+          break;
+        case _SPILL:
+          *pStorageClass = BrigSpillSpace;
+          break;
+        case _ARG:
+          *pStorageClass = BrigArgSpace;
+          break;
+        default:
+          *pStorageClass = BrigFlatSpace;
+      }
       context->token_to_scan = yylex();
       continue;
     }
 
     if (context->token_to_scan == _AR) {
+      *pMemorySemantic = BrigAcquireRelease;
       context->token_to_scan = yylex();
       continue;
     }
 
-    if (context->token_to_scan == _REL || context->token_to_scan == _ACQ) {
+    if (context->token_to_scan == _REL) {
+      *pMemorySemantic = BrigRelease;
+      context->token_to_scan = yylex();
+      continue;
+    }
+    if (context->token_to_scan == _ACQ) {
+      *pMemorySemantic = BrigAcquire;
       context->token_to_scan = yylex();
       continue;
     }
 
     if (context->token_to_scan == _REGION) {
+      // TODO(Chuang) need to check "_region" out again.
+      *pMemorySemantic = BrigRegular;
       context->token_to_scan = yylex();
       continue;
     }
@@ -5562,6 +5598,7 @@ int AtomModifiers(Context* context) {
   context->set_error(UNKNOWN_ERROR);
   return 1;
 }
+
 int AtomicNoRet(Context* context) {
   // first token is ATOMICNORET or ATOMICNORET_CAS
   const unsigned int first_token = context->token_to_scan;

@@ -71,6 +71,8 @@ int RIW_Operand(Context* context);
 int BodyStatementNested(Context* context);
 int ArgStatement(Context* context);
 int ArgStatements(Context* context);
+int BodyStatement(Context* context);
+int BodyStatements(Context* context);
 int GlobalGroupDecl(Context* context);
 
 /* MUL */
@@ -137,6 +139,8 @@ int GlobalSamplerDeclPart2(Context *context);
 int InitializableDeclPart2(Context* context, BrigStorageClass32_t storage_class);
 int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset);
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
+int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass, 
+                       BrigMemorySemantic32_t* pMemorySemantic);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

@@ -2457,6 +2457,117 @@ TEST(ParserTest, ArgStatements) {
   delete lexer;
 };
 
+// -----------------  Test for BodyStatement rule -------------------
+// bodyStatement := TOKEN_COMMENT
+//                  | pragma
+//                  | block
+//                  | declprefix initializableDecl
+//                  | declprefix uninitializableDecl
+//                  | argblock
+//                  | location
+//                  | label
+//                  | labeltarget
+//                  | operation
+TEST(ParserTest, BodyStatement) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input("//Hello World\n"); //comment
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("/*This is Comment*/\n"); // comment  
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("block \"debug\"\n"); // block
+  input.append("blocknumeric_b8 255, 23, 10, 23;\n");
+  input.append("blocknumeric_b32 1255, 0x323, 10, 23;\n");
+  input.append("blocknumeric_b64 0x123456781, 0x323, 10, 23;\n");
+  input.append("blockstring \"this is a string\";\n");
+  input.append("endblock;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("pragma \"this is string!\";"); // pragma
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("align 8 static "); // declprefix initializableDecl
+  input.append("readonly_f64 %d[3] ={ 1.2L, 1.3L,1.4L };\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("align 8 static "); // declprefix uninitializableDecl
+  input.append("private_f32 %f[3];\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("{frsqrt_ftz_f32 $s1, $s0;}\n"); // argblock
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("loc 1 20 0;"); // location
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("@_test_label_2: \n"); // label
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("@tab: labeltargets @a1, @a2;\n"); // labeltarget
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  input.assign("ret;"); // operation
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatement(context));
+
+  delete lexer;
+};
+
+// -----------------  Test for bodyStatements rule -------------------
+// bodyStatements := { bodyStatement } bodyStatement
+TEST(ParserTest, BodyStatements) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+  std::string input("/*This is Comment*/\n"); // one bodyStatement
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatements(context));
+
+  input.assign("pragma \"this is string!\";"); // two bodyStatements 
+  input.append("@tab: labeltargets @a1, @a2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatements(context));
+
+  input.assign("extern const"); // three bodyStatements 
+  input.append("arg_f32 %f[3];\n");
+  input.append("pragma \"this is string!\";\n");
+  input.append("pragma \"this is string!\";\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BodyStatements(context));
+
+  delete lexer;
+};
+
 TEST(ParserTest, KernelArgumentList) {
   Lexer* lexer = new Lexer();
 
@@ -3508,7 +3619,7 @@ TEST(ParserTest, Atom) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Atom(context));
-  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
   delete lexer;
 }
