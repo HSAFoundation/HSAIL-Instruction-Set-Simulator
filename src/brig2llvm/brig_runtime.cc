@@ -9,6 +9,12 @@ namespace brig {
 
 ForceBrigRuntimeLinkage::ForceBrigRuntimeLinkage() {}
 
+template<class T, class U, bool S> const bool IntPolicy<T, U, S>::isSigned;
+template<class T, class U, bool S> const unsigned IntPolicy<T, U, S>::Bits;
+template<class T, class U, bool S> const T IntPolicy<T, U, S>::HighBit;
+template<class T, class U, bool S> const T IntPolicy<T, U, S>::Max;
+template<class T, class U, bool S> const T IntPolicy<T, U, S>::Min;
+
 template<class T> static T Abs(T t) { return abs(t); }
 template<> f32 Abs<f32>(f32 f) { return fabsf(f); }
 template<> f64 Abs<f64>(f64 d) { return fabs(d);  }

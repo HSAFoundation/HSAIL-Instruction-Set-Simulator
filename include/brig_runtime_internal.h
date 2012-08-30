@@ -86,20 +86,14 @@ defineVec(s64, 2)
 defineVec(f64, 2)
 
 #define declareBitInst(INST,NARY)               \
-  declare ## NARY(INST, b8)                     \
-  declare ## NARY(INST, b16)                    \
   declare ## NARY(INST, b32)                    \
   declare ## NARY(INST, b64)
 
 #define declareSignedInst(INST,NARY)            \
-  declare ## NARY(INST, s8)                     \
-  declare ## NARY(INST, s16)                    \
   declare ## NARY(INST, s32)                    \
   declare ## NARY(INST, s64)
 
 #define declareUnsignedInst(INST,NARY)          \
-  declare ## NARY(INST, u8)                     \
-  declare ## NARY(INST, u16)                    \
   declare ## NARY(INST, u32)                    \
   declare ## NARY(INST, u64)
 
@@ -182,10 +176,10 @@ template<> struct Int<u8>  : public IntPolicy<u8,  u8,  false> {};
 template<> struct Int<u16> : public IntPolicy<u16, u16, false> {};
 template<> struct Int<u32> : public IntPolicy<u32, u32, false> {};
 template<> struct Int<u64> : public IntPolicy<u64, u64, false> {};
-template<> struct Int<s8>  : public IntPolicy<s8,  u8,  false> {};
-template<> struct Int<s16> : public IntPolicy<s16, u16, false> {};
-template<> struct Int<s32> : public IntPolicy<s32, u32, false> {};
-template<> struct Int<s64> : public IntPolicy<s64, u64, false> {};
+template<> struct Int<s8>  : public IntPolicy<s8,  u8,  true>  {};
+template<> struct Int<s16> : public IntPolicy<s16, u16, true>  {};
+template<> struct Int<s32> : public IntPolicy<s32, u32, true>  {};
+template<> struct Int<s64> : public IntPolicy<s64, u64, true>  {};
 
 } // namespace brig
 } // namespace hsa
