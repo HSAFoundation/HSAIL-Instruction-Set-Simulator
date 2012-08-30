@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#11 - edit change 793355 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#12 - edit change 793390 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -80,63 +80,68 @@ class IProgram;
 class IDispatchDescriptor;
 
 /**
+ * @ingroup Dispatch, Debugger
  * The wave action lets the user chose what happens to a wave when an
  * exception occurs, there are three choices
  */
 typedef enum {
-	HALT_WAVE=1, /*!< Halt the wave, usually this is what happens, wave is
-		       not killed, just halted */
-	KILL_WAVE=2, /*!< Kill the wave, wave is killed at the point of
-		       exception, if not all the wavefronts in the wave take a
-		       fault, the place in the code where the non-faulty waves
-		       get killed is not deterministic. It usually happens
-		       before the next barrier */
-	RESUME_WAVE=4 /*!< increment the PC to the next instruction and
-			continue running, this choice is for advanced users */
+    HALT_WAVE=1, /*!< Halt the wave, usually this is what happens, 
+                   wave is not killed, just halted */
+    KILL_WAVE=2, /*!< Kill the wave, wave is killed at the point of
+                   exception, if not all the wavefronts in the wave take a
+                   fault, the place in the code where the non-faulty waves
+                   get killed is not deterministic. It usually happens
+                   before the next barrier */
+    RESUME_WAVE=4 /*!< increment the PC to the next instruction and
+                    continue running, this choice is for advanced users */
 } HSAWaveAction;
 
 
 /**
+ * @ingroup Dispatch
  * This is to chose what should happen to the application program, there are
  * three choices
  */
 typedef enum {
-	IGNORE_HOST=1, /*!< the application doesn't want to know about the
-			 exception */
-        EXIT_HOST=2,   /*!< the application wants runtime to call exit() */
-	INTERRUPT_HOST=4 /*!< the host is expecing it be interrupted, host has
-			   registered a call back for this via events */
+    IGNORE_HOST = 1,   /*!< the application doesn't want to know about the
+                        exception */
+    EXIT_HOST = 2,     /*!< the application wants runtime to call exit() */
+    INTERRUPT_HOST = 4 /*!< the host is expecing it be interrupted, host has
+                        registered a call back for this via events */
 } HSAHostAction;
 
 /**
+ * @ingroup Dispatch, Debugger
  * This is to chose what should happen to the application program in terms of
  * the data it uses. There are three choices
  * */
 typedef enum {
-        FLUSH_ALL=1, /*!< flush all the caches the runtime can flush*/
-	FLUSH_BOTTOM_LEVEL =2,/*!< flush flushable caches closer to the vector
-				arrays*/
-        FLUSH_TOP_LEVEL=4  /*!< flush top-level GPU cache */
+    FLUSH_ALL=1,         /*!< flush all the caches the runtime can flush*/
+    FLUSH_BOTTOM_LEVEL=2,/*!< flush flushable caches closer to the processing
+                            units */
+    FLUSH_TOP_LEVEL=4    /*!< flush top-level cache */
 } HSACachePolicy;
 
 
 /**
+ * @ingroup Dispatch, Debugger
  * the function pointer for registering handlers associated with events in HSA
  */
 typedef void (*HSATrapHandle)(void *,int);
 
 /**
+ * @ingroup Dispatch, Debugger
  * the exception policy is comprised of wave action, host action and the
  * location of trap handle
  */
 typedef struct HSAExceptionPolicy {
     int enableException;       /*!< default is to enable them */
     HSAWaveAction waveAction;  /*!< default wave action is to halt it */
-	HSAHostAction hostAction;  /*!< default host action is to ignore the
-				     event when it occurs it but inform the
-				     host when it does wait on this kernel */
-	HSATrapHandle trapHandle;  /*!< if host action is to interrupt, this
-				     trap handle gets executed */
+    HSAHostAction hostAction;  /*!< default host action is to ignore the
+                                 event when it occurs it but inform the
+                                 host when it does wait on this kernel */
+    HSATrapHandle trapHandle;  /*!< if host action is to interrupt, this
+                                 function gets executed */
 
     HSAExceptionPolicy()
     {
@@ -148,17 +153,18 @@ typedef struct HSAExceptionPolicy {
 }HSAExceptionPolicy;
 
 /**
+ * @ingroup Dispatch
  * completion policy defined the following
  */
 typedef enum {
-	WAIT_DEPENDENCY=1,  /*!< return from launch only after waiting for all
-			      dependencies */
-        WAIT_ENQUEUE=2,  /*!< return from launch only after enqueue is intiated */
-	WAIT_LAUNCH=4,  /*!< return from launch after the kernel launch is
-			  actually copied on to the queue*/
-	WAIT_COMPLETION=8  /*!< return after the kernel is completed execution,
-			     event is still returned if this kernel takes an
-			     exception */
+    WAIT_DEPENDENCY=1, /*!< return from launch only after waiting for all
+                          dependencies */
+    WAIT_ENQUEUE=2,    /*!< return from launch only after enqueue is intiated */
+    WAIT_LAUNCH=4,     /*!< return from launch after the kernel launch is
+                         actually copied on to the queue*/
+    WAIT_COMPLETION=8  /*!< return after the kernel is completed execution,
+                            event is still returned if this kernel takes an
+                            exception */
 }HSACompletionPolicy;
 
 /** 
@@ -166,41 +172,41 @@ typedef enum {
  * policy 
  */
 typedef struct LaunchAttributes {
-	HSACompletionPolicy completionPolicy; /*!< default has none of the
-						guarantees listed in the
-						policy*/
-	HSAExceptionPolicy exceptionPolicy; /*!< default is to generate
-					      exceptions*/
-	
-	/* trap handler used for GPU exeception and HW debugger */
-	void *trapHandler;  
-	/* trap handler buffer, accessed by trap handler */
-	void *trapHandlerBuffer;
-	/* trap handler buffer size */
-	void *trapHandlerBufferSize;
+    HSACompletionPolicy completionPolicy; /*!< default has none of the
+                                            guarantees listed in the
+                                            policy*/
+    HSAExceptionPolicy exceptionPolicy; /*!< default is to generate
+                                          exceptions*/
 
-	HSACachePolicy cachePolicy; /*!< default is to flush everything */
-        int gridX; /*!< default is 1*/
-        int gridY; /*!< default is 1*/
-        int gridZ; /*!< default is 1*/
-        int groupX; /*!< default is 1*/
-        int groupY; /*!< default is 1*/
-        int groupZ; /*!< default is 1*/
-        int groupOffsets[3];
+    void *trapHandler;/*!< trap handler used for GPU exeception and HW debugger */
+    
+    void *trapHandlerBuffer;/*!< trap handler buffer, accessed by trap handler */
+    
+    size_t trapHandlerBufferSizeByte; /*!< trap handler buffer size */
 
-        LaunchAttributes()
-        {
-            cachePolicy = FLUSH_ALL;
-            gridX = 1;
-            gridY = 1;
-            gridZ = 1;
-            groupX = 1;
-            groupY = 1;
-            groupZ = 1;
-            groupOffsets[0]=0;
-            groupOffsets[1]=0;
-            groupOffsets[2]=0;
-        }
+    HSACachePolicy cachePolicy; /*!< default is to flush everything */
+
+    int gridX; /*!< default is 1*/
+    int gridY; /*!< default is 1*/
+    int gridZ; /*!< default is 1*/
+    int groupX; /*!< default is 1*/
+    int groupY; /*!< default is 1*/
+    int groupZ; /*!< default is 1*/
+    int groupOffsets[3];
+
+    LaunchAttributes()
+    {
+        cachePolicy = FLUSH_ALL;
+        gridX = 1;
+        gridY = 1;
+        gridZ = 1;
+        groupX = 1;
+        groupY = 1;
+        groupZ = 1;
+        groupOffsets[0]=0;
+        groupOffsets[1]=0;
+        groupOffsets[2]=0;
+    }
 }LaunchAttributes;
 
 typedef hsa::vector<hsa::IDevice*>::const_iterator Idevice_itr;
@@ -210,6 +216,7 @@ typedef std::string KernelId;
 
 /**
  * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment = 0)
+ * @ingroup Memory
  */
 DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment = 0);
 
@@ -219,17 +226,22 @@ DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment = 0);
 DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const IDevice& dev);
 
 /**
+ * @ingroup Memory
  * @copydoc hsacore::freeMemory
  */
 DLL_PUBLIC void freeMemory(void* ptr);
 
 /**
+ * @ingroup Memory
  * @copydoc hsacore::registerMemory
  */
-DLL_PUBLIC void registerMemory(void* ptr, const size_t size,
-		const uint32_t type);
+DLL_PUBLIC void registerMemory(
+                void* ptr, 
+                const size_t size,
+                const uint32_t type);
 
 /**
+ * @ingroup Memory
  * @copydoc hsacore::deregisterMemory
  */
 DLL_PUBLIC void deregisterMemory(void* ptr);
@@ -246,42 +258,62 @@ DLL_PUBLIC void unmapMemory(void* ptr);
 
 
 /**
- * @brief APIs for creating debug event
- */
-DLL_PUBLIC hsa::DebuggerEvent * 
-createDebuggerEvent(
-	hsa::IDevice *dev, 
-	bool manulRest, 
-	bool state
-	);
-
-DLL_PUBLIC hsa::DebuggerEvent * 
-createDebuggerEvent(
-	hsa::IDevice *dev, 
-    void *userBuffer, 
-    bool manulRest, 
-    bool state
-	);
-
-/**
+ * @ingroup Debugger
  * @brief installs the trap handler
+ * This method takes note of the trap handler to be installed for a particular
+ * device. The method requires that the trapHandler be located in HSA memory
+ * (i.e. memory allocated throught HSA memory allocation API). Once a trap
+ * handler is specified for a device, all the dispatches on all the queues
+ * created from that device use the trap handler. SQ Debug mode is NOT enabled
+ * by merely setting a trap handler. An ENV, indicating AMD tools are present
+ * and active (ENV TBD), must be set for SQ Debug mode to be set for every
+ * dispatch
+ *
+ * @param dev the HSA device
+ * @param trapHandler the location of the finalized trapHandler
+ * @param trapHandlerSizeByte size of the trap handler in bytes
+ *
  */
-DLL_PUBLIC hsa::AMDRETCODE 
+DLL_PUBLIC void 
 setupDbgTrapHandler(
-	hsa::IDevice * dev, 
-	void *         trapHandler,
-	size_t         trapHandlerSizeByte
-	);
+                hsa::IDevice * dev, 
+                void *         trapHandler,
+                size_t         trapHandlerSizeByte
+                );
 
 /**
+ * @ingroup Debugger
  * @brief installs the trap handler buffer
+ * The trap handler buffer must be allocated with-in the context of the
+ * process that launches the kernel. A protection mechanism (based on PASSID
+ * and VIMDs) in the HSA Driver ensures that pages corresponding to a trap
+ * handler buffer are locked-in. 
+ *
+ * @param dev the HSA device
+ * @param trapHandlerBuffer the location of the trap handler buffer
+ * @param trapHandlerBufferSizeByte the size of this buffer in bytes
  */
-DLL_PUBLIC hsa::AMDRETCODE 
+DLL_PUBLIC void 
 setupDbgTrapHandlerBuffer(
-	hsa::IDevice * dev, 
-	void *   trapHandlerBuffer,
-	size_t   trapHandlerBufferSizeByte
-	);
+                hsa::IDevice * dev, 
+                void *   trapHandlerBuffer,
+                size_t   trapHandlerBufferSizeByte
+                );
+
+/**
+ * @ingroup Debugger
+ * @brief flush device caches 
+ * The device cache may be flushed at any time by the debugger. 
+ * The HSA runtime create a private high-priority queue that it uses to send
+ * commands down to the device. Cache fluses done by this API use this private
+ * queue.
+ *
+ * @param dev the HSA device
+ * @param HSACachePolicy indicates the cache policy, which is users choice
+ *
+ */
+DLL_PUBLIC void
+flushDeviceCaches(hsa::IDevice *dev, HSACachePolicy cachePolicy);
 
 /**
  * @brief Device class, public interface in the device layer.
@@ -310,26 +342,26 @@ public:
     // Get the device information in bulk.
     //virtual const Info& info()=0;
 
-	//Temp hack to get the asicinfo
-	virtual void* getASICInfo()=0;
+    //Temp hack to get the asicinfo
+    virtual void* getASICInfo()=0;
 
-	//setup trap handler
-	virtual hsa::AMDRETCODE setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
+    //setup trap handler
+    virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
 
-	//setup trap handler buffer
-	virtual hsa::AMDRETCODE setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+    //setup trap handler buffer
+    virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
 
-	//get trap handler and its size
-	virtual hsa::AMDRETCODE getTrapHandler(void* &trapHandler, size_t &trapHandlerSizeByte) = 0;
+    //get trap handler and its size
+    virtual void getTrapHandler(void* &trapHandler, size_t &trapHandlerSizeByte) = 0;
 
-	//get the trap handler buffer and its size
-	virtual hsa::AMDRETCODE getTrapHandlerBuffer(void* &trapHandlerBuffer, size_t &trapHandlerBufferSizeByte) = 0;
+    //get the trap handler buffer and its size
+    virtual void getTrapHandlerBuffer(void* &trapHandlerBuffer, size_t &trapHandlerBufferSizeByte) = 0;
 
-	//add queue to the list
-	virtual hsa::AMDRETCODE addQueueToList(hsa::IQueue *queue) = 0;
+    //add queue to list
+    virtual void addQueueToList(IQueue *queue) = 0;
 
-	//get dispatch descriptor from dispatch ID
-    virtual IDispatchDescriptor * getDispatchDescriptor(uint32_t dispatchID) = 0;
+    //find dispatch descriptor from dispatch ID
+    virtual IDispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
 
     virtual ~IDevice(){};
 };
@@ -338,7 +370,6 @@ class DLL_PUBLIC Event
 {
 
 public:
-
     /**
      * @brief Default destructor of Event interface.
      */
@@ -397,31 +428,8 @@ public:
      */
     virtual uint32_t waitOnEvents(bool waitOnAll, uint32_t timeOut,
                                   uint32_t eventCnt, hsa::Event **eventList) = 0;
-
 };
 
-class DLL_PUBLIC DebuggerEvent
-{
-public:
-    /**
-     * @brief Default destructor of Event interface.
-     */
-    virtual ~DebuggerEvent(){};
-
-    /**
-     * @brief Ensures that the event is generated atleast once after this
-     * call was invoked
-     *
-     * @param time in milliseconds, 0 for time means blocking wait
-     *
-     * @return HsaEventWaitReturn return value indicating success or timeout.
-     */
-    virtual HsaEventWaitReturn wait() = 0;
-    virtual HsaEventWaitReturn wait(uint32_t timeOut) = 0;
-	virtual hsa::AMDRETCODE set() = 0;
-	virtual hsa::AMDRETCODE reset() = 0;
-	virtual hsa::AMDRETCODE queryState() = 0;
-};
 
 class DLL_PUBLIC IQueue
 {
@@ -433,17 +441,23 @@ public:
      */
     virtual ~IQueue(){};
 
-    virtual hsa::AMDRETCODE dispatch(void *kinfo, void *prgmptr, unsigned int prgmsize, hsa::Event *eventptr)=0;
-    virtual hsa::Event * dispatch(IKernel *k, RTKernelArg arg1, hsa::Event *ievp)=0;
-    virtual hsa::Event * dispatch(IKernel * kernel, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+    virtual hsa::Event *dispatch(IKernel * kernel, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+
     virtual hsa::Event *dispatch(IDispatchDescriptor * dispDescriptor, LaunchAttributes *launchAttr, hsa::Event * depEvent)=0;
+    
     virtual hsa::Event *dispatch(IKernel * kernel, LaunchAttributes *launchAttr, hsa::Event * depEvent, uint32_t numArgs, ...)=0;
+    
     virtual hsa::Event *dispatch(IKernel* kernel, LaunchAttributes *launchAttr, hsa::Event* depEvent, hsacore::vector<RTKernelArg>& args)=0;
-    virtual hsa::AMDRETCODE getScratchUserPtr(void **ptr)=0;
-    virtual hsa::AMDRETCODE getScratchSize(unsigned int *scrsize)=0;
+    
     virtual hsa::AMDRETCODE flush()=0;
+
+    virtual void setupTrapHandler(void *pTrapHandler, size_t trapHandlerSizeByte) = 0;
+
+    virtual void setupTrapHandlerBuffer(void *pTrapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+    
     virtual IDispatchDescriptor * createDispatchDescriptor(IKernel * kernel, LaunchAttributes *launchAttr, uint32_t numArgs, ...)=0;
-    virtual IDispatchDescriptor * getDispatchDescriptor(uint32_t dispatchID) = 0;
+    
+    virtual IDispatchDescriptor * findDispatchDescriptor(uint32_t dispatchID) = 0;
 
 };
 
@@ -483,7 +497,7 @@ public:
     * @param index - index of the argument
     * @return - The type of the argument as a HSAIL_ADDRESS_QUALIFIER enum
     * */
-	//virtual HSAIL_ADDRESS_QUALIFIER getArgAddrQualifier(int index)=0;
+    //virtual HSAIL_ADDRESS_QUALIFIER getArgAddrQualifier(int index)=0;
 };
 
 class IRuntimeApi;
@@ -503,18 +517,23 @@ typedef hsa::IRuntimeApi* (*fptr_getRuntime)();
 class DLL_PUBLIC IRuntimeApi  
 {
 public:
-	// All the exported global functions must have corresponding pure virtual public method declared in this interface class.
+    // All the exported global functions must have corresponding pure virtual public method declared in this interface class.
     virtual hsa::AMDRETCODE getDeviceCount( uint32_t* count )=0;
+
     virtual const hsa::vector<hsa::IDevice*>& getDevices()=0;
 
     virtual hsa::AMDRETCODE createDeviceQueue(hsa::IDevice *d, unsigned int size, hsa::IQueue* &q)=0;
+
     virtual hsa::AMDRETCODE createProgram(char *charElf, size_t elfSize, Idevice_list_ptr pDevices, IProgram* &p){
 	return 1;
     };
+
     virtual hsa::AMDRETCODE createProgramFromELF(void *charElf, Idevice_list_ptr pDevices, IProgram* &p){
         return 1;
     }
+
     virtual hsa::AMDRETCODE createDeviceEvent(hsa::IDevice *d, hsa::Event* &e)=0;
+
     virtual IKernel *createKernel(IProgram * k, hsa::KernelId & kid)=0;
 
     /**
@@ -559,41 +578,251 @@ public:
     * @param size length of kernel name 
     * @return returns a built kernel for execution
     */
+
     virtual hsa::IKernel * build(const char* kernelName,size_t size) = 0;
     /*! Add a device to the list of devices a kernel is built against.
     * @param device The device to add.
     */
+
     virtual void addDevice(hsa::IDevice * device)  = 0;
     /*! Get metadata associated with a kernel 
     * @param d The device the kernel will run on 
     * @param kid the KernelID identiying the kernel
     */
+
     virtual hsacore::HsailKernel* getMetaData(IDevice *d, KernelId &kid) = 0;
     /*! standard destructor */
     virtual ~IProgram(){};
 };
 
+/**
+* @ingroup Debugger, Dispatch
+*/
 class DLL_PUBLIC IDispatchDescriptor
 {
 public:
     /*! Allocates the memory for dispatch  */
     virtual void initDispatch () = 0;
+    
     /*! Gives the user the command packet built by the command writer */
     virtual uint32_t GetCommandPkt(uint32_t * buf) = 0;
+    
     /*! Hand off the command to the core queue for execution */
     virtual void execCommandPkt() = 0;
+    
     /*! Wait for notification that the kernel has executed */
     virtual void waitForEndOfKernel() = 0;
-	/*! Get the dispatch ID */
-	virtual uint32_t getDispatchID() = 0;
+	
+    /*! Get the dispatch ID */
+    virtual uint32_t getDispatchID() = 0;
+    
     /*! Deallocates memory as necessary */
     virtual ~IDispatchDescriptor(){};
-    /*! Deallocates memory as necessary */
-	virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
-    /*! Deallocates memory as necessary */
-	virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+    
+    /*! setup trap handler*/
+    virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte) = 0;
+    
+    /*! associate buffer with trap handler */
+    virtual void setupTrapHandlerBuffer(void *trapHandlerBuffer, size_t trapHandlerBufferSizeByte) = 0;
+
+    /**
+     * @brief function to get the location of the current ISA as used in the
+     * dispatch
+     * This function flushes the device caches before returning and hence is
+     * not a simple getter. The debugger has the ability to query the
+     * descriptor of a dispatch from any debug event to lead it to the actual
+     * dispatch in the runtime that caused the debug event. Once debugger has
+     * this dispatch descriptor, it may query the pointer and size of the ISA,
+     * modify the ISA if need be and return the control to the user. The SIZE
+     * of the ISA or the relative location of non-nop and nop instructions
+     * MUST NOT BE CHANGED! The debugger is only allowed to replace NOPs with
+     * S_TRAP. SIMM16 must have 11111111 in relevent bits (0:7). 
+     * @param ptr the location of the ISA
+     * @param size the size of the ISA
+     */
+    virtual void getISA(void * &ptr, uint32_t &size) = 0;
+    
+    /**
+     * @brief the debugger needs to know the scratch address that was given to
+     * this kernel for this dispatch. 
+     * When in debug model _ONLY_ SYSTEM_MEMORY may be used for any dispatch
+     * resources. This API points debugger to the starting location of the
+     * scratch used for this dispatch.  
+     * @param addr_hi the high 32 bits of the address 
+     * @param addr_lo the low 32 bits of the address
+     */
+    virtual void getScratchAddress(uint32_t &addr_hi, uint32_t &addr_lo) = 0;
+    
+    /**
+     * @brief, allows the query of the scratch offset within the scratch space
+     * allocated for each kernel by each thread
+     * @param waveid ID of the wave
+     * @param groupID the groupID (global)
+     * @param threadID the thread ID within a group
+     */
+    virtual uint32_t getScratchWaveOffset(uint32_t waveID, uint32_t groupID, uint32_t threadID) = 0;
+    
+    /**
+     * @brief returns the pointer to ELF so debugger or other tools that
+     * received asynchronous notification about this dispatch can do
+     * deep-dives
+     */
+    virtual void * getELF() = 0;
+    
+    /**
+     * @brief API to give the user an ability to control the wave
+     *
+     * The entire dispatch (entire "grid") can be controlled via WaveAction
+     * choices
+     * @param waveID the ID of a wave
+     * @param waveAct the response
+     */
+    virtual void waveControl(uint32_t waveID,HSAWaveAction waveAct) = 0;
 
 };
+
+/**
+ * @ingroup Debugger
+ * the debugger event class, that internally extends from the common runtime
+ * event
+ */
+class DLL_PUBLIC DebuggerEvent
+{
+public:
+    /**
+     * @brief Default destructor of Event interface.
+     */
+    virtual ~DebuggerEvent(){};
+
+    /**
+     * @brief wait for an event to be generated by debug activity
+     *
+     * @param time in milliseconds, 0 for time means blocking wait
+     *
+     * @return HsaEventWaitReturn return value indicating success or timeout.
+     */
+    virtual HsaEventWaitReturn wait() = 0;
+    
+    virtual HsaEventWaitReturn wait(uint32_t timeOut) = 0;
+	
+    /**
+     * @brief explicitly set the event, forcefully. Useful in graceful exits
+     *
+     * This function sets the event without consideration to if an event is
+     * pending, if there is a waiter, or if debugger is running
+     *
+     * @throws a derivative of std::exception if event is not valid
+     */
+    virtual void set() = 0;
+	
+    /**
+     * @brief explicitly set the event, forcefully. Useful in graceful
+     * recovery
+     *
+     * This function resets the event without consideration to if an event is
+     * pending, if there is a waiter, or if debugger is running
+     *
+     * @throws a derivative of std::exception if event is not valid
+     */
+    virtual void reset() = 0;
+    
+    /**
+     * @brief query the current state of the event
+     *
+     * @throws exception if event is not valid
+     */
+    virtual void queryState() = 0;
+     
+    /**
+     * @brief get the actual ID of the wave that caused this event in the
+     * first place
+     *
+     * @there may be scenarious where this cannot be obtained. One example is
+     * when the wave gets killed
+     */ 
+    virtual uint32_t getActiveWaveID() = 0;
+
+    /**
+     * @brief get the dispatch descriptor (a runtime structure) of the
+     * dispatch that caused the creation of the wave that caused this event to
+     * occur
+     *
+     * this allows for a lot of info to be gathered about the dispatch. All
+     * the operations that can be performed via a dispatch descriptor may be
+     * performed. Resources used by runtime for a dispatch are not freed until
+     * a dispatch descriptor for that dispatch stays active. Hence info about
+     * argument buffers, global variables, etc., may also be obtained
+     *
+     */ 
+    virtual IDispatchDescriptor * getDispatchDescriptor() = 0;
+    
+    /*
+     * @brief API to get the PC at which debug activity occured
+     *
+     * THIS API will be modified to return array of PCs and a corresponding
+     * array of group IDs of the wavefronts to which these PCs belong to
+     */
+    virtual void getPC(uint32_t waveID, uint32_t &pc_hi, uint32_t &pc_lo) = 0;
+
+};
+
+/**
+ * @ingroup Debugger
+ * @brief APIs for creating debug event
+ *
+ * @param dev pointer to the HSA runtime device
+ *
+ * @param manualReset if this parameter is true the function creates a
+ * manual-reset event object; if this parameter is false the function creates
+ * an auto-reset event object.  
+ *
+ * @param isSignaled if this parameter is true, the initial state of the event
+ * is signaled, otherwise is nonsignaled.
+ */
+DLL_PUBLIC hsa::DebuggerEvent * 
+createDebuggerEvent(
+                hsa::IDevice *dev, 
+                bool manualReset, 
+                bool state
+                );
+
+/**
+ * @ingroup Debugger
+ * @brief APIs for creating debug event
+ *
+ * This function is a work around to create a debugger event when the KFD
+ * event mechanism does not work. In this approach, the user provides a buffer
+ * that can be accessed by the trap hander, which will write a specific value
+ * to a specific location in the buffer in the trap handler. Then the event
+ * wait function can poll the specific location to check whether trap handler
+ * is executed to the location where the write buffer instruction is executed
+ * (With the KFD mechanism, the s_sendmsg instruction is executed instead of
+ * writing a value to the buffer.).
+ *
+ * @param dev pointer to the HSA runtime device
+ *
+ * @param userBuffer  pointer to the trap handler buffer to mock the event
+ * mechanism. This buffer should be the trap handler buffer that can be
+ * accessed by the trap handler.
+ * 
+ * @param manualReset if this parameter is true the function creates a
+ * manual-reset event object; if this parameter is false the function creates
+ * an auto-reset event object.  
+ *
+ * @param isSignaled if this parameter is true, the initial state of the event
+ * is signaled, otherwise is nonsignaled.
+ * 
+ *
+ */
+DLL_PUBLIC hsa::DebuggerEvent * 
+createDebuggerEvent(
+                hsa::IDevice *dev, 
+                void *userBuffer, 
+                uint32_t writeBackLoc,
+                uint32_t writeBackValue,
+                bool manualReset, 
+                bool state
+                );
 
 /**
  * @}
