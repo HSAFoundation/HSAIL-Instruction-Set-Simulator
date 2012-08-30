@@ -2962,38 +2962,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
   }
 }
 
-template <class X> X absX(X a) {
-  X c = a < 0;
-  c *= c;
-  return a - a * c  - a * c;
-}
-
-template int absX<>(int);
-template float absX<>(float);
-template double absX<>(double);
-
-#include <cfloat>
-
-TEST(Brig2LLVMTest, Abs) {
-
-  for(int i = -255; i < 255; ++i) {
-    EXPECT_EQ(abs(i), absX(i));
-  }
-  EXPECT_EQ(abs(INT32_MAX), absX(INT32_MAX));
-  EXPECT_EQ(abs(INT32_MIN), absX(INT32_MIN));
-
-
-  for(float f = -255; f < 255; ++f) {
-    EXPECT_EQ(abs(f), absX(f));
-  }
-  EXPECT_EQ(fabs(FLT_MAX), absX(FLT_MAX));
-  EXPECT_EQ(fabs(FLT_MIN), absX(FLT_MIN));
-  EXPECT_EQ(fabs(FLT_EPSILON), absX(FLT_EPSILON));
-  EXPECT_EQ(fabs(-FLT_MAX), absX(-FLT_MAX));
-  EXPECT_EQ(fabs(-FLT_MIN), absX(-FLT_MIN));
-  EXPECT_EQ(fabs(-FLT_EPSILON), absX(-FLT_EPSILON));
-}
-
 TEST(Brig2LLVMTest, validateBrigInstBase) {
   {
     hsa::brig::StringBuffer strings;
