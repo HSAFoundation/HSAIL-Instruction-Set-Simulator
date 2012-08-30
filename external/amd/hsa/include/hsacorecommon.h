@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#7 - edit change 783545 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#8 - edit change 786230 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -31,6 +31,7 @@
     
     #ifdef ATI_OS_LINUX
         #include <unistd.h>
+        #include <stdexcept>
     #endif
 
 #endif
@@ -42,12 +43,214 @@
  */
 namespace hsacore
 {
-
+    
+// TODO: Replace out_of_range with an HSART exception
 template<typename T>
-class vector : public std::vector<T>
+class vector
 {
+public:
+    typedef T* iterator;
+    typedef T* const_iterator;
 
-};
+    vector() : items_(0), data_(0), capacity_(0), size_(0) { }
+
+    ~vector()
+    {
+        try
+        {
+            clear();
+            delete[] data_;
+        }
+        catch(...){
+            delete[] data_;
+        }
+    }
+
+    vector(const vector& rhs) :
+        items_(0), data_(0), capacity_(0), size_(0)
+    {
+        if(rhs.size_ != 0){
+            assign(rhs.begin(), rhs.end());
+        }
+    }
+
+    const vector& operator=(const vector& rhs)
+    {
+        if(this == &rhs){
+            return *this;
+        }
+        if(rhs.size_ != 0){
+            assign(rhs.begin(), rhs.end());
+        }
+        else {
+            clear();
+        }
+        return *this;
+    }
+
+    //Replaces memcpy in &operator()
+    template <class I> void assign(I start, I end)
+    {
+        clear();
+        while(start != end){
+            push_back(*start);
+            start++;
+        }
+    }
+
+
+    //return size of vector
+    size_t size() const
+    {
+        return size_;
+    }
+
+    //return capacity (max possible size) of vector
+    size_t capacity() const
+    {
+        return capacity_;
+    }
+
+    //return true only if vector is empty
+    bool empty() const
+    {
+        return (size_ == 0); 
+    }
+
+    //Empty the vector, set size = 0, reset capacity to default
+    void clear()
+    {
+        while(size_ > 0){
+            pop_back();
+        } 
+    }
+
+    //Removes last element of non-empty vector.  Empty vector -> no action
+    void pop_back()
+    {
+        if(size_ > 0) {
+            items_[size_ -1].~T();
+            size_--;
+        }
+    }
+
+    // Item is inserted at end of vector - if vector is full, capacity is doubled
+    // before item is added
+    void push_back(const T& item)
+    {        
+        ptrdiff_t itemSize = reinterpret_cast<char*>(&items_[1]) - reinterpret_cast<char*>(&items_[0]);
+
+        if(capacity_ == 0){
+            capacity_ = 1;
+
+            data_ = new char[capacity_ * itemSize];
+            items_ = reinterpret_cast<T*>(data_);
+        }
+        if(size_ == capacity_) {
+            size_t prevCapacity = capacity_;
+            capacity_ *= 2;
+            T* prevItems( items_ ); //prevItems and items_ point to same location
+            char *prevData( data_ );
+            data_ = new char[capacity_ * itemSize];
+            items_ = reinterpret_cast<T*>(data_);
+            for(size_t cpyCount=0; cpyCount < size_; cpyCount++){
+                new (&items_[cpyCount]) T(prevItems[cpyCount]);
+            }
+            // TODO: memory leak in case of exceptions. Make RAII.
+            delete[] prevData;
+        }
+        new(&items_[size_]) T(item);  
+        size_++;
+    }
+
+    // return ref to last item in vector
+    T& back()
+    {
+        if(size_ <= 0) {
+            throw std::out_of_range("vector::back() called on empty hsa::vector.");
+        }
+        return (items_[size_-1]);
+    }
+
+    const T& back() const
+    {
+        if(size_ <= 0) {
+            throw std::out_of_range("vector::back() called on empty hsa::vector.");
+        }
+        return (items_[size_-1]);
+    }
+
+    //return value of nth item (first position is 0)
+    const T& operator[] (size_t n) const
+    {
+        return items_[n];
+    }
+
+    T& operator[] (size_t n)
+    {
+        return items_[n];
+    }
+
+    const T& at(size_t n) const
+    {
+        if(n > size_){
+            throw std::out_of_range("vector::at() called on element outside hsa::vector.");
+        }
+        return items_[n];
+    }
+
+    T& at(size_t n) 
+    {
+        if(n > size_){
+            throw std::out_of_range("vector::at() called on element outside hsa::vector.");
+        }
+        return items_[n];
+    }
+
+    //return ref to vector start
+    iterator begin()
+    {
+        return items_;
+    }
+
+    //return ref to vector end
+    iterator end()
+    {
+        return items_ + size_;
+    }
+
+    //return ref to vector start
+
+    const_iterator begin() const
+    {
+        return cbegin();
+    }
+
+    //return ref to vector end
+    const_iterator end() const
+    {
+        return cend();
+    }
+
+    //return ref to vector start
+    const_iterator cbegin() const
+    {
+        return items_;
+    }
+
+    //return ref to vector end
+    const_iterator cend() const
+    {
+        return items_ + size_;
+    }
+
+private:
+    T*    items_; //items contained in vector
+    char* data_;
+    size_t    capacity_;
+    size_t    size_; //total size
+    
+};//end Vector
 
 /**
  * @brief Specifies the different timeout periods supported
