@@ -1,22 +1,22 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#3 - edit change 775106 (text)
+//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#4 - edit change 775354 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
 #if defined _WIN32 || defined __CYGWIN__
-	#ifdef __GNUC__
-		#define DLL_PUBLIC __attribute__ ((dllexport))
-	#else
-		#define DLL_PUBLIC __declspec(dllexport) // Note: actually gcc seems to also supports this syntax.
-	#endif
-	#define DLL_LOCAL
+    #ifdef __GNUC__
+        #define DLL_PUBLIC __attribute__ ((dllexport))
+    #else
+        #define DLL_PUBLIC __declspec(dllexport) // Note: actually gcc seems to also supports this syntax.
+    #endif
+    #define DLL_LOCAL
 #else
-	#if __GNUC__ >= 4
-		#define DLL_PUBLIC __attribute__ ((visibility ("default")))
-		#define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-	#else
-		#define DLL_PUBLIC
-		#define DLL_LOCAL
-	#endif
+    #if __GNUC__ >= 4
+        #define DLL_PUBLIC __attribute__ ((visibility ("default")))
+        #define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+    #else
+        #define DLL_PUBLIC
+        #define DLL_LOCAL
+    #endif
 #endif
 
 
@@ -157,16 +157,17 @@ class DLL_PUBLIC HsailKernel
  * @{
  */
 typedef enum {
+
         INVALID_ARG=1,
         OUTOFBOUNDS_ARG=2,
         QUEUE_ERROR=4,
-	QUEUE_INVALID=8,
+        QUEUE_INVALID=8,
         EVENT_ERROR=16,
-	EVENT_INVALID=32,
+        EVENT_INVALID=32,
         ALLOCATION_FAILURE=64,
-	PROGRAM_ERROR=128,
-	CORE_ERROR=256,
-	MEMORY_ERROR=512,
+        PROGRAM_ERROR=128,
+        CORE_ERROR=256,
+        MEMORY_ERROR=512,
         HSAILPROGRAM_ERROR=1024
 	
 } HSACoreExceptionType;
@@ -184,7 +185,7 @@ public:
      * @param fname name of the function
      * @param info detail, probably better to keep it under 40 chars 
      */
-    void appendInfo(const char *fname,const char *erinfo)
+    virtual void appendInfo(const char *fname,const char *erinfo)
     {
         info_.append("<-");
         info_.append(fname);
@@ -218,11 +219,13 @@ public:
         const char * c = info_.c_str(); 
         return c;
     }
+protected:
+    std::string info_; ///< place to "append" and carry along an exception
+    int excepttype_;
 
 private:
     exception& operator = (const exception&);
-    std::string info_; ///< place to "append" and carry along an exception
-    int excepttype_;
+
 };
 
 #define ERR_THROW_EX(errVal, errMsg, expVal)                        \
@@ -243,24 +246,24 @@ private:
 class DLL_PUBLIC MemoryDescriptor
 {
 public:
-	enum MemoryType { HOT_PLUGGABLE, NON_VOLATILE };
-	enum HeapType { SYSTEM, PUBLIC, PRIVATE };
-	virtual MemoryType	 getMemoryType()=0 ;
-	virtual HeapType	 getHeapType()=0;
-	virtual uint32_t getSizeLow()=0;
-	virtual uint32_t getSizeHigh()=0;
-	virtual uint64_t	 getSize()=0;
-	virtual uint32_t getWidth()=0;
-	virtual uint32_t getMaxMemoryClock()=0;
+    enum MemoryType { HOT_PLUGGABLE, NON_VOLATILE };
+    enum HeapType { SYSTEM, PUBLIC, PRIVATE };
+    virtual MemoryType getMemoryType()=0 ;
+    virtual HeapType getHeapType()=0;
+    virtual uint32_t getSizeLow()=0;
+    virtual uint32_t getSizeHigh()=0;
+    virtual uint64_t getSize()=0;
+    virtual uint32_t getWidth()=0;
+    virtual uint32_t getMaxMemoryClock()=0;
     virtual ~MemoryDescriptor() {};
 };
 
 class DLL_PUBLIC CacheDescriptor
 {
 public:
-	enum CacheType { DATA=1, INSTRUCTION, CPU, SIMD };
-	virtual uint32_t    getProcessorId()=0;
-	virtual uint32_t    getCacheLevel()=0;
+    enum CacheType { DATA=1, INSTRUCTION, CPU, SIMD };
+    virtual uint32_t    getProcessorId()=0;
+    virtual uint32_t    getCacheLevel()=0;
     virtual uint32_t    getCacheSize()=0;
     virtual uint32_t    getCacheLineSize()=0;
     virtual uint32_t    getCacheLinesPerTag()=0;
@@ -274,14 +277,14 @@ public:
 class DLL_PUBLIC IOLinkDescriptor
 {
 public:
-	enum IOLinkType { UNDEFINED=0, HYPERTRANSPORT, PCIEXPRESS, AMBA, OTHER };
-	virtual IOLinkType getIoLinkType()=0;
+    enum IOLinkType { UNDEFINED=0, HYPERTRANSPORT, PCIEXPRESS, AMBA, OTHER };
+    virtual IOLinkType getIoLinkType()=0;
     virtual uint32_t getMajorVersion()=0;
     virtual uint32_t getMinorVersion()=0;
-	virtual uint32_t getFromNode()=0;
+    virtual uint32_t getFromNode()=0;
     virtual uint32_t getToNode()=0;
-	virtual uint32_t getWeight()=0;
-	virtual uint32_t getMinimumLatency()=0;
+    virtual uint32_t getWeight()=0;
+    virtual uint32_t getMinimumLatency()=0;
     virtual uint32_t getMaximumLatency()=0;
     virtual uint32_t getMinimumBandwidth()=0;
     virtual uint32_t getMaximumBandwidth()=0;
@@ -315,9 +318,9 @@ enum SystemMemoryOptions
 
 enum DeviceType 
 { 
-	CPU=AMD_DEVICE_TYPE_CPU, 
-	GPU=AMD_DEVICE_TYPE_GPU, 
-	INVALID=AMD_DEVICE_TYPE_UNKNOWN 
+    CPU=AMD_DEVICE_TYPE_CPU, 
+    GPU=AMD_DEVICE_TYPE_GPU, 
+    INVALID=AMD_DEVICE_TYPE_UNKNOWN 
 };
 
 
