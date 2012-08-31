@@ -75,6 +75,7 @@ void Context::set_default_values(void) {
   arg_output = false ;
   token_value.format = BrigImageFormatUnknown;
   token_value.order = BrigImageOrderUnknown;
+  token_value.storage_class = BrigFlatSpace;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {

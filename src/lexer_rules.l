@@ -622,35 +622,42 @@ all               { free_string(context);
 _readonly         { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
                     context->yycolno+=yyleng;
+                    context->token_value.storage_class = BrigReadonlySpace ;
                     return _READONLY; }
 
 _kernarg          { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
                     context->yycolno+=yyleng;
+                    context->token_value.storage_class = BrigKernargSpace ;
                     return _KERNARG;   }
 
 _global           { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
                     context->yycolno+=yyleng;
+                    context->token_value.storage_class = BrigGlobalSpace ;
                     return _GLOBAL; }
 
 _private          { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
                     context->yycolno+=yyleng;
+                    context->token_value.storage_class = BrigPrivateSpace ;
                     return _PRIVATE; }
 
 _arg              { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
                     context->yycolno+=yyleng;
+                    context->token_value.storage_class = BrigArgSpace ;
                     return _ARG; }
 
 _group            { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
                     context->yycolno+=yyleng;
+                    context->token_value.storage_class = BrigGroupSpace ;
                     return _GROUP; }
 
 _spill            { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
+                    context->token_value.storage_class = BrigSpillSpace ;
                     context->yycolno+=yyleng;
                     return _SPILL; }
 

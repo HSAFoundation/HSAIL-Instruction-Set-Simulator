@@ -3885,31 +3885,7 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
     }
 
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-      switch (context->token_to_scan) {
-        case _GLOBAL:
-          pLdSt_op->storageClass = BrigGlobalSpace;
-          break;
-        case _GROUP:
-          pLdSt_op->storageClass = BrigGroupSpace;
-          break;
-        case _PRIVATE:
-          pLdSt_op->storageClass = BrigPrivateSpace;
-          break;
-        case _KERNARG:
-          pLdSt_op->storageClass = BrigKernargSpace;
-          break;
-        case _READONLY:
-          pLdSt_op->storageClass = BrigReadonlySpace;
-          break;
-        case _SPILL:
-          pLdSt_op->storageClass = BrigSpillSpace;
-          break;
-        case _ARG:
-          pLdSt_op->storageClass = BrigArgSpace;
-          break;
-        default:
-          pLdSt_op->storageClass = BrigFlatSpace;
-      }
+      pLdSt_op->storageClass = context->token_value.storage_class;
       context->token_to_scan = yylex();
       continue;
     }
@@ -4147,31 +4123,7 @@ int Lda(Context* context) {
   };
 
   if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-    switch (context->token_to_scan) {
-      case _GLOBAL:
-        lda_op.storageClass = BrigGlobalSpace;
-        break;
-      case _GROUP:
-        lda_op.storageClass = BrigGroupSpace;
-        break;
-      case _PRIVATE:
-        lda_op.storageClass = BrigPrivateSpace;
-        break;
-      case _KERNARG:
-        lda_op.storageClass = BrigKernargSpace;
-        break;
-      case _READONLY:
-        lda_op.storageClass = BrigReadonlySpace;
-        break;
-      case _SPILL:
-        lda_op.storageClass = BrigSpillSpace;
-        break;
-      case _ARG:
-        lda_op.storageClass = BrigArgSpace;
-        break;
-      default:
-        lda_op.storageClass = BrigFlatSpace;
-    }
+    lda_op.storageClass = context->token_value.storage_class;
     context->token_to_scan = yylex();
   }
   if (context->token_type == DATA_TYPE_ID) {
