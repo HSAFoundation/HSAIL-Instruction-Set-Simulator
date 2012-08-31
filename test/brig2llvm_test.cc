@@ -372,21 +372,11 @@ TEST(Brig2LLVMTest, Example3) {
     "%gpu_reg_p = alloca %struct.regs")));
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "ret void")));
-<<<<<<< variant A
 
     llvm::Module *mod = codegen.getModule();
     hsa::brig::u8x4 x;
     void *args[] = { &x };
     hsa::brig::launchBrig(mod, mod->getFunction("packed_ops"), args);
->>>>>>> variant B
-
-    llvm::Module *mod = codegen.getModule();
-    typedef unsigned char u8x4 __attribute__((vector_size(4)));
-    u8x4 x;
-    void *args[] = { &x };
-    hsa::brig::launchBrig(mod, mod->getFunction("packed_ops"), args);
-####### Ancestor
-======= end
   }
 }
 
