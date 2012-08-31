@@ -3045,3 +3045,91 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
   }
 }
 
+TEST(Brig2LLVMTest, validateBrigInstAtomic) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstAtomic bca = {
+      sizeof(bca),
+      BrigEInstAtomic,
+      BrigAtomic,
+      Brigb32,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0},
+      BrigAtomicSub,
+      BrigGlobalSpace,
+      BrigAcquire
+    };
+    code.append(&bca);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstAtomic bca = {
+      sizeof(bca),
+      BrigEInstAtomic,
+      BrigLd,
+      Brigf64x2 + 1,
+      BrigPackPsat,
+      {20, 0, 0, 0, 0},
+      BrigAtomicSub + 1,
+      BrigFlatSpace,
+      BrigDep
+    };
+    code.append(&bca);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid opcode, should be either BrigAtomic or BrigAtomicNoRet")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "o_operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid atomicOperation")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid storage class, can be global, group, private, kernarg, readonly, spill, or arg")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, BrigParAcquireRelease")));
+  }
+}
+

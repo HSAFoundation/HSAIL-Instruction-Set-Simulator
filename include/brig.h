@@ -41,6 +41,22 @@ enum BrigSymbolModifier {
   BrigArray = 2,  // set means vector (size in dim); not set means scalar
   BrigFlex = 4    // set means flexible array
 };
+
+// 20.5.2
+enum BrigAtomicOperation {
+  BrigAtomicAnd,
+  BrigAtomicOr,
+  BrigAtomicXor,
+  BrigAtomicCas,
+  BrigAtomicExch,
+  BrigAtomicAdd,
+  BrigAtomicInc,
+  BrigAtomicDec,
+  BrigAtomicMin,
+  BrigAtomicMax,
+  BrigAtomicSub
+};
+
 // 20.5.3
 enum BrigAttribute {
     BrigExtern,
@@ -170,6 +186,19 @@ enum BrigInstKinds {
   BrigEInstAtomicImage,
   BrigEInstImage
 };
+
+// 20.5.14
+enum BrigMemorySemantic {
+  BrigRegular,
+  BrigAcquire,
+  BrigRelease,
+  BrigAcquireRelease,
+  BrigDep,
+  BrigParAcquire,
+  BrigParRelease,
+  BrigParAcquireRelease
+};
+
 // 20.5.20
 enum BrigStorageClass {
     BrigGlobalSpace,
