@@ -3078,7 +3078,8 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands, 
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -3127,9 +3128,11 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid atomicOperation")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid storage class, can be global, group, private, kernarg, readonly, spill, or arg")));
+    "Invalid storage class, can be global, group, private, kernarg, "
+    "readonly, spill, or arg")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, BrigParAcquireRelease")));
+    "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, "
+    "BrigParAcquireRelease")));
   }
 }
 

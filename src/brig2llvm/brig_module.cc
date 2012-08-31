@@ -539,8 +539,10 @@ bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) const {
 // validating the code section
 bool BrigModule::validate(const BrigInstAtomic *code) const {
   bool valid = true;
-  valid &= check(code->opcode == BrigAtomic || code->opcode == BrigAtomicNoRet,
-                 "Invalid opcode, should be either BrigAtomic or BrigAtomicNoRet");
+  valid &= check(code->opcode == BrigAtomic ||
+                 code->opcode == BrigAtomicNoRet,
+                 "Invalid opcode, should be either BrigAtomic or "
+                 "BrigAtomicNoRet");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
   for (unsigned i = 0; i < 5; i++) {
@@ -563,7 +565,8 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
   valid &= check(code->memorySemantic == BrigAcquire ||
                  code->memorySemantic == BrigAcquireRelease ||
                  code->memorySemantic == BrigParAcquireRelease,
-                 "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, BrigParAcquireRelease");
+                 "Invalid memorySemantic, can be BrigAcquire, "
+                 "BrigAcquireRelease, BrigParAcquireRelease");
   return valid;
 }
 
