@@ -537,7 +537,36 @@ bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) const {
 }
 
 // validating the code section
-bool BrigModule::validate(const BrigInstAtomic *code) const { return true; }
+bool BrigModule::validate(const BrigInstAtomic *code) const {
+  bool valid = true;
+  valid &= check(code->opcode == BrigAtomic || code->opcode == BrigAtomicNoRet,
+                 "Invalid opcode, should be either BrigAtomic or BrigAtomicNoRet");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                   "o_operands past the operands section");
+    }
+  }
+  valid &= check(code->atomicOperation <= BrigAtomicSub,
+                 "Invalid atomicOperation");
+  valid &= check(code->storageClass == BrigGlobalSpace ||
+                 code->storageClass == BrigGroupSpace ||
+                 code->storageClass == BrigPrivateSpace ||
+                 code->storageClass == BrigKernargSpace ||
+                 code->storageClass == BrigReadonlySpace ||
+                 code->storageClass == BrigSpillSpace ||
+                 code->storageClass == BrigArgSpace,
+                 "Invalid storage class, can be global, group, "
+                 "private, kernarg, readonly, spill, or arg");
+  valid &= check(code->memorySemantic == BrigAcquire ||
+                 code->memorySemantic == BrigAcquireRelease ||
+                 code->memorySemantic == BrigParAcquireRelease,
+                 "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, BrigParAcquireRelease");
+  return valid;
+}
+
 bool BrigModule::validate(const BrigInstAtomicImage *code) const { return true; }
 bool BrigModule::validate(const BrigInstBar *code) const { return true; }
 
