@@ -566,5 +566,27 @@ bool BrigModule::validate(const BrigInstMem *code) const { return true; }
 bool BrigModule::validate(const BrigInstMod *code) const { return true; }
 bool BrigModule::validate(const BrigInstRead *code) const { return true; }
 
+bool BrigModule::validate(const inst_iterator inst) const {
+
+  // Exit early to avoid segmentation faults.
+  inst_iterator firstValidCode(S_.code);
+  if(!check(firstValidCode <= inst, "inst before the code section"))
+    return false;
+
+  inst_iterator E(S_.code + S_.codeSize);
+  if(!check(inst <= E, "inst past the code section"))
+    return false;
+
+  inst_iterator lastValidCode(S_.code + S_.codeSize -
+                            sizeof(BrigInstBase));
+  if(!check(inst <= lastValidCode, "inst spans the code section"))
+    return false;
+
+  if(!check(inst + 1 <= E, "inst spans the code section"))
+    return false;
+
+  return true;
+}
+
 } // namespace brig
 } // namespace hsa
