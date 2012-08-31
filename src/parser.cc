@@ -1384,7 +1384,7 @@ int ArgumentDecl(Context* context) {
       context->set_error(MISSING_DATA_TYPE);
     }
   }
-  context->set_error(MISSING_DECLPREFIX);
+
   return 1;
 }
 
@@ -2427,7 +2427,6 @@ int InitializableDecl(Context* context) {
     BrigStorageClass32_t storage_class = context->token_value.storage_class;
     return (InitializableDeclPart2(context, storage_class));
   } else {
-    context->set_error(MISSING_GLOBAL_IDENTIFIER);
     return 1;
   }
 }
@@ -2497,9 +2496,7 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
     } else {
       context->set_error(MISSING_IDENTIFIER);
     }
-  } else {
-    context->set_error(MISSING_DATA_TYPE);
-  }
+  } 
   return 1;
 }
 
@@ -2773,7 +2770,7 @@ int SignatureArgumentList(Context *context) {
         }
       }
     } else {
-      context->set_error(MISSING_ARGUMENT_LIST);
+      context->set_error(MISSING_ARGUMENT);
       return 1;
     }
   }
@@ -2792,7 +2789,6 @@ int FunctionSignature(Context *context) {
       if (')' == context->token_to_scan) {  // empty signature Argument List
         context->token_to_scan = yylex();
       } else if (!SignatureArgumentList(context)) {
-    // TODO(xiaopeng) SignatureArgumentList read one more word
         if (context->token_to_scan == ')')
           context->token_to_scan = yylex();
         else
@@ -2809,7 +2805,6 @@ int FunctionSignature(Context *context) {
       if (')' == context->token_to_scan) {  // empty
         context->token_to_scan = yylex();
       } else if (!SignatureArgumentList(context)) {
-        // TODO(xiaopeng) SignatureArgumentList read one more word
         if (context->token_to_scan == ')')
           context->token_to_scan = yylex();
         else
@@ -2848,9 +2843,7 @@ int Label(Context* context) {
       context->set_error(MISSING_COLON);
       return 1;
     }
-  } else {
-    context->set_error(INVALID_LABEL);
-  }
+  } 
   return 1;
 }
 
@@ -2876,9 +2869,7 @@ int LabelTargets(Context* context) {
     } else {
       context->set_error(UNKNOWN_ERROR);
     }
-  } else {
-    context->set_error(INVALID_LABEL);
-  }
+  } 
   return 1;
 }
 
@@ -4722,7 +4713,7 @@ int Operation(Context* context) {
     if (!Branch(context)) {
       return 0;
     }
-  } else if (context->token_type = QUERY_OP) {
+  } else if (context->token_type == QUERY_OP) {
     if (!Query(context)) {
       return 0;
     }
@@ -5106,7 +5097,6 @@ int GlobalImageDecl(Context *context) {
     context->token_to_scan = yylex();
     return (GlobalImageDeclPart2(context));
   }else{
-    context->set_error(MISSING_GLOBAL_IDENTIFIER);
     return 1;
   }
 }
@@ -5269,6 +5259,9 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
 
 int ImageInitializer(Context *context) {
   // first must be '='
+  if('=' != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
   if ('{' == context->token_to_scan) {
     while (1) {
@@ -5876,10 +5869,8 @@ int GlobalSymbolDeclpart2(Context* context) {
 int GlobalSymbolDecl(Context* context) {
   if (!DeclPrefix(context)) {
     return GlobalSymbolDeclpart2(context);
-  } else{
-    context->set_error(MISSING_DECLPREFIX);
-    return 1;
-  }
+  } 
+  return 1;
 }
 
 int Directive(Context* context) {
@@ -5913,11 +5904,8 @@ int Directive(Context* context) {
       }
       return 1;
     default:
-      context->set_error(UNKNOWN_ERROR);
       return 1;    
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 int SobInit(Context *context){
@@ -6146,9 +6134,8 @@ int GlobalDecl(Context *context){
     return FunctionSignature(context);
   } else if (!DeclPrefix(context)){
     return GlobalDeclpart2(context);
-  } else {
-    context->set_error(MISSING_IDENTIFIER);
   }
+
   return 1;
 }
 
