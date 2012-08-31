@@ -3833,7 +3833,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   
   delete lexer ;
-}
+};
 
 TEST(CodegenTest,GlobalImageDeclCodegen){
   context->set_error_reporter(main_reporter);
@@ -3880,7 +3880,60 @@ TEST(CodegenTest,GlobalImageDeclCodegen){
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   
   delete lexer ;
-}
+};
+
+TEST(CodegenTest,GlobalSamplerDeclCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("global_Samp &demo={coord = normalized, filter = linear, ");
+  input.append("boundaryU = clamp, boundaryV = wrap, boundaryV = mirror } ;");
+  
+  Lexer *lexer = new Lexer(input);
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigDirectiveSampler ref = {
+    40,                     //size
+    BrigEDirectiveSampler,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,           // storag class 
+      BrigNone ,                // attribut
+      0,                        // reserved
+      0,                        // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      Brigb64,                  // type
+      1,                        // align
+    },
+    1,                      //valid
+    1,                      //normalized
+    BrigSamplerFilterLinear,//filter
+    BrigSamplerClamp,       //boundaryU
+    BrigSamplerWrap,        //boundaryV
+    BrigSamplerMirror,      //boundaryW
+    0                       //reserved1
+  };
+  EXPECT_EQ(0,GlobalSamplerDecl(context));
+
+  BrigDirectiveSampler get ;
+  context->get_directive(0,&get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.valid, get.valid);
+  EXPECT_EQ(ref.normalized, get.normalized);
+  EXPECT_EQ(ref.filter, get.filter);
+  EXPECT_EQ(ref.boundaryU, get.boundaryU);
+  EXPECT_EQ(ref.boundaryV, get.boundaryV);
+  EXPECT_EQ(ref.boundaryW, get.boundaryW);
+
+  delete lexer ;
+};
+
 
 }  // namespace brig
 }  // namespace hsa

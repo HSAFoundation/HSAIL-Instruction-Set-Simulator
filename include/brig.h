@@ -435,6 +435,21 @@ enum BrigImageOrder {
   BrigImageOrderUnknown // used when no order is specified
 };
 
+//PRM 20.5.1
+enum BrigAddrFilter {
+  BrigSamplerFilterLinear,
+  BrigSamplerFilterNearest
+};
+
+//PRM 20.5.4
+enum BrigBoundaryMode {
+  BrigSamplerClamp,
+  BrigSamplerWrap,
+  BrigSamplerMirror,
+  BrigSamplerMirrorOnce,
+  BrigSamplerBorder
+};
+
 
 // PRM 20.3.2
 struct BrigSymbolCommon {
