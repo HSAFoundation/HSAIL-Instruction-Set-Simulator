@@ -5953,13 +5953,13 @@ int SobInitializer(Context *context){
 }
 
 int GlobalSamplerDecl(Context *context){
- 	if(GLOBAL == context->token_to_scan){
-		context->token_to_scan = yylex();
-		return (GlobalSamplerDeclPart2(context));
-	}else{
-		context->set_error(MISSING_GLOBAL_IDENTIFIER);
-		return 1;
-	}
+  if(GLOBAL == context->token_to_scan){
+    context->token_to_scan = yylex();
+    return (GlobalSamplerDeclPart2(context));
+  }else{
+    context->set_error(MISSING_GLOBAL_IDENTIFIER);
+    return 1;
+  }
 }	
 
 int GlobalSamplerDeclPart2(Context *context){	

@@ -3835,5 +3835,52 @@ TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
   delete lexer ;
 }
 
+TEST(CodegenTest,GlobalImageDeclCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("global_RWImg &demo={format = signed_int32 ,order = r,width = 2,height = 3,depth = 4 } ;");
+  
+  Lexer *lexer = new Lexer(input);
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigDirectiveImage ref = {
+    56,                     //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class 
+      BrigNone ,                // attribut
+      0,                        // reserved
+      0,                        // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      Brigb64,                  // type
+      1,                        // align
+    },
+    2,                      //width
+    3,                      //height
+    4,                      //depth
+    1,                      //array
+    BrigImageOrderUnknown,  //order
+    BrigImageFormatUnknown  //format
+  };
+  EXPECT_EQ(0,GlobalImageDecl(context));
+
+  BrigDirectiveImage get ;
+  context->get_directive(0,&get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.width, get.width);
+  EXPECT_EQ(ref.height, get.height);
+  EXPECT_EQ(ref.depth, get.depth);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  
+  delete lexer ;
+}
+
 }  // namespace brig
 }  // namespace hsa
