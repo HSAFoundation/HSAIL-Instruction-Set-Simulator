@@ -3887,7 +3887,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
   context->clear_context();
 
   std::string input("global_Samp &demo={coord = normalized, filter = linear, ");
-  input.append("boundaryU = clamp, boundaryV = wrap, boundaryV = mirror } ;");
+  input.append("boundaryU = clamp, boundaryV = wrap, boundaryW = mirror } ;");
   
   Lexer *lexer = new Lexer(input);
   lexer->set_source_string(input);

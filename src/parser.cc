@@ -2421,14 +2421,15 @@ int Initializer(Context* context) {
 
 int InitializableDecl(Context* context) {
 
-	if((context->token_to_scan==GLOBAL) || (context->token_to_scan == READONLY)){
-		context->token_to_scan = yylex();
-		BrigStorageClass32_t storage_class = context->token_value.storage_class;
-		return (InitializableDeclPart2(context, storage_class));
-	} else{
-		context->set_error(MISSING_GLOBAL_IDENTIFIER);
-		return 1;
-	}
+  if ((context->token_to_scan==GLOBAL) 
+     || (context->token_to_scan == READONLY)){
+    context->token_to_scan = yylex();
+    BrigStorageClass32_t storage_class = context->token_value.storage_class;
+    return (InitializableDeclPart2(context, storage_class));
+  } else {
+    context->set_error(MISSING_GLOBAL_IDENTIFIER);
+    return 1;
+  }
 }
 
 int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
@@ -5124,15 +5125,15 @@ int GlobalImageDeclPart2(Context *context){
         56,                     //size
         BrigEDirectiveImage,    //kind
         {
-          0,                         // c_code
-          storage_class,            // storag class 
-          BrigNone ,                // attribut
-          0,                        // reserved
-          0,                        // symbolModifier
-          0,                        // dim
-          var_name_offset,          // s_name
-          Brigb64,                  // type
-          1,                        // align
+          context->get_code_offset(),      // c_code
+          storage_class,                   // storag class 
+          context->get_attribute(),        // attribut
+          0,                               // reserved
+          context->get_symbol_modifier(),  // symbolModifier
+          0,                               // dim
+          var_name_offset,                 // s_name
+          context->token_value.data_type,  // type
+          context->get_alignment()         // align
         },
         0,                      //width
         0,                      //height
@@ -5197,7 +5198,6 @@ int GlobalReadOnlyImageDecl(Context *context) {
 
     return GlobalReadOnlyImageDeclPart2(context);
   }else{
-    context->set_error(MISSING_GLOBAL_IDENTIFIER);
     return 1;
   }	
 }
@@ -5216,15 +5216,15 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
         56,                     //size
         BrigEDirectiveImage,    //kind
         {
-          0,                         // c_code
-          storage_class,            // storag class 
-          BrigNone ,                // attribut
-          0,                        // reserved
-          0,                        // symbolModifier
-          0,                        // dim
-          var_name_offset,          // s_name
-          Brigb64,                  // type
-          1,                        // align
+          context->get_code_offset(),      // c_code
+          storage_class,                   // storag class 
+          context->get_attribute(),        // attribut
+          0,                               // reserved
+          context->get_symbol_modifier(),  // symbolModifier
+          0,                               // dim
+          var_name_offset,                 // s_name
+          context->token_value.data_type,  // type
+          context->get_alignment()         // align
         },
         0,                      //width
         0,                      //height
@@ -5921,15 +5921,44 @@ int Directive(Context* context) {
 }
 
 int SobInit(Context *context){
+ unsigned int first_token = context->token_to_scan ;
+
  if(COORD == context->token_to_scan  
     ||FILTER == context->token_to_scan  
     ||BOUNDARYU == context->token_to_scan  
     ||BOUNDARYV == context->token_to_scan  
     ||BOUNDARYW == context->token_to_scan){
+  BrigDirectiveSampler bds ;
+  context->get_directive(context->current_samp_offset,&bds);
+  bds.valid = 1;
+ 
     context->token_to_scan = yylex();
     if('=' == context->token_to_scan){
       context->token_to_scan = yylex();
       if(TOKEN_PROPERTY == context->token_to_scan){
+        switch(first_token){
+	  case COORD:
+            bds.normalized = context->token_value.normalized; 
+            break ;
+          case FILTER:
+            bds.filter = context->token_value.filter;
+            break ;
+	  case BOUNDARYU:
+            bds.boundaryU = context->token_value.boundary_mode; 
+            break ;
+	  case BOUNDARYV:
+            bds.boundaryV = context->token_value.boundary_mode; 
+            break ;            
+	  case BOUNDARYW:
+            bds.boundaryW = context->token_value.boundary_mode; 
+            break ;
+	}
+        unsigned char *bds_charp = 
+              reinterpret_cast<unsigned char*> (&bds);
+        context->update_directive_bytes(bds_charp,
+                                        context->current_samp_offset,
+                                        sizeof(bds));
+
         context->token_to_scan = yylex();
         return 0;
       }else{
@@ -5938,9 +5967,7 @@ int SobInit(Context *context){
     }else{ //for '='
       context->set_error(MISSING_IDENTIFIER);
     }
-  }else{
-    context->set_error(MISSING_IDENTIFIER);
-  }  
+  }
 
   return 1;
 }
@@ -5948,7 +5975,6 @@ int SobInit(Context *context){
 int SobInitializer(Context *context){
   //first must be '='
   if('=' != context->token_to_scan){
-     context->set_error(MISSING_IDENTIFIER);
      return 1;
   }
 
@@ -5985,17 +6011,45 @@ int GlobalSamplerDecl(Context *context){
     context->token_to_scan = yylex();
     return (GlobalSamplerDeclPart2(context));
   }else{
-    context->set_error(MISSING_GLOBAL_IDENTIFIER);
     return 1;
   }
 }	
 
 int GlobalSamplerDeclPart2(Context *context){	
   // First token has already been verified as GLOBAL
+  BrigStorageClass32_t storage_class = context->token_value.storage_class ;
 	
   if (_SAMP == context->token_to_scan){ 
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan){
+      std::string var_name(context->token_value.string_val);      
+      int var_name_offset = context->add_symbol(var_name);
+      
+      BrigDirectiveSampler bds = {
+        40,                                //size
+        BrigEDirectiveSampler,             //kind
+        {
+          context->get_code_offset(),      // c_code
+          storage_class,                   // storag class 
+          context->get_attribute(),        // attribut
+          0,                               // reserved
+          context->get_symbol_modifier(),  // symbolModifier
+          0,                               // dim
+          var_name_offset,                 // s_name
+          context->token_value.data_type,  // type
+          context->get_alignment()         // align
+        },
+        0,                      //valid
+        0,                      //normalized
+        0,                      //filter
+        0,                      //boundaryU
+        0,                      //boundaryV
+        0,                      //boundaryW
+        0                       //reserved1
+      };
+      context->current_samp_offset = context->get_directive_offset();
+      context->append_directive(&bds);
+
       context->token_to_scan = yylex();
       if ('[' == context->token_to_scan){
         if (!ArrayDimensionSet(context)){

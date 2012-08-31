@@ -374,55 +374,55 @@ a                                              { context->token_type = PROPERTY;
                                                  context->token_value.order = BrigImage_A;
                                                  return TOKEN_PROPERTY; }
 
-rx                                              { context->token_type = PROPERTY;
+rx                                             { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_RX;
                                                  return TOKEN_PROPERTY; }
 
-rg                                              { context->token_type = PROPERTY;
+rg                                             { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_RG;
                                                  return TOKEN_PROPERTY; }
 
-rgx                                              { context->token_type = PROPERTY;
+rgx                                            { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_RGX;
                                                  return TOKEN_PROPERTY; }
 
-ra                                              { context->token_type = PROPERTY;
+ra                                             { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_RA;
                                                  return TOKEN_PROPERTY; }
 
-rgb                                              { context->token_type = PROPERTY;
+rgb                                            { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_RGB;
                                                  return TOKEN_PROPERTY; }
 
-rgba                                              { context->token_type = PROPERTY;
+rgba                                           { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_RGBA;
                                                  return TOKEN_PROPERTY; }
 
-rgbx                                              { context->token_type = PROPERTY;
+rgbx                                           { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_RGBX;
                                                  return TOKEN_PROPERTY; }
 
-bgra                                              { context->token_type = PROPERTY;
+bgra                                           { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_BGRA;
                                                  return TOKEN_PROPERTY; }
 
-argb                                              { context->token_type = PROPERTY;
+argb                                           { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.order = BrigImage_ARGB;
@@ -440,20 +440,59 @@ luminance                                      { context->token_type = PROPERTY;
                                                  context->token_value.order = BrigImage_LUMINANCE;
                                                  return TOKEN_PROPERTY; }
 
-(normalized|unnormalized)                                                   { context->token_type = PROPERTY;
-                                                                              free_string(context);
-                                                                              context->yycolno+=yyleng;
-                                                                              return TOKEN_PROPERTY; }
+normalized                                     { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.normalized = true;
+                                                 return TOKEN_PROPERTY; }
 
-(nearest|linear)                                                            { context->token_type = PROPERTY;
-                                                                              free_string(context);
-                                                                              context->yycolno+=yyleng;
-                                                                              return TOKEN_PROPERTY; }
+unnormalized                                   { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.normalized = false;
+                                                 return TOKEN_PROPERTY; }
 
-(wrap|clamp|mirror|mirroronce|border)                                       { context->token_type = PROPERTY;
-                                                                              free_string(context);
-                                                                              context->yycolno+=yyleng;
-                                                                              return TOKEN_PROPERTY;}
+nearest                                        { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.filter = BrigSamplerFilterNearest;
+                                                 return TOKEN_PROPERTY; }
+
+linear                                         { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.filter = BrigSamplerFilterLinear;
+                                                 return TOKEN_PROPERTY; }
+
+wrap                                           { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.boundary_mode = BrigSamplerWrap;
+                                                 return TOKEN_PROPERTY;}
+
+clamp                                          { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.boundary_mode = BrigSamplerClamp;
+                                                 return TOKEN_PROPERTY;}
+
+mirror                                         { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.boundary_mode = BrigSamplerMirror;
+                                                 return TOKEN_PROPERTY;}
+
+mirroronce                                     { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.boundary_mode = BrigSamplerMirrorOnce;
+                                                 return TOKEN_PROPERTY;}
+
+border                                         { context->token_type = PROPERTY;
+                                                 free_string(context);
+                                                 context->yycolno+=yyleng;
+                                                 context->token_value.boundary_mode = BrigSamplerBorder;
+                                                 return TOKEN_PROPERTY;}
 
 WAVESIZE      { context->token_type = WAVESIZE;
                 free_string(context);

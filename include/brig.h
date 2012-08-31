@@ -27,7 +27,8 @@ typedef uint32_t BrigOpcode32_t;
 typedef uint32_t BrigAtomicOperation32_t;
 typedef uint32_t BrigMemorySemantic32_t;
 typedef uint32_t BrigCompareOperation32_t;
-
+typedef uint8_t  BrigBoundaryMode8_t;
+typedef uint8_t  BrigAddrFilter8_t;
 // Enums
 
 // Custom enum to check for alignment of structs
