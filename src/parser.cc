@@ -4703,22 +4703,33 @@ int RIW_Operand(Context* context) {
 int Segp(Context* context) {
   if (context->token_to_scan == SEGMENTP) { //segmentp
     context->token_to_scan = yylex();
+
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == _B1) { //datatypeId must be b1
-        context->token_to_scan = yylex();
+        context->token_to_scan = yylex();     
         //dest must be c register
         if (context->token_to_scan == TOKEN_CREGISTER) { 
           context->token_to_scan = yylex();
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            if (!RIW_Operand(context)) {
+            if(context->token_type == REGISTER ) { 
+              context->token_to_scan = yylex();
               if (context->token_to_scan == ';') {
                 context->token_to_scan = yylex();
                 return 0;
               } else {
                 context->set_error(MISSING_SEMICOLON);
               }
+            } else if (context->token_type == CONSTANT || 
+                       context->token_to_scan == TOKEN_WAVESIZE) {
+              context->token_to_scan = yylex();
+              if (context->token_to_scan == ';') {
+                context->token_to_scan = yylex();
+                return 0;
+              } else {
+                context->set_error(MISSING_SEMICOLON);
+              }          
             } else {
               context->set_error(MISSING_OPERAND);
             }
@@ -4738,6 +4749,7 @@ int Segp(Context* context) {
   } else if (context->token_to_scan == STOF || // stof or ftos
              context->token_to_scan == FTOS) {
     context->token_to_scan = yylex();
+
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == _U32 ||
@@ -4748,13 +4760,23 @@ int Segp(Context* context) {
           context->token_to_scan = yylex();
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            if (!RIW_Operand(context)) {
+            if(context->token_type == REGISTER ) { 
+              context->token_to_scan = yylex();
               if (context->token_to_scan == ';') {
                 context->token_to_scan = yylex();
                 return 0;
               } else {
                 context->set_error(MISSING_SEMICOLON);
               }
+            } else if (context->token_type == CONSTANT || 
+                       context->token_to_scan == TOKEN_WAVESIZE) {
+              context->token_to_scan = yylex();
+              if (context->token_to_scan == ';') {
+                context->token_to_scan = yylex();
+                return 0;
+              } else {
+                context->set_error(MISSING_SEMICOLON);
+              }          
             } else {
               context->set_error(MISSING_OPERAND);
             }
