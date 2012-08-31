@@ -10,9 +10,6 @@ struct ForceBrigRuntimeLinkage {
   ForceBrigRuntimeLinkage();
 };
 
-typedef __int128_t   int128_t;
-typedef __uint128_t uint128_t;
-
 typedef bool       b1;
 typedef uint8_t    b8;
 typedef uint8_t    u8;
@@ -26,7 +23,7 @@ typedef  int32_t   s32;
 typedef uint64_t   b64;
 typedef uint64_t   u64;
 typedef  int64_t   s64;
-typedef uint128_t b128;
+typedef b64        b128[2];
 
 // typedef __half f16; // Not a real half yet.
 typedef float  f32;
