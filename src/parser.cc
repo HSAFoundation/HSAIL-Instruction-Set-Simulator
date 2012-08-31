@@ -5112,10 +5112,38 @@ int GlobalImageDecl(Context *context) {
 
 int GlobalImageDeclPart2(Context *context){	
  //First token has been scanned and verified as global. Read next token.
+  BrigStorageClass32_t storage_class = context->token_value.storage_class ;
   
   if (_RWIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
+      std::string var_name(context->token_value.string_val);      
+      int var_name_offset = context->add_symbol(var_name);
+      
+      BrigDirectiveImage bdi = {
+        56,                     //size
+        BrigEDirectiveImage,    //kind
+        {
+          0,                         // c_code
+          storage_class,            // storag class 
+          BrigNone ,                // attribut
+          0,                        // reserved
+          0,                        // symbolModifier
+          0,                        // dim
+          var_name_offset,          // s_name
+          Brigb64,                  // type
+          1,                        // align
+        },
+        0,                      //width
+        0,                      //height
+        0,                      //depth
+        1,                      //array
+        BrigImageOrderUnknown,  //order
+        BrigImageFormatUnknown  //format
+      };
+      context->current_img_offset = context->get_directive_offset();
+      context->append_directive(&bdi);
+
       context->token_to_scan = yylex();
       if ('[' == context->token_to_scan) {
         if (!ArrayDimensionSet(context)) {
