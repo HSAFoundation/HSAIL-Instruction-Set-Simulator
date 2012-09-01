@@ -374,7 +374,7 @@ TEST(Brig2LLVMTest, Example3) {
     "ret void")));
 
     llvm::Module *mod = codegen.getModule();
-    hsa::brig::u8x4 x;
+    u8x4 x;
     void *args[] = { &x };
     hsa::brig::launchBrig(mod, mod->getFunction("packed_ops"), args);
   }
@@ -606,7 +606,7 @@ TEST(Brig2LLVMTest, Example4) {
     "; preds = %then, %brig.init.succ")));
 
     llvm::Module *mod = codegen.getModule();
-    hsa::brig::u8x4 x;
+    u8x4 x;
     void *args[] = { &x };
     hsa::brig::launchBrig(mod, mod->getFunction("branch_ops"), args);
   }
@@ -3078,7 +3078,7 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, 
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }

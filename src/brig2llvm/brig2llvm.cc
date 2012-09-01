@@ -461,7 +461,9 @@ static void runOnInstruction(llvm::BasicBlock &B,
                              FunState &state) {
   llvm::LLVMContext &C = B.getContext();
 
-  if(inst->opcode == BrigAbs) {
+  if(inst->opcode == BrigAbs ||
+     inst->opcode == BrigMax ||
+     inst->opcode == BrigMin) {
     runOnComplexInst(B, inst, helper, state);
   } else if(BrigInstHelper::isSaturated(BrigPacking(inst->packing))) {
     runOnComplexInst(B, inst, helper, state);
