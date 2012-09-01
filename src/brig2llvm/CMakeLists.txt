@@ -18,8 +18,6 @@ MESSAGE("INCLUDE SEARCH DIRECTORIES: ${PROJ_SEARCH_PATH}")
 include("${PROJECT_BINARY_DIR}/compiler/share/llvm/cmake/LLVMConfig.cmake")
 include(HandleLLVMOptions)
 
-set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
-
 set(LLVM_LINK_COMPONENTS core jit nativecodegen)
 add_llvm_library(brig2llvm
   brig2llvm.cc
