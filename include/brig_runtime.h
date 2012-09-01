@@ -10,6 +10,9 @@ struct ForceBrigRuntimeLinkage {
   ForceBrigRuntimeLinkage();
 };
 
+} // namespace brig
+} // namespace hsa
+
 typedef bool       b1;
 typedef uint8_t    b8;
 typedef uint8_t    u8;
@@ -61,8 +64,5 @@ declareVector(f64, 2);
 
 #undef declareVector
 #undef vector
-
-} // namespace brig
-} // namespace hsa
 
 #endif // BRIG_RUNTIME_H
