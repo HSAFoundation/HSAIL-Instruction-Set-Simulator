@@ -732,16 +732,19 @@ fbar_initSizeWg     { free_string(context);
 fbar_wait           { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarWait;
                       return FBAR_WAIT; }
 
 fbar_arrive         { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarArrive;
                       return FBAR_ARRIVE; }
 
 fbar_skip           { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarSkip;
                       return FBAR_SKIP; }
 
 fbar_release        { free_string(context);
@@ -753,51 +756,61 @@ fbar_release        { free_string(context);
 countup             { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigCountup;
                       return COUNTUP; }
 
 laneid              { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigLaneId;
                       return LANEID; }
 
 dynwaveid           { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigDynWaveId;
                       return DYNWAVEID; }
 
 maxdynwaveid        { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigMaxDynWaveId;
                       return MAXDYNWAVEID; }
 
 dispatchid          { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigDispatchId;
                       return DISPATCHID; }
 
 cu                  { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigCU;
                       return CU; }
 
 workdim             { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigWorkDim;
                       return WORKDIM; }
 
 workitemid_flat     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = Brigworkitemidflat;
                       return WORKITEMID_FLAT; }
 
 workitemaid_flat    { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = Brigworkitemaidflat;
                       return WORKITEMAID_FLAT; }
 
 debugtrap           { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigDebugtrap;
                       return DEBUGTRAP; }
 
 abs                 { free_string(context);
@@ -1801,6 +1814,7 @@ nop                 { free_string(context);
 clock               { free_string(context);
                       context->token_type = COMMON_KEYWORD;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigClock;
                       return CLOCK;}
 
 syscall             { free_string(context);
