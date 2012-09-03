@@ -4520,22 +4520,82 @@ int RIW_Operand(Context* context) {
 int Segp(Context* context) {
   if (context->token_to_scan == SEGMENTP) { //segmentp
     context->token_to_scan = yylex();
+
+    BrigInstMem segmentp_op = {
+      36,                    // size
+      BrigEInstMem,          // kind
+      BrigSegmentp,          // opcode
+      Brigb32,               // type
+      BrigNoPacking,         // packing
+      {0, 0, 0, 0, 0},       // o_operands[5]
+      BrigFlatSpace          // storageClass
+    };
+
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+      switch (context->token_to_scan) {
+        case _GLOBAL:
+          segmentp_op.storageClass = BrigGlobalSpace;
+          break;
+        case _GROUP:
+          segmentp_op.storageClass = BrigGroupSpace;
+          break;
+        case _PRIVATE:
+          segmentp_op.storageClass = BrigPrivateSpace;
+          break;
+        case _KERNARG:
+          segmentp_op.storageClass = BrigKernargSpace;
+          break;
+        case _READONLY:
+          segmentp_op.storageClass = BrigReadonlySpace;
+          break;
+        case _SPILL:
+          segmentp_op.storageClass = BrigSpillSpace;
+          break;
+        case _ARG:
+          segmentp_op.storageClass = BrigArgSpace;
+          break;
+        default:
+          segmentp_op.storageClass = BrigFlatSpace;
+      }
       context->token_to_scan = yylex();
       if (context->token_to_scan == _B1) { //datatypeId must be b1
-        context->token_to_scan = yylex();
+        segmentp_op.type = context->token_value.data_type;
+        context->token_to_scan = yylex();     
         //dest must be c register
         if (context->token_to_scan == TOKEN_CREGISTER) { 
-          context->token_to_scan = yylex();
+          std::string oper_name = context->token_value.string_val;
+          if (Operand(context)) {
+            return 1;
+          }
+          segmentp_op.o_operands[0] = context->operand_map[oper_name];
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            if (!RIW_Operand(context)) {
+            if(context->token_type == REGISTER ) {
+              std::string oper_name = context->token_value.string_val;
+              if (Operand(context)) {
+                return 1;
+              }
+              segmentp_op.o_operands[1] = context->operand_map[oper_name]; 
               if (context->token_to_scan == ';') {
+                context->append_code(&segmentp_op);
                 context->token_to_scan = yylex();
                 return 0;
               } else {
                 context->set_error(MISSING_SEMICOLON);
               }
+            } else if (context->token_type == CONSTANT || 
+                       context->token_to_scan == TOKEN_WAVESIZE) {
+              if (Operand(context)) {
+                return 1;
+              }
+              segmentp_op.o_operands[1] = context->get_operand_offset();
+              if (context->token_to_scan == ';') {
+                context->append_code(&segmentp_op);
+                context->token_to_scan = yylex();
+                return 0;
+              } else {
+                context->set_error(MISSING_SEMICOLON);
+              }          
             } else {
               context->set_error(MISSING_OPERAND);
             }
@@ -4555,23 +4615,92 @@ int Segp(Context* context) {
   } else if (context->token_to_scan == STOF || // stof or ftos
              context->token_to_scan == FTOS) {
     context->token_to_scan = yylex();
+
+    BrigInstMem sf_op = {
+      36,                    // size
+      BrigEInstMem,          // kind
+      BrigStoF,              // opcode
+      Brigb32,               // type
+      BrigNoPacking,         // packing
+      {0, 0, 0, 0, 0},       // o_operands[5]
+      BrigFlatSpace          // storageClass
+    };
+
+    switch (context->token_to_scan) {
+      case STOF:
+        sf_op.opcode = BrigStoF;
+        break;
+      case FTOS:
+        sf_op.opcode = BrigFtoS;
+        break;
+    }
+
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+      switch (context->token_to_scan) {
+        case _GLOBAL:
+          sf_op.storageClass = BrigGlobalSpace;
+          break;
+        case _GROUP:
+          sf_op.storageClass = BrigGroupSpace;
+          break;
+        case _PRIVATE:
+          sf_op.storageClass = BrigPrivateSpace;
+          break;
+        case _KERNARG:
+          sf_op.storageClass = BrigKernargSpace;
+          break;
+        case _READONLY:
+          sf_op.storageClass = BrigReadonlySpace;
+          break;
+        case _SPILL:
+          sf_op.storageClass = BrigSpillSpace;
+          break;
+        case _ARG:
+          sf_op.storageClass = BrigArgSpace;
+          break;
+        default:
+          sf_op.storageClass = BrigFlatSpace;
+      }
       context->token_to_scan = yylex();
       if (context->token_to_scan == _U32 ||
           context->token_to_scan == _U64) { //datatypeId must be u32 or u64
+        sf_op.type = context->token_value.data_type;
         context->token_to_scan = yylex();
         //dest must be d register
         if (context->token_to_scan == TOKEN_DREGISTER) { 
-          context->token_to_scan = yylex();
+          std::string oper_name = context->token_value.string_val;
+          if (Operand(context)) {
+            return 1;
+          }
+          sf_op.o_operands[0] = context->operand_map[oper_name];
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            if (!RIW_Operand(context)) {
+            if(context->token_type == REGISTER ) {
+              std::string oper_name = context->token_value.string_val;
+              if (Operand(context)) {
+                return 1;
+              }
+              sf_op.o_operands[1] = context->operand_map[oper_name]; 
               if (context->token_to_scan == ';') {
+                context->append_code(&sf_op);
                 context->token_to_scan = yylex();
                 return 0;
               } else {
                 context->set_error(MISSING_SEMICOLON);
               }
+            } else if (context->token_type == CONSTANT || 
+                       context->token_to_scan == TOKEN_WAVESIZE) {
+              if (Operand(context)) {
+                return 1;
+              }
+              sf_op.o_operands[1] = context->get_operand_offset();
+              if (context->token_to_scan == ';') {
+                context->append_code(&sf_op);
+                context->token_to_scan = yylex();
+                return 0;
+              } else {
+                context->set_error(MISSING_SEMICOLON);
+              }          
             } else {
               context->set_error(MISSING_OPERAND);
             }
