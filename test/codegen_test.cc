@@ -3256,7 +3256,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   BrigOperandCompound refComp = {
     20,                    // size
     BrigEOperandCompound,  // kind
-    Brigb32,               // type
+    Brigb64,               // type
     0,                     // reserved
     36,                    // name
     52,                    // reg
@@ -3275,7 +3275,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
@@ -3284,7 +3284,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
@@ -3318,7 +3318,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
     16,                    // size
     BrigEOperandIndirect,  // kind
     8,                     // reg
-    Brigb32,               // type
+    Brigb64,               // type
     0,                     // reserved
     8                      // offset
   };
@@ -3368,7 +3368,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   BrigOperandCompound ref2 = {
     20,                    // size
     BrigEOperandCompound,  // kind
-    Brigb32,               // type
+    Brigb64,               // type
     0,                     // reserved
     8,                     // name
     24,                    // reg
@@ -3393,7 +3393,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
@@ -3415,7 +3415,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   BrigOperandCompound ref3 = {
     20,                    // size
     BrigEOperandCompound,  // kind
-    Brigb32,               // type
+    Brigb64,               // type
     0,                     // reserved
     24,                    // name
     40,                    // reg
@@ -3444,7 +3444,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
@@ -3453,7 +3453,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
@@ -3481,7 +3481,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
     16,                    // size
     BrigEOperandIndirect,  // kind
     72,                    // reg
-    Brigb32,               // type
+    Brigb64,               // type
     0,                     // reserved
     -5                     // offset
   };
@@ -3588,7 +3588,7 @@ TEST(CodegenTest, PairAddressableOperand_CodeGen_SimpleTest) {
   BrigOperandCompound ref = {
     20,                    // size
     BrigEOperandCompound,  // kind
-    Brigb32,               // type
+    Brigb64,               // type
     0,                     // reserved
     8,                     // name
     24,                    // reg
@@ -3612,7 +3612,7 @@ TEST(CodegenTest, PairAddressableOperand_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
@@ -3674,7 +3674,7 @@ TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset);
@@ -3958,7 +3958,7 @@ TEST(CodegenTest, Atom_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset); 
@@ -4006,7 +4006,7 @@ TEST(CodegenTest, Atom_CodeGen_SimpleTest) {
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
+  EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   EXPECT_EQ(0, getAddr.offset); 
@@ -4318,7 +4318,7 @@ TEST(CodegenTest, OffsetAddressableOperand_CodeGen_Test) {
     16,                     // size
     BrigEOperandIndirect,   // kind
     8,                      // reg
-    Brigb32,               // type
+    Brigb64,               // type
     0,                      // reserved
     11                      // offset
   };
@@ -4326,7 +4326,7 @@ TEST(CodegenTest, OffsetAddressableOperand_CodeGen_Test) {
     16,                     // size
     BrigEOperandIndirect,   // kind
     36,                     // reg
-    Brigb32,                // type
+    Brigb64,                // type
     0,                      // reserved
     -5                      // offset
   };
@@ -4334,7 +4334,7 @@ TEST(CodegenTest, OffsetAddressableOperand_CodeGen_Test) {
     16,                     // size
     BrigEOperandIndirect,   // kind
     0,                      // reg
-    Brigb32,                // type
+    Brigb64,                // type
     0,                      // reserved
     77                      // offset
   };

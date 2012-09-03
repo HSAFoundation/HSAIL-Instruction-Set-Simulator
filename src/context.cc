@@ -62,7 +62,7 @@ void Context::clear_context(void) {
 }
 
 void Context::set_default_values(void) {
-  machine = BrigESmall;
+  machine = BrigELarge;
   profile = BrigEFull;
   ftz = BrigENosftz;
   attribute = BrigNone;

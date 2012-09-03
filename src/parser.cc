@@ -5288,6 +5288,13 @@ int GlobalImageDeclPart2(Context *context){
       std::string var_name(context->token_value.string_val);      
       int var_name_offset = context->add_symbol(var_name);
       
+      BrigDataType16_t data_type ;
+      if (BrigELarge == context->get_machine()){
+        data_type = Brigb64 ;
+      } else {
+        data_type = Brigb32;
+      }
+
       BrigDirectiveImage bdi = {
         56,                     //size
         BrigEDirectiveImage,    //kind
@@ -5299,7 +5306,7 @@ int GlobalImageDeclPart2(Context *context){
           context->get_symbol_modifier(),  // symbolModifier
           0,                               // dim
           var_name_offset,                 // s_name
-          context->token_value.data_type,  // type
+          data_type,                       // type
           context->get_alignment()         // align
         },
         0,                      //width
@@ -5378,7 +5385,13 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
       std::string var_name(context->token_value.string_val);      
       int var_name_offset = context->add_symbol(var_name);
-      
+
+      BrigDataType16_t data_type ;
+      if (BrigELarge == context->get_machine()){
+        data_type = Brigb64 ;
+      } else {
+        data_type = Brigb32;
+      }
       BrigDirectiveImage bdi = {
         56,                     //size
         BrigEDirectiveImage,    //kind
@@ -5390,7 +5403,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
           context->get_symbol_modifier(),  // symbolModifier
           0,                               // dim
           var_name_offset,                 // s_name
-          context->token_value.data_type,  // type
+          data_type,                       // type
           context->get_alignment()         // align
         },
         0,                      //width
