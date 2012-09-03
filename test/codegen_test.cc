@@ -3922,6 +3922,100 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.s.c_code, get.s.c_code);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.attribute, get.s.attribute);
+  EXPECT_EQ(ref.s.reserved, get.s.reserved);
+  EXPECT_EQ(ref.s.symbolModifier, get.s.symbolModifier);
+  EXPECT_EQ(ref.s.dim, get.s.dim);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.s.type, get.s.type);
+  EXPECT_EQ(ref.s.align, get.s.align);
+  EXPECT_EQ(ref.valid, get.valid);
+  EXPECT_EQ(ref.normalized, get.normalized);
+  EXPECT_EQ(ref.filter, get.filter);
+  EXPECT_EQ(ref.boundaryU, get.boundaryU);
+  EXPECT_EQ(ref.boundaryV, get.boundaryV);
+  EXPECT_EQ(ref.boundaryW, get.boundaryW);
+  EXPECT_EQ(ref.reserved1, get.reserved1);
+
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  input.assign("global_Samp &demo={coord = unnormalized, filter = nearest, ");
+  input.append("boundaryU = mirroronce, boundaryV = border, boundaryW = clamp } ;");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,GlobalSamplerDecl(context));
+
+  context->get_directive(0,&get);
+  ref.normalized=0;
+  ref.filter=BrigSamplerFilterNearest;
+  ref.boundaryU=BrigSamplerMirrorOnce;
+  ref.boundaryV=BrigSamplerBorder;
+  ref.boundaryW=BrigSamplerClamp;
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.attribute, get.s.attribute);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.valid, get.valid);
+  EXPECT_EQ(ref.normalized, get.normalized);
+  EXPECT_EQ(ref.filter, get.filter);
+  EXPECT_EQ(ref.boundaryU, get.boundaryU);
+  EXPECT_EQ(ref.boundaryV, get.boundaryV);
+  EXPECT_EQ(ref.boundaryW, get.boundaryW);
+
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  input.assign("global_Samp &demo={coord = unnormalized, filter = nearest, ");
+  input.append("boundaryU = wrap, boundaryV = clamp, boundaryW = wrap } ;");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,GlobalSamplerDecl(context));
+
+  context->get_directive(0,&get);
+  ref.normalized=0;
+  ref.filter=BrigSamplerFilterNearest;
+  ref.boundaryU=BrigSamplerWrap;
+  ref.boundaryV=BrigSamplerClamp;
+  ref.boundaryW=BrigSamplerWrap;
+  
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.attribute, get.s.attribute);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.valid, get.valid);
+  EXPECT_EQ(ref.normalized, get.normalized);
+  EXPECT_EQ(ref.filter, get.filter);
+  EXPECT_EQ(ref.boundaryU, get.boundaryU);
+  EXPECT_EQ(ref.boundaryV, get.boundaryV);
+  EXPECT_EQ(ref.boundaryW, get.boundaryW);
+
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  input.assign("global_Samp &demo={coord = unnormalized, filter = nearest, ");
+  input.append("boundaryU = mirror, boundaryV = mirror, boundaryW = border } ;");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,GlobalSamplerDecl(context));
+
+  context->get_directive(0,&get);
+  ref.normalized=0;
+  ref.filter=BrigSamplerFilterNearest;
+  ref.boundaryU=BrigSamplerMirror;
+  ref.boundaryV=BrigSamplerMirror;
+  ref.boundaryW=BrigSamplerBorder;
+  
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
   EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   EXPECT_EQ(ref.valid, get.valid);
@@ -3931,9 +4025,36 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
   EXPECT_EQ(ref.boundaryV, get.boundaryV);
   EXPECT_EQ(ref.boundaryW, get.boundaryW);
 
-  delete lexer ;
-};
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  input.assign("global_Samp &demo={coord = unnormalized, filter = nearest, ");
+  input.append("boundaryU = border, boundaryV = mirroronce, boundaryW = mirroronce } ;");
 
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,GlobalSamplerDecl(context));
+
+  context->get_directive(0,&get);
+  ref.normalized=0;
+  ref.filter=BrigSamplerFilterNearest;
+  ref.boundaryU=BrigSamplerBorder;
+  ref.boundaryV=BrigSamplerMirrorOnce;
+  ref.boundaryW=BrigSamplerMirrorOnce;
+  
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.valid, get.valid);
+  EXPECT_EQ(ref.normalized, get.normalized);
+  EXPECT_EQ(ref.filter, get.filter);
+  EXPECT_EQ(ref.boundaryU, get.boundaryU);
+  EXPECT_EQ(ref.boundaryV, get.boundaryV);
+  EXPECT_EQ(ref.boundaryW, get.boundaryW);
+     
+  delete lexer;
+};
 
 }  // namespace brig
 }  // namespace hsa
