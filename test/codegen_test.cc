@@ -4298,5 +4298,44 @@ TEST(CodegenTest, OffsetAddressableOperand_CodeGen_Test) {
   delete lexer;
 };
 
+TEST(CodegenTest, GlobalPrivateDeclCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("private_f32  &demo; ");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigDirectiveSymbol private_var = {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+  {
+    0,                         // c_code
+    BrigPrivateSpace,         // storag class 
+    BrigNone ,                // attribut
+    0,                        // reserved
+    0,                        // symbolModifier
+    0,                        // dim
+    0,                        // s_name
+    Brigf32,                  // type
+    1,                        // align
+  },
+  0,                        // d_init
+  0,                         // reserved
+  };
+  EXPECT_EQ(0,GlobalPrivateDecl(context));
+  BrigDirectiveSymbol get_sym ;
+
+  context->get_directive(0, &get_sym);
+  EXPECT_EQ(private_var.size, get_sym.size);
+  EXPECT_EQ(private_var.kind, get_sym.kind);
+  EXPECT_EQ(private_var.s.storageClass, get_sym.s.storageClass);
+  EXPECT_EQ(private_var.s.s_name, get_sym.s.s_name);
+  EXPECT_EQ(private_var.s.type, get_sym.s.type);
+  EXPECT_EQ(private_var.d_init, get_sym.d_init);
+
+  delete lexer;
+};
 }  // namespace brig
 }  // namespace hsa
