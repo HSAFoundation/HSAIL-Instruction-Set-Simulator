@@ -248,6 +248,7 @@ class Context {
     BrigcOffset32_t current_inst_offset;
     BrigdOffset32_t current_bdf_offset;
     BrigoOffset32_t current_argList_offset;
+    BrigdOffset32_t current_img_offset ;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in an instruction
     std::map<std::string, BrigoOffset32_t> arg_map;
@@ -272,6 +273,8 @@ class Context {
       BrigOpcode32_t    opcode;
       BrigPacking16_t   packing;
       BrigStorageClass32_t storage_class;
+      BrigImageOrder32_t order;
+      BrigImageFormat32_t format;
     } token_value;
 
   private:
