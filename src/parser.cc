@@ -3743,13 +3743,37 @@ int GlobalGroupDecl(Context* context) {
   // first token is Group
   context->token_to_scan = yylex();
   if (context->token_type == DATA_TYPE_ID) {
+
+    BrigDataType16_t data_type = context->token_value.data_type ;
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+
+      BrigsOffset32_t var_name_offset = context->add_symbol(context->token_value.string_val);
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {}
       }
       if (context->token_to_scan == ';') {
+
+        BrigDirectiveSymbol bds = {
+        40,                       // size
+        BrigEDirectiveSymbol ,    // kind
+        {
+          context->get_code_offset(),     // c_code
+          BrigGroupSpace,                 // storag class 
+          BrigNone ,                      // attribut
+          0,                              // reserved
+          context->get_symbol_modifier(), // symbolModifier
+          0,                              // dim
+          var_name_offset,                // s_name
+          data_type,                      // type
+          context->get_alignment(),       // align
+        },
+        0,                         // d_init
+        0,                         // reserved
+        };
+        context->append_directive(&bds);
+
         context->token_to_scan = yylex();
         return 0;
       } else {
