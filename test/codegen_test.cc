@@ -4151,7 +4151,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
       BrigGlobalSpace,           // storag class 
       BrigNone ,                // attribut
       0,                        // reserved
-      0,                        // symbolModifier
+      1,                        // symbolModifier
       0,                        // dim
       0,                        // s_name
       Brigb64,                  // type

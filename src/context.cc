@@ -66,6 +66,7 @@ void Context::set_default_values(void) {
   profile = BrigEFull;
   ftz = BrigENosftz;
   attribute = BrigNone;
+  alignment = 1;
   fbar = 0;
   token_type = UNKNOWN;
   token_to_scan = 0;

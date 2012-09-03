@@ -6183,13 +6183,19 @@ int GlobalSamplerDecl(Context *context){
 int GlobalSamplerDeclPart2(Context *context){	
   // First token has already been verified as GLOBAL
   BrigStorageClass32_t storage_class = context->token_value.storage_class ;
-	
+  	
   if (_SAMP == context->token_to_scan){ 
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan){
       std::string var_name(context->token_value.string_val);      
       int var_name_offset = context->add_symbol(var_name);
-      
+
+      BrigDataType16_t data_type ;
+      if (BrigELarge == context->get_machine()){
+        data_type = Brigb64 ;
+      } else {
+        data_type = Brigb32;
+      }
       BrigDirectiveSampler bds = {
         40,                                //size
         BrigEDirectiveSampler,             //kind
@@ -6201,7 +6207,7 @@ int GlobalSamplerDeclPart2(Context *context){
           context->get_symbol_modifier(),  // symbolModifier
           0,                               // dim
           var_name_offset,                 // s_name
-          context->token_value.data_type,  // type
+          data_type,                       // type
           context->get_alignment()         // align
         },
         0,                      //valid
