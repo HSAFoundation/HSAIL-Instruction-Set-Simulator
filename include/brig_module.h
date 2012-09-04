@@ -91,6 +91,7 @@ class BrigModule {
   bool validate(const BrigInstMem *code) const;
   bool validate(const BrigInstMod *code) const;
   bool validate(const BrigInstRead *code) const;
+  bool validate(const BrigAluModifier *c) const;
 
   bool validate(const inst_iterator inst) const;
 
