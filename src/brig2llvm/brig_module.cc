@@ -632,7 +632,28 @@ bool BrigModule::validate(const BrigInstCmp *code) const {
                  "Invalid reserved");
   return valid;
 }
-bool BrigModule::validate(const BrigInstImage *code) const { return true; }
+bool BrigModule::validate(const BrigInstImage *code) const {
+  bool valid = true;
+  valid &= check(code->opcode == BrigRdImage,
+                 "Invalid opcode");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                   "o_operands past the operands section");
+    }
+  }
+  valid &= check(code->geom <= Briggeom_2da,
+                 "Invalid type of image geometry");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  valid &= check(code->stype <= Brigf64x2,
+                 "Invalid stype");
+  valid &= check(code->packing <= BrigPackPsat,
+                 "Invalid packing control");
+  valid &= check(code->reserved == 0,
+                 "reserved must be zero");
+  return valid;
+}
 bool BrigModule::validate(const BrigInstCvt *code) const { return true; }
 bool BrigModule::validate(const BrigInstLdSt *code) const { return true; }
 bool BrigModule::validate(const BrigInstMem *code) const { return true; }
