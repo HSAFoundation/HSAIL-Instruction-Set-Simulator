@@ -1014,4 +1014,44 @@ enum BrigBoundaryMode {
   BrigSamplerMirrorOnce,
   BrigSamplerBorder
 };
+
+enum BrigGeom {
+  Briggeom_1d,
+  Briggeom_2d,
+  Briggeom_3d,
+  Briggeom_1da,
+  Briggeom_1db,
+  Briggeom_2da
+};
+
+enum BrigCompareOperation {
+  BrigEq,
+  BrigNe,
+  BrigLt,
+  BrigLe,
+  BrigGt,
+  BrigGe,
+  BrigEqu,
+  BrigNeu,
+  BrigLtu,
+  BrigLeu,
+  BrigGtu,
+  BrigGeu,
+  BrigNum,
+  BrigNan,
+  BrigSeq,
+  BrigSne,
+  BrigSlt,
+  BrigSle,
+  BrigSgt,
+  BrigSge,
+  BrigSgeu,
+  BrigSequ,
+  BrigSneu,
+  BrigSltu,
+  BrigSleu,
+  BrigSnum,
+  BrigSnan,
+  BrigSgtu
+};
 #endif  // INCLUDE_BRIG_H_
