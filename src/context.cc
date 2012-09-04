@@ -189,7 +189,7 @@ Context::context_error_t Context::update_code_bytes(unsigned char* value,
 Context::context_error_t Context::update_operand_bytes(unsigned char* value,
                                      uint32_t offset,
                                      uint32_t nBytes) {
-  Buffer::error_t err = cbuf->modify(value, offset, nBytes);
+  Buffer::error_t err = obuf->modify(value, offset, nBytes);
 
   if (err == Buffer::SUCCESS)
     return CONTEXT_OK;

@@ -4320,6 +4320,7 @@ TEST(CodegenTest, OffsetAddressableOperand_CodeGen_Test) {
 TEST(CodegenTest, Label_CodeGen_Test) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  // TODO(Chuang) set the type to Brn and Cbr
   BrigInstBase refCbrLab3 = {
     32,                    // size
     BrigEInstBase,         // kind
