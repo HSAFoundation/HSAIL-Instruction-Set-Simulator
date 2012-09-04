@@ -2423,8 +2423,8 @@ int InitializableDecl(Context* context) {
 
   if ((context->token_to_scan==GLOBAL) 
      || (context->token_to_scan == READONLY)){
-    context->token_to_scan = yylex();
     BrigStorageClass32_t storage_class = context->token_value.storage_class;
+    context->token_to_scan = yylex();
     return (InitializableDeclPart2(context, storage_class));
   } else {
     return 1;
@@ -2436,6 +2436,8 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
   
   //First token already verified as GLOBAL/READONLY
   if (context->token_type == DATA_TYPE_ID) {
+    BrigDataType16_t data_type = context->token_value.data_type;
+
     context->token_to_scan = yylex();
 
     if (!Identifier(context)) {
@@ -2460,7 +2462,7 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
               context->get_symbol_modifier(),   // symbol modifier
               0,                                // dim
               var_name_offset,                  // s_name
-              context->token_value.data_type,                        // data type
+              data_type,                        // data type
               context->get_alignment(),         // alignment
             },
             0,                                // d_init = 0 for arg
