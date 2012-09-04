@@ -4591,3 +4591,88 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
     "reserved must be zero")));
   }
 }
+
+TEST(Brig2LLVMTest, validateBrigInstBar) {
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstBar bib = {
+      sizeof(bib),
+      BrigEInstBar,
+      BrigBarrier,
+      Brigu32,
+      0,
+      {0, 0, 0, 0, 0},
+      1
+    }; 
+    code.append(&bib);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid()); 
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstBar bib = {
+      sizeof(bib),
+      BrigEInstBar,
+      BrigLd,
+      Brigf64x2 + 1,
+      0,
+      {20, 0, 0, 0, 0},
+      8
+    }; 
+    code.append(&bib);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid opcode, should be either BrigBarrier, BrigSync or BrigBrn")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "o_operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid syncFlags, should be either BrigGroupLevel BrigGlobalLevel"
+    "or BrigPartialLevel")));
+  }
+}
