@@ -249,10 +249,12 @@ template<class T> static void MadLogic(T result, T x, T y, T z) {
   } else if(isPosInf(x * y) && isNegInf(z)) {
     EXPECT_PRED1(isNan<T>, result);
   } else {
-    EXPECT_EQ(x * y +z, result);
+    EXPECT_EQ(x * y + z, result);
   }
 }
 // These test are temporarily disabled since they are VERY slow
 // TestAll(SignedInst,         Mad, Ternary)
 // TestAll(UnsignedInst,       Mad, Ternary)
 // TestAll(FloatInst,          Mad, Ternary)
+
+
