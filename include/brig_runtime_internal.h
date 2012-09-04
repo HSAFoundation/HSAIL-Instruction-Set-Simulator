@@ -2,6 +2,7 @@
 #define BRIG_RUNTIME_INTERNAL_H
 
 #include "brig_runtime.h"
+#include <cmath>
 
 namespace hsa {
 namespace brig {
@@ -14,6 +15,7 @@ struct VecPolicy {
   static const unsigned Len = L;
   typedef Base (*UMapFn)(Base);
   typedef Base (*BMapFn)(Base, Base);
+  typedef Base (*SMapFn)(Base, unsigned);
   typedef void (*UForEachFn)(Base);
   typedef void (*BForEachFn)(Base, Base);
   typedef void (*TForEachFn)(Base, Base, Base);
@@ -57,6 +59,13 @@ static T map(typename Vec<T>::BMapFn MapFn, T x, T y) {
   return x;
 }
 
+template<class T>
+static T map(typename Vec<T>::SMapFn MapFn, T x, typename Vec<T>::Base y) {
+  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
+    ((Vec<T>) x)[i] = MapFn(((Vec<T>) x)[i], y);
+  }
+  return x;
+}
 
 template<class T>
 static void ForEach(typename Vec<T>::UForEachFn MapFn, T t) {
@@ -111,6 +120,7 @@ defineVec(s64, 2)
 defineVec(f64, 2)
 
 #define BitInst(D,INST,NARY)                    \
+  D ## NARY(INST, b1)                           \
   D ## NARY(INST, b32)                          \
   D ## NARY(INST, b64)
 
@@ -141,6 +151,23 @@ defineVec(f64, 2)
   NARY ## Vector(D, INST, u16x4)                \
   NARY ## Vector(D, INST, u32x2)
 
+#define ShiftInst(D,INST)                       \
+  D ## Shift(INST, s32)                         \
+  D ## Shift(INST, u32)                         \
+  D ## Shift(INST, s64)                         \
+  D ## Shift(INST, u64)                         \
+  D ## ShiftVector(INST, s8x4)                  \
+  D ## ShiftVector(INST, s8x8)                  \
+  D ## ShiftVector(INST, s16x2)                 \
+  D ## ShiftVector(INST, s16x4)                 \
+  D ## ShiftVector(INST, s32x2)                 \
+  D ## ShiftVector(INST, u8x4)                  \
+  D ## ShiftVector(INST, u8x8)                  \
+  D ## ShiftVector(INST, u16x2)                 \
+  D ## ShiftVector(INST, u16x4)                 \
+  D ## ShiftVector(INST, u32x2)
+
+
 #define FloatVectorInst(D,INST,NARY)            \
   /* NARY ## Vector(D, INST, f16x2) */          \
   /* NARY ## Vector(D, INST, f16x4) */          \
@@ -166,6 +193,16 @@ defineVec(f64, 2)
     return FUNC(t, u);                                  \
   }
 
+#define defineTernary(FUNC,TYPE)                                \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v) {  \
+    return FUNC(t, u, v);                                       \
+  }
+
+#define defineShift(FUNC,TYPE)                                  \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift) {  \
+    return FUNC(t, shift);                                      \
+  }
+
 #define defineUnaryVectorPacking(FUNC,TYPE,PACKING)             \
   extern "C" TYPE FUNC ## _ ## PACKING ## _ ## TYPE (TYPE t) {  \
     return FUNC ## Vector(Vec<TYPE>::PACKING(t));               \
@@ -176,11 +213,19 @@ defineVec(f64, 2)
     return FUNC ## Vector(Vec<TYPE>::P1(t), Vec<TYPE>::P2(u));          \
   }
 
+#define defineShiftVector(FUNC,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift) {  \
+    return FUNC ## Vector(t, shift);                            \
+  }
+
 #define declareUnary(FUNC,TYPE)                 \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t);
 
 #define declareBinary(FUNC,TYPE)                      \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u);
+
+#define declareTernary(FUNC,TYPE)                     \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v);
 
 #define declareUnaryVectorPacking(FUNC,TYPE,PACKING)          \
   extern "C" TYPE FUNC ## _ ## PACKING ## _ ## TYPE (TYPE t);
@@ -203,14 +248,17 @@ template<> struct IntTypes<false> {
   typedef u8  Int8Ty;
 };
 
-template<class T, class U, bool S> struct IntPolicy : public IntTypes<S> {
+template<class T, class U, bool S> struct IntPolicy :
+    public IntTypes<S> {
   typedef U Unsigned;
   static const bool isSigned = S;
   static const unsigned Bits = 8 * sizeof(T);
+  static const unsigned ShiftMask = Bits - 1;
   static const T HighBit = T(T(1) << (Bits - 1));
   static const T Min = isSigned ? HighBit :  T(0);
   static const T Max = ~Min;
   static bool isNeg(T t) { return isSigned && (t & HighBit); }
+  static bool isNegOne(T t) { return isSigned && t == T(~0); }
 };
 
 template<class T> struct Int;
@@ -224,7 +272,19 @@ template<> struct Int<s16> : public IntPolicy<s16, u16, true>  {};
 template<> struct Int<s32> : public IntPolicy<s32, u32, true>  {};
 template<> struct Int<s64> : public IntPolicy<s64, u64, true>  {};
 
-template <class T> inline bool isNan(T t) { return t != t; }
+template<class T> inline bool isNan(T t) { return false; }
+template<> inline bool isNan(float f) { return isnan(f); }
+template<> inline bool isNan(double d) { return isnan(d); }
+
+template<class T> inline bool isDivisionError(T x, T y) {
+  if(y == 0) return true;
+  if(!Int<T>::isSigned) return false;
+  if(Int<T>::isNegOne(x) && y == Int<T>::Min) return true;
+  if(x == Int<T>::Min && Int<T>::isNegOne(y)) return true;
+  return false;
+}
+template<> inline bool isDivisionError(float, float) { return false; }
+template<> inline bool isDivisionError(double, double) { return false; }
 
 } // namespace brig
 } // namespace hsa

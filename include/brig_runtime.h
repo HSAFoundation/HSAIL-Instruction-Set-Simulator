@@ -26,7 +26,6 @@ typedef  int32_t   s32;
 typedef uint64_t   b64;
 typedef uint64_t   u64;
 typedef  int64_t   s64;
-typedef b64        b128[2];
 
 // typedef __half f16; // Not a real half yet.
 typedef float  f32;
@@ -61,6 +60,8 @@ declareVector(f32, 4);
 declareVector(u64, 2);
 declareVector(s64, 2);
 declareVector(f64, 2);
+
+typedef u32x4 b128;
 
 #undef declareVector
 #undef vector
