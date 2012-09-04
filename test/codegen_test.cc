@@ -515,7 +515,7 @@ TEST(CodegenTest, Example4_Branch) {
   EXPECT_EQ(Brigb1, cbr_op.type);
   EXPECT_EQ(0U, cbr_op.o_operands[0]);
   EXPECT_EQ(8U, cbr_op.o_operands[1]);
-  EXPECT_EQ(44U, cbr_op.o_operands[2]);
+  EXPECT_EQ(20U, cbr_op.o_operands[2]);
   EXPECT_EQ(0U, cbr_op.o_operands[3]);
   EXPECT_EQ(0U, cbr_op.o_operands[4]);
 
@@ -525,7 +525,7 @@ TEST(CodegenTest, Example4_Branch) {
   EXPECT_EQ(36U, br_op.size);
   EXPECT_EQ(BrigBrn, br_op.opcode);
   EXPECT_EQ(0U, br_op.o_operands[0]);
-  EXPECT_EQ(76U, br_op.o_operands[1]);
+  EXPECT_EQ(52U, br_op.o_operands[1]);
   EXPECT_EQ(0U, br_op.o_operands[2]);
   EXPECT_EQ(0U, br_op.o_operands[3]);
   EXPECT_EQ(0U, br_op.o_operands[4]);

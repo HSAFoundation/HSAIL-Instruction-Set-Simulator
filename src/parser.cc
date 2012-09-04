@@ -4568,7 +4568,6 @@ int Instruction1(Context* context) {
       inst1_op.o_operands[0] = context->operand_map[oper_name]; 
       if (context->token_to_scan == ';') {
         context->append_code(&inst1_op);
-        printf("%d\n" , context->get_code_offset());
         context->token_to_scan = yylex();
         return 0;
       } else {
@@ -6452,4 +6451,4 @@ int TopLevelStatements(Context *context){
 }  
 
 }  // namespace brig
-}  // namespace hsapointpoint
+}  // namespace hsa
