@@ -1027,14 +1027,6 @@ enum BrigBoundaryMode {
   BrigSamplerBorder
 };
 
-enum BrigGeom {
-  Briggeom_1d,
-  Briggeom_2d,
-  Briggeom_3d,
-  Briggeom_1da,
-  Briggeom_1db,
-  Briggeom_2da
-};
 
 enum BrigCompareOperation {
   BrigEq,
