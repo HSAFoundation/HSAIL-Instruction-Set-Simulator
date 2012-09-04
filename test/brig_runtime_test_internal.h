@@ -169,6 +169,16 @@ static void TestInst(T (*Impl)(T, T), void (*Logic)(T, T, T)) {
 }
 
 template<class T>
+static void TestInst(T (*Impl)(T, T, T), void (*Logic)(T, T, T, T)) {
+  const std::vector<T> &testVector = getTestVector<T>();
+  for(unsigned i = 0; i < testVector.size(); ++i)
+    for(unsigned j = 0; j < testVector.size(); ++j)
+      for(unsigned k = 0; k < testVector.size(); ++k)
+        Logic(Impl(testVector[i], testVector[j], testVector[k]),
+              testVector[i], testVector[j], testVector[k]);
+}
+
+template<class T>
 static void TestVectorInst(T (*Impl)(T), void (*Logic)(T, T)) {
   typedef typename hsa::brig::Vec<T>::Base Base;
   const std::vector<Base> &testVector = getTestVector<Base>();
@@ -202,5 +212,17 @@ template<> bool isNegZero(double d) {
 template<class T> static bool isPosZero(T t) { return !isNegZero(t); }
 
 template<class T> static bool Not(bool (*Fn)(T), T t) { return !Fn(t); }
+
+template<class T> static bool isInf(T t) { return false; }
+template<> bool isInf(float f)  { return isinf(f); }
+template<> bool isInf(double d) { return isinf(d); }
+
+template<class T> static bool isPosInf(T t) { return false; }
+template<> bool isPosInf(float f)  { return isinf(f) && f > 0.0; }
+template<> bool isPosInf(double d) { return isinf(d) && d > 0.0; }
+
+template<class T> static bool isNegInf(T t) { return false; }
+template<> bool isNegInf(float f)  { return isinf(f) && f < 0.0; }
+template<> bool isNegInf(double d) { return isinf(d) && d < 0.0; }
 
 #endif // BRIG_RUNTIME_TEST_INTERNAL_H
