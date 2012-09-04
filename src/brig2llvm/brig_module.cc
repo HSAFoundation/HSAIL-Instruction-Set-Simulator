@@ -605,15 +605,8 @@ bool BrigModule::validate(const BrigInstAtomicImage *code) const {
   }
   valid &= check(code->atomicOperation <= BrigAtomicSub,
                  "Invalid atomicOperation");
-  valid &= check(code->storageClass == BrigGlobalSpace ||
-                 code->storageClass == BrigGroupSpace ||
-                 code->storageClass == BrigPrivateSpace ||
-                 code->storageClass == BrigKernargSpace ||
-                 code->storageClass == BrigReadonlySpace ||
-                 code->storageClass == BrigSpillSpace ||
-                 code->storageClass == BrigArgSpace,
-                 "Invalid storage class, can be global, group, "
-                 "private, kernarg, readonly, spill, or arg");
+  valid &= check(code->storageClass == BrigGlobalSpace,
+                 "Invalid storage class, must be global");
   valid &= check(code->memorySemantic == BrigAcquire ||
                  code->memorySemantic == BrigAcquireRelease ||
                  code->memorySemantic == BrigParAcquireRelease,

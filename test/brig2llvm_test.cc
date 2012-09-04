@@ -749,8 +749,7 @@ TEST(Brig2LLVMTest, Example5) {
 }
 
 TEST(Brig2LLVMTest, Example6) {
-// this test case is same as the wiki
-#if 0
+#if 0  // this test case is same as the wiki
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&callee"));
@@ -782,9 +781,9 @@ TEST(Brig2LLVMTest, Example6) {
       0,                               // c_code
       0,                               // s_name
       1,                               // inParamCount
-      140,                  // d_firstScopeDirective
+      140,                             // d_firstScopeDirective
       3,                               // operationCount
-      140,                  // d_nextDirective
+      140,                             // d_nextDirective
       BrigNone,                        // attribute
       0,                               // fbarCount
       1,                               // outParamCount
@@ -855,7 +854,7 @@ TEST(Brig2LLVMTest, Example6) {
 
     BrigDirectiveSymbol bdsy3 = {
       sizeof(bdsy3),                    // size
-      BrigEDirectiveSymbol,            // kind
+      BrigEDirectiveSymbol,             // kind
       {
         120,                             // c_code
         BrigArgSpace,                    // storageClass
@@ -1046,7 +1045,7 @@ TEST(Brig2LLVMTest, Example6) {
       sizeof(boal1),                   // size
       BrigEOperandArgumentList,        // kind
       1,                               // elementCount
-      {116}                              // o_args[0]
+      {116}                            // o_args[0]
     };
     operands.append(&boal1);
 
@@ -1061,7 +1060,7 @@ TEST(Brig2LLVMTest, Example6) {
       sizeof(boal2),                   // size
       BrigEOperandArgumentList,        // kind
       1,                               // elementCount
-      {136}                              // o_args[0]
+      {136}                            // o_args[0]
     };
     operands.append(&boal2);
 
@@ -1074,6 +1073,7 @@ TEST(Brig2LLVMTest, Example6) {
   
     hsa::brig::GenLLVM codegen(strings, directives, code, operands);
     codegen();
+
     EXPECT_NE(0, codegen.str().size());
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
     "define void @callee(float *%output, float *%input) {")));
@@ -1086,9 +1086,9 @@ TEST(Brig2LLVMTest, Example6) {
     llvm::ArrayRef<void *> args;
     hsa::brig::launchBrig(mod, mod->getFunction("caller"), args);
   }
-#endif
-//this test case move the seventh operands to the last
-#if 0
+#endif  //end of this test case is same as the wiki
+  
+#if 0  //this test case move the seventh operands to the last
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&callee"));
@@ -1127,7 +1127,7 @@ TEST(Brig2LLVMTest, Example6) {
       BrigNone,                        // attribute
       0,                               // fbarCount
       1,                               // outParamCount
-      100                               // d_firstParam           
+      100                              // d_firstParam           
     };
     directives.append(&callee);
 
@@ -1270,7 +1270,7 @@ TEST(Brig2LLVMTest, Example6) {
       BrigRet,                         //opcode
       Brigf32,                         //type
       BrigNoPacking,                   //packing
-      {0, 0, 0, 0, 0},                 //o_operand/this test case move the seventh operands to the last
+      {0, 0, 0, 0, 0},                 //o_operand
     };
     code.append(&ret);
 
@@ -1293,7 +1293,7 @@ TEST(Brig2LLVMTest, Example6) {
       BrigCall,                        // opcode
       Brigf32,                         // type
       BrigNoPacking,                   // packing
-      { 0, 88, 80, 108, 0 },          // o_operand
+      { 0, 88, 80, 108, 0 },           // o_operand
     };
     code.append(&call);
     code.append(&ld1);
@@ -1306,7 +1306,7 @@ TEST(Brig2LLVMTest, Example6) {
       BrigLd,                          // opcode
       Brigf32,                         // type
       BrigNoPacking,                   // packing
-      { 0, 8,  128, 0, 0 },             // o_operand
+      { 0, 8,  128, 0, 0 },            // o_operand
       BrigArgSpace,                    // storageClasss
       BrigRegular,                     // memorySemantic
       0                                // equivClass      
@@ -1375,7 +1375,7 @@ TEST(Brig2LLVMTest, Example6) {
       sizeof(boal1),                   // size
       BrigEOperandArgumentList,        // kind
       1,                               // elementCount
-      {100}                              // o_args[0]
+      {100}                             // o_args[0]
     };
     operands.append(&boal1);
 
@@ -1390,7 +1390,7 @@ TEST(Brig2LLVMTest, Example6) {
       sizeof(boal2),                   // size
       BrigEOperandArgumentList,        // kind
       1,                               // elementCount
-      {120}                              // o_args[0]
+      {120}                            // o_args[0]
     };
     operands.append(&boal2);
 
@@ -1403,7 +1403,7 @@ TEST(Brig2LLVMTest, Example6) {
 
     BrigOperandAddress boa4 = {
       sizeof(boa4),                    // size
-      BrigEOperandAddress,             // kind/this test case move the seventh operands to the last
+      BrigEOperandAddress,             // kind
       Brigb32,                         // type
       0,                               // reserved
       228,                             // directive
@@ -1425,7 +1425,7 @@ TEST(Brig2LLVMTest, Example6) {
     llvm::ArrayRef<void *> args;
     hsa::brig::launchBrig(mod, mod->getFunction("caller"), args);
   }
-#endif
+#endif  //end of this test case move the seventh operands to the last
 }
 
 TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
@@ -3904,8 +3904,7 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid atomicOperation")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid storage class, can be global, group, private, kernarg, "
-    "readonly, spill, or arg")));
+    "Invalid storage class, must be global")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, "
     "BrigParAcquireRelease")));
