@@ -2840,7 +2840,37 @@ int FunctionSignature(Context *context) {
 
 int Label(Context* context) {
   if (context->token_to_scan == TOKEN_LABEL) {
+    BrigDirectiveLabel label_directive = {
+      12,                     // size
+      BrigEDirectiveLabel,    // kind
+      0,                      // c_code
+      0                       // s_name
+    };
+    std::string s_name = context->token_value.string_val;
+
     if (yylex() == ':') {
+      if (!context->symbol_map.count(s_name)) {
+        label_directive.c_code = context->get_code_offset();
+        BrigsOffset32_t str_offset = context->lookup_symbol(s_name);
+        if (str_offset == -1) {
+          str_offset = context->get_string_offset();
+          context->add_symbol(s_name);
+        }
+        label_directive.s_name = str_offset;
+        if (context->label_o_map.count(s_name)) {
+          BrigoOffset32_t ope_offset = context->label_o_map[s_name];
+          BrigdOffset32_t lab_dir_offset = context->get_directive_offset();
+          unsigned char* lab_d_Offset = reinterpret_cast<unsigned char*>(&lab_dir_offset);
+          // sizeof(uint16_t) << 1: 
+          // leaped over BrigOperandLabelRef.size and .kind
+          // make the offset to point the address of labeldirecitive in BrigOperandLabelRef
+          context->update_operand_bytes(lab_d_Offset, 
+                                        ope_offset + sizeof(uint16_t) * 2, 
+                                        sizeof(BrigdOffset32_t));
+        }
+        context->symbol_map[s_name] = context->get_directive_offset();
+        context->append_directive(&label_directive);
+      }
       context->token_to_scan = yylex();
       return 0;
     } else {
@@ -6407,4 +6437,4 @@ int TopLevelStatements(Context *context){
 }  
 
 }  // namespace brig
-}  // namespace hsa
+}  // namespace hsapointpoint
