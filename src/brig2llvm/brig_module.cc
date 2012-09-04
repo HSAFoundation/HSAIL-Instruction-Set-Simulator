@@ -537,6 +537,25 @@ bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) const {
 }
 
 // validating the code section
+bool BrigModule::validate(const BrigAluModifier *c) const {
+  bool valid = true;
+  if(c->approx == 1) {
+    valid &= check(c->floatOrInt == 1,
+                   "Invalid floatOrInt");
+  }
+  if(c->floatOrInt == 1) {
+    valid &= check(c->hi == 0,
+                   "Invalid hi");
+  }
+  if(c->floatOrInt == 0) {
+    valid &= check(c->ftz == 0,
+                   "Invalid ftz");
+  }
+  valid &= check(c->reserved == 0,
+                 "Invalid reserved");
+  return valid;
+}
+
 bool BrigModule::validate(const BrigInstAtomic *code) const {
   bool valid = true;
   valid &= check(code->opcode == BrigAtomic ||
@@ -595,8 +614,45 @@ bool BrigModule::validate(const BrigInstImage *code) const { return true; }
 bool BrigModule::validate(const BrigInstCvt *code) const { return true; }
 bool BrigModule::validate(const BrigInstLdSt *code) const { return true; }
 bool BrigModule::validate(const BrigInstMem *code) const { return true; }
-bool BrigModule::validate(const BrigInstMod *code) const { return true; }
-bool BrigModule::validate(const BrigInstRead *code) const { return true; }
+bool BrigModule::validate(const BrigInstMod *code) const { 
+  bool valid = true;
+  valid &= check(code->opcode <= BrigFbarInitSizeKnown,
+                 "Invalid opcode");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  valid &= check(code->packing <= BrigPackPsat,
+                 "Invalid packing control");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                   "o_operands past the operands section");
+    }
+  }
+  valid &= validate(&code->aluModifier);
+  return valid;
+}
+bool BrigModule::validate(const BrigInstRead *code) const { 
+  bool valid = true;
+  valid &= check(code->opcode == BrigRdImage,
+                 "Invalid opcode");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                   "o_operands past the operands section");
+    }
+  }
+  valid &= check(code->geom <= Briggeom_2da,
+                 "Invalid type of image geometry");
+  valid &= check(code->stype <= Brigf64x2,
+                 "Invalide type");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  valid &= check(code->packing <= BrigPackPsat,
+                 "Invalid packing control");
+  valid &= check(code->reserved == 0,
+                 "reserved must be zero");
+  return valid;
+}
 
 bool BrigModule::validate(const inst_iterator inst) const {
 
