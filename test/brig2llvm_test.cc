@@ -3484,16 +3484,16 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer code;
     BrigInstCmp bic = {
-      sizeof(bic),
-      BrigEInstCmp,
-      BrigCmp,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 0, 0, 0},
-      0,
-      0,
-      0
+      sizeof(bic),              //size
+      BrigEInstCmp,             //kind
+      BrigCmp,                  //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 0, 0, 0, 0},    //aluModifier
+      0,                        //comparisonOperator
+      0,                        //sourceType
+      0                         //reserved
     };
     code.append(&bic);
 
@@ -3521,16 +3521,16 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer code;
     BrigInstCmp bic = {
-      sizeof(bic),
-      BrigEInstCmp,
-      BrigCmp + 1,
-      Brigf64x2 + 1,
-      BrigPackPsat + 1,
-      {20, 0, 0, 0, 0},
-      {0, 0, 0, 0, 0, 0, 0},
-      BrigSgtu + 1,
-      Brigf64x2 + 1,
-      1
+      sizeof(bic),              //size
+      BrigEInstCmp,             //kind
+      BrigCmp + 1,              //opcode
+      Brigf64x2 + 1,            //type
+      BrigPackPsat + 1,         //packing
+      {20, 0, 0, 0, 0},         //o_operands[5]
+      {0, 0, 0, 0, 0, 0, 0},    //aluModifier
+      BrigSgtu + 1,             //comparisonOperator;
+      Brigf64x2 + 1,            //sourceType
+      1                         //reserved
     };
     code.append(&bic);
     hsa::brig::Buffer operands;
@@ -3574,16 +3574,16 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer code;
     BrigInstCmp bic = {
-      sizeof(bic),
-      BrigEInstCmp,
-      0,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 1, 0, 0},
-      0,
-      0,
-      0
+      sizeof(bic),              //size
+      BrigEInstCmp,             //kind
+      0,                        //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 0, 1, 0, 0},    //aluModifier
+      0,                        //comparisonOperator
+      0,                        //sourceType
+      0                         //reserved
     };
     code.append(&bic);
 
@@ -3616,16 +3616,16 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer code;
     BrigInstCmp bic = {
-      sizeof(bic),
-      BrigEInstCmp,
-      0,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
-      {1, 0, 1, 0, 0, 0, 0},
-      0,
-      0,
-      0
+      sizeof(bic),              //size
+      BrigEInstCmp,             //kind
+      0,                        //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {1, 0, 1, 0, 0, 0, 0},    //aluModifier
+      0,                        //comparisonOperator
+      0,                        //sourceType
+      0                         //reserved
     };
     code.append(&bic);
 
@@ -3658,16 +3658,16 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer code;
     BrigInstCmp bic = {
-      sizeof(bic),
-      BrigEInstCmp,
-      0,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
-      {0, 0, 0, 1, 0, 0, 0},
-      0,
-      0,
-      0
+      sizeof(bic),              //size
+      BrigEInstCmp,             //kind
+      0,                        //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 1, 0, 0, 0},    //aluModifier
+      0,                        //comparisonOperator
+      0,                        //sourceType
+      0                         //reserved
     };
     code.append(&bic);
 
@@ -3700,16 +3700,16 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer code;
     BrigInstCmp bic = {
-      sizeof(bic),
-      BrigEInstCmp,
-      0,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 0, 0, 1},
-      0,
-      0,
-      0
+      sizeof(bic),              //size
+      BrigEInstCmp,             //kind
+      0,                        //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 0, 0, 0, 1},    //aluModifier
+      0,                        //comparisonOperator
+      0,                        //sourceType
+      0                         //reserved
     };
     code.append(&bic);
 
