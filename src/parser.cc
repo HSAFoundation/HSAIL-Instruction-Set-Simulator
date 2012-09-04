@@ -4475,12 +4475,30 @@ int Instruction0(Context* context) {
 }
 
 int Instruction1(Context* context) {
+ 
+  BrigInstBase inst1_op = {
+    sizeof(inst1_op),
+    BrigEInstBase,
+    BrigLaneId,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0}
+  };
+
+  inst1_op.opcode = context->token_value.opcode;
+
   if (context->token_type == INSTRUCTION1_OPCODE_NODT) {
     // Instruction1OpcodeNoDT
     context->token_to_scan = yylex();
     if (!RoundingMode(context)) {  // with RoundingMode
-      if (!Operand(context)) {
+      if (context->token_to_scan == TOKEN_SREGISTER) { 
+        std::string oper_name = context->token_value.string_val;
+        if (Operand(context)) {
+          return 1;
+        }
+        inst1_op.o_operands[0] = context->operand_map[oper_name];
         if (context->token_to_scan == ';') {
+          context->append_code(&inst1_op);
           context->token_to_scan = yylex();
           return 0;
         } else {
@@ -4488,21 +4506,34 @@ int Instruction1(Context* context) {
         }
       } else {
          context->set_error(MISSING_OPERAND);
+      } // without RoundingMode
+    } else if (context->token_to_scan == TOKEN_SREGISTER) { 
+      std::string oper_name = context->token_value.string_val;
+      if (Operand(context)) {
+        return 1;
       }
-    } else if (!Operand(context)) {  // without RoundingMode
+      inst1_op.o_operands[0] = context->operand_map[oper_name]; 
       if (context->token_to_scan == ';') {
+        context->append_code(&inst1_op);
+        printf("%d\n" , context->get_code_offset());
         context->token_to_scan = yylex();
         return 0;
       } else {
         context->set_error(MISSING_SEMICOLON);
-      }
+    }
     } else {
-        context->set_error(MISSING_OPERAND);
+      context->set_error(MISSING_OPERAND);
     }
   } else if (context->token_to_scan == CLOCK) {  // clock
     context->token_to_scan = yylex();
-    if (!Operand(context)) {
+    if (context->token_to_scan == TOKEN_DREGISTER) { 
+      std::string oper_name = context->token_value.string_val;
+      if (Operand(context)) {
+        return 1;
+      }
+      inst1_op.o_operands[0] = context->operand_map[oper_name]; 
       if (context->token_to_scan == ';') {
+        context->append_code(&inst1_op);
         context->token_to_scan = yylex();
         return 0;
       } else {
@@ -4513,11 +4544,18 @@ int Instruction1(Context* context) {
     }
   } else if (context->token_type == INSTRUCTION1_OPCODE) {
     context->token_to_scan = yylex();
-    if (!RoundingMode(context)) {  // with RoundingMode
+    if (!RoundingMode(context)) {  // with RoundingMode        
       if (context->token_type == DATA_TYPE_ID) {
+        inst1_op.type = context->token_value.data_type;
         context->token_to_scan = yylex();
-        if (!Operand(context)) {
+        if (context->token_type == REGISTER) { 
+          std::string oper_name = context->token_value.string_val;
+          if (Operand(context)) {
+            return 1;
+          }
+          inst1_op.o_operands[0] = context->operand_map[oper_name]; 
           if (context->token_to_scan == ';') {
+            context->append_code(&inst1_op);
             context->token_to_scan = yylex();
             return 0;
           } else {
@@ -4530,9 +4568,16 @@ int Instruction1(Context* context) {
         context->set_error(MISSING_DATA_TYPE);
       }
     } else if (context->token_type == DATA_TYPE_ID) {  // without RoundingMode
+      inst1_op.type = context->token_value.data_type;
       context->token_to_scan = yylex();
-      if (!Operand(context)) {
+      if (context->token_type == REGISTER) { 
+        std::string oper_name = context->token_value.string_val;
+        if (Operand(context)) {
+          return 1;
+        }
+        inst1_op.o_operands[0] = context->operand_map[oper_name]; 
         if (context->token_to_scan == ';') {
+          context->append_code(&inst1_op);
           context->token_to_scan = yylex();
           return 0;
         } else {

@@ -2017,7 +2017,7 @@ TEST(ParserTest, Instruction1) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("clock $c2;\n");  // clock
+  input.assign("clock $d2;\n");  // clock
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
