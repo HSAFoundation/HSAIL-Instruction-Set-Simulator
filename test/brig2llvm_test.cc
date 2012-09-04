@@ -4499,3 +4499,95 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
     "Invalid reserved")));
   }
 }
+TEST(Brig2LLVMTest, validateBrigInstImage) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+
+    BrigInstImage bii = {
+      sizeof(bii),              //size
+      BrigEInstImage,           //kind
+      BrigRdImage,              //opcode
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      0,                        //geom
+      0,                        //type
+      0,                        //stype
+      0,                        //packing
+      0                         //reserved
+    };
+    code.append(&bii);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstImage bii = {
+      sizeof(bii),              //size
+      BrigEInstImage,           //kind
+      BrigRdImage + 1,          //opcode
+      {20, 0, 0, 0, 0},         //o_operands[5]
+      Briggeom_2da + 1,         //geom
+      Brigf64x2 + 1,            //type
+      Brigf64x2 + 1,            //stype
+      BrigPackPsat + 1,         //packing
+      1                         //reserved
+    };
+    code.append(&bii);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid opcode")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "o_operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type of image geometry")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid stype")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid packing control")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "reserved must be zero")));
+  }
+}
