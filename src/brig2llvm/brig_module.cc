@@ -609,7 +609,29 @@ bool BrigModule::validate(const BrigInstBase *code) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigInstCmp *code) const { return true; }
+bool BrigModule::validate(const BrigInstCmp *code) const { 
+  bool valid = true;
+  valid &= check(code->opcode == BrigCmp,
+                 "Invalid opcode");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  valid &= check(code->packing <= BrigPackPsat,
+                 "Invalid packing control");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                   "o_operands past the operands section");
+    }
+  }
+  valid &= validate(&code->aluModifier);
+  valid &= check(code->comparisonOperator <= BrigSgtu,
+                 "Invalid comparisonOperator");
+  valid &= check(code->sourceType <= Brigf64x2,
+                 "Invalid sourceType");
+  valid &= check(code->reserved == 0,
+                 "Invalid reserved");
+  return valid;
+}
 bool BrigModule::validate(const BrigInstImage *code) const { return true; }
 bool BrigModule::validate(const BrigInstCvt *code) const { return true; }
 bool BrigModule::validate(const BrigInstLdSt *code) const { return true; }
