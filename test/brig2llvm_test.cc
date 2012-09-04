@@ -3464,3 +3464,263 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
     "Invalid reserved")));
   }
 }
+TEST(Brig2LLVMTest, validateBrigInstCmp) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCmp bic = {
+      sizeof(bic),
+      BrigEInstCmp,
+      BrigCmp,
+      0,
+      0,
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0, 0, 0},
+      0,
+      0,
+      0
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCmp bic = {
+      sizeof(bic),
+      BrigEInstCmp,
+      BrigCmp + 1,
+      Brigf64x2 + 1,
+      BrigPackPsat + 1,
+      {20, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0, 0, 0},
+      BrigSgtu + 1,
+      Brigf64x2 + 1,
+      1
+    };
+    code.append(&bic);
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid opcode")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid packing control")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "o_operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid comparisonOperator")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid sourceType")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid reserved")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCmp bic = {
+      sizeof(bic),
+      BrigEInstCmp,
+      0,
+      0,
+      0,
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 1, 0, 0},
+      0,
+      0,
+      0
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid floatOrInt")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCmp bic = {
+      sizeof(bic),
+      BrigEInstCmp,
+      0,
+      0,
+      0,
+      {0, 0, 0, 0, 0},
+      {1, 0, 1, 0, 0, 0, 0},
+      0,
+      0,
+      0
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid hi")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCmp bic = {
+      sizeof(bic),
+      BrigEInstCmp,
+      0,
+      0,
+      0,
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 1, 0, 0, 0},
+      0,
+      0,
+      0
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid ftz")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCmp bic = {
+      sizeof(bic),
+      BrigEInstCmp,
+      0,
+      0,
+      0,
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0, 0, 1},
+      0,
+      0,
+      0
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid reserved")));
+  }
+}
