@@ -13,19 +13,9 @@
     TestInst(INST, LOGIC);                      \
   }
 
-#define MakeShiftTest(INST,LOGIC)               \
-  TEST(BrigRuntimeTest, INST) {                 \
-    TestShift(INST, LOGIC);                     \
-  }
-
 #define MakeVectorTest(INST,LOGIC)              \
   TEST(BrigRuntimeTest, INST) {                 \
     TestVectorInst(INST, LOGIC);                \
-  }
-
-#define MakeVectorShiftTest(INST,LOGIC)         \
-  TEST(BrigRuntimeTest, INST) {                 \
-    TestVectorShift(INST, LOGIC);               \
   }
 
 #define TestAll(TYPE,INST,NARY)                 \
@@ -50,21 +40,15 @@
   MakeTest(INST ## _f32, INST ## Logic)         \
   MakeTest(INST ## _f64, INST ## Logic)
 
-#define TestShiftInst(INST,NARY)                            \
-  MakeShiftTest(INST ## _s32, INST ## Logic)                \
-  MakeShiftTest(INST ## _u32, INST ## Logic)                \
-  MakeShiftTest(INST ## _s64, INST ## Logic)                \
-  MakeShiftTest(INST ## _u64, INST ## Logic)                \
-  MakeVectorShiftTest(INST ## _s8x4,  INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _s8x8,  INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _s16x2, INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _s16x4, INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _s32x2, INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _u8x4,  INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _u8x8,  INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _u16x2, INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _u16x4, INST ## VectorLogic)  \
-  MakeVectorShiftTest(INST ## _u32x2, INST ## VectorLogic)
+#define TestShiftInst(INST,NARY)                      \
+  TestSignedInst(INST, NARY)                          \
+  TestUnsignedInst(INST, NARY)                        \
+  MakeVectorTest(INST ## _s8x4,  INST ## VectorLogic) \
+  MakeVectorTest(INST ## _s16x2, INST ## VectorLogic) \
+  MakeVectorTest(INST ## _s32x2, INST ## VectorLogic) \
+  MakeVectorTest(INST ## _u8x4,  INST ## VectorLogic) \
+  MakeVectorTest(INST ## _u16x2, INST ## VectorLogic) \
+  MakeVectorTest(INST ## _u32x2, INST ## VectorLogic)
 
 #define TestSignedVectorInst(INST,NARY)         \
   Test ## NARY ## SignedVectorInst(INST)
@@ -189,69 +173,52 @@ template<class T> static const std::vector<T> &getTestVector() {
   return testVector;
 }
 
-template<class T, class R>
-static void TestInst(R (*Impl)(T), void (*Logic)(R, T)) {
-  const std::vector<T> &testVector = getTestVector<T>();
-  for(unsigned i = 0; i < testVector.size(); ++i) {
-    T a = testVector[i];
+template<class R, class A>
+static void TestInst(R (*Impl)(A), void (*Logic)(R, A)) {
+  for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
+    A a = getTestVector<A>()[i];
     Logic(Impl(a), a);
   }
 }
 
-template<class T, class R>
-static void TestInst(R (*Impl)(T, T), void (*Logic)(R, T, T)) {
-  const std::vector<T> &testVector = getTestVector<T>();
-  for(unsigned i = 0; i < testVector.size(); ++i) {
-    T a = testVector[i];
-    for(unsigned j = 0; j < testVector.size(); ++j) {
-      T b = testVector[j];
+template<class R, class A, class B>
+static void TestInst(R (*Impl)(A, B), void (*Logic)(R, A, B)) {
+  for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
+    A a = getTestVector<A>()[i];
+    for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      B b = getTestVector<B>()[j];
       Logic(Impl(a, b), a, b);
     }
   }
 }
 
-template<class T, class R>
-static void TestInst(R (*Impl)(T, T, T), void (*Logic)(R, T, T, T)) {
-  const std::vector<T> &testVector = getTestVector<T>();
-  for(unsigned i = 0; i < testVector.size(); ++i) {
-    T a = testVector[i];
-    for(unsigned j = 0; j < testVector.size(); ++j) {
-      T b = testVector[j];
-      for(unsigned k = 0; k < testVector.size(); ++k) {
-        T c = testVector[k];
+template<class R, class A, class B, class C>
+static void TestInst(R (*Impl)(A, B, C), void (*Logic)(R, A, B, C)) {
+  for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
+    A a = getTestVector<A>()[i];
+    for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      B b = getTestVector<B>()[j];
+      for(unsigned k = 0; k < getTestVector<C>().size(); ++k) {
+        C c = getTestVector<C>()[k];
         Logic(Impl(a, b, c), a, b, c);
       }
     }
   }
 }
 
-template<class T, class R>
-static void TestInst(R (*Impl)(T, T, T, T), void (*Logic)(R, T, T, T, T)) {
-  const std::vector<T> &testVector = getTestVector<T>();
-  for(unsigned i = 0; i < testVector.size(); ++i) {
-    T a = testVector[i];
-    for(unsigned j = 0; j < testVector.size(); ++j) {
-      T b = testVector[j];
-      for(unsigned k = 0; k < testVector.size(); ++k) {
-        T c = testVector[k];
-        for(unsigned m = 0; m < testVector.size(); ++m) {
-          T d = testVector[m];
+template<class R, class A, class B, class C, class D>
+static void TestInst(R (*Impl)(A, B, C, D), void (*Logic)(R, A, B, C, D)) {
+  for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
+    A a = getTestVector<A>()[i];
+    for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      B b = getTestVector<B>()[j];
+      for(unsigned k = 0; k < getTestVector<C>().size(); ++k) {
+        C c = getTestVector<C>()[k];
+        for(unsigned m = 0; m < getTestVector<D>().size(); ++m) {
+          D d = getTestVector<D>()[m];
           Logic(Impl(a, b, c, d), a, b, c, d);
         }
       }
-    }
-  }
-}
-
-template<class T, class R>
-static void TestShift(R (*Impl)(T, unsigned), void (*Logic)(R, T, unsigned)) {
-  const std::vector<T> &testVectorT = getTestVector<T>();
-  const std::vector<unsigned> &testVectorU = getTestVector<unsigned>();
-  for(unsigned i = 0; i < testVectorT.size(); ++i) {
-    T a = testVectorT[i];
-    for(unsigned j = 0; j < testVectorU.size(); ++j) {
-      unsigned b = testVectorU[j];
-      Logic(Impl(a, b), a, b);
     }
   }
 }
@@ -280,8 +247,8 @@ static void TestVectorInst(R (*Impl)(T, T), void (*Logic)(R, T, T)) {
 }
 
 template<class T, class R>
-static void TestVectorShift(R (*Impl)(T, unsigned),
-                            void (*Logic)(R, T, unsigned)) {
+static void TestVectorInst(R (*Impl)(T, unsigned),
+                           void (*Logic)(R, T, unsigned)) {
   typedef typename hsa::brig::Vec<T>::Base Base;
   const std::vector<Base> &testVectorB = getTestVector<Base>();
   const std::vector<unsigned> &testVectorU = getTestVector<unsigned>();

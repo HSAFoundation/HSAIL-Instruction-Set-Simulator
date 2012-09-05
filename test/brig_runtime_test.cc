@@ -10,8 +10,6 @@ using hsa::brig::Int24Ty;
 using hsa::brig::Int12Ty;
 using hsa::brig::Vec;
 
-GTEST_DEFINE_bool_(run_slow_tests, false, "Enable slow tests");
-
 template<class T> static void AbsLogic(T result, T a) {
   if(!isNan(result) && !isNan(a))  {
     EXPECT_TRUE(result == a || result == -a);
@@ -496,11 +494,11 @@ static void Movd_lo_b64_Logic(b64 result, b64 a, b32 b) {
   EXPECT_EQ(b32(b), b32(result));
 }
 extern "C" b64 Movd_lo_b64(b64, b32);
-MakeShiftTest(Movd_lo_b64, Movd_lo_b64_Logic)
+MakeTest(Movd_lo_b64, Movd_lo_b64_Logic)
 
 static void Movd_hi_b64_Logic(b64 result, b64 a, b32 b) {
   EXPECT_EQ(a >> 32, b32(result));
   EXPECT_EQ(b32(b), result >> 32);
 }
 extern "C" b64 Movd_hi_b64(b64, b32);
-MakeShiftTest(Movd_hi_b64, Movd_hi_b64_Logic)
+MakeTest(Movd_hi_b64, Movd_hi_b64_Logic)
