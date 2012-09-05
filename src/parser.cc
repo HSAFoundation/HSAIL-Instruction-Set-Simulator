@@ -1899,9 +1899,9 @@ int Codeblock(Context* context) {
       BrigEOperandLabelRef,
       label_directive_offset
       };
-
-      context->append_operand(&label_operand);
-      context->label_o_map[label_name] = label_operand_offset;
+      // TODO(Chuang): BrigOperandLabelRef shouldn't be generated in here.
+      // context->append_operand(&label_operand);
+      // context->label_o_map[label_name] = label_operand_offset;
 
       // update the d_nextDirective.
       BrigDirectiveFunction bdf;
@@ -2116,15 +2116,24 @@ int Branch(Context* context) {
           // 1. check if the label is already defined,
           // 2. if defined, just set it up
           // 3. if not, add it to the multimap
-          std::string label_name = context->token_value.string_val;
 
-          if (context->label_o_map.count(label_name)) {
-            inst_op.o_operands[2] = context->label_o_map[label_name];
-          } else {
-            context->label_c_map.insert(make_pair(
-                                          label_name,
-                                          context->get_code_offset()+20));
-          }
+              std::string label_name = context->token_value.string_val;
+              
+              if (context->label_o_map.count(label_name)) {
+                inst_op.o_operands[2] = context->label_o_map[label_name];
+              } else {
+                BrigOperandLabelRef opLabelRef = {
+                  8,
+                  BrigEOperandLabelRef,
+                  -1
+                };
+                inst_op.o_operands[2] = context->get_operand_offset();
+                context->label_o_map[label_name] = context->get_operand_offset();
+                if (context->symbol_map.count(label_name)) {
+                  opLabelRef.labeldirective = context->symbol_map[label_name];
+                }
+                context->append_operand(&opLabelRef);
+              }
 
           context->token_to_scan = yylex();  // should be ';'
         } else if (!Identifier(context)) {
@@ -2133,11 +2142,10 @@ int Branch(Context* context) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
 
-            if (context->token_to_scan == TOKEN_LABEL) {  // LABEL
-                context->token_to_scan = yylex();  // should be ';'
+            if (context->token_to_scan == TOKEN_LABEL) {  // LABEL                
+              context->token_to_scan = yylex();  // should be ';'
             } else if (context->token_to_scan == '[') {
               context->token_to_scan = yylex();
-
               if (!Identifier(context)) {
                 context->token_to_scan = yylex();  // should be ']'
               } else if (context->token_to_scan == TOKEN_LABEL) {
@@ -2211,15 +2219,23 @@ int Branch(Context* context) {
       // 1. check if the label is already defined,
       // 2. if defined, just set it up
       // 3. if not, add it to the multimap
-      std::string label_name = context->token_value.string_val;
-
-      if (context->label_o_map.count(label_name)) {
-        inst_op.o_operands[1] = context->label_o_map[label_name];
-      } else {
-        context->label_c_map.insert(make_pair(
-                                      label_name,
-                                      context->get_code_offset()+16));
-      }
+              std::string label_name = context->token_value.string_val;
+              
+              if (context->label_o_map.count(label_name)) {
+                inst_op.o_operands[1] = context->label_o_map[label_name];
+              } else {
+                BrigOperandLabelRef opLabelRef = {
+                  8,
+                  BrigEOperandLabelRef,
+                  -1
+                };
+                inst_op.o_operands[1] = context->get_operand_offset();
+                context->label_o_map[label_name] = context->get_operand_offset();
+                if (context->symbol_map.count(label_name)) {
+                  opLabelRef.labeldirective = context->symbol_map[label_name];
+                }
+                context->append_operand(&opLabelRef);
+              }
       context->token_to_scan = yylex();
       if (context->token_to_scan == ';') {
         context->append_code(&inst_op);
@@ -2838,7 +2854,36 @@ int FunctionSignature(Context *context) {
 
 int Label(Context* context) {
   if (context->token_to_scan == TOKEN_LABEL) {
+    BrigDirectiveLabel label_directive = {
+      12,                     // size
+      BrigEDirectiveLabel,    // kind
+      0,                      // c_code
+      0                       // s_name
+    };
+    std::string s_name = context->token_value.string_val;
     if (yylex() == ':') {
+      if (!context->symbol_map.count(s_name)) {
+        label_directive.c_code = context->get_code_offset();
+        BrigsOffset32_t str_offset = context->lookup_symbol(s_name);
+        if (str_offset == -1) {
+          str_offset = context->get_string_offset();
+          context->add_symbol(s_name);
+        }
+        label_directive.s_name = str_offset;
+        if (context->label_o_map.count(s_name)) {
+          BrigoOffset32_t ope_offset = context->label_o_map[s_name];
+          BrigdOffset32_t lab_dir_offset = context->get_directive_offset();
+          unsigned char* lab_d_Offset = reinterpret_cast<unsigned char*>(&lab_dir_offset);
+          // sizeof(uint16_t) << 1: 
+          // leaped over BrigOperandLabelRef.size and .kind
+          // make the offset to point the address of labeldirecitive in BrigOperandLabelRef
+          context->update_operand_bytes(lab_d_Offset, 
+                                        ope_offset + sizeof(uint16_t) * 2, 
+                                        sizeof(BrigdOffset32_t));
+        }
+        context->symbol_map[s_name] = context->get_directive_offset();
+        context->append_directive(&label_directive);
+      }
       context->token_to_scan = yylex();
       return 0;
     } else {
@@ -4517,7 +4562,6 @@ int Instruction1(Context* context) {
       inst1_op.o_operands[0] = context->operand_map[oper_name]; 
       if (context->token_to_scan == ';') {
         context->append_code(&inst1_op);
-        printf("%d\n" , context->get_code_offset());
         context->token_to_scan = yylex();
         return 0;
       } else {

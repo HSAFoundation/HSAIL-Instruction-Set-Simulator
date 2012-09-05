@@ -515,7 +515,7 @@ TEST(CodegenTest, Example4_Branch) {
   EXPECT_EQ(Brigb1, cbr_op.type);
   EXPECT_EQ(0U, cbr_op.o_operands[0]);
   EXPECT_EQ(8U, cbr_op.o_operands[1]);
-  EXPECT_EQ(44U, cbr_op.o_operands[2]);
+  EXPECT_EQ(20U, cbr_op.o_operands[2]);
   EXPECT_EQ(0U, cbr_op.o_operands[3]);
   EXPECT_EQ(0U, cbr_op.o_operands[4]);
 
@@ -525,7 +525,7 @@ TEST(CodegenTest, Example4_Branch) {
   EXPECT_EQ(36U, br_op.size);
   EXPECT_EQ(BrigBrn, br_op.opcode);
   EXPECT_EQ(0U, br_op.o_operands[0]);
-  EXPECT_EQ(76U, br_op.o_operands[1]);
+  EXPECT_EQ(52U, br_op.o_operands[1]);
   EXPECT_EQ(0U, br_op.o_operands[2]);
   EXPECT_EQ(0U, br_op.o_operands[3]);
   EXPECT_EQ(0U, br_op.o_operands[4]);
@@ -4617,6 +4617,231 @@ TEST(CodegenTest, GlobalGroupDeclCodeGen) {
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
+
+  delete lexer;
+};
+
+TEST(CodegenTest, Label_CodeGen_Test) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  // TODO(Chuang) set the type to Brn and Cbr
+  BrigInstBase refCbrLab3 = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigCbr,               // opcode
+    Brigb1,               // type
+    BrigNoPacking,         // packing
+    {0, 16, 28, 0, 0}        // o_operands[5]
+  };
+
+  BrigInstBar refBrnLab1 = {
+    36,                  // size
+    BrigEInstBar,        // kind
+    BrigBrn,             // opcode
+    0,             // type
+    BrigNoPacking,       // packing
+    {0, 8, 0, 0, 0},     // o_operands[5]
+    0                    // syncFlags
+  };
+  BrigInstBase refCbrLab1 = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigCbr,               // opcode
+    Brigb1,               // type
+    BrigNoPacking,         // packing
+    {0, 16, 8, 0, 0}        // o_operands[5]
+  };
+  BrigInstBar refBrnLab2 = {
+    36,                  // size
+    BrigEInstBar,        // kind
+    BrigBrn,             // opcode
+    0,             // type
+    BrigNoPacking,       // packing
+    {0, 36, 0, 0, 0},     // o_operands[5]
+    0                    // syncFlags
+  };
+
+  BrigDirectiveLabel ref1 = {
+    12,                     // size
+    BrigEDirectiveLabel,    // kind
+    36,                     // c_code
+    0                       // s_name
+  };  
+  BrigDirectiveLabel ref2 = {
+    12,                     // size
+    BrigEDirectiveLabel,    // kind
+    68,                     // c_code
+    10                      // s_name
+  };  
+  BrigDirectiveLabel ref3 = {
+    12,                     // size
+    BrigEDirectiveLabel,    // kind
+    68,                     // c_code
+    16                      // s_name
+  };
+  BrigDirectiveLabel ref4 = {
+    12,                     // size
+    BrigEDirectiveLabel,    // kind
+    104,                    // c_code
+    22                      // s_name
+  };
+
+  BrigDirectiveLabel get1, get2, get3, get4;
+  BrigOperandLabelRef getLabRef;
+  BrigInstBase getCbrCode;
+  BrigInstBar getBrnCode;
+
+  std::string input("brn @lab1;\n");  // brn lab1
+  input.append("@lab1:\n");
+  input.append("cbr $c1, @lab3;\n");  // cbr lab3
+  input.append("@lab2:");
+  input.append("@lab3:");
+  input.append("brn @lab2;\n");       // brn lab2
+  input.append("@lab4:\n");
+  input.append("cbr $c1, @lab1;\n");  // cbr lab1
+
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  // brn lab1
+  EXPECT_EQ(0, Branch(context));  
+  context->get_code(0, &getBrnCode);
+  context->get_operand(8, &getLabRef);
+
+  EXPECT_EQ(refBrnLab1.size, getBrnCode.size);
+  EXPECT_EQ(refBrnLab1.kind, getBrnCode.kind);
+  EXPECT_EQ(refBrnLab1.opcode, getBrnCode.opcode);
+  EXPECT_EQ(refBrnLab1.type, getBrnCode.type);
+  EXPECT_EQ(refBrnLab1.packing, getBrnCode.packing);
+  EXPECT_EQ(refBrnLab1.o_operands[0], getBrnCode.o_operands[0]);
+  EXPECT_EQ(refBrnLab1.o_operands[1], getBrnCode.o_operands[1]);
+  EXPECT_EQ(refBrnLab1.o_operands[2], getBrnCode.o_operands[2]);
+  EXPECT_EQ(refBrnLab1.o_operands[3], getBrnCode.o_operands[3]);
+  EXPECT_EQ(refBrnLab1.o_operands[4], getBrnCode.o_operands[4]);
+  // TODO(Chuang) set the value of .syncFlags
+  // EXPECT_EQ(refBrn.syncFlags, getBrnCode.syncFlags);
+  
+  EXPECT_EQ(8, getLabRef.size);
+  EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
+  // When the label isn't declared.
+  // the value of labeldirective is -1 now.
+  EXPECT_EQ(-1, getLabRef.labeldirective);
+
+  // lab1
+  EXPECT_EQ(0, Label(context));   
+  context->get_operand(8, &getLabRef);
+  EXPECT_EQ(0, getLabRef.labeldirective);
+
+  // cbr lab3
+  EXPECT_EQ(0, Branch(context));  
+
+  context->get_code(36, &getCbrCode);
+
+  EXPECT_EQ(refCbrLab3.size, getCbrCode.size);
+  EXPECT_EQ(refCbrLab3.kind, getCbrCode.kind);
+  EXPECT_EQ(refCbrLab3.opcode, getCbrCode.opcode);
+  EXPECT_EQ(refCbrLab3.type, getCbrCode.type);
+  EXPECT_EQ(refCbrLab3.packing, getCbrCode.packing);
+  EXPECT_EQ(refCbrLab3.o_operands[0], getCbrCode.o_operands[0]);
+  EXPECT_EQ(refCbrLab3.o_operands[1], getCbrCode.o_operands[1]);
+  EXPECT_EQ(refCbrLab3.o_operands[2], getCbrCode.o_operands[2]);
+  EXPECT_EQ(refCbrLab3.o_operands[3], getCbrCode.o_operands[3]);
+  EXPECT_EQ(refCbrLab3.o_operands[4], getCbrCode.o_operands[4]);
+
+  context->get_operand(28, &getLabRef);
+  EXPECT_EQ(8, getLabRef.size);
+  EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
+  // When the label isn't declared.
+  // the value of labeldirective is -1 now.
+  EXPECT_EQ(-1, getLabRef.labeldirective);
+
+  // lab2
+  EXPECT_EQ(0, Label(context));
+  
+  // lab3
+  EXPECT_EQ(0, Label(context));
+  context->get_operand(28, &getLabRef);
+  EXPECT_EQ(24, getLabRef.labeldirective);
+
+  // brn lab2
+  EXPECT_EQ(0, Branch(context));
+
+  context->get_code(68, &getBrnCode);
+  context->get_operand(36, &getLabRef);
+
+  EXPECT_EQ(refBrnLab2.size, getBrnCode.size);
+  EXPECT_EQ(refBrnLab2.kind, getBrnCode.kind);
+  EXPECT_EQ(refBrnLab2.opcode, getBrnCode.opcode);
+  EXPECT_EQ(refBrnLab2.type, getBrnCode.type);
+  EXPECT_EQ(refBrnLab2.packing, getBrnCode.packing);
+  EXPECT_EQ(refBrnLab2.o_operands[0], getBrnCode.o_operands[0]);
+  EXPECT_EQ(refBrnLab2.o_operands[1], getBrnCode.o_operands[1]);
+  EXPECT_EQ(refBrnLab2.o_operands[2], getBrnCode.o_operands[2]);
+  EXPECT_EQ(refBrnLab2.o_operands[3], getBrnCode.o_operands[3]);
+  EXPECT_EQ(refBrnLab2.o_operands[4], getBrnCode.o_operands[4]);
+  // TODO(Chuang) set the value of .syncFlags
+  // EXPECT_EQ(refBrn.syncFlags, getBrnCode.syncFlags);
+  
+  EXPECT_EQ(8, getLabRef.size);
+  EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
+  EXPECT_EQ(12, getLabRef.labeldirective);
+  
+  // lab4
+  EXPECT_EQ(0, Label(context));   
+
+  // cbr lab1
+  EXPECT_EQ(0, Branch(context));  
+
+  context->get_code(104, &getCbrCode);
+
+  EXPECT_EQ(refCbrLab1.size, getCbrCode.size);
+  EXPECT_EQ(refCbrLab1.kind, getCbrCode.kind);
+  EXPECT_EQ(refCbrLab1.opcode, getCbrCode.opcode);
+  EXPECT_EQ(refCbrLab1.type, getCbrCode.type);
+  EXPECT_EQ(refCbrLab1.packing, getCbrCode.packing);
+  EXPECT_EQ(refCbrLab1.o_operands[0], getCbrCode.o_operands[0]);
+  EXPECT_EQ(refCbrLab1.o_operands[1], getCbrCode.o_operands[1]);
+  EXPECT_EQ(refCbrLab1.o_operands[2], getCbrCode.o_operands[2]);
+  EXPECT_EQ(refCbrLab1.o_operands[3], getCbrCode.o_operands[3]);
+  EXPECT_EQ(refCbrLab1.o_operands[4], getCbrCode.o_operands[4]);
+
+  context->get_operand(8, &getLabRef);
+  EXPECT_EQ(8, getLabRef.size);
+  EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
+  EXPECT_EQ(0, getLabRef.labeldirective);
+
+
+  context->get_directive(0, &get1);
+  
+  // lab1
+  EXPECT_EQ(ref1.size, get1.size);
+  EXPECT_EQ(ref1.kind, get1.kind);
+  EXPECT_EQ(ref1.c_code, get1.c_code);
+  EXPECT_EQ(ref1.s_name, get1.s_name);
+
+  context->get_directive(12, &get2);
+
+  // lab2
+  EXPECT_EQ(ref2.size, get2.size);
+  EXPECT_EQ(ref2.kind, get2.kind);
+  EXPECT_EQ(ref2.c_code, get2.c_code);
+  EXPECT_EQ(ref2.s_name, get2.s_name);
+
+  context->get_directive(24, &get3);
+
+  // lab3
+  EXPECT_EQ(ref3.size, get3.size);
+  EXPECT_EQ(ref3.kind, get3.kind);
+  EXPECT_EQ(ref3.c_code, get3.c_code);
+  EXPECT_EQ(ref3.s_name, get3.s_name);
+
+  context->get_directive(36, &get4);
+
+  // lab4
+  EXPECT_EQ(ref4.size, get4.size);
+  EXPECT_EQ(ref4.kind, get4.kind);
+  EXPECT_EQ(ref4.c_code, get4.c_code);
+  EXPECT_EQ(ref4.s_name, get4.s_name);
 
   delete lexer;
 };
