@@ -19,6 +19,7 @@ struct VecPolicy {
   typedef void (*UForEachFn)(Base);
   typedef void (*BForEachFn)(Base, Base);
   typedef void (*TForEachFn)(Base, Base, Base);
+  typedef void (*SForEachFn)(Base, Base, unsigned);
 
   VecPolicy(Type &t) : t_(t) {}
 
@@ -88,6 +89,13 @@ static void ForEach(typename Vec<T>::TForEachFn MapFn, T x, T y, T z) {
   }
 }
 
+template<class T>
+static void ForEach(typename Vec<T>::SForEachFn MapFn, T x, T y, unsigned z) {
+  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
+    MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i], z);
+  }
+}
+
 #define defineVec(T,LEN)                                            \
   template<> struct Vec<T ## x ## LEN> :                            \
     public VecPolicy<T ## x ## LEN, T, LEN> {                       \
@@ -151,7 +159,7 @@ defineVec(f64, 2)
   NARY ## Vector(D, INST, u16x4)                \
   NARY ## Vector(D, INST, u32x2)
 
-#define ShiftInst(D,INST)                       \
+#define ShiftInst(D,INST,NARY)                  \
   D ## Shift(INST, s32)                         \
   D ## Shift(INST, u32)                         \
   D ## Shift(INST, s64)                         \
@@ -227,11 +235,17 @@ defineVec(f64, 2)
 #define declareTernary(FUNC,TYPE)                     \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v);
 
+#define declareShift(FUNC,TYPE)                               \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift);
+
 #define declareUnaryVectorPacking(FUNC,TYPE,PACKING)          \
   extern "C" TYPE FUNC ## _ ## PACKING ## _ ## TYPE (TYPE t);
 
 #define declareBinaryVectorPacking(FUNC,TYPE,P1,P2)                     \
   extern "C" TYPE FUNC ## _ ## P1 ## P2 ## _ ## TYPE (TYPE t, TYPE u);
+
+#define declareShiftVector(FUNC,TYPE)                           \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift);
 
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {
@@ -285,6 +299,21 @@ template<class T> inline bool isDivisionError(T x, T y) {
 }
 template<> inline bool isDivisionError(float, float) { return false; }
 template<> inline bool isDivisionError(double, double) { return false; }
+
+template<class T> inline T Int48Ty(T t) {
+  struct { T x:48; } Ext;
+  return Ext.x = t;
+}
+
+template<class T> inline T Int24Ty(T t) {
+  struct { T x:24; } Ext;
+  return Ext.x = t;
+}
+
+template<class T> inline T Int12Ty(T t) {
+  struct { T x:12; } Ext;
+  return Ext.x = t;
+}
 
 } // namespace brig
 } // namespace hsa
