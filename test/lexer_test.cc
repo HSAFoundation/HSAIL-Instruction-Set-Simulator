@@ -13,14 +13,14 @@ namespace brig {
 Context* context = Context::get_instance();
 
 // ------------------ BASIC LEXER TESTS -----------------
-//Integer Constant Test
+// Integer Constant Test
 std::string integerconstant_input[] =
 {
   "0",
   "1234567",
   "2147483647",
-  //"2147483648",
-  //"4294967295",
+  // "2147483648",
+  // "4294967295",
   "00",
   "000",
   "001",
@@ -45,8 +45,8 @@ unsigned long integerconstant_output[]=
   0,
   1234567,
   2147483647,
-  //2147483648,
-  //4294967295,
+  // 2147483648,
+  // 4294967295,
   0,
   0,
   1,
@@ -72,7 +72,7 @@ class Bug1_IntegerConstant : public ::testing::TestWithParam<int>
 };
 TEST_P(Bug1_IntegerConstant, IntegerConstants)
 {
-  int n =GetParam();
+  int n = GetParam();
   Lexer* lexer = new Lexer(integerconstant_input[n]);
 
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
@@ -80,12 +80,13 @@ TEST_P(Bug1_IntegerConstant, IntegerConstants)
 
   delete lexer;
 }
-INSTANTIATE_TEST_CASE_P(LexTest, Bug1_IntegerConstant, testing::Range(0,21));
+INSTANTIATE_TEST_CASE_P(LexTest, Bug1_IntegerConstant, testing::Range(0, 21));
 
 TEST(LexTest, Bug1_IntegerConstantWrongCase) {
   std::string input("089");
   Lexer* lexer = new Lexer(input);
-  EXPECT_NE(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
 
   input.assign("0.7");
   lexer->set_source_string(input);
