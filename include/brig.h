@@ -376,6 +376,7 @@ enum BrigOpcode {
   BrigFbarInitSizeKnown = 123
 };
 
+
 // Brig Support Structures
 // BrigAluModifier specifies arithmetic logic unit controls:
 struct BrigAluModifier {
@@ -1003,6 +1004,21 @@ struct BrigInstAtomic {
   BrigAtomicOperation32_t atomicOperation;
   BrigStorageClass32_t storageClass;
   BrigMemorySemantic32_t memorySemantic;
+};
+
+// The BrigInstAtomicImage
+// The BrigInstAtomicImage format is used for atomicNoReturn image operations.
+struct BrigInstAtomicImage {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAtomicOperation32_t atomicOperation;
+  BrigStorageClass32_t storageClass;
+  BrigMemorySemantic32_t memorySemantic;
+  BrigGeom32_t geom;
 };
 
 
