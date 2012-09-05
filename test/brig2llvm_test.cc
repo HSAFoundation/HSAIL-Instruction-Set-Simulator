@@ -4694,6 +4694,7 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
     "or BrigPartialLevel")));
   }
 }
+
 TEST(Brig2LLVMTest, validateBrigInstMem) {
   {
     hsa::brig::StringBuffer strings;
@@ -4772,5 +4773,258 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
     "Invalid packing control")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "o_operands past the operands section")));
+  }
+}
+
+TEST(Brig2LLVMTest, validateBrigInstCvt) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCvt bic = {
+      sizeof(bic),              //size
+      BrigEInstCvt,             //kind
+      BrigCvt,                  //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 0, 0, 0, 0},    //aluModifier
+      0,                        //stype
+      0                         //reserved
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCvt bic = {
+      sizeof(bic),              //size
+      BrigEInstCvt,             //kind
+      BrigCvt + 1,              //opcode
+      Brigf64x2 + 1,            //type
+      BrigPackPsat + 1,         //packing
+      {20, 0, 0, 0, 0},         //o_operands[5]
+      {0, 0, 0, 0, 0, 0, 0},    //aluModifier
+      Brigf64x2 + 1,            //stype
+      1                         //reserved
+    };
+    code.append(&bic);
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid opcode")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid packing control")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "o_operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid stype")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "reserved must be zero")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCvt bic = {
+      sizeof(bic),              //size
+      BrigEInstCvt,             //kind
+      0,                        //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 0, 1, 0, 0},    //aluModifier
+      0,                        //stype
+      0                         //reserved
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid floatOrInt")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCvt bic = {
+      sizeof(bic),              //size
+      BrigEInstCvt,             //kind
+      0,                        //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {1, 0, 1, 0, 0, 0, 0},    //aluModifier
+      0,                        //stype
+      0                         //reserved
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid hi")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCvt bic = {
+      sizeof(bic),              //size
+      BrigEInstCvt,             //kind
+      0,                        //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 1, 0, 0, 0},    //aluModifier
+      0,                        //stype
+      0                         //reserved
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid ftz")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstCvt bic = {
+      sizeof(bic),              //size
+      BrigEInstCvt,             //kind
+      0,                        //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 0, 0, 0, 1},    //aluModifier
+      0,                        //stype
+      0                         //reserved
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid reserved")));
   }
 }
