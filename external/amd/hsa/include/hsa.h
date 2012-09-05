@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#26 - edit change 811758 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#27 - edit change 812680 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -385,7 +385,7 @@ public:
 
     virtual uint32_t getCapabilities()=0;
 
-    virtual std::string& getName()=0;
+    virtual string& getName()=0;
 
     virtual const hsa::vector<hsa::MemoryDescriptor*>& getMemoryDescriptors()=0;
 
@@ -397,7 +397,7 @@ public:
 
     virtual bool isDedicatedCompute()=0;
 
-
+    virtual uint32_t getMaxGroupMemorySize()=0;
 
     // Get the device information in bulk.
     //virtual const Info& info()=0;
@@ -417,6 +417,13 @@ public:
      *  debugger, exception, system call.
      */
     virtual void setupTrapHandler(void *trapHandler, size_t trapHandlerSizeByte, uint32_t trapType) = 0;
+
+	/**
+     * @brief Get the wavefront size
+     *
+     * @return returns the size of wavefront.
+     */
+    virtual int getWaveFrontSize()=0;
 
     /**
      * @brief Set up trap handler buffer in the current device
@@ -707,6 +714,13 @@ public:
 
  
 
+    /**
+     * @brief Get the runtime API version
+     *
+     *
+     * @return runtime API version.
+     */
+    virtual const string getVersion()=0;
 
     virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
 //    virtual Kernel *createKernel(Program * k, hsa::KernelId & kid)=0;
