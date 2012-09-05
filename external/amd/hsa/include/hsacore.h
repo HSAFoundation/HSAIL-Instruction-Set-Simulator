@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#15 - edit change 811758 (text)
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#16 - edit change 812680 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -727,16 +727,9 @@ public:
      *
      * @return returns the size of the local data store in KB.
      */
-    virtual int getLDSSize()=0;
+    virtual uint32_t getMaxGroupMemorySize()=0;
 
      /**
-     * @brief Get the size of the GDS in KB
-     *
-     * @return returns the size of the global data store in KB.
-     */
-    virtual int getGDSSize()=0;
-
-      /**
      * @brief Get the wavefront size
      *
      * @return returns the size of wavefront.
