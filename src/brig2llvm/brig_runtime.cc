@@ -206,8 +206,8 @@ FloatInst(define, Mad, Ternary)
 
 template<class T> static T Mul24(T x, T y) {
   typedef typename Int<T>::Int64Ty Int64Ty;
-  Int64Ty x64 = x;
-  Int64Ty y64 = y;
+  Int64Ty x64 = Int24Ty(x);
+  Int64Ty y64 = Int24Ty(y);
   return T(x64 * y64 & 0xFFFFFFFF);
 }
 SignedInst(define, Mul24, Binary)
@@ -215,18 +215,18 @@ UnsignedInst(define, Mul24, Binary)
 
 template<class T> static T Mul24Hi(T x, T y) {
   typedef typename Int<T>::Int64Ty Int64Ty;
-  Int64Ty x64 = x;
-  Int64Ty y64 = y;
-  return T((x64 * y64) >> 32);
+  Int64Ty x64 = Int24Ty(x);
+  Int64Ty y64 = Int24Ty(y);
+  return T(Int12Ty((x64 * y64) >> 32));
 }
 SignedInst(define, Mul24Hi, Binary)
 UnsignedInst(define, Mul24Hi, Binary)
 
 template<class T> static T Mad24(T x, T y, T z) {
   typedef typename Int<T>::Int64Ty Int64Ty;
-  Int64Ty x64 = x;
-  Int64Ty y64 = y;
-  Int64Ty z64 = z;
+  Int64Ty x64 = Int24Ty(x);
+  Int64Ty y64 = Int24Ty(y);
+  Int64Ty z64 = Int64Ty(z);
   return T((x64 * y64 + z64) & 0xFFFFFFFF);
 }
 SignedInst(define, Mad24, Ternary)
@@ -234,10 +234,10 @@ UnsignedInst(define, Mad24, Ternary)
 
 template<class T> static T Mad24Hi(T x, T y, T z) {
   typedef typename Int<T>::Int64Ty Int64Ty;
-  Int64Ty x64 = x;
-  Int64Ty y64 = y;
-  Int64Ty z64 = z;
-  return T((x64 * y64 + z64) >> 32);
+  Int64Ty x64 = Int24Ty(x);
+  Int64Ty y64 = Int24Ty(y);
+  Int64Ty z64 = Int64Ty(z);
+  return T(Int12Ty((x64 * y64 + z64) >> 32));
 }
 SignedInst(define, Mad24Hi, Ternary)
 UnsignedInst(define, Mad24Hi, Ternary)
@@ -246,13 +246,13 @@ template<class T> static T Shl(T x, unsigned y) {
   return x << (y & Int<T>::ShiftMask);
 }
 template<class T> static T ShlVector(T x, unsigned y) { return map(Shl, x, y); }
-ShiftInst(define, Shl)
+ShiftInst(define, Shl, Binary)
 
 template<class T> static T Shr(T x, unsigned y) {
   return x >> (y & Int<T>::ShiftMask);
 }
 template<class T> static T ShrVector(T x, unsigned y) { return map(Shr, x, y); }
-ShiftInst(define, Shr)
+ShiftInst(define, Shr, Binary)
 
 template<class T> static T And(T x, T y) { return x & y; }
 BitInst(define, And, Binary)
@@ -264,9 +264,11 @@ template<class T> static T Xor(T x, T y) { return x ^ y; }
 BitInst(define, Xor, Binary)
 
 template<class T> static T Not(T x) { return ~x; }
+template<> bool Not(bool x) { return !x; }
 BitInst(define, Not, Unary)
 
-template<class T> static T Popcount(T x) { return __builtin_popcount(x); }
+static b32 Popcount(b32 x) { return __builtin_popcount(x); }
+static b64 Popcount(b64 x) { return __builtin_popcountl(x); }
 defineUnary(Popcount, b32)
 defineUnary(Popcount, b64)
 
@@ -346,9 +348,9 @@ extern "C" b128 Mov_b128_b128(b128 x) { return x; }
 extern "C" b32 Movs_lo_b32(b64 x) { return x; }
 extern "C" b32 Movs_hi_b32(b64 x) { return x >> 32; }
 
-extern "C" b32 Movd_lo_b64(b64 x, b32 y) { return (x << 32) | b64(y); }
-extern "C" b32 Movd_hi_b64(b64 x, b32 y) {
-  return (b64(y) << 32) | (x & Int<b32>::Max);
+extern "C" b64 Movd_lo_b64(b64 x, b32 y) { return (x >> 32 << 32) | b64(y); }
+extern "C" b64 Movd_hi_b64(b64 x, b32 y) {
+  return (b64(y) << 32) | (x >> 32);
 }
 
 } // namespace brig
