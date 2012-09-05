@@ -701,7 +701,31 @@ bool BrigModule::validate(const BrigInstImage *code) const {
 }
 bool BrigModule::validate(const BrigInstCvt *code) const { return true; }
 bool BrigModule::validate(const BrigInstLdSt *code) const { return true; }
-bool BrigModule::validate(const BrigInstMem *code) const { return true; }
+bool BrigModule::validate(const BrigInstMem *code) const {
+  bool valid = true;
+  valid &= check(code->opcode <= BrigFbarInitSizeKnown,
+                 "Invalid opcode");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  valid &= check(code->packing <= BrigPackPsat,
+                 "Invalid packing control");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                   "o_operands past the operands section");
+    }
+  }
+  valid &= check(code->storageClass == BrigGlobalSpace ||
+                 code->storageClass == BrigGroupSpace ||
+                 code->storageClass == BrigPrivateSpace ||
+                 code->storageClass == BrigKernargSpace ||
+                 code->storageClass == BrigReadonlySpace ||
+                 code->storageClass == BrigSpillSpace ||
+                 code->storageClass == BrigArgSpace,
+                 "Invalid storage class, can be global, group, "
+                 "private, kernarg, readonly, spill, or arg");
+    return valid;
+}
 bool BrigModule::validate(const BrigInstMod *code) const {
   bool valid = true;
   valid &= check(code->opcode <= BrigFbarInitSizeKnown,

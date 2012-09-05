@@ -4694,3 +4694,82 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
     "or BrigPartialLevel")));
   }
 }
+TEST(Brig2LLVMTest, validateBrigInstMem) {
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstMem bcm = {
+      sizeof(bcm),
+      BrigEInstMem,
+      BrigRet,
+      Brigb32,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0},
+      BrigGlobalSpace
+    };
+    code.append(&bcm);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstMem bcm = {
+      sizeof(bcm),
+      BrigEInstMem,
+      BrigFbarInitSizeKnown + 1,
+      Brigf64x2 + 1,
+      BrigPackPsat + 1,
+      {20, 0, 0, 0, 0},
+      BrigFlatSpace
+    };
+    code.append(&bcm);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid opcode")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid packing control")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "o_operands past the operands section")));
+  }
+}
