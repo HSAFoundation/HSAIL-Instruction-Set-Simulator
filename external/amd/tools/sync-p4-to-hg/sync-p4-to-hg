@@ -78,7 +78,7 @@ while(<FILES>) {
 	system("mkdir -p `dirname $hgpath`");
 	system("touch $hgpath");
 	system("hg add $hgpath");
-	system("hg ci -m \"initial revision\"");
+	system("hg ci -m \"$hgpath initial revision\"");
     }
 
     print "syncing $p4file#$p4last to $hgpath#$hgmaxrev\n";
@@ -87,7 +87,7 @@ while(<FILES>) {
     # if they match (no changes) verify that file contents are the same
     if ($p4last == $hgmaxrev) {
 	system("rm -f $hgpath.perforce");
-	system("p4 print $depotpath#$p4last >$hgpath.perforce");
+	system("p4 print -o $hgpath.perforce $depotpath#$p4last >/dev/null");
 	if (`diff $hgpath $hgpath.perforce`) {
 	    die("file contents of $hgpath are not the same for rev $p4last");
 	}
@@ -104,6 +104,6 @@ while(<FILES>) {
 	$changelist = `p4 files $depotpath#$i`;
 	chop $changelist;
 	$changelist =~ s/^.* change (\d+) \(.*$/\1/;
-	system("hg ci -m \"revision:$i changelist:$changelist\"");
+	system("hg ci -m \"$hgpath revision:$i changelist:$changelist\"");
     }
 }
