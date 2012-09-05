@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#27 - edit change 812680 (text)
+//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#28 - edit change 813468 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
@@ -619,32 +619,6 @@ public:
                         hsacore::vector<RTKernelArgs>& args)=0;
     
     virtual void flush()=0;
-
-    /**
-     * @brief Set up trap handler in the current device
-     *
-     * @param trapHandler pointer to the trap handler, this address needs
-     * to be 256-byte aligned.
-     *
-     * @param trapHandlerSizeByte size of the trap handler in bytes
-     *
-     * @param trapType different types of trap handler, currently, support runtime,  
-     *  debugger, exception, system call.
-     */
-    virtual void setupTrapHandler(void *pTrapHandler, size_t trapHandlerSizeByte, uint32_t trapType) = 0;
-
-    /**
-     * @brief Set up trap handler buffer in the current device
-     *
-     * @param trapHandlerBuffer pointer to the trap handler buffer, this 
-     * address needs to be 256-byte aligned.
-     *
-     * @param trapHandlerBufferSizeByte size of the trap handler buffer in bytes
-     *
-     * @param trapType different types of trap handler, currently, support runtime,  
-     *  debugger, exception, system call.
-     */
-    virtual void setupTrapHandlerBuffer(void *pTrapHandlerBuffer, size_t trapHandlerBufferSizeByte, uint32_t trapType) = 0;
 
     /**
      * @brief create a dispatch descriptor
