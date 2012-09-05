@@ -188,6 +188,14 @@ template<class T> static T Rem(T x, T y) {
 SignedInst(define, Rem, Binary)
 UnsignedInst(define, Rem, Binary)
 
+template <class T> static T Carry(T x, T y) {
+  typedef typename Int<T>::Unsigned Unsigned;
+  if ((Unsigned) x + (Unsigned) y < (Unsigned) x) return T(1);
+  else return T(0);
+}
+SignedInst(define, Carry, Binary)
+UnsignedInst(define, Carry, Binary)
+
 template<class T> static T Borrow(T x, T y) {
   typedef typename Int<T>::Unsigned Unsigned;
   Unsigned ux = Unsigned(x);
