@@ -1,4 +1,4 @@
-#!/usr/bin/perl -s
+#!/usr/bin/env perl
 
 # syncing hsa team's perforce files to MCW's mercurial repository
 
@@ -7,8 +7,16 @@
 #  cd to root of hg repo
 #  /path/to/sync-p4-to-hg -param=/path/to/filelist
 
+if ($#ARGV >= 0) {
+    $switch = $ARGV[0]; shift;
+    if ($switch =~ /-c/) {
+        $paramfile = $ARGV[0];
+    } else {
+        die("bad arguments");
+    }
+}
+
 # argument parsing
-$paramfile = $param;
 print "using parameter file $paramfile\n";
 if ($paramfile eq "") { die("bad arguments"); }
 
@@ -67,6 +75,7 @@ while(<FILES>) {
     if ($hgmaxrev == -1) {
 	# file does not exist...  try to add it
 	print "creating file $hgpath\n";
+	system("mkdir -p `dirname $hgpath`");
 	system("touch $hgpath");
 	system("hg add $hgpath");
 	system("hg ci -m \"initial revision\"");

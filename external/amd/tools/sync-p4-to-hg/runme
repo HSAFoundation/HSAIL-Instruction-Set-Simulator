@@ -1,4 +1,0 @@
-#!/bin/sh -x
-
-tools/sync-p4-to-hg/sync-p4-to-hg -param=tools/sync-p4-to-hg/files-to-sync
-
