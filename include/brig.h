@@ -172,6 +172,18 @@ enum BrigSftz {
   BrigENosftz
 };
 
+//PRM 20.5.9
+//BrigGeom
+//BrigGeom is used to specify the number of coordinates needed to access an image.
+enum BrigGeom {
+  Briggeom_1d,
+  Briggeom_2d,
+  Briggeom_3d,
+  Briggeom_1da,
+  Briggeom_1db,
+  Briggeom_2da
+};
+
 // PRM 20.5.12
 enum BrigInstKinds {
   BrigEInstBase,
@@ -1018,14 +1030,6 @@ enum BrigBoundaryMode {
   BrigSamplerBorder
 };
 
-enum BrigGeom {
-  Briggeom_1d,
-  Briggeom_2d,
-  Briggeom_3d,
-  Briggeom_1da,
-  Briggeom_1db,
-  Briggeom_2da
-};
 
 enum BrigCompareOperation {
   BrigEq,

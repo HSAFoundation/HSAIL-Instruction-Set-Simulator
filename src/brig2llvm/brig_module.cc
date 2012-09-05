@@ -590,9 +590,52 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
 }
 
 bool BrigModule::validate(const BrigInstAtomicImage *code) const {
-  return true;
+  bool valid = true;
+  valid &= check(code->opcode == BrigAtomicImage ||
+                 code->opcode == BrigAtomicNoRetImage,
+                 "Invalid opcode, should be either BrigAtomicImage or "
+                 "BrigAtomicNoRetImage");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                     "o_operands past the operands section");
+    }
+  }
+  valid &= check(code->atomicOperation <= BrigAtomicSub,
+                 "Invalid atomicOperation");
+  valid &= check(code->storageClass == BrigGlobalSpace,
+                 "Invalid storage class, must be global");
+  valid &= check(code->memorySemantic == BrigAcquire ||
+                 code->memorySemantic == BrigAcquireRelease ||
+                 code->memorySemantic == BrigParAcquireRelease,
+                 "Invalid memorySemantic, can be BrigAcquire, "
+                 "BrigAcquireRelease, BrigParAcquireRelease");
+  valid &= check(code->geom <= Briggeom_2da, "Invalid geom");
+  return valid;
 }
-bool BrigModule::validate(const BrigInstBar *code) const { return true; }
+
+bool BrigModule::validate(const BrigInstBar *code) const {
+  bool valid = true;
+  valid &= check(code->opcode == BrigBarrier ||
+                 code->opcode == BrigSync    ||
+                 code->opcode == BrigBrn,
+                 "Invalid opcode, should be either BrigBarrier, BrigSync or "
+                 "BrigBrn");
+  valid &= check(code->type <= Brigf64x2, "Invalid type");
+  for (unsigned i = 0; i < 5; i++) {
+    if (code->o_operands[i]) {
+      valid &= check(code->o_operands[i] < S_.operandsSize,
+                     "o_operands past the operands section");
+    }
+  }
+  valid &= check(
+    code->syncFlags <= (BrigGroupLevel | BrigGlobalLevel | BrigPartialLevel),
+    "Invalid syncFlags, should be either BrigGroupLevel BrigGlobalLevel"
+    "or BrigPartialLevel");
+  return valid;
+}
 
 bool BrigModule::validate(const BrigInstBase *code) const {
   bool valid = true;

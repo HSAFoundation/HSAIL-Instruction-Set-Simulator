@@ -748,6 +748,686 @@ TEST(Brig2LLVMTest, Example5) {
   }
 }
 
+TEST(Brig2LLVMTest, Example6) {
+#if 0  // this test case is same as the wiki
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&callee"));
+    strings.append(std::string("%output"));
+    strings.append(std::string("%input"));
+    strings.append(std::string("$s0"));
+    strings.append(std::string("&caller"));
+    strings.append(std::string("%an_input"));
+    strings.append(std::string("$s1"));
+    strings.append(std::string("%an_output"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),                     // size
+      BrigEDirectiveVersion,           // kind
+      0,                               // c_code
+      1,                               // major
+      0,                               // minor
+      BrigESmall,                      // machine
+      BrigEFull,                       // profile
+      BrigENosftz,                     // ftz
+      0                                // reserved
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction callee = {
+      sizeof(callee),                  // size
+      BrigEDirectiveFunction,          // kind
+      0,                               // c_code
+      0,                               // s_name
+      1,                               // inParamCount
+      140,                             // d_firstScopeDirective
+      3,                               // operationCount
+      140,                             // d_nextDirective
+      BrigNone,                        // attribute
+      0,                               // fbarCount
+      1,                               // outParamCount
+      100                               // d_firstParam
+    };
+    directives.append(&callee);
+
+    BrigDirectiveSymbol bdsy1 = {
+      sizeof(bdsy1),                   // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        8,                               // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy1);
+
+    BrigDirectiveSymbol bdsy2 = {
+      sizeof(bdsy2),                   // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        16,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy2);
+
+    BrigDirectiveFunction caller = {
+      sizeof(caller),                  // size
+      BrigEDirectiveFunction,          // kind
+      120,                             // c_code
+      27,                              // s_name
+      0,                               // inParamCount
+      180,                             // d_firstScopeDirective
+      3,                               // operationCount
+      276,                             // d_nextDirective
+      BrigNone,                        // attribute
+      0,                               // fbarCount
+      0,                               // outParamCount
+      0                                // d_firstParam
+    };
+    directives.append(&caller);
+
+    BrigDirectiveScope bdsc1 = {
+      sizeof(bdsc1),                   // size
+      BrigEDirectiveArgStart,          // kind
+      120                              // c_code
+    };
+    directives.append(&bdsc1);
+
+    BrigDirectiveSymbol bdsy3 = {
+      sizeof(bdsy3),                    // size
+      BrigEDirectiveSymbol,             // kind
+      {
+        120,                             // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        35,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy3);
+
+    BrigDirectiveSymbol bdsy4 = {
+      sizeof(bdsy4),                   // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        164,                             // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        49,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy4);
+
+    BrigDirectiveScope bdsc2 = {
+      sizeof(bdsc2),                   // size
+      BrigEDirectiveArgEnd,            // kind
+      240                              // c_code
+    };
+    directives.append(&bdsc2);
+
+    hsa::brig::Buffer code;
+    BrigInstLdSt ld1 = {
+      sizeof(ld1),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigLd,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 0, 8, 20, 0, 0 },              // o_operand
+      BrigArgSpace,                    // storageClass
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
+    };
+    code.append(&ld1);
+
+    BrigInstLdSt st1 = {
+      sizeof(st1),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigSt,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 8, 36, 0, 0, 0 },              // o_operand
+      BrigArgSpace,                    // storageClass
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
+    };
+    code.append(&st1);
+
+    BrigInstBase ret = {
+      sizeof(ret),                     //size
+      BrigEInstBase,                   //kind
+      BrigRet,                         //opcode
+      Brigf32,                         //type
+      BrigNoPacking,                   //packing
+      {0, 0, 0, 0, 0},                 //o_operand
+    };
+    code.append(&ret);
+
+    BrigInstLdSt st2 = {
+      sizeof(st2),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigSt,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 52, 64, 0, 0, 0 },             // o_operand
+      BrigArgSpace,                    // storageClass
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
+    };
+    code.append(&st2);
+
+    BrigInstBase call = {
+      sizeof(call),                    // size
+      BrigEInstBase,                   // kind
+      BrigCall,                        // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 0, 104, 96, 124, 0 },          // o_operand
+    };
+    code.append(&call);
+    code.append(&ld1);
+    code.append(&st1);
+    code.append(&ret);
+
+    BrigInstLdSt ld2 = {
+      sizeof(ld2),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigLd,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 0, 8,  80, 0, 0 },             // o_operand
+      BrigArgSpace,                    // storageClasss
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
+    };
+    code.append(&ld2);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandReg bor1 = {
+      sizeof(bor1),                    // size
+      BrigEOperandReg,                 // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      23                               // name
+    };
+    operands.append(&bor1);
+
+    BrigOperandAddress boa1 = {
+      sizeof(boa1),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      100,                             // directive
+      0                                // offset
+    };
+    operands.append(&boa1);
+
+    BrigOperandAddress boa2 = {
+      sizeof(boa2),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      60,                              // directive
+      0                                // offset
+    };
+    operands.append(&boa2);
+
+    BrigOperandReg bor2 = {
+      sizeof(bor2),                    // size
+      BrigEOperandReg,                 // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      45                               // name
+    };
+    operands.append(&bor2);
+
+    BrigOperandAddress boa3 = {
+      sizeof(boa3),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      188,                             // directive
+      0                                // offset
+    };
+    operands.append(&boa3);
+
+    BrigOperandAddress boa4 = {
+      sizeof(boa4),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      228,                             // directive
+      0                                // offset
+    };
+    operands.append(&boa4);
+
+    BrigOperandFunctionRef bofr = {
+      sizeof(bofr),                    // size
+      BrigEOperandFunctionRef,         // kind
+      20                               // fn
+    };
+    operands.append(&bofr);
+
+    BrigOperandArgumentList boal1 = {
+      sizeof(boal1),                   // size
+      BrigEOperandArgumentList,        // kind
+      1,                               // elementCount
+      {116}                            // o_args[0]
+    };
+    operands.append(&boal1);
+
+    BrigOperandArgumentRef boar1 = {
+      sizeof(boar1),                   // size
+      BrigEOperandArgumentRef,         // kind
+      188                              // arg
+    };
+    operands.append(&boar1);
+
+    BrigOperandArgumentList boal2 = {
+      sizeof(boal2),                   // size
+      BrigEOperandArgumentList,        // kind
+      1,                               // elementCount
+      {136}                            // o_args[0]
+    };
+    operands.append(&boal2);
+
+    BrigOperandArgumentRef boar2 = {
+      sizeof(boar2),                   // size
+      BrigEOperandArgumentRef,         // kind
+      228                              // arg
+    };
+    operands.append(&boar2);
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @callee(float *%output, float *%input) {")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @caller() {")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "call void @callee(float *%output, float *%input)")));
+
+    llvm::Module *mod = codegen.getModule();
+    llvm::ArrayRef<void *> args;
+    hsa::brig::launchBrig(mod, mod->getFunction("caller"), args);
+  }
+#endif  //end of this test case is same as the wiki
+
+#if 0  //this test case move the seventh operands to the last
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&callee"));
+    strings.append(std::string("%output"));
+    strings.append(std::string("%input"));
+    strings.append(std::string("$s0"));
+    strings.append(std::string("&caller"));
+    strings.append(std::string("%an_input"));
+    strings.append(std::string("$s1"));
+    strings.append(std::string("%an_output"));
+
+    hsa::brig::Buffer directives;
+
+    BrigDirectiveVersion bdv = {
+      20,                              // size
+      BrigEDirectiveVersion,           // kind
+      0,                               // c_code
+      1,                               // major
+      0,                               // minor
+      BrigESmall,                      // machine
+      BrigEFull,                       // profile
+      BrigENosftz,                     // ftz
+      0                                // reserved
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction callee = {
+      40,                              // size
+      BrigEDirectiveFunction,          // kind
+      0,                               // c_code
+      0,                               // s_name
+      1,                               // inParamCount
+      140,                             // d_firstScopeDirective
+      3,                               // operationCount
+      140,                             // d_nextDirective
+      BrigNone,                        // attribute
+      0,                               // fbarCount
+      1,                               // outParamCount
+      100                              // d_firstParam
+    };
+    directives.append(&callee);
+
+    BrigDirectiveSymbol bdsy1 = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        8,                               // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy1);
+
+    BrigDirectiveSymbol bdsy2 = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        16,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy2);
+
+    BrigDirectiveFunction caller = {
+      40,                              // size
+      BrigEDirectiveFunction,          // kind
+      120,                             // c_code
+      27,                              // s_name
+      0,                               // inParamCount
+      180,                             // d_firstScopeDirective
+      3,                               // operationCount
+      276,                             // d_nextDirective
+      BrigNone,                        // attribute
+      0,                               // fbarCount
+      0,                               // outParamCount
+      0                                // d_firstParam
+    };
+    directives.append(&caller);
+
+    BrigDirectiveScope bdsc1 = {
+      8,                               // size
+      BrigEDirectiveArgStart,          // kind
+      120                              // c_code
+    };
+    directives.append(&bdsc1);
+
+    BrigDirectiveSymbol bdsy3 = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        120,                             // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        35,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy3);
+
+    BrigDirectiveSymbol bdsy4 = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        164,                             // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        49,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy4);
+
+    BrigDirectiveScope bdsc2 = {
+      8,                               // size
+      BrigEDirectiveArgEnd,            // kind
+      240                              // c_code
+    };
+    directives.append(&bdsc2);
+
+    hsa::brig::Buffer code;
+    BrigInstLdSt ld1 = {
+      sizeof(ld1),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigLd,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 0, 8, 20, 0, 0 },              // o_operand
+      BrigArgSpace,                    // storageClass
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
+    };
+    code.append(&ld1);
+
+    BrigInstLdSt st1 = {
+      sizeof(st1),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigSt,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 8, 36, 0, 0, 0 },              // o_operand
+      BrigArgSpace,                    // storageClass
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
+    };
+    code.append(&st1);
+
+    BrigInstBase ret = {
+      sizeof(ret),                     //size
+      BrigEInstBase,                   //kind
+      BrigRet,                         //opcode
+      Brigf32,                         //type
+      BrigNoPacking,                   //packing
+      {0, 0, 0, 0, 0},                 //o_operand
+    };
+    code.append(&ret);
+
+    BrigInstLdSt st2 = {
+      sizeof(st2),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigSt,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 52, 64, 0, 0, 0 },             // o_operand
+      BrigArgSpace,                    // storageClass
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
+    };
+    code.append(&st2);
+
+    BrigInstBase call = {
+      sizeof(call),                    // size
+      BrigEInstBase,                   // kind
+      BrigCall,                        // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 0, 88, 80, 108, 0 },           // o_operand
+    };
+    code.append(&call);
+    code.append(&ld1);
+    code.append(&st1);
+    code.append(&ret);
+
+    BrigInstLdSt ld2 = {
+      sizeof(ld2),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigLd,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 0, 8,  128, 0, 0 },            // o_operand
+      BrigArgSpace,                    // storageClasss
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
+    };
+    code.append(&ld2);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandReg bor1 = {
+      sizeof(bor1),                    // size
+      BrigEOperandReg,                 // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      23                               // name
+    };
+    operands.append(&bor1);
+
+    BrigOperandAddress boa1 = {
+      sizeof(boa1),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      100,                             // directive
+      0                                // offset
+    };
+    operands.append(&boa1);
+
+    BrigOperandAddress boa2 = {
+      sizeof(boa2),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      60,                              // directive
+      0                                // offset
+    };
+    operands.append(&boa2);
+
+    BrigOperandReg bor2 = {
+      sizeof(bor2),                    // size
+      BrigEOperandReg,                 // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      45                               // name
+    };
+    operands.append(&bor2);
+
+    BrigOperandAddress boa3 = {
+      sizeof(boa3),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      188,                             // directive
+      0                                // offset
+    };
+    operands.append(&boa3);
+
+    BrigOperandFunctionRef bofr = {
+      sizeof(bofr),                    // size
+      BrigEOperandFunctionRef,         // kind
+      20                               // fn
+    };
+    operands.append(&bofr);
+
+    BrigOperandArgumentList boal1 = {
+      sizeof(boal1),                   // size
+      BrigEOperandArgumentList,        // kind
+      1,                               // elementCount
+      {100}                             // o_args[0]
+    };
+    operands.append(&boal1);
+
+    BrigOperandArgumentRef boar1 = {
+      sizeof(boar1),                   // size
+      BrigEOperandArgumentRef,         // kind
+      188                              // arg
+    };
+    operands.append(&boar1);
+
+    BrigOperandArgumentList boal2 = {
+      sizeof(boal2),                   // size
+      BrigEOperandArgumentList,        // kind
+      1,                               // elementCount
+      {120}                            // o_args[0]
+    };
+    operands.append(&boal2);
+
+    BrigOperandArgumentRef boar2 = {
+      sizeof(boar2),                   // size
+      BrigEOperandArgumentRef,         // kind
+      228                              // arg
+    };
+    operands.append(&boar2);
+
+    BrigOperandAddress boa4 = {
+      sizeof(boa4),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      228,                             // directive
+      0                                // offset
+    };
+    operands.append(&boa4);
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    codegen();
+    EXPECT_NE(0, codegen.str().size());
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @callee(float *%output, float *%input) {")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "define void @caller() {")));
+    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    "call void @callee(float *%output, float *%input)")));
+
+    llvm::Module *mod = codegen.getModule();
+    llvm::ArrayRef<void *> args;
+    hsa::brig::launchBrig(mod, mod->getFunction("caller"), args);
+  }
+#endif  //end of this test case move the seventh operands to the last
+}
+
 TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
   {
     hsa::brig::StringBuffer strings;
@@ -3148,6 +3828,102 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
     "BrigParAcquireRelease")));
   }
 }
+
+TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstAtomicImage biai = {
+      sizeof(biai),
+      BrigEInstAtomicImage,
+      BrigAtomicImage,
+      Brigb32,
+      0,
+      {0, 0, 0, 0, 0},
+      BrigAtomicSub,
+      BrigGlobalSpace,
+      BrigAcquire,
+      0
+    };
+    code.append(&biai);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstAtomicImage biai = {
+      sizeof(biai),
+      BrigEInstAtomicImage,
+      BrigLd,
+      Brigf64x2 + 1,
+      0,
+      {20, 0, 0, 0, 0},
+      BrigAtomicSub + 1,
+      BrigFlatSpace,
+      BrigDep,
+      Briggeom_2da + 1
+    };
+    code.append(&biai);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid opcode, should be either BrigAtomicImage "
+    "or BrigAtomicNoRetImage")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "o_operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid atomicOperation")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid storage class, must be global")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, "
+    "BrigParAcquireRelease")));
+  }
+}
 TEST(Brig2LLVMTest, validateBrigInstRead) {
   {
     hsa::brig::StringBuffer strings;
@@ -3831,5 +4607,90 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
     "Invalid packing control")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
+  }
+}
+
+TEST(Brig2LLVMTest, validateBrigInstBar) {
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstBar bib = {
+      sizeof(bib),
+      BrigEInstBar,
+      BrigBarrier,
+      Brigu32,
+      0,
+      {0, 0, 0, 0, 0},
+      1
+    };
+    code.append(&bib);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    BrigInstBar bib = {
+      sizeof(bib),
+      BrigEInstBar,
+      BrigLd,
+      Brigf64x2 + 1,
+      0,
+      {20, 0, 0, 0, 0},
+      8
+    };
+    code.append(&bib);
+
+    hsa::brig::Buffer operands;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid opcode, should be either BrigBarrier, BrigSync or BrigBrn")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "o_operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid syncFlags, should be either BrigGroupLevel BrigGlobalLevel"
+    "or BrigPartialLevel")));
   }
 }
