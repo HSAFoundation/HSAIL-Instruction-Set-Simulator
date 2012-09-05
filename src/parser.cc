@@ -3796,119 +3796,226 @@ int GlobalGroupDecl(Context* context) {
   context->set_error(UNKNOWN_ERROR);
   return 1;
 }
+
 int MulInst(Context* context) {
-  if (context->token_type == PACKING) {
+  if (context->token_to_scan == MUL) {
     context->token_to_scan = yylex();
-  }
-  if (context->token_type == DATA_TYPE_ID) {
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
-    context->set_error(MISSING_DATA_TYPE);
-    return 1;
-  }
-  return 1;
-}
-int Mul24Inst(Context* context) {
-  if (context->token_type == DATA_TYPE_ID) {
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
-    context->set_error(MISSING_DATA_TYPE);
-    return 1;
-  }
-  return 1;
-}
-int Mad24Inst(Context* context) {
-  if (context->token_type == DATA_TYPE_ID) {
-    context->token_to_scan = yylex();
-    if (!Operand(context)) {
-      if (context->token_to_scan == ',') {
+    if (!RoundingMode(context)) {
+      if (context->token_type == PACKING) {
         context->token_to_scan = yylex();
-        return 0;
+      } 
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!Operand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if (!Operand(context)) {
+                  if (context->token_to_scan == ';') {
+                    context->token_to_scan = yylex();
+                    return 0;
+                  } else {
+                    context->set_error(MISSING_SEMICOLON);
+                  }
+                } else {
+                  context->set_error(MISSING_OPERAND);
+                } 
+              } else {
+                context->set_error(MISSING_COMMA);
+              } 
+            } else {
+              context->set_error(MISSING_OPERAND);
+            }
+          } else {
+            context->set_error(MISSING_COMMA);
+          }
+        } else {
+          context->set_error(MISSING_OPERAND);
+        }
       } else {
-        context->set_error(MISSING_COMMA);
-        return 1;
+        context->set_error(MISSING_DATA_TYPE);
+      }
+    } else { // without roundingmode
+      if (context->token_type == PACKING) {
+        context->token_to_scan = yylex();
+      }
+      if (context->token_type == DATA_TYPE_ID) {
+        context->token_to_scan = yylex();
+        if (!Operand(context)) {
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (!Operand(context)) {
+              if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                if (!Operand(context)) {
+                  if (context->token_to_scan == ';') {
+                    context->token_to_scan = yylex();
+                    return 0;
+                  } else {
+                    context->set_error(MISSING_SEMICOLON);
+                  }
+                } else {
+                  context->set_error(MISSING_OPERAND);
+                } 
+              } else {
+                context->set_error(MISSING_COMMA);
+              } 
+            } else {
+              context->set_error(MISSING_OPERAND);
+            }
+          } else {
+            context->set_error(MISSING_COMMA);
+          }
+        } else {
+          context->set_error(MISSING_OPERAND);
+        }
+      } else {
+        context->set_error(MISSING_DATA_TYPE);
+      }       
+    }
+  } else if (context->token_to_scan == MUL_HI) {
+    context->token_to_scan = yylex();
+    if (context->token_type == PACKING) {
+      context->token_to_scan = yylex();
+    }
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context)) {
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              if (!Operand(context)) {
+                if (context->token_to_scan == ';') {
+                  context->token_to_scan = yylex();
+                  return 0;
+                } else {
+                    context->set_error(MISSING_SEMICOLON);
+                }
+              } else {
+                context->set_error(MISSING_OPERAND);
+              } 
+            } else {
+              context->set_error(MISSING_COMMA);
+            } 
+          } else {
+            context->set_error(MISSING_OPERAND);
+          }
+        } else {
+          context->set_error(MISSING_COMMA);
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
       }
     } else {
-      context->set_error(MISSING_OPERAND);
-      return 1;
-    }
-  } else {
-    context->set_error(MISSING_DATA_TYPE);
-    return 1;
+      context->set_error(MISSING_DATA_TYPE);
+    }        
+  }  
+  return 1;
+}
+
+int Mul24Inst(Context* context) {
+  if (context->token_to_scan == MUL24_HI ||
+      context->token_to_scan == MUL24) {
+    context->token_to_scan = yylex();
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context)) {
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              if (!Operand(context)) {
+                if (context->token_to_scan == ';') {
+                  context->token_to_scan = yylex();
+                  return 0;
+                } else {
+                  context->set_error(MISSING_SEMICOLON);
+                }
+              } else {
+                context->set_error(MISSING_OPERAND);
+              } 
+            } else {
+              context->set_error(MISSING_COMMA);
+            } 
+          } else {
+            context->set_error(MISSING_OPERAND);
+          }
+        } else {
+          context->set_error(MISSING_COMMA);
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+    }        
+  }
+  return 1;
+}
+
+int Mad24Inst(Context* context) {
+  if (context->token_to_scan == MAD24_HI ||
+      context->token_to_scan == MAD24) {
+    context->token_to_scan = yylex();
+    if (context->token_type == DATA_TYPE_ID) {
+      context->token_to_scan = yylex();
+      if (!Operand(context)) {
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+          if (!Operand(context)) {
+            if (context->token_to_scan == ',') {
+              context->token_to_scan = yylex();
+              if (!Operand(context)) {
+                if (context->token_to_scan == ',') {
+                context->token_to_scan = yylex();
+                  if (!Operand(context)) {
+                    if (context->token_to_scan == ';') {
+                      context->token_to_scan = yylex();
+                      return 0;
+                    } else {
+                      context->set_error(MISSING_SEMICOLON);
+                    }
+                  } else {
+                    context->set_error(MISSING_OPERAND);
+                  } 
+                } else {
+                  context->set_error(MISSING_COMMA);
+                } 
+              } else {
+                context->set_error(MISSING_OPERAND);
+              }
+            } else {
+              context->set_error(MISSING_COMMA);
+            }
+          } else {
+            context->set_error(MISSING_OPERAND);
+          }
+        } else {
+          context->set_error(MISSING_COMMA);
+        }  
+      } else {
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+    } 
   }
   return 1;
 }
 
 int Mul(Context* context) {
-  unsigned int first_token = context->token_to_scan;
-  context->token_to_scan = yylex();
-  switch (first_token) {
-    case MUL: {
-      if (!RoundingMode(context)) {
-      }
-    }
-    case MUL_HI: {
-      if (!MulInst(context)) {
-        break;
-      } else {
-        return 1;
-      }
-    }
-    case MUL24:
-    case MUL24_HI: {
-      if (!Mul24Inst(context)) {
-        break;
-      } else {
-        return 1;
-      }
-    }
-    case MAD24:
-    case MAD24_HI: {
-      if (!Mad24Inst(context)) {
-        break;
-      } else {
-        return 1;
-      }
-    }
-    default: {
-      return 1;
-    }
+  if (!MulInst(context)) {
+    return 0;
+  } else if (!Mul24Inst(context)) {
+    return 0;
+  } else if (!Mad24Inst(context)) {
+    return 0;
   }
-  if (!Operand(context)) {
-    if (context->token_to_scan != ',') {
-      context->set_error(MISSING_COMMA);
-      return 1;
-    }
-    context->token_to_scan = yylex();
-    if (!Operand(context)) {
-      if (context->token_to_scan != ',') {
-        context->set_error(MISSING_COMMA);
-        return 1;
-      }
-      context->token_to_scan = yylex();
-
-      if (!Operand(context)) {
-        if (context->token_to_scan == ';') {
-          return 0;
-        } else {  // ';'
-          context->set_error(MISSING_OPERAND);
-          return 1;
-        }
-      } else {  // Operand 3 or 4
-        context->set_error(MISSING_OPERAND);
-        return 1;
-      }
-    } else {  // Operand 2 or 3
-      context->set_error(MISSING_OPERAND);
-      return 1;
-    }
-  } else {  // Operand 1 or 2
-    context->set_error(MISSING_OPERAND);
-    return 1;
-  }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
