@@ -25,13 +25,15 @@ BrigSymbol &BrigSymbol::operator++() {
 
 BrigSymbol arg_begin(const BrigFunction &fun) {
   BrigSymbol symbol(fun.S_, fun.it_ + 1);
-  if(!isa<BrigDirectiveSymbolCommon>(symbol.it_)) ++symbol;
+  if(symbol.it_ != fun.S_.end() && !isa<BrigDirectiveSymbolCommon>(symbol.it_))
+    ++symbol;
   return symbol;
 }
 
 BrigSymbol arg_end(const BrigFunction &fun) {
   BrigSymbol symbol(fun.S_, fun.it_ + 1 + fun.getNumArgs());
-  if(!isa<BrigDirectiveSymbolCommon>(symbol.it_)) ++symbol;
+  if(symbol.it_ != fun.S_.end() && !isa<BrigDirectiveSymbolCommon>(symbol.it_))
+    ++symbol;
   return symbol;
 }
 

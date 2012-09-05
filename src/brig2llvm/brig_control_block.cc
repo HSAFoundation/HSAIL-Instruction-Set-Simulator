@@ -26,9 +26,10 @@ BrigControlBlock cb_begin(const BrigFunction &F) {
 
 BrigControlBlock cb_end(const BrigFunction &F) {
   dir_iterator dirE(F.S_.directives + F.getMethod()->d_nextDirective);
-  assert(!isa<BrigDirectiveLabel>(dirE) && "Label outside of function!?");
+  assert((dirE == F.S_.end() || !isa<BrigDirectiveLabel>(dirE)) &&
+         "Label outside of function!?");
   BrigControlBlock E(F.S_, dirE);
-  if(!isa<BrigDirectiveMethod>(dirE)) ++E;
+  if(dirE != F.S_.end() && !isa<BrigDirectiveMethod>(dirE)) ++E;
   return E;
 }
 

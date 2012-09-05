@@ -48,11 +48,11 @@ class BrigControlBlock {
     S_(S),  it_(it) {}
 
   uint32_t getCCode() const {
+    if(it_ == S_.end()) return S_.codeSize;
+
     const BrigDirectiveFunction *fun = dyn_cast<BrigDirectiveFunction>(it_);
     const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_);
-
-    if(it_ == S_.end()) return S_.codeSize;
-    else if(fun) return fun->c_code;
+    if(fun) return fun->c_code;
     else if(label) return label->c_code;
     else assert(false && "Bad control block");
   }
