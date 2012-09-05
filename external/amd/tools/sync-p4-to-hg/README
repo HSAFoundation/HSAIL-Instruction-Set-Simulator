@@ -2,15 +2,13 @@
 How to use the sync-p4-to-hg tool:
 
 - Look at the files-to-sync file.  Each line contains pairs of paths.  The first one is the perforce depot path to the file.  The second one is the destination path to the mercurial repository.
-- cd to the directory where the second column files are rooted at.
-- This should be $ROOT/external/amd.
+- observe the file p4-sync-to-hg-cron-job to make sure that the paths are correct
 
 Now run:
 
-tools/sync-p4-to-hg/runme
+p4-sync-to-hg-cron-job
 
-This should run:
-tools/sync-p4-to-hg/sync-p4-to-hg -param=tools/sync-p4-to-hg/files-to-sync
+or install it as a cron job to run whenever you want.
 
 that would do the job.
 

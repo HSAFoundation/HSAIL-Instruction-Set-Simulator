@@ -1,4 +1,4 @@
-//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#8 - edit change 803839 (text)
+//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#9 - edit change 812680 (text)
 #ifndef _HSACOMMON_H_
 #define _HSACOMMON_H_
 
@@ -1440,6 +1440,54 @@ public:
     virtual ~IOLinkDescriptor() {} ;
 };
 
+/**
+ * @brief Version class.
+ * Version is of the form major.minor.patch.
+ * Rules for incrementing the major, minor, patch versions:
+ * a) major: 
+        i) incremented only when public APIs signatures
+           are changed, IS NOT backward compatible with
+           previous major versions.
+       ii) Reset the minor version to 0.
+      iii) Reset the patch version to 0.
+ * b) minor: 
+        i) incremented when new feature is added, needs
+           to be backward compatible with previous minor 
+           versions.
+       ii) Reset the patch version to 0.
+ * c) patch: 
+        i) incremented only for bug fixes, no user visible
+           API changes, needs to be backward and forward
+           compatible with previous patch versions.
+ */
+class Version
+{
+    uint32_t major_;
+    uint32_t minor_;
+    uint32_t patch_;
+public:
+    Version(uint32_t mj, uint32_t mn, uint32_t pt) : major_(mj), minor_(mn), patch_(pt) {   }
+    /**
+     * @brief Get the current major version
+     *
+     * @return returns the current major version
+     */
+    uint32_t getMajorVersion() { return major_; }
+     /**
+     * @brief Get the current minor version
+     *
+     * @return returns current minor version
+     */
+    uint32_t getMinorVersion() { return minor_; }
+     /**
+     * @brief Get the current patch version
+     *
+     * @return returns current patch version
+     */
+    uint32_t getPatchVersion() { return patch_; }
+};
+
+
 } // end namespace hsacommon
 
 namespace hsa
@@ -1449,6 +1497,7 @@ using namespace hsacommon;
 
 using hsacommon::vector;
 using hsacommon::string;
+using hsacommon::Version;
 
 /**
 *******************************************************************************
