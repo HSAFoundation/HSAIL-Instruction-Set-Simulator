@@ -229,6 +229,20 @@ template<class T> static void RemLogic(T result, T a, T b) {
 TestAll(SignedInst,         Rem, Binary)
 TestAll(UnsignedInst,       Rem, Binary)
 
+template<class T> static void CarryLogic(T result, T a, T b) {
+  typedef typename Int<T>::Int64Ty Int64Ty;
+  typedef typename Int<T>::Unsigned Unsigned;
+  Int64Ty a64 = Int64Ty(a);
+  Int64Ty b64 = Int64Ty(b);
+  if ((Unsigned) a64 + (Unsigned) b64 < (Unsigned) a64) {
+    EXPECT_EQ(T(1), result);
+  } else {
+    EXPECT_EQ(T(0), result);
+  }
+}
+TestAll(SignedInst,         Carry, Binary)
+TestAll(UnsignedInst,       Carry, Binary)
+
 template<class T> static void BorrowLogic(T result, T a, T b) {
   if(Int<T>::isSigned) {
     bool isNegA = Int<T>::isNeg(a);
