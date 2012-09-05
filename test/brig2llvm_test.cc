@@ -1910,7 +1910,7 @@ TEST(Brig2LLVMTest, validateBrigDirectivePragma) {
     "s_name past the strings section")));
   }
 }
-TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
+TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&packeed_ops"));
@@ -2010,7 +2010,7 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
   }
 }
 
-TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
+TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
   {
     hsa::brig::Buffer strings;
     hsa::brig::Buffer directives;
@@ -2054,7 +2054,8 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
     };
     directives.append(&bds);
 
-    hsa::brig::BrigModule mod(strings,directives,code,operands,&llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -2314,7 +2315,7 @@ TEST(Brig2LLVMTest,BrigDirectiveSampler_test) {
   }
 }
 
-TEST(Brig2LLVMTest,BrigDirectiveLabel_test) {
+TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&return_true"));
@@ -2342,7 +2343,8 @@ TEST(Brig2LLVMTest,BrigDirectiveLabel_test) {
     };
     directives.append(&bdl);
 
-    hsa::brig::BrigModule mod(strings,directives,code,operands,&llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -2415,7 +2417,7 @@ TEST(Brig2LLVMTest,BrigDirectiveLabel_test) {
     "s_name past the strings section")));
   }
 }
-TEST(Brig2LLVMTest,BrigDirectiveLabelList_test) {
+TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
   {
     hsa::brig::StringBuffer strings;
     strings.append(std::string("&return_true"));
@@ -2443,7 +2445,8 @@ TEST(Brig2LLVMTest,BrigDirectiveLabelList_test) {
     };
     directives.append(&bdll);
 
-    hsa::brig::BrigModule mod(strings,directives,code,operands,&llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
