@@ -797,7 +797,8 @@ struct BrigInstBar {
 };
 
 // BrigInstAtomic
-// The BrigInstAtomic format is used for atomic operations: atomicReturn and atomicNoReturn.
+// The BrigInstAtomic format is used for atomic operations: atomicReturn and
+// atomicNoReturn.
 struct BrigInstAtomic {
   static const uint16_t InstKind = BrigEInstAtomic;
   uint16_t size;
@@ -859,7 +860,8 @@ struct BrigInstCvt {
 };
 
 // BrigInstImage
-// The BrigInstImage format is used for the load image and store image operations.
+// The BrigInstImage format is used for the load image and store image
+// operations.
 struct BrigInstImage {
   static const uint16_t InstKind = BrigEInstImage;
   uint16_t size;
@@ -887,7 +889,8 @@ struct BrigInstMem {
 };
 
 // BrigInstRead
-// The BrigInstRead format is a special format used for the read image operation.
+// The BrigInstRead format is a special format used for the read image
+// operation.
 struct BrigInstRead {
   static const uint16_t InstKind = BrigEInstRead;
   uint16_t size;

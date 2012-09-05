@@ -589,7 +589,9 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigInstAtomicImage *code) const { return true; }
+bool BrigModule::validate(const BrigInstAtomicImage *code) const {
+  return true;
+}
 bool BrigModule::validate(const BrigInstBar *code) const { return true; }
 
 bool BrigModule::validate(const BrigInstBase *code) const {
@@ -609,7 +611,7 @@ bool BrigModule::validate(const BrigInstBase *code) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigInstCmp *code) const { 
+bool BrigModule::validate(const BrigInstCmp *code) const {
   bool valid = true;
   valid &= check(code->opcode == BrigCmp,
                  "Invalid opcode");
@@ -657,7 +659,7 @@ bool BrigModule::validate(const BrigInstImage *code) const {
 bool BrigModule::validate(const BrigInstCvt *code) const { return true; }
 bool BrigModule::validate(const BrigInstLdSt *code) const { return true; }
 bool BrigModule::validate(const BrigInstMem *code) const { return true; }
-bool BrigModule::validate(const BrigInstMod *code) const { 
+bool BrigModule::validate(const BrigInstMod *code) const {
   bool valid = true;
   valid &= check(code->opcode <= BrigFbarInitSizeKnown,
                  "Invalid opcode");
@@ -674,7 +676,7 @@ bool BrigModule::validate(const BrigInstMod *code) const {
   valid &= validate(&code->aluModifier);
   return valid;
 }
-bool BrigModule::validate(const BrigInstRead *code) const { 
+bool BrigModule::validate(const BrigInstRead *code) const {
   bool valid = true;
   valid &= check(code->opcode == BrigRdImage,
                  "Invalid opcode");

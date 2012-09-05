@@ -1,4 +1,4 @@
-//===- brig_engine.cc - BRIG Interpreter / Dynamic compiler ----------------===//
+//===- brig_engine.cc - BRIG Interpreter / Dynamic compiler ---------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //

@@ -892,7 +892,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   //invalid test
@@ -1007,7 +1008,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveLoc) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   //invalid test
@@ -1952,7 +1954,8 @@ TEST(Brig2LLVMTest,BrigDirectiveImage_test) {
     };
     directives.append(&bdi);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -2654,7 +2657,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       //elementCount = 9, allocate 16 byte memory
         1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
     };
-    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    uint8_t array[sizeof(BrigDirectiveInit) +
+                  sizeof(values) - sizeof(uint64_t)];
     BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
     bdi->size = sizeof(array);
@@ -2672,7 +2676,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   //invalid test
@@ -2698,7 +2703,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       //elementCount = 9, allocate 16 byte memory
         1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
     };
-    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    uint8_t array[sizeof(BrigDirectiveInit) +
+                  sizeof(values) - sizeof(uint64_t)];
     BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
     bdi->size = sizeof(array);
@@ -2753,7 +2759,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       //elementCount = 9, allocate 16 byte memory
         1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
     };
-    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    uint8_t array[sizeof(BrigDirectiveInit) +
+                  sizeof(values) - sizeof(uint64_t)];
     BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
     bdi->size = sizeof(array);
@@ -2806,7 +2813,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       //elementCount = 9, allocate 16 byte memory
         1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0
     };
-    uint8_t array[sizeof(BrigDirectiveInit) + sizeof(values) - sizeof(uint64_t)];
+    uint8_t array[sizeof(BrigDirectiveInit) +
+                  sizeof(values) - sizeof(uint64_t)];
     BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
     bdi->size = sizeof(array);
@@ -2870,7 +2878,8 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   //invalid test
@@ -2997,7 +3006,8 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -3169,7 +3179,8 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -3259,7 +3270,8 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -3499,7 +3511,8 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
@@ -3759,7 +3772,8 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {
