@@ -4259,56 +4259,166 @@ int Lda(Context* context) {
   return 1;
 }
 
+int OptacqregPart2(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
+  if (context->token_to_scan == _REL) {
+    *pMemSemantic = BrigRelease;
+    context->token_to_scan = yylex();
+  } else if (context->token_to_scan == _ACQ) {
+    *pMemSemantic = BrigAcquire;
+    context->token_to_scan = yylex();
+  } else if (context->token_to_scan == _AR) {
+    *pMemSemantic = BrigAcquireRelease;
+    context->token_to_scan = yylex();
+  }
+  return 0;
+}
+int Optacqreg(Context* context) {
+  BrigMemorySemantic32_t temp;
+  return OptacqregPart2(context, &temp);
+}
+
 int ImageRet(Context* context) {
   // first token is ATOMIC_IMAGE
-  unsigned second_token;
+  unsigned int second_token;
+  BrigInstAtomicImage img_inst = {
+    48,                     // size
+    BrigEInstAtomicImage,   // kind
+    BrigAtomicImage,        // opcode
+    Brigb32,                // type
+    BrigNoPacking,          // packing
+    {0, 0, 0, 0, 0},        // o_operands[5]
+    0,                      // atomicOperation
+    BrigGlobalSpace,          // storageClass
+    BrigRegular,            // memorySemantic
+    0                       // geom
+  };
   context->token_to_scan = yylex();
   second_token = context->token_to_scan;
 
   if (context->token_to_scan == _CAS) {
+    img_inst.atomicOperation = BrigAtomicCas;
     context->token_to_scan = yylex();
   } else if (context->token_type == ATOMIC_OP) {
+    switch (context->token_to_scan) {  // without _CAS_
+      case _AND_:
+        img_inst.atomicOperation = BrigAtomicAnd;
+        break;
+      case _OR_:
+        img_inst.atomicOperation = BrigAtomicOr;
+        break;
+      case _XOR_:
+        img_inst.atomicOperation = BrigAtomicXor;
+        break;
+      case _EXCH_:
+        img_inst.atomicOperation = BrigAtomicExch;
+        break;
+      case _ADD_:
+        img_inst.atomicOperation = BrigAtomicAdd;
+        break;
+      case _INC_:
+        img_inst.atomicOperation = BrigAtomicInc;
+        break;
+      case _DEC_:
+        img_inst.atomicOperation = BrigAtomicDec;
+        break;
+      case _MIN_:
+        img_inst.atomicOperation = BrigAtomicMin;
+        break;
+      case _MAX_:
+        img_inst.atomicOperation = BrigAtomicMax;
+        break;
+      case _SUB_:
+        img_inst.atomicOperation = BrigAtomicSub;
+        break;
+      default:
+        context->set_error(MISSING_DECLPREFIX);
+        return 1;
+    }
     context->token_to_scan =yylex();
   } else {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  if (context->token_to_scan == _AR || context->token_to_scan == _REL ||
-      context->token_to_scan == _ACQ ) {
-    context->token_to_scan = yylex();
+  if (!OptacqregPart2(context, &img_inst.storageClass)) {
   }
 
   if (context->token_type == GEOMETRY_ID) {
+    switch (context->token_to_scan) {
+      case _1D:
+        img_inst.geom = Briggeom_1d;
+        break;
+      case _2D:
+        img_inst.geom = Briggeom_2d;
+        break;
+      case _3D:
+        img_inst.geom = Briggeom_3d;
+        break;
+      case _1DB:
+        img_inst.geom = Briggeom_1db;
+        break;
+      case _1DA:
+        img_inst.geom = Briggeom_1da;
+        break;
+      case _2DA:
+        img_inst.geom = Briggeom_2da;
+        break;
+      default:
+        context->set_error(MISSING_DECLPREFIX);
+        return 1;
+    }
     context->token_to_scan = yylex();
     if (context->token_type == DATA_TYPE_ID) {
+      img_inst.type = context->token_value.data_type;
+   
+      std::string op_name;
       context->token_to_scan = yylex();
-      if (!Operand(context)) {
+      if (context->valid_string) {
+        op_name = context->token_value.string_val;
+      }
+      if (!Operand(context)) {  
+        img_inst.o_operands[0] = context->operand_map[op_name];
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
+          img_inst.o_operands[1] = context->get_operand_offset();
           if (context->token_to_scan == '[') {
             context->token_to_scan = yylex();
             if (!AddressableOperand(context)) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
+                unsigned int curOpCount = 2;
                 if (context->token_to_scan == '(') {
                   if (!ArrayOperandList(context)) {
                   } else {
                     context->set_error(MISSING_CLOSING_PARENTHESIS);
                     return 1;
                   }
-                } else if (!Operand(context)) {
-                } else {  // Array Operand
-                  context->set_error(MISSING_OPERAND);
-                  return 1;
-                }
+                } else {
+                  if (context->valid_string) {
+                    op_name = context->token_value.string_val;
+                  }
+                  if (!Operand(context)) {
+                    img_inst.o_operands[curOpCount++] = context->operand_map[op_name];
+                  } else {  // Array Operand
+                    context->set_error(MISSING_OPERAND);
+                    return 1;
+                  }
+               }
 
                 if (context->token_to_scan == ',') {
                   context->token_to_scan = yylex();
+                  if (context->valid_string) {
+                    op_name = context->token_value.string_val;
+                  }
                   if (!Operand(context)) {
+                    img_inst.o_operands[curOpCount++] = context->operand_map[op_name];
                     if (second_token == _CAS) {
                       if (context->token_to_scan == ',') {
                         context->token_to_scan = yylex();
+                        if (context->valid_string) {
+                          op_name = context->token_value.string_val;
+                        }
                         if (!Operand(context)) {
+                          img_inst.o_operands[curOpCount++] = context->operand_map[op_name];
                         } else {  // Operand
                           context->set_error(MISSING_OPERAND);
                           return 1;
@@ -4319,6 +4429,7 @@ int ImageRet(Context* context) {
                       }
                     }
                     if (context->token_to_scan == ';') {
+                      context->append_code(&img_inst);
                       context->token_to_scan = yylex();
                       return 0;
                     } else {  // ';'
