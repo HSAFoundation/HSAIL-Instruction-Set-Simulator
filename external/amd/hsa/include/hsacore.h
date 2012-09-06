@@ -1,3 +1,4 @@
+//depot/stg/hsa/drivers/hsa/api/core/runtime/public/hsacore.h#17 - edit change 813963 (text)
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
@@ -126,166 +127,48 @@ DLL_PUBLIC Event* createCoreEvent(EVENTID eventId, bool autoReset, bool initStat
  */
 DLL_PUBLIC void destroyCoreEvent(Event *eventObj);
 
-
 /**
- * @brief Allocate system memory.
+ * @deprecated
+ * @brief Allocates global memory that is accessible by all AMD devices 
+ *        in the platform. 
  *
- * Allocates \c size bytes of linear memory in the
- * system and returns a pointer to the allocated memory. The memory is
- * not initialized. If \c size is 0, then allocateMemory() returns NULL.
+ * Allocates \c size bytes of linear memory and returns a pointer to 
+ * the allocated memory. The memory is not initialized. If \c size 
+ * is 0, then this function returns NULL.
  *
- * The allocated system memory will be registered and be available to 
- * all the devices in the platform.
- *
- * The type of the allocated memory is by default pageable and cache coherent.
+ * The allocated memory by default will be system memory that is pageable, 
+ * cache coherent and readable / writeable by both host and devices. 
  *
  * @param size Requested allocation size in bytes.
  * @param alignment The alignment size in bytes for the address of resulting 
- *                  allocation. The value of this parameter needs to be a power 
- *                  of two. The default value is zero, where no particular 
- *                  alignment will be applied.
+ *                  allocation. The default value of this parameter is zero, 
+ *                  where no particular alignment will be applied. If the value 
+ *                  is not zero, it needs to be a power of two and minimum of 
+ *                  sizeof(void*). 
  * @exception HsaException if the input is invalid, or if the runtime is
- *            unable to allocate enough memory to perform the requested operation.
+ *            unable to allocate enough memory to perform the requested 
+ *            operation.
  * @return Pointer to allocated memory.
  *
  */
-DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment = 0);
-
+DLL_PUBLIC void* 
+allocateGlobalMemory(const size_t size, 
+                     const size_t alignment = 0);
+      
 /**
- * @brief Allocate system or device memory.
+ * @deprecated
+ * @brief Frees a global memory region pointed to by \c ptr, which must have been
+ *        returned by a previous call to \c hsacore::allocateGlobalMemory(). Otherwise, 
+ *        or if \c freeGlobalMemory(ptr) has already been called before, undefined 
+ *        behavior may occur. If a null pointer is passed as argument, no 
+ *        action occurs.
  *
- * Allocates \c size bytes of linear memory in the specified device or in the
- * system and returns a pointer to the allocated memory. The memory is
- * not initialized. If \c size is 0, then allocateMemory() returns NULL.
- *
- * The memory allocated is automatically registered by the affected device(s).
- *
- * If the SYSTEM_MEMORY flag is set, the runtime will try to allocate
- * system memory close to \c device. In any case, system memory will
- * be registered and be available to all the devices in the platform.
- * All the other memory types require that a valid device is specified.
- *
- * The type of memory is one of MemoryType. Further options might be
- * indicated using a mask.
- * @li If the type is SYSTEM_MEMORY, further options can be indicated by creating a
- *     mask using the values in SystemMemoryOptions. For instance, to allocate
- *     pinned, read only system memory we would specify the type as
- *     <tt>SYSTEM_MEMORY | PINNED |  READ_ONLY</tt>.
- *     If no option are specified, the runtime assumes the mask
- *     <tt>SYSTEM_MEMORY | PAGEABLE | CACHED</tt>.
- * @li If the type is LOCAL_MEMORY, further options can be indicated by creating a
- * 	   mask using the values in LocalMemoryOptions. If no options are
- * 	   specified, the runtime assumes the mask <tt>LOCAL_MEMORY | CPU_ACCESSIBLE</tt>.
- * @li All the other memory types do not support further options.
- *
- * @param size Requested allocation size in bytes.
- * @param alignment The alignment size in bytes for the address of resulting 
- *                  allocation. The value of this parameter needs to be a power 
- *                  of two. The default value is zero, where no particular 
- *                  alignment will be applied.
- * @param type Type of memory to be allocated.
- * @param dev Device where the allocated memory will be available.
- * @exception HsaException if the input is invalid, or if the runtime is
- *            unable to allocate enough memory to perform the requested operation.
- * @return Pointer to allocated memory.
- *
- * @see MemoryType
- * @see SystemMemoryOptions
- * @see LocalMemoryOptions
- */
-DLL_PUBLIC void* allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev);
-
-/**
- * @brief Frees system or device memory.
- *
- * Frees the memory space pointed to by ptr, which must have been
- * returned by a previous call to allocateMemory(). Otherwise, or if
- * freeMemory(ptr) has already been called before, undefined behavior
- * occurs. If a null pointer is passed as argument, no action occurs.The
- * memory deallocated is automatically deregistered in all the corresponding
- * devices.
- *
- * @param ptr Pointer to memory to free.
+ * @param ptr Pointer to the memory to be freed.
  * @exception HsaException if the the runtime is
  *            unable to deallocate the specified memory region.
  */
-DLL_PUBLIC void freeMemory(void* ptr);
-
-/**
- * @deprecated This method will probably not be part of the final API. Be aware
- * that the documentation might be incomplete or inconsistent.
- *
- * @brief Register system memory to be used by the device.
- *
- * Registers the memory space pointed to by ptr as usable by the device. The
- * memory space has to be system memory allocated by standard OS mechanisms
- * (malloc, calloc, etc.). If a pointer allocated by allocateMemory is passed
- * as argument, undefined behavior occurs. If a null pointer is passed as
- * argument, or size is 0, no action occurs.
- *
- * @param ptr Pointer to system memory.
- * @param size Requested registration size in bytes.
- * @param type Deprecated, to be removed.
- */
 DLL_PUBLIC void 
-registerMemory(void* ptr, const size_t size, const uint32_t type);
-
-/**
- * @deprecated This method will probably not be part of the final API. Be aware
- * that the documentation might be incomplete or inconsistent.
- *
- * @brief Deregister system memory previously registered by the device.
- *
- * Deregisters the memory space pointed to by ptr, which must been
- * registered by a previous call to registerMemory(). Otherwise, undefined
- * behavior ocurrs. If a null pointer is passed as argument, no action
- * occurs.
- *
- * @param ptr Pointer to memory to deregister.
- */
-DLL_PUBLIC void 
-deregisterMemory(void* ptr);
-
-/**
- * @brief Indicate that a memory region will be used by the device(s).
- *
- * Indicates that the memory region passed as parameter will be used by the
- * available device(s).
- * \li In the case of HSA devices, this invocation is optional if the memory
- *     type of the region is SYSTEM_MEMORY, and might speed up accesses to
- *     that memory
- *     region. If the type is LOCAL_MEMORY, it is mandatory for the device
- *     to map the region before accessing it.
- * \li In case of near-HSA devices, it is mandatory for the device to map
- *     the region before accessing it, independently of the type of the region.
- *
- * If a null pointer is passed as argument, or size is 0, no action occurs.
- *
- * @param ptr Pointer to memory.
- * @param size Requested mapping size in bytes.
- * @exception HsaException if the runtime is unable to map enough memory to
- *            perform the requested operation.
- *
- */
-DLL_PUBLIC void 
-mapMemory(void* ptr, const size_t size);
-
-/**
- * @brief Indicate that a memory regions will not longer be used by the device(s).
- *
- * Unmaps the memory space pointed to by the parameter, which must been
- * mapped by a previous call to hsacore::mapMemory(). Otherwise, undefined
- * behavior ocurrs. If a null pointer is passed as argument, no action
- * occurs. Note that, in HSA devices, a SYTEM_MEMORY memory space is still
- * accessible by the device even after unmapping it.
- *
- * @param ptr Pointer to memory to unmap.
- * @exception HsaException if the runtime is unable to unmap the specified
- *            memory region.
- *
- */
-DLL_PUBLIC void 
-unmapMemory(void* ptr);
+freeGlobalMemory(void* ptr);
 
 ///////////////////////////////////////////////////////////////////////////////
 //Exported Queue interface class
@@ -696,7 +579,7 @@ public:
      *
      * @return reference to a vector of memory descriptor pointers.
      */
-    virtual const vector<MemoryDescriptor*>& getMemoryDescriptors()=0;
+    virtual const vector<MemoryDescriptor*>& getMemoryDescriptors() const = 0;
 
        /**
      * @brief Get the cache descriptors associated with the device. Cache descriptor is the
@@ -728,7 +611,7 @@ public:
      */
     virtual uint32_t getMaxGroupMemorySize()=0;
 
-     /**
+      /**
      * @brief Get the wavefront size
      *
      * @return returns the size of wavefront.
@@ -847,6 +730,163 @@ public:
                                         uint32_t *&buffAddr, uint32_t &buffSize,
                                         uint32_t prcntSimd = hsacore::Queue::DEFAULT_PRCNT_SIMD,
                                         int32_t schedPrior = hsacore::Queue::DEFAULT_SCHED_RANK) = 0;
+
+    /**
+     * @brief Allocates global memory with specific properties. The allocated 
+     *        memory is accessible by the host and the calling device.
+     *
+     * Developers can determine the properties of the allocation, such as the 
+     * heap type, host/device accessibility, and performance hint, by setting 
+     * the \c heapType and \c flag parameter.
+     * 
+     * The \c heapType parameter must contain one of the following heap types. 
+     * @li HEAP_TYPE_SYSTEM The global memory is allocated in the system 
+     *                        near the calling device. 
+     * @li HEAP_TYPE_DEVICE_PUBLIC The global memory is allocated in host visible 
+     *                             part of the device local memory.
+     *
+     * The \c flag parameter must contain one of the following host accessibility options.
+     * @li MEMORY_OPTION_HOST_READ_WRITE The host is able to read and write to
+     *     the allocated memory.
+     * @li MEMORY_OPTION_HOST_READ_ONLY The host can only read 
+     *                                  the allocated memory.
+     * @li MEMORY_OPTION_HOST_WRITE_ONLY The host can only write to 
+     *                                   the allocated memory.
+     * @li MEMORY_OPTION_HOST_NO_ACCESS The host can not read or write to 
+     *     the allocated memory.
+     *
+     * The \c flag parameter must contain one of the following 
+     * device accessibility options.
+     * @li MEMORY_OPTION_DEVICE_READ_WRITE The calling device is able to 
+     *     read and write to the allocated memory.
+     * @li MEMORY_OPTION_DEVICE_READ_ONLY The calling device can only read 
+     *                                    the allocated memory.
+     * @li MEMORY_OPTION_DEVICE_WRITE_ONLY The calling device can only write 
+     *                                     to the allcoated memory.
+     * @li MEMORY_OPTION_DEVICE_NO_ACCESS The calling device can not 
+     *                                    read or write to the allocated memory.
+     *
+     * Additionaly, the \c flag parameter can be combined with 
+     * the following performance hints.
+     * Note that these options are not mandatory.
+     * @li MEMORY_OPTION_UNCACHED Sets the allocated memory to be non-cachable. 
+     *                            This option is mutually exclusive with 
+     *                            MEMORY_OPTION_WRITE_COMBINED.
+     * @li MEMORY_OPTION_WRITE_COMBINED Sets the allocated memory to be 
+     *                                  write-combined. This option is mutually 
+     *                                  exclusive with MEMORY_OPTION_UNCACHED.
+     * @li MEMORY_OPTION_NONPAGEABLE Disables paging on the allocated memory.
+     *
+     * @param size Size of the allocation in bytes.
+     * @param alignment The alignment size in bytes for the address of resulting 
+     *                  allocation. If the value is zero, no particular alignment 
+     *                  will be applied. If the value is not zero, it needs to be 
+     *                  a power of two and minimum of sizeof(void*). 
+     * @param heapType The backing storage of the allocated global memory.
+     * @param flag The type and propertird of the allocated memory.
+     * @param dev The device argument for localizing the memory allocation.
+     * @exception HsaException if the input is invalid, or if the runtime is
+     *            unable to allocate enough memory to perform the requested 
+     *            operation.
+     * @return Pointer to the allocated memory.
+     *
+     * @see MemoryType
+     * @see MemoryOption
+     */
+    virtual void* 
+    allocateGlobalMemory(const size_t size, 
+                         const size_t alignment, 
+                         const HeapType heapType,
+                         const uint32_t flag) = 0;
+
+    /**
+     * @brief Frees global memory, which must have been returned by a previous 
+     *        call to \c hsacore::Device::allocateGlobalMemory(). Otherwise, 
+     *        or if \c freeGlobalMemory(ptr) has already been called before, 
+     *        undefined behavior may occur. If a null pointer is passed as 
+     *        argument, no action occurs.
+     *
+     * @param ptr Pointer to the memory to be freed.
+     * @exception HsaException if the the runtime is
+     *            unable to deallocate the specified memory region.
+     */
+    virtual void 
+    freeGlobalMemory(void* ptr) = 0;
+
+    /**
+     * @brief Gives hint to the runtime that a particular memory region
+     *        will be used by the calling device. This routine is optional 
+     *        and is exclusively provided for the purpose of performance.
+     *
+     * Registration to a memory region, which overlaps a previously registered
+     * memory is allowed. This includes registering the same memory 
+     * region multiple times.
+     *
+     * Memory region allocated with hsacore::allocateGlobalMemory or 
+     * hsacore::Device::allocateGlobalMemory is automatically registered.
+     *
+     * @param ptr Pointer to a valid system memory.
+     * @param size Requested registration size in bytes.
+     */
+    virtual void 
+    registerMemory(void* ptr, const size_t size) = 0;
+
+    /**
+     * @brief Deregister system memory previously registered by the device.
+     *
+     * Deregisters the memory space pointed to by ptr, which must been
+     * registered by a previous call to hsacore::Device::registerMemory(). 
+     * Otherwise, undefined behavior ocurrs. A memory region that was registered 
+     * multiple times needs to be deregistered for the same amount of time.
+     * If a null pointer is passed as argument, no action occurs.
+     *
+     * Memory region deallocated with hsacore::freeGlobalMemory or 
+     * hsacore::Device::freeGlobalMemory is automatically deregistered.
+     *
+     * @param ptr Pointer to memory to deregister.
+     */
+    virtual void 
+    deregisterMemory(void* ptr) = 0;
+
+    /**
+     * @brief Indicates that a global memory region will be used by the 
+     *        host or the calling device.
+     *
+     * This method has several purposes depending on  
+     * the location of the memory.
+     * \li In the case of global memory located in the system, this function is optional 
+     *     and may speed up the access.
+     * \li As for global memory located in the device local memory, a call to this 
+     *     function is mandatory to make the memory region accessible by the host or the 
+     *     calling device. Otherwise, undefined behavior may occurs.
+     *
+     * If a null pointer is passed as argument, or size is 0, no action occurs.
+     *
+     * @param ptr Pointer to a valid memory.
+     * @param size Requested mapping size in bytes.
+     * @exception HsaException if the runtime is unable to map enough memory to
+     *            perform the requested operation.
+     *
+     */
+    virtual void 
+    mapMemory(void* ptr, const size_t size) = 0;
+
+    /**
+     * @brief Indicates that a memory regions will not longer be used 
+     *        by the host or calling device.
+     *
+     * The memory region to be unmapped must have been
+     * mapped by a previous call to hsacore::Device::mapMemory(). Otherwise, undefined
+     * behavior ocurrs. If a null pointer is passed as argument, no action
+     * occurs. 
+     *
+     * @param ptr Pointer to a valid memory to unmap.
+     * @exception HsaException if the runtime is unable to unmap the specified
+     *            memory region.
+     *
+     */
+    virtual void 
+    unmapMemory(void* ptr) = 0;
 
     /**
      * API to control the wave execution on this device.
@@ -1015,51 +1055,24 @@ public:
     // For each function in exported global functions above (hsacore.h) add
     // the same function here as a public method of this(IHsaCoreApi)
     // interface class.
-    unsigned getDeviceCount();
+    virtual unsigned getDeviceCount() = 0;
 
-    const vector<hsacore::Device*>& getDevices();
-
-    /**
-     * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment = 0)
-     */
-    void* 
-    allocateMemory(const size_t size, const size_t alignment = 0);
-
-     /**
-     * @copydoc hsacore::allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev)
-     */
-    void* 
-    allocateMemory(const size_t size, const size_t alignment, const uint32_t type, const Device& dev);
+    virtual const vector<hsacore::Device*>& getDevices() = 0;
 
     /**
-     * @copydoc hsacore::freeMemory
+     * @copydoc hsacore::allocateGlobalMemory(size_t,size_t)
      */
-    void freeMemory(void* ptr);
+    virtual void* 
+    allocateGlobalMemory(const size_t size,
+                         const size_t alignment = 0) = 0;
 
     /**
-     * @copydoc hsacore::registerMemory
+     * @copydoc hsacore::freeGlobalMemory(void*)
      */
-    void
-    registerMemory(void* ptr, const size_t size, const uint32_t type);
+    virtual void 
+    freeGlobalMemory(void* ptr) = 0;
 
-    /**
-     * @copydoc hsacore::deregisterMemory
-     */
-    void
-    deregisterMemory(void* ptr);
-
-    /**
-     * @copydoc hsacore::mapMemory
-     */
-    void
-    mapMemory(void* ptr, const size_t size);
-
-    /**
-     * @copydoc hsacore::unmapMemory
-     */
-    void
-    unmapMemory(void* ptr);
-
+    virtual ~HsaCoreApi(){};
 };
 
 /*@}*/
