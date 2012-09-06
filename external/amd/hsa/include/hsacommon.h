@@ -1,3 +1,4 @@
+//depot/stg/hsa/drivers/hsa/api/common/hsacommon.h#10 - edit change 813963 (text)
 #ifndef _HSACOMMON_H_
 #define _HSACOMMON_H_
 
@@ -425,39 +426,127 @@ typedef enum {
 
 } HsaEventWaitReturn;
 
+/**
+ * @brief Specifies different memory types according to HSAIL spec 
+ *        that can be allocated through the runtime.
+ */
+typedef enum
+{
+    MEMORY_TYPE_UNDEFINED = 0,
+
+    /* 
+     * @brief Memory visible to all work-groups and agents. 
+     */
+    MEMORY_TYPE_GLOBAL = 1,
+
+    /* 
+     * @brief Memory visible only within a single work-group. 
+     */
+    MEMORY_TYPE_GROUP = 2,
+} MemoryType;
+
+/**
+ * @brief Specifies different kinds of backing storage for 
+ *        MEMORY_TYPE_GLOBAL.
+ */
+typedef enum
+{
+    HEAP_TYPE_UNDEFINED = 0,
+
+    /*
+     * @brief GLOBAL memory is allocated in system physical memory.
+     */
+    HEAP_TYPE_SYSTEM = (1U << 0), 
+
+    /*
+     * @brief GLOBAL memory is allocated in device-global memory.
+     */
+    HEAP_TYPE_DEVICE = (1U << 1)
+} HeapType;
+
 typedef enum
 {
     /**
-     * Conventional system/host memory.
+     * Memory option used for requesting memory with caching disabled. This
+     * option is mutually exclusive with the MEMORY_OPTION_WRITE_COMBINED option. 
      */
-    MEMORY_TYPE_SYSTEM  = (1U << 0),
+    MEMORY_OPTION_UNCACHED = (1U << 8),
 
     /**
-     * Device on-board memory. For some devices, MEMORY_TYPE_DEVICE and
-     * MEMORY_TYPE_SYSTEM are the same.
+     * Memory option used for requesting memory that is write combined. 
      */
-    MEMORY_TYPE_DEVICE  = (1U << 1),
+    MEMORY_OPTION_WRITE_COMBINED = (1U << 9),
 
     /**
-     * Device group memory visible across all work-items in a single work-group.
+     * Memory option used for requesting memory that won't be paged-out to disk.
+     * This option is mutually exclusive with the MEMORY_OPTION_PAGEABLE option. 
      */
-    MEMORY_TYPE_GROUP   = (1U << 2),
+    MEMORY_OPTION_NONPAGEABLE = (1U << 10),
 
     /**
-     * Device global memory visible across all work-items in all work-groups.
+     * Memory option used for declaring that the requested memory will be both
+     * read and written by the device. This option is mutually exclusive with
+     * the MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_ONLY, and
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
      */
-    MEMORY_TYPE_GLOBAL  = (1U << 3),
+    MEMORY_OPTION_DEVICE_READ_WRITE = (1U << 11),
 
     /**
-     *
+     * Memory option used for declaring that the requested memory will only be
+     * both read by the device. This option is mutually exclusive with the
+     * MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_WRITE, and
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
      */
-    MEMORY_TYPE_TEXTURE = (1U << 4),
+    MEMORY_OPTION_DEVICE_READ_ONLY = (1U << 12),
 
     /**
-     *
+     * Memory option used for declaring that the requested memory will only be
+     * both written by the device. This option is mutually exclusive with the
+     * MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_WRITE, and
+     * MEMORY_OPTION_DEVICE_READ_ONLY options. 
      */
-    MEMORY_TYPE_SCRATCH = (1U << 5)
-} MemoryType;
+    MEMORY_OPTION_DEVICE_WRITE_ONLY = (1U << 13),
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * accessed by the host. This option is mutually exclusive with the 
+     * MEMORY_OPTION_DEVICE_READ_WRITE, MEMORY_OPTION_DEVICE_READ_ONLY, and
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_DEVICE_NO_ACCESS = (1U << 14),
+
+    /**
+     * Memory option used for declaring that the requested memory will be both
+     * read and written by the host. This option is mutually exclusive with the
+     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_ONLY, and
+     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_HOST_READ_WRITE = (1U << 15),
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * both read by the host. This option is mutually exclusive with the
+     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_WRITE, and
+     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_HOST_READ_ONLY = (1U << 16),
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * both written by the host. This option is mutually exclusive with the
+     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_WRITE, and
+     * MEMORY_OPTION_HOST_READ_ONLY options. 
+     */
+    MEMORY_OPTION_HOST_WRITE_ONLY = (1U << 17),
+
+    /**
+     * Memory option used for declaring that the requested memory will only be
+     * accessed by the host. This option is mutually exclusive with the
+     * MEMORY_OPTION_HOST_READ_WRITE, MEMORY_OPTION_HOST_READ_ONLY, and
+     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     */
+    MEMORY_OPTION_HOST_NO_ACCESS = (1U << 18),
+} MemoryOption;
 
 /**
  * @brief hsacommon ASICInfo class, represents ASIC specific information of a GPU device.
@@ -1088,6 +1177,9 @@ typedef enum {
     /// Failed due to the functionality hasn't implemented yet
     STATUS_NOT_IMPLEMENTED = -8,
 
+    // Failed due to the memory type being unsupported
+    STATUS_UNSUPPORTED = -9,
+
     /// Not categorized yet!!!
     STATUS_UNCATEGORIZED = -15,
 } Status;
@@ -1274,8 +1366,6 @@ public:
 class DLL_PUBLIC MemoryDescriptor
 {
 public:
-    enum MemoryType { HOT_PLUGGABLE, NON_VOLATILE };
-    enum HeapType { SYSTEM, PUBLIC, PRIVATE };
     /**
      * @brief Getter function for MemoryType
      * @return returns a MemoryType enumeration.
@@ -1317,6 +1407,7 @@ public:
      * @return returns max memory clock.
      */
     virtual uint32_t getMaxMemoryClock()=0;
+
     virtual ~MemoryDescriptor() {};
 };
 
@@ -1444,20 +1535,20 @@ public:
  * Version is of the form major.minor.patch.
  * Rules for incrementing the major, minor, patch versions:
  * a) major: 
-        i) incremented only when public APIs signatures
-           are changed, IS NOT backward compatible with
-           previous major versions.
-       ii) Reset the minor version to 0.
-      iii) Reset the patch version to 0.
+ *      i) incremented only when public APIs signatures
+ *         are changed, IS NOT backward compatible with
+ *         previous major versions.
+ *     ii) Reset the minor version to 0.
+ *    iii) Reset the patch version to 0.
  * b) minor: 
-        i) incremented when new feature is added, needs
-           to be backward compatible with previous minor 
-           versions.
-       ii) Reset the patch version to 0.
+ *      i) incremented when new feature is added, needs
+ *         to be backward compatible with previous minor 
+ *         versions.
+ *     ii) Reset the patch version to 0.
  * c) patch: 
-        i) incremented only for bug fixes, no user visible
-           API changes, needs to be backward and forward
-           compatible with previous patch versions.
+ *      i) incremented only for bug fixes, no user visible
+ *         API changes, needs to be backward and forward
+ *         compatible with previous patch versions.
  */
 class Version
 {
