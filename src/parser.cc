@@ -6572,7 +6572,27 @@ int TopLevelStatements(Context *context){
   }
 }  
 
-int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand) {
+int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
+  std::string op_name;
+  if (context->token_to_scan == '(') {
+    if (!ArrayOperandListPart2(context ,pRetOpOffset)) {
+      return 0;
+    } else {
+      context->set_error(MISSING_CLOSING_PARENTHESIS);
+      return 1;
+    }
+  } else {
+    if (context->valid_string) {
+      op_name = context->token_value.string_val;
+    }
+    if (!Operand(context)) {
+      *pRetOpOffset = context->operand_map[op_name];
+      return 0;
+    } else {
+      context->set_error(MISSING_OPERAND);
+      return 1;
+    }
+  }
   return 1;
 }
 int ArrayOperand(Context* context) {
