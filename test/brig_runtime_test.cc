@@ -417,6 +417,20 @@ template<class T> static void ExtractLogic(T result, T a, T b, T c) {
 TestAll(SignedInst,   Extract, Ternary)
 TestAll(UnsignedInst, Extract, Ternary)
 
+template<class T> static void InsertLogic(T result, T a, T b, T c, T d) {
+  if (32 == Int<T>::Bits) {
+    T result32 = a & ~(~(~T(0) << (d & 0x11111)) << (c & 0x11111)) |
+                 (b << (c & 0x11111));
+    EXPECT_EQ(result32, result);
+  } else if (64 == Int<T>::Bits) {
+    T result64 = a & ~(~(~T(0) << (d & 0x111111)) << (c & 0x111111)) |
+                 (b << (c & 0x111111));
+    EXPECT_EQ(result64, result);
+  }
+}
+TestAll(SignedInst,   Insert, Insert)
+TestAll(UnsignedInst, Insert, Insert)
+
 template<class T> static void BitselectLogic(T result, T a, T b, T c) {
   EXPECT_EQ(b &  a, result &  a);
   EXPECT_EQ(c & ~a, result & ~a);
