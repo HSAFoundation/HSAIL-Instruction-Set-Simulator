@@ -40,6 +40,7 @@ bool BrigModule::validate(void) const {
   bool valid = true;
   valid &= validateDirectives();
   valid &= validateCode();
+  valid &= validateOperands();
   valid &= validateStrings();
   return valid;
 }
@@ -118,6 +119,34 @@ bool BrigModule::validateCode(void) const {
       caseBrig(InstMod);
       caseBrig(InstRead);
       default: check(false, "Unrecognized code");
+    }
+  }
+
+  return true;
+}
+
+bool BrigModule::validateOperands(void) const {
+  oper_iterator it = S_.oper_begin();
+  const oper_iterator E = S_.oper_begin();
+
+  for(; it != E; it++) {
+    if(!validate(it)) return false;
+    switch(it->kind) {
+      caseBrig(OperandAddress);
+      caseBrig(OperandArgumentList);
+      caseBrig(OperandArgumentRef);
+      caseBrig(OperandBase);
+      caseBrig(OperandCompound);
+      caseBrig(OperandFunctionRef);
+      caseBrig(OperandImmed);
+      caseBrig(OperandIndirect);
+      caseBrig(OperandLabelRef);
+      caseBrig(OperandOpaque);
+      caseBrig(OperandReg);
+      caseBrig(OperandRegV2);
+      caseBrig(OperandRegV4);
+      caseBrig(OperandWaveSz);
+      default: check(false, "Unrecognized operands");
     }
   }
 
@@ -828,6 +857,43 @@ bool BrigModule::validate(const inst_iterator inst) const {
     return false;
 
   if(!check(inst + 1 <= E, "inst spans the code section"))
+    return false;
+
+  return true;
+}
+
+bool BrigModule::validate(const BrigOperandAddress *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandArgumentList *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandArgumentRef *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandBase *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandCompound *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandFunctionRef *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandImmed *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandIndirect *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandLabelRef *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandOpaque *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandReg *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandRegV2 *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandRegV4 *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandWaveSz *operand) const { return true; }
+
+bool BrigModule::validate(const oper_iterator operands) const {
+
+  // Exit early to avoid segmentation faults.
+  oper_iterator firstValidOperands(S_.operands);
+  if(!check(firstValidOperands <= operands, "operands before the operands section"))
+    return false;
+
+  oper_iterator E(S_.operands + S_.operandsSize);
+  if(!check(operands <= E, "operands past the operands section"))
+    return false;
+
+  oper_iterator lastValidOperands(S_.operands + S_.operandsSize -
+                            sizeof(BrigOperandBase));
+  if(!check(operands <= lastValidOperands, "operands spans the operands section"))
+    return false;
+
+  if(!check(operands + 1 <= E, "operands spans the operands section"))
     return false;
 
   return true;

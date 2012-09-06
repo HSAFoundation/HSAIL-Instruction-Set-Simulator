@@ -52,6 +52,7 @@ class BrigModule {
   bool validate(void) const;
   bool validateDirectives(void) const;
   bool validateCode(void) const;
+  bool validateOperands(void) const;
   bool validateStrings(void) const;
 
   bool validate(const BrigDirectiveMethod *dir) const;
@@ -93,6 +94,22 @@ class BrigModule {
   bool validate(const BrigInstRead *code) const;
   bool validate(const BrigAluModifier *c) const;
 
+  bool validate(const BrigOperandAddress *operand) const;
+  bool validate(const BrigOperandArgumentList *operand) const;
+  bool validate(const BrigOperandArgumentRef *operand) const;
+  bool validate(const BrigOperandBase *operand) const;
+  bool validate(const BrigOperandCompound *operand) const;
+  bool validate(const BrigOperandFunctionRef *operand) const;
+  bool validate(const BrigOperandImmed *operand) const;
+  bool validate(const BrigOperandIndirect *operand) const;
+  bool validate(const BrigOperandLabelRef *operand) const;
+  bool validate(const BrigOperandOpaque *operand) const;
+  bool validate(const BrigOperandReg *operand) const;
+  bool validate(const BrigOperandRegV2 *operand) const;
+  bool validate(const BrigOperandRegV4 *operand) const;
+  bool validate(const BrigOperandWaveSz *operand) const;
+
+  bool validate(const oper_iterator operands) const;
   bool validate(const inst_iterator inst) const;
 
   bool validOrEnd(const dir_iterator dir) const;

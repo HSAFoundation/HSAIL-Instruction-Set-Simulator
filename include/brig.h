@@ -918,6 +918,7 @@ struct BrigInstRead {
 
 
 struct BrigOperandBase {
+  static const uint16_t OperKind = BrigEOperandBase;
   uint16_t size;
   uint16_t kind;
 };
@@ -1015,6 +1016,72 @@ struct BrigOperandArgumentRef {
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t arg;
+};
+
+//BrigOperandCompound
+//BrigOperandCompound is used for compound addressing modes.
+struct BrigOperandCompound {
+  static const uint16_t OperKind = BrigEOperandCompound;
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t name;
+  BrigoOffset32_t reg;
+  int32_t offset;
+};
+
+//BrigOperandIndirect
+//BrigOperandIndirect is used for register plus offset addressing modes.
+struct BrigOperandIndirect {
+  static const uint16_t OperKind = BrigEOperandIndirect;
+  uint16_t size;
+  uint16_t kind;
+  BrigoOffset32_t reg;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  int32_t offset;
+};
+
+//BrigOperandOpaque
+//BrigOperandOpaque is used for addressing image and sampler objects.
+struct BrigOperandOpaque {
+  static const uint16_t OperKind = BrigEOperandOpaque;
+  uint16_t size;
+  uint16_t kind;
+  BrigdOffset32_t name;
+  BrigoOffset32_t reg;
+  int32_t offset;
+};
+
+//BrigOperandRegV2
+//BrigOperandRegV2 is used for certain memory operations.
+struct BrigOperandRegV2 {
+  static const uint16_t OperKind = BrigEOperandRegV2;
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t regs[2];
+};
+
+//BrigOperandRegV4
+//BrigOperandRegV4 is used for certain memory operations.
+struct BrigOperandRegV4 {
+  static const uint16_t OperKind = BrigEOperandRegV4;
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t regs[4];
+};
+
+//BrigOperandWaveSz
+//BrigOperandWaveSz is a compile-time value equal to the size of a wavefront.
+struct BrigOperandWaveSz {
+  static const uint16_t OperKind = BrigEOperandWaveSz;
+  uint16_t size;
+  uint16_t kind;
 };
 
 enum BrigAddrFilter {
