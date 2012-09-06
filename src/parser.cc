@@ -6596,7 +6596,8 @@ int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
   return 1;
 }
 int ArrayOperand(Context* context) {
-  return ArrayOperandPart2(context, NULL);
+  BrigoOffset32_t opOffset;
+  return ArrayOperandPart2(context, &opOffset);
 }
 
 }  // namespace brig
