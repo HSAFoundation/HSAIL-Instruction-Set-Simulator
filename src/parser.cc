@@ -332,6 +332,11 @@ int AddressableOperand(Context* context) {
 }
 
 int ArrayOperandList(Context* context) {
+  BrigoOffset32_t opOffset;
+  return ArrayOperandListPart2(context, &opOffset);
+}
+
+int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
   // assumed first_token is '('
   unsigned int count_op = 0;
   BrigoOffset32_t regs[4] = {0};
@@ -354,7 +359,6 @@ int ArrayOperandList(Context* context) {
         context->set_error(INVALID_OPERAND);
         return 1;
       }
-
       ++count_op;
       context->token_to_scan = yylex();
       if (context->token_to_scan == ')') {
@@ -377,6 +381,9 @@ int ArrayOperandList(Context* context) {
       return 1;
     }
     case 1: {
+      // just have one operand.
+      // e.g. ($s1)
+      *pRetOpOffset = regs[0];
       break;
     }
     case 2: {
@@ -390,6 +397,8 @@ int ArrayOperandList(Context* context) {
       oper_regV2.regs[0] = regs[0];
       oper_regV2.regs[1] = regs[1];
       oper_regV2.type = type;
+
+      *pRetOpOffset = context->get_operand_offset();
       context->append_operand(&oper_regV2);
       
       break;
@@ -408,6 +417,8 @@ int ArrayOperandList(Context* context) {
       oper_regV4.regs[2] = regs[2];
       oper_regV4.regs[3] = regs[3];
       oper_regV4.type = type;
+
+      *pRetOpOffset = context->get_operand_offset();
       context->append_operand(&oper_regV4);
       
       break;

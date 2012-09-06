@@ -143,6 +143,7 @@ int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass, 
                        BrigMemorySemantic32_t* pMemorySemantic);
 int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
+int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 }  // namespace brig
 }  // namespace hsa
