@@ -132,6 +132,8 @@ int TopLevelStatements(Context *context);
 
 int Optacqreg(Context* context);
 
+int ArrayOperand(Context* context);
+
 //Declarations of Helper Functions 
 int GlobalImageDeclPart2(Context *context);
 int GlobalReadOnlyImageDeclPart2(Context *context);
@@ -144,6 +146,8 @@ int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass,
                        BrigMemorySemantic32_t* pMemorySemantic);
 int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
+
+int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand);
 
 }  // namespace brig
 }  // namespace hsa

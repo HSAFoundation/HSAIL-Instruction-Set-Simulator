@@ -6572,5 +6572,12 @@ int TopLevelStatements(Context *context){
   }
 }  
 
+int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand) {
+  return 1;
+}
+int ArrayOperand(Context* context) {
+  return ArrayOperandPart2(context, NULL);
+}
+
 }  // namespace brig
 }  // namespace hsa

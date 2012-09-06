@@ -4685,6 +4685,126 @@ TEST(CodegenTest, ImageRet_CodeGen_Test) {
   delete lexer;
 };
 
+TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigOperandRegV4 refV4 = {
+    24,                    // size
+    BrigEOperandRegV4,     // kind
+    Brigb32,               // type
+    0,                     // reserved
+    {8, 20, 32, 8}         // regs
+  };
+
+  BrigOperandRegV4 getRegV4;
+  BrigOperandRegV2 getRegV2;
+  BrigOperandReg getReg;
+
+  std::string input("( $s1,$s2, $s3 , $s1)\n");
+  Lexer* lexer = new Lexer(input);
+  BrigoOffset32_t getoOffset;
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getRegV4);
+  // BrigOperandRegV4
+  EXPECT_EQ(refV4.size, getRegV4.size);
+  EXPECT_EQ(refV4.kind, getRegV4.kind);
+  EXPECT_EQ(refV4.type, getRegV4.type);
+  EXPECT_EQ(refV4.reserved, getRegV4.reserved);
+  EXPECT_EQ(refV4.regs[0], getRegV4.regs[0]);
+  EXPECT_EQ(refV4.regs[1], getRegV4.regs[1]);
+  EXPECT_EQ(refV4.regs[2], getRegV4.regs[2]);
+  EXPECT_EQ(refV4.regs[3], getRegV4.regs[3]);
+
+  BrigOperandRegV2 refV2 = {
+    16,                    // size
+    BrigEOperandRegV2,     // kind
+    Brigb1,                // type
+    0,                     // reserved
+    {68, 68}               // regs
+  };
+
+  input.assign("($c2, $c2)\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getRegV2);
+  // BrigOperandRegV2
+  EXPECT_EQ(refV2.size, getRegV2.size);
+  EXPECT_EQ(refV2.kind, getRegV2.kind);
+  EXPECT_EQ(refV2.type, getRegV2.type);
+  EXPECT_EQ(refV2.reserved, getRegV2.reserved);
+  EXPECT_EQ(refV2.regs[0], getRegV2.regs[0]);
+  EXPECT_EQ(refV2.regs[1], getRegV2.regs[1]);
+
+  input.assign("($d1)\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getReg);
+
+  BrigOperandReg refRegD1 = {
+    12,                    // size
+    BrigEOperandReg,       // kind
+    Brigb64,               // type
+    0,                     // reserved
+    16                     // name
+  };
+
+  EXPECT_EQ(refRegD1.size, getReg.size);
+  EXPECT_EQ(refRegD1.kind, getReg.kind);
+  EXPECT_EQ(refRegD1.type, getReg.type);
+  EXPECT_EQ(refRegD1.reserved, getReg.reserved);
+  EXPECT_EQ(refRegD1.name, getReg.name);
+
+  EXPECT_EQ(108, context->get_operand_offset());
+
+  input.assign("($s3)\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getReg);
+
+  BrigOperandReg refRegS3 = {
+    12,                    // size
+    BrigEOperandReg,       // kind
+    Brigb32,               // type
+    0,                     // reserved
+    8                      // name
+  };
+
+  EXPECT_EQ(refRegS3.size, getReg.size);
+  EXPECT_EQ(refRegS3.kind, getReg.kind);
+  EXPECT_EQ(refRegS3.type, getReg.type);
+  EXPECT_EQ(refRegS3.reserved, getReg.reserved);
+  EXPECT_EQ(refRegS3.name, getReg.name);
+
+  input.assign("$s2\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getReg);
+
+  BrigOperandReg refRegS2 = {
+    12,                    // size
+    BrigEOperandReg,       // kind
+    Brigb32,               // type
+    0,                     // reserved
+    4                      // name
+  };
+
+  EXPECT_EQ(refRegS2.size, getReg.size);
+  EXPECT_EQ(refRegS2.kind, getReg.kind);
+  EXPECT_EQ(refRegS2.type, getReg.type);
+  EXPECT_EQ(refRegS2.reserved, getReg.reserved);
+  EXPECT_EQ(refRegS2.name, getReg.name);
+
+  EXPECT_EQ(108, context->get_operand_offset());
+ 
+  delete lexer;
+};
+
 
 }  // namespace brig
 }  // namespace hsa
