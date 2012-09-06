@@ -3,7 +3,8 @@
 #include "llvm/Support/raw_ostream.h"
 #include <cstring>
 #include <set>
-
+#include <stdio.h>
+#include <iostream>
 namespace hsa {
 namespace brig {
 
@@ -127,9 +128,11 @@ bool BrigModule::validateCode(void) const {
 
 bool BrigModule::validateOperands(void) const {
   oper_iterator it = S_.oper_begin();
-  const oper_iterator E = S_.oper_begin();
+  const oper_iterator E = S_.oper_end();
 
-  for(; it != E; it++) {
+  if (it != E) it = it.skipOperandsNull();
+
+  for(; it != E; ++it) {
     if(!validate(it)) return false;
     switch(it->kind) {
       caseBrig(OperandAddress);

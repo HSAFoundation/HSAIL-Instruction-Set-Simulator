@@ -90,6 +90,11 @@ template<class Super> class brig_iterator : private Super {
     return *this;
   }
 
+  Self skipOperandsNull() {
+    curr += 8;
+    return *this;
+  }
+
   const Base &operator*() const {
     return *reinterpret_cast<const Base *>(curr);
   }
