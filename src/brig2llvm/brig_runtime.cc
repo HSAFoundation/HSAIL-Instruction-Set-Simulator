@@ -308,6 +308,23 @@ template<class T> static T Extract(T x, unsigned y, unsigned z) {
 SignedInst(define, Extract, Ternary)
 UnsignedInst(define, Extract, Ternary)
 
+template<class T> static T Insert(T w, T x, unsigned y, unsigned z) {
+  typedef typename Int<T>::Unsigned Unsigned;
+  if (32 == Int<T>::Bits) {
+    y &= 0x11111;
+    z &= 0x11111;
+  } else if (64 == Int<T>::Bits) {
+    y &= 0x111111;
+    z &= 0x111111;
+  }
+  Unsigned mask = ~(~T(0) << z) << y;
+  mask = ~mask;
+  w &= mask;
+  return w | (x << y);
+}
+SignedInst(define, Insert, Insert)
+UnsignedInst(define, Insert, Insert)
+
 template<class T> static T Bitselect(T x, T y, T z) {
   return (y & x) | (z & ~x);
 }
