@@ -1,4 +1,3 @@
-//depot/stg/hsa/drivers/hsa/api/hsart/public/hsa.h#29 - edit change 813963 (text)
 #ifndef _HSA_H_
 #define _HSA_H_
 
