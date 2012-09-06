@@ -1,4 +1,3 @@
-//depot/stg/hsa/drivers/hsa/api/core/common/hsacorecommon.h#13 - edit change 813963 (text)
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
