@@ -5119,3 +5119,127 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
     "Invalid equivClass, must less than 64")));
   }
 }
+
+TEST(Brig2LLVMTest, validateBrigOperandAddress) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("%input"));
+    strings.append(std::string("%an_input"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveSymbol bds = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        8,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bds);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandAddress boa = {
+      sizeof(boa),
+      BrigEOperandAddress,
+      Brigb32,
+      0,
+      60,
+      0
+    };
+    operands.append(&boa);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("%input"));
+    strings.append(std::string("%an_input"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveSymbol bds = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        8,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bds);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandAddress boa = {
+      sizeof(boa),
+      BrigEOperandAddress,
+      Brigu32,
+      1,
+      60,
+      1
+    };
+    operands.append(&boa);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invald datatype, should be Brigb32 and Brigb64")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "reserved must be zero")));
+  }
+}
