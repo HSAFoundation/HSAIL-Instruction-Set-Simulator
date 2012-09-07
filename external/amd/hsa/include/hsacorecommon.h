@@ -61,12 +61,6 @@ class DLL_PUBLIC HsailKernel
          */
         virtual void getISA(const void* &isa,
                             size_t &size)=0;
-        
-        /*! Gets the list of arguments and metadata information
-         * associated with each argument - global,local etc
-         * @return a pointer to the list of arguments
-         */
-        virtual char* getArgListInfo()=0;
 
         /*! Gets the number of arguments
          * @return a pointer to the list of arguments
@@ -83,7 +77,7 @@ class DLL_PUBLIC HsailKernel
          *  @return -               The userELements and the count are 
          *                          stored in the parameters
          */
-         virtual void getUserElements(void* userElements,
+         virtual void getUserElements(void* &userElements,
                         int& noUserELements) = 0;
 
          /*! Getter function for the extended user elements
@@ -97,7 +91,7 @@ class DLL_PUBLIC HsailKernel
           *  @return                  - The extUserELements and the count 
           *                             are stored in the parameters
           */
-          virtual void getExtUserElements(void* extUserElements,
+          virtual void getExtUserElements(void* &extUserElements,
                        int& noExtUserELements) = 0;
 
 
@@ -106,6 +100,13 @@ class DLL_PUBLIC HsailKernel
            *  @return returns the number of spgr elements
            */
           virtual int getSGPR() = 0;
+
+           /*! Getter function for the number of vgpr 
+            *  @return returns the number of vpgrs
+           */
+          
+          int getVGPR();
+
           virtual ~HsailKernel(){}
 };
 /* @}*/
