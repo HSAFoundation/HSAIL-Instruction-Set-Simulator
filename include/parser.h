@@ -133,6 +133,7 @@ int TopLevelStatements(Context *context);
 int Optacqreg(Context* context);
 
 int ArrayOperand(Context* context);
+int QueryOp(Context* context);
 
 //Declarations of Helper Functions 
 int GlobalImageDeclPart2(Context *context);
@@ -148,6 +149,8 @@ int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand);
+int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode);
+int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
 
 }  // namespace brig
 }  // namespace hsa
