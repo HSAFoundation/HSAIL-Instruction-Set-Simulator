@@ -3,8 +3,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <cstring>
 #include <set>
-#include <stdio.h>
-#include <iostream>
+
 namespace hsa {
 namespace brig {
 
@@ -130,9 +129,11 @@ bool BrigModule::validateOperands(void) const {
   oper_iterator it = S_.oper_begin();
   const oper_iterator E = S_.oper_end();
 
-  if (it != E) it = it.skipOperandsNull();
+  for(unsigned i = 0; i < std::min(size_t(8), S_.operandsSize); ++i)
+    check(!S_.operands[i],
+          "The first eight bytes of the operands section must be zero");
 
-  for(; it != E; ++it) {
+  for(; it < E; ++it) {
     if(!validate(it)) return false;
     switch(it->kind) {
       caseBrig(OperandAddress);
@@ -865,26 +866,55 @@ bool BrigModule::validate(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validate(const BrigOperandAddress *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandArgumentList *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandArgumentRef *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandBase *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandCompound *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandFunctionRef *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandImmed *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandIndirect *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandLabelRef *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandOpaque *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandReg *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandRegV2 *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandRegV4 *operand) const { return true; }
-bool BrigModule::validate(const BrigOperandWaveSz *operand) const { return true; }
+bool BrigModule::validate(const BrigOperandAddress *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandBase *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandCompound *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandImmed *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandIndirect *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandOpaque *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandReg *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandRegV4 *operand) const {
+  return true;
+}
+bool BrigModule::validate(const BrigOperandWaveSz *operand) const {
+  return true;
+}
 
 bool BrigModule::validate(const oper_iterator operands) const {
 
   // Exit early to avoid segmentation faults.
   oper_iterator firstValidOperands(S_.operands);
-  if(!check(firstValidOperands <= operands, "operands before the operands section"))
+  if(!check(firstValidOperands <= operands,
+     "operands before the operands section"))
     return false;
 
   oper_iterator E(S_.operands + S_.operandsSize);
@@ -893,7 +923,8 @@ bool BrigModule::validate(const oper_iterator operands) const {
 
   oper_iterator lastValidOperands(S_.operands + S_.operandsSize -
                             sizeof(BrigOperandBase));
-  if(!check(operands <= lastValidOperands, "operands spans the operands section"))
+  if(!check(operands <= lastValidOperands,
+     "operands spans the operands section"))
     return false;
 
   if(!check(operands + 1 <= E, "operands spans the operands section"))
