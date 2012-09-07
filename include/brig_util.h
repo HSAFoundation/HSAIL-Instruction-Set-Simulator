@@ -192,7 +192,9 @@ struct BrigSections {
   inst_iterator code_begin() const { return inst_iterator(code); };
   inst_iterator code_end() const { return inst_iterator(code + codeSize); };
   oper_iterator oper_begin() const { return oper_iterator(operands + 8); };
-  oper_iterator oper_end() const { return oper_iterator(operands + operandsSize); };
+  oper_iterator oper_end() const {
+    return oper_iterator(operands + operandsSize);
+  };
 };
 
 } // namespace brig

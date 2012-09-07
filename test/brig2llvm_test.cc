@@ -4810,7 +4810,8 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &llvm::errs());
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
   {

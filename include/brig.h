@@ -174,7 +174,8 @@ enum BrigSftz {
 
 //PRM 20.5.9
 //BrigGeom
-//BrigGeom is used to specify the number of coordinates needed to access an image.
+//BrigGeom is used to specify the number of coordinates needed to access an
+//image.
 enum BrigGeom {
   Briggeom_1d,
   Briggeom_2d,
