@@ -866,9 +866,16 @@ bool BrigModule::validate(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validate(const BrigOperandAddress *operand) const {
-  return true;
+bool BrigModule::validate(const BrigOperandAddress *operand) const { 
+  bool valid = true;
+  valid &= check(operand->type == Brigb32 ||
+                 operand->type == Brigb64, "Invald datatype, should be " 
+                 "Brigb32 and Brigb64");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid; 
 }
+
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
   return true;
 }
