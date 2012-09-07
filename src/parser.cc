@@ -324,7 +324,7 @@ int BaseOperand(Context* context) {
 
 int AddressableOperand(Context* context) {
   BrigoOffset32_t opOffset;
-  return AddressableOperandPart2(context, &opOffset, false);
+  return AddressableOperandPart2(context, &opOffset, true);
 }
 
 int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler){
@@ -345,7 +345,11 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
           0,                      // directive
           0
         };
-
+        // TODO(Chuang) name isn't declared in directive.
+        // if (!context->symbol_map.count(name)) {
+        //   context->set_error(MISSING_OPERAND);
+        //   return 1;
+        // }
         boa.directive = context->symbol_map[name];
 
         if (context->get_machine() == BrigELarge) {
@@ -361,6 +365,11 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
           0,                      // reg
           0                       // offset
         };
+        // TODO(Chuang) name isn't declared in directive.
+        // if (!context->symbol_map.count(name)) {
+        //   context->set_error(MISSING_OPERAND);
+        //   return 1;
+        // }
         boo.name = context->symbol_map[name];
         *pRetOpOffset = context->get_operand_offset();
         context->append_operand(&boo);
@@ -368,6 +377,15 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
       context->token_to_scan = yylex();
       return 0;
     } else if (context->token_to_scan == '<') {
+      if (!IsImageOrSampler) {
+        context->set_error(INVALID_OPERATION);
+        return 1;
+      }
+      // TODO(Chuang) name isn't declared in directive.
+      // if (!context->symbol_map.count(name)) {
+      //   context->set_error(MISSING_OPERAND);
+      //   return 1;
+      // }
       BrigOperandOpaque boo = {
         16,
         BrigEOperandOpaque,
@@ -3460,48 +3478,21 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
   return 1;
 }
 
-int OffsetAddressableOperand(Context* context){
-
-	return OffsetAddressableOperandPart2(context, 0);
+int OffsetAddressableOperand(Context* context) {
+  return OffsetAddressableOperandPart2(context, 0);
 }
 
 int MemoryOperand(Context* context) {
+  // Chuang
   // this judge(first token == '[') is necessary in here
   if (context->token_to_scan == '[') {
-    int CurrentoOffset = 0;
+    BrigoOffset32_t currentToOffset = 0;
     context->token_to_scan = yylex();
-    CurrentoOffset = context->get_operand_offset();
     // AddressableOperand
-    if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
-        (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
-      std::string name(context->token_value.string_val);
-
-      context->token_to_scan = yylex();
-
-      if (context->token_to_scan == ']') {
-        BrigOperandAddress boa = {
-          sizeof(boa),            // size
-          BrigEOperandAddress,    // kind
-          Brigb32,                // type
-          0,                      // reserved
-          0,                      // directive
-          0
-        };
-  
-        boa.directive = context->symbol_map[name];
-  
-        if (context->get_machine() == BrigELarge) {
-          boa.type = Brigb64;
-        }
-        context->append_operand(&boa);
-        context->token_to_scan = yylex();
-      } else {
-        context->set_error(MISSING_CLOSING_BRACKET);
-        return 1;
-      }
+    if (!AddressableOperandPart2(context, &currentToOffset, false)) {
       if (context->token_to_scan == '[') {
         context->token_to_scan = yylex();
-        if (!OffsetAddressableOperandPart2(context, CurrentoOffset)) {
+        if (!OffsetAddressableOperandPart2(context, currentToOffset)) {
           // Global/Local Identifier with offsetAddressOperand.
           return 0;
         }

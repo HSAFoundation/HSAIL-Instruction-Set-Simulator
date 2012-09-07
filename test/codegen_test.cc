@@ -1209,8 +1209,8 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
   // get 2 tokens pass '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, AddressableOperand(context));
+  BrigoOffset32_t opOffset;
+  EXPECT_EQ(0, AddressableOperandPart2(context, &opOffset, false));
 
   name.assign(input.c_str());
   BrigOperandAddress ref = {
@@ -4576,7 +4576,7 @@ TEST(CodegenTest, ImageRet_CodeGen_Test) {
 
   BrigInstAtomicImage get1, get2;
   BrigOperandReg getReg;
-  BrigOperandAddress getAddr;
+  BrigOperandOpaque getImg;
   
   // The register must be an s or d register (c registers are not allowed). 
   std::string input("atomic_image_xor_1d_b32 $s0, [&namedRWImg1], $s1, $s3;\n");
@@ -4663,24 +4663,21 @@ TEST(CodegenTest, ImageRet_CodeGen_Test) {
   EXPECT_EQ(17, getReg.name);  
 
 
-  context->get_operand(20, &getAddr);  
-  // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
-  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
-  EXPECT_EQ(0, getAddr.reserved);
-  EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset); 
+  context->get_operand(20, &getImg);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImg.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
+  EXPECT_EQ(0, getImg.name);
+  EXPECT_EQ(0, getImg.reg);
+  EXPECT_EQ(0, getImg.offset); 
 
-
-  context->get_operand(72, &getAddr);  
-  // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
-  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
-  EXPECT_EQ(0, getAddr.reserved);
-  EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset); 
+  context->get_operand(72, &getImg);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImg.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
+  EXPECT_EQ(0, getImg.name);
+  EXPECT_EQ(0, getImg.reg);
+  EXPECT_EQ(0, getImg.offset); 
 
   delete lexer;
 };
@@ -4837,7 +4834,7 @@ TEST(CodegenTest, ImageNoRet_CodeGen_Test) {
 
   BrigInstAtomicImage get1, get2;
   BrigOperandReg getReg;
-  BrigOperandAddress getAddr;
+  BrigOperandOpaque getImg;
   
   // The register must be an s or d register (c registers are not allowed).
   std::string input("atomicNoRet_image_cas_1d_b32 [&namedRWImg], $s1, $s3, $s4;\n");
@@ -4926,24 +4923,21 @@ TEST(CodegenTest, ImageNoRet_CodeGen_Test) {
   EXPECT_EQ(36, getRegV2.regs[1]);
 
 
-  context->get_operand(8, &getAddr);  
-  // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
-  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
-  EXPECT_EQ(0, getAddr.reserved);
-  EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset); 
+  context->get_operand(8, &getImg);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImg.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
+  EXPECT_EQ(0, getImg.name);
+  EXPECT_EQ(0, getImg.reg);
+  EXPECT_EQ(0, getImg.offset); 
 
-
-  context->get_operand(60, &getAddr);  
-  // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
-  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb32, getAddr.type);
-  EXPECT_EQ(0, getAddr.reserved);
-  EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset); 
+  context->get_operand(60, &getImg);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImg.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
+  EXPECT_EQ(0, getImg.name);
+  EXPECT_EQ(0, getImg.reg);
+  EXPECT_EQ(0, getImg.offset); 
 
   delete lexer;
 };
