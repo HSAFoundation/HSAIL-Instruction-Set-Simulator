@@ -75,21 +75,21 @@ TEST(ParserTest, AddressableOperandTest) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
-  input.assign("[%local_id<$d7>] \n");
+  input.assign("[%local_id<$s7>] \n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
-  input.assign("[%global_id<$q5 + 10>] \n");
+  input.assign("[%global_id<$s5 + 10>] \n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
-  input.assign("[%global_id<$d6 - 10 >]\n");
+  input.assign("[%global_id<$s6 - 10 >]\n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
@@ -106,13 +106,13 @@ TEST(ParserTest, QueryTest) {
   context->set_error_reporter(main_reporter);
 
   // test the Query types;
-  std::string input("query_order_u32  $c1 , [&Test<$d7  + 100>]; \n");
+  std::string input("query_order_b32  $s1 , [&Test<$s7  + 100>]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Query(context));
 
   lexer->get_next_token();
-  input.assign("query_data_u32  $c1 , [&Test<$d7  + 100>]; \n");
+  input.assign("query_data_b32  $s1 , [&Test<$s7  + 100>]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Query(context));
@@ -2299,7 +2299,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("query_data_u32  $c1 , [&Test<$d7  + 100>]; \n"); 
+  input.assign("query_data_b32  $s1 , [&Test<$s7  + 100>]; \n"); 
   // query
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
