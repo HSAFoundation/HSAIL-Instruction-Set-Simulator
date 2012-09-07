@@ -361,5 +361,29 @@ extern "C" b64 Movd_hi_b64(b64 x, b32 y) {
   return (b64(y) << 32) | (x >> 32);
 }
 
+template<class T> static T ShuffleVector(T x, T y, b32 z) {
+
+  unsigned len   = Vec<T>::Len;
+  unsigned mask  = len - 1;
+  unsigned shift = Vec<T>::LogLen;
+  b32 shuffle = z;
+  T result = { 0 };
+
+  for(unsigned i = 0; i < len / 2; ++i) {
+    unsigned offset = shuffle & mask;
+    ((Vec<T>) result)[i] = ((Vec<T>) x)[offset];
+    shuffle >>= shift;
+  }
+
+  for(unsigned i = len / 2; i < len; ++i) {
+    unsigned offset = shuffle & mask;
+    ((Vec<T>) result)[i] = ((Vec<T>) y)[offset];
+    shuffle >>= shift;
+  }
+
+  return result;
+}
+ShuffleVectorInst(define,   Shuffle, Ternary)
+
 } // namespace brig
 } // namespace hsa

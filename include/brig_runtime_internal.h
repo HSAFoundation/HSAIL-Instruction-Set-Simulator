@@ -13,6 +13,10 @@ struct VecPolicy {
   typedef T Type;
   typedef B Base;
   static const unsigned Len = L;
+  static const unsigned LogLen =
+    L == 2 ? 1 :
+    L == 4 ? 2 :
+    L == 8 ? 3 : 4;
   typedef Base (*UMapFn)(Base);
   typedef Base (*BMapFn)(Base, Base);
   typedef Base (*SMapFn)(Base, unsigned);
@@ -191,6 +195,21 @@ defineVec(f64, 2)
   D ## BinaryVectorPacking(FUNC, TYPE, S, P)    \
   D ## BinaryVectorPacking(FUNC, TYPE, S, S)
 
+#define ShuffleVectorInst(D,INST,NARY)          \
+  D ## ShuffleVector(INST, s8x4)                \
+  D ## ShuffleVector(INST, s8x8)                \
+  D ## ShuffleVector(INST, s16x2)               \
+  D ## ShuffleVector(INST, s16x4)               \
+  D ## ShuffleVector(INST, s32x2)               \
+  D ## ShuffleVector(INST, u8x4)                \
+  D ## ShuffleVector(INST, u8x8)                \
+  D ## ShuffleVector(INST, u16x2)               \
+  D ## ShuffleVector(INST, u16x4)               \
+  D ## ShuffleVector(INST, u32x2)               \
+  /* D ## ShuffleVector(INST, f16x2) */         \
+  /* D ## ShuffleVector(INST, f16x4) */         \
+  D ## ShuffleVector(INST, f32x2)
+
 #define defineUnary(FUNC,TYPE)                  \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t) {  \
     return FUNC(t);                             \
@@ -206,9 +225,9 @@ defineVec(f64, 2)
     return FUNC(t, u, v);                                       \
   }
 
-#define defineShift(FUNC,TYPE)                                  \
-  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift) {  \
-    return FUNC(t, shift);                                      \
+#define defineShift(FUNC,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, b32 shift) { \
+    return FUNC(t, shift);                                \
   }
 
 #define defineUnaryVectorPacking(FUNC,TYPE,PACKING)             \
@@ -221,9 +240,14 @@ defineVec(f64, 2)
     return FUNC ## Vector(Vec<TYPE>::P1(t), Vec<TYPE>::P2(u));          \
   }
 
-#define defineShiftVector(FUNC,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift) {  \
-    return FUNC ## Vector(t, shift);                            \
+#define defineShiftVector(FUNC,TYPE)                      \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, b32 shift) { \
+    return FUNC ## Vector(t, shift);                      \
+  }
+
+#define defineShuffleVector(FUNC,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, b32 shift) { \
+    return FUNC ## Vector(t, u, shift);                           \
   }
 
 #define declareUnary(FUNC,TYPE)                 \
@@ -232,7 +256,7 @@ defineVec(f64, 2)
 #define declareBinary(FUNC,TYPE)                      \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u);
 
-#define declareTernary(FUNC,TYPE)                     \
+#define declareTernary(FUNC,TYPE)                             \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v);
 
 #define declareShift(FUNC,TYPE)                               \
@@ -244,8 +268,11 @@ defineVec(f64, 2)
 #define declareBinaryVectorPacking(FUNC,TYPE,P1,P2)                     \
   extern "C" TYPE FUNC ## _ ## P1 ## P2 ## _ ## TYPE (TYPE t, TYPE u);
 
-#define declareShiftVector(FUNC,TYPE)                           \
+#define declareShiftVector(FUNC,TYPE)                         \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift);
+
+#define declareShuffleVector(FUNC,TYPE)                               \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, unsigned shift);
 
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {
