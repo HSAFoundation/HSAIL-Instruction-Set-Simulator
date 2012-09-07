@@ -310,20 +310,15 @@ UnsignedInst(define, Extract, Ternary)
 
 template<class T> static T Insert(T w, T x, unsigned y, unsigned z) {
   typedef typename Int<T>::Unsigned Unsigned;
-  if (32 == Int<T>::Bits) {
-    y &= 0x11111;
-    z &= 0x11111;
-  } else if (64 == Int<T>::Bits) {
-    y &= 0x111111;
-    z &= 0x111111;
-  }
-  Unsigned mask = ~(~T(0) << z) << y;
+  T width  = y & T(Int<T>::Bits - 1);
+  T offset = z & T(Int<T>::Bits - 1);
+  Unsigned mask = ~(~T(0) << width) << offset;
   mask = ~mask;
   w &= mask;
-  return w | (x << y);
+  return w | (x << offset);
 }
-SignedInst(define, Insert, Insert)
-UnsignedInst(define, Insert, Insert)
+SignedInst(define, Insert, Quaternary)
+UnsignedInst(define, Insert, Quaternary)
 
 template<class T> static T Bitselect(T x, T y, T z) {
   return (y & x) | (z & ~x);

@@ -206,7 +206,7 @@ defineVec(f64, 2)
     return FUNC(t, u, v);                                       \
   }
 
-#define defineInsert(FUNC,TYPE)                                \
+#define defineQuaternary(FUNC,TYPE)                                \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v, TYPE w) {  \
     return FUNC(t, u, v, w);                                       \
   }
@@ -240,7 +240,7 @@ defineVec(f64, 2)
 #define declareTernary(FUNC,TYPE)                     \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v);
 
-#define declareInsert(FUNC,TYPE)                     \
+#define declareQuaternary(FUNC,TYPE)                     \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v, TYPE w);
 
 #define declareShift(FUNC,TYPE)                               \

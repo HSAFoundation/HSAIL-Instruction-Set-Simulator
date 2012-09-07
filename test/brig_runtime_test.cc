@@ -418,18 +418,22 @@ TestAll(SignedInst,   Extract, Ternary)
 TestAll(UnsignedInst, Extract, Ternary)
 
 template<class T> static void InsertLogic(T result, T a, T b, T c, T d) {
+
+  T width  = c & T(Int<T>::Bits - 1);
+  T offset = d & T(Int<T>::Bits - 1);
+
   if (32 == Int<T>::Bits) {
-    T result32 = a & ~(~(~T(0) << (d & 0x11111)) << (c & 0x11111)) |
-                 (b << (c & 0x11111));
+    T result32 = (a & ~(~(0xffffffff << width) << offset)) |
+                 (b << offset);
     EXPECT_EQ(result32, result);
   } else if (64 == Int<T>::Bits) {
-    T result64 = a & ~(~(~T(0) << (d & 0x111111)) << (c & 0x111111)) |
-                 (b << (c & 0x111111));
+    T result64 = (a & ~(~(0xffffffffffffffff << width) << offset)) |
+                 (b << offset);
     EXPECT_EQ(result64, result);
   }
 }
-TestAll(SignedInst,   Insert, Insert)
-TestAll(UnsignedInst, Insert, Insert)
+TestAll(SignedInst,   Insert, Quaternary)
+TestAll(UnsignedInst, Insert, Quaternary)
 
 template<class T> static void BitselectLogic(T result, T a, T b, T c) {
   EXPECT_EQ(b &  a, result &  a);
