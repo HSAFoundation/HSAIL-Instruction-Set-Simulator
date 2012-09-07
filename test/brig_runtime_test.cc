@@ -533,3 +533,12 @@ template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
   }
 }
 TestAll(ShuffleVectorInst, Shuffle, Ternary)
+
+template<class T> static void CmovLogic(T result, T a, T b, T c) {
+  if(a & 1) {
+    EXPECT_EQ(b, result);
+  } else {
+    EXPECT_EQ(c, result);
+  }
+}
+TestAll(BitInst, Cmov, Ternary)

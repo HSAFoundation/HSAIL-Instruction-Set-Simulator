@@ -38,7 +38,9 @@ GTEST_API_ int main(int argc, char **argv) {
       "-BrigRuntimeTest.Mad*:"
       "BrigRuntimeTest.Extract*:"
       "BrigRuntimeTest.Bitselect*:"
-      "BrigRuntimeTest.Mov_b128_b32:";
+      "BrigRuntimeTest.Mov_b128_b32:"
+      "BrigRuntimeTest.Shuffle*:"
+      "BrigRuntimeTest.Cmov*:";
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
