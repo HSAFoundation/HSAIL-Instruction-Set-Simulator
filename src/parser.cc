@@ -336,30 +336,55 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
     context->token_to_scan = yylex();
 
     if (context->token_to_scan == ']') {
-      BrigOperandAddress boa = {
-        sizeof(boa),            // size
-        BrigEOperandAddress,    // kind
-        Brigb32,                // type
-        0,                      // reserved
-        0,                      // directive
-        0
-      };
+      if (!IsImageOrSampler) {
+        BrigOperandAddress boa = {
+          sizeof(boa),            // size
+          BrigEOperandAddress,    // kind
+          Brigb32,                // type
+          0,                      // reserved
+          0,                      // directive
+          0
+        };
 
-      boa.directive = context->symbol_map[name];
+        boa.directive = context->symbol_map[name];
 
-      if (context->get_machine() == BrigELarge)
-        boa.type = Brigb64;
-
-      context->append_operand(&boa);
+        if (context->get_machine() == BrigELarge) {
+          boa.type = Brigb64;
+        }
+        *pRetOpOffset = context->get_operand_offset();
+        context->append_operand(&boa); 
+      } else {
+        BrigOperandOpaque boo = {
+          16,
+          BrigEOperandOpaque,
+          0,                      // name
+          0,                      // reg
+          0                       // offset
+        };
+        boo.name = context->symbol_map[name];
+        *pRetOpOffset = context->get_operand_offset();
+        context->append_operand(&boo);
+      }
       context->token_to_scan = yylex();
       return 0;
     } else if (context->token_to_scan == '<') {
+      BrigOperandOpaque boo = {
+        16,
+        BrigEOperandOpaque,
+        context->symbol_map[name], // name
+        0,                         // reg
+        0                          // offset
+      };
       context->token_to_scan = yylex();
       if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+        boo.offset = context->token_value.int_val;
+
         context->token_to_scan = yylex();
         if (context->token_to_scan == '>') {
           context->token_to_scan = yylex();
           if (context->token_to_scan == ']') {
+            *pRetOpOffset = context->get_operand_offset();
+            context->append_operand(&boo);
             context->token_to_scan = yylex();
             return 0;
           } else {
@@ -368,11 +393,18 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
         } else {
           context->set_error(MISSING_CLOSING_BRACKET);
         }
-      } else if (context->token_type == REGISTER) {
+      } else if (context->token_to_scan == TOKEN_SREGISTER) {
+        name = context->token_value.string_val;
+        if (Identifier(context)) {
+          return 1;
+        }
+        boo.reg = context->operand_map[name];
         context->token_to_scan = yylex();
         if (context->token_to_scan == '>') {
           context->token_to_scan = yylex();
           if (context->token_to_scan == ']') {
+            *pRetOpOffset = context->get_operand_offset();
+            context->append_operand(&boo);
             context->token_to_scan = yylex();
             return 0;
           } else {
@@ -380,12 +412,19 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
           }
         } else if ((context->token_to_scan == '+') ||
                    (context->token_to_scan == '-')) {
+          int sign = 1;
+          if (context->token_to_scan == '-') {
+            sign = -1;
+          }
           context->token_to_scan = yylex();
           if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+            boo.offset = context->token_value.int_val * sign;
             context->token_to_scan = yylex();
             if (context->token_to_scan == '>') {
               context->token_to_scan = yylex();
               if (context->token_to_scan == ']') {
+                *pRetOpOffset = context->get_operand_offset();
+                context->append_operand(&boo);
                 context->token_to_scan = yylex();
                 return 0;
               } else {
