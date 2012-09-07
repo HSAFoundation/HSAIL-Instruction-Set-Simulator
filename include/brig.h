@@ -1021,6 +1021,15 @@ struct BrigInstAtomicImage {
   BrigGeom32_t geom;
 };
 
+// BrigOperandOpaque
+// BrigOperandOpaque is used for addressing image and sampler objects.
+struct BrigOperandOpaque {
+  uint16_t size;
+  uint16_t kind;
+  BrigdOffset32_t name;
+  BrigoOffset32_t reg;
+  int32_t offset;
+};
 
 
 #endif  // INCLUDE_BRIG_H_
