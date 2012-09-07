@@ -92,6 +92,15 @@
   /* MakeVectorTest(INST ## _PP_f16x2, INST ## Logic) */  \
   MakeVectorTest(INST ## _PP_f32x2, INST ## VectorLogic)
 
+#define TestShuffleVectorInst(INST,NARY)              \
+  MakeVectorTest(INST ## _s8x4,  INST ## Logic)       \
+  MakeVectorTest(INST ## _s16x2, INST ## Logic)       \
+  MakeVectorTest(INST ## _s32x2, INST ## Logic)       \
+  MakeVectorTest(INST ## _u8x4,  INST ## Logic)       \
+  MakeVectorTest(INST ## _u16x2, INST ## Logic)       \
+  MakeVectorTest(INST ## _u32x2, INST ## Logic)       \
+  /* MakeVectorTest(INST ## _f16x2, INST ## Logic) */ \
+  MakeVectorTest(INST ## _f32x2, INST ## Logic)
 
 template<class T> static void initTestVector(std::vector<T> &testVector) {
   for(unsigned i = 0; i < 255; ++i)
@@ -257,6 +266,24 @@ static void TestVectorInst(R (*Impl)(T, unsigned),
     for(unsigned j = 0; j < testVectorU.size(); ++j) {
       unsigned b = testVectorU[j];
       Logic(Impl(a, b), a, b);
+    }
+  }
+}
+
+template<class T, class R>
+static void TestVectorInst(R (*Impl)(T, T, unsigned),
+                           void (*Logic)(R, T, T, unsigned)) {
+  typedef typename hsa::brig::Vec<T>::Base Base;
+  const std::vector<Base> &testVectorB = getTestVector<Base>();
+  const std::vector<unsigned> &testVectorU = getTestVector<unsigned>();
+  for(unsigned i = 0; i < testVectorB.size(); ++i) {
+    T a = { testVectorB[i] };
+    for(unsigned j = 0; j < testVectorB.size(); ++j) {
+      T b = { testVectorB[j] };
+      for(unsigned k = 0; k < testVectorB.size(); ++k) {
+        unsigned c = testVectorU[k];
+        Logic(Impl(a, b, c), a, b, c);
+      }
     }
   }
 }

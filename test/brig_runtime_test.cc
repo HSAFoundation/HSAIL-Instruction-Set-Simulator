@@ -502,3 +502,34 @@ static void Movd_hi_b64_Logic(b64 result, b64 a, b32 b) {
 }
 extern "C" b64 Movd_hi_b64(b64, b32);
 MakeTest(Movd_hi_b64, Movd_hi_b64_Logic)
+
+template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
+
+  typedef typename Vec<T>::Base Base;
+
+  unsigned len   = Vec<T>::Len;
+  unsigned mask  = len - 1;
+  unsigned shift = Vec<T>::LogLen;
+  b32 shuffle = c;
+
+  for(unsigned i = 0; i < len / 2; ++i) {
+    unsigned offset = shuffle & mask;
+    if(isNan(((Vec<T>) a)[offset])) {
+      EXPECT_PRED1(isNan<Base>, ((Vec<T>) result)[i]);
+    } else {
+      EXPECT_EQ(((Vec<T>) a)[offset], ((Vec<T>) result)[i]);
+    }
+    shuffle >>= shift;
+  }
+
+  for(unsigned i = len / 2; i < len; ++i) {
+    unsigned offset = shuffle & mask;
+    if(isNan(((Vec<T>) b)[offset])) {
+      EXPECT_PRED1(isNan<Base>, ((Vec<T>) result)[i]);
+    } else {
+      EXPECT_EQ(((Vec<T>) b)[offset], ((Vec<T>) result)[i]);
+    }
+    shuffle >>= shift;
+  }
+}
+TestAll(ShuffleVectorInst, Shuffle, Ternary)
