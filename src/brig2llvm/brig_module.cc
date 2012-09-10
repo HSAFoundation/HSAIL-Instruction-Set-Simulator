@@ -867,8 +867,20 @@ bool BrigModule::validate(const inst_iterator inst) const {
 }
 
 bool BrigModule::validate(const BrigOperandAddress *operand) const {
-  return true;
+  bool valid = true;
+  valid &= check(operand->type == Brigb32 ||
+                 operand->type == Brigb64, "Invald datatype, should be "
+                 "Brigb32 and Brigb64");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  valid &= check(operand->directive < S_.directivesSize,
+                 "directive past the directive section");
+  dir_iterator dir(S_.directives + operand->directive);
+  valid &= check(isa<BrigDirectiveSymbol>(dir),
+                 "Invalid directive, should point to a BrigDirectiveSymbol");
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
   return true;
 }
