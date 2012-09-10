@@ -6068,84 +6068,134 @@ int Ret(Context* context) {
 
 int ImageRead(Context *context) {
   // first token is RD_IMAGE
+  BrigInstRead imgRdInst = {
+    40,                    // size
+    BrigEInstRead,         // kind
+    BrigRdImage,           // opcode
+    {0, 0, 0, 0, 0},       // o_operands[5]
+    0,                     // geom
+    0,                     // stype
+    0,                     // type
+    BrigNoPacking,         // packing
+    0                      // reserved
+  };
   context->token_to_scan = yylex();
   if (context->token_to_scan == _V4) {
     context->token_to_scan = yylex();
+    // Note: 1db is not supported
     if (context->token_type == GEOMETRY_ID) {
+      switch (context->token_to_scan) {
+        case _1D:
+          imgRdInst.geom = Briggeom_1d;
+          break;
+        case _2D:
+          imgRdInst.geom = Briggeom_2d;
+          break;
+        case _3D:
+          imgRdInst.geom = Briggeom_3d;
+          break;
+        case _1DA:
+          imgRdInst.geom = Briggeom_1da;
+          break;
+        case _2DA:
+          imgRdInst.geom = Briggeom_2da;
+          break;
+        default:
+          context->set_error(MISSING_DECLPREFIX);
+          return 1;
+      }
+    
       context->token_to_scan = yylex();
-      if (context->token_type == DATA_TYPE_ID) {
+      // Note: destLength: Destination length: 32 (f32, u32, or s32) 
+      if (context->token_to_scan == _F32 ||
+          context->token_to_scan == _U32 ||
+          context->token_to_scan == _S32) {
+        
+        imgRdInst.type = context->token_value.data_type;
         context->token_to_scan = yylex();
-        if (context->token_type == DATA_TYPE_ID) {
+        // Note: srcLength: Source length: 32 srcType: f32 or u32.
+        if (context->token_to_scan == _F32 ||
+            context->token_to_scan == _U32) {
+
+          imgRdInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
 
-          if (context->token_to_scan == '(') {
-            if (!ArrayOperandList(context)) {
-            } else {
-              context->set_error(MISSING_CLOSING_PARENTHESIS);
+          if (!ArrayOperandPart2(context, &imgRdInst.o_operands[0])) {
+            // Note: dest: Destination. Must be a vector of four s registers.
+            uint16_t kind;
+            context->get_operand(imgRdInst.o_operands[0] + sizeof(uint16_t), &kind);
+            if (kind != BrigEOperandRegV4) {
+              context->set_error(INVALID_OPERAND);
               return 1;
             }
-          } else if (!Operand(context)) {
-          } else {  // Array Operand
-            context->set_error(MISSING_OPERAND);
-            return 1;
-          }
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if (context->token_to_scan == '[') {
+            if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              if (!AddressableOperand(context)) {
-                if (context->token_to_scan == ',') {
-                  context->token_to_scan = yylex();
-                  if (context->token_to_scan == '[') {
+              // TODO(Chuang): Whether the sampler("[Samp]") can be omitted.
+              // rd_image used with integer coordinates has restrictions on the sampler:
+              // coord must be unnormalized.
+              // filter must be nearest.
+              // The boundary mode must be clamp or border.
+
+              if (context->token_to_scan == '[') {
+                context->token_to_scan = yylex();
+                if (!AddressableOperandPart2(context, &imgRdInst.o_operands[1], true)) {
+                  if (context->token_to_scan == ',') {
+                    unsigned int opCount = 2;
                     context->token_to_scan = yylex();
-                    if (!AddressableOperand(context)) {
-                      if (context->token_to_scan == ',') {
-                        context->token_to_scan = yylex();
-                      } else {  // ','
-                        context->set_error(MISSING_COMMA);
+                    if (context->token_to_scan == '[') {
+                      context->token_to_scan = yylex();
+                      if (!AddressableOperandPart2(context, &imgRdInst.o_operands[opCount++], true)) {
+                        if (context->token_to_scan == ',') {
+                          context->token_to_scan = yylex();
+                        } else {  // ','
+                          context->set_error(MISSING_COMMA);
+                          return 1;
+                        }
+                      } else {  // Addressable Operand
+                        context->set_error(INVALID_OPERAND);
                         return 1;
                       }
-                    } else {  // Addressable Operand
+                    } else {  // '['
+                      context->set_error(MISSING_OPERAND);
+                      return 1;
+                    }
+                    // TODO(Chuang): src: Register source for the coordinates. 
+                    // A scalar for 1D images; a 2-element vector for 2D images; 
+                    // a 4-element vector for 3D images, where the fourth element is ignored. 
+                    // Each coordinate must be in an s register
+
+                    if (!ArrayOperandPart2(context, &imgRdInst.o_operands[opCount])) {
+
+                      if (context->token_to_scan == ';') {
+                        context->append_code(&imgRdInst);
+                        context->token_to_scan = yylex();
+                        return 0;
+                      } else {  // ';'
+                        context->set_error(MISSING_SEMICOLON);
+                        return 1;
+                      }
+                    } else {  // Array Operand
                       context->set_error(INVALID_OPERAND);
                       return 1;
                     }
-                  } else {  // '['
-                    context->set_error(MISSING_OPERAND);
+                  } else {  // ','
+                    context->set_error(MISSING_COMMA);
                     return 1;
                   }
-
-                  if (context->token_to_scan == '(') {
-                    if (!ArrayOperandList(context)) {
-                    } else {
-                      context->set_error(MISSING_CLOSING_PARENTHESIS);
-                      return 1;
-                    }
-                  } else if (!Operand(context)) {
-                  } else {  // Array Operand
-                    context->set_error(MISSING_OPERAND);
-                    return 1;
-                  }
-                  if (context->token_to_scan == ';') {
-                    context->token_to_scan = yylex();
-                    return 0;
-                  } else {  // ';'
-                    context->set_error(MISSING_SEMICOLON);
-                    return 1;
-                  }
-                } else {  // ','
-                  context->set_error(MISSING_COMMA);
+                } else {  // Addressable Operand
+                  context->set_error(INVALID_OPERAND);
                   return 1;
                 }
-              } else {  // Addressable Operand
-                context->set_error(INVALID_OPERAND);
+              } else {  // '['
+                context->set_error(MISSING_OPERAND);
                 return 1;
               }
-            } else {
-              context->set_error(MISSING_OPERAND);
+            } else {  // ','
+              context->set_error(MISSING_COMMA);
               return 1;
             }
-          } else {  // ','
-            context->set_error(MISSING_COMMA);
+          } else {  // Array Operand
+            context->set_error(MISSING_OPERAND);
             return 1;
           }
         } else {  // Data Type
