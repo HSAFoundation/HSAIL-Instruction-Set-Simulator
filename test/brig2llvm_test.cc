@@ -5227,7 +5227,7 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       BrigEOperandAddress,
       Brigu32,
       1,
-      20,
+      60,
       1
     };
     operands.append(&boa);
@@ -5241,5 +5241,9 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
     "Invald datatype, should be Brigb32 and Brigb64")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "directive past the directive section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid directive, should point to a BrigDirectiveSymbol")));
   }
 }

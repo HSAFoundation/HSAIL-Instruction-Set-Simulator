@@ -873,6 +873,11 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
                  "Brigb32 and Brigb64");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
+  valid &= check(operand->directive < S_.directivesSize,
+                 "directive past the directive section");
+  valid &= check(isa<BrigDirectiveSymbol>(dir_iterator(S_.directives + 
+                 operand->directive)), "Invalid directive, should point "
+                 "to a BrigDirectiveSymbol");
   return valid; 
 }
 
