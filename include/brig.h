@@ -1047,5 +1047,21 @@ struct BrigOperandOpaque {
   int32_t offset;
 };
 
+// BrigInstImage
+// The BrigInstImage format is used for the load image and store image operations. It is
+// similar to BrigInstRead, but has an additional field.
+struct BrigInstImage {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigoOffset32_t o_operands[5];
+  BrigGeom32_t geom;
+  BrigDataType16_t type;
+  BrigDataType16_t stype;
+  BrigPacking16_t packing;
+  uint16_t reserved;
+};
+
+
 
 #endif  // INCLUDE_BRIG_H_
