@@ -390,5 +390,33 @@ template<class T> static T Cmov(T x, T y, T z) {
 }
 BitInst(define, Cmov, Ternary)
 
+// Neither C++98 nor C++11 implement C99's floating point hexadecimal literals. :(
+// 0x3F7FFFFE == 0x1.fffffep-1f
+// 0x3FEFFFFFFFFFFFFF == 0x1.fffffffffffffp-1
+extern "C" f32 Fract_f32(f32 f) {
+  union { b32 b; f32 f; } AlmostOne = { 0x3F7FFFFE };
+  return std::min(f - std::floor(f), AlmostOne.f);
+}
+
+extern "C" f64 Fract_f64(f64 d) {
+  union { b64 b; f64 d; } AlmostOne = { 0x3FEFFFFFFFFFFFFF };
+  return std::min(d - std::floor(d), AlmostOne.d);
+}
+
+template<class T> static T Sqrt(T x) {
+  return std::sqrt(x);
+}
+FloatInst(define, Sqrt, Unary)
+
+template<class T> static T Fma(T x, T y, T z);
+template<> f32 Fma(f32 x, f32 y, f32 z) { return fmaf(x, y, z); }
+template<> f64 Fma(f64 x, f64 y, f64 z) { return fma(x, y, z); }
+FloatInst(define, Fma, Ternary)
+
+template<class T> static T Copysign(T x, T y);
+template<> f32 Copysign(f32 x, f32 y) { return copysignf(x, y); }
+template<> f64 Copysign(f64 x, f64 y) { return copysign(x, y); }
+FloatInst(define, Copysign, Binary)
+
 } // namespace brig
 } // namespace hsa
