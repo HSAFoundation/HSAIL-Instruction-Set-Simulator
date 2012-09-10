@@ -447,5 +447,23 @@ template<class T> static b1 Class(T x, b32 y) {
 extern "C" b1 Class_f32(f32 f, b32 y) { return Class(f, y); }
 extern "C" b1 Class_f64(f64 f, b32 y) { return Class(f, y); }
 
+template<class T> static T Frsqrt(T x) {
+  if(std::fpclassify(x) == FP_SUBNORMAL) {
+    return x > 0 ? INFINITY : -INFINITY;
+  } else {
+    return  T(1.0) / std::sqrt(x);
+  }
+}
+FloatInst(define, Frsqrt, Unary)
+
+template<class T> static T Frcp(T x) {
+  if(std::fpclassify(x) == FP_SUBNORMAL) {
+    return x > 0 ? INFINITY : -INFINITY;
+  } else {
+    return T(1.0) / x;
+  }
+}
+FloatInst(define, Frcp, Unary)
+
 } // namespace brig
 } // namespace hsa

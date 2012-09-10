@@ -380,7 +380,9 @@ template<> bool isNegZero(double d) {
   return d == 0.0 && copysign(1.0, d) < 0.0;
 }
 
-template<class T> static bool isPosZero(T t) { return !isNegZero(t); }
+template<class T> static bool isPosZero(T t) { return false; }
+template<> bool isPosZero(f32 f) { return f == 0.0 && !isNegZero(f); }
+template<> bool isPosZero(f64 f) { return f == 0.0 && !isNegZero(f); }
 
 template<class T> static bool isInf(T t) { return false; }
 template<> bool isInf(float f)  { return isinf(f); }
