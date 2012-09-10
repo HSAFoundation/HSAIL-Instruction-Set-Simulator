@@ -26,10 +26,7 @@ template struct IntPolicy<s16, u16, true>;
 template struct IntPolicy<s32, u32, true>;
 template struct IntPolicy<s64, u64, true>;
 
-template<class T> static T Abs(T t) { return abs(t); }
-template<> f32 Abs<f32>(f32 f) { return fabsf(f); }
-template<> f64 Abs<f64>(f64 d) { return fabs(d);  }
-template<> s64 Abs<s64>(s64 s) { return labs(s);  }
+template<class T> static T Abs(T t) { return std::abs(t); }
 template<class T> static T AbsVector(T t) { return map(Abs, t); }
 SignedInst(define, Abs, Unary)
 FloatInst(define, Abs, Unary)
@@ -262,7 +259,7 @@ template<class T> static T Shr(T x, unsigned y) {
 template<class T> static T ShrVector(T x, unsigned y) { return map(Shr, x, y); }
 ShiftInst(define, Shr, Binary)
 
-template<class T> static T UnpackLo(T x, T y) { 
+template<class T> static T UnpackLo(T x, T y) {
  T result;
   for(unsigned i = 0; i < Vec<T>::Len; i += 2) {
     ((Vec<T>) result)[i]     = ((Vec<T>) x)[i / 2];
@@ -424,19 +421,13 @@ extern "C" f64 Fract_f64(f64 d) {
   return std::min(d - std::floor(d), AlmostOne.d);
 }
 
-template<class T> static T Sqrt(T x) {
-  return std::sqrt(x);
-}
+template<class T> static T Sqrt(T x) { return std::sqrt(x); }
 FloatInst(define, Sqrt, Unary)
 
-template<class T> static T Fma(T x, T y, T z);
-template<> f32 Fma(f32 x, f32 y, f32 z) { return fmaf(x, y, z); }
-template<> f64 Fma(f64 x, f64 y, f64 z) { return fma(x, y, z); }
+template<class T> static T Fma(T x, T y, T z) { return fma(x, y, z); }
 FloatInst(define, Fma, Ternary)
 
-template<class T> static T Copysign(T x, T y);
-template<> f32 Copysign(f32 x, f32 y) { return copysignf(x, y); }
-template<> f64 Copysign(f64 x, f64 y) { return copysign(x, y); }
+template<class T> static T Copysign(T x, T y) { return copysign(x, y); }
 FloatInst(define, Copysign, Binary)
 
 } // namespace brig
