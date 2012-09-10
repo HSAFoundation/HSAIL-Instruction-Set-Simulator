@@ -681,3 +681,48 @@ extern "C" b1 Class_f32(f32, unsigned);
 extern "C" b1 Class_f64(f64, unsigned);
 MakeTest(Class_f32, ClassLogic)
 MakeTest(Class_f64, ClassLogic)
+
+template<class T> static void FrsqrtLogic(T result, T a) {
+  int fpclass = std::fpclassify(a);
+  if(isNan(a) || isNegInf(a)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(fpclass == FP_NORMAL && a < 0.0) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(fpclass == FP_SUBNORMAL && a < 0.0) {
+    EXPECT_PRED1(isNegInf<T>, result);
+  } else if(isNegZero(a)) {
+    EXPECT_PRED1(isNegInf<T>, result);
+  } else if(isPosZero(a)) {
+    EXPECT_PRED1(isPosInf<T>, result);
+  } else if(fpclass == FP_SUBNORMAL && a > 0.0) {
+    EXPECT_PRED1(isPosInf<T>, result);
+  } else if(isPosInf(a)) {
+    EXPECT_EQ(0.0, result);
+  } else {
+    EXPECT_FLOAT_EQ(a, (1.0 / result) * (1.0 / result));
+  }
+}
+TestAll(FloatInst, Frsqrt, Unary)
+
+template<class T> static void FrcpLogic(T result, T a) {
+  int fpclass = std::fpclassify(a);
+  if(isNan(a)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(isNegInf(a)) {
+    EXPECT_PRED1(isNegZero<T>, result);
+  } else if(fpclass == FP_SUBNORMAL && a < 0) {
+    EXPECT_PRED1(isNegInf<T>, result);
+  } else if(isNegZero(a)) {
+    EXPECT_PRED1(isNegInf<T>, result);
+  } else if(isPosZero(a)) {
+    EXPECT_PRED1(isPosInf<T>, result);
+  } else if(fpclass == FP_SUBNORMAL && a > 0) {
+    EXPECT_PRED1(isPosInf<T>, result);
+  } else if(isPosInf(a)) {
+    EXPECT_PRED1(isPosZero<T>, result);
+  } else {
+    EXPECT_FLOAT_EQ(a, 1.0 / result);
+  }
+}
+TestAll(FloatInst, Frcp, Unary)
+
