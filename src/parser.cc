@@ -5607,66 +5607,91 @@ int ImageLoad(Context* context) {
 
 int ImageStore(Context* context) {
   // first token is St_image
+  BrigInstImage imageInst = {
+    40,                    // size
+    BrigEInstImage,        // kind
+    BrigStImage,           // opcode
+    {0, 0, 0, 0, 0},   // o_operands[5]
+    0,                 // geom
+    0,                 // type
+    0,                 // stype
+    BrigNoPacking,         // packing
+    0                      // reserved
+  };
   context->token_to_scan = yylex();
   if (context->token_to_scan == _V4) {
     context->token_to_scan = yylex();
     if (context->token_type == GEOMETRY_ID) {
+      switch (context->token_to_scan) {
+        case _1D:
+          imageInst.geom = Briggeom_1d;
+          break;
+        case _2D:
+          imageInst.geom = Briggeom_2d;
+          break;
+        case _3D:
+          imageInst.geom = Briggeom_3d;
+          break;
+        case _1DB:
+          imageInst.geom = Briggeom_1db;
+          break;
+        case _1DA:
+          imageInst.geom = Briggeom_1da;
+          break;
+        case _2DA:
+          imageInst.geom = Briggeom_2da;
+          break;
+        default:
+          context->set_error(MISSING_DECLPREFIX);
+          return 1;
+      }
       context->token_to_scan = yylex();
       if (context->token_type == DATA_TYPE_ID) {
+        imageInst.type = context->token_value.data_type;
         context->token_to_scan = yylex();
         if (context->token_type == DATA_TYPE_ID) {
+          imageInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
-          if (context->token_to_scan == '(') {
-            if (!ArrayOperandList(context)) {
-            } else {
-              context->set_error(MISSING_CLOSING_PARENTHESIS);
-              return 1;
-            }
-          } else if (!Operand(context)) {
-          } else {  // Array Operand
-            context->set_error(MISSING_OPERAND);
-            return 1;
-          }
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if (context->token_to_scan == '[') {
+          if (!ArrayOperandPart2(context, &imageInst.o_operands[0])) {
+            if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              if (!AddressableOperand(context)) {
-                if (context->token_to_scan == ',') {
-                  context->token_to_scan = yylex();
-                  if (context->token_to_scan == '(') {
-                    if (!ArrayOperandList(context)) {
-                    } else {
-                      context->set_error(MISSING_CLOSING_PARENTHESIS);
+              if (context->token_to_scan == '[') {
+                context->token_to_scan = yylex();
+                if (!AddressableOperandPart2(context, &imageInst.o_operands[1], true)) {
+                  if (context->token_to_scan == ',') {
+                    context->token_to_scan = yylex();
+                    if (!ArrayOperandPart2(context, &imageInst.o_operands[2])) {
+                      if (context->token_to_scan == ';') {
+                        context->append_code(&imageInst);
+                        context->token_to_scan = yylex();
+                        return 0;
+                      } else {  // ';'
+                        context->set_error(MISSING_SEMICOLON);
+                        return 1;
+                      }
+                    } else {  // ArrayOperand
+                      context->set_error(INVALID_OPERAND);
                       return 1;
                     }
-                  } else if (!Operand(context)) {
-                  } else {  // Array Operand
-                    context->set_error(MISSING_OPERAND);
+                  } else {  // ','
+                    context->set_error(MISSING_COMMA);
                     return 1;
                   }
-                  if (context->token_to_scan == ';') {
-                    context->token_to_scan = yylex();
-                    return 0;
-                  } else {  // ';'
-                    context->set_error(MISSING_SEMICOLON);
-                    return 1;
-                  }
-                } else {  // ','
-                  context->set_error(MISSING_COMMA);
+                } else {  // Addressable Operand
+                  context->set_error(INVALID_OPERAND);
                   return 1;
                 }
-              } else {  // Addressable Operand
-                context->set_error(INVALID_OPERAND);
+              } else {
+                context->set_error(MISSING_OPERAND);
                 return 1;
               }
-            } else {
-              context->set_error(MISSING_OPERAND);
+            } else {  // ','
+              context->set_error(MISSING_COMMA);
               return 1;
             }
-          } else {  // ','
-            context->set_error(MISSING_COMMA);
-            return 1;
+          } else {  // ArrayOperand
+            context->set_error(INVALID_OPERAND);
+            return 1;             
           }
         } else {  // Data Type
           context->set_error(MISSING_DATA_TYPE);
