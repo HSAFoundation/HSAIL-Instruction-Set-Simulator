@@ -6952,6 +6952,7 @@ int TopLevelStatements(Context *context){
     else
       return 1;
   }
+  return 0;
 }  
 
 int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
