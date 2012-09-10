@@ -262,6 +262,18 @@ template<class T> static T Shr(T x, unsigned y) {
 template<class T> static T ShrVector(T x, unsigned y) { return map(Shr, x, y); }
 ShiftInst(define, Shr, Binary)
 
+template<class T> static T UnpackLo(T x, T y) { 
+ T result;
+  return result;
+}
+UnpackInst(define, UnpackLo, Binary)
+
+template<class T> static T UnpackHi(T x, T y) {
+  T result;
+  return result;
+}
+UnpackInst(define, UnpackHi, Binary)
+
 template<class T> static T And(T x, T y) { return x & y; }
 BitInst(define, And, Binary)
 

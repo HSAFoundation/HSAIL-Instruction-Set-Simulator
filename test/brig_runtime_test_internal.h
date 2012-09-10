@@ -50,6 +50,21 @@
   MakeVectorTest(INST ## _u16x2, INST ## VectorLogic) \
   MakeVectorTest(INST ## _u32x2, INST ## VectorLogic)
 
+#define TestUnpackInst(INST,NARY)                            \
+  MakeVectorTest(INST ## _s8x4,   INST ## Logic)  \
+  MakeVectorTest(INST ## _s8x8,   INST ## Logic)  \
+  MakeVectorTest(INST ## _s16x2,  INST ## Logic)  \
+  MakeVectorTest(INST ## _s16x4,  INST ## Logic)  \
+  MakeVectorTest(INST ## _s32x2,  INST ## Logic)  \
+  MakeVectorTest(INST ## _u8x4,   INST ## Logic)  \
+  MakeVectorTest(INST ## _u8x8,   INST ## Logic)  \
+  MakeVectorTest(INST ## _u16x2,  INST ## Logic)  \
+  MakeVectorTest(INST ## _u16x4,  INST ## Logic)  \
+  MakeVectorTest(INST ## _u32x2,  INST ## Logic)    \
+  /*MakeVectorTest(INST ## _f16x2,  INST ## Logic)*/  \
+  /*MakeVectorTest(INST ## _f16x4,  INST ## Logic)*/  \
+  MakeVectorTest(INST ## _f32x2,  INST ## Logic)
+
 #define TestSignedVectorInst(INST,NARY)         \
   Test ## NARY ## SignedVectorInst(INST)
 
