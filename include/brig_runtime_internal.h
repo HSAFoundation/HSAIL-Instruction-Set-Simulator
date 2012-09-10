@@ -179,6 +179,20 @@ defineVec(f64, 2)
   D ## ShiftVector(INST, u16x4)                 \
   D ## ShiftVector(INST, u32x2)
 
+#define UnpackInst(D,INST,NARY)                 \
+  D ## NARY(INST, s8x4)                         \
+  D ## NARY(INST, s8x8)                         \
+  D ## NARY(INST, s16x2)                        \
+  D ## NARY(INST, s16x4)                        \
+  D ## NARY(INST, s32x2)                        \
+  D ## NARY(INST, u8x4)                         \
+  D ## NARY(INST, u8x8)                         \
+  D ## NARY(INST, u16x2)                        \
+  D ## NARY(INST, u16x4)                        \
+  D ## NARY(INST, u32x2)                        \
+  /* D ## NARY(INST, f16x2) */                  \
+  /* D ## NARY(INST, f16x4) */                  \
+  D ## NARY(INST, f32x2)
 
 #define FloatVectorInst(D,INST,NARY)            \
   /* NARY ## Vector(D, INST, f16x2) */          \

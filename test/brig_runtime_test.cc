@@ -336,6 +336,42 @@ template<class T> static void ShrVectorLogic(T result, T a, unsigned b) {
 }
 TestAll(ShiftInst, Shr, Binary)
 
+template<class T> static void UnpackLoLogic(T result, T a, T b) {
+  for(unsigned i = 0; i < Vec<T>::Len / 2; ++i) {
+    if(!isNan(((Vec<T>) a)[i]) &&
+       !isNan(((Vec<T>) result)[i * 2]))
+    {
+      EXPECT_EQ(((Vec<T>) a)[i],
+                      ((Vec<T>) result)[i * 2]);
+    }
+    if(!isNan(((Vec<T>) b)[i]) &&
+       !isNan(((Vec<T>) result)[i * 2 + 1]))
+    {
+      EXPECT_EQ(((Vec<T>) b)[i],
+                      ((Vec<T>) result)[i * 2 + 1]);
+    }
+  }
+}
+TestAll(UnpackInst, UnpackLo, Binary)
+
+template<class T> static void UnpackHiLogic(T result, T a, T b) {
+  for(unsigned i = 0; i < Vec<T>::Len / 2; ++i) {
+    if(!isNan(((Vec<T>) a)[i + Vec<T>::Len /2]) &&
+         !isNan(((Vec<T>) result)[i * 2]))
+    {
+      EXPECT_EQ(((Vec<T>) a)[i + Vec<T>::Len / 2],
+                      ((Vec<T>) result)[i * 2]);
+    }
+    if(!isNan(((Vec<T>) b)[i + Vec<T>::Len / 2]) &&
+       !isNan(((Vec<T>) result)[i * 2 + 1]))
+    {
+      EXPECT_EQ(((Vec<T>) b)[i + Vec<T>::Len / 2],
+                      ((Vec<T>) result)[i * 2 + 1]);
+    }
+  }
+}
+TestAll(UnpackInst, UnpackHi, Binary)
+
 template<class T> static void AndLogic(T result, T a, T b) {
   EXPECT_EQ(~(~a | ~b), result);
 }
