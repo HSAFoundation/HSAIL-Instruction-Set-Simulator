@@ -542,3 +542,70 @@ template<class T> static void CmovLogic(T result, T a, T b, T c) {
   }
 }
 TestAll(BitInst, Cmov, Ternary)
+
+template<class T> static void FractLogic(T result, T a) {
+
+  if(isNan(a) || isInf(a)) {
+    EXPECT_PRED1(isNan<T>, result);
+    return;
+  }
+
+  EXPECT_GT(1, result);
+  EXPECT_LE(0, result);
+  if(a >= 0 || a <= -FLT_EPSILON)
+    EXPECT_DOUBLE_EQ(a, std::floor(a) + result);
+  else
+    EXPECT_FLOAT_EQ(1.0f, result);
+}
+TestAll(FloatInst, Fract, Unary)
+
+template<class T> static void SqrtLogic(T result, T a) {
+  if(isNan(a)) {
+    EXPECT_PRED1(isNan<T>, a);
+  } else if(a >= 0.0) {
+    EXPECT_FLOAT_EQ(a, result * result);
+  }
+}
+TestAll(FloatInst, Sqrt, Unary)
+
+template<class T> static void FmaLogic(T result, T a, T b, T c) {
+  if(isNan(a) || isNan(b) || isNan(c)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(isInf(a) && b == 0) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(a == 0 && isInf(b)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(!isInf(a) && !isInf(b) && isInf(c)) {
+    EXPECT_EQ(c, result);
+  } else if(isNegInf(a * b) && isPosInf(c)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(isPosInf(a * b) && isNegInf(c)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(isInf(a * b) && !isInf(c)) {
+    EXPECT_FLOAT_EQ(a * b, result - c);
+  } else if(result >= FLT_EPSILON || result <= -FLT_EPSILON) {
+    EXPECT_FLOAT_EQ((double ) a * b + c, result);
+  }
+}
+TestAll(FloatInst, Fma, Ternary)
+
+template<class T> static void CopysignLogic(T result, T a, T b);
+template<> void CopysignLogic(f64 result, f64 a, f64 b) {
+  union Conv { f64 d; b64 b; };
+  Conv aConv = { a };
+  Conv bConv = { b };
+  Conv resultConv = { result };
+  b64 mask = (1UL << 63) - 1;
+  EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
+  EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
+}
+template<> void CopysignLogic(f32 result, f32 a, f32 b) {
+  union Conv { f32 d; b32 b; };
+  Conv aConv = { a };
+  Conv bConv = { b };
+  Conv resultConv = { result };
+  b32 mask = (1UL << 31) - 1;
+  EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
+  EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
+}
+TestAll(FloatInst, Copysign, Binary)
