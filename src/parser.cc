@@ -5564,20 +5564,39 @@ int ImageLoad(Context* context) {
           return 1;
       }
       context->token_to_scan = yylex();
-      if (context->token_type == DATA_TYPE_ID) {
+      // Note: destLength: Destination length: 32 (f32, u32, or s32) 
+      if (context->token_to_scan == _F32 ||
+          context->token_to_scan == _U32 ||
+          context->token_to_scan == _S32) {
+        
         imgLdInst.type = context->token_value.data_type;
         context->token_to_scan = yylex();
-        if (context->token_type == DATA_TYPE_ID) {
+        // Note: srcLength: Source length: 32 srcType: u32.
+        if (context->token_to_scan == _U32) {
           imgLdInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
           if (!ArrayOperandPart2(context, &imgLdInst.o_operands[0])) {
+            // Note: dest: Destination. Must be a vector of four s registers.
+            uint16_t kind;
+            context->get_operand(imgLdInst.o_operands[0] + sizeof(uint16_t), &kind);
+            if (kind != BrigEOperandRegV4) {
+              context->set_error(INVALID_OPERAND);
+              return 1;
+            }
+
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
+              // TODO(Chuang): [image]: The image. Must be a read-write or read-only image.
               if (context->token_to_scan == '[') {
                 context->token_to_scan = yylex();
                 if (!AddressableOperandPart2(context, &imgLdInst.o_operands[1], true)) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
+                    // TODO(Chuang): src: Register source for the coordinates. 
+                    // A scalar for 1D images; a 2-element vector for 2D images; 
+                    // a 4-element vector for 3D images, where the fourth element is ignored. 
+                    // Each coordinate must be in an s register
+
                     if (!ArrayOperandPart2(context, &imgLdInst.o_operands[2])) {
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgLdInst);
@@ -5632,7 +5651,7 @@ int ImageLoad(Context* context) {
 
 int ImageStore(Context* context) {
   // first token is St_image
-  BrigInstImage imageInst = {
+  BrigInstImage imgStInst = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
@@ -5649,45 +5668,63 @@ int ImageStore(Context* context) {
     if (context->token_type == GEOMETRY_ID) {
       switch (context->token_to_scan) {
         case _1D:
-          imageInst.geom = Briggeom_1d;
+          imgStInst.geom = Briggeom_1d;
           break;
         case _2D:
-          imageInst.geom = Briggeom_2d;
+          imgStInst.geom = Briggeom_2d;
           break;
         case _3D:
-          imageInst.geom = Briggeom_3d;
+          imgStInst.geom = Briggeom_3d;
           break;
         case _1DB:
-          imageInst.geom = Briggeom_1db;
+          imgStInst.geom = Briggeom_1db;
           break;
         case _1DA:
-          imageInst.geom = Briggeom_1da;
+          imgStInst.geom = Briggeom_1da;
           break;
         case _2DA:
-          imageInst.geom = Briggeom_2da;
+          imgStInst.geom = Briggeom_2da;
           break;
         default:
           context->set_error(MISSING_DECLPREFIX);
           return 1;
       }
       context->token_to_scan = yylex();
-      if (context->token_type == DATA_TYPE_ID) {
-        imageInst.type = context->token_value.data_type;
+      // Note: destLength: Destination length: 32 (f32, u32, or s32) 
+      if (context->token_to_scan == _F32 ||
+          context->token_to_scan == _U32 ||
+          context->token_to_scan == _S32) {
+        
+        imgStInst.type = context->token_value.data_type;
         context->token_to_scan = yylex();
-        if (context->token_type == DATA_TYPE_ID) {
-          imageInst.stype = context->token_value.data_type;
+        // Note: srcLength: Source length: 32 srcType: u32.
+        if (context->token_to_scan == _U32) {
+          imgStInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
-          if (!ArrayOperandPart2(context, &imageInst.o_operands[0])) {
+          if (!ArrayOperandPart2(context, &imgStInst.o_operands[0])) {
+            // Note: dest: Destination. Must be a vector of four s registers.
+            uint16_t kind;
+            context->get_operand(imgStInst.o_operands[0] + sizeof(uint16_t), &kind);
+            if (kind != BrigEOperandRegV4) {
+              context->set_error(INVALID_OPERAND);
+              return 1;
+            }
+
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
+              // TODO(Chuang): [image]: Destination image. A read-write image.
               if (context->token_to_scan == '[') {
                 context->token_to_scan = yylex();
-                if (!AddressableOperandPart2(context, &imageInst.o_operands[1], true)) {
+                if (!AddressableOperandPart2(context, &imgStInst.o_operands[1], true)) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
-                    if (!ArrayOperandPart2(context, &imageInst.o_operands[2])) {
+                    // TODO(Chuang): src: Register source for the coordinates. 
+                    // A scalar for 1D images; a 2-element vector for 2D images; 
+                    // a 4-element vector for 3D images, where the fourth element is ignored. 
+                    // Each coordinate must be in an s register
+                    if (!ArrayOperandPart2(context, &imgStInst.o_operands[2])) {
                       if (context->token_to_scan == ';') {
-                        context->append_code(&imageInst);
+                        context->append_code(&imgStInst);
                         context->token_to_scan = yylex();
                         return 0;
                       } else {  // ';'
