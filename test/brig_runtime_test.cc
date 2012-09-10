@@ -2,12 +2,20 @@
 
 #include "gtest/gtest.h"
 
+using hsa::brig::BrigFPClass;
 using hsa::brig::ForEach;
 using hsa::brig::Int;
-using hsa::brig::isNan;
 using hsa::brig::Int48Ty;
 using hsa::brig::Int24Ty;
 using hsa::brig::Int12Ty;
+using hsa::brig::isInf;
+using hsa::brig::isNan;
+using hsa::brig::isNegInf;
+using hsa::brig::isNegZero;
+using hsa::brig::isPosInf;
+using hsa::brig::isPosZero;
+using hsa::brig::isQNan;
+using hsa::brig::isSNan;
 using hsa::brig::Vec;
 
 template<class T> static void AbsLogic(T result, T a) {
@@ -645,3 +653,31 @@ template<> void CopysignLogic(f32 result, f32 a, f32 b) {
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
 TestAll(FloatInst, Copysign, Binary)
+
+template<class T> static void ClassLogic(b1 result, T a, b32 b) {
+  int fpclass = std::fpclassify(a);
+  if(b & hsa::brig::SNan && isSNan(a))
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::QNan && isQNan(a))
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::NegInf && isNegInf(a))
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::NegNorm && fpclass == FP_NORMAL && a < 0)
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::NegSubnorm && fpclass == FP_SUBNORMAL && a < 0)
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::NegZero && isNegZero(a))
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::PosZero && isPosZero(a))
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::PosSubnorm && fpclass == FP_SUBNORMAL && a > 0)
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::PosNorm && fpclass == FP_NORMAL && a > 0)
+    EXPECT_TRUE(result);
+  if(b & hsa::brig::PosInf && isPosInf(a))
+    EXPECT_TRUE(result);
+}
+extern "C" b1 Class_f32(f32, unsigned);
+extern "C" b1 Class_f64(f64, unsigned);
+MakeTest(Class_f32, ClassLogic)
+MakeTest(Class_f64, ClassLogic)

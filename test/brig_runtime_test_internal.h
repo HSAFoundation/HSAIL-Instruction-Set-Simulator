@@ -155,6 +155,9 @@ template<> void initTestVector(std::vector<float> &testVector) {
   testVector.push_back(INFINITY);
   testVector.push_back(NAN);
 
+  union { b32 b; f32 f; } SNAN = { 0x7FC00000 };
+  testVector.push_back(SNAN.f);
+
   for(float f = 1.0f; f != INFINITY; f *= 2)
     testVector.push_back(f);
 
@@ -180,6 +183,9 @@ template<> void initTestVector(std::vector<double> &testVector) {
   testVector.push_back(M_SQRT1_2);
   testVector.push_back(INFINITY);
   testVector.push_back(NAN);
+
+  union { b64 b; f64 f; } SNAN = { 0x7FF8000000000000UL };
+  testVector.push_back(SNAN.f);
 
   for(double d = 1.0; d != INFINITY; d *= 2)
     testVector.push_back(d);
@@ -303,28 +309,6 @@ static void TestVectorInst(R (*Impl)(T, T, unsigned),
   }
 }
 
-template<class T> static bool isNegZero(T t) { return false; }
-template<> bool isNegZero(float  f) {
-  return f == 0.0 && copysignf(1.0, f) < 0.0;
-}
-template<> bool isNegZero(double d) {
-  return d == 0.0 && copysign(1.0, d) < 0.0;
-}
-
-template<class T> static bool isPosZero(T t) { return !isNegZero(t); }
-
 template<class T> static bool Not(bool (*Fn)(T), T t) { return !Fn(t); }
-
-template<class T> static bool isInf(T t) { return false; }
-template<> bool isInf(float f)  { return isinf(f); }
-template<> bool isInf(double d) { return isinf(d); }
-
-template<class T> static bool isPosInf(T t) { return false; }
-template<> bool isPosInf(float f)  { return isinf(f) && f > 0.0; }
-template<> bool isPosInf(double d) { return isinf(d) && d > 0.0; }
-
-template<class T> static bool isNegInf(T t) { return false; }
-template<> bool isNegInf(float f)  { return isinf(f) && f < 0.0; }
-template<> bool isNegInf(double d) { return isinf(d) && d < 0.0; }
 
 #endif // BRIG_RUNTIME_TEST_INTERNAL_H
