@@ -1063,5 +1063,23 @@ struct BrigInstImage {
 };
 
 
+// The BrigInstRead
+// The BrigInstRead format is a special format used for the read image operation. The
+// read image operation needs an associated geometry (1D, 2D, 3D, 1DA, 1DB, or 2DA) and
+// the type of the coordinates.
+
+struct BrigInstRead {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigoOffset32_t o_operands[5];
+  BrigGeom32_t geom;
+  BrigDataType16_t stype;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  uint16_t reserved;
+};
+
+
 
 #endif  // INCLUDE_BRIG_H_
