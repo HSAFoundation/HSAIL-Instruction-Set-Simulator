@@ -5169,7 +5169,7 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       BrigEOperandAddress,
       Brigb32,
       0,
-      60,
+      20,
       0
     };
     operands.append(&boa);
@@ -5227,7 +5227,7 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       BrigEOperandAddress,
       Brigu32,
       1,
-      60,
+      20,
       1
     };
     operands.append(&boa);
