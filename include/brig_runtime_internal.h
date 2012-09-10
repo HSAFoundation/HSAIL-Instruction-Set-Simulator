@@ -331,6 +331,22 @@ template<class T> inline bool isNan(T t) { return false; }
 template<> inline bool isNan(float f) { return isnan(f); }
 template<> inline bool isNan(double d) { return isnan(d); }
 
+template<class T> inline bool isSNan(T t) { return false; }
+template<> inline bool isSNan(f32 f) {
+  if(!isNan(f)) return false;
+  union { f32 f; b32 b; } Conv = { f };
+  b32 mask = (1U << 22);
+  return Conv.b & mask;
+}
+template<> inline bool isSNan(f64 f) {
+  if(!isNan(f)) return false;
+  union { f64 f; b64 b; } Conv = { f };
+  b64 mask = (1UL << 51);
+  return Conv.b & mask;
+}
+
+template<class T> inline bool isQNan(T t) { return isNan(t) && !isSNan(t); }
+
 template<class T> inline bool isDivisionError(T x, T y) {
   if(y == 0) return true;
   if(!Int<T>::isSigned) return false;
@@ -355,6 +371,41 @@ template<class T> inline T Int12Ty(T t) {
   struct { T x:12; } Ext;
   return Ext.x = t;
 }
+
+template<class T> static bool isNegZero(T t) { return false; }
+template<> bool isNegZero(float  f) {
+  return f == 0.0 && copysignf(1.0, f) < 0.0;
+}
+template<> bool isNegZero(double d) {
+  return d == 0.0 && copysign(1.0, d) < 0.0;
+}
+
+template<class T> static bool isPosZero(T t) { return !isNegZero(t); }
+
+template<class T> static bool isInf(T t) { return false; }
+template<> bool isInf(float f)  { return isinf(f); }
+template<> bool isInf(double d) { return isinf(d); }
+
+template<class T> static bool isPosInf(T t) { return false; }
+template<> bool isPosInf(float f)  { return isinf(f) && f > 0.0; }
+template<> bool isPosInf(double d) { return isinf(d) && d > 0.0; }
+
+template<class T> static bool isNegInf(T t) { return false; }
+template<> bool isNegInf(float f)  { return isinf(f) && f < 0.0; }
+template<> bool isNegInf(double d) { return isinf(d) && d < 0.0; }
+
+enum BrigFPClass {
+  SNan       = 0x001,
+  QNan       = 0x002,
+  NegInf     = 0x004,
+  NegNorm    = 0x008,
+  NegSubnorm = 0x010,
+  NegZero    = 0x020,
+  PosZero    = 0x040,
+  PosSubnorm = 0x080,
+  PosNorm    = 0x100,
+  PosInf     = 0x200
+};
 
 } // namespace brig
 } // namespace hsa

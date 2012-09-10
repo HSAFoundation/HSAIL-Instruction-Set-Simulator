@@ -430,5 +430,22 @@ FloatInst(define, Fma, Ternary)
 template<class T> static T Copysign(T x, T y) { return copysign(x, y); }
 FloatInst(define, Copysign, Binary)
 
+template<class T> static b1 Class(T x, b32 y) {
+  int fpclass = std::fpclassify(x);
+  if(y & SNan && isSNan(x)) return true;
+  if(y & QNan && isQNan(x)) return true;
+  if(y & NegInf && isNegInf(x)) return true;
+  if(y & NegNorm && fpclass == FP_NORMAL && x < 0) return true;
+  if(y & NegSubnorm && fpclass == FP_SUBNORMAL && x < 0) return true;
+  if(y & NegZero && isNegZero(x)) return true;
+  if(y & PosZero && isPosZero(x)) return true;
+  if(y & PosSubnorm && fpclass == FP_SUBNORMAL && x > 0) return true;
+  if(y & PosNorm && fpclass == FP_NORMAL && x > 0) return true;
+  if(y & PosInf && isPosInf(x)) return true;
+  return false;
+}
+extern "C" b1 Class_f32(f32 f, b32 y) { return Class(f, y); }
+extern "C" b1 Class_f64(f64 f, b32 y) { return Class(f, y); }
+
 } // namespace brig
 } // namespace hsa
