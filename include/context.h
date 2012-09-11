@@ -241,6 +241,9 @@ class Context {
     BrigoOffset32_t get_operand_offset(void) const {return obuf->size();}
     BrigsOffset32_t get_string_offset(void) const {return sbuf->size();}
 
+    //get buffer
+    Buffer *get_directive(void) const {return dbuf;}
+
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
 
@@ -250,6 +253,7 @@ class Context {
     BrigoOffset32_t current_argList_offset;
     BrigdOffset32_t current_img_offset ;
     BrigdOffset32_t current_samp_offset ;
+    BrigdOffset32_t current_argdecl_offset;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in an instruction
     std::map<std::string, BrigoOffset32_t> arg_map;

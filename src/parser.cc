@@ -2390,10 +2390,35 @@ int Initializer(Context* context) {
       hasCurlyBrackets = true;
     }
     BrigDirectiveSymbol bds ;
-    BrigdOffset32_t sym_offset = context->get_directive_offset - sizeof(BrigDirectiveSymbol);
+    //BrigdOffset32_t sym_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
+    BrigdOffset32_t sym_offset = context->current_argdecl_offset;
     context->get_directive(sym_offset,&bds);
-    
-    
+    BrigDataType16_t init_type ;
+    BrigDataType16_t data_type = context->get_type();
+    switch(data_type){
+      case Brigb1: init_type = Brigb1; break;
+
+      case Brigs8:
+      case Brigu8:
+      case Brigb8: init_type = Brigb8; break;
+
+      case Brigs16:
+      case Brigu16:
+      case Brigf16:
+      case Brigb16: init_type = Brigb16; break;
+
+      case Brigs32:
+      case Brigu32:
+      case Brigf32:
+      case Brigb32: init_type = Brigb32; break;
+
+      case Brigs64:
+      case Brigu64:
+      case Brigf64:
+      case Brigb64: init_type = Brigb64; break;
+    }
+    context->set_type(init_type);
+
     switch (context->token_to_scan) {
       case TOKEN_DOUBLE_CONSTANT:
         if (!FloatListSingle(context)) {
@@ -2470,43 +2495,43 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
-      } else {  // no arrayDimension
-          // add by fxiaopeng
-          BrigDirectiveSymbol sym_decl = {
-            sizeof(sym_decl),                 // size
-            BrigEDirectiveSymbol,             // kind
-            {
-              context->get_code_offset(),       // c_code
-              storage_class,                    // storageClass ??
-              context->get_attribute(),         // attribute
-              0,                                // reserved
-              context->get_symbol_modifier(),   // symbol modifier
-              0,                                // dim
-              var_name_offset,                  // s_name
-              context->get_type(),                        // data type
-              context->get_alignment(),         // alignment
-            },
-            0,                                // d_init = 0 for arg
-            0                                 // reserved
-          };
-
-          context->append_directive(&sym_decl);
-          BrigDirectiveFunction bdf;
-          context->get_directive(context->current_bdf_offset, &bdf);
-          BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
-          BrigdOffset32_t next_directive = bdf.d_nextDirective;
-          if (first_scope == next_directive) {
-            bdf.d_nextDirective += 40;
-            bdf.d_firstScopedDirective = bdf.d_nextDirective;
-          } else {
-            bdf.d_nextDirective += 40;
-          }
-
-          unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-          context->update_directive_bytes(bdf_charp ,
-                                          context->current_bdf_offset,
-                                          40);
+      } 
+      BrigDirectiveSymbol sym_decl = {
+        sizeof(sym_decl),                 // size
+        BrigEDirectiveSymbol,             // kind
+        {
+          context->get_code_offset(),       // c_code
+          storage_class,                    // storageClass ??
+          context->get_attribute(),         // attribute
+          0,                                // reserved
+          context->get_symbol_modifier(),   // symbol modifier
+          0,                                // dim
+          var_name_offset,                  // s_name
+          context->get_type(),                        // data type
+          context->get_alignment(),         // alignment
+        },
+        0,                                // d_init = 0 for arg
+        0                                 // reserved
+      };
+          
+      context->current_argdecl_offset = context->get_directive_offset();
+      context->append_directive(&sym_decl);
+       
+      BrigDirectiveFunction bdf;
+      context->get_directive(context->current_bdf_offset, &bdf);
+      BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
+      BrigdOffset32_t next_directive = bdf.d_nextDirective;
+      if (first_scope == next_directive) {
+        bdf.d_nextDirective += sizeof(sym_decl);
+        bdf.d_firstScopedDirective = bdf.d_nextDirective;
+      } else {
+        bdf.d_nextDirective += sizeof(sym_decl);
       }
+
+      unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+      context->update_directive_bytes(bdf_charp ,
+                                      context->current_bdf_offset,
+                                      sizeof(BrigDirectiveFunction));
 
       if (!Initializer(context)) {
         if (context->token_to_scan == ';') {
@@ -2541,8 +2566,7 @@ int UninitializableDecl(Context* context) {
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
-      } else {  // no arrayDimension
-          // add by fxiaopeng
+      } //else {  // no arrayDimension
           BrigDirectiveSymbol sym_decl = {
             sizeof(sym_decl),                 // size
             BrigEDirectiveSymbol,             // kind
@@ -2567,17 +2591,17 @@ int UninitializableDecl(Context* context) {
           BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
           BrigdOffset32_t next_directive = bdf.d_nextDirective;
           if (first_scope == next_directive) {
-            bdf.d_nextDirective += 40;
+            bdf.d_nextDirective += sizeof(sym_decl);
             bdf.d_firstScopedDirective = bdf.d_nextDirective;
           } else {
-            bdf.d_nextDirective += 40;
+            bdf.d_nextDirective += sizeof(sym_decl);
           }
 
           unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
           context->update_directive_bytes(bdf_charp ,
                                           context->current_bdf_offset,
-                                          40);
-      }
+                                          sizeof(sym_decl));
+      //}
 
       if (context->token_to_scan == ';') {
         context->token_to_scan = yylex();
@@ -5280,7 +5304,13 @@ int ImageStore(Context* context) {
 
 int SingleListSingle(Context * context) {
   if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+    uint32_t elementCount = 0;
+    std::vector<float> single_list ;
+
     while (1) {
+      elementCount ++;
+      single_list.push_back(context->token_value.float_val);
+
       context->token_to_scan = yylex();
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
@@ -5291,11 +5321,93 @@ int SingleListSingle(Context * context) {
           return 1;
         }
       } else {
+        uint32_t n = 0;
+	// elementCount
+	switch(context->get_type()){
+	case Brigb1: 
+	  // n = elementCount; 
+          break;
+	case Brigb8: 
+          n = ((elementCount&0xfff8)>>3)+((elementCount&0x07)!=0) ;
+          break;
+	case Brigb16:
+          n = ((elementCount&0xfffc)>>2)+((elementCount&0x03)!=0) ;
+          break;
+	case Brigb32:
+          n = ((elementCount&0xfffe)>>1)+((elementCount&0x01)!=0) ;
+          break;
+        case Brigb64:
+          n = elementCount ;
+          break;
+	  }
+        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
+        uint8_t *array = new uint8_t[arraySize];
+        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+        uint32_t init_length = 0;
+
+        bdi->size = arraySize;
+        bdi->kind = BrigEDirectiveInit;
+        bdi->c_code = 0 ;
+        bdi->elementCount = elementCount;
+        bdi->type = context->get_type();
+        bdi->reserved = 0 ;
+
+        switch(context->get_type()){
+	case Brigb1:
+          break;
+        case Brigb8:
+          for(int i = 0; i < elementCount; i ++ ){ // right ?? lose value??
+            memmove(&bdi->initializationData.u8[i],&single_list[i],sizeof(uint8_t));
+	  }
+          init_length =  n * 8;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u8[i] = 0;
+          }
+          break;
+        case Brigb16:
+          for(int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+            memmove(&bdi->initializationData.u16[i],&single_list[i],sizeof(uint16_t));
+	  }
+          init_length =  n * 4;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u16[i] = 0;
+          }
+          break;
+        case Brigb32:
+          for(int i = 0; i < elementCount; i ++ ){
+            memmove(&bdi->initializationData.u32[i],&single_list[i],sizeof(uint32_t));
+	  }
+          init_length =  n * 2;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u32[i] = 0;
+          }
+          break;
+        case Brigb64:
+          for(int i = 0; i < elementCount; i ++ ){
+            memmove(&bdi->initializationData.u64[i],&single_list[i],sizeof(uint64_t));
+	  }
+          break;
+        }
+
+        // update the BrigDirectiveSymbol.d_init and dim
+        BrigDirectiveSymbol bds ;
+        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+        // BrigdOffset32_t bds_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
+        context->get_directive(bds_offset,&bds);
+        bds.d_init = context->get_directive_offset();
+        bds.s.dim = init_length;
+
+        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+        context->update_directive_bytes(bds_charp,
+                                        bds_offset,
+                                        sizeof(BrigDirectiveSymbol));
+
+        context->append_directive(bdi);
+        delete bdi;
         return 0;
       }
     }
   } else {
-    context->set_error(MISSING_SINGLE_CONSTANT);
     return 1;
   }
   return 0;
@@ -6026,27 +6138,173 @@ int Pragma(Context* context) {
   return 1;
 }
 int LabelList(Context* context) {
+  uint32_t elementCount = 0;
+  std::vector<BrigDirectiveLabel> label_list;
+
   while (context->token_to_scan == TOKEN_LABEL) {
+    std::string label_name = context->token_value.string_val;
+    BrigsOffset32_t label_name_offset = context->add_symbol(label_name);
+
+    BrigDirectiveLabel bdl = {
+      sizeof(BrigDirectiveLabel),  //size
+      BrigEDirectiveLabel,         //kind
+      0,                           //c_code
+      label_name_offset            //s_name
+    };
+    label_list.push_back(bdl);
+
+    elementCount ++;
     context->token_to_scan = yylex();
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
       continue;
     } else {
-      // Note: the token has been updated
+      // create
+      size_t arraySize = sizeof(BrigDirectiveLabelInit) + 
+                         (elementCount - 1) * sizeof(BrigdOffset32_t);
+      uint8_t *array = new uint8_t[arraySize];
+      BrigDirectiveLabelInit *bdli = reinterpret_cast<BrigDirectiveLabelInit*>(array);
+
+      // update the BrigDirectiveSymbol.d_init and dim
+      BrigDirectiveSymbol bds ;
+      BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+      context->get_directive(bds_offset,&bds);
+      bds.d_init = context->get_directive_offset();
+      bds.s.dim = elementCount;
+
+      unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+      context->update_directive_bytes(bds_charp,
+                                      bds_offset,
+                                      sizeof(BrigDirectiveSymbol));
+
+      // fill the filed of structure
+      bdli->size = arraySize;
+      bdli->kind = BrigEDirectiveLabelInit;
+      bdli->c_code = 0;
+      bdli->elementCount = elementCount;  
+      context->append_directive(bdli);
+
+      for (int i = 0 ; i < elementCount ; i ++){
+        bdli->d_labels[i] = context->get_directive_offset();
+        // put into the symbo_map,not need to check,
+        // will be first time to put ?
+        std::string label_name = context->get_string(label_list[i].s_name);
+        context->symbol_map[label_name] = context->get_directive_offset();
+
+        context->append_directive(&label_list[i]);        
+      }
+      
+      unsigned char *bdli_charp = reinterpret_cast<unsigned char*>(bdli);
+      context->update_directive_bytes(bdli_charp,
+                                      bds.d_init,
+                                      arraySize); 
+      delete bdli;
+
       return 0;
     }
   }  // While
-  context->set_error(MISSING_DOUBLE_CONSTANT);
+
   return 1;
 }
 int FloatListSingle(Context* context) {
+  uint32_t elementCount = 0;
+  std::vector<double> float_list ;
+
   while (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
+    elementCount ++ ;
+    float_list.push_back(context->token_value.double_val);
+
     context->token_to_scan = yylex();
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
       continue;
     } else {
-      // Note: the token has been updated
+    // Note: the token has been updated
+     uint32_t n = 0;
+    // elementCount
+    switch(context->get_type()){
+      case Brigb1: 
+	// n = elementCount; 
+        break;
+      case Brigb8: 
+        n = ((elementCount&0xfff8)>>3)+((elementCount&0x07)!=0) ;
+        break;
+      case Brigb16:
+        n = ((elementCount&0xfffc)>>2)+((elementCount&0x03)!=0) ;
+        break;
+      case Brigb32:
+        n = ((elementCount&0xfffe)>>1)+((elementCount&0x01)!=0) ;
+        break;
+      case Brigb64:
+        n = elementCount ;
+        break;
+	}
+      size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
+      uint8_t *array = new uint8_t[arraySize];
+      BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+      uint32_t init_length = 0;  
+        
+      bdi->size = arraySize;
+      bdi->kind = BrigEDirectiveInit;
+      bdi->c_code = 0 ;
+      bdi->elementCount = elementCount;
+      bdi->type = context->get_type();
+      bdi->reserved = 0;
+
+      switch(context->get_type()){
+      case Brigb1:
+        break;
+      case Brigb8:
+        for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+          memmove(&bdi->initializationData.u8[i], &float_list[i],sizeof(uint8_t));
+	}
+        init_length = 8 * n ;
+        for (int i = elementCount; i < init_length; i ++){
+          bdi->initializationData.u8[i] = 0;
+        }
+        break;
+      case Brigb16:
+        for (int i = 0; i < elementCount; i ++ ){ // right ?? lose value??
+          memmove(&bdi->initializationData.u16[i], &float_list[i],sizeof(uint16_t));
+	}
+        init_length = 4 * n ;
+        for (int i = elementCount; i < init_length; i ++){
+          bdi->initializationData.u16[i] = 0;
+        }
+        break;
+      case Brigb32:
+        for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+          memmove(&bdi->initializationData.u32[i], &float_list[i],sizeof(uint32_t));
+	}
+        init_length = 2 * n ;
+        for (int i = elementCount; i < init_length; i ++){
+          bdi->initializationData.u32[i] = 0;
+        }
+        break;
+      case Brigb64:
+        for (int i = 0; i < elementCount; i ++ ){
+          memmove(&bdi->initializationData.u64[i], &float_list[i],sizeof(uint64_t));
+	}
+        init_length = n;
+        break;
+      }
+
+      // update the BrigDirectiveSymbol.d_init and dim
+      BrigDirectiveSymbol bds ;
+      BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+      // BrigdOffset32_t bds_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
+      context->get_directive(bds_offset,&bds);
+      bds.d_init = context->get_directive_offset();
+      bds.s.dim = init_length;
+
+      unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+      context->update_directive_bytes(bds_charp,
+                                      bds_offset,
+                                      sizeof(BrigDirectiveSymbol));
+        
+      context->append_directive(bdi);
+        
+      delete bdi;
       return 0;
     }
   }  // While
@@ -6055,6 +6313,8 @@ int FloatListSingle(Context* context) {
 }
 
 int DecimalListSingle(Context* context) {
+  uint32_t elementCount = 0;
+  std::vector<int32_t> decimal_list ;
 
   while (1) {
     if (context->token_to_scan == '-') {
@@ -6067,18 +6327,107 @@ int DecimalListSingle(Context* context) {
       }
     }
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      elementCount ++;
+      decimal_list.push_back(context->token_value.int_val);
+
       context->token_to_scan = yylex();
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         continue;
       } else {
         // Note: the token has been updated
+        uint32_t n = 0;
+	// elementCount
+	switch(context->get_type()){
+	case Brigb1: 
+	  // n = elementCount; 
+          break;
+	case Brigb8: 
+          n = ((elementCount&0xfff8)>>3)+((elementCount&0x07)!=0) ;
+          break;
+	case Brigb16:
+          n = ((elementCount&0xfffc)>>2)+((elementCount&0x03)!=0) ;
+          break;
+	case Brigb32:
+          n = ((elementCount&0xfffe)>>1)+((elementCount&0x01)!=0) ;
+          break;
+        case Brigb64:
+          n = elementCount ;
+          break;
+	  }
+        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
+        uint8_t *array = new uint8_t[arraySize];
+        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+        uint32_t init_length = 0;  
+        
+        bdi->size = arraySize;
+        bdi->kind = BrigEDirectiveInit;
+        bdi->c_code = 0 ;
+        bdi->elementCount = elementCount;
+        bdi->type = context->get_type();
+        bdi->reserved = 0;
+
+        switch(context->get_type()){
+	case Brigb1:
+          break;
+        case Brigb8:
+          for (int i = 0; i < elementCount; i ++ ){
+            bdi->initializationData.u8[i] = decimal_list[i];
+	  }
+          init_length = 8 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u8[i] = 0;
+          }
+          break;
+        case Brigb16:
+          for (int i = 0; i < elementCount; i ++ ){
+            bdi->initializationData.u16[i] = decimal_list[i];
+	  }
+          init_length = 4 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u8[i] = 0;
+          }
+          break;
+        case Brigb32:
+          for (int i = 0; i < elementCount; i ++ ){
+            bdi->initializationData.u32[i] = decimal_list[i];
+	  }
+          init_length = 2 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u8[i] = 0;
+          }
+          break;
+        case Brigb64:
+          for (int i = 0; i < elementCount; i ++ ){
+            bdi->initializationData.u64[i] = decimal_list[i];
+	  }
+          init_length =  n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u8[i] = 0;
+          }
+          break;
+        }
+
+        // update the BrigDirectiveSymbol.d_init and dim
+        BrigDirectiveSymbol bds ;
+        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+        // BrigdOffset32_t bds_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
+        context->get_directive(bds_offset,&bds);
+        bds.d_init = context->get_directive_offset();
+        bds.s.dim = init_length;
+
+        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+        context->update_directive_bytes(bds_charp,
+                                        bds_offset,
+                                        sizeof(BrigDirectiveSymbol));
+        
+        context->append_directive(bdi);
+        
+        delete bdi;
         return 0;
       }  // ','
     }  // integer constant
-    return 0;
   }  // While
-  context->set_error(MISSING_INTEGER_CONSTANT);
   return 1;
 }
 

@@ -4851,6 +4851,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
+  // case for decimal
   std::string input("global_b8 &x[9] = { 1,2,3,4,5,6,7,8,9 }; ");
 
   Lexer* lexer = new Lexer(input);
@@ -4865,7 +4866,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
     BrigNone ,                // attribut
     0,                        // reserved
     0,                        // symbolModifier
-    0,                        // dim
+    16,                        // dim
     0,                        // s_name
     Brigb8,                  // type
     1,                        // align
@@ -4910,27 +4911,41 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.dim, get.s.dim);
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
 
-  BrigDirectiveInit get1 ;
-  context->get_directive(40,&get1);
-  EXPECT_EQ(bdi->size, get1.size);
-  EXPECT_EQ(bdi->kind, get1.kind);
-  EXPECT_EQ(bdi->c_code, get1.c_code);
-  EXPECT_EQ(bdi->elementCount, get1.elementCount);
-  EXPECT_EQ(bdi->type, get1.type);
-  EXPECT_EQ(bdi->reserved, get1.reserved);
-  EXPECT_EQ(bdi->initializationData.u8[0],get1.initializationData.u8[0]);
-  EXPECT_EQ(bdi->initializationData.u8[1],get1.initializationData.u8[1]);
-  EXPECT_EQ(bdi->initializationData.u8[2],get1.initializationData.u8[2]);
-  EXPECT_EQ(bdi->initializationData.u8[3],get1.initializationData.u8[3]);
-  EXPECT_EQ(bdi->initializationData.u8[4],get1.initializationData.u8[4]);
-  EXPECT_EQ(bdi->initializationData.u8[5],get1.initializationData.u8[5]);
-  EXPECT_EQ(bdi->initializationData.u8[6],get1.initializationData.u8[6]);
-  EXPECT_EQ(bdi->initializationData.u8[7],get1.initializationData.u8[7]);
-  EXPECT_EQ(bdi->initializationData.u8[8],get1.initializationData.u8[8]);
+ 
+  Buffer *dbuf = context->get_directive();
+
+  BrigDirectiveInit *get1 =
+    reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[40]);
+
+  
+  EXPECT_EQ(bdi->size, get1->size);
+  EXPECT_EQ(bdi->kind, get1->kind);
+  EXPECT_EQ(bdi->c_code, get1->c_code);
+  EXPECT_EQ(bdi->elementCount, get1->elementCount);
+  EXPECT_EQ(bdi->type, get1->type);
+  EXPECT_EQ(bdi->reserved, get1->reserved);
+  EXPECT_EQ(bdi->initializationData.u8[0],get1->initializationData.u8[0]);
+  EXPECT_EQ(bdi->initializationData.u8[1],get1->initializationData.u8[1]);
+  EXPECT_EQ(bdi->initializationData.u8[2],get1->initializationData.u8[2]);
+  EXPECT_EQ(bdi->initializationData.u8[3],get1->initializationData.u8[3]);
+  EXPECT_EQ(bdi->initializationData.u8[4],get1->initializationData.u8[4]);
+  EXPECT_EQ(bdi->initializationData.u8[5],get1->initializationData.u8[5]);
+  EXPECT_EQ(bdi->initializationData.u8[6],get1->initializationData.u8[6]);
+  EXPECT_EQ(bdi->initializationData.u8[7],get1->initializationData.u8[7]);
+  EXPECT_EQ(bdi->initializationData.u8[8],get1->initializationData.u8[8]);
+  EXPECT_EQ(bdi->initializationData.u8[9],get1->initializationData.u8[9]);
+  EXPECT_EQ(bdi->initializationData.u8[10],get1->initializationData.u8[10]);
+  EXPECT_EQ(bdi->initializationData.u8[11],get1->initializationData.u8[11]);
+  EXPECT_EQ(bdi->initializationData.u8[12],get1->initializationData.u8[12]);
+  EXPECT_EQ(bdi->initializationData.u8[13],get1->initializationData.u8[13]);
+  EXPECT_EQ(bdi->initializationData.u8[14],get1->initializationData.u8[14]);
+  EXPECT_EQ(bdi->initializationData.u8[15],get1->initializationData.u8[15]);
+  delete bdi;
 
   // case for single
   context->clear_context();
@@ -4957,7 +4972,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   0,                         // reserved
   };
 
-  arraySize = sizeof(BrigDirectiveInit) + 2 * sizeof(uint64_t); 
+  arraySize = sizeof(BrigDirectiveInit) + 4 * sizeof(uint64_t); 
   array = new uint8_t[arraySize];
 
   bdi = reinterpret_cast<BrigDirectiveInit *>(array);
@@ -4968,16 +4983,27 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   bdi->elementCount = 9;           //elementCount
   bdi->type = Brigb32;              //type
   bdi->reserved = 0;               //reserved
-  bdi->initializationData.u32[0] = 1.1;    //initializationData
-  bdi->initializationData.u32[1] = 2.2;
-  bdi->initializationData.u32[2] = 3.3;
-  bdi->initializationData.u32[3] = 4.4;
-  bdi->initializationData.u32[4] = 5.5;
-  bdi->initializationData.u32[5] = 6.6;
-  bdi->initializationData.u32[6] = 7.7;
-  bdi->initializationData.u32[7] = 8.8;
-  bdi->initializationData.u32[8] = 9.9;    
-  bdi->initializationData.u32[9] = 0;
+
+  float fvalue = 1.1;
+  memmove(&bdi->initializationData.u32[0], &fvalue, sizeof(uint32_t));    //initializationData
+  fvalue = 2.2;
+  memmove(&bdi->initializationData.u32[1], &fvalue, sizeof(uint32_t));
+  fvalue = 3.3;
+  memmove(&bdi->initializationData.u32[2], &fvalue, sizeof(uint32_t));
+  fvalue = 4.4;
+  memmove(&bdi->initializationData.u32[3], &fvalue, sizeof(uint32_t));
+  fvalue = 5.5;
+  memmove(&bdi->initializationData.u32[4], &fvalue, sizeof(uint32_t));
+  fvalue = 6.6;
+  memmove(&bdi->initializationData.u32[5], &fvalue, sizeof(uint32_t));
+  fvalue = 7.7;
+  memmove(&bdi->initializationData.u32[6], &fvalue, sizeof(uint32_t));
+  fvalue = 8.8;
+  memmove(&bdi->initializationData.u32[7], &fvalue, sizeof(uint32_t));
+  fvalue = 9.9;
+  memmove(&bdi->initializationData.u32[8], &fvalue, sizeof(uint32_t));
+  fvalue = 0.0;
+  memmove(&bdi->initializationData.u32[9], &fvalue, sizeof(uint32_t));  
 
   EXPECT_EQ(0,InitializableDecl(context));
 
@@ -5049,16 +5075,25 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   bdi->elementCount = 9;           //elementCount
   bdi->type = Brigb64;              //type
   bdi->reserved = 0;               //reserved
-  bdi->initializationData.u64[0] = 1.1;    //initializationData
-  bdi->initializationData.u64[1] = 2.2;
-  bdi->initializationData.u64[2] = 3.3;
-  bdi->initializationData.u64[3] = 4.4;
-  bdi->initializationData.u64[4] = 5.5;
-  bdi->initializationData.u64[5] = 6.6;
-  bdi->initializationData.u64[6] = 7.7;
-  bdi->initializationData.u64[7] = 8.8;
 
-  bdi->initializationData.u64[8] = 9.9;    //initializationData
+  double dvalue = 1.1 ;
+  memmove(&bdi->initializationData.u64[0], &dvalue, sizeof(uint64_t));    //initializationData
+  dvalue = 2.2;
+  memmove(&bdi->initializationData.u64[1], &dvalue, sizeof(uint64_t));
+  dvalue = 3.3;
+  memmove(&bdi->initializationData.u64[2], &dvalue, sizeof(uint64_t));
+  dvalue = 4.4;
+  memmove(&bdi->initializationData.u64[3], &dvalue, sizeof(uint64_t));
+  dvalue = 5.5;
+  memmove(&bdi->initializationData.u64[4], &dvalue, sizeof(uint64_t));
+  dvalue = 6.6;
+  memmove(&bdi->initializationData.u64[5], &dvalue, sizeof(uint64_t));
+  dvalue = 7.7;
+  memmove(&bdi->initializationData.u64[6], &dvalue, sizeof(uint64_t));
+  dvalue = 8.8;
+  memmove(&bdi->initializationData.u64[7], &dvalue, sizeof(uint64_t));
+  dvalue = 9.9;
+  memmove(&bdi->initializationData.u64[8], &dvalue, sizeof(uint64_t));
 
   EXPECT_EQ(0,InitializableDecl(context));
 
