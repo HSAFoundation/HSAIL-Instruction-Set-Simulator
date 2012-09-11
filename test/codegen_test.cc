@@ -1209,8 +1209,8 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
   // get 2 tokens pass '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, AddressableOperand(context));
+  BrigoOffset32_t opOffset;
+  EXPECT_EQ(0, AddressableOperandPart2(context, &opOffset, false));
 
   name.assign(input.c_str());
   BrigOperandAddress ref = {
@@ -4844,6 +4844,547 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   EXPECT_EQ(ref4.kind, get4.kind);
   EXPECT_EQ(ref4.c_code, get4.c_code);
   EXPECT_EQ(ref4.s_name, get4.s_name);
+
+  delete lexer;
+};
+
+TEST(CodegenTest, ImageRet_CodeGen_Test) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstAtomicImage ref1 = {
+    48,                     // size
+    BrigEInstAtomicImage,   // kind
+    BrigAtomicImage,        // opcode
+    Brigb32,                    // type
+    BrigNoPacking,          // packing
+    {8, 20, 36, 48, 0},         // o_operands[5]
+    BrigAtomicXor,          // atomicOperation
+    BrigGlobalSpace,        // storageClass
+    BrigRegular,            // memorySemantic
+    Briggeom_1d             // geom
+
+  };  
+
+  BrigInstAtomicImage ref2 = {
+    48,                     // size
+    BrigEInstAtomicImage,   // kind
+    BrigAtomicImage,        // opcode
+    Brigb32,                    // type
+    BrigNoPacking,          // packing
+    {60, 72, 36, 48, 88},         // o_operands[5]
+    BrigAtomicCas,          // atomicOperation
+    BrigGlobalSpace,        // storageClass
+    BrigRegular,            // memorySemantic
+    Briggeom_1d             // geom
+  };
+
+  BrigInstAtomicImage get1, get2;
+  BrigOperandReg getReg;
+  BrigOperandOpaque getImg;
+  
+  // The register must be an s or d register (c registers are not allowed). 
+  std::string input("atomic_image_xor_1d_b32 $s0, [&namedRWImg1], $s1, $s3;\n");
+  input.append("atomic_image_cas_1d_b32 $s10, [&namedRWImg2], $s1, $s3, $s4;\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, ImageRet(context));
+  EXPECT_EQ(0, ImageRet(context));
+
+  context->get_code(0, &get1);  
+
+  EXPECT_EQ(ref1.size, get1.size);
+  EXPECT_EQ(ref1.kind, get1.kind);
+  EXPECT_EQ(ref1.opcode, get1.opcode);
+  EXPECT_EQ(ref1.type, get1.type);
+  EXPECT_EQ(ref1.packing, get1.packing);
+  EXPECT_EQ(ref1.o_operands[0], get1.o_operands[0]);
+  EXPECT_EQ(ref1.o_operands[1], get1.o_operands[1]);
+  EXPECT_EQ(ref1.o_operands[2], get1.o_operands[2]);
+  EXPECT_EQ(ref1.o_operands[3], get1.o_operands[3]);
+  EXPECT_EQ(ref1.o_operands[4], get1.o_operands[4]);
+
+  EXPECT_EQ(ref1.atomicOperation, get1.atomicOperation);
+  EXPECT_EQ(ref1.storageClass, get1.storageClass);
+  EXPECT_EQ(ref1.memorySemantic, get1.memorySemantic);
+  EXPECT_EQ(ref1.geom, get1.geom);
+
+  context->get_code(48, &get2);
+
+  EXPECT_EQ(ref2.size, get2.size);
+  EXPECT_EQ(ref2.kind, get2.kind);
+  EXPECT_EQ(ref2.opcode, get2.opcode);
+  EXPECT_EQ(ref2.type, get2.type);
+  EXPECT_EQ(ref2.packing, get2.packing);
+  EXPECT_EQ(ref2.o_operands[0], get2.o_operands[0]);
+  EXPECT_EQ(ref2.o_operands[1], get2.o_operands[1]);
+  EXPECT_EQ(ref2.o_operands[2], get2.o_operands[2]);
+  EXPECT_EQ(ref2.o_operands[3], get2.o_operands[3]);
+  EXPECT_EQ(ref2.o_operands[4], get2.o_operands[4]);
+
+  EXPECT_EQ(ref2.atomicOperation, get2.atomicOperation);
+  EXPECT_EQ(ref2.storageClass, get2.storageClass);
+  EXPECT_EQ(ref2.memorySemantic, get2.memorySemantic);
+  EXPECT_EQ(ref2.geom, get2.geom);
+
+  context->get_operand(8, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);  
+
+  context->get_operand(36, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(4, getReg.name);  
+  context->get_operand(48, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name);  
+  context->get_operand(60, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(12, getReg.name);  
+  context->get_operand(88, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(17, getReg.name);  
+
+
+  context->get_operand(20, &getImg);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImg.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
+  EXPECT_EQ(0, getImg.name);
+  EXPECT_EQ(0, getImg.reg);
+  EXPECT_EQ(0, getImg.offset); 
+
+  context->get_operand(72, &getImg);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImg.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
+  EXPECT_EQ(0, getImg.name);
+  EXPECT_EQ(0, getImg.reg);
+  EXPECT_EQ(0, getImg.offset); 
+
+  delete lexer;
+};
+
+TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigOperandRegV4 refV4 = {
+    24,                    // size
+    BrigEOperandRegV4,     // kind
+    Brigb32,               // type
+    0,                     // reserved
+    {8, 20, 32, 8}         // regs
+  };
+
+  BrigOperandRegV4 getRegV4;
+  BrigOperandRegV2 getRegV2;
+  BrigOperandReg getReg;
+
+  std::string input("( $s1,$s2, $s3 , $s1)\n");
+  Lexer* lexer = new Lexer(input);
+  BrigoOffset32_t getoOffset;
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getRegV4);
+  // BrigOperandRegV4
+  EXPECT_EQ(refV4.size, getRegV4.size);
+  EXPECT_EQ(refV4.kind, getRegV4.kind);
+  EXPECT_EQ(refV4.type, getRegV4.type);
+  EXPECT_EQ(refV4.reserved, getRegV4.reserved);
+  EXPECT_EQ(refV4.regs[0], getRegV4.regs[0]);
+  EXPECT_EQ(refV4.regs[1], getRegV4.regs[1]);
+  EXPECT_EQ(refV4.regs[2], getRegV4.regs[2]);
+  EXPECT_EQ(refV4.regs[3], getRegV4.regs[3]);
+
+  BrigOperandRegV2 refV2 = {
+    16,                    // size
+    BrigEOperandRegV2,     // kind
+    Brigb1,                // type
+    0,                     // reserved
+    {68, 68}               // regs
+  };
+
+  input.assign("($c2, $c2)\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getRegV2);
+  // BrigOperandRegV2
+  EXPECT_EQ(refV2.size, getRegV2.size);
+  EXPECT_EQ(refV2.kind, getRegV2.kind);
+  EXPECT_EQ(refV2.type, getRegV2.type);
+  EXPECT_EQ(refV2.reserved, getRegV2.reserved);
+  EXPECT_EQ(refV2.regs[0], getRegV2.regs[0]);
+  EXPECT_EQ(refV2.regs[1], getRegV2.regs[1]);
+
+  input.assign("($d1)\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getReg);
+
+  BrigOperandReg refRegD1 = {
+    12,                    // size
+    BrigEOperandReg,       // kind
+    Brigb64,               // type
+    0,                     // reserved
+    16                     // name
+  };
+
+  EXPECT_EQ(refRegD1.size, getReg.size);
+  EXPECT_EQ(refRegD1.kind, getReg.kind);
+  EXPECT_EQ(refRegD1.type, getReg.type);
+  EXPECT_EQ(refRegD1.reserved, getReg.reserved);
+  EXPECT_EQ(refRegD1.name, getReg.name);
+
+  EXPECT_EQ(108, context->get_operand_offset());
+
+  input.assign("($s3)\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getReg);
+
+  BrigOperandReg refRegS3 = {
+    12,                    // size
+    BrigEOperandReg,       // kind
+    Brigb32,               // type
+    0,                     // reserved
+    8                      // name
+  };
+
+  EXPECT_EQ(refRegS3.size, getReg.size);
+  EXPECT_EQ(refRegS3.kind, getReg.kind);
+  EXPECT_EQ(refRegS3.type, getReg.type);
+  EXPECT_EQ(refRegS3.reserved, getReg.reserved);
+  EXPECT_EQ(refRegS3.name, getReg.name);
+
+  input.assign("$s2\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArrayOperandPart2(context, &getoOffset));
+  context->get_operand(getoOffset, &getReg);
+
+  BrigOperandReg refRegS2 = {
+    12,                    // size
+    BrigEOperandReg,       // kind
+    Brigb32,               // type
+    0,                     // reserved
+    4                      // name
+  };
+
+  EXPECT_EQ(refRegS2.size, getReg.size);
+  EXPECT_EQ(refRegS2.kind, getReg.kind);
+  EXPECT_EQ(refRegS2.type, getReg.type);
+  EXPECT_EQ(refRegS2.reserved, getReg.reserved);
+  EXPECT_EQ(refRegS2.name, getReg.name);
+
+  EXPECT_EQ(108, context->get_operand_offset());
+ 
+  delete lexer;
+};
+
+TEST(CodegenTest, ImageNoRet_CodeGen_Test) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstAtomicImage ref1 = {
+    48,                     // size
+    BrigEInstAtomicImage,   // kind
+    BrigAtomicNoRetImage,   // opcode
+    Brigb32,                // type
+    BrigNoPacking,          // packing
+    {8, 24, 36, 48, 0},     // o_operands[5]
+    BrigAtomicCas,          // atomicOperation
+    BrigGlobalSpace,        // storageClass
+    BrigRegular,            // memorySemantic
+    Briggeom_1d             // geom
+  };  
+
+  BrigInstAtomicImage ref2 = {
+    48,                     // size
+    BrigEInstAtomicImage,   // kind
+    BrigAtomicNoRetImage,   // opcode
+    Brigs32,                // type
+    BrigNoPacking,          // packing
+    {60, 88, 104, 0, 0},    // o_operands[5]
+    BrigAtomicAnd,          // atomicOperation
+    BrigGlobalSpace,        // storageClass
+    BrigAcquireRelease,     // memorySemantic
+    Briggeom_2d             // geom
+  };
+
+  BrigInstAtomicImage get1, get2;
+  BrigOperandReg getReg;
+  BrigOperandOpaque getImg;
+  
+  // The register must be an s or d register (c registers are not allowed).
+  std::string input("atomicNoRet_image_cas_1d_b32 [&namedRWImg], $s1, $s3, $s4;\n");
+  input.append("atomicNoRet_image_and_ar_2d_s32 [&namedRWImg], ($s0,$s3), $s2;\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, ImageNoRet(context));
+  EXPECT_EQ(0, ImageNoRet(context));
+
+  context->get_code(0, &get1);  
+
+  EXPECT_EQ(ref1.size, get1.size);
+  EXPECT_EQ(ref1.kind, get1.kind);
+  EXPECT_EQ(ref1.opcode, get1.opcode);
+  EXPECT_EQ(ref1.type, get1.type);
+  EXPECT_EQ(ref1.packing, get1.packing);
+  EXPECT_EQ(ref1.o_operands[0], get1.o_operands[0]);
+  EXPECT_EQ(ref1.o_operands[1], get1.o_operands[1]);
+  EXPECT_EQ(ref1.o_operands[2], get1.o_operands[2]);
+  EXPECT_EQ(ref1.o_operands[3], get1.o_operands[3]);
+  EXPECT_EQ(ref1.o_operands[4], get1.o_operands[4]);
+
+  EXPECT_EQ(ref1.atomicOperation, get1.atomicOperation);
+  EXPECT_EQ(ref1.storageClass, get1.storageClass);
+  EXPECT_EQ(ref1.memorySemantic, get1.memorySemantic);
+  EXPECT_EQ(ref1.geom, get1.geom);
+
+  context->get_code(48, &get2);
+
+  EXPECT_EQ(ref2.size, get2.size);
+  EXPECT_EQ(ref2.kind, get2.kind);
+  EXPECT_EQ(ref2.opcode, get2.opcode);
+  EXPECT_EQ(ref2.type, get2.type);
+  EXPECT_EQ(ref2.packing, get2.packing);
+  EXPECT_EQ(ref2.o_operands[0], get2.o_operands[0]);
+  EXPECT_EQ(ref2.o_operands[1], get2.o_operands[1]);
+  EXPECT_EQ(ref2.o_operands[2], get2.o_operands[2]);
+  EXPECT_EQ(ref2.o_operands[3], get2.o_operands[3]);
+  EXPECT_EQ(ref2.o_operands[4], get2.o_operands[4]);
+
+  EXPECT_EQ(ref2.atomicOperation, get2.atomicOperation);
+  EXPECT_EQ(ref2.storageClass, get2.storageClass);
+  EXPECT_EQ(ref2.memorySemantic, get2.memorySemantic);
+  EXPECT_EQ(ref2.geom, get2.geom);
+
+  context->get_operand(24, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);  
+
+  context->get_operand(36, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(4, getReg.name);  
+  context->get_operand(48, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name);  
+  context->get_operand(76, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(12, getReg.name);  
+  BrigOperandRegV2 getRegV2;
+  context->get_operand(88, &getRegV2);  
+  // BrigOperandRegV2
+  EXPECT_EQ(16, getRegV2.size);
+  EXPECT_EQ(BrigEOperandRegV2, getRegV2.kind);
+  EXPECT_EQ(Brigb32, getRegV2.type);
+  EXPECT_EQ(0, getRegV2.reserved);
+  EXPECT_EQ(76, getRegV2.regs[0]);
+  EXPECT_EQ(36, getRegV2.regs[1]);
+
+
+  context->get_operand(8, &getImg);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImg.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
+  EXPECT_EQ(0, getImg.name);
+  EXPECT_EQ(0, getImg.reg);
+  EXPECT_EQ(0, getImg.offset); 
+
+  context->get_operand(60, &getImg);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImg.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
+  EXPECT_EQ(0, getImg.name);
+  EXPECT_EQ(0, getImg.reg);
+  EXPECT_EQ(0, getImg.offset); 
+
+  delete lexer;
+};
+
+
+TEST(CodegenTest, Query_CodeGen_Test) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase refOrder = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigQueryOrder,        // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {8, 20, 0, 0, 0}       // o_operands[5]
+  };
+
+  BrigInstBase refData = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigQueryData,         // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {36, 60, 0, 0, 0}      // o_operands[5]
+  };
+
+  BrigInstBase refWidth = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigQueryWidth,        // opcode
+    Brigu32,               // type
+    BrigNoPacking,         // packing
+    {8, 76, 0, 0, 0}       // o_operands[5]
+  };
+
+  BrigInstBase get;
+  BrigOperandReg getReg;
+  BrigOperandOpaque getImage;
+  
+  std::string input("query_order_b32 $s0, [&namedRWImg1];\n");
+  input.append("query_data_b32 $s1, [&namedRWImg1<$s2 - 4>];\n");
+  input.append("query_width_u32 $s0, [&namedSamp<10>];\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+
+  context->symbol_map["&namedRWImg1"] = 30;
+  context->symbol_map["&namedSamp"] = 0;
+
+  EXPECT_EQ(0, Query(context));
+  EXPECT_EQ(0, Query(context));
+  EXPECT_EQ(0, Query(context));
+
+  context->get_code(0, &get);  
+
+  EXPECT_EQ(refOrder.size, get.size);
+  EXPECT_EQ(refOrder.kind, get.kind);
+  EXPECT_EQ(refOrder.opcode, get.opcode);
+  EXPECT_EQ(refOrder.type, get.type);
+  EXPECT_EQ(refOrder.packing, get.packing);
+  EXPECT_EQ(refOrder.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(refOrder.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(refOrder.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(refOrder.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(refOrder.o_operands[4], get.o_operands[4]);
+
+  context->get_code(32, &get);
+
+  EXPECT_EQ(refData.size, get.size);
+  EXPECT_EQ(refData.kind, get.kind);
+  EXPECT_EQ(refData.opcode, get.opcode);
+  EXPECT_EQ(refData.type, get.type);
+  EXPECT_EQ(refData.packing, get.packing);
+  EXPECT_EQ(refData.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(refData.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(refData.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(refData.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(refData.o_operands[4], get.o_operands[4]);
+
+  context->get_code(64, &get);
+
+  EXPECT_EQ(refWidth.size, get.size);
+  EXPECT_EQ(refWidth.kind, get.kind);
+  EXPECT_EQ(refWidth.opcode, get.opcode);
+  EXPECT_EQ(refWidth.type, get.type);
+  EXPECT_EQ(refWidth.packing, get.packing);
+  EXPECT_EQ(refWidth.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(refWidth.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(refWidth.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(refWidth.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(refWidth.o_operands[4], get.o_operands[4]);
+
+
+  context->get_operand(8, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);
+
+  context->get_operand(36, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(4, getReg.name);
+  context->get_operand(48, &getReg);
+
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name);
+
+  context->get_operand(20, &getImage);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImage.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
+  EXPECT_EQ(30, getImage.name);
+  EXPECT_EQ(0, getImage.reg);
+  EXPECT_EQ(0, getImage.offset);
+
+  context->get_operand(60, &getImage);
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImage.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
+  EXPECT_EQ(30, getImage.name);
+  EXPECT_EQ(48, getImage.reg);
+  EXPECT_EQ(-4, getImage.offset);
+
+  context->get_operand(76, &getImage);  
+  // BrigOperandOpaque
+  EXPECT_EQ(16, getImage.size);
+  EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
+  EXPECT_EQ(0, getImage.name);
+  EXPECT_EQ(0, getImage.reg);
+  EXPECT_EQ(10, getImage.offset);
 
   delete lexer;
 };
