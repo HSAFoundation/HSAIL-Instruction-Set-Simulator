@@ -318,13 +318,25 @@ template<class T> static T BitRev(T x) {
 SignedInst(define, BitRev, Unary)
 UnsignedInst(define, BitRev, Unary)
 
-template<class T> static T Extract(T x, unsigned y, unsigned z) {
+template<class T> static T Extract(T x, b32 y, b32 z) {
   unsigned offset = Int<T>::ShiftMask & y;
   unsigned width  = Int<T>::ShiftMask & z;
   return (x << offset) >> (Int<T>::Bits - width);
 }
 SignedInst(define, Extract, Ternary)
 UnsignedInst(define, Extract, Ternary)
+
+template<class T> static T Insert(T w, T x, b32 y, b32 z) {
+  typedef typename Int<T>::Unsigned Unsigned;
+  T width  = y & T(Int<T>::Bits - 1);
+  T offset = z & T(Int<T>::Bits - 1);
+  Unsigned mask = ~(~T(0) << width) << offset;
+  mask = ~mask;
+  w &= mask;
+  return w | (x << offset);
+}
+SignedInst(define, Insert, Quaternary)
+UnsignedInst(define, Insert, Quaternary)
 
 template<class T> static T Bitselect(T x, T y, T z) {
   return (y & x) | (z & ~x);
