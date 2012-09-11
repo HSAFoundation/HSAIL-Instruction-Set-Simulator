@@ -300,7 +300,7 @@ defineUnary(Popcount, b64)
 
 // Bit reverse implementation loosely adapted from Sean Eron Anderson's article
 // at: http://graphics.stanford.edu/~seander/bithacks.html
-template<class T> static T Bitrev(T x) {
+template<class T> static T BitRev(T x) {
   typedef typename Int<T>::Unsigned Unsigned;
   Unsigned v = Unsigned(x); // input bits to be reversed
   Unsigned r = v; // r will be reversed bits of v; first get LSB of v
@@ -315,8 +315,8 @@ template<class T> static T Bitrev(T x) {
 
   return T(r);
 }
-SignedInst(define, Bitrev, Unary)
-UnsignedInst(define, Bitrev, Unary)
+SignedInst(define, BitRev, Unary)
+UnsignedInst(define, BitRev, Unary)
 
 template<class T> static T Extract(T x, unsigned y, unsigned z) {
   unsigned offset = Int<T>::ShiftMask & y;
@@ -427,8 +427,8 @@ FloatInst(define, Sqrt, Unary)
 template<class T> static T Fma(T x, T y, T z) { return fma(x, y, z); }
 FloatInst(define, Fma, Ternary)
 
-template<class T> static T Copysign(T x, T y) { return copysign(x, y); }
-FloatInst(define, Copysign, Binary)
+template<class T> static T CopySign(T x, T y) { return copysign(x, y); }
+FloatInst(define, CopySign, Binary)
 
 template<class T> static b1 Class(T x, b32 y) {
   int fpclass = std::fpclassify(x);
@@ -464,6 +464,34 @@ template<class T> static T Frcp(T x) {
   }
 }
 FloatInst(define, Frcp, Unary)
+
+CmpInst(eq, x == y)
+CmpInst(ne, !isUnordered(x, y) && x != y)
+CmpInst(lt, x <  y)
+CmpInst(le, x <= y)
+CmpInst(gt, x >  y)
+CmpInst(ge, x >= y)
+
+Cmp(define, eq, b1)
+Cmp(define, ne, b1)
+
+CmpImpl(num,  !isNan(x) && !isNan(y))
+CmpImpl(snum, !isNan(x) && !isNan(y))
+CmpImpl(nan,   isNan(x) ||  isNan(y))
+CmpImpl(snan,  isNan(x) ||  isNan(y))
+
+// Cmp(define, num, f16)
+Cmp(define, num,  f32)
+Cmp(define, num,  f64)
+// Cmp(define, snum, f16)
+Cmp(define, snum, f32)
+Cmp(define, snum, f64)
+// Cmp(define, nan, f16)
+Cmp(define, nan,  f32)
+Cmp(define, nan,  f64)
+// Cmp(define, snan, f16)
+Cmp(define, snan, f32)
+Cmp(define, snan, f64)
 
 } // namespace brig
 } // namespace hsa

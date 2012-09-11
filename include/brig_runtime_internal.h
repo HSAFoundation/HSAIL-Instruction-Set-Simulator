@@ -224,6 +224,48 @@ defineVec(f64, 2)
   /* D ## ShuffleVector(INST, f16x4) */         \
   D ## ShuffleVector(INST, f32x2)
 
+#define CmpImpl(FUNC,PRED)                              \
+  template<class T> static T Cmp_ ## FUNC (T x, T y) {  \
+    return PRED;                                        \
+  }
+
+#define CmpInst(FUNC,PRED)                              \
+  CmpImpl(FUNC, (PRED))                                 \
+  CmpImpl(s ## FUNC, (PRED))                            \
+  CmpImpl(FUNC ## u, isUnordered(x, y) || (PRED))       \
+  CmpImpl(s ## FUNC ## u, isUnordered(x, y) || (PRED))  \
+  Cmp(define, FUNC, b32)                                \
+  Cmp(define, FUNC, b64)                                \
+  Cmp(define, FUNC, s32)                                \
+  Cmp(define, FUNC, s64)                                \
+  Cmp(define, FUNC, u32)                                \
+  Cmp(define, FUNC, u64)                                \
+  /* Cmp(define, Cmp_ ## FUNC, f16) */                  \
+  FCmp(define, FUNC, f32)                               \
+  FCmp(define, FUNC, f64)
+
+#define FCmp(D,FUNC,TYPE)                       \
+  Cmp(D, FUNC, TYPE)                            \
+  Cmp(D, s ## FUNC, TYPE)                       \
+  Cmp(D, FUNC ## u, TYPE)                       \
+  Cmp(D, s ## FUNC ## u, TYPE)
+
+#define Cmp(D,FUNC,TYPE)                        \
+  D ## CmpRet(Cmp_ ## FUNC, b1, TYPE)           \
+  D ## CmpRet(Cmp_ ## FUNC, b32, TYPE)          \
+  D ## CmpRet(Cmp_ ## FUNC, s32, TYPE)          \
+  D ## CmpRet(Cmp_ ## FUNC, u32, TYPE)          \
+  /* D ## CmpRet(Cmp_ ## FUNC, f16, TYPE) */    \
+  D ## CmpRet(Cmp_ ## FUNC, f32, TYPE)
+
+#define defineCmpRet(FUNC,RET,TYPE)                                 \
+  extern "C" bool FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u) {  \
+    return FUNC(t, u);                                              \
+  }
+
+#define declareCmpRet(FUNC,RET,TYPE)                              \
+  extern "C" bool FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u);
+
 #define defineUnary(FUNC,TYPE)                  \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t) {  \
     return FUNC(t);                             \
@@ -408,6 +450,20 @@ enum BrigFPClass {
   PosNorm    = 0x100,
   PosInf     = 0x200
 };
+
+template<class T> inline T cmpResult(bool result) {
+  return result ? ~T(0) : T(0);
+}
+template<> inline f32 cmpResult(bool result) {
+  return result ? 1.0f : 0.0f;
+}
+template<> inline f64 cmpResult(bool result) {
+  return result ? 1.0 : 0.0;
+}
+
+template<class T> inline b1 isUnordered(T x, T y) {
+  return isNan(x) || isNan(y);
+}
 
 } // namespace brig
 } // namespace hsa
