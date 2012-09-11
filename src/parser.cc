@@ -4017,16 +4017,29 @@ int CvtModifier1(Context* context) {
 }
 
 int Mov(Context* context) {
-// first token is MOV "mov"
+  // Chuang
+  // first token is MOV "mov"
+
+  BrigInstBase movInst = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigMov,               // opcode
+    0,                     // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+ 
   context->token_to_scan = yylex();
 
   if (context->token_type == DATA_TYPE_ID) {
+    movInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
-    if (!Operand(context) || !ArrayOperandList(context)) {
+    if (!ArrayOperandPart2(context, &movInst.o_operands[0])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (!Operand(context) || !ArrayOperandList(context)) {
+        if (!ArrayOperandPart2(context, &movInst.o_operands[1])) {
           if (context->token_to_scan == ';') {
+            context->append_code(&movInst);
             context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
