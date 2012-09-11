@@ -4038,8 +4038,12 @@ int Mov(Context* context) {
   };
  
   context->token_to_scan = yylex();
+  // TODO(Chuang): When type is b128 or b64 etc, check whether the operands is correct.
+  if (context->token_to_scan == _B1 ||
+      context->token_to_scan == _B32 ||
+      context->token_to_scan == _B64 ||
+      context->token_to_scan == _B128) {
 
-  if (context->token_type == DATA_TYPE_ID) {
     movInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
     if (!ArrayOperandPart2(context, &movInst.o_operands[0])) {
