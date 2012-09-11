@@ -48,8 +48,7 @@ typedef hsa::RTKernelArgs KernelArgs;
  */
 class DLL_PUBLIC HsailKernel
 {
-    protected:
-        char* argListInfo;
+ 
     public:
         HsailKernel(){};
 
@@ -99,15 +98,44 @@ class DLL_PUBLIC HsailKernel
            *  (Pure Virtual function) 
            *  @return returns the number of spgr elements
            */
-          virtual int getSGPR() = 0;
+          virtual int getNoSGPRs() = 0;
 
            /*! Getter function for the number of vgpr 
             *  @return returns the number of vpgrs
            */
-          
-          int getVGPR();
+          virtual int getNoVGPRs() = 0;
 
-          virtual ~HsailKernel(){}
+          /* @brief - Reserves VGPRS for the debugger
+          *   @param noOfRegisters - Number of registers to reserve
+          *   @returns - 1 on success or 0 on overflow
+          */
+          virtual bool reserveVGPRs(int noOfRegisters) = 0;
+
+
+          /* @brief - Returns the first index of the registers 
+          *  reserved for the debugger
+          *  return - Returns the index of type uint32_t
+          */
+          virtual uint32_t getTrapReservedVGPRIndex() = 0;
+
+          /* @brief - Returns the index of the register that 
+          * contains the Buffer Wave offset
+          * return - Returns the index of type uint32_t
+          */
+          virtual uint32_t getScratchBufferWaveOffsetSGPRIndex() = 0;
+
+          /* @brief - Returns a pointer to the DWARF info (BRIG to ISA)
+          * return - Returns the index of type uint32_t
+          */
+          virtual void* getDebugISASourceInfo() = 0;
+
+          /* @brief - Returns a pointer to the DWARF info 
+          * (Higher level language to BRIG)
+          * return - Returns the index of type uint32_t
+          */
+          virtual void* getDebugBRIGSourceInfo() = 0;
+
+          virtual ~HsailKernel(){};
 };
 /* @}*/
 
