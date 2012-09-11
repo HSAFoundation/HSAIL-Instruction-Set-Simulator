@@ -214,6 +214,28 @@ typedef struct HSAExceptionPolicy {
 }HSAExceptionPolicy;
 
 /**
+ * @ingroup Event
+ * the timeinfo is always given in absolute device time with the exception of the queueCPUTime.
+ */
+typedef struct _EventTimeInfo
+{
+	uint32_t * hostTime;
+	uint32_t * queuedTime;
+	uint32_t * submittedTime;
+	uint32_t * runningTime;
+	uint32_t * completeTime;
+	
+    _EventTimeInfo()
+    {
+        hostTime = NULL;
+        queuedTime = NULL;
+        submittedTime = NULL;
+        runningTime = NULL;
+        completeTime = NULL;
+    }
+
+} EventTimeInfo;
+/**
  * @ingroup Dispatch
  * completion policy defined the following
  */
@@ -288,7 +310,7 @@ typedef struct LaunchAttributes {
     int groupY; /*!< default is 1*/
     int groupZ; /*!< default is 1*/
     int groupOffsets[3];
-
+    bool timestampEnabled;
     LaunchAttributes()
     {
         blockingPolicy = BLOCKING_POLICY_NONE;
@@ -302,7 +324,10 @@ typedef struct LaunchAttributes {
         groupOffsets[0]=0;
         groupOffsets[1]=0;
         groupOffsets[2]=0;
+        timestampEnabled = false;
     }
+    
+    
 }LaunchAttributes;
 
 typedef hsa::vector<hsa::Device*>::const_iterator Device_itr;
@@ -730,6 +755,14 @@ public:
      */
     virtual uint32_t waitOnEvents(bool waitOnAll, uint32_t timeOut,
                                   uint32_t eventCnt, hsa::Event **eventList) = 0;
+    
+    /**
+     * @brief Retrieves a structure containing absolute wall times from the device which indicate 
+     * when the various states of an event occured.
+     * 
+     * @return EventTimeInfo structure containing wallclock times
+     */
+    virtual EventTimeInfo * getTimeInfo() = 0;
 };
 
 
