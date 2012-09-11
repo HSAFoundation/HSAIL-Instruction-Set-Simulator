@@ -4846,5 +4846,317 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   delete lexer;
 };
 
+
+TEST(CodegenTest, InitializableDeclCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("global_b8 &x[9] = { 1,2,3,4,5,6,7,8,9 }; ");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigDirectiveSymbol ref = {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+  {
+    0,                         // c_code
+    BrigGlobalSpace,         // storag class 
+    BrigNone ,                // attribut
+    0,                        // reserved
+    0,                        // symbolModifier
+    0,                        // dim
+    0,                        // s_name
+    Brigb8,                  // type
+    1,                        // align
+  },
+  40,                        // d_init
+  0,                         // reserved
+  };
+
+  size_t arraySize = sizeof(BrigDirectiveInit) + sizeof(uint64_t); 
+  uint8_t *array = new uint8_t[arraySize];
+
+  BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+  bdi->size = arraySize;           //size
+  bdi->kind = BrigEDirectiveInit;  //kind
+  bdi->c_code = 0;                 //c_code
+  bdi->elementCount = 9;           //elementCount
+  bdi->type = Brigb8;              //type
+  bdi->reserved = 0;               //reserved
+  bdi->initializationData.u8[0] = 1;    //initializationData
+  bdi->initializationData.u8[1] = 2;
+  bdi->initializationData.u8[2] = 3;
+  bdi->initializationData.u8[3] = 4;
+  bdi->initializationData.u8[4] = 5;
+  bdi->initializationData.u8[5] = 6;
+  bdi->initializationData.u8[6] = 7;
+  bdi->initializationData.u8[7] = 8;
+
+  bdi->initializationData.u8[8] = 9;    //initializationData
+  bdi->initializationData.u8[9] = 0;
+  bdi->initializationData.u8[10] = 0;
+  bdi->initializationData.u8[11] = 0;
+  bdi->initializationData.u8[12] = 0;
+  bdi->initializationData.u8[13] = 0;
+  bdi->initializationData.u8[14] = 0;
+  bdi->initializationData.u8[15] = 0;
+
+  EXPECT_EQ(0,InitializableDecl(context));
+
+  BrigDirectiveSymbol get ;
+  context->get_directive(0, &get);
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.s.type, get.s.type);
+  EXPECT_EQ(ref.d_init, get.d_init);
+
+  BrigDirectiveInit get1 ;
+  context->get_directive(40,&get1);
+  EXPECT_EQ(bdi->size, get1.size);
+  EXPECT_EQ(bdi->kind, get1.kind);
+  EXPECT_EQ(bdi->c_code, get1.c_code);
+  EXPECT_EQ(bdi->elementCount, get1.elementCount);
+  EXPECT_EQ(bdi->type, get1.type);
+  EXPECT_EQ(bdi->reserved, get1.reserved);
+  EXPECT_EQ(bdi->initializationData.u8[0],get1.initializationData.u8[0]);
+  EXPECT_EQ(bdi->initializationData.u8[1],get1.initializationData.u8[1]);
+  EXPECT_EQ(bdi->initializationData.u8[2],get1.initializationData.u8[2]);
+  EXPECT_EQ(bdi->initializationData.u8[3],get1.initializationData.u8[3]);
+  EXPECT_EQ(bdi->initializationData.u8[4],get1.initializationData.u8[4]);
+  EXPECT_EQ(bdi->initializationData.u8[5],get1.initializationData.u8[5]);
+  EXPECT_EQ(bdi->initializationData.u8[6],get1.initializationData.u8[6]);
+  EXPECT_EQ(bdi->initializationData.u8[7],get1.initializationData.u8[7]);
+  EXPECT_EQ(bdi->initializationData.u8[8],get1.initializationData.u8[8]);
+
+  // case for single
+  context->clear_context();
+  input.assign("global_f32 &x[9] = { 1.1f,2.2f,3.3f,4.4f,5.5f,6.6f,7.7f,8.8f,9.9f }; ");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigDirectiveSymbol ref1 = {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+  {
+    0,                         // c_code
+    BrigGlobalSpace,         // storag class 
+    BrigNone ,                // attribut
+    0,                        // reserved
+    0,                        // symbolModifier
+    10,                        // dim
+    0,                        // s_name
+    Brigf32,                  // type
+    1,                        // align
+  },
+  40,                        // d_init
+  0,                         // reserved
+  };
+
+  arraySize = sizeof(BrigDirectiveInit) + 2 * sizeof(uint64_t); 
+  array = new uint8_t[arraySize];
+
+  bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+  bdi->size = arraySize;           //size
+  bdi->kind = BrigEDirectiveInit;  //kind
+  bdi->c_code = 0;                 //c_code
+  bdi->elementCount = 9;           //elementCount
+  bdi->type = Brigb32;              //type
+  bdi->reserved = 0;               //reserved
+  bdi->initializationData.u32[0] = 1.1;    //initializationData
+  bdi->initializationData.u32[1] = 2.2;
+  bdi->initializationData.u32[2] = 3.3;
+  bdi->initializationData.u32[3] = 4.4;
+  bdi->initializationData.u32[4] = 5.5;
+  bdi->initializationData.u32[5] = 6.6;
+  bdi->initializationData.u32[6] = 7.7;
+  bdi->initializationData.u32[7] = 8.8;
+  bdi->initializationData.u32[8] = 9.9;    
+  bdi->initializationData.u32[9] = 0;
+
+  EXPECT_EQ(0,InitializableDecl(context));
+
+  context->get_directive(0, &get);
+  EXPECT_EQ(ref1.size, get.size);
+  EXPECT_EQ(ref1.kind, get.kind);
+  EXPECT_EQ(ref1.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref1.s.dim, get.s.dim);
+  EXPECT_EQ(ref1.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref1.s.type, get.s.type);
+  EXPECT_EQ(ref1.d_init, get.d_init);
+
+  get1 =
+    reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[40]);
+
+  
+  EXPECT_EQ(bdi->size, get1->size);
+  EXPECT_EQ(bdi->kind, get1->kind);
+  EXPECT_EQ(bdi->c_code, get1->c_code);
+  EXPECT_EQ(bdi->elementCount, get1->elementCount);
+  EXPECT_EQ(bdi->type, get1->type);
+  EXPECT_EQ(bdi->reserved, get1->reserved);
+  EXPECT_EQ(bdi->initializationData.u32[0],get1->initializationData.u32[0]);
+  EXPECT_EQ(bdi->initializationData.u32[1],get1->initializationData.u32[1]);
+  EXPECT_EQ(bdi->initializationData.u32[2],get1->initializationData.u32[2]);
+  EXPECT_EQ(bdi->initializationData.u32[3],get1->initializationData.u32[3]);
+  EXPECT_EQ(bdi->initializationData.u32[4],get1->initializationData.u32[4]);
+  EXPECT_EQ(bdi->initializationData.u32[5],get1->initializationData.u32[5]);
+  EXPECT_EQ(bdi->initializationData.u32[6],get1->initializationData.u32[6]);
+  EXPECT_EQ(bdi->initializationData.u32[7],get1->initializationData.u32[7]);
+  EXPECT_EQ(bdi->initializationData.u32[8],get1->initializationData.u32[8]);
+  EXPECT_EQ(bdi->initializationData.u32[9],get1->initializationData.u32[9]);
+  delete bdi;
+
+
+  // case for float 
+  context->clear_context();
+  input.assign("global_f64 &x[9] = { 1.1l,2.2l,3.3l,4.4l,5.5l,6.6l,7.7l,8.8l,9.9l }; ");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigDirectiveSymbol ref2 = {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+  {
+    0,                         // c_code
+    BrigGlobalSpace,         // storag class 
+    BrigNone ,                // attribut
+    0,                        // reserved
+    0,                        // symbolModifier
+    9,                        // dim
+    0,                        // s_name
+    Brigf64,                  // type
+    1,                        // align
+  },
+  40,                        // d_init
+  0,                         // reserved
+  };
+
+  arraySize = sizeof(BrigDirectiveInit) + 8 * sizeof(uint64_t); 
+  array = new uint8_t[arraySize];
+
+  bdi = reinterpret_cast<BrigDirectiveInit *>(array);
+
+  bdi->size = arraySize;           //size
+  bdi->kind = BrigEDirectiveInit;  //kind
+  bdi->c_code = 0;                 //c_code
+  bdi->elementCount = 9;           //elementCount
+  bdi->type = Brigb64;              //type
+  bdi->reserved = 0;               //reserved
+  bdi->initializationData.u64[0] = 1.1;    //initializationData
+  bdi->initializationData.u64[1] = 2.2;
+  bdi->initializationData.u64[2] = 3.3;
+  bdi->initializationData.u64[3] = 4.4;
+  bdi->initializationData.u64[4] = 5.5;
+  bdi->initializationData.u64[5] = 6.6;
+  bdi->initializationData.u64[6] = 7.7;
+  bdi->initializationData.u64[7] = 8.8;
+
+  bdi->initializationData.u64[8] = 9.9;    //initializationData
+
+  EXPECT_EQ(0,InitializableDecl(context));
+
+  context->get_directive(0, &get);
+  EXPECT_EQ(ref2.size, get.size);
+  EXPECT_EQ(ref2.kind, get.kind);
+  EXPECT_EQ(ref2.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref2.s.dim, get.s.dim);
+  EXPECT_EQ(ref2.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref2.s.type, get.s.type);
+  EXPECT_EQ(ref2.d_init, get.d_init);
+
+  get1 =
+    reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[40]);
+
+  
+  EXPECT_EQ(bdi->size, get1->size);
+  EXPECT_EQ(bdi->kind, get1->kind);
+  EXPECT_EQ(bdi->c_code, get1->c_code);
+  EXPECT_EQ(bdi->elementCount, get1->elementCount);
+  EXPECT_EQ(bdi->type, get1->type);
+  EXPECT_EQ(bdi->reserved, get1->reserved);
+  EXPECT_EQ(bdi->initializationData.u64[0],get1->initializationData.u64[0]);
+  EXPECT_EQ(bdi->initializationData.u64[1],get1->initializationData.u64[1]);
+  EXPECT_EQ(bdi->initializationData.u64[2],get1->initializationData.u64[2]);
+  EXPECT_EQ(bdi->initializationData.u64[3],get1->initializationData.u64[3]);
+  EXPECT_EQ(bdi->initializationData.u64[4],get1->initializationData.u64[4]);
+  EXPECT_EQ(bdi->initializationData.u64[5],get1->initializationData.u64[5]);
+  EXPECT_EQ(bdi->initializationData.u64[6],get1->initializationData.u64[6]);
+  EXPECT_EQ(bdi->initializationData.u64[7],get1->initializationData.u64[7]);
+  EXPECT_EQ(bdi->initializationData.u64[8],get1->initializationData.u64[8]);
+  delete bdi;
+
+// case for label 
+  context->clear_context();
+  input.assign("global_f64 &x[3] = {@a, @b, @c}; ");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigDirectiveSymbol ref3 = {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+  {
+    0,                        // c_code
+    BrigGlobalSpace,          // storag class 
+    BrigNone ,                // attribut
+    0,                        // reserved
+    0,                        // symbolModifier
+    3,                        // dim
+    0,                        // s_name
+    Brigf64,                  // type
+    1,                        // align
+  },
+  40,                        // d_init
+  0,                         // reserved
+  };
+
+  arraySize = sizeof(BrigDirectiveLabelInit) + 2 * sizeof(BrigdOffset32_t); 
+  array = new uint8_t[arraySize];
+
+  BrigDirectiveLabelInit *bdli = reinterpret_cast<BrigDirectiveLabelInit *>(array);
+
+  bdli->size = arraySize;                //size
+  bdli->kind = BrigEDirectiveLabelInit;  //kind
+  bdli->c_code = 0;                      //c_code
+  bdli->elementCount = 3;                //elementCount
+  bdli->d_labels[0] = 64;                //d_labels
+  bdli->d_labels[1] = 76;
+  bdli->d_labels[2] = 88;
+
+  EXPECT_EQ(0,InitializableDecl(context));
+
+  context->get_directive(0, &get);
+  EXPECT_EQ(ref3.size, get.size);
+  EXPECT_EQ(ref3.kind, get.kind);
+  EXPECT_EQ(ref3.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref3.s.dim, get.s.dim);
+  EXPECT_EQ(ref3.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref3.s.type, get.s.type);
+  EXPECT_EQ(ref3.d_init, get.d_init);
+
+  BrigDirectiveLabelInit* get2 =
+    reinterpret_cast<BrigDirectiveLabelInit*>(&dbuf->get()[40]);
+
+  
+  EXPECT_EQ(bdli->size, get2->size);
+  EXPECT_EQ(bdli->kind, get2->kind);
+  EXPECT_EQ(bdli->c_code, get2->c_code);
+  EXPECT_EQ(bdli->elementCount, get2->elementCount);
+
+  EXPECT_EQ(bdli->d_labels[0],get2->d_labels[0]);
+  EXPECT_EQ(bdli->d_labels[1],get2->d_labels[1]);
+  EXPECT_EQ(bdli->d_labels[2],get2->d_labels[2]);
+  delete bdli;
+
+  delete lexer;
+};
+
 }  // namespace brig
 }  // namespace hsa

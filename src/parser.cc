@@ -2389,6 +2389,11 @@ int Initializer(Context* context) {
       context->token_to_scan = yylex();
       hasCurlyBrackets = true;
     }
+    BrigDirectiveSymbol bds ;
+    BrigdOffset32_t sym_offset = context->get_directive_offset - sizeof(BrigDirectiveSymbol);
+    context->get_directive(sym_offset,&bds);
+    
+    
     switch (context->token_to_scan) {
       case TOKEN_DOUBLE_CONSTANT:
         if (!FloatListSingle(context)) {
@@ -2452,8 +2457,8 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
   
   //First token already verified as GLOBAL/READONLY
   if (context->token_type == DATA_TYPE_ID) {
-    BrigDataType16_t data_type = context->token_value.data_type;
-
+    context->set_type(context->token_value.data_type);
+    
     context->token_to_scan = yylex();
 
     if (!Identifier(context)) {
@@ -2478,7 +2483,7 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
               context->get_symbol_modifier(),   // symbol modifier
               0,                                // dim
               var_name_offset,                  // s_name
-              data_type,                        // data type
+              context->get_type(),                        // data type
               context->get_alignment(),         // alignment
             },
             0,                                // d_init = 0 for arg
