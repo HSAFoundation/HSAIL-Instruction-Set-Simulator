@@ -891,6 +891,7 @@ bool BrigModule::validate(const BrigOperandBase *operand) const {
   bool valid = true;
   return valid;
 }
+
 bool BrigModule::validate(const BrigOperandCompound *operand) const {
   bool valid = true;
   valid &= check(operand->type == Brigb32 ||
@@ -913,9 +914,17 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
                  "must be an s or d register");
   return valid;
 }
+
 bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
-  return true;
+  bool valid = true;
+  valid &= check(operand->fn < S_.directivesSize, 
+                 "fn past directive section");
+  valid &= check(isa<BrigDirectiveFunction>(dir_iterator(S_.directives + 
+                 operand->fn)), "Invalid directive, should point "
+                 "to a BrigDirectiveFunction");
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandImmed *operand) const {
   return true;
 }
