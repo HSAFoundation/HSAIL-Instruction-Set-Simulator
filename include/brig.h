@@ -452,6 +452,37 @@ enum BrigBoundaryMode {
   BrigSamplerBorder
 };
 
+enum BrigCompareOperation {
+  BrigEq,
+  BrigNe,
+  BrigLt,
+  BrigLe,
+  BrigGt,
+  BrigGe,
+  BrigEqu,
+  BrigNeu,
+  BrigLtu,
+  BrigLeu,
+  BrigGtu,
+  BrigGeu,
+  BrigNum,
+  BrigNan,
+  BrigSeq,
+  BrigSne,
+  BrigSlt,
+  BrigSle,
+  BrigSgt,
+  BrigSge,
+  BrigSgeu,
+  BrigSequ,
+  BrigSneu,
+  BrigSltu,
+  BrigSleu,
+  BrigSnum,
+  BrigSnan,
+  BrigSgtu
+};
+
 
 // PRM 20.3.2
 struct BrigSymbolCommon {
@@ -1080,6 +1111,22 @@ struct BrigInstRead {
   uint16_t reserved;
 };
 
+// BrigInstCmp
+// The BrigInstCmp format is used for compare operations. The compare operation
+// needs a special format because it has a comparison operator and a second type.
+
+struct BrigInstCmp {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAluModifier aluModifier;
+  BrigCompareOperation32_t comparisonOperator;
+  BrigDataType16_t sourceType;
+  uint16_t reserved;
+};
 
 
 #endif  // INCLUDE_BRIG_H_
