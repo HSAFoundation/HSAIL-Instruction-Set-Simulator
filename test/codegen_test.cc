@@ -4171,14 +4171,14 @@ TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
     56,                     //size
     BrigEDirectiveImage,    //kind
     {
-      0,                         // c_code
+      0,                        // c_code
       BrigGlobalSpace,          // storag class 
       BrigNone ,                // attribut
       0,                        // reserved
       0,                        // symbolModifier
       0,                        // dim
       0,                        // s_name
-      Brigb64,                  // type
+      BrigROImg,                // type
       1,                        // align
     },
     4,                      //width
@@ -4200,6 +4200,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
   EXPECT_EQ(ref.depth, get.depth);
   EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.s.type, get.s.type);
   
   delete lexer ;
 };
@@ -4225,7 +4226,7 @@ TEST(CodegenTest,GlobalImageDeclCodegen){
       0,                        // symbolModifier
       0,                        // dim
       0,                        // s_name
-      Brigb64,                  // type
+      BrigRWImg,                  // type
       1,                        // align
     },
     2,                      //width
@@ -4247,7 +4248,8 @@ TEST(CodegenTest,GlobalImageDeclCodegen){
   EXPECT_EQ(ref.depth, get.depth);
   EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
-  
+  EXPECT_EQ(ref.s.type, get.s.type);
+ 
   delete lexer ;
 };
 
@@ -4266,14 +4268,14 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
     40,                     //size
     BrigEDirectiveSampler,    //kind
     {
-      0,                         // c_code
-      BrigGlobalSpace,           // storag class 
+      0,                        // c_code
+      BrigGlobalSpace,          // storag class 
       BrigNone ,                // attribut
       0,                        // reserved
       1,                        // symbolModifier
       0,                        // dim
       0,                        // s_name
-      Brigb64,                  // type
+      BrigSamp,                 // type
       1,                        // align
     },
     1,                      //valid
