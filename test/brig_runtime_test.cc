@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-using hsa::brig::BrigFPClass;
+using hsa::brig::cmpResult;
 using hsa::brig::ForEach;
 using hsa::brig::Int;
 using hsa::brig::Int48Ty;
@@ -16,6 +16,7 @@ using hsa::brig::isPosInf;
 using hsa::brig::isPosZero;
 using hsa::brig::isQNan;
 using hsa::brig::isSNan;
+using hsa::brig::isUnordered;
 using hsa::brig::Vec;
 
 template<class T> static void AbsLogic(T result, T a) {
@@ -418,7 +419,7 @@ MakeTest(Popcount_b64, PopcountLogic)
 
 // Bit reverse implementation loosely adapted from Sean Eron Anderson's article
 // at: http://graphics.stanford.edu/~seander/bithacks.html
-template<class T> static void BitrevLogic(T result, T a) {
+template<class T> static void BitRevLogic(T result, T a) {
   union Helper {
     u8 a[sizeof(T)];
     T  t;
@@ -441,8 +442,8 @@ template<class T> static void BitrevLogic(T result, T a) {
 
   EXPECT_EQ(rev.t, result);
 }
-TestAll(SignedInst,   Bitrev, Unary)
-TestAll(UnsignedInst, Bitrev, Unary)
+TestAll(SignedInst,   BitRev, Unary)
+TestAll(UnsignedInst, BitRev, Unary)
 
 template<class T> static void ExtractLogic(T result, T a, T b, T c) {
 
@@ -633,8 +634,8 @@ template<class T> static void FmaLogic(T result, T a, T b, T c) {
 }
 TestAll(FloatInst, Fma, Ternary)
 
-template<class T> static void CopysignLogic(T result, T a, T b);
-template<> void CopysignLogic(f64 result, f64 a, f64 b) {
+template<class T> static void CopySignLogic(T result, T a, T b);
+template<> void CopySignLogic(f64 result, f64 a, f64 b) {
   union Conv { f64 d; b64 b; };
   Conv aConv = { a };
   Conv bConv = { b };
@@ -643,7 +644,7 @@ template<> void CopysignLogic(f64 result, f64 a, f64 b) {
   EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
-template<> void CopysignLogic(f32 result, f32 a, f32 b) {
+template<> void CopySignLogic(f32 result, f32 a, f32 b) {
   union Conv { f32 d; b32 b; };
   Conv aConv = { a };
   Conv bConv = { b };
@@ -652,7 +653,7 @@ template<> void CopysignLogic(f32 result, f32 a, f32 b) {
   EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
-TestAll(FloatInst, Copysign, Binary)
+TestAll(FloatInst, CopySign, Binary)
 
 template<class T> static void ClassLogic(b1 result, T a, b32 b) {
   int fpclass = std::fpclassify(a);
@@ -726,3 +727,33 @@ template<class T> static void FrcpLogic(T result, T a) {
 }
 TestAll(FloatInst, Frcp, Unary)
 
+TestCmp(eq, a == b)
+TestCmp(ne, a != b)
+TestCmp(lt, a <  b)
+TestCmp(le, a <= b)
+TestCmp(gt, a >  b)
+TestCmp(ge, a >= b)
+
+Cmp(declare, eq, b1)
+Cmp(declare, ne, b1)
+MakeCmpTest(eq, b1)
+MakeCmpTest(ne, b1)
+
+template<class R, class T> void Cmp_numLogic(R result, T a, T b) {
+  EXPECT_EQ(cmpResult<R>(!isNan(a) && !isNan(b)), result);
+}
+template<class R, class T> void Cmp_nanLogic(R result, T a, T b) {
+  EXPECT_EQ(cmpResult<R>(isNan(a) || isNan(b)), result);
+}
+// Cmp(declare, num, f16)
+Cmp(declare, num,  f32)
+Cmp(declare, num,  f64)
+// Cmp(declare, nan, f16)
+Cmp(declare, nan,  f32)
+Cmp(declare, nan,  f64)
+// MakeCmpTest(num, f16)
+MakeCmpTest(num, f32)
+MakeCmpTest(num, f64)
+// MakeCmpTest(nan, f16)
+MakeCmpTest(nan, f32)
+MakeCmpTest(nan, f64)

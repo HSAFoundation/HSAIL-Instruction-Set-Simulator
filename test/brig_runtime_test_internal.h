@@ -117,6 +117,52 @@
   /* MakeVectorTest(INST ## _f16x2, INST ## Logic) */ \
   MakeVectorTest(INST ## _f32x2, INST ## Logic)
 
+#define MakeCmpTest(FUNC,TYPE)                                          \
+  MakeTest(Cmp_ ## FUNC ## _b1_  ## TYPE,   Cmp_ ## FUNC ## Logic)      \
+  MakeTest(Cmp_ ## FUNC ## _b32_ ## TYPE, Cmp_ ## FUNC ## Logic)        \
+  MakeTest(Cmp_ ## FUNC ## _s32_ ## TYPE, Cmp_ ## FUNC ## Logic)        \
+  MakeTest(Cmp_ ## FUNC ## _u32_ ## TYPE, Cmp_ ## FUNC ## Logic)        \
+  /* MakeTest(Cmp_ ## FUNC ## _f16_ ## TYPE, Cmp_ ## FUNC ## Logic) */  \
+  MakeTest(Cmp_ ## FUNC ## _f32_ ## TYPE, Cmp_ ## FUNC ## Logic)
+
+#define TestCmp(FUNC,PRED)                                  \
+  template<class R, class T>                                \
+  static void Cmp_ ## FUNC ## Logic(R result, T a, T b) {   \
+    if(isNan(a) || isNan(b)) {                              \
+      EXPECT_EQ(cmpResult<R>(false), result);               \
+    } else {                                                \
+      EXPECT_EQ(cmpResult<R>(PRED), result);                \
+    }                                                       \
+  }                                                         \
+  template<class R, class T>                                \
+  static void Cmp_ ## FUNC ## uLogic(R result, T a, T b) {  \
+    if(isNan(a) || isNan(b)) {                              \
+      EXPECT_EQ(cmpResult<R>(true), result);                \
+    } else {                                                \
+      EXPECT_EQ(cmpResult<R>(PRED), result);                \
+    }                                                       \
+  }                                                         \
+  Cmp(declare, FUNC, b32)                                   \
+  Cmp(declare, FUNC, b64)                                   \
+  Cmp(declare, FUNC, s32)                                   \
+  Cmp(declare, FUNC, s64)                                   \
+  Cmp(declare, FUNC, u32)                                   \
+  Cmp(declare, FUNC, u64)                                   \
+  /* Cmp(declare, Cmp_ ## FUNC, f16) */                     \
+  FCmp(declare, FUNC, f32)                                  \
+  FCmp(declare, FUNC, f64)                                  \
+  MakeCmpTest(FUNC, b32)                                    \
+  MakeCmpTest(FUNC, b64)                                    \
+  MakeCmpTest(FUNC, s32)                                    \
+  MakeCmpTest(FUNC, s64)                                    \
+  MakeCmpTest(FUNC, u32)                                    \
+  MakeCmpTest(FUNC, u64)                                    \
+  /* MakeCmpTest(MakeCmpTest_ ## FUNC, f16) */              \
+  MakeCmpTest(FUNC, f32)                                    \
+  MakeCmpTest(FUNC ## u, f32)                               \
+  MakeCmpTest(FUNC, f64)                                    \
+  MakeCmpTest(FUNC ## u, f64)
+
 template<class T> static void initTestVector(std::vector<T> &testVector) {
   for(unsigned i = 0; i < 255; ++i)
     testVector.push_back(T(i));
