@@ -3229,31 +3229,176 @@ int OperandList(Context* context) {
   return 1;
 }
 
-int Cmp(Context* context) {
-  // first token is PACKEDCMP or CMP
-  unsigned int first_token = context->token_to_scan;
-  context->token_to_scan = yylex();
-  if (context->token_type == COMPARISON) {
-    context->token_to_scan = yylex();
-    if (first_token == CMP) {
-      if (context->token_type == DATA_TYPE_ID) {
-        context->token_to_scan = yylex();
-      } else {
-        context->set_error(MISSING_DATA_TYPE);
-        return 1;
-      }
-    }
+int ComparisonId(Context* context) {
+   BrigCompareOperation32_t cmpOperation;
+   return ComparisonIdPart2(context, &cmpOperation);
+}
 
+int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation) {
+  switch(context->token_to_scan) {
+    case _EQ:
+      *pCmpOperation = BrigEq;
+      break;
+    case _NE:
+      *pCmpOperation = BrigNe;
+      break;
+    case _LT:
+      *pCmpOperation = BrigLt;
+      break;
+    case _LE:
+      *pCmpOperation = BrigLe;
+      break;
+    case _GT:
+      *pCmpOperation = BrigGt;
+      break;
+    case _GE:
+      *pCmpOperation = BrigGe;
+      break;
+    case _EQU:
+      *pCmpOperation = BrigEqu;
+      break;
+    case _NEU:
+      *pCmpOperation = BrigNeu;
+      break;
+    case _LTU:
+      *pCmpOperation = BrigLtu;
+      break;
+    case _LEU:
+      *pCmpOperation = BrigLeu;
+      break;
+    case _GTU:
+      *pCmpOperation = BrigGtu;
+      break;
+    case _GEU:
+      *pCmpOperation = BrigGeu;
+      break;
+    case _NUM:
+      *pCmpOperation = BrigNum;
+      break;
+    case _NAN:
+      *pCmpOperation = BrigNan;
+      break;
+    case _SEQ:
+      *pCmpOperation = BrigSeq;
+      break;
+    case _SNE:
+      *pCmpOperation = BrigSne;
+      break;
+    case _SLT:
+      *pCmpOperation = BrigSlt;
+      break;
+    case _SLE:
+      *pCmpOperation = BrigSle;
+      break;
+    case _SGT:
+      *pCmpOperation = BrigSgt;
+      break;
+    case _SGE:
+      *pCmpOperation = BrigSge;
+      break;
+    case _SGEU:
+      *pCmpOperation = BrigSgeu;
+      break;
+    case _SEQU:
+      *pCmpOperation = BrigSequ;
+      break;
+    case _SNEU:
+      *pCmpOperation = BrigSneu;
+      break;
+    case _SLTU:
+      *pCmpOperation = BrigSltu;
+      break;
+    case _SLEU:
+      *pCmpOperation = BrigSleu;
+      break;
+    case _SNUM:
+      *pCmpOperation = BrigSnum;
+      break;
+    case _SNAN:
+      *pCmpOperation = BrigSnan;
+      break;
+    case _SGTU:
+      *pCmpOperation = BrigSgtu;
+      break;
+    default:
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+  }
+  return 0;
+}
+
+
+int Cmp(Context* context) {
+  // Chuang
+  // first token is PACKEDCMP or CMP
+  BrigInstCmp cmpInst = {
+    44,                 // size
+    BrigEInstCmp,       // kind
+    BrigCmp,            // opcode
+    0,                  // type
+    BrigNoPacking,      // packing
+    {0, 0, 0, 0, 0},  // o_operands[5]
+    {0, 0, 0, 0, 0, 0, 0},                  // aluModifier
+    0,             // comparisonOperator
+    0,             // sourceType
+    0                   // reserved
+  };
+  const unsigned int first_token = context->token_to_scan;
+  context->token_to_scan = yylex();
+  if (!ComparisonIdPart2(context, &cmpInst.comparisonOperator)) {
+    context->token_to_scan = yylex();
+    // 1, 32. Can be 16 if the implementation supports f16.
     if (context->token_type == DATA_TYPE_ID) {
+      cmpInst.type = context->token_value.data_type;
       context->token_to_scan = yylex();
-      if (!Operand(context)) {
+      if (first_token == CMP) {
+        // 1, 32. Can be 16 if the implementation supports f16.
+        if (context->token_type == DATA_TYPE_ID) {
+          cmpInst.sourceType = context->token_value.data_type;
+          context->token_to_scan = yylex();
+        } else {
+          context->set_error(MISSING_DATA_TYPE);
+          return 1;
+        }
+      } else {  // CMP
+        cmpInst.opcode = BrigPackedCmp;
+      }
+      std::string opName;
+      // Note: Dest must be a register.
+      if (context->token_type == REGISTER) {
+        opName = context->token_value.string_val;
+        if (Operand(context)) {
+          return 1;
+        }
+        cmpInst.o_operands[0] = context->operand_map[opName];
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
+          BrigoOffset32_t opSize = 0;
+          opSize = context->get_operand_offset();
+          if (context->valid_string) {
+            opName = context->token_value.string_val;
+          }
           if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()) {
+              cmpInst.o_operands[1] = context->operand_map[opName];
+            } else {
+              cmpInst.o_operands[1] = opSize;
+            }
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
+              opSize = context->get_operand_offset();
+              if (context->valid_string) {
+                opName = context->token_value.string_val;
+              }
+  
               if (!Operand(context)) {
+                if (opSize == context->get_operand_offset()) {
+                  cmpInst.o_operands[2] = context->operand_map[opName];
+                } else {
+                  cmpInst.o_operands[2] = opSize;
+                }
                 if (context->token_to_scan == ';') {
+                  context->append_code(&cmpInst);
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -3264,14 +3409,14 @@ int Cmp(Context* context) {
                 context->set_error(INVALID_THIRD_OPERAND);
                 return 1;
               }
-            } else {
+            } else {  // ','
               context->set_error(MISSING_COMMA);
             }
           } else {  // 2 operand
             context->set_error(INVALID_SECOND_OPERAND);
             return 1;
           }
-        } else {
+        } else {  // ','
           context->set_error(MISSING_COMMA);
         }
       } else {  // 1 operand

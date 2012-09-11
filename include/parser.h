@@ -134,6 +134,7 @@ int Optacqreg(Context* context);
 
 int ArrayOperand(Context* context);
 int QueryOp(Context* context);
+int ComparisonId(Context* context);
 
 //Declarations of Helper Functions 
 int GlobalImageDeclPart2(Context *context);
@@ -151,6 +152,7 @@ int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand);
 int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode);
 int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
+int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
 
 }  // namespace brig
 }  // namespace hsa
