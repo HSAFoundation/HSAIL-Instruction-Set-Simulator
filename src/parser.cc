@@ -3377,6 +3377,10 @@ int Cmp(Context* context) {
           opSize = context->get_operand_offset();
           if (context->valid_string) {
             opName = context->token_value.string_val;
+          } else {
+            if (context->token_type == CONSTANT) {
+              opSize += opSize & 0x7;
+            }
           }
           if (!Operand(context)) {
             if (opSize == context->get_operand_offset()) {
@@ -3389,6 +3393,10 @@ int Cmp(Context* context) {
               opSize = context->get_operand_offset();
               if (context->valid_string) {
                 opName = context->token_value.string_val;
+              } else {
+                if (context->token_type == CONSTANT) {
+                  opSize += opSize & 0x7;
+                }
               }
   
               if (!Operand(context)) {
@@ -7259,12 +7267,24 @@ int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
       return 1;
     }
   } else {
+    BrigoOffset32_t opSize = context->get_operand_offset();
+
     if (context->valid_string) {
       op_name = context->token_value.string_val;
+    } else {
+      if (context->token_type == CONSTANT) {
+        opSize += opSize & 0x7;
+      }
     }
+    
     if (!Operand(context)) {
-      *pRetOpOffset = context->operand_map[op_name];
+      if (opSize == context->get_operand_offset()) {
+        *pRetOpOffset = context->operand_map[op_name];
+      } else { 
+        *pRetOpOffset = opSize;
+      }
       return 0;
+   
     } else {
       context->set_error(MISSING_OPERAND);
       return 1;

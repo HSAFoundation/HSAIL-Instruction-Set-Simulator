@@ -6149,7 +6149,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
     BrigCmp,            // opcode
     Brigf32,            // type
     BrigNoPacking,      // packing
-    {8, 56, 68, 0, 0},  // o_operands[5]
+    {8, 56, 72, 0, 0},  // o_operands[5]
     {0, 0, 0, 0, 0, 0, 0},                  // aluModifier
     BrigGt,             // comparisonOperator
     Brigb32,             // sourceType
@@ -6162,7 +6162,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
     BrigCmp,            // opcode
     Brigb1,             // type
     BrigNoPacking,      // packing
-    {96, 56, 108, 0, 0},  // o_operands[5]
+    {96, 56, 112, 0, 0},  // o_operands[5]
     {0, 0, 0, 0, 0, 0, 0},                  // aluModifier
     BrigEqu,            // comparisonOperator
     Brigf32,            // sourceType
@@ -6556,7 +6556,6 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(movB128Ref.o_operands[2], getBase.o_operands[2]);
   EXPECT_EQ(movB128Ref.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(movB128Ref.o_operands[4], getBase.o_operands[4]);
-
 
   context->get_operand(8, &getReg);  
   // BrigOperandReg
