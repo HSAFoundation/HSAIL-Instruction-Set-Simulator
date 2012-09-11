@@ -374,6 +374,15 @@ class DLL_PUBLIC Device
 public:
     virtual hsa::DeviceType getType() const = 0;
 
+     /**
+     * @brief Compiles a kernel down to ISA and returns a hsa::kernel
+     *
+     * @param prog - program object
+     *
+     * @param kernelName - name of the kernel to compiler
+     *
+     * @param options- compiler options to compiler for
+     */
     virtual hsa::Kernel* compile(
                     hsa::Program* prog,
                     const char* kernelName,
@@ -837,6 +846,17 @@ public:
      *            unable to deallocate the specified memory region.
      */
    virtual void freeGroupMemory(const void* ptr) = 0;
+
+    /* @brief Returns a pointer to the ISA.
+    * return - returns a void pointer to the location of ISA
+    */
+   virtual void* getISA() = 0;
+
+   /* @brief Returns the size of ISA
+    * return - returns the size of of ISA
+    */
+   virtual size_t getSizeOfISA() = 0;
+
 };
 
 class RuntimeApi;
