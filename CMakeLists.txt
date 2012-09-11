@@ -23,7 +23,7 @@ set(hsail2brig_test_SOURCES
 	  ${FLEX_lexer_OUTPUTS}
 	  )
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
-option(ENABLE_BRIG_FE "Build LLVM frontend for BRIG" OFF)
+option(ENABLE_BRIG_FE "Build LLVM frontend for BRIG" ON)
 if (ENABLE_BRIG_FE)
 
   SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
