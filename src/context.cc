@@ -62,10 +62,11 @@ void Context::clear_context(void) {
 }
 
 void Context::set_default_values(void) {
-  machine = BrigESmall;
+  machine = BrigELarge;
   profile = BrigEFull;
   ftz = BrigENosftz;
   attribute = BrigNone;
+  alignment = 1;
   fbar = 0;
   token_type = UNKNOWN;
   token_to_scan = 0;
@@ -76,6 +77,7 @@ void Context::set_default_values(void) {
   arg_output = false ;
   token_value.format = BrigImageFormatUnknown;
   token_value.order = BrigImageOrderUnknown;
+  token_value.storage_class = BrigFlatSpace;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {

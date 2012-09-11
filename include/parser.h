@@ -127,9 +127,13 @@ int LdaMod(Context *context);
 int OffsetAddressableOperand(Context* context);
 int LdModifier(Context* context);
 
-
 int TopLevelStatement(Context *context);
 int TopLevelStatements(Context *context);
+
+int Optacqreg(Context* context);
+
+int ArrayOperand(Context* context);
+int QueryOp(Context* context);
 
 //Declarations of Helper Functions 
 int GlobalImageDeclPart2(Context *context);
@@ -141,6 +145,13 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass, 
                        BrigMemorySemantic32_t* pMemorySemantic);
+int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
+int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
+
+int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand);
+int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode);
+int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

@@ -27,7 +27,8 @@ typedef uint32_t BrigOpcode32_t;
 typedef uint32_t BrigAtomicOperation32_t;
 typedef uint32_t BrigMemorySemantic32_t;
 typedef uint32_t BrigCompareOperation32_t;
-
+typedef uint8_t  BrigBoundaryMode8_t;
+typedef uint8_t  BrigAddrFilter8_t;
 // Enums
 
 // Custom enum to check for alignment of structs
@@ -376,6 +377,7 @@ enum BrigOpcode {
   BrigFbarInitSizeKnown = 123
 };
 
+
 // Brig Support Structures
 // BrigAluModifier specifies arithmetic logic unit controls:
 struct BrigAluModifier {
@@ -433,6 +435,21 @@ enum BrigImageOrder {
   BrigImage_INTENSITY,
   BrigImage_LUMINANCE,
   BrigImageOrderUnknown // used when no order is specified
+};
+
+//PRM 20.5.1
+enum BrigAddrFilter {
+  BrigSamplerFilterLinear,
+  BrigSamplerFilterNearest
+};
+
+//PRM 20.5.4
+enum BrigBoundaryMode {
+  BrigSamplerClamp,
+  BrigSamplerWrap,
+  BrigSamplerMirror,
+  BrigSamplerMirrorOnce,
+  BrigSamplerBorder
 };
 
 
@@ -1005,6 +1022,30 @@ struct BrigInstAtomic {
   BrigMemorySemantic32_t memorySemantic;
 };
 
+// The BrigInstAtomicImage
+// The BrigInstAtomicImage format is used for atomicNoReturn image operations.
+struct BrigInstAtomicImage {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAtomicOperation32_t atomicOperation;
+  BrigStorageClass32_t storageClass;
+  BrigMemorySemantic32_t memorySemantic;
+  BrigGeom32_t geom;
+};
+
+// BrigOperandOpaque
+// BrigOperandOpaque is used for addressing image and sampler objects.
+struct BrigOperandOpaque {
+  uint16_t size;
+  uint16_t kind;
+  BrigdOffset32_t name;
+  BrigoOffset32_t reg;
+  int32_t offset;
+};
 
 
 #endif  // INCLUDE_BRIG_H_
