@@ -1422,6 +1422,7 @@ int ArrayDimensionSet(Context* context) {
   // first token must be '['
   uint32_t dim = 1;
   bool have_size = false;
+  context->set_isArray(true);
   context->token_to_scan = yylex();
 
   while (1) {
@@ -1442,10 +1443,10 @@ int ArrayDimensionSet(Context* context) {
     }
   }
   if (!have_size){
-    context->set_dim(0);
+    context->set_dim(0);// flexiable array
     context->set_symbol_modifier(BrigFlex);
   } else {
-    context->set_dim(dim);
+    context->set_dim(dim); // vector(size in dim)
     context->set_symbol_modifier(BrigArray);
   }
   return 0;
@@ -1472,6 +1473,9 @@ int ArgumentDecl(Context* context) {
 
         // scan for arrayDimensions
         context->token_to_scan = yylex();
+        // set default value(scalar)
+        context->set_dim(0);
+        context->set_symbol_modifier(BrigArray);
         if (context->token_to_scan == '[') {
           if (!ArrayDimensionSet(context)) {
             // context->token_to_scan has been set in ArrayDimensionSet()
@@ -1488,7 +1492,7 @@ int ArgumentDecl(Context* context) {
           context->get_attribute(),         // attribute
           0,                                // reserved
           context->get_symbol_modifier(),   // symbol modifier
-          0,                                // dim
+          context->get_dim(),               // dim
           arg_name_offset,                  // s_name
           context->get_type(),              // data type
           context->get_alignment(),         // alignment
@@ -2645,6 +2649,10 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
 
       // scan for arrayDimensions
       context->token_to_scan = yylex();
+
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
@@ -2658,7 +2666,7 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
           context->get_attribute(),         // attribute
           0,                                // reserved
           context->get_symbol_modifier(),   // symbol modifier
-          0,                                // dim
+          context->get_dim(),                                // dim
           var_name_offset,                  // s_name
           context->get_type(),                        // data type
           context->get_alignment(),         // alignment
@@ -2716,6 +2724,9 @@ int UninitializableDecl(Context* context) {
 
       // scan for arrayDimensions
       context->token_to_scan = yylex();
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
@@ -2726,10 +2737,10 @@ int UninitializableDecl(Context* context) {
         {
           context->get_code_offset(),       // c_code
           storage_class,                    // storageClass 
-          context->get_attribute(),           // attribute
+          context->get_attribute(),         // attribute
           0,                                // reserved
           context->get_symbol_modifier(),   // symbol modifier
-          0,                                // dim
+          context->get_dim(),               // dim
           var_name_offset,                  // s_name
           context->token_value.data_type,   // data type
           context->get_alignment(),         // alignment
@@ -2787,43 +2798,46 @@ int ArgUninitializableDecl(Context* context) {
       // for Now, assume this is a scalar. [CAUTION]
       std::string arg_name = context->token_value.string_val;
 
-      BrigDirectiveSymbol arg_decl = {
-        sizeof(arg_decl),                 // size
-        BrigEDirectiveSymbol,             // kind
-        {
-          context->get_code_offset(),       // c_code
-          storage_class,                    // storageClass
-          context->get_attribute(),         // attribute
-          0,                                // reserved
-          context->get_symbol_modifier(),   // symbol modifier
-          0,                                // dim
-          context->add_symbol(arg_name),    // s_name
-          data_type,   // data_type
-          context->get_alignment(),         // alignment
-        },
-        0,                                // d_init = 0 for arg
-        0                                 // reserved
-      };
-
-      BrigOperandArgumentRef arg_ref = {
-        8,
-        BrigEOperandArgumentRef,
-        context->get_directive_offset()
-      };
-
-      context->symbol_map[arg_name]= context->get_operand_offset();
-      context->append_directive(&arg_decl);
-      // add the operand to the map.
-      context->arg_map[arg_name] = context->get_operand_offset();
-      context->append_operand(&arg_ref);
-
       // scan for arrayDimensions
       context->token_to_scan = yylex();
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
       }
       if (context->token_to_scan == ';') {
+        BrigDirectiveSymbol arg_decl = {
+          sizeof(arg_decl),                 // size
+          BrigEDirectiveSymbol,             // kind
+          {
+            context->get_code_offset(),       // c_code
+            storage_class,                    // storageClass
+            context->get_attribute(),         // attribute
+            0,                                // reserved
+            context->get_symbol_modifier(),     // symbol modifier
+            context->get_dim(),               // dim
+            context->add_symbol(arg_name),    // s_name
+            data_type,                        // data_type
+            context->get_alignment(),         // alignment
+          },
+          0,                                // d_init = 0 for arg
+          0                                 // reserved
+        };
+
+        BrigOperandArgumentRef arg_ref = {
+          8,
+          BrigEOperandArgumentRef,
+          context->get_directive_offset()
+        };
+
+        context->symbol_map[arg_name]= context->get_operand_offset();
+        context->append_directive(&arg_decl);
+        // add the operand to the map.
+        context->arg_map[arg_name] = context->get_operand_offset();
+        context->append_operand(&arg_ref);
+
         context->token_to_scan = yylex();
         arg_name.clear();
         return 0;
@@ -3336,7 +3350,9 @@ int GlobalPrivateDecl(Context* context) {
       
       BrigsOffset32_t var_name_offset = context->add_symbol(context->token_value.string_val);
       context->token_to_scan = yylex();
-
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {}
       }
@@ -3352,7 +3368,7 @@ int GlobalPrivateDecl(Context* context) {
           BrigNone ,                      // attribut
           0,                              // reserved
           context->get_symbol_modifier(), // symbolModifier
-          0,                              // dim
+          context->get_dim(),             // dim
           var_name_offset,                // s_name
           data_type,                      // type
           context->get_alignment(),       // align
@@ -3951,6 +3967,9 @@ int GlobalGroupDecl(Context* context) {
 
       BrigsOffset32_t var_name_offset = context->add_symbol(context->token_value.string_val);
       context->token_to_scan = yylex();
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {}
       }
@@ -3965,7 +3984,7 @@ int GlobalGroupDecl(Context* context) {
           BrigNone ,                      // attribut
           0,                              // reserved
           context->get_symbol_modifier(), // symbolModifier
-          0,                              // dim
+          context->get_dim(),             // dim
           var_name_offset,                // s_name
           data_type,                      // type
           context->get_alignment(),       // align
@@ -5818,7 +5837,10 @@ int SingleListSingle(Context * context) {
         // BrigdOffset32_t bds_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
         context->get_directive(bds_offset,&bds);
         bds.d_init = context->get_directive_offset();
-        bds.s.dim = init_length;
+        if (0 == context->get_dim() && context->get_isArray())
+          bds.s.symbolModifier = BrigArray;
+        if (context->get_dim() < init_length)
+          bds.s.dim = init_length;
 
         unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
         context->update_directive_bytes(bds_charp,
@@ -5927,6 +5949,16 @@ int GlobalImageDeclPart2(Context *context){
       std::string var_name(context->token_value.string_val);      
       int var_name_offset = context->add_symbol(var_name);
 
+      context->token_to_scan = yylex();
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
+      if ('[' == context->token_to_scan) {
+        if (!ArrayDimensionSet(context)) {
+        } else {          
+          return 1;
+        }
+      }
       BrigDirectiveImage bdi = {
         56,                     //size
         BrigEDirectiveImage,    //kind
@@ -5936,7 +5968,7 @@ int GlobalImageDeclPart2(Context *context){
           context->get_attribute(),        // attribut
           0,                               // reserved
           context->get_symbol_modifier(),  // symbolModifier
-          0,                               // dim
+          context->get_dim(),              // dim
           var_name_offset,                 // s_name
           BrigRWImg,                       // type
           context->get_alignment()         // align
@@ -5951,40 +5983,15 @@ int GlobalImageDeclPart2(Context *context){
       context->current_img_offset = context->get_directive_offset();
       context->append_directive(&bdi);
 
-      context->token_to_scan = yylex();
-      if ('[' == context->token_to_scan) {
-        if (!ArrayDimensionSet(context)) {
-          if ('=' == context->token_to_scan) {
-            if (!ImageInitializer(context)) {
-              if (';' == context->token_to_scan) {
-                context->token_to_scan = yylex();
-                return 0;
-              } else {
-                context->set_error(MISSING_SEMICOLON);
-              }
-            } else {
-              context->set_error(INVALID_IMAGE_INIT);
-            }
-          } else {  // end for =
-            if (';' == context->token_to_scan) {
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-            }
-          }
+      if ('=' == context->token_to_scan) {
+        if (!ImageInitializer(context)) {
+        } else {
+          context->set_error(INVALID_IMAGE_INIT);
+          return 1;
         }
-      } else if ('=' == context->token_to_scan) {  // end for [
-        if (!ImageInitializer(context)) {       // no arraydimensions
-          if (';' == context->token_to_scan) {
-            context->token_to_scan = yylex();
-            return 0;
-          } else {
-            context->set_error(MISSING_SEMICOLON);
-          }
-        }
-      } else if (';' == context->token_to_scan) {
-        // no arrayDimensions and imageInitializer
+      }
+
+      if (';' == context->token_to_scan) {
         context->token_to_scan = yylex();
         return 0;
       } else {
@@ -6018,6 +6025,16 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
       std::string var_name(context->token_value.string_val);      
       int var_name_offset = context->add_symbol(var_name);
 
+      context->token_to_scan = yylex();
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
+      if ('[' == context->token_to_scan) {
+        if (!ArrayDimensionSet(context)) {
+        } else {          
+          return 1;
+        }
+      }
       BrigDirectiveImage bdi = {
         56,                     //size
         BrigEDirectiveImage,    //kind
@@ -6027,7 +6044,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
           context->get_attribute(),        // attribut
           0,                               // reserved
           context->get_symbol_modifier(),  // symbolModifier
-          0,                               // dim
+          context->get_dim(),              // dim
           var_name_offset,                 // s_name
           BrigROImg,                       // type
           context->get_alignment()         // align
@@ -6041,15 +6058,6 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
       };
       context->current_img_offset = context->get_directive_offset();
       context->append_directive(&bdi);
-
-      context->token_to_scan = yylex();
-      if ('[' == context->token_to_scan) {
-        if (!ArrayDimensionSet(context)) {
-        } else {
-          
-          return 1;
-        }
-      }
 
       if ('=' == context->token_to_scan) {
         if (!ImageInitializer(context)) {
@@ -6592,6 +6600,8 @@ int LabelList(Context* context) {
       context->get_directive(bds_offset,&bds);
       bds.d_init = context->get_directive_offset();
       bds.s.dim = elementCount;
+      if (0 == context->get_dim() && context->get_isArray())
+        bds.s.symbolModifier = BrigArray;
 
       unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
       context->update_directive_bytes(bds_charp,
@@ -6717,7 +6727,10 @@ int FloatListSingle(Context* context) {
       // BrigdOffset32_t bds_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
       context->get_directive(bds_offset,&bds);
       bds.d_init = context->get_directive_offset();
-      bds.s.dim = init_length;
+      if (0 == context->get_dim() && context->get_isArray())
+        bds.s.symbolModifier = BrigArray;
+      if (context->get_dim() < init_length)
+        bds.s.dim = init_length;
 
       unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
       context->update_directive_bytes(bds_charp,
@@ -6833,10 +6846,16 @@ int DecimalListSingle(Context* context) {
         // update the BrigDirectiveSymbol.d_init and dim
         BrigDirectiveSymbol bds ;
         BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-        // BrigdOffset32_t bds_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
         context->get_directive(bds_offset,&bds);
         bds.d_init = context->get_directive_offset();
-        bds.s.dim = init_length;
+        if (0 == context->get_dim() && context->get_isArray()){
+          bds.s.symbolModifier = BrigArray;
+          context->set_symbol_modifier(BrigArray);
+        }
+        if (context->get_dim() < init_length){
+          bds.s.dim = init_length;
+          context->set_dim(init_length);
+        }
 
         unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
         context->update_directive_bytes(bds_charp,
@@ -7070,6 +7089,18 @@ int GlobalSamplerDeclPart2(Context *context){
       std::string var_name(context->token_value.string_val);      
       int var_name_offset = context->add_symbol(var_name);
 
+      context->token_to_scan = yylex();
+
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
+      if ('[' == context->token_to_scan) {
+        if (!ArrayDimensionSet(context)) {
+        } else {          
+          return 1;
+        }
+      }
+
       BrigDirectiveSampler bds = {
         40,                                //size
         BrigEDirectiveSampler,             //kind
@@ -7079,7 +7110,7 @@ int GlobalSamplerDeclPart2(Context *context){
           context->get_attribute(),        // attribut
           0,                               // reserved
           context->get_symbol_modifier(),  // symbolModifier
-          0,                               // dim
+          context->get_dim(),              // dim
           var_name_offset,                 // s_name
           BrigSamp,                        // type
           context->get_alignment()         // align
@@ -7095,38 +7126,18 @@ int GlobalSamplerDeclPart2(Context *context){
       context->current_samp_offset = context->get_directive_offset();
       context->append_directive(&bds);
 
-      context->token_to_scan = yylex();
-      if ('[' == context->token_to_scan){
-        if (!ArrayDimensionSet(context)){
-          if (!SobInitializer(context)){
-            if (';' == context->token_to_scan){
-              context->token_to_scan = yylex();
-              return 0 ;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-            }
-          } else {// end for =
-            if (';' == context->token_to_scan){
-              context->token_to_scan = yylex();
-              return 0 ;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-            }
-          }
+      if ('=' == context->token_to_scan) {
+        if (!SobInitializer(context)) {
+        } else {
+          context->set_error(INVALID_IMAGE_INIT);
+          return 1;
         }
-      } else if ('=' == context->token_to_scan){// end for [
-        if (!SobInitializer(context)){       // no arraydimensions
-          if (';' == context->token_to_scan){
-            context->token_to_scan = yylex();
-            return 0 ;
-          } else {
-            context->set_error(MISSING_SEMICOLON);
-          }
-        } 
-      } else if (';' == context->token_to_scan){ // no arrayDimensions and imageInitializer
+      }
+
+      if (';' == context->token_to_scan) {
         context->token_to_scan = yylex();
-        return 0 ;
-      } else{
+        return 0;
+      } else {
         context->set_error(MISSING_SEMICOLON);
       }
     }

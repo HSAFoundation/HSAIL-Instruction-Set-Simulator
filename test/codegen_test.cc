@@ -3573,7 +3573,6 @@ TEST(CodegenTest, ArrayOperandList_CodeGen_SimpleTest) {
   EXPECT_EQ(ref.reserved, getReg.reserved);
   EXPECT_EQ(ref.name, getReg.name);
 
-
   delete lexer;
 };
 
@@ -4272,7 +4271,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
       BrigGlobalSpace,          // storag class 
       BrigNone ,                // attribut
       0,                        // reserved
-      0,                        // symbolModifier
+      2,                        // symbolModifier
       0,                        // dim
       0,                        // s_name
       BrigSamp,                 // type
