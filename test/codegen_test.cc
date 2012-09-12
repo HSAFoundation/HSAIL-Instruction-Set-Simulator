@@ -5771,5 +5771,34 @@ TEST(CodegenTest, ArrayDimensionSetCodeGen) {
   delete lexer;
 };
 
+TEST(CodegenTest,FileDeclCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  std::string input("file 1 \"math.c\" ;");
+  
+  BrigDirectiveFile ref = {
+    16,                   //size
+    BrigEDirectiveFile,   //kind
+    0,                    //c_code
+    1,                    //fileid
+    0                     //s_filename
+  };
+
+  Lexer *lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0,FileDecl(context));
+  
+  BrigDirectiveFile get;
+  context->get_directive(0,&get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.c_code,get.c_code);
+  EXPECT_EQ(ref.fileid,get.fileid);
+  EXPECT_EQ(ref.s_filename,get.s_filename); 
+  delete lexer; 
+};
+
 }  // namespace brig
 }  // namespace hsa
