@@ -273,6 +273,14 @@ char Context::get_operand_loc() const {
   return operand_loc;
 }
 
+uint32_t Context::get_dim() const {
+  return dim;
+}
+
+bool Context::get_isArray() const {
+  return is_array;
+}
+
 // set context
 void Context::set_alu_modifier(BrigAluModifier modifier) {
   this->aluModifier = modifier;
@@ -319,6 +327,15 @@ void Context::set_opcode(BrigOpcode32_t opcode) {
 void Context::set_operand_loc(char loc) {
   this->operand_loc = loc;
 }
+
+void Context::set_dim(uint32_t dim) {
+  this->dim = dim;
+}
+
+void Context::set_isArray(bool is_array) {
+  this->is_array = is_array;
+}
+
 // the operationCount of BrigDirectiveFunction add by 1
 void Context::update_bdf_operation_count(){
   BrigDirectiveFunction bdf;
