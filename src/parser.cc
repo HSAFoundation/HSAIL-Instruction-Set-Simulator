@@ -1420,6 +1420,7 @@ int FBar(Context* context) {
 
 int ArrayDimensionSet(Context* context) {
   // first token must be '['
+  uint32_t dim = 1;
   context->token_to_scan = yylex();
 
   while (1) {
@@ -1431,6 +1432,7 @@ int ArrayDimensionSet(Context* context) {
         break;
       }
     } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      dim *= context->token_value.int_val;
       context->token_to_scan = yylex();  // scan next
     } else {
       context->set_error(MISSING_CLOSING_BRACKET);

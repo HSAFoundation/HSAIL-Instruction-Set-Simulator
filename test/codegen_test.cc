@@ -5736,5 +5736,41 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   delete lexer;
 };
 
+
+TEST(CodegenTest, ArrayDimensionSetCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  // case for decimal
+  std::string input("global_b8 &x[9]; ");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,ArrayDimensionSet(context));
+
+  EXPECT_EQ(9, context->get_dim());
+  EXPECT_EQ(BrigArray, get_symbolModifier());
+
+
+  input.assign("global_u16 &x[] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,InitializableDecl(context));
+  EXPECT_EQ(BrigFlex,context->get_symbol_modifier());
+  EXPECT_EQ(0, context->get_dim());
+
+  input.assign("global_u8 &y[] = {1,2,3,4,5,6,7,8,9};");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,InitializableDecl(context));
+  EXPECT_EQ(BrigArray,context->get_symbol_modifier());
+  EXPECT_EQ(16, context->get_dim());
+
+  delete lexer;
+};
+
 }  // namespace brig
 }  // namespace hsa
