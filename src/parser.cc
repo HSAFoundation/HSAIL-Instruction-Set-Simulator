@@ -1466,60 +1466,59 @@ int ArgumentDecl(Context* context) {
             // context->token_to_scan has been set in ArrayDimensionSet()
             return 0;
           }
-        } else {
-          // no arrayDimensions
-          BrigdOffset32_t dsize = context->get_directive_offset();
-          BrigDirectiveSymbol sym_decl = {
-          sizeof(sym_decl),                 // size
-          BrigEDirectiveSymbol,             // kind
-          {
-            context->get_code_offset(),       // c_code
-            storage_class,                    // storageClass
-            context->get_attribute(),         // attribute
-            0,                                // reserved
-            context->get_symbol_modifier(),   // symbol modifier
-            0,                                // dim
-            arg_name_offset,                  // s_name
-            context->token_value.data_type,   // data type
-            context->get_alignment(),         // alignment
-          },
-          0,                                // d_init = 0 for arg
-          0                                 // reserved
-          };
-          // append the DirectiveSymbol to .directive section.
-          context->append_directive(&sym_decl);
-          context->symbol_map[arg_name] = dsize;
-
-          // update the current DirectiveFunction.
-          // 1. update the directive offset.
-          BrigDirectiveFunction bdf;
-          context->get_directive(context->current_bdf_offset, &bdf);
-          BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
-          BrigdOffset32_t next_directive = bdf.d_nextDirective;
-          if (first_scope == next_directive) {
-            bdf.d_nextDirective += sizeof(sym_decl);
-            bdf.d_firstScopedDirective = bdf.d_nextDirective;
-          } else {
-            bdf.d_nextDirective += sizeof(sym_decl);
-          }
-
-          // update param count
-          if (context->is_arg_output()) {
-            bdf.outParamCount++;
-          } else {
-            if (!bdf.inParamCount)
-              bdf.d_firstInParam = dsize;
-            bdf.inParamCount++;
-          }
-          unsigned char * bdf_charp =
-            reinterpret_cast<unsigned char*>(&bdf);
-          context->update_directive_bytes(bdf_charp,
-                                          context->current_bdf_offset,
-                                          40);
-
-          context->get_directive(context->current_bdf_offset, &bdf);
-          return 0;
         }
+        BrigdOffset32_t dsize = context->get_directive_offset();
+        BrigDirectiveSymbol sym_decl = {
+        sizeof(sym_decl),                 // size
+        BrigEDirectiveSymbol,             // kind
+        {
+          context->get_code_offset(),       // c_code
+          storage_class,                    // storageClass
+          context->get_attribute(),         // attribute
+          0,                                // reserved
+          context->get_symbol_modifier(),   // symbol modifier
+          0,                                // dim
+          arg_name_offset,                  // s_name
+          context->get_type(),              // data type
+          context->get_alignment(),         // alignment
+        },
+        0,                                // d_init = 0 for arg
+        0                                 // reserved
+        };
+        // append the DirectiveSymbol to .directive section.
+        context->append_directive(&sym_decl);
+        context->symbol_map[arg_name] = dsize;
+
+        // update the current DirectiveFunction.
+        // 1. update the directive offset.
+        BrigDirectiveFunction bdf;
+        context->get_directive(context->current_bdf_offset, &bdf);
+        BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
+        BrigdOffset32_t next_directive = bdf.d_nextDirective;
+        if (first_scope == next_directive) {
+          bdf.d_nextDirective += sizeof(sym_decl);
+          bdf.d_firstScopedDirective = bdf.d_nextDirective;
+        } else {
+          bdf.d_nextDirective += sizeof(sym_decl);
+        }
+
+        // update param count
+        if (context->is_arg_output()) {
+          bdf.outParamCount++;
+        } else {
+          if (!bdf.inParamCount)
+            bdf.d_firstInParam = dsize;
+          bdf.inParamCount++;
+        }
+        unsigned char * bdf_charp =
+          reinterpret_cast<unsigned char*>(&bdf);
+        context->update_directive_bytes(bdf_charp,
+                                        context->current_bdf_offset,
+                                        40);
+
+        context->get_directive(context->current_bdf_offset, &bdf);
+        return 0;
+       
       } else {
         context->set_error(MISSING_IDENTIFIER);
       }
@@ -2727,8 +2726,8 @@ int UninitializableDecl(Context* context) {
         0,                                // d_init = 0 for arg
         0                                 // reserved
       };
-
       context->append_directive(&sym_decl);
+
       BrigDirectiveFunction bdf;
       context->get_directive(context->current_bdf_offset, &bdf);
       BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
@@ -6545,6 +6544,9 @@ int Pragma(Context* context) {
   context->set_error(UNKNOWN_ERROR);
   return 1;
 }
+
+// the type must be u or s
+// size must 32 or 64
 int LabelList(Context* context) {
   uint32_t elementCount = 0;
   std::vector<BrigDirectiveLabel> label_list;
