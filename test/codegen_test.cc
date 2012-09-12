@@ -5800,5 +5800,37 @@ TEST(CodegenTest,FileDeclCodegen){
   delete lexer; 
 };
 
+TEST(CodegenTest,LocationCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  std::string input("loc 1 10 5 ;");
+  
+  BrigDirectiveLoc ref = {
+    20,                   //size
+    BrigEDirectiveLoc,    //kind
+    0,                    //c_code
+    1,                    //sourceFile
+    10,                   //sourceLine
+    5                     //sourceColumn
+  }; 
+
+  Lexer *lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0,Location(context));
+  
+  BrigDirectiveLoc get;
+  context->get_directive(0,&get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.c_code,get.c_code);
+  EXPECT_EQ(ref.sourceFile,get.sourceFile);
+  EXPECT_EQ(ref.sourceLine,get.sourceLine);
+  EXPECT_EQ(ref.sourceColumn,get.sourceColumn); 
+  
+  delete lexer; 
+};
+
 }  // namespace brig
 }  // namespace hsa

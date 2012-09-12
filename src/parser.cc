@@ -6477,7 +6477,7 @@ int AtomicNoRet(Context* context) {
 }
 
 int Location(Context* context) {
-  // first token is LOG
+  // first token is LOC
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     context->token_to_scan = yylex();
