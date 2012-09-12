@@ -477,6 +477,10 @@ template<class T> static T Frcp(T x) {
 }
 FloatInst(define, Frcp, Unary)
 
+extern "C" u32 f2u4_u32(f32 w, f32 x, f32 y, f32 z){
+  return 0;   
+}
+
 CmpInst(eq, x == y)
 CmpInst(ne, !isUnordered(x, y) && x != y)
 CmpInst(lt, x <  y)
