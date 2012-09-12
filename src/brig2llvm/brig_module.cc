@@ -901,14 +901,15 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
                  "reserved must be zero");
   valid &= check(operand->name < S_.operandsSize,
                  "name past the operands section");
-  valid &= check(isa<BrigOperandAddress>(oper_iterator(S_.operands + 
-                 operand->name)), "Invalid name, should point to "
-                 "BrigOperandAddress");
+  oper_iterator nameOper(S_.operands + operand->name);
+  valid &= check(isa<BrigOperandAddress>(nameOper), 
+                 "Invalid name, should point to BrigOperandAddress");
   valid &= check(operand->reg < S_.operandsSize,
                  "reg past the operands section");
   const oper_iterator oper(S_.operands + operand->reg);
   if(!validate(oper)) return false;
-  const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);  
+  const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+  valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");  
   valid &= check(bor->type == Brigb32 ||
                  bor->type == Brigb64, "Invalid register, the register "
                  "must be an s or d register");
@@ -919,9 +920,9 @@ bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
   bool valid = true;
   valid &= check(operand->fn < S_.directivesSize, 
                  "fn past directive section");
-  valid &= check(isa<BrigDirectiveFunction>(dir_iterator(S_.directives + 
-                 operand->fn)), "Invalid directive, should point "
-                 "to a BrigDirectiveFunction");
+  dir_iterator fnDir(S_.directives + operand->fn);
+  valid &= check(isa<BrigDirectiveFunction>(fnDir), "Invalid directive, "
+                 "should point to a BrigDirectiveFunction");
   return valid;
 }
 
