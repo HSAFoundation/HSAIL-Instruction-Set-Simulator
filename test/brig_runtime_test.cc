@@ -742,7 +742,7 @@ template<class T> static void FrcpLogic(T result, T a) {
 }
 TestAll(FloatInst, Frcp, Unary)
 
-static void f2u4_u32_Logic(u32 result, f32 a, f32 b, f32 c, f32 d) {
+static void F2u4_u32_Logic(u32 result, f32 a, f32 b, f32 c, f32 d) {
   if(isNan(a) || a < 0.0f || a >= 256.0f) return;
   if(isNan(b) || b < 0.0f || b >= 256.0f) return;
   if(isNan(c) || c < 0.0f || c >= 256.0f) return;
@@ -753,8 +753,8 @@ static void f2u4_u32_Logic(u32 result, f32 a, f32 b, f32 c, f32 d) {
   EXPECT_EQ((result >> 16) & 0xFF, lrint(b) & 0xFF);
   EXPECT_EQ((result >> 24) & 0xFF, lrint(a) & 0xFF);
 }
-extern "C" u32 f2u4_u32(f32 a, f32 b, f32 c, f32 d);
-MakeTest(f2u4_u32, f2u4_u32_Logic)
+extern "C" u32 F2u4_u32(f32 a, f32 b, f32 c, f32 d);
+MakeTest(F2u4_u32, F2u4_u32_Logic)
 
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)
