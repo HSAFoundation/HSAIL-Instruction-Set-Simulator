@@ -6478,14 +6478,31 @@ int AtomicNoRet(Context* context) {
 
 int Location(Context* context) {
   // first token is LOC
+  if (LOC != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+    uint32_t sourceFile = context->token_value.int_val;
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      uint32_t sourceLine = context->token_value.int_val;
       context->token_to_scan = yylex();
       if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+        uint32_t sourceColumn = context->token_value.int_val;
         context->token_to_scan = yylex();
         if (context->token_to_scan == ';') {
+
+          BrigDirectiveLoc bdl = {
+            sizeof(BrigDirectiveLoc),   //size 
+            BrigEDirectiveLoc,          //kind
+            context->get_code_offset(), //c_code
+            sourceFile,                 //sourceFile
+            sourceLine,                 //sourceLine
+            sourceColumn                //sourceColumn
+          };
+          context->append_directive(&bdl);
+
           context->token_to_scan = yylex();
           return 0;
         } else {  // ';'
