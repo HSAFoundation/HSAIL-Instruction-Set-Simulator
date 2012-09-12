@@ -460,6 +460,21 @@ template<class T> static void ExtractLogic(T result, T a, T b, T c) {
 TestAll(SignedInst,   Extract, Ternary)
 TestAll(UnsignedInst, Extract, Ternary)
 
+template<class T> static void InsertLogic(T result, T a, T b, T c, T d) {
+
+  unsigned width  = c & T(Int<T>::Bits - 1);
+  unsigned offset = d & T(Int<T>::Bits - 1);
+  T resultNe = a;
+  for (unsigned i = 0; i < width && offset + i < Int<T>::Bits; ++i) {
+    resultNe &= ~(T(1) << (offset + i));
+    resultNe |= (b << offset) & (T(1) << (offset + i));
+  }
+  resultNe |= (b & (~T(0) << width)) << offset;
+  EXPECT_EQ(resultNe, result);
+}
+TestAll(SignedInst,   Insert, Quaternary)
+TestAll(UnsignedInst, Insert, Quaternary)
+
 template<class T> static void BitselectLogic(T result, T a, T b, T c) {
   EXPECT_EQ(b &  a, result &  a);
   EXPECT_EQ(c & ~a, result & ~a);
