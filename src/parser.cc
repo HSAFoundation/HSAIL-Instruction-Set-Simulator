@@ -2709,42 +2709,41 @@ int UninitializableDecl(Context* context) {
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
-      } //else {  // no arrayDimension
-          BrigDirectiveSymbol sym_decl = {
-            sizeof(sym_decl),                 // size
-            BrigEDirectiveSymbol,             // kind
-            {
-              context->get_code_offset(),       // c_code
-              storage_class,                    // storageClass ??
-              context->get_attribute(),           // attribute
-              0,                                // reserved
-              context->get_symbol_modifier(),   // symbol modifier
-              0,                                // dim
-              var_name_offset,                  // s_name
-              context->token_value.data_type,   // data type
-              context->get_alignment(),         // alignment
-            },
-            0,                                // d_init = 0 for arg
-            0                                 // reserved
-          };
+      } 
+      BrigDirectiveSymbol sym_decl = {
+        sizeof(sym_decl),                 // size
+        BrigEDirectiveSymbol,             // kind
+        {
+          context->get_code_offset(),       // c_code
+          storage_class,                    // storageClass 
+          context->get_attribute(),           // attribute
+          0,                                // reserved
+          context->get_symbol_modifier(),   // symbol modifier
+          0,                                // dim
+          var_name_offset,                  // s_name
+          context->token_value.data_type,   // data type
+          context->get_alignment(),         // alignment
+        },
+        0,                                // d_init = 0 for arg
+        0                                 // reserved
+      };
 
-          context->append_directive(&sym_decl);
-          BrigDirectiveFunction bdf;
-          context->get_directive(context->current_bdf_offset, &bdf);
-          BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
-          BrigdOffset32_t next_directive = bdf.d_nextDirective;
-          if (first_scope == next_directive) {
-            bdf.d_nextDirective += sizeof(sym_decl);
-            bdf.d_firstScopedDirective = bdf.d_nextDirective;
-          } else {
-            bdf.d_nextDirective += sizeof(sym_decl);
-          }
+      context->append_directive(&sym_decl);
+      BrigDirectiveFunction bdf;
+      context->get_directive(context->current_bdf_offset, &bdf);
+      BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
+      BrigdOffset32_t next_directive = bdf.d_nextDirective;
+      if (first_scope == next_directive) {
+        bdf.d_nextDirective += sizeof(sym_decl);
+        bdf.d_firstScopedDirective = bdf.d_nextDirective;
+      } else {
+        bdf.d_nextDirective += sizeof(sym_decl);
+      }
 
-          unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-          context->update_directive_bytes(bdf_charp ,
+      unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+      context->update_directive_bytes(bdf_charp ,
                                           context->current_bdf_offset,
                                           sizeof(sym_decl));
-      //}
 
       if (context->token_to_scan == ';') {
         context->token_to_scan = yylex();
@@ -5829,18 +5828,26 @@ int SingleListSingle(Context * context) {
 
 int ImageInit(Context *context) {
   BrigDirectiveImage bdi ;
+  uint32_t first_token ;
 
   if (FORMAT == context->token_to_scan
     || ORDER == context->token_to_scan) {
+    first_token = context->token_to_scan;
     context->token_to_scan = yylex();
+
      if ('=' == context->token_to_scan) {
        context->token_to_scan = yylex();
 
        if (TOKEN_PROPERTY == context->token_to_scan) {         
          context->get_directive(context->current_img_offset,&bdi);
-         bdi.format = context->token_value.format;
-         bdi.order  = context->token_value.order;
-
+         switch(first_token){
+           case FORMAT:
+             bdi.format = context->token_value.format;
+             break;
+           case ORDER:
+             bdi.order  = context->token_value.order;
+             break;
+         }
        } else {
          context->set_error(MISSING_PROPERTY);
          return 1;
@@ -5852,7 +5859,7 @@ int ImageInit(Context *context) {
   } else if (WIDTH == context->token_to_scan
        || HEIGHT == context->token_to_scan
        || DEPTH == context->token_to_scan) {
-    uint32_t first_token = context->token_to_scan ;
+    first_token = context->token_to_scan ;
 
     context->token_to_scan = yylex();
     if ('=' == context->token_to_scan) {
