@@ -6576,10 +6576,58 @@ int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass,
 
 int AtomicNoRet(Context* context) {
   // first token is ATOMICNORET or ATOMICNORET_CAS
+
+  BrigInstAtomic aNoRetInst = {
+    44,                    // size
+    BrigEInstAtomic,       // kind
+    BrigAtomicNoRet,       // opcode
+    0,                     // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0},       // o_operands[5]
+    BrigAtomicCas,         // atomicOperation
+    BrigGlobalSpace,       // storageClass
+    0                      // memorySemantic
+  };
+
   const unsigned int first_token = context->token_to_scan;
   context->token_to_scan = yylex();
   if (first_token == ATOMICNORET) {
     if (context->token_type == ATOMIC_OP) {
+      switch (context->token_to_scan) {  // without _CAS_
+        case _AND_:
+          aNoRetInst.atomicOperation = BrigAtomicAnd;
+          break;
+        case _OR_:
+          aNoRetInst.atomicOperation = BrigAtomicOr;
+          break;
+        case _XOR_:
+          aNoRetInst.atomicOperation = BrigAtomicXor;
+          break;
+        case _EXCH_:
+          aNoRetInst.atomicOperation = BrigAtomicExch;
+          break;
+        case _ADD_:
+          aNoRetInst.atomicOperation = BrigAtomicAdd;
+          break;
+        case _INC_:
+          aNoRetInst.atomicOperation = BrigAtomicInc;
+          break;
+        case _DEC_:
+          aNoRetInst.atomicOperation = BrigAtomicDec;
+          break;
+        case _MIN_:
+          aNoRetInst.atomicOperation = BrigAtomicMin;
+          break;
+        case _MAX_:
+          aNoRetInst.atomicOperation = BrigAtomicMax;
+          break;
+        case _SUB_:
+          aNoRetInst.atomicOperation = BrigAtomicSub;
+          break;
+        default:
+          context->set_error(MISSING_DECLPREFIX);
+          return 1;
+      }
       context->token_to_scan = yylex();
     } else {
       context->set_error(MISSING_OPERAND);
@@ -6587,14 +6635,46 @@ int AtomicNoRet(Context* context) {
     }
   }
 
-  if (!AtomModifiers(context)) {
-    if (context->token_type == DATA_TYPE_ID) {
+  if (!AtomModifiersPart2(context, &aNoRetInst.storageClass, &aNoRetInst.memorySemantic)) {
+
+    // Type: b, u, s, f (f is supported only for max and min).
+    // Length: 32, 64.
+    if ((context->token_to_scan == _U32 ||
+         context->token_to_scan == _S32 ||
+         context->token_to_scan == _B32 ||
+         context->token_to_scan == _U64 ||
+         context->token_to_scan == _S64 ||
+         context->token_to_scan == _B64) || 
+        ((aNoRetInst.atomicOperation == BrigAtomicMax || 
+         aNoRetInst.atomicOperation == BrigAtomicMin) &&
+         (context->token_to_scan == _F32 ||
+          context->token_to_scan == _F64))) {
+          
+      aNoRetInst.type = context->token_value.data_type;
       context->token_to_scan = yylex();
+      aNoRetInst.o_operands[0] = context->get_operand_offset();
       if (!MemoryOperand(context)) {
+        unsigned int opCount = 1;
+        BrigoOffset32_t opSize = 0;
+        std::string opName;
+
         if (first_token == ATOMICNORET_CAS) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
+            opSize = context->get_operand_offset();
+            if (context->valid_string) {
+              opName = context->token_value.string_val;
+            } else {
+              if (context->token_type == CONSTANT) {
+                opSize += opSize & 0x7;
+              }
+            }
             if (!Operand(context)) {
+              if (opSize == context->get_operand_offset()) {
+                aNoRetInst.o_operands[opCount++] = context->operand_map[opName];
+              } else { 
+                aNoRetInst.o_operands[opCount++] = opSize;
+              }
             } else {
               context->set_error(MISSING_OPERAND);
               return 1;
@@ -6606,8 +6686,22 @@ int AtomicNoRet(Context* context) {
         }
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
+          opSize = context->get_operand_offset();
+          if (context->valid_string) {
+            opName = context->token_value.string_val;
+          } else {
+            if (context->token_type == CONSTANT) {
+              opSize += opSize & 0x7;
+            }
+          }
           if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()) {
+              aNoRetInst.o_operands[opCount++] = context->operand_map[opName];
+            } else { 
+              aNoRetInst.o_operands[opCount++] = opSize;
+            }
             if (context->token_to_scan == ';') {
+              context->append_code(&aNoRetInst);
               context->token_to_scan = yylex();
               return 0;
             } else {
