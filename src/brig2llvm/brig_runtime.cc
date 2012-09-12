@@ -469,6 +469,26 @@ template<class T> static T Fsin(T x) {
 }
 FloatInst(define, Fsin, Unary)
 
+template<class T> static T Flog2(T x) {
+  if(std::fpclassify(x) == FP_SUBNORMAL) {
+    return -INFINITY;
+  } else if(std::fpclassify(x) == FP_NORMAL && x < 0) {
+    return -INFINITY;
+  } else {
+    return std::log(x)/std::log(2); 
+  }
+}
+FloatInst(define, Flog2, Unary)
+
+template<class T> static T Fexp2(T x) {
+  if (std::fpclassify(x) == FP_NORMAL && x < 0) {
+    return 0.0;
+  } else {
+    return std::pow(2, x);
+  }
+}
+FloatInst(define, Fexp2, Unary)
+
 template<class T> static T Frsqrt(T x) {
   if(std::fpclassify(x) == FP_SUBNORMAL) {
     return x > 0 ? INFINITY : -INFINITY;
