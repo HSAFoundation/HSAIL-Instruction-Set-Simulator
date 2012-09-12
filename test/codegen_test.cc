@@ -4272,7 +4272,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
       BrigGlobalSpace,          // storag class 
       BrigNone ,                // attribut
       0,                        // reserved
-      1,                        // symbolModifier
+      0,                        // symbolModifier
       0,                        // dim
       0,                        // s_name
       BrigSamp,                 // type
@@ -5742,15 +5742,15 @@ TEST(CodegenTest, ArrayDimensionSetCodeGen) {
   context->clear_context();
 
   // case for decimal
-  std::string input("global_b8 &x[9]; ");
+  std::string input("[9][9] ");
 
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0,ArrayDimensionSet(context));
 
-  EXPECT_EQ(9, context->get_dim());
-  EXPECT_EQ(BrigArray, get_symbolModifier());
+  EXPECT_EQ(81, context->get_dim());
+  EXPECT_EQ(BrigArray, context->get_symbol_modifier());
 
 
   input.assign("global_u16 &x[] ;");

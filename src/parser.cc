@@ -1421,6 +1421,7 @@ int FBar(Context* context) {
 int ArrayDimensionSet(Context* context) {
   // first token must be '['
   uint32_t dim = 1;
+  bool have_size = false;
   context->token_to_scan = yylex();
 
   while (1) {
@@ -1432,12 +1433,20 @@ int ArrayDimensionSet(Context* context) {
         break;
       }
     } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      have_size = true;
       dim *= context->token_value.int_val;
       context->token_to_scan = yylex();  // scan next
     } else {
       context->set_error(MISSING_CLOSING_BRACKET);
       return 1;
     }
+  }
+  if (!have_size){
+    context->set_dim(0);
+    context->set_symbol_modifier(BrigFlex);
+  } else {
+    context->set_dim(dim);
+    context->set_symbol_modifier(BrigArray);
   }
   return 0;
 }
