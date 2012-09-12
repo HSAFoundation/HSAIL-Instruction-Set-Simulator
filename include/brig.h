@@ -965,7 +965,6 @@ struct BrigOperandAddress {
   BrigDataType16_t type;
   uint16_t reserved;
   BrigdOffset32_t directive;
-  int32_t offset;
 };
 
 // BrigOperandLabelRef

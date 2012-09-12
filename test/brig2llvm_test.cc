@@ -5123,8 +5123,8 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
 TEST(Brig2LLVMTest, validateBrigOperandAddress) {
   {
     hsa::brig::StringBuffer strings;
-    strings.append(std::string("%input"));  
-    strings.append(std::string("%an_input"));  
+    strings.append(std::string("%input"));
+    strings.append(std::string("%an_input"));
 
     hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {
@@ -5169,8 +5169,7 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       BrigEOperandAddress,
       Brigb32,
       0,
-      20,
-      0
+      20
     };
     operands.append(&boa);
 
@@ -5227,8 +5226,7 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       BrigEOperandAddress,
       Brigu32,
       1,
-      60,
-      1
+      60
     };
     operands.append(&boa);
 
