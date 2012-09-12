@@ -99,7 +99,7 @@ while(<FILES>) {
     for ($i = $hgmaxrev+1; $i <= $p4last; $i++) {
 	if ($i == 0) { next; }
 	print "syncing iteration $i for $hgpath\n";
-	system("p4 print $depotpath#$i >$hgpath");
+	system("p4 print -o $hgpath $depotpath#$i >/dev/null");
 	# get changelist number
 	$changelist = `p4 files $depotpath#$i`;
 	chop $changelist;
