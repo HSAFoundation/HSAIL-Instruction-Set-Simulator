@@ -1128,5 +1128,21 @@ struct BrigInstCmp {
   uint16_t reserved;
 };
 
+// BrigInstCvt
+// The BrigInstCvt format is used for convert operations.
+
+struct BrigInstCvt {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAluModifier aluModifier;
+  BrigDataType16_t stype;
+  uint16_t reserved;
+};
+
+
 
 #endif  // INCLUDE_BRIG_H_

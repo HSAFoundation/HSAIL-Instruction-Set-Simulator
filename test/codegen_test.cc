@@ -7489,5 +7489,122 @@ TEST(CodegenTest, AtomicNoRet_CodeGen_Test) {
   delete lexer;
 };
 
+TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("cvt_f32_f64 $s1, $d1;\n");
+  input.append("cvt_down_f32_f32 $s1,$s2;\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  BrigInstCvt cvtRef1 = {
+    40,                    // size
+    BrigEInstCvt,         // kind
+    BrigCvt,               // opcode
+    Brigf32,               // type
+    BrigNoPacking,         // packing
+    {8, 20, 0, 0, 0},     // o_operands[5]
+    {0},                 // aluModifier
+    Brigf64,                   // stype
+    0                    // reserved
+  };
+
+  BrigInstCvt cvtRef2 = {
+    40,                    // size
+    BrigEInstCvt,         // kind
+    BrigCvt,               // opcode
+    Brigf32,               // type
+    BrigNoPacking,         // packing
+    {8, 32, 0, 0, 0},     // o_operands[5]
+    {1, 3, 0, 0, 0, 0, 0},     // aluModifier
+    Brigf32,                   // stype
+    0                    // reserved
+  };
+
+  BrigInstCvt getCvt;
+  BrigOperandReg getReg;
+  unsigned int* pAluModRef,* pAluModGet;
+  pAluModRef = pAluModGet = NULL;
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  
+  EXPECT_EQ(0, Cvt(context)); 
+  EXPECT_EQ(0, Cvt(context));
+
+  context->get_code(0, &getCvt);
+
+  EXPECT_EQ(cvtRef1.size, getCvt.size);
+  EXPECT_EQ(cvtRef1.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef1.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef1.type, getCvt.type);
+  EXPECT_EQ(cvtRef1.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef1.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef1.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef1.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef1.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef1.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef1.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef1.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
+
+  context->get_code(40, &getCvt);
+
+  EXPECT_EQ(cvtRef2.size, getCvt.size);
+  EXPECT_EQ(cvtRef2.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef2.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef2.type, getCvt.type);
+  EXPECT_EQ(cvtRef2.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef2.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef2.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef2.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef2.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef2.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef2.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef2.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef2.reserved, getCvt.reserved);
+
+
+  context->get_operand(8, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);  
+
+  context->get_operand(20, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb64, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(4, getReg.name);  
+
+  context->get_operand(32, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name);  
+
+  delete lexer;
+};
+
+
+
+
 }  // namespace brig
 }  // namespace hsa
