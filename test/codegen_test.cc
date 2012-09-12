@@ -5388,6 +5388,288 @@ TEST(CodegenTest, Query_CodeGen_Test) {
   delete lexer;
 };
 
+TEST(CodegenTest, Instruction1Op_CodeGen_fbar_Wait_b64) {
+
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFbarWait,
+    Brigb64,
+    BrigNoPacking,
+    {8, 0, 0, 0, 0}
+  };
+
+  std::string input("fbar_wait_b64 $d0;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  context->get_operand(8, &getReg);
+  context->get_code(0, &getBase);
+
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb64, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);
+
+  // BrigInstBase
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.packing, getBase.packing);
+
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  delete lexer;
+};
+
+TEST(CodegenTest, Instruction1Op_CodeGen_fbar_Arrive_b64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFbarArrive,
+    Brigb64,
+    BrigNoPacking,
+    {8, 0, 0, 0, 0}
+  };
+
+  std::string input("fbar_arrive_b64 $d0;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  context->get_operand(8, &getReg);
+  context->get_code(0, &getBase);
+
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb64, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);
+
+  // BrigInstBase
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.packing, getBase.packing);
+
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  delete lexer;
+};
+
+TEST(CodegenTest, Instruction1Op_CodeGen_fbar_skip_b64) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigFbarSkip,
+    Brigb64,
+    BrigNoPacking,
+    {8, 0, 0, 0, 0}
+  };
+
+  std::string input("fbar_skip_b64 $d0;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  context->get_operand(8, &getReg);
+  context->get_code(0, &getBase);
+
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb64, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);
+
+  // BrigInstBase
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.packing, getBase.packing);
+
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  delete lexer;
+};
+
+TEST(CodegenTest, Instruction1Op_CodeGen_Countup_u32) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase ref = {
+    32,
+    BrigEInstBase,
+    BrigCountup,
+    Brigu32,
+    BrigNoPacking,
+    {8, 0, 0, 0, 0}
+  };
+
+  std::string input("countup_u32 $s1;");
+  Lexer* lexer = new Lexer(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction1(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  context->get_operand(8, &getReg);
+  context->get_code(0, &getBase);
+
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name);
+
+  // BrigInstBase
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.packing, getBase.packing);
+
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  delete lexer;
+};
+
+TEST(CodegenTest, Instruction1op_CodeGen_fbar_Release) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("fbar_release_b64 $d0;");
+  input.append("fbar_release_b64 $d0,$d1;");
+
+  Lexer* lexer = new Lexer(input);
+
+  BrigInstBase ref1={
+    32,
+    BrigEInstBase,
+    BrigFbarRelease,
+    Brigb64,
+    BrigNoPacking,
+    {8, 0, 0, 0, 0}
+  };
+  BrigInstBase ref2={
+    32,
+    BrigEInstBase,
+    BrigFbarRelease,
+    Brigb64,
+    BrigNoPacking,
+    {8, 20, 0, 0, 0}
+  };
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg1,getReg2;
+  //BrigOperandImmed getImm;
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction1(context));
+  EXPECT_EQ(0, Instruction1(context));
+
+  context->get_code(0, &getBase);
+  context->get_operand(8, &getReg1);
+
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg1.size);
+  EXPECT_EQ(BrigEOperandReg, getReg1.kind);
+  EXPECT_EQ(Brigb64, getReg1.type);
+  EXPECT_EQ(0, getReg1.reserved);
+  EXPECT_EQ(0, getReg1.name);
+
+  // BrigInstBase
+  EXPECT_EQ(ref1.size, getBase.size);
+  EXPECT_EQ(ref1.kind, getBase.kind);
+  EXPECT_EQ(ref1.opcode, getBase.opcode);
+  EXPECT_EQ(ref1.type, getBase.type);
+  EXPECT_EQ(ref1.packing, getBase.packing);
+
+  EXPECT_EQ(ref1.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref1.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref1.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref1.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref1.o_operands[4], getBase.o_operands[4]);
+
+  context->get_operand(8, &getReg1);
+  context->get_operand(20, &getReg2);
+  context->get_code(32, &getBase);
+
+  // BrigOperandReg1
+  EXPECT_EQ(12, getReg1.size);
+  EXPECT_EQ(BrigEOperandReg, getReg1.kind);
+  EXPECT_EQ(Brigb64, getReg1.type);
+  EXPECT_EQ(0, getReg1.reserved);
+  EXPECT_EQ(0, getReg1.name);
+
+ // BrigOperandReg2
+  EXPECT_EQ(12, getReg2.size);
+  EXPECT_EQ(BrigEOperandReg, getReg2.kind);
+  EXPECT_EQ(Brigb64, getReg2.type);
+  EXPECT_EQ(0, getReg2.reserved);
+  EXPECT_EQ(4, getReg2.name);
+
+  // BrigInstBase
+  EXPECT_EQ(ref2.size, getBase.size);
+  EXPECT_EQ(ref2.kind, getBase.kind);
+  EXPECT_EQ(ref2.opcode, getBase.opcode);
+  EXPECT_EQ(ref2.type, getBase.type);
+  EXPECT_EQ(ref2.packing, getBase.packing);
+
+  EXPECT_EQ(ref2.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref2.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref2.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref2.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref2.o_operands[4], getBase.o_operands[4]);
+
+  delete lexer;
+};
+
 
 }  // namespace brig
 }  // namespace hsa
