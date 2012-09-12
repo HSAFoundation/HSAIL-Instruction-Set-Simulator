@@ -1218,8 +1218,7 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
     BrigEOperandAddress,  // kind
     Brigb32,              // Data Type
     0,                    // reserved
-    context->symbol_map[name],                    // directive
-    0,                    // offset -> ??
+    context->symbol_map[name]                    // directive
   };
 
   if (context->get_machine() == BrigELarge)

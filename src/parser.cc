@@ -266,8 +266,7 @@ int AddressableOperand(Context* context) {
         BrigEOperandAddress,    // kind
         Brigb32,                // type
         0,                      // reserved
-        0,                      // directive
-        0
+        0                       // directive
       };
 
       boa.directive = context->symbol_map[name];
