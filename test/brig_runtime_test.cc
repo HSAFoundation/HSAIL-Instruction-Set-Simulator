@@ -683,6 +683,34 @@ extern "C" b1 Class_f64(f64, unsigned);
 MakeTest(Class_f32, ClassLogic)
 MakeTest(Class_f64, ClassLogic)
 
+template<class T> static void FcosLogic(T result, T a) {
+  int fpclass = std::fpclassify(a);
+  if(isNan(a) || isInf(a)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(fpclass == FP_NORMAL && (-512 * PI > a || a > 512 * PI)) {
+    EXPECT_FLOAT_EQ(cos(1.0), result);
+  } else if(fpclass == FP_SUBNORMAL && (-512 * PI > a || a > 512 * PI)) {
+    EXPECT_FLOAT_EQ(cos(1.0), result);
+  } else {
+    EXPECT_FLOAT_EQ(cos(a), result);
+  }
+}
+TestAll(FloatInst, Fcos, Unary)
+
+template<class T> static void FsinLogic(T result, T a) {
+  int fpclass = std::fpclassify(a);
+  if(isNan(a) || isInf(a)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(fpclass == FP_NORMAL && (-512 * PI > a || a > 512 * PI)) {
+    EXPECT_FLOAT_EQ(sin(1.0), result);
+  } else if(fpclass == FP_SUBNORMAL && (-512 * PI > a || a > 512 * PI)) {
+    EXPECT_FLOAT_EQ(sin(1.0), result);
+  } else {
+    EXPECT_FLOAT_EQ(sin(a), result);
+  }
+}
+TestAll(FloatInst, Fsin, Unary)
+
 template<class T> static void FrsqrtLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isNegInf(a)) {
