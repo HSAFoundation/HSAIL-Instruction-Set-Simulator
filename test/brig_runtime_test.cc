@@ -687,10 +687,12 @@ template<class T> static void FcosLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isInf(a)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(fpclass == FP_NORMAL && (-512 * PI > a || a > 512 * PI)) {
+  } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
     EXPECT_FLOAT_EQ(cos(1.0), result);
-  } else if(fpclass == FP_SUBNORMAL && (-512 * PI > a || a > 512 * PI)) {
-    EXPECT_FLOAT_EQ(cos(1.0), result);
+  } else if(isNegZero(a)) {
+    EXPECT_FLOAT_EQ(1.0, result);
+  } else if(isPosZero(a)) {
+    EXPECT_FLOAT_EQ(1.0, result);
   } else {
     EXPECT_FLOAT_EQ(cos(a), result);
   }
@@ -701,10 +703,12 @@ template<class T> static void FsinLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isInf(a)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(fpclass == FP_NORMAL && (-512 * PI > a || a > 512 * PI)) {
+  } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
     EXPECT_FLOAT_EQ(sin(1.0), result);
-  } else if(fpclass == FP_SUBNORMAL && (-512 * PI > a || a > 512 * PI)) {
-    EXPECT_FLOAT_EQ(sin(1.0), result);
+  } else if(isNegZero(a)) {
+    EXPECT_FLOAT_EQ(0.0, result);
+  } else if(isPosZero(a)) {
+    EXPECT_FLOAT_EQ(0.0, result);
   } else {
     EXPECT_FLOAT_EQ(sin(a), result);
   }

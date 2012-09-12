@@ -450,7 +450,7 @@ extern "C" b1 Class_f64(f64 f, b32 y) { return Class(f, y); }
 template<class T> static T Fcos(T x) {
   if(isNan(x)) return x;
   if(isInf(x)) return NAN;
-  if(-512 * PI <= x && x <= 512 * PI) {
+  if(-512 * M_PI <= x && x <= 512 * M_PI) {
     return std::cos(x);
   } else {
     return std::cos(1.0);
@@ -461,7 +461,7 @@ FloatInst(define, Fcos, Unary)
 template<class T> static T Fsin(T x) {
   if(isNan(x)) return x;
   if(isInf(x)) return NAN;
-  if(-512 * PI <= x && x <= 512 * PI) {
+  if(-512 * M_PI <= x && x <= 512 * M_PI) {
     return std::sin(x);
   } else {
     return std::sin(1.0);

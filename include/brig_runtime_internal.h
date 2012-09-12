@@ -131,8 +131,6 @@ defineVec(u64, 2)
 defineVec(s64, 2)
 defineVec(f64, 2)
 
-#define PI 3.1415926
-
 #define BitInst(D,INST,NARY)                    \
   D ## NARY(INST, b1)                           \
   D ## NARY(INST, b32)                          \
