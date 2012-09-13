@@ -841,7 +841,7 @@ public:
     virtual hsa::Event *dispatch(Kernel* kernel, 
                         LaunchAttributes *launchAttr,
                         hsa::Event* depEvent, 
-                        hsacore::vector<RTKernelArgs>& args)=0;
+                        hsacore::vector<KernelArg>& args)=0;
     
     virtual void flush()=0;
 
