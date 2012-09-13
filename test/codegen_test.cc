@@ -1218,8 +1218,7 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
     BrigEOperandAddress,  // kind
     Brigb32,              // Data Type
     0,                    // reserved
-    context->symbol_map[name],                    // directive
-    0,                    // offset -> ??
+    context->symbol_map[name]                    // directive
   };
 
   if (context->get_machine() == BrigELarge)
@@ -2740,7 +2739,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_unpack0) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_alloca) {
   context->set_error_reporter(main_reporter);
@@ -2776,7 +2775,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_alloca) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemid) {
   context->set_error_reporter(main_reporter);
@@ -2812,7 +2811,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemaid) {
   context->set_error_reporter(main_reporter);
@@ -2848,7 +2847,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workitemaid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupid) {
   context->set_error_reporter(main_reporter);
@@ -2884,7 +2883,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupid) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupsize) {
   context->set_error_reporter(main_reporter);
@@ -2920,7 +2919,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_workgroupsize) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangesize) {
   context->set_error_reporter(main_reporter);
@@ -2956,7 +2955,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangesize) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
   context->set_error_reporter(main_reporter);
@@ -2992,7 +2991,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, RetCodeGen) {
   context->set_error_reporter(main_reporter);
@@ -3106,7 +3105,7 @@ TEST(CodegenTest, BarCodeGen) {
   //case 2
   context->clear_context();
   input.assign("barrier_width(all)_group ;");
-  
+
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Bar(context));
@@ -3133,7 +3132,7 @@ TEST(CodegenTest, BarCodeGen) {
     BrigEOperandImmed,
     Brigb32,
     0,
-    0
+    { 0 }
   };
 
   BrigOperandImmed get_boi;
@@ -3157,7 +3156,7 @@ TEST(CodegenTest, OptionalWidthCodeGen) {
     BrigEOperandImmed,
     Brigb32,
     0,
-    2
+    { 2 }
   };
 
   std::string input("_width(2);");
@@ -3278,7 +3277,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset);
+  //EXPECT_EQ(0, getAddr.offset);
 
   context->get_operand(36, &getAddr);
   // BrigOperandAddress
@@ -3287,7 +3286,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset);
+  //EXPECT_EQ(0, getAddr.offset);
 
   context->get_operand(52, &getReg);
   // BrigOperandReg
@@ -3387,8 +3386,8 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(0, MemoryOperand(context));
   
   context->get_operand(8, &getAddr);
-  context->get_operand(24, &getReg);
-  context->get_operand(36, &get2);
+  context->get_operand(20, &getReg);
+  context->get_operand(32, &get2);
   
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
@@ -3396,7 +3395,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset);
+  //EXPECT_EQ(0, getAddr.offset);
   // BrigOperandReg
   EXPECT_EQ(12, getReg.size);
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
@@ -3447,19 +3446,19 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset);
+//  EXPECT_EQ(0, getAddr.offset);
 
-  context->get_operand(24, &getAddr);
+  context->get_operand(20, &getAddr);
   // BrigOperandAddress
   EXPECT_EQ(16, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
-  EXPECT_EQ(0, getAddr.offset);
+//  EXPECT_EQ(0, getAddr.offset);
 
 
-  context->get_operand(40, &getReg);
+  context->get_operand(32, &getReg);
   // BrigOperandReg
   EXPECT_EQ(12, getReg.size);
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
@@ -3467,7 +3466,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(0, getReg.reserved);
   EXPECT_EQ(12, getReg.name);
 
-  context->get_operand(52, &get3);
+  context->get_operand(44, &get3);
   // BrigOperandCompoud
   EXPECT_EQ(ref3.size, get3.size);
   EXPECT_EQ(ref3.kind, get3.kind);
@@ -3487,7 +3486,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   };
   BrigOperandIndirect getInd;
 
-  context->get_operand(84, &getInd);
+  context->get_operand(76, &getInd);
   // BrigOperandIndirect
   EXPECT_EQ(refInd.size, getInd.size);
   EXPECT_EQ(refInd.kind, getInd.kind);

@@ -5,6 +5,9 @@ include_directories(.)
 include_directories(include)
 include_directories(${CMAKE_BINARY_DIR})
 add_definitions(-DGTEST_HAS_PTHREAD=0)
+if (CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
+endif (CMAKE_COMPILER_IS_GNUCXX)
 flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
 set(hsail2brig_test_SOURCES
@@ -23,7 +26,7 @@ set(hsail2brig_test_SOURCES
 	  ${FLEX_lexer_OUTPUTS}
 	  )
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
-option(ENABLE_BRIG_FE "Build LLVM frontend for BRIG" OFF)
+option(ENABLE_BRIG_FE "Build LLVM frontend for BRIG" ON)
 if (ENABLE_BRIG_FE)
 
   SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
@@ -83,4 +86,13 @@ if (ENABLE_BRIG_FE)
      )
   add_executable(brig2llvm_test ${brig2llvm_test_SOURCES})
   target_link_libraries(brig2llvm_test brig2llvm)
+
+  set(brig_runtime_test_SOURCES
+      test/brig_runtime_test.cc
+      gtest/gtest-all.cc
+      gtest/gtest_main.cc
+     )
+  add_executable(brig_runtime_test ${brig_runtime_test_SOURCES})
+  target_link_libraries(brig_runtime_test brig2llvm)
+
 endif (ENABLE_BRIG_FE)

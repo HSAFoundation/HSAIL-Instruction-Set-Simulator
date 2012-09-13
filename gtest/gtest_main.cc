@@ -34,6 +34,17 @@
 GTEST_API_ int main(int argc, char **argv) {
   std::cout << "Running main() from gtest_main.cc\n";
 
+  ::testing::GTEST_FLAG(filter) =
+      "-BrigRuntimeTest.Mad*:"
+      "BrigRuntimeTest.Extract*:"
+      "BrigRuntimeTest.Bitselect*:"
+      "BrigRuntimeTest.Mov_b128_b32:"
+      "BrigRuntimeTest.Shuffle*:"
+      "BrigRuntimeTest.Cmov*:"
+      "BrigRuntimeTest.Fma*:"
+      "BrigRuntimeTest.Insert*:"
+      "BrigRuntimeTest.F2u4_u32:";
+
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

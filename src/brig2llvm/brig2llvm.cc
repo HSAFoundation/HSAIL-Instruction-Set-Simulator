@@ -29,15 +29,15 @@ llvm::StructType *GenLLVM::create_soa_type(
 
 void GenLLVM::gen_GPU_states(void) {
   llvm::StructType *c_reg_type = create_soa_type(
-    llvm::Type::getInt1Ty(*C_), "c_regs",8);
+    llvm::Type::getInt1Ty(*C_), "c_regs", 8);
   llvm::StructType *s_reg_type = create_soa_type(
-    llvm::Type::getInt32Ty(*C_), "s_regs",16);
+    llvm::Type::getInt32Ty(*C_), "s_regs", 32);
   llvm::StructType *d_reg_type = create_soa_type(
-    llvm::Type::getInt64Ty(*C_), "d_regs",8);
+    llvm::Type::getInt64Ty(*C_), "d_regs", 32);
   llvm::StructType *q_reg_type = create_soa_type(
-    llvm::Type::getIntNTy(*C_, 128), "q_regs",8);
+    llvm::Type::getIntNTy(*C_, 128), "q_regs", 8);
   llvm::StructType *pc_reg_type = create_soa_type(
-    llvm::Type::getIntNTy(*C_, 32), "pc_regs",3);
+    llvm::Type::getIntNTy(*C_, 32), "pc_regs", 3);
   std::vector<llvm::Type *> tv1;
   tv1.push_back(c_reg_type);
   tv1.push_back(s_reg_type);
@@ -461,7 +461,9 @@ static void runOnInstruction(llvm::BasicBlock &B,
                              FunState &state) {
   llvm::LLVMContext &C = B.getContext();
 
-  if(inst->opcode == BrigAbs) {
+  if(inst->opcode == BrigAbs ||
+     inst->opcode == BrigMax ||
+     inst->opcode == BrigMin) {
     runOnComplexInst(B, inst, helper, state);
   } else if(BrigInstHelper::isSaturated(BrigPacking(inst->packing))) {
     runOnComplexInst(B, inst, helper, state);

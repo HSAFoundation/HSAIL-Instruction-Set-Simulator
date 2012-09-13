@@ -1,0 +1,24 @@
+#!/bin/csh
+
+set path = ($path $HOME/bin)
+export $path
+
+setenv P4PORT orswp4p1:1666
+setenv P4USER gkyriazi
+setenv P4CLIENT gk-pae
+
+set OUTFILE = $HOME/mcw/log/sync.log
+set TOOLSDIR = tools/sync-p4-to-hg
+
+cd $HOME
+cd mcw/simulator/sync-tree/hsail2brigamd
+cd external/amd
+
+touch $OUTFILE
+date "+DATE: %Y%m%d-%H%M%S" | tee -a $OUTFILE
+echo "Pulling:" |& tee -a $OUTFILE
+hg pull |& tee -a $OUTFILE 
+echo "Syncing:" |& tee -a $OUTFILE
+$TOOLSDIR/sync-p4-to-hg -c $TOOLSDIR/files-to-sync |& tee -a $OUTFILE
+echo "Pushing:" |& tee -a $OUTFILE
+hg push |& tee -a $OUTFILE

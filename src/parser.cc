@@ -342,8 +342,8 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
           BrigEOperandAddress,    // kind
           Brigb32,                // type
           0,                      // reserved
-          0,                      // directive
-          0
+          0/*,                      // directive
+          0*/
         };
         // TODO(Chuang) name isn't declared in directive.
         // if (!context->symbol_map.count(name)) {
@@ -797,7 +797,7 @@ int Instruction2(Context* context) {
 
       // check whether there is a Packing (optional)
       if (context->token_type == PACKING) {
-        // there is packing	
+        // there is packing
         inst_op.packing = context->token_value.packing;
         context->token_to_scan = yylex();
       }
@@ -847,7 +847,7 @@ int Instruction2(Context* context) {
     }
   } else if (context->token_type == INSTRUCTION2_OPCODE_NODT) {
     context->token_to_scan = yylex();  // set context for RoundingMode
-    if (!RoundingMode(context)) {      
+    if (!RoundingMode(context)) {
       // check the operands
       if (!Operand(context)) {
         if (context->token_to_scan == ',') {
@@ -2165,8 +2165,6 @@ int Function(Context* context) {
 }
 
 int Program(Context* context) {
-  int result;
-
   if (context->token_to_scan == VERSION) {
     if (!Version(context)) {
       // parse topLevelStatement
@@ -2187,7 +2185,7 @@ int OptionalWidth(Context* context) {
       BrigEOperandImmed,
       Brigb32,
       0,
-      0
+      { 0 }
     } ;
     context->token_to_scan = yylex();
     if (context->token_to_scan == '(') {
@@ -2589,13 +2587,13 @@ int Initializer(Context* context) {
         } else {
           return 1;
         }
-      case TOKEN_SINGLE_CONSTANT: 
+      case TOKEN_SINGLE_CONSTANT:
         if (!SingleListSingle(context)) {
           break;
         } else {
           return 1;
         }
-      case TOKEN_LABEL: 
+      case TOKEN_LABEL:
         if (hasCurlyBrackets) {
           if (!LabelList(context)) {
             break;
@@ -2636,7 +2634,7 @@ int InitializableDecl(Context* context) {
 
 int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
 {
-  
+
   //First token already verified as GLOBAL/READONLY
   if (context->token_type == DATA_TYPE_ID) {
     context->set_type(context->token_value.data_type);
@@ -5420,16 +5418,16 @@ int Instruction1(Context* context) {
   return 1;
 }  
 
-// this function specifies operand must be register,immediate value,or WAVESIZE 
+// this function specifies operand must be register,immediate value,or WAVESIZE
 int RIW_Operand(Context* context) {
   if (context->token_type == REGISTER) {
     context->token_to_scan = yylex(); // set token for next function
     return 0;
   } else if (context->token_type == CONSTANT) {
-    context->token_to_scan = yylex(); 
+    context->token_to_scan = yylex();
     return 0;
   } else if (context->token_to_scan == TOKEN_WAVESIZE) {
-    context->token_to_scan = yylex(); 
+    context->token_to_scan = yylex();
     return 0;
   } else {
     context->set_error(INVALID_OPERATION);
@@ -5482,7 +5480,7 @@ int Segp(Context* context) {
         segmentp_op.type = context->token_value.data_type;
         context->token_to_scan = yylex();     
         //dest must be c register
-        if (context->token_to_scan == TOKEN_CREGISTER) { 
+        if (context->token_to_scan == TOKEN_CREGISTER) {
           std::string oper_name = context->token_value.string_val;
           if (Operand(context)) {
             return 1;
@@ -5530,7 +5528,7 @@ int Segp(Context* context) {
       }
     } else {
       // should be missing ADDRESS_SPACE_IDENTIFIER
-      context->set_error(UNKNOWN_ERROR);  
+      context->set_error(UNKNOWN_ERROR);
     }
   } else if (context->token_to_scan == STOF || // stof or ftos
              context->token_to_scan == FTOS) {
@@ -5587,7 +5585,7 @@ int Segp(Context* context) {
         sf_op.type = context->token_value.data_type;
         context->token_to_scan = yylex();
         //dest must be d register
-        if (context->token_to_scan == TOKEN_DREGISTER) { 
+        if (context->token_to_scan == TOKEN_DREGISTER) {
           std::string oper_name = context->token_value.string_val;
           if (Operand(context)) {
             return 1;
@@ -5635,18 +5633,18 @@ int Segp(Context* context) {
       }
     } else {
       // should be missing ADDRESS_SPACE_IDENTIFIER
-      context->set_error(UNKNOWN_ERROR);  
-    }  
+      context->set_error(UNKNOWN_ERROR);
+    }
   }
   return 1;
 }
 
 int Operation(Context* context) {
   if (context->token_type == INSTRUCTION1_OPCODE_NODT ||
-      context->token_to_scan == CLOCK || 
+      context->token_to_scan == CLOCK ||
       context->token_type == INSTRUCTION1_OPCODE) {
     if (!Instruction1(context)) {
-      return 0; 
+      return 0;
     }
   } else if (context->token_to_scan == NOP) {
     if (!Instruction0(context)) {
@@ -5824,7 +5822,7 @@ int ArgStatement(Context* context) {
         return 0;
       }
     }
-  } 
+  }
   return 1;
 }
 
@@ -6336,10 +6334,10 @@ int GlobalImageDecl(Context *context) {
   }
 }
 
-int GlobalImageDeclPart2(Context *context){	
+int GlobalImageDeclPart2(Context *context){
  //First token has been scanned and verified as global. Read next token.
   BrigStorageClass32_t storage_class = context->token_value.storage_class ;
-  
+
   if (_RWIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
@@ -6413,7 +6411,7 @@ int GlobalReadOnlyImageDecl(Context *context) {
 }
 
 int GlobalReadOnlyImageDeclPart2(Context *context){
-  //First token has been scanned and verified as global. Scan next token.		
+  //First token has been scanned and verified as global. Scan next token.
  BrigStorageClass32_t storage_class = context->token_value.storage_class ;
 
  if (_ROIMG == context->token_to_scan) {
@@ -6517,7 +6515,6 @@ int Ret(Context* context) {
     return 1;
 
   BrigOpcode32_t opcode = context->token_value.opcode ;
-  uint32_t syncFlag = BrigPartialLevel ;
 
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
@@ -6698,7 +6695,7 @@ int Sync(Context* context) {
   // first token is SYNC
   if(SYNC != context->token_to_scan)
     return 1;
-  
+
   BrigOpcode32_t opcode = context->token_value.opcode;
   uint32_t syncFlags = BrigPartialLevel; //default
 
@@ -6710,7 +6707,7 @@ int Sync(Context* context) {
     syncFlags = BrigGroupLevel;
     context->token_to_scan = yylex();
   }
-  if (context->token_to_scan == ';') {    
+  if (context->token_to_scan == ';') {
     BrigInstBar op_sync = {
       36,
       BrigEInstBar,
@@ -6735,7 +6732,7 @@ int Bar(Context* context) {
   // first token is BARRIER
   if(BARRIER != context->token_to_scan)
     return 1;
-  
+
   BrigOpcode32_t opcode = context->token_value.opcode;
   uint32_t syncFlags = BrigPartialLevel; //default
 
@@ -7512,7 +7509,7 @@ int Directive(Context* context) {
     case PRAGMA:
       if (!Pragma(context)) {
         return 0;
-      } 
+      }
       return 1;
     case EXTENSION:
       if (!Extension(context)) {
@@ -7538,17 +7535,17 @@ int Directive(Context* context) {
       }
       return 1;
     default:
-      return 1;    
+      return 1;
   }
 }
 
 int SobInit(Context *context){
  unsigned int first_token = context->token_to_scan ;
 
- if(COORD == context->token_to_scan  
-    ||FILTER == context->token_to_scan  
-    ||BOUNDARYU == context->token_to_scan  
-    ||BOUNDARYV == context->token_to_scan  
+ if(COORD == context->token_to_scan
+    ||FILTER == context->token_to_scan
+    ||BOUNDARYU == context->token_to_scan
+    ||BOUNDARYV == context->token_to_scan
     ||BOUNDARYW == context->token_to_scan){
   BrigDirectiveSampler bds ;
   context->get_directive(context->current_samp_offset,&bds);
@@ -7635,9 +7632,9 @@ int GlobalSamplerDecl(Context *context){
   }else{
     return 1;
   }
-}	
+}
 
-int GlobalSamplerDeclPart2(Context *context){	
+int GlobalSamplerDeclPart2(Context *context){
   // First token has already been verified as GLOBAL
   BrigStorageClass32_t storage_class = context->token_value.storage_class ;
   	
@@ -7706,7 +7703,7 @@ int GlobalSamplerDeclPart2(Context *context){
 }
 
 int GlobalInitializablePart2(Context* context){
-	
+
   if (GLOBAL == context->token_to_scan){
     BrigStorageClass32_t storage_class = context->token_value.storage_class;
     context->token_to_scan = yylex();
@@ -7755,7 +7752,7 @@ int GlobalDeclpart2(Context *context){
 } 
 
 int GlobalDecl(Context *context){
-  
+
   if (SIGNATURE == context->token_to_scan){ // functionSignature 
     return FunctionSignature(context);
   } else if (!DeclPrefix(context)){
@@ -7796,8 +7793,8 @@ int PairAddressableOperand(Context* context) {
           BrigEOperandAddress,    // kind
           Brigb32,                // type
           0,                      // reserved
-          0,                      // directive
-          0
+          0/*,                      // directive
+          0*/
         };
   
         boa.directive = context->symbol_map[name];

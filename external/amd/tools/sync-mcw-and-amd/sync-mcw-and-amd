@@ -1,0 +1,33 @@
+#!/bin/csh 
+
+# aliases from hgrc file
+set REPO1=mcwrep
+set REPO2=amdrep
+
+# assume we are at the local repository
+
+echo "-- Pulling from MCW repository:"
+hg pull $REPO1
+set MERGE=`hg up |& grep abort`
+if (x"$MERGE" != x"") then
+	echo "$0 NEEDS ATTENTION" >/dev/stderr
+	echo "-- need to merge repo $REPO1" >/dev/stderr
+	exit 1
+endif
+
+echo "--Pulling from AMD repository:"
+hg pull $REPO2
+set MERGE=`hg up |& grep abort`
+if (x"$MERGE" != x"") then
+	echo "$0 NEEDS ATTENTION" >/dev/stderr
+	echo "-- need to merge repo $REPO2" >/dev/stderr
+	exit 1
+endif
+
+echo "-- Pushing to MCW repository:"
+echo "-- hg outgoing reports:"
+hg outgoing $REPO1
+#hg push $REPO1
+echo "-- Pushing to AMD repository:"
+hg push $REPO2
+
