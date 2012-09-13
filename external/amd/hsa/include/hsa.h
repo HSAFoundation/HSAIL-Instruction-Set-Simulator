@@ -927,7 +927,7 @@ public:
      *
      * @return runtime API version.
      */
-    virtual const string getVersion()=0;
+    virtual const string& getVersion()=0;
 
     virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
 //    virtual Kernel *createKernel(Program * k, hsa::KernelId & kid)=0;
@@ -1281,6 +1281,31 @@ public:
      */ 
     virtual DispatchDescriptor * getDispatchDescriptor() = 0;
 };
+
+/**
+ * @brief get the version of the RuntimeApi.
+ * 
+ * Rules for incrementing the major, minor, patch versions:
+ * a) major: 
+        i) incremented only when public APIs signatures
+           are changed, IS NOT backward compatible with
+           previous major versions.
+       ii) Reset the minor version to 0.
+      iii) Reset the patch version to 0.
+ * b) minor: 
+        i) incremented when new feature is added, needs
+           to be backward compatible with previous minor 
+           versions.
+       ii) Reset the patch version to 0.
+ * c) patch: 
+        i) incremented only for bug fixes, no user visible
+           API changes, needs to be backward and forward
+           compatible with previous patch versions.
+ * @return string containing the version number in the 
+ *         form major.minor.patch
+*/
+
+DLL_PUBLIC const hsa::string& getVersion();
 
 /**
  * @ingroup Debugger
