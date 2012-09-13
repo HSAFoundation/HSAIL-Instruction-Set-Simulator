@@ -689,10 +689,12 @@ template<class T> static void FcosLogic(T result, T a) {
     EXPECT_PRED1(isNan<T>, result);
   } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
     EXPECT_FLOAT_EQ(cos(1.0), result);
+  } else if(fpclass == FP_SUBNORMAL) {
+    EXPECT_EQ(1.0, result);
   } else if(isNegZero(a)) {
-    EXPECT_FLOAT_EQ(1.0, result);
+    EXPECT_EQ(1.0, result);
   } else if(isPosZero(a)) {
-    EXPECT_FLOAT_EQ(1.0, result);
+    EXPECT_EQ(1.0, result);
   } else {
     EXPECT_FLOAT_EQ(cos(a), result);
   }
@@ -705,10 +707,14 @@ template<class T> static void FsinLogic(T result, T a) {
     EXPECT_PRED1(isNan<T>, result);
   } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
     EXPECT_FLOAT_EQ(sin(1.0), result);
+  } else if(fpclass == FP_SUBNORMAL && a > 0.0) {
+    EXPECT_PRED1(isPosZero<T>, result);
+  } else if(fpclass == FP_SUBNORMAL && a < 0.0) {
+    EXPECT_EQ(0.0, result);
   } else if(isNegZero(a)) {
-    EXPECT_FLOAT_EQ(0.0, result);
+    EXPECT_PRED1(isNegZero<T>, result);
   } else if(isPosZero(a)) {
-    EXPECT_FLOAT_EQ(0.0, result);
+    EXPECT_PRED1(isPosZero<T>, result);
   } else {
     EXPECT_FLOAT_EQ(sin(a), result);
   }
@@ -740,17 +746,17 @@ template<class T> static void Fexp2Logic(T result, T a) {
   if(isNan(a)) {
     EXPECT_PRED1(isNan<T>, result);
   } else if(isNegInf(a)) {
-    EXPECT_FLOAT_EQ(0.0, result);
+    EXPECT_PRED1(isPosZero<T>, result);
   } else if(isPosInf(a)) {
     EXPECT_PRED1(isPosInf<T>, result);
   } else if(fpclass == FP_NORMAL && a < 0.0) {
-    EXPECT_FLOAT_EQ(0.0, result);
+    EXPECT_PRED1(isPosZero<T>, result);
   } else if(fpclass == FP_SUBNORMAL) {
-    EXPECT_FLOAT_EQ(1.0, result);
+    EXPECT_EQ(1.0, result);
   } else if(isNegZero(a)) {
-    EXPECT_FLOAT_EQ(1.0, result);
+    EXPECT_EQ(1.0, result);
   } else if(isPosZero(a)) {
-    EXPECT_FLOAT_EQ(1.0, result);
+    EXPECT_EQ(1.0, result);
   } else {
     EXPECT_FLOAT_EQ(exp2(a), result);
   }
