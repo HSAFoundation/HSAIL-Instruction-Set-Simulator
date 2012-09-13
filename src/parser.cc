@@ -3749,35 +3749,115 @@ int MemoryOperand(Context* context) {
 
 int Instruction5(Context* context) {
   // first token is F2U4 "f2u4"
+
+  BrigInstBase f2u4Inst = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigF2u4,               // opcode
+    Brigu32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}       // o_operands[5]
+  };
   context->token_to_scan = yylex();
-  if (context->token_type == DATA_TYPE_ID) {
+  // Note: must be _u32.
+  if (context->token_to_scan == _U32) {
     context->token_to_scan = yylex();
+    std::string opName;
+    BrigoOffset32_t opSize = 0;
+
+    // Note: dest: The destination is an f32.
+    opSize = context->get_operand_offset(); 
+    if (context->token_to_scan == TOKEN_SREGISTER) {
+      opName = context->token_value.string_val;
+    } else if (context->token_type == CONSTANT) {
+      opSize += opSize & 0x7;
+    }
+   
     if (!Operand(context)) {
+      if (opSize == context->get_operand_offset()) {
+        f2u4Inst.o_operands[0] = context->operand_map[opName];
+      } else {
+        f2u4Inst.o_operands[0] = opSize;
+      }
+ 
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
+
+      opSize = context->get_operand_offset(); 
+      // Note: Sources. All are b32
+      if (context->token_to_scan == TOKEN_SREGISTER) {
+        opName = context->token_value.string_val;
+      } else if (context->token_type == CONSTANT) {
+        opSize += opSize & 0x7;
+      }
       if (!Operand(context)) {
+        if (opSize == context->get_operand_offset()) {
+          f2u4Inst.o_operands[1] = context->operand_map[opName];
+        } else {
+          f2u4Inst.o_operands[1] = opSize;
+        }
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
+
+        opSize = context->get_operand_offset(); 
+        // Note: Sources. All are b32
+        if (context->token_to_scan == TOKEN_SREGISTER) {
+          opName = context->token_value.string_val;
+        } else if (context->token_type == CONSTANT) {
+          opSize += opSize & 0x7;
+        }
         if (!Operand(context)) {
+          if (opSize == context->get_operand_offset()) {
+            f2u4Inst.o_operands[2] = context->operand_map[opName];
+          } else {
+            f2u4Inst.o_operands[2] = opSize;
+          }
+
           if (context->token_to_scan != ',') {
             context->set_error(MISSING_COMMA);
             return 1;
           }
           context->token_to_scan = yylex();
+
+          opSize = context->get_operand_offset(); 
+          // Note: Sources. All are b32
+          if (context->token_to_scan == TOKEN_SREGISTER) {
+            opName = context->token_value.string_val;
+          } else if (context->token_type == CONSTANT) {
+            opSize += opSize & 0x7;
+          }
           if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()) {
+              f2u4Inst.o_operands[3] = context->operand_map[opName];
+            } else {
+              f2u4Inst.o_operands[3] = opSize;
+            }
             if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
             }
             context->token_to_scan = yylex();
+            opSize = context->get_operand_offset(); 
+            // Note: Sources. All are b32
+            if (context->token_to_scan == TOKEN_SREGISTER) {
+              opName = context->token_value.string_val;
+            } else if (context->token_type == CONSTANT) {
+              opSize += opSize & 0x7;
+            }
             if (!Operand(context)) {
+              if (opSize == context->get_operand_offset()) {
+                f2u4Inst.o_operands[4] = context->operand_map[opName];
+              } else {
+                f2u4Inst.o_operands[4] = opSize;
+              }
               if (context->token_to_scan == ';') {
+                context->append_code(&f2u4Inst);
                 context->token_to_scan = yylex();
                 return 0;
               } else {
