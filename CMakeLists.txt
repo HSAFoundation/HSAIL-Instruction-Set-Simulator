@@ -14,6 +14,7 @@ set(hsail2brig_test_SOURCES
     test/lexer_test.cc
     test/parser_test.cc
     test/codegen_test.cc
+    test/hsail2brig_test.cc
 	  gmock/gmock_main.cc
 	  gmock/gmock-gtest-all.cc
 	  src/parser.cc

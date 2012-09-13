@@ -53,6 +53,7 @@ void Context::clear_context(void) {
   operand_map.clear();
   label_o_map.clear();
   label_c_map.clear();
+  symbol_map.clear();
   if (valid_string) {
     free(token_value.string_val);
     valid_string = false;
@@ -61,10 +62,11 @@ void Context::clear_context(void) {
 }
 
 void Context::set_default_values(void) {
-  machine = BrigESmall;
+  machine = BrigELarge;
   profile = BrigEFull;
   ftz = BrigENosftz;
   attribute = BrigNone;
+  alignment = 1;
   fbar = 0;
   token_type = UNKNOWN;
   token_to_scan = 0;
@@ -73,6 +75,9 @@ void Context::set_default_values(void) {
   yycolno = 0;
   yylineno = 1;
   arg_output = false ;
+  token_value.format = BrigImageFormatUnknown;
+  token_value.order = BrigImageOrderUnknown;
+  token_value.storage_class = BrigFlatSpace;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
@@ -186,7 +191,7 @@ Context::context_error_t Context::update_code_bytes(unsigned char* value,
 Context::context_error_t Context::update_operand_bytes(unsigned char* value,
                                      uint32_t offset,
                                      uint32_t nBytes) {
-  Buffer::error_t err = cbuf->modify(value, offset, nBytes);
+  Buffer::error_t err = obuf->modify(value, offset, nBytes);
 
   if (err == Buffer::SUCCESS)
     return CONTEXT_OK;
@@ -268,6 +273,14 @@ char Context::get_operand_loc() const {
   return operand_loc;
 }
 
+uint32_t Context::get_dim() const {
+  return dim;
+}
+
+bool Context::get_isArray() const {
+  return is_array;
+}
+
 // set context
 void Context::set_alu_modifier(BrigAluModifier modifier) {
   this->aluModifier = modifier;
@@ -314,6 +327,15 @@ void Context::set_opcode(BrigOpcode32_t opcode) {
 void Context::set_operand_loc(char loc) {
   this->operand_loc = loc;
 }
+
+void Context::set_dim(uint32_t dim) {
+  this->dim = dim;
+}
+
+void Context::set_isArray(bool is_array) {
+  this->is_array = is_array;
+}
+
 // the operationCount of BrigDirectiveFunction add by 1
 void Context::update_bdf_operation_count(){
   BrigDirectiveFunction bdf;

@@ -220,6 +220,8 @@ class Context {
     BrigDataType16_t get_type() const;
     BrigOpcode32_t get_opcode() const;
     char get_operand_loc() const;
+    uint32_t get_dim() const;
+    bool get_isArray() const;
 
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
@@ -234,12 +236,17 @@ class Context {
     void set_opcode(BrigOpcode32_t opcode);
     // let context know the location of current operand
     void set_operand_loc(char loc);
+    void set_dim(uint32_t dim);
+    void set_isArray(bool is_array);
 
     // get current offset
     BrigcOffset32_t get_code_offset(void) const {return cbuf->size();}
     BrigdOffset32_t get_directive_offset(void) const {return dbuf->size();}
     BrigoOffset32_t get_operand_offset(void) const {return obuf->size();}
     BrigsOffset32_t get_string_offset(void) const {return sbuf->size();}
+
+    //get buffer
+    Buffer *get_directive(void) const {return dbuf;}
 
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
@@ -248,6 +255,9 @@ class Context {
     BrigcOffset32_t current_inst_offset;
     BrigdOffset32_t current_bdf_offset;
     BrigoOffset32_t current_argList_offset;
+    BrigdOffset32_t current_img_offset ;
+    BrigdOffset32_t current_samp_offset ;
+    BrigdOffset32_t current_argdecl_offset;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in an instruction
     std::map<std::string, BrigoOffset32_t> arg_map;
@@ -272,6 +282,11 @@ class Context {
       BrigOpcode32_t    opcode;
       BrigPacking16_t   packing;
       BrigStorageClass32_t storage_class;
+      BrigImageOrder32_t order;
+      BrigImageFormat32_t format;
+      BrigBoundaryMode8_t boundary_mode;
+      BrigAddrFilter8_t  filter ;
+      bool normalized ;
     } token_value;
 
   private:
@@ -301,6 +316,8 @@ class Context {
     char operand_loc;   // 1 -> 5
     bool error_reporter_set;
     bool arg_output;
+    uint32_t dim;
+    bool is_array;
 };
 
 }  // namespace brig

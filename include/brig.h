@@ -27,7 +27,8 @@ typedef uint32_t BrigOpcode32_t;
 typedef uint32_t BrigAtomicOperation32_t;
 typedef uint32_t BrigMemorySemantic32_t;
 typedef uint32_t BrigCompareOperation32_t;
-
+typedef uint8_t  BrigBoundaryMode8_t;
+typedef uint8_t  BrigAddrFilter8_t;
 // Enums
 
 // Custom enum to check for alignment of structs
@@ -173,7 +174,7 @@ enum BrigSftz {
 };
 
 //PRM 20.5.9
-//BrigGeom
+/*//BrigGeom
 //BrigGeom is used to specify the number of coordinates needed to access an
 //image.
 enum BrigGeom {
@@ -184,7 +185,7 @@ enum BrigGeom {
   Briggeom_1db,
   Briggeom_2da
 };
-
+*/
 // PRM 20.5.12
 enum BrigInstKinds {
   BrigEInstBase,
@@ -263,7 +264,34 @@ enum BrigPacking {
   BrigPackSsat,
   BrigPackPsat
 };
+/*// BrigMemorySemantic
+// BrigMemorySemantic is used to specify the semantics for a memory operation.
+enum BrigMemorySemantic {
+  BrigRegular,
+  BrigAcquire,
+  BrigRelease,
+  BrigAcquireRelease,
+  BrigDep,
+  BrigBin
+};
+*/
 
+/*// BrigAtomicOperation
+// BrigAtomicOperation is used to specify the type of atomic operation.
+enum BrigAtomicOperation {
+  BrigAtomicAnd,
+  BrigAtomicOr,
+  BrigAtomicXor,
+  BrigAtomicCas,
+  BrigAtomicExch,
+  BrigAtomicAdd,
+  BrigAtomicInc,
+  BrigAtomicDec,
+  BrigAtomicMin,
+  BrigAtomicMax,
+  BrigAtomicSub
+};
+*/
 // BrigOpcode
 // BrigOpcode is used to specify the opcode for the HSAIL operation.
 enum BrigOpcode {
@@ -392,6 +420,7 @@ enum BrigOpcode {
   BrigFbarInitSizeKnown = 123
 };
 
+
 // Brig Support Structures
 // BrigAluModifier specifies arithmetic logic unit controls:
 struct BrigAluModifier {
@@ -403,6 +432,100 @@ struct BrigAluModifier {
   uint32_t fbar: 1;
   uint32_t reserved: 25;
 };
+
+//PRM 	20.5.9
+enum BrigGeom { 
+  Briggeom_1d,  //1D image (1 coordinate needed)
+  Briggeom_2d,  //2D image (2 coordinate needed)
+  Briggeom_3d,  //3D image (3 coordinate needed)
+  Briggeom_1da, //1DA image array (2 coordinates needed)
+  Briggeom_1db, //1DB image  buffer (1 coordinates needed)
+  Briggeom_2da  //2DA image array (3 coordinates needed)
+};
+
+//PRM 	20.5.10
+enum BrigImageFormat {
+  BrigSNORM_INT8,
+  BrigSNORM_INT16,
+  BrigUNORM_INT8,
+  BrigUNORM_INT16,
+  BrigUNORM_SHORT_565,
+  BrigUNORM_SHORT_555,
+  BrigUNORM_SHORT_101010,
+  BrigSIGNED_INT8,
+  BrigSIGNED_INT16,
+  BrigSIGNED_INT32,
+  BrigUNSIGNED_INT8,
+  BrigUNSIGNED_INT16,
+  BrigUNSIGNED_INT32,
+  BrigHALF_FLOAT,
+  BrigFLOAT,
+  BrigImageFormatUnknown
+};
+
+enum BrigImageOrder {
+  BrigImage_R,
+  BrigImage_A,
+  BrigImage_RX,
+  BrigImage_RG,
+  BrigImage_RGX,
+  BrigImage_RA,
+  BrigImage_RGB,
+  BrigImage_RGBA,
+  BrigImage_RGBX,
+  BrigImage_BGRA,
+  BrigImage_ARGB,
+  BrigImage_INTENSITY,
+  BrigImage_LUMINANCE,
+  BrigImageOrderUnknown // used when no order is specified
+};
+
+//PRM 20.5.1
+enum BrigAddrFilter {
+  BrigSamplerFilterLinear,
+  BrigSamplerFilterNearest
+};
+
+//PRM 20.5.4
+enum BrigBoundaryMode {
+  BrigSamplerClamp,
+  BrigSamplerWrap,
+  BrigSamplerMirror,
+  BrigSamplerMirrorOnce,
+  BrigSamplerBorder
+};
+
+enum BrigCompareOperation {
+  BrigEq,
+  BrigNe,
+  BrigLt,
+  BrigLe,
+  BrigGt,
+  BrigGe,
+  BrigEqu,
+  BrigNeu,
+  BrigLtu,
+  BrigLeu,
+  BrigGtu,
+  BrigGeu,
+  BrigNum,
+  BrigNan,
+  BrigSeq,
+  BrigSne,
+  BrigSlt,
+  BrigSle,
+  BrigSgt,
+  BrigSge,
+  BrigSgeu,
+  BrigSequ,
+  BrigSneu,
+  BrigSltu,
+  BrigSleu,
+  BrigSnum,
+  BrigSnan,
+  BrigSgtu
+};
+
 
 // PRM 20.3.2
 struct BrigSymbolCommon {
@@ -976,7 +1099,6 @@ struct BrigOperandLabelRef {
   uint32_t labeldirective;
 };
 
-
 // BrigOperandFunctionRef
 // BrigOperandFunctionRef is used for a reference
 // to a function or function signature.
@@ -1017,6 +1139,166 @@ struct BrigOperandArgumentRef {
   uint16_t kind;
   BrigdOffset32_t arg;
 };
+
+struct BrigOperandIndirect {
+  uint16_t size;
+  uint16_t kind;
+  BrigoOffset32_t reg;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  int32_t offset;
+};
+
+struct BrigOperandCompound {
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t name;
+  BrigoOffset32_t reg;
+  int32_t offset;
+};
+
+// BrigOperandRegV2
+// BrigOperandRegV2 is used for certain memory operations 
+// to allow vector register forms.
+struct BrigOperandRegV2 {
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t regs[2];
+};
+
+// BrigOperandRegV4
+// BrigOperandRegV4 is used for certain memory operations 
+// to allow vector register forms.
+struct BrigOperandRegV4 {
+  uint16_t size;
+  uint16_t kind;
+  BrigDataType16_t type;
+  uint16_t reserved;
+  BrigoOffset32_t regs[4];
+};
+
+/*// BrigInstMem
+// The BrigInstMem format is used for operations 
+// that take a space modifier. 
+struct BrigInstMem {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigStorageClass32_t storageClass;
+};
+
+// BrigInstAtomic
+// The BrigInstAtomic format is used for atomic operations: atomicReturn and
+// atomicNoReturn.
+struct BrigInstAtomic {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAtomicOperation32_t atomicOperation;
+  BrigStorageClass32_t storageClass;
+  BrigMemorySemantic32_t memorySemantic;
+};
+
+// The BrigInstAtomicImage
+// The BrigInstAtomicImage format is used for atomicNoReturn image operations.
+struct BrigInstAtomicImage {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAtomicOperation32_t atomicOperation;
+  BrigStorageClass32_t storageClass;
+  BrigMemorySemantic32_t memorySemantic;
+  BrigGeom32_t geom;
+};
+*/
+// BrigOperandOpaque
+// BrigOperandOpaque is used for addressing image and sampler objects.
+struct BrigOperandOpaque {
+  uint16_t size;
+  uint16_t kind;
+  BrigdOffset32_t name;
+  BrigoOffset32_t reg;
+  int32_t offset;
+};
+
+/*// BrigInstImage
+// The BrigInstImage format is used for the load image and store image operations. It is
+// similar to BrigInstRead, but has an additional field.
+struct BrigInstImage {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigoOffset32_t o_operands[5];
+  BrigGeom32_t geom;
+  BrigDataType16_t type;
+  BrigDataType16_t stype;
+  BrigPacking16_t packing;
+  uint16_t reserved;
+};
+
+
+// The BrigInstRead
+// The BrigInstRead format is a special format used for the read image operation. The
+// read image operation needs an associated geometry (1D, 2D, 3D, 1DA, 1DB, or 2DA) and
+// the type of the coordinates.
+
+struct BrigInstRead {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigoOffset32_t o_operands[5];
+  BrigGeom32_t geom;
+  BrigDataType16_t stype;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  uint16_t reserved;
+};
+
+// BrigInstCmp
+// The BrigInstCmp format is used for compare operations. The compare operation
+// needs a special format because it has a comparison operator and a second type.
+
+struct BrigInstCmp {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAluModifier aluModifier;
+  BrigCompareOperation32_t comparisonOperator;
+  BrigDataType16_t sourceType;
+  uint16_t reserved;
+};
+
+// BrigInstCvt
+// The BrigInstCvt format is used for convert operations.
+
+struct BrigInstCvt {
+  uint16_t size;
+  uint16_t kind;
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigPacking16_t packing;
+  BrigoOffset32_t o_operands[5];
+  BrigAluModifier aluModifier;
+  BrigDataType16_t stype;
+  uint16_t reserved;
+};
+
 
 //BrigOperandCompound
 //BrigOperandCompound is used for compound addressing modes.
@@ -1075,7 +1357,7 @@ struct BrigOperandRegV4 {
   uint16_t reserved;
   BrigoOffset32_t regs[4];
 };
-
+*/
 //BrigOperandWaveSz
 //BrigOperandWaveSz is a compile-time value equal to the size of a wavefront.
 struct BrigOperandWaveSz {
@@ -1083,7 +1365,7 @@ struct BrigOperandWaveSz {
   uint16_t size;
   uint16_t kind;
 };
-
+/*
 enum BrigAddrFilter {
   BrigSamplerFilterLinear,
   BrigSamplerFilterNearest
@@ -1128,4 +1410,5 @@ enum BrigCompareOperation {
   BrigSnan,
   BrigSgtu
 };
+*/
 #endif  // INCLUDE_BRIG_H_
