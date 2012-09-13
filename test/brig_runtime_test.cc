@@ -698,10 +698,10 @@ extern "C" b1 Class_f64(f64, unsigned);
 MakeTest(Class_f32, ClassLogic)
 MakeTest(Class_f64, ClassLogic)
 
-template<class T> static void FcosLogic(T result, T a) {
+static void Fcos_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isInf(a)) {
-    EXPECT_PRED1(isNan<T>, result);
+    EXPECT_PRED1(isNan<f32>, result);
   } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
     EXPECT_FLOAT_EQ(cos(1.0), result);
   } else if(fpclass == FP_SUBNORMAL) {
@@ -714,58 +714,61 @@ template<class T> static void FcosLogic(T result, T a) {
     EXPECT_FLOAT_EQ(cos(a), result);
   }
 }
-TestAll(FloatInst, Fcos, Unary)
+extern "C" f32 Fcos_f32(f32);
+MakeTest(Fcos_f32, Fcos_f32_Logic)
 
-template<class T> static void FsinLogic(T result, T a) {
+static void Fsin_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isInf(a)) {
-    EXPECT_PRED1(isNan<T>, result);
+    EXPECT_PRED1(isNan<f32>, result);
   } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
     EXPECT_FLOAT_EQ(sin(1.0), result);
   } else if(fpclass == FP_SUBNORMAL && a > 0.0) {
-    EXPECT_PRED1(isPosZero<T>, result);
+    EXPECT_PRED1(isPosZero<f32>, result);
   } else if(fpclass == FP_SUBNORMAL && a < 0.0) {
-    EXPECT_EQ(0.0, result);
+    EXPECT_PRED1(isNegZero<f32>, result);
   } else if(isNegZero(a)) {
-    EXPECT_PRED1(isNegZero<T>, result);
+    EXPECT_PRED1(isNegZero<f32>, result);
   } else if(isPosZero(a)) {
-    EXPECT_PRED1(isPosZero<T>, result);
+    EXPECT_PRED1(isPosZero<f32>, result);
   } else {
     EXPECT_FLOAT_EQ(sin(a), result);
   }
 }
-TestAll(FloatInst, Fsin, Unary)
+extern "C" f32 Fsin_f32(f32);
+MakeTest(Fsin_f32, Fsin_f32_Logic)
 
-template<class T> static void Flog2Logic(T result, T a) {
+static void Flog2_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isNegInf(a)) {
-    EXPECT_PRED1(isNan<T>, result);
+    EXPECT_PRED1(isNan<f32>, result);
   } else if(isPosInf(a)) {
-    EXPECT_PRED1(isPosInf<T>, result);
+    EXPECT_PRED1(isPosInf<f32>, result);
   } else if(fpclass == FP_NORMAL && a < 0.0) {
-    EXPECT_PRED1(isNegInf<T>, result);
+    EXPECT_PRED1(isNegInf<f32>, result);
   } else if(fpclass == FP_SUBNORMAL) {
-    EXPECT_PRED1(isNegInf<T>, result);
+    EXPECT_PRED1(isNegInf<f32>, result);
   } else if(isNegZero(a)) {
-    EXPECT_PRED1(isNegInf<T>, result);
+    EXPECT_PRED1(isNegInf<f32>, result);
   } else if(isPosZero(a)) {
-    EXPECT_PRED1(isNegInf<T>, result);
+    EXPECT_PRED1(isNegInf<f32>, result);
   } else {
     EXPECT_FLOAT_EQ(log2(a), result);
   }
 }
-TestAll(FloatInst, Flog2, Unary)
+extern "C" f32 Flog2_f32(f32);
+MakeTest(Flog2_f32, Flog2_f32_Logic)
 
-template<class T> static void Fexp2Logic(T result, T a) {
+static void Fexp2_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a)) {
-    EXPECT_PRED1(isNan<T>, result);
+    EXPECT_PRED1(isNan<f32>, result);
   } else if(isNegInf(a)) {
-    EXPECT_PRED1(isPosZero<T>, result);
+    EXPECT_PRED1(isPosZero<f32>, result);
   } else if(isPosInf(a)) {
-    EXPECT_PRED1(isPosInf<T>, result);
+    EXPECT_PRED1(isPosInf<f32>, result);
   } else if(fpclass == FP_NORMAL && a < 0.0) {
-    EXPECT_PRED1(isPosZero<T>, result);
+    EXPECT_PRED1(isPosZero<f32>, result);
   } else if(fpclass == FP_SUBNORMAL) {
     EXPECT_EQ(1.0, result);
   } else if(isNegZero(a)) {
@@ -776,7 +779,8 @@ template<class T> static void Fexp2Logic(T result, T a) {
     EXPECT_FLOAT_EQ(exp2(a), result);
   }
 }
-TestAll(FloatInst, Fexp2, Unary)
+extern "C" f32 Fexp2_f32(f32);
+MakeTest(Fexp2_f32, Fexp2_f32_Logic)
 
 template<class T> static void FrsqrtLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
