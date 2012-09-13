@@ -38,7 +38,7 @@ using namespace hsacommon;
 using hsacommon::vector;
 using hsacommon::string;
 
-typedef hsa::RTKernelArgs KernelArgs;
+typedef hsa::KernelArg KernelArg;
 
 /* @}*/
 
