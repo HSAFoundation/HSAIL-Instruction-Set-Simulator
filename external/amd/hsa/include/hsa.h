@@ -236,6 +236,14 @@ typedef struct _EventTimeInfo
 
 } EventTimeInfo;
 
+typedef struct _DeviceClockCounterInfo
+{
+    uint64_t hostClockCounter;
+    uint64_t deviceClockCounter;
+    uint64_t deviceFrequency;
+
+} DeviceClockCounterInfo;
+
 /**
  * @ingroup Dispatch
  * completion policy defined the following
@@ -698,6 +706,26 @@ public:
     virtual void 
     unmapMemory(void* ptr) = 0;
 
+    /**
+    * @brief Returns a structure of highly correlated host and device times
+    *        as well as the frequency of the device for conversion purposes.
+    *
+    * The frequency returned will be the max frequency reported by the ASIC.
+    * Additionally, until the KFD implements the wall clock feature, this will
+    * return invalid data.
+    * @return DeviceClockCounterInfo containing the clock stamps from host 
+    *         and device along with device frequency.
+    */
+    virtual DeviceClockCounterInfo getClockCounterInfo() = 0;
+    
+    /**
+    * @brief Returns the max frequency as reported by kfd for the
+    *        approriate device type.
+    *
+    * @return max frequency as integer
+    */
+    virtual int getMaxFrequency()=0;
+
     virtual ~Device(){};
 };
 
@@ -770,6 +798,8 @@ public:
      * @return EventTimeInfo structure containing wallclock times
      */
     virtual EventTimeInfo * getTimeInfo() = 0;
+
+    virtual Device * getDevice() = 0;
 };
 
 
