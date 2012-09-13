@@ -5306,8 +5306,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       BrigEOperandAddress,
       Brigb32,
       0,
-      20,
-      0
+      20
     };
     operands.append(&boa);
 
@@ -5332,7 +5331,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     strings.append(std::string("&callee"));
     strings.append(std::string("%output"));
     strings.append(std::string("%input"));
-    strings.append(std::string("$s0"));
+    strings.append(std::string("$c0"));
 
     hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {
@@ -5358,7 +5357,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
         0,                               // reserved
         0,                               // symbolModifier
         0,                               // dim
-        8,                               // s_name
+        0,                               // s_name
         Brigf32,                         // type
         1                                // align
       },
@@ -5377,17 +5376,16 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       BrigEOperandReg,
       Brigb1,
       0,
-      0
+      23
     };
     operands.append(&bor);
 
     BrigOperandAddress boa = {
       16,
       BrigEOperandAddress,
-      Brigb32,
+      Brigb64,
       0,
-      20,
-      0
+      20
     };
     operands.append(&boa);
 
@@ -5411,8 +5409,6 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     "Invald datatype, should be Brigb32 and Brigb64")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "name past the operands section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid name, should point to BrigOperandAddress")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5450,7 +5446,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
         0,                               // reserved
         0,                               // symbolModifier
         0,                               // dim
-        8,                               // s_name
+        0,                               // s_name
         Brigf32,                         // type
         1                                // align
       },
@@ -5469,7 +5465,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       BrigEOperandReg,
       Brigb32,
       0,
-      0
+      23
     };
     operands.append(&bor);
 
@@ -5478,8 +5474,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       BrigEOperandAddress,
       Brigb32,
       0,
-      20,
-      0
+      20
     };
     operands.append(&boa);
 
@@ -5613,8 +5608,6 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "fn past directive section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid directive, should point to a BrigDirectiveFunction")));
   }

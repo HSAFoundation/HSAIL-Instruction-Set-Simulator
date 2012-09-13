@@ -899,9 +899,8 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
                  "Brigb32 and Brigb64");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
-  valid &= check(operand->name < S_.operandsSize,
-                 "name past the operands section");
   oper_iterator nameOper(S_.operands + operand->name);
+  valid &= validate(nameOper);
   valid &= check(isa<BrigOperandAddress>(nameOper), 
                  "Invalid name, should point to BrigOperandAddress");
   valid &= check(operand->reg < S_.operandsSize,
@@ -918,11 +917,12 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
 
 bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
   bool valid = true;
-  valid &= check(operand->fn < S_.directivesSize, 
-                 "fn past directive section");
   dir_iterator fnDir(S_.directives + operand->fn);
-  valid &= check(isa<BrigDirectiveFunction>(fnDir), "Invalid directive, "
-                 "should point to a BrigDirectiveFunction");
+  valid &= validate(fnDir);
+  valid &= check(isa<BrigDirectiveFunction>(fnDir) ||
+                 isa<BrigDirectiveSignature>(fnDir), 
+                 "Invalid directive, should point to a "
+                 "BrigDirectiveFunction or BrigDirectiveSibnature");
   return valid;
 }
 
