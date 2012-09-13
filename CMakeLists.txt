@@ -5,7 +5,9 @@ include_directories(.)
 include_directories(include)
 include_directories(${CMAKE_BINARY_DIR})
 add_definitions(-DGTEST_HAS_PTHREAD=0)
-set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
+if (${CMAKE_CXX_COMPILER} MATCHES ".*/g[+][+].*")
+  set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
+endif (${CMAKE_CXX_COMPILER} MATCHES ".*/g[+][+].*")
 flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
 set(hsail2brig_test_SOURCES
