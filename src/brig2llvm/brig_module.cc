@@ -884,9 +884,16 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
   return true;
 }
+
 bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
-  return true;
+  bool valid = true;
+  dir_iterator argDir(S_.directives + operand->arg);
+  valid &= validate(argDir);
+  valid &= check(isa<BrigDirectiveSymbol>(argDir), 
+                 "Invalid reg, should be point BrigDirectiveSymbol");
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandBase *operand) const {
   bool valid = true;
   return valid;
