@@ -756,6 +756,44 @@ static void F2u4_u32_Logic(u32 result, f32 a, f32 b, f32 c, f32 d) {
 extern "C" u32 F2u4_u32(f32 a, f32 b, f32 c, f32 d);
 MakeTest(F2u4_u32, F2u4_u32_Logic)
 
+static void Unpack3Logic(f32 result, b32 a) {
+  EXPECT_EQ(result, (a >> 24) & 0xFF);
+}
+extern "C" f32 Unpack3(b32);
+MakeTest(Unpack3, Unpack3Logic)
+
+static void Unpack2Logic(f32 result, b32 a) {
+  EXPECT_EQ(result, (a >> 16) & 0xFF);
+}
+extern "C" f32 Unpack2(b32);
+MakeTest(Unpack2, Unpack2Logic)
+
+static void Unpack1Logic(f32 result, b32 a) {
+  EXPECT_EQ(result, (a >> 8) & 0xFF);
+}
+extern "C" f32 Unpack1(b32);
+MakeTest(Unpack1, Unpack1Logic)
+
+static void Unpack0Logic(f32 result, b32 a) {
+  EXPECT_EQ(result, (a & 0xFF));
+}
+extern "C" f32 Unpack0(b32);
+MakeTest(Unpack0, Unpack0Logic)
+
+static void Bitalign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
+  if(c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {
+    unsigned tag = (32 - c) / 8;
+    for(unsigned i = 0; i < 4; ++i) {
+      if(i + tag > 3)
+        EXPECT_EQ((result >> (i * 8)) & 0xFF, (a >> (((i + tag) % 4) * 8)) & 0xFF);
+      else 
+        EXPECT_EQ((result >> (i * 8)) & 0xFF, (b >> ((i + tag) * 8)) & 0xFF);
+    }
+  }
+}
+extern "C" b32 Bitalign_b32(b32, b32, b32);
+MakeTest(Bitalign_b32, Bitalign_b32_Logic)
+
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)
 TestCmp(lt, a <  b)
