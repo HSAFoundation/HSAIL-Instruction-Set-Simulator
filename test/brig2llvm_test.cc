@@ -5612,3 +5612,109 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     "Invalid directive, should point to a BrigDirectiveFunction")));
   }
 }
+
+TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("&callee");
+    strings.append("&caller");
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandReg bor = {
+      12,
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      23
+    };
+    operands.append(&bor);
+
+    BrigOperandIndirect boi = {
+      sizeof(boi),
+      BrigEOperandIndirect,
+      8,               
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&boi);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("&callee");
+    strings.append("&caller");
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandReg bor = {
+      12,
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      23
+    };
+    operands.append(&bor);
+
+    BrigOperandIndirect boi = {
+      sizeof(boi),
+      BrigEOperandIndirect,
+      40,               
+      Brigu32,
+      1,
+      0
+    };
+    operands.append(&boi);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid reg, should be point BrigOprandReg")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invald datatype, should be Brigb32 and Brigb64")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "reserved must be zero")));
+  }
+}
