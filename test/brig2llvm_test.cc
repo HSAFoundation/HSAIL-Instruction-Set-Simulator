@@ -5495,7 +5495,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "reg past the operands section")));
+    "operands past the operands section")));
   }
 }
 

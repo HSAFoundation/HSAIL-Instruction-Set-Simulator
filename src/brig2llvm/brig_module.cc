@@ -910,15 +910,15 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
   valid &= validate(nameOper);
   valid &= check(isa<BrigOperandAddress>(nameOper), 
                  "Invalid name, should point to BrigOperandAddress");
-  valid &= check(operand->reg < S_.operandsSize,
-                 "reg past the operands section");
-  const oper_iterator oper(S_.operands + operand->reg);
-  if(!validate(oper)) return false;
-  const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
-  valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");  
-  valid &= check(bor->type == Brigb32 ||
-                 bor->type == Brigb64, "Invalid register, the register "
-                 "must be an s or d register");
+  if(operand->reg) {
+    const oper_iterator oper(S_.operands + operand->reg);
+    if(!validate(oper)) return false;
+    const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");  
+    valid &= check(bor->type == Brigb32 ||
+                   bor->type == Brigb64, "Invalid register, the register "
+                   "must be an s or d register");
+  }
   return valid;
 }
 
@@ -939,13 +939,15 @@ bool BrigModule::validate(const BrigOperandImmed *operand) const {
 
 bool BrigModule::validate(const BrigOperandIndirect *operand) const {
   bool valid = true;
-  oper_iterator regOper(S_.operands + operand->reg);
-  valid &= validate(regOper);
-  valid &= check(isa<BrigOperandReg>(regOper), 
-                 "Invalid reg, should be point BrigOprandReg");
-  valid &= check(operand->type == Brigb32 ||
-                 operand->type == Brigb64, "Invald datatype, should be " 
-                 "Brigb32 and Brigb64");
+  if (operand->reg) {
+    oper_iterator regOper(S_.operands + operand->reg);
+    valid &= validate(regOper);
+    valid &= check(isa<BrigOperandReg>(regOper), 
+                   "Invalid reg, should be point BrigOprandReg");
+    valid &= check(operand->type == Brigb32 ||
+                   operand->type == Brigb64, "Invald datatype, should be "
+                   "Brigb32 and Brigb64");
+  }
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   return valid;
