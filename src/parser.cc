@@ -3129,6 +3129,10 @@ int LabelTargets(Context* context) {
   return 1;
 }
 
+int Instruction4CmovPart5(Context* context) {
+  return 1;
+}
+
 int Instruction4FmaPart2(Context* context) {
  BrigInstBase fmaInst = {
     32,                    // size

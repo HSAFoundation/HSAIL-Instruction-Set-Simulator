@@ -7807,6 +7807,111 @@ TEST(CodegenTest,  Instruction4_Fma_CodeGen_SimpleTest) {
   delete lexer;
 };
 
+TEST(CodegenTest,  Instruction4_Cmov_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  // Note: Cmov without ftz and rounding.
+  BrigInstBase cmovB32Ref = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigCmov,               // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {8, 20, 32, 44, 0}       // o_operands[5]
+  };
+
+  BrigInstBase cmovU8x4Ref = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigCmov,               // opcode
+    Brigu8x4,               // type
+    BrigNoPacking,         // packing
+    {8, 56, 8, 44, 0}       // o_operands[5]
+  };
+
+  std::string input("cmov_b32 $s1, $c0, $s3, $s2;\n");
+  input.append("cmov_u8x4 $s1, $s0, $s1, $s2;\n");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction4CmovPart5(context));
+  EXPECT_EQ(0, Instruction4CmovPart5(context));
+
+  BrigOperandReg getReg;
+  BrigInstBase  getCmov;
+
+  context->get_code(0, &getCmov);
+
+  // BrigInstBase
+  EXPECT_EQ(cmovB32Ref.size, getCmov.size);
+  EXPECT_EQ(cmovB32Ref.kind, getCmov.kind);
+  EXPECT_EQ(cmovB32Ref.opcode, getCmov.opcode);
+  EXPECT_EQ(cmovB32Ref.type, getCmov.type);
+  EXPECT_EQ(cmovB32Ref.packing, getCmov.packing);
+  EXPECT_EQ(cmovB32Ref.o_operands[0], getCmov.o_operands[0]);
+  EXPECT_EQ(cmovB32Ref.o_operands[1], getCmov.o_operands[1]);
+  EXPECT_EQ(cmovB32Ref.o_operands[2], getCmov.o_operands[2]);
+  EXPECT_EQ(cmovB32Ref.o_operands[3], getCmov.o_operands[3]);
+  EXPECT_EQ(cmovB32Ref.o_operands[4], getCmov.o_operands[4]);
+
+  context->get_code(32, &getCmov);
+
+  // BrigInstBase
+  EXPECT_EQ(cmovU8x4Ref.size, getCmov.size);
+  EXPECT_EQ(cmovU8x4Ref.kind, getCmov.kind);
+  EXPECT_EQ(cmovU8x4Ref.opcode, getCmov.opcode);
+  EXPECT_EQ(cmovU8x4Ref.type, getCmov.type);
+  EXPECT_EQ(cmovU8x4Ref.packing, getCmov.packing);
+  EXPECT_EQ(cmovU8x4Ref.o_operands[0], getCmov.o_operands[0]);
+  EXPECT_EQ(cmovU8x4Ref.o_operands[1], getCmov.o_operands[1]);
+  EXPECT_EQ(cmovU8x4Ref.o_operands[2], getCmov.o_operands[2]);
+  EXPECT_EQ(cmovU8x4Ref.o_operands[3], getCmov.o_operands[3]);
+  EXPECT_EQ(cmovU8x4Ref.o_operands[4], getCmov.o_operands[4]);
+
+
+  context->get_operand(8, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name); 
+
+  context->get_operand(20, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb1, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(4, getReg.name); 
+
+  context->get_operand(32, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name); 
+
+  context->get_operand(44, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(12, getReg.name); 
+
+  context->get_operand(56, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(16, getReg.name); 
+
+  delete lexer;
+};
 
 
 
