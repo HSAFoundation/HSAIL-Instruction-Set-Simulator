@@ -3226,7 +3226,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
     BrigSt,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {8, 36, 0, 0, 0},  // operand[5]
+    {8, 32, 0, 0, 0},  // operand[5]
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass
@@ -3257,8 +3257,8 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
     BrigEOperandCompound,  // kind
     Brigb64,               // type
     0,                     // reserved
-    36,                    // name
-    52,                    // reg
+    32,                    // name
+    44,                    // reg
     -4                     // offset
   };
 
@@ -3272,23 +3272,23 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
 
   context->get_operand(20, &getAddr);
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   //EXPECT_EQ(0, getAddr.offset);
 
-  context->get_operand(36, &getAddr);
+  context->get_operand(32, &getAddr);
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
   //EXPECT_EQ(0, getAddr.offset);
 
-  context->get_operand(52, &getReg);
+  context->get_operand(44, &getReg);
   // BrigOperandReg
   EXPECT_EQ(12, getReg.size);
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
@@ -3296,7 +3296,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   EXPECT_EQ(0, getReg.reserved);
   EXPECT_EQ(19, getReg.name);
 
-  context->get_operand(64, &getComp);
+  context->get_operand(56, &getComp);
   // BrigOperandCompoud
   EXPECT_EQ(refComp.size, getComp.size);
   EXPECT_EQ(refComp.kind, getComp.kind);
@@ -3390,7 +3390,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   context->get_operand(32, &get2);
   
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
@@ -3416,8 +3416,8 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
     BrigEOperandCompound,  // kind
     Brigb64,               // type
     0,                     // reserved
-    24,                    // name
-    40,                    // reg
+    20,                    // name
+    32,                    // reg
     0                      // offset
   };
   BrigOperandCompound get3;
@@ -3441,7 +3441,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
 
   context->get_operand(8, &getAddr);
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
@@ -3450,7 +3450,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
 
   context->get_operand(20, &getAddr);
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
@@ -3479,7 +3479,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   BrigOperandIndirect refInd = {
     16,                    // size
     BrigEOperandIndirect,  // kind
-    72,                    // reg
+    64,                    // reg
     Brigb64,               // type
     0,                     // reserved
     -5                     // offset
@@ -3608,7 +3608,7 @@ TEST(CodegenTest, PairAddressableOperand_CodeGen_SimpleTest) {
   context->get_operand(32, &getComp);
   
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
@@ -3670,7 +3670,7 @@ TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
   EXPECT_EQ(0, getReg.reserved);
   EXPECT_EQ(5, getReg.name);  
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
@@ -4073,7 +4073,7 @@ TEST(CodegenTest, Atom_CodeGen_SimpleTest) {
 
   context->get_operand(20, &getAddr);  
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
@@ -4121,7 +4121,7 @@ TEST(CodegenTest, Atom_CodeGen_SimpleTest) {
 
   context->get_operand(92, &getAddr);  
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
@@ -7388,7 +7388,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen_Test) {
     BrigAtomicNoRet,       // opcode
     Brigf64,               // type
     BrigNoPacking,         // packing
-    {68, 80, 0, 0, 0},     // o_operands[5]
+    {72, 88, 0, 0, 0},     // o_operands[5]
     BrigAtomicMax,         // atomicOperation
     BrigGlobalSpace,       // storageClass
     BrigAcquireRelease     // memorySemantic
@@ -7459,7 +7459,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen_Test) {
   EXPECT_EQ(Brigb32, getImm.type);
   EXPECT_EQ(12, getImm.bits.u);
 
-  context->get_operand(80, &getImm);
+  context->get_operand(88, &getImm);
   // BrigOperandImmed
   EXPECT_EQ(24, getImm.size);
   EXPECT_EQ(BrigEOperandImmed, getImm.kind);
@@ -7469,16 +7469,16 @@ TEST(CodegenTest, AtomicNoRet_CodeGen_Test) {
 
   context->get_operand(8, &getAddr);  
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
 //  EXPECT_EQ(0, getAddr.offset);
 
-  context->get_operand(68, &getAddr);  
+  context->get_operand(72, &getAddr);  
   // BrigOperandAddress
-  EXPECT_EQ(16, getAddr.size);
+  EXPECT_EQ(12, getAddr.size);
   EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
