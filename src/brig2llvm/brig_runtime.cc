@@ -525,6 +525,37 @@ extern "C" u32 F2u4_u32(f32 w, f32 x, f32 y, f32 z){
            +  (lrint(z) & 0xFF));
 }
 
+extern "C" f32 Unpack3(b32 w) {
+  return f32((w >> 24) & 0xFF);
+}
+
+extern "C" f32 Unpack2(b32 w) {
+  return f32((w >> 16) & 0xFF);
+}
+
+extern "C" f32 Unpack1(b32 w) {
+  return f32((w >> 8) & 0xFF);
+}
+
+extern "C" f32 Unpack0(b32 w) {
+  return f32(w & 0xFF);
+}
+
+extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
+  switch(y) {
+    case 0:
+      return w;
+    case 8:
+    case 16:
+    case 24:
+      return (w << y) | (x >> (32 - y));
+    case 32:
+      return x;
+    default :
+      return 0;  
+  }
+}
+
 CmpInst(eq, x == y)
 CmpInst(ne, !isUnordered(x, y) && x != y)
 CmpInst(lt, x <  y)
