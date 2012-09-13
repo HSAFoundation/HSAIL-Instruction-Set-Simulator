@@ -49,7 +49,7 @@ struct VecPolicy {
 template<class T> struct Vec;
 
 template<class T>
-static T map(typename Vec<T>::UMapFn MapFn, T t) {
+inline T map(typename Vec<T>::UMapFn MapFn, T t) {
   for(unsigned i = 0; i < Vec<T>::Len; ++i) {
     ((Vec<T>) t)[i] = MapFn(((Vec<T>) t)[i]);
   }
@@ -57,7 +57,7 @@ static T map(typename Vec<T>::UMapFn MapFn, T t) {
 }
 
 template<class T>
-static T map(typename Vec<T>::BMapFn MapFn, T x, T y) {
+inline T map(typename Vec<T>::BMapFn MapFn, T x, T y) {
   for(unsigned i = 0; i < Vec<T>::Len; ++i) {
     ((Vec<T>) x)[i] = MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i]);
   }
@@ -65,7 +65,7 @@ static T map(typename Vec<T>::BMapFn MapFn, T x, T y) {
 }
 
 template<class T>
-static T map(typename Vec<T>::SMapFn MapFn, T x, typename Vec<T>::Base y) {
+inline T map(typename Vec<T>::SMapFn MapFn, T x, typename Vec<T>::Base y) {
   for(unsigned i = 0; i < Vec<T>::Len; ++i) {
     ((Vec<T>) x)[i] = MapFn(((Vec<T>) x)[i], y);
   }
@@ -73,28 +73,28 @@ static T map(typename Vec<T>::SMapFn MapFn, T x, typename Vec<T>::Base y) {
 }
 
 template<class T>
-static void ForEach(typename Vec<T>::UForEachFn MapFn, T t) {
+inline void ForEach(typename Vec<T>::UForEachFn MapFn, T t) {
   for(unsigned i = 0; i < Vec<T>::Len; ++i) {
     MapFn(((Vec<T>) t)[i]);
   }
 }
 
 template<class T>
-static void ForEach(typename Vec<T>::BForEachFn MapFn, T x, T y) {
+inline void ForEach(typename Vec<T>::BForEachFn MapFn, T x, T y) {
   for(unsigned i = 0; i < Vec<T>::Len; ++i) {
     MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i]);
   }
 }
 
 template<class T>
-static void ForEach(typename Vec<T>::TForEachFn MapFn, T x, T y, T z) {
+inline void ForEach(typename Vec<T>::TForEachFn MapFn, T x, T y, T z) {
   for(unsigned i = 0; i < Vec<T>::Len; ++i) {
     MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i], ((Vec<T>) z)[i]);
   }
 }
 
 template<class T>
-static void ForEach(typename Vec<T>::SForEachFn MapFn, T x, T y, unsigned z) {
+inline void ForEach(typename Vec<T>::SForEachFn MapFn, T x, T y, unsigned z) {
   for(unsigned i = 0; i < Vec<T>::Len; ++i) {
     MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i], z);
   }
@@ -378,8 +378,8 @@ template<> struct Int<s32> : public IntPolicy<s32, u32, true>  {};
 template<> struct Int<s64> : public IntPolicy<s64, u64, true>  {};
 
 template<class T> inline bool isNan(T t) { return false; }
-template<> inline bool isNan(float f) { return isnan(f); }
-template<> inline bool isNan(double d) { return isnan(d); }
+template<> inline bool isNan(float f) { return std::isnan(f); }
+template<> inline bool isNan(double d) { return std::isnan(d); }
 
 template<class T> inline bool isSNan(T t) { return false; }
 template<> inline bool isSNan(f32 f) {
@@ -422,29 +422,29 @@ template<class T> inline T Int12Ty(T t) {
   return Ext.x = t;
 }
 
-template<class T> static bool isNegZero(T t) { return false; }
-template<> bool isNegZero(float  f) {
+template<class T> inline bool isNegZero(T t) { return false; }
+template<> inline bool isNegZero(float  f) {
   return f == 0.0 && copysignf(1.0, f) < 0.0;
 }
-template<> bool isNegZero(double d) {
+template<> inline bool isNegZero(double d) {
   return d == 0.0 && copysign(1.0, d) < 0.0;
 }
 
-template<class T> static bool isPosZero(T t) { return false; }
-template<> bool isPosZero(f32 f) { return f == 0.0 && !isNegZero(f); }
-template<> bool isPosZero(f64 f) { return f == 0.0 && !isNegZero(f); }
+template<class T> inline bool isPosZero(T t) { return false; }
+template<> inline bool isPosZero(f32 f) { return f == 0.0 && !isNegZero(f); }
+template<> inline bool isPosZero(f64 f) { return f == 0.0 && !isNegZero(f); }
 
-template<class T> static bool isInf(T t) { return false; }
-template<> bool isInf(float f)  { return isinf(f); }
-template<> bool isInf(double d) { return isinf(d); }
+template<class T> inline bool isInf(T t) { return false; }
+template<> inline bool isInf(float f)  { return std::isinf(f); }
+template<> inline bool isInf(double d) { return std::isinf(d); }
 
-template<class T> static bool isPosInf(T t) { return false; }
-template<> bool isPosInf(float f)  { return isinf(f) && f > 0.0; }
-template<> bool isPosInf(double d) { return isinf(d) && d > 0.0; }
+template<class T> inline bool isPosInf(T t) { return false; }
+template<> inline bool isPosInf(float f)  { return std::isinf(f) && f > 0.0; }
+template<> inline bool isPosInf(double d) { return std::isinf(d) && d > 0.0; }
 
-template<class T> static bool isNegInf(T t) { return false; }
-template<> bool isNegInf(float f)  { return isinf(f) && f < 0.0; }
-template<> bool isNegInf(double d) { return isinf(d) && d < 0.0; }
+template<class T> inline bool isNegInf(T t) { return false; }
+template<> inline bool isNegInf(float f)  { return std::isinf(f) && f < 0.0; }
+template<> inline bool isNegInf(double d) { return std::isinf(d) && d < 0.0; }
 
 enum BrigFPClass {
   SNan       = 0x001,
