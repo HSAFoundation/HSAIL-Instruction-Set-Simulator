@@ -1595,7 +1595,7 @@ using hsacommon::Version;
 * @brief This union provides a container for kernel argument types.
 *******************************************************************************
 */
-union RTKernelArgs
+union KernelArg
 {
     void* addr;             ///< pointer to a buffer
     int32_t s32value;       ///< signed 32 bit value
