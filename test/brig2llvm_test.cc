@@ -5616,8 +5616,10 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
 TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
   {
     hsa::brig::StringBuffer strings;
-    strings.append("&callee");
-    strings.append("&caller");
+    strings.append(std::string("&callee"));
+    strings.append(std::string("%output"));
+    strings.append(std::string("%input"));
+    strings.append(std::string("$s0"));
 
     hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {
@@ -5664,8 +5666,10 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
   //invalid test
   {
     hsa::brig::StringBuffer strings;
-    strings.append("&callee");
-    strings.append("&caller");
+    strings.append(std::string("&callee"));
+    strings.append(std::string("%output"));
+    strings.append(std::string("%input"));
+    strings.append(std::string("$s0"));
 
     hsa::brig::Buffer directives;
     BrigDirectiveVersion bdv = {

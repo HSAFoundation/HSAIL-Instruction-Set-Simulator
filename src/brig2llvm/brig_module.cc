@@ -929,9 +929,21 @@ bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
 bool BrigModule::validate(const BrigOperandImmed *operand) const {
   return true;
 }
+
 bool BrigModule::validate(const BrigOperandIndirect *operand) const {
-  return true;
+  bool valid = true;
+  oper_iterator regOper(S_.operands + operand->reg);
+  valid &= validate(regOper);
+  valid &= check(isa<BrigOperandReg>(regOper), 
+                 "Invalid reg, should be point BrigOprandReg");
+  valid &= check(operand->type == Brigb32 ||
+                 operand->type == Brigb64, "Invald datatype, should be " 
+                 "Brigb32 and Brigb64");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
   return true;
 }
