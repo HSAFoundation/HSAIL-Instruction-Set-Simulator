@@ -7810,5 +7810,134 @@ TEST(CodegenTest,PragmaCodegen){
   delete lexer;
 };
 
+TEST(CodegenTest,BlockCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("block \"debug\"");
+  // input.append("blocknumeric_b8 255, 23, 10, 23;");
+  input.append("blocknumeric_b32 1255, 0x323, 10, 23;");
+  input.append("blocknumeric_b64 0x12345678, 0x323, 10, 23;");
+
+  input.append("blockstring \"this is a string\";");
+  input.append("endblock;");
+
+  Lexer *lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,Block(context));
+ 
+  // block end
+  BrigBlockEnd bbe = {
+    sizeof(BrigBlockEnd),
+    BrigEDirectiveBlockEnd
+  };
+  BrigBlockEnd get_bbe;
+  BrigdOffset32_t bbe_d_offset = context->get_directive_offset() - sizeof(BrigBlockEnd);
+  context->get_directive(bbe_d_offset, &get_bbe);
+  
+  EXPECT_EQ(bbe.size,get_bbe.size);
+  EXPECT_EQ(bbe.kind,get_bbe.kind);
+
+  // block string
+  uint32_t bbs_len = strlen("\"this is a string\"") + 1 ;
+  BrigsOffset32_t bbs_s_offset = context->get_string_offset() - bbs_len;
+  BrigBlockString bbs = {
+    sizeof(BrigBlockString),
+    BrigEDirectiveBlockString,
+    bbs_s_offset
+  }; 
+  BrigBlockString get_bbs;
+  BrigdOffset32_t bbs_d_offset = bbe_d_offset - sizeof(BrigBlockString);
+  context->get_directive(bbs_d_offset, &get_bbs);
+  
+  EXPECT_EQ(bbs.size,get_bbs.size);
+  EXPECT_EQ(bbs.kind,get_bbs.kind); 
+  EXPECT_EQ(bbs.s_name,get_bbs.s_name);
+ 
+  // blocknumeric
+  size_t arraySize = sizeof(BrigBlockNumeric) + 3 * sizeof(uint64_t);
+  BrigdOffset32_t bbn1_d_offset = bbs_d_offset - arraySize ;
+
+  uint8_t *array = new uint8_t[arraySize];
+  BrigBlockNumeric *bbn1 =
+        reinterpret_cast<BrigBlockNumeric*>(array);
+  bbn1->size = arraySize;
+  bbn1->kind = BrigEDirectiveBlockNumeric;
+  bbn1->type = Brigb64;
+  bbn1->elementCount = 4;
+  bbn1->u64[0] = 0x12345678;
+  bbn1->u64[1] = 0x323;
+  bbn1->u64[2] = 10;
+  bbn1->u64[3] = 23;
+
+  array = new uint8_t[arraySize];
+  BrigBlockNumeric *get = reinterpret_cast<BrigBlockNumeric*>(array);
+  unsigned char *get_charp = reinterpret_cast<unsigned char *>(get);
+  context->get_directive_bytes(get_charp,bbn1_d_offset,arraySize);
+
+  EXPECT_EQ(bbn1->size,get->size);
+  EXPECT_EQ(bbn1->kind,get->kind); 
+  EXPECT_EQ(bbn1->type,get->type);
+  EXPECT_EQ(bbn1->elementCount,get->elementCount);
+  EXPECT_EQ(bbn1->u64[0],get->u64[0]);
+  EXPECT_EQ(bbn1->u64[1],get->u64[1]);
+  EXPECT_EQ(bbn1->u64[2],get->u64[2]);
+  EXPECT_EQ(bbn1->u64[3],get->u64[3]);
+  delete bbn1;
+  delete get;
+
+ // blocknumeric
+  arraySize = sizeof(BrigBlockNumeric) + sizeof(uint64_t);
+  BrigdOffset32_t bbn2_d_offset = bbn1_d_offset - arraySize;
+  array = new uint8_t[arraySize];
+  BrigBlockNumeric *bbn2 =
+        reinterpret_cast<BrigBlockNumeric*>(array);
+  bbn2->size = arraySize;
+  bbn2->kind =  BrigEDirectiveBlockNumeric;
+  bbn2->type = Brigb32;
+  bbn2->elementCount = 4;
+  bbn2->u32[0] = 1255;
+  bbn2->u32[1] = 0x323;
+  bbn2->u32[2] = 10;
+  bbn2->u32[3] = 23;
+
+  array = new uint8_t[arraySize];
+  get = reinterpret_cast<BrigBlockNumeric*>(array);
+  get_charp = reinterpret_cast<unsigned char *>(get);
+  context->get_directive_bytes(get_charp,bbn2_d_offset,arraySize);
+
+  EXPECT_EQ(bbn2->size,get->size);
+  EXPECT_EQ(bbn2->kind,get->kind); 
+  EXPECT_EQ(bbn2->type,get->type);
+  EXPECT_EQ(bbn2->elementCount,get->elementCount);
+  EXPECT_EQ(bbn2->u32[0],get->u32[0]);
+  EXPECT_EQ(bbn2->u32[1],get->u32[1]);
+  EXPECT_EQ(bbn2->u32[2],get->u32[2]);
+  EXPECT_EQ(bbn2->u32[3],get->u32[3]);
+  delete bbn2;
+  delete get;
+  
+  // blockstart
+  uint32_t str2_len = strlen("\"debug\"") + 1;
+  BrigBlockStart start = {
+    sizeof(BrigBlockStart),
+    BrigEDirectiveBlockStart,
+    context->get_code_offset(),
+    bbs_s_offset - str2_len
+  };
+  BrigdOffset32_t bbs2_d_offset = bbn2_d_offset - sizeof(BrigBlockStart) 
+             - sizeof(BrigDirectivePad);
+  BrigBlockStart get_start;
+  context->get_directive(bbs2_d_offset,&get_start);
+
+  EXPECT_EQ(start.size,get_start.size);
+  EXPECT_EQ(start.kind,get_start.kind);
+  EXPECT_EQ(start.c_code,get_start.c_code);
+  EXPECT_EQ(start.s_name,get_start.s_name);
+ 
+  delete lexer;
+};
+
 }  // namespace brig
 }  // namespace hsa
