@@ -7604,6 +7604,78 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
 };
 
 
+TEST(CodegenTest,  Instruction5_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase f2u4Ref = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigF2u4,               // opcode
+    Brigu32,               // type
+    BrigNoPacking,         // packing
+    {8, 20, 32, 44, 32}       // o_operands[5]
+  };
+
+  std::string input("f2u4_u32 $s1, $s2, $s3, $s9, $s3;\n");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction5(context));
+
+  BrigOperandReg getReg;
+  BrigInstBase  getF2u4;
+
+  context->get_code(0, &getF2u4);
+
+  // BrigInstBase
+  EXPECT_EQ(f2u4Ref.size, getF2u4.size);
+  EXPECT_EQ(f2u4Ref.kind, getF2u4.kind);
+  EXPECT_EQ(f2u4Ref.opcode, getF2u4.opcode);
+  EXPECT_EQ(f2u4Ref.type, getF2u4.type);
+  EXPECT_EQ(f2u4Ref.packing, getF2u4.packing);
+  EXPECT_EQ(f2u4Ref.o_operands[0], getF2u4.o_operands[0]);
+  EXPECT_EQ(f2u4Ref.o_operands[1], getF2u4.o_operands[1]);
+  EXPECT_EQ(f2u4Ref.o_operands[2], getF2u4.o_operands[2]);
+  EXPECT_EQ(f2u4Ref.o_operands[3], getF2u4.o_operands[3]);
+  EXPECT_EQ(f2u4Ref.o_operands[4], getF2u4.o_operands[4]);
+
+
+  context->get_operand(8, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name); 
+
+  context->get_operand(20, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(4, getReg.name); 
+
+  context->get_operand(32, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name); 
+
+  context->get_operand(44, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(12, getReg.name); 
+
+  delete lexer;
+};
 
 
 }  // namespace brig
