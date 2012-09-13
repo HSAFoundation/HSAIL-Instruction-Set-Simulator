@@ -3130,11 +3130,145 @@ int LabelTargets(Context* context) {
 }
 
 int Instruction4CmovPart5(Context* context) {
+  BrigInstBase cmovInst = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigCmov,               // opcode
+    0,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}       // o_operands[5]
+  };
+ 
+  context->token_to_scan = yylex();
+
+  // TODO(Chuang):Type: For the regular operation: b. 
+  // For the packed operation: s, u, f.
+  // Length: For rhe regular operation, Length can be 1, 32, 64. 
+  // Applies to src1, and src2. For the packed
+  // operation, Length can be any packed type.
+
+  if (context->token_type == DATA_TYPE_ID) {
+    cmovInst.type = context->token_value.data_type;
+    context->token_to_scan = yylex();
+    
+    // Note: dest: Destination register.
+    std::string opName;
+    BrigoOffset32_t opSize;
+
+    if (context->token_type == REGISTER) {
+      opName = context->token_value.string_val;
+    } else {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    } 
+
+    if (!Operand(context)) {
+      cmovInst.o_operands[0] = context->operand_map[opName];
+      if (context->token_to_scan != ',') {
+        context->set_error(MISSING_COMMA);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+
+      // TODO(Chuang): src0, src1, src2: Sources. For the regular operation, 
+      // src0 must be a control (c) register or an immediate value. 
+      // For the packed operation, if the Length is 32-bit, 
+      // then src0 must be an s register or literal value; if
+      // the Length is 64-bit, then src0 must be a d register or literal value.
+
+      opSize = context->get_operand_offset();
+      if (context->token_type == REGISTER) {
+        opName = context->token_value.string_val;
+      } else if (context->token_type == CONSTANT) {
+        opSize += opSize & 0x7;
+      } else {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }
+
+      if (!Operand(context)) {
+        if (opSize == context->get_operand_offset()) {
+          cmovInst.o_operands[1] = context->operand_map[opName];
+        } else {
+          cmovInst.o_operands[1] = opSize;
+        }
+        if (context->token_to_scan != ',') {
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+        opSize = context->get_operand_offset();
+        if (context->token_type == REGISTER) {
+          opName = context->token_value.string_val;
+        } else if (context->token_type == CONSTANT) {
+          opSize += opSize & 0x7;
+        } else {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+        
+        if (!Operand(context)) {
+          if (opSize == context->get_operand_offset()) {
+            cmovInst.o_operands[2] = context->operand_map[opName];
+          } else {
+            cmovInst.o_operands[2] = opSize;
+          }
+          if (context->token_to_scan != ',') {
+              context->set_error(MISSING_COMMA);
+              return 1;
+          }
+          context->token_to_scan = yylex();
+
+          opSize = context->get_operand_offset();
+          if (context->token_type == REGISTER) {
+            opName = context->token_value.string_val;
+          } else if (context->token_type == CONSTANT) {
+            opSize += opSize & 0x7;
+          } else {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
+
+          if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()) {
+              cmovInst.o_operands[3] = context->operand_map[opName];
+            } else {
+              cmovInst.o_operands[3] = opSize;
+            }
+            if (context->token_to_scan == ';') {
+              context->append_code(&cmovInst);
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }  // ';'
+          } else {  // 4 operand
+              context->set_error(INVALID_FOURTH_OPERAND);
+              return 1;
+          }
+        } else {  // 3 operand
+          context->set_error(INVALID_THIRD_OPERAND);
+          return 1;
+        }
+      } else {  // 2 operand
+        context->set_error(INVALID_SECOND_OPERAND);
+        return 1;
+      }
+    } else {  // 1 operand
+      context->set_error(INVALID_FIRST_OPERAND);
+      return 1;
+    }
+  } else {  // DATA_TYPE_ID
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
   return 1;
+
 }
 
 int Instruction4FmaPart2(Context* context) {
- BrigInstBase fmaInst = {
+  BrigInstBase fmaInst = {
     32,                    // size
     BrigEInstBase,         // kind
     BrigFma,               // opcode
