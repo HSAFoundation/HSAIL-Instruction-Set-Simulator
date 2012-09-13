@@ -48,8 +48,7 @@ typedef hsa::RTKernelArgs KernelArgs;
  */
 class DLL_PUBLIC HsailKernel
 {
-    protected:
-        char* argListInfo;
+ 
     public:
         HsailKernel(){};
 
@@ -61,12 +60,6 @@ class DLL_PUBLIC HsailKernel
          */
         virtual void getISA(const void* &isa,
                             size_t &size)=0;
-        
-        /*! Gets the list of arguments and metadata information
-         * associated with each argument - global,local etc
-         * @return a pointer to the list of arguments
-         */
-        virtual char* getArgListInfo()=0;
 
         /*! Gets the number of arguments
          * @return a pointer to the list of arguments
@@ -83,7 +76,7 @@ class DLL_PUBLIC HsailKernel
          *  @return -               The userELements and the count are 
          *                          stored in the parameters
          */
-         virtual void getUserElements(void* userElements,
+         virtual void getUserElements(void* &userElements,
                         int& noUserELements) = 0;
 
          /*! Getter function for the extended user elements
@@ -97,7 +90,7 @@ class DLL_PUBLIC HsailKernel
           *  @return                  - The extUserELements and the count 
           *                             are stored in the parameters
           */
-          virtual void getExtUserElements(void* extUserElements,
+          virtual void getExtUserElements(void* &extUserElements,
                        int& noExtUserELements) = 0;
 
 
@@ -105,108 +98,46 @@ class DLL_PUBLIC HsailKernel
            *  (Pure Virtual function) 
            *  @return returns the number of spgr elements
            */
-          virtual int getSGPR() = 0;
-          virtual ~HsailKernel(){}
+          virtual int getNoSGPRs() = 0;
+
+           /*! Getter function for the number of vgpr 
+            *  @return returns the number of vpgrs
+           */
+          virtual int getNoVGPRs() = 0;
+
+          /* @brief - Reserves VGPRS for the debugger
+          *   @param noOfRegisters - Number of registers to reserve
+          *   @returns - 1 on success or 0 on overflow
+          */
+          virtual bool reserveVGPRs(int noOfRegisters) = 0;
+
+
+          /* @brief - Returns the first index of the registers 
+          *  reserved for the debugger
+          *  return - Returns the index of type uint32_t
+          */
+          virtual uint32_t getTrapReservedVGPRIndex() = 0;
+
+          /* @brief - Returns the index of the register that 
+          * contains the Buffer Wave offset
+          * return - Returns the index of type uint32_t
+          */
+          virtual uint32_t getScratchBufferWaveOffsetSGPRIndex() = 0;
+
+          /* @brief - Returns a pointer to the DWARF info (BRIG to ISA)
+          * return - Returns the index of type uint32_t
+          */
+          virtual void* getDebugISASourceInfo() = 0;
+
+          /* @brief - Returns a pointer to the DWARF info 
+          * (Higher level language to BRIG)
+          * return - Returns the index of type uint32_t
+          */
+          virtual void* getDebugBRIGSourceInfo() = 0;
+
+          virtual ~HsailKernel(){};
 };
 /* @}*/
-
-typedef enum
-{
-
-    /**
-     * Memory option used for requesting memory with caching enabled. This
-     * option is mutually exclusive with the MEMORY_OPTION_UNCACHED option. 
-     */
-    MEMORY_OPTION_CACHED = (1U << 12),
-
-    /**
-     * Memory option used for requesting memory with caching disabled. This
-     * option is mutually exclusive with the MEMORY_OPTION_CACHED option. 
-     */
-    MEMORY_OPTION_UNCACHED = (1U << 13),
-
-    /**
-     * Memory option used for requesting memory capable of being paged-out to
-     * disk. This option is mutually exclusive with the
-     * MEMORY_OPTION_NONPAGEABLE option.
-     */
-    MEMORY_OPTION_PAGEABLE = (1U <<  7),
-
-    /**
-     * Memory option used for requesting memory that won't be paged-out to disk.
-     * This option is mutually exclusive with the MEMORY_OPTION_PAGEABLE option. 
-     */
-    MEMORY_OPTION_NONPAGEABLE = (1U <<  8),
-
-    /**
-     * Memory option used for requesting memory that is write combined. 
-     */
-    MEMORY_OPTION_WRITE_COMBINED = (1U << 14),
-
-    /**
-     * Memory option used for declaring that the requested memory will only be
-     * accessed by the host. This option is mutually exclusive with the 
-     * MEMORY_OPTION_DEVICE_READ_WRITE, MEMORY_OPTION_DEVICE_READ_ONLY, and
-     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
-     */
-    MEMORY_OPTION_DEVICE_NO_ACCESS,
-
-    /**
-     * Memory option used for declaring that the requested memory will be both
-     * read and written by the device. This option is mutually exclusive with
-     * the MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_ONLY, and
-     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
-     */
-    MEMORY_OPTION_DEVICE_READ_WRITE = (1U << 17),
-
-    /**
-     * Memory option used for declaring that the requested memory will only be
-     * both read by the device. This option is mutually exclusive with the
-     * MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_WRITE, and
-     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
-     */
-    MEMORY_OPTION_DEVICE_READ_ONLY = (1U << 18),
-
-    /**
-     * Memory option used for declaring that the requested memory will only be
-     * both written by the device. This option is mutually exclusive with the
-     * MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_WRITE, and
-     * MEMORY_OPTION_DEVICE_READ_ONLY options. 
-     */
-    MEMORY_OPTION_DEVICE_WRITE_ONLY,
-
-    /**
-     * Memory option used for declaring that the requested memory will only be
-     * accessed by the host. This option is mutually exclusive with the
-     * MEMORY_OPTION_HOST_READ_WRITE, MEMORY_OPTION_HOST_READ_ONLY, and
-     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
-     */
-    MEMORY_OPTION_HOST_NO_ACCESS,
-
-    /**
-     * Memory option used for declaring that the requested memory will be both
-     * read and written by the host. This option is mutually exclusive with the
-     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_ONLY, and
-     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
-     */
-    MEMORY_OPTION_HOST_READ_WRITE,
-
-    /**
-     * Memory option used for declaring that the requested memory will only be
-     * both read by the host. This option is mutually exclusive with the
-     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_WRITE, and
-     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
-     */
-    MEMORY_OPTION_HOST_READ_ONLY,
-
-    /**
-     * Memory option used for declaring that the requested memory will only be
-     * both written by the host. This option is mutually exclusive with the
-     * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_WRITE, and
-     * MEMORY_OPTION_HOST_READ_ONLY options. 
-     */
-    MEMORY_OPTION_HOST_WRITE_ONLY
-} MemoryOption;
 
 }
 /* @}*/

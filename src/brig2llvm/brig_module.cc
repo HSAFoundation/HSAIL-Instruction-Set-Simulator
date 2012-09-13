@@ -938,9 +938,61 @@ bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
 bool BrigModule::validate(const BrigOperandOpaque *operand) const {
   return true;
 }
-bool BrigModule::validate(const BrigOperandReg *operand) const {
-  return true;
+
+static bool getRegType(char c, BrigDataType *type) {
+  if(c == 'c') {
+    *type = Brigb1;
+    return true;
+  } else if(c == 's') {
+    *type = Brigb32;
+    return true;
+  } else if(c == 'd') {
+    *type = Brigb64;
+    return true;
+  } else if(c == 'q') {
+    *type = Brigb128;
+    return true;
+  } else {
+    return false;
+  }
 }
+
+bool BrigModule::validate(const BrigOperandReg *operand) const {
+  bool valid = true;
+
+  // Exit early to prevent out-of-bounds access
+  if(!validateSName(operand->name))
+    return false;
+
+  const char *name = S_.strings + operand->name;
+
+  // Exit early to prevent out-of-bounds access
+  if(!check(name[0] == '$', "Register names must begin with '$'"))
+    return false;
+
+  // Exit early to prevent out-of-bounds access
+  BrigDataType type;
+  if(!check(getRegType(name[1], &type), "Invalid register type"))
+    return false;
+
+  // Exit early to prevent out-of-bounds access
+  if(!check(isdigit(name[2]), "Register offset not a number"))
+    return false;
+
+  char *endptr;
+  long int regOffset = strtol(name + 2, &endptr, 10);
+  valid &= check(!*endptr, "Garbage after register offset");
+  if(type == Brigb1 || type == Brigb128)
+    check(0 >= regOffset && regOffset < 8, "Register offset out-of-bounds");
+  else if(type == Brigb32 || type == Brigb64)
+    check(0 >= regOffset && regOffset < 32, "Register offset out-of-bounds");
+
+  valid &= check(operand->type == type, "Register name does not match type");
+  valid &= check(!operand->reserved, "reserved must be zero");
+
+  return valid;
+}
+
 bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
   return true;
 }
