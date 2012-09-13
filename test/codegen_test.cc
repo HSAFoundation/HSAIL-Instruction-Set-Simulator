@@ -7677,5 +7677,139 @@ TEST(CodegenTest,  Instruction5_CodeGen_SimpleTest) {
 };
 
 
+TEST(CodegenTest,  Instruction4_Fma_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstMod fmaF32Ref = {
+    36,                    // size
+    BrigEInstMod,         // kind
+    BrigFma,               // opcode
+    Brigf32,               // type
+    BrigNoPacking,         // packing
+    {8, 24, 48, 64, 0},      // o_operands[5]
+    {1, 2, 0, 1, 0, 0 ,0}
+  };
+
+  BrigInstBase fmaF64Ref = {
+    32,                    // size
+    BrigEInstBase,         // kind
+    BrigFma,               // opcode
+    Brigf64,               // type
+    BrigNoPacking,         // packing
+    {88, 104, 128, 88, 0}       // o_operands[5]
+  };
+
+  std::string input("fma_ftz_up_f32 $s3,1.0f,$s1,23f;\n");
+  input.append("fma_f64 $d3,1.0,$d0, $d3;\n");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction4FmaPart2(context));
+  EXPECT_EQ(0, Instruction4FmaPart2(context));
+
+  BrigOperandReg getReg;
+  BrigOperandImmed getImm;
+  BrigInstBase  getFma;
+  BrigInstMod getMod;
+
+  context->get_code(0, &getMod);
+
+  // BrigInstBase
+  EXPECT_EQ(fmaF32Ref.size, getMod.size);
+  EXPECT_EQ(fmaF32Ref.kind, getMod.kind);
+  EXPECT_EQ(fmaF32Ref.opcode, getMod.opcode);
+  EXPECT_EQ(fmaF32Ref.type, getMod.type);
+  EXPECT_EQ(fmaF32Ref.packing, getMod.packing);
+  EXPECT_EQ(fmaF32Ref.o_operands[0], getMod.o_operands[0]);
+  EXPECT_EQ(fmaF32Ref.o_operands[1], getMod.o_operands[1]);
+  EXPECT_EQ(fmaF32Ref.o_operands[2], getMod.o_operands[2]);
+  EXPECT_EQ(fmaF32Ref.o_operands[3], getMod.o_operands[3]);
+  EXPECT_EQ(fmaF32Ref.o_operands[4], getMod.o_operands[4]);
+  // EXPECT_EQ(cmpNeRef.aluModifier, get.aluModifier);
+  unsigned int *pAluModRef = reinterpret_cast<unsigned int*>(&fmaF32Ref.aluModifier);
+  unsigned int *pAluModGet = reinterpret_cast<unsigned int*>(&getMod.aluModifier);
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+
+  context->get_code(36, &getFma);
+
+  // BrigInstBase
+  EXPECT_EQ(fmaF64Ref.size, getFma.size);
+  EXPECT_EQ(fmaF64Ref.kind, getFma.kind);
+  EXPECT_EQ(fmaF64Ref.opcode, getFma.opcode);
+  EXPECT_EQ(fmaF64Ref.type, getFma.type);
+  EXPECT_EQ(fmaF64Ref.packing, getFma.packing);
+  EXPECT_EQ(fmaF64Ref.o_operands[0], getFma.o_operands[0]);
+  EXPECT_EQ(fmaF64Ref.o_operands[1], getFma.o_operands[1]);
+  EXPECT_EQ(fmaF64Ref.o_operands[2], getFma.o_operands[2]);
+  EXPECT_EQ(fmaF64Ref.o_operands[3], getFma.o_operands[3]);
+  EXPECT_EQ(fmaF64Ref.o_operands[4], getFma.o_operands[4]);
+
+
+  context->get_operand(8, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name); 
+
+  context->get_operand(48, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(4, getReg.name); 
+
+  context->get_operand(88, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb64, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name); 
+
+  context->get_operand(128, &getReg);  
+  // BrigOperandReg
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb64, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(12, getReg.name); 
+
+  context->get_operand(24, &getImm);  
+  // BrigOperandImmed
+  EXPECT_EQ(24, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(1.0f, getImm.bits.f);
+
+  context->get_operand(64, &getImm);  
+  // BrigOperandImmed
+  EXPECT_EQ(24, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(23.0f, getImm.bits.f);
+
+  context->get_operand(104, &getImm);  
+  // BrigOperandImmed
+  EXPECT_EQ(24, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb64, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(1.0, getImm.bits.d);
+
+  delete lexer;
+};
+
+
+
+
+
 }  // namespace brig
 }  // namespace hsa

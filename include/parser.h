@@ -154,6 +154,8 @@ int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* 
 int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
 int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
 
+int Instruction4FmaPart2(Context* context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

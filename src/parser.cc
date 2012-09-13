@@ -3129,6 +3129,10 @@ int LabelTargets(Context* context) {
   return 1;
 }
 
+int Instruction4FmaPart2(Context* context) {
+  return 1;
+}
+
 int Instruction4(Context* context) {
   if (context->token_type == INSTRUCTION4_OPCODE) {
     context->token_to_scan = yylex();
