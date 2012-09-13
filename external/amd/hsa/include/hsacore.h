@@ -634,6 +634,20 @@ public:
     virtual ASICInfo* getASICInfo()=0;
 
     /**
+    * @brief Get the max frequency of the gpu device
+    * 
+    * @return max frequency as integer
+    */
+    virtual int getMaxClockRateOfFCompute()=0;
+    
+    /**
+    * @brief Get the max frequency of the cpu device
+    * 
+    * @return max frequency as integer
+    */
+    virtual int getMaxClockRateOfCCompute()=0;
+               
+    /**
      * API to determine the maximum number of queues that can actually
      * be created for this device.  
      *
