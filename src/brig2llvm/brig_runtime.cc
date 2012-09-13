@@ -556,6 +556,15 @@ extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
   }
 }
 
+extern "C" b32 Bytealign_b32(b32 w, b32 x, b32 y) {
+  return 0;
+}
+
+extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
+  b32 result = 0;
+  return result;      
+}
+
 CmpInst(eq, x == y)
 CmpInst(ne, !isUnordered(x, y) && x != y)
 CmpInst(lt, x <  y)
