@@ -459,6 +459,51 @@ template<class T> static b1 Class(T x, b32 y) {
 extern "C" b1 Class_f32(f32 f, b32 y) { return Class(f, y); }
 extern "C" b1 Class_f64(f64 f, b32 y) { return Class(f, y); }
 
+template<class T> static T Fcos(T x) {
+  if(isNan(x)) return x;
+  if(isInf(x)) return NAN;
+  if(-512 * M_PI <= x && x <= 512 * M_PI) {
+    return std::cos(x);
+  } else {
+    return std::cos(1.0);
+  }
+}
+FloatInst(define, Fcos, Unary)
+
+template<class T> static T Fsin(T x) {
+  if(isNan(x)) return x;
+  if(isInf(x)) return NAN;
+  if(std::fpclassify(x) == FP_SUBNORMAL) {
+    return x > 0 ? +0.0 : 0.0;;
+  }
+  if(-512 * M_PI <= x && x <= 512 * M_PI) {
+    return std::sin(x);
+  } else {
+    return std::sin(1.0);
+  }
+}
+FloatInst(define, Fsin, Unary)
+
+template<class T> static T Flog2(T x) {
+  if(std::fpclassify(x) == FP_SUBNORMAL) {
+    return -INFINITY;
+  } else if(std::fpclassify(x) == FP_NORMAL && x < 0) {
+    return -INFINITY;
+  } else {
+    return log2(x);
+  }
+}
+FloatInst(define, Flog2, Unary)
+
+template<class T> static T Fexp2(T x) {
+  if (std::fpclassify(x) == FP_NORMAL && x < 0) {
+    return 0.0;
+  } else {
+    return exp2(x);
+  }
+}
+FloatInst(define, Fexp2, Unary)
+
 template<class T> static T Frsqrt(T x) {
   if(std::fpclassify(x) == FP_SUBNORMAL) {
     return x > 0 ? INFINITY : -INFINITY;
