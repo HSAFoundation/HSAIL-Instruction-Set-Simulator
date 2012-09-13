@@ -557,11 +557,16 @@ extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
 }
 
 extern "C" b32 Bytealign_b32(b32 w, b32 x, b32 y) {
-  return 0;
+  return Bitalign_b32(w, x, y * 8);
 }
 
 extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
+  for(unsigned i = 0; i < 4; ++i) {
+    result |= (((((w >> 8 * i) & 0xFF)
+               + ((x >> 8 * i) & 0xFF)
+               + ((y >> 8 * i) & 0x1)) >> 1) & 0xFF) << 8 * i;
+  }
   return result;      
 }
 
