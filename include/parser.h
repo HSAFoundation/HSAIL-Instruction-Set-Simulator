@@ -156,6 +156,7 @@ int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation)
 
 int Instruction4FmaPart2(Context* context);
 int Instruction4MadPart3(Context* context);
+int Instruction4BitStringOperationPart4(Context* context);
 int Instruction4CmovPart5(Context* context);
 int Instruction4ShufflePart6(Context* context);
 

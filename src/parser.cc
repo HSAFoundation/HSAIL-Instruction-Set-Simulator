@@ -3715,6 +3715,10 @@ int Instruction4MadPart3(Context* context) {
   return 1;
 }
 
+int Instruction4BitStringOperationPart4(Context* context) {
+  return 1;
+}
+
 int Instruction4(Context* context) {
   if (context->token_type == INSTRUCTION4_OPCODE) {
     context->token_to_scan = yylex();
