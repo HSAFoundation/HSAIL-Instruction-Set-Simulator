@@ -3130,7 +3130,139 @@ int LabelTargets(Context* context) {
 }
 
 int Instruction4ShufflePart6(Context* context) {
+  BrigInstBase shuffleInst = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigShuffle,           // opcode
+    0,                     // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+ 
+  context->token_to_scan = yylex();
+  // Type: s, u, f.
+  // Length: 8x4, 16x2, 16x4, 32x2
+
+  if (context->token_to_scan == _U8X4 ||
+      context->token_to_scan == _S8X4 ||
+      context->token_to_scan == _U16X2 ||
+      context->token_to_scan == _S16X2 ||
+      context->token_to_scan == _F16X2 ||
+      context->token_to_scan == _U16X4 ||
+      context->token_to_scan == _S16X4 ||
+      context->token_to_scan == _F16X4 ||
+      context->token_to_scan == _U32X2 ||
+      context->token_to_scan == _S32X2 ||
+      context->token_to_scan == _F32X2) {
+
+    shuffleInst.type = context->token_value.data_type;
+    context->token_to_scan = yylex();
+    
+    // Note: dest: Destination register.
+    std::string opName;
+    BrigoOffset32_t opSize;
+
+    if (context->token_type == REGISTER) {
+      opName = context->token_value.string_val;
+    } else {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    } 
+
+    if (!Operand(context)) {
+      shuffleInst.o_operands[0] = context->operand_map[opName];
+      if (context->token_to_scan != ',') {
+        context->set_error(MISSING_COMMA);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+
+      opSize = context->get_operand_offset();
+      if (context->token_type == REGISTER) {
+        opName = context->token_value.string_val;
+      } else if (context->token_type == CONSTANT) {
+        opSize += opSize & 0x7;
+      } else {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }
+
+      if (!Operand(context)) {
+        if (opSize == context->get_operand_offset()) {
+          shuffleInst.o_operands[1] = context->operand_map[opName];
+        } else {
+          shuffleInst.o_operands[1] = opSize;
+        }
+        if (context->token_to_scan != ',') {
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+        opSize = context->get_operand_offset();
+        if (context->token_type == REGISTER) {
+          opName = context->token_value.string_val;
+        } else if (context->token_type == CONSTANT) {
+          opSize += opSize & 0x7;
+        } else {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+        
+        if (!Operand(context)) {
+          if (opSize == context->get_operand_offset()) {
+            shuffleInst.o_operands[2] = context->operand_map[opName];
+          } else {
+            shuffleInst.o_operands[2] = opSize;
+          }
+          if (context->token_to_scan != ',') {
+              context->set_error(MISSING_COMMA);
+              return 1;
+          }
+          context->token_to_scan = yylex();
+
+          opSize = context->get_operand_offset();
+
+          // src2: Source. Must be a literal value used to select elements
+          if (context->token_type == CONSTANT) {
+            opSize += opSize & 0x7;
+          } else {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
+
+          if (!Operand(context)) {
+            shuffleInst.o_operands[3] = opSize;
+
+            if (context->token_to_scan == ';') {
+              context->append_code(&shuffleInst);
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }  // ';'
+          } else {  // 4 operand
+              context->set_error(INVALID_FOURTH_OPERAND);
+              return 1;
+          }
+        } else {  // 3 operand
+          context->set_error(INVALID_THIRD_OPERAND);
+          return 1;
+        }
+      } else {  // 2 operand
+        context->set_error(INVALID_SECOND_OPERAND);
+        return 1;
+      }
+    } else {  // 1 operand
+      context->set_error(INVALID_FIRST_OPERAND);
+      return 1;
+    }
+  } else {  // DATA_TYPE_ID
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
   return 1;
+
 }
 
 int Instruction4CmovPart5(Context* context) {
