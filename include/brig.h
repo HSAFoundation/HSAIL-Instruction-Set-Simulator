@@ -27,7 +27,8 @@ typedef uint32_t BrigOpcode32_t;
 typedef uint32_t BrigAtomicOperation32_t;
 typedef uint32_t BrigMemorySemantic32_t;
 typedef uint32_t BrigCompareOperation32_t;
-
+typedef uint8_t  BrigBoundaryMode8_t;
+typedef uint8_t  BrigAddrFilter8_t;
 // Enums
 
 // Custom enum to check for alignment of structs
@@ -43,6 +44,7 @@ enum BrigSymbolModifier {
 };
 
 // 20.5.2
+// BrigAtomicOperation is used to specify the type of atomic operation.
 enum BrigAtomicOperation {
   BrigAtomicAnd,
   BrigAtomicOr,
@@ -172,19 +174,6 @@ enum BrigSftz {
   BrigENosftz
 };
 
-//PRM 20.5.9
-//BrigGeom
-//BrigGeom is used to specify the number of coordinates needed to access an
-//image.
-enum BrigGeom {
-  Briggeom_1d,
-  Briggeom_2d,
-  Briggeom_3d,
-  Briggeom_1da,
-  Briggeom_1db,
-  Briggeom_2da
-};
-
 // PRM 20.5.12
 enum BrigInstKinds {
   BrigEInstBase,
@@ -201,6 +190,7 @@ enum BrigInstKinds {
 };
 
 // 20.5.14
+// BrigMemorySemantic is used to specify the semantics for a memory operation.
 enum BrigMemorySemantic {
   BrigRegular,
   BrigAcquire,
@@ -392,6 +382,7 @@ enum BrigOpcode {
   BrigFbarInitSizeKnown = 123
 };
 
+
 // Brig Support Structures
 // BrigAluModifier specifies arithmetic logic unit controls:
 struct BrigAluModifier {
@@ -403,6 +394,103 @@ struct BrigAluModifier {
   uint32_t fbar: 1;
   uint32_t reserved: 25;
 };
+
+//PRM 	20.5.9
+//BrigGeom
+//BrigGeom is used to specify the number of coordinates needed to access an
+//image.
+enum BrigGeom {
+  Briggeom_1d,  //1D image (1 coordinate needed)
+  Briggeom_2d,  //2D image (2 coordinate needed)
+  Briggeom_3d,  //3D image (3 coordinate needed)
+  Briggeom_1da, //1DA image array (2 coordinates needed)
+  Briggeom_1db, //1DB image  buffer (1 coordinates needed)
+  Briggeom_2da  //2DA image array (3 coordinates needed)
+};
+
+//PRM 	20.5.10
+enum BrigImageFormat {
+  BrigSNORM_INT8,
+  BrigSNORM_INT16,
+  BrigUNORM_INT8,
+  BrigUNORM_INT16,
+  BrigUNORM_SHORT_565,
+  BrigUNORM_SHORT_555,
+  BrigUNORM_SHORT_101010,
+  BrigSIGNED_INT8,
+  BrigSIGNED_INT16,
+  BrigSIGNED_INT32,
+  BrigUNSIGNED_INT8,
+  BrigUNSIGNED_INT16,
+  BrigUNSIGNED_INT32,
+  BrigHALF_FLOAT,
+  BrigFLOAT,
+  BrigImageFormatUnknown
+};
+
+enum BrigImageOrder {
+  BrigImage_R,
+  BrigImage_A,
+  BrigImage_RX,
+  BrigImage_RG,
+  BrigImage_RGX,
+  BrigImage_RA,
+  BrigImage_RGB,
+  BrigImage_RGBA,
+  BrigImage_RGBX,
+  BrigImage_BGRA,
+  BrigImage_ARGB,
+  BrigImage_INTENSITY,
+  BrigImage_LUMINANCE,
+  BrigImageOrderUnknown // used when no order is specified
+};
+
+//PRM 20.5.1
+enum BrigAddrFilter {
+  BrigSamplerFilterLinear,
+  BrigSamplerFilterNearest
+};
+
+//PRM 20.5.4
+enum BrigBoundaryMode {
+  BrigSamplerClamp,
+  BrigSamplerWrap,
+  BrigSamplerMirror,
+  BrigSamplerMirrorOnce,
+  BrigSamplerBorder
+};
+
+enum BrigCompareOperation {
+  BrigEq,
+  BrigNe,
+  BrigLt,
+  BrigLe,
+  BrigGt,
+  BrigGe,
+  BrigEqu,
+  BrigNeu,
+  BrigLtu,
+  BrigLeu,
+  BrigGtu,
+  BrigGeu,
+  BrigNum,
+  BrigNan,
+  BrigSeq,
+  BrigSne,
+  BrigSlt,
+  BrigSle,
+  BrigSgt,
+  BrigSge,
+  BrigSgeu,
+  BrigSequ,
+  BrigSneu,
+  BrigSltu,
+  BrigSleu,
+  BrigSnum,
+  BrigSnan,
+  BrigSgtu
+};
+
 
 // PRM 20.3.2
 struct BrigSymbolCommon {
@@ -976,7 +1064,6 @@ struct BrigOperandLabelRef {
   uint32_t labeldirective;
 };
 
-
 // BrigOperandFunctionRef
 // BrigOperandFunctionRef is used for a reference
 // to a function or function signature.
@@ -1083,7 +1170,7 @@ struct BrigOperandWaveSz {
   uint16_t size;
   uint16_t kind;
 };
-
+/*
 enum BrigAddrFilter {
   BrigSamplerFilterLinear,
   BrigSamplerFilterNearest
@@ -1128,4 +1215,5 @@ enum BrigCompareOperation {
   BrigSnan,
   BrigSgtu
 };
+*/
 #endif  // INCLUDE_BRIG_H_

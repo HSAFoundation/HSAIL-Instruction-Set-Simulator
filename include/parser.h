@@ -56,7 +56,7 @@ int Kernel(Context *context);
 int OperandList(Context* context);
 int Cmp(Context* context);
 int GlobalPrivateDecl(Context* context);
-int OffsetAddressableOperand(Context* context);
+int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset);
 int MemoryOperand(Context* context);
 int Ldc(Context* context);
 int Instruction5(Context* context);
@@ -68,15 +68,20 @@ int Instruction1(Context* context);
 int Operation(Context* context);
 int Segp(Context* context);
 int RIW_Operand(Context* context);
-
+int BodyStatementNested(Context* context);
+int ArgStatement(Context* context);
+int ArgStatements(Context* context);
+int BodyStatement(Context* context);
+int BodyStatements(Context* context);
 int GlobalGroupDecl(Context* context);
+
 /* MUL */
 int Mul(Context* context);
 int MulInst(Context* context);
 int Mul24Inst(Context* context);
 int Mad24Inst(Context* context);
 int Ld(Context* context);
-int LdModifier(Context* context);
+int LdModifier(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int St(Context* context);
 int Lda(Context* context);
 int ImageRet(Context* context);
@@ -117,6 +122,37 @@ int GlobalInitializablePart2(Context* context);
 int GlobalInitializable(Context* context);
 
 int SequenceOfPrograms(Context *context);
+int PairAddressableOperand(Context *context);
+int LdaMod(Context *context);
+int OffsetAddressableOperand(Context* context);
+int LdModifier(Context* context);
+
+int TopLevelStatement(Context *context);
+int TopLevelStatements(Context *context);
+
+int Optacqreg(Context* context);
+
+int ArrayOperand(Context* context);
+int QueryOp(Context* context);
+int ComparisonId(Context* context);
+
+//Declarations of Helper Functions 
+int GlobalImageDeclPart2(Context *context);
+int GlobalReadOnlyImageDeclPart2(Context *context);
+int GlobalInitializablePart2(Context* context);
+int GlobalSamplerDeclPart2(Context *context);
+int InitializableDeclPart2(Context* context, BrigStorageClass32_t storage_class);
+int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset);
+int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
+int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass, 
+                       BrigMemorySemantic32_t* pMemorySemantic);
+int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
+int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
+
+int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand);
+int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode);
+int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
+int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
 
 }  // namespace brig
 }  // namespace hsa

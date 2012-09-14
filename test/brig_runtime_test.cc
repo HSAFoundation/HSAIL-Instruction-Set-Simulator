@@ -878,6 +878,31 @@ static void Bitalign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
 extern "C" b32 Bitalign_b32(b32, b32, b32);
 MakeTest(Bitalign_b32, Bitalign_b32_Logic)
 
+static void Bytealign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
+  if(c <= 4) {
+    unsigned tag = (4 - c);
+    for(unsigned i = 0; i < 4; ++i) {
+      if(i + tag > 3)
+        EXPECT_EQ((result >> (i * 8)) & 0xFF, ((a) >> (((i + tag) % 4) * 8)) & 0xFF);
+      else 
+        EXPECT_EQ((result >> (i * 8)) & 0xFF, ((b) >> (((i + tag)) * 8)) & 0xFF);
+    }
+  }
+}
+extern "C" b32 Bytealign_b32(b32, b32, b32);
+MakeTest(Bytealign_b32, Bytealign_b32_Logic)
+
+static void Lerp_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+  for(unsigned i = 0; i < 4; ++i) {
+    EXPECT_EQ((result >> i * 8) & 0xFF,
+                ((((a >> i * 8) & 0xFF)
+                + ((b >> i * 8) & 0xFF)
+                + ((c >> i * 8) & 0x1)) >> 1) & 0xFF); 
+  }
+}
+extern "C" b32 Lerp_b32(b32, b32, b32);
+MakeTest(Lerp_b32, Lerp_b32_Logic)
+
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)
 TestCmp(lt, a <  b)
