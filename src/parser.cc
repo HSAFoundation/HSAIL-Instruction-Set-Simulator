@@ -7125,27 +7125,42 @@ int Location(Context* context) {
   }
   return 1;
 }
+
 int Control(Context* context) {
+  BrigControlType32_t controlType;
+  // values[0] = 1 if on,By default, memopt_on is enabled.
+  uint32_t values[3] = {1,0,0}; 
+
   if (context->token_to_scan == MEMOPT_ON) {
+    controlType = BrigEMemOpt;
+    values[0] = 1;
   } else if (context->token_to_scan == MEMOPT_OFF) {
+    controlType = BrigEMemOpt;
+    values[0] = 0;
   } else if (context->token_to_scan == WORKGROUPS_PER_CU) {
+    controlType = BrigEMaxGperC;
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      values[0] = context->token_value.int_val; //TODO
     } else {  // Integer Constant
       context->set_error(MISSING_INTEGER_CONSTANT);
       return 1;
     }
   } else if (context->token_to_scan == ITEMS_PER_WORKGROUP) {
+    controlType = BrigEMaxTid;
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      values[0] = context->token_value.int_val;
       context->token_to_scan = yylex();
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+          values[1] = context->token_value.int_val;
           context->token_to_scan = yylex();
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
             if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+              values[2] = context->token_value.int_val;
             } else {  // Integer Constant
               context->set_error(MISSING_INTEGER_CONSTANT);
               return 1;
@@ -7167,16 +7182,26 @@ int Control(Context* context) {
       return 1;
     }
   } else {
-    context->set_error(UNKNOWN_ERROR);
     return 1;
   }
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
+    // codegen
+    BrigDirectiveControl bdc = {
+      sizeof(BrigDirectiveControl),   // size
+      BrigEDirectiveControl,          // kind
+      context->get_code_offset(),     // c_code
+      controlType,                    // controlType
+      {values[0],values[1],values[2]} //values
+    };
+    context->append_directive(&bdc);
+
     context->token_to_scan = yylex();
     return 0;
+  } else {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 int Pragma(Context* context) {
