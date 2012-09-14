@@ -870,7 +870,7 @@ static void Bitalign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
     for(unsigned i = 0; i < 4; ++i) {
       if(i + tag > 3)
         EXPECT_EQ((result >> (i * 8)) & 0xFF, (a >> (((i + tag) % 4) * 8)) & 0xFF);
-      else 
+      else
         EXPECT_EQ((result >> (i * 8)) & 0xFF, (b >> ((i + tag) * 8)) & 0xFF);
     }
   }
@@ -884,7 +884,7 @@ static void Bytealign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
     for(unsigned i = 0; i < 4; ++i) {
       if(i + tag > 3)
         EXPECT_EQ((result >> (i * 8)) & 0xFF, ((a) >> (((i + tag) % 4) * 8)) & 0xFF);
-      else 
+      else
         EXPECT_EQ((result >> (i * 8)) & 0xFF, ((b) >> (((i + tag)) * 8)) & 0xFF);
     }
   }
@@ -897,42 +897,45 @@ static void Lerp_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
     EXPECT_EQ((result >> i * 8) & 0xFF,
                 ((((a >> i * 8) & 0xFF)
                 + ((b >> i * 8) & 0xFF)
-                + ((c >> i * 8) & 0x1)) >> 1) & 0xFF); 
+                + ((c >> i * 8) & 0x1)) >> 1) & 0xFF);
   }
 }
 extern "C" b32 Lerp_b32(b32, b32, b32);
 MakeTest(Lerp_b32, Lerp_b32_Logic)
 
 static void Sad_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
-  EXPECT_EQ(result, abs(a - b) + c);    
+  EXPECT_EQ(abs(a - b) + c, result);
 }
 extern "C" b32 Sad_b32(b32, b32, b32);
 MakeTest(Sad_b32, Sad_b32_Logic)
 
 static void Sad2_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
-  EXPECT_EQ(result, abs((a & 0xFFFF) - (b & 0xFFFF))
-                  + abs(((a >> 16) & 0xFFFF) - ((b >> 16) & 0xFFFF))
-                  + c);    
+  EXPECT_EQ(abs((a & 0xFFFF) - (b & 0xFFFF)) +
+            abs(((a >> 16) & 0xFFFF) - ((b >> 16) & 0xFFFF)) +
+            c,
+            result);
 }
 extern "C" b32 Sad2_b32(b32, b32, b32);
 MakeTest(Sad2_b32, Sad2_b32_Logic)
 
 static void Sad4_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
-  EXPECT_EQ(result, abs((a & 0xFF) - (b & 0xFF))
-                  + abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF))
-                  + abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF))
-                  + abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF))
-                  + c);    
+  EXPECT_EQ(abs((a & 0xFF) - (b & 0xFF)) +
+            abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF)) +
+            abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF)) +
+            abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF)) +
+            c,
+            result);
 }
 extern "C" b32 Sad4_b32(b32, b32, b32);
 MakeTest(Sad4_b32, Sad4_b32_Logic)
 
 static void Sad4hi_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
-  EXPECT_EQ(result, ((abs((a & 0xFF) - (b & 0xFF))
-                    + abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF))
-                    + abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF))
-                    + abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF))) << 16)
-                    + c);    
+  EXPECT_EQ(((abs((a & 0xFF) - (b & 0xFF)) +
+              abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF)) +
+              abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF)) +
+              abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF))) << 16) +
+            c,
+            result);
 }
 extern "C" b32 Sad4hi_b32(b32, b32, b32);
 MakeTest(Sad4hi_b32, Sad4hi_b32_Logic)
