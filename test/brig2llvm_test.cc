@@ -5609,7 +5609,8 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid directive, should point to a BrigDirectiveFunction or BrigDirectiveSibnature")));
+    "Invalid directive, should point to a BrigDirectiveFunction "
+    "or BrigDirectiveSibnature")));
   }
 }
 
@@ -5652,7 +5653,7 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
     BrigOperandIndirect boi = {
       sizeof(boi),
       BrigEOperandIndirect,
-      8,               
+      8,
       Brigb32,
       0,
       0
@@ -5702,7 +5703,7 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
     BrigOperandIndirect boi = {
       sizeof(boi),
       BrigEOperandIndirect,
-      40,               
+      40,
       Brigu32,
       1,
       0
@@ -5841,7 +5842,7 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
 
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
-    for(unsigned i = 0; i < 8; ++i) 
+    for(unsigned i = 0; i < 8; ++i)
       operands.append_char(0);
 
     BrigOperandReg bor = {
@@ -5884,7 +5885,7 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
 
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
-    for(unsigned i = 0; i < 8; ++i) 
+    for(unsigned i = 0; i < 8; ++i)
       operands.append_char(0);
 
     BrigOperandReg bor = {
@@ -5923,7 +5924,7 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
 
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
-    for(unsigned i = 0; i < 8; ++i) 
+    for(unsigned i = 0; i < 8; ++i)
       operands.append_char(0);
 
     BrigOperandReg bor = {
@@ -5962,7 +5963,7 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
 
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
-    for(unsigned i = 0; i < 8; ++i) 
+    for(unsigned i = 0; i < 8; ++i)
       operands.append_char(0);
 
     BrigOperandReg bor = {
@@ -6001,7 +6002,7 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
 
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
-    for(unsigned i = 0; i < 8; ++i) 
+    for(unsigned i = 0; i < 8; ++i)
       operands.append_char(0);
 
     BrigOperandReg bor = {
@@ -6041,7 +6042,7 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
 
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
-    for(unsigned i = 0; i < 8; ++i) 
+    for(unsigned i = 0; i < 8; ++i)
       operands.append_char(0);
 
     BrigOperandReg bor = {
@@ -6088,7 +6089,7 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
 
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
-    for(unsigned i = 0; i < 8; ++i) 
+    for(unsigned i = 0; i < 8; ++i)
       operands.append_char(0);
 
     BrigOperandReg bor = {

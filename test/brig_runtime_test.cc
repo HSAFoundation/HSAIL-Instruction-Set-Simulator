@@ -869,9 +869,11 @@ static void Bitalign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
     unsigned tag = (32 - c) / 8;
     for(unsigned i = 0; i < 4; ++i) {
       if(i + tag > 3)
-        EXPECT_EQ((result >> (i * 8)) & 0xFF, (a >> (((i + tag) % 4) * 8)) & 0xFF);
+        EXPECT_EQ((a >> (((i + tag) % 4) * 8)) & 0xFF,
+                  (result >> (i * 8)) & 0xFF);
       else
-        EXPECT_EQ((result >> (i * 8)) & 0xFF, (b >> ((i + tag) * 8)) & 0xFF);
+        EXPECT_EQ((b >> ((i + tag) * 8)) & 0xFF,
+                  (result >> (i * 8)) & 0xFF);
     }
   }
 }
@@ -883,9 +885,11 @@ static void Bytealign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
     unsigned tag = (4 - c);
     for(unsigned i = 0; i < 4; ++i) {
       if(i + tag > 3)
-        EXPECT_EQ((result >> (i * 8)) & 0xFF, ((a) >> (((i + tag) % 4) * 8)) & 0xFF);
+        EXPECT_EQ(((a) >> (((i + tag) % 4) * 8)) & 0xFF,
+                  (result >> (i * 8)) & 0xFF);
       else
-        EXPECT_EQ((result >> (i * 8)) & 0xFF, ((b) >> (((i + tag)) * 8)) & 0xFF);
+        EXPECT_EQ(((b) >> (((i + tag)) * 8)) & 0xFF,
+                  (result >> (i * 8)) & 0xFF);
     }
   }
 }

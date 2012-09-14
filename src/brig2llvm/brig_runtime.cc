@@ -420,7 +420,8 @@ template<class T> static T Cmov(T x, T y, T z) {
 }
 BitInst(define, Cmov, Ternary)
 
-// Neither C++98 nor C++11 implement C99's floating point hexadecimal literals. :(
+// Neither C++98 nor C++11 implement C99's floating point hexadecimal
+// literals. :(
 // 0x3F7FFFFE == 0x1.fffffep-1f
 // 0x3FEFFFFFFFFFFFFF == 0x1.fffffffffffffp-1
 extern "C" f32 Fract_f32(f32 f) {
@@ -552,7 +553,7 @@ extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
     case 32:
       return x;
     default :
-      return 0;  
+      return 0;
   }
 }
 
@@ -567,7 +568,7 @@ extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
                + ((x >> 8 * i) & 0xFF)
                + ((y >> 8 * i) & 0x1)) >> 1) & 0xFF) << 8 * i;
   }
-  return result;      
+  return result;
 }
 
 extern "C" b32 Sad_b32(b32 w, b32 x, b32 y) {
