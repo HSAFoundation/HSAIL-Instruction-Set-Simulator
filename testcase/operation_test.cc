@@ -17,16 +17,6 @@ namespace brig {
 extern ErrorReporter* main_reporter;
 extern Context* context;
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigLaneId_test case           **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        laneid    dest:s reg;                     **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTLaneid: public ::testing::TestWithParam<int>{
-};
-
 TEST_P(Instruction1opNoDTLaneid, BrigLaneId){
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -67,16 +57,6 @@ TEST_P(Instruction1opNoDTLaneid, BrigLaneId){
 INSTANTIATE_TEST_CASE_P(OperationTest, 
                         Instruction1opNoDTLaneid, 
                         testing::Range(0,1));
-
-/*****************************************************************************/
-/*****************        TITLE     :BrigDynWaveId_test case        **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        dynwaveid   dest:s reg;                   **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTDynwaveid: public ::testing::TestWithParam<int>{
-};
 
 TEST_P(Instruction1opNoDTDynwaveid, BrigDynWaveId){
   context->set_error_reporter(main_reporter);
@@ -119,16 +99,6 @@ INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction1opNoDTDynwaveid, 
                         testing::Range(0,1));
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigDispatchId_test case       **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        dispatchid    dest:s reg;                 **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTDispatchid: public ::testing::TestWithParam<int>{
-};
-
 TEST_P(Instruction1opNoDTDispatchid, BrigDispatchId){
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -170,16 +140,6 @@ INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction1opNoDTDispatchid, 
                         testing::Range(0,1));
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigCU_test case               **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        cu    dest:s reg;                         **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTCu: public ::testing::TestWithParam<int>{
-};
-
 TEST_P(Instruction1opNoDTCu, BrigCU){
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -219,16 +179,6 @@ TEST_P(Instruction1opNoDTCu, BrigCU){
 INSTANTIATE_TEST_CASE_P(OperationTest, 
                         Instruction1opNoDTCu, 
                         testing::Range(0,1));
-
-/*****************************************************************************/
-/*****************        TITLE     :BrigWorkDim_test case          **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        workdim     dest:s reg;                   **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTWorkdim: public ::testing::TestWithParam<int>{
-};
 
 TEST_P(Instruction1opNoDTWorkdim, BrigWorkDim){
   context->set_error_reporter(main_reporter);
@@ -271,15 +221,6 @@ INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction1opNoDTWorkdim, 
                         testing::Range(0,1));
 
-/*****************************************************************************/
-/*****************        TITLE     :Brigworkitemidflat_test case   **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        workitemid_flat      dest:s reg;          **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTWorkitemidFlat: public ::testing::TestWithParam<int>{
-};
 
 TEST_P(Instruction1opNoDTWorkitemidFlat, BrigWorkItemIdflat){
   context->set_error_reporter(main_reporter);
@@ -322,16 +263,6 @@ INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction1opNoDTWorkitemidFlat, 
                         testing::Range(0,1));
 
-/*****************************************************************************/
-/*****************        TITLE     :Brigworkitemaidflat_test case  **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        workitemaid_flat    dest:s reg;           **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTWorkitemaidFlat: public ::testing::TestWithParam<int>{
-};
-
 TEST_P(Instruction1opNoDTWorkitemaidFlat, BrigWorkItemAIdflat){
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -373,16 +304,6 @@ INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction1opNoDTWorkitemaidFlat, 
                         testing::Range(0,1));
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigClock_test case            **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        clock    dest:d reg;                      **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTClock: public ::testing::TestWithParam<int>{
-};
-
 TEST_P(Instruction1opNoDTClock, BrigClock){
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -423,16 +344,6 @@ INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction1opNoDTClock, 
                         testing::Range(0,1));
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigDebugtrap_test case        **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************      debugtrap  src:s reg,Immed value,(wavesize) **********/
-/*****************************************************************************/
-
-class Instruction1opNoDTDebugtrap: public ::testing::TestWithParam<int>{
-};
-
 TEST_P(Instruction1opNoDTDebugtrap, BrigDebugtrap){
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -446,9 +357,9 @@ TEST_P(Instruction1opNoDTDebugtrap, BrigDebugtrap){
   BrigInstBase getBase;
   BrigOperandReg getReg;
   BrigOperandImmed getImm;
-
+  BrigOperandWaveSz getWaveSz;
   context->get_code(0, &getBase);
-  BrigInstBase ref = outputarray_instruction1opnodt_debugtrap[int(n/4)];
+  BrigInstBase ref = outputarray_instruction1opnodt_debugtrap[int(n/5)];
 
   EXPECT_EQ(ref.size, getBase.size);
   EXPECT_EQ(ref.kind, getBase.kind);
@@ -486,13 +397,17 @@ TEST_P(Instruction1opNoDTDebugtrap, BrigDebugtrap){
     EXPECT_EQ(Brigb32, getImm.type);
     EXPECT_EQ(61, getImm.bits.u);
   }
-
+  if(n == 4){
+    context->get_operand(8, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
   delete lexer;
 }
 
 INSTANTIATE_TEST_CASE_P(OperationTest, 
                         Instruction1opNoDTDebugtrap, 
-                        testing::Range(0,4));
-
+                        testing::Range(0,5));
 }  // namespace brig
 }  // namespace hsa

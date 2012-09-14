@@ -6,17 +6,11 @@
 namespace hsa {
 namespace brig {
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigLaneId_test case           **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        laneid    dest:s reg;                     **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTLaneid: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_laneid[] = {
   "laneid $s1;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_laneid[] = {
   {
     32,
@@ -28,17 +22,11 @@ BrigInstBase outputarray_instruction1opnodt_laneid[] = {
   }
 };
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigDynWaveId_test case        **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        dynwaveid   dest:s reg;                   **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTDynwaveid: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_dynwaveid[] = {
   "dynwaveid $s1;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_dynwaveid[] = {
   {
     32,
@@ -50,17 +38,11 @@ BrigInstBase outputarray_instruction1opnodt_dynwaveid[] = {
   }
 };
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigDispatchId_test case       **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        dispatchid    dest:s reg;                 **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTDispatchid: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_dispatchid[] = {
   "dispatchid $s1;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_dispatchid[] = {
   {
     32,
@@ -72,17 +54,11 @@ BrigInstBase outputarray_instruction1opnodt_dispatchid[] = {
   }
 };
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigCU_test case               **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        cu    dest:s reg;                         **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTCu: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_cu[] = {
   "cu $s1;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_cu[] = {
   {
     32,
@@ -94,17 +70,11 @@ BrigInstBase outputarray_instruction1opnodt_cu[] = {
   }
 };
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigWorkDim_test case          **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        workdim     dest:s reg;                   **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTWorkdim: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_workdim[] = {
   "workdim $s1;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_workdim[] = {
   {
     32,
@@ -116,17 +86,11 @@ BrigInstBase outputarray_instruction1opnodt_workdim[] = {
   }
 };
 
-/*****************************************************************************/
-/*****************        TITLE     :Brigworkitemidflat_test case   **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        workitemid_flat      dest:s reg;          **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTWorkitemidFlat: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_workitemidflat[] = {
   "workitemid_flat $s1;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_workitemidflat[] = {
   {
     32,
@@ -138,17 +102,11 @@ BrigInstBase outputarray_instruction1opnodt_workitemidflat[] = {
   }
 };
 
-/*****************************************************************************/
-/*****************        TITLE     :Brigworkitemaidflat_test case  **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        workitemaid_flat    dest:s reg;           **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTWorkitemaidFlat: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_workitemaidflat[] = {
   "workitemaid_flat $s1;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_workitemaidflat[] = {
   {
     32,
@@ -160,17 +118,11 @@ BrigInstBase outputarray_instruction1opnodt_workitemaidflat[] = {
   }
 };
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigClock_test case            **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************        clock    dest:d reg;                      **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTClock: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_clock[] = {
   "clock $d1;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_clock[] = {
   {
     32,
@@ -182,20 +134,15 @@ BrigInstBase outputarray_instruction1opnodt_clock[] = {
   }
 };
 
-/*****************************************************************************/
-/*****************        TITLE     :BrigDebugtrap_test case        **********/
-/*****************        TIME      :2012-09-03                     **********/
-/*****************        AUTHOR    :Jiang Yan                      **********/
-/*****************   debugtrap  src:s reg,Immed value,(wavesize)    **********/
-/*****************************************************************************/
-
+class Instruction1opNoDTDebugtrap: public ::testing::TestWithParam<int>{
+};
 std::string inputarray_instruction1opnodt_debugtrap[] = {
   "debugtrap $s0;",
   "debugtrap $s4;",
   "debugtrap 0;",
   "debugtrap 61;"
+  "debugtrap WAVESIZE;"
 };
-
 BrigInstBase outputarray_instruction1opnodt_debugtrap[] = {
   {
     32,
