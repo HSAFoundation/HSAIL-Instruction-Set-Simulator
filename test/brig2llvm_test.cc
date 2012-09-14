@@ -5820,3 +5820,294 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
     "Invalid reg, should be point BrigDirectiveSymbol")));
   }
 }
+TEST(Brig2LLVMTest, validateBrigOperandReg) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$s21");
+    strings.append("$c1");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor);
+    BrigOperandReg bod = {
+      sizeof(bod),
+      BrigEOperandReg,
+      Brigb1,
+      0,
+      5
+    };
+    operands.append(&bod);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$s20s");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Garbage after register offset")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("#d20s");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Register names must begin with '$'")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$a2");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid register type")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$ss");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Register offset not a number")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$s91447483646");
+    strings.append("$c2");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor),
+      BrigEOperandReg,
+      Brigb1,
+      0,
+      0
+    };
+    operands.append(&bor);
+    BrigOperandReg bod = {
+      sizeof(bod),
+      BrigEOperandReg,
+      Brigb64,
+      0,
+      13
+    };
+    operands.append(&bod);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Register offset out-of-bounds")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$s21");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor),
+      BrigEOperandReg,
+      Brigb1,
+      1,
+      0
+    };
+    operands.append(&bor);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Register name does not match type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "reserved must be zero")));
+  }
+}
