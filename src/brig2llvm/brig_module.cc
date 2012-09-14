@@ -883,7 +883,19 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
-  return true;
+  bool valid = true;
+  if (operand->elementCount) {
+    valid &= check(sizeof(BrigOperandArgumentList) + 
+                   sizeof(operand->o_args[1]) *(operand->elementCount - 1) <= 
+                   operand->size, "Invalid size");
+    for (unsigned i = 0; i < operand->elementCount; i++) {
+      oper_iterator argsOper(S_.operands + operand->o_args[i]);
+      valid &= validate(argsOper);
+      valid &= check(isa<BrigOperandArgumentRef>(argsOper), 
+                     "Invalid o_args, should point BrigOperandArgumentRef");
+    }
+  }
+  return valid;
 }
 
 bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
