@@ -6111,3 +6111,271 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     "reserved must be zero")));
   }
 }
+TEST(Brig2LLVMTest, validateBrigOperandRegV2) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$s21");
+    strings.append("$s1");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor);
+    BrigOperandReg bod = {
+      sizeof(bod),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      5
+    };
+    operands.append(&bod);
+    
+    BrigOperandRegV2 borv = {
+      sizeof(borv),
+      BrigEOperandRegV2,
+      Brigb32,
+      0,
+      {8,20}
+    };
+    operands.append(&borv);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$s21");
+    strings.append("$c1");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor1);
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb1,
+      0,
+      5
+    };
+    operands.append(&bor2);
+    
+    BrigOperandRegV2 borv = {
+      sizeof(borv),
+      BrigEOperandRegV2,
+      Brigb128,
+      1,
+      {8,20}
+    };
+    operands.append(&borv);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "registers' type should be the same")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid date type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "reserved must be zero")));
+  }
+}
+TEST(Brig2LLVMTest, validateBrigOperandRegV4) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$s21");
+    strings.append("$s1");
+    strings.append("$s2");
+    strings.append("$s3");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor1);
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      5
+    };
+    operands.append(&bor2);
+    BrigOperandReg bor3 = {
+      sizeof(bor3),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      9
+    };
+    operands.append(&bor3);
+    BrigOperandReg bor4 = {
+      sizeof(bor4),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      13
+    };
+    operands.append(&bor4);
+    
+    BrigOperandRegV4 borv = {
+      sizeof(borv),
+      BrigEOperandRegV4,
+      Brigb32,
+      0,
+      {8,20,32,44}
+    };
+    operands.append(&borv);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("$s21");
+    strings.append("$c1");
+    strings.append("$d2");
+    strings.append("$s3");
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) 
+      operands.append_char(0);
+
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      0
+    };
+    operands.append(&bor1);
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb1,
+      0,
+      5
+    };
+    operands.append(&bor2);
+    BrigOperandReg bor3 = {
+      sizeof(bor3),
+      BrigEOperandReg,
+      Brigb64,
+      0,
+      9
+    };
+    operands.append(&bor3);
+    BrigOperandReg bor4 = {
+      sizeof(bor4),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      13
+    };
+    operands.append(&bor4);
+    
+    BrigOperandRegV4 borv = {
+      sizeof(borv),
+      BrigEOperandRegV4,
+      Brigb128,
+      1,
+      {8,20,32,44}
+    };
+    operands.append(&borv);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "registers' type should be the same")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid date type")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "reserved must be zero")));
+  }
+}

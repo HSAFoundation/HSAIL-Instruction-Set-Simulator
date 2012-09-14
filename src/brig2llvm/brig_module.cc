@@ -1019,10 +1019,52 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
-  return true;
+  bool valid = true;
+  BrigDataType16_t types[2];
+  int i;
+  for(i = 0; i < 2; i++) {
+    const oper_iterator oper(S_.operands + operand->regs[i]);
+    if(!validate(oper)) return false;
+    const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
+    types[i] = bor->type;
+  }
+  valid &= check(types[0] == types[1],
+                 "registers' type should be the same");
+  valid &= check(operand->type == Brigb1 ||
+                 operand->type == Brigb32 ||
+                 operand->type == Brigb64,
+                 "Invalid date type");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid;
 }
 bool BrigModule::validate(const BrigOperandRegV4 *operand) const {
-  return true;
+  bool valid = true;
+  BrigDataType16_t types[4];
+  int i;
+  for(i = 0; i < 4; i++) {
+    const oper_iterator oper(S_.operands + operand->regs[i]);
+    if(!validate(oper)) return false;
+    const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
+    types[i] = bor->type;
+  }
+  valid &= check(types[0] == types[1],
+                 "registers' type should be the same");
+  valid &= check(types[0] == types[2],
+                 "registers' type should be the same");
+  valid &= check(types[0] == types[3],
+                 "registers' type should be the same");
+  valid &= check(types[0] == operand->type,
+                   "operand type must be the same as the register types");
+  valid &= check(operand->type == Brigb1 ||
+                 operand->type == Brigb32 ||
+                 operand->type == Brigb64,
+                 "Invalid date type");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid;
 }
 bool BrigModule::validate(const BrigOperandWaveSz *operand) const {
   return true;
