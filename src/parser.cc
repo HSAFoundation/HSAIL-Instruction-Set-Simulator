@@ -3129,6 +3129,10 @@ int LabelTargets(Context* context) {
   return 1;
 }
 
+int Instruction4ShufflePart6(Context* context) {
+  return 1;
+}
+
 int Instruction4CmovPart5(Context* context) {
   BrigInstBase cmovInst = {
     sizeof(BrigInstBase),                    // size

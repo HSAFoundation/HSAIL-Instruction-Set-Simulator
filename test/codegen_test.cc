@@ -7994,7 +7994,88 @@ TEST(CodegenTest,  Instruction4_Cmov_CodeGen_SimpleTest) {
 };
 
 
+TEST(CodegenTest,  Instruction4_Shuffle_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  // Note: Shuffle without ftz and rounding.
+  BrigInstBase shuffleRef = {
+    sizeof(BrigInstBase),   // size
+    BrigEInstBase,          // kind
+    BrigShuffle,               // opcode
+    Brigu8x4,               // type
+    BrigNoPacking,          // packing
+    {0, 0, 0, 0, 0}         // o_operands[5]
+  };
 
+  std::string input("shuffle_u8x4 $s10, $s12, $s12, 0x55;\n");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction4ShufflePart6(context));
+
+  BrigoOffset32_t curOpOffset = 8;
+  BrigcOffset32_t curCodeOffset = 0;
+  
+  BrigOperandReg getReg;
+  BrigInstBase  getShuffle;
+  BrigOperandImmed getImm;
+
+  shuffleRef.o_operands[0] = curOpOffset;
+  context->get_operand(curOpOffset, &getReg);  
+  curOpOffset += sizeof(BrigOperandReg);
+
+  // BrigOperandReg
+  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name); 
+
+  shuffleRef.o_operands[1] = curOpOffset;
+  shuffleRef.o_operands[2] = curOpOffset;
+  context->get_operand(curOpOffset, &getReg);  
+  curOpOffset += sizeof(BrigOperandReg);
+
+  // BrigOperandReg
+  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(5, getReg.name); 
+  context->get_code(curCodeOffset, &getShuffle);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  curOpOffset += curOpOffset & 0x7;
+  shuffleRef.o_operands[3] = curOpOffset;
+  context->get_operand(curOpOffset, &getImm);  
+  curOpOffset += sizeof(BrigOperandImmed);
+
+  // BrigOperandImmed
+  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(0x55, getImm.bits.u);
+
+
+  context->get_code(curCodeOffset, &getShuffle);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  // BrigInstBase
+  EXPECT_EQ(shuffleRef.size, getShuffle.size);
+  EXPECT_EQ(shuffleRef.kind, getShuffle.kind);
+  EXPECT_EQ(shuffleRef.opcode, getShuffle.opcode);
+  EXPECT_EQ(shuffleRef.type, getShuffle.type);
+  EXPECT_EQ(shuffleRef.packing, getShuffle.packing);
+  EXPECT_EQ(shuffleRef.o_operands[0], getShuffle.o_operands[0]);
+  EXPECT_EQ(shuffleRef.o_operands[1], getShuffle.o_operands[1]);
+  EXPECT_EQ(shuffleRef.o_operands[2], getShuffle.o_operands[2]);
+  EXPECT_EQ(shuffleRef.o_operands[3], getShuffle.o_operands[3]);
+  EXPECT_EQ(shuffleRef.o_operands[4], getShuffle.o_operands[4]);
+
+  delete lexer;
+};
 
 }  // namespace brig
 }  // namespace hsa
