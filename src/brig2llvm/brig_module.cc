@@ -910,6 +910,7 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
   valid &= validate(nameOper);
   valid &= check(isa<BrigOperandAddress>(nameOper), 
                  "Invalid name, should point to BrigOperandAddress");
+
   if(operand->reg) {
     const oper_iterator oper(S_.operands + operand->reg);
     if(!validate(oper)) return false;
@@ -919,6 +920,7 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
                    bor->type == Brigb64, "Invalid register, the register "
                    "must be an s or d register");
   }
+
   return valid;
 }
 
@@ -939,6 +941,7 @@ bool BrigModule::validate(const BrigOperandImmed *operand) const {
 
 bool BrigModule::validate(const BrigOperandIndirect *operand) const {
   bool valid = true;
+
   if (operand->reg) {
     oper_iterator regOper(S_.operands + operand->reg);
     valid &= validate(regOper);
@@ -948,6 +951,7 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
                    operand->type == Brigb64, "Invald datatype, should be "
                    "Brigb32 and Brigb64");
   }
+
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   return valid;
