@@ -3294,7 +3294,7 @@ int Instruction4CmovPart5(Context* context) {
     if (context->token_type == REGISTER) {
       opName = context->token_value.string_val;
     } else {
-      context->set_error(INVALID_OPERAND);
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     } 
 
@@ -3453,7 +3453,7 @@ int Instruction4MultiMediaOperationPart1(Context* context) {
     if (context->token_type == REGISTER) {
       opName = context->token_value.string_val;
     } else {
-      context->set_error(INVALID_OPERAND);
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     } 
 
@@ -3999,62 +3999,48 @@ int Instruction4BitStringOperationPart4(Context* context) {
 }
 
 int Instruction4(Context* context) {
-  if (context->token_type == INSTRUCTION4_OPCODE) {
-    context->token_to_scan = yylex();
-    if (!RoundingMode(context)) {
-    }
-    if (context->token_type == DATA_TYPE_ID) {
-      context->token_to_scan = yylex();
-      if (!Operand(context)) {
-        if (context->token_to_scan != ',') {
-          context->set_error(MISSING_COMMA);
-          return 1;
-        }
-        context->token_to_scan = yylex();
-        if (!Operand(context)) {
-          if (context->token_to_scan != ',') {
-            context->set_error(MISSING_COMMA);
-            return 1;
-          }
-          context->token_to_scan = yylex();
-          if (!Operand(context)) {
-            if (context->token_to_scan != ',') {
-              context->set_error(MISSING_COMMA);
-              return 1;
-            }
-            context->token_to_scan = yylex();
-            if (!Operand(context)) {
-              if (context->token_to_scan == ';') {
-                context->token_to_scan = yylex();
-                return 0;
-              } else {
-                context->set_error(MISSING_SEMICOLON);
-                return 1;
-              }  // ';'
-            } else {  // 4 operand
-              context->set_error(INVALID_FOURTH_OPERAND);
-              return 1;
-            }
-          } else {  // 3 operand
-            context->set_error(INVALID_THIRD_OPERAND);
-            return 1;
-          }
-        } else {  // 2 operand
-          context->set_error(INVALID_SECOND_OPERAND);
-          return 1;
-        }
-      } else {  // 1 operand
-        context->set_error(INVALID_FIRST_OPERAND);
-        return 1;
-      }
-    } else {  // DATA_TYPE_ID
-      context->set_error(MISSING_DATA_TYPE);
-      return 1;
-    }
-  } else {  // INSTRUCTION4_OPCODE
-    context->set_error(INVALID_INSTRUCTION);
-  }
 
+  switch(context->token_to_scan) {
+    case SAD:
+    case SAD2:
+    case SAD4:
+    case SAD4HI:
+    case LERP:
+    case BITALIGN:
+    case BYTEALIGN:
+      if (!Instruction4MultiMediaOperationPart1(context)) {
+        return 0;
+      }
+      return 1;
+    case FMA:
+      if (!Instruction4FmaPart2(context)) {
+        return 0;
+      }
+      return 1;
+    case MAD:
+      if (!Instruction4MadPart3(context)) {
+        return 0;
+      }
+      return 1;
+    case EXTRACT:
+    case INSERT:
+    case BITSELECT:
+      if (!Instruction4BitStringOperationPart4(context)) {
+        return 0;
+      }
+      return 1;
+    case CMOV:
+      if (!Instruction4CmovPart5(context)) {
+        return 0;
+      }
+      return 1;
+    case SHUFFLE:
+      if (!Instruction4ShufflePart6(context)) {
+        return 0;
+      }
+      return 1;
+  }
+  
   return 1;
 }
 
