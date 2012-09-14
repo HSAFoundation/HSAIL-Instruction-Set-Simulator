@@ -3894,12 +3894,24 @@ int Instruction5(Context* context) {
 
 int Extension(Context* context) {
   // first token is EXTENSION "extension"
+  if (EXTENSION != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
 
   if (context->token_to_scan == TOKEN_STRING) {
+    std::string str(context->token_value.string_val);
     context->token_to_scan = yylex();
 
     if (context->token_to_scan == ';') {
+      BrigDirectiveExtension bde = {
+        sizeof(BrigDirectiveExtension),
+        BrigEDirectiveExtension,
+        context->get_code_offset(),
+        context->add_symbol(str)
+      };
+      context->append_directive(&bde);
+
       context->token_to_scan = yylex();
       return 0;
     } else {   // missing ";"
