@@ -1313,6 +1313,19 @@ public:
 };
 
 /**
+ * @brief get the count of devices on the platform
+ *
+ * @return the count of the number of devices
+ *         in the platform.
+ * */
+DLL_PUBLIC uint32_t getDeviceCount();
+/**
+ * @brief get a list of devices available on the platform.
+ * @return Returns the list of all Devices 
+ * */
+DLL_PUBLIC const hsa::vector<hsa::Device*>& getDevices();
+
+/**
  * @brief get the version of the RuntimeApi.
  * 
  * Rules for incrementing the major, minor, patch versions:
