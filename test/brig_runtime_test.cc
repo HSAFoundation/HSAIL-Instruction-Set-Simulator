@@ -4,6 +4,8 @@
 
 using hsa::brig::cmpResult;
 using hsa::brig::ForEach;
+using hsa::brig::getMax;
+using hsa::brig::getMin;
 using hsa::brig::Int;
 using hsa::brig::Int48Ty;
 using hsa::brig::Int24Ty;
@@ -956,10 +958,10 @@ Cmp(declare, ne, b1)
 MakeCmpTest(eq, b1)
 MakeCmpTest(ne, b1)
 
-template<class R, class T> void Cmp_numLogic(R result, T a, T b) {
+template<class R, class T> static void Cmp_numLogic(R result, T a, T b) {
   EXPECT_EQ(cmpResult<R>(!isNan(a) && !isNan(b)), result);
 }
-template<class R, class T> void Cmp_nanLogic(R result, T a, T b) {
+template<class R, class T> static void Cmp_nanLogic(R result, T a, T b) {
   EXPECT_EQ(cmpResult<R>(isNan(a) || isNan(b)), result);
 }
 // Cmp(declare, num, f16)
@@ -974,3 +976,72 @@ MakeCmpTest(num, f64)
 // MakeCmpTest(nan, f16)
 MakeCmpTest(nan, f32)
 MakeCmpTest(nan, f64)
+
+template<class R, class T> static void Cvt_Logic(R result, T a) {
+  if(isBool<R>()) {
+    EXPECT_EQ(result, a != T(0));
+  } else if(isNan(a)) {
+    EXPECT_EQ(0, result);
+  } else if(isPosInf(a)) {
+    EXPECT_EQ(getMax<R>(), result);
+  } else if(isNegInf(a)) {
+    EXPECT_EQ(getMin<R>(), result);
+  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_EQ(R(a), result);
+  }
+}
+template<class R, class T> static void Cvt_upi_Logic(R result, T a) {
+  if(isNan(a)) {
+    EXPECT_EQ(0, result);
+  } else if(isPosInf(a)) {
+    EXPECT_EQ(getMax<R>(), result);
+  } else if(isNegInf(a)) {
+    EXPECT_EQ(getMin<R>(), result);
+  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_LE(a, result);
+  }
+}
+template<class R, class T> static void Cvt_downi_Logic(R result, T a) {
+  if(isNan(a)) {
+    EXPECT_EQ(0, result);
+  } else if(isPosInf(a)) {
+    EXPECT_EQ(getMax<R>(), result);
+  } else if(isNegInf(a)) {
+    EXPECT_EQ(getMin<R>(), result);
+  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_GE(a, result);
+  }
+}
+template<class R, class T> static void Cvt_zeroi_Logic(R result, T a) {
+  if(isNan(a)) {
+    EXPECT_EQ(0, result);
+  } else if(isPosInf(a)) {
+    EXPECT_EQ(getMax<R>(), result);
+  } else if(isNegInf(a)) {
+    EXPECT_EQ(getMin<R>(), result);
+  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_GE(std::abs(a), std::abs(result));
+  }
+}
+template<class R, class T> static void Cvt_neari_Logic(R result, T a) {
+  if(isNan(a)) {
+    EXPECT_EQ(0, result);
+  } else if(isPosInf(a)) {
+    EXPECT_EQ(getMax<R>(), result);
+  } else if(isNegInf(a)) {
+    EXPECT_EQ(getMin<R>(), result);
+  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_GE(0.5, std::abs(f64(result) - f64(a)));
+  }
+}
+MakeCvtI2FTest(Cvt_)
+MakeCvtF2ITest(f32)
+MakeCvtF2ITest(f64)
+MakeCvtX2ITestRet(f32, b1, Cvt_)
+MakeCvtX2ITestRet(f64, b1, Cvt_)
+MakeCvtF2FsTest(f32)
+MakeCvtF2FsTest(f64)
+MakeCvtF2FdTest(up,   a <= result)
+MakeCvtF2FdTest(down, a >= result)
+MakeCvtF2FdTest(zero, abs(a) >= abs(result))
+MakeCvtF2FdTest(near, (f32) a == result)
