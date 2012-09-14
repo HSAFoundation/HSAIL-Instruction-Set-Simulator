@@ -5607,8 +5607,7 @@ int Segp(Context* context) {
     }
   } else if (context->token_to_scan == STOF || // stof or ftos
              context->token_to_scan == FTOS) {
-    context->token_to_scan = yylex();
-
+    
     BrigInstMem sf_op = {
       36,                    // size
       BrigEInstMem,          // kind
@@ -5627,7 +5626,7 @@ int Segp(Context* context) {
         sf_op.opcode = BrigFtoS;
         break;
     }
-
+    context->token_to_scan = yylex();
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
       switch (context->token_to_scan) {
         case _GLOBAL:
