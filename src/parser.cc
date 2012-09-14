@@ -7502,7 +7502,7 @@ int DecimalListSingle(Context* context) {
 	  }
           init_length = 4 * n ;
           for (int i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u8[i] = 0;
+            bdi->initializationData.u16[i] = 0;
           }
           break;
         case Brigb32:
@@ -7511,7 +7511,7 @@ int DecimalListSingle(Context* context) {
 	  }
           init_length = 2 * n ;
           for (int i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u8[i] = 0;
+            bdi->initializationData.u32[i] = 0;
           }
           break;
         case Brigb64:
@@ -7520,7 +7520,7 @@ int DecimalListSingle(Context* context) {
 	  }
           init_length =  n ;
           for (int i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u8[i] = 0;
+            bdi->initializationData.u64[i] = 0;
           }
           break;
         }
