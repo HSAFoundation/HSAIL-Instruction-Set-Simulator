@@ -7754,6 +7754,33 @@ TEST(CodegenTest,  Instruction5_CodeGen_SimpleTest) {
   delete lexer;
 };
 
+TEST(CodegenTest,ExtensionCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("extension \"\\device\\amd.hsa\";");
+  
+  Lexer *lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,Extension(context));
+
+  BrigDirectiveExtension ref = {
+    12, 
+    BrigEDirectiveExtension,
+    0,
+    0
+  };
+  BrigDirectiveExtension get;
+  context->get_directive(0,&get);
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.c_code,get.c_code);
+  EXPECT_EQ(ref.s_name,get.s_name); 
+
+  delete lexer;
+};
 
 }  // namespace brig
 }  // namespace hsa
