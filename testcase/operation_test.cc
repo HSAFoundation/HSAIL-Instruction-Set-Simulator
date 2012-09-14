@@ -409,6 +409,7 @@ TEST_P(Instruction1opNoDTDebugtrap, BrigDebugtrap){
 INSTANTIATE_TEST_CASE_P(OperationTest, 
                         Instruction1opNoDTDebugtrap, 
                         testing::Range(0,5));
+
 TEST_P(MulBase, BrigMulBase) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
