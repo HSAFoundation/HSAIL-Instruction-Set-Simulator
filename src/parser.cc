@@ -7218,10 +7218,22 @@ int Control(Context* context) {
 
 int Pragma(Context* context) {
   // first token is PRAGMA
+  if(PRAGMA != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_STRING) {
+    std::string s_name = context->token_value.string_val;
     context->token_to_scan = yylex();
     if (context->token_to_scan == ';') {
+      BrigDirectivePragma bdp = {
+        sizeof(BrigDirectivePragma), // size
+        BrigEDirectivePragma,        // kind
+        context->get_code_offset(),  // c_code
+        context->add_symbol(s_name)  // s_name
+      };
+      context->append_directive(&bdp);
+
       context->token_to_scan = yylex();
       return 0;
     } else {  // ';'
@@ -7232,8 +7244,6 @@ int Pragma(Context* context) {
     context->set_error(MISSING_STRING);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 // the type must be u or s
