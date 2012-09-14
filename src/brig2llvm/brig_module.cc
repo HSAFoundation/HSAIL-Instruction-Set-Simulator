@@ -958,7 +958,13 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
-  return true;
+  bool valid = true;
+  dir_iterator directiveDir(S_.directives + operand->labeldirective);
+  valid &= validate(directiveDir);
+  valid &= check(isa<BrigDirectiveLabel>(directiveDir), 
+                 "Invalid directive, should point "
+                 "to a BrigDirectiveLabel");
+  return valid;
 }
 bool BrigModule::validate(const BrigOperandOpaque *operand) const {
   return true;
