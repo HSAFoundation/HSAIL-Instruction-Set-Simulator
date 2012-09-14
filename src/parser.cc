@@ -3403,6 +3403,10 @@ int Instruction4CmovPart5(Context* context) {
 
 }
 
+int Instruction4MultiMediaOperationPart1(Context* context) {
+  return 1;
+}
+
 int Instruction4FmaPart2(Context* context) {
   BrigInstBase fmaInst = {
     sizeof(BrigInstBase),   // size

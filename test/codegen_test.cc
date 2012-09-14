@@ -8433,5 +8433,198 @@ TEST(CodegenTest,  Instruction4_BitStringOperation_CodeGen_SimpleTest) {
 };
 
 
+TEST(CodegenTest,  Instruction4_MultiMediaOperation_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  // Note: Bit String Operation without ftz and rounding.
+
+
+  BrigInstBase bitAlignInst = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigBitAlign,         // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+
+  BrigInstBase byteAlignInst = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigByteAlign,         // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+
+  BrigInstBase sadInst = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigSad4hi,           // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+
+  BrigInstBase lerpInst = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigLerp,              // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+
+
+  std::string input("bitalign_b32 $s5, $s0, $s1, $s2;\n");
+  input.append("bytealign_b32 $s5, $s0, $s1, $s2;\n");
+  input.append("sad4hi_b32 $s5, $s0, $s1, $s6;\n");
+  input.append("lerp_b32 $s5, $s0, $s1, $s2;\n");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction4MultiMediaOperationPart1(context));
+  EXPECT_EQ(0, Instruction4MultiMediaOperationPart1(context));
+  EXPECT_EQ(0, Instruction4MultiMediaOperationPart1(context));
+  EXPECT_EQ(0, Instruction4MultiMediaOperationPart1(context));
+
+  BrigoOffset32_t curOpOffset = 8;
+  BrigcOffset32_t curCodeOffset = 0;
+  
+  BrigOperandReg getReg;
+  BrigInstBase getBase;
+
+  // BrigOperandReg S5
+  byteAlignInst.o_operands[0] = curOpOffset;
+  bitAlignInst.o_operands[0] = curOpOffset;
+  lerpInst.o_operands[0] = curOpOffset;
+  sadInst.o_operands[0] = curOpOffset;
+  context->get_operand(curOpOffset, &getReg);  
+  curOpOffset += sizeof(BrigOperandReg);
+
+  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name); 
+
+  // BrigOperandReg S0
+  byteAlignInst.o_operands[1] = curOpOffset;
+  bitAlignInst.o_operands[1] = curOpOffset;
+  lerpInst.o_operands[1] = curOpOffset;
+  sadInst.o_operands[1] = curOpOffset;  
+  context->get_operand(curOpOffset, &getReg);  
+  curOpOffset += sizeof(BrigOperandReg);
+
+  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(4, getReg.name); 
+
+  // BrigOperandReg S1
+  byteAlignInst.o_operands[2] = curOpOffset;
+  bitAlignInst.o_operands[2] = curOpOffset;
+  lerpInst.o_operands[2] = curOpOffset;
+  sadInst.o_operands[2] = curOpOffset;
+  context->get_operand(curOpOffset, &getReg);  
+  curOpOffset += sizeof(BrigOperandReg);
+
+  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(8, getReg.name); 
+
+  // BrigOperandReg S2
+  byteAlignInst.o_operands[3] = curOpOffset;
+  bitAlignInst.o_operands[3] = curOpOffset;
+  lerpInst.o_operands[3] = curOpOffset;
+  context->get_operand(curOpOffset, &getReg);  
+  curOpOffset += sizeof(BrigOperandReg);
+
+  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(12, getReg.name); 
+
+  // BrigOperandReg S6
+  sadInst.o_operands[3] = curOpOffset;
+  context->get_operand(curOpOffset, &getReg);  
+  curOpOffset += sizeof(BrigOperandReg);
+
+  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(16, getReg.name); 
+
+
+  context->get_code(curCodeOffset, &getBase);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  // BrigInstBase bitalign
+  EXPECT_EQ(bitAlignInst.size, getBase.size);
+  EXPECT_EQ(bitAlignInst.kind, getBase.kind);
+  EXPECT_EQ(bitAlignInst.opcode, getBase.opcode);
+  EXPECT_EQ(bitAlignInst.type, getBase.type);
+  EXPECT_EQ(bitAlignInst.packing, getBase.packing);
+  EXPECT_EQ(bitAlignInst.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(bitAlignInst.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(bitAlignInst.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(bitAlignInst.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(bitAlignInst.o_operands[4], getBase.o_operands[4]);
+
+  context->get_code(curCodeOffset, &getBase);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  // BrigInstBase bytealign
+  EXPECT_EQ(byteAlignInst.size, getBase.size);
+  EXPECT_EQ(byteAlignInst.kind, getBase.kind);
+  EXPECT_EQ(byteAlignInst.opcode, getBase.opcode);
+  EXPECT_EQ(byteAlignInst.type, getBase.type);
+  EXPECT_EQ(byteAlignInst.packing, getBase.packing);
+  EXPECT_EQ(byteAlignInst.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(byteAlignInst.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(byteAlignInst.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(byteAlignInst.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(byteAlignInst.o_operands[4], getBase.o_operands[4]);
+
+  context->get_code(curCodeOffset, &getBase);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  // BrigInstBase sad4hi
+  EXPECT_EQ(sadInst.size, getBase.size);
+  EXPECT_EQ(sadInst.kind, getBase.kind);
+  EXPECT_EQ(sadInst.opcode, getBase.opcode);
+  EXPECT_EQ(sadInst.type, getBase.type);
+  EXPECT_EQ(sadInst.packing, getBase.packing);
+  EXPECT_EQ(sadInst.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(sadInst.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(sadInst.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(sadInst.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(sadInst.o_operands[4], getBase.o_operands[4]);
+
+  context->get_code(curCodeOffset, &getBase);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  // BrigInstBase lerp
+  EXPECT_EQ(lerpInst.size, getBase.size);
+  EXPECT_EQ(lerpInst.kind, getBase.kind);
+  EXPECT_EQ(lerpInst.opcode, getBase.opcode);
+  EXPECT_EQ(lerpInst.type, getBase.type);
+  EXPECT_EQ(lerpInst.packing, getBase.packing);
+  EXPECT_EQ(lerpInst.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(lerpInst.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(lerpInst.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(lerpInst.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(lerpInst.o_operands[4], getBase.o_operands[4]);
+
+  delete lexer;
+};
+
+
 }  // namespace brig
 }  // namespace hsa
