@@ -3404,6 +3404,145 @@ int Instruction4CmovPart5(Context* context) {
 }
 
 int Instruction4MultiMediaOperationPart1(Context* context) {
+  const unsigned int first_token = context->token_to_scan;
+  
+  BrigInstBase mmoInst = {
+    sizeof(BrigInstBase),   // size
+    BrigEInstBase,         // kind
+    0,                     // opcode
+    0,                     // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}       // o_operands[5]
+  };
+  
+  switch(first_token) {
+    case SAD:
+      mmoInst.opcode = BrigSad;
+      break;
+    case SAD2:
+      mmoInst.opcode = BrigSad2;
+      break;
+    case SAD4:
+      mmoInst.opcode = BrigSad4;
+      break;
+    case SAD4HI:
+      mmoInst.opcode = BrigSad4hi;
+      break;
+    case LERP:
+      mmoInst.opcode = BrigLerp;
+      break;
+    case BITALIGN:
+      mmoInst.opcode = BrigBitAlign;
+      break;
+    case BYTEALIGN:
+      mmoInst.opcode = BrigByteAlign;
+      break;
+  }
+  
+  context->token_to_scan = yylex();
+  // Note: must be b32
+  if (context->token_to_scan == _B32) {
+
+    mmoInst.type = context->token_value.data_type;
+    context->token_to_scan = yylex();
+    
+    // TODO(Chuang): dest:  The destination is an f32.
+    std::string opName;
+    BrigoOffset32_t opSize;
+
+    if (context->token_type == REGISTER) {
+      opName = context->token_value.string_val;
+    } else {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    } 
+
+    if (!Operand(context)) {
+      mmoInst.o_operands[0] = context->operand_map[opName];
+      if (context->token_to_scan != ',') {
+        context->set_error(MISSING_COMMA);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+      // TODO(Chuang):src0, src1, src2, src3: Sources. All are b32
+      opSize = context->get_operand_offset();
+      if (context->token_type == REGISTER) {
+        opName = context->token_value.string_val;
+      } else if (context->token_type == CONSTANT) {
+        opSize += opSize & 0x7;
+      }  // else WaveSize
+
+      if (!Operand(context)) {
+        if (opSize == context->get_operand_offset()) {
+          mmoInst.o_operands[1] = context->operand_map[opName];
+        } else {
+          mmoInst.o_operands[1] = opSize;
+        }
+        if (context->token_to_scan != ',') {
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+        opSize = context->get_operand_offset();
+        if (context->token_type == REGISTER) {
+          opName = context->token_value.string_val;
+        } else if (context->token_type == CONSTANT) {
+          opSize += opSize & 0x7;
+        }  // else WaveSize
+        
+        if (!Operand(context)) {
+          if (opSize == context->get_operand_offset()) {
+            mmoInst.o_operands[2] = context->operand_map[opName];
+          } else {
+            mmoInst.o_operands[2] = opSize;
+          }
+          if (context->token_to_scan != ',') {
+              context->set_error(MISSING_COMMA);
+              return 1;
+          }
+          context->token_to_scan = yylex();
+
+          opSize = context->get_operand_offset();
+          if (context->token_type == REGISTER) {
+            opName = context->token_value.string_val;
+          } else if (context->token_type == CONSTANT) {
+            opSize += opSize & 0x7;
+          }  // else WaveSize 
+
+          if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()) {
+              mmoInst.o_operands[3] = context->operand_map[opName];
+            } else {
+              mmoInst.o_operands[3] = opSize;
+            }
+            if (context->token_to_scan == ';') {
+              context->append_code(&mmoInst);
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }  // ';'
+          } else {  // 4 operand
+              context->set_error(INVALID_FOURTH_OPERAND);
+              return 1;
+          }
+        } else {  // 3 operand
+          context->set_error(INVALID_THIRD_OPERAND);
+          return 1;
+        }
+      } else {  // 2 operand
+        context->set_error(INVALID_SECOND_OPERAND);
+        return 1;
+      }
+    } else {  // 1 operand
+      context->set_error(INVALID_FIRST_OPERAND);
+      return 1;
+    }
+  } else {  // DATA_TYPE_ID
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
   return 1;
 }
 
