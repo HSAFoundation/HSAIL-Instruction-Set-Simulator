@@ -570,6 +570,25 @@ extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
   return result;      
 }
 
+extern "C" b32 Sad_b32(b32 w, b32 x, b32 y) {
+  return 0;
+}
+
+extern "C" b32 Sad2_b32(b32 w, b32 x, b32 y) {
+  b32 result = 0;
+  return result;
+}
+
+extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
+  b32 result = 0;
+  return result;
+}
+
+extern "C" b32 Sad4hi_b32(b32 w, b32 x, b32 y) {
+  b32 result = 0;
+  return result;
+}
+
 CmpInst(eq, x == y)
 CmpInst(ne, !isUnordered(x, y) && x != y)
 CmpInst(lt, x <  y)

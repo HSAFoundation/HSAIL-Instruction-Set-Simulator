@@ -903,6 +903,40 @@ static void Lerp_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
 extern "C" b32 Lerp_b32(b32, b32, b32);
 MakeTest(Lerp_b32, Lerp_b32_Logic)
 
+static void Sad_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+  EXPECT_EQ(result, abs(a - b) + c);    
+}
+extern "C" b32 Sad_b32(b32, b32, b32);
+MakeTest(Sad_b32, Sad_b32_Logic)
+
+static void Sad2_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+  EXPECT_EQ(result, abs((a & 0xFFFF) - (b & 0xFFFF))
+                  + abs(((a >> 16) & 0xFFFF) - ((b >> 16) & 0xFFFF))
+                  + c);    
+}
+extern "C" b32 Sad2_b32(b32, b32, b32);
+MakeTest(Sad2_b32, Sad2_b32_Logic)
+
+static void Sad4_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+  EXPECT_EQ(result, abs((a & 0xFF) - (b & 0xFF))
+                  + abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF))
+                  + abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF))
+                  + abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF))
+                  + c);    
+}
+extern "C" b32 Sad4_b32(b32, b32, b32);
+MakeTest(Sad4_b32, Sad4_b32_Logic)
+
+static void Sad4hi_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+  EXPECT_EQ(result, ((abs((a & 0xFF) - (b & 0xFF))
+                    + abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF))
+                    + abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF))
+                    + abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF))) << 16)
+                    + c);    
+}
+extern "C" b32 Sad4hi_b32(b32, b32, b32);
+MakeTest(Sad4hi_b32, Sad4hi_b32_Logic)
+
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)
 TestCmp(lt, a <  b)
