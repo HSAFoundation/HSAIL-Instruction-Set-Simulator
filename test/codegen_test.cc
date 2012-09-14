@@ -7763,16 +7763,19 @@ TEST(CodegenTest,ExtensionCodegen){
   Lexer *lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
 
+  size_t str_len = strlen("\"\\device\\amd.hsa\"") + 1;
   EXPECT_EQ(0,Extension(context));
 
   BrigDirectiveExtension ref = {
-    12, 
+    sizeof(BrigDirectiveExtension), 
     BrigEDirectiveExtension,
-    0,
-    0
+    context->get_code_offset(),
+    context->get_string_offset() - str_len
   };
   BrigDirectiveExtension get;
-  context->get_directive(0,&get);
+  BrigdOffset32_t d_offset = context->get_directive_offset()
+           - sizeof(BrigDirectiveExtension);
+  context->get_directive(d_offset,&get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
@@ -7794,13 +7797,15 @@ TEST(CodegenTest,PragmaCodegen){
   EXPECT_EQ(0,Pragma(context));
 
   BrigDirectivePragma ref = {
-    12, 
+    sizeof(BrigDirectivePragma), 
     BrigEDirectivePragma,
-    0,
-    0
+    context->get_code_offset(),
+    context->get_string_offset() - (strlen("\"once\"") + 1)
   };
   BrigDirectivePragma get;
-  context->get_directive(0,&get);
+  BrigdOffset32_t d_offset = context->get_directive_offset()
+                       -sizeof(BrigDirectivePragma);
+  context->get_directive(d_offset,&get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
