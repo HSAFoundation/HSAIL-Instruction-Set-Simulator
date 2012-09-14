@@ -96,6 +96,7 @@ class BrigModule {
 
   bool validate(const BrigOperandAddress *operand) const;
   bool validate(const BrigOperandArgumentList *operand) const;
+  bool validate(const BrigOperandFunctionList *operand) const;
   bool validate(const BrigOperandArgumentRef *operand) const;
   bool validate(const BrigOperandBase *operand) const;
   bool validate(const BrigOperandCompound *operand) const;

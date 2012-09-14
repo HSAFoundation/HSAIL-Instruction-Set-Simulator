@@ -138,6 +138,7 @@ bool BrigModule::validateOperands(void) const {
     switch(it->kind) {
       caseBrig(OperandAddress);
       caseBrig(OperandArgumentList);
+      caseBrig(OperandFunctionList);
       caseBrig(OperandArgumentRef);
       caseBrig(OperandBase);
       caseBrig(OperandCompound);
@@ -882,6 +883,10 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
+  return true;
+}
+
+bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
   return true;
 }
 
