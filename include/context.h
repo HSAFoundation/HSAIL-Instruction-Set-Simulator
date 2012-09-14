@@ -222,6 +222,7 @@ class Context {
     char get_operand_loc() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
+    bool get_isBlockNumeric const;
 
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
@@ -238,6 +239,7 @@ class Context {
     void set_operand_loc(char loc);
     void set_dim(uint32_t dim);
     void set_isArray(bool is_array);
+    void set_isBlockNumeric(bool is_blockNumeric);
 
     // get current offset
     BrigcOffset32_t get_code_offset(void) const {return cbuf->size();}
@@ -318,6 +320,7 @@ class Context {
     bool arg_output;
     uint32_t dim;
     bool is_array;
+    bool is_blockNumeric;
 };
 
 }  // namespace brig

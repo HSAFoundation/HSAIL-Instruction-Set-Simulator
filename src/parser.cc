@@ -7557,8 +7557,21 @@ int DecimalListSingle(Context* context) {
 
 int Block(Context* context) {
   // first token is BLOCK
+  if (BLOCK != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_STRING) {
+    std::string name = context->token_value.string_val;
+    // block start
+    BrigBlockStart bbs = {
+      sizeof(BrigBlockStart),     // size
+      BrigEDirectiveBlockStart,   // kind
+      context->get_code_offset(), // c_code
+      context->add_symbol(name)   // s_name
+    };
+    context->append_directive(&bbs);
+
     context->token_to_scan = yylex();
     if (context->token_to_scan == ENDBLOCK) {
       context->set_error(MISSING_SECTION_ITEM);
@@ -7568,14 +7581,27 @@ int Block(Context* context) {
       if (context->token_to_scan == BLOCKSTRING) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == TOKEN_STRING) {
+          std::string str = context->token_value.string_val;
+          // block string
+          BrigBlockString bbs = {
+            sizeof(BrigBlockString),
+            BrigEDirectiveBlockString, 
+            context->add_symbol(str)
+          };
+          context->append_directive(&bbs);
+
           context->token_to_scan = yylex();
         } else {  // String
           context->set_error(INVALID_SECTION_ITEM);
           return 1;
         }
       } else if (context->token_to_scan == BLOCKNUMERIC) {
+        context->set_isBlockNumeric(true);
+
         context->token_to_scan = yylex();
         if (context->token_type == DATA_TYPE_ID) {
+          context->set_type(context->token_value.data_type);
+
           context->token_to_scan = yylex();
           if (context->token_to_scan == TOKEN_LABEL) {
             context->token_to_scan = yylex();
@@ -7603,6 +7629,13 @@ int Block(Context* context) {
     }  // While
     context->token_to_scan = yylex();
     if (context->token_to_scan == ';') {
+      // block end
+      BrigBlockEnd bbe = {
+        sizeof(BrigBlockEnd),
+        BrigEDirectiveBlockEnd
+      };
+      context->append_directive(&bbe);
+
       context->token_to_scan = yylex();
       return 0;
     } else {  // ';'
