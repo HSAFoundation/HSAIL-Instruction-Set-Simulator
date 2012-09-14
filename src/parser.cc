@@ -3716,6 +3716,142 @@ int Instruction4MadPart3(Context* context) {
 }
 
 int Instruction4BitStringOperationPart4(Context* context) {
+  const unsigned int first_token = context->token_to_scan;
+  
+  BrigInstBase bsoInst = {
+    sizeof(BrigInstBase),   // size
+    BrigEInstBase,         // kind
+    0,                     // opcode
+    0,                     // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}       // o_operands[5]
+  };
+  
+  switch(first_token) {
+    case EXTRACT:
+      bsoInst.opcode = BrigExtract;
+      break;
+    case INSERT:
+      bsoInst.opcode = BrigInsert;
+      break;
+    case BITSELECT:
+      bsoInst.opcode = BrigBitselect;
+      break;
+  }
+  
+  context->token_to_scan = yylex();
+  // Note: Type s, u; Length 32, 64;
+  // TODO(Chuang):  I think "b" should be in its type
+  if (context->token_to_scan == _S32 ||
+      context->token_to_scan == _S64 ||
+      context->token_to_scan == _U32 ||
+      context->token_to_scan == _U64 ||
+      context->token_to_scan == _B32 ||
+      context->token_to_scan == _B64) {
+
+    bsoInst.type = context->token_value.data_type;
+    context->token_to_scan = yylex();
+    
+    // Note: dest: Destination register.
+    std::string opName;
+    BrigoOffset32_t opSize;
+
+    if (context->token_type == REGISTER) {
+      opName = context->token_value.string_val;
+    } else {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    } 
+
+    if (!Operand(context)) {
+      bsoInst.o_operands[0] = context->operand_map[opName];
+      if (context->token_to_scan != ',') {
+        context->set_error(MISSING_COMMA);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+
+      opSize = context->get_operand_offset();
+      if (context->token_type == REGISTER) {
+        opName = context->token_value.string_val;
+      } else if (context->token_type == CONSTANT) {
+        opSize += opSize & 0x7;
+      }  // else WaveSize
+
+      if (!Operand(context)) {
+        if (opSize == context->get_operand_offset()) {
+          bsoInst.o_operands[1] = context->operand_map[opName];
+        } else {
+          bsoInst.o_operands[1] = opSize;
+        }
+        if (context->token_to_scan != ',') {
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+        opSize = context->get_operand_offset();
+        if (context->token_type == REGISTER) {
+          opName = context->token_value.string_val;
+        } else if (context->token_type == CONSTANT) {
+          opSize += opSize & 0x7;
+        }  // else WaveSize
+        
+        // TODO(Chuang): src1, src2: type follow as the kind of opcode.
+        // different opcode will have different rule of types.
+
+        if (!Operand(context)) {
+          if (opSize == context->get_operand_offset()) {
+            bsoInst.o_operands[2] = context->operand_map[opName];
+          } else {
+            bsoInst.o_operands[2] = opSize;
+          }
+          if (context->token_to_scan != ',') {
+              context->set_error(MISSING_COMMA);
+              return 1;
+          }
+          context->token_to_scan = yylex();
+
+          opSize = context->get_operand_offset();
+          if (context->token_type == REGISTER) {
+            opName = context->token_value.string_val;
+          } else if (context->token_type == CONSTANT) {
+            opSize += opSize & 0x7;
+          }  // else WaveSize 
+
+          if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()) {
+              bsoInst.o_operands[3] = context->operand_map[opName];
+            } else {
+              bsoInst.o_operands[3] = opSize;
+            }
+            if (context->token_to_scan == ';') {
+              context->append_code(&bsoInst);
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }  // ';'
+          } else {  // 4 operand
+              context->set_error(INVALID_FOURTH_OPERAND);
+              return 1;
+          }
+        } else {  // 3 operand
+          context->set_error(INVALID_THIRD_OPERAND);
+          return 1;
+        }
+      } else {  // 2 operand
+        context->set_error(INVALID_SECOND_OPERAND);
+        return 1;
+      }
+    } else {  // 1 operand
+      context->set_error(INVALID_FIRST_OPERAND);
+      return 1;
+    }
+  } else {  // DATA_TYPE_ID
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
   return 1;
 }
 
