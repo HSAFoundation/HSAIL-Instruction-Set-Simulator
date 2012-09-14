@@ -62,7 +62,7 @@ int QueryOp(Context* context) {
 int Query(Context* context) {
   // Chuang
   BrigInstBase query_inst = {
-    32,                    // size
+    sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
     0,                     // opcode
     Brigb32,               // type
@@ -3131,7 +3131,7 @@ int LabelTargets(Context* context) {
 
 int Instruction4CmovPart5(Context* context) {
   BrigInstBase cmovInst = {
-    32,                    // size
+    sizeof(BrigInstBase),                    // size
     BrigEInstBase,         // kind
     BrigCmov,               // opcode
     0,               // type
@@ -3269,7 +3269,7 @@ int Instruction4CmovPart5(Context* context) {
 
 int Instruction4FmaPart2(Context* context) {
   BrigInstBase fmaInst = {
-    32,                    // size
+    sizeof(BrigInstBase),   // size
     BrigEInstBase,         // kind
     BrigFma,               // opcode
     0,               // type
@@ -3371,12 +3371,12 @@ int Instruction4FmaPart2(Context* context) {
               int* pCmp = reinterpret_cast<int*>(&aluModifier);
               if (*pCmp != 0) {
                 BrigInstMod fmaMod = {
-                  36,                    // size
+                  sizeof(BrigInstMod),  // size
                   BrigEInstMod,         // kind
-                  BrigFma,               // opcode
-                  fmaInst.type,               // type
-                  BrigNoPacking,         // packing
-                  {0, 0, 0, 0, 0},    // o_operands[5]
+                  BrigFma,              // opcode
+                  fmaInst.type,         // type
+                  BrigNoPacking,        // packing
+                  {0, 0, 0, 0, 0},      // o_operands[5]
                   {0}  // aluModifier
                 };
                 for (int i = 0 ; i < 5 ; ++i) {
@@ -3688,7 +3688,7 @@ int Cmp(Context* context) {
   // Chuang
   // first token is PACKEDCMP or CMP
   BrigInstCmp cmpInst = {
-    44,                 // size
+    sizeof(BrigInstCmp),  // size
     BrigEInstCmp,       // kind
     BrigCmp,            // opcode
     0,                  // type
@@ -4041,7 +4041,7 @@ int Instruction5(Context* context) {
   // first token is F2U4 "f2u4"
 
   BrigInstBase f2u4Inst = {
-    32,                    // size
+    sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
     BrigF2u4,               // opcode
     Brigu32,               // type
@@ -4204,7 +4204,7 @@ int Ldc(Context* context) {
   context->token_to_scan = yylex();
 
   BrigInstBase ldc_op = {
-    32,                    // size
+    sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
     BrigLdc,               // opcode
     Brigb32,               // type
@@ -4257,7 +4257,7 @@ int Atom(Context* context) {
   const unsigned int first_token = context->token_to_scan;
   context->token_to_scan = yylex();
   BrigInstAtomic atom_op = {
-    44,                    // size
+    sizeof(BrigInstAtomic), // size
     BrigEInstAtomic,       // kind
     BrigAtomic,            // opcode
     Brigb32,               // type
@@ -4468,7 +4468,7 @@ int Mov(Context* context) {
   // first token is MOV "mov"
 
   BrigInstBase movInst = {
-    32,                    // size
+    sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
     BrigMov,               // opcode
     0,                     // type
@@ -5076,7 +5076,7 @@ int Lda(Context* context) {
   context->token_to_scan = yylex();
 
   BrigInstMem lda_op = {
-    36,                    // size
+    sizeof(BrigInstMem),   // size
     BrigEInstMem,          // kind
     BrigLda,               // opcode
     Brigb32,               // type
@@ -5151,7 +5151,7 @@ int ImageRet(Context* context) {
   // first token is ATOMIC_IMAGE
   unsigned int second_token;
   BrigInstAtomicImage img_inst = {
-    48,                     // size
+    sizeof(BrigInstAtomicImage), // size
     BrigEInstAtomicImage,   // kind
     BrigAtomicImage,        // opcode
     Brigb32,                // type
@@ -5342,7 +5342,7 @@ int ImageRet(Context* context) {
 int ImageNoRet(Context* context) {
   // first token is ATOMICNORET_IMAGE
   BrigInstAtomicImage imgNoRet = {
-    48,                     // size
+    sizeof(BrigInstAtomicImage),  // size
     BrigEInstAtomicImage,   // kind
     BrigAtomicNoRetImage,   // opcode
     Brigb32,                // type
@@ -5517,7 +5517,7 @@ int Cvt(Context* context) {
   // TODO(Chuang): Extensions for Conversions
 
   BrigInstCvt cvtInst = {
-    40,                  // size
+    sizeof(BrigInstCvt), // size
     BrigEInstCvt,        // kind
     BrigCvt,             // opcode
     0,                   // type
@@ -6261,7 +6261,7 @@ int BodyStatements(Context* context) {
 int ImageLoad(Context* context) {
   // first token is LD_IMAGE
   BrigInstImage imgLdInst = {
-    40,                    // size
+    sizeof(BrigInstImage), // size
     BrigEInstImage,        // kind
     BrigLdImage,           // opcode
     {0, 0, 0, 0, 0},   // o_operands[5]
@@ -6387,7 +6387,7 @@ int ImageLoad(Context* context) {
 int ImageStore(Context* context) {
   // first token is St_image
   BrigInstImage imgStInst = {
-    40,                    // size
+    sizeof(BrigInstImage), // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
     {0, 0, 0, 0, 0},   // o_operands[5]
@@ -6912,7 +6912,7 @@ int Ret(Context* context) {
 int ImageRead(Context *context) {
   // first token is RD_IMAGE
   BrigInstRead imgRdInst = {
-    40,                    // size
+    sizeof(BrigInstRead),  // size
     BrigEInstRead,         // kind
     BrigRdImage,           // opcode
     {0, 0, 0, 0, 0},       // o_operands[5]
@@ -7214,7 +7214,7 @@ int AtomicNoRet(Context* context) {
   // first token is ATOMICNORET or ATOMICNORET_CAS
 
   BrigInstAtomic aNoRetInst = {
-    44,                    // size
+    sizeof(BrigInstAtomic),   // size
     BrigEInstAtomic,       // kind
     BrigAtomicNoRet,       // opcode
     0,                     // type
