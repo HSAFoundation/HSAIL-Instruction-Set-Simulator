@@ -14,10 +14,13 @@ set(hsail2brig_test_SOURCES
     test/lexer_test.cc
     test/parser_test.cc
     test/codegen_test.cc
-    test/hsail2brig_test.cc
-	  gmock/gmock_main.cc
-	  gmock/gmock-gtest-all.cc
-	  src/parser.cc
+    testcase/globaldecl_test.cc
+    testcase/version_test.cc
+    testcase/operation_test.cc
+    testcase/operand_test.cc
+	 gmock/gmock_main.cc
+	 gmock/gmock-gtest-all.cc
+	 src/parser.cc
     src/brig_buffer.cc
     src/parser_wrapper.cc
     src/lexer_wrapper.cc
