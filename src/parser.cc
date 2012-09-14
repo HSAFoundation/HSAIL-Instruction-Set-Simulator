@@ -7353,76 +7353,130 @@ int FloatListSingle(Context* context) {
       case Brigb64:
         n = elementCount ;
         break;
-	}
-      size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
-      uint8_t *array = new uint8_t[arraySize];
-      BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-      uint32_t init_length = 0;  
-        
-      bdi->size = arraySize;
-      bdi->kind = BrigEDirectiveInit;
-      bdi->c_code = 0 ;
-      bdi->elementCount = elementCount;
-      bdi->type = context->get_type();
-      bdi->reserved = 0;
-
-      switch(context->get_type()){
-      case Brigb1:
-        break;
-      case Brigb8:
-        for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
-          memmove(&bdi->initializationData.u8[i], &float_list[i],sizeof(uint8_t));
-	}
-        init_length = 8 * n ;
-        for (int i = elementCount; i < init_length; i ++){
-          bdi->initializationData.u8[i] = 0;
-        }
-        break;
-      case Brigb16:
-        for (int i = 0; i < elementCount; i ++ ){ // right ?? lose value??
-          memmove(&bdi->initializationData.u16[i], &float_list[i],sizeof(uint16_t));
-	}
-        init_length = 4 * n ;
-        for (int i = elementCount; i < init_length; i ++){
-          bdi->initializationData.u16[i] = 0;
-        }
-        break;
-      case Brigb32:
-        for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
-          memmove(&bdi->initializationData.u32[i], &float_list[i],sizeof(uint32_t));
-	}
-        init_length = 2 * n ;
-        for (int i = elementCount; i < init_length; i ++){
-          bdi->initializationData.u32[i] = 0;
-        }
-        break;
-      case Brigb64:
-        for (int i = 0; i < elementCount; i ++ ){
-          memmove(&bdi->initializationData.u64[i], &float_list[i],sizeof(uint64_t));
-	}
-        init_length = n;
-        break;
       }
-
-      // update the BrigDirectiveSymbol.d_init and dim
-      BrigDirectiveSymbol bds ;
-      BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-      // BrigdOffset32_t bds_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
-      context->get_directive(bds_offset,&bds);
-      bds.d_init = context->get_directive_offset();
-      if (0 == context->get_dim() && context->get_isArray())
-        bds.s.symbolModifier = BrigArray;
-      if (context->get_dim() < init_length)
-        bds.s.dim = init_length;
-
-      unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-      context->update_directive_bytes(bds_charp,
-                                      bds_offset,
-                                      sizeof(BrigDirectiveSymbol));
+      if (!context->get_isBlockNumeric()){
+        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
+        uint8_t *array = new uint8_t[arraySize];
+        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+        uint32_t init_length = 0;  
         
-      context->append_directive(bdi);
+        bdi->size = arraySize;
+        bdi->kind = BrigEDirectiveInit;
+        bdi->c_code = 0 ;
+        bdi->elementCount = elementCount;
+        bdi->type = context->get_type();
+        bdi->reserved = 0;
+
+        switch(context->get_type()){
+        case Brigb1:
+          break;
+        case Brigb8:
+          for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+            memmove(&bdi->initializationData.u8[i], &float_list[i],sizeof(uint8_t));
+	  }
+          init_length = 8 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u8[i] = 0;
+          }
+          break;
+        case Brigb16:
+          for (int i = 0; i < elementCount; i ++ ){ // right ?? lose value??
+            memmove(&bdi->initializationData.u16[i], &float_list[i],sizeof(uint16_t));
+	  }
+          init_length = 4 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u16[i] = 0;
+          }
+          break;
+        case Brigb32:
+          for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+            memmove(&bdi->initializationData.u32[i], &float_list[i],sizeof(uint32_t));
+	  }
+          init_length = 2 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u32[i] = 0;
+          }
+          break;
+        case Brigb64:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bdi->initializationData.u64[i], &float_list[i],sizeof(uint64_t));
+	  }
+          init_length = n;
+          break;
+        }
+
+        // update the BrigDirectiveSymbol.d_init and dim
+        BrigDirectiveSymbol bds ;
+        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+        context->get_directive(bds_offset,&bds);
+        bds.d_init = context->get_directive_offset();
+        if (0 == context->get_dim() && context->get_isArray())
+          bds.s.symbolModifier = BrigArray;
+        if (context->get_dim() < init_length)
+          bds.s.dim = init_length;
+
+        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+        context->update_directive_bytes(bds_charp,
+                                        bds_offset,
+                                        sizeof(BrigDirectiveSymbol));
         
-      delete bdi;
+        context->append_directive(bdi);
+        
+        delete bdi;
+      } else { //blockNumeric
+        size_t arraySize = sizeof(BrigBlockNumeric) + (n - 1) * sizeof(uint64_t);
+        uint8_t *array = new uint8_t[arraySize];
+        BrigBlockNumeric *bbn = reinterpret_cast<BrigBlockNumeric*>(array);
+        uint32_t len = 0;
+          
+        bbn->size = arraySize;
+        bbn->kind = BrigEDirectiveBlockNumeric;
+        bbn->type = context->get_type();
+        bbn->elementCount = elementCount;
+          
+        switch(context->get_type()){
+        case Brigb1:
+          break;
+        case Brigb8:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bbn->u8[i],&float_list[i],sizeof(uint8_t));
+	  }
+          len = 8 * n ;
+          for (int i = elementCount; i < len; i ++){
+            bbn->u8[i] = 0;
+          }
+          break;
+        case Brigb16:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bbn->u16[i],&float_list[i],sizeof(uint16_t));
+	  }
+          len = 4 * n ;
+          for (int i = elementCount; i < len; i ++){
+            bbn->u16[i] = 0;
+          }
+          break;
+        case Brigb32:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bbn->u32[i],&float_list[i],sizeof(uint32_t));
+	  }
+          len = 2 * n ;
+          for (int i = elementCount; i < len; i ++){
+            bbn->u32[i] = 0;
+          }
+          break;
+        case Brigb64:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bbn->u64[i],&float_list[i],sizeof(uint64_t));
+	  }
+          len =  n ;
+          for (int i = elementCount; i < len; i ++){
+            bbn->u64[i] = 0;
+          }
+          break;
+        }
+        context->append_directive(bbn);
+        delete bbn;
+      }
       return 0;
     }
   }  // While
