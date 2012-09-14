@@ -2574,6 +2574,7 @@ int Initializer(Context* context) {
     }
     context->set_type(init_type);
 
+    context->set_isBlockNumeric(false);
     switch (context->token_to_scan) {
       case TOKEN_DOUBLE_CONSTANT:
         if (!FloatListSingle(context)) {
@@ -7471,82 +7472,137 @@ int DecimalListSingle(Context* context) {
         case Brigb64:
           n = elementCount ;
           break;
-	  }
-        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
-        uint8_t *array = new uint8_t[arraySize];
-        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-        uint32_t init_length = 0;  
+	}
+        if (!context->get_isBlockNumeric()){
+          size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
+          uint8_t *array = new uint8_t[arraySize];
+          BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+          uint32_t init_length = 0;  
         
-        bdi->size = arraySize;
-        bdi->kind = BrigEDirectiveInit;
-        bdi->c_code = 0 ;
-        bdi->elementCount = elementCount;
-        bdi->type = context->get_type();
-        bdi->reserved = 0;
+          bdi->size = arraySize;
+          bdi->kind = BrigEDirectiveInit;
+          bdi->c_code = 0 ;
+          bdi->elementCount = elementCount;
+          bdi->type = context->get_type();
+          bdi->reserved = 0;
 
-        switch(context->get_type()){
-	case Brigb1:
-          break;
-        case Brigb8:
-          for (int i = 0; i < elementCount; i ++ ){
-            bdi->initializationData.u8[i] = decimal_list[i];
-	  }
-          init_length = 8 * n ;
-          for (int i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u8[i] = 0;
+          switch(context->get_type()){
+          case Brigb1:
+            break;
+          case Brigb8:
+            for (int i = 0; i < elementCount; i ++ ){
+              bdi->initializationData.u8[i] = decimal_list[i];
+	    }
+            init_length = 8 * n ;
+            for (int i = elementCount; i < init_length; i ++){
+              bdi->initializationData.u8[i] = 0;
+            }
+            break;
+          case Brigb16:
+            for (int i = 0; i < elementCount; i ++ ){
+              bdi->initializationData.u16[i] = decimal_list[i];
+	    }
+            init_length = 4 * n ;
+            for (int i = elementCount; i < init_length; i ++){
+              bdi->initializationData.u16[i] = 0;
+            }
+            break;
+          case Brigb32:
+            for (int i = 0; i < elementCount; i ++ ){
+              bdi->initializationData.u32[i] = decimal_list[i];
+	    }
+            init_length = 2 * n ;
+            for (int i = elementCount; i < init_length; i ++){
+              bdi->initializationData.u32[i] = 0;
+            }
+            break;
+          case Brigb64:
+            for (int i = 0; i < elementCount; i ++ ){
+              bdi->initializationData.u64[i] = decimal_list[i];
+	    }
+            init_length =  n ;
+            for (int i = elementCount; i < init_length; i ++){
+              bdi->initializationData.u64[i] = 0;
+            }
+            break;
           }
-          break;
-        case Brigb16:
-          for (int i = 0; i < elementCount; i ++ ){
-            bdi->initializationData.u16[i] = decimal_list[i];
-	  }
-          init_length = 4 * n ;
-          for (int i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u16[i] = 0;
-          }
-          break;
-        case Brigb32:
-          for (int i = 0; i < elementCount; i ++ ){
-            bdi->initializationData.u32[i] = decimal_list[i];
-	  }
-          init_length = 2 * n ;
-          for (int i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u32[i] = 0;
-          }
-          break;
-        case Brigb64:
-          for (int i = 0; i < elementCount; i ++ ){
-            bdi->initializationData.u64[i] = decimal_list[i];
-	  }
-          init_length =  n ;
-          for (int i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u64[i] = 0;
-          }
-          break;
-        }
 
-        // update the BrigDirectiveSymbol.d_init and dim
-        BrigDirectiveSymbol bds ;
-        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-        context->get_directive(bds_offset,&bds);
-        bds.d_init = context->get_directive_offset();
-        if (0 == context->get_dim() && context->get_isArray()){
-          bds.s.symbolModifier = BrigArray;
-          context->set_symbol_modifier(BrigArray);
-        }
-        if (context->get_dim() < init_length){
-          bds.s.dim = init_length;
-          context->set_dim(init_length);
-        }
+          // update the BrigDirectiveSymbol.d_init and dim
+          BrigDirectiveSymbol bds ;
+          BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+          context->get_directive(bds_offset,&bds);
+          bds.d_init = context->get_directive_offset();
+          if (0 == context->get_dim() && context->get_isArray()){
+            bds.s.symbolModifier = BrigArray;
+            context->set_symbol_modifier(BrigArray);
+          }
+          if (context->get_dim() < init_length){
+            bds.s.dim = init_length;
+            context->set_dim(init_length);
+          }
 
-        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-        context->update_directive_bytes(bds_charp,
-                                        bds_offset,
-                                        sizeof(BrigDirectiveSymbol));
+          unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+          context->update_directive_bytes(bds_charp,
+                                          bds_offset,
+                                          sizeof(BrigDirectiveSymbol));
         
-        context->append_directive(bdi);
+          context->append_directive(bdi);
         
-        delete bdi;
+          delete bdi;
+	} else { //blockNumeric
+          size_t arraySize = sizeof(BrigBlockNumeric) + (n - 1) * sizeof(uint64_t);
+          uint8_t *array = new uint8_t[arraySize];
+          BrigBlockNumeric *bbn = reinterpret_cast<BrigBlockNumeric*>(array);
+          uint32_t len = 0;
+          
+          bbn->size = arraySize;
+          bbn->kind = BrigEDirectiveBlockNumeric;
+          bbn->type = context->get_type();
+          bbn->elementCount = elementCount;
+          
+          switch(context->get_type()){
+          case Brigb1:
+            break;
+          case Brigb8:
+            for (int i = 0; i < elementCount; i ++ ){
+              bbn->u8[i] = decimal_list[i];
+	    }
+            len = 8 * n ;
+            for (int i = elementCount; i < len; i ++){
+              bbn->u8[i] = 0;
+            }
+            break;
+          case Brigb16:
+            for (int i = 0; i < elementCount; i ++ ){
+              bbn->u16[i] = decimal_list[i];
+	    }
+            len = 4 * n ;
+            for (int i = elementCount; i < len; i ++){
+              bbn->u16[i] = 0;
+            }
+            break;
+          case Brigb32:
+            for (int i = 0; i < elementCount; i ++ ){
+              bbn->u32[i] = decimal_list[i];
+	    }
+            len = 2 * n ;
+            for (int i = elementCount; i < len; i ++){
+              bbn->u32[i] = 0;
+            }
+            break;
+          case Brigb64:
+            for (int i = 0; i < elementCount; i ++ ){
+              bbn->u64[i] = decimal_list[i];
+	    }
+            len =  n ;
+            for (int i = elementCount; i < len; i ++){
+              bbn->u64[i] = 0;
+            }
+            break;
+          }
+          context->append_directive(bbn);
+          delete bbn;
+	}
         return 0;
       }  // ','
     }  // integer constant

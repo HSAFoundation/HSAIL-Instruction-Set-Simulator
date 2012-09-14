@@ -222,7 +222,7 @@ class Context {
     char get_operand_loc() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
-    bool get_isBlockNumeric const;
+    bool get_isBlockNumeric() const;
 
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
