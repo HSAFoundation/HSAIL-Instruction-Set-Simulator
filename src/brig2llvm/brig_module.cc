@@ -1008,9 +1008,9 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
   long int regOffset = strtol(name + 2, &endptr, 10);
   valid &= check(!*endptr, "Garbage after register offset");
   if(type == Brigb1 || type == Brigb128)
-    check(0 >= regOffset && regOffset < 8, "Register offset out-of-bounds");
+    check(0 <= regOffset && regOffset < 8, "Register offset out-of-bounds");
   else if(type == Brigb32 || type == Brigb64)
-    check(0 >= regOffset && regOffset < 32, "Register offset out-of-bounds");
+    check(0 <= regOffset && regOffset < 32, "Register offset out-of-bounds");
 
   valid &= check(operand->type == type, "Register name does not match type");
   valid &= check(!operand->reserved, "reserved must be zero");
