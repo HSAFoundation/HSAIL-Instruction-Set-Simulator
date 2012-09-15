@@ -40,6 +40,18 @@
 namespace hsacommon
 {
 
+/**
+ * @brief A structure containing absolute wall times from the device which indicate 
+ * when the various states of an event occured in addition to device frequency.
+ */ 
+typedef struct _DeviceClockCounterInfo
+{
+    uint64_t hostClockCounter;
+    uint64_t deviceClockCounter;
+    uint64_t deviceFrequency;
+
+} DeviceClockCounterInfo;
+
 // TODO: Replace out_of_range with an HSART exception
 /**
  * @brief Class hsa::vector replaces std::vector container.
