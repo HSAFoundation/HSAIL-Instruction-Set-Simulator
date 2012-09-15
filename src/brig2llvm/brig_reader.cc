@@ -45,7 +45,7 @@ BrigReader *BrigReader::createBrigReader(llvm::object::ObjectFile *objFile) {
       if(it->getContents(operands)) return NULL;
     } else if(name == ".brig_debug" || name == ".debug") {
       if(it->getContents(debug)) return NULL;
-    } else if(name == ".brig_strtab" || name == ".strtab") {
+    } else if(name == ".brig_strtab" || name == ".strings") {
       if(it->getContents(strings)) return NULL;
     }
   }
@@ -55,7 +55,7 @@ BrigReader *BrigReader::createBrigReader(llvm::object::ObjectFile *objFile) {
   if(!operands.size()) return NULL;
   if(!strings.size()) return NULL;
 
-  return new BrigReader(objFile, directives, code, operands, strings, debug);
+  return new BrigReader(objFile, directives, code, operands, debug, strings);
 }
 
 } // namespace brig

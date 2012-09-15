@@ -22,13 +22,13 @@ class BrigReader {
   const llvm::StringRef debug_;
   const llvm::StringRef strings_;
 
-  const char *getDirectives() const { return directives_.data(); }
-  const char *getCode() const { return code_.data(); }
-  const char *getOperands() const { return operands_.data(); }
-  const char *getDebug() const { return debug_.data(); }
-  const char *getStrings() const { return strings_.data(); }
-
  public:
+
+  const llvm::StringRef &getDirectives() const { return directives_; }
+  const llvm::StringRef &getCode() const { return code_; }
+  const llvm::StringRef &getOperands() const { return operands_; }
+  const llvm::StringRef &getDebug() const { return debug_; }
+  const llvm::StringRef &getStrings() const { return strings_; }
 
   ~BrigReader();
 
