@@ -236,13 +236,6 @@ typedef struct _EventTimeInfo
 
 } EventTimeInfo;
 
-typedef struct _DeviceClockCounterInfo
-{
-    uint64_t hostClockCounter;
-    uint64_t deviceClockCounter;
-    uint64_t deviceFrequency;
-
-} DeviceClockCounterInfo;
 
 /**
  * @ingroup Dispatch
