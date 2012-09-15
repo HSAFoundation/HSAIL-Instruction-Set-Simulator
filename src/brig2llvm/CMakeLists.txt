@@ -27,5 +27,6 @@ add_llvm_library(brig2llvm
   brig_control_block.cc
   brig_inst_helper.cc
   brig_engine.cc
-  brig_runtime.cc)
+  brig_runtime.cc
+  brig_reader.cc)
 llvm_config(brig2llvm ${LLVM_LINK_COMPONENTS})
