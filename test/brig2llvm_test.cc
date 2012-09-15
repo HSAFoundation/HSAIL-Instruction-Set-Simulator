@@ -1877,7 +1877,7 @@ TEST(Brig2LLVMTest, VarSizeDirective) {
                              &args[2]);
 
     EXPECT_EQ(sizeof(BrigDirectiveSignature) +
-              sizeof(sizeof(BrigDirectiveSignature::BrigProtoType)),
+              sizeof(BrigDirectiveSignature::BrigProtoType),
               bb.size());
   }
 }
@@ -3272,8 +3272,6 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "d_labels offset is wrong, not a BrigDirectiveLabel")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "d_labels past the directives section")));
   }
 }
 
