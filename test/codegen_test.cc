@@ -1058,7 +1058,7 @@ TEST(CodegenTest, NumericValueOperandCodeGen) {
 
   // reference struct
   ref.type = Brigb32;
-  ref.bits.u = -5;
+  ref.bits.u = (unsigned int) (-5);
   // get structure from context and compare
   curr_o_offset = context->get_operand_offset();
   context->get_operand(curr_o_offset-sizeof(get), &get);

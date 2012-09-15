@@ -2566,6 +2566,8 @@ int Initializer(Context* context) {
       case Brigu64:
       case Brigf64:
       case Brigb64: init_type = Brigb64; break;
+	  default: context->set_error(UNKNOWN_ERROR);
+				return 1;
     }
     context->set_type(init_type);
 
