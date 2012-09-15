@@ -8,7 +8,7 @@ add_definitions(-DGTEST_HAS_PTHREAD=0)
 if (CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
 endif (CMAKE_COMPILER_IS_GNUCXX)
-set(CMAKE_CXX_FLAGS "-DTEST_PATH=\\\"${PROJECT_SOURCE_DIR}/test\\\" ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
 flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
 set(hsail2brig_test_SOURCES

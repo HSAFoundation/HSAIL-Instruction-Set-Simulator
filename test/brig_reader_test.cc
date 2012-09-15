@@ -3,11 +3,14 @@
 
 #include "gtest/gtest.h"
 
+#define STR(X) #X
+#define XSTR(X) STR(X)
+
 using hsa::brig::BrigReader;
 
 TEST(BrigReaderTest, VectorCopy) {
   BrigReader *reader =
-    BrigReader::createBrigReader(TEST_PATH "/VectorCopy.bin");
+    BrigReader::createBrigReader(XSTR(TEST_PATH) "/VectorCopy.bin");
   EXPECT_TRUE(reader);
   if(!reader) return;
 
