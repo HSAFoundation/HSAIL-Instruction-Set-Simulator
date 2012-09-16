@@ -1363,45 +1363,6 @@ createDebuggerEvent(
                 bool state
                 );
 
-/**
- * @ingroup Debugger
- * @brief APIs for creating debug event
- *
- * This function is a work around to create a debugger event when the KFD
- * event mechanism does not work. In this approach, the user provides a buffer
- * that can be accessed by the trap hander, which will write a specific value
- * to a specific location in the buffer in the trap handler. Then the event
- * wait function can poll the specific location to check whether trap handler
- * is executed to the location where the write buffer instruction is executed
- * (With the KFD mechanism, the s_sendmsg instruction is executed instead of
- * writing a value to the buffer.).
- *
- * @param dev pointer to the HSA runtime device
- *
- * @param userBuffer  pointer to the trap handler buffer to mock the event
- * mechanism. This buffer should be the trap handler buffer that can be
- * accessed by the trap handler.
- * 
- * @param manualReset if this parameter is true the function creates a
- * manual-reset event object; if this parameter is false the function creates
- * an auto-reset event object.  
- *
- * @param isSignaled if this parameter is true, the initial state of the event
- * is signaled, otherwise is nonsignaled.
- * 
- *
- */
-DLL_PUBLIC hsa::DebuggerEvent * 
-createDebuggerEvent(
-                hsa::Device *dev, 
-                void *userBuffer, 
-                uint32_t writeBackLoc,
-                uint32_t writeBackValue,
-                bool manualReset, 
-                bool state
-                );
-
-
 /* @ brief Creates a Program object from an ELF
  * @param charElf - Pointer to an ELF
  * @param elfSize - size of the ELF
