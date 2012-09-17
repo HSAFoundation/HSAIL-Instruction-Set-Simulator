@@ -43,7 +43,12 @@ GTEST_API_ int main(int argc, char **argv) {
       "BrigRuntimeTest.Cmov*:"
       "BrigRuntimeTest.Fma*:"
       "BrigRuntimeTest.Insert*:"
-      "BrigRuntimeTest.F2u4_u32:";
+      "BrigRuntimeTest.F2u4_u32:"
+      "BrigRuntimeTest.Bitalign_b32:"
+      "BrigRuntimeTest.Bytealign_b32:"
+      "BrigRuntimeTest.Lerp_b32:"
+      "BrigRuntimeTest.Sad*_b32:"
+      "BrigRuntimeTest.Cmp_*:";
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
