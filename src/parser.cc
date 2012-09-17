@@ -2920,33 +2920,110 @@ int SignatureType(Context *context) {
 
 int SysCall(Context* context) {
   // first token is _SYSCALL "syscall"
+
+  BrigInstBase syscallInst = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigSyscall,         // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+  std::string opName;
   context->token_to_scan = yylex();
 
+  if (context->valid_string) {
+    opName = context->token_value.string_val;
+  } else {
+    context->set_error(INVALID_FIRST_OPERAND);
+    return 1;
+  }
+  // Note: dest: Destination. Must be a 32-bit register.
   if (context->token_to_scan == TOKEN_SREGISTER) {
-    if (yylex() == ',') {
+    if (Operand(context)) {
+      return 1;
+    }
+    syscallInst.o_operands[0] = context->operand_map[opName];
+    if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
-
+      BrigoOffset32_t opSize = 0;
+      // n: An integer literal. Valid values fit into a u32 data type.
+      opSize = context->get_operand_offset();
+      opSize += opSize & 0x7;
       if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        if (yylex() == ',') {
+        if (Operand(context)) {
+          return 1;
+        }
+        syscallInst.o_operands[1] = opSize;
+        if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
+
           if (((context->token_to_scan == TOKEN_SREGISTER) ||
                (context->token_to_scan == TOKEN_WAVESIZE) ||
                (context->token_to_scan == TOKEN_INTEGER_CONSTANT))) {
-            if (yylex() == ',') {
+            opSize = context->get_operand_offset();
+            if (context->token_to_scan == TOKEN_SREGISTER) {
+              opName = context->token_value.string_val;
+            } else {
+              if (context->token_type == CONSTANT) {
+                opSize += opSize & 0x7;
+              }            
+            }
+            if (Operand(context)) {
+              return 1;
+            }
+            if (context->get_operand_offset() == opSize) {
+              syscallInst.o_operands[2] = context->operand_map[opName];
+            } else {
+              syscallInst.o_operands[2] = opSize;
+            }
+            if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
 
               if ((context->token_to_scan == TOKEN_SREGISTER) ||
                   (context->token_to_scan == TOKEN_WAVESIZE) ||
                   (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-                if (yylex() == ',') {
+                opSize = context->get_operand_offset();
+                if (context->token_to_scan == TOKEN_SREGISTER) {
+                  opName = context->token_value.string_val;
+                } else {
+                  if (context->token_type == CONSTANT) {
+                    opSize += opSize & 0x7;
+                  }                
+                }
+                if (Operand(context)) {
+                  return 1;
+                }
+                if (context->get_operand_offset() == opSize) {
+                  syscallInst.o_operands[3] = context->operand_map[opName];
+                } else {
+                  syscallInst.o_operands[3] = opSize;
+                }
+                if (context->token_to_scan == ',') {
                   context->token_to_scan = yylex();
 
                   if ((context->token_to_scan == TOKEN_SREGISTER) ||
                       (context->token_to_scan == TOKEN_WAVESIZE) ||
                       (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-                    context->token_to_scan = yylex();
+                    opSize = context->get_operand_offset();
+                    if (context->token_to_scan == TOKEN_SREGISTER) {
+                      opName = context->token_value.string_val;
+                    } else {
+                      if (context->token_type == CONSTANT) {
+                        opSize += opSize & 0x7;
+                      }
+                    }
+                    if (Operand(context)) {
+                      return 1;
+                    }
+                    if (context->get_operand_offset() == opSize) {
+                      syscallInst.o_operands[4] = context->operand_map[opName];
+                    } else {
+                      syscallInst.o_operands[4] = opSize;
+                    }
 
                     if (context->token_to_scan == ';') {
+                      context->append_code(&syscallInst);
                       context->token_to_scan = yylex();
                       return 0;
                     } else {  // ';'
