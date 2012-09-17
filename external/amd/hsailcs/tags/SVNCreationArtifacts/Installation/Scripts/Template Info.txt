@@ -1,0 +1,52 @@
+
+PkgBuild.cmd
+
+Remove Public/NDA/Internal as neccessary
+Update SET PROJECT_NAME="Project Name" to project name
+
+
+Setup.ism
+
+General Information:
+	Summary Information Stream:
+		Title:
+		Subject:
+		(Can ignore Package Code as is generated every compile)
+		Comments:
+	Product Properties:
+		Name:
+		(Can ignore version number, script is updated every compile)
+		(Can ignore Product Code, script is updated every compile)
+		Upgrade Code:
+		Install Conditions:
+		INSTALLDIR:  Should almost always be Program Files\AMD\Product Name
+		
+Setup Design:
+	Documentation
+		Documentation_Internal
+			AllOtherFiles_Internal: Generate a new Component Code
+		Documentation_NDA
+			AllOtherFiles_NDA: Generate a new Component Code
+		Documentation_Public
+			AllOtherFiles_Public: Generate a new Component Code
+	Application
+		DesktopShortcut: Generate a new Component Code
+
+Behavior and Logic
+	Custom Actions
+		InstTool/InstTool64/RemTool/RemTool64:  Remove in not required by application.
+
+Media
+	Upgrades
+		Propare Setup for Upgrade Scenarios
+			Upgrade Windows Installer Setup
+				UpgradeItem: Set to Products sharing my product code, any earlier version.
+	Releases
+		Releases
+			Check every release for Launcher Copyright year to be set to current year.
+
+Notes:
+
+Please go through all of these items before adding new files.
+
+Expects License files and ReadMe files to exist in the default locations in SVN.  Developers should not alter these names or locations.

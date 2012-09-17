@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<manifestSchema version="0.0.0.2">
+	<product name="_RMS_PRODUCT_NAME_" releaseType="NDA">
+		<versionNumber>_PKG_VERSION_</versionNumber>
+		<description>_PROJECT_NAME_</description>
+		<readMe>.\Readme.rtf</readMe>
+		<silentInstall>.\setup.exe /s /v"/qn ALLUSERS=1"</silentInstall>
+		<payload>
+			<item number="1">
+				<fileName>setup.exe</fileName>
+				<description>Windows Executable</description>
+			</item>
+			<item number="2">
+				<fileName>Readme.rtf</fileName>
+				<description>Product Documentation</description>
+			</item>
+		</payload>		
+	</product>
+</manifestSchema>
