@@ -1520,7 +1520,7 @@ TEST(ParserTest, Instruction4) {
   EXPECT_CALL(mer, get_last_error())
      .Times(AtLeast(1));
 
-  std::string input("mad_ftz_u64 $d1, $d2, $d3, $d4;\n");
+  std::string input("mad_ftz_f64 $d1, $d2, $d3, $d4;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction4(context));
