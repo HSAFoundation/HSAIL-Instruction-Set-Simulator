@@ -2911,9 +2911,6 @@ int SignatureType(Context *context) {
         context->token_to_scan = yylex();
         if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
           context->token_to_scan = yylex();
-          // set default value(scalar)
-          context->set_dim(0);
-          context->set_symbol_modifier(BrigArray);
           if ('[' == context->token_to_scan){
             return ArrayDimensionSet(context);
 	  }

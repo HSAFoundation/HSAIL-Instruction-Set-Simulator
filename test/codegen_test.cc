@@ -7941,5 +7941,74 @@ TEST(CodegenTest,BlockCodegen){
   delete lexer;
 };
 
+TEST(CodegenTest,FunctionSignatureCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("signature &test(arg_u32)(arg_f32) :fbar(2) ;");
+  Lexer *lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0,FunctionSignature(context));
+  
+  size_t arraySize = sizeof(BrigDirectiveSignature) + 
+      sizeof(BrigDirectiveSignature::types);
+  uint8_t *array = new uint8_t[arraySize];
+  
+  BrigDirectiveSignature *ref = 
+        reinterpret_cast<BrigDirectiveSignature *>(array);
+
+  ref->size = arraySize;
+  ref->kind = BrigEDirectiveSignature;
+  ref->c_code = context->get_code_offset();
+  ref->s_name = context->get_string_offset()-(strlen("&test") + 1);
+  ref->fbarCount = 2;
+  ref->reserved = 0;
+  ref->outCount = 1;
+  ref->inCount = 1;
+  ref->types[0].type = Brigu32;
+  ref->types[0].align = 1;
+  ref->types[0].hasDim = 0;
+  ref->types[0].dim = 0;
+
+  ref->types[1].type = Brigf32;
+  ref->types[1].align = 1;
+  ref->types[1].hasDim = 0;
+  ref->types[1].dim = 0;
+
+// Buffer *dbuf = context->get_directive();
+  uint32_t offset = context->get_directive_offset() - arraySize;
+//  BrigDirectiveSignature *get = 
+  //     reinterpret_cast<BrigDirectiveSignature*>(&dbuf->get()[offset]);
+
+  array = new uint8_t[arraySize];
+  BrigDirectiveSignature *get = 
+      reinterpret_cast<BrigDirectiveSignature*>(array);
+  unsigned char *get_charp =  reinterpret_cast<unsigned char *>(get);
+
+  context->get_directive_bytes(get_charp,offset,arraySize);
+  EXPECT_EQ(ref->size,get->size);
+  EXPECT_EQ(ref->kind,get->kind);
+  EXPECT_EQ(ref->c_code,get->c_code);
+  EXPECT_EQ(ref->s_name,get->s_name);
+  EXPECT_EQ(ref->fbarCount,get->fbarCount);
+  EXPECT_EQ(ref->reserved,get->reserved);
+  EXPECT_EQ(ref->outCount,get->outCount);
+  EXPECT_EQ(ref->inCount,get->inCount);
+  EXPECT_EQ(ref->types[0].type,get->types[0].type);
+  EXPECT_EQ(ref->types[0].align,get->types[0].align);
+  EXPECT_EQ(ref->types[0].hasDim,get->types[0].hasDim);
+  EXPECT_EQ(ref->types[0].dim,get->types[0].dim);
+  EXPECT_EQ(ref->types[1].type,get->types[1].type);
+  EXPECT_EQ(ref->types[1].align,get->types[1].align);
+  EXPECT_EQ(ref->types[1].hasDim,get->types[1].hasDim);
+  EXPECT_EQ(ref->types[1].dim,get->types[1].dim);
+  
+  delete ref;
+  delete get;
+
+  delete lexer;
+};
+
 }  // namespace brig
 }  // namespace hsa
