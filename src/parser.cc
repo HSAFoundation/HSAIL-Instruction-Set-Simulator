@@ -2901,20 +2901,44 @@ int VectorToken(Context *context) {
 }
 
 int SignatureType(Context *context) {
-  // first token is ARG
-  context->token_to_scan = yylex();
-
-  if (DATA_TYPE_ID == context->token_type) {
-    context->token_to_scan = yylex();
-    if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan)
-    // ignore the local identifier
+  // alignment optional
+  if (ALIGN == context->token_to_scan){
+    if (Alignment(context))
+      return 1;
+    if (ARG == context->token_to_scan){
       context->token_to_scan = yylex();
-    return 0;
-  } else if (_ROIMG == context->token_to_scan
-           || _RWIMG == context->token_to_scan
-           || _SAMP == context->token_to_scan ) {
+      if (DATA_TYPE_ID == context->token_type){
+        context->token_to_scan = yylex();
+        if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
+          context->token_to_scan = yylex();
+          // set default value(scalar)
+          context->set_dim(0);
+          context->set_symbol_modifier(BrigArray);
+          if ('[' == context->token_to_scan){
+            return ArrayDimensionSet(context);
+	  }
+	}
+        return 0;
+      }
+    }
+  } else if (ARG == context->token_to_scan){
     context->token_to_scan = yylex();
-    return 0;
+    if (DATA_TYPE_ID == context->token_type) {
+      context->token_to_scan = yylex();
+      if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
+      // ignore the local identifier
+        context->token_to_scan = yylex();
+        if ('[' == context->token_to_scan){
+          return ArrayDimensionSet(context);
+        }
+      }
+      return 0;
+    } else if (_ROIMG == context->token_to_scan
+             || _RWIMG == context->token_to_scan
+             || _SAMP == context->token_to_scan ) {
+      context->token_to_scan = yylex();
+      return 0;
+    }
   }
   return 1;
 }
@@ -2985,7 +3009,8 @@ int SysCall(Context* context) {
 
 int SignatureArgumentList(Context *context) {
   while (1) {
-    if (context->token_to_scan == ARG) {
+    if (ARG == context->token_to_scan 
+        || ALIGN == context->token_to_scan ) {
       if (!SignatureType(context)) {
         if (',' == context->token_to_scan) {
           context->token_to_scan = yylex();
