@@ -448,7 +448,7 @@ std::string input_array_mul_ftz_round[] = {
   "mul_ftz_down_f64 $d1, $d2, $d3;",
   "mul_ftz_down_f64 $d1, $d2, 1;",
   "mul_ftz_down_f64 $d1, 1, $d3;",
-  "mul_ftz_down_f64 $d1, 1, 1;"
+  "mul_ftz_down_f64 $d1, 1, 1;",
   // f16
   "mul_f16 $s1, $s2, $s3;",
   "mul_f16 $s1, $s2, 1.0;",
