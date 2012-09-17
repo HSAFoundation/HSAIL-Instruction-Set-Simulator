@@ -698,6 +698,90 @@ extern "C" b1 Class_f64(f64, unsigned);
 MakeTest(Class_f32, ClassLogic)
 MakeTest(Class_f64, ClassLogic)
 
+static void Fcos_f32_Logic(f32 result, f32 a) {
+  int fpclass = std::fpclassify(a);
+  if(isNan(a) || isInf(a)) {
+    EXPECT_PRED1(isNan<f32>, result);
+  } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
+    EXPECT_FLOAT_EQ(cos(1.0), result);
+  } else if(fpclass == FP_SUBNORMAL) {
+    EXPECT_EQ(1.0, result);
+  } else if(isNegZero(a)) {
+    EXPECT_EQ(1.0, result);
+  } else if(isPosZero(a)) {
+    EXPECT_EQ(1.0, result);
+  } else {
+    EXPECT_FLOAT_EQ(cos(a), result);
+  }
+}
+extern "C" f32 Fcos_f32(f32);
+MakeTest(Fcos_f32, Fcos_f32_Logic)
+
+static void Fsin_f32_Logic(f32 result, f32 a) {
+  int fpclass = std::fpclassify(a);
+  if(isNan(a) || isInf(a)) {
+    EXPECT_PRED1(isNan<f32>, result);
+  } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
+    EXPECT_FLOAT_EQ(sin(1.0), result);
+  } else if(fpclass == FP_SUBNORMAL && a > 0.0) {
+    EXPECT_PRED1(isPosZero<f32>, result);
+  } else if(fpclass == FP_SUBNORMAL && a < 0.0) {
+    EXPECT_PRED1(isNegZero<f32>, result);
+  } else if(isNegZero(a)) {
+    EXPECT_PRED1(isNegZero<f32>, result);
+  } else if(isPosZero(a)) {
+    EXPECT_PRED1(isPosZero<f32>, result);
+  } else {
+    EXPECT_FLOAT_EQ(sin(a), result);
+  }
+}
+extern "C" f32 Fsin_f32(f32);
+MakeTest(Fsin_f32, Fsin_f32_Logic)
+
+static void Flog2_f32_Logic(f32 result, f32 a) {
+  int fpclass = std::fpclassify(a);
+  if(isNan(a) || isNegInf(a)) {
+    EXPECT_PRED1(isNan<f32>, result);
+  } else if(isPosInf(a)) {
+    EXPECT_PRED1(isPosInf<f32>, result);
+  } else if(fpclass == FP_NORMAL && a < 0.0) {
+    EXPECT_PRED1(isNegInf<f32>, result);
+  } else if(fpclass == FP_SUBNORMAL) {
+    EXPECT_PRED1(isNegInf<f32>, result);
+  } else if(isNegZero(a)) {
+    EXPECT_PRED1(isNegInf<f32>, result);
+  } else if(isPosZero(a)) {
+    EXPECT_PRED1(isNegInf<f32>, result);
+  } else {
+    EXPECT_FLOAT_EQ(log2(a), result);
+  }
+}
+extern "C" f32 Flog2_f32(f32);
+MakeTest(Flog2_f32, Flog2_f32_Logic)
+
+static void Fexp2_f32_Logic(f32 result, f32 a) {
+  int fpclass = std::fpclassify(a);
+  if(isNan(a)) {
+    EXPECT_PRED1(isNan<f32>, result);
+  } else if(isNegInf(a)) {
+    EXPECT_PRED1(isPosZero<f32>, result);
+  } else if(isPosInf(a)) {
+    EXPECT_PRED1(isPosInf<f32>, result);
+  } else if(fpclass == FP_NORMAL && a < 0.0) {
+    EXPECT_PRED1(isPosZero<f32>, result);
+  } else if(fpclass == FP_SUBNORMAL) {
+    EXPECT_EQ(1.0, result);
+  } else if(isNegZero(a)) {
+    EXPECT_EQ(1.0, result);
+  } else if(isPosZero(a)) {
+    EXPECT_EQ(1.0, result);
+  } else {
+    EXPECT_FLOAT_EQ(exp2(a), result);
+  }
+}
+extern "C" f32 Fexp2_f32(f32);
+MakeTest(Fexp2_f32, Fexp2_f32_Logic)
+
 template<class T> static void FrsqrtLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isNegInf(a)) {
@@ -755,6 +839,69 @@ static void F2u4_u32_Logic(u32 result, f32 a, f32 b, f32 c, f32 d) {
 }
 extern "C" u32 F2u4_u32(f32 a, f32 b, f32 c, f32 d);
 MakeTest(F2u4_u32, F2u4_u32_Logic)
+
+static void Unpack3Logic(f32 result, b32 a) {
+  EXPECT_EQ(result, (a >> 24) & 0xFF);
+}
+extern "C" f32 Unpack3(b32);
+MakeTest(Unpack3, Unpack3Logic)
+
+static void Unpack2Logic(f32 result, b32 a) {
+  EXPECT_EQ(result, (a >> 16) & 0xFF);
+}
+extern "C" f32 Unpack2(b32);
+MakeTest(Unpack2, Unpack2Logic)
+
+static void Unpack1Logic(f32 result, b32 a) {
+  EXPECT_EQ(result, (a >> 8) & 0xFF);
+}
+extern "C" f32 Unpack1(b32);
+MakeTest(Unpack1, Unpack1Logic)
+
+static void Unpack0Logic(f32 result, b32 a) {
+  EXPECT_EQ(result, (a & 0xFF));
+}
+extern "C" f32 Unpack0(b32);
+MakeTest(Unpack0, Unpack0Logic)
+
+static void Bitalign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
+  if(c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {
+    unsigned tag = (32 - c) / 8;
+    for(unsigned i = 0; i < 4; ++i) {
+      if(i + tag > 3)
+        EXPECT_EQ((result >> (i * 8)) & 0xFF, (a >> (((i + tag) % 4) * 8)) & 0xFF);
+      else 
+        EXPECT_EQ((result >> (i * 8)) & 0xFF, (b >> ((i + tag) * 8)) & 0xFF);
+    }
+  }
+}
+extern "C" b32 Bitalign_b32(b32, b32, b32);
+MakeTest(Bitalign_b32, Bitalign_b32_Logic)
+
+static void Bytealign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
+  if(c <= 4) {
+    unsigned tag = (4 - c);
+    for(unsigned i = 0; i < 4; ++i) {
+      if(i + tag > 3)
+        EXPECT_EQ((result >> (i * 8)) & 0xFF, ((a) >> (((i + tag) % 4) * 8)) & 0xFF);
+      else 
+        EXPECT_EQ((result >> (i * 8)) & 0xFF, ((b) >> (((i + tag)) * 8)) & 0xFF);
+    }
+  }
+}
+extern "C" b32 Bytealign_b32(b32, b32, b32);
+MakeTest(Bytealign_b32, Bytealign_b32_Logic)
+
+static void Lerp_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+  for(unsigned i = 0; i < 4; ++i) {
+    EXPECT_EQ((result >> i * 8) & 0xFF,
+                ((((a >> i * 8) & 0xFF)
+                + ((b >> i * 8) & 0xFF)
+                + ((c >> i * 8) & 0x1)) >> 1) & 0xFF); 
+  }
+}
+extern "C" b32 Lerp_b32(b32, b32, b32);
+MakeTest(Lerp_b32, Lerp_b32_Logic)
 
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)

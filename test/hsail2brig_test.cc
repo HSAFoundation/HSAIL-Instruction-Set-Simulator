@@ -21,10 +21,10 @@ TEST_P(CodegenTest_GlobalSamplerDecl,GlobalSamplerDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(inputArray_GlobalSamplerDecl[n]);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -54,7 +54,7 @@ TEST_P(CodegenTest_GlobalSamplerDecl,GlobalSamplerDecl)
   EXPECT_EQ(ref.boundaryV, get.boundaryV);
   EXPECT_EQ(ref.boundaryW, get.boundaryW);
   EXPECT_EQ(ref.reserved1, get.reserved1);
- 
+
   delete lexer;
 }
 
@@ -64,10 +64,10 @@ TEST_P(CodegenTest_GlobalImageDecl,GlobalImageDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(inputArray_GlobalImageDecl[n]);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -95,7 +95,7 @@ TEST_P(CodegenTest_GlobalImageDecl,GlobalImageDecl)
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   EXPECT_EQ(ref.s.type, get.s.type);
   //EXPECT_EQ(ref.s.align, get.s.align);
- 
+
   delete lexer;
 }
 
@@ -105,10 +105,10 @@ TEST_P(CodegenTest_GlobalReadOnlyImageDecl,GlobalReadOnlyImageDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(inputArray_GlobalReadOnlyImageDecl[n]);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -136,7 +136,7 @@ TEST_P(CodegenTest_GlobalReadOnlyImageDecl,GlobalReadOnlyImageDecl)
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   EXPECT_EQ(ref.s.type, get.s.type);
   //EXPECT_EQ(ref.s.align, get.s.align);
- 
+
   delete lexer;
 }
 
@@ -146,10 +146,10 @@ TEST_P(CodegenTest_GlobalPrivateDecl,GlobalPrivateDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(inputArray_GlobalPrivateDecl[n]);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -175,9 +175,9 @@ TEST_P(CodegenTest_GlobalPrivateDecl,GlobalPrivateDecl)
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
- 
+
   delete lexer;
-};
+}
 
 INSTANTIATE_TEST_CASE_P(TestGlobalPrivateDecl,CodegenTest_GlobalPrivateDecl,testing::Range(0,3));
 
@@ -185,10 +185,10 @@ TEST_P(CodegenTest_GlobalGroupDecl,GlobalGroupDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(inputArray_GlobalGroupDecl[n]);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -214,9 +214,9 @@ TEST_P(CodegenTest_GlobalGroupDecl,GlobalGroupDecl)
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
- 
+
   delete lexer;
-};
+}
 
 INSTANTIATE_TEST_CASE_P(TestGlobalGroupDecl,CodegenTest_GlobalGroupDecl,testing::Range(0,3));
 

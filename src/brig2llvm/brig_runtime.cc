@@ -459,6 +459,47 @@ template<class T> static b1 Class(T x, b32 y) {
 extern "C" b1 Class_f32(f32 f, b32 y) { return Class(f, y); }
 extern "C" b1 Class_f64(f64 f, b32 y) { return Class(f, y); }
 
+extern "C" f32 Fcos_f32(f32 x) {
+  if(isNan(x)) return x;
+  if(isInf(x)) return NAN;
+  if(-512 * M_PI <= x && x <= 512 * M_PI) {
+    return std::cos(x);
+  } else {
+    return std::cos(1.0);
+  }
+}
+
+extern "C" f32 Fsin_f32(f32 x) {
+  if(isNan(x)) return x;
+  if(isInf(x)) return NAN;
+  if(std::fpclassify(x) == FP_SUBNORMAL) {
+    return copysign(0.0, x);
+  }
+  if(-512 * M_PI <= x && x <= 512 * M_PI) {
+    return std::sin(x);
+  } else {
+    return std::sin(1.0);
+  }
+}
+
+extern "C" f32 Flog2_f32(f32 x) {
+  if(std::fpclassify(x) == FP_SUBNORMAL) {
+    return -INFINITY;
+  } else if(std::fpclassify(x) == FP_NORMAL && x < 0) {
+    return -INFINITY;
+  } else {
+    return log2(x);
+  }
+}
+
+extern "C" f32 Fexp2_f32(f32 x) {
+  if (std::fpclassify(x) == FP_NORMAL && x < 0) {
+    return 0.0;
+  } else {
+    return exp2(x);
+  }
+}
+
 template<class T> static T Frsqrt(T x) {
   if(std::fpclassify(x) == FP_SUBNORMAL) {
     return x > 0 ? INFINITY : -INFINITY;
@@ -482,6 +523,51 @@ extern "C" u32 F2u4_u32(f32 w, f32 x, f32 y, f32 z){
            + ((lrint(x) & 0xFF) << 16)
            + ((lrint(y) & 0xFF) << 8)
            +  (lrint(z) & 0xFF));
+}
+
+extern "C" f32 Unpack3(b32 w) {
+  return f32((w >> 24) & 0xFF);
+}
+
+extern "C" f32 Unpack2(b32 w) {
+  return f32((w >> 16) & 0xFF);
+}
+
+extern "C" f32 Unpack1(b32 w) {
+  return f32((w >> 8) & 0xFF);
+}
+
+extern "C" f32 Unpack0(b32 w) {
+  return f32(w & 0xFF);
+}
+
+extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
+  switch(y) {
+    case 0:
+      return w;
+    case 8:
+    case 16:
+    case 24:
+      return (w << y) | (x >> (32 - y));
+    case 32:
+      return x;
+    default :
+      return 0;  
+  }
+}
+
+extern "C" b32 Bytealign_b32(b32 w, b32 x, b32 y) {
+  return Bitalign_b32(w, x, y * 8);
+}
+
+extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
+  b32 result = 0;
+  for(unsigned i = 0; i < 4; ++i) {
+    result |= (((((w >> 8 * i) & 0xFF)
+               + ((x >> 8 * i) & 0xFF)
+               + ((y >> 8 * i) & 0x1)) >> 1) & 0xFF) << 8 * i;
+  }
+  return result;      
 }
 
 CmpInst(eq, x == y)
