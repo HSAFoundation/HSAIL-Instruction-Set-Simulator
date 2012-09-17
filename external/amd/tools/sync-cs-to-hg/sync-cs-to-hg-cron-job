@@ -1,0 +1,16 @@
+#!/bin/csh
+
+set path = ($path $HOME/bin)
+
+set OUTFILE = $HOME/mcw/log/cs-sync.log
+set TOOLSDIR = ../tools/sync-cs-to-hg
+
+cd $HOME
+cd mcw/simulator/sync-tree/hsail2brigamd
+cd external/amd
+cd hsailcs
+
+touch $OUTFILE
+date "+DATE: %Y%m%d-%H%M%S" | tee -a $OUTFILE
+$TOOLSDIR/sync-cs-to-hg |& tee -a $OUTFILE
+
