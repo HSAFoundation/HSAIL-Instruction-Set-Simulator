@@ -140,7 +140,7 @@ std::string inputarray_instruction1opnodt_debugtrap[] = {
   "debugtrap $s0;",
   "debugtrap $s4;",
   "debugtrap 0;",
-  "debugtrap 61;"
+  "debugtrap 61;",
   "debugtrap WAVESIZE;"
 };
 BrigInstBase outputarray_instruction1opnodt_debugtrap[] = {
@@ -204,20 +204,20 @@ class MulBaseFalse : public ::testing::TestWithParam<int>
 
 };
 std::string input_array_mul_base_false[] = {
-  "mul_s32 $s1;"
+  "mul_s32 $s1;",
   "mul_s32 $s1, $s2;",
   "mul_s32 1, $s2, $s3;",
   "mul_s32 WAVESIZE, $s2, $s3;",
-  "mul_s64 $s1;"
+  "mul_s64 $s1;",
   "mul_s64 $s1, $s2;",
   "mul_s64 1, $s2, $s3;",
   "mul_s64 WAVESIZE, $s2, $s3;",
   "mul_s64 $s1, $s2, $s3;",
-  "mul_u32 $s1;"
+  "mul_u32 $s1;",
   "mul_u32 $s1, $s2;",
   "mul_u32 1, $s2, $s3;",
-  "mul_u32 WAVESIZE, $s2, $s3;"
-  "mul_u64 $s1;"
+  "mul_u32 WAVESIZE, $s2, $s3;",
+  "mul_u64 $s1;",
   "mul_u64 $s1, $s2;",
   "mul_u64 1, $s2, $s3;",
   "mul_u64 WAVESIZE, $s2, $s3;"
