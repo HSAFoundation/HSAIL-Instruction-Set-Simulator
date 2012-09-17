@@ -2908,20 +2908,30 @@ int SignatureType(Context *context) {
     if (ARG == context->token_to_scan){
       context->token_to_scan = yylex();
       if (DATA_TYPE_ID == context->token_type){
+        context->set_type(context->token_value.data_type);
         context->token_to_scan = yylex();
+        // set default value(scalar)
+        context->set_dim(0);
+        context->set_symbol_modifier(BrigArray);
         if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
           context->token_to_scan = yylex();
           if ('[' == context->token_to_scan){
-            return ArrayDimensionSet(context);
+            if (!ArrayDimensionSet(context)){
+            } else {
+              return 1;
+	    }
 	  }
 	}
-        return 0;
       }
     }
   } else if (ARG == context->token_to_scan){
     context->token_to_scan = yylex();
     if (DATA_TYPE_ID == context->token_type) {
+      context->set_type(context->token_value.data_type);
       context->token_to_scan = yylex();
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
       if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
       // ignore the local identifier
         context->token_to_scan = yylex();
@@ -2929,15 +2939,24 @@ int SignatureType(Context *context) {
           return ArrayDimensionSet(context);
         }
       }
-      return 0;
     } else if (_ROIMG == context->token_to_scan
              || _RWIMG == context->token_to_scan
              || _SAMP == context->token_to_scan ) {
+      context->set_type(context->token_value.data_type);
       context->token_to_scan = yylex();
-      return 0;
     }
+  } else {
+    return 1;
   }
-  return 1;
+  BrigDirectiveSignature::BrigProtoType bpt = {
+    context->get_type(),
+    context->get_alignment(),
+    (context->get_dim() != 0),
+    context->get_dim()
+  };
+  context->types.push_back(bpt);
+
+  return 0;
 }
 
 int SysCall(Context* context) {
@@ -3027,8 +3046,12 @@ int SignatureArgumentList(Context *context) {
 int FunctionSignature(Context *context) {
   // first token is SIGNATURE
   context->token_to_scan = yylex();
-
+  
+  size_t inCount = 0;
+  size_t outCount = 0;
   if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
+    std::string name = context->token_value.string_val;
+    BrigsOffset32_t name_offset = context->add_symbol(name);
     context->token_to_scan = yylex();
     // check return argument list
     if ('(' == context->token_to_scan) {
@@ -3036,6 +3059,7 @@ int FunctionSignature(Context *context) {
       if (')' == context->token_to_scan) {  // empty signature Argument List
         context->token_to_scan = yylex();
       } else if (!SignatureArgumentList(context)) {
+        outCount = context->types.size();
         if (context->token_to_scan == ')')
           context->token_to_scan = yylex();
         else
@@ -3052,6 +3076,7 @@ int FunctionSignature(Context *context) {
       if (')' == context->token_to_scan) {  // empty
         context->token_to_scan = yylex();
       } else if (!SignatureArgumentList(context)) {
+        inCount = context->types.size() - outCount ;
         if (context->token_to_scan == ')')
           context->token_to_scan = yylex();
         else
@@ -3071,6 +3096,25 @@ int FunctionSignature(Context *context) {
     }
 
     if (';' == context->token_to_scan) {  // end with ;
+
+      size_t arraySize = sizeof(BrigDirectiveSignature) +
+             (context->types.size() - 1) * sizeof(BrigDirectiveSignature::BrigProtoType);
+      uint8_t *array  = new uint8_t[arraySize];
+      BrigDirectiveSignature *bds = 
+          reinterpret_cast<BrigDirectiveSignature*>(array);
+
+      bds->size = arraySize;
+      bds->kind = BrigEDirectiveSignature;
+      bds->c_code = context->get_code_offset();
+      bds->s_name = name_offset;
+      bds->fbarCount = context->get_fbar();
+      bds->reserved = 0;
+      bds->outCount = outCount;
+      bds->inCount = inCount;
+      for(int i = 0;i < context->types.size();i++)
+        memmove(&bds->types[i],&context->types[i],sizeof(BrigDirectiveSignature::BrigProtoType));
+      context->append_directive(bds);      
+
       context->token_to_scan = yylex();
       return 0;
     } else {

@@ -269,6 +269,9 @@ class Context {
     std::map<std::string, BrigoOffset32_t> label_o_map;
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
     std::map<std::string, BrigdOffset32_t> symbol_map;
+    
+    // contains the type info of functionSignature  
+    std::vector<BrigDirectiveSignature::BrigProtoType> types;
 
     unsigned int token_to_scan;
     int               yycolno;

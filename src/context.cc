@@ -59,6 +59,7 @@ void Context::clear_context(void) {
     valid_string = false;
   }
   set_default_values();
+  types.clear();
 }
 
 void Context::set_default_values(void) {
