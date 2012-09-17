@@ -3,6 +3,7 @@
 
 #include "brig_runtime.h"
 #include <cmath>
+#include <fenv.h>
 
 namespace hsa {
 namespace brig {
@@ -266,6 +267,59 @@ defineVec(f64, 2)
 #define declareCmpRet(FUNC,RET,TYPE)                              \
   extern "C" bool FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u);
 
+#define RIICvt(D)                               \
+  IBCvt(I, D, Cvt, ~0)
+
+#define RFICvt(D)                               \
+  FICvt(D, Cvt,       ~0)                       \
+  FICvt(D, Cvt_upi,   FE_UPWARD)                \
+  FICvt(D, Cvt_downi, FE_DOWNWARD)              \
+  FICvt(D, Cvt_zeroi, FE_TOWARDZERO)            \
+  FICvt(D, Cvt_neari, FE_TONEAREST)
+
+#define RIFCvt(D)                               \
+  IBCvt(F, D, Cvt,      ~0)                     \
+  IBCvt(F, D, Cvt_up,   FE_UPWARD)              \
+  IBCvt(F, D, Cvt_down, FE_DOWNWARD)            \
+  IBCvt(F, D, Cvt_zero, FE_TOWARDZERO)          \
+  IBCvt(F, D, Cvt_near, FE_TONEAREST)
+
+#define IBCvt(B,D,FUNC,ROUND)                   \
+  B ## Cvt(D, FUNC, ROUND, b1)                  \
+  B ## Cvt(D, FUNC, ROUND, u8)                  \
+  B ## Cvt(D, FUNC, ROUND, s8)                  \
+  B ## Cvt(D, FUNC, ROUND, u16)                 \
+  B ## Cvt(D, FUNC, ROUND, s16)                 \
+  B ## Cvt(D, FUNC, ROUND, u32)                 \
+  B ## Cvt(D, FUNC, ROUND, s32)                 \
+  B ## Cvt(D, FUNC, ROUND, u64)                 \
+  B ## Cvt(D, FUNC, ROUND, s64)
+
+#define FICvt(D,FUNC,ROUND)                     \
+  /* ICvt(D, FUNC, ROUND, f16) */               \
+  ICvt(D, FUNC, ROUND, f32)                     \
+  ICvt(D, FUNC, ROUND, f64)
+
+#define ICvt(D,FUNC,ROUND,TYPE)                 \
+  D ## Cvt(FUNC, ROUND, u8,  TYPE)              \
+  D ## Cvt(FUNC, ROUND, s8,  TYPE)              \
+  D ## Cvt(FUNC, ROUND, u16, TYPE)              \
+  D ## Cvt(FUNC, ROUND, s16, TYPE)              \
+  D ## Cvt(FUNC, ROUND, u32, TYPE)              \
+  D ## Cvt(FUNC, ROUND, s32, TYPE)              \
+  D ## Cvt(FUNC, ROUND, u64, TYPE)              \
+  D ## Cvt(FUNC, ROUND, s64, TYPE)
+
+#define FCvt(D,FUNC,ROUND,TYPE)                 \
+  /* D ## Cvt(FUNC, ROUND, f16, TYPE) */        \
+  D ## Cvt(FUNC, ROUND, f32, TYPE)              \
+  D ## Cvt(FUNC, ROUND, f64, TYPE)
+
+#define defineCvt(FUNC,ROUND,RET,TYPE)                    \
+  extern "C" RET FUNC ## _ ## RET ## _ ## TYPE (TYPE t) { \
+    return Cvt<RET>(t, ROUND);                      \
+  }
+
 #define defineUnary(FUNC,TYPE)                  \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t) {  \
     return FUNC(t);                             \
@@ -445,6 +499,16 @@ template<> inline bool isPosInf(double d) { return std::isinf(d) && d > 0.0; }
 template<class T> inline bool isNegInf(T t) { return false; }
 template<> inline bool isNegInf(float f)  { return std::isinf(f) && f < 0.0; }
 template<> inline bool isNegInf(double d) { return std::isinf(d) && d < 0.0; }
+
+template<class T> inline T getMax() { return Int<T>::Max; }
+template<> inline b1  getMax() { return true; }
+template<> inline f32 getMax() { return INFINITY; }
+template<> inline f64 getMax() { return INFINITY; }
+
+template<class T> inline T getMin() { return Int<T>::Min; }
+template<> inline b1  getMin() { return false; }
+template<> inline f32 getMin() { return -INFINITY; }
+template<> inline f64 getMin() { return -INFINITY; }
 
 enum BrigFPClass {
   SNan       = 0x001,
