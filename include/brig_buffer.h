@@ -41,7 +41,11 @@ class Buffer {
   }
 
   // get the whole buffer as a vector
-   std::vector<unsigned char> get(void) const {
+  const std::vector<unsigned char> &get(void) const {
+    return buf_;
+  }
+
+  std::vector<unsigned char> &get(void) {
     return buf_;
   }
 

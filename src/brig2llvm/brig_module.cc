@@ -884,24 +884,79 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
   return true;
 }
+
 bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
-  return true;
+  bool valid = true;
+  dir_iterator argDir(S_.directives + operand->arg);
+  valid &= validate(argDir);
+  valid &= check(isa<BrigDirectiveSymbol>(argDir), 
+                 "Invalid reg, should be point BrigDirectiveSymbol");
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandBase *operand) const {
-  return true;
+  bool valid = true;
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandCompound *operand) const {
-  return true;
+  bool valid = true;
+  valid &= check(operand->type == Brigb32 ||
+                 operand->type == Brigb64, "Invald datatype, should be " 
+                 "Brigb32 and Brigb64");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  oper_iterator nameOper(S_.operands + operand->name);
+  valid &= validate(nameOper);
+  valid &= check(isa<BrigOperandAddress>(nameOper), 
+                 "Invalid name, should point to BrigOperandAddress");
+
+  if(operand->reg) {
+    const oper_iterator oper(S_.operands + operand->reg);
+    if(!validate(oper)) return false;
+    const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");  
+    valid &= check(bor->type == Brigb32 ||
+                   bor->type == Brigb64, "Invalid register, the register "
+                   "must be an s or d register");
+  }
+
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
-  return true;
+  bool valid = true;
+  dir_iterator fnDir(S_.directives + operand->fn);
+  valid &= validate(fnDir);
+  valid &= check(isa<BrigDirectiveFunction>(fnDir) ||
+                 isa<BrigDirectiveSignature>(fnDir), 
+                 "Invalid directive, should point to a "
+                 "BrigDirectiveFunction or BrigDirectiveSibnature");
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandImmed *operand) const {
   return true;
 }
+
 bool BrigModule::validate(const BrigOperandIndirect *operand) const {
-  return true;
+  bool valid = true;
+
+  if (operand->reg) {
+    oper_iterator regOper(S_.operands + operand->reg);
+    valid &= validate(regOper);
+    valid &= check(isa<BrigOperandReg>(regOper), 
+                   "Invalid reg, should be point BrigOprandReg");
+    valid &= check(operand->type == Brigb32 ||
+                   operand->type == Brigb64, "Invald datatype, should be "
+                   "Brigb32 and Brigb64");
+  }
+
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid;
 }
+
 bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
   return true;
 }
@@ -953,9 +1008,9 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
   long int regOffset = strtol(name + 2, &endptr, 10);
   valid &= check(!*endptr, "Garbage after register offset");
   if(type == Brigb1 || type == Brigb128)
-    check(0 >= regOffset && regOffset < 8, "Register offset out-of-bounds");
+    check(0 <= regOffset && regOffset < 8, "Register offset out-of-bounds");
   else if(type == Brigb32 || type == Brigb64)
-    check(0 >= regOffset && regOffset < 32, "Register offset out-of-bounds");
+    check(0 <= regOffset && regOffset < 32, "Register offset out-of-bounds");
 
   valid &= check(operand->type == type, "Register name does not match type");
   valid &= check(!operand->reserved, "reserved must be zero");
