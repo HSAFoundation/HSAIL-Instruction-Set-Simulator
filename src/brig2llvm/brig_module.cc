@@ -1036,10 +1036,40 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
-  return true;
+  bool valid = true;
+  for(int i = 0; i < 2; i++) {
+    const oper_iterator oper(S_.operands + operand->regs[i]);
+    if(!validate(oper)) return false;
+    const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
+    valid &= check(bor->type == operand->type,
+                   "should be the same type with BrigOperandReg");
+  }
+  valid &= check(operand->type == Brigb1 ||
+                 operand->type == Brigb32 ||
+                 operand->type == Brigb64,
+                 "Invalid date type");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid;
 }
 bool BrigModule::validate(const BrigOperandRegV4 *operand) const {
-  return true;
+  bool valid = true;
+  for(int i = 0; i < 4; i++) {
+    const oper_iterator oper(S_.operands + operand->regs[i]);
+    if(!validate(oper)) return false;
+    const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
+    valid &= check(bor->type == operand->type,
+                   "should be the same type with BrigOperandReg");
+  }
+  valid &= check(operand->type == Brigb1 ||
+                 operand->type == Brigb32 ||
+                 operand->type == Brigb64,
+                 "Invalid date type");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid;
 }
 bool BrigModule::validate(const BrigOperandWaveSz *operand) const {
   return true;
