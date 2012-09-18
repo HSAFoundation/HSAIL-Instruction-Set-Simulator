@@ -71,106 +71,37 @@
   MakeVectorTest(INST ## _f32x2,  INST ## Logic)
 
 #define TestAtomicInst(INST,NARY)             \
-  MakeAtomicTest(INST ## _s32, INST ## Logic, NARY)                         \
-  MakeAtomicTest(INST ## _global_s32, INST ## Logic, NARY)                  \
-  MakeAtomicTest(INST ## _global_acq_s32, INST ## Logic, NARY)              \
-  MakeAtomicTest(INST ## _global_ar_s32, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _global_part_ar_s32, INST ## Logic, NARY)          \
-  MakeAtomicTest(INST ## _group_s32, INST ## Logic, NARY)                   \
-  MakeAtomicTest(INST ## _group_acq_s32, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _group_ar_s32, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _group_part_ar_s32, INST ## Logic, NARY)           \
-  MakeAtomicTest(INST ## _private_s32, INST ## Logic, NARY)                 \
-  MakeAtomicTest(INST ## _private_acq_s32, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _private_ar_s32, INST ## Logic, NARY)              \
-  MakeAtomicTest(INST ## _private_part_ar_s32, INST ## Logic, NARY)         \
-  MakeAtomicTest(INST ## _readonly_s32, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _readonly_acq_s32, INST ## Logic, NARY)            \
-  MakeAtomicTest(INST ## _readonly_ar_s32, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _readonly_part_ar_s32, INST ## Logic, NARY)        \
-  MakeAtomicTest(INST ## _spill_s32, INST ## Logic, NARY)                   \
-  MakeAtomicTest(INST ## _spill_acq_s32, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _spill_ar_s32, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _spill_part_ar_s32, INST ## Logic, NARY)           \
-  MakeAtomicTest(INST ## _arg_s32, INST ## Logic, NARY)                     \
-  MakeAtomicTest(INST ## _arg_acq_s32, INST ## Logic, NARY)                 \
-  MakeAtomicTest(INST ## _arg_ar_s32, INST ## Logic, NARY)                  \
-  MakeAtomicTest(INST ## _arg_part_ar_s32, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _s64, INST ## Logic, NARY)                         \
-  MakeAtomicTest(INST ## _global_s64, INST ## Logic, NARY)                  \
-  MakeAtomicTest(INST ## _global_acq_s64, INST ## Logic, NARY)              \
-  MakeAtomicTest(INST ## _global_ar_s64, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _global_part_ar_s64, INST ## Logic, NARY)          \
-  MakeAtomicTest(INST ## _group_s64, INST ## Logic, NARY)                   \
-  MakeAtomicTest(INST ## _group_acq_s64, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _group_ar_s64, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _group_part_ar_s64, INST ## Logic, NARY)           \
-  MakeAtomicTest(INST ## _private_s64, INST ## Logic, NARY)                 \
-  MakeAtomicTest(INST ## _private_acq_s64, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _private_ar_s64, INST ## Logic, NARY)              \
-  MakeAtomicTest(INST ## _private_part_ar_s64, INST ## Logic, NARY)         \
-  MakeAtomicTest(INST ## _readonly_s64, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _readonly_acq_s64, INST ## Logic, NARY)            \
-  MakeAtomicTest(INST ## _readonly_ar_s64, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _readonly_part_ar_s64, INST ## Logic, NARY)        \
-  MakeAtomicTest(INST ## _spill_s64, INST ## Logic, NARY)                   \
-  MakeAtomicTest(INST ## _spill_acq_s64, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _spill_ar_s64, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _spill_part_ar_s64, INST ## Logic, NARY)           \
-  MakeAtomicTest(INST ## _arg_s64, INST ## Logic, NARY)                     \
-  MakeAtomicTest(INST ## _arg_acq_s64, INST ## Logic, NARY)                 \
-  MakeAtomicTest(INST ## _arg_ar_s64, INST ## Logic, NARY)                  \
-  MakeAtomicTest(INST ## _arg_part_ar_s64, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _u32, INST ## Logic, NARY)                         \
-  MakeAtomicTest(INST ## _global_u32, INST ## Logic, NARY)                  \
-  MakeAtomicTest(INST ## _global_acq_u32, INST ## Logic, NARY)              \
-  MakeAtomicTest(INST ## _global_ar_u32, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _global_part_ar_u32, INST ## Logic, NARY)          \
-  MakeAtomicTest(INST ## _group_u32, INST ## Logic, NARY)                   \
-  MakeAtomicTest(INST ## _group_acq_u32, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _group_ar_u32, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _group_part_ar_u32, INST ## Logic, NARY)           \
-  MakeAtomicTest(INST ## _private_u32, INST ## Logic, NARY)                 \
-  MakeAtomicTest(INST ## _private_acq_u32, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _private_ar_u32, INST ## Logic, NARY)              \
-  MakeAtomicTest(INST ## _private_part_ar_u32, INST ## Logic, NARY)         \
-  MakeAtomicTest(INST ## _readonly_u32, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _readonly_acq_u32, INST ## Logic, NARY)            \
-  MakeAtomicTest(INST ## _readonly_ar_u32, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _readonly_part_ar_u32, INST ## Logic, NARY)        \
-  MakeAtomicTest(INST ## _spill_u32, INST ## Logic, NARY)                   \
-  MakeAtomicTest(INST ## _spill_acq_u32, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _spill_ar_u32, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _spill_part_ar_u32, INST ## Logic, NARY)           \
-  MakeAtomicTest(INST ## _arg_u32, INST ## Logic, NARY)                     \
-  MakeAtomicTest(INST ## _arg_acq_u32, INST ## Logic, NARY)                 \
-  MakeAtomicTest(INST ## _arg_ar_u32, INST ## Logic, NARY)                  \
-  MakeAtomicTest(INST ## _arg_part_ar_u32, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _u64, INST ## Logic, NARY)                         \
-  MakeAtomicTest(INST ## _global_u64, INST ## Logic, NARY)                  \
-  MakeAtomicTest(INST ## _global_acq_u64, INST ## Logic, NARY)              \
-  MakeAtomicTest(INST ## _global_ar_u64, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _global_part_ar_u64, INST ## Logic, NARY)          \
-  MakeAtomicTest(INST ## _group_u64, INST ## Logic, NARY)                   \
-  MakeAtomicTest(INST ## _group_acq_u64, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _group_ar_u64, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _group_part_ar_u64, INST ## Logic, NARY)           \
-  MakeAtomicTest(INST ## _private_u64, INST ## Logic, NARY)                 \
-  MakeAtomicTest(INST ## _private_acq_u64, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _private_ar_u64, INST ## Logic, NARY)              \
-  MakeAtomicTest(INST ## _private_part_ar_u64, INST ## Logic, NARY)         \
-  MakeAtomicTest(INST ## _readonly_u64, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _readonly_acq_u64, INST ## Logic, NARY)            \
-  MakeAtomicTest(INST ## _readonly_ar_u64, INST ## Logic, NARY)             \
-  MakeAtomicTest(INST ## _readonly_part_ar_u64, INST ## Logic, NARY)        \
-  MakeAtomicTest(INST ## _spill_u64, INST ## Logic, NARY)                   \
-  MakeAtomicTest(INST ## _spill_acq_u64, INST ## Logic, NARY)               \
-  MakeAtomicTest(INST ## _spill_ar_u64, INST ## Logic, NARY)                \
-  MakeAtomicTest(INST ## _spill_part_ar_u64, INST ## Logic, NARY)           \
-  MakeAtomicTest(INST ## _arg_u64, INST ## Logic, NARY)                     \
-  MakeAtomicTest(INST ## _arg_acq_u64, INST ## Logic, NARY)                 \
-  MakeAtomicTest(INST ## _arg_ar_u64, INST ## Logic, NARY)                  \
-  MakeAtomicTest(INST ## _arg_part_ar_u64, INST ## Logic, NARY)
+  TestAtomicInstType(INST, NARY, s32)         \
+  TestAtomicInstType(INST, NARY, s64)         \
+  TestAtomicInstType(INST, NARY, u32)         \
+  TestAtomicInstType(INST, NARY, u64)
+
+#define TestAtomicInstType(INST,NARY,TYPE)             \
+  MakeAtomicTest(INST ## _ ## TYPE, INST ## Logic, NARY)                   \
+  MakeAtomicTest(INST ## _global_ ## TYPE, INST ## Logic, NARY)            \
+  MakeAtomicTest(INST ## _global_acq_ ## TYPE, INST ## Logic, NARY)        \
+  MakeAtomicTest(INST ## _global_ar_ ## TYPE, INST ## Logic, NARY)         \
+  MakeAtomicTest(INST ## _global_part_ar_ ## TYPE, INST ## Logic, NARY)    \
+  MakeAtomicTest(INST ## _group_ ## TYPE, INST ## Logic, NARY)             \
+  MakeAtomicTest(INST ## _group_acq_ ## TYPE, INST ## Logic, NARY)         \
+  MakeAtomicTest(INST ## _group_ar_ ## TYPE, INST ## Logic, NARY)          \
+  MakeAtomicTest(INST ## _group_part_ar_ ## TYPE, INST ## Logic, NARY)     \
+  MakeAtomicTest(INST ## _private_ ## TYPE, INST ## Logic, NARY)           \
+  MakeAtomicTest(INST ## _private_acq_ ## TYPE, INST ## Logic, NARY)       \
+  MakeAtomicTest(INST ## _private_ar_ ## TYPE, INST ## Logic, NARY)        \
+  MakeAtomicTest(INST ## _private_part_ar_ ## TYPE, INST ## Logic, NARY)   \
+  MakeAtomicTest(INST ## _readonly_ ## TYPE, INST ## Logic, NARY)          \
+  MakeAtomicTest(INST ## _readonly_acq_ ## TYPE, INST ## Logic, NARY)      \
+  MakeAtomicTest(INST ## _readonly_ar_ ## TYPE, INST ## Logic, NARY)       \
+  MakeAtomicTest(INST ## _readonly_part_ar_ ## TYPE, INST ## Logic, NARY)  \
+  MakeAtomicTest(INST ## _spill_ ## TYPE, INST ## Logic, NARY)             \
+  MakeAtomicTest(INST ## _spill_acq_ ## TYPE, INST ## Logic, NARY)         \
+  MakeAtomicTest(INST ## _spill_ar_ ## TYPE, INST ## Logic, NARY)          \
+  MakeAtomicTest(INST ## _spill_part_ar_ ## TYPE, INST ## Logic, NARY)     \
+  MakeAtomicTest(INST ## _arg_ ## TYPE, INST ## Logic, NARY)               \
+  MakeAtomicTest(INST ## _arg_acq_ ## TYPE, INST ## Logic, NARY)           \
+  MakeAtomicTest(INST ## _arg_ar_ ## TYPE, INST ## Logic, NARY)            \
+  MakeAtomicTest(INST ## _arg_part_ar_ ## TYPE, INST ## Logic, NARY)
 
 #define TestSignedVectorInst(INST,NARY)         \
   Test ## NARY ## SignedVectorInst(INST)

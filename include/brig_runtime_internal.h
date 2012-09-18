@@ -226,107 +226,37 @@ defineVec(f64, 2)
   D ## ShuffleVector(INST, f32x2)
 
 #define AtomicInst(D,INST,NARY)                 \
-  D ## AtomicInst ## NARY(INST, s32)                          \
-  D ## Atomic ## NARY(INST, global, s32)                      \
-  D ## Atomic ## NARY(INST, global_acq, s32)                  \
-  D ## Atomic ## NARY(INST, global_ar, s32)                   \
-  D ## Atomic ## NARY(INST, global_part_ar, s32)              \
-  D ## Atomic ## NARY(INST, group, s32)                       \
-  D ## Atomic ## NARY(INST, group_acq, s32)                   \
-  D ## Atomic ## NARY(INST, group_ar, s32)                    \
-  D ## Atomic ## NARY(INST, group_part_ar, s32)               \
-  D ## Atomic ## NARY(INST, private, s32)                     \
-  D ## Atomic ## NARY(INST, private_acq, s32)                 \
-  D ## Atomic ## NARY(INST, private_ar, s32)                  \
-  D ## Atomic ## NARY(INST, private_part_ar, s32)             \
-  D ## Atomic ## NARY(INST, readonly, s32)                    \
-  D ## Atomic ## NARY(INST, readonly_acq, s32)                \
-  D ## Atomic ## NARY(INST, readonly_ar, s32)                 \
-  D ## Atomic ## NARY(INST, readonly_part_ar, s32)            \
-  D ## Atomic ## NARY(INST, spill, s32)                       \
-  D ## Atomic ## NARY(INST, spill_acq, s32)                   \
-  D ## Atomic ## NARY(INST, spill_ar, s32)                    \
-  D ## Atomic ## NARY(INST, spill_part_ar, s32)               \
-  D ## Atomic ## NARY(INST, arg, s32)                         \
-  D ## Atomic ## NARY(INST, arg_acq, s32)                     \
-  D ## Atomic ## NARY(INST, arg_ar, s32)                      \
-  D ## Atomic ## NARY(INST, arg_part_ar, s32)                 \
-  D ## AtomicInst ## NARY(INST, u32)                          \
-  D ## Atomic ## NARY(INST, global, u32)                      \
-  D ## Atomic ## NARY(INST, global_acq, u32)                  \
-  D ## Atomic ## NARY(INST, global_ar, u32)                   \
-  D ## Atomic ## NARY(INST, global_part_ar, u32)              \
-  D ## Atomic ## NARY(INST, group, u32)                       \
-  D ## Atomic ## NARY(INST, group_acq, u32)                   \
-  D ## Atomic ## NARY(INST, group_ar, u32)                    \
-  D ## Atomic ## NARY(INST, group_part_ar, u32)               \
-  D ## Atomic ## NARY(INST, private, u32)                     \
-  D ## Atomic ## NARY(INST, private_acq, u32)                 \
-  D ## Atomic ## NARY(INST, private_ar, u32)                  \
-  D ## Atomic ## NARY(INST, private_part_ar, u32)             \
-  D ## Atomic ## NARY(INST, readonly, u32)                    \
-  D ## Atomic ## NARY(INST, readonly_acq, u32)                \
-  D ## Atomic ## NARY(INST, readonly_ar, u32)                 \
-  D ## Atomic ## NARY(INST, readonly_part_ar, u32)            \
-  D ## Atomic ## NARY(INST, spill, u32)                       \
-  D ## Atomic ## NARY(INST, spill_acq, u32)                   \
-  D ## Atomic ## NARY(INST, spill_ar, u32)                    \
-  D ## Atomic ## NARY(INST, spill_part_ar, u32)               \
-  D ## Atomic ## NARY(INST, arg, u32)                         \
-  D ## Atomic ## NARY(INST, arg_acq, u32)                     \
-  D ## Atomic ## NARY(INST, arg_ar, u32)                      \
-  D ## Atomic ## NARY(INST, arg_part_ar, u32)                 \
-  D ## AtomicInst ## NARY(INST, s64)                          \
-  D ## Atomic ## NARY(INST, global, s64)                      \
-  D ## Atomic ## NARY(INST, global_acq, s64)                  \
-  D ## Atomic ## NARY(INST, global_ar, s64)                   \
-  D ## Atomic ## NARY(INST, global_part_ar, s64)              \
-  D ## Atomic ## NARY(INST, group, s64)                       \
-  D ## Atomic ## NARY(INST, group_acq, s64)                   \
-  D ## Atomic ## NARY(INST, group_ar, s64)                    \
-  D ## Atomic ## NARY(INST, group_part_ar, s64)               \
-  D ## Atomic ## NARY(INST, private, s64)                     \
-  D ## Atomic ## NARY(INST, private_acq, s64)                 \
-  D ## Atomic ## NARY(INST, private_ar, s64)                  \
-  D ## Atomic ## NARY(INST, private_part_ar, s64)             \
-  D ## Atomic ## NARY(INST, readonly, s64)                    \
-  D ## Atomic ## NARY(INST, readonly_acq, s64)                \
-  D ## Atomic ## NARY(INST, readonly_ar, s64)                 \
-  D ## Atomic ## NARY(INST, readonly_part_ar, s64)            \
-  D ## Atomic ## NARY(INST, spill, s64)                       \
-  D ## Atomic ## NARY(INST, spill_acq, s64)                   \
-  D ## Atomic ## NARY(INST, spill_ar, s64)                    \
-  D ## Atomic ## NARY(INST, spill_part_ar, s64)               \
-  D ## Atomic ## NARY(INST, arg, s64)                         \
-  D ## Atomic ## NARY(INST, arg_acq, s64)                     \
-  D ## Atomic ## NARY(INST, arg_ar, s64)                      \
-  D ## Atomic ## NARY(INST, arg_part_ar, s64)                 \
-  D ## AtomicInst ## NARY(INST, u64)                          \
-  D ## Atomic ## NARY(INST, global, u64)                      \
-  D ## Atomic ## NARY(INST, global_acq, u64)                  \
-  D ## Atomic ## NARY(INST, global_ar, u64)                   \
-  D ## Atomic ## NARY(INST, global_part_ar, u64)              \
-  D ## Atomic ## NARY(INST, group, u64)                       \
-  D ## Atomic ## NARY(INST, group_acq, u64)                   \
-  D ## Atomic ## NARY(INST, group_ar, u64)                    \
-  D ## Atomic ## NARY(INST, group_part_ar, u64)               \
-  D ## Atomic ## NARY(INST, private, u64)                     \
-  D ## Atomic ## NARY(INST, private_acq, u64)                 \
-  D ## Atomic ## NARY(INST, private_ar, u64)                  \
-  D ## Atomic ## NARY(INST, private_part_ar, u64)             \
-  D ## Atomic ## NARY(INST, readonly, u64)                    \
-  D ## Atomic ## NARY(INST, readonly_acq, u64)                \
-  D ## Atomic ## NARY(INST, readonly_ar, u64)                 \
-  D ## Atomic ## NARY(INST, readonly_part_ar, u64)            \
-  D ## Atomic ## NARY(INST, spill, u64)                       \
-  D ## Atomic ## NARY(INST, spill_acq, u64)                   \
-  D ## Atomic ## NARY(INST, spill_ar, u64)                    \
-  D ## Atomic ## NARY(INST, spill_part_ar, u64)               \
-  D ## Atomic ## NARY(INST, arg, u64)                         \
-  D ## Atomic ## NARY(INST, arg_acq, u64)                     \
-  D ## Atomic ## NARY(INST, arg_ar, u64)                      \
-  D ## Atomic ## NARY(INST, arg_part_ar, u64)
+  AtomicInstType(D, INST, NARY, s32)            \
+  AtomicInstType(D, INST, NARY, s64)            \
+  AtomicInstType(D, INST, NARY, u32)            \
+  AtomicInstType(D, INST, NARY, u64)
 
+#define AtomicInstType(D,INST,NARY,TYPE)                 \
+  D ## AtomicInst ## NARY(INST, TYPE)                          \
+  D ## Atomic ## NARY(INST, global, TYPE)                      \
+  D ## Atomic ## NARY(INST, global_acq, TYPE)                  \
+  D ## Atomic ## NARY(INST, global_ar, TYPE)                   \
+  D ## Atomic ## NARY(INST, global_part_ar, TYPE)              \
+  D ## Atomic ## NARY(INST, group, TYPE)                       \
+  D ## Atomic ## NARY(INST, group_acq, TYPE)                   \
+  D ## Atomic ## NARY(INST, group_ar, TYPE)                    \
+  D ## Atomic ## NARY(INST, group_part_ar, TYPE)               \
+  D ## Atomic ## NARY(INST, private, TYPE)                     \
+  D ## Atomic ## NARY(INST, private_acq, TYPE)                 \
+  D ## Atomic ## NARY(INST, private_ar, TYPE)                  \
+  D ## Atomic ## NARY(INST, private_part_ar, TYPE)             \
+  D ## Atomic ## NARY(INST, readonly, TYPE)                    \
+  D ## Atomic ## NARY(INST, readonly_acq, TYPE)                \
+  D ## Atomic ## NARY(INST, readonly_ar, TYPE)                 \
+  D ## Atomic ## NARY(INST, readonly_part_ar, TYPE)            \
+  D ## Atomic ## NARY(INST, spill, TYPE)                       \
+  D ## Atomic ## NARY(INST, spill_acq, TYPE)                   \
+  D ## Atomic ## NARY(INST, spill_ar, TYPE)                    \
+  D ## Atomic ## NARY(INST, spill_part_ar, TYPE)               \
+  D ## Atomic ## NARY(INST, arg, TYPE)                         \
+  D ## Atomic ## NARY(INST, arg_acq, TYPE)                     \
+  D ## Atomic ## NARY(INST, arg_ar, TYPE)                      \
+  D ## Atomic ## NARY(INST, arg_part_ar, TYPE)
 
 #define CmpImpl(FUNC,PRED)                              \
   template<class T> static T Cmp_ ## FUNC (T x, T y) {  \
