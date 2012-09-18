@@ -827,5 +827,105 @@ TEST(CodegenTest, InitializableDeclCodeGen_global_b8) {
   delete bdi;
 };
 
+
+TEST_P(CodegenTestFileDecl,FileDecl)
+{
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  int n = GetParam();
+  std::string input(inputarray_filedecl[n]);
+ 
+  Lexer* lexer = new Lexer(input);
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, FileDecl(context));
+
+  BrigDirectiveFile get;
+  context->get_directive(0, &get);
+
+  BrigDirectiveFile ref = outputarray_filedecl[n];
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.c_code,get.c_code);
+  EXPECT_EQ(ref.fileid,get.fileid);
+  EXPECT_EQ(ref.s_filename,get.s_filename);
+ 
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(TestFileDecl,
+                        CodegenTestFileDecl,
+                        testing::Range(0,2));
+
+TEST_P(TestFileDeclFalseInput, FileDeclFalseInput) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(inputarray_filedecl_false[n]);
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, FileDecl(context));
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(TestFileDeclFalse,
+                        TestFileDeclFalseInput,
+                        testing::Range(0,7));
+
+TEST_P(CodegenTestLocation,Location)
+{
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  int n = GetParam();
+  std::string input(inputarray_location[n]);
+ 
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Location(context));
+
+  BrigDirectiveLoc get;
+  context->get_directive(0, &get);
+
+  BrigDirectiveLoc ref = outputarray_location[n];
+
+  EXPECT_EQ(ref.size,get.size);
+  EXPECT_EQ(ref.kind,get.kind);
+  EXPECT_EQ(ref.c_code,get.c_code);
+  EXPECT_EQ(ref.sourceFile,get.sourceFile);
+  EXPECT_EQ(ref.sourceLine,get.sourceLine);
+  EXPECT_EQ(ref.sourceColumn,get.sourceColumn);
+ 
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(TestLocation,
+                        CodegenTestLocation,
+                        testing::Range(0,1));
+
+TEST_P(TestLocationFalseInput, LocationFalseInput) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(inputarray_location_false[n]);
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Location(context));
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(TestLocationFalse,
+                        TestLocationFalseInput,
+                        testing::Range(0,5));
+
+
 }  // namespace brig
 }  // namespace hsa

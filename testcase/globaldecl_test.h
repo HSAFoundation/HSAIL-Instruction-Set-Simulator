@@ -1319,6 +1319,80 @@ BrigDirectiveSymbol outputarray_globalgroupdecl[3] = {
   }
 };
 
+class CodegenTestFileDecl: public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string inputarray_filedecl[] = {
+  "file 1 \"\" ;",
+  "file 2 \"this is a file\";"
+};
+
+BrigDirectiveFile outputarray_filedecl[] = {
+  {
+    16,                   //size
+    BrigEDirectiveFile,   //kind
+    0,                    //c_code
+    1,                    //fileid
+    0                     //s_filename
+  },
+  {
+    16,                   //size
+    BrigEDirectiveFile,   //kind
+    0,                    //c_code
+    2,                    //fileid
+    0                     //s_filename
+  }
+};
+
+class TestFileDeclFalseInput: public ::testing::TestWithParam<int>
+{
+
+};
+std::string inputarray_filedecl_false[] = {
+  "file 1 \";",
+  "file 2 this is a file\";",
+  "file  \"this is a file\";",
+  "fil 3 \"this is a file\";",
+  "file 3 \"this is a file\" ",
+  "file 1.0f \"this is a file\";",
+  "file -1 \"this is a file\";"
+};
+
+class CodegenTestLocation: public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string inputarray_location[] = {
+  "loc 12 22 32 ;"
+};
+
+BrigDirectiveLoc outputarray_location[] = {
+  {
+    20,                   //size
+    BrigEDirectiveLoc,    //kind
+    0,                    //c_code
+    12,                   //sourceFile
+    22,                   //sourceLine
+    32                    //sourceColumn
+  },
+
+};
+
+class TestLocationFalseInput: public ::testing::TestWithParam<int>
+{
+
+};
+std::string inputarray_location_false[] = {
+  "locq 12 22 32 ;",
+  "loc 12 22 32 ",
+  "loc 12 22 ; ",
+  "loc -12 22 32 ;",
+  "loc 12 22.0f 32 ;"
+};
+
 }  // namespace brig
 }  // namespace hsa
 #endif //GLOBALDECL_TEST_H_
