@@ -981,6 +981,461 @@ BrigInstBase output_array_mul_floating[] = {
     {8, 20, 44, 0, 0}
   }
 };
+
+
+class SegpSegmentpb1: public ::testing::TestWithParam<int>{
+};
+std::string inputarray_segp_segmentpb1[] = {
+  //global
+  "segmentp_global_b1 $c1,$s2;",
+  "segmentp_global_b1 $c1,$d2;",
+  "segmentp_global_b1 $c1,61;",
+  //group
+  "segmentp_group_b1 $c1,$s2;",
+  "segmentp_group_b1 $c1,$d2;",
+  "segmentp_group_b1 $c1,61;",
+  //private
+  "segmentp_private_b1 $c1,$s2;",
+  "segmentp_private_b1 $c1,$d2;",
+  "segmentp_private_b1 $c1,61;",
+  //kernarg
+  "segmentp_kernarg_b1 $c1,$s2;",
+  "segmentp_kernarg_b1 $c1,$d2;",
+  "segmentp_kernarg_b1 $c1,61;",
+  //readonly
+  "segmentp_readonly_b1 $c1,$s2;",
+  "segmentp_readonly_b1 $c1,$d2;",
+  "segmentp_readonly_b1 $c1,61;",
+  //spill 
+  "segmentp_spill_b1 $c1,$s2;",
+  "segmentp_spill_b1 $c1,$d2;", 
+  "segmentp_spill_b1 $c1,61;",
+  //arg
+  "segmentp_arg_b1 $c1,$s2;",
+  "segmentp_arg_b1 $c1,$d2;",
+  "segmentp_arg_b1 $c1,61;"
+};
+
+BrigInstMem outputarray_segp_segmentpb1[] = {
+  {//0
+    36,
+    BrigEInstMem,
+    BrigSegmentp,
+    Brigb1,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGlobalSpace
+  }, 
+  {//1
+    36,
+    BrigEInstMem,
+    BrigSegmentp,
+    Brigb1,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGroupSpace
+  },
+  {//2
+    36,
+    BrigEInstMem,
+    BrigSegmentp,
+    Brigb1,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigPrivateSpace
+  },
+  {//3
+    36,
+    BrigEInstMem,
+    BrigSegmentp,
+    Brigb1,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigKernargSpace
+  },
+  {//4
+    36,
+    BrigEInstMem,
+    BrigSegmentp,
+    Brigb1,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigReadonlySpace
+  },
+  {//5
+    36,
+    BrigEInstMem,
+    BrigSegmentp,
+    Brigb1,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigSpillSpace
+  },
+  {//6
+    36,
+    BrigEInstMem,
+    BrigSegmentp,
+    Brigb1,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigArgSpace
+  }
+};
+
+
+class SegpFtos: public ::testing::TestWithParam<int>
+{
+};
+std::string inputarray_segp_ftos[] = {
+  //global u32
+  "ftos_global_u32 $d1,$s2;",
+  "ftos_global_u32 $d1,61;",
+  //group u32
+  "ftos_group_u32 $d1,$s2;",
+  "ftos_group_u32 $d1,61;",
+  //private u32
+  "ftos_private_u32 $d1,$s2;",
+  "ftos_private_u32 $d1,61;",
+  //kernarg u32
+  "ftos_kernarg_u32 $d1,$s2;",
+  "ftos_kernarg_u32 $d1,61;",
+  //readonly u32
+  "ftos_readonly_u32 $d1,$s2;",
+  "ftos_readonly_u32 $d1,61;",
+  //spill u32
+  "ftos_spill_u32 $d1,$s2;",
+  "ftos_spill_u32 $d1,61;",
+  //arg u32
+  "ftos_arg_u32 $d1,$s2;",
+  "ftos_arg_u32 $d1,61;",
+  //global u64
+  "ftos_global_u64 $d1,$d2;",
+  "ftos_global_u64 $d1,1;",
+  //group u64
+  "ftos_group_u64 $d1,$d2;",
+  "ftos_group_u64 $d1,1;",
+  //private u64 
+  "ftos_private_u64 $d1,$d2;",
+  "ftos_private_u64 $d1,1;",
+  //kernarg u64
+  "ftos_kernarg_u64 $d1,$d2;",
+  "ftos_kernarg_u64 $d1,1;",
+  //readonly u64
+  "ftos_readonly_u64 $d1,$d2;",
+  "ftos_readonly_u64 $d1,1;",
+  //spill u64 
+  "ftos_spill_u64 $d1,$d2;",
+  "ftos_spill_u64 $d1,1;",
+  //arg u64
+  "ftos_arg_u64 $d1,$d2;",
+  "ftos_arg_u64 $d1,1;"
+};
+
+BrigInstMem outputarray_segp_ftos[] = {
+  {//0
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGlobalSpace
+  },
+  {//1
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGroupSpace
+  },
+  {//2
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigPrivateSpace
+  },
+  {//3
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigKernargSpace
+  },
+  {//4
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigReadonlySpace
+  },
+  {//5
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigSpillSpace
+  },
+  {//6
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigArgSpace
+  },
+  {//7
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGlobalSpace
+  },
+  {//8
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGroupSpace
+  },
+  {//9
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigPrivateSpace
+  },
+  {//10
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigKernargSpace
+  },
+  {//11
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigReadonlySpace
+  },
+  {//12
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigSpillSpace
+  },
+  {//13
+    36,
+    BrigEInstMem,
+    BrigFtoS,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigArgSpace
+  }
+};
+
+
+class SegpStof : public ::testing::TestWithParam<int>{
+};
+std::string inputarray_segp_stof[] = {
+  //global u32
+  "stof_global_u32 $d1,$s2;",
+  "stof_global_u32 $d1,61;",
+  //group u32
+  "stof_group_u32 $d1,$s2;",
+  "stof_group_u32 $d1,61;",
+  //private u32
+  "stof_private_u32 $d1,$s2;",
+  "stof_private_u32 $d1,61;",
+  //kernarg u32
+  "stof_kernarg_u32 $d1,$s2;",
+  "stof_kernarg_u32 $d1,61;",
+  //readonly u32
+  "stof_readonly_u32 $d1,$s2;",
+  "stof_readonly_u32 $d1,61;",
+  //spill u32
+  "stof_spill_u32 $d1,$s2;",
+  "stof_spill_u32 $d1,61;",
+  //arg u32
+  "stof_arg_u32 $d1,$s2;",
+  "stof_arg_u32 $d1,61;",
+  //global u64
+  "stof_global_u64 $d1,$d2;",
+  "stof_global_u64 $d1,1;",
+  //group u64
+  "stof_group_u64 $d1,$d2;",
+  "stof_group_u64 $d1,1;",
+  //private u64 
+  "stof_private_u64 $d1,$d2;",
+  "stof_private_u64 $d1,1;",
+  //kernarg u64
+  "stof_kernarg_u64 $d1,$d2;",
+  "stof_kernarg_u64 $d1,1;",
+  //readonly u64
+  "stof_readonly_u64 $d1,$d2;",
+  "stof_readonly_u64 $d1,1;",
+  //spill u64 
+  "stof_spill_u64 $d1,$d2;",
+  "stof_spill_u64 $d1,1;",
+  //arg u64
+  "stof_arg_u64 $d1,$d2;",
+  "stof_arg_u64 $d1,1;"
+};
+
+BrigInstMem outputarray_segp_stof[] = {
+  {//0
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGlobalSpace
+  },
+  {//1
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGroupSpace
+  },
+  {//2
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigPrivateSpace
+  },
+  {//3
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigKernargSpace
+  },
+  {//4
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigReadonlySpace
+  },
+  {//5
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigSpillSpace
+  },
+  {//6
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu32,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigArgSpace
+  },
+  {//7
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGlobalSpace
+  },
+  {//8
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigGroupSpace
+  },
+  {//9
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigPrivateSpace
+  },
+  {//10
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigKernargSpace
+  },
+  {//11
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigReadonlySpace
+  },
+  {//12
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigSpillSpace
+  },
+  {//13
+    36,
+    BrigEInstMem,
+    BrigStoF,
+    Brigu64,
+    BrigNoPacking,
+    {8,20,0,0,0},
+    BrigArgSpace
+  }
+};
 }  // namespace brig
 }  // namespace hsa
 #endif //CODEGEN_TEST_H_
