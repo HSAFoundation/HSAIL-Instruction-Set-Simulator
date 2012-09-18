@@ -147,7 +147,7 @@ BrigInstBase outputarray_instruction1opnodt_debugtrap[] = {
   {
     32,
     BrigEInstBase,
-    BrigDebugtrap, 
+    BrigDebugtrap,
     Brigb32,
     BrigNoPacking,
     {8, 0, 0, 0, 0}
@@ -1006,9 +1006,9 @@ std::string inputarray_segp_segmentpb1[] = {
   "segmentp_readonly_b1 $c1,$s2;",
   "segmentp_readonly_b1 $c1,$d2;",
   "segmentp_readonly_b1 $c1,61;",
-  //spill 
+  //spill
   "segmentp_spill_b1 $c1,$s2;",
-  "segmentp_spill_b1 $c1,$d2;", 
+  "segmentp_spill_b1 $c1,$d2;",
   "segmentp_spill_b1 $c1,61;",
   //arg
   "segmentp_arg_b1 $c1,$s2;",
@@ -1025,7 +1025,7 @@ BrigInstMem outputarray_segp_segmentpb1[] = {
     BrigNoPacking,
     {8,20,0,0,0},
     BrigGlobalSpace
-  }, 
+  },
   {//1
     36,
     BrigEInstMem,
@@ -1114,7 +1114,7 @@ std::string inputarray_segp_ftos[] = {
   //group u64
   "ftos_group_u64 $d1,$d2;",
   "ftos_group_u64 $d1,1;",
-  //private u64 
+  //private u64
   "ftos_private_u64 $d1,$d2;",
   "ftos_private_u64 $d1,1;",
   //kernarg u64
@@ -1123,7 +1123,7 @@ std::string inputarray_segp_ftos[] = {
   //readonly u64
   "ftos_readonly_u64 $d1,$d2;",
   "ftos_readonly_u64 $d1,1;",
-  //spill u64 
+  //spill u64
   "ftos_spill_u64 $d1,$d2;",
   "ftos_spill_u64 $d1,1;",
   //arg u64
@@ -1291,7 +1291,7 @@ std::string inputarray_segp_stof[] = {
   //group u64
   "stof_group_u64 $d1,$d2;",
   "stof_group_u64 $d1,1;",
-  //private u64 
+  //private u64
   "stof_private_u64 $d1,$d2;",
   "stof_private_u64 $d1,1;",
   //kernarg u64
@@ -1300,7 +1300,7 @@ std::string inputarray_segp_stof[] = {
   //readonly u64
   "stof_readonly_u64 $d1,$d2;",
   "stof_readonly_u64 $d1,1;",
-  //spill u64 
+  //spill u64
   "stof_spill_u64 $d1,$d2;",
   "stof_spill_u64 $d1,1;",
   //arg u64
@@ -1436,6 +1436,2335 @@ BrigInstMem outputarray_segp_stof[] = {
     BrigArgSpace
   }
 };
+
+class MulControl : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul_control[] = {
+  // 32-bit
+  "mul_pp_u8x4 $s1, $s2, $s3;",
+  "mul_pp_s8x4 $s1, $s2, $s3;",
+  "mul_pp_u16x2 $s1, $s2, $s3;",
+  "mul_pp_s16x2 $s1, $s2, $s3;",
+  "mul_pp_sat_u8x4 $s1, $s2, $s3;",
+  "mul_pp_sat_s8x4 $s1, $s2, $s3;",
+  "mul_pp_sat_u16x2 $s1, $s2, $s3;",
+  "mul_pp_sat_s16x2 $s1, $s2, $s3;",
+  "mul_ps_u8x4 $s1, $s2, $s3;",
+  "mul_ps_s8x4 $s1, $s2, $s3;",
+  "mul_ps_u16x2 $s1, $s2, $s3;",
+  "mul_ps_s16x2 $s1, $s2, $s3;",
+  "mul_ps_sat_u8x4 $s1, $s2, $s3;",
+  "mul_ps_sat_s8x4 $s1, $s2, $s3;",
+  "mul_ps_sat_u16x2 $s1, $s2, $s3;",
+  "mul_ps_sat_s16x2 $s1, $s2, $s3;",
+  "mul_sp_u8x4 $s1, $s2, $s3;",
+  "mul_sp_s8x4 $s1, $s2, $s3;",
+  "mul_sp_u16x2 $s1, $s2, $s3;",
+  "mul_sp_s16x2 $s1, $s2, $s3;",
+  "mul_sp_sat_u8x4 $s1, $s2, $s3;",
+  "mul_sp_sat_s8x4 $s1, $s2, $s3;",
+  "mul_sp_sat_u16x2 $s1, $s2, $s3;",
+  "mul_sp_sat_s16x2 $s1, $s2, $s3;",
+  "mul_ss_u8x4 $s1, $s2, $s3;",
+  "mul_ss_s8x4 $s1, $s2, $s3;",
+  "mul_ss_u16x2 $s1, $s2, $s3;",
+  "mul_ss_s16x2 $s1, $s2, $s3;",
+  "mul_ss_sat_u8x4 $s1, $s2, $s3;",
+  "mul_ss_sat_s8x4 $s1, $s2, $s3;",
+  "mul_ss_sat_u16x2 $s1, $s2, $s3;",
+  "mul_ss_sat_s16x2 $s1, $s2, $s3;",
+  "mul_pp_f16x2 $s1, $s2, $s3;",
+  "mul_ps_f16x2 $s1, $s2, $s3;",
+  "mul_sp_f16x2 $s1, $s2, $s3;",
+  "mul_ss_f16x2 $s1, $s2, $s3;",
+  // 64-bit
+  "mul_pp_u8x8 $d1, $d2, $d3;",
+  "mul_pp_s8x8 $d1, $d2, $d3;",
+  "mul_pp_u16x4 $d1, $d2, $d3;",
+  "mul_pp_s16x4 $d1, $d2, $d3;",
+  "mul_pp_sat_u8x8 $d1, $d2, $d3;",
+  "mul_pp_sat_s8x8 $d1, $d2, $d3;",
+  "mul_pp_sat_u16x4 $d1, $d2, $d3;",
+  "mul_pp_sat_s16x4 $d1, $d2, $d3;",
+  "mul_ps_u8x8 $d1, $d2, $d3;",
+  "mul_ps_s8x8 $d1, $d2, $d3;",
+  "mul_ps_u16x4 $d1, $d2, $d3;",
+  "mul_ps_s16x4 $d1, $d2, $d3;",
+  "mul_ps_sat_u8x8 $d1, $d2, $d3;",
+  "mul_ps_sat_s8x8 $d1, $d2, $d3;",
+  "mul_ps_sat_u16x4 $d1, $d2, $d3;",
+  "mul_ps_sat_s16x4 $d1, $d2, $d3;",
+  "mul_sp_u8x8 $d1, $d2, $d3;",
+  "mul_sp_s8x8 $d1, $d2, $d3;",
+  "mul_sp_u16x4 $d1, $d2, $d3;",
+  "mul_sp_s16x4 $d1, $d2, $d3;",
+  "mul_sp_sat_u8x8 $d1, $d2, $d3;",
+  "mul_sp_sat_s8x8 $d1, $d2, $d3;",
+  "mul_sp_sat_u16x4 $d1, $d2, $d3;",
+  "mul_sp_sat_s16x4 $d1, $d2, $d3;",
+  "mul_ss_u8x8 $d1, $d2, $d3;",
+  "mul_ss_s8x8 $d1, $d2, $d3;",
+  "mul_ss_u16x4 $d1, $d2, $d3;",
+  "mul_ss_s16x4 $d1, $d2, $d3;",
+  "mul_ss_sat_u8x8 $d1, $d2, $d3;",
+  "mul_ss_sat_s8x8 $d1, $d2, $d3;",
+  "mul_ss_sat_u16x4 $d1, $d2, $d3;",
+  "mul_ss_sat_s16x4 $d1, $d2, $d3;",
+  "mul_pp_f16x4 $d1, $d2, $d3;",
+  "mul_pp_f32x2 $d1, $d2, $d3;",
+  "mul_ps_f16x4 $d1, $d2, $d3;",
+  "mul_ps_f32x2 $d1, $d2, $d3;",
+  "mul_sp_f16x4 $d1, $d2, $d3;",
+  "mul_sp_f32x2 $d1, $d2, $d3;",
+  "mul_ss_f16x4 $d1, $d2, $d3;",
+  "mul_ss_f32x2 $d1, $d2, $d3;"
+};
+BrigInstBase output_array_mul_control[] = {
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf16x2,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf16x2,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf16x2,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf16x2,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x8,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x8,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x4,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x4,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x8,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x8,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x4,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x4,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x8,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x8,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x4,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x4,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x8,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x8,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x4,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x4,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x8,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x8,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x4,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x4,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x8,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x8,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x4,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x4,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x8,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x8,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x4,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x4,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x8,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x8,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x4,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x4,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf16x4,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf32x2,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf16x4,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf32x2,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf16x4,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf32x2,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf16x4,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigf32x2,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  }
+};
+class MulControlFalse : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul_control_false[] = {
+  "mul_pp_u8x4 $s1;",
+  "mul_pp_u8x4 $s1, $s2;",
+  "mul_pp_u8x4 1;",
+  "mul_pp_u8x4 WAVESIZE, $s2;",
+  "mul_pp_s8x4 $s1;",
+  "mul_pp_s8x4 $s1, $s2;",
+  "mul_pp_s8x4 1, $s2, $s3;",
+  "mul_pp_s8x4 WAVESIZE, $s2, $s3;",
+  "mul_pp_u16x2 $s1;",
+  "mul_pp_u16x2 $s1,$s2;",
+  "mul_pp_u16x2 1, $s2, $s3;",
+  "mul_pp_u16x2 WAVESIZE, $s2, $s3;",
+  "mul_pp_s16x2 $s1;",
+  "mul_pp_s16x2 $s1, $s2;",
+  "mul_pp_s16x2 1, $s2, $s3;",
+  "mul_pp_s16x2 WAVESIZE, $s2, $s3;",
+  "mul_pp_sat_u8x4 $s1;",
+  "mul_pp_sat_u8x4 $s1, $s2;",
+  "mul_pp_sat_u8x4 1, $s2, $s3;",
+  "mul_pp_sat_u8x4 WAVESIZE, $s2, $s3;",
+  "mul_pp_sat_s8x4 $s1;",
+  "mul_pp_sat_s8x4 $s1, $s2;",
+  "mul_pp_sat_s8x4 1, $s2, $s3;",
+  "mul_pp_sat_s8x4 WAVESIZE, $s2, $s3;",
+  "mul_pp_sat_u16x2 $s1;",
+  "mul_pp_sat_u16x2 $s1, $s2;",
+  "mul_pp_sat_u16x2 1, $s2, $s3;",
+  "mul_pp_sat_u16x2 WAVESIZE, $s2, $s3;",
+  "mul_pp_sat_s16x2 $s1;",
+  "mul_pp_sat_s16x2 $s1, $s2;",
+  "mul_pp_sat_s16x2 1, $s2, $s3;",
+  "mul_pp_sat_s16x2 WAVESIZE, $s2, $s3;",
+  "mul_ps_u8x4 $s1;",
+  "mul_ps_u8x4 $s1, $s2;",
+  "mul_ps_u8x4 1;",
+  "mul_ps_u8x4 WAVESIZE, $s2;",
+  "mul_ps_s8x4 $s1;",
+  "mul_ps_s8x4 $s1, $s2;",
+  "mul_ps_s8x4 1, $s2, $s3;",
+  "mul_ps_s8x4 WAVESIZE, $s2, $s3;",
+  "mul_ps_u16x2 $s1;",
+  "mul_ps_u16x2 $s1,$s2;",
+  "mul_ps_u16x2 1, $s2, $s3;",
+  "mul_ps_u16x2 WAVESIZE, $s2, $s3;",
+  "mul_ps_s16x2 $s1;",
+  "mul_ps_s16x2 $s1, $s2;",
+  "mul_ps_s16x2 1, $s2, $s3;",
+  "mul_ps_s16x2 WAVESIZE, $s2, $s3;",
+  "mul_ps_sat_u8x4 $s1;",
+  "mul_ps_sat_u8x4 $s1, $s2;",
+  "mul_ps_sat_u8x4 1, $s2, $s3;",
+  "mul_ps_sat_u8x4 WAVESIZE, $s2, $s3;",
+  "mul_ps_sat_s8x4 $s1;",
+  "mul_ps_sat_s8x4 $s1, $s2;",
+  "mul_ps_sat_s8x4 1, $s2, $s3;",
+  "mul_ps_sat_s8x4 WAVESIZE, $s2, $s3;",
+  "mul_ps_sat_u16x2 $s1;",
+  "mul_ps_sat_u16x2 $s1, $s2;",
+  "mul_ps_sat_u16x2 1, $s2, $s3;",
+  "mul_ps_sat_u16x2 WAVESIZE, $s2, $s3;",
+  "mul_ps_sat_s16x2 $s1;",
+  "mul_ps_sat_s16x2 $s1, $s2;",
+  "mul_ps_sat_s16x2 1, $s2, $s3;",
+  "mul_ps_sat_s16x2 WAVESIZE, $s2, $s3;",
+  "mul_sp_u8x4 $s1;",
+  "mul_sp_u8x4 $s1, $s2;",
+  "mul_sp_u8x4 1;",
+  "mul_sp_u8x4 WAVESIZE, $s2;",
+  "mul_sp_s8x4 $s1;",
+  "mul_sp_s8x4 $s1, $s2;",
+  "mul_sp_s8x4 1, $s2, $s3;",
+  "mul_sp_s8x4 WAVESIZE, $s2, $s3;",
+  "mul_sp_u16x2 $s1;",
+  "mul_sp_u16x2 $s1,$s2;",
+  "mul_sp_u16x2 1, $s2, $s3;",
+  "mul_sp_u16x2 WAVESIZE, $s2, $s3;",
+  "mul_sp_s16x2 $s1;",
+  "mul_sp_s16x2 $s1, $s2;",
+  "mul_sp_s16x2 1, $s2, $s3;",
+  "mul_sp_s16x2 WAVESIZE, $s2, $s3;",
+  "mul_sp_sat_u8x4 $s1;",
+  "mul_sp_sat_u8x4 $s1, $s2;",
+  "mul_sp_sat_u8x4 1, $s2, $s3;",
+  "mul_sp_sat_u8x4 WAVESIZE, $s2, $s3;",
+  "mul_sp_sat_s8x4 $s1;",
+  "mul_sp_sat_s8x4 $s1, $s2;",
+  "mul_sp_sat_s8x4 1, $s2, $s3;",
+  "mul_sp_sat_s8x4 WAVESIZE, $s2, $s3;",
+  "mul_sp_sat_u16x2 $s1;",
+  "mul_sp_sat_u16x2 $s1, $s2;",
+  "mul_sp_sat_u16x2 1, $s2, $s3;",
+  "mul_sp_sat_u16x2 WAVESIZE, $s2, $s3;",
+  "mul_sp_sat_s16x2 $s1;",
+  "mul_sp_sat_s16x2 $s1, $s2;",
+  "mul_sp_sat_s16x2 1, $s2, $s3;",
+  "mul_sp_sat_s16x2 WAVESIZE, $s2, $s3;",
+  "mul_ss_u8x4 $s1;",
+  "mul_ss_u8x4 $s1, $s2;",
+  "mul_ss_u8x4 1;",
+  "mul_ss_u8x4 WAVESIZE, $s2;",
+  "mul_ss_s8x4 $s1;",
+  "mul_ss_s8x4 $s1, $s2;",
+  "mul_ss_s8x4 1, $s2, $s3;",
+  "mul_ss_s8x4 WAVESIZE, $s2, $s3;",
+  "mul_ss_u16x2 $s1;",
+  "mul_ss_u16x2 $s1,$s2;",
+  "mul_ss_u16x2 1, $s2, $s3;",
+  "mul_ss_u16x2 WAVESIZE, $s2, $s3;",
+  "mul_ss_s16x2 $s1;",
+  "mul_ss_s16x2 $s1, $s2;",
+  "mul_ss_s16x2 1, $s2, $s3;",
+  "mul_ss_s16x2 WAVESIZE, $s2, $s3;",
+  "mul_ss_sat_u8x4 $s1;",
+  "mul_ss_sat_u8x4 $s1, $s2;",
+  "mul_ss_sat_u8x4 1, $s2, $s3;",
+  "mul_ss_sat_u8x4 WAVESIZE, $s2, $s3;",
+  "mul_ss_sat_s8x4 $s1;",
+  "mul_ss_sat_s8x4 $s1, $s2;",
+  "mul_ss_sat_s8x4 1, $s2, $s3;",
+  "mul_ss_sat_s8x4 WAVESIZE, $s2, $s3;",
+  "mul_ss_sat_u16x2 $s1;",
+  "mul_ss_sat_u16x2 $s1, $s2;",
+  "mul_ss_sat_u16x2 1, $s2, $s3;",
+  "mul_ss_sat_u16x2 WAVESIZE, $s2, $s3;",
+  "mul_ss_sat_s16x2 $s1;",
+  "mul_ss_sat_s16x2 $s1, $s2;",
+  "mul_ss_sat_s16x2 1, $s2, $s3;",
+  "mul_ss_sat_s16x2 WAVESIZE, $s2, $s3;",
+  "mul_pp_f16x2 $s1;",
+  "mul_pp_f16x2 $s1, $s2;",
+  "mul_pp_f16x2 1, $s2, $s3;",
+  "mul_ps_f16x2 $s1;",
+  "mul_ps_f16x2 $s1, $s2;",
+  "mul_ps_f16x2 1, $s2, $s3;",
+  "mul_sp_f16x2 $s1;",
+  "mul_sp_f16x2 $s1, $s2;",
+  "mul_sp_f16x2 1, $s2, $s3;",
+  "mul_ss_f16x2 $s1;",
+  "mul_ss_f16x2 $s1, $s2;",
+  "mul_ss_f16x2 1, $s2, $s3;",
+  "mul_pp_u8x8 $d1;",
+  "mul_pp_s8x8 $d1, $d2;",
+  "mul_pp_u16x4 $d1;",
+  "mul_pp_s16x4 1, $d2, $d3;",
+  "mul_pp_sat_u8x8 $d1;",
+  "mul_pp_sat_s8x8 $d1, $d2;",
+  "mul_pp_sat_u16x4 1, $d2, $d3;",
+  "mul_pp_sat_s16x4 $d1, $d2;",
+  "mul_ps_u8x8 $d1;",
+  "mul_ps_s8x8 1, $d2, $d3;",
+  "mul_ps_u16x4 $d1;",
+  "mul_ps_s16x4 $d1, $d2;",
+  "mul_ps_sat_u8x8 1, $d2, $d3;",
+  "mul_ps_sat_s8x8 $d1;",
+  "mul_ps_sat_u16x4 $d1, $d2;",
+  "mul_ps_sat_s16x4 1, $d2, $d3;",
+  "mul_sp_u8x8 $d1;",
+  "mul_sp_s8x8 $d1, $d2;",
+  "mul_sp_u16x4 1, $d2, $d3;",
+  "mul_sp_s16x4 $d1;",
+  "mul_sp_sat_u8x8 $d1, $d2;",
+  "mul_sp_sat_s8x8 1, $d2, $d3;",
+  "mul_sp_sat_u16x4 $d1;",
+  "mul_sp_sat_s16x4 $d1, $d2;",
+  "mul_ss_u8x8 1, $d2, $d3;",
+  "mul_ss_s8x8 $d1;",
+  "mul_ss_u16x4 $d1, $d2;",
+  "mul_ss_s16x4 1, $d2, $d3;",
+  "mul_ss_sat_u8x8 $d1;",
+  "mul_ss_sat_s8x8 $d1, $d2;",
+  "mul_ss_sat_u16x4 1, $d2, $d3;",
+  "mul_ss_sat_s16x4 $d1;",
+  "mul_pp_f16x4 $d1, $d2;",
+  "mul_pp_f32x2 1, $d2, $d3;",
+  "mul_ps_f16x4 $d1;",
+  "mul_ps_f32x2 $d1, $d2;",
+  "mul_sp_f16x4 1, $d2, $d3;",
+  "mul_sp_f32x2 $d1;",
+  "mul_ss_f16x4 $d1, $d2;",
+  "mul_ss_f32x2 1, $d2, $d3;"
+};
+class MulHis32Base : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul_hi_s32_base[] = {
+  "mul_hi_s32 $s1, $s2, $s3;",
+  "mul_hi_s32 $s1, $s2, 1;",
+  "mul_hi_s32 $s1, $s2, WAVESIZE;",
+  "mul_hi_s32 $s1, 1, $s3;",
+  "mul_hi_s32 $s1, 1, 1;",
+  "mul_hi_s32 $s1, 1, WAVESIZE;",
+  "mul_hi_s32 $s1, WAVESIZE, $s3;",
+  "mul_hi_s32 $s1, WAVESIZE, 1;",
+  "mul_hi_s32 $s1, WAVESIZE, WAVESIZE;"
+};
+BrigInstBase output_array_mul_hi_s32_base[] = {
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  }
+};
+class MulHis32BaseFalse : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul_hi_s32_base_false[] = {
+  "mul_hi_s32 $s1;",
+  "mul_hi_s32 $s1, $s2;",
+  "mul_hi_s32 WAVESIZE,$s1, $s2;",
+  "mul_hi_s32 1, $s1, $s2;",
+  "mul_hi_s32 1, 1, 1;"
+};
+
+class MulHiu32Base : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul_hi_u32_base[] = {
+  "mul_hi_u32 $s1, $s2, $s3;",
+  "mul_hi_u32 $s1, $s2, 1;",
+  "mul_hi_u32 $s1, $s2, WAVESIZE;",
+  "mul_hi_u32 $s1, 1, $s3;",
+  "mul_hi_u32 $s1, 1, 1;",
+  "mul_hi_u32 $s1, 1, WAVESIZE;",
+  "mul_hi_u32 $s1, WAVESIZE, $s3;",
+  "mul_hi_u32 $s1, WAVESIZE, 1;",
+  "mul_hi_u32 $s1, WAVESIZE, WAVESIZE;"
+};
+BrigInstBase output_array_mul_hi_u32_base[] = {
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  }
+};
+class MulHiu32BaseFalse : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul_hi_u32_base_false[] = {
+  "mul_hi_u32 $s1;",
+  "mul_hi_u32 $s1, $s2;",
+  "mul_hi_u32 WAVESIZE,$s1, $s2;",
+  "mul_hi_u32 1, $s1, $s2;",
+  "mul_hi_u32 1, 1, 1;"
+};
+
+class MulHiControl : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul_hi_control[] = {
+  "mul_hi_pp_u8x4 $s1, $s2, $s3;",
+  "mul_hi_pp_s8x4 $s1, $s2, $s3;",
+  "mul_hi_pp_u16x2 $s1, $s2, $s3;",
+  "mul_hi_pp_s16x2 $s1, $s2, $s3;",
+  "mul_hi_ps_u8x4 $s1, $s2, $s3;",
+  "mul_hi_ps_s8x4 $s1, $s2, $s3;",
+  "mul_hi_ps_u16x2 $s1, $s2, $s3;",
+  "mul_hi_ps_s16x2 $s1, $s2, $s3;",
+  "mul_hi_sp_u8x4 $s1, $s2, $s3;",
+  "mul_hi_sp_s8x4 $s1, $s2, $s3;",
+  "mul_hi_sp_u16x2 $s1, $s2, $s3;",
+  "mul_hi_sp_s16x2 $s1, $s2, $s3;",
+  "mul_hi_ss_u8x4 $s1, $s2, $s3;",
+  "mul_hi_ss_s8x4 $s1, $s2, $s3;",
+  "mul_hi_ss_u16x2 $s1, $s2, $s3;",
+  "mul_hi_ss_s16x2 $s1, $s2, $s3;"
+};
+BrigInstBase output_array_mul_hi_control[] = {
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu8x4,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs8x4,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigu16x2,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul,
+    Brigs16x2,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  }
+};
+class MulHiControlFalse : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul_hi_control_false[] = {
+  "mul_hi_pp_u8x4 $s1;",
+  "mul_hi_pp_s8x4 $s1, $s2;",
+  "mul_hi_pp_u16x2 $s2, $s3;",
+  "mul_hi_pp_s16x2 $s3;",
+  "mul_hi_ps_u8x4 $s1;",
+  "mul_hi_ps_s8x4 $s1, $s2;",
+  "mul_hi_ps_u16x2 $s1;",
+  "mul_hi_ps_s16x2 $s1;",
+  "mul_hi_sp_u8x4 $s1, $s2;",
+  "mul_hi_sp_s8x4 $s1;",
+  "mul_hi_sp_u16x2 $s1, $s2;",
+  "mul_hi_sp_s16x2 $s1;",
+  "mul_hi_ss_u8x4 $s1;",
+  "mul_hi_ss_s8x4 $s1;",
+  "mul_hi_ss_u16x2 1, $s2, $s3;",
+  "mul_hi_ss_s16x2 WAVESIZE, $s2, $s3;"
+};
+
+class Mul24 : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul24[] = {
+  // s32
+  "mul24_s32 $s1, $s2, $s3;",
+  "mul24_s32 $s1, $s2, 1;",
+  "mul24_s32 $s1, $s2, WAVESIZE;",
+  "mul24_s32 $s1, 1, $s3;",
+  "mul24_s32 $s1, 1, 1;",
+  "mul24_s32 $s1, 1, WAVESIZE;",
+  "mul24_s32 $s1, WAVESIZE, $s3;",
+  "mul24_s32 $s1, WAVESIZE, 1;",
+  "mul24_s32 $s1, WAVESIZE, WAVESIZE;",
+  // s64
+  "mul24_s64 $d1, $d2, $d3;",
+  "mul24_s64 $d1, $d2, 1;",
+  "mul24_s64 $d1, $d2, WAVESIZE;",
+  "mul24_s64 $d1, 1, $d3;",
+  "mul24_s64 $d1, 1, 1;",
+  "mul24_s64 $d1, 1, WAVESIZE;",
+  "mul24_s64 $d1, WAVESIZE, $d3;",
+  "mul24_s64 $d1, WAVESIZE, 1;",
+  "mul24_s64 $d1, WAVESIZE, WAVESIZE;",
+  // u32
+  "mul24_u32 $s1, $s2, $s3;",
+  "mul24_u32 $s1, $s2, 1;",
+  "mul24_u32 $s1, $s2, WAVESIZE;",
+  "mul24_u32 $s1, 1, $s3;",
+  "mul24_u32 $s1, 1, 1;",
+  "mul24_u32 $s1, 1, WAVESIZE;",
+  "mul24_u32 $s1, WAVESIZE, $s3;",
+  "mul24_u32 $s1, WAVESIZE, 1;",
+  "mul24_u32 $s1, WAVESIZE, WAVESIZE;",
+  // u64
+  "mul24_u64 $d1, $d2, $d3;",
+  "mul24_u64 $d1, $d2, 1;",
+  "mul24_u64 $d1, $d2, WAVESIZE;",
+  "mul24_u64 $d1, 1, $d3;",
+  "mul24_u64 $d1, 1, 1;",
+  "mul24_u64 $d1, 1, WAVESIZE;",
+  "mul24_u64 $d1, WAVESIZE, $d3;",
+  "mul24_u64 $d1, WAVESIZE, 1;",
+  "mul24_u64 $d1, WAVESIZE, WAVESIZE;"
+};
+
+BrigInstBase output_array_mul24[] = {
+  // s32
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  // s64
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  // u32
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  // u64
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  }
+};
+class Mul24False : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul24_false[] = {
+  "mul24_s32 $s1;",
+  "mul24_s64 $s1, $s2;",
+  "mul24_u32 1, 1, $s3;",
+  "mul24_u64 WAVESIZE, 1, 1;"
+};
+
+class Mul24Hi : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul24_hi[] = {
+  // s32
+  "mul24_hi_s32 $s1, $s2, $s3;",
+  "mul24_hi_s32 $s1, $s2, 1;",
+  "mul24_hi_s32 $s1, $s2, WAVESIZE;",
+  "mul24_hi_s32 $s1, 1, $s3;",
+  "mul24_hi_s32 $s1, 1, 1;",
+  "mul24_hi_s32 $s1, 1, WAVESIZE;",
+  "mul24_hi_s32 $s1, WAVESIZE, $s3;",
+  "mul24_hi_s32 $s1, WAVESIZE, 1;",
+  "mul24_hi_s32 $s1, WAVESIZE, WAVESIZE;",
+  // s64
+  "mul24_hi_s64 $d1, $d2, $d3;",
+  "mul24_hi_s64 $d1, $d2, 1;",
+  "mul24_hi_s64 $d1, $d2, WAVESIZE;",
+  "mul24_hi_s64 $d1, 1, $d3;",
+  "mul24_hi_s64 $d1, 1, 1;",
+  "mul24_hi_s64 $d1, 1, WAVESIZE;",
+  "mul24_hi_s64 $d1, WAVESIZE, $d3;",
+  "mul24_hi_s64 $d1, WAVESIZE, 1;",
+  "mul24_hi_s64 $d1, WAVESIZE, WAVESIZE;",
+  // u32
+  "mul24_hi_u32 $s1, $s2, $s3;",
+  "mul24_hi_u32 $s1, $s2, 1;",
+  "mul24_hi_u32 $s1, $s2, WAVESIZE;",
+  "mul24_hi_u32 $s1, 1, $s3;",
+  "mul24_hi_u32 $s1, 1, 1;",
+  "mul24_hi_u32 $s1, 1, WAVESIZE;",
+  "mul24_hi_u32 $s1, WAVESIZE, $s3;",
+  "mul24_hi_u32 $s1, WAVESIZE, 1;",
+  "mul24_hi_u32 $s1, WAVESIZE, WAVESIZE;",
+  // u64
+  "mul24_hi_u64 $d1, $d2, $d3;",
+  "mul24_hi_u64 $d1, $d2, 1;",
+  "mul24_hi_u64 $d1, $d2, WAVESIZE;",
+  "mul24_hi_u64 $d1, 1, $d3;",
+  "mul24_hi_u64 $d1, 1, 1;",
+  "mul24_hi_u64 $d1, 1, WAVESIZE;",
+  "mul24_hi_u64 $d1, WAVESIZE, $d3;",
+  "mul24_hi_u64 $d1, WAVESIZE, 1;",
+  "mul24_hi_u64 $d1, WAVESIZE, WAVESIZE;"
+};
+
+BrigInstBase output_array_mul24_hi[] = {
+  // s32
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  // s64
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  // u32
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  // u64
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMul24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  }
+};
+class Mul24HiFalse : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mul24_hi_false[] = {
+  "mul24_hi_s32 $s1;",
+  "mul24_hi_s64 $s1, $s2;",
+  "mul24_hi_u32 1, 1, $s3;",
+  "mul24_hi_u64 WAVESIZE, 1, 1;"
+};
+
+class Mad24 : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mad24[] = {
+  // s32
+  "mad24_s32 $s1, $s2, $s3, $s4;",
+  "mad24_s32 $s1, $s2, $s3, 1;",
+  "mad24_s32 $s1, $s2, $s3, WAVESIZE;",
+  "mad24_s32 $s1, $s2, 1, $s4;",
+  "mad24_s32 $s1, $s2, 1, 1;",
+  "mad24_s32 $s1, $s2, 1, WAVESIZE;",
+  "mad24_s32 $s1, $s2, WAVESIZE, $s4;",
+  "mad24_s32 $s1, $s2, WAVESIZE, 1;",
+  "mad24_s32 $s1, $s2, WAVESIZE, WAVESIZE;",
+  "mad24_s32 $s1, 1, $s3, $s4;",
+  "mad24_s32 $s1, 1, $s3, 1;",
+  "mad24_s32 $s1, 1, $s3, WAVESIZE;",
+  "mad24_s32 $s1, 1, 1, $s4;",
+  "mad24_s32 $s1, 1, 1, 1;",
+  "mad24_s32 $s1, 1, 1, WAVESIZE;",
+  "mad24_s32 $s1, 1, WAVESIZE, $s4;",
+  "mad24_s32 $s1, 1, WAVESIZE, 1;",
+  "mad24_s32 $s1, 1, WAVESIZE, WAVESIZE;",
+  "mad24_s32 $s1, WAVESIZE, $s3, $s4;",
+  "mad24_s32 $s1, WAVESIZE, $s3, 1;",
+  "mad24_s32 $s1, WAVESIZE, $s3, WAVESIZE;",
+  "mad24_s32 $s1, WAVESIZE, 1, $s4;",
+  "mad24_s32 $s1, WAVESIZE, 1, 1;",
+  "mad24_s32 $s1, WAVESIZE, 1, WAVESIZE;",
+  "mad24_s32 $s1, WAVESIZE, WAVESIZE, $s4;",
+  "mad24_s32 $s1, WAVESIZE, WAVESIZE, 1;",
+  "mad24_s32 $s1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // s64
+  "mad24_s64 $d1, $d2, $d3, $d4;",
+  "mad24_s64 $d1, $d2, $d3, 1;",
+  "mad24_s64 $d1, $d2, $d3, WAVESIZE;",
+  "mad24_s64 $d1, $d2, 1, $d4;",
+  "mad24_s64 $d1, $d2, 1, 1;",
+  "mad24_s64 $d1, $d2, 1, WAVESIZE;",
+  "mad24_s64 $d1, $d2, WAVESIZE, $d4;",
+  "mad24_s64 $d1, $d2, WAVESIZE, 1;",
+  "mad24_s64 $d1, $d2, WAVESIZE, WAVESIZE;",
+  "mad24_s64 $d1, 1, $d3, $d4;",
+  "mad24_s64 $d1, 1, $d3, 1;",
+  "mad24_s64 $d1, 1, $d3, WAVESIZE;",
+  "mad24_s64 $d1, 1, 1, $d4;",
+  "mad24_s64 $d1, 1, 1, 1;",
+  "mad24_s64 $d1, 1, 1, WAVESIZE;",
+  "mad24_s64 $d1, 1, WAVESIZE, $d4;",
+  "mad24_s64 $d1, 1, WAVESIZE, 1;",
+  "mad24_s64 $d1, 1, WAVESIZE, WAVESIZE;",
+  "mad24_s64 $d1, WAVESIZE, $d3, $d4;",
+  "mad24_s64 $d1, WAVESIZE, $d3, 1;",
+  "mad24_s64 $d1, WAVESIZE, $d3, WAVESIZE;",
+  "mad24_s64 $d1, WAVESIZE, 1, $d4;",
+  "mad24_s64 $d1, WAVESIZE, 1, 1;",
+  "mad24_s64 $d1, WAVESIZE, 1, WAVESIZE;",
+  "mad24_s64 $d1, WAVESIZE, WAVESIZE, $d4;",
+  "mad24_s64 $d1, WAVESIZE, WAVESIZE, 1;",
+  "mad24_s64 $d1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // u32
+  "mad24_u32 $s1, $s2, $s3, $s4;",
+  "mad24_u32 $s1, $s2, $s3, 1;",
+  "mad24_u32 $s1, $s2, $s3, WAVESIZE;",
+  "mad24_u32 $s1, $s2, 1, $s4;",
+  "mad24_u32 $s1, $s2, 1, 1;",
+  "mad24_u32 $s1, $s2, 1, WAVESIZE;",
+  "mad24_u32 $s1, $s2, WAVESIZE, $s4;",
+  "mad24_u32 $s1, $s2, WAVESIZE, 1;",
+  "mad24_u32 $s1, $s2, WAVESIZE, WAVESIZE;",
+  "mad24_u32 $s1, 1, $s3, $s4;",
+  "mad24_u32 $s1, 1, $s3, 1;",
+  "mad24_u32 $s1, 1, $s3, WAVESIZE;",
+  "mad24_u32 $s1, 1, 1, $s4;",
+  "mad24_u32 $s1, 1, 1, 1;",
+  "mad24_u32 $s1, 1, 1, WAVESIZE;",
+  "mad24_u32 $s1, 1, WAVESIZE, $s4;",
+  "mad24_u32 $s1, 1, WAVESIZE, 1;",
+  "mad24_u32 $s1, 1, WAVESIZE, WAVESIZE;",
+  "mad24_u32 $s1, WAVESIZE, $s3, $s4;",
+  "mad24_u32 $s1, WAVESIZE, $s3, 1;",
+  "mad24_u32 $s1, WAVESIZE, $s3, WAVESIZE;",
+  "mad24_u32 $s1, WAVESIZE, 1, $s4;",
+  "mad24_u32 $s1, WAVESIZE, 1, 1;",
+  "mad24_u32 $s1, WAVESIZE, 1, WAVESIZE;",
+  "mad24_u32 $s1, WAVESIZE, WAVESIZE, $s4;",
+  "mad24_u32 $s1, WAVESIZE, WAVESIZE, 1;",
+  "mad24_u32 $s1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // u64
+  "mad24_u64 $d1, $d2, $d3, $d4;",
+  "mad24_u64 $d1, $d2, $d3, 1;",
+  "mad24_u64 $d1, $d2, $d3, WAVESIZE;",
+  "mad24_u64 $d1, $d2, 1, $d4;",
+  "mad24_u64 $d1, $d2, 1, 1;",
+  "mad24_u64 $d1, $d2, 1, WAVESIZE;",
+  "mad24_u64 $d1, $d2, WAVESIZE, $d4;",
+  "mad24_u64 $d1, $d2, WAVESIZE, 1;",
+  "mad24_u64 $d1, $d2, WAVESIZE, WAVESIZE;",
+  "mad24_u64 $d1, 1, $d3, $d4;",
+  "mad24_u64 $d1, 1, $d3, 1;",
+  "mad24_u64 $d1, 1, $d3, WAVESIZE;",
+  "mad24_u64 $d1, 1, 1, $d4;",
+  "mad24_u64 $d1, 1, 1, 1;",
+  "mad24_u64 $d1, 1, 1, WAVESIZE;",
+  "mad24_u64 $d1, 1, WAVESIZE, $d4;",
+  "mad24_u64 $d1, 1, WAVESIZE, 1;",
+  "mad24_u64 $d1, 1, WAVESIZE, WAVESIZE;",
+  "mad24_u64 $d1, WAVESIZE, $d3, $d4;",
+  "mad24_u64 $d1, WAVESIZE, $d3, 1;",
+  "mad24_u64 $d1, WAVESIZE, $d3, WAVESIZE;",
+  "mad24_u64 $d1, WAVESIZE, 1, $d4;",
+  "mad24_u64 $d1, WAVESIZE, 1, 1;",
+  "mad24_u64 $d1, WAVESIZE, 1, WAVESIZE;",
+  "mad24_u64 $d1, WAVESIZE, WAVESIZE, $d4;",
+  "mad24_u64 $d1, WAVESIZE, WAVESIZE, 1;",
+  "mad24_u64 $d1, WAVESIZE, WAVESIZE, WAVESIZE;",
+};
+BrigInstBase output_array_mad24[] = {
+  // s32
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // s64
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // u32
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // u64
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  }
+};
+class Mad24False : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mad24_false[] = {
+  "mad24_s32 $s1;",
+  "mad24_s64 $s1, $s2;",
+  "mad24_u32 1, 1, $s3;",
+  "mad24_u64 WAVESIZE, 1, 1;"
+};
+
+class Mad24Hi : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mad24_hi[] = {
+  // s32
+  "mad24hi_s32 $s1, $s2, $s3, $s4;",
+  "mad24hi_s32 $s1, $s2, $s3, 1;",
+  "mad24hi_s32 $s1, $s2, $s3, WAVESIZE;",
+  "mad24hi_s32 $s1, $s2, 1, $s4;",
+  "mad24hi_s32 $s1, $s2, 1, 1;",
+  "mad24hi_s32 $s1, $s2, 1, WAVESIZE;",
+  "mad24hi_s32 $s1, $s2, WAVESIZE, $s4;",
+  "mad24hi_s32 $s1, $s2, WAVESIZE, 1;",
+  "mad24hi_s32 $s1, $s2, WAVESIZE, WAVESIZE;",
+  "mad24hi_s32 $s1, 1, $s3, $s4;",
+  "mad24hi_s32 $s1, 1, $s3, 1;",
+  "mad24hi_s32 $s1, 1, $s3, WAVESIZE;",
+  "mad24hi_s32 $s1, 1, 1, $s4;",
+  "mad24hi_s32 $s1, 1, 1, 1;",
+  "mad24hi_s32 $s1, 1, 1, WAVESIZE;",
+  "mad24hi_s32 $s1, 1, WAVESIZE, $s4;",
+  "mad24hi_s32 $s1, 1, WAVESIZE, 1;",
+  "mad24hi_s32 $s1, 1, WAVESIZE, WAVESIZE;",
+  "mad24hi_s32 $s1, WAVESIZE, $s3, $s4;",
+  "mad24hi_s32 $s1, WAVESIZE, $s3, 1;",
+  "mad24hi_s32 $s1, WAVESIZE, $s3, WAVESIZE;",
+  "mad24hi_s32 $s1, WAVESIZE, 1, $s4;",
+  "mad24hi_s32 $s1, WAVESIZE, 1, 1;",
+  "mad24hi_s32 $s1, WAVESIZE, 1, WAVESIZE;",
+  "mad24hi_s32 $s1, WAVESIZE, WAVESIZE, $s4;",
+  "mad24hi_s32 $s1, WAVESIZE, WAVESIZE, 1;",
+  "mad24hi_s32 $s1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // s64
+  "mad24hi_s64 $d1, $d2, $d3, $d4;",
+  "mad24hi_s64 $d1, $d2, $d3, 1;",
+  "mad24hi_s64 $d1, $d2, $d3, WAVESIZE;",
+  "mad24hi_s64 $d1, $d2, 1, $d4;",
+  "mad24hi_s64 $d1, $d2, 1, 1;",
+  "mad24hi_s64 $d1, $d2, 1, WAVESIZE;",
+  "mad24hi_s64 $d1, $d2, WAVESIZE, $d4;",
+  "mad24hi_s64 $d1, $d2, WAVESIZE, 1;",
+  "mad24hi_s64 $d1, $d2, WAVESIZE, WAVESIZE;",
+  "mad24hi_s64 $d1, 1, $d3, $d4;",
+  "mad24hi_s64 $d1, 1, $d3, 1;",
+  "mad24hi_s64 $d1, 1, $d3, WAVESIZE;",
+  "mad24hi_s64 $d1, 1, 1, $d4;",
+  "mad24hi_s64 $d1, 1, 1, 1;",
+  "mad24hi_s64 $d1, 1, 1, WAVESIZE;",
+  "mad24hi_s64 $d1, 1, WAVESIZE, $d4;",
+  "mad24hi_s64 $d1, 1, WAVESIZE, 1;",
+  "mad24hi_s64 $d1, 1, WAVESIZE, WAVESIZE;",
+  "mad24hi_s64 $d1, WAVESIZE, $d3, $d4;",
+  "mad24hi_s64 $d1, WAVESIZE, $d3, 1;",
+  "mad24hi_s64 $d1, WAVESIZE, $d3, WAVESIZE;",
+  "mad24hi_s64 $d1, WAVESIZE, 1, $d4;",
+  "mad24hi_s64 $d1, WAVESIZE, 1, 1;",
+  "mad24hi_s64 $d1, WAVESIZE, 1, WAVESIZE;",
+  "mad24hi_s64 $d1, WAVESIZE, WAVESIZE, $d4;",
+  "mad24hi_s64 $d1, WAVESIZE, WAVESIZE, 1;",
+  "mad24hi_s64 $d1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // u32
+  "mad24hi_u32 $s1, $s2, $s3, $s4;",
+  "mad24hi_u32 $s1, $s2, $s3, 1;",
+  "mad24hi_u32 $s1, $s2, $s3, WAVESIZE;",
+  "mad24hi_u32 $s1, $s2, 1, $s4;",
+  "mad24hi_u32 $s1, $s2, 1, 1;",
+  "mad24hi_u32 $s1, $s2, 1, WAVESIZE;",
+  "mad24hi_u32 $s1, $s2, WAVESIZE, $s4;",
+  "mad24hi_u32 $s1, $s2, WAVESIZE, 1;",
+  "mad24hi_u32 $s1, $s2, WAVESIZE, WAVESIZE;",
+  "mad24hi_u32 $s1, 1, $s3, $s4;",
+  "mad24hi_u32 $s1, 1, $s3, 1;",
+  "mad24hi_u32 $s1, 1, $s3, WAVESIZE;",
+  "mad24hi_u32 $s1, 1, 1, $s4;",
+  "mad24hi_u32 $s1, 1, 1, 1;",
+  "mad24hi_u32 $s1, 1, 1, WAVESIZE;",
+  "mad24hi_u32 $s1, 1, WAVESIZE, $s4;",
+  "mad24hi_u32 $s1, 1, WAVESIZE, 1;",
+  "mad24hi_u32 $s1, 1, WAVESIZE, WAVESIZE;",
+  "mad24hi_u32 $s1, WAVESIZE, $s3, $s4;",
+  "mad24hi_u32 $s1, WAVESIZE, $s3, 1;",
+  "mad24hi_u32 $s1, WAVESIZE, $s3, WAVESIZE;",
+  "mad24hi_u32 $s1, WAVESIZE, 1, $s4;",
+  "mad24hi_u32 $s1, WAVESIZE, 1, 1;",
+  "mad24hi_u32 $s1, WAVESIZE, 1, WAVESIZE;",
+  "mad24hi_u32 $s1, WAVESIZE, WAVESIZE, $s4;",
+  "mad24hi_u32 $s1, WAVESIZE, WAVESIZE, 1;",
+  "mad24hi_u32 $s1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // u64
+  "mad24hi_u64 $d1, $d2, $d3, $d4;",
+  "mad24hi_u64 $d1, $d2, $d3, 1;",
+  "mad24hi_u64 $d1, $d2, $d3, WAVESIZE;",
+  "mad24hi_u64 $d1, $d2, 1, $d4;",
+  "mad24hi_u64 $d1, $d2, 1, 1;",
+  "mad24hi_u64 $d1, $d2, 1, WAVESIZE;",
+  "mad24hi_u64 $d1, $d2, WAVESIZE, $d4;",
+  "mad24hi_u64 $d1, $d2, WAVESIZE, 1;",
+  "mad24hi_u64 $d1, $d2, WAVESIZE, WAVESIZE;",
+  "mad24hi_u64 $d1, 1, $d3, $d4;",
+  "mad24hi_u64 $d1, 1, $d3, 1;",
+  "mad24hi_u64 $d1, 1, $d3, WAVESIZE;",
+  "mad24hi_u64 $d1, 1, 1, $d4;",
+  "mad24hi_u64 $d1, 1, 1, 1;",
+  "mad24hi_u64 $d1, 1, 1, WAVESIZE;",
+  "mad24hi_u64 $d1, 1, WAVESIZE, $d4;",
+  "mad24hi_u64 $d1, 1, WAVESIZE, 1;",
+  "mad24hi_u64 $d1, 1, WAVESIZE, WAVESIZE;",
+  "mad24hi_u64 $d1, WAVESIZE, $d3, $d4;",
+  "mad24hi_u64 $d1, WAVESIZE, $d3, 1;",
+  "mad24hi_u64 $d1, WAVESIZE, $d3, WAVESIZE;",
+  "mad24hi_u64 $d1, WAVESIZE, 1, $d4;",
+  "mad24hi_u64 $d1, WAVESIZE, 1, 1;",
+  "mad24hi_u64 $d1, WAVESIZE, 1, WAVESIZE;",
+  "mad24hi_u64 $d1, WAVESIZE, WAVESIZE, $d4;",
+  "mad24hi_u64 $d1, WAVESIZE, WAVESIZE, 1;",
+  "mad24hi_u64 $d1, WAVESIZE, WAVESIZE, WAVESIZE;"
+};
+
+BrigInstBase output_array_mad24_hi[] = {
+  // s32
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // s64
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // u32
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // u64
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad24,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  }
+};
+class Mad24HiFalse : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mad24_hi_false[] = {
+  "mad24_s32 $s1;",
+  "mad24_s64 $s1, $s2;",
+  "mad24_u32 1, 1, $s3;",
+  "mad24_u64 WAVESIZE, 1, 1;"
+};
+
 }  // namespace brig
 }  // namespace hsa
 #endif //CODEGEN_TEST_H_
