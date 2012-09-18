@@ -670,7 +670,7 @@ template<> void CopySignLogic(f32 result, f32 a, f32 b) {
   EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
-TestAll(FloatInst, CopySign, Binary)
+//TestAll(FloatInst, CopySign, Binary)
 
 template<class T> static void ClassLogic(b1 result, T a, b32 b) {
   int fpclass = std::fpclassify(a);
@@ -1045,3 +1045,54 @@ MakeCvtF2FdTest(up,   a <= result)
 MakeCvtF2FdTest(down, a >= result)
 MakeCvtF2FdTest(zero, abs(a) >= abs(result))
 MakeCvtF2FdTest(near, (f32) a == result)
+
+template<class T> static void Atomic_andLogic(T result, T *a, T b) {
+  EXPECT_EQ(*a, T(result & b));
+}
+TestAll(AtomicInst, Atomic_and, Binary)
+
+template<class T> static void Atomic_orLogic(T result, T *a, T b) {
+  EXPECT_EQ(*a, T(result | b));
+}
+TestAll(AtomicInst, Atomic_or, Binary)
+
+template<class T> static void Atomic_exchLogic(T result, T* a, T b) {
+  EXPECT_EQ(b, *a);
+}
+TestAll(AtomicInst, Atomic_exch, Binary)
+
+template<class T> static void Atomic_addLogic(T result, T* a, T b) {
+  if(isNan(result) || isNan(b)) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isPosInf(*a) && isNegInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isNegInf(result) && isPosInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else {
+    EXPECT_EQ(T(result + b), *a);
+  }
+}
+TestAll(AtomicInst, Atomic_add, Binary)
+
+template<class T> static void Atomic_subLogic(T result, T* a, T b) {
+  if(isNan(result) || isNan(b)) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isPosInf(*a) && isNegInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isNegInf(result) && isPosInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else {
+    EXPECT_EQ(T(result - b), *a);
+  }
+}
+TestAll(AtomicInst, Atomic_sub, Binary)
+
+template<class T> static void Atomic_casLogic(T result, T* a, T b, T c) {
+  if(result == b) {
+    EXPECT_EQ(c, *a);
+  } else {
+    EXPECT_EQ(result, *a);
+  }
+}
+TestAll(AtomicInst, Atomic_cas, Ternary)
+
