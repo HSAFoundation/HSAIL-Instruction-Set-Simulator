@@ -225,6 +225,109 @@ defineVec(f64, 2)
   /* D ## ShuffleVector(INST, f16x4) */         \
   D ## ShuffleVector(INST, f32x2)
 
+#define AtomicInst(D,INST,NARY)                 \
+  D ## AtomicInst ## NARY(INST, s32)                          \
+  D ## Atomic ## NARY(INST, global, s32)                      \
+  D ## Atomic ## NARY(INST, global_acq, s32)                  \
+  D ## Atomic ## NARY(INST, global_ar, s32)                   \
+  D ## Atomic ## NARY(INST, global_part_ar, s32)              \
+  D ## Atomic ## NARY(INST, group, s32)                       \
+  D ## Atomic ## NARY(INST, group_acq, s32)                   \
+  D ## Atomic ## NARY(INST, group_ar, s32)                    \
+  D ## Atomic ## NARY(INST, group_part_ar, s32)               \
+  D ## Atomic ## NARY(INST, private, s32)                     \
+  D ## Atomic ## NARY(INST, private_acq, s32)                 \
+  D ## Atomic ## NARY(INST, private_ar, s32)                  \
+  D ## Atomic ## NARY(INST, private_part_ar, s32)             \
+  D ## Atomic ## NARY(INST, readonly, s32)                    \
+  D ## Atomic ## NARY(INST, readonly_acq, s32)                \
+  D ## Atomic ## NARY(INST, readonly_ar, s32)                 \
+  D ## Atomic ## NARY(INST, readonly_part_ar, s32)            \
+  D ## Atomic ## NARY(INST, spill, s32)                       \
+  D ## Atomic ## NARY(INST, spill_acq, s32)                   \
+  D ## Atomic ## NARY(INST, spill_ar, s32)                    \
+  D ## Atomic ## NARY(INST, spill_part_ar, s32)               \
+  D ## Atomic ## NARY(INST, arg, s32)                         \
+  D ## Atomic ## NARY(INST, arg_acq, s32)                     \
+  D ## Atomic ## NARY(INST, arg_ar, s32)                      \
+  D ## Atomic ## NARY(INST, arg_part_ar, s32)                 \
+  D ## AtomicInst ## NARY(INST, u32)                          \
+  D ## Atomic ## NARY(INST, global, u32)                      \
+  D ## Atomic ## NARY(INST, global_acq, u32)                  \
+  D ## Atomic ## NARY(INST, global_ar, u32)                   \
+  D ## Atomic ## NARY(INST, global_part_ar, u32)              \
+  D ## Atomic ## NARY(INST, group, u32)                       \
+  D ## Atomic ## NARY(INST, group_acq, u32)                   \
+  D ## Atomic ## NARY(INST, group_ar, u32)                    \
+  D ## Atomic ## NARY(INST, group_part_ar, u32)               \
+  D ## Atomic ## NARY(INST, private, u32)                     \
+  D ## Atomic ## NARY(INST, private_acq, u32)                 \
+  D ## Atomic ## NARY(INST, private_ar, u32)                  \
+  D ## Atomic ## NARY(INST, private_part_ar, u32)             \
+  D ## Atomic ## NARY(INST, readonly, u32)                    \
+  D ## Atomic ## NARY(INST, readonly_acq, u32)                \
+  D ## Atomic ## NARY(INST, readonly_ar, u32)                 \
+  D ## Atomic ## NARY(INST, readonly_part_ar, u32)            \
+  D ## Atomic ## NARY(INST, spill, u32)                       \
+  D ## Atomic ## NARY(INST, spill_acq, u32)                   \
+  D ## Atomic ## NARY(INST, spill_ar, u32)                    \
+  D ## Atomic ## NARY(INST, spill_part_ar, u32)               \
+  D ## Atomic ## NARY(INST, arg, u32)                         \
+  D ## Atomic ## NARY(INST, arg_acq, u32)                     \
+  D ## Atomic ## NARY(INST, arg_ar, u32)                      \
+  D ## Atomic ## NARY(INST, arg_part_ar, u32)                 \
+  D ## AtomicInst ## NARY(INST, s64)                          \
+  D ## Atomic ## NARY(INST, global, s64)                      \
+  D ## Atomic ## NARY(INST, global_acq, s64)                  \
+  D ## Atomic ## NARY(INST, global_ar, s64)                   \
+  D ## Atomic ## NARY(INST, global_part_ar, s64)              \
+  D ## Atomic ## NARY(INST, group, s64)                       \
+  D ## Atomic ## NARY(INST, group_acq, s64)                   \
+  D ## Atomic ## NARY(INST, group_ar, s64)                    \
+  D ## Atomic ## NARY(INST, group_part_ar, s64)               \
+  D ## Atomic ## NARY(INST, private, s64)                     \
+  D ## Atomic ## NARY(INST, private_acq, s64)                 \
+  D ## Atomic ## NARY(INST, private_ar, s64)                  \
+  D ## Atomic ## NARY(INST, private_part_ar, s64)             \
+  D ## Atomic ## NARY(INST, readonly, s64)                    \
+  D ## Atomic ## NARY(INST, readonly_acq, s64)                \
+  D ## Atomic ## NARY(INST, readonly_ar, s64)                 \
+  D ## Atomic ## NARY(INST, readonly_part_ar, s64)            \
+  D ## Atomic ## NARY(INST, spill, s64)                       \
+  D ## Atomic ## NARY(INST, spill_acq, s64)                   \
+  D ## Atomic ## NARY(INST, spill_ar, s64)                    \
+  D ## Atomic ## NARY(INST, spill_part_ar, s64)               \
+  D ## Atomic ## NARY(INST, arg, s64)                         \
+  D ## Atomic ## NARY(INST, arg_acq, s64)                     \
+  D ## Atomic ## NARY(INST, arg_ar, s64)                      \
+  D ## Atomic ## NARY(INST, arg_part_ar, s64)                 \
+  D ## AtomicInst ## NARY(INST, u64)                          \
+  D ## Atomic ## NARY(INST, global, u64)                      \
+  D ## Atomic ## NARY(INST, global_acq, u64)                  \
+  D ## Atomic ## NARY(INST, global_ar, u64)                   \
+  D ## Atomic ## NARY(INST, global_part_ar, u64)              \
+  D ## Atomic ## NARY(INST, group, u64)                       \
+  D ## Atomic ## NARY(INST, group_acq, u64)                   \
+  D ## Atomic ## NARY(INST, group_ar, u64)                    \
+  D ## Atomic ## NARY(INST, group_part_ar, u64)               \
+  D ## Atomic ## NARY(INST, private, u64)                     \
+  D ## Atomic ## NARY(INST, private_acq, u64)                 \
+  D ## Atomic ## NARY(INST, private_ar, u64)                  \
+  D ## Atomic ## NARY(INST, private_part_ar, u64)             \
+  D ## Atomic ## NARY(INST, readonly, u64)                    \
+  D ## Atomic ## NARY(INST, readonly_acq, u64)                \
+  D ## Atomic ## NARY(INST, readonly_ar, u64)                 \
+  D ## Atomic ## NARY(INST, readonly_part_ar, u64)            \
+  D ## Atomic ## NARY(INST, spill, u64)                       \
+  D ## Atomic ## NARY(INST, spill_acq, u64)                   \
+  D ## Atomic ## NARY(INST, spill_ar, u64)                    \
+  D ## Atomic ## NARY(INST, spill_part_ar, u64)               \
+  D ## Atomic ## NARY(INST, arg, u64)                         \
+  D ## Atomic ## NARY(INST, arg_acq, u64)                     \
+  D ## Atomic ## NARY(INST, arg_ar, u64)                      \
+  D ## Atomic ## NARY(INST, arg_part_ar, u64)
+
+
 #define CmpImpl(FUNC,PRED)                              \
   template<class T> static T Cmp_ ## FUNC (T x, T y) {  \
     return PRED;                                        \
@@ -365,6 +468,26 @@ defineVec(f64, 2)
     return FUNC ## Vector(t, u, shift);                           \
   }
 
+#define defineAtomicInstBinary(FUNC,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE* t, TYPE u) { \
+    return FUNC(t, u);                           \
+  }
+
+#define defineAtomicInstTernary(FUNC,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) { \
+    return FUNC(t, u, v);                           \
+  }
+
+#define defineAtomicBinary(FUNC,SEGMENT_SEM,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## SEGMENT_SEM ## _ ## TYPE (TYPE* t, TYPE u) { \
+    return FUNC(t, u);                           \
+  }
+
+#define defineAtomicTernary(FUNC,SEGMENT_SEM,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## SEGMENT_SEM ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) { \
+    return FUNC(t, u, v);                           \
+  }
+
 #define declareUnary(FUNC,TYPE)                 \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t);
 
@@ -391,6 +514,18 @@ defineVec(f64, 2)
 
 #define declareShuffleVector(FUNC,TYPE)                               \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, unsigned shift);
+
+#define declareAtomicInstBinary(FUNC,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE *t, TYPE u);
+
+#define declareAtomicInstTernary(FUNC,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);
+
+#define declareAtomicBinary(FUNC,SEGMENT_SEM,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## SEGMENT_SEM ## _ ## TYPE (TYPE *t, TYPE u);
+
+#define declareAtomicTernary(FUNC,SEGMENT_SEM,TYPE)                            \
+  extern "C" TYPE FUNC ## _ ## SEGMENT_SEM ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);
 
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {

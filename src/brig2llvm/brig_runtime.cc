@@ -711,5 +711,41 @@ defineCvt(Cvt_zero, FE_TOWARDZERO, f32, f64)
 defineCvt(Cvt_near, FE_TONEAREST,  f32, f64)
 // A rounding modifier is illegal in all other cases
 defineCvt(Cvt, ~0, f64, f32)
+
+template<class T> static T Atomic_and(T *x, T y) {
+  return __sync_fetch_and_and(x, y);
+}
+AtomicInst(define, Atomic_and, Binary)
+
+template<class T> static T Atomic_or(T *x, T y) {
+  return __sync_fetch_and_or(x, y);
+}
+AtomicInst(define, Atomic_or, Binary)
+
+template<class T> static T Atomic_xor(T *x, T y) {
+  return __sync_fetch_and_xor(x, y);
+}
+AtomicInst(define, Atomic_xor, Binary)
+
+template<class T> static T Atomic_exch(T *x, T y) {
+  return __sync_val_compare_and_swap(x, *x, y);
+}
+AtomicInst(define, Atomic_exch, Binary)
+
+template<class T> static T Atomic_add(T *x, T y) {
+  return __sync_fetch_and_add (x, y);
+}
+AtomicInst(define, Atomic_add, Binary)
+
+template<class T> static T Atomic_sub(T *x, T y) {
+  return __sync_fetch_and_sub (x, y);
+}
+AtomicInst(define, Atomic_sub, Binary)
+
+template<class T> static T Atomic_cas(T *x, T y, T z) {
+  return __sync_val_compare_and_swap(x, y, z);
+}
+AtomicInst(define, Atomic_cas, Ternary)
+
 } // namespace brig
 } // namespace hsa
