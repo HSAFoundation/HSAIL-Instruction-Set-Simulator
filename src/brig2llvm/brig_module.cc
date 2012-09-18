@@ -910,24 +910,46 @@ bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
 
 bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
   bool valid = true;
+  unsigned funRefCount = 0;
+  unsigned argRefCount = 0;
+
   if (operand->elementCount) {
-    valid &= check(sizeof(BrigOperandFunctionList) + 
-                   sizeof(operand->o_args[1]) * (operand->elementCount - 1) <= 
-                   operand->size, "Invalid size");
     if (operand->elementCount == 1) {
-      oper_iterator argsOper1(S_.operands + operand->o_args[0]);
-      valid &= validate(argsOper1);
-      valid &= check(isa<BrigOperandArgumentRef>(argsOper1), 
-                     "Invalid args, should point to BrigOperandArgumentRef");
-    } else {
-      for (unsigned i = 0; i < operand->elementCount; i++) {
-        oper_iterator argsOper(S_.operands + operand->o_args[i]);
-        valid &= validate(argsOper);
-        valid &= check(isa<BrigOperandFunctionRef>(argsOper), 
+      //element is 1, point to BrigOperandArgumentRef
+       oper_iterator arg(S_.operands + operand->o_args[0]);
+       valid = validate(arg);
+       valid &= check(isa<BrigOperandArgumentRef>(arg), 
+                      "Invalid args, should point to BrigOperandArgumentRef");
+       const BrigOperandArgumentRef *argRef = dyn_cast<BrigOperandArgumentRef>(arg);
+         dir_iterator funSig(S_.directives + argRef->arg);
+         if (!validate(funSig))  return false;
+         //conflict with BrigOperandArgumentRef refer to BrigDirectiveSymbol
+         valid &= check(isa<BrigDirectiveSignature>(funSig),   
+                        "should point to BrigOperandArgumentRef, "
+                        "refer to BrigDirectiveSignature");
+         ++argRefCount;
+    } else {  
+      //point to BrigOperandFunctionRef
+        for (unsigned i = 0; i < operand->elementCount; ++i) {
+          oper_iterator argFun(S_.operands + operand->o_args[i]);
+          valid &= validate(argFun); 
+          valid &= check(isa<BrigOperandFunctionRef>(argFun), 
                        "Invalid o_args, should point BrigOperandFunctionRef");
+          const BrigOperandFunctionRef *funRef = dyn_cast<BrigOperandFunctionRef>(argFun);
+            dir_iterator fun(S_.directives + funRef->fn);
+            if (!validate(fun)) return false;
+            valid &= check(isa<BrigDirectiveFunction>(fun), 
+                           "should point to BrigOperandFunctionRef, "
+                           "refer to BrigDirectiveFunction");
+            ++funRefCount;
+          }
       }
-    }
   }
+  valid &= check(funRefCount == operand->elementCount || 
+                 argRefCount == operand->elementCount, 
+                 "element of o_args shoule be BrigOperandFunctionRef "
+                 "or BrigOperandArgumentRef");
+  valid &= check(argRefCount < 2, "Invalid argRefCount, shoule be 1 or 0");
   return valid;
 }
 

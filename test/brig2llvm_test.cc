@@ -6472,3 +6472,298 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV4) {
     "reserved must be zero")));
   }
 }
+
+TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&callee"));
+    strings.append(std::string("%output"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveSymbol bdsy3 = {
+      sizeof(bdsy3),                    // size
+      BrigEDirectiveSymbol,             // kind
+      {
+        0,                             // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        8,                               // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy3);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandArgumentRef boar = {
+      sizeof(boar),
+      BrigEOperandArgumentRef,
+      20                    //arg
+    };
+    operands.append(&boar);
+    
+    BrigOperandArgumentList boal = {
+      sizeof(boal),
+      BrigEOperandArgumentList,
+      1,
+      {8}
+    };
+    operands.append(&boal);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append(std::string("&callee"));
+    strings.append(std::string("%output"));
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveSymbol bdsy3 = {
+      sizeof(bdsy3),                    // size
+      BrigEDirectiveSymbol,             // kind
+      {
+        0,                             // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        8,                               // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy3);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandArgumentRef boar = {
+      sizeof(boar),
+      BrigEOperandArgumentRef,
+      20                    //arg
+    };
+    operands.append(&boar);
+    
+    BrigOperandArgumentList boal = {
+      sizeof(boal),
+      BrigEOperandArgumentList,
+      1,
+      {50}
+    };
+    operands.append(&boal);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid o_args, should point BrigOperandArgumentRef")));
+  }
+}
+
+TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
+  {
+    hsa::brig::StringBuffer strings;
+    strings.append("&callee");
+    strings.append("&caller");
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction callee = {
+      sizeof(callee),                 // size
+      BrigEDirectiveFunction,         // kind
+      0,                              // c_code
+      0,                              // s_name
+      0,                              // inParamCount
+      directives.size() +
+      sizeof(callee),                 // d_firstSCopedDirective
+      1,                              // operationCount
+      directives.size() +
+      sizeof(callee),                 // d_nextDirective
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      0,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&callee);
+
+    BrigDirectiveFunction caller = {
+      sizeof(caller),                 // size
+      BrigEDirectiveFunction,         // kind
+      0,                             // c_code
+      8,                              // s_name
+      0,                              // inParamCount
+      directives.size() +
+      sizeof(caller),                 // d_firstSCopedDirective
+      2,                              // operationCount
+      directives.size() + sizeof(callee) +
+      2 * sizeof(BrigDirectiveScope), // d_nextDirective
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      0,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&caller);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandFunctionRef bofr1 = {
+      sizeof(bofr1),
+      BrigEOperandFunctionRef,
+      20                    //arg
+    };
+    operands.append(&bofr1);
+
+    BrigOperandFunctionRef bofr2 = {
+      sizeof(bofr2),
+      BrigEOperandFunctionRef,
+      60                    //arg
+    };
+    operands.append(&bofr2);
+
+    size_t arraySize =
+      sizeof(BrigOperandFunctionList) + (2 - 1) * sizeof(uint32_t);
+    uint8_t *arrayFun = new uint8_t[arraySize];
+    BrigOperandFunctionList *bdfl =
+      reinterpret_cast<BrigOperandFunctionList *>(arrayFun);
+    bdfl->size = arraySize;
+    bdfl->kind = BrigEOperandFunctionList;
+    bdfl->elementCount = 2;
+    bdfl->o_args[0] = 8;
+    bdfl->o_args[1] = 16;
+    operands.append(bdfl);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  //invalid test, elementCount be 1
+ /* {
+    hsa::brig::StringBuffer strings;
+    strings.append("&callee");
+    strings.append("&caller");
+
+    hsa::brig::Buffer directives;
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction callee = {
+      sizeof(callee),                 // size
+      BrigEDirectiveFunction,         // kind
+      0,                              // c_code
+      0,                              // s_name
+      0,                              // inParamCount
+      directives.size() +
+      sizeof(callee),                 // d_firstSCopedDirective
+      1,                              // operationCount
+      directives.size() +
+      sizeof(callee),                 // d_nextDirective
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      0,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&callee);
+
+    hsa::brig::Buffer code;
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandFunctionRef bofr = {
+      sizeof(bofr),
+      BrigEOperandFunctionRef,
+      20
+    };
+    operands.append(&bofr);
+
+    BrigOperandFunctionList bofl = {
+      sizeof(bofl),
+      BrigEOperandFunctionList,
+      1,
+      {50}
+    };
+    operands.append(&bofl);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "operands past the operands section")));
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid args, should point to BrigOperandArgumentRef")));
+  }*/
+}
