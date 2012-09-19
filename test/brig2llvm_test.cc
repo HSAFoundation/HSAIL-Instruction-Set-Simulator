@@ -6603,7 +6603,7 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "operands past the operands section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid o_args, should point BrigOperandArgumentRef")));
+    "Invalid o_args, should point to BrigOperandArgumentRef")));
   }
 }
 
