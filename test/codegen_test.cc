@@ -8964,7 +8964,7 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   EXPECT_EQ(0,FunctionSignature(context));
   
   size_t arraySize = sizeof(BrigDirectiveSignature) + 
-      sizeof(BrigDirectiveSignature::types);
+      sizeof(BrigDirectiveSignature::BrigProtoType);
   uint8_t *array = new uint8_t[arraySize];
   
   BrigDirectiveSignature *ref = 
