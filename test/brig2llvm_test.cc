@@ -5608,7 +5608,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid directive, should point to a BrigDirectiveFunction "
-    "or BrigDirectiveSibnature")));
+    "or BrigDirectiveSignature")));
   }
 }
 
