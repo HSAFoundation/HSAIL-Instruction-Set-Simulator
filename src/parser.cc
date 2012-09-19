@@ -1564,20 +1564,19 @@ int ArgumentListBody(Context* context) {
 int FunctionDefinition(Context* context) {
   if (!DeclPrefix(context)) {
     if (context->token_to_scan == FUNCTION) {
-      // add default struct (Miao)
-
+      
       context->current_bdf_offset = context->get_directive_offset();
       BrigdOffset32_t bdf_offset = context->current_bdf_offset;
 
       BrigDirectiveFunction bdf = {
-      40,                      // size
+      sizeof(BrigDirectiveFunction),                      // size
       BrigEDirectiveFunction,  // kind
       context->get_code_offset(),   // c_code
       0,  // name
       0,  // in param count
-      bdf_offset+40,          // d_firstScopedDirective
+      bdf_offset+sizeof(BrigDirectiveFunction),          // d_firstScopedDirective
       0,  // operation count
-      bdf_offset+40,          // d_nextDirective
+      bdf_offset+sizeof(BrigDirectiveFunction),          // d_nextDirective
       context->get_attribute(),  // attribute
       context->get_fbar(),   // fbar count
       0,    // out param count
