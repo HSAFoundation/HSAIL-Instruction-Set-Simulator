@@ -2892,15 +2892,6 @@ int FileDecl(Context* context) {
   return 1;
 }
 
-int VectorToken(Context *context) {
-  if ((_V2 == context->token_to_scan) || (_V4 == context->token_to_scan)) {
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
-    return 1;
-  }
-}
-
 int SignatureType(Context *context) {
   // alignment optional
   if (ALIGN == context->token_to_scan){
