@@ -1673,6 +1673,7 @@ int FunctionDefinition(Context* context) {
   return 1;
 }
 
+/*
 int FunctionDeclpart1(Context* context) {
   //if (!DeclPrefix(context)) {
     if (context->token_to_scan == FUNCTION) {
@@ -1750,12 +1751,12 @@ int FunctionDeclpart2(Context *context){
   }
 
   return 1;
-}
+}*/
 int FunctionDecl(Context *context){
   if (!DeclPrefix(context)) {
-    if (!FunctionDeclpart1(context)){
+    if (!FunctionDefinition(context)){
       if (';' == context->token_to_scan){
-        return FunctionDeclpart2(context) ;
+        return 0 ;
       } else {
         context->set_error(MISSING_IDENTIFIER);
       }
@@ -8767,7 +8768,12 @@ int GlobalInitializable(Context* context){
 int GlobalDeclpart2(Context *context){
   // the header is declPrefix
   if(FUNCTION == context->token_to_scan){
-    return FunctionDeclpart1(context);
+    if(!FunctionDefinition(context)){
+	   if(';'== context->token_to_scan)
+		  return 0;
+		else return 1;
+	}
+	else return 1;
   } else if (!GlobalInitializablePart2(context)){
     return 0;
   } else if (!GlobalSymbolDeclpart2(context)){
@@ -8781,7 +8787,7 @@ int GlobalDecl(Context *context){
   if (SIGNATURE == context->token_to_scan){ // functionSignature
     return FunctionSignature(context);
   } else if (!DeclPrefix(context)){
-    return GlobalDeclpart2(context);
+      return GlobalDeclpart2(context);
   }
 
   return 1;
@@ -8879,25 +8885,33 @@ int TopLevelStatement(Context *context){
     }
   }
 
-  if (!GlobalDeclpart2(context)){
-    if (';' == context->token_to_scan){
-      return FunctionDeclpart2(context);
-    } else if('{' == context->token_to_scan){
-      return Functionpart2(context);
-    } else {
-      return 0;
-    }
+  if(FUNCTION == context->token_to_scan){
+	if(!FunctionDefinition(context)){
+		if(';' == context->token_to_scan){
+			context->token_to_scan = yylex();
+			return 0;
+		}	
+		else {
+			if(!Codeblock(context)){
+				context->token_to_scan = yylex();
+				return 0;
+			} else 
+				return 1;
+		}
+	} else return 1;
+  } else if (!GlobalInitializablePart2(context)){
+    return 0;
+  } else if (!GlobalSymbolDeclpart2(context)){
+    return 0;
   }
-  return 1;
 }
 
 int TopLevelStatements(Context *context){
- while (context->token_to_scan &&
-         (context->token_to_scan != VERSION)){
-    if (!TopLevelStatement(context))
-      continue ;
-    else
-      return 1;
+ while (context->token_to_scan && (context->token_to_scan != VERSION)){
+	if (TopLevelStatement(context)){
+		return 1;
+	}
+	else continue;
   }
   return 0;
 }
