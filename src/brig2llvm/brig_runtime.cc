@@ -742,6 +742,16 @@ template<class T> static T Atomic_sub(T *x, T y) {
 }
 AtomicInst(define, Atomic_sub, Binary)
 
+template<class T> static T Atomic_inc(T *x, T y) {
+  return __sync_fetch_and_add (x, 1);
+}
+AtomicInst(define, Atomic_inc, Binary)
+
+template<class T> static T Atomic_dec(T *x, T y) {
+  return __sync_fetch_and_sub (x, 1);
+}
+AtomicInst(define, Atomic_dec, Binary)
+
 template<class T> static T Atomic_cas(T *x, T y, T z) {
   return __sync_val_compare_and_swap(x, y, z);
 }

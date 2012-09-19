@@ -1087,6 +1087,32 @@ template<class T> static void Atomic_subLogic(T result, T* a, T b) {
 }
 TestAll(AtomicInst, Atomic_sub, Binary)
 
+template<class T> static void Atomic_incLogic(T result, T* a, T b) {
+  if(isNan(result) || isNan(b)) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isPosInf(*a) && isNegInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isNegInf(result) && isPosInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else {
+    EXPECT_EQ(T(result + 1), *a);
+  }
+}
+TestAll(AtomicInst, Atomic_inc, Binary)
+
+template<class T> static void Atomic_decLogic(T result, T* a, T b) {
+  if(isNan(result) || isNan(b)) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isPosInf(*a) && isNegInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isNegInf(result) && isPosInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else {
+    EXPECT_EQ(T(result - 1), *a);
+  }
+}
+TestAll(AtomicInst, Atomic_dec, Binary)
+
 template<class T> static void Atomic_casLogic(T result, T* a, T b, T c) {
   if(result == b) {
     EXPECT_EQ(c, *a);
