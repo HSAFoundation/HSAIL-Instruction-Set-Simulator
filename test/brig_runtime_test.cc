@@ -670,7 +670,7 @@ template<> void CopySignLogic(f32 result, f32 a, f32 b) {
   EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
-//TestAll(FloatInst, CopySign, Binary)
+TestAll(FloatInst, CopySign, Binary)
 
 template<class T> static void ClassLogic(b1 result, T a, b32 b) {
   int fpclass = std::fpclassify(a);

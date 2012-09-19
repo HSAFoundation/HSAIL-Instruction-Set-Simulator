@@ -226,37 +226,10 @@ defineVec(f64, 2)
   D ## ShuffleVector(INST, f32x2)
 
 #define AtomicInst(D,INST,NARY)                 \
-  AtomicInstType(D, INST, NARY, s32)            \
-  AtomicInstType(D, INST, NARY, s64)            \
-  AtomicInstType(D, INST, NARY, u32)            \
-  AtomicInstType(D, INST, NARY, u64)
-
-#define AtomicInstType(D,INST,NARY,TYPE)                 \
-  D ## AtomicInst ## NARY(INST, TYPE)                          \
-  D ## Atomic ## NARY(INST, global, TYPE)                      \
-  D ## Atomic ## NARY(INST, global_acq, TYPE)                  \
-  D ## Atomic ## NARY(INST, global_ar, TYPE)                   \
-  D ## Atomic ## NARY(INST, global_part_ar, TYPE)              \
-  D ## Atomic ## NARY(INST, group, TYPE)                       \
-  D ## Atomic ## NARY(INST, group_acq, TYPE)                   \
-  D ## Atomic ## NARY(INST, group_ar, TYPE)                    \
-  D ## Atomic ## NARY(INST, group_part_ar, TYPE)               \
-  D ## Atomic ## NARY(INST, private, TYPE)                     \
-  D ## Atomic ## NARY(INST, private_acq, TYPE)                 \
-  D ## Atomic ## NARY(INST, private_ar, TYPE)                  \
-  D ## Atomic ## NARY(INST, private_part_ar, TYPE)             \
-  D ## Atomic ## NARY(INST, readonly, TYPE)                    \
-  D ## Atomic ## NARY(INST, readonly_acq, TYPE)                \
-  D ## Atomic ## NARY(INST, readonly_ar, TYPE)                 \
-  D ## Atomic ## NARY(INST, readonly_part_ar, TYPE)            \
-  D ## Atomic ## NARY(INST, spill, TYPE)                       \
-  D ## Atomic ## NARY(INST, spill_acq, TYPE)                   \
-  D ## Atomic ## NARY(INST, spill_ar, TYPE)                    \
-  D ## Atomic ## NARY(INST, spill_part_ar, TYPE)               \
-  D ## Atomic ## NARY(INST, arg, TYPE)                         \
-  D ## Atomic ## NARY(INST, arg_acq, TYPE)                     \
-  D ## Atomic ## NARY(INST, arg_ar, TYPE)                      \
-  D ## Atomic ## NARY(INST, arg_part_ar, TYPE)
+  D ## Atomic ## NARY(INST, s32)                \
+  D ## Atomic ## NARY(INST, s64)                \
+  D ## Atomic ## NARY(INST, u32)                \
+  D ## Atomic ## NARY(INST, u64)
 
 #define CmpImpl(FUNC,PRED)                              \
   template<class T> static T Cmp_ ## FUNC (T x, T y) {  \
@@ -398,23 +371,13 @@ defineVec(f64, 2)
     return FUNC ## Vector(t, u, shift);                           \
   }
 
-#define defineAtomicInstBinary(FUNC,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## TYPE (TYPE* t, TYPE u) { \
+#define defineAtomicBinary(FUNC,TYPE)                            \
+  extern "C" TYPE FUNC  ## _ ## TYPE (TYPE* t, TYPE u) { \
     return FUNC(t, u);                           \
   }
 
-#define defineAtomicInstTernary(FUNC,TYPE)                            \
+#define defineAtomicTernary(FUNC,TYPE)                            \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) { \
-    return FUNC(t, u, v);                           \
-  }
-
-#define defineAtomicBinary(FUNC,SEGMENT_SEM,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## SEGMENT_SEM ## _ ## TYPE (TYPE* t, TYPE u) { \
-    return FUNC(t, u);                           \
-  }
-
-#define defineAtomicTernary(FUNC,SEGMENT_SEM,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## SEGMENT_SEM ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) { \
     return FUNC(t, u, v);                           \
   }
 
@@ -445,17 +408,11 @@ defineVec(f64, 2)
 #define declareShuffleVector(FUNC,TYPE)                               \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, unsigned shift);
 
-#define declareAtomicInstBinary(FUNC,TYPE)                            \
+#define declareAtomicBinary(FUNC,TYPE)                            \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE *t, TYPE u);
 
-#define declareAtomicInstTernary(FUNC,TYPE)                            \
+#define declareAtomicTernary(FUNC,TYPE)                            \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);
-
-#define declareAtomicBinary(FUNC,SEGMENT_SEM,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## SEGMENT_SEM ## _ ## TYPE (TYPE *t, TYPE u);
-
-#define declareAtomicTernary(FUNC,SEGMENT_SEM,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## SEGMENT_SEM ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);
 
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {
