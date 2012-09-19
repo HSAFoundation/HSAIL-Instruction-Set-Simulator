@@ -1416,7 +1416,27 @@ TEST(ParserTest, SignatureType) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureType(context));
 
+  input.assign("align 4 arg_u32 \n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, SignatureType(context));
+
   input.assign("arg_u32 %a\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, SignatureType(context));
+
+  input.assign("align 4 arg_u32 %a\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, SignatureType(context));
+
+  input.assign("arg_u32 %a[9]\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, SignatureType(context));
+
+  input.assign("align 4 arg_u32 %a[9]\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureType(context));

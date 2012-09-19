@@ -2572,6 +2572,7 @@ int Initializer(Context* context) {
     }
     context->set_type(init_type);
 
+    context->set_isBlockNumeric(false);
     switch (context->token_to_scan) {
       case TOKEN_DOUBLE_CONSTANT:
         if (!FloatListSingle(context)) {
@@ -2901,22 +2902,62 @@ int VectorToken(Context *context) {
 }
 
 int SignatureType(Context *context) {
-  // first token is ARG
-  context->token_to_scan = yylex();
-
-  if (DATA_TYPE_ID == context->token_type) {
-    context->token_to_scan = yylex();
-    if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan)
-    // ignore the local identifier
+  // alignment optional
+  if (ALIGN == context->token_to_scan){
+    if (Alignment(context))
+      return 1;
+    if (ARG == context->token_to_scan){
       context->token_to_scan = yylex();
-    return 0;
-  } else if (_ROIMG == context->token_to_scan
-           || _RWIMG == context->token_to_scan
-           || _SAMP == context->token_to_scan ) {
+      if (DATA_TYPE_ID == context->token_type){
+        context->set_type(context->token_value.data_type);
+        context->token_to_scan = yylex();
+        // set default value(scalar)
+        context->set_dim(0);
+        context->set_symbol_modifier(BrigArray);
+        if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
+          context->token_to_scan = yylex();
+          if ('[' == context->token_to_scan){
+            if (!ArrayDimensionSet(context)){
+            } else {
+              return 1;
+	    }
+	  }
+	}
+      }
+    }
+  } else if (ARG == context->token_to_scan){
     context->token_to_scan = yylex();
-    return 0;
+    if (DATA_TYPE_ID == context->token_type) {
+      context->set_type(context->token_value.data_type);
+      context->token_to_scan = yylex();
+      // set default value(scalar)
+      context->set_dim(0);
+      context->set_symbol_modifier(BrigArray);
+      if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
+      // ignore the local identifier
+        context->token_to_scan = yylex();
+        if ('[' == context->token_to_scan){
+          return ArrayDimensionSet(context);
+        }
+      }
+    } else if (_ROIMG == context->token_to_scan
+             || _RWIMG == context->token_to_scan
+             || _SAMP == context->token_to_scan ) {
+      context->set_type(context->token_value.data_type);
+      context->token_to_scan = yylex();
+    }
+  } else {
+    return 1;
   }
-  return 1;
+  BrigDirectiveSignature::BrigProtoType bpt = {
+    context->get_type(),
+    context->get_alignment(),
+    (context->get_dim() != 0),
+    context->get_dim()
+  };
+  context->types.push_back(bpt);
+
+  return 0;
 }
 
 int SysCall(Context* context) {
@@ -3062,7 +3103,8 @@ int SysCall(Context* context) {
 
 int SignatureArgumentList(Context *context) {
   while (1) {
-    if (context->token_to_scan == ARG) {
+    if (ARG == context->token_to_scan 
+        || ALIGN == context->token_to_scan ) {
       if (!SignatureType(context)) {
         if (',' == context->token_to_scan) {
           context->token_to_scan = yylex();
@@ -3082,8 +3124,12 @@ int SignatureArgumentList(Context *context) {
 int FunctionSignature(Context *context) {
   // first token is SIGNATURE
   context->token_to_scan = yylex();
-
+  
+  size_t inCount = 0;
+  size_t outCount = 0;
   if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
+    std::string name = context->token_value.string_val;
+    BrigsOffset32_t name_offset = context->add_symbol(name);
     context->token_to_scan = yylex();
     // check return argument list
     if ('(' == context->token_to_scan) {
@@ -3091,6 +3137,7 @@ int FunctionSignature(Context *context) {
       if (')' == context->token_to_scan) {  // empty signature Argument List
         context->token_to_scan = yylex();
       } else if (!SignatureArgumentList(context)) {
+        outCount = context->types.size();
         if (context->token_to_scan == ')')
           context->token_to_scan = yylex();
         else
@@ -3107,6 +3154,7 @@ int FunctionSignature(Context *context) {
       if (')' == context->token_to_scan) {  // empty
         context->token_to_scan = yylex();
       } else if (!SignatureArgumentList(context)) {
+        inCount = context->types.size() - outCount ;
         if (context->token_to_scan == ')')
           context->token_to_scan = yylex();
         else
@@ -3126,6 +3174,25 @@ int FunctionSignature(Context *context) {
     }
 
     if (';' == context->token_to_scan) {  // end with ;
+
+      size_t arraySize = sizeof(BrigDirectiveSignature) +
+             (context->types.size() - 1) * sizeof(BrigDirectiveSignature::BrigProtoType);
+      uint8_t *array  = new uint8_t[arraySize];
+      BrigDirectiveSignature *bds = 
+          reinterpret_cast<BrigDirectiveSignature*>(array);
+
+      bds->size = arraySize;
+      bds->kind = BrigEDirectiveSignature;
+      bds->c_code = context->get_code_offset();
+      bds->s_name = name_offset;
+      bds->fbarCount = context->get_fbar();
+      bds->reserved = 0;
+      bds->outCount = outCount;
+      bds->inCount = inCount;
+      for(int i = 0;i < context->types.size();i++)
+        memmove(&bds->types[i],&context->types[i],sizeof(BrigDirectiveSignature::BrigProtoType));
+      context->append_directive(bds);      
+
       context->token_to_scan = yylex();
       return 0;
     } else {
@@ -4841,12 +4908,24 @@ int Instruction5(Context* context) {
 
 int Extension(Context* context) {
   // first token is EXTENSION "extension"
+  if (EXTENSION != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
 
   if (context->token_to_scan == TOKEN_STRING) {
+    std::string str(context->token_value.string_val);
     context->token_to_scan = yylex();
 
     if (context->token_to_scan == ';') {
+      BrigDirectiveExtension bde = {
+        sizeof(BrigDirectiveExtension),
+        BrigEDirectiveExtension,
+        context->get_code_offset(),
+        context->add_symbol(str)
+      };
+      context->append_directive(&bde);
+
       context->token_to_scan = yylex();
       return 0;
     } else {   // missing ";"
@@ -8071,27 +8150,42 @@ int Location(Context* context) {
   }
   return 1;
 }
+
 int Control(Context* context) {
+  BrigControlType32_t controlType;
+  // values[0] = 1 if on,By default, memopt_on is enabled.
+  uint32_t values[3] = {1,0,0}; 
+
   if (context->token_to_scan == MEMOPT_ON) {
+    controlType = BrigEMemOpt;
+    values[0] = 1;
   } else if (context->token_to_scan == MEMOPT_OFF) {
+    controlType = BrigEMemOpt;
+    values[0] = 0;
   } else if (context->token_to_scan == WORKGROUPS_PER_CU) {
+    controlType = BrigEMaxGperC;
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      values[0] = context->token_value.int_val; //TODO
     } else {  // Integer Constant
       context->set_error(MISSING_INTEGER_CONSTANT);
       return 1;
     }
   } else if (context->token_to_scan == ITEMS_PER_WORKGROUP) {
+    controlType = BrigEMaxTid;
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      values[0] = context->token_value.int_val;
       context->token_to_scan = yylex();
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+          values[1] = context->token_value.int_val;
           context->token_to_scan = yylex();
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
             if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+              values[2] = context->token_value.int_val;
             } else {  // Integer Constant
               context->set_error(MISSING_INTEGER_CONSTANT);
               return 1;
@@ -8113,24 +8207,46 @@ int Control(Context* context) {
       return 1;
     }
   } else {
-    context->set_error(UNKNOWN_ERROR);
     return 1;
   }
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
+    // codegen
+    BrigDirectiveControl bdc = {
+      sizeof(BrigDirectiveControl),   // size
+      BrigEDirectiveControl,          // kind
+      context->get_code_offset(),     // c_code
+      controlType,                    // controlType
+      {values[0],values[1],values[2]} //values
+    };
+    context->append_directive(&bdc);
+
     context->token_to_scan = yylex();
     return 0;
+  } else {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 int Pragma(Context* context) {
   // first token is PRAGMA
+  if(PRAGMA != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_STRING) {
+    std::string s_name = context->token_value.string_val;
     context->token_to_scan = yylex();
     if (context->token_to_scan == ';') {
+      BrigDirectivePragma bdp = {
+        sizeof(BrigDirectivePragma), // size
+        BrigEDirectivePragma,        // kind
+        context->get_code_offset(),  // c_code
+        context->add_symbol(s_name)  // s_name
+      };
+      context->append_directive(&bdp);
+
       context->token_to_scan = yylex();
       return 0;
     } else {  // ';'
@@ -8141,8 +8257,6 @@ int Pragma(Context* context) {
     context->set_error(MISSING_STRING);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
-  return 1;
 }
 
 // the type must be u or s
@@ -8251,76 +8365,130 @@ int FloatListSingle(Context* context) {
       case Brigb64:
         n = elementCount ;
         break;
-	}
-      size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
-      uint8_t *array = new uint8_t[arraySize];
-      BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-      uint32_t init_length = 0;
-
-      bdi->size = arraySize;
-      bdi->kind = BrigEDirectiveInit;
-      bdi->c_code = 0 ;
-      bdi->elementCount = elementCount;
-      bdi->type = context->get_type();
-      bdi->reserved = 0;
-
-      switch(context->get_type()){
-      case Brigb1:
-        break;
-      case Brigb8:
-        for (unsigned i = 0; i < elementCount; i ++ ){// right ?? lose value??
-          memmove(&bdi->initializationData.u8[i], &float_list[i],sizeof(uint8_t));
-	}
-        init_length = 8 * n ;
-        for (unsigned i = elementCount; i < init_length; i ++){
-          bdi->initializationData.u8[i] = 0;
-        }
-        break;
-      case Brigb16:
-        for (unsigned i = 0; i < elementCount; i ++ ){ // right ?? lose value??
-          memmove(&bdi->initializationData.u16[i], &float_list[i],sizeof(uint16_t));
-	}
-        init_length = 4 * n ;
-        for (unsigned i = elementCount; i < init_length; i ++){
-          bdi->initializationData.u16[i] = 0;
-        }
-        break;
-      case Brigb32:
-        for (unsigned i = 0; i < elementCount; i ++ ){// right ?? lose value??
-          memmove(&bdi->initializationData.u32[i], &float_list[i],sizeof(uint32_t));
-	}
-        init_length = 2 * n ;
-        for (unsigned i = elementCount; i < init_length; i ++){
-          bdi->initializationData.u32[i] = 0;
-        }
-        break;
-      case Brigb64:
-        for (unsigned i = 0; i < elementCount; i ++ ){
-          memmove(&bdi->initializationData.u64[i], &float_list[i],sizeof(uint64_t));
-	}
-        init_length = n;
-        break;
       }
+      if (!context->get_isBlockNumeric()){
+        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
+        uint8_t *array = new uint8_t[arraySize];
+        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+        uint32_t init_length = 0;  
+        
+        bdi->size = arraySize;
+        bdi->kind = BrigEDirectiveInit;
+        bdi->c_code = 0 ;
+        bdi->elementCount = elementCount;
+        bdi->type = context->get_type();
+        bdi->reserved = 0;
 
-      // update the BrigDirectiveSymbol.d_init and dim
-      BrigDirectiveSymbol bds ;
-      BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-      // BrigdOffset32_t bds_offset = context->get_directive_offset() - sizeof(BrigDirectiveSymbol);
-      context->get_directive(bds_offset,&bds);
-      bds.d_init = context->get_directive_offset();
-      if (0 == context->get_dim() && context->get_isArray())
-        bds.s.symbolModifier = BrigArray;
-      if (context->get_dim() < init_length)
-        bds.s.dim = init_length;
+        switch(context->get_type()){
+        case Brigb1:
+          break;
+        case Brigb8:
+          for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+            memmove(&bdi->initializationData.u8[i], &float_list[i],sizeof(uint8_t));
+	  }
+          init_length = 8 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u8[i] = 0;
+          }
+          break;
+        case Brigb16:
+          for (int i = 0; i < elementCount; i ++ ){ // right ?? lose value??
+            memmove(&bdi->initializationData.u16[i], &float_list[i],sizeof(uint16_t));
+	  }
+          init_length = 4 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u16[i] = 0;
+          }
+          break;
+        case Brigb32:
+          for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+            memmove(&bdi->initializationData.u32[i], &float_list[i],sizeof(uint32_t));
+	  }
+          init_length = 2 * n ;
+          for (int i = elementCount; i < init_length; i ++){
+            bdi->initializationData.u32[i] = 0;
+          }
+          break;
+        case Brigb64:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bdi->initializationData.u64[i], &float_list[i],sizeof(uint64_t));
+	  }
+          init_length = n;
+          break;
+        }
 
-      unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-      context->update_directive_bytes(bds_charp,
-                                      bds_offset,
-                                      sizeof(BrigDirectiveSymbol));
+        // update the BrigDirectiveSymbol.d_init and dim
+        BrigDirectiveSymbol bds ;
+        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+        context->get_directive(bds_offset,&bds);
+        bds.d_init = context->get_directive_offset();
+        if (0 == context->get_dim() && context->get_isArray())
+          bds.s.symbolModifier = BrigArray;
+        if (context->get_dim() < init_length)
+          bds.s.dim = init_length;
 
-      context->append_directive(bdi);
-
-      delete bdi;
+        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+        context->update_directive_bytes(bds_charp,
+                                        bds_offset,
+                                        sizeof(BrigDirectiveSymbol));
+        
+        context->append_directive(bdi);
+        
+        delete bdi;
+      } else { //blockNumeric
+        size_t arraySize = sizeof(BrigBlockNumeric) + (n - 1) * sizeof(uint64_t);
+        uint8_t *array = new uint8_t[arraySize];
+        BrigBlockNumeric *bbn = reinterpret_cast<BrigBlockNumeric*>(array);
+        uint32_t len = 0;
+          
+        bbn->size = arraySize;
+        bbn->kind = BrigEDirectiveBlockNumeric;
+        bbn->type = context->get_type();
+        bbn->elementCount = elementCount;
+          
+        switch(context->get_type()){
+        case Brigb1:
+          break;
+        case Brigb8:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bbn->u8[i],&float_list[i],sizeof(uint8_t));
+	  }
+          len = 8 * n ;
+          for (int i = elementCount; i < len; i ++){
+            bbn->u8[i] = 0;
+          }
+          break;
+        case Brigb16:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bbn->u16[i],&float_list[i],sizeof(uint16_t));
+	  }
+          len = 4 * n ;
+          for (int i = elementCount; i < len; i ++){
+            bbn->u16[i] = 0;
+          }
+          break;
+        case Brigb32:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bbn->u32[i],&float_list[i],sizeof(uint32_t));
+	  }
+          len = 2 * n ;
+          for (int i = elementCount; i < len; i ++){
+            bbn->u32[i] = 0;
+          }
+          break;
+        case Brigb64:
+          for (int i = 0; i < elementCount; i ++ ){
+            memmove(&bbn->u64[i],&float_list[i],sizeof(uint64_t));
+	  }
+          len =  n ;
+          for (int i = elementCount; i < len; i ++){
+            bbn->u64[i] = 0;
+          }
+          break;
+        }
+        context->append_directive(bbn);
+        delete bbn;
+      }
       return 0;
     }
   }  // While
@@ -8370,82 +8538,137 @@ int DecimalListSingle(Context* context) {
         case Brigb64:
           n = elementCount ;
           break;
-	  }
-        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
-        uint8_t *array = new uint8_t[arraySize];
-        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-        uint32_t init_length = 0;
+	}
+        if (!context->get_isBlockNumeric()){
+          size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
+          uint8_t *array = new uint8_t[arraySize];
+          BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+          uint32_t init_length = 0;  
+        
+          bdi->size = arraySize;
+          bdi->kind = BrigEDirectiveInit;
+          bdi->c_code = 0 ;
+          bdi->elementCount = elementCount;
+          bdi->type = context->get_type();
+          bdi->reserved = 0;
 
-        bdi->size = arraySize;
-        bdi->kind = BrigEDirectiveInit;
-        bdi->c_code = 0 ;
-        bdi->elementCount = elementCount;
-        bdi->type = context->get_type();
-        bdi->reserved = 0;
-
-        switch(context->get_type()){
-	case Brigb1:
-          break;
-        case Brigb8:
-          for (unsigned i = 0; i < elementCount; i ++ ){
-            bdi->initializationData.u8[i] = decimal_list[i];
-	  }
-          init_length = 8 * n ;
-          for (unsigned i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u8[i] = 0;
+          switch(context->get_type()){
+          case Brigb1:
+            break;
+          case Brigb8:
+            for (int i = 0; i < elementCount; i ++ ){
+              bdi->initializationData.u8[i] = decimal_list[i];
+	    }
+            init_length = 8 * n ;
+            for (int i = elementCount; i < init_length; i ++){
+              bdi->initializationData.u8[i] = 0;
+            }
+            break;
+          case Brigb16:
+            for (int i = 0; i < elementCount; i ++ ){
+              bdi->initializationData.u16[i] = decimal_list[i];
+	    }
+            init_length = 4 * n ;
+            for (int i = elementCount; i < init_length; i ++){
+              bdi->initializationData.u16[i] = 0;
+            }
+            break;
+          case Brigb32:
+            for (int i = 0; i < elementCount; i ++ ){
+              bdi->initializationData.u32[i] = decimal_list[i];
+	    }
+            init_length = 2 * n ;
+            for (int i = elementCount; i < init_length; i ++){
+              bdi->initializationData.u32[i] = 0;
+            }
+            break;
+          case Brigb64:
+            for (int i = 0; i < elementCount; i ++ ){
+              bdi->initializationData.u64[i] = decimal_list[i];
+	    }
+            init_length =  n ;
+            for (int i = elementCount; i < init_length; i ++){
+              bdi->initializationData.u64[i] = 0;
+            }
+            break;
           }
-          break;
-        case Brigb16:
-          for (unsigned i = 0; i < elementCount; i ++ ){
-            bdi->initializationData.u16[i] = decimal_list[i];
-	  }
-          init_length = 4 * n ;
-          for (unsigned i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u8[i] = 0;
-          }
-          break;
-        case Brigb32:
-          for (unsigned i = 0; i < elementCount; i ++ ){
-            bdi->initializationData.u32[i] = decimal_list[i];
-	  }
-          init_length = 2 * n ;
-          for (unsigned i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u8[i] = 0;
-          }
-          break;
-        case Brigb64:
-          for (unsigned i = 0; i < elementCount; i ++ ){
-            bdi->initializationData.u64[i] = decimal_list[i];
-	  }
-          init_length =  n ;
-          for (unsigned i = elementCount; i < init_length; i ++){
-            bdi->initializationData.u8[i] = 0;
-          }
-          break;
-        }
 
-        // update the BrigDirectiveSymbol.d_init and dim
-        BrigDirectiveSymbol bds ;
-        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-        context->get_directive(bds_offset,&bds);
-        bds.d_init = context->get_directive_offset();
-        if (0 == context->get_dim() && context->get_isArray()){
-          bds.s.symbolModifier = BrigArray;
-          context->set_symbol_modifier(BrigArray);
-        }
-        if (context->get_dim() < init_length){
-          bds.s.dim = init_length;
-          context->set_dim(init_length);
-        }
+          // update the BrigDirectiveSymbol.d_init and dim
+          BrigDirectiveSymbol bds ;
+          BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+          context->get_directive(bds_offset,&bds);
+          bds.d_init = context->get_directive_offset();
+          if (0 == context->get_dim() && context->get_isArray()){
+            bds.s.symbolModifier = BrigArray;
+            context->set_symbol_modifier(BrigArray);
+          }
+          if (context->get_dim() < init_length){
+            bds.s.dim = init_length;
+            context->set_dim(init_length);
+          }
 
-        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-        context->update_directive_bytes(bds_charp,
-                                        bds_offset,
-                                        sizeof(BrigDirectiveSymbol));
-
+          unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+          context->update_directive_bytes(bds_charp,
+                                          bds_offset,
+                                          sizeof(BrigDirectiveSymbol));
+        
         context->append_directive(bdi);
-
-        delete bdi;
+        
+          delete bdi;
+	} else { //blockNumeric
+          size_t arraySize = sizeof(BrigBlockNumeric) + (n - 1) * sizeof(uint64_t);
+          uint8_t *array = new uint8_t[arraySize];
+          BrigBlockNumeric *bbn = reinterpret_cast<BrigBlockNumeric*>(array);
+          uint32_t len = 0;
+          
+          bbn->size = arraySize;
+          bbn->kind = BrigEDirectiveBlockNumeric;
+          bbn->type = context->get_type();
+          bbn->elementCount = elementCount;
+          
+          switch(context->get_type()){
+          case Brigb1:
+            break;
+          case Brigb8:
+            for (int i = 0; i < elementCount; i ++ ){
+              bbn->u8[i] = decimal_list[i];
+	    }
+            len = 8 * n ;
+            for (int i = elementCount; i < len; i ++){
+              bbn->u8[i] = 0;
+            }
+            break;
+          case Brigb16:
+            for (int i = 0; i < elementCount; i ++ ){
+              bbn->u16[i] = decimal_list[i];
+	    }
+            len = 4 * n ;
+            for (int i = elementCount; i < len; i ++){
+              bbn->u16[i] = 0;
+            }
+            break;
+          case Brigb32:
+            for (int i = 0; i < elementCount; i ++ ){
+              bbn->u32[i] = decimal_list[i];
+	    }
+            len = 2 * n ;
+            for (int i = elementCount; i < len; i ++){
+              bbn->u32[i] = 0;
+            }
+            break;
+          case Brigb64:
+            for (int i = 0; i < elementCount; i ++ ){
+              bbn->u64[i] = decimal_list[i];
+	    }
+            len =  n ;
+            for (int i = elementCount; i < len; i ++){
+              bbn->u64[i] = 0;
+            }
+            break;
+          }
+          context->append_directive(bbn);
+          delete bbn;
+	}
         return 0;
       }  // ','
     }  // integer constant
@@ -8456,8 +8679,21 @@ int DecimalListSingle(Context* context) {
 
 int Block(Context* context) {
   // first token is BLOCK
+  if (BLOCK != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_STRING) {
+    std::string name = context->token_value.string_val;
+    // block start
+    BrigBlockStart bbs = {
+      sizeof(BrigBlockStart),     // size
+      BrigEDirectiveBlockStart,   // kind
+      context->get_code_offset(), // c_code
+      context->add_symbol(name)   // s_name
+    };
+    context->append_directive(&bbs);
+
     context->token_to_scan = yylex();
     if (context->token_to_scan == ENDBLOCK) {
       context->set_error(MISSING_SECTION_ITEM);
@@ -8467,14 +8703,27 @@ int Block(Context* context) {
       if (context->token_to_scan == BLOCKSTRING) {
         context->token_to_scan = yylex();
         if (context->token_to_scan == TOKEN_STRING) {
+          std::string str = context->token_value.string_val;
+          // block string
+          BrigBlockString bbs = {
+            sizeof(BrigBlockString),
+            BrigEDirectiveBlockString, 
+            context->add_symbol(str)
+          };
+          context->append_directive(&bbs);
+
           context->token_to_scan = yylex();
         } else {  // String
           context->set_error(INVALID_SECTION_ITEM);
           return 1;
         }
       } else if (context->token_to_scan == BLOCKNUMERIC) {
+        context->set_isBlockNumeric(true);
+
         context->token_to_scan = yylex();
         if (context->token_type == DATA_TYPE_ID) {
+          context->set_type(context->token_value.data_type);
+
           context->token_to_scan = yylex();
           if (context->token_to_scan == TOKEN_LABEL) {
             context->token_to_scan = yylex();
@@ -8502,6 +8751,13 @@ int Block(Context* context) {
     }  // While
     context->token_to_scan = yylex();
     if (context->token_to_scan == ';') {
+      // block end
+      BrigBlockEnd bbe = {
+        sizeof(BrigBlockEnd),
+        BrigEDirectiveBlockEnd
+      };
+      context->append_directive(&bbe);
+
       context->token_to_scan = yylex();
       return 0;
     } else {  // ';'
