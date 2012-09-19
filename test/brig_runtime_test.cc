@@ -1056,6 +1056,11 @@ template<class T> static void Atomic_orLogic(T result, T *a, T b) {
 }
 TestAll(AtomicInst, Atomic_or, Binary)
 
+template<class T> static void Atomic_xorLogic(T result, T* a, T b) {
+  EXPECT_EQ((result | b) & ~(result & b), *a);
+}
+TestAll(AtomicInst, Atomic_xor, Binary)
+
 template<class T> static void Atomic_exchLogic(T result, T* a, T b) {
   EXPECT_EQ(b, *a);
 }
@@ -1094,6 +1099,10 @@ template<class T> static void Atomic_incLogic(T result, T* a, T b) {
     EXPECT_PRED1(isNan<T>, *a);
   } else if((isNegInf(result) && isPosInf(b))) {
     EXPECT_PRED1(isNan<T>, *a);
+  } else if(result + 1 > b && b > 0) {
+    EXPECT_EQ(b, *a);
+  } else if(result + 1 <= 0) {
+    EXPECT_EQ(0, *a);
   } else {
     EXPECT_EQ(T(result + 1), *a);
   }
@@ -1107,6 +1116,10 @@ template<class T> static void Atomic_decLogic(T result, T* a, T b) {
     EXPECT_PRED1(isNan<T>, *a);
   } else if((isNegInf(result) && isPosInf(b))) {
     EXPECT_PRED1(isNan<T>, *a);
+  } else if(result - 1 > b && b > 0) {
+    EXPECT_EQ(b, *a);
+  } else if(result - 1 <= 0) {
+    EXPECT_EQ(0, *a);
   } else {
     EXPECT_EQ(T(result - 1), *a);
   }
