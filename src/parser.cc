@@ -4248,7 +4248,7 @@ int KernelArgumentDecl(Context *context) {
         // update the current DirectiveKernel.
         // 1. update the directive offset.
         BrigDirectiveKernel bdk;
-        context->get_directive(context->current_bdk_offset, &bdk);
+        context->get_directive(context->current_bdf_offset, &bdk);
         BrigdOffset32_t first_scope = bdk.d_firstScopedDirective;
         BrigdOffset32_t next_directive = bdk.d_nextDirective;
         if (first_scope == next_directive) {
@@ -4269,10 +4269,8 @@ int KernelArgumentDecl(Context *context) {
         unsigned char * bdk_charp =
           reinterpret_cast<unsigned char*>(&bdk);
         context->update_directive_bytes(bdk_charp,
-                                        context->current_bdk_offset,
+                                        context->current_bdf_offset,
                                         40);
-
-        context->get_directive(context->current_bdk_offset, &bdk);
         return 0;
 
       } else {
@@ -4306,26 +4304,28 @@ int Kernel(Context *context) {
   context->token_to_scan = yylex();
   if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
     context->current_bdf_offset = context->get_directive_offset();
-    BrigdOffset32_t bdf_offset = context->current_bdf_offset;
+    BrigdOffset32_t bdk_offset = context->current_bdf_offset;
 
+
+    std::string kern_name = context->token_value.string_val;
+    BrigsOffset32_t check_result = context->add_symbol(kern_name);
+    
+    size_t bdk_size = sizeof(BrigDirectiveKernel);
     BrigDirectiveKernel bdk = {
-      40,                          // size
+      bdk_size,                    // size
       BrigEDirectiveKernel,        // kind
       context->get_code_offset(),  // c_code
-      0,                           // name
-      0,                           // in param count
-      bdf_offset+40,               // d_firstScopedDirective
+      0,                           // s_name
+      check_result,                // in param count
+      bdk_offset + bdk_size,       // d_firstScopedDirective
       0,                           // operation count
-      bdf_offset+40,               // d_nextDirective
+      bdk_offset + bdk_size,       // d_nextDirective
       context->get_attribute(),    // attribute
-      context->get_fbar(),         // fbar count
+      0,                           // fbar count
       0,                           // out param count
       0                            // d_firstInParam
     };
 
-    std::string kern_name = context->token_value.string_val;
-    BrigsOffset32_t check_result = context->add_symbol(kern_name);
-    bdk.s_name = check_result;
     context->append_directive(&bdk);
     context->func_map[kern_name] = context->current_bdf_offset;
 
@@ -4359,6 +4359,13 @@ int Kernel(Context *context) {
         context->set_error(INVALID_FBAR);
         return 1;
       }
+      bdk.fbarCount = context->get_fbar();
+      // update 
+      unsigned char *bdk_charp =
+         reinterpret_cast<unsigned char*>(&bdk);
+      context->update_directive_bytes(bdk_charp,
+                                context->current_bdf_offset,
+                                bdk_size); 
     } else {
       if (!Codeblock(context)) {
         if (';' == context->token_to_scan) {
