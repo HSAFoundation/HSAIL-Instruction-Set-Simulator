@@ -4194,9 +4194,96 @@ int Instruction4ShufflePart6(Context* context) {
 
 
 int KernelArgumentDecl(Context *context) {
-  // maybe  change in the future
-  return  ArgumentDecl(context);
-  // return 1;
+  if (!DeclPrefix(context)) {
+    BrigStorageClass32_t storage_class = context->token_value.storage_class;
+
+    // skip over "arg" in context->token_to_scan
+    context->token_to_scan = yylex();
+    if ((context->token_type == DATA_TYPE_ID)||
+        (context->token_to_scan == _RWIMG) ||
+        (context->token_to_scan == _SAMP) ||
+        (context->token_to_scan == _ROIMG)) {
+      context->set_type(context->token_value.data_type);
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
+        // for argument, we need to set a BrigDirectiveSymbol
+        // and write the corresponding string into .string section.
+
+        std::string arg_name = context->token_value.string_val;
+        int arg_name_offset = context->add_symbol(arg_name);
+
+        // scan for arrayDimensions
+        context->token_to_scan = yylex();
+        // set default value(scalar)
+        context->set_dim(0);
+        context->set_symbol_modifier(BrigArray);
+        if (context->token_to_scan == '[') {
+          if (!ArrayDimensionSet(context)) {
+            // context->token_to_scan has been set in ArrayDimensionSet()
+            return 0;
+          }
+        }
+        BrigdOffset32_t dsize = context->get_directive_offset();
+        BrigDirectiveSymbol sym_decl = {
+        sizeof(sym_decl),                 // size
+        BrigEDirectiveSymbol,             // kind
+        {
+          context->get_code_offset(),       // c_code
+          storage_class,                    // storageClass
+          context->get_attribute(),         // attribute
+          0,                                // reserved
+          context->get_symbol_modifier(),   // symbol modifier
+          context->get_dim(),               // dim
+          arg_name_offset,                  // s_name
+          context->get_type(),              // data type
+          context->get_alignment(),         // alignment
+        },
+        0,                                // d_init = 0 for arg
+        0                                 // reserved
+        };
+        // append the DirectiveSymbol to .directive section.
+        context->append_directive(&sym_decl);
+        context->symbol_map[arg_name] = dsize;
+
+        // update the current DirectiveKernel.
+        // 1. update the directive offset.
+        BrigDirectiveKernel bdk;
+        context->get_directive(context->current_bdk_offset, &bdk);
+        BrigdOffset32_t first_scope = bdk.d_firstScopedDirective;
+        BrigdOffset32_t next_directive = bdk.d_nextDirective;
+        if (first_scope == next_directive) {
+          bdk.d_nextDirective += sizeof(sym_decl);
+          bdk.d_firstScopedDirective = bdk.d_nextDirective;
+        } else {
+          bdk.d_nextDirective += sizeof(sym_decl);
+        }
+
+        // update param count
+        if (context->is_arg_output()) {
+          bdk.outParamCount++;
+        } else {
+          if (!bdk.inParamCount)
+            bdk.d_firstInParam = dsize;
+          bdk.inParamCount++;
+        }
+        unsigned char * bdk_charp =
+          reinterpret_cast<unsigned char*>(&bdk);
+        context->update_directive_bytes(bdk_charp,
+                                        context->current_bdk_offset,
+                                        40);
+
+        context->get_directive(context->current_bdk_offset, &bdk);
+        return 0;
+
+      } else {
+        context->set_error(MISSING_IDENTIFIER);
+      }
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+    }
+  }
+
+  return 1;
 }
 int KernelArgumentListBody(Context *context) {
   // maybe change int the future
@@ -7432,7 +7519,6 @@ int GlobalImageDecl(Context *context) {
 
 int GlobalImageDeclPart2(Context *context){
  //First token has been scanned and verified as global. Read next token.
-  BrigStorageClass32_t storage_class = context->token_value.storage_class ;
 
   if (_RWIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
@@ -7455,7 +7541,7 @@ int GlobalImageDeclPart2(Context *context){
         BrigEDirectiveImage,    //kind
         {
           context->get_code_offset(),      // c_code
-          storage_class,                   // storag class
+          BrigGlobalSpace,                 // storag class
           context->get_attribute(),        // attribut
           0,                               // reserved
           context->get_symbol_modifier(),  // symbolModifier
@@ -7508,8 +7594,7 @@ int GlobalReadOnlyImageDecl(Context *context) {
 
 int GlobalReadOnlyImageDeclPart2(Context *context){
   //First token has been scanned and verified as global. Scan next token.
- BrigStorageClass32_t storage_class = context->token_value.storage_class ;
-
+ 
  if (_ROIMG == context->token_to_scan) {
     context->token_to_scan = yylex();
     if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
@@ -7531,7 +7616,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
         BrigEDirectiveImage,    //kind
         {
           context->get_code_offset(),      // c_code
-          storage_class,                   // storag class
+          BrigGlobalSpace,                 // storag class
           context->get_attribute(),        // attribut
           0,                               // reserved
           context->get_symbol_modifier(),  // symbolModifier
@@ -8909,7 +8994,6 @@ int GlobalSamplerDecl(Context *context){
 
 int GlobalSamplerDeclPart2(Context *context){
   // First token has already been verified as GLOBAL
-  BrigStorageClass32_t storage_class = context->token_value.storage_class ;
 
   if (_SAMP == context->token_to_scan){
     context->token_to_scan = yylex();
@@ -8934,7 +9018,7 @@ int GlobalSamplerDeclPart2(Context *context){
         BrigEDirectiveSampler,             //kind
         {
           context->get_code_offset(),      // c_code
-          storage_class,                   // storag class
+          BrigGlobalSpace,                 // storag class
           context->get_attribute(),        // attribut
           0,                               // reserved
           context->get_symbol_modifier(),  // symbolModifier

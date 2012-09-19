@@ -514,16 +514,19 @@ global            { context->token_type = INITIALIZABLE_ADDRESS;
 _Samp             { context->token_type = COMMON_KEYWORD;
                     free_string(context);
                     context->yycolno+=yyleng;
+                    context->token_value.data_type = BrigSamp;
                     return _SAMP; }
 
 _RWImg            { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.data_type = BrigRWImg;
                     return _RWIMG; }
 
 _ROImg            { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.data_type = BrigROImg;
                     return _ROIMG; }
 
 align             { free_string(context);
