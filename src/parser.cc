@@ -4286,9 +4286,19 @@ int KernelArgumentDecl(Context *context) {
   return 1;
 }
 int KernelArgumentListBody(Context *context) {
-  // maybe change int the future
-  return ArgumentListBody(context);
-  // return 1;
+  while (1) {
+    if (!KernelArgumentDecl(context)) {
+      if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+      } else {
+        break;  // context was set in ArgumentDecl
+      }
+    } else {
+      context->set_error(MISSING_ARGUMENT);
+      return 1;
+    }
+  }
+  return 0;
 }
 
 int Kernel(Context *context) {
