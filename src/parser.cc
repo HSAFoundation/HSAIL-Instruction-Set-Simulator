@@ -2581,6 +2581,7 @@ int Initializer(Context* context) {
           return 1;
         }
       case TOKEN_INTEGER_CONSTANT:
+      case '-':
         if (!DecimalListSingle(context)) {
           break;
         } else {
