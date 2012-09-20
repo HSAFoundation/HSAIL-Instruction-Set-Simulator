@@ -3226,7 +3226,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
     BrigSt,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {8, 32, 0, 0, 0},  // operand[5]
+    {8, 56, 0, 0, 0},  // operand[5]
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass
@@ -3641,8 +3641,8 @@ TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
   Lexer* lexer = new Lexer(input);
 
   BrigInstMem ref = {
-    36,                    // size
-    BrigEInstMem,           // kind
+    sizeof(BrigInstMem),   // size
+    BrigEInstMem,          // kind
     BrigLda,               // opcode
     Brigu32,               // type
     BrigNoPacking,         // packing
@@ -3675,7 +3675,6 @@ TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
   EXPECT_EQ(Brigb64, getAddr.type);
   EXPECT_EQ(0, getAddr.reserved);
   EXPECT_EQ(0, getAddr.directive);
-//  EXPECT_EQ(0, getAddr.offset);
 
   // BrigInstMem
   EXPECT_EQ(ref.size, getMem.size);

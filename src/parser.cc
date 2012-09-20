@@ -568,7 +568,7 @@ int CallTargets(Context* context) {
   // assumed first_token is '['
   // TODO(Chuang): the max size is 256
   BrigoOffset32_t arg_offset[256] = {0};
-  unsigned int nElements = 0;
+  int nElements = 0;
   std::string funcName;
 
   if (context->token_to_scan != '[') {
@@ -591,7 +591,7 @@ int CallTargets(Context* context) {
         sizeof(BrigOperandArgumentList),
         BrigEOperandFunctionList,
         1,
-        context->arg_map[funcName]
+        { context->arg_map[funcName] }
       };
 
       context->current_argList_offset = context->get_operand_offset();
@@ -3243,7 +3243,7 @@ int FunctionSignature(Context *context) {
       bds->reserved = 0;
       bds->outCount = outCount;
       bds->inCount = inCount;
-      for(int i = 0;i < context->types.size();i++)
+      for(unsigned int i = 0; i < context->types.size(); i++)
         memmove(&bds->types[i],&context->types[i],sizeof(BrigDirectiveSignature::BrigProtoType));
       context->append_directive(bds);      
 
@@ -3537,7 +3537,7 @@ int Instruction4FmaPart2(Context* context) {
     {0, 0, 0, 0, 0}       // o_operands[5]
   };
  
-  BrigAluModifier aluModifier = {0};
+  BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
 
   context->token_to_scan = yylex();
   if (!RoundingMode(context)) {
@@ -3637,7 +3637,7 @@ int Instruction4FmaPart2(Context* context) {
                   fmaInst.type,         // type
                   BrigNoPacking,        // packing
                   {0, 0, 0, 0, 0},      // o_operands[5]
-                  {0}  // aluModifier
+                  {0, 0, 0, 0, 0, 0, 0}  // aluModifier
                 };
                 for (int i = 0 ; i < 5 ; ++i) {
                   fmaMod.o_operands[i] = fmaInst.o_operands[i];
@@ -3688,7 +3688,7 @@ int Instruction4MadPart3(Context* context) {
     {0, 0, 0, 0, 0}       // o_operands[5]
   };
  
-  BrigAluModifier aluModifier = {0};
+  BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
 
   context->token_to_scan = yylex();
   if (!RoundingMode(context)) {
@@ -3799,7 +3799,7 @@ int Instruction4MadPart3(Context* context) {
                   madInst.type,         // type
                   BrigNoPacking,        // packing
                   {0, 0, 0, 0, 0},      // o_operands[5]
-                  {0}  // aluModifier
+                  {0, 0, 0, 0, 0, 0, 0}  // aluModifier
                 };
                 for (int i = 0 ; i < 5 ; ++i) {
                   madMod.o_operands[i] = madInst.o_operands[i];
@@ -4627,7 +4627,8 @@ int GlobalPrivateDecl(Context* context) {
   return 1;
 }
 
-int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset) {
+int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset, 
+                                  BrigoOffset32_t* pRetOpOffset) {
 
     std::string operand_name;
     // if the value of addrOpOffset is ZERO,
@@ -4676,6 +4677,7 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
               compound_op.offset = context->token_value.int_val * imm_sign;
               context->token_to_scan = yylex();
               if (context->token_to_scan == ']') {
+                *pRetOpOffset = context->get_operand_offset();
                 context->append_operand(&compound_op);
                 context->token_to_scan = yylex();
                 return 0;
@@ -4688,6 +4690,7 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
               return 1;
             }
           } else if (context->token_to_scan == ']') {
+            *pRetOpOffset = context->get_operand_offset();
             context->append_operand(&compound_op);
             context->token_to_scan = yylex();
             return 0;
@@ -4696,8 +4699,11 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
             return 1;
           }
         } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+          compound_op.offset = context->token_value.int_val;
           context->token_to_scan = yylex();
           if (context->token_to_scan == ']') {
+            *pRetOpOffset = context->get_operand_offset();
+            context->append_operand(&compound_op);
             context->token_to_scan = yylex();
             return 0;
           } else {
@@ -4757,6 +4763,7 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
           }
         }
         if (context->token_to_scan == ']') {
+          *pRetOpOffset = context->get_operand_offset();
           context->append_operand(&indirect_op);
           context->token_to_scan = yylex();
           return 0;
@@ -4768,6 +4775,7 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
         indirect_op.offset = context->token_value.int_val;
         context->token_to_scan = yylex();
         if (context->token_to_scan == ']') {
+          *pRetOpOffset = context->get_operand_offset();
           context->append_operand(&indirect_op);
           context->token_to_scan = yylex();
           return 0;
@@ -4786,10 +4794,16 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
 }
 
 int OffsetAddressableOperand(Context* context) {
-  return OffsetAddressableOperandPart2(context, 0);
+  BrigoOffset32_t retOpOffset;
+  return OffsetAddressableOperandPart2(context, 0, &retOpOffset);
 }
 
 int MemoryOperand(Context* context) {
+  BrigoOffset32_t retOpOffset;
+  return MemoryOperandPart2(context, &retOpOffset);
+}
+
+int MemoryOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
   // Chuang
   // this judge(first token == '[') is necessary in here
   if (context->token_to_scan == '[') {
@@ -4799,16 +4813,15 @@ int MemoryOperand(Context* context) {
     if (!AddressableOperandPart2(context, &currentToOffset, false)) {
       if (context->token_to_scan == '[') {
         context->token_to_scan = yylex();
-        if (!OffsetAddressableOperandPart2(context, currentToOffset)) {
+        if (!OffsetAddressableOperandPart2(context, currentToOffset, pRetOpOffset)) {
           // Global/Local Identifier with offsetAddressOperand.
           return 0;
         }
       }
       // only Global/Local Identifier without offsetAddressOperand.
+      *pRetOpOffset = currentToOffset;
       return 0;
-    } else if (!AddressableOperand(context)) {
-      return 0;
-    } else if (!OffsetAddressableOperandPart2(context, 0)) {
+    } else if (!OffsetAddressableOperandPart2(context, 0, pRetOpOffset)) {
       return 0;
     }  // Global/Local Identifier/AddressableOperand/offsetAddressableOperand
   }  // '['
@@ -4994,38 +5007,87 @@ int Ldc(Context* context) {
   context->token_to_scan = yylex();
 
   BrigInstBase ldc_op = {
-    32,                    // size
+    sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
     BrigLdc,               // opcode
     Brigb32,               // type
     BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0}       // o_operands[5]
+    {0, 0, 0, 0, 0}        // o_operands[5]
   };
 
-  if (context->token_type == DATA_TYPE_ID) {
+  if (context->token_to_scan == _B32 ||
+      (context->token_to_scan == _B64 && 
+       context->get_machine() == BrigELarge)) {
+  
+    // If the source is a function, the destination size depends on 
+    // the machine model. For large, the destination must be 64 bits; 
+    // for small, the destination must be 32 bits. For
+    // more information
+
     ldc_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
-    std::string oper_name = context->token_value.string_val;
+    std::string oper_name;
+    // dest: must be BrigEOperandReg.
+    if (context->token_to_scan == TOKEN_SREGISTER ||
+        (context->token_to_scan == TOKEN_DREGISTER && 
+         ldc_op.type == Brigb64)) {
+      oper_name = context->token_value.string_val;
+    } else {
+      context->set_error(INVALID_FIRST_OPERAND);
+      return 1;
+    }
     if (!Operand(context)) {
       ldc_op.o_operands[0] = context->operand_map[oper_name];
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         // op[1] must be BrigEOperandLabelRef or BrigEOperandFunctionRef
-        if (context->token_to_scan == TOKEN_LABEL ||
-            context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+        
+        if (context->token_to_scan == TOKEN_LABEL && ldc_op.type != Brigb64) {
           oper_name = context->token_value.string_val;
-          ldc_op.o_operands[1] = context->operand_map[oper_name];
-          context->token_to_scan = yylex();
-          if (context->token_to_scan == ';') {
-            context->append_code(&ldc_op);
-            context->token_to_scan = yylex();
-            return 0;
-          } else {  // ';'
-            context->set_error(MISSING_SEMICOLON);
-            return 1;
+          if (!context->label_o_map.count(oper_name)) {
+            BrigOperandLabelRef labRef = {
+              8,                     // size
+              BrigEOperandLabelRef,  // kind
+              -1                      // labeldirective
+            };
+
+            if (context->symbol_map.count(oper_name)) {
+              labRef.labeldirective = context->symbol_map[oper_name];
+            }
+            ldc_op.o_operands[1] = context->get_operand_offset();
+            context->label_o_map[oper_name] = context->get_operand_offset();
+            context->append_operand(&labRef);
+            
+          } else {
+            ldc_op.o_operands[1] = context->label_o_map[oper_name];
           }
-        } else {  // label or identifier
+        } else if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+          oper_name = context->token_value.string_val;
+          if (!context->func_o_map.count(oper_name)) {
+            BrigOperandFunctionRef funRef = {
+              8,                        // size
+              BrigEOperandFunctionRef,  // kind
+              0                         // fn
+            };
+            // TODO(Chuang): whether the func has been defined.
+            funRef.fn = context->func_map[oper_name];
+            context->func_o_map[oper_name] = context->get_operand_offset();
+            ldc_op.o_operands[1] = context->get_operand_offset();
+            context->append_operand(&funRef);
+          } else {
+            ldc_op.o_operands[1] = context->func_o_map[oper_name];
+          }
+        } else {
           context->set_error(INVALID_SECOND_OPERAND);
+          return 1;
+        } 
+        context->token_to_scan = yylex();
+        if (context->token_to_scan == ';') {
+          context->append_code(&ldc_op);
+          context->token_to_scan = yylex();
+          return 0;
+        } else {  // ';'
+          context->set_error(MISSING_SEMICOLON);
           return 1;
         }
       } else {
@@ -5113,8 +5175,8 @@ int Atom(Context* context) {
         atom_op.o_operands[0] = context->operand_map[oper_name];
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          atom_op.o_operands[1] = context->get_operand_offset();
-          if (!MemoryOperand(context)) {
+          
+          if (!MemoryOperandPart2(context, &atom_op.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
               if (context->valid_string) {
@@ -5765,8 +5827,7 @@ int Ld(Context* context) {
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
 
-      ld_op.o_operands[2] = context->get_operand_offset();
-      if (!MemoryOperand(context)) {
+      if (!MemoryOperandPart2(context, &ld_op.o_operands[2])) {
         if (context->token_to_scan == ';') {
           context->append_code(&ld_op);
           context->token_to_scan = yylex();
@@ -5835,8 +5896,7 @@ int St(Context* context) {
     }
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
-      st_op.o_operands[1] = context->get_operand_offset();
-      if (!MemoryOperand(context)) {
+      if (!MemoryOperandPart2(context, &st_op.o_operands[1])) {
         if (context->token_to_scan == ';') {
           context->token_to_scan = yylex();
           context->append_code(&st_op);
@@ -5866,7 +5926,7 @@ int Lda(Context* context) {
   context->token_to_scan = yylex();
 
   BrigInstMem lda_op = {
-    36,                    // size
+    sizeof(BrigInstMem),   // size
     BrigEInstMem,          // kind
     BrigLda,               // opcode
     Brigb32,               // type
@@ -5879,18 +5939,32 @@ int Lda(Context* context) {
     lda_op.storageClass = context->token_value.storage_class;
     context->token_to_scan = yylex();
   }
-  if (context->token_type == DATA_TYPE_ID) {
+  // Note: lda_uLength I think 'b' is also allowed.
+  // Length: 1, 32, 64 
+  if (context->token_to_scan == _U32 ||
+      context->token_to_scan == _U64 || 
+      context->token_to_scan == _B32 ||
+      context->token_to_scan == _B64) {
+
     lda_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
-    std::string oper_name = context->token_value.string_val;
-
+    std::string oper_name;
+    // dest: must be BrigEOperandReg.
+    if ((context->token_to_scan == TOKEN_SREGISTER && 
+         (lda_op.type == Brigu32 || lda_op.type == Brigb32)) ||
+        (context->token_to_scan == TOKEN_DREGISTER &&
+         (lda_op.type == Brigu64 || lda_op.type == Brigb64))) {
+      oper_name = context->token_value.string_val;
+    } else {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
     if (!Operand(context)) {
       lda_op.o_operands[0] = context->operand_map[oper_name];
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        lda_op.o_operands[1] = context->get_operand_offset();
-        if (!MemoryOperand(context)) {
+        if (!MemoryOperandPart2(context, &lda_op.o_operands[1])) {
           if (context->token_to_scan == ';') {
             context->append_code(&lda_op);
             context->token_to_scan = yylex();
@@ -8077,8 +8151,8 @@ int AtomicNoRet(Context* context) {
 
       aNoRetInst.type = context->token_value.data_type;
       context->token_to_scan = yylex();
-      aNoRetInst.o_operands[0] = context->get_operand_offset();
-      if (!MemoryOperand(context)) {
+      
+      if (!MemoryOperandPart2(context, &aNoRetInst.o_operands[0])) {
         unsigned int opCount = 1;
         BrigoOffset32_t opSize = 0;
         std::string opName;
@@ -8437,34 +8511,34 @@ int FloatListSingle(Context* context) {
         case Brigb1:
           break;
         case Brigb8:
-          for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+          for (uint32_t i = 0; i < elementCount; i ++ ){// right ?? lose value??
             memmove(&bdi->initializationData.u8[i], &float_list[i],sizeof(uint8_t));
 	  }
           init_length = 8 * n ;
-          for (int i = elementCount; i < init_length; i ++){
+          for (uint32_t i = elementCount; i < init_length; i ++){
             bdi->initializationData.u8[i] = 0;
           }
           break;
         case Brigb16:
-          for (int i = 0; i < elementCount; i ++ ){ // right ?? lose value??
+          for (uint32_t i = 0; i < elementCount; i ++ ){ // right ?? lose value??
             memmove(&bdi->initializationData.u16[i], &float_list[i],sizeof(uint16_t));
 	  }
           init_length = 4 * n ;
-          for (int i = elementCount; i < init_length; i ++){
+          for (uint32_t i = elementCount; i < init_length; i ++){
             bdi->initializationData.u16[i] = 0;
           }
           break;
         case Brigb32:
-          for (int i = 0; i < elementCount; i ++ ){// right ?? lose value??
+          for (uint32_t i = 0; i < elementCount; i ++ ){// right ?? lose value??
             memmove(&bdi->initializationData.u32[i], &float_list[i],sizeof(uint32_t));
 	  }
           init_length = 2 * n ;
-          for (int i = elementCount; i < init_length; i ++){
+          for (uint32_t i = elementCount; i < init_length; i ++){
             bdi->initializationData.u32[i] = 0;
           }
           break;
         case Brigb64:
-          for (int i = 0; i < elementCount; i ++ ){
+          for (uint32_t i = 0; i < elementCount; i ++ ){
             memmove(&bdi->initializationData.u64[i], &float_list[i],sizeof(uint64_t));
 	  }
           init_length = n;
@@ -8504,38 +8578,38 @@ int FloatListSingle(Context* context) {
         case Brigb1:
           break;
         case Brigb8:
-          for (int i = 0; i < elementCount; i ++ ){
+          for (uint32_t i = 0; i < elementCount; i ++ ){
             memmove(&bbn->u8[i],&float_list[i],sizeof(uint8_t));
 	  }
           len = 8 * n ;
-          for (int i = elementCount; i < len; i ++){
+          for (uint32_t i = elementCount; i < len; i ++){
             bbn->u8[i] = 0;
           }
           break;
         case Brigb16:
-          for (int i = 0; i < elementCount; i ++ ){
+          for (uint32_t i = 0; i < elementCount; i ++ ){
             memmove(&bbn->u16[i],&float_list[i],sizeof(uint16_t));
 	  }
           len = 4 * n ;
-          for (int i = elementCount; i < len; i ++){
+          for (uint32_t i = elementCount; i < len; i ++){
             bbn->u16[i] = 0;
           }
           break;
         case Brigb32:
-          for (int i = 0; i < elementCount; i ++ ){
+          for (uint32_t i = 0; i < elementCount; i ++ ){
             memmove(&bbn->u32[i],&float_list[i],sizeof(uint32_t));
 	  }
           len = 2 * n ;
-          for (int i = elementCount; i < len; i ++){
+          for (uint32_t i = elementCount; i < len; i ++){
             bbn->u32[i] = 0;
           }
           break;
         case Brigb64:
-          for (int i = 0; i < elementCount; i ++ ){
+          for (uint32_t i = 0; i < elementCount; i ++ ){
             memmove(&bbn->u64[i],&float_list[i],sizeof(uint64_t));
 	  }
           len =  n ;
-          for (int i = elementCount; i < len; i ++){
+          for (uint32_t i = elementCount; i < len; i ++){
             bbn->u64[i] = 0;
           }
           break;
@@ -8610,38 +8684,38 @@ int DecimalListSingle(Context* context) {
           case Brigb1:
             break;
           case Brigb8:
-            for (int i = 0; i < elementCount; i ++ ){
+            for (uint32_t i = 0; i < elementCount; i ++ ){
               bdi->initializationData.u8[i] = decimal_list[i];
 	    }
             init_length = 8 * n ;
-            for (int i = elementCount; i < init_length; i ++){
+            for (uint32_t i = elementCount; i < init_length; i ++){
               bdi->initializationData.u8[i] = 0;
             }
             break;
           case Brigb16:
-            for (int i = 0; i < elementCount; i ++ ){
+            for (uint32_t i = 0; i < elementCount; i ++ ){
               bdi->initializationData.u16[i] = decimal_list[i];
 	    }
             init_length = 4 * n ;
-            for (int i = elementCount; i < init_length; i ++){
+            for (uint32_t i = elementCount; i < init_length; i ++){
               bdi->initializationData.u16[i] = 0;
             }
             break;
           case Brigb32:
-            for (int i = 0; i < elementCount; i ++ ){
+            for (uint32_t i = 0; i < elementCount; i ++ ){
               bdi->initializationData.u32[i] = decimal_list[i];
 	    }
             init_length = 2 * n ;
-            for (int i = elementCount; i < init_length; i ++){
+            for (uint32_t i = elementCount; i < init_length; i ++){
               bdi->initializationData.u32[i] = 0;
             }
             break;
           case Brigb64:
-            for (int i = 0; i < elementCount; i ++ ){
+            for (uint32_t i = 0; i < elementCount; i ++ ){
               bdi->initializationData.u64[i] = decimal_list[i];
 	    }
             init_length =  n ;
-            for (int i = elementCount; i < init_length; i ++){
+            for (uint32_t i = elementCount; i < init_length; i ++){
               bdi->initializationData.u64[i] = 0;
             }
             break;
@@ -8684,38 +8758,38 @@ int DecimalListSingle(Context* context) {
           case Brigb1:
             break;
           case Brigb8:
-            for (int i = 0; i < elementCount; i ++ ){
+            for (uint32_t i = 0; i < elementCount; i ++ ){
               bbn->u8[i] = decimal_list[i];
 	    }
             len = 8 * n ;
-            for (int i = elementCount; i < len; i ++){
+            for (uint32_t i = elementCount; i < len; i ++){
               bbn->u8[i] = 0;
             }
             break;
           case Brigb16:
-            for (int i = 0; i < elementCount; i ++ ){
+            for (uint32_t i = 0; i < elementCount; i ++ ){
               bbn->u16[i] = decimal_list[i];
 	    }
             len = 4 * n ;
-            for (int i = elementCount; i < len; i ++){
+            for (uint32_t i = elementCount; i < len; i ++){
               bbn->u16[i] = 0;
             }
             break;
           case Brigb32:
-            for (int i = 0; i < elementCount; i ++ ){
+            for (uint32_t i = 0; i < elementCount; i ++ ){
               bbn->u32[i] = decimal_list[i];
 	    }
             len = 2 * n ;
-            for (int i = elementCount; i < len; i ++){
+            for (uint32_t i = elementCount; i < len; i ++){
               bbn->u32[i] = 0;
             }
             break;
           case Brigb64:
-            for (int i = 0; i < elementCount; i ++ ){
+            for (uint32_t i = 0; i < elementCount; i ++ ){
               bbn->u64[i] = decimal_list[i];
 	    }
             len =  n ;
-            for (int i = elementCount; i < len; i ++){
+            for (uint32_t i = elementCount; i < len; i ++){
               bbn->u64[i] = 0;
             }
             break;
@@ -9134,8 +9208,7 @@ int PairAddressableOperand(Context* context) {
           BrigEOperandAddress,    // kind
           Brigb32,                // type
           0,                      // reserved
-          0/*,                      // directive
-          0*/
+          0                       // directive
         };
 
         boa.directive = context->symbol_map[name];
@@ -9146,8 +9219,9 @@ int PairAddressableOperand(Context* context) {
         context->append_operand(&boa);
         context->token_to_scan = yylex();
         if (context->token_to_scan == '[') {
+          BrigoOffset32_t retOpOffset;
           context->token_to_scan = yylex();
-          if (!OffsetAddressableOperandPart2(context, CurrentoOffset)) {
+          if (!OffsetAddressableOperandPart2(context, CurrentoOffset, &retOpOffset)) {
             // Global/Local Identifier with offsetAddressOperand.
             return 0;
           } else {
@@ -9214,6 +9288,7 @@ int TopLevelStatement(Context *context){
   } else if (!GlobalSymbolDeclpart2(context)){
     return 0;
   }
+  return 1;
 }
 
 int TopLevelStatements(Context *context){
