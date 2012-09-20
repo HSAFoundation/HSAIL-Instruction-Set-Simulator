@@ -9631,5 +9631,37 @@ TEST(CodegenTest, Instruction0_CodeGen_SimpleTest) {
   delete lexer;
 }
 
+
+TEST(CodegenTest, WAVESIZE_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("11\n");
+  input.append("WAVESIZE\n");
+  input.append("WAVESIZE\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  BrigOperandWaveSz get;
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BaseOperand(context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BaseOperand(context));
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, BaseOperand(context));
+  EXPECT_EQ(36, context->get_operand_offset());
+
+  EXPECT_EQ(32, context->operand_map["WAVESIZE"]);
+  context->get_operand(context->operand_map["WAVESIZE"], &get);
+
+  EXPECT_EQ(4, get.size);
+  EXPECT_EQ(BrigEOperandWaveSz, get.kind);
+  
+
+  delete lexer;
+}
+
 }  // namespace brig
 }  // namespace hsa

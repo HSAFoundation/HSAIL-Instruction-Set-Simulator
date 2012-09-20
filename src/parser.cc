@@ -210,6 +210,14 @@ int BaseOperand(Context* context) {
 
     return 0;
   } else if (context->token_to_scan == TOKEN_WAVESIZE) {
+    if (!context->operand_map.count("WAVESIZE")) {
+      BrigOperandWaveSz waveOp = {
+        sizeof(BrigOperandWaveSz),
+        BrigEOperandWaveSz
+      };
+      context->operand_map["WAVESIZE"] = context->get_operand_offset();
+      context->append_operand(&waveOp);
+    }
     return 0;  // currently not supported
   } else if (context->token_to_scan == '-') {
     context->token_to_scan = yylex();
