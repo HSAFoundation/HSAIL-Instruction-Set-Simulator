@@ -25,13 +25,44 @@
  */
 namespace hsacore
 {
-   
+
 /** 
  * @addtogroup HSACoreCommonTyps 
  * Cross-Core-Module common Types
  *  @{
  */
-  
+
+enum ASICFamily
+{
+    ASIC_FAMILY_SI,
+    ASIC_FAMILY_CI
+};
+
+/**
+ * @brief hsacommon ASICInfo class, represents ASIC specific information of a GPU device.
+ */
+class DLL_PUBLIC ASICInfo
+{
+public:
+    /*! Getter function to check for image support.
+     * @return bool indicating image support.
+    */
+    virtual bool isImageSupport()=0;
+    /*! Getter function to check for double precision support.
+     * @return bool indicating double support.
+    */
+    virtual bool isDoublePrecision()=0;
+    /*! Getter function to check the ASIC Family.
+     * @return returns an ASICFamily enumeration.
+    */
+    virtual ASICFamily getASICFamily()=0;
+    /*! Getter function to get the max queue size in bytes.
+     * @return returns maximum queue size that can be created in bytes.
+    */
+    virtual uint32_t getMaxQueueSize()=0;
+    virtual ~ASICInfo() {};
+};
+
 // TODO: Replace out_of_range with an HSART exception
 using namespace hsacommon;
 
