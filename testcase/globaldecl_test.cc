@@ -334,7 +334,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_u32) {
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
-    4,                      // dim
+    3,                      // dim
     0,                      // s_name
     Brigu32,                // type
     1,                      // align
@@ -419,7 +419,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f32) {
     BrigNone ,               // attribut
     0,                       // reserved
     BrigArray,               // symbolModifier
-    4,                       // dim
+    3,                       // dim
     0,                       // s_name
     Brigf32,                 // type
     1,                       // align
@@ -504,7 +504,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f32) {
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
-    4,                      // dim
+    3,                      // dim
     0,                      // s_name
     Brigf32,                // type
     1,                      // align
@@ -756,7 +756,7 @@ TEST(CodegenTest, InitializableDeclCodeGen_global_b8) {
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
-    8,                      // dim
+    7,                      // dim
     0,                      // s_name
     Brigb8,                 // type
     1,                      // align
@@ -926,6 +926,46 @@ INSTANTIATE_TEST_CASE_P(TestLocationFalse,
                         TestLocationFalseInput,
                         testing::Range(0,5));
 
+TEST_P(CodegenTestGlobalSymbolDecl,GlobalSymbolDecl)
+{
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+ 
+  int n = GetParam();
+  std::string input(inputarray_globalsymboldecl[n]);
+ 
+  Lexer* lexer = new Lexer(input);
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, GlobalSymbolDecl(context));
+
+  BrigDirectiveSymbol get;
+  context->get_directive(0, &get);
+
+  BrigDirectiveSymbol ref = outputarray_globalsymboldecl[n];
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.s.c_code, get.s.c_code);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.attribute, get.s.attribute);
+  EXPECT_EQ(ref.s.reserved, get.s.reserved);
+  EXPECT_EQ(ref.s.symbolModifier, get.s.symbolModifier);
+  EXPECT_EQ(ref.s.dim, get.s.dim);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.s.type, get.s.type);
+  EXPECT_EQ(ref.s.align, get.s.align);
+  EXPECT_EQ(ref.s.type, get.s.type);
+  EXPECT_EQ(ref.d_init, get.d_init);
+  EXPECT_EQ(ref.reserved, get.reserved);
+ 
+  delete lexer;
+};
+
+INSTANTIATE_TEST_CASE_P(TestGlobalSymbolDecl,
+                        CodegenTestGlobalSymbolDecl,
+                        testing::Range(0,54));
 
 }  // namespace brig
 }  // namespace hsa
