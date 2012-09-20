@@ -727,7 +727,7 @@ TEST(ParserTest, ParseCallTargets) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("[&global, %local]\n");
+  std::string input("[&globalfunc1, &globalfunc2]\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallTargets(context));
@@ -770,7 +770,7 @@ TEST(ParserTest, Call) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Call(context));
 
-  input.assign("call_width(all) &callee \n");
+  input.assign("call_width(all) $s1 \n");
   input.append("(%output1,&output2)(%input1, $d7) [&id1, &id2];\n");
 
   lexer->set_source_string(input);
@@ -1696,7 +1696,7 @@ TEST(ParserTest, Ldc) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ldc(context));
 
-  input.assign("ldc_b64 $s2, @lab;");  // label
+  input.assign("ldc_b32 $s2, @lab;");  // label
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ldc(context));
@@ -1707,19 +1707,19 @@ TEST(ParserTest, Ldc) {
   // EXPECT_EQ(0, Ldc(context));
 
   // wrong cases
-  input.assign("ldc_b64 $s1, &some_function");  // lack of ';'
+  input.assign("ldc_b32 $s1, &some_function");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
-  input.assign("ldc_b64 $s1 &some_function;");  // lack of ','
+  input.assign("ldc_b32 $s1 &some_function;");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
   EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
-  input.assign("ldc_b64 $s1 &some_function;");  // lack of ','
+  input.assign("ldc_b32 $s1 &some_function;");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
@@ -1737,7 +1737,7 @@ TEST(ParserTest, Ldc) {
   EXPECT_NE(0, Ldc(context));
   EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
 
-  input.assign("ldc_b64 $s1, e123;");  // unrecognized identifier
+  input.assign("ldc_b32 $s1, e123;");  // unrecognized identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
@@ -2246,7 +2246,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("lda_group_b32 $s1, [%g];\n"); // lda
+  input.assign("lda_group_u32 $s1, [%g];\n"); // lda
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
@@ -3365,7 +3365,7 @@ TEST(ParserTest, Lda) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));
 
-  input.assign("lda_group_b32 $s1, [%g];");
+  input.assign("lda_group_u32 $s1, [%g];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));

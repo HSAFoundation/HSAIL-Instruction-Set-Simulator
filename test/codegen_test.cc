@@ -3636,7 +3636,7 @@ TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
-  std::string input("lda_group_b32 $s1, [%loc];\n");
+  std::string input("lda_group_u32 $s1, [%loc];\n");
 
   Lexer* lexer = new Lexer(input);
 
@@ -3644,7 +3644,7 @@ TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
     36,                    // size
     BrigEInstMem,           // kind
     BrigLda,               // opcode
-    Brigb32,               // type
+    Brigu32,               // type
     BrigNoPacking,         // packing
     {8, 20, 0, 0, 0},      // o_operands[5]
     BrigGroupSpace         // storageClass
@@ -3932,7 +3932,7 @@ TEST(CodegenTest, Ldc_CodeGen_SimpleTest) {
     BrigLdc,               // opcode
     Brigb64,               // type
     BrigNoPacking,         // packing
-    {24, 8, 0, 0, 0}       // o_operands[5]
+    {8, 20, 0, 0, 0}       // o_operands[5]
   };
   BrigInstBase ref2 = {
     32,                    // size
@@ -3940,7 +3940,7 @@ TEST(CodegenTest, Ldc_CodeGen_SimpleTest) {
     BrigLdc,               // opcode
     Brigb32,               // type
     BrigNoPacking,         // packing
-    {36, 16, 0, 0, 0}       // o_operands[5]
+    {28, 40, 0, 0, 0}       // o_operands[5]
   };
 
   BrigInstBase getBase;
@@ -3948,29 +3948,14 @@ TEST(CodegenTest, Ldc_CodeGen_SimpleTest) {
 
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  BrigOperandFunctionRef fn_pad_op = {
-    8,                        // size
-    BrigEOperandFunctionRef,  // kind
-    0                         // fn
-  };
-  BrigOperandLabelRef lab_pad_op = {
-    8,                     // size
-    BrigEOperandLabelRef,  // kind
-    0                      // labeldirective
-  };
 
   context->add_symbol("&foo");
   context->add_symbol("@lab");
-  context->operand_map["&foo"] = context->get_operand_offset();
-  context->append_operand(&fn_pad_op);
-  context->operand_map["@lab"] = context->get_operand_offset();
-  context->append_operand(&lab_pad_op);
-
 
   EXPECT_EQ(0, Ldc(context));
   EXPECT_EQ(0, Ldc(context));
 
-  context->get_operand(24, &getReg);
+  context->get_operand(8, &getReg);
   // BrigOperandReg
   EXPECT_EQ(12, getReg.size);
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
@@ -3978,7 +3963,7 @@ TEST(CodegenTest, Ldc_CodeGen_SimpleTest) {
   EXPECT_EQ(0, getReg.reserved);
   EXPECT_EQ(10, getReg.name);
 
-  context->get_operand(36, &getReg);
+  context->get_operand(28, &getReg);
   // BrigOperandReg
   EXPECT_EQ(12, getReg.size);
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
@@ -7218,7 +7203,7 @@ TEST(CodegenTest,ControlCodegen){
   EXPECT_EQ(ref2.values[2],get.values[2]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
@@ -7906,7 +7891,7 @@ TEST(CodegenTest,  Instruction4_Fma_CodeGen_SimpleTest) {
   EXPECT_EQ(fmaF64Ref.o_operands[4], getFma.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest,  Instruction4_Cmov_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
@@ -8034,7 +8019,7 @@ TEST(CodegenTest,  Instruction4_Cmov_CodeGen_SimpleTest) {
   EXPECT_EQ(cmovU8x4Ref.o_operands[4], getCmov.o_operands[4]);
 
   delete lexer;
-};
+}
 
 
 TEST(CodegenTest,  Instruction4_Shuffle_CodeGen_SimpleTest) {
@@ -8118,7 +8103,7 @@ TEST(CodegenTest,  Instruction4_Shuffle_CodeGen_SimpleTest) {
   EXPECT_EQ(shuffleRef.o_operands[4], getShuffle.o_operands[4]);
 
   delete lexer;
-};
+}
 
 
 TEST(CodegenTest,  Instruction4_Mad_CodeGen_SimpleTest) {
@@ -8288,7 +8273,7 @@ TEST(CodegenTest,  Instruction4_Mad_CodeGen_SimpleTest) {
   EXPECT_EQ(madBase.o_operands[4], getBase.o_operands[4]);
 
   delete lexer;
-};
+}
 
 
 TEST(CodegenTest,  Instruction4_BitStringOperation_CodeGen_SimpleTest) {
@@ -8473,7 +8458,7 @@ TEST(CodegenTest,  Instruction4_BitStringOperation_CodeGen_SimpleTest) {
   EXPECT_EQ(bitsInst.o_operands[4], getBase.o_operands[4]);
 
   delete lexer;
-};
+}
 
 
 TEST(CodegenTest,  Instruction4_MultiMediaOperation_CodeGen_SimpleTest) {
@@ -8666,7 +8651,7 @@ TEST(CodegenTest,  Instruction4_MultiMediaOperation_CodeGen_SimpleTest) {
   EXPECT_EQ(lerpInst.o_operands[4], getBase.o_operands[4]);
 
   delete lexer;
-};
+}
 
 
 TEST(CodegenTest, Syscall_CodeGen_SimpleTest) {
@@ -8761,7 +8746,7 @@ TEST(CodegenTest, Syscall_CodeGen_SimpleTest) {
   EXPECT_EQ(syscallInst.o_operands[4], getBase.o_operands[4]);
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest,ExtensionCodegen){
   context->set_error_reporter(main_reporter);
@@ -8792,7 +8777,7 @@ TEST(CodegenTest,ExtensionCodegen){
   EXPECT_EQ(ref.s_name,get.s_name); 
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest,PragmaCodegen){
   context->set_error_reporter(main_reporter);
@@ -8822,7 +8807,7 @@ TEST(CodegenTest,PragmaCodegen){
   EXPECT_EQ(ref.s_name,get.s_name); 
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest,BlockCodegen){
   context->set_error_reporter(main_reporter);
@@ -8951,7 +8936,7 @@ TEST(CodegenTest,BlockCodegen){
   EXPECT_EQ(start.s_name,get_start.s_name);
  
   delete lexer;
-};
+}
 
 TEST(CodegenTest,FunctionSignatureCodegen){
   context->set_error_reporter(main_reporter);
@@ -9020,7 +9005,7 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   delete get;
 
   delete lexer;
-};
+}
 
 TEST(CodegenTest, FunctionDeclCodeGen){
   context->set_error_reporter(main_reporter);
