@@ -3776,7 +3776,7 @@ std::string inputarray_instruction3op_add_int[] = {
   "add_s32 $s1, $s2, $s3;",
   //"add_s32 $s1, $s2, 1;",
   "add_s32 $s1, $s2, WAVESIZE;",
-  //src0:reg u64	
+  //src0:reg u64
   "add_u64 $d1, $d2, $d3;",
   //"add_u64 $d1, $d2, 1;",
   "add_u64 $d1, $d2, WAVESIZE;",
@@ -4022,27 +4022,27 @@ std::string inputarray_instruction3op_add_float[] = {
   //src0:reg f16
   "add_f16 $s1, $s2, $s3;",
   "add_near_f16 $s1, $s2, $s3;",
-  //"add_f16 $s1, $s2, 0.2;", 
+  //"add_f16 $s1, $s2, 0.2;",
   //"add_near_f16 $s1, $s2, 0.2;",
   //src0:reg f32
   "add_f32 $s1, $s2, $s3;",
   "add_near_f32 $s1, $s2, $s3;",
-  //"add_f32 $s1, $s2, 0.2;", 
+  //"add_f32 $s1, $s2, 0.2;",
   //"add_near_f32 $s1, $s2, 0.2;",
   //src0:reg f64
   "add_f64 $d1, $d2, $d3;",
   "add_near_f64 $d1, $d2, $d3;"//,
-  //"add_f64 $d1, $d2, 0.2;", 
+  //"add_f64 $d1, $d2, 0.2;",
   //"add_near_f64 $d1, $d2, 0.2;",
   //src0:immed f16
   //"add_f16 $s1, 0.1, $s3;",
   //"add_near_f16 $s1, 0.1, $s3;",
-  //"add_f16 $s1, 0.1, 0.2;", 
+  //"add_f16 $s1, 0.1, 0.2;",
   //"add_near_f16 $s1, 0.1, 0.2;",
   //src0:immed f32
   //"add_f32 $s1, 0.1, $s3;",
   //"add_near_f32 $s1, 0.1, $s3;",
-  //"add_f32 $s1, 0.1, 0.2;", 
+  //"add_f32 $s1, 0.1, 0.2;",
   //"add_near_f32 $s1, 0.1, 0.2;",
   //src0:immed f64
   //"add_f64 $d1, 0.1, $d3;",
@@ -4144,22 +4144,22 @@ std::string inputarray_instruction3op_add_ftz_round_float[] = {
   //"add_up_f64 $d1, 0.1, 0.2;",
   //src0:reg f16 noftz down
   "add_down_f16 $s1, $s2, $s3;",//24
-  //"add_down_f16 $s1, $s2, 0.2;", 
+  //"add_down_f16 $s1, $s2, 0.2;",
   //src0:reg f32 noftz down
   "add_down_f32 $s1, $s2, $s3;",
-  //"add_down_f32 $s1, $s2, 0.2;", 
+  //"add_down_f32 $s1, $s2, 0.2;",
   //src0:reg f64 noftz down
   "add_down_f64 $d1, $d2, $d3;",
-  //"add_down_f64 $d1, $d2, 0.2;", 
+  //"add_down_f64 $d1, $d2, 0.2;",
   //src0:immed f16 noftz down
   //"add_down_f16 $s1, 0.1, $s3;",//30
-  //"add_down_f16 $s1, 0.1, 0.2;", 
+  //"add_down_f16 $s1, 0.1, 0.2;",
   //src0:immed f32 noftz down
   //"add_down_f32 $s1, 0.1, $s3;",
-  //"add_down_f32 $s1, 0.1, 0.2;", 
+  //"add_down_f32 $s1, 0.1, 0.2;",
   //src0:immed f64 noftz down
   //"add_down_f64 $d1, 0.1, $d3;",
-  //"add_down_f64 $d1, 0.1, 0.2;", 
+  //"add_down_f64 $d1, 0.1, 0.2;",
   //src0:reg f16 ftz near
   "add_ftz_f16 $s1, $s2, $s3;",//36
   "add_ftz_near_f16 $s1, $s2, $s3;",
@@ -4194,37 +4194,37 @@ std::string inputarray_instruction3op_add_ftz_round_float[] = {
   "add_ftz_zero_f16 $s1, $s2, $s3;",//60
   //"add_ftz_zero_f16 $s1, $s2, 0.2;",
   //src0:reg f32 ftz zero
-  "add_ftz_zero_f32 $s1, $s2, $s3;", 
+  "add_ftz_zero_f32 $s1, $s2, $s3;",
   //"add_ftz_zero_f32 $s1, $s2, 0.2;",
   //src0:reg f64 ftz zero
-  "add_ftz_zero_f64 $d1, $d2, $d3;", 
+  "add_ftz_zero_f64 $d1, $d2, $d3;",
   //"add_ftz_zero_f64 $d1, $d2, 0.2;",
   //src0:immed f16 ftz zero
   //"add_ftz_zero_f16 $s1, 0.1, $s3;",
   //"add_ftz_zero_f16 $s1, 0.1, 0.2;",
   //src0:immed f32 ftz zero
-  //"add_ftz_zero_f32 $s1, 0.1, $s3;", 
+  //"add_ftz_zero_f32 $s1, 0.1, $s3;",
   //"add_ftz_zero_f32 $s1, 0.1, 0.2;",
   //src0:immed f64 ftz zero
   //"add_ftz_zero_f64 $d1, 0.1, $d3;",//70
   //"add_ftz_zero_f64 $d1, 0.1, 0.2;",
   //src0:reg f16 ftz up
-  "add_ftz_up_f16 $s1, $s2, $s3;", 
+  "add_ftz_up_f16 $s1, $s2, $s3;",
   //"add_ftz_up_f16 $s1, $s2, 0.2;",
   //src0:reg f32 ftz up
-  "add_ftz_up_f32 $s1, $s2, $s3;", 
+  "add_ftz_up_f32 $s1, $s2, $s3;",
   //"add_ftz_up_f32 $s1, $s2, 0.2;",
   //src0:reg f64 ftz up
-  "add_ftz_up_f64 $d1, $d2, $d3;", 
+  "add_ftz_up_f64 $d1, $d2, $d3;",
   //"add_ftz_up_f64 $d1, $d2, 0.2;",
   //src0:immed f16 ftz up
-  //"add_ftz_up_f16 $s1, 0.1, $s3;", 
+  //"add_ftz_up_f16 $s1, 0.1, $s3;",
   //"add_ftz_up_f16 $s1, 0.1, 0.2;",
   //src0:immed f32 ftz up
   //"add_ftz_up_f32 $s1, 0.1, $s3;", //80
   //"add_ftz_up_f32 $s1, 0.1, 0.2;",
   //src0:immed f64 ftz up
-  //"add_ftz_up_f64 $d1, 0.1, $d3;", 
+  //"add_ftz_up_f64 $d1, 0.1, $d3;",
   //"add_ftz_up_f64 $d1, 0.1, 0.2;",
   //src0:reg f16 ftz down
   "add_ftz_down_f16 $s1, $s2, $s3;",
@@ -4948,7 +4948,7 @@ std::string inputarray_instruction3op_borrow[] = {
   //src0:wavesize s64
   "borrow_s64 $d1, WAVESIZE, $d3;",
   //"borrow_s64 $d1, WAVESIZE, 61;",
-  "borrow_s64 $d1, WAVESIZE, WAVESIZE;" 
+  "borrow_s64 $d1, WAVESIZE, WAVESIZE;"
 };
 
 BrigInstBase outputarray_instruction3op_borrow[] = {
@@ -5050,6 +5050,1676 @@ BrigInstBase outputarray_instruction3op_borrow[] = {
   }
 };
 
+class Instruction4Mad : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mad[]={
+  // s32
+  "mad_s32 $s1, $s2, $s3, $s4;",
+  "mad_s32 $s1, $s2, $s3, 1;",
+  "mad_s32 $s1, $s2, $s3, WAVESIZE;",
+  "mad_s32 $s1, $s2, 1, $s4;",
+  "mad_s32 $s1, $s2, 1, 1;",
+  "mad_s32 $s1, $s2, 1, WAVESIZE;",
+  "mad_s32 $s1, $s2, WAVESIZE, $s4;",
+  "mad_s32 $s1, $s2, WAVESIZE, 1;",
+  "mad_s32 $s1, $s2, WAVESIZE, WAVESIZE;",
+  "mad_s32 $s1, 1, $s3, $s4;",
+  "mad_s32 $s1, 1, $s3, 1;",
+  "mad_s32 $s1, 1, $s3, WAVESIZE;",
+  "mad_s32 $s1, 1, 1, $s4;",
+  "mad_s32 $s1, 1, 1, 1;",
+  "mad_s32 $s1, 1, 1, WAVESIZE;",
+  "mad_s32 $s1, 1, WAVESIZE, $s4;",
+  "mad_s32 $s1, 1, WAVESIZE, 1;",
+  "mad_s32 $s1, 1, WAVESIZE, WAVESIZE;",
+  "mad_s32 $s1, WAVESIZE, $s3, $s4;",
+  "mad_s32 $s1, WAVESIZE, $s3, 1;",
+  "mad_s32 $s1, WAVESIZE, $s3, WAVESIZE;",
+  "mad_s32 $s1, WAVESIZE, 1, $s4;",
+  "mad_s32 $s1, WAVESIZE, 1, 1;",
+  "mad_s32 $s1, WAVESIZE, 1, WAVESIZE;",
+  "mad_s32 $s1, WAVESIZE, WAVESIZE, $s4;",
+  "mad_s32 $s1, WAVESIZE, WAVESIZE, 1;",
+  "mad_s32 $s1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // s64
+  "mad_s64 $d1, $d2, $d3, $d4;",
+  "mad_s64 $d1, $d2, $d3, 1;",
+  "mad_s64 $d1, $d2, $d3, WAVESIZE;",
+  "mad_s64 $d1, $d2, 1, $d4;",
+  "mad_s64 $d1, $d2, 1, 1;",
+  "mad_s64 $d1, $d2, 1, WAVESIZE;",
+  "mad_s64 $d1, $d2, WAVESIZE, $d4;",
+  "mad_s64 $d1, $d2, WAVESIZE, 1;",
+  "mad_s64 $d1, $d2, WAVESIZE, WAVESIZE;",
+  "mad_s64 $d1, 1, $d3, $d4;",
+  "mad_s64 $d1, 1, $d3, 1;",
+  "mad_s64 $d1, 1, $d3, WAVESIZE;",
+  "mad_s64 $d1, 1, 1, $d4;",
+  "mad_s64 $d1, 1, 1, 1;",
+  "mad_s64 $d1, 1, 1, WAVESIZE;",
+  "mad_s64 $d1, 1, WAVESIZE, $d4;",
+  "mad_s64 $d1, 1, WAVESIZE, 1;",
+  "mad_s64 $d1, 1, WAVESIZE, WAVESIZE;",
+  "mad_s64 $d1, WAVESIZE, $d3, $d4;",
+  "mad_s64 $d1, WAVESIZE, $d3, 1;",
+  "mad_s64 $d1, WAVESIZE, $d3, WAVESIZE;",
+  "mad_s64 $d1, WAVESIZE, 1, $d4;",
+  "mad_s64 $d1, WAVESIZE, 1, 1;",
+  "mad_s64 $d1, WAVESIZE, 1, WAVESIZE;",
+  "mad_s64 $d1, WAVESIZE, WAVESIZE, $d4;",
+  "mad_s64 $d1, WAVESIZE, WAVESIZE, 1;",
+  "mad_s64 $d1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // u32
+  "mad_u32 $s1, $s2, $s3, $s4;",
+  "mad_u32 $s1, $s2, $s3, 1;",
+  "mad_u32 $s1, $s2, $s3, WAVESIZE;",
+  "mad_u32 $s1, $s2, 1, $s4;",
+  "mad_u32 $s1, $s2, 1, 1;",
+  "mad_u32 $s1, $s2, 1, WAVESIZE;",
+  "mad_u32 $s1, $s2, WAVESIZE, $s4;",
+  "mad_u32 $s1, $s2, WAVESIZE, 1;",
+  "mad_u32 $s1, $s2, WAVESIZE, WAVESIZE;",
+  "mad_u32 $s1, 1, $s3, $s4;",
+  "mad_u32 $s1, 1, $s3, 1;",
+  "mad_u32 $s1, 1, $s3, WAVESIZE;",
+  "mad_u32 $s1, 1, 1, $s4;",
+  "mad_u32 $s1, 1, 1, 1;",
+  "mad_u32 $s1, 1, 1, WAVESIZE;",
+  "mad_u32 $s1, 1, WAVESIZE, $s4;",
+  "mad_u32 $s1, 1, WAVESIZE, 1;",
+  "mad_u32 $s1, 1, WAVESIZE, WAVESIZE;",
+  "mad_u32 $s1, WAVESIZE, $s3, $s4;",
+  "mad_u32 $s1, WAVESIZE, $s3, 1;",
+  "mad_u32 $s1, WAVESIZE, $s3, WAVESIZE;",
+  "mad_u32 $s1, WAVESIZE, 1, $s4;",
+  "mad_u32 $s1, WAVESIZE, 1, 1;",
+  "mad_u32 $s1, WAVESIZE, 1, WAVESIZE;",
+  "mad_u32 $s1, WAVESIZE, WAVESIZE, $s4;",
+  "mad_u32 $s1, WAVESIZE, WAVESIZE, 1;",
+  "mad_u32 $s1, WAVESIZE, WAVESIZE, WAVESIZE;",
+  // u64
+  "mad_u64 $d1, $d2, $d3, $d4;",
+  "mad_u64 $d1, $d2, $d3, 1;",
+  "mad_u64 $d1, $d2, $d3, WAVESIZE;",
+  "mad_u64 $d1, $d2, 1, $d4;",
+  "mad_u64 $d1, $d2, 1, 1;",
+  "mad_u64 $d1, $d2, 1, WAVESIZE;",
+  "mad_u64 $d1, $d2, WAVESIZE, $d4;",
+  "mad_u64 $d1, $d2, WAVESIZE, 1;",
+  "mad_u64 $d1, $d2, WAVESIZE, WAVESIZE;",
+  "mad_u64 $d1, 1, $d3, $d4;",
+  "mad_u64 $d1, 1, $d3, 1;",
+  "mad_u64 $d1, 1, $d3, WAVESIZE;",
+  "mad_u64 $d1, 1, 1, $d4;",
+  "mad_u64 $d1, 1, 1, 1;",
+  "mad_u64 $d1, 1, 1, WAVESIZE;",
+  "mad_u64 $d1, 1, WAVESIZE, $d4;",
+  "mad_u64 $d1, 1, WAVESIZE, 1;",
+  "mad_u64 $d1, 1, WAVESIZE, WAVESIZE;",
+  "mad_u64 $d1, WAVESIZE, $d3, $d4;",
+  "mad_u64 $d1, WAVESIZE, $d3, 1;",
+  "mad_u64 $d1, WAVESIZE, $d3, WAVESIZE;",
+  "mad_u64 $d1, WAVESIZE, 1, $d4;",
+  "mad_u64 $d1, WAVESIZE, 1, 1;",
+  "mad_u64 $d1, WAVESIZE, 1, WAVESIZE;",
+  "mad_u64 $d1, WAVESIZE, WAVESIZE, $d4;",
+  "mad_u64 $d1, WAVESIZE, WAVESIZE, 1;",
+  "mad_u64 $d1, WAVESIZE, WAVESIZE, WAVESIZE;"
+};
+BrigInstBase output_array_mad[]={
+  // s32
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // s64
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // u32
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  },
+  // u64
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 36, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 48, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 28, 0}
+  }
+};
+class Instruction4MadFalse : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mad_false[] = {
+  "mad_s32 $s1;",
+  "mad_s64 $s1, $s2;",
+  "mad_u32 1, 1, $s3;",
+  "mad_u64 WAVESIZE, 1, 1;"
+};
+
+class Instruction4MadFtzRound : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mad_ftz_round[] = {
+  // ftz_f16
+  "mad_ftz_f16 $s1, $s2, $s3, $s4;",
+  "mad_ftz_f16 $s1, $s2, $s3, 1;",
+  "mad_ftz_f16 $s1, $s2, 1, $s4;",
+  "mad_ftz_f16 $s1, $s2, 1, 1;",
+  "mad_ftz_f16 $s1, 1, $s3, $s4;",
+  "mad_ftz_f16 $s1, 1, $s3, 1;",
+  "mad_ftz_f16 $s1, 1, 1, $s4;",
+  "mad_ftz_f16 $s1, 1, 1, 1;",
+  // ftz_f32
+  "mad_ftz_f32 $s1, $s2, $s3, $s4;",
+  "mad_ftz_f32 $s1, $s2, $s3, 1;",
+  "mad_ftz_f32 $s1, $s2, 1, $s4;",
+  "mad_ftz_f32 $s1, $s2, 1, 1;",
+  "mad_ftz_f32 $s1, 1, $s3, $s4;",
+  "mad_ftz_f32 $s1, 1, $s3, 1;",
+  "mad_ftz_f32 $s1, 1, 1, $s4;",
+  "mad_ftz_f32 $s1, 1, 1, 1;",
+  // ftz_f64
+  "mad_ftz_f64 $s1, $s2, $s3, $s4;",
+  "mad_ftz_f64 $s1, $s2, $s3, 1;",
+  "mad_ftz_f64 $s1, $s2, 1, $s4;",
+  "mad_ftz_f64 $s1, $s2, 1, 1;",
+  "mad_ftz_f64 $s1, 1, $s3, $s4;",
+  "mad_ftz_f64 $s1, 1, $s3, 1;",
+  "mad_ftz_f64 $s1, 1, 1, $s4;",
+  "mad_ftz_f64 $s1, 1, 1, 1;",
+  // near_f16
+  "mad_near_f16 $s1, $s2, $s3, $s4;",
+  "mad_near_f16 $s1, $s2, $s3, 1;",
+  "mad_near_f16 $s1, $s2, 1, $s4;",
+  "mad_near_f16 $s1, $s2, 1, 1;",
+  "mad_near_f16 $s1, 1, $s3, $s4;",
+  "mad_near_f16 $s1, 1, $s3, 1;",
+  "mad_near_f16 $s1, 1, 1, $s4;",
+  "mad_near_f16 $s1, 1, 1, 1;",
+  // near_f32
+  "mad_near_f32 $s1, $s2, $s3, $s4;",
+  "mad_near_f32 $s1, $s2, $s3, 1;",
+  "mad_near_f32 $s1, $s2, 1, $s4;",
+  "mad_near_f32 $s1, $s2, 1, 1;",
+  "mad_near_f32 $s1, 1, $s3, $s4;",
+  "mad_near_f32 $s1, 1, $s3, 1;",
+  "mad_near_f32 $s1, 1, 1, $s4;",
+  "mad_near_f32 $s1, 1, 1, 1;",
+  // near_f64
+  "mad_near_f64 $s1, $s2, $s3, $s4;",
+  "mad_near_f64 $s1, $s2, $s3, 1;",
+  "mad_near_f64 $s1, $s2, 1, $s4;",
+  "mad_near_f64 $s1, $s2, 1, 1;",
+  "mad_near_f64 $s1, 1, $s3, $s4;",
+  "mad_near_f64 $s1, 1, $s3, 1;",
+  "mad_near_f64 $s1, 1, 1, $s4;",
+  "mad_near_f64 $s1, 1, 1, 1;",
+  // zero_f16
+  "mad_zero_f16 $s1, $s2, $s3, $s4;",
+  "mad_zero_f16 $s1, $s2, $s3, 1;",
+  "mad_zero_f16 $s1, $s2, 1, $s4;",
+  "mad_zero_f16 $s1, $s2, 1, 1;",
+  "mad_zero_f16 $s1, 1, $s3, $s4;",
+  "mad_zero_f16 $s1, 1, $s3, 1;",
+  "mad_zero_f16 $s1, 1, 1, $s4;",
+  "mad_zero_f16 $s1, 1, 1, 1;",
+  // zero_f32
+  "mad_zero_f32 $s1, $s2, $s3, $s4;",
+  "mad_zero_f32 $s1, $s2, $s3, 1;",
+  "mad_zero_f32 $s1, $s2, 1, $s4;",
+  "mad_zero_f32 $s1, $s2, 1, 1;",
+  "mad_zero_f32 $s1, 1, $s3, $s4;",
+  "mad_zero_f32 $s1, 1, $s3, 1;",
+  "mad_zero_f32 $s1, 1, 1, $s4;",
+  "mad_zero_f32 $s1, 1, 1, 1;",
+  // zero_f64
+  "mad_zero_f64 $s1, $s2, $s3, $s4;",
+  "mad_zero_f64 $s1, $s2, $s3, 1;",
+  "mad_zero_f64 $s1, $s2, 1, $s4;",
+  "mad_zero_f64 $s1, $s2, 1, 1;",
+  "mad_zero_f64 $s1, 1, $s3, $s4;",
+  "mad_zero_f64 $s1, 1, $s3, 1;",
+  "mad_zero_f64 $s1, 1, 1, $s4;",
+  "mad_zero_f64 $s1, 1, 1, 1;",
+  // up_f16
+  "mad_up_f16 $s1, $s2, $s3, $s4;",
+  "mad_up_f16 $s1, $s2, $s3, 1;",
+  "mad_up_f16 $s1, $s2, 1, $s4;",
+  "mad_up_f16 $s1, $s2, 1, 1;",
+  "mad_up_f16 $s1, 1, $s3, $s4;",
+  "mad_up_f16 $s1, 1, $s3, 1;",
+  "mad_up_f16 $s1, 1, 1, $s4;",
+  "mad_up_f16 $s1, 1, 1, 1;",
+  // up_f32
+  "mad_up_f32 $s1, $s2, $s3, $s4;",
+  "mad_up_f32 $s1, $s2, $s3, 1;",
+  "mad_up_f32 $s1, $s2, 1, $s4;",
+  "mad_up_f32 $s1, $s2, 1, 1;",
+  "mad_up_f32 $s1, 1, $s3, $s4;",
+  "mad_up_f32 $s1, 1, $s3, 1;",
+  "mad_up_f32 $s1, 1, 1, $s4;",
+  "mad_up_f32 $s1, 1, 1, 1;",
+  // up_f64
+  "mad_up_f64 $s1, $s2, $s3, $s4;",
+  "mad_up_f64 $s1, $s2, $s3, 1;",
+  "mad_up_f64 $s1, $s2, 1, $s4;",
+  "mad_up_f64 $s1, $s2, 1, 1;",
+  "mad_up_f64 $s1, 1, $s3, $s4;",
+  "mad_up_f64 $s1, 1, $s3, 1;",
+  "mad_up_f64 $s1, 1, 1, $s4;",
+  "mad_up_f64 $s1, 1, 1, 1;",
+  // down_f16
+  "mad_down_f16 $s1, $s2, $s3, $s4;",
+  "mad_down_f16 $s1, $s2, $s3, 1;",
+  "mad_down_f16 $s1, $s2, 1, $s4;",
+  "mad_down_f16 $s1, $s2, 1, 1;",
+  "mad_down_f16 $s1, 1, $s3, $s4;",
+  "mad_down_f16 $s1, 1, $s3, 1;",
+  "mad_down_f16 $s1, 1, 1, $s4;",
+  "mad_down_f16 $s1, 1, 1, 1;",
+  // down_f32
+  "mad_down_f32 $s1, $s2, $s3, $s4;",
+  "mad_down_f32 $s1, $s2, $s3, 1;",
+  "mad_down_f32 $s1, $s2, 1, $s4;",
+  "mad_down_f32 $s1, $s2, 1, 1;",
+  "mad_down_f32 $s1, 1, $s3, $s4;",
+  "mad_down_f32 $s1, 1, $s3, 1;",
+  "mad_down_f32 $s1, 1, 1, $s4;",
+  "mad_down_f32 $s1, 1, 1, 1;",
+  // down_f64
+  "mad_down_f64 $s1, $s2, $s3, $s4;",
+  "mad_down_f64 $s1, $s2, $s3, 1;",
+  "mad_down_f64 $s1, $s2, 1, $s4;",
+  "mad_down_f64 $s1, $s2, 1, 1;",
+  "mad_down_f64 $s1, 1, $s3, $s4;",
+  "mad_down_f64 $s1, 1, $s3, 1;",
+  "mad_down_f64 $s1, 1, 1, $s4;",
+  "mad_down_f64 $s1, 1, 1, 1;",
+  // ftz_zero_f16
+  "mad_ftz_zero_f16 $s1, $s2, $s3, $s4;",
+  "mad_ftz_zero_f16 $s1, $s2, $s3, 1;",
+  "mad_ftz_zero_f16 $s1, $s2, 1, $s4;",
+  "mad_ftz_zero_f16 $s1, $s2, 1, 1;",
+  "mad_ftz_zero_f16 $s1, 1, $s3, $s4;",
+  "mad_ftz_zero_f16 $s1, 1, $s3, 1;",
+  "mad_ftz_zero_f16 $s1, 1, 1, $s4;",
+  "mad_ftz_zero_f16 $s1, 1, 1, 1;",
+  // ftz_zero_f32
+  "mad_ftz_zero_f32 $s1, $s2, $s3, $s4;",
+  "mad_ftz_zero_f32 $s1, $s2, $s3, 1;",
+  "mad_ftz_zero_f32 $s1, $s2, 1, $s4;",
+  "mad_ftz_zero_f32 $s1, $s2, 1, 1;",
+  "mad_ftz_zero_f32 $s1, 1, $s3, $s4;",
+  "mad_ftz_zero_f32 $s1, 1, $s3, 1;",
+  "mad_ftz_zero_f32 $s1, 1, 1, $s4;",
+  "mad_ftz_zero_f32 $s1, 1, 1, 1;",
+  // ftz_zero_f64
+  "mad_ftz_zero_f64 $s1, $s2, $s3, $s4;",
+  "mad_ftz_zero_f64 $s1, $s2, $s3, 1;",
+  "mad_ftz_zero_f64 $s1, $s2, 1, $s4;",
+  "mad_ftz_zero_f64 $s1, $s2, 1, 1;",
+  "mad_ftz_zero_f64 $s1, 1, $s3, $s4;",
+  "mad_ftz_zero_f64 $s1, 1, $s3, 1;",
+  "mad_ftz_zero_f64 $s1, 1, 1, $s4;",
+  "mad_ftz_zero_f64 $s1, 1, 1, 1;",
+  // ftz_up_f16
+  "mad_ftz_up_f16 $s1, $s2, $s3, $s4;",
+  "mad_ftz_up_f16 $s1, $s2, $s3, 1;",
+  "mad_ftz_up_f16 $s1, $s2, 1, $s4;",
+  "mad_ftz_up_f16 $s1, $s2, 1, 1;",
+  "mad_ftz_up_f16 $s1, 1, $s3, $s4;",
+  "mad_ftz_up_f16 $s1, 1, $s3, 1;",
+  "mad_ftz_up_f16 $s1, 1, 1, $s4;",
+  "mad_ftz_up_f16 $s1, 1, 1, 1;",
+  // ftz_up_f32
+  "mad_ftz_up_f32 $s1, $s2, $s3, $s4;",
+  "mad_ftz_up_f32 $s1, $s2, $s3, 1;",
+  "mad_ftz_up_f32 $s1, $s2, 1, $s4;",
+  "mad_ftz_up_f32 $s1, $s2, 1, 1;",
+  "mad_ftz_up_f32 $s1, 1, $s3, $s4;",
+  "mad_ftz_up_f32 $s1, 1, $s3, 1;",
+  "mad_ftz_up_f32 $s1, 1, 1, $s4;",
+  "mad_ftz_up_f32 $s1, 1, 1, 1;",
+  // ftz_up_f64
+  "mad_ftz_up_f64 $s1, $s2, $s3, $s4;",
+  "mad_ftz_up_f64 $s1, $s2, $s3, 1;",
+  "mad_ftz_up_f64 $s1, $s2, 1, $s4;",
+  "mad_ftz_up_f64 $s1, $s2, 1, 1;",
+  "mad_ftz_up_f64 $s1, 1, $s3, $s4;",
+  "mad_ftz_up_f64 $s1, 1, $s3, 1;",
+  "mad_ftz_up_f64 $s1, 1, 1, $s4;",
+  "mad_ftz_up_f64 $s1, 1, 1, 1;",
+  // ftz_down_f16
+  "mad_ftz_down_f16 $s1, $s2, $s3, $s4;",
+  "mad_ftz_down_f16 $s1, $s2, $s3, 1;",
+  "mad_ftz_down_f16 $s1, $s2, 1, $s4;",
+  "mad_ftz_down_f16 $s1, $s2, 1, 1;",
+  "mad_ftz_down_f16 $s1, 1, $s3, $s4;",
+  "mad_ftz_down_f16 $s1, 1, $s3, 1;",
+  "mad_ftz_down_f16 $s1, 1, 1, $s4;",
+  "mad_ftz_down_f16 $s1, 1, 1, 1;",
+  // ftz_down_f32
+  "mad_ftz_down_f32 $s1, $s2, $s3, $s4;",
+  "mad_ftz_down_f32 $s1, $s2, $s3, 1;",
+  "mad_ftz_down_f32 $s1, $s2, 1, $s4;",
+  "mad_ftz_down_f32 $s1, $s2, 1, 1;",
+  "mad_ftz_down_f32 $s1, 1, $s3, $s4;",
+  "mad_ftz_down_f32 $s1, 1, $s3, 1;",
+  "mad_ftz_down_f32 $s1, 1, 1, $s4;",
+  "mad_ftz_down_f32 $s1, 1, 1, 1;",
+  // ftz_down_f64
+  "mad_ftz_down_f64 $s1, $s2, $s3, $s4;",
+  "mad_ftz_down_f64 $s1, $s2, $s3, 1;",
+  "mad_ftz_down_f64 $s1, $s2, 1, $s4;",
+  "mad_ftz_down_f64 $s1, $s2, 1, 1;",
+  "mad_ftz_down_f64 $s1, 1, $s3, $s4;",
+  "mad_ftz_down_f64 $s1, 1, $s3, 1;",
+  "mad_ftz_down_f64 $s1, 1, 1, $s4;",
+  "mad_ftz_down_f64 $s1, 1, 1, 1;",
+  // f16
+  "mad_f16 $s1, $s2, $s3, $s4;",
+  "mad_f16 $s1, $s2, $s3, 1;",
+  "mad_f16 $s1, $s2, 1, $s4;",
+  "mad_f16 $s1, $s2, 1, 1;",
+  "mad_f16 $s1, 1, $s3, $s4;",
+  "mad_f16 $s1, 1, $s3, 1;",
+  "mad_f16 $s1, 1, 1, $s4;",
+  "mad_f16 $s1, 1, 1, 1;",
+  // f32
+  "mad_f32 $s1, $s2, $s3, $s4;",
+  "mad_f32 $s1, $s2, $s3, 1;",
+  "mad_f32 $s1, $s2, 1, $s4;",
+  "mad_f32 $s1, $s2, 1, 1;",
+  "mad_f32 $s1, 1, $s3, $s4;",
+  "mad_f32 $s1, 1, $s3, 1;",
+  "mad_f32 $s1, 1, 1, $s4;",
+  "mad_f32 $s1, 1, 1, 1;",
+  // f64
+  "mad_f64 $s1, $s2, $s3, $s4;",
+  "mad_f64 $s1, $s2, $s3, 1;",
+  "mad_f64 $s1, $s2, 1, $s4;",
+  "mad_f64 $s1, $s2, 1, 1;",
+  "mad_f64 $s1, 1, $s3, $s4;",
+  "mad_f64 $s1, 1, $s3, 1;",
+  "mad_f64 $s1, 1, 1, $s4;",
+  "mad_f64 $s1, 1, 1, 1;"
+};
+BrigAluModifier mad_bam[] = {
+  {1,0,0,1,0,0,0},// ftz
+  {1,0,0,0,0,0,0},// near
+  {1,1,0,0,0,0,0},// zero
+  {1,2,0,0,0,0,0},// up
+  {1,3,0,0,0,0,0},// down
+  {1,1,0,1,0,0,0},// ftz_zero
+  {1,2,0,1,0,0,0},// ftz_up
+  {1,3,0,1,0,0,0} // ftz_down
+};
+BrigInstMod output_array_mad_ftz_round[] = {
+  // ftz
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[0]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[0]
+  },
+  // near
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[1]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[1]
+  },
+  // zero
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[2]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[2]
+  },
+  // up
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[3]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[3]
+  },
+  // down
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[4]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[4]
+  },
+  // ftz_zero
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[5]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[5]
+  },
+  // ftz_up
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[6]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[6]
+  },
+  // ftz_down
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0},
+    mad_bam[7]
+  },
+  {
+    36,
+    BrigEInstMod,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0},
+    mad_bam[7]
+  }
+};
+
+BrigInstBase output_array_mad_floating[] = {
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  },
+  {
+    32,
+    BrigEInstBase,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 44, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 56, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 56, 0}
+  },
+  {
+    36,
+    BrigEInstBase,
+    BrigMad,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 68, 0}
+  }
+};
+class Instruction4MadFtzRoundFalse : public ::testing::TestWithParam<int>
+{
+
+};
+std::string input_array_mad_ftz_round_false[] = {
+  "mad_ftz_f16 $s1;",
+  "mad_near_f32 $s1, $s2;",
+  "mad_zero_f64 $s1, $s2, $s3;",
+  "mad_up_f16 WAVESIZE, $s2, $s3, $s4;",
+  "mad_down_f32 1, WAVESIZE, $s3, $s4;",
+  "mad_ftz_zero_f64 $s1, $s2, WAVESIZE;",
+  "mad_ftz_up_f16 $s1, 1, WAVESIZE;",
+  "mad_ftz_down_f32 1, 1, 1, 1;",
+  "mad_f32 1, 1,WAVESIZE,WAVESIZE;"
+};
 
 }  // namespace brig
 }  // namespace hsa
