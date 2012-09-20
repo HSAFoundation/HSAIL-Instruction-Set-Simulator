@@ -50,6 +50,10 @@ bool BrigModule::validateDirectives(void) const {
   dir_iterator it = S_.begin();
   const dir_iterator E = S_.end();
 
+  for(unsigned i = 0; i < std::min(size_t(8), S_.directivesSize); ++i)
+    check(!S_.directives[i],
+          "The first eight bytes of the directives section must be zero");
+
   if(!validate(it)) return false;
   if(!check(it != E, "Empty directive section")) return false;
 
@@ -106,6 +110,10 @@ bool BrigModule::validateCode(void) const {
 
   inst_iterator it = S_.code_begin();
   const inst_iterator E = S_.code_end();
+
+  for(unsigned i = 0; i < std::min(size_t(8), S_.codeSize); ++i)
+    check(!S_.code[i],
+          "The first eight bytes of the code section must be zero");
 
   for(; it != E; it++) {
     if(!validate(it)) return false;
@@ -171,10 +179,14 @@ bool BrigModule::validateStrings(void) const {
 
   bool valid = true;
 
+  for(unsigned i = 0; i < std::min(size_t(8), S_.stringsSize); ++i)
+    check(!S_.strings[i],
+          "The first eight bytes of the strings section must be zero");
+
   std::set<std::string> stringSet;
 
-  const char *curr = S_.strings;
-  size_t maxLen = S_.stringsSize;
+  const char *curr = S_.strings + 8;
+  size_t maxLen = S_.stringsSize - 8;
 
   while(maxLen) {
     size_t len = strnlen(curr, maxLen);
@@ -894,10 +906,13 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
 
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
   bool valid = true;
+  if (operand->elementCount) {
+      valid &= check(sizeof(BrigOperandArgumentList) + 
+                     sizeof(operand->o_args[1]) * (operand->elementCount - 1) 
+                     <= operand->size, "Invalid size");
+  }
+
   for (unsigned i = 0; i < operand->elementCount; ++i) {
-    valid &= check(sizeof(BrigOperandArgumentList) + 
-                   sizeof(operand->o_args[1]) *(operand->elementCount - 1) <= 
-                   operand->size, "Invalid size");
     oper_iterator arg(S_.operands + operand->o_args[i]);
     valid &= validate(arg);
     valid &= check(isa<BrigOperandArgumentRef>(arg), 
@@ -910,6 +925,12 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
   bool valid = true;
   unsigned funRefCount = 0;
   unsigned argRefCount = 0;
+
+  if (operand->elementCount) {
+      valid &= check(sizeof(BrigOperandArgumentList) + 
+                     sizeof(operand->o_args[1]) * (operand->elementCount - 1) 
+                     <= operand->size, "Invalid size");
+  }
 
   for (unsigned i = 0; i < operand->elementCount; ++i) {
     oper_iterator arg(S_.operands + operand->o_args[i]);
@@ -936,9 +957,10 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
   }
   valid &= check(funRefCount == operand->elementCount || 
                  argRefCount == operand->elementCount, 
-                 "element of o_args shoule be BrigOperandFunctionRef "
+                 "element of o_args should be BrigOperandFunctionRef "
                  "or BrigOperandArgumentRef");
-  valid &= check(argRefCount < 2, "Invalid argRefCount, shoule be 1 or 0");
+  valid &= check(argRefCount < 2, "Invalid argRefCount, should be 1 or 0");
+
   return valid;
 }
 

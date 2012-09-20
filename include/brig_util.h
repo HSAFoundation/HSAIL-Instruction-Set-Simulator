@@ -185,11 +185,11 @@ struct BrigSections {
     stringsSize(stringsSize), directivesSize(directivesSize),
     codeSize(codeSize), operandsSize(operandsSize) {}
 
-  dir_iterator begin() const { return dir_iterator(directives); };
+  dir_iterator begin() const { return dir_iterator(directives + 8); };
   dir_iterator end() const {
     return dir_iterator(directives + directivesSize);
   };
-  inst_iterator code_begin() const { return inst_iterator(code); };
+  inst_iterator code_begin() const { return inst_iterator(code + 8); };
   inst_iterator code_end() const { return inst_iterator(code + codeSize); };
   oper_iterator oper_begin() const { return oper_iterator(operands + 8); };
   oper_iterator oper_end() const {
