@@ -6572,8 +6572,17 @@ int Cvt(Context* context) {
 
 int Instruction0(Context* context) {
   // first token is NOP "nop"
+  BrigInstBase inst0 = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigNop,               // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
+    context->append_code(&inst0);
     context->token_to_scan = yylex();
     return 0;
   } else {
