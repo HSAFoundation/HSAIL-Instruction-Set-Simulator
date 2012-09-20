@@ -7509,18 +7509,22 @@ int GlobalImageDeclPart2(Context *context){
         }
       }
 
-      // array for 1d or 2d,else set 1
-      if (0 == bdi.depth){
-        BrigDirectiveImage get;
-        context->get_directive(context->current_img_offset,&get);
+      // array for 1da or 2da,else set 1
+      if ((0 != bdi.width && 0 != bdi.height)
+         ||(0 != bdi.width && 0 != bdi.depth)
+         ||(0 != bdi.height && 0 != bdi.depth)){
+        if (context->get_dim()){// a array
+          BrigDirectiveImage get;
+          context->get_directive(context->current_img_offset,&get);
 
-        get.array = context->get_dim();
+          get.array = context->get_dim();
 
-        unsigned char *bdi_charp = 
-          reinterpret_cast<unsigned char*>(&get);
-        context->update_directive_bytes(bdi_charp,
-                                        context->current_img_offset,
-                                        sizeof(BrigDirectiveImage));
+          unsigned char *bdi_charp = 
+            reinterpret_cast<unsigned char*>(&get);
+          context->update_directive_bytes(bdi_charp,
+                                          context->current_img_offset,
+                                          sizeof(BrigDirectiveImage));
+        }
       }
 
       if (';' == context->token_to_scan) {

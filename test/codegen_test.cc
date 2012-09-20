@@ -4206,14 +4206,14 @@ TEST(CodegenTest,GlobalImageDeclCodegen){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
-  std::string input("global_RWImg &demo={format = signed_int32 ,order = r,width = 2,height = 3,depth = 4 } ;");
+  std::string input("global_RWImg &demo[9]={format = signed_int32 ,order = r,width = 2,height = 3,depth = 4 } ;");
 
   Lexer *lexer = new Lexer(input);
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
 
   BrigDirectiveImage ref = {
-    56,                     //size
+    sizeof(BrigDirectiveImage),                     //size
     BrigEDirectiveImage,    //kind
     {
       0,                         // c_code
@@ -4229,7 +4229,7 @@ TEST(CodegenTest,GlobalImageDeclCodegen){
     2,                      //width
     3,                      //height
     4,                      //depth
-    1,                      //array
+    9,                      //array
     BrigImageOrderUnknown,  //order
     BrigImageFormatUnknown  //format
   };
@@ -4243,6 +4243,7 @@ TEST(CodegenTest,GlobalImageDeclCodegen){
   EXPECT_EQ(ref.width, get.width);
   EXPECT_EQ(ref.height, get.height);
   EXPECT_EQ(ref.depth, get.depth);
+  EXPECT_EQ(ref.array, get.array);
   EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   EXPECT_EQ(ref.s.type, get.s.type);
