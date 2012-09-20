@@ -31,7 +31,7 @@ bool (BrigModule::check)(bool test, const Message &msg,
                          const char *filename, unsigned lineno,
                          const char *cause) const {
   if(!test && out_)
-     (*out_) << filename << "." << lineno << ": " << msg
+     (*out_) << filename << ":" << lineno << " " << msg
             << " (" << cause << ")\n";
   return test;
 }
@@ -704,7 +704,7 @@ bool BrigModule::validate(const BrigInstBase *code) const {
   for (unsigned i = 0; i < 5; i++) {
     if (code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
-                   "o_operands past the operands section");
+                     "o_operands past the operands section");
     }
   }
   return valid;
