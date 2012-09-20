@@ -8669,7 +8669,7 @@ TEST(CodegenTest,  Instruction4_MultiMediaOperation_CodeGen_SimpleTest) {
 };
 
 
-TEST(CodegenTest,  Syscall_CodeGen_SimpleTest) {
+TEST(CodegenTest, Syscall_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -9097,6 +9097,338 @@ TEST(CodegenTest, FunctionDeclCodeGen){
   EXPECT_EQ(ref2.attribute, get.attribute);
   EXPECT_EQ(ref2.d_firstInParam, get.d_firstInParam);
   
+  delete lexer;
+}
+
+TEST(CodegenTest, Call_CodeGen_SimpleTest) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  BrigInstBase callInst1 = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigCall,              // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+
+  BrigInstMod callInst2 = {
+    sizeof(BrigInstMod),  // size
+    BrigEInstMod,         // kind
+    BrigCall,              // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0},       // o_operands[5]
+    {0, 0, 0, 0, 0, 1, 0}  // aluModifier
+  };
+
+  BrigInstBase callInst3 = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigCall,              // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+
+  BrigInstBase callInst4 = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigCall,              // opcode
+    Brigb32,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0}        // o_operands[5]
+  };
+
+
+  std::string input("call_width(64) $s1 (%in) [&foo, &bar];\n");
+  input.append("call_width(all)_fbar $s1 (%out)(%in) &sigFunc;\n");
+  input.append("call &foo(%out)(%in);\n");
+  input.append("call &bar(%in);\n");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  context->func_map["&foo"] = 0xf7;
+  context->func_map["&bar"] = 0xf8;
+  context->symbol_map["%in"] = 0xf9;
+  context->symbol_map["%out"] = 0xfa;
+
+  EXPECT_EQ(0, Call(context));
+  EXPECT_EQ(0, Call(context));
+  EXPECT_EQ(0, Call(context));
+  EXPECT_EQ(0, Call(context));
+
+  BrigoOffset32_t curOpOffset = 8;
+  BrigcOffset32_t curCodeOffset = 0;
+  BrigoOffset32_t inOpRefOffset = 0;
+  BrigoOffset32_t outOpRefOffset = 0;
+  BrigoOffset32_t fooOpRefOffset = 0;
+  BrigoOffset32_t barOpRefOffset = 0;
+  BrigoOffset32_t sigOpRefOffset = 0;
+
+  BrigOperandReg getReg;
+  BrigInstBase getBase;
+  BrigInstMod getMod;
+  BrigOperandArgumentList getArgList;
+  BrigOperandFunctionRef getFunRef;
+  BrigOperandArgumentRef getArgRef;
+  BrigOperandImmed getImm;
+
+  // BrigOperandImmed b32 64
+
+  curOpOffset += curOpOffset & 0x7;
+  callInst1.o_operands[0] = curOpOffset;
+  context->get_operand(curOpOffset, &getImm);  
+  curOpOffset += sizeof(BrigOperandImmed);
+
+  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(64, getImm.bits.u);
+
+  callInst1.o_operands[1] = 0;
+
+  // BrigOperandReg S1
+  callInst1.o_operands[2] = curOpOffset;
+  callInst2.o_operands[2] = curOpOffset;
+
+  context->get_operand(curOpOffset, &getReg);  
+  curOpOffset += sizeof(BrigOperandReg);
+
+  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(0, getReg.name); 
+  // BrigOperandArgumentRef input Argument %in
+  
+  inOpRefOffset = curOpOffset;
+  context->get_operand(curOpOffset, &getArgRef);
+  curOpOffset += sizeof(BrigOperandArgumentRef);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentRef), getArgRef.size);
+  EXPECT_EQ(BrigEOperandArgumentRef, getArgRef.kind);
+  EXPECT_EQ(0xf9, getArgRef.arg);
+
+  // BrigOperandArgumentList input Argument List
+  callInst1.o_operands[3] = curOpOffset;
+  context->get_operand(curOpOffset, &getArgList);  
+  curOpOffset += sizeof(BrigOperandArgumentList);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
+  EXPECT_EQ(BrigEOperandArgumentList, getArgList.kind);
+  EXPECT_EQ(1, getArgList.elementCount);
+  EXPECT_EQ(inOpRefOffset, getArgList.o_args[0]);
+
+  // BrigOperandFunctionRef func &foo Argument
+  
+  fooOpRefOffset = curOpOffset;
+  callInst3.o_operands[2] = curOpOffset;
+  context->get_operand(curOpOffset, &getFunRef);
+  curOpOffset += sizeof(BrigOperandFunctionRef);
+
+  EXPECT_EQ(sizeof(BrigOperandFunctionRef), getFunRef.size);
+  EXPECT_EQ(BrigEOperandFunctionRef, getFunRef.kind);
+  EXPECT_EQ(0xf7, getFunRef.fn);
+
+  // BrigOperandFunctionRef func &bar Argument
+  
+  barOpRefOffset = curOpOffset;
+  callInst4.o_operands[2] = curOpOffset;
+  context->get_operand(curOpOffset, &getFunRef);
+  curOpOffset += sizeof(BrigOperandFunctionRef);
+
+  EXPECT_EQ(sizeof(BrigOperandFunctionRef), getFunRef.size);
+  EXPECT_EQ(BrigEOperandFunctionRef, getFunRef.kind);
+  EXPECT_EQ(0xf8, getFunRef.fn);
+
+
+  // BrigOperandArgumentList func List
+  callInst1.o_operands[4] = curOpOffset;
+ 
+  context->get_operand(curOpOffset, &getArgList); 
+  curOpOffset += sizeof(BrigOperandArgumentList);
+  BrigoOffset32_t o_args_1 = 0;
+  context->get_operand(curOpOffset, &o_args_1);
+  curOpOffset += sizeof(BrigoOffset32_t);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentList) + sizeof(BrigoOffset32_t), getArgList.size);
+  EXPECT_EQ(BrigEOperandFunctionList, getArgList.kind);
+  EXPECT_EQ(2, getArgList.elementCount);
+  EXPECT_EQ(fooOpRefOffset, getArgList.o_args[0]);
+  EXPECT_EQ(barOpRefOffset, o_args_1); 
+
+
+
+  context->get_code(curCodeOffset, &getBase);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  // BrigInstBase Call 1
+  EXPECT_EQ(callInst1.size, getBase.size);
+  EXPECT_EQ(callInst1.kind, getBase.kind);
+  EXPECT_EQ(callInst1.opcode, getBase.opcode);
+  EXPECT_EQ(callInst1.type, getBase.type);
+  EXPECT_EQ(callInst1.packing, getBase.packing);
+  EXPECT_EQ(callInst1.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(callInst1.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(callInst1.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(callInst1.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(callInst1.o_operands[4], getBase.o_operands[4]);
+
+  // BrigOperandImmed b32 all
+
+  curOpOffset += curOpOffset & 0x7;
+  callInst2.o_operands[0] = curOpOffset;
+  context->get_operand(curOpOffset, &getImm);  
+  curOpOffset += sizeof(BrigOperandImmed);
+
+  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(0, getImm.bits.u);
+
+  // BrigOperandArgumentRef output Argument %out
+  outOpRefOffset = curOpOffset;
+  context->get_operand(curOpOffset, &getArgRef);
+  curOpOffset += sizeof(BrigOperandArgumentRef);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentRef), getArgRef.size);
+  EXPECT_EQ(BrigEOperandArgumentRef, getArgRef.kind);
+  EXPECT_EQ(0xfa, getArgRef.arg);
+
+  // BrigOperandArgumentList output Argument List
+  callInst2.o_operands[1] = curOpOffset;
+  context->get_operand(curOpOffset, &getArgList);  
+  curOpOffset += sizeof(BrigOperandArgumentList);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
+  EXPECT_EQ(BrigEOperandArgumentList, getArgList.kind);
+  EXPECT_EQ(1, getArgList.elementCount);
+  EXPECT_EQ(outOpRefOffset, getArgList.o_args[0]);
+
+  // BrigOperandArgumentList input Argument List
+  callInst2.o_operands[3] = curOpOffset;
+  context->get_operand(curOpOffset, &getArgList);  
+  curOpOffset += sizeof(BrigOperandArgumentList);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
+  EXPECT_EQ(BrigEOperandArgumentList, getArgList.kind);
+  EXPECT_EQ(1, getArgList.elementCount);
+  EXPECT_EQ(inOpRefOffset, getArgList.o_args[0]);
+
+  // BrigOperandArgumentRef signature function &signFun
+  sigOpRefOffset = curOpOffset;
+  context->get_operand(curOpOffset, &getArgRef);
+  curOpOffset += sizeof(BrigOperandArgumentRef);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentRef), getArgRef.size);
+  EXPECT_EQ(BrigEOperandArgumentRef, getArgRef.kind);
+  EXPECT_EQ(0, getArgRef.arg);
+
+  // BrigOperandArgumentList &sigFun signature
+  callInst2.o_operands[4] = curOpOffset;
+  
+  context->get_operand(curOpOffset, &getArgList); 
+  curOpOffset += sizeof(BrigOperandArgumentList);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
+  EXPECT_EQ(BrigEOperandFunctionList, getArgList.kind);
+  EXPECT_EQ(1, getArgList.elementCount);
+  EXPECT_EQ(sigOpRefOffset, getArgList.o_args[0]);
+
+  context->get_code(curCodeOffset, &getMod);
+  curCodeOffset += sizeof(BrigInstMod);
+
+  // BrigInstBase Call 2
+  EXPECT_EQ(callInst2.size, getMod.size);
+  EXPECT_EQ(callInst2.kind, getMod.kind);
+  EXPECT_EQ(callInst2.opcode, getMod.opcode);
+  EXPECT_EQ(callInst2.type, getMod.type);
+  EXPECT_EQ(callInst2.packing, getMod.packing);
+  EXPECT_EQ(callInst2.o_operands[0], getMod.o_operands[0]);
+  EXPECT_EQ(callInst2.o_operands[1], getMod.o_operands[1]);
+  EXPECT_EQ(callInst2.o_operands[2], getMod.o_operands[2]);
+  EXPECT_EQ(callInst2.o_operands[3], getMod.o_operands[3]);
+  EXPECT_EQ(callInst2.o_operands[4], getMod.o_operands[4]);
+
+  unsigned int *pAluModRef = reinterpret_cast<unsigned int*>(&callInst2.aluModifier);
+  unsigned int *pAluModGet = reinterpret_cast<unsigned int*>(&getMod.aluModifier);
+
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  callInst3.o_operands[0] = 0;
+  callInst3.o_operands[4] = 0;
+
+  // BrigOperandArgumentList output Argument List
+  callInst3.o_operands[1] = curOpOffset;
+  context->get_operand(curOpOffset, &getArgList);  
+  curOpOffset += sizeof(BrigOperandArgumentList);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
+  EXPECT_EQ(BrigEOperandArgumentList, getArgList.kind);
+  EXPECT_EQ(1, getArgList.elementCount);
+  EXPECT_EQ(outOpRefOffset, getArgList.o_args[0]);
+
+
+  // BrigOperandArgumentList input Argument List
+  callInst3.o_operands[3] = curOpOffset;
+  context->get_operand(curOpOffset, &getArgList);  
+  curOpOffset += sizeof(BrigOperandArgumentList);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
+  EXPECT_EQ(BrigEOperandArgumentList, getArgList.kind);
+  EXPECT_EQ(1, getArgList.elementCount);
+  EXPECT_EQ(inOpRefOffset, getArgList.o_args[0]);
+
+  context->get_code(curCodeOffset, &getBase);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  // BrigInstBase Call 3
+  EXPECT_EQ(callInst3.size, getBase.size);
+  EXPECT_EQ(callInst3.kind, getBase.kind);
+  EXPECT_EQ(callInst3.opcode, getBase.opcode);
+  EXPECT_EQ(callInst3.type, getBase.type);
+  EXPECT_EQ(callInst3.packing, getBase.packing);
+  EXPECT_EQ(callInst3.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(callInst3.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(callInst3.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(callInst3.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(callInst3.o_operands[4], getBase.o_operands[4]);
+
+  callInst4.o_operands[0] = 0;
+  callInst4.o_operands[1] = 0;
+  callInst4.o_operands[4] = 0;
+
+  // BrigOperandArgumentList input Argument List
+  callInst4.o_operands[3] = curOpOffset;
+  context->get_operand(curOpOffset, &getArgList);  
+  curOpOffset += sizeof(BrigOperandArgumentList);
+
+  EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
+  EXPECT_EQ(BrigEOperandArgumentList, getArgList.kind);
+  EXPECT_EQ(1, getArgList.elementCount);
+  EXPECT_EQ(inOpRefOffset, getArgList.o_args[0]);
+
+  context->get_code(curCodeOffset, &getBase);
+  curCodeOffset += sizeof(BrigInstBase);
+
+  // BrigInstBase Call 4
+  EXPECT_EQ(callInst4.size, getBase.size);
+  EXPECT_EQ(callInst4.kind, getBase.kind);
+  EXPECT_EQ(callInst4.opcode, getBase.opcode);
+  EXPECT_EQ(callInst4.type, getBase.type);
+  EXPECT_EQ(callInst4.packing, getBase.packing);
+  EXPECT_EQ(callInst4.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(callInst4.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(callInst4.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(callInst4.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(callInst4.o_operands[4], getBase.o_operands[4]);
+
+
   delete lexer;
 }
 }  // namespace brig
