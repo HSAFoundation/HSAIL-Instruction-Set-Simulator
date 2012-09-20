@@ -7012,8 +7012,6 @@ TEST_P(Mad24HiFalse, BrigMad24) {
 }
 INSTANTIATE_TEST_CASE_P(CodegenTest, Mad24HiFalse, testing::Range(0,4));
 
-
-
 TEST_P(Instruction3OpAddInt, BrigAdd){
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -7307,9 +7305,10 @@ TEST_P(Instruction3OpAddPackedint, BrigAdd){
   delete lexer;
 }
 
+
 INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction3OpAddPackedint,
-                        testing::Range(0,8/*10*/));
+                        testing::Range(0,8));
 
 
 TEST_P(Instruction3OpAddFloat, BrigAdd){
@@ -7513,7 +7512,7 @@ TEST_P(Instruction3OpAddFtzRoundFloat, BrigAdd){
 
 INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction3OpAddFtzRoundFloat,
-                        testing::Range(0,24/*96*/));
+                        testing::Range(0,24));
 
 
 TEST_P(Instruction3OpAddPackedFloat, BrigAdd){
@@ -7616,7 +7615,7 @@ TEST_P(Instruction3OpCarry, BrigCarry){
   //BrigOperandImmed getImm;
   BrigOperandWaveSz getWaveSz;
   context->get_code(0, &getBase);
-  BrigInstBase ref = outputarray_instruction3op_carry[int(n/2/*3*/)];
+  BrigInstBase ref = outputarray_instruction3op_carry[int(n/2)];
 
   EXPECT_EQ(ref.size, getBase.size);
   EXPECT_EQ(ref.kind, getBase.kind);
@@ -7811,7 +7810,7 @@ TEST_P(Instruction3OpCarry, BrigCarry){
 
 INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction3OpCarry,
-                        testing::Range(0,16/*36*/));
+                        testing::Range(0,16));
 
 
 TEST_P(Instruction3OpBorrow, BrigBorrow){
@@ -7829,7 +7828,7 @@ TEST_P(Instruction3OpBorrow, BrigBorrow){
   //BrigOperandImmed getImm;
   BrigOperandWaveSz getWaveSz;
   context->get_code(0, &getBase);
-  BrigInstBase ref = outputarray_instruction3op_borrow[int(n/2/*3*/)];
+  BrigInstBase ref = outputarray_instruction3op_borrow[int(n/2)];
 
   EXPECT_EQ(ref.size, getBase.size);
   EXPECT_EQ(ref.kind, getBase.kind);
@@ -8024,7 +8023,7 @@ TEST_P(Instruction3OpBorrow, BrigBorrow){
 
 INSTANTIATE_TEST_CASE_P(OperationTest,
                         Instruction3OpBorrow,
-                        testing::Range(0,16/*36*/));
+                        testing::Range(0,16));
 
 TEST_P(Instruction4Mad, BrigMad) {
   context->set_error_reporter(main_reporter);
