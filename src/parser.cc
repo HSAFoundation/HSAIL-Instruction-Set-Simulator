@@ -566,12 +566,93 @@ int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
 }
 int CallTargets(Context* context) {
   // assumed first_token is '['
+  // TODO(Chuang): the max size is 256
+  BrigoOffset32_t arg_offset[256] = {0};
+  unsigned int nElements = 0;
+  std::string funcName;
+
+  if (context->token_to_scan != '[') {
+    if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+      funcName = context->token_value.string_val;
+
+      if (!context->arg_map.count(funcName)) {
+        BrigOperandArgumentRef opArgRef = {
+          sizeof(BrigOperandArgumentRef),
+          BrigEOperandArgumentRef,
+          0
+        };
+        // TODO(Chuang): judge whether the identifier has been defined.
+        // and which Map will the offset of directive about signature func be saved into?
+        opArgRef.arg = context->func_map[funcName];
+        context->arg_map[funcName] = context->get_operand_offset();   
+        context->append_operand(&opArgRef);
+      }
+      BrigOperandArgumentList funcList = {
+        sizeof(BrigOperandArgumentList),
+        BrigEOperandFunctionList,
+        1,
+        context->arg_map[funcName]
+      };
+
+      context->current_argList_offset = context->get_operand_offset();
+      context->append_operand(&funcList);
+      context->token_to_scan = yylex();
+      return 0;
+    } else {
+      return 1;
+    }
+  }
   while (1) {
     context->token_to_scan = yylex();  // set context for Identifier()
+    // TODO(Chuang): the name of function must be global identifiers.
+    if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
+      funcName = context->token_value.string_val;
+    } else {
+      context->set_error(MISSING_IDENTIFIER);
+      return 1;
+    }
     if (!Identifier(context)) {
+      if (context->func_o_map.count(funcName)) {
+        arg_offset[nElements++] = context->func_o_map[funcName];
+      } else {
+        BrigOperandFunctionRef opArgRef = {
+          sizeof(BrigOperandFunctionRef),
+          BrigEOperandFunctionRef,
+          0
+        };
+        // TODO(Chuang): judge whether the identifier has been defined.
+        opArgRef.fn = context->func_map[funcName];
+        context->func_o_map[funcName] = context->get_operand_offset();   
+        context->append_operand(&opArgRef);
+        arg_offset[nElements++] = context->func_o_map[funcName];
+      }
       context->token_to_scan = yylex();
       if (context->token_to_scan == ']') {
+      size_t list_size = sizeof(BrigOperandArgumentList);
+      if (nElements > 1) {
+        list_size += sizeof(BrigoOffset32_t) * (nElements - 1);
+      } else if (nElements == 0) {
+        // there is one identifier at least.
+        context->set_error(MISSING_IDENTIFIER);
+        return 1;
+      }
+
+      char *array = new char[list_size];
+      BrigOperandArgumentList &funcList =
+        *reinterpret_cast<BrigOperandArgumentList *>(array);
+        funcList.size = list_size;
+        funcList.kind = BrigEOperandFunctionList;
+        funcList.elementCount = nElements;
+        for (int32_t i = 0; i < nElements; ++i) {
+          funcList.o_args[i] = arg_offset[i];
+        }
+
+        context->current_argList_offset = context->get_operand_offset();
+        context->append_operand(&funcList);
+
         context->token_to_scan = yylex();  // set context for following function
+        delete[] array;
+
         break;
       } else if (context->token_to_scan == ',') {
       } else {
@@ -606,8 +687,9 @@ int CallArgs(Context* context) {
 
     if (context->token_to_scan == ')') {
       size_t list_size = sizeof(BrigOperandArgumentList);
-      if (n_elements > 1)
+      if (n_elements > 1) {
         list_size += sizeof(BrigoOffset32_t) * (n_elements - 1);
+      }
 
       char *array = new char[list_size];
       BrigOperandArgumentList &arg_list =
@@ -618,6 +700,11 @@ int CallArgs(Context* context) {
       for (int32_t i = 0; i < n_elements; ++i) {
         arg_list.o_args[i] = arg_offset[i];
       }
+      if (!n_elements) {
+        // this is an empty Argument List.
+        arg_list.o_args[0] = 0;
+      }
+
       context->current_argList_offset = context->get_operand_offset();
       context->append_operand(&arg_list);
       context->token_to_scan = yylex();
@@ -627,7 +714,20 @@ int CallArgs(Context* context) {
     } else if (!Operand(context)) {
       if ((saved_token == TOKEN_GLOBAL_IDENTIFIER)||
           (saved_token == TOKEN_LOCAL_IDENTIFIER)) {
-        arg_offset[n_elements] = context->arg_map[arg_name];
+        if (context->arg_map.count(arg_name)) {
+          arg_offset[n_elements] = context->arg_map[arg_name];
+        } else {
+          BrigOperandArgumentRef opArgRef = {
+            sizeof(BrigOperandArgumentRef),
+            BrigEOperandArgumentRef,
+            0
+          };
+          // TODO(Chuang): judge whether the identifier has been defined.
+          opArgRef.arg = context->symbol_map[arg_name];
+          context->arg_map[arg_name] = context->get_operand_offset();   
+          context->append_operand(&opArgRef);
+          arg_offset[n_elements] = context->arg_map[arg_name];
+        }
       }
 
       n_elements++;
@@ -2365,88 +2465,122 @@ int Branch(Context* context) {
 
 int Call(Context* context) {
   // first token is "call"
+  BrigoOffset32_t firstOpOffset = 0;
+  BrigoOffset32_t secondOpOffset = 0;
+
+  bool hasWidthOrFbar = false;
+  bool hasFbar = false;
+
+  BrigInstBase callInst = {
+    sizeof(BrigInstBase),
+    BrigEInstBase,
+    BrigCall,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0}
+  };
 
   context->token_to_scan = yylex();
   // optional width
   if (context->token_to_scan == _WIDTH) {
+    BrigoOffset32_t curOpOffset = context->get_operand_offset();
     if (!OptionalWidth(context)) {
+      callInst.o_operands[0] = curOpOffset;
+      hasWidthOrFbar = true;
     } else {
       return 1;
     }
   }
-
-  unsigned int temp = context->token_to_scan;
-  std::string func_name;
-  if (temp == TOKEN_GLOBAL_IDENTIFIER) {
-    func_name.assign(context->token_value.string_val);
+  if (context->token_to_scan == __FBAR) {
+    hasWidthOrFbar = true;
+    hasFbar = true;
+    context->token_to_scan = yylex();
   }
 
-  if (!Operand(context)) {
-    // the operand should be a register or a Func name.
-    // Assuming the function must be defined before the call.
+  std::string opName;
+  const unsigned int firstOpToken = context->token_to_scan;;
+  // the operand should be a register or a Func name.
+  // and if isThereWidthOrFbar is true, token must be a global identifier.
+  
 
-    // Default Structure
-    BrigInstBase call_op = {
-      32,
-      BrigEInstBase,
-      BrigCall,
-      Brigb32,
-      BrigNoPacking,
-      {0, 0, 0, 0, 0}
-    };
-
-    // If Call by its name.
-    if (temp == TOKEN_GLOBAL_IDENTIFIER) {
-      if (context->func_o_map.count(func_name)) {
-        call_op.o_operands[2] = context->func_o_map[func_name];
-      } else {
-        BrigOperandFunctionRef func_o_ref = {
-          8,
-          BrigEOperandFunctionRef,
-          context->func_map[func_name]
-        };
-        context->func_o_map[func_name] = context->get_operand_offset();
-        context->append_operand(&func_o_ref);
-        call_op.o_operands[2] = context->func_o_map[func_name];
-      }
-    }
-    // check for twoCallArgs
-    if (context->token_to_scan == '(') {
-      if (!CallArgs(context)) {
-        call_op.o_operands[1] = context->current_argList_offset;
-      } else {
-        return 1;
-      }
-    }
-
-    if (context->token_to_scan == '(') {
-      if (!CallArgs(context)) {
-        call_op.o_operands[3] = context->current_argList_offset;
-      } else {
-        return 1;
-      }
-    }
-
-    // check for CallTarget
-    if (context->token_to_scan == ';') {
-      context->append_code(&call_op);
-      context->token_to_scan = yylex();
-      return 0;
-    } else if (context->token_to_scan == '[') {
-      if (!CallTargets(context)) {
-        if (context->token_to_scan == ';') {
-            context->token_to_scan = yylex();
-           return 0;
-        } else {
-          context->set_error(MISSING_SEMICOLON);
-        }
-      }
-      return 1;
+  if (firstOpToken == TOKEN_GLOBAL_IDENTIFIER && !hasWidthOrFbar) {
+    opName.assign(context->token_value.string_val);
+    if (context->func_o_map.count(opName)) {
+      callInst.o_operands[2] = context->func_o_map[opName];
     } else {
-      context->set_error(MISSING_SEMICOLON);
+      BrigOperandFunctionRef func_o_ref = {
+        8,
+        BrigEOperandFunctionRef,
+        context->func_map[opName]
+      };
+      context->func_o_map[opName] = context->get_operand_offset();
+      context->append_operand(&func_o_ref);
+      callInst.o_operands[2] = context->func_o_map[opName];
     }
+    context->token_to_scan = yylex();
+  } else if (firstOpToken == TOKEN_SREGISTER) {
+    opName.assign(context->token_value.string_val);
+    if (Operand(context)) {
+      return 1;
+    }
+    callInst.o_operands[2] = context->operand_map[opName];
   } else {
     context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+
+  // check for twoCallArgs
+  if (context->token_to_scan == '(') {
+    if (!CallArgs(context)) {
+      firstOpOffset = context->current_argList_offset;
+    } else {
+      return 1;
+    }
+  }
+
+  if (context->token_to_scan == '(') {
+    if (!CallArgs(context)) {
+      secondOpOffset = context->current_argList_offset;
+    } else {
+      return 1;
+    }
+  }
+  if (secondOpOffset) {
+    callInst.o_operands[1] = firstOpOffset;
+    callInst.o_operands[3] = secondOpOffset;
+  } else {
+    callInst.o_operands[1] = 0;
+    callInst.o_operands[3] = firstOpOffset;
+  }
+  // if there is CallTarget, the first operand token must be a s register.
+  if (firstOpToken == TOKEN_SREGISTER) {
+    if (!CallTargets(context)) {
+      callInst.o_operands[4] = context->current_argList_offset;
+    } else {
+      return 1;
+    }
+  }
+  if (context->token_to_scan == ';') {
+    if (hasFbar) {
+      BrigInstMod callMod;
+      callMod.size = sizeof(BrigInstMod);
+      callMod.kind = BrigEInstMod;
+      callMod.opcode = callInst.opcode;
+      callMod.type = callInst.type;
+      callMod.packing = callInst.packing;
+      for (int i = 0 ; i < 5 ; ++i) {
+        callMod.o_operands[i] = callInst.o_operands[i];
+      }
+      memset(&callMod.aluModifier, 0, sizeof(BrigAluModifier));
+      callMod.aluModifier.fbar = 1;
+      context->append_code(&callMod);
+    } else {
+      context->append_code(&callInst);  
+    }
+    context->token_to_scan = yylex();
+    return 0;
+  } else {
+    context->set_error(MISSING_SEMICOLON);
   }
   return 1;
 }
