@@ -836,6 +836,11 @@ TEST(ParserTest, InitializableDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
 
+  input.assign("readonly_s32 &x[4]= {-12, 13,14, -13};\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, InitializableDecl(context));
+
   input.assign("global_u32 &x[3] = 12, -13,14 ; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
