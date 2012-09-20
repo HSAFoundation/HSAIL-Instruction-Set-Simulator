@@ -559,17 +559,6 @@ typedef enum
     MEMORY_OPTION_HOST_NO_ACCESS = (1U << 18),
 } MemoryOption;
 
-/**
- * @brief hsacommon ASICInfo class, represents ASIC specific information of a GPU device.
- */
-enum ASICType
-{
-    ASIC_TYPE_SI_TAHITI,
-    ASIC_TYPE_SI_PITCAIRN,
-    ASIC_TYPE_CI_BONAIRE,
-    ASIC_TYPE_CI_SKU2
-};
-
 typedef enum
 {
     DEVICE_TYPE_CPU=AMD_DEVICE_TYPE_CPU,
@@ -1350,25 +1339,6 @@ class UnsupportedOperation: public Exception {};
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
-
-
-class DLL_PUBLIC ASICInfo
-{
-public:
-    /*! Getter function to check for image support.
-     * @return bool indicating image support.
-    */
-    virtual bool isImageSupport()=0;
-    /*! Getter function to check for double precision support.
-     * @return bool indicating double support.
-    */
-    virtual bool isDoublePrecision()=0;
-    /*! Getter function to check the ASIC Type.
-     * @return returns an ASICType enumeration.
-    */
-    virtual ASICType getASICType()=0;
-    virtual ~ASICInfo() {};
-};
 
 /**
  * @brief MemoryDescriptor class, each descriptor
