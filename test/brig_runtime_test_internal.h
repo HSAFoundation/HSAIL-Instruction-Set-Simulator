@@ -163,6 +163,81 @@
   MakeCmpTest(FUNC, f64)                                    \
   MakeCmpTest(FUNC ## u, f64)
 
+#define MakeCvtF2FsTest(TYPE)                   \
+  MakeCvtF2FsTestFun(TYPE, Cvt, TYPE)           \
+  MakeCvtF2FsTestFun(TYPE, Cvt_upi, ceil)       \
+  MakeCvtF2FsTestFun(TYPE, Cvt_downi, floor)    \
+  MakeCvtF2FsTestFun(TYPE, Cvt_zeroi, trunc)    \
+  MakeCvtF2FsTestFun(TYPE, Cvt_neari, nearbyint)
+
+#define MakeCvtF2FsTestFun(TYPE,NAME,FUNC)                              \
+  static void NAME ## _ ## TYPE ## _ ## TYPE ## _Logic(TYPE result,     \
+                                                       TYPE a) {        \
+    if(isNan(a)) {                                                      \
+      EXPECT_PRED1(isNan<TYPE>, a);                                     \
+    } else {                                                            \
+      EXPECT_EQ(FUNC(a), result);                                       \
+    }                                                                   \
+  }                                                                     \
+  extern "C" TYPE NAME ## _ ## TYPE ## _ ## TYPE (TYPE);                \
+  MakeTest(NAME ## _ ## TYPE ## _ ## TYPE,                              \
+           NAME ## _ ## TYPE ## _ ## TYPE ## _Logic)
+
+#define MakeCvtF2FdTest(NAME,PRED)                                    \
+  static void Cvt_ ## NAME ## _f32_f64_Logic(f32 result, f64 a) {     \
+    if(isNan(a)) {                                                    \
+      EXPECT_PRED1(isNan<f32>, result);                               \
+    } else if(isPosInf(a)) {                                          \
+      EXPECT_PRED1(isPosInf<f32>, result);                            \
+    } else if(isNegInf(a)) {                                          \
+      EXPECT_PRED1(isNegInf<f32>, result);                            \
+    } else {                                                          \
+      EXPECT_TRUE(PRED);                                              \
+    }                                                                 \
+  }                                                                   \
+  extern "C" f32 Cvt_ ## NAME ## _f32_f64(f64);                       \
+  MakeTest(Cvt_ ## NAME ## _f32_f64, Cvt_ ## NAME ## _f32_f64_Logic)
+
+#define MakeCvtX2ITestRet(TYPE,RET,NAME)              \
+  extern "C" RET NAME ## RET ## _ ## TYPE (TYPE);     \
+  MakeTest(NAME ## RET ## _ ## TYPE,  NAME ## Logic)
+
+#define MakeCvtX2ITest(TYPE,NAME)               \
+  MakeCvtX2ITestRet(TYPE, u8,  NAME)            \
+  MakeCvtX2ITestRet(TYPE, s8,  NAME)            \
+  MakeCvtX2ITestRet(TYPE, u16, NAME)            \
+  MakeCvtX2ITestRet(TYPE, s16, NAME)            \
+  MakeCvtX2ITestRet(TYPE, u32, NAME)            \
+  MakeCvtX2ITestRet(TYPE, s32, NAME)            \
+  MakeCvtX2ITestRet(TYPE, u64, NAME)            \
+  MakeCvtX2ITestRet(TYPE, s64, NAME)
+
+#define MakeCvtF2ITest(TYPE)                 \
+  MakeCvtX2ITest(TYPE, Cvt_)                 \
+  MakeCvtX2ITest(TYPE, Cvt_upi_)             \
+  MakeCvtX2ITest(TYPE, Cvt_downi_)           \
+  MakeCvtX2ITest(TYPE, Cvt_zeroi_)           \
+  MakeCvtX2ITest(TYPE, Cvt_neari_)
+
+#define MakeCvtI2FTestRet(TYPE,RET,NAME)              \
+  extern "C" RET NAME ## RET ## _ ## TYPE (TYPE);     \
+  MakeTest(NAME ## RET ## _ ## TYPE,  NAME ## Logic)
+
+#define MakeCvtI2FTestType(TYPE,NAME)           \
+  /* MakeCvtI2FTestRet(TYPE, f16, NAME) */      \
+  MakeCvtI2FTestRet(TYPE, f32, NAME)            \
+  MakeCvtI2FTestRet(TYPE, f64, NAME)            \
+
+#define MakeCvtI2FTest(NAME)                    \
+  MakeCvtI2FTestType(u8, NAME)                  \
+  MakeCvtI2FTestType(s8, NAME)                  \
+  MakeCvtI2FTestType(u16, NAME)                 \
+  MakeCvtI2FTestType(s16, NAME)                 \
+  MakeCvtI2FTestType(u32, NAME)                 \
+  MakeCvtI2FTestType(s32, NAME)                 \
+  MakeCvtI2FTestType(u64, NAME)                 \
+  MakeCvtI2FTestType(s64, NAME)
+
 template<class T> static void initTestVector(std::vector<T> &testVector) {
   for(unsigned i = 0; i < 255; ++i)
     testVector.push_back(T(i));
@@ -356,5 +431,9 @@ static void TestVectorInst(R (*Impl)(T, T, unsigned),
 }
 
 template<class T> static bool Not(bool (*Fn)(T), T t) { return !Fn(t); }
+
+
+template<class T> bool isBool()       { return false; }
+template<>        bool isBool<bool>() { return true;  }
 
 #endif // BRIG_RUNTIME_TEST_INTERNAL_H

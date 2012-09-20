@@ -420,7 +420,8 @@ template<class T> static T Cmov(T x, T y, T z) {
 }
 BitInst(define, Cmov, Ternary)
 
-// Neither C++98 nor C++11 implement C99's floating point hexadecimal literals. :(
+// Neither C++98 nor C++11 implement C99's floating point hexadecimal
+// literals. :(
 // 0x3F7FFFFE == 0x1.fffffep-1f
 // 0x3FEFFFFFFFFFFFFF == 0x1.fffffffffffffp-1
 extern "C" f32 Fract_f32(f32 f) {
@@ -552,7 +553,7 @@ extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
     case 32:
       return x;
     default :
-      return 0;  
+      return 0;
   }
 }
 
@@ -567,7 +568,38 @@ extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
                + ((x >> 8 * i) & 0xFF)
                + ((y >> 8 * i) & 0x1)) >> 1) & 0xFF) << 8 * i;
   }
-  return result;      
+  return result;
+}
+
+extern "C" b32 Sad_b32(b32 w, b32 x, b32 y) {
+  return abs(w - x) + y;
+}
+
+extern "C" b32 Sad2_b32(b32 w, b32 x, b32 y) {
+  b32 result = 0;
+  for(unsigned i = 0; i < 2; ++i){
+    result += Sad_b32((w >> i * 16) & 0xFFFF,
+                      (x >> i * 16) & 0xFFFF, 0);
+  }
+  return result + y;
+}
+
+extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
+  b32 result = 0;
+  for(unsigned i = 0; i < 4; ++i){
+    result += Sad_b32((w >> i * 8) & 0xFF,
+                      (x >> i * 8) & 0xFF, 0);
+  }
+  return result + y;
+}
+
+extern "C" b32 Sad4hi_b32(b32 w, b32 x, b32 y) {
+  b32 result = 0;
+  for(unsigned i = 0; i < 4; ++i){
+    result += Sad_b32((w >> i * 8) & 0xFF,
+                      (x >> i * 8) & 0xFF, 0);
+  }
+  return (result << 16) + y;
 }
 
 CmpInst(eq, x == y)
@@ -598,5 +630,86 @@ Cmp(define, nan,  f64)
 Cmp(define, snan, f32)
 Cmp(define, snan, f64)
 
+// Integer rounding:
+// f32 to Int, f32 to f32, f32 to f64
+template<class R> static R Cvt(f32 f, int mode) {
+  if(isPosInf(f)) return getMax<R>();
+  if(isNegInf(f)) return getMin<R>();
+  if(isNan(f)) return 0;
+  if(!~mode) return R(f);
+  int oldMode = fegetround();
+  fesetround(mode);
+  volatile R result = R(nearbyint(f));
+  fesetround(oldMode);
+  return result;
+}
+template<> bool Cvt(f32 f, int mode) { return f != 0.0f; }
+// Integer rounding:
+// f64 to Int, f64 to f64
+template<class R> static R Cvt(f64 f, int mode) {
+  if(isPosInf(f)) return getMax<R>();
+  if(isNegInf(f)) return getMin<R>();
+  if(isNan(f)) return 0;
+  if(!~mode) return R(f);
+  int oldMode = fegetround();
+  fesetround(mode);
+  volatile R result = R(nearbyint(f));
+  fesetround(oldMode);
+  return result;
+}
+// Floating point rounding:
+// f64 to f32
+template<> f32 Cvt(f64 f, int mode) {
+  int oldMode = fegetround();
+  fesetround(mode);
+  volatile f32 result = f32(f);
+  fesetround(oldMode);
+  return result;
+}
+template<> bool Cvt(f64 f, int mode) { return f != 0.0; }
+// Floating point rounding:
+// Int to Int, Int to f32, Int to f64
+template<class R, class T> static R Cvt(T t, int mode)  {
+  if(!~mode) return R(t);
+  int oldMode = fegetround();
+  fesetround(mode);
+  volatile R result = R(t);
+  fesetround(oldMode);
+  return result;
+}
+RIICvt(define)
+RFICvt(define)
+RIFCvt(define)
+// Boolean conversions
+defineCvt(Cvt,       ~0,            b1,  b1)
+defineCvt(Cvt,       ~0,            b1,  s8)
+defineCvt(Cvt,       ~0,            b1,  u8)
+defineCvt(Cvt,       ~0,            b1,  s16)
+defineCvt(Cvt,       ~0,            b1,  u16)
+defineCvt(Cvt,       ~0,            b1,  s32)
+defineCvt(Cvt,       ~0,            b1,  u32)
+defineCvt(Cvt,       ~0,            b1,  f32)
+defineCvt(Cvt,       ~0,            b1,  s64)
+defineCvt(Cvt,       ~0,            b1,  u64)
+defineCvt(Cvt,       ~0,            b1,  f64)
+// Converting from a floating point to a floating point of the same type takes
+// an integer rounding modifier
+defineCvt(Cvt,       ~0,            f32, f32)
+defineCvt(Cvt,       ~0,            f64, f64)
+defineCvt(Cvt_upi,   FE_UPWARD,     f32, f32)
+defineCvt(Cvt_upi,   FE_UPWARD,     f64, f64)
+defineCvt(Cvt_downi, FE_DOWNWARD,   f32, f32)
+defineCvt(Cvt_downi, FE_DOWNWARD,   f64, f64)
+defineCvt(Cvt_zeroi, FE_TOWARDZERO, f32, f32)
+defineCvt(Cvt_zeroi, FE_TOWARDZERO, f64, f64)
+defineCvt(Cvt_neari, FE_TONEAREST,  f32, f32)
+defineCvt(Cvt_neari, FE_TONEAREST,  f64, f64)
+// A rounding modifier is required where precision may be lost
+defineCvt(Cvt_up,   FE_UPWARD,     f32, f64)
+defineCvt(Cvt_down, FE_DOWNWARD,   f32, f64)
+defineCvt(Cvt_zero, FE_TOWARDZERO, f32, f64)
+defineCvt(Cvt_near, FE_TONEAREST,  f32, f64)
+// A rounding modifier is illegal in all other cases
+defineCvt(Cvt, ~0, f64, f32)
 } // namespace brig
 } // namespace hsa
