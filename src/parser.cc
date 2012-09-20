@@ -100,6 +100,10 @@ int Query(Context* context) {
             if (context->token_to_scan == ';') {
 
               context->append_code(&query_inst);
+              // OperationCount adds 1 
+              // in BrigDirectiveFunction or BrigDirectivekernel
+              context->update_bdf_operation_count();
+
               context->token_to_scan = yylex();
               return 0;
             } else {
@@ -764,6 +768,7 @@ int Instruction2(Context* context) {
                 // may need to edit others, worry about that later.
 
                 // update context for later functions
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -824,6 +829,7 @@ int Instruction2(Context* context) {
                 // may need to edit others, worry about that later.
 
                 // set context for later functions
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -898,6 +904,7 @@ int Instruction2(Context* context) {
               // may need to edit others, worry about that later.
 
               // set context for later functions
+              context->update_bdf_operation_count();
               context->token_to_scan = yylex();
               return 0;
             } else {
@@ -961,6 +968,7 @@ int Instruction2(Context* context) {
                 // may need to edit others, worry about that later.
 
                 // set context for later functions
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -1011,7 +1019,8 @@ int Instruction2(Context* context) {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry about that later.
-
+                
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();  // set context for later
                 return 0;
               } else {
@@ -1085,6 +1094,8 @@ int Instruction3(Context* context) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (context->token_to_scan == ';') {
                   context->append_code(&inst_op);
+ 
+                  context->update_bdf_operation_count();
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -1146,6 +1157,8 @@ int Instruction3(Context* context) {
                 inst_op.o_operands[2] = context->operand_map[oper_str];
                 if (context->token_to_scan == ';') {
                   context->append_code(&inst_op);
+
+                  context->update_bdf_operation_count();
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -2252,14 +2265,8 @@ int Branch(Context* context) {
         }
         if (context->token_to_scan == ';') {
           context->append_code(&inst_op);
-          // update the operationCount.
-          BrigDirectiveFunction bdf;
-          context->get_directive(context->current_bdf_offset, &bdf);
-          bdf.operationCount++;
-          unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-          context->update_directive_bytes(bdf_charp,
-                                          context->current_bdf_offset,
-                                          sizeof(bdf));
+
+          context->update_bdf_operation_count();
           context->token_to_scan = yylex();
           return 0;
         } else {
@@ -2310,14 +2317,8 @@ int Branch(Context* context) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ';') {
         context->append_code(&inst_op);
-          // update the operationCount.
-          BrigDirectiveFunction bdf;
-          context->get_directive(context->current_bdf_offset, &bdf);
-          bdf.operationCount++;
-          unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-          context->update_directive_bytes(bdf_charp,
-                                          context->current_bdf_offset,
-                                          sizeof(bdf));
+
+        context->update_bdf_operation_count();
         context->token_to_scan = yylex();
         return 0;
       } else {
@@ -2978,6 +2979,8 @@ int SysCall(Context* context) {
 
                     if (context->token_to_scan == ';') {
                       context->append_code(&syscallInst);
+
+                      context->update_bdf_operation_count();
                       context->token_to_scan = yylex();
                       return 0;
                     } else {  // ';'
@@ -4506,6 +4509,11 @@ int Cmp(Context* context) {
                 }
                 if (context->token_to_scan == ';') {
                   context->append_code(&cmpInst);
+
+                  // OperationCount adds 1 
+                  // in BrigDirectiveFunction or BrigDirectivekernel
+                  context->update_bdf_operation_count();
+
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -4891,6 +4899,8 @@ int Instruction5(Context* context) {
               }
               if (context->token_to_scan == ';') {
                 context->append_code(&f2u4Inst);
+
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -4983,6 +4993,11 @@ int Ldc(Context* context) {
           context->token_to_scan = yylex();
           if (context->token_to_scan == ';') {
             context->append_code(&ldc_op);
+
+            // OperationCount adds 1 
+            // in BrigDirectiveFunction or BrigDirectivekernel
+            context->update_bdf_operation_count();
+
             context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
@@ -5113,6 +5128,11 @@ int Atom(Context* context) {
                 }
                 if (context->token_to_scan == ';') {
                   context->append_code(&atom_op);
+
+                  // OperationCount adds 1 
+                  // in BrigDirectiveFunction or BrigDirectivekernel
+                  context->update_bdf_operation_count();
+
                   context->token_to_scan = yylex();
                   return 0;
                 } else {  // ';'
@@ -5246,6 +5266,11 @@ int Mov(Context* context) {
         if (!ArrayOperandPart2(context, &movInst.o_operands[1])) {
           if (context->token_to_scan == ';') {
             context->append_code(&movInst);
+
+            // OperationCount adds 1 
+            // in BrigDirectiveFunction or BrigDirectivekernel
+            context->update_bdf_operation_count();
+
             context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
@@ -5734,6 +5759,11 @@ int Ld(Context* context) {
       if (!MemoryOperand(context)) {
         if (context->token_to_scan == ';') {
           context->append_code(&ld_op);
+
+          // OperationCount adds 1 
+          // in BrigDirectiveFunction or BrigDirectivekernel
+          context->update_bdf_operation_count();
+
           context->token_to_scan = yylex();
           return 0;
         } else {  // ';'
@@ -5803,8 +5833,13 @@ int St(Context* context) {
       st_op.o_operands[1] = context->get_operand_offset();
       if (!MemoryOperand(context)) {
         if (context->token_to_scan == ';') {
-          context->token_to_scan = yylex();
           context->append_code(&st_op);
+
+          // OperationCount adds 1 
+          // in BrigDirectiveFunction or BrigDirectivekernel
+          context->update_bdf_operation_count();
+
+          context->token_to_scan = yylex();          
           return 0;
         } else {  // ';'
           context->set_error(MISSING_SEMICOLON);
@@ -5858,6 +5893,11 @@ int Lda(Context* context) {
         if (!MemoryOperand(context)) {
           if (context->token_to_scan == ';') {
             context->append_code(&lda_op);
+
+            // OperationCount adds 1 
+            // in BrigDirectiveFunction or BrigDirectivekernel
+            context->update_bdf_operation_count();
+
             context->token_to_scan = yylex();
             return 0;
           } else {  // ';'
@@ -6055,6 +6095,8 @@ int ImageRet(Context* context) {
                     }
                     if (context->token_to_scan == ';') {
                       context->append_code(&img_inst);
+
+                      context->update_bdf_operation_count();
                       context->token_to_scan = yylex();
                       return 0;
                     } else {  // ';'
@@ -6226,6 +6268,9 @@ int ImageNoRet(Context* context) {
                   }
                   if (context->token_to_scan == ';') {
                     context->append_code(&imgNoRet);
+
+                    context->update_bdf_operation_count();
+
                     context->token_to_scan = yylex();
                     return 0;
                   } else {  // ';'
@@ -6342,6 +6387,11 @@ int Cvt(Context* context) {
             }
             if (context->token_to_scan == ';') {
               context->append_code(&cvtInst);
+
+              // OperationCount adds 1 
+              // in BrigDirectiveFunction or BrigDirectivekernel
+              context->update_bdf_operation_count();
+
               context->token_to_scan = yylex();
               return 0;
             } else {
@@ -6369,6 +6419,8 @@ int Instruction0(Context* context) {
   // first token is NOP "nop"
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
+
+    context->update_bdf_operation_count();
     context->token_to_scan = yylex();
     return 0;
   } else {
@@ -6418,6 +6470,8 @@ int Instruction1(Context* context) {
         }
         if (context->token_to_scan == ';') {
           context->append_code(&inst1_op);
+
+          context->update_bdf_operation_count();
           context->token_to_scan = yylex();
           return 0;
         } else {
@@ -6438,6 +6492,8 @@ int Instruction1(Context* context) {
         inst1_op.o_operands[0] = context->operand_map[oper_name];
         if (context->token_to_scan == ';') {
           context->append_code(&inst1_op);
+
+          context->update_bdf_operation_count();
           context->token_to_scan = yylex();
           return 0;
         } else {
@@ -6457,6 +6513,8 @@ int Instruction1(Context* context) {
       inst1_op.o_operands[0] = context->operand_map[oper_name];
       if (context->token_to_scan == ';') {
         context->append_code(&inst1_op);
+
+        context->update_bdf_operation_count();
         context->token_to_scan = yylex();
         return 0;
       } else {
@@ -6491,6 +6549,8 @@ int Instruction1(Context* context) {
               inst1_op.o_operands[1] = context->operand_map[oper_name];
                 if (context->token_to_scan == ';') {
                   context->append_code(&inst1_op);
+
+                  context->update_bdf_operation_count();
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -6501,6 +6561,8 @@ int Instruction1(Context* context) {
             } // one operand
           } else if (context->token_to_scan == ';') {
             context->append_code(&inst1_op);
+   
+            context->update_bdf_operation_count();
             context->token_to_scan = yylex();
             return 0;
           } else {
@@ -6527,6 +6589,8 @@ int Instruction1(Context* context) {
           inst1_op.o_operands[0] = context->operand_map[oper_name];
           if (context->token_to_scan == ';') {
             context->append_code(&inst1_op);
+
+            context->update_bdf_operation_count();
             context->token_to_scan = yylex();
             return 0;
           } else {
@@ -6598,6 +6662,8 @@ int Segp(Context* context) {
               segmentp_op.o_operands[1] = context->operand_map[oper_name];
               if (context->token_to_scan == ';') {
                 context->append_code(&segmentp_op);
+            
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -6611,6 +6677,8 @@ int Segp(Context* context) {
               }
               if (context->token_to_scan == ';') {
                 context->append_code(&segmentp_op);
+
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -6679,6 +6747,8 @@ int Segp(Context* context) {
               sf_op.o_operands[1] = context->operand_map[oper_name];
               if (context->token_to_scan == ';') {
                 context->append_code(&sf_op);
+
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -6692,6 +6762,8 @@ int Segp(Context* context) {
               }
               if (context->token_to_scan == ';') {
                 context->append_code(&sf_op);
+
+                context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -7043,6 +7115,9 @@ int ImageLoad(Context* context) {
                     if (!ArrayOperandPart2(context, &imgLdInst.o_operands[2])) {
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgLdInst);
+
+                        context->update_bdf_operation_count();
+
                         context->token_to_scan = yylex();
                         return 0;
                       } else {  // ';'
@@ -7168,6 +7243,9 @@ int ImageStore(Context* context) {
                     if (!ArrayOperandPart2(context, &imgStInst.o_operands[2])) {
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgStInst);
+
+                        context->update_bdf_operation_count();
+
                         context->token_to_scan = yylex();
                         return 0;
                       } else {  // ';'
@@ -7753,6 +7831,9 @@ int ImageRead(Context *context) {
 
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgRdInst);
+
+                        context->update_bdf_operation_count();
+
                         context->token_to_scan = yylex();
                         return 0;
                       } else {  // ';'
@@ -8057,6 +8138,9 @@ int AtomicNoRet(Context* context) {
             }
             if (context->token_to_scan == ';') {
               context->append_code(&aNoRetInst);
+
+              context->update_bdf_operation_count();
+
               context->token_to_scan = yylex();
               return 0;
             } else {
