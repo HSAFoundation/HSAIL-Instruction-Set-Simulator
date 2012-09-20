@@ -836,6 +836,11 @@ TEST(ParserTest, InitializableDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, InitializableDecl(context));
 
+  input.assign("readonly_s32 &x[4]= {-12, 13,14, -13};\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, InitializableDecl(context));
+
   input.assign("global_u32 &x[3] = 12, -13,14 ; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -1116,27 +1121,6 @@ TEST(ParserTest, FileDecl) {
   EXPECT_EQ(MISSING_INTEGER_CONSTANT, mer.get_last_error());
 
   context->set_error_reporter(main_reporter);
-  delete lexer;
-}
-
-TEST(ParserTest, VectorToken) {
-  // Create a lexer
-  Lexer* lexer = new Lexer();
-  // register error reporter with context
-  context->set_error_reporter(main_reporter);
-
-  std::string input("_v2\n");
-
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, VectorToken(context));
-
-  // input.clear() ;
-  input.assign("_v4\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, VectorToken(context));
-
   delete lexer;
 }
 
