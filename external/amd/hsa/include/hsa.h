@@ -434,8 +434,12 @@ public:
     // Get the device information in bulk.
     //virtual const Info& info()=0;
 
-    //Temp hack to get the asicinfo
-    virtual void* getASICInfo()=0;
+   	/**
+     * @brief get the max user-mode queue size possible
+     *
+     * @return returns max queue size in bytes 
+     */
+    virtual uint32_t getMaxQueueSize()=0;
 
     /**
      * @brief Set up trap handler in the current device
