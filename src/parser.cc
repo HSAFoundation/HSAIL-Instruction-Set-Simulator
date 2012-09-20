@@ -1564,8 +1564,7 @@ int ArgumentListBody(Context* context) {
 int FunctionDefinition(Context* context) {
   if (!DeclPrefix(context)) {
     if (context->token_to_scan == FUNCTION) {
-      // add default struct (Miao)
-
+      
       context->current_bdf_offset = context->get_directive_offset();
       BrigdOffset32_t bdf_offset = context->current_bdf_offset;
       uint16_t size = sizeof(BrigDirectiveFunction);
@@ -1673,85 +1672,6 @@ int FunctionDefinition(Context* context) {
   return 1;
 }
 
-/*
-int FunctionDeclpart1(Context* context) {
-  //if (!DeclPrefix(context)) {
-    if (context->token_to_scan == FUNCTION) {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
-        // check return argument list
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == '(') {
-          context->token_to_scan = yylex();
-
-          if (context->token_to_scan == ')') {   // empty argument list body
-              context->token_to_scan = yylex();
-          } else if (!ArgumentListBody(context)) {
-            if (context->token_to_scan == ')') {
-                context->token_to_scan = yylex();
-            } else {
-              context->set_error(MISSING_CLOSING_PARENTHESIS);
-              return 1;
-            }
-          } else {
-            context->set_error(INVALID_ARGUMENT_LIST);
-            return 1;
-          }
-        } else {
-          context->set_error(MISSING_ARGUMENT_LIST);
-          return 1;
-        }
-        // check argument list
-        if (context->token_to_scan == '(') {
-            context->token_to_scan = yylex();
-
-          if (context->token_to_scan == ')') {   // empty argument list body
-              context->token_to_scan = yylex();
-          } else if (!ArgumentListBody(context)) {
-            if (context->token_to_scan == ')') {
-                context->token_to_scan = yylex();
-            } else {
-              context->set_error(MISSING_CLOSING_PARENTHESIS);
-              return 1;
-            }
-          } else {
-            context->set_error(INVALID_ARGUMENT_LIST);
-            return 1;
-          }
-        } else {
-          context->set_error(MISSING_ARGUMENT_LIST);
-          return 1;
-        }
-
-
-        // check for optional FBar
-        if (context->token_to_scan == _FBAR) {
-          if (!FBar(context)) {
-            return 0;
-          } else {
-            context->set_error(INVALID_FBAR);
-          }
-        } else {
-          return 0;
-        }
-      } else {
-        context->set_error(MISSING_IDENTIFIER);
-      }
-    }
- // } else {
- //   context->set_error(MISSING_DECLPREFIX);
- // }
-  return 1;
-}
-
-int FunctionDeclpart2(Context *context){
-  if (';' == context->token_to_scan){
-    context->token_to_scan = yylex();
-    return 0 ;
-  }
-
-  return 1;
-}*/
 int FunctionDecl(Context *context){
   if (!DeclPrefix(context)) {
     if (!FunctionDefinition(context)){
