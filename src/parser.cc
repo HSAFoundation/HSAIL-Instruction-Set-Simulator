@@ -92,6 +92,7 @@ int Query(Context* context) {
           context->token_to_scan = yylex();
           if (context->token_to_scan != '[') {
             context->set_error(MISSING_OPERAND);
+            return 1;
           } else {
             context->token_to_scan = yylex();
           }
@@ -3326,61 +3327,48 @@ int LabelTargets(Context* context) {
 }
 
 int Instruction4(Context* context) {
-  if (context->token_type == INSTRUCTION4_OPCODE) {
-    context->token_to_scan = yylex();
-    if (!RoundingMode(context)) {
-    }
-    if (context->token_type == DATA_TYPE_ID) {
-      context->token_to_scan = yylex();
-      if (!Operand(context)) {
-        if (context->token_to_scan != ',') {
-          context->set_error(MISSING_COMMA);
-          return 1;
-        }
-        context->token_to_scan = yylex();
-        if (!Operand(context)) {
-          if (context->token_to_scan != ',') {
-            context->set_error(MISSING_COMMA);
-            return 1;
-          }
-          context->token_to_scan = yylex();
-          if (!Operand(context)) {
-            if (context->token_to_scan != ',') {
-              context->set_error(MISSING_COMMA);
-              return 1;
-            }
-            context->token_to_scan = yylex();
-            if (!Operand(context)) {
-              if (context->token_to_scan == ';') {
-                context->token_to_scan = yylex();
-                return 0;
-              } else {
-                context->set_error(MISSING_SEMICOLON);
-                return 1;
-              }  // ';'
-            } else {  // 4 operand
-              context->set_error(INVALID_FOURTH_OPERAND);
-              return 1;
-            }
-          } else {  // 3 operand
-            context->set_error(INVALID_THIRD_OPERAND);
-            return 1;
-          }
-        } else {  // 2 operand
-          context->set_error(INVALID_SECOND_OPERAND);
-          return 1;
-        }
-      } else {  // 1 operand
-        context->set_error(INVALID_FIRST_OPERAND);
-        return 1;
+
+  switch(context->token_to_scan) {
+    case SAD:
+    case SAD2:
+    case SAD4:
+    case SAD4HI:
+    case LERP:
+    case BITALIGN:
+    case BYTEALIGN:
+      if (!Instruction4MultiMediaOperationPart1(context)) {
+        return 0;
       }
-    } else {  // DATA_TYPE_ID
-      context->set_error(MISSING_DATA_TYPE);
       return 1;
-    }
-  } else {  // INSTRUCTION4_OPCODE
-  context->set_error(INVALID_INSTRUCTION);
+    case FMA:
+      if (!Instruction4FmaPart2(context)) {
+        return 0;
+      }
+      return 1;
+    case MAD:
+      if (!Instruction4MadPart3(context)) {
+        return 0;
+      }
+      return 1;
+    case EXTRACT:
+    case INSERT:
+    case BITSELECT:
+      if (!Instruction4BitStringOperationPart4(context)) {
+        return 0;
+      }
+      return 1;
+    case CMOV:
+      if (!Instruction4CmovPart5(context)) {
+        return 0;
+      }
+      return 1;
+    case SHUFFLE:
+      if (!Instruction4ShufflePart6(context)) {
+        return 0;
+      }
+      return 1;
   }
+  
   return 1;
 }
 
@@ -5348,13 +5336,13 @@ int Mov(Context* context) {
           } else {  // ';'
             context->set_error(MISSING_SEMICOLON);
           }
-        } else {  // Operand or ArrayOperandList
+        } else {  // ArrayOperand
           context->set_error(INVALID_SECOND_OPERAND);
         }
       } else {  // ','
         context->set_error(MISSING_COMMA);
       }
-    } else {  // Operand or ArrayOperandList
+    } else {  // ArrayOperand
       context->set_error(INVALID_FIRST_OPERAND);
     }
   } else {  // datatypeId
@@ -5808,40 +5796,29 @@ int Ld(Context* context) {
     // Get Type value in here
     ld_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
-    if (context->token_to_scan == '(') {
-      ld_op.o_operands[1] = context->get_operand_offset();
-      if (!ArrayOperandList(context)) {
-      } else {
-        context->set_error(MISSING_CLOSING_PARENTHESIS);
+    if (!ArrayOperandPart2(context, &ld_op.o_operands[1])) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+
+        if (!MemoryOperandPart2(context, &ld_op.o_operands[2])) {
+          if (context->token_to_scan == ';') {
+            context->append_code(&ld_op);
+            context->token_to_scan = yylex();
+            return 0;
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+            return 1;
+          }
+        } else {  // Memory Operand
+          context->set_error(UNKNOWN_ERROR);
+          return 1;
+        }
+      } else {  // ','
+        context->set_error(MISSING_COMMA);
         return 1;
       }
     } else {
-      std::string oper_name = context->token_value.string_val;
-      if (!Operand(context)) {
-      ld_op.o_operands[1] = context->operand_map[oper_name];
-      } else {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-    }
-    if (context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-
-      if (!MemoryOperandPart2(context, &ld_op.o_operands[2])) {
-        if (context->token_to_scan == ';') {
-          context->append_code(&ld_op);
-          context->token_to_scan = yylex();
-          return 0;
-        } else {  // ';'
-          context->set_error(MISSING_SEMICOLON);
-          return 1;
-        }
-      } else {  // Memory Operand
-        context->set_error(UNKNOWN_ERROR);
-        return 1;
-      }
-    } else {  // ','
-      context->set_error(MISSING_COMMA);
+      context->set_error(INVALID_OPERAND);
       return 1;
     }
   } else {  // Data Type
@@ -5877,40 +5854,28 @@ int St(Context* context) {
   if (context->token_type == DATA_TYPE_ID) {
     st_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
-    if (context->token_to_scan == '(') {
-      st_op.o_operands[0] = context->get_operand_offset();
-
-      if (!ArrayOperandList(context)) {
-      } else {
-        context->set_error(MISSING_CLOSING_PARENTHESIS);
+    if (!ArrayOperandPart2(context, &st_op.o_operands[0])) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!MemoryOperandPart2(context, &st_op.o_operands[1])) {
+          if (context->token_to_scan == ';') {
+            context->token_to_scan = yylex();
+            context->append_code(&st_op);
+            return 0;
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+            return 1;
+          }
+        } else {  // Memory Operand
+          context->set_error(UNKNOWN_ERROR);
+          return 1;
+        }
+      } else {  // ','
+        context->set_error(MISSING_COMMA);
         return 1;
       }
     } else {
-      std::string oper_name = context->token_value.string_val;
-      if (!Operand(context)) {
-        st_op.o_operands[0] = context->operand_map[oper_name];
-      } else {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-    }
-    if (context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-      if (!MemoryOperandPart2(context, &st_op.o_operands[1])) {
-        if (context->token_to_scan == ';') {
-          context->token_to_scan = yylex();
-          context->append_code(&st_op);
-          return 0;
-        } else {  // ';'
-          context->set_error(MISSING_SEMICOLON);
-          return 1;
-        }
-      } else {  // Memory Operand
-        context->set_error(UNKNOWN_ERROR);
-        return 1;
-      }
-    } else {  // ','
-      context->set_error(MISSING_COMMA);
+      context->set_error(INVALID_OPERAND);
       return 1;
     }
   } else {  // Data Type
@@ -6227,36 +6192,45 @@ int ImageNoRet(Context* context) {
     imgNoRet.atomicOperation = BrigAtomicCas;
     context->token_to_scan = yylex();
   } else if (context->token_type == ATOMIC_OP) {
-    switch (context->token_to_scan) {  // without _CAS_
+    switch (context->token_to_scan) {  // without _CAS_ , _EXCh_
       case _AND_:
         imgNoRet.atomicOperation = BrigAtomicAnd;
+        imgNoRet.type = Brigb32;
         break;
       case _OR_:
         imgNoRet.atomicOperation = BrigAtomicOr;
+        imgNoRet.type = Brigb32;
         break;
       case _XOR_:
         imgNoRet.atomicOperation = BrigAtomicXor;
+        imgNoRet.type = Brigb32;
         break;
-      case _EXCH_:
-        imgNoRet.atomicOperation = BrigAtomicExch;
-        break;
+    //   case _EXCH_:
+    //    imgNoRet.atomicOperation = BrigAtomicExch;
+    //   break;
       case _ADD_:
         imgNoRet.atomicOperation = BrigAtomicAdd;
+        imgNoRet.type = Brigu64;  
         break;
       case _INC_:
         imgNoRet.atomicOperation = BrigAtomicInc;
+        imgNoRet.type = Brigs32;
         break;
       case _DEC_:
         imgNoRet.atomicOperation = BrigAtomicDec;
+        imgNoRet.type = Brigb32;
         break;
       case _MIN_:
         imgNoRet.atomicOperation = BrigAtomicMin;
+        imgNoRet.type = Brigu32;
         break;
       case _MAX_:
         imgNoRet.atomicOperation = BrigAtomicMax;
+        imgNoRet.type = Brigu32;
         break;
       case _SUB_:
         imgNoRet.atomicOperation = BrigAtomicSub;
+        imgNoRet.type = Brigu64;
         break;
       default:
         context->set_error(MISSING_DECLPREFIX);
@@ -6295,11 +6269,31 @@ int ImageNoRet(Context* context) {
         return 1;
     }
     context->token_to_scan = yylex();
+    // TypeLength: u32, s32, b32, u64, depending on the type of operation. 
+    // The add operation applies to u32, u64, and s32 types; 
+    // min and max apply to u32 and s32 types; inc and dec apply to s32 types; 
+    // and and, or, xor, and cas apply to b32 types.
+    /*
+    BrigDataType16_t type = context->token_value.data_type;
+    if (type == imgNoRet.type ||
+        ((imgNoRet.atomicOperation == BrigAtomicSub || 
+          imgNoRet.atomicOperation == BrigAtomicAdd) && 
+         (type == Brigu32 || type == Brigs32)) ||
+        ((imgNoRet.atomicOperation == BrigAtomicMin ||
+          imgNoRet.atomicOperation == BrigAtomicMax) &&
+         type == Brigs32)) {
+      imgNoRet.type = type;
+    } else {
+      context->set_error(MISSING_DATA_TYPE);
+      return 1;
+    }*/
+
     if (context->token_type == DATA_TYPE_ID) {
 
       std::string op_name;
-
       imgNoRet.type = context->token_value.data_type;
+
+
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
         imgNoRet.o_operands[0] = context->get_operand_offset();
@@ -6311,6 +6305,7 @@ int ImageNoRet(Context* context) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
                 unsigned int opCount = 2;
+                         
                 if (context->valid_string) {
                   op_name = context->token_value.string_val;
                 }
