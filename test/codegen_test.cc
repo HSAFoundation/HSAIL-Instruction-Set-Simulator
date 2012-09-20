@@ -4263,8 +4263,8 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
   context->token_to_scan = lexer->get_next_token();
 
   BrigDirectiveSampler ref = {
-    40,                     //size
-    BrigEDirectiveSampler,    //kind
+    sizeof(BrigDirectiveSampler),//size
+    BrigEDirectiveSampler,       //kind
     {
       0,                        // c_code
       BrigGlobalSpace,          // storag class

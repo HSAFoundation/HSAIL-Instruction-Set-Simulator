@@ -6575,31 +6575,8 @@ int Segp(Context* context) {
     };
 
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-      switch (context->token_to_scan) {
-        case _GLOBAL:
-          segmentp_op.storageClass = BrigGlobalSpace;
-          break;
-        case _GROUP:
-          segmentp_op.storageClass = BrigGroupSpace;
-          break;
-        case _PRIVATE:
-          segmentp_op.storageClass = BrigPrivateSpace;
-          break;
-        case _KERNARG:
-          segmentp_op.storageClass = BrigKernargSpace;
-          break;
-        case _READONLY:
-          segmentp_op.storageClass = BrigReadonlySpace;
-          break;
-        case _SPILL:
-          segmentp_op.storageClass = BrigSpillSpace;
-          break;
-        case _ARG:
-          segmentp_op.storageClass = BrigArgSpace;
-          break;
-        default:
-          segmentp_op.storageClass = BrigFlatSpace;
-      }
+      segmentp_op.storageClass = context->token_value.storage_class;
+
       context->token_to_scan = yylex();
       if (context->token_to_scan == _B1) { //datatypeId must be b1
         segmentp_op.type = context->token_value.data_type;
@@ -6678,31 +6655,8 @@ int Segp(Context* context) {
     }
     context->token_to_scan = yylex();
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-      switch (context->token_to_scan) {
-        case _GLOBAL:
-          sf_op.storageClass = BrigGlobalSpace;
-          break;
-        case _GROUP:
-          sf_op.storageClass = BrigGroupSpace;
-          break;
-        case _PRIVATE:
-          sf_op.storageClass = BrigPrivateSpace;
-          break;
-        case _KERNARG:
-          sf_op.storageClass = BrigKernargSpace;
-          break;
-        case _READONLY:
-          sf_op.storageClass = BrigReadonlySpace;
-          break;
-        case _SPILL:
-          sf_op.storageClass = BrigSpillSpace;
-          break;
-        case _ARG:
-          sf_op.storageClass = BrigArgSpace;
-          break;
-        default:
-          sf_op.storageClass = BrigFlatSpace;
-      }
+      sf_op.storageClass = context->token_value.storage_class;
+
       context->token_to_scan = yylex();
       if (context->token_to_scan == _U32 ||
           context->token_to_scan == _U64) { //datatypeId must be u32 or u64
@@ -7509,14 +7463,14 @@ int GlobalImageDeclPart2(Context *context){
         }
       }
 
-      // array for 1da or 2da,else set 1
-      if ((0 != bdi.width && 0 != bdi.height)
-         ||(0 != bdi.width && 0 != bdi.depth)
-         ||(0 != bdi.height && 0 != bdi.depth)){
-        if (context->get_dim()){// a array
-          BrigDirectiveImage get;
-          context->get_directive(context->current_img_offset,&get);
+      BrigDirectiveImage get;
+      context->get_directive(context->current_img_offset,&get);
 
+      // array for 1da or 2da,else set 1
+      if (context->get_dim()){// a array
+        if ((0 != get.width && 0 != get.height)
+           ||(0 != get.width && 0 != get.depth)
+           ||(0 != get.height && 0 != get.depth)){        
           get.array = context->get_dim();
 
           unsigned char *bdi_charp = 
@@ -7599,6 +7553,24 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
         } else {
           context->set_error(INVALID_IMAGE_INIT);
           return 1;
+        }
+      }
+
+      BrigDirectiveImage get;
+      context->get_directive(context->current_img_offset,&get);
+
+      // array for 1da or 2da,else set 1
+      if (context->get_dim()){ // a array
+        if ((0 != get.width && 0 != get.height)
+           ||(0 != get.width && 0 != get.depth)
+           ||(0 != get.height && 0 != get.depth)){
+          get.array = context->get_dim();
+
+          unsigned char *bdi_charp = 
+            reinterpret_cast<unsigned char*>(&get);
+          context->update_directive_bytes(bdi_charp,
+                                          context->current_img_offset,
+                                          sizeof(BrigDirectiveImage));
         }
       }
 
@@ -7922,31 +7894,8 @@ int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass,
                        BrigMemorySemantic32_t* pMemorySemantic) {
   while (1) {
     if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-      switch (context->token_to_scan) {
-        case _GLOBAL:
-          *pStorageClass = BrigGlobalSpace;
-          break;
-        case _GROUP:
-          *pStorageClass = BrigGroupSpace;
-          break;
-        case _PRIVATE:
-          *pStorageClass = BrigPrivateSpace;
-          break;
-        case _KERNARG:
-          *pStorageClass = BrigKernargSpace;
-          break;
-        case _READONLY:
-          *pStorageClass = BrigReadonlySpace;
-          break;
-        case _SPILL:
-          *pStorageClass = BrigSpillSpace;
-          break;
-        case _ARG:
-          *pStorageClass = BrigArgSpace;
-          break;
-        default:
-          *pStorageClass = BrigFlatSpace;
-      }
+      *pStorageClass = context->token_value.storage_class;
+
       context->token_to_scan = yylex();
       continue;
     }
