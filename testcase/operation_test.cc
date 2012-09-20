@@ -7012,5 +7012,1020 @@ TEST_P(Mad24HiFalse, BrigMad24) {
 }
 INSTANTIATE_TEST_CASE_P(CodegenTest, Mad24HiFalse, testing::Range(0,4));
 
+
+
+TEST_P(Instruction3OpAddInt, BrigAdd){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(inputarray_instruction3op_add_int[n]);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction3(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  //BrigOperandImmed getImm;
+  BrigOperandWaveSz getWaveSz;
+  context->get_code(0, &getBase);
+  BrigInstBase ref = outputarray_instruction3op_add_int[int(n/2)];
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  if((n == 0)||(n == 2)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+  if((n == 1)||(n == 3)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 4)||(n == 6)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);  
+  }
+  if((n == 5)||(n == 7)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 8)||(n == 10)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+  }
+  if((n == 9)||(n == 11)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 12)||(n == 14)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+  }
+  if((n == 13)||(n == 15)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getWaveSz);
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(OperationTest, 
+                        Instruction3OpAddInt, 
+                        testing::Range(0,16));
+
+
+TEST_P(Instruction3OpAddPackedint, BrigAdd){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(inputarray_instruction3op_add_packed_int[n]);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction3(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  context->get_code(0, &getBase);
+  BrigInstBase ref = outputarray_instruction3op_add_packed_int[n];
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  if((n == 0)||(n == 1)||(n == 2)||(n ==3)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+  if((n == 4)||(n == 5)||(n == 6)||(n ==7)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(OperationTest, 
+                        Instruction3OpAddPackedint, 
+                        testing::Range(0,8/*10*/));
+
+
+TEST_P(Instruction3OpAddFloat, BrigAdd){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(inputarray_instruction3op_add_float[n]);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction3(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  //BrigOperandImmed getImm;
+  context->get_code(0, &getBase);
+  BrigInstBase ref = outputarray_instruction3op_add_float[int(n/2)];
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  if((n == 0)||(n == 1)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+  if((n == 2)||(n == 3)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+  if((n == 4)||(n == 5)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(OperationTest, 
+                        Instruction3OpAddFloat, 
+                        testing::Range(0,6));
+
+
+TEST_P(Instruction3OpAddFtzRoundFloat, BrigAdd){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(inputarray_instruction3op_add_ftz_round_float[n]);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction3(context));
+
+  BrigInstMod getMod;
+  BrigOperandReg getReg;
+  //BrigOperandImmed getImm;
+  context->get_code(0, &getMod);
+  BrigInstMod ref = outputarray_instruction3op_add_ftz_round_float[int(n/1)];
+
+  EXPECT_EQ(ref.size, getMod.size);
+  EXPECT_EQ(ref.kind, getMod.kind);
+  EXPECT_EQ(ref.opcode, getMod.opcode);
+  EXPECT_EQ(ref.packing, getMod.packing);
+  EXPECT_EQ(ref.type, getMod.type);
+  EXPECT_EQ(ref.o_operands[0], getMod.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getMod.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getMod.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getMod.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getMod.o_operands[4]);
+
+  EXPECT_EQ(ref.aluModifier.ftz, getMod.aluModifier.ftz);
+  EXPECT_EQ(ref.aluModifier.rounding, getMod.aluModifier.rounding);
+  EXPECT_EQ(ref.aluModifier.floatOrInt, getMod.aluModifier.floatOrInt);
+
+  if((n == 0)||(n == 1)||(n == 3)||(n == 4)||(n == 6)||(n == 7)||(n == 9)||
+     (n == 10)||(n == 11)||(n == 12)||(n == 15)||(n == 16)||(n == 18)||
+     (n == 19)||(n == 21)||(n == 22)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+  if((n == 2)||(n == 5)||(n == 8)||(n == 13)||(n == 14)||(n == 17)||(n == 20)||
+     (n == 23)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(OperationTest, 
+                        Instruction3OpAddFtzRoundFloat, 
+                        testing::Range(0,24/*96*/));
+
+
+TEST_P(Instruction3OpAddPackedFloat, BrigAdd){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(inputarray_instruction3op_add_packed_float[n]);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction3(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  context->get_code(0, &getBase);
+  BrigInstBase ref = outputarray_instruction3op_add_packed_float[n];
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+ if(n == 0){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+  if((n == 1)||(n == 2)||(n == 3)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(OperationTest, 
+                        Instruction3OpAddPackedFloat, 
+                        testing::Range(0,4));
+
+
+TEST_P(Instruction3OpCarry, BrigCarry){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(inputarray_instruction3op_carry[n]);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction3(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  //BrigOperandImmed getImm;
+  BrigOperandWaveSz getWaveSz;
+  context->get_code(0, &getBase);
+  BrigInstBase ref = outputarray_instruction3op_carry[int(n/2/*3*/)];
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  if((n == 0)||(n == 2)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+  if((n == 1)||(n == 3)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 4)||(n == 6)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);  
+  }
+  if((n == 5)||(n == 7)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 8)||(n == 10)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+  }
+  if((n == 9)||(n == 11)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 12)||(n == 14)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+  }
+  if((n == 13)||(n == 15)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getWaveSz);
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(OperationTest, 
+                        Instruction3OpCarry, 
+                        testing::Range(0,16/*36*/));
+
+
+TEST_P(Instruction3OpBorrow, BrigBorrow){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(inputarray_instruction3op_borrow[n]);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction3(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  //BrigOperandImmed getImm;
+  BrigOperandWaveSz getWaveSz;
+  context->get_code(0, &getBase);
+  BrigInstBase ref = outputarray_instruction3op_borrow[int(n/2/*3*/)];
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+    if((n == 0)||(n == 2)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);
+  }
+  if((n == 1)||(n == 3)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 4)||(n == 6)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(8, getReg.name);  
+  }
+  if((n == 5)||(n == 7)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+
+    context->get_operand(32, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 8)||(n == 10)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(4, getReg.name);  
+  }
+  if((n == 9)||(n == 11)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+  if((n == 12)||(n == 14)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);  
+  }
+  if((n == 13)||(n == 15)){
+    context->get_operand(8, &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(12, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(0, getReg.name);
+
+    context->get_operand(20, &getWaveSz);  
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+
+    context->get_operand(24, &getWaveSz);
+    //BrigOperandWaveSz
+    EXPECT_EQ(4, getWaveSz.size);
+    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+  }
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(OperationTest, 
+                        Instruction3OpBorrow, 
+                        testing::Range(0,16/*36*/));
+
+
 }  // namespace brig
 }  // namespace hsa

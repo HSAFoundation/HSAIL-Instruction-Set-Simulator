@@ -3764,6 +3764,1293 @@ std::string input_array_mad24_hi_false[] = {
   "mad24_hi_u64 WAVESIZE, 1, 1;"
 };
 
+
+class Instruction3OpAddInt: public ::testing::TestWithParam<int>{
+};
+std::string inputarray_instruction3op_add_int[] = {
+//src0:reg u32
+  "add_u32 $s1, $s2, $s3;",
+  //"add_u32 $s1, $s2, 1;",
+  "add_u32 $s1, $s2, WAVESIZE;",
+  //src0:reg s32
+  "add_s32 $s1, $s2, $s3;",
+  //"add_s32 $s1, $s2, 1;",
+  "add_s32 $s1, $s2, WAVESIZE;",
+  //src0:reg u64	
+  "add_u64 $d1, $d2, $d3;",
+  //"add_u64 $d1, $d2, 1;",
+  "add_u64 $d1, $d2, WAVESIZE;",
+  //src0:reg s64
+  "add_s64 $d1, $d2, $d3;",
+  //"add_s64 $d1, $d2, 1;",
+  "add_s64 $d1, $d2, WAVESIZE;",
+  //src0:immed value u32
+  //"add_u32 $s1, 61, $s3;",
+  //"add_u32 $s1, 61, 1;",
+  //"add_u32 $s1, 61, WAVESIZE;",
+  //src0:immed value s32
+  //"add_s32 $d1, 61, $d3;",
+  //"add_s32 $s1, 61, 1;",
+  //"add_s32 $s1, 61, WAVESIZE;",
+  //src0:immed value u64
+  //"add_u64 $d1, 61, $d3;",
+  //"add_u64 $d1, 61, 1;",
+  //"add_u64 $d1, 61, WAVESIZE;",
+  //src0:immed value s64
+  //"add_s64 $d1, 61, $d3;",
+  //"add_s64 $d1, 61, 1;",
+  //"add_s64 $d1, 61, WAVESIZE;",
+  //src0:wavesize u32
+  "add_u32 $s1, WAVESIZE, $s3;",
+  //"add_u32 $s1, WAVESIZE, 61;",
+  "add_u32 $s1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize s32
+  "add_s32 $s1, WAVESIZE, $s3;",
+  //"add_s32 $s1, WAVESIZE, 61;",
+  "add_s32 $s1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize u64
+  "add_u64 $d1, WAVESIZE, $d3;",
+  //"add_u64 $d1, WAVESIZE, 61;",
+  "add_u64 $d1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize s64
+  "add_s64 $d1, WAVESIZE, $d3;",
+  //"add_s64 $d1, WAVESIZE, 61;",
+  "add_s64 $d1, WAVESIZE, WAVESIZE;"
+};
+
+BrigInstBase outputarray_instruction3op_add_int[] = {
+ {//0
+    32,                                         //src0:reg u32
+    BrigEInstBase,
+    BrigAdd,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//1
+    32,                                         //src0:reg s32
+    BrigEInstBase,
+    BrigAdd,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//2
+    32,                                         //src0:reg u64
+    BrigEInstBase,
+    BrigAdd,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//3
+    32,                                         //src0:reg s64
+    BrigEInstBase,
+    BrigAdd,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },/*
+  {//4
+    32,                                         //src0:immed value u32
+    BrigEInstBase,
+    BrigAdd,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//5
+    32,                                         //src0:immed value s32
+    BrigEInstBase,
+    BrigAdd,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//6
+    32,                                         //src0:immed value u64
+    BrigEInstBase,
+    BrigAdd,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//7
+    32,                                         //src0:immed value s64
+    BrigEInstBase,
+    BrigAdd,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },*/
+  {//8
+    32,                                         //src0:wavesize u32
+    BrigEInstBase,
+    BrigAdd,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//9
+    32,                                          //src0:wavesize s32
+    BrigEInstBase,
+    BrigAdd,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//10
+    32,                                          //src0:wavesize u64
+    BrigEInstBase,
+    BrigAdd,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//11
+    32,                                          //src0:wavesize s64
+    BrigEInstBase,
+    BrigAdd,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  }
+};
+
+class Instruction3OpAddPackedint: public ::testing::TestWithParam<int>{
+};
+std::string inputarray_instruction3op_add_packed_int[] = {
+  "add_pp_u8x4 $s1, $s2, $s3;",
+  "add_pp_sat_s8x4 $s1, $s2, $s3;",
+  "add_ps_u16x2 $s1, $s2, $s3;",
+  "add_ps_sat_s16x2 $s1, $s2, $s3;",
+  "add_sp_u8x8 $d1, $d2, $d3;",
+  "add_sp_sat_s8x8 $d1, $d2, $d3;",
+  "add_ss_u16x4 $d1, $d2, $d3;",
+  "add_ss_sat_s16x4 $d1, $d2, $d3;"/*,
+  "add_ss_u32x2 $d1, $d2, $d3;",
+  "add_ss_sat_s32x2 $d1, $d2, $d3;"*/
+};
+
+BrigInstBase outputarray_instruction3op_add_packed_int[] = {
+  {//0
+    32,                         //pp_u8x4
+    BrigEInstBase,
+    BrigAdd,
+    Brigu8x4,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {//1
+    32,                         //pp_sat_s8x4
+    BrigEInstBase,
+    BrigAdd,
+    Brigs8x4,
+    BrigPackPPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {//2
+    32,                         //ps_u16x2
+    BrigEInstBase,
+    BrigAdd,
+    Brigu16x2,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {//3
+    32,                         //ps_sat_s16x2
+    BrigEInstBase,
+    BrigAdd,
+    Brigs16x2,
+    BrigPackPSsat,
+    {8, 20, 32, 0, 0}
+  },
+  {//4
+    32,                         //sp_u8x8
+    BrigEInstBase,
+    BrigAdd,
+    Brigu8x8,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {//5
+    32,                         //sp_sat_s8x8
+    BrigEInstBase,
+    BrigAdd,
+    Brigs8x8,
+    BrigPackSPsat,
+    {8, 20, 32, 0, 0}
+  },
+  {//6
+    32,                         //ss_u16x4
+    BrigEInstBase,
+    BrigAdd,
+    Brigu16x4,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {//7
+    32,                         //ss_sat_s16x4
+    BrigEInstBase,
+    BrigAdd,
+    Brigs16x4,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  }/*,
+  {//8
+    32,                         //ss_u32x2
+    BrigEInstBase,
+    BrigAdd,
+    Brigu32x2,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  },
+  {//9
+    32,                         //ss_sat_s32x2
+    BrigEInstBase,
+    BrigAdd,
+    Brigs32x2,
+    BrigPackSSsat,
+    {8, 20, 32, 0, 0}
+  }*/
+};
+
+
+class Instruction3OpAddFloat: public ::testing::TestWithParam<int>{
+};
+std::string inputarray_instruction3op_add_float[] = {
+  //src0:reg f16
+  "add_f16 $s1, $s2, $s3;",
+  "add_near_f16 $s1, $s2, $s3;",
+  //"add_f16 $s1, $s2, 0.2;", 
+  //"add_near_f16 $s1, $s2, 0.2;",
+  //src0:reg f32
+  "add_f32 $s1, $s2, $s3;",
+  "add_near_f32 $s1, $s2, $s3;",
+  //"add_f32 $s1, $s2, 0.2;", 
+  //"add_near_f32 $s1, $s2, 0.2;",
+  //src0:reg f64
+  "add_f64 $d1, $d2, $d3;",
+  "add_near_f64 $d1, $d2, $d3;"//,
+  //"add_f64 $d1, $d2, 0.2;", 
+  //"add_near_f64 $d1, $d2, 0.2;",
+  //src0:immed f16
+  //"add_f16 $s1, 0.1, $s3;",
+  //"add_near_f16 $s1, 0.1, $s3;",
+  //"add_f16 $s1, 0.1, 0.2;", 
+  //"add_near_f16 $s1, 0.1, 0.2;",
+  //src0:immed f32
+  //"add_f32 $s1, 0.1, $s3;",
+  //"add_near_f32 $s1, 0.1, $s3;",
+  //"add_f32 $s1, 0.1, 0.2;", 
+  //"add_near_f32 $s1, 0.1, 0.2;",
+  //src0:immed f64
+  //"add_f64 $d1, 0.1, $d3;",
+  //"add_near_f64 $d1, 0.1, $d3;",
+  //"add_f64 $d1, 0.1, 0.2;",
+  //"add_near_f64 $d1, 0.1, 0.2;"
+};
+
+BrigInstBase outputarray_instruction3op_add_float[] = {
+  {//0
+    32,	                                               //src0:reg f16
+    BrigEInstBase,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//1
+    32,	                                                //src0:reg f32
+    BrigEInstBase,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//2
+    32,	                                                //src0:reg f64
+    BrigEInstBase,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  }/*,
+  {//3
+    32,	                                                //src0:immed f16
+    BrigEInstBase,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//4
+    32,	                                                //src0:immed f32
+    BrigEInstBase,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//5
+    32,	                                                //src0:immed f64
+    BrigEInstBase,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  }*/
+};
+
+
+class Instruction3OpAddFtzRoundFloat: public ::testing::TestWithParam<int>{
+};
+std::string inputarray_instruction3op_add_ftz_round_float[] = {
+  //src0:reg f16 noftz zero
+  "add_zero_f16 $s1, $s2, $s3;",//0
+  //"add_zero_f16 $s1, $s2, 0.2;",
+  //src0:reg f32 noftz zero
+  "add_zero_f32 $s1, $s2, $s3;",
+  //"add_zero_f32 $s1, $s2, 0.2;",
+  //src0:reg f64 noftz zero
+  "add_zero_f64 $d1, $d2, $d3;",
+  //"add_zero_f64 $d1, $d2, 0.2;",
+  //src0:immed f16 noftz zero
+  //"add_zero_f16 $s1, 0.1, $s3;",//6
+  //"add_zero_f16 $s1, 0.1, 0.2;",
+  //src0:immed f32 noftz zero
+  //"add_zero_f32 $s1, 0.1, $s3;",
+  //"add_zero_f32 $s1, 0.1, 0.2;",
+  //src0:immed f64 noftz zero
+  //"add_zero_f64 $d1, 0.1, $d3;",
+  //"add_zero_f64 $d1, 0.1, 0.2;",
+  //src0:reg f16 noftz up
+  "add_up_f16 $s1, $s2, $s3;",//12
+  //"add_up_f16 $s1, $s2, 0.2;",
+  //src0:reg f32 noftz up
+  "add_up_f32 $s1, $s2, $s3;",
+  //"add_up_f32 $s1, $s2, 0.2;",
+  //src0:reg f64 noftz up
+  "add_up_f64 $d1, $d2, $d3;",
+  //"add_up_f64 $d1, $d2, 0.2;",
+  //src0:immed f16 noftz up
+  //"add_up_f16 $s1, 0.1, $s3;",//18
+  //"add_up_f16 $s1, 0.1, 0.2;",
+  //src0:immed f32 noftz up
+  //"add_up_f32 $s1, 0.1, $s3;",
+  //"add_up_f32 $s1, 0.1, 0.2;",
+  //src0:immed f64 noftz up
+  //"add_up_f64 $d1, 0.1, $d3;",
+  //"add_up_f64 $d1, 0.1, 0.2;",
+  //src0:reg f16 noftz down
+  "add_down_f16 $s1, $s2, $s3;",//24
+  //"add_down_f16 $s1, $s2, 0.2;", 
+  //src0:reg f32 noftz down
+  "add_down_f32 $s1, $s2, $s3;",
+  //"add_down_f32 $s1, $s2, 0.2;", 
+  //src0:reg f64 noftz down
+  "add_down_f64 $d1, $d2, $d3;",
+  //"add_down_f64 $d1, $d2, 0.2;", 
+  //src0:immed f16 noftz down
+  //"add_down_f16 $s1, 0.1, $s3;",//30
+  //"add_down_f16 $s1, 0.1, 0.2;", 
+  //src0:immed f32 noftz down
+  //"add_down_f32 $s1, 0.1, $s3;",
+  //"add_down_f32 $s1, 0.1, 0.2;", 
+  //src0:immed f64 noftz down
+  //"add_down_f64 $d1, 0.1, $d3;",
+  //"add_down_f64 $d1, 0.1, 0.2;", 
+  //src0:reg f16 ftz near
+  "add_ftz_f16 $s1, $s2, $s3;",//36
+  "add_ftz_near_f16 $s1, $s2, $s3;",
+  //"add_ftz_f16 $s1, $s2, 0.2;",
+  //"add_ftz_near_f16 $s1, $s2, 0.2;",
+  //src0:reg f32 ftz near
+  "add_ftz_f32 $s1, $s2, $s3;",
+  "add_ftz_near_f32 $s1, $s2, $s3;",
+  //"add_ftz_f32 $s1, $s2, 0.2;",
+  //"add_ftz_near_f32 $s1, $s2, 0.2;",
+  //src0:reg f64 ftz near
+  "add_ftz_f64 $d1, $d2, $d3;",//44
+  "add_ftz_near_f64 $d1, $d2, $d3;",
+  //"add_ftz_f64 $d1, $d2, 0.2;",
+  //"add_ftz_near_f64 $d1, $d2, 0.2;",
+  //src0:immed f16 ftz near
+  //"add_ftz_f16 $s1, 0.1, $s3;",
+  //"add_ftz_near_f16 $s1, 0.1, $s3;",
+  //"add_ftz_f16 $s1, 0.1, 0.2;",
+  //"add_ftz_near_f16 $s1, 0.1, 0.2;",
+  //src0:immed f32 ftz near
+  //"add_ftz_f32 $s1, 0.1, $d3;",//52
+  //"add_ftz_near_f32 $s1, 0.1, $d3;",
+  //"add_ftz_f32 $s1, 0.1, 0.2;",
+  //"add_ftz_near_f32 $s1, 0.1, 0.2;",
+  //src0:immed f64 ftz near
+  //"add_ftz_f64 $d1, 0.1, $d3;",
+  //"add_ftz_near_f64 $d1, 0.1, $d3;",
+  //"add_ftz_f64 $d1, 0.1, 0.2;",
+  //"add_ftz_near_f64 $d1, 0.1, 0.2;",
+  //src0:reg f16 ftz zero
+  "add_ftz_zero_f16 $s1, $s2, $s3;",//60
+  //"add_ftz_zero_f16 $s1, $s2, 0.2;",
+  //src0:reg f32 ftz zero
+  "add_ftz_zero_f32 $s1, $s2, $s3;", 
+  //"add_ftz_zero_f32 $s1, $s2, 0.2;",
+  //src0:reg f64 ftz zero
+  "add_ftz_zero_f64 $d1, $d2, $d3;", 
+  //"add_ftz_zero_f64 $d1, $d2, 0.2;",
+  //src0:immed f16 ftz zero
+  //"add_ftz_zero_f16 $s1, 0.1, $s3;",
+  //"add_ftz_zero_f16 $s1, 0.1, 0.2;",
+  //src0:immed f32 ftz zero
+  //"add_ftz_zero_f32 $s1, 0.1, $s3;", 
+  //"add_ftz_zero_f32 $s1, 0.1, 0.2;",
+  //src0:immed f64 ftz zero
+  //"add_ftz_zero_f64 $d1, 0.1, $d3;",//70
+  //"add_ftz_zero_f64 $d1, 0.1, 0.2;",
+  //src0:reg f16 ftz up
+  "add_ftz_up_f16 $s1, $s2, $s3;", 
+  //"add_ftz_up_f16 $s1, $s2, 0.2;",
+  //src0:reg f32 ftz up
+  "add_ftz_up_f32 $s1, $s2, $s3;", 
+  //"add_ftz_up_f32 $s1, $s2, 0.2;",
+  //src0:reg f64 ftz up
+  "add_ftz_up_f64 $d1, $d2, $d3;", 
+  //"add_ftz_up_f64 $d1, $d2, 0.2;",
+  //src0:immed f16 ftz up
+  //"add_ftz_up_f16 $s1, 0.1, $s3;", 
+  //"add_ftz_up_f16 $s1, 0.1, 0.2;",
+  //src0:immed f32 ftz up
+  //"add_ftz_up_f32 $s1, 0.1, $s3;", //80
+  //"add_ftz_up_f32 $s1, 0.1, 0.2;",
+  //src0:immed f64 ftz up
+  //"add_ftz_up_f64 $d1, 0.1, $d3;", 
+  //"add_ftz_up_f64 $d1, 0.1, 0.2;",
+  //src0:reg f16 ftz down
+  "add_ftz_down_f16 $s1, $s2, $s3;",
+  //"add_ftz_down_f16 $s1, $s2, 0.2;",
+  //src0:reg f32 ftz down
+  "add_ftz_down_f32 $s1, $s2, $s3;",
+  //"add_ftz_down_f32 $s1, $s2, 0.2;",
+  //src0:reg f64 ftz down
+  "add_ftz_down_f64 $d1, $d2, $d3;"//, //88
+  //"add_ftz_down_f64 $d1, $d2, 0.2;",
+  //src0:immed f16 ftz down
+  //"add_ftz_down_f16 $s1, 0.1, $s3;",
+  //"add_ftz_down_f16 $s1, 0.1, 0.2;",
+  //src0:immed f32 ftz down
+  //"add_ftz_down_f32 $s1, 0.1, $s3;",
+  //"add_ftz_down_f32 $s1, 0.1, 0.2;",
+  //src0:immed f64 ftz down
+  //"add_ftz_down_f64 $d1, 0.1, $d3;",
+  //"add_ftz_down_f64 $d1, 0.1, 0.2;"
+};
+
+BrigAluModifier add_bam[] = {
+  {1,0,0,0,0,0,0},//float,near,noint,noftz,approx,fbar,reserved
+
+  {1,1,0,0,0,0,0},//float,zero,noint,noftz,approx,fbar,reserved
+
+  {1,2,0,0,0,0,0},//float,up,noint,noftz,approx,fbar,reserved
+
+  {1,3,0,0,0,0,0},//float,down,noint,noftz,approx,fbar,reserved
+
+  {1,0,0,1,0,0,0},//float,near,noint,ftz,approx,fbar,reserved
+
+  {1,1,0,1,0,0,0},//float,zero,noint,ftz,approx,fbar,reserved
+
+  {1,2,0,1,0,0,0},//float,up,noint,ftz,approx,fbar,reserved
+
+  {1,3,0,1,0,0,0} //float,down,noint,ftz,approx,fbar,reserved
+};
+
+BrigInstMod outputarray_instruction3op_add_ftz_round_float[] = {
+  {//0
+    36,                               //src0:reg f16 noftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[1]
+  },
+  {//2
+    36,                                //src0:reg f32 noftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[1]
+  },
+  {//3
+    36,                                //src0:reg f64 noftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[1]
+  },/*
+  {//4
+    36,                              //src0:immed value f16 noftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[1]
+  },
+  {//5
+    36,                              //src0:immed value f32 noftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[1]
+  },
+  {//6
+    36,                             //src0:immed value f32 noftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[1]
+  },*/
+  {//7
+    36,                             //src0:reg f16 noftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[2]
+  },
+  {//8
+    36,                               //src0:reg f32 noftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[2]
+  },
+  {//9
+    36,                               //src0:reg f64 noftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[2]
+  },/*
+  {//10
+    36,                              //src0:immed value f16 noftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[2]
+  },
+  {//11
+    36,                             //src0:immed value f32 noftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[2]
+  },
+  {//12
+    36,                            //src0:immed value f64 noftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[2]
+  },*/
+  {//13
+    36,                           //src0:reg f16 noftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[3]
+  },
+  {//14
+    36,                           //src0:reg f32 noftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[3]
+  },
+  {//15
+    36,                          //src0:reg f64 noftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[3]
+  },/*
+  {//16
+    36,                          //src0:immed value f16 noftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[3]
+  },
+  {//17
+    36,                          //src0:immed value f32 noftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[3]
+  },
+  {//18
+    36,                          //src0:immed value f64 noftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[3]
+  },*/
+  {//19
+    36,                          //src0:reg f16 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[4]
+  },
+  {//20
+    36,                          //src0:reg f16 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[4]
+  },
+  {//21
+    36,                          //src0:reg f32 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[4]
+  },
+  {//22
+    36,                          //src0:reg f32 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[4]
+  },
+  {//23
+    36,                           //src0:reg f64 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[4]
+  },
+  {//24
+    36,                          //src0:reg f64 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[4]
+  },/*
+  {//25
+    36,                          //src0:immed value f16 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[4]
+  },
+  {//26
+    36,                          //src0:immed value f16 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[4]
+  },
+  {//27
+    36,                          //src0:immed value f32 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[4]
+  },
+  {//28
+    36,                          //src0:immed value f32 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[4]
+  },
+  {//29
+    36,                          //src0:immed value f64 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[4]
+  },
+  {//30
+    36,                          //src0:immed value f64 ftz near
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[4]
+  },*/
+  {//31
+    36,                          //src0:reg f16 ftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[5]
+  },
+  {//32
+    36,                          //src0:reg f32 ftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[5]
+  },
+  {//33
+    36,                          //src0:reg f64 ftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[5]
+  },/*
+  {//34
+    36,                          //src0:immed value f16 ftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[5]
+  },
+  {//35
+    36,                          //src0:immed value f32 ftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[5]
+  },
+  {//36
+    36,                          //src0:immed value f32 ftz zero
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[5]
+  },*/
+  {//37
+    36,                          //src0:reg f16 ftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[6]
+  },
+  {//38
+    36,                          //src0:reg f32 ftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[6]
+  },
+  {//39
+    36,                          //src0:reg f64 ftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[6]
+  },/*
+  {//40
+    36,                          //src0:immed value f16 ftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[6]
+  },
+  {//41
+    36,                          //src0:immed value f32 ftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[6]
+  },
+  {//42
+    36,                          //src0:immed value f64 ftz up
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[6]
+  },*/
+  {//43
+    36,                          //src0:reg f16 ftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[7]
+  },
+  {//44
+    36,                          //src0:reg f32 ftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[7]
+  },
+  {//45
+    36,                          //src0:reg f64 ftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0},
+    add_bam[7]
+  }/*,
+  {//46
+    36,                          //src0:immed value f16 ftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf16,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[7]
+  },
+  {//47
+    36,                          //src0:immed value f32 ftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[7]
+  },
+  {//48
+    36,                          //src0:immed value f64 ftz down
+    BrigEInstMod,
+    BrigAdd,
+    Brigf64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0},
+    add_bam[7]
+  }*/
+};
+
+
+class Instruction3OpAddPackedFloat: public ::testing::TestWithParam<int>{
+};
+std::string inputarray_instruction3op_add_packed_float[] = {
+  "add_pp_f16x2 $s1, $s2, $s3;",
+  "add_ps_f16x4 $d1, $d2, $d3;",
+  "add_sp_f32x2 $d1, $d2, $d3;",
+  "add_ss_f32x2 $d1, $d2, $d3;"
+};
+
+BrigInstBase outputarray_instruction3op_add_packed_float[] = {
+  {//0
+    32,
+    BrigEInstBase,
+    BrigAdd,
+    Brigf16x2,
+    BrigPackPP,
+    {8, 20, 32, 0, 0}
+  },
+  {//1
+    32,
+    BrigEInstBase,
+    BrigAdd,
+    Brigf16x4,
+    BrigPackPS,
+    {8, 20, 32, 0, 0}
+  },
+  {//2
+    32,
+    BrigEInstBase,
+    BrigAdd,
+    Brigf32x2,
+    BrigPackSP,
+    {8, 20, 32, 0, 0}
+  },
+  {//3
+    32,
+    BrigEInstBase,
+    BrigAdd,
+    Brigf32x2,
+    BrigPackSS,
+    {8, 20, 32, 0, 0}
+  }
+};
+
+
+class Instruction3OpCarry: public ::testing::TestWithParam<int>{
+};
+std::string inputarray_instruction3op_carry[] = {
+  //src0:reg u32
+  "carry_u32 $s1, $s2, $s3;",
+  //"carry_u32 $s1, $s2, 1;",
+  "carry_u32 $s1, $s2, WAVESIZE;",
+  //src0:reg s32
+  "carry_s32 $s1, $s2, $s3;",
+  //"carry_s32 $s1, $s2, 1;",
+  "carry_s32 $s1, $s2, WAVESIZE;",
+  //src0:reg u64
+  "carry_u64 $d1, $d2, $d3;",//6
+  //"carry_u64 $d1, $d2, 1;",
+  "carry_u64 $d1, $d2, WAVESIZE;",
+  //src0:reg s64
+  "carry_s64 $d1, $d2, $d3;",
+  //"carry_s64 $d1, $d2, 1;",
+  "carry_s64 $d1, $d2, WAVESIZE;",
+  //src0:immed u32
+  //"carry_u32 $s1, 61, $s3;",
+  //"carry_u32 $s1, 61, 1;",
+  //"carry_u32 $s1, 61, WAVESIZE;",
+  //src0:immed s32
+  //"carry_s32 $s1, 61, $d3;",//15
+  //"carry_s32 $s1, 61, 1;",
+  //"carry_s32 $s1, 61, WAVESIZE;",
+  //src0:immed u64
+  //"carry_u64 $d1, 61, $d3;",
+  //"carry_u64 $d1, 61, 1;",
+  //"carry_u64 $d1, 61, WAVESIZE;",
+  //src0:immed s64
+  //"carry_s64 $d1, 61, $d3;",
+  //"carry_s64 $d1, 61, 1;",
+  //"carry_s64 $d1, 61, WAVESIZE;",
+  //src0:wavesize u32
+  "carry_u32 $s1, WAVESIZE, $s3;",//24
+  //"carry_u32 $s1, WAVESIZE, 61;",
+  "carry_u32 $s1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize s32
+  "carry_s32 $s1, WAVESIZE, $s3;",
+  //"carry_s32 $s1, WAVESIZE, 61;",
+  "carry_s32 $s1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize u64
+  "carry_u64 $d1, WAVESIZE, $d3;",
+  //"carry_u64 $d1, WAVESIZE, 61;",//31
+  "carry_u64 $d1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize s64
+  "carry_s64 $d1, WAVESIZE, $d3;",
+  //"carry_s64 $d1, WAVESIZE, 61;",
+  "carry_s64 $d1, WAVESIZE, WAVESIZE;"
+};
+
+BrigInstBase outputarray_instruction3op_carry[] = {
+  {//0
+    32,                          //src0:reg u32
+    BrigEInstBase,
+    BrigCarry,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//1
+    32,                          //src0:reg s32
+    BrigEInstBase,
+    BrigCarry,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//2
+    32,                          //src0:reg u64
+    BrigEInstBase,
+    BrigCarry,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//3
+    32,                          //src0:reg s64
+    BrigEInstBase,
+    BrigCarry,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },/*
+  {//4
+    32,                          //src0:immed value u32
+    BrigEInstBase,
+    BrigCarry,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//5
+    32,                          //src0:immed value s32
+    BrigEInstBase,
+    BrigCarry,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//6
+    32,                          //src0:immed value u64
+    BrigEInstBase,
+    BrigCarry,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//7
+    32,                          //src0:immed value s64
+    BrigEInstBase,
+    BrigCarry,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },*/
+  {//8
+    32,                          //src0:wavesize u32
+    BrigEInstBase,
+    BrigCarry,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//9
+    32,                          //src0:wavesize s32
+    BrigEInstBase,
+    BrigCarry,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//10
+    32,                          //src0:wavesize u64
+    BrigEInstBase,
+    BrigCarry,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//11
+    32,                          //src0:wavesize s64
+    BrigEInstBase,
+    BrigCarry,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  }
+};
+
+
+class Instruction3OpBorrow: public ::testing::TestWithParam<int>{
+};
+std::string inputarray_instruction3op_borrow[] = {
+  //src0:reg u32
+  "borrow_u32 $s1, $s2, $s3;",
+  //"borrow_u32 $s1, $s2, 1;",
+  "borrow_u32 $s1, $s2, WAVESIZE;",
+  //src0:reg s32
+  "borrow_s32 $s1, $s2, $s3;",
+  //"borrow_s32 $s1, $s2, 1;",
+  "borrow_s32 $s1, $s2, WAVESIZE;",
+  //src0:reg u64
+  "borrow_u64 $d1, $d2, $d3;",
+  //"borrow_u64 $d1, $d2, 1;",
+  "borrow_u64 $d1, $d2, WAVESIZE;",
+  //src0:reg s64
+  "borrow_s64 $d1, $d2, $d3;",
+  //"borrow_s64 $d1, $d2, 1;",
+  "borrow_s64 $d1, $d2, WAVESIZE;",
+  //src0:immed u32
+  //"borrow_u32 $s1, 61, $s3;",
+  //"borrow_u32 $s1, 61, 1;",
+  //"borrow_u32 $s1, 61, WAVESIZE;",
+  //src0:immed s32
+  //"borrow_s32 $s1, 61, $d3;",
+  //"borrow_s32 $s1, 61, 1;",
+  //"borrow_s32 $s1, 61, WAVESIZE;",
+  //src0:immed u64
+  //"borrow_u64 $d1, 61, $d3;",
+  //"borrow_u64 $d1, 61, 1;",
+  //"borrow_u64 $d1, 61, WAVESIZE;",
+  //src0:immed s64
+  //"borrow_s64 $d1, 61, $d3;",
+  //"borrow_s64 $d1, 61, 1;",
+  //"borrow_s64 $d1, 61, WAVESIZE;",
+  //src0:wavesize u32
+  "borrow_u32 $s1, WAVESIZE, $s3;",
+  //"borrow_u32 $s1, WAVESIZE, 61;",
+  "borrow_u32 $s1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize s32
+  "borrow_s32 $s1, WAVESIZE, $s3;",
+  //"borrow_s32 $s1, WAVESIZE, 61;",
+  "borrow_s32 $s1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize u64
+  "borrow_u64 $d1, WAVESIZE, $d3;",
+  //"borrow_u64 $d1, WAVESIZE, 61;",
+  "borrow_u64 $d1, WAVESIZE, WAVESIZE;",
+  //src0:wavesize s64
+  "borrow_s64 $d1, WAVESIZE, $d3;",
+  //"borrow_s64 $d1, WAVESIZE, 61;",
+  "borrow_s64 $d1, WAVESIZE, WAVESIZE;" 
+};
+
+BrigInstBase outputarray_instruction3op_borrow[] = {
+  {//0
+    32,                        //src0:reg u32
+    BrigEInstBase,
+    BrigBorrow,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//1
+    32,                        //src0:reg s32
+    BrigEInstBase,
+    BrigBorrow,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//2
+    32,                        //src0:reg u64
+    BrigEInstBase,
+    BrigBorrow,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },
+  {//3
+    32,                        //src0:reg s64
+    BrigEInstBase,
+    BrigBorrow,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 32, 0, 0}
+  },/*
+  {//4
+    32,                        //src0:immed value u32
+    BrigEInstBase,
+    BrigBorrow,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//5
+    32,                        //src0:immed value s32
+    BrigEInstBase,
+    BrigBorrow,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//6
+    32,                        //src0:immed value u64
+    BrigEInstBase,
+    BrigBorrow,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },
+  {//7
+    32,                        //src0:immed value s64
+    BrigEInstBase,
+    BrigBorrow,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 44, 0, 0}
+  },*/
+  {//8
+    32,                         //src0:wavesize u32
+    BrigEInstBase,
+    BrigBorrow,
+    Brigu32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//9
+    32,                         //src0:wavesize s32
+    BrigEInstBase,
+    BrigBorrow,
+    Brigs32,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//10
+    32,                         //src0:wavesize u64
+    BrigEInstBase,
+    BrigBorrow,
+    Brigu64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  },
+  {//11
+    32,                         //src0:wavesize s64
+    BrigEInstBase,
+    BrigBorrow,
+    Brigs64,
+    BrigNoPacking,
+    {8, 20, 24, 0, 0}
+  }
+};
+
+
 }  // namespace brig
 }  // namespace hsa
 #endif //CODEGEN_TEST_H_
