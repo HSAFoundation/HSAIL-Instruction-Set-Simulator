@@ -45,7 +45,8 @@ BrigReader *BrigReader::createBrigReader(llvm::object::ObjectFile *objFile) {
       if(it->getContents(operands)) return NULL;
     } else if(name == ".brig_debug" || name == ".debug") {
       if(it->getContents(debug)) return NULL;
-    } else if(name == ".brig_strtab" || name == ".strings") {
+    } else if(name == ".brig_strtab" || name == ".strtab" ||
+              name == ".strings") {
       if(it->getContents(strings)) return NULL;
     }
   }
