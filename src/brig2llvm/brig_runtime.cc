@@ -715,53 +715,93 @@ defineCvt(Cvt, ~0, f64, f32)
 template<class T> static T Atomic_and(T *x, T y) {
   return __sync_fetch_and_and(x, y);
 }
-AtomicInst(define, Atomic_and, Binary)
+template<class T> static void AtomicNoRet_and(T *x, T y) {
+  __sync_fetch_and_and (x, y);
+  return;
+}
+AtomicInst(define, and, Binary)
 
 template<class T> static T Atomic_or(T *x, T y) {
   return __sync_fetch_and_or(x, y);
 }
-AtomicInst(define, Atomic_or, Binary)
+template<class T> static void AtomicNoRet_or(T *x, T y) {
+  __sync_fetch_and_or(x, y);
+  return;
+}
+AtomicInst(define, or, Binary)
 
 template<class T> static T Atomic_xor(T *x, T y) {
   return __sync_fetch_and_xor(x, y);
 }
-AtomicInst(define, Atomic_xor, Binary)
+template<class T> static void AtomicNoRet_xor(T *x, T y) {
+  __sync_fetch_and_xor(x, y);
+  return;
+}
+AtomicInst(define, xor, Binary)
 
 template<class T> static T Atomic_exch(T *x, T y) {
   return __sync_val_compare_and_swap(x, *x, y);
 }
-AtomicInst(define, Atomic_exch, Binary)
+template<class T> static void AtomicNoRet_exch(T *x, T y) {
+  __sync_val_compare_and_swap(x, *x, y);
+  return;
+}
+AtomicInst(define, exch, Binary)
 
 template<class T> static T Atomic_add(T *x, T y) {
   return __sync_fetch_and_add (x, y);
 }
-AtomicInst(define, Atomic_add, Binary)
+template<class T> static void AtomicNoRet_add(T *x, T y) {
+  __sync_fetch_and_add (x, y);
+  return;
+}
+AtomicInst(define, add, Binary)
 
 template<class T> static T Atomic_sub(T *x, T y) {
   return __sync_fetch_and_sub (x, y);
 }
-AtomicInst(define, Atomic_sub, Binary)
+template<class T> static void AtomicNoRet_sub(T *x, T y) {
+  __sync_fetch_and_sub (x, y);
+  return;
+}
+AtomicInst(define, sub, Binary)
 
 template<class T> static T Atomic_inc(T *x, T y) {
   T result = __sync_fetch_and_add (x, 1);
-  if (*x > y && y > 0) *x = y;
-  if (*x <= 0) *x = 0;
+  if (*x > y && y > 0) __sync_val_compare_and_swap(x, *x, y);
+  if (*x <= 0) __sync_val_compare_and_swap(x, *x, 0);
   return result;
 }
-AtomicInst(define, Atomic_inc, Binary)
+template<class T> static void AtomicNoRet_inc(T *x, T y) {
+  __sync_fetch_and_add (x, 1);
+  if (*x > y && y > 0) __sync_val_compare_and_swap(x, *x, y);
+  if (*x <= 0) __sync_val_compare_and_swap(x, *x, 0);
+  return;
+}
+AtomicInst(define, inc, Binary)
 
 template<class T> static T Atomic_dec(T *x, T y) {
   T result = __sync_fetch_and_sub (x, 1);
-  if (*x > y && y > 0) *x = y;
-  if (*x <= 0) *x = 0;
+  if (*x > y && y > 0) __sync_val_compare_and_swap(x, *x, y);
+  if (*x <= 0) __sync_val_compare_and_swap(x, *x, 0);
   return result;
 }
-AtomicInst(define, Atomic_dec, Binary)
+template<class T> static void AtomicNoRet_dec(T *x, T y) {
+  __sync_fetch_and_sub (x, 1);
+  if (*x > y && y > 0) __sync_val_compare_and_swap(x, *x, y);
+  if (*x <= 0) __sync_val_compare_and_swap(x, *x, 0);
+  return;
+}
+AtomicInst(define, dec, Binary)
 
 template<class T> static T Atomic_cas(T *x, T y, T z) {
   return __sync_val_compare_and_swap(x, y, z);
 }
-AtomicInst(define, Atomic_cas, Ternary)
+template<class T> static void AtomicNoRet_cas(T *x, T y, T z) {
+  __sync_val_compare_and_swap(x, y, z);
+  return;
+}
+AtomicInst(define, cas, Ternary)
 
 } // namespace brig
 } // namespace hsa

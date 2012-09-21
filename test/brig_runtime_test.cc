@@ -1049,22 +1049,22 @@ MakeCvtF2FdTest(near, (f32) a == result)
 template<class T> static void Atomic_andLogic(T result, T *a, T b) {
   EXPECT_EQ(*a, T(result & b));
 }
-TestAll(AtomicInst, Atomic_and, Binary)
+TestAll(AtomicInst, and, Binary)
 
 template<class T> static void Atomic_orLogic(T result, T *a, T b) {
   EXPECT_EQ(*a, T(result | b));
 }
-TestAll(AtomicInst, Atomic_or, Binary)
+TestAll(AtomicInst, or, Binary)
 
 template<class T> static void Atomic_xorLogic(T result, T* a, T b) {
   EXPECT_EQ((result | b) & ~(result & b), *a);
 }
-TestAll(AtomicInst, Atomic_xor, Binary)
+TestAll(AtomicInst, xor, Binary)
 
 template<class T> static void Atomic_exchLogic(T result, T* a, T b) {
   EXPECT_EQ(b, *a);
 }
-TestAll(AtomicInst, Atomic_exch, Binary)
+TestAll(AtomicInst, exch, Binary)
 
 template<class T> static void Atomic_addLogic(T result, T* a, T b) {
   if(isNan(result) || isNan(b)) {
@@ -1077,7 +1077,7 @@ template<class T> static void Atomic_addLogic(T result, T* a, T b) {
     EXPECT_EQ(T(result + b), *a);
   }
 }
-TestAll(AtomicInst, Atomic_add, Binary)
+TestAll(AtomicInst, add, Binary)
 
 template<class T> static void Atomic_subLogic(T result, T* a, T b) {
   if(isNan(result) || isNan(b)) {
@@ -1090,7 +1090,7 @@ template<class T> static void Atomic_subLogic(T result, T* a, T b) {
     EXPECT_EQ(T(result - b), *a);
   }
 }
-TestAll(AtomicInst, Atomic_sub, Binary)
+TestAll(AtomicInst, sub, Binary)
 
 template<class T> static void Atomic_incLogic(T result, T* a, T b) {
   if(isNan(result) || isNan(b)) {
@@ -1107,7 +1107,7 @@ template<class T> static void Atomic_incLogic(T result, T* a, T b) {
     EXPECT_EQ(T(result + 1), *a);
   }
 }
-TestAll(AtomicInst, Atomic_inc, Binary)
+TestAll(AtomicInst, inc, Binary)
 
 template<class T> static void Atomic_decLogic(T result, T* a, T b) {
   if(isNan(result) || isNan(b)) {
@@ -1124,7 +1124,7 @@ template<class T> static void Atomic_decLogic(T result, T* a, T b) {
     EXPECT_EQ(T(result - 1), *a);
   }
 }
-TestAll(AtomicInst, Atomic_dec, Binary)
+TestAll(AtomicInst, dec, Binary)
 
 template<class T> static void Atomic_casLogic(T result, T* a, T b, T c) {
   if(result == b) {
@@ -1133,5 +1133,6 @@ template<class T> static void Atomic_casLogic(T result, T* a, T b, T c) {
     EXPECT_EQ(result, *a);
   }
 }
-TestAll(AtomicInst, Atomic_cas, Ternary)
+TestAll(AtomicInst, cas, Ternary)
+
 

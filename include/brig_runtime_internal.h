@@ -372,14 +372,21 @@ defineVec(f64, 2)
   }
 
 #define defineAtomicBinary(FUNC,TYPE)                            \
-  extern "C" TYPE FUNC  ## _ ## TYPE (TYPE* t, TYPE u) { \
-    return FUNC(t, u);                           \
+  extern "C" TYPE Atomic_ ## FUNC  ## _ ## TYPE (TYPE* t, TYPE u) { \
+    return Atomic_ ## FUNC(t, u);                           \
+  }  \
+  extern "C" void AtomicNoRet_ ## FUNC  ## _ ## TYPE (TYPE* t, TYPE u) {         \
+    AtomicNoRet_ ## FUNC(t, u);                                                                  \
   }
 
 #define defineAtomicTernary(FUNC,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) { \
-    return FUNC(t, u, v);                           \
+  extern "C" TYPE Atomic_ ## FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) { \
+    return Atomic_ ## FUNC(t, u, v);                           \
+  }  \
+  extern "C" void AtomicNoRet_ ## FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) {     \
+    AtomicNoRet_ ## FUNC(t, u, v);                                                     \
   }
+
 
 #define declareUnary(FUNC,TYPE)                 \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t);
@@ -409,10 +416,12 @@ defineVec(f64, 2)
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, unsigned shift);
 
 #define declareAtomicBinary(FUNC,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## TYPE (TYPE *t, TYPE u);
+  extern "C" TYPE Atomic_ ## FUNC ## _ ## TYPE (TYPE *t, TYPE u);            \
+  extern "C" void AtomicNoRet_ ## FUNC ## _ ## TYPE (TYPE *t, TYPE u);
 
 #define declareAtomicTernary(FUNC,TYPE)                            \
-  extern "C" TYPE FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);
+  extern "C" TYPE Atomic_ ## FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);     \
+  extern "C" void AtomicNoRet_ ## FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);
 
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {
