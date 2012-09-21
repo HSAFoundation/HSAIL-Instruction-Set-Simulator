@@ -18,6 +18,11 @@ typedef BrigBlockNumeric BrigDirectiveBlockNumeric;
 typedef BrigBlockString BrigDirectiveBlockString;
 typedef BrigBlockEnd BrigDirectiveBlockEnd;
 
+typedef BrigBlockStart BrigDebugBlockStart;
+typedef BrigBlockNumeric BrigDebugBlockNumeric;
+typedef BrigBlockString BrigDebugBlockString;
+typedef BrigBlockEnd BrigDebugBlockEnd;
+
 template<class T> inline T *dyn_cast(BrigDirectiveBase *dir) {
   return dir->kind == T::DirKind ? reinterpret_cast<T *>(dir) : NULL;
 }
@@ -167,23 +172,27 @@ struct BrigSections {
   const char *directives;
   const char *code;
   const char *operands;
+  const char *debug;
   const size_t stringsSize;
   const size_t directivesSize;
   const size_t codeSize;
   const size_t operandsSize;
+  const size_t debugSize;
 
   BrigSections(const char *strings,
                const char *directives,
                const char *code,
                const char *operands,
+               const char *debug,
                const size_t stringsSize,
                const size_t directivesSize,
                const size_t codeSize,
-               const size_t operandsSize) :
+               const size_t operandsSize,
+               const size_t debugSize) :
     strings(strings), directives(directives),
-    code(code), operands(operands),
+    code(code), operands(operands), debug(debug),
     stringsSize(stringsSize), directivesSize(directivesSize),
-    codeSize(codeSize), operandsSize(operandsSize) {}
+    codeSize(codeSize), operandsSize(operandsSize), debugSize(debugSize) {}
 
   dir_iterator begin() const { return dir_iterator(directives + 8); };
   dir_iterator end() const {

@@ -546,9 +546,10 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
 GenLLVM::GenLLVM(const StringBuffer &strings,
                  const Buffer &directives,
                  const Buffer &code,
-                 const Buffer &operands) :
+                 const Buffer &operands,
+                 const Buffer &debug) :
   strings_(strings), directives_(directives),
-  code_(code), operands_(operands),
+  code_(code), operands_(operands), debug_(debug),
   brig_frontend_(NULL) {
 }
 void GenLLVM::operator()(void) {
@@ -556,7 +557,8 @@ void GenLLVM::operator()(void) {
   C_ = new llvm::LLVMContext();
   brig_frontend_ = new llvm::Module("BRIG", *C_);
 
-  BrigModule mod(strings_, directives_, code_, operands_, &llvm::errs());
+  BrigModule mod(strings_, directives_, code_, operands_, 
+                 debug_, &llvm::errs());
   assert(mod.isValid());
 
   gen_GPU_states();

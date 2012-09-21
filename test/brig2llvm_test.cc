@@ -124,7 +124,9 @@ TEST(Brig2LLVMTest, Example1) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    hsa::brig::Buffer debug;
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
     codegen();
     EXPECT_NE(0U, codegen.str().size());
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -210,7 +212,9 @@ TEST(Brig2LLVMTest, Example2) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    hsa::brig::Buffer debug;
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
     codegen();
     EXPECT_NE(0U, codegen.str().size());
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -369,7 +373,9 @@ TEST(Brig2LLVMTest, Example3) {
     };
     operands.append(&bor4);
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    hsa::brig::Buffer debug;
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
     codegen();
     EXPECT_NE(0, codegen.str().size());
 
@@ -607,7 +613,9 @@ TEST(Brig2LLVMTest, Example4) {
     zero.bits.u = 0;
     operands.append(&zero);
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    hsa::brig::Buffer debug;
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
     codegen();
     EXPECT_NE(0, codegen.str().size());
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -757,7 +765,9 @@ TEST(Brig2LLVMTest, Example5) {
     };
     operands.append(&argList);
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands);
+    hsa::brig::Buffer debug;
+
+    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
     codegen();
     EXPECT_NE(0, codegen.str().size());
     EXPECT_NE(std::string::npos, codegen.str().find(std::string(
@@ -1489,7 +1499,9 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
     hsa::brig::Buffer operands;
     for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -1528,9 +1540,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -1569,9 +1584,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -1613,7 +1631,9 @@ TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -1652,9 +1672,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -1681,11 +1704,11 @@ TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
     directives.append(&bdv);
 
     BrigDirectiveFile bdf = {
-      sizeof(bdf),                                   //uint16_t size;
-      BrigEDirectiveFile,                            //uint16_t kind;
-      0,                                             //BrigcOffset32_t c_code; correct: 0
-      1,                                             //uint32_t fileid;
-      100                                            //BrigsOffset32_t s_filename; correct: 0
+      sizeof(bdf),        //uint16_t size;
+      BrigEDirectiveFile, //uint16_t kind;
+      0,                  //BrigcOffset32_t c_code; correct: 0
+      1,                  //uint32_t fileid;
+      100                 //BrigsOffset32_t s_filename; correct: 0
     };
     directives.append(&bdf);
 
@@ -1694,9 +1717,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -1738,7 +1764,9 @@ TEST(Brig2LLVMTest, validateBrigDirectiveLoc) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -1763,12 +1791,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveLoc) {
     directives.append(&bdv);
 
     BrigDirectiveLoc bdl =  {
-      sizeof(bdl),                              //uint16_t size;
-      BrigEDirectiveLoc,                        //uint16_t kind;
-      10,                                       //BrigcOffset32_t c_code;  correct: 0
-      0,                                        //uint32_t sourceFile;
-      0,                                        //uint32_t sourceLine;
-      0,                                        //uint32_t sourceColumn;
+      sizeof(bdl),       //uint16_t size;
+      BrigEDirectiveLoc, //uint16_t kind;
+      10,                //BrigcOffset32_t c_code;  correct: 0
+      0,                 //uint32_t sourceFile;
+      0,                 //uint32_t sourceLine;
+      0,                 //uint32_t sourceColumn;
     };
     directives.append(&bdl);
 
@@ -1777,9 +1805,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveLoc) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -1820,7 +1851,9 @@ TEST(Brig2LLVMTest, validateBrigDirectiveControl) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -1857,9 +1890,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveControl) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -1952,6 +1988,7 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2005,7 +2042,7 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
     directives.append(&bds);
 
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
    }
@@ -2018,6 +2055,7 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2070,7 +2108,8 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod2(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod2(strings, directives, code, operands,
+                               debug, &errMsgOut);
     errMsgOut.flush();
     EXPECT_FALSE(mod2.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2103,6 +2142,7 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2125,7 +2165,7 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
     };
     directives.append(&bde);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -2138,6 +2178,7 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2162,7 +2203,8 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod1(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod1(strings, directives, code, operands,
+                               debug, &errMsgOut);
     errMsgOut.flush();
     EXPECT_FALSE(mod1.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2183,6 +2225,7 @@ TEST(Brig2LLVMTest, BrigDirectiveArgStart_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2204,7 +2247,7 @@ TEST(Brig2LLVMTest, BrigDirectiveArgStart_test) {
     };
     directives.append(&bdas);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -2218,6 +2261,7 @@ TEST(Brig2LLVMTest, BrigDirectiveArgStart_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2241,7 +2285,8 @@ TEST(Brig2LLVMTest, BrigDirectiveArgStart_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod1(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod1(strings, directives, code, operands,
+                               debug, &errMsgOut);
     errMsgOut.flush();
     EXPECT_FALSE(mod1.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2260,6 +2305,7 @@ TEST(Brig2LLVMTest, BrigDirectiveArgEnd_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2281,7 +2327,7 @@ TEST(Brig2LLVMTest, BrigDirectiveArgEnd_test) {
     };
     directives.append(&bdae);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -2295,6 +2341,7 @@ TEST(Brig2LLVMTest, BrigDirectiveArgEnd_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2318,7 +2365,8 @@ TEST(Brig2LLVMTest, BrigDirectiveArgEnd_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod1(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod1(strings, directives, code, operands,
+                               debug, &errMsgOut);
     errMsgOut.flush();
     EXPECT_FALSE(mod1.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2382,7 +2430,9 @@ TEST(Brig2LLVMTest, BrigBlockMethodValidTest) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -2422,9 +2472,12 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockStart_invalid) {
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     errMsgOut.flush();
     EXPECT_FALSE(mod.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2462,9 +2515,12 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     errMsgOut.flush();
     EXPECT_FALSE(mod.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2502,9 +2558,12 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid2) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     errMsgOut.flush();
     EXPECT_FALSE(mod.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2538,10 +2597,12 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockString_invalid) {
     directives.append(&bstr);
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     errMsgOut.flush();
     EXPECT_FALSE(mod.isValid());
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2577,7 +2638,10 @@ TEST(Brig2LLVMTest, validateBrigDirectivePad) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -2613,7 +2677,10 @@ TEST(Brig2LLVMTest, validateBrigDirectivePragma) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -2651,9 +2718,12 @@ TEST(Brig2LLVMTest, validateBrigDirectivePragma) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2692,9 +2762,12 @@ TEST(Brig2LLVMTest, validateBrigDirectivePragma) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2711,6 +2784,7 @@ TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2748,7 +2822,7 @@ TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
     };
     directives.append(&bdi);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -2760,6 +2834,7 @@ TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2799,7 +2874,8 @@ TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2816,6 +2892,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2854,7 +2931,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     };
     directives.append(&bds);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -2866,6 +2943,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2906,7 +2984,8 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2920,6 +2999,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -2960,7 +3040,8 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -2974,6 +3055,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -3014,7 +3096,8 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3028,6 +3111,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -3068,7 +3152,8 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3082,6 +3167,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -3122,7 +3208,8 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3140,6 +3227,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -3161,7 +3249,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
     };
     directives.append(&bdl);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -3173,6 +3261,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -3196,7 +3285,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3211,6 +3301,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
@@ -3234,7 +3325,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3251,6 +3343,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
+
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
       BrigEDirectiveVersion,
@@ -3272,7 +3366,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
     };
     directives.append(&bdll);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -3284,6 +3378,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
+
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
       BrigEDirectiveVersion,
@@ -3306,7 +3402,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
     directives.append(&bdll);
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3376,7 +3473,9 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -3421,9 +3520,12 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3454,10 +3556,12 @@ TEST(Brig2LLVMTest, UniqueString) {
 
     hsa::brig::Buffer code;
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3517,7 +3621,9 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -3566,9 +3672,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3625,9 +3734,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3682,9 +3794,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3730,8 +3845,9 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -3772,10 +3888,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
 
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3823,9 +3941,12 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3868,7 +3989,9 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -3904,9 +4027,12 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -3956,7 +4082,9 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -3995,9 +4123,12 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4055,7 +4186,9 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -4097,9 +4230,12 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4155,7 +4291,9 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -4195,9 +4333,12 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4252,7 +4393,9 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -4290,9 +4433,12 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4338,9 +4484,12 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4380,9 +4529,12 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4422,9 +4574,12 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4464,9 +4619,12 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4512,7 +4670,9 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -4552,9 +4712,12 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
     code.append(&bic);
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4609,9 +4772,12 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4654,9 +4820,12 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4699,9 +4868,12 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4744,9 +4916,12 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4792,7 +4967,9 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -4832,9 +5009,12 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4889,7 +5069,9 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -4928,9 +5110,12 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -4979,7 +5164,9 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -5016,9 +5203,12 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5069,7 +5259,9 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -5108,9 +5300,12 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
     code.append(&bic);
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5162,9 +5357,12 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5206,9 +5404,12 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5250,9 +5451,12 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5294,9 +5498,12 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5340,7 +5547,9 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
 
     hsa::brig::Buffer operands;
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -5379,9 +5588,12 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
 
     hsa::brig::Buffer operands;
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5455,7 +5667,9 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
     };
     operands.append(&boa);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -5515,9 +5729,12 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
     };
     operands.append(&boa);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5609,7 +5826,9 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     };
     operands.append(&boc);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -5691,9 +5910,12 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     };
     operands.append(&boc);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5780,9 +6002,12 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     };
     operands.append(&boc);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
+                              &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5866,9 +6091,12 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     };
     operands.append(&boc);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -5929,7 +6157,9 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     };
     operands.append(&bofr);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -5992,9 +6222,12 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     };
     operands.append(&bofr);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6052,7 +6285,9 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
     };
     operands.append(&boi);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -6110,9 +6345,12 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
     };
     operands.append(&boi);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6178,7 +6416,9 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
     };
     operands.append(&boar);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -6221,9 +6461,12 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
     };
     operands.append(&boar);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6274,7 +6517,9 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     };
     operands.append(&bod);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -6312,9 +6557,12 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     };
     operands.append(&bor);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6354,9 +6602,12 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     };
     operands.append(&bor);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6396,9 +6647,12 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     };
     operands.append(&bor);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6438,9 +6692,12 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     };
     operands.append(&bor);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6489,9 +6746,12 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     };
     operands.append(&bod);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6531,9 +6791,12 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     };
     operands.append(&bor);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6586,7 +6849,9 @@ TEST(Brig2LLVMTest, validateBrigOperandLabelRef) {
     };
     operands.append(&bolr);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -6638,9 +6903,12 @@ TEST(Brig2LLVMTest, validateBrigOperandLabelRef) {
     };
     operands.append(&bolr);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6700,7 +6968,9 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV2) {
     };
     operands.append(&borv);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -6756,9 +7026,12 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV2) {
     };
     operands.append(&borv);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6840,7 +7113,9 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV4) {
     };
     operands.append(&borv);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -6914,9 +7189,12 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV4) {
     };
     operands.append(&borv);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6990,7 +7268,9 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
     };
     operands.append(&boal);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -7081,9 +7361,12 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
     };
     operands.append(&boal);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -7176,9 +7459,12 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
     };
     operands.append(&boal);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -7276,7 +7562,9 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     bdfl->o_args[1] = 16;
     operands.append(bdfl);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -7339,9 +7627,12 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     };
     operands.append(&bofl);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
+                              &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -7386,7 +7677,9 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
     };
     operands.append(&boi);
 
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
+    hsa::brig::Buffer debug;
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
   }
@@ -7426,9 +7719,12 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
     };
     operands.append(&boi);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -7470,9 +7766,12 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
     };
     operands.append(&boi);
 
+    hsa::brig::Buffer debug;
+
     std::string errorMsg;
     llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(

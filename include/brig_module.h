@@ -26,15 +26,18 @@ class BrigModule {
              const Buffer &directives,
              const Buffer &code,
              const Buffer &operands,
+             const Buffer &debug,
              llvm::raw_ostream *out) :
     S_(reinterpret_cast<const char *>(&strings.get()[0]),
        &directives.get()[0],
        &code.get()[0],
        &operands.get()[0],
+       &debug.get()[0],
        strings.size(),
        directives.size(),
        code.size(),
-       operands.size()),
+       operands.size(),
+       debug.size()),
     out_(out),
     valid_(validate()) {}
 
@@ -43,10 +46,12 @@ class BrigModule {
        reader.getDirectives().data(),
        reader.getCode().data(),
        reader.getOperands().data(),
+       reader.getDebug().data(),
        reader.getStrings().size(),
        reader.getDirectives().size(),
        reader.getCode().size(),
-       reader.getOperands().size()
+       reader.getOperands().size(),
+       reader.getDebug().size()
       ),
     out_(out),
     valid_(validate()) {}
@@ -68,6 +73,7 @@ class BrigModule {
   bool validateCode(void) const;
   bool validateOperands(void) const;
   bool validateStrings(void) const;
+  bool validateDebug(void) const;
 
   bool validate(const BrigDirectiveMethod *dir) const;
   bool validate(const BrigDirectiveSymbol *dir) const;
