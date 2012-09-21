@@ -7163,7 +7163,8 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
       sizeof(boi),
       BrigEOperandImmed,
       Brigb32,
-      0
+      0,
+      { 0 }
     };
     operands.append(&boi);
 
@@ -7202,7 +7203,8 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
       sizeof(boi),
       BrigEOperandImmed,
       Brigb128,
-      0
+      0,
+      { 0 }
     };
     operands.append(&boi);
 
@@ -7245,7 +7247,8 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
       sizeof(boi),
       BrigEOperandImmed,
       Brigb1,
-      1
+      1,
+      { 0 }
     };
     operands.append(&boi);
 
