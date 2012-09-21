@@ -9099,5 +9099,52 @@ TEST(CodegenTest, FunctionDeclCodeGen){
 
   delete lexer;
 }
+
+TEST(CodegenTest, GlobalSymbolDecl){
+ context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("align 1 static group_s8 &tmp[2];\n");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, GlobalSymbolDecl(context));
+  BrigDirectiveSymbol ref = {
+//alignment externOrStatic
+//"align 1 static group_s8 &tmp[2];"
+	40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigs8,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  };
+  BrigDirectiveSymbol get;
+  context->get_directive(0, &get);
+  
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.s.c_code, get.s.c_code);
+  EXPECT_EQ(ref.s.attribute, get.s.attribute);
+  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+  EXPECT_EQ(ref.s.symbolModifier, get.s.symbolModifier);
+  EXPECT_EQ(ref.s.dim, get.s.dim);
+  EXPECT_EQ(ref.s.s_name, get.s.s_name);
+  EXPECT_EQ(ref.s.type, get.s.type);
+  EXPECT_EQ(ref.s.align, get.s.align);
+  delete lexer;
+}
+
+
 }  // namespace brig
 }  // namespace hsa

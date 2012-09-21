@@ -1266,17 +1266,18 @@ int Version(Context* context) {
 
 int Alignment(Context* context) {
   // first token must be "align" keyword
-  context->token_to_scan = yylex();
-  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-    context->set_alignment(context->token_value.int_val);
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
-    context->set_error(MISSING_INTEGER_CONSTANT);
-    return 1;
-  }
+	context->token_to_scan = yylex();
+	if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+		context->set_alignment(context->token_value.int_val);
+		context->token_to_scan = yylex();
+		return 0;
+	} else {
+		context->set_error(MISSING_INTEGER_CONSTANT);
+		return 1;
+	}
+	
 }
-
+/*
 int DeclPrefix(Context* context) {
   if (context->token_to_scan == ALIGN) {
     if (!Alignment(context)) {
@@ -1397,6 +1398,65 @@ int DeclPrefix(Context* context) {
   return 0;
 }
 
+
+*/
+int DeclPrefix(Context* context){
+
+	context->set_attribute(BrigNone);
+	context->init_symbol_modifier();
+	if((context->token_to_scan == ALIGN) || (context->token_to_scan == EXTERN) || (context->token_to_scan == STATIC) || (context->token_to_scan==CONST)){
+		switch(context->token_to_scan){
+			case ALIGN: if(Alignment(context)) return 1; 
+						break;
+			case CONST:
+						context->set_symbol_modifier(BrigConst);
+						context->token_to_scan = yylex();
+						break;
+			default: if(context->token_to_scan==EXTERN)
+						context->set_attribute(BrigExtern);
+					 else if(context->token_to_scan == STATIC)
+							context->set_attribute(BrigStatic);
+					 context->token_to_scan = yylex();
+					 break;
+		}
+	}else return 0;
+	
+	if((context->token_to_scan == ALIGN) || (context->token_to_scan == EXTERN) || (context->token_to_scan == STATIC) || (context->token_to_scan==CONST)){
+		switch(context->token_to_scan){
+			case ALIGN: if(Alignment(context)) return 1; 
+						break;
+			case CONST:
+						context->set_symbol_modifier(BrigConst);
+						context->token_to_scan = yylex();
+						break;
+			default: if(context->token_to_scan==EXTERN)
+						context->set_attribute(BrigExtern);
+					 else if(context->token_to_scan == STATIC)
+							context->set_attribute(BrigStatic);
+					 context->token_to_scan = yylex();
+					 break;
+		}
+	} else return 0;
+	if((context->token_to_scan == ALIGN) || (context->token_to_scan == EXTERN) || (context->token_to_scan == STATIC) || (context->token_to_scan==CONST)){
+		switch(context->token_to_scan){
+			case ALIGN: if(Alignment(context)) return 1; 
+						break;
+			case CONST:
+						context->set_symbol_modifier(BrigConst);
+						context->token_to_scan = yylex();
+						break;
+			default: if(context->token_to_scan==EXTERN)
+						context->set_attribute(BrigExtern);
+					 else if(context->token_to_scan == STATIC)
+							context->set_attribute(BrigStatic);
+					 context->token_to_scan = yylex();
+					 break;
+		}
+	}
+	return 0;
+}
+
+
 int FBar(Context* context) {
   // first token must be _FBAR
   context->token_to_scan = yylex();
@@ -1444,6 +1504,7 @@ int ArrayDimensionSet(Context* context) {
   }
   if (!have_size){
     context->set_dim(0);// flexiable array
+	context->set_symbol_modifier(BrigArray);
     context->set_symbol_modifier(BrigFlex);
   } else {
     context->set_dim(dim); // vector(size in dim)
@@ -2570,7 +2631,7 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
 
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+      //context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
@@ -2644,7 +2705,7 @@ int UninitializableDecl(Context* context) {
       context->token_to_scan = yylex();
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+      //context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
@@ -2720,7 +2781,7 @@ int ArgUninitializableDecl(Context* context) {
       context->token_to_scan = yylex();
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+      //context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {
         }
@@ -2825,7 +2886,7 @@ int SignatureType(Context *context) {
         context->token_to_scan = yylex();
         // set default value(scalar)
         context->set_dim(0);
-        context->set_symbol_modifier(BrigArray);
+        //context->set_symbol_modifier(BrigArray);
         if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
           context->token_to_scan = yylex();
           if ('[' == context->token_to_scan){
@@ -2844,7 +2905,7 @@ int SignatureType(Context *context) {
       context->token_to_scan = yylex();
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+     // context->set_symbol_modifier(BrigArray);
       if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
       // ignore the local identifier
         context->token_to_scan = yylex();
@@ -4140,7 +4201,7 @@ int KernelArgumentDecl(Context *context) {
         context->token_to_scan = yylex();
         // set default value(scalar)
         context->set_dim(0);
-        context->set_symbol_modifier(BrigArray);
+        //context->set_symbol_modifier(BrigArray);
         if (context->token_to_scan == '[') {
           if (!ArrayDimensionSet(context)) {
             // context->token_to_scan has been set in ArrayDimensionSet()
@@ -4552,7 +4613,7 @@ int GlobalPrivateDecl(Context* context) {
       context->token_to_scan = yylex();
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+      //context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {}
       }
@@ -4565,7 +4626,7 @@ int GlobalPrivateDecl(Context* context) {
         {
           context->get_code_offset(),     // c_code
           BrigPrivateSpace,               // storag class
-          BrigNone ,                      // attribut
+          context->get_attribute() ,                      // attribut
           0,                              // reserved
           context->get_symbol_modifier(), // symbolModifier
           context->get_dim(),             // dim
@@ -5279,7 +5340,7 @@ int GlobalGroupDecl(Context* context) {
       context->token_to_scan = yylex();
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+      //context->set_symbol_modifier(BrigArray);
       if (context->token_to_scan == '[') {
         if (!ArrayDimensionSet(context)) {}
       }
@@ -5291,7 +5352,7 @@ int GlobalGroupDecl(Context* context) {
         {
           context->get_code_offset(),     // c_code
           BrigGroupSpace,                 // storag class
-          BrigNone ,                      // attribut
+          context->get_attribute() ,                      // attribut
           0,                              // reserved
           context->get_symbol_modifier(), // symbolModifier
           context->get_dim(),             // dim
@@ -7470,7 +7531,7 @@ int GlobalImageDeclPart2(Context *context){
       context->token_to_scan = yylex();
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+      //context->set_symbol_modifier(BrigArray);
       if ('[' == context->token_to_scan) {
         if (!ArrayDimensionSet(context)) {
         } else {
@@ -7559,7 +7620,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
       context->token_to_scan = yylex();
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+      //context->set_symbol_modifier(BrigArray);
       if ('[' == context->token_to_scan) {
         if (!ArrayDimensionSet(context)) {
         } else {
@@ -8960,7 +9021,7 @@ int GlobalSamplerDeclPart2(Context *context){
 
       // set default value(scalar)
       context->set_dim(0);
-      context->set_symbol_modifier(BrigArray);
+      //context->set_symbol_modifier(BrigArray);
       if ('[' == context->token_to_scan) {
         if (!ArrayDimensionSet(context)) {
         } else {
