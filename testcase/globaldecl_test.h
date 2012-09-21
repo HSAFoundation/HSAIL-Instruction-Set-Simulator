@@ -1770,7 +1770,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigb128,                // type
@@ -1788,7 +1788,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigu8x4,                // type
@@ -1806,7 +1806,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigu8x16,              // type
@@ -1824,7 +1824,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigs8x16,              // type
@@ -1842,7 +1842,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigu16x8,              // type
@@ -1860,7 +1860,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigs16x8,              // type
@@ -1878,7 +1878,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigf16x8,              // type
@@ -1897,7 +1897,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigs8x4,              // type
@@ -1915,7 +1915,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigu8x8,              // type
@@ -1952,7 +1952,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigs16x2,              // type
@@ -1989,7 +1989,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigf16x2,              // type
@@ -2026,7 +2026,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigs16x4,              // type
@@ -2063,7 +2063,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigf16x4,              // type
@@ -2100,7 +2100,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigf16x4,              // type
@@ -2155,7 +2155,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigf32x4,              // type
@@ -2209,7 +2209,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigf32x4,              // type
@@ -2246,7 +2246,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigs32x2,              // type
@@ -2301,7 +2301,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigf16x4,              // type
@@ -2320,7 +2320,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    BrigConst | BrigArray,              // symbolModifier
     2,                      // dim
     0,                      // s_name
     Brigf16x4,              // type
@@ -2375,7 +2375,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigGroupSpace,         // storag class 
     BrigNone ,              // attribut
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigs32,                // type
@@ -2429,7 +2429,7 @@ BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
     BrigPrivateSpace,       // storag class 
     BrigNone ,              // attribut
     0,                      // reserved
-    BrigArray,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     0,                      // s_name
     Brigs32,                // type
