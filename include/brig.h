@@ -124,7 +124,7 @@ enum BrigDataType {
 // BrigDirectiveKinds
 // BrigDirectiveKinds is used to specify the kind of directive.
 enum BrigDirectiveKinds {
-  BrigEDirectiveFunction,
+  BrigEDirectiveFunction = 0,
   BrigEDirectiveKernel,
   BrigEDirectiveSymbol,
   BrigEDirectiveImage,
@@ -147,7 +147,7 @@ enum BrigDirectiveKinds {
   BrigEDirectiveBlockNumeric,
   BrigEDirectiveBlockString,
   BrigEDirectiveBlockEnd,
-  BrigEDirectivePad
+  BrigEDirectivePad = 23
 };
 
 // BrigMachine
@@ -176,7 +176,7 @@ enum BrigSftz {
 
 // PRM 20.5.12
 enum BrigInstKinds {
-  BrigEInstBase,
+  BrigEInstBase = 24,
   BrigEInstMod,
   BrigEInstCvt,
   BrigEInstRead,
@@ -186,7 +186,7 @@ enum BrigInstKinds {
   BrigEInstMem,
   BrigEInstAtomic,
   BrigEInstAtomicImage,
-  BrigEInstImage
+  BrigEInstImage = 34
 };
 
 // 20.5.14
@@ -218,7 +218,7 @@ enum BrigStorageClass {
 // BrigOperandKinds
 // BrigOperandKinds is used to specify the kind of operand.
 enum BrigOperandKinds {
-  BrigEOperandBase,
+  BrigEOperandBase = 35,
   BrigEOperandReg,
   BrigEOperandImmed,
   BrigEOperandRegV2,
@@ -233,7 +233,7 @@ enum BrigOperandKinds {
   BrigEOperandWaveSz,
   BrigEOperandFunctionRef,
   BrigEOperandPad,
-  BrigEOperandOpaque
+  BrigEOperandOpaque = 50
 };
 
 // BrigPacking

@@ -125,15 +125,41 @@ int Query(Context* context) {
   return 1;
 }
 
-int Operand(Context* context) {
-  if (!Identifier(context)) {  // an Identifier
-    context->token_to_scan = yylex();  // set token for next function
+int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
+  BrigoOffset32_t opSize;
+  std::string opName;
+  opSize = context->get_operand_offset();
+  if (context->token_type == REGISTER ||
+      context->token_to_scan == WAVESIZE) {
+    opName = context->token_value.string_val;
+  } else if (context->token_type == CONSTANT) {
+    opSize += opSize & 0x7;
+  }  // else TOKEN_GLOBAL_IDENTIFIER TOKEN_LOCAL_IDENTIFIER
+       
+  if (!Identifier(context)) { 
+    if (opSize == context->get_operand_offset()) {
+      *pRetOpOffset = context->operand_map[opName];
+    } else {
+      *pRetOpOffset = opSize;
+    }
+    context->token_to_scan = yylex();  
     return 0;
-  } else if (!BaseOperand(context)) {    // a base Operand
-    context->token_to_scan = yylex();  // set token for next function
+  } else if (!BaseOperand(context)) {  
+    if (opSize == context->get_operand_offset()) {
+      *pRetOpOffset = context->operand_map[opName];
+    } else {
+      *pRetOpOffset = opSize;
+    }
+    context->token_to_scan = yylex();  
     return 0;
   }
   return 1;
+
+}
+
+int Operand(Context* context) {
+  BrigoOffset32_t retOpOffset;
+  return OperandPart2(context, &retOpOffset);
 }
 
 int Identifier(Context* context) {
@@ -860,16 +886,12 @@ int Instruction2(Context* context) {
         inst_op.type = context->token_value.data_type;
 
         context->token_to_scan = yylex();  // set context for Operand()
-        std::string oper_str = context->token_value.string_val;
 
-        if (!Operand(context)) {
-          inst_op.o_operands[0] = context->operand_map[oper_str];
+        if (!OperandPart2(context, &inst_op.o_operands[0])) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();  // set context for Operand()
-            oper_str = context->token_value.string_val;
 
-            if (!Operand(context)) {
-              inst_op.o_operands[1] = context->operand_map[oper_str];
+            if (!OperandPart2(context, &inst_op.o_operands[1])) {
               if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
@@ -921,16 +943,12 @@ int Instruction2(Context* context) {
         inst_op.type = context->token_value.data_type;
 
         context->token_to_scan = yylex();  // set context for Operand()
-        std::string oper_str = context->token_value.string_val;
 
-        if (!Operand(context)) {
-          inst_op.o_operands[0] = context->operand_map[oper_str];
+        if (!OperandPart2(context, &inst_op.o_operands[0])) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();  // set context for Operand()
-            oper_str = context->token_value.string_val;
 
-            if (!Operand(context)) {
-              inst_op.o_operands[1] = context->operand_map[oper_str];
+            if (!OperandPart2(context, &inst_op.o_operands[1])) {
               if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
@@ -996,16 +1014,12 @@ int Instruction2(Context* context) {
       {0, 0, 0, 0, 0}
       };
 
-      std::string oper_str = context->token_value.string_val;
 
-      if (!Operand(context)) {
-        inst_op.o_operands[0] = context->operand_map[oper_str];
+      if (!OperandPart2(context, &inst_op.o_operands[0])) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();  // set context for Operand()
-          oper_str = context->token_value.string_val;
 
-          if (!Operand(context)) {
-            inst_op.o_operands[1] = context->operand_map[oper_str];
+          if (!OperandPart2(context, &inst_op.o_operands[1])) {
             if (context->token_to_scan == ';') {
               context->append_code(&inst_op);
               // if the rule is valid, just write to the .code section,
@@ -1060,16 +1074,12 @@ int Instruction2(Context* context) {
 
 
         context->token_to_scan = yylex();  // set context for Operand()
-        std::string oper_str = context->token_value.string_val;
 
-        if (!Operand(context)) {
-          inst_op.o_operands[0] = context->operand_map[oper_str];
+        if (!OperandPart2(context, &inst_op.o_operands[0])) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();  // set context for Operand()
-            oper_str = context->token_value.string_val;
 
-            if (!Operand(context)) {
-              inst_op.o_operands[1] = context->operand_map[oper_str];
+            if (!OperandPart2(context, &inst_op.o_operands[1])) {
               if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
@@ -1113,16 +1123,13 @@ int Instruction2(Context* context) {
         inst_op.type = context->token_value.data_type;
 
         context->token_to_scan = yylex();  // set context for Operand()
-        std::string oper_str = context->token_value.string_val;
 
-        if (!Operand(context)) {
-          inst_op.o_operands[0] = context->operand_map[oper_str];
+
+        if (!OperandPart2(context, &inst_op.o_operands[0])) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();  // set context for Operand()
-            oper_str = context->token_value.string_val;
 
-            if (!Operand(context)) {
-              inst_op.o_operands[1] = context->operand_map[oper_str];
+            if (!OperandPart2(context, &inst_op.o_operands[1])) {
               if (context->token_to_scan == ';') {
                 context->append_code(&inst_op);
                 // if the rule is valid, just write to the .code section,
@@ -1184,22 +1191,16 @@ int Instruction3(Context* context) {
       // check the operands
       inst_op.type = context->token_value.data_type;
       context->token_to_scan = yylex();
-      std::string oper_str = context->token_value.string_val;
 
-      if (!Operand(context)) {
-        inst_op.o_operands[0] = context->operand_map[oper_str];
+      if (!OperandPart2(context, &inst_op.o_operands[0])) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          oper_str = context->token_value.string_val;
 
-          if (!Operand(context)) {
-            inst_op.o_operands[1] = context->operand_map[oper_str];
+          if (!OperandPart2(context, &inst_op.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              oper_str = context->token_value.string_val;
 
-              if (!Operand(context)) {
-                inst_op.o_operands[2] = context->operand_map[oper_str];
+              if (!OperandPart2(context, &inst_op.o_operands[2])) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&inst_op);
  
@@ -1247,22 +1248,16 @@ int Instruction3(Context* context) {
       inst_op.type = context->token_value.data_type;
 
       context->token_to_scan = yylex();
-      std::string oper_str = context->token_value.string_val;
 
-      if (!Operand(context)) {
-        inst_op.o_operands[0] = context->operand_map[oper_str];
+      if (!OperandPart2(context, &inst_op.o_operands[0])) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          oper_str = context->token_value.string_val;
 
-          if (!Operand(context)) {
-            inst_op.o_operands[1] = context->operand_map[oper_str];
+          if (!OperandPart2(context, &inst_op.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              oper_str = context->token_value.string_val;
 
-              if (!Operand(context)) {
-                inst_op.o_operands[2] = context->operand_map[oper_str];
+              if (!OperandPart2(context, &inst_op.o_operands[2])) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&inst_op);
 
@@ -1998,197 +1993,45 @@ int ArgBlock(Context* context) {
   }
   return 1;
 }
-
-int Codeblock(Context* context) {
-  // first token should be '{'
-  context->token_to_scan = yylex();
-  while (1) {
-    if ((context->token_type == INSTRUCTION2_OPCODE) ||
-        (context->token_type == INSTRUCTION2_OPCODE_NODT) ||
-        (context->token_type == INSTRUCTION2_OPCODE_FTZ)) {
-      // Instruction 2 Operation
-      if (!Instruction2(context)) {
-        // update the operationCount.
-        BrigDirectiveFunction bdf;
-        context->get_directive(context->current_bdf_offset, &bdf);
-        bdf.operationCount++;
-
-        unsigned char * bdf_charp =
-          reinterpret_cast<unsigned char*>(&bdf);
-        context->update_directive_bytes(bdf_charp,
-                                        context->current_bdf_offset,
-                                        sizeof(bdf));
-
-      } else {
-        return 1;
-      }
-    } else if ((context->token_type == INSTRUCTION3_OPCODE) ||
-               (context->token_type == INSTRUCTION3_OPCODE_FTZ)) {
-      // Instruction 3 Operation
-      if (!Instruction3(context)) {
-        // update the operationCount.
-        BrigDirectiveFunction bdf;
-        context->get_directive(context->current_bdf_offset, &bdf);
-        bdf.operationCount++;
-
-        unsigned char * bdf_charp =
-          reinterpret_cast<unsigned char*>(&bdf);
-        context->update_directive_bytes(bdf_charp,
-                                        context->current_bdf_offset,
-                                        bdf.size);
-      } else {
-        return 1;
-      }
-    } else if (context->token_type == QUERY_OP) {  // Query Operation
-      if (!Query(context)) {
-      } else {
-        return 1;
-      }
-    } else if (context->token_to_scan == RET) {  // ret operation
-      if (yylex() == ';') {
-      BrigInstBase op_ret = {
-        sizeof(BrigInstBase),
-        BrigEInstBase,
-        BrigRet,
-        Brigb32,
-        BrigNoPacking,
-        {0, 0, 0, 0, 0}
-        };
-      // write to .code section
-      context->append_code(&op_ret);
-      BrigDirectiveFunction bdf;
-      context->get_directive(context->current_bdf_offset, &bdf);
-      bdf.operationCount++;
-
-      unsigned char * bdf_charp =
-        reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp,
-                                      context->current_bdf_offset,
-                                      sizeof(bdf));
-
-      context->token_to_scan = yylex();
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-        return 1;
-      }
-    } else if ((context->token_to_scan == BRN) ||
-               (context->token_to_scan == CBR)) {
-      if (!Branch(context)) {
-      } else {
-        return 1;
-      }
-    } else if (context->token_to_scan == TOKEN_LABEL) {  // label
-      // add to the .directive section
-      std::string label_name = context->token_value.string_val;
-
-      BrigDirectiveLabel label_directive = {
-        sizeof(BrigDirectiveLabel),
-        BrigEDirectiveLabel,
-        context->get_code_offset(),
-        context->add_symbol(label_name)
-      };
-
-      BrigdOffset32_t label_directive_offset = context->get_directive_offset();
-      context->append_directive(&label_directive);
-
-      // add to the .operand section
-      BrigoOffset32_t label_operand_offset = context->get_operand_offset();
-      // TODO(Chuang): BrigOperandLabelRef shouldn't be generated in here.
-      // context->append_operand(&label_operand);
-      // context->label_o_map[label_name] = label_operand_offset;
-
-      // update the d_nextDirective.
-      BrigDirectiveFunction bdf;
-      context->get_directive(context->current_bdf_offset, &bdf);
-      if (bdf.d_firstScopedDirective == bdf.d_nextDirective)
-        // check if the firstScopedDirective is modified before.
-        bdf.d_firstScopedDirective = label_directive_offset;
-      bdf.d_nextDirective = context->get_directive_offset();
-      unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp,
-                                      context->current_bdf_offset,
-                                      bdf.size);
-
-      // check if there are any operation in .code need update
-      if (context->label_c_map.count(label_name)) {
-      // previously, there maybe brn, cbr need label.
-      // update all
-        typedef std::multimap<std::string, BrigcOffset32_t>::size_type sz_type;
-        sz_type entries = context->label_c_map.count(label_name);
-
-        std::multimap<std::string, BrigcOffset32_t>::iterator iter =
-                                        context->label_c_map.find(label_name);
-        for (sz_type cnt = 0; cnt != entries; ++cnt, ++iter) {
-          BrigcOffset32_t offset = iter->second;
-          unsigned char* value =
-                    reinterpret_cast<unsigned char*> (&label_operand_offset);
-          context->update_code_bytes(value, offset, 4);
-        }
-      }
-
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ':') {
-        context->token_to_scan = yylex();
-      } else {
-        context->set_error(MISSING_COLON);
-        return 1;
-      }
-    } else if (context->token_to_scan == '{') {
-      // argument scope -> inner codeblock
-      if (!ArgBlock(context)) {
-      } else {
-        return 1;
-      }
-    } else if ((context->token_to_scan == ALIGN) ||
-               (context->token_to_scan == CONST) ||
-               (context->token_to_scan == STATIC) ||
-               (context->token_to_scan == EXTERN)) {
-      if (!DeclPrefix(context)) {
-        if (context->token_type == INITIALIZABLE_ADDRESS) {
-          // initializable decl
-          if (!InitializableDecl(context)) {
-          } else {
-            return 1;
-          }
-        } else if (context->token_type == UNINITIALIZABLE_ADDRESS) {
-          // uninitializable decl
-          if (!UninitializableDecl(context)) {
-          } else {
-            return 1;
-          }
-        } else {
-          return 1;
-        }
-      } else {
-        return 1;
-      }
-    } else if (context->token_type == INITIALIZABLE_ADDRESS) {
-      if (!InitializableDecl(context)) {
-      } else {
-        return 1;
-      }
-    } else if (context->token_type == UNINITIALIZABLE_ADDRESS) {
-      if (!UninitializableDecl(context)) {
-      } else {
-        return 1;
-      }
-    } else if (context->token_to_scan == '}') {
+int CodeBlockEnd(Context* context) {
+  if (context->token_to_scan == '}') {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ';') {
       context->token_to_scan = yylex();
       return 0;
     } else {
-      break;
+      context->set_error(MISSING_SEMICOLON);
+    }
+  } else {
+    context->set_error(MISSING_CLOSING_BRACKET);
+  }
+  return 1;
+}
+int Codeblock(Context* context) {
+  // first token should be '{'
+  context->token_to_scan = yylex();
+  if (!BodyStatements(context)) {
+    if (!CodeBlockEnd(context)) {
+    
+      BrigDirectiveFunction bdf;
+      context->get_directive(context->current_bdf_offset, &bdf);
+      bdf.d_nextDirective = context->get_directive_offset();
+
+      unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+      context->update_directive_bytes(bdf_charp,
+                                 context->current_bdf_offset,
+                                 sizeof(bdf));
+
+      return 0;
+    } else {
+      return 1;
     }
   }
   return 1;
 }
 int Functionpart2(Context *context){
   if (!Codeblock(context)){
-    if (';' == context->token_to_scan){
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_SEMICOLON);
-    }
+    return 0;
   }
   return 1;
 }
@@ -2812,7 +2655,7 @@ int UninitializableDecl(Context* context) {
         0                                 // reserved
       };
       context->append_directive(&sym_decl);
-
+/*
       BrigDirectiveFunction bdf;
       context->get_directive(context->current_bdf_offset, &bdf);
       BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
@@ -2828,7 +2671,7 @@ int UninitializableDecl(Context* context) {
       context->update_directive_bytes(bdf_charp ,
                                           context->current_bdf_offset,
                                           sizeof(sym_decl));
-
+*/
       if (context->token_to_scan == ';') {
         context->token_to_scan = yylex();
         return 0;
@@ -2841,6 +2684,7 @@ int UninitializableDecl(Context* context) {
   } else {
     context->set_error(MISSING_DATA_TYPE);
   }
+
   return 1;
 }
 
@@ -4328,7 +4172,7 @@ int KernelArgumentDecl(Context *context) {
           reinterpret_cast<unsigned char*>(&bdk);
         context->update_directive_bytes(bdk_charp,
                                         context->current_bdf_offset,
-                                        40);
+                                        sizeof(BrigDirectiveKernel));
         return 0;
 
       } else {
@@ -4429,12 +4273,7 @@ int Kernel(Context *context) {
                                 bdk_size); 
     }
     if (!Codeblock(context)) {
-      if (';' == context->token_to_scan) {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
+      return 0;
     }    
   } else {
     context->set_error(MISSING_IDENTIFIER);
@@ -7300,15 +7139,18 @@ int Operation(Context* context) {
              context->token_type == INSTRUCTION2_OPCODE ||
              context->token_type == INSTRUCTION2_OPCODE_NODT) {
     if (!Instruction2(context)) {
+      context->update_bdf_operation_count();
       return 0;
     }
   } else if (context->token_type == INSTRUCTION3_OPCODE ||
              context->token_type == INSTRUCTION3_OPCODE_FTZ) {
     if (!Instruction3(context)) {
+      context->update_bdf_operation_count();
       return 0;
     }
   } else if (context->token_type == INSTRUCTION4_OPCODE) {
     if (!Instruction4(context)) {
+      context->update_bdf_operation_count();
       return 0;
     }
   } else if (context->token_to_scan == PACKEDCMP ||
@@ -7323,6 +7165,7 @@ int Operation(Context* context) {
              context->token_to_scan == MAD24 ||
              context->token_to_scan == MAD24_HI) {
     if (!Mul(context)) {
+      context->update_bdf_operation_count();
       return 0;
     }
   } else if (context->token_to_scan == F2U4) {
@@ -7366,6 +7209,7 @@ int Operation(Context* context) {
     }
   } else if (context->token_to_scan == LD) {
     if (!Ld(context)) {
+      context->update_bdf_operation_count();
       return 0;
     }
   } else if (context->token_to_scan == ST) {
@@ -7399,6 +7243,7 @@ int Operation(Context* context) {
     }
   }  else if (context->token_to_scan == RET) {
     if (!Ret(context)) {
+      context->update_bdf_operation_count();
       return 0;
     }
   } else if (context->token_to_scan == CBR ||
@@ -7483,6 +7328,7 @@ int ArgStatements(Context* context) {
 }
 
 int BodyStatement(Context* context) {
+  
   if (context->token_to_scan == TOKEN_COMMENT) {
     context->token_to_scan = yylex();
     return 0;
@@ -7497,7 +7343,9 @@ int BodyStatement(Context* context) {
   } else if (context->token_to_scan == ALIGN ||
              context->token_to_scan == CONST ||
              context->token_to_scan == EXTERN ||
-             context->token_to_scan == STATIC) {
+             context->token_to_scan == STATIC ||
+             context->token_type == UNINITIALIZABLE_ADDRESS ||
+             context->token_type == INITIALIZABLE_ADDRESS) {
     if (!DeclPrefix(context)) {
       if (!InitializableDecl(context)) {
         return 0;
@@ -7514,13 +7362,15 @@ int BodyStatement(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
-    context->token_to_scan = yylex();
-    return 0;
+    if (!Label(context)) {
+      return 0;
+    }
   } else if (!LabelTargets(context)) {
     return 0;
   } else if (!Operation(context)) {
     return 0;
   }
+
   return 1;
 }
 
@@ -8197,8 +8047,9 @@ int ImageInitializer(Context *context) {
 
 int Ret(Context* context) {
   // first token is RET
-  if(RET != context->token_to_scan)
+  if(RET != context->token_to_scan) {
     return 1;
+  }
 
   BrigOpcode32_t opcode = context->token_value.opcode ;
 
@@ -8214,7 +8065,6 @@ int Ret(Context* context) {
     };
     // write to .code section
     context->append_code(&op_ret);
-    // context->update_bdf_operation_count();
 
     context->token_to_scan = yylex();
     return 0;
@@ -9023,7 +8873,7 @@ int FloatListSingle(Context* context) {
           }
           break;
         case Brigb16:
-          for (int i = 0; i < elementCount; i ++ ){
+          for (uint32_t i = 0; i < elementCount; i ++ ){
             memmove(&bbn->u16[i],&float_list[i],sizeof(uint16_t));
 	  }
           len = 4 * n ;
@@ -9103,7 +8953,7 @@ int DecimalListSingle(Context* context) {
           n = elementCount ;
           break;
 	}
-        if (!context->get_isBlockNumeric()){
+        if (!context->get_isBlockNumeric()) {
           size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
           uint8_t *array = new uint8_t[arraySize];
           BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
@@ -9712,7 +9562,6 @@ int TopLevelStatement(Context *context){
 		}	
 		else {
 			if(!Codeblock(context)){
-				context->token_to_scan = yylex();
 				return 0;
 			} else 
 				return 1;
