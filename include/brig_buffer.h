@@ -50,7 +50,7 @@ class Buffer {
   }
 
   // get a specific number of bytes from a specific offset
-  error_t get_bytes(unsigned char* value, uint32_t offset, uint32_t nBytes) {
+  error_t get_bytes(char* value, uint32_t offset, uint32_t nBytes) {
     if (buf_.size() == 0)
       return EMPTY_BUFFER;
     if (buf_.end() < buf_.begin()+ offset + nBytes)

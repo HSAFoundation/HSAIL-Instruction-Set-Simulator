@@ -170,17 +170,21 @@ class Context {
     /* Byte-level manipulators */
     // functions to get a sequence of values of a certain buffer
     // at a specific offset.
-    context_error_t get_directive_bytes(unsigned char* value,
+    context_error_t get_directive_bytes(char* value,
                                         uint32_t offset,
                                         uint32_t nBytes);
 
-    context_error_t get_code_bytes(unsigned char* value,
+    context_error_t get_code_bytes(char* value,
                                    uint32_t offset,
                                    uint32_t nBytes);
 
-    context_error_t get_operand_bytes(unsigned char* value,
+    context_error_t get_operand_bytes(char* value,
                                       uint32_t offset,
                                       uint32_t nBytes);
+
+    context_error_t get_string_bytes(char* value,
+                                     uint32_t offset,
+                                     uint32_t nBytes);
 
     // Modify a number of bytes of a buffer at a specific offset
     context_error_t update_directive_bytes(unsigned char* value,
@@ -222,6 +226,7 @@ class Context {
     char get_operand_loc() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
+    bool get_isBlockNumeric() const;
 
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
@@ -238,6 +243,7 @@ class Context {
     void set_operand_loc(char loc);
     void set_dim(uint32_t dim);
     void set_isArray(bool is_array);
+    void set_isBlockNumeric(bool is_blockNumeric);
 
     // get current offset
     BrigcOffset32_t get_code_offset(void) const {return cbuf->size();}
@@ -267,6 +273,9 @@ class Context {
     std::map<std::string, BrigoOffset32_t> label_o_map;
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
     std::map<std::string, BrigdOffset32_t> symbol_map;
+
+    // contains the type info of functionSignature
+    std::vector<BrigDirectiveSignature::BrigProtoType> types;
 
     unsigned int token_to_scan;
     int               yycolno;
@@ -318,6 +327,7 @@ class Context {
     bool arg_output;
     uint32_t dim;
     bool is_array;
+    bool is_blockNumeric;
 };
 
 }  // namespace brig

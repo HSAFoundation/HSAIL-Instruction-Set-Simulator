@@ -514,16 +514,19 @@ global            { context->token_type = INITIALIZABLE_ADDRESS;
 _Samp             { context->token_type = COMMON_KEYWORD;
                     free_string(context);
                     context->yycolno+=yyleng;
+                    context->token_value.data_type = BrigSamp;
                     return _SAMP; }
 
 _RWImg            { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.data_type = BrigRWImg;
                     return _RWIMG; }
 
 _ROImg            { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
+                    context->token_value.data_type = BrigROImg;
                     return _ROIMG; }
 
 align             { free_string(context);
@@ -1753,6 +1756,19 @@ _f32x2              { free_string(context);
                       context->token_value.data_type = Brigf32x2;
                       context->yycolno+=yyleng;
                       return  _F32X2;}
+
+_u32x2              { free_string(context);
+                      context->token_type = DATA_TYPE_ID;
+                      context->token_value.data_type = Brigu32x2;
+                      context->yycolno+=yyleng;
+                      return  _U32X2;}
+
+_s32x2              { free_string(context);
+                      context->token_type = DATA_TYPE_ID;
+                      context->token_value.data_type = Brigs32x2;
+                      context->yycolno+=yyleng;
+                      return  _S32X2;}
+
 
 _u8x8               { free_string(context);
                       context->token_type = DATA_TYPE_ID;

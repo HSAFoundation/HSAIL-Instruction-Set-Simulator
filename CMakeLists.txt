@@ -11,14 +11,20 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
 flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
+
+option(ENABLE_TEST_CASE "Run test cases" OFF)
+if (ENABLE_TEST_CASE)
 set(hsail2brig_test_SOURCES
     test/lexer_test.cc
     test/parser_test.cc
     test/codegen_test.cc
-    test/hsail2brig_test.cc
-	  gmock/gmock_main.cc
-	  gmock/gmock-gtest-all.cc
-	  src/parser.cc
+    testcase/globaldecl_test.cc
+    testcase/version_test.cc
+    testcase/operation_test.cc
+    testcase/operand_test.cc
+	 gmock/gmock_main.cc
+	 gmock/gmock-gtest-all.cc
+	 src/parser.cc
     src/brig_buffer.cc
     src/parser_wrapper.cc
     src/lexer_wrapper.cc
@@ -26,6 +32,23 @@ set(hsail2brig_test_SOURCES
     src/context.cc
 	  ${FLEX_lexer_OUTPUTS}
 	  )
+else (ENABLE_TEST_CASE)
+  set(hsail2brig_test_SOURCES
+    test/lexer_test.cc
+    test/parser_test.cc
+    test/codegen_test.cc
+	 gmock/gmock_main.cc
+	 gmock/gmock-gtest-all.cc
+	 src/parser.cc
+    src/brig_buffer.cc
+    src/parser_wrapper.cc
+    src/lexer_wrapper.cc
+    src/error_reporter.cc
+    src/context.cc
+	  ${FLEX_lexer_OUTPUTS}
+	  )
+endif (ENABLE_TEST_CASE)
+
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
 
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")

@@ -59,6 +59,7 @@ void Context::clear_context(void) {
     valid_string = false;
   }
   set_default_values();
+  types.clear();
 }
 
 void Context::set_default_values(void) {
@@ -75,9 +76,6 @@ void Context::set_default_values(void) {
   yycolno = 0;
   yylineno = 1;
   arg_output = false ;
-  token_value.format = BrigImageFormatUnknown;
-  token_value.order = BrigImageOrderUnknown;
-  token_value.storage_class = BrigFlatSpace;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
@@ -121,7 +119,7 @@ int Context::lookup_symbol(const std::string& s) {
 
 // functions to get a sequence of values of a certain buffer
 // at a specific offset.
-Context::context_error_t Context::get_directive_bytes(unsigned char* value,
+Context::context_error_t Context::get_directive_bytes(char* value,
                                     uint32_t offset,
                                     uint32_t nBytes) {
   Buffer::error_t err = dbuf->get_bytes(value, offset, nBytes);
@@ -134,7 +132,7 @@ Context::context_error_t Context::get_directive_bytes(unsigned char* value,
     return CONTEXT_OK;
 }
 
-Context::context_error_t Context::get_code_bytes(unsigned char* value,
+Context::context_error_t Context::get_code_bytes(char* value,
                                uint32_t offset,
                                uint32_t nBytes) {
   Buffer::error_t err = cbuf->get_bytes(value, offset, nBytes);
@@ -147,7 +145,7 @@ Context::context_error_t Context::get_code_bytes(unsigned char* value,
     return CONTEXT_OK;
 }
 
-Context::context_error_t Context::get_operand_bytes(unsigned char* value,
+Context::context_error_t Context::get_operand_bytes(char* value,
                                   uint32_t offset,
                                   uint32_t nBytes) {
   Buffer::error_t err = obuf->get_bytes(value, offset, nBytes);
@@ -173,6 +171,19 @@ Context::context_error_t Context::update_directive_bytes(unsigned char* value,
     return INVALID_OFFSET;
   else
     return UNKNOWN_ERROR;
+}
+
+Context::context_error_t Context::get_string_bytes(char* value,
+                                  uint32_t offset,
+                                  uint32_t nBytes) {
+  Buffer::error_t err = sbuf->get_bytes(value, offset, nBytes);
+
+  if (err == Buffer::INVALID_OFFSET)
+    return INVALID_OFFSET;
+  else if (err == Buffer::EMPTY_BUFFER)
+    return EMPTY_BUFFER;
+  else
+    return CONTEXT_OK;
 }
 
 Context::context_error_t Context::update_code_bytes(unsigned char* value,
@@ -281,6 +292,10 @@ bool Context::get_isArray() const {
   return is_array;
 }
 
+bool Context::get_isBlockNumeric() const {
+  return is_blockNumeric;
+}
+
 // set context
 void Context::set_alu_modifier(BrigAluModifier modifier) {
   this->aluModifier = modifier;
@@ -334,6 +349,10 @@ void Context::set_dim(uint32_t dim) {
 
 void Context::set_isArray(bool is_array) {
   this->is_array = is_array;
+}
+
+void Context::set_isBlockNumeric(bool is_blockNumeric) {
+  this->is_blockNumeric = is_blockNumeric;
 }
 
 // the operationCount of BrigDirectiveFunction add by 1
