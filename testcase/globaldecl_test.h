@@ -1393,6 +1393,1071 @@ std::string inputarray_location_false[] = {
   "loc 12 22.0f 32 ;"
 };
 
+class CodegenTestGlobalSymbolDecl: public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string inputarray_globalsymboldecl[] = {
+//alignment externOrStatic
+  "align 1 static group_s8 &tmp[2];",
+  "align 2 static group_s16 &tmp[2];",
+  "align 4 static group_s32 &tmp[2];",
+  "align 8 static group_s64 &tmp[2];",
+  "align 4 extern group_u8 &tmp[2];",
+  "align 4 extern group_u16 &tmp[2];",
+  "align 8 extern group_u32 &tmp[2];",
+  "align 8 extern group_u64 &tmp[2];",
+//externOrStatic alignment
+  "static align 2 private_f16 &tmp[2];",
+  "static align 8 private_f32 &tmp[2];",
+  "static align 8 private_f64 &tmp[2];",
+  "static align 1 private_b1 &tmp[2];",
+  "extern align 1 private_b8 &tmp[2];",
+  "extern align 2 private_b16 &tmp[2];",
+  "extern align 4 private_b32 &tmp[2];",
+  "extern align 8 private_b64 &tmp[2];",
+ //externOrStatic
+  "extern private_b128 &tmp;",
+  "extern private_u8x4 &tmp;",
+  "extern private_u8x16 &tmp;",
+  "extern group_s8x16 &tmp;",
+  "static group_u16x8 &tmp;",
+  "static group_s16x8 &tmp;",
+  "static group_f16x8 &tmp;",
+//alignment
+  "align 4 group_s8x4 &tmp;",
+  "align 8 private_u8x8 &tmp;",
+//const alignment externOrStatic
+  "const align 8 extern group_s8x8 &tmp;",
+  "const align 8 static private_s16x2 &tmp[2];",
+//const externOrStatic
+  "const extern group_u16x2 &tmp;",
+  "const static private_f16x2 &tmp[2];",
+//const alignment
+  "const align 8 group_u16x4 &tmp;",
+  "const align 8 private_s16x4 &tmp[2];",
+//alignment const externOrStatic
+  "align 8 const extern group_f16x4 &tmp;",
+  "align 8 const static private_f16x4 &tmp[2];",
+//externOrStatic const alignment
+  "extern const align 8 group_f16x4 &tmp;",
+  "static const align 8 private_f16x4 &tmp[2];",
+//externOrStatic const
+  "static const group_u32x4 &tmp;",
+  "static const group_s32x4 &tmp;",
+  "static const group_f32x4 &tmp[2];",
+  "extern const private_u32x4 &tmp;",
+  "extern const private_s32x4 &tmp;",
+  "extern const private_f32x4 &tmp[2];",
+//alignment const
+  "align 8 const group_u32x2 &tmp;",
+  "align 8 const group_s32x2 &tmp[2];",
+  "align 8 const private_f32x2 &tmp;",
+//alignment externOrStatic const
+  "align 8 extern const group_f16x4 &tmp;",
+  "align 8 static const private_f16x4 &tmp[2];",
+//externOrStatic alignment const
+  "extern align 8 const group_f16x4 &tmp[2];",
+  "static align 8 const private_f16x4 &tmp;",
+//no declprefix
+  "group_u32 &tmp[2][2];",
+  "group_s32 &tmp;",
+  "group_b32 &tmp[2];",
+  "private_u32 &tmp[2][2];",
+  "private_s32 &tmp;",
+  "private_b32 &tmp[2];"
+};
+
+BrigDirectiveSymbol outputarray_globalsymboldecl[] = {
+//alignment externOrStatic
+//"align 1 static group_s8 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigs8,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 2 static group_s16 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigStatic,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigs16,                // type
+    2,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 4 static group_s32 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigStatic,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigs32,                // type
+    4,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 8 static group_s64 &tmp[2];"
+ {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigStatic,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigs64,                // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 4 extern group_u8 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigExtern,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigu8,                // type
+    4,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 4 extern group_u16 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigExtern,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigu16,                // type
+    4,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 8 extern group_u32 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigExtern,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigu32,                // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 8 extern group_u64 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigExtern,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigu64,                // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//externOrStatic alignment
+//"static align 2 private_f16 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,         // storag class 
+    BrigStatic,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf16,                // type
+    2,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static align 8 private_f32 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,         // storag class 
+    BrigStatic,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf32,                // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static align 8 private_f64 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,         // storag class 
+    BrigStatic,            // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf64,                // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static align 1 private_b1 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigb1,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern align 1 private_b8 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigb8,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern align 2 private_b16 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigb16,                // type
+    2,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern align 4 private_b32 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigb32,                // type
+    4,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern align 8 private_b64 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigb64,                // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//externOrStatic
+//"extern private_b128 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigb128,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern private_u8x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu8x4,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern private_u8x16 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu8x16,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern group_s8x16 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigs8x16,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static group_u16x8 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu16x8,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static group_s16x8 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigs16x8,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static group_f16x8 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigf16x8,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//alignment
+//"align 4 group_s8x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigNone,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigs8x4,              // type
+    4,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 8 private_u8x8 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigNone,             // attribute
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu8x8,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//const alignment externOrStatic
+//"const align 8 extern group_s8x8 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigs8x8,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"const align 8 static private_s16x2 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigs16x2,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//const externOrStatic
+//"const extern group_u16x2 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu16x2,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"const static private_f16x2 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf16x2,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//const alignment
+//"const align 8 group_u16x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigNone,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"const align 8 private_s16x4 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigNone,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigs16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//alignment const externOrStatic
+//"align 8 const extern group_f16x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigf16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 8 const static private_f16x4 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//externOrStatic const alignment
+//"extern const align 8 group_f16x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigf16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static const align 8 private_f16x4 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//externOrStatic const
+//"static const group_u32x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu32x4,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static const group_s32x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigs32x4,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static const group_f32x4 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf32x4,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern const private_u32x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu32x4,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern const private_s32x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigs32x4,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"extern const private_f32x4 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf32x4,              // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//alignment const
+//"align 8 const group_u32x2 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigNone,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigu32x2,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 8 const group_s32x2 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigNone,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigs32x2,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 8 const private_f32x2 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigNone,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigf32x2,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//alignment externOrStatic const
+//"align 8 extern const group_f16x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigf16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"align 8 static const private_f16x4 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//externOrStatic alignment const
+//"extern align 8 const group_f16x4 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,       // storag class 
+    BrigExtern,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigf16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//"static align 8 const private_f16x4 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigStatic,             // attribute
+    0,                      // reserved
+    BrigConst,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigf16x4,              // type
+    8,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+//no declprefix
+// "group_u32 &tmp[2][2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigNone ,              // attribut
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    4,                      // dim
+    0,                      // s_name
+    Brigu32,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+// "group_s32 &tmp;"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigNone ,              // attribut
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigs32,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+// "group_b32 &tmp[2];"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigGroupSpace,         // storag class 
+    BrigNone ,              // attribut
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigb32,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+// "private_u32 &tmp[2][2];\n"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigNone ,              // attribut
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    4,                      // dim
+    0,                      // s_name
+    Brigu32,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+// "private_s32 &tmp;\n"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigNone ,              // attribut
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    0,                      // dim
+    0,                      // s_name
+    Brigs32,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  },
+// "private_b32 &tmp[2];\n"
+  {
+  40,                       // size
+  BrigEDirectiveSymbol ,    // kind
+    {
+    0,                      // c_code
+    BrigPrivateSpace,       // storag class 
+    BrigNone ,              // attribut
+    0,                      // reserved
+    BrigArray,              // symbolModifier
+    2,                      // dim
+    0,                      // s_name
+    Brigb32,                // type
+    1,                      // align
+     },
+  0,                        // d_init
+  0,                        // reserved
+  }
+};
+
 }  // namespace brig
 }  // namespace hsa
 #endif //GLOBALDECL_TEST_H_
