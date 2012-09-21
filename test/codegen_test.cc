@@ -9099,6 +9099,161 @@ TEST(CodegenTest, FunctionDeclCodeGen){
   EXPECT_EQ(ref2.d_firstInParam, get.d_firstInParam);
   
   delete lexer;
-}
+};
+
+
+TEST(CodegenTest, MulCodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("mul_u32 $s1 ,$s2, $s3;\n");
+  input.append("mul_hi_u32 $s1, $s2, $s9;\n");
+
+  Lexer* lexer = new Lexer(input);
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Mul(context));
+  EXPECT_EQ(0, Mul(context));
+
+  BrigcOffset32_t ref2_c_offset = context->get_code_offset() - sizeof(BrigInstBase);
+  BrigcOffset32_t ref1_c_offset = ref2_c_offset - sizeof(BrigInstBase);
+
+  BrigoOffset32_t reg9_o_offset = context->get_operand_offset() - sizeof(BrigOperandReg);
+  BrigoOffset32_t reg3_o_offset = reg9_o_offset - sizeof(BrigOperandReg);
+  BrigoOffset32_t reg2_o_offset = reg3_o_offset - sizeof(BrigOperandReg);
+  BrigoOffset32_t reg1_o_offset = reg2_o_offset - sizeof(BrigOperandReg);
+
+  BrigInstBase ref1 = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigMul,               // opcode
+    Brigu32,               // type
+    BrigNoPacking,         // packing
+    {                      // o_operands[5]
+      reg1_o_offset,
+      reg2_o_offset, 
+      reg3_o_offset,
+      0, 
+      0
+    }      
+  };
+  BrigInstBase ref2 = {
+    sizeof(BrigInstBase),  // size
+    BrigEInstBase,         // kind
+    BrigMul,               // opcode
+    Brigu32,               // type
+    BrigNoPacking,         // packing
+    {                      // o_operands[5]
+      reg1_o_offset,
+      reg2_o_offset, 
+      reg9_o_offset,
+      0, 
+      0
+    }      
+  };
+  BrigsOffset32_t reg9_s_offset = context->get_string_offset() 
+          - (strlen("$s9") + 1);
+  BrigsOffset32_t reg3_s_offset = reg9_s_offset - (strlen("$s3") + 1);
+  BrigsOffset32_t reg2_s_offset = reg3_s_offset - (strlen("$s2") + 1);
+  BrigsOffset32_t reg1_s_offset = reg2_s_offset - (strlen("$s1") + 1);
+
+  BrigOperandReg reg1 = {
+    sizeof(BrigOperandReg),
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    reg1_s_offset
+  };
+
+  BrigOperandReg reg2 = {
+    sizeof(BrigOperandReg),
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    reg2_s_offset
+  };
+  BrigOperandReg reg3 = {
+    sizeof(BrigOperandReg),
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    reg3_s_offset
+  };
+
+  BrigOperandReg reg9 = {
+    sizeof(BrigOperandReg),
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    reg9_s_offset
+  };
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+
+  context->get_operand(reg9_o_offset, &getReg);
+  // BrigOperandReg
+  EXPECT_EQ(reg9.size, getReg.size);
+  EXPECT_EQ(reg9.kind, getReg.kind);
+  EXPECT_EQ(reg9.type, getReg.type);
+  EXPECT_EQ(reg9.reserved, getReg.reserved);
+  EXPECT_EQ(reg9.name, getReg.name);
+
+  context->get_operand(reg3_o_offset, &getReg);
+  // BrigOperandReg
+  EXPECT_EQ(reg3.size, getReg.size);
+  EXPECT_EQ(reg3.kind, getReg.kind);
+  EXPECT_EQ(reg3.type, getReg.type);
+  EXPECT_EQ(reg3.reserved, getReg.reserved);
+  EXPECT_EQ(reg3.name, getReg.name);
+
+  context->get_operand(reg2_o_offset, &getReg);
+  // BrigOperandReg
+  EXPECT_EQ(reg2.size, getReg.size);
+  EXPECT_EQ(reg2.kind, getReg.kind);
+  EXPECT_EQ(reg2.type, getReg.type);
+  EXPECT_EQ(reg2.reserved, getReg.reserved);
+  EXPECT_EQ(reg2.name, getReg.name);
+
+  context->get_operand(reg1_o_offset, &getReg);
+  // BrigOperandReg
+  EXPECT_EQ(reg1.size, getReg.size);
+  EXPECT_EQ(reg1.kind, getReg.kind);
+  EXPECT_EQ(reg1.type, getReg.type);
+  EXPECT_EQ(reg1.reserved, getReg.reserved);
+  EXPECT_EQ(reg1.name, getReg.name);
+  
+  context->get_code(ref1_c_offset, &getBase);
+  // BrigInstBase
+  EXPECT_EQ(ref1.size, getBase.size);
+  EXPECT_EQ(ref1.kind, getBase.kind);
+  EXPECT_EQ(ref1.opcode, getBase.opcode);
+  EXPECT_EQ(ref1.type, getBase.type);
+  EXPECT_EQ(ref1.packing, getBase.packing);
+
+  EXPECT_EQ(ref1.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref1.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref1.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref1.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref1.o_operands[4], getBase.o_operands[4]);
+
+  context->get_code(ref2_c_offset, &getBase);
+  // BrigInstBase
+  EXPECT_EQ(ref2.size, getBase.size);
+  EXPECT_EQ(ref2.kind, getBase.kind);
+  EXPECT_EQ(ref2.opcode, getBase.opcode);
+  EXPECT_EQ(ref2.type, getBase.type);
+  EXPECT_EQ(ref2.packing, getBase.packing);
+  EXPECT_EQ(ref2.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref2.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref2.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref2.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref2.o_operands[4], getBase.o_operands[4]);
+
+  delete lexer;
+};
+
+
 }  // namespace brig
 }  // namespace hsa
