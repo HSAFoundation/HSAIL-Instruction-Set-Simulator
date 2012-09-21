@@ -768,7 +768,7 @@ int Instruction2(Context* context) {
                 // may need to edit others, worry about that later.
 
                 // update context for later functions
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -829,7 +829,7 @@ int Instruction2(Context* context) {
                 // may need to edit others, worry about that later.
 
                 // set context for later functions
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -904,7 +904,7 @@ int Instruction2(Context* context) {
               // may need to edit others, worry about that later.
 
               // set context for later functions
-              context->update_bdf_operation_count();
+              // context->update_bdf_operation_count();
               context->token_to_scan = yylex();
               return 0;
             } else {
@@ -968,7 +968,7 @@ int Instruction2(Context* context) {
                 // may need to edit others, worry about that later.
 
                 // set context for later functions
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -1020,7 +1020,7 @@ int Instruction2(Context* context) {
                 // if the rule is valid, just write to the .code section,
                 // may need to edit others, worry about that later.
                 
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();  // set context for later
                 return 0;
               } else {
@@ -1095,7 +1095,7 @@ int Instruction3(Context* context) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&inst_op);
  
-                  context->update_bdf_operation_count();
+                  // context->update_bdf_operation_count();
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -1158,7 +1158,7 @@ int Instruction3(Context* context) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&inst_op);
 
-                  context->update_bdf_operation_count();
+                  // context->update_bdf_operation_count();
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -2980,7 +2980,7 @@ int SysCall(Context* context) {
                     if (context->token_to_scan == ';') {
                       context->append_code(&syscallInst);
 
-                      context->update_bdf_operation_count();
+                      // context->update_bdf_operation_count();
                       context->token_to_scan = yylex();
                       return 0;
                     } else {  // ';'
@@ -4514,7 +4514,7 @@ int Cmp(Context* context) {
 
                   // OperationCount adds 1 
                   // in BrigDirectiveFunction or BrigDirectivekernel
-                  context->update_bdf_operation_count();
+                  // context->update_bdf_operation_count();
 
                   context->token_to_scan = yylex();
                   return 0;
@@ -4902,7 +4902,7 @@ int Instruction5(Context* context) {
               if (context->token_to_scan == ';') {
                 context->append_code(&f2u4Inst);
 
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -4998,7 +4998,7 @@ int Ldc(Context* context) {
 
             // OperationCount adds 1 
             // in BrigDirectiveFunction or BrigDirectivekernel
-            context->update_bdf_operation_count();
+            // context->update_bdf_operation_count();
 
             context->token_to_scan = yylex();
             return 0;
@@ -5133,7 +5133,7 @@ int Atom(Context* context) {
 
                   // OperationCount adds 1 
                   // in BrigDirectiveFunction or BrigDirectivekernel
-                  context->update_bdf_operation_count();
+                  // context->update_bdf_operation_count();
 
                   context->token_to_scan = yylex();
                   return 0;
@@ -5271,7 +5271,7 @@ int Mov(Context* context) {
 
             // OperationCount adds 1 
             // in BrigDirectiveFunction or BrigDirectivekernel
-            context->update_bdf_operation_count();
+            // context->update_bdf_operation_count();
 
             context->token_to_scan = yylex();
             return 0;
@@ -5354,8 +5354,8 @@ int MulInst(Context* context) {
     context->token_to_scan = yylex();
     if (!RoundingMode(context)) { // with roundingmode
 
-      BrigInstMod mul_op = {
-        sizeof(mul_op),     // size
+      BrigInstMod bim = {
+        sizeof(BrigInstMod),     // size
         BrigEInstMod,       // kind
         BrigMul,            // opcode
         Brigb32,            // type
@@ -5365,54 +5365,75 @@ int MulInst(Context* context) {
       };
 
       if (context->token_type == PACKING) {
-        mul_op.packing = context->token_value.packing;
+        bim.packing = context->token_value.packing;
         context->token_to_scan = yylex();
       }
+      BrigoOffset32_t opSize = 0;
+      std::string opName;
+      size_t opCount = 0;
+
       if (context->token_type == DATA_TYPE_ID) {
-        mul_op.type = context->token_value.data_type;
+        context->set_type(context->token_value.data_type);
+        bim.type = context->get_type();
+        
         context->token_to_scan = yylex();
-        if (context->token_type == REGISTER) {
-          std::string oper_name = context->token_value.string_val;
-          if (Operand(context)) {
-            return 1;
-          }
-          mul_op.o_operands[0] = context->operand_map[oper_name];
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if(context->token_type == REGISTER ) {
-              std::string oper_name = context->token_value.string_val;
-              if (Operand(context)) {
-                return 1;
-              }
-              mul_op.o_operands[1] = context->operand_map[oper_name];
-            } else if (context->token_type == CONSTANT ||
-                       context->token_to_scan == TOKEN_WAVESIZE) {
-              mul_op.o_operands[1] = context->get_operand_offset();
-              if (Operand(context)) {
-                return 1;
-              }
+        if (REGISTER == context->token_type){
+          opName = context->token_value.string_val;
+        } else {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+        if (Operand(context)) {
+          return 1;
+        }
+        bim.o_operands[opCount++] = context->operand_map[opName];
+        if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+
+            opSize = context->get_operand_offset();
+            if (REGISTER == context->token_type){
+              opName = context->token_value.string_val;
+            } else if (CONSTANT == context->token_type
+                     || '-' == context->token_to_scan){
+              opSize += opSize & 0x7;
             } else {
-              context->set_error(MISSING_OPERAND);
+              context->set_error(INVALID_OPERAND);
+              return 1;
             }
+            if (Operand(context)) {
+              return 1;
+            }
+            if (opSize == context->get_operand_offset()){
+              bim.o_operands[opCount++] = context->operand_map[opName];
+            } else { 
+              bim.o_operands[opCount++] = opSize;
+            }
+
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              if (context->token_type == REGISTER) {
-                std::string oper_name = context->token_value.string_val;
-                if (Operand(context)) {
-                  return 1;
-                }
-              mul_op.o_operands[2] = context->operand_map[oper_name];
-              } else if (context->token_type == CONSTANT ||
-                       context->token_to_scan == TOKEN_WAVESIZE) {
-                mul_op.o_operands[2] = context->get_operand_offset();
-                if (Operand(context)) {
-                  return 1;
-                }
+
+              opSize = context->get_operand_offset();
+              if (REGISTER == context->token_type){
+                opName = context->token_value.string_val;
+              } else if (CONSTANT == context->token_type
+                       || '-' == context->token_to_scan){
+                opSize += opSize & 0x7;
               } else {
-              context->set_error(MISSING_OPERAND);
+                context->set_error(INVALID_OPERAND);
+                return 1;
+              }
+              if (Operand(context)) {
+                return 1;
+              }
+              if (opSize == context->get_operand_offset()){
+                bim.o_operands[opCount++] = context->operand_map[opName];
+              } else { 
+                bim.o_operands[opCount++] = opSize;
               }
               if (context->token_to_scan == ';') {
-                context->append_code(&mul_op);
+                context->append_code(&bim);
+                context->update_bdf_operation_count();
+
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -5420,30 +5441,86 @@ int MulInst(Context* context) {
               }
             } else {
               context->set_error(MISSING_COMMA);
-            }
-          }  else {
-            context->set_error(MISSING_COMMA);
           }
-        } else {
-          context->set_error(MISSING_OPERAND);
+        }  else {
+          context->set_error(MISSING_COMMA);
         }
       } else {
         context->set_error(MISSING_DATA_TYPE);
       }
     } else { // without roundingmode
+      BrigInstBase bib = {
+        sizeof(BrigInstBase), //size
+        BrigEInstBase,        //kind
+        BrigMul,              //opcode
+        Brigb32,              //type
+        BrigNoPacking,        //packing
+        {0,0,0,0,0}           //o_operands[5]
+      };
       if (context->token_type == PACKING) {
+        bib.packing = context->token_value.packing;
         context->token_to_scan = yylex();
       }
+      BrigoOffset32_t opSize = 0;
+      std::string opName;
+      size_t opCount = 0;
+
       if (context->token_type == DATA_TYPE_ID) {
+        context->set_type(context->token_value.data_type);
+        bib.type = context->get_type();
+
         context->token_to_scan = yylex();
-        if (!Operand(context)) {
+        if (REGISTER == context->token_type){
+          opName = context->token_value.string_val;
+        } else {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }          
+        if (!Operand(context)) {  // operand reg
+          bib.o_operands[opCount++] = context->operand_map[opName];
+
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
+
+            opSize = context->get_operand_offset();
+            if (REGISTER == context->token_type){
+              opName = context->token_value.string_val;
+            } else if (CONSTANT == context->token_type
+                     || '-' == context->token_to_scan){
+              opSize += opSize & 0x7;
+            } else {
+              context->set_error(INVALID_OPERAND);
+              return 1;
+            }
             if (!Operand(context)) {
+              if (opSize == context->get_operand_offset()){
+                bib.o_operands[opCount++] = context->operand_map[opName];
+              } else { 
+                bib.o_operands[opCount++] = opSize;
+              }
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
+
+                opSize = context->get_operand_offset();
+                if (REGISTER == context->token_type){
+                  opName = context->token_value.string_val;
+                } else if (CONSTANT == context->token_type
+                        || '-' == context->token_to_scan){
+                  opSize += opSize & 0x7;
+                } else {
+                  context->set_error(INVALID_OPERAND);
+                  return 1;
+                }
                 if (!Operand(context)) {
+                  if (opSize == context->get_operand_offset()){
+                    bib.o_operands[opCount++] = context->operand_map[opName];
+                  } else { 
+                    bib.o_operands[opCount++] = opSize;
+                  }
                   if (context->token_to_scan == ';') {
+                    context->append_code(&bib);
+                    // context->update_bdf_operation_count();
+
                     context->token_to_scan = yylex();
                     return 0;
                   } else {
@@ -5469,20 +5546,80 @@ int MulInst(Context* context) {
       }
     }
   } else if (context->token_to_scan == MUL_HI) {
+    BrigInstBase bib = {
+      sizeof(BrigInstBase), //size
+      BrigEInstBase,        //kind
+      BrigMul,              //opcode
+      Brigb32,              //type
+      BrigNoPacking,        //packing
+      {0,0,0,0,0}           //o_operands[5]
+    };
     context->token_to_scan = yylex();
     if (context->token_type == PACKING) {
       context->token_to_scan = yylex();
     }
+
+    BrigoOffset32_t opSize = 0;
+    std::string opName;
+    size_t opCount = 0;
+
     if (context->token_type == DATA_TYPE_ID) {
+      context->set_type(context->token_value.data_type);
+      bib.type = context->get_type();
+
       context->token_to_scan = yylex();
+
+      if (REGISTER == context->token_type){
+        opName = context->token_value.string_val;
+      } else {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }     
       if (!Operand(context)) {
+        bib.o_operands[opCount++] = context->operand_map[opName];
+
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
+
+          opSize = context->get_operand_offset();
+          if (REGISTER == context->token_type){
+            opName = context->token_value.string_val;
+          } else if (CONSTANT == context->token_type
+                   || '-' == context->token_to_scan){
+            opSize += opSize & 0x7;
+          } else {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
           if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()){
+              bib.o_operands[opCount++] = context->operand_map[opName];
+            } else { 
+              bib.o_operands[opCount++] = opSize;
+            }
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
+
+              opSize = context->get_operand_offset();
+              if (REGISTER == context->token_type){
+                opName = context->token_value.string_val;
+              } else if (CONSTANT == context->token_type
+                        || '-' == context->token_to_scan){
+                opSize += opSize & 0x7;
+              } else {
+                context->set_error(INVALID_OPERAND);
+                return 1;
+              }
               if (!Operand(context)) {
+                if (opSize == context->get_operand_offset()){
+                  bib.o_operands[opCount++] = context->operand_map[opName];
+                } else { 
+                  bib.o_operands[opCount++] = opSize;
+                }
                 if (context->token_to_scan == ';') {
+                  context->append_code(&bib);
+                  // context->update_bdf_operation_count();
+
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -5513,17 +5650,84 @@ int MulInst(Context* context) {
 int Mul24Inst(Context* context) {
   if (context->token_to_scan == MUL24_HI ||
       context->token_to_scan == MUL24) {
+    BrigInstBase bib = {
+      sizeof(BrigInstBase), //size
+      BrigEInstBase,        //kind
+      BrigMul,              //opcode
+      Brigb32,              //type
+      BrigNoPacking,        //packing
+      {0,0,0,0,0}           //o_operands[5]
+    };
+
+    BrigoOffset32_t opSize = 0;
+    std::string opName;
+    size_t opCount = 0;
+
     context->token_to_scan = yylex();
     if (context->token_type == DATA_TYPE_ID) {
+      if(!(_U32 == context->token_to_scan
+         || _U64 == context->token_to_scan
+         || _S32 == context->token_to_scan
+         || _S64 == context->token_to_scan)){
+         // u or s ,32 or 64
+         return 1;
+      }
+      context->set_type(context->token_value.data_type);
+      bib.type = context->get_type();
+
       context->token_to_scan = yylex();
+
+      if (REGISTER == context->token_type){
+        opName = context->token_value.string_val;
+      } else {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }    
       if (!Operand(context)) {
+        bib.o_operands[opCount++] = context->operand_map[opName];
+
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
+
+          opSize = context->get_operand_offset();
+          if (REGISTER == context->token_type){
+            opName = context->token_value.string_val;
+          } else if (CONSTANT == context->token_type
+                    || '-' == context->token_to_scan){
+            opSize += opSize & 0x7;
+          } else {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
           if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()){
+              bib.o_operands[opCount++] = context->operand_map[opName];
+            } else { 
+              bib.o_operands[opCount++] = opSize;
+            }
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
+
+              opSize = context->get_operand_offset();
+              if (REGISTER == context->token_type){
+                opName = context->token_value.string_val;
+              } else if (CONSTANT == context->token_type
+                         || '-' == context->token_to_scan){
+                opSize += opSize & 0x7;
+              } else {
+                context->set_error(INVALID_OPERAND);
+                return 1;
+              }
               if (!Operand(context)) {
+                if (opSize == context->get_operand_offset()){
+                  bib.o_operands[opCount++] = context->operand_map[opName];
+                } else { 
+                  bib.o_operands[opCount++] = opSize;
+                }
                 if (context->token_to_scan == ';') {
+                  context->append_code(&bib);
+                  context->update_bdf_operation_count();
+
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -5554,20 +5758,102 @@ int Mul24Inst(Context* context) {
 int Mad24Inst(Context* context) {
   if (context->token_to_scan == MAD24_HI ||
       context->token_to_scan == MAD24) {
+    BrigInstBase bib = {
+      sizeof(BrigInstBase), //size
+      BrigEInstBase,        //kind
+      BrigMul,              //opcode
+      Brigb32,              //type
+      BrigNoPacking,        //packing
+      {0,0,0,0,0}           //o_operands[5]
+    };
+
+    BrigoOffset32_t opSize = 0;
+    std::string opName;
+    size_t opCount = 0;
+
     context->token_to_scan = yylex();
     if (context->token_type == DATA_TYPE_ID) {
+      if(!(_U32 == context->token_to_scan
+         || _U64 == context->token_to_scan
+         || _S32 == context->token_to_scan
+         || _S64 == context->token_to_scan)){
+         // u or s ,32 or 64
+         return 1;
+      }
+      context->set_type(context->token_value.data_type);
+      bib.type = context->get_type();
+
       context->token_to_scan = yylex();
+      if (REGISTER == context->token_type){
+        opName = context->token_value.string_val;
+      } else {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }    
       if (!Operand(context)) {
+        bib.o_operands[opCount++] = context->operand_map[opName];
+
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
+
+          opSize = context->get_operand_offset();
+          if (REGISTER == context->token_type){
+            opName = context->token_value.string_val;
+          } else if (CONSTANT == context->token_type
+                    || '-' == context->token_to_scan){
+            opSize += opSize & 0x7;
+          } else {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
           if (!Operand(context)) {
+            if (opSize == context->get_operand_offset()){
+              bib.o_operands[opCount++] = context->operand_map[opName];
+            } else { 
+              bib.o_operands[opCount++] = opSize;
+            }
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
+
+              opSize = context->get_operand_offset();
+              if (REGISTER == context->token_type){
+                opName = context->token_value.string_val;
+              } else if (CONSTANT == context->token_type
+                         || '-' == context->token_to_scan){
+                opSize += opSize & 0x7;
+              } else {
+                context->set_error(INVALID_OPERAND);
+                return 1;
+              }
               if (!Operand(context)) {
+                if (opSize == context->get_operand_offset()){
+                  bib.o_operands[opCount++] = context->operand_map[opName];
+                } else { 
+                  bib.o_operands[opCount++] = opSize;
+                }
                 if (context->token_to_scan == ',') {
-                context->token_to_scan = yylex();
+                  context->token_to_scan = yylex();
+
+                  opSize = context->get_operand_offset();
+                  if (REGISTER == context->token_type){
+                    opName = context->token_value.string_val;
+                  } else if (CONSTANT == context->token_type
+                             || '-' == context->token_to_scan){
+                    opSize += opSize & 0x7;
+                  } else {
+                    context->set_error(INVALID_OPERAND);
+                    return 1;
+                  }
                   if (!Operand(context)) {
+                    if (opSize == context->get_operand_offset()){
+                      bib.o_operands[opCount++] = context->operand_map[opName];
+                    } else { 
+                      bib.o_operands[opCount++] = opSize;
+                    }
                     if (context->token_to_scan == ';') {
+                      context->append_code(&bib);
+                      context->update_bdf_operation_count();
+
                       context->token_to_scan = yylex();
                       return 0;
                     } else {
@@ -5764,7 +6050,7 @@ int Ld(Context* context) {
 
           // OperationCount adds 1 
           // in BrigDirectiveFunction or BrigDirectivekernel
-          context->update_bdf_operation_count();
+          // context->update_bdf_operation_count();
 
           context->token_to_scan = yylex();
           return 0;
@@ -5839,7 +6125,7 @@ int St(Context* context) {
 
           // OperationCount adds 1 
           // in BrigDirectiveFunction or BrigDirectivekernel
-          context->update_bdf_operation_count();
+          // context->update_bdf_operation_count();
 
           context->token_to_scan = yylex();          
           return 0;
@@ -5898,7 +6184,7 @@ int Lda(Context* context) {
 
             // OperationCount adds 1 
             // in BrigDirectiveFunction or BrigDirectivekernel
-            context->update_bdf_operation_count();
+            // context->update_bdf_operation_count();
 
             context->token_to_scan = yylex();
             return 0;
@@ -6098,7 +6384,7 @@ int ImageRet(Context* context) {
                     if (context->token_to_scan == ';') {
                       context->append_code(&img_inst);
 
-                      context->update_bdf_operation_count();
+                      // context->update_bdf_operation_count();
                       context->token_to_scan = yylex();
                       return 0;
                     } else {  // ';'
@@ -6271,7 +6557,7 @@ int ImageNoRet(Context* context) {
                   if (context->token_to_scan == ';') {
                     context->append_code(&imgNoRet);
 
-                    context->update_bdf_operation_count();
+                    // context->update_bdf_operation_count();
 
                     context->token_to_scan = yylex();
                     return 0;
@@ -6392,7 +6678,7 @@ int Cvt(Context* context) {
 
               // OperationCount adds 1 
               // in BrigDirectiveFunction or BrigDirectivekernel
-              context->update_bdf_operation_count();
+              // context->update_bdf_operation_count();
 
               context->token_to_scan = yylex();
               return 0;
@@ -6422,7 +6708,7 @@ int Instruction0(Context* context) {
   context->token_to_scan = yylex();
   if (context->token_to_scan == ';') {
 
-    context->update_bdf_operation_count();
+    // context->update_bdf_operation_count();
     context->token_to_scan = yylex();
     return 0;
   } else {
@@ -6473,7 +6759,7 @@ int Instruction1(Context* context) {
         if (context->token_to_scan == ';') {
           context->append_code(&inst1_op);
 
-          context->update_bdf_operation_count();
+          // context->update_bdf_operation_count();
           context->token_to_scan = yylex();
           return 0;
         } else {
@@ -6495,7 +6781,7 @@ int Instruction1(Context* context) {
         if (context->token_to_scan == ';') {
           context->append_code(&inst1_op);
 
-          context->update_bdf_operation_count();
+          // context->update_bdf_operation_count();
           context->token_to_scan = yylex();
           return 0;
         } else {
@@ -6516,7 +6802,7 @@ int Instruction1(Context* context) {
       if (context->token_to_scan == ';') {
         context->append_code(&inst1_op);
 
-        context->update_bdf_operation_count();
+        // context->update_bdf_operation_count();
         context->token_to_scan = yylex();
         return 0;
       } else {
@@ -6552,7 +6838,7 @@ int Instruction1(Context* context) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&inst1_op);
 
-                  context->update_bdf_operation_count();
+                  // context->update_bdf_operation_count();
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
@@ -6564,7 +6850,7 @@ int Instruction1(Context* context) {
           } else if (context->token_to_scan == ';') {
             context->append_code(&inst1_op);
    
-            context->update_bdf_operation_count();
+            // context->update_bdf_operation_count();
             context->token_to_scan = yylex();
             return 0;
           } else {
@@ -6592,7 +6878,7 @@ int Instruction1(Context* context) {
           if (context->token_to_scan == ';') {
             context->append_code(&inst1_op);
 
-            context->update_bdf_operation_count();
+            // context->update_bdf_operation_count();
             context->token_to_scan = yylex();
             return 0;
           } else {
@@ -6665,7 +6951,7 @@ int Segp(Context* context) {
               if (context->token_to_scan == ';') {
                 context->append_code(&segmentp_op);
             
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -6680,7 +6966,7 @@ int Segp(Context* context) {
               if (context->token_to_scan == ';') {
                 context->append_code(&segmentp_op);
 
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -6750,7 +7036,7 @@ int Segp(Context* context) {
               if (context->token_to_scan == ';') {
                 context->append_code(&sf_op);
 
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -6765,7 +7051,7 @@ int Segp(Context* context) {
               if (context->token_to_scan == ';') {
                 context->append_code(&sf_op);
 
-                context->update_bdf_operation_count();
+                // context->update_bdf_operation_count();
                 context->token_to_scan = yylex();
                 return 0;
               } else {
@@ -7118,7 +7404,7 @@ int ImageLoad(Context* context) {
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgLdInst);
 
-                        context->update_bdf_operation_count();
+                        // context->update_bdf_operation_count();
 
                         context->token_to_scan = yylex();
                         return 0;
@@ -7246,7 +7532,7 @@ int ImageStore(Context* context) {
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgStInst);
 
-                        context->update_bdf_operation_count();
+                        // context->update_bdf_operation_count();
 
                         context->token_to_scan = yylex();
                         return 0;
@@ -7720,7 +8006,7 @@ int Ret(Context* context) {
     };
     // write to .code section
     context->append_code(&op_ret);
-    context->update_bdf_operation_count();
+    // context->update_bdf_operation_count();
 
     context->token_to_scan = yylex();
     return 0;
@@ -7834,7 +8120,7 @@ int ImageRead(Context *context) {
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgRdInst);
 
-                        context->update_bdf_operation_count();
+                        // context->update_bdf_operation_count();
 
                         context->token_to_scan = yylex();
                         return 0;
@@ -7913,7 +8199,7 @@ int Sync(Context* context) {
       syncFlags
     };
     context->append_code(&op_sync);
-    context->update_bdf_operation_count();
+    // context->update_bdf_operation_count();
 
     context->token_to_scan = yylex();
     return 0;
@@ -7955,7 +8241,7 @@ int Bar(Context* context) {
         syncFlags
       };
       context->append_code(&op_bar);
-      context->update_bdf_operation_count();
+      // context->update_bdf_operation_count();
 
       context->token_to_scan = yylex();
       return 0;
@@ -8141,7 +8427,7 @@ int AtomicNoRet(Context* context) {
             if (context->token_to_scan == ';') {
               context->append_code(&aNoRetInst);
 
-              context->update_bdf_operation_count();
+              // context->update_bdf_operation_count();
 
               context->token_to_scan = yylex();
               return 0;
