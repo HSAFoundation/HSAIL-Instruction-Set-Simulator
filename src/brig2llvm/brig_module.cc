@@ -31,7 +31,7 @@ bool (BrigModule::check)(bool test, const Message &msg,
                          const char *filename, unsigned lineno,
                          const char *cause) const {
   if(!test && out_)
-     (*out_) << filename << "." << lineno << ": " << msg
+     (*out_) << filename << ":" << lineno << " " << msg
             << " (" << cause << ")\n";
   return test;
 }
@@ -704,7 +704,7 @@ bool BrigModule::validate(const BrigInstBase *code) const {
   for (unsigned i = 0; i < 5; i++) {
     if (code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
-                   "o_operands past the operands section");
+                     "o_operands past the operands section");
     }
   }
   return valid;
@@ -906,16 +906,16 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
 
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
   bool valid = true;
-  if (operand->elementCount) {
-      valid &= check(sizeof(BrigOperandArgumentList) + 
-                     sizeof(operand->o_args[1]) * (operand->elementCount - 1) 
-                     <= operand->size, "Invalid size");
-  }
+
+  size_t dirSize =
+    sizeof(BrigOperandArgumentList) +
+    sizeof(operand->o_args[0]) * (std::max(1U, operand->elementCount) - 1);
+  valid &= check(operand->size >= dirSize, "Invalid size");
 
   for (unsigned i = 0; i < operand->elementCount; ++i) {
     oper_iterator arg(S_.operands + operand->o_args[i]);
-    if (!validate(arg)) return false;
-    valid &= check(isa<BrigOperandArgumentRef>(arg), 
+    if(!validate(arg)) return false;
+    valid &= check(isa<BrigOperandArgumentRef>(arg),
                    "Invalid o_args, should point to BrigOperandArgumentRef");
   }
   return valid;
@@ -926,37 +926,37 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
   unsigned funRefCount = 0;
   unsigned argRefCount = 0;
 
-  if (operand->elementCount) {
-      valid &= check(sizeof(BrigOperandArgumentList) + 
-                     sizeof(operand->o_args[1]) * (operand->elementCount - 1) 
-                     <= operand->size, "Invalid size");
+  if(operand->elementCount) {
+    valid &= check(sizeof(BrigOperandArgumentList) +
+                   sizeof(operand->o_args[1]) * (operand->elementCount - 1)
+                   <= operand->size, "Invalid size");
   }
 
-  for (unsigned i = 0; i < operand->elementCount; ++i) {
+  for(unsigned i = 0; i < operand->elementCount; ++i) {
     oper_iterator arg(S_.operands + operand->o_args[i]);
-    if (!validate(arg)) return false;
-    if (const BrigOperandFunctionRef *funRef = 
-        dyn_cast<BrigOperandFunctionRef>(arg)) {
+    if(!validate(arg)) return false;
+    if(const BrigOperandFunctionRef *funRef =
+       dyn_cast<BrigOperandFunctionRef>(arg)) {
       dir_iterator fun(S_.directives + funRef->fn);
       if (!validate(fun)) return false;
-      valid &= check(isa<BrigDirectiveFunction>(fun), 
+      valid &= check(isa<BrigDirectiveFunction>(fun),
                      "should point to BrigOperandFunctionRef, "
                      "refer to BrigDirectiveFunction");
       ++funRefCount;
     }
-    if (const BrigOperandArgumentRef *argRef = 
+    if(const BrigOperandArgumentRef *argRef =
         dyn_cast<BrigOperandArgumentRef>(arg)) {
       dir_iterator funSig(S_.directives + argRef->arg);
-      if (!validate(funSig))  return false;
+      if (!validate(funSig)) return false;
       //conflict with BrigOperandArgumentRef refer to BrigDirectiveSymbol
-      valid &= check(isa<BrigDirectiveSignature>(funSig),   
+      valid &= check(isa<BrigDirectiveSignature>(funSig),
                      "should point to BrigOperandArgumentRef, "
                      "refer to BrigDirectiveSignature");
       ++argRefCount;
     }
   }
-  valid &= check(funRefCount == operand->elementCount || 
-                 argRefCount == operand->elementCount, 
+  valid &= check(funRefCount == operand->elementCount ||
+                 argRefCount == operand->elementCount,
                  "element of o_args should be BrigOperandFunctionRef "
                  "or BrigOperandArgumentRef");
   valid &= check(argRefCount < 2, "Invalid argRefCount, should be 1 or 0");

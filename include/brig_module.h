@@ -40,7 +40,7 @@ class BrigModule {
 
   BrigModule(const BrigReader &reader, llvm::raw_ostream *out) :
     S_(reader.getStrings().data(),
-       reader.getDirectives().data() + 4,
+       reader.getDirectives().data(),
        reader.getCode().data(),
        reader.getOperands().data(),
        reader.getStrings().size(),

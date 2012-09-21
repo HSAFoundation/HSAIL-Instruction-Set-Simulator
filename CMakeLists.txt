@@ -95,6 +95,13 @@ add_executable(brig_runtime_test ${brig_runtime_test_SOURCES})
 target_link_libraries(brig_runtime_test brig2llvm)
 
 set(brig_reader_test_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
   test/brig_reader_test.cc
   gtest/gtest-all.cc
   gtest/gtest_main.cc
