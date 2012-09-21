@@ -976,7 +976,7 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
 bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
   bool valid = true;
   dir_iterator argDir(S_.directives + operand->arg);
-  valid &= validate(argDir);
+  if(!validate(argDir)) return false;
   valid &= check(isa<BrigDirectiveSymbol>(argDir),
                  "Invalid reg, should be point BrigDirectiveSymbol");
   return valid;
@@ -995,7 +995,7 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   oper_iterator nameOper(S_.operands + operand->name);
-  valid &= validate(nameOper);
+  if(!validate(nameOper)) return false;
   valid &= check(isa<BrigOperandAddress>(nameOper),
                  "Invalid name, should point to BrigOperandAddress");
 
@@ -1016,7 +1016,7 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
 bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
   bool valid = true;
   dir_iterator fnDir(S_.directives + operand->fn);
-  valid &= validate(fnDir);
+  if(!validate(fnDir)) return false;
   valid &= check(isa<BrigDirectiveFunction>(fnDir) ||
                  isa<BrigDirectiveSignature>(fnDir),
                  "Invalid directive, should point to a "
@@ -1045,7 +1045,7 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
 
   if (operand->reg) {
     oper_iterator regOper(S_.operands + operand->reg);
-    valid &= validate(regOper);
+    if(!validate(regOper)) return false;
     valid &= check(isa<BrigOperandReg>(regOper),
                    "Invalid reg, should be point BrigOprandReg");
     valid &= check(operand->type == Brigb32 ||
@@ -1061,14 +1061,27 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
 bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
   bool valid = true;
   dir_iterator directiveDir(S_.directives + operand->labeldirective);
-  valid &= validate(directiveDir);
+  if(!validate(directiveDir)) return false;
   valid &= check(isa<BrigDirectiveLabel>(directiveDir),
                  "Invalid directive, should point "
                  "to a BrigDirectiveLabel");
   return valid;
 }
 bool BrigModule::validate(const BrigOperandOpaque *operand) const {
-  return true;
+  bool valid = true;
+  dir_iterator nameDir(S_.directives + operand->name);
+  if(!validate(nameDir)) return false;
+  valid &= check(isa<BrigDirectiveImage>(nameDir) ||
+                 isa<BrigDirectiveSampler>(nameDir),
+                 "Invalid directive, should point to a "
+                 "BrigDirectiveImage or BrigDirectiveSampler");
+  const oper_iterator oper(S_.operands + operand->reg);
+  if(!validate(oper)) return false;
+  const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+  if(!check(bor, "reg offset is wrong, not a BrigOperandReg")) return false;
+  valid &= check(bor->type == Brigb32,
+                 "Register type should be Brigb32");
+  return valid;
 }
 
 static bool getRegType(char c, BrigDataType *type) {

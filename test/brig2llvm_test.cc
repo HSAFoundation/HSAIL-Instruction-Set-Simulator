@@ -5685,7 +5685,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       BrigEOperandCompound,
       Brigu32,
       1,
-      120,
+      36,
       8,
       0
     };
@@ -5701,9 +5701,92 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid name, should point to BrigOperandAddress")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid register, the register must be an s or d register")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("&callee"));
+    strings.append(std::string("%output"));
+    strings.append(std::string("%input"));
+    strings.append(std::string("$c0"));
+
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveSymbol bds = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        8,                               // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bds);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandReg bor = {
+      12,
+      BrigEOperandReg,
+      Brigb1,
+      0,
+      31
+    };
+    operands.append(&bor);
+
+    BrigOperandAddress boa = {
+      16,
+      BrigEOperandAddress,
+      Brigb64,
+      0,
+      28
+    };
+    operands.append(&boa);
+
+    BrigOperandCompound boc = {
+      sizeof(boc),
+      BrigEOperandCompound,
+      Brigu32,
+      0,
+      8,
+      8,
+      0
+    };
+    operands.append(&boc);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid name, should point to BrigOperandAddress")));
   }
   //invalid test about reg past operand section
   {
@@ -5890,6 +5973,12 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     };
     directives.append(&callee);
 
+    BrigDirectivePad bdp = {
+      sizeof(bdp),
+      BrigEDirectivePad
+    };
+    directives.append(&bdp);
+
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
 
@@ -5899,7 +5988,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     BrigOperandFunctionRef bofr = {
       sizeof(bofr),
       BrigEOperandFunctionRef,
-      70
+      68
     };
     operands.append(&bofr);
 
@@ -6006,10 +6095,15 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
     };
     operands.append(&bor);
 
+    BrigOperandWaveSz bows = {
+      sizeof(bows),
+      BrigEOperandWaveSz
+    };
+
     BrigOperandIndirect boi = {
       sizeof(boi),
       BrigEOperandIndirect,
-      40,
+      20,
       Brigu32,
       1,
       0
@@ -6108,6 +6202,11 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
       0
     };
     directives.append(&bdv);
+    BrigDirectivePad bdp = {
+      sizeof(bdp),
+      BrigEDirectivePad
+    };
+    directives.append(&bdp);
 
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
@@ -6118,7 +6217,7 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
     BrigOperandArgumentRef boar = {
       sizeof(boar),
       BrigEOperandArgumentRef,
-      120                    //arg
+      20                    //arg
     };
     operands.append(&boar);
 
@@ -6127,8 +6226,6 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
     hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "dir past the directives section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid reg, should be point BrigDirectiveSymbol")));
   }
@@ -6522,6 +6619,11 @@ TEST(Brig2LLVMTest, validateBrigOperandLabelRef) {
       0
     };
     directives.append(&bdl);
+    BrigDirectivePad bdp = {
+      sizeof(bdp),
+      BrigEDirectivePad
+    };
+    directives.append(&bdp);
 
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
@@ -6532,7 +6634,7 @@ TEST(Brig2LLVMTest, validateBrigOperandLabelRef) {
     BrigOperandLabelRef bolr = {
       sizeof(bolr),
       BrigEOperandLabelRef,
-      21
+      32
     };
     operands.append(&bolr);
 
@@ -7179,7 +7281,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     EXPECT_TRUE(mod.isValid());
   }
   //invalid test, elementCount be 1
- /* {
+  {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
     strings.append("&callee");
@@ -7244,9 +7346,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "operands past the operands section")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid args, should point to BrigOperandArgumentRef")));
-  }*/
+  }
 }
 
 TEST(Brig2LLVMTest, validateBrigOperandImmed) {
