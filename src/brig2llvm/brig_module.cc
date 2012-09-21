@@ -641,11 +641,12 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
                  code->storageClass == BrigArgSpace,
                  "Invalid storage class, can be global, group, "
                  "private, kernarg, readonly, spill, or arg");
-  valid &= check(code->memorySemantic == BrigAcquire ||
+  valid &= check(code->memorySemantic == BrigRegular ||
+                 code->memorySemantic == BrigAcquire ||
                  code->memorySemantic == BrigAcquireRelease ||
                  code->memorySemantic == BrigParAcquireRelease,
-                 "Invalid memorySemantic, can be BrigAcquire, "
-                 "BrigAcquireRelease, BrigParAcquireRelease");
+                 "Invalid memorySemantic, can be regular, acquire, "
+                 "acquire release, or partial acquire release");
   return valid;
 }
 
@@ -667,11 +668,11 @@ bool BrigModule::validate(const BrigInstAtomicImage *code) const {
                  "Invalid atomicOperation");
   valid &= check(code->storageClass == BrigGlobalSpace,
                  "Invalid storage class, must be global");
-  valid &= check(code->memorySemantic == BrigAcquire ||
-                 code->memorySemantic == BrigAcquireRelease ||
-                 code->memorySemantic == BrigParAcquireRelease,
-                 "Invalid memorySemantic, can be BrigAcquire, "
-                 "BrigAcquireRelease, BrigParAcquireRelease");
+  valid &= check(code->memorySemantic == BrigRegular ||
+                 code->memorySemantic == BrigAcquire ||
+                 code->memorySemantic == BrigAcquireRelease,
+                 "Invalid memorySemantic, can be regular, "
+                 "acquire, or acquire release");
   valid &= check(code->geom <= Briggeom_2da, "Invalid geom");
   return valid;
 }
@@ -797,11 +798,15 @@ bool BrigModule::validate(const BrigInstLdSt *code) const {
   valid &= check(code->storageClass <= BrigFlatSpace,
                  "Invalid storage class, can be global, group, "
                  "private, kernarg, readonly, spill, arg or flat");
-  valid &= check(code->memorySemantic == BrigAcquire ||
-                 code->memorySemantic == BrigAcquireRelease ||
-                 code->memorySemantic == BrigParAcquireRelease,
-                 "Invalid memorySemantic, can be BrigAcquire, "
-                 "BrigAcquireRelease, BrigParAcquireRelease");
+  valid &= check(code->memorySemantic == BrigRegular ||
+                 code->memorySemantic == BrigAcquire ||
+                 code->memorySemantic == BrigRelease ||
+                 code->memorySemantic == BrigDep ||
+                 code->memorySemantic == BrigParAcquire ||
+                 code->memorySemantic == BrigParRelease,
+                 "Invalid memorySemantic, can be regular, "
+                 "acquire, release, dep, partial acquire, "
+                 "or partial release");
   valid &= check(code->equivClass < 64,
                  "Invalid equivClass, must less than 64");
   return valid;
