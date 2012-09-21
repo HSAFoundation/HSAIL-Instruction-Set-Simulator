@@ -1016,7 +1016,19 @@ bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandImmed *operand) const {
-  return true;
+  bool valid = true;
+
+  valid &= check(Brigb1 == operand->type  || Brigb8 == operand->type  ||
+                 Brigb16 == operand->type || Brigb32 == operand->type ||
+                 Brigb64 == operand->type,
+                 "Invalid type, must be b1, b8, b16, b32 or b64");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  long int immedSize = sizeof(BrigOperandImmed) - 2 * sizeof(uint64_t);
+  long int immediateSize = immedSize + getTypeSize(operand->type);
+  valid &= check(immediateSize <= operand->size,
+                 "Operand size too small for immediate");
+  return valid;
 }
 
 bool BrigModule::validate(const BrigOperandIndirect *operand) const {

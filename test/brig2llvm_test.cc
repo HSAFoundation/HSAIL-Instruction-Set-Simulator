@@ -7130,3 +7130,131 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     "Invalid args, should point to BrigOperandArgumentRef")));
   }*/
 }
+
+TEST(Brig2LLVMTest, validateBrigOperandImmed) {
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i)
+      strings.append_char(0);
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i)
+      directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      8,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i)
+      code.append_char(0);
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i)
+      operands.append_char(0);
+
+    BrigOperandImmed boi = {
+      sizeof(boi),
+      BrigEOperandImmed,
+      Brigb32,
+      0
+    };
+    operands.append(&boi);
+
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              &llvm::errs());
+    EXPECT_TRUE(mod.isValid());
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i)
+      strings.append_char(0);
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i)
+      directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i)
+      code.append_char(0);
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i)
+      operands.append_char(0);
+
+    BrigOperandImmed boi = {
+      sizeof(boi),
+      BrigEOperandImmed,
+      Brigb128,
+      0
+    };
+    operands.append(&boi);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Invalid type, must be b1, b8, b16, b32 or b64")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i)
+      strings.append_char(0);
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i)
+      directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i)
+      code.append_char(0);
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i)
+      operands.append_char(0);
+
+    BrigOperandImmed boi = {
+      sizeof(boi),
+      BrigEOperandImmed,
+      Brigb1,
+      1
+    };
+    operands.append(&boi);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "reserved must be zero")));
+  }
+}
