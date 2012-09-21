@@ -496,7 +496,9 @@ border                                         { context->token_type = PROPERTY;
 
 WAVESIZE      { context->token_type = WAVESIZE;
                 free_string(context);
-                context->yycolno+=yyleng;
+                context->token_value.string_val = strdup(yytext);
+                context->valid_string = true;
+                context->yycolno += yyleng;
                 return TOKEN_WAVESIZE; }
 
   /* keywords */
