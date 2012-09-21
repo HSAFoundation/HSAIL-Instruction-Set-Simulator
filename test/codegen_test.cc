@@ -8872,7 +8872,7 @@ TEST(CodegenTest,BlockCodegen){
 
   array = new uint8_t[arraySize];
   BrigBlockNumeric *get = reinterpret_cast<BrigBlockNumeric*>(array);
-  unsigned char *get_charp = reinterpret_cast<unsigned char *>(get);
+  char *get_charp = reinterpret_cast<char *>(get);
   context->get_directive_bytes(get_charp,bbn1_d_offset,arraySize);
 
   EXPECT_EQ(bbn1->size,get->size);
@@ -8903,7 +8903,7 @@ TEST(CodegenTest,BlockCodegen){
 
   array = new uint8_t[arraySize];
   get = reinterpret_cast<BrigBlockNumeric*>(array);
-  get_charp = reinterpret_cast<unsigned char *>(get);
+  get_charp = reinterpret_cast<char *>(get);
   context->get_directive_bytes(get_charp,bbn2_d_offset,arraySize);
 
   EXPECT_EQ(bbn2->size,get->size);
@@ -8981,7 +8981,7 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   array = new uint8_t[arraySize];
   BrigDirectiveSignature *get = 
       reinterpret_cast<BrigDirectiveSignature*>(array);
-  unsigned char *get_charp =  reinterpret_cast<unsigned char *>(get);
+  char *get_charp =  reinterpret_cast<char *>(get);
 
   context->get_directive_bytes(get_charp,offset,arraySize);
   EXPECT_EQ(ref->size,get->size);
