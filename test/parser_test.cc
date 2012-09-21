@@ -4638,6 +4638,44 @@ TEST(ParserTest, TopLevelStatements) {
   delete lexer;
 }
 
+TEST(ParserTest, Program_VectorCopy) {
+  // Create a lexer
+  Lexer* lexer = new Lexer();
+  // register error reporter with context
+  context->set_error_reporter(main_reporter);
+
+  std::string input("version 1:0:$small;\n");
+  input.append("\n");
+  input.append("kernel &__OpenCL_vec_copy_kernel(\n");
+  input.append("        kernarg_u32 %arg_val0, \n");
+  input.append("        kernarg_u32 %arg_val1, \n");
+  input.append("        kernarg_u32 %arg_val2)\n");
+  input.append("{\n");
+  input.append("@__OpenCL_vec_copy_kernel_entry:\n");
+  input.append("        ld_kernarg_u32  $s0, [%arg_val2] ;\n");
+  input.append("        workitemaid     $s1, 0 ;\n");
+  input.append("        cmp_ge_b1_u32    $c0, $s1, $s0 ;\n");
+  input.append("        ld_kernarg_u32  $s0, [%arg_val1] ;\n");
+  input.append("        ld_kernarg_u32  $s2, [%arg_val0] ;\n");
+  input.append("        cbr     $c0, @BB0_2 ;\n");
+  input.append("\n");
+  input.append("        shl_u32  $s1, $s1, 2 ;\n");
+  input.append("        add_u32  $s0, $s0, $s1 ;\n");
+  input.append("        add_u32  $s1, $s2, $s1 ;\n");
+  input.append("        ld_global_f32   $s1, [$s1] ;\n");
+  input.append("        st_global_f32   $s1, [$s0] ;\n");
+  input.append("@BB0_2:\n");
+  input.append("        ret ;\n");
+  input.append("};\n");
+
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Program(context));
+
+  delete lexer;
+}
+
 // ------------------  PARSER WRAPPER TEST -----------------
 TEST(ParserWrapperTest, ScanSymbolsWithParser) {
   std::string input("version 1:0:$large;\n");
