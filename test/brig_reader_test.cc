@@ -91,6 +91,10 @@ TEST(BrigWriterTest, EmptyBRIG) {
   EXPECT_TRUE(mod.isValid());
 
   delete reader;
+
+  bool existed;
+  llvm::sys::fs::remove(resultPath.c_str(), existed);
+  EXPECT_TRUE(existed);
 }
 
 TEST(BrigWriterTest, VectorCopy) {
