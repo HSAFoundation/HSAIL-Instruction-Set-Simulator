@@ -1,0 +1,103 @@
+/*******************************************************************************
+ * Copyright (c) 2012 The HSA Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and/or associated documentation files (the
+ * "Materials"), to deal in the Materials without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Materials, and to
+ * permit persons to whom the Materials are furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Materials.
+ *
+ * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+ ******************************************************************************/
+
+
+/******************************************************************************
+Binary File should be created using assembler
+1. Using Assembler 
+	HSAILasm.exe -assemble foo.hsail
+	This creates foo.brigg file
+2. Using Assembler
+	objgen.exe foo.hsail foo
+	This creates foo brigg file
+*******************************************************************************/
+
+/******************************************************************************
+Test Name: LargeMode
+Corresponds to: Chapter1 - Overview
+Test Purpose: To verify if Large Mode is supported
+******************************************************************************/
+
+/*****************************************************************************
+SVN Information (we will have version information here)
+*****************************************************************************/
+
+/*****************************************************************************
+First Operand values in ArrayA
+DataA[0x0] = 0x0000000000000001;
+DataA[0x8] = 0x00000000FFFFFFFF;
+DataA[0x10] = 0x00000000FFFFFFFF;
+DataA[0x18] = 0xFFFFFFFFFFFFFFFF;
+DataA[0x20] = 0xFFFFFFFFFFFFFFFF;
+
+Second Operand values in ArrayA
+DataA[0x28] = 0x0000000000000001;
+DataA[0x30] = 0x0000000000000001;
+DataA[0x38] = 0x0000000000000011;
+DataA[0x40] = 0x0000000000000001;
+DataA[0x48] = 0x0000000000000011;
+
+RESULT
+DataA[50] = 0x0000000000000002;
+DataA[58] = 0x0000000100000000;
+DataA[60] = 0x0000000100000010;
+DataA[68] = 0x0000000000000000;
+DataA[70] = 0x0000000000000010;
+******************************************************************************/
+version 1:0:$large;
+
+
+
+kernel &__LargeMode(kernarg_u64 %arg_val0)
+{
+
+	ld_kernarg_u64 $d0, [%arg_val0];
+
+	//add_u64 $d2, [$d0], [$d0+0x28];
+	add_u64	$d2, [$d0], [$d0+40];
+	//st_global_u64	$d2, [$d0+0x50];
+	st_global_u64 $d2, [$d0+80];
+
+	//add_u64	 $d2, [$d0+0x8], [$d0+0x30];
+	add_u64	$d2, [$d0+8], [$d0+48];
+	//st_global_u64	$d2, [$d0+0x58];
+	st_global_u64 $d2, [$d0+88];
+
+	//add_u64	 $d2, [$d0+0x10], [$d0+0x38];
+	add_u64	 $d2, [$d0+16], [$d0+56];
+	//st_global_u64	$d2, [$d0+0x60];
+	st_global_u64 $d2, [$d0+96];
+
+	//add_u64	 $d2, [$d0+0x18], [$d0+0x40];
+	add_u64	 $d2, [$d0+24], [$d0+64];
+	//st_global_u64	$d2, [$d0+0x68];
+	st_global_u64 $d2, [$d0+104];
+
+	//add_u64	 $d2, [$d0+0x20], [$d0+0x48];
+	add_u64	$d2, [$d0+32], [$d0+72];
+	//st_global_u64	$d2, [$d0+0x70];
+	st_global_u64 $d2, [$d0+112];
+
+
+	ret;
+};

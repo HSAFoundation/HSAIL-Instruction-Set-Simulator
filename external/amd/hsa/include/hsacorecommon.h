@@ -25,20 +25,51 @@
  */
 namespace hsacore
 {
-   
+
 /** 
  * @addtogroup HSACoreCommonTyps 
  * Cross-Core-Module common Types
  *  @{
  */
-  
+
+enum ASICFamily
+{
+    ASIC_FAMILY_SI,
+    ASIC_FAMILY_CI
+};
+
+/**
+ * @brief hsacommon ASICInfo class, represents ASIC specific information of a GPU device.
+ */
+class DLL_PUBLIC ASICInfo
+{
+public:
+    /*! Getter function to check for image support.
+     * @return bool indicating image support.
+    */
+    virtual bool isImageSupport()=0;
+    /*! Getter function to check for double precision support.
+     * @return bool indicating double support.
+    */
+    virtual bool isDoublePrecision()=0;
+    /*! Getter function to check the ASIC Family.
+     * @return returns an ASICFamily enumeration.
+    */
+    virtual ASICFamily getASICFamily()=0;
+    /*! Getter function to get the max queue size in bytes.
+     * @return returns maximum queue size that can be created in bytes.
+    */
+    virtual uint32_t getMaxQueueSize()=0;
+    virtual ~ASICInfo() {};
+};
+
 // TODO: Replace out_of_range with an HSART exception
 using namespace hsacommon;
 
 using hsacommon::vector;
 using hsacommon::string;
 
-typedef hsa::RTKernelArgs KernelArgs;
+typedef hsa::KernelArg KernelArg;
 
 /* @}*/
 
@@ -116,13 +147,14 @@ class DLL_PUBLIC HsailKernel
           *  reserved for the debugger
           *  return - Returns the index of type uint32_t
           */
-          virtual uint32_t getTrapReservedVGPRIndex() = 0;
+          virtual int getTrapReservedVGPRIndex() = 0;
 
           /* @brief - Returns the index of the register that 
           * contains the Buffer Wave offset
           * return - Returns the index of type uint32_t
+          * returns -1 if value is scratch buffer is not set
           */
-          virtual uint32_t getScratchBufferWaveOffsetSGPRIndex() = 0;
+          virtual int getScratchBufferWaveOffsetSGPRIndex() = 0;
 
           /* @brief - Returns a pointer to the DWARF info (BRIG to ISA)
           * return - Returns the index of type uint32_t

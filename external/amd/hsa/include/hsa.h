@@ -236,6 +236,7 @@ typedef struct _EventTimeInfo
 
 } EventTimeInfo;
 
+
 /**
  * @ingroup Dispatch
  * completion policy defined the following
@@ -433,8 +434,12 @@ public:
     // Get the device information in bulk.
     //virtual const Info& info()=0;
 
-    //Temp hack to get the asicinfo
-    virtual void* getASICInfo()=0;
+   	/**
+     * @brief get the max user-mode queue size possible
+     *
+     * @return returns max queue size in bytes 
+     */
+    virtual uint32_t getMaxQueueSize()=0;
 
     /**
      * @brief Set up trap handler in the current device
@@ -698,6 +703,26 @@ public:
     virtual void 
     unmapMemory(void* ptr) = 0;
 
+    /**
+    * @brief Returns a structure of highly correlated host and device times
+    *        as well as the frequency of the device for conversion purposes.
+    *
+    * The frequency returned will be the max frequency reported by the ASIC.
+    * Additionally, until the KFD implements the wall clock feature, this will
+    * return invalid data.
+    * @return DeviceClockCounterInfo containing the clock stamps from host 
+    *         and device along with device frequency.
+    */
+    virtual DeviceClockCounterInfo getClockCounterInfo() = 0;
+    
+    /**
+    * @brief Returns the max frequency as reported by kfd for the
+    *        approriate device type.
+    *
+    * @return max frequency as integer
+    */
+    virtual int getMaxFrequency()=0;
+
     virtual ~Device(){};
 };
 
@@ -770,6 +795,8 @@ public:
      * @return EventTimeInfo structure containing wallclock times
      */
     virtual EventTimeInfo * getTimeInfo() = 0;
+
+    virtual Device * getDevice() = 0;
 };
 
 
@@ -811,7 +838,7 @@ public:
     virtual hsa::Event *dispatch(Kernel* kernel, 
                         LaunchAttributes *launchAttr,
                         hsa::Event* depEvent, 
-                        hsacore::vector<RTKernelArgs>& args)=0;
+                        hsacore::vector<KernelArg>& args)=0;
     
     virtual void flush()=0;
 
@@ -927,7 +954,7 @@ public:
      *
      * @return runtime API version.
      */
-    virtual const string getVersion()=0;
+    virtual const string& getVersion()=0;
 
     virtual hsa::Event* createDeviceEvent(hsa::Device *d)=0;
 //    virtual Kernel *createKernel(Program * k, hsa::KernelId & kid)=0;
@@ -1283,63 +1310,62 @@ public:
 };
 
 /**
- * @ingroup Debugger
- * @brief APIs for creating debug event
+ * @brief get the count of devices on the platform
  *
- * @param dev pointer to the HSA runtime device
- *
- * @param manualReset if this parameter is true the function creates a
- * manual-reset event object; if this parameter is false the function creates
- * an auto-reset event object.  
- *
- * @param isSignaled if this parameter is true, the initial state of the event
- * is signaled, otherwise is nonsignaled.
- */
-DLL_PUBLIC hsa::DebuggerEvent * 
-createDebuggerEvent(
-                hsa::Device *dev, 
-                bool manualReset, 
-                bool state
-                );
+ * @return the count of the number of devices
+ *         in the platform.
+ * */
+DLL_PUBLIC uint32_t getDeviceCount();
+/**
+ * @brief get a list of devices available on the platform.
+ * @return Returns the list of all Devices 
+ * */
+DLL_PUBLIC const hsa::vector<hsa::Device*>& getDevices();
+
+/**
+ * @brief get the version of the RuntimeApi.
+ * 
+ * Rules for incrementing the major, minor, patch versions:
+ * a) major: 
+        i) incremented only when public APIs signatures
+           are changed, IS NOT backward compatible with
+           previous major versions.
+       ii) Reset the minor version to 0.
+      iii) Reset the patch version to 0.
+ * b) minor: 
+        i) incremented when new feature is added, needs
+           to be backward compatible with previous minor 
+           versions.
+       ii) Reset the patch version to 0.
+ * c) patch: 
+        i) incremented only for bug fixes, no user visible
+           API changes, needs to be backward and forward
+           compatible with previous patch versions.
+ * @return string containing the version number in the 
+ *         form major.minor.patch
+*/
+
+DLL_PUBLIC const hsa::string& getVersion();
 
 /**
  * @ingroup Debugger
  * @brief APIs for creating debug event
  *
- * This function is a work around to create a debugger event when the KFD
- * event mechanism does not work. In this approach, the user provides a buffer
- * that can be accessed by the trap hander, which will write a specific value
- * to a specific location in the buffer in the trap handler. Then the event
- * wait function can poll the specific location to check whether trap handler
- * is executed to the location where the write buffer instruction is executed
- * (With the KFD mechanism, the s_sendmsg instruction is executed instead of
- * writing a value to the buffer.).
- *
  * @param dev pointer to the HSA runtime device
  *
- * @param userBuffer  pointer to the trap handler buffer to mock the event
- * mechanism. This buffer should be the trap handler buffer that can be
- * accessed by the trap handler.
- * 
  * @param manualReset if this parameter is true the function creates a
  * manual-reset event object; if this parameter is false the function creates
  * an auto-reset event object.  
  *
  * @param isSignaled if this parameter is true, the initial state of the event
  * is signaled, otherwise is nonsignaled.
- * 
- *
  */
 DLL_PUBLIC hsa::DebuggerEvent * 
 createDebuggerEvent(
                 hsa::Device *dev, 
-                void *userBuffer, 
-                uint32_t writeBackLoc,
-                uint32_t writeBackValue,
                 bool manualReset, 
                 bool state
                 );
-
 
 /* @ brief Creates a Program object from an ELF
  * @param charElf - Pointer to an ELF

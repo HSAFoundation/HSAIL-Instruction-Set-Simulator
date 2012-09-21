@@ -42,6 +42,8 @@ typedef enum _EVENTID
     MAX_EVENTS
 } EVENTID;
 
+
+
 class Device;
 class Queue;
 class Event;
@@ -634,6 +636,20 @@ public:
     virtual ASICInfo* getASICInfo()=0;
 
     /**
+    * @brief Get the max frequency of the gpu device
+    * 
+    * @return max frequency as integer
+    */
+    virtual int getMaxClockRateOfFCompute()=0;
+    
+    /**
+    * @brief Get the max frequency of the cpu device
+    * 
+    * @return max frequency as integer
+    */
+    virtual int getMaxClockRateOfCCompute()=0;
+               
+    /**
      * API to determine the maximum number of queues that can actually
      * be created for this device.  
      *
@@ -905,6 +921,19 @@ public:
                         uint32_t       Mode,
                         uint32_t       TrapId,
                         void*          msgPtr) = 0;
+
+    /**
+    * @brief Returns a structure of highly correlated host and device times
+    *        as well as the frequency of the device for conversion purposes.
+    *
+    * The frequency returned will be the max frequency reported by the ASIC.
+    * Additionally, until the KFD implements the wall clock feature, this will
+    * return invalid data.
+    *
+    * @return DeviceClockCounterInfo containing the clock stamps from host 
+    *         and device along with device frequency.
+    */
+    virtual DeviceClockCounterInfo getClockCounterInfo() = 0;    
 
 	virtual ~Device(){};
 };

@@ -40,6 +40,18 @@
 namespace hsacommon
 {
 
+/**
+ * @brief A structure containing absolute wall times from the device which indicate 
+ * when the various states of an event occured in addition to device frequency.
+ */ 
+typedef struct _DeviceClockCounterInfo
+{
+    uint64_t hostClockCounter;
+    uint64_t deviceClockCounter;
+    uint64_t deviceFrequency;
+
+} DeviceClockCounterInfo;
+
 // TODO: Replace out_of_range with an HSART exception
 /**
  * @brief Class hsa::vector replaces std::vector container.
@@ -546,17 +558,6 @@ typedef enum
      */
     MEMORY_OPTION_HOST_NO_ACCESS = (1U << 18),
 } MemoryOption;
-
-/**
- * @brief hsacommon ASICInfo class, represents ASIC specific information of a GPU device.
- */
-enum ASICType
-{
-    ASIC_TYPE_SI_TAHITI,
-    ASIC_TYPE_SI_PITCAIRN,
-    ASIC_TYPE_CI_SKU1,
-    ASIC_TYPE_CI_SKU2
-};
 
 typedef enum
 {
@@ -1339,25 +1340,6 @@ class UnsupportedOperation: public Exception {};
         throw (exObj);                                              \
     }
 
-
-class DLL_PUBLIC ASICInfo
-{
-public:
-    /*! Getter function to check for image support.
-     * @return bool indicating image support.
-    */
-    virtual bool isImageSupport()=0;
-    /*! Getter function to check for double precision support.
-     * @return bool indicating double support.
-    */
-    virtual bool isDoublePrecision()=0;
-    /*! Getter function to check the ASIC Type.
-     * @return returns an ASICType enumeration.
-    */
-    virtual ASICType getASICType()=0;
-    virtual ~ASICInfo() {};
-};
-
 /**
  * @brief MemoryDescriptor class, each descriptor
  * provides interfaces to get different memory properties.
@@ -1595,7 +1577,7 @@ using hsacommon::Version;
 * @brief This union provides a container for kernel argument types.
 *******************************************************************************
 */
-union RTKernelArgs
+union KernelArg
 {
     void* addr;             ///< pointer to a buffer
     int32_t s32value;       ///< signed 32 bit value

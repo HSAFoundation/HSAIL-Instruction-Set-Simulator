@@ -1,0 +1,39 @@
+#!/bin/csh 
+
+#
+# sync conformance suite tree to hg
+
+# aliases from hgrc file
+set REPO=mcwrep
+
+# assume that the cs tree is checked out from svn at intended hg directory
+# also assume that we are at that directory
+
+echo "-- Updating CS repository:"
+svn up
+
+echo "-- Pulling from MCW repository:"
+hg pull $REPO
+set MERGE=`hg up |& grep abort`
+if (x"$MERGE" != x"") then
+	echo "$0 NEEDS ATTENTION" >/dev/stderr
+	echo "-- need to merge repo $REPO" >/dev/stderr
+	exit 1
+endif
+
+echo "-- Add new files in MCW repository"
+set MERGE=`svn st | grep '^?' | awk '{print $2;}'`
+foreach a ($MERGE)
+	echo "adding $a"
+	hg add $a
+end
+
+echo "-- Checking in changes in MCW repository (if needed)"
+if (x"$MERGE" != x"") then
+	set MYDATE=`date "+%Y%m%d-%H%M%S"`
+	hg ci -m "HSAILCS syncing on $MYDATE"
+endif
+
+echo "-- Pushing to MCW repository:"
+hg push $REPO
+
