@@ -6045,7 +6045,7 @@ TEST(CodegenTest, ArrayDimensionSetCodeGen) {
   context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0,InitializableDecl(context));
-  EXPECT_EQ(BrigArray,context->get_symbol_modifier());
+  EXPECT_EQ(BrigFlex | BrigArray,context->get_symbol_modifier());
   EXPECT_EQ(16, context->get_dim());
 
   delete lexer;

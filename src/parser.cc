@@ -1504,7 +1504,7 @@ int ArrayDimensionSet(Context* context) {
   }
   if (!have_size){
     context->set_dim(0);// flexiable array
-	context->set_symbol_modifier(BrigArray);
+	//context->set_symbol_modifier(BrigArray);
     context->set_symbol_modifier(BrigFlex);
   } else {
     context->set_dim(dim); // vector(size in dim)
@@ -1622,8 +1622,13 @@ int ArgumentListBody(Context* context) {
   return 0;
 }
 
-int FunctionDefinition(Context* context) {
-  if (!DeclPrefix(context)) {
+int FunctionDefinition(Context* context){
+	if(!DeclPrefix(context)){
+		return FunctionDefinitionPart2(context);
+	} else return 1;
+}
+int FunctionDefinitionPart2(Context* context) {
+  
     if (context->token_to_scan == FUNCTION) {
 
       context->current_bdf_offset = context->get_directive_offset();
@@ -1729,13 +1734,12 @@ int FunctionDefinition(Context* context) {
         context->set_error(MISSING_IDENTIFIER);
       }
     }
-  }
-  return 1;
+  
 }
 
 int FunctionDecl(Context *context){
   if (!DeclPrefix(context)) {
-    if (!FunctionDefinition(context)){
+    if (!FunctionDefinitionPart2(context)){
       if (';' == context->token_to_scan){
         return 0 ;
       } else {
@@ -2615,7 +2619,7 @@ int InitializableDecl(Context* context) {
 
 int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
 {
-
+  context->init_symbol_modifier();
   //First token already verified as GLOBAL/READONLY
   if (context->token_type == DATA_TYPE_ID) {
     context->set_type(context->token_value.data_type);

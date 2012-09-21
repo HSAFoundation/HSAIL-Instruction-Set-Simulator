@@ -160,6 +160,7 @@ int Instruction4MadPart3(Context* context);
 int Instruction4BitStringOperationPart4(Context* context);
 int Instruction4CmovPart5(Context* context);
 int Instruction4ShufflePart6(Context* context);
+int FunctionDefinitionPart2(Context* context);
 
 }  // namespace brig
 }  // namespace hsa
