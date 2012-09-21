@@ -4,6 +4,10 @@
 #include "error_reporter.h"
 #include "parser_wrapper.h"
 
+#include "llvm/ADT/SmallString.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/system_error.h"
 #include "gtest/gtest.h"
 
 #define STR(X) #X
@@ -23,8 +27,68 @@ TEST(BrigReaderTest, VectorCopy) {
   EXPECT_TRUE(reader);
   if(!reader) return;
 
-  hsa::brig::BrigModule mod(*reader, &llvm::errs());
+  hsa::brig::BrigModule mod(*reader, NULL);
   EXPECT_TRUE(!mod.isValid());
+
+  delete reader;
+}
+
+TEST(BrigWriterTest, EmptyBRIG) {
+
+  int result_fd;
+  llvm::SmallString<128> resultPath;
+  llvm::error_code ec =
+    llvm::sys::fs::unique_file("emptyBrig-%%%%%.o", result_fd, resultPath);
+  EXPECT_TRUE(!ec);
+  if(ec) return;
+
+  llvm::raw_fd_ostream out(result_fd, true);
+
+  hsa::brig::Buffer dirBuf;
+  for(unsigned i = 0; i < 8; ++i) dirBuf.append_char(0);
+  BrigDirectiveVersion bdv = {
+    sizeof(bdv),
+    BrigEDirectiveVersion,
+    8,
+    1,
+    0,
+    BrigELarge,
+    BrigEFull,
+    BrigENosftz,
+    0
+  };
+  dirBuf.append(&bdv);
+  llvm::StringRef directives(&dirBuf.get()[0], dirBuf.size());
+
+  hsa::brig::Buffer codeBuf;
+  for(unsigned i = 0; i < 8; ++i) codeBuf.append_char(0);
+  llvm::StringRef code(&codeBuf.get()[0], codeBuf.size());
+
+  hsa::brig::Buffer operBuf;
+  for(unsigned i = 0; i < 8; ++i) operBuf.append_char(0);
+  llvm::StringRef operands(&operBuf.get()[0], operBuf.size());
+
+  hsa::brig::Buffer debugBuf;
+  for(unsigned i = 0; i < 8; ++i) debugBuf.append_char(0);
+  llvm::StringRef debug(&debugBuf.get()[0], debugBuf.size());
+
+  hsa::brig::StringBuffer stringsBuf;
+  for(unsigned i = 0; i < 8; ++i) stringsBuf.append_char(0);
+  llvm::StringRef strings(&stringsBuf.get()[0], stringsBuf.size());
+
+  bool result =
+    BrigWriter::write(out, directives, code, operands, debug, strings);
+  EXPECT_TRUE(result);
+  if(!result) return;
+  out.close();
+
+  BrigReader *reader =
+    BrigReader::createBrigReader(resultPath.c_str());
+  EXPECT_TRUE(reader);
+  if(!reader) return;
+
+  hsa::brig::BrigModule mod(*reader, &llvm::errs());
+  EXPECT_TRUE(mod.isValid());
 
   delete reader;
 }
@@ -62,8 +126,9 @@ TEST(BrigWriterTest, VectorCopy) {
   context->set_error_reporter(ErrorReporter::get_instance());
   int res = parser.parse();
   EXPECT_TRUE(!res);
-  BrigcOffset32_t codeSize = context->get_code_offset();
-  BrigdOffset32_t dirSize  = context->get_directive_offset();
-  BrigoOffset32_t operSize = context->get_operand_offset();
-  BrigsOffset32_t strSize  = context->get_string_offset();
+
+  // BrigcOffset32_t codeSize = context->get_code_offset();
+  // BrigdOffset32_t dirSize  = context->get_directive_offset();
+  // BrigoOffset32_t operSize = context->get_operand_offset();
+  // BrigsOffset32_t strSize  = context->get_string_offset();
 }

@@ -32,7 +32,7 @@ bool BrigWriter::write(const char *filename,
 
   out.close();
 
-  return out.has_error() && success;
+  return !out.has_error() && success;
 }
 
 bool BrigWriter::write(llvm::raw_fd_ostream &out,
@@ -71,8 +71,8 @@ bool BrigWriter::write(llvm::raw_fd_ostream &out,
   out.seek(0);
 
   llvm::ELF::Elf32_Ehdr header = {
-    { llvm::ELF::EI_MAG0,
-      llvm::ELF::EI_MAG1, llvm::ELF::EI_MAG2, llvm::ELF::EI_MAG3,
+    { llvm::ELF::ElfMagic[0],
+      llvm::ELF::ElfMagic[1], llvm::ELF::ElfMagic[2], llvm::ELF::ElfMagic[3],
       llvm::ELF::ELFCLASS32,
       llvm::ELF::ELFDATA2LSB,
       llvm::ELF::EV_CURRENT,
@@ -91,15 +91,17 @@ bool BrigWriter::write(llvm::raw_fd_ostream &out,
     0, // e_phnum
     sizeof(llvm::ELF::Elf32_Shdr), // e_shentsize
     NumSecEntries, // e_shnum
-    llvm::ELF::SHN_UNDEF
+    NumSecEntries - 1 // e_shstrndx
   };
   out.write(reinterpret_cast<const char *>(&header), sizeof(header));
 
-  return out.has_error();
+  return !out.has_error();
 }
 
 void BrigWriter::align(llvm::raw_fd_ostream &out) {
-  while(!out.tell() % sizeof(uint64_t)) out.write(0);
+  // HSA PRM 19.1.1: All sections must start on a memory address that is a
+  // multiple of 16. This allows Brig structures to be naturally aligned.
+  while(!out.tell() % 16) out.write(0);
 }
 
 size_t BrigWriter::writeSection(llvm::raw_fd_ostream &out,

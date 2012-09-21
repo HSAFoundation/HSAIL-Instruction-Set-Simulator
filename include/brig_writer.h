@@ -25,7 +25,7 @@ class BrigWriter {
 
  private:
 
-  static const unsigned NumSecEntries = 6;
+  static const unsigned NumSecEntries = 7;
   static const char Sections[];
   static const llvm::StringRef shstrtab;
 
