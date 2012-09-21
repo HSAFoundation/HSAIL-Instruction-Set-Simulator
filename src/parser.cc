@@ -4286,23 +4286,25 @@ int Kernel(Context *context) {
         context->set_error(INVALID_FBAR);
         return 1;
       }
-      bdk.fbarCount = context->get_fbar();
+      BrigDirectiveKernel get;
+      context->get_directive(context->current_bdf_offset,&get);
+
+      get.fbarCount = context->get_fbar();
       // update 
       unsigned char *bdk_charp =
-         reinterpret_cast<unsigned char*>(&bdk);
+         reinterpret_cast<unsigned char*>(&get);
       context->update_directive_bytes(bdk_charp,
                                 context->current_bdf_offset,
                                 bdk_size); 
-    } else {
-      if (!Codeblock(context)) {
-        if (';' == context->token_to_scan) {
-          context->token_to_scan = yylex();
-          return 0;
-        } else {
-          context->set_error(MISSING_SEMICOLON);
-        }
-      }
     }
+    if (!Codeblock(context)) {
+      if (';' == context->token_to_scan) {
+        context->token_to_scan = yylex();
+        return 0;
+      } else {
+        context->set_error(MISSING_SEMICOLON);
+      }
+    }    
   } else {
     context->set_error(MISSING_IDENTIFIER);
   }
