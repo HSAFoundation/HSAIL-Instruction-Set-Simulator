@@ -4012,8 +4012,8 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
     "Invalid storage class, can be global, group, private, kernarg, "
     "readonly, spill, or arg")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, "
-    "BrigParAcquireRelease")));
+    "Invalid memorySemantic, can be regular, acquire, "
+    "acquire release, or partial acquire release")));
   }
 }
 
@@ -4114,8 +4114,8 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid storage class, must be global")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, "
-    "BrigParAcquireRelease")));
+    "Invalid memorySemantic, can be regular, "
+    "acquire, or acquire release")));
   }
 }
 TEST(Brig2LLVMTest, validateBrigInstRead) {
@@ -5366,14 +5366,14 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     BrigInstAtomic bils = {
       sizeof(bils),
-      BrigEInstLdSt,
+      BrigEInstAtomic,
       BrigFbarInitSizeKnown + 1,
       Brigf64x2 + 1,
       BrigPackPsat,
       {20, 0, 0, 0, 0},
+      BrigAtomicSub + 1,
       BrigFlatSpace + 1,
       BrigDep,
-      64
     };
     code.append(&bils);
 
@@ -5391,13 +5391,11 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "o_operands past the operands section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid storage class, can be global, group, "
-    "private, kernarg, readonly, spill, arg or flat")));
+    "Invalid atomicOperation")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid memorySemantic, can be BrigAcquire, BrigAcquireRelease, "
-    "BrigParAcquireRelease")));
+    "Invalid storage class")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid equivClass, must less than 64")));
+    "Invalid memorySemantic")));
   }
 }
 
