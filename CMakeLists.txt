@@ -8,9 +8,10 @@ add_definitions(-DGTEST_HAS_PTHREAD=0)
 if (CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
 endif (CMAKE_COMPILER_IS_GNUCXX)
+set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
 flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
-	
+
 option(ENABLE_TEST_CASE "Run test cases" OFF)
 if (ENABLE_TEST_CASE)
 set(hsail2brig_test_SOURCES
@@ -47,11 +48,9 @@ else (ENABLE_TEST_CASE)
 	  ${FLEX_lexer_OUTPUTS}
 	  )
 endif (ENABLE_TEST_CASE)
-	  
+
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
 
-option(ENABLE_BRIG_FE "Build LLVM frontend for BRIG" ON)
-if (ENABLE_BRIG_FE)
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
 include (EnsureLLVMisPresent)
@@ -117,4 +116,18 @@ set(brig_runtime_test_SOURCES
   )
 add_executable(brig_runtime_test ${brig_runtime_test_SOURCES})
 target_link_libraries(brig_runtime_test brig2llvm)
-endif(ENABLE_BRIG_FE)
+
+set(brig_reader_test_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  test/brig_reader_test.cc
+  gtest/gtest-all.cc
+  gtest/gtest_main.cc
+  )
+add_executable(brig_reader_test ${brig_reader_test_SOURCES})
+target_link_libraries(brig_reader_test brig2llvm)

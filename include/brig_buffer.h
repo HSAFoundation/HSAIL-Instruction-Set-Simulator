@@ -41,22 +41,22 @@ class Buffer {
   }
 
   // get the whole buffer as a vector
-  const std::vector<unsigned char> &get(void) const {
+  const std::vector<char> &get(void) const {
     return buf_;
   }
 
-  std::vector<unsigned char> &get(void) {
+  std::vector<char> &get(void) {
     return buf_;
   }
 
   // get a specific number of bytes from a specific offset
-  error_t get_bytes(unsigned char* value, uint32_t offset, uint32_t nBytes) {
+  error_t get_bytes(char* value, uint32_t offset, uint32_t nBytes) {
     if (buf_.size() == 0)
       return EMPTY_BUFFER;
     if (buf_.end() < buf_.begin()+ offset + nBytes)
       return INVALID_OFFSET;
 
-    std::vector<unsigned char>::iterator it;
+    std::vector<char>::iterator it;
     for (it = buf_.begin()+offset;
          it < buf_.begin()+offset+nBytes;
          it++)
@@ -82,7 +82,7 @@ class Buffer {
       return INVALID_OFFSET;
 
 
-    std::vector<unsigned char>::iterator it;
+    std::vector<char>::iterator it;
     unsigned char* temp_ptr = reinterpret_cast<unsigned char*>(item);
 
     for (it = buf_.begin()+offset;
@@ -106,7 +106,7 @@ class Buffer {
   error_t modify(unsigned char* value,
                 uint32_t offset,
                 uint32_t nBytes) {
-    std::vector<unsigned char>::iterator it;
+    std::vector<char>::iterator it;
     if ( buf_.end() < buf_.begin()+offset+nBytes ) {
       return INVALID_OFFSET;
     } else {
@@ -124,7 +124,7 @@ class Buffer {
 
 
  private:
-  std::vector<unsigned char> buf_;
+  std::vector<char> buf_;
 };
 
 class StringBuffer: public Buffer {

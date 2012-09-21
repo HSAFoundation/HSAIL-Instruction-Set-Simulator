@@ -31,7 +31,7 @@ bool (BrigModule::check)(bool test, const Message &msg,
                          const char *filename, unsigned lineno,
                          const char *cause) const {
   if(!test && out_)
-     (*out_) << filename << "." << lineno << ": " << msg
+     (*out_) << filename << ":" << lineno << " " << msg
             << " (" << cause << ")\n";
   return test;
 }
@@ -50,12 +50,17 @@ bool BrigModule::validateDirectives(void) const {
   dir_iterator it = S_.begin();
   const dir_iterator E = S_.end();
 
+  for(unsigned i = 0; i < std::min(size_t(8), S_.directivesSize); ++i)
+    check(!S_.directives[i],
+          "The first eight bytes of the directives section must be zero");
+
   if(!validate(it)) return false;
   if(!check(it != E, "Empty directive section")) return false;
 
   // 20.8.22: The BrigDirectiveVersion directive must be the first directive
   // in the .directives section.
   const BrigDirectiveVersion *bdv = dyn_cast<BrigDirectiveVersion>(it);
+  if(!check(bdv, "Missing BrigDirectiveVersion")) return false;
   if(!validate(bdv)) return false;
 
 #define caseBrig(X)                                   \
@@ -92,7 +97,9 @@ bool BrigModule::validateDirectives(void) const {
       caseBrig(DirectiveBlockString);
       caseBrig(DirectiveBlockEnd);
       caseBrig(DirectivePad);
-    default: check(false, "Unrecognized directive");
+    default:
+      check(false, "Unrecognized directive");
+      return false;
     }
   }
 
@@ -103,6 +110,10 @@ bool BrigModule::validateCode(void) const {
 
   inst_iterator it = S_.code_begin();
   const inst_iterator E = S_.code_end();
+
+  for(unsigned i = 0; i < std::min(size_t(8), S_.codeSize); ++i)
+    check(!S_.code[i],
+          "The first eight bytes of the code section must be zero");
 
   for(; it != E; it++) {
     if(!validate(it)) return false;
@@ -118,7 +129,9 @@ bool BrigModule::validateCode(void) const {
       caseBrig(InstMem);
       caseBrig(InstMod);
       caseBrig(InstRead);
-      default: check(false, "Unrecognized code");
+      default:
+        check(false, "Unrecognized code");
+        return false;
     }
   }
 
@@ -138,6 +151,7 @@ bool BrigModule::validateOperands(void) const {
     switch(it->kind) {
       caseBrig(OperandAddress);
       caseBrig(OperandArgumentList);
+      caseBrig(OperandFunctionList);
       caseBrig(OperandArgumentRef);
       caseBrig(OperandBase);
       caseBrig(OperandCompound);
@@ -150,7 +164,9 @@ bool BrigModule::validateOperands(void) const {
       caseBrig(OperandRegV2);
       caseBrig(OperandRegV4);
       caseBrig(OperandWaveSz);
-      default: check(false, "Unrecognized operands");
+      default:
+        check(false, "Unrecognized operands");
+        return false;
     }
   }
 
@@ -163,10 +179,14 @@ bool BrigModule::validateStrings(void) const {
 
   bool valid = true;
 
+  for(unsigned i = 0; i < std::min(size_t(8), S_.stringsSize); ++i)
+    check(!S_.strings[i],
+          "The first eight bytes of the strings section must be zero");
+
   std::set<std::string> stringSet;
 
-  const char *curr = S_.strings;
-  size_t maxLen = S_.stringsSize;
+  const char *curr = S_.strings + 8;
+  size_t maxLen = S_.stringsSize - 8;
 
   while(maxLen) {
     size_t len = strnlen(curr, maxLen);
@@ -195,7 +215,7 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
   for(unsigned i = 0; i < paramCount; ++i, ++argIt) {
     if(!validate(argIt)) return false;
     const BrigDirectiveSymbol *bds = dyn_cast<BrigDirectiveSymbol>(argIt);
-    valid &= check(bds, "Too few argument symbols");
+    if(!check(bds, "Too few argument symbols")) return false;
     valid &= check(bds->s.storageClass == BrigArgSpace,
                    "Argument not in arg space");
   }
@@ -247,7 +267,7 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
       dyn_cast<BrigDirectiveInit>(init);
     const BrigDirectiveLabelInit *bdli =
       dyn_cast<BrigDirectiveLabelInit>(init);
-    valid &= check(bdi || bdli, "Missing initializer");
+    if(!check(bdi || bdli, "Missing initializer")) return false;
 
     uint32_t elementCount = bdi ? bdi->elementCount : bdli->elementCount;
     valid &= check(elementCount == dir->s.dim,
@@ -318,10 +338,12 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
   valid &= check(dir->profile == BrigEFull ||
                  dir->profile == BrigEReduced,
                  "Invalid profile");
+
   valid &= check(dir->ftz == BrigESftz ||
                  dir->ftz == BrigENosftz,
                  "Invalid flush to zero");
   valid &= check(!dir->reserved, "Reserved not zero");
+
   return valid;
 }
 
@@ -393,7 +415,8 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
     const dir_iterator init(S_.directives + dir->d_labels[i]);
     if(!validate(init)) return false;
     const BrigDirectiveLabel *bcl = dyn_cast<BrigDirectiveLabel>(init);
-    valid &= check(bcl, "d_labels offset is wrong, not a BrigDirectiveLabel");
+    if(!check(bcl, "d_labels offset is wrong, not a BrigDirectiveLabel"))
+      return false;
   }
   return valid;
 }
@@ -563,7 +586,7 @@ bool BrigModule::validateSName(BrigsOffset32_t s_name) const {
 
 bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) const {
   bool valid = true;
-  const uint8_t *dirOffset = reinterpret_cast<const uint8_t *>(dir);
+  const char *dirOffset = reinterpret_cast<const char *>(dir);
   valid &= check((S_.directives - dirOffset) % alignment == 0,
                  "Improperly aligned directive");
   return valid;
@@ -681,7 +704,7 @@ bool BrigModule::validate(const BrigInstBase *code) const {
   for (unsigned i = 0; i < 5; i++) {
     if (code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
-                   "o_operands past the operands section");
+                     "o_operands past the operands section");
     }
   }
   return valid;
@@ -882,14 +905,70 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
-  return true;
+  bool valid = true;
+
+  size_t dirSize =
+    sizeof(BrigOperandArgumentList) +
+    sizeof(operand->o_args[0]) * (std::max(1U, operand->elementCount) - 1);
+  valid &= check(operand->size >= dirSize, "Invalid size");
+
+  for (unsigned i = 0; i < operand->elementCount; ++i) {
+    oper_iterator arg(S_.operands + operand->o_args[i]);
+    if(!validate(arg)) return false;
+    valid &= check(isa<BrigOperandArgumentRef>(arg),
+                   "Invalid o_args, should point to BrigOperandArgumentRef");
+  }
+  return valid;
+}
+
+bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
+  bool valid = true;
+  unsigned funRefCount = 0;
+  unsigned argRefCount = 0;
+
+  if(operand->elementCount) {
+    valid &= check(sizeof(BrigOperandArgumentList) +
+                   sizeof(operand->o_args[1]) * (operand->elementCount - 1)
+                   <= operand->size, "Invalid size");
+  }
+
+  for(unsigned i = 0; i < operand->elementCount; ++i) {
+    oper_iterator arg(S_.operands + operand->o_args[i]);
+    if(!validate(arg)) return false;
+    if(const BrigOperandFunctionRef *funRef =
+       dyn_cast<BrigOperandFunctionRef>(arg)) {
+      dir_iterator fun(S_.directives + funRef->fn);
+      if (!validate(fun)) return false;
+      valid &= check(isa<BrigDirectiveFunction>(fun),
+                     "should point to BrigOperandFunctionRef, "
+                     "refer to BrigDirectiveFunction");
+      ++funRefCount;
+    }
+    if(const BrigOperandArgumentRef *argRef =
+        dyn_cast<BrigOperandArgumentRef>(arg)) {
+      dir_iterator funSig(S_.directives + argRef->arg);
+      if (!validate(funSig)) return false;
+      //conflict with BrigOperandArgumentRef refer to BrigDirectiveSymbol
+      valid &= check(isa<BrigDirectiveSignature>(funSig),
+                     "should point to BrigOperandArgumentRef, "
+                     "refer to BrigDirectiveSignature");
+      ++argRefCount;
+    }
+  }
+  valid &= check(funRefCount == operand->elementCount ||
+                 argRefCount == operand->elementCount,
+                 "element of o_args should be BrigOperandFunctionRef "
+                 "or BrigOperandArgumentRef");
+  valid &= check(argRefCount < 2, "Invalid argRefCount, should be 1 or 0");
+
+  return valid;
 }
 
 bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
   bool valid = true;
   dir_iterator argDir(S_.directives + operand->arg);
   valid &= validate(argDir);
-  valid &= check(isa<BrigDirectiveSymbol>(argDir), 
+  valid &= check(isa<BrigDirectiveSymbol>(argDir),
                  "Invalid reg, should be point BrigDirectiveSymbol");
   return valid;
 }
@@ -902,20 +981,21 @@ bool BrigModule::validate(const BrigOperandBase *operand) const {
 bool BrigModule::validate(const BrigOperandCompound *operand) const {
   bool valid = true;
   valid &= check(operand->type == Brigb32 ||
-                 operand->type == Brigb64, "Invald datatype, should be " 
+                 operand->type == Brigb64, "Invald datatype, should be "
                  "Brigb32 and Brigb64");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   oper_iterator nameOper(S_.operands + operand->name);
   valid &= validate(nameOper);
-  valid &= check(isa<BrigOperandAddress>(nameOper), 
+  valid &= check(isa<BrigOperandAddress>(nameOper),
                  "Invalid name, should point to BrigOperandAddress");
 
   if(operand->reg) {
     const oper_iterator oper(S_.operands + operand->reg);
     if(!validate(oper)) return false;
     const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
-    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");  
+    if(!check(bor, "reg offset is wrong, not a BrigOperandReg"))
+      return false;
     valid &= check(bor->type == Brigb32 ||
                    bor->type == Brigb64, "Invalid register, the register "
                    "must be an s or d register");
@@ -929,14 +1009,26 @@ bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
   dir_iterator fnDir(S_.directives + operand->fn);
   valid &= validate(fnDir);
   valid &= check(isa<BrigDirectiveFunction>(fnDir) ||
-                 isa<BrigDirectiveSignature>(fnDir), 
+                 isa<BrigDirectiveSignature>(fnDir),
                  "Invalid directive, should point to a "
-                 "BrigDirectiveFunction or BrigDirectiveSibnature");
+                 "BrigDirectiveFunction or BrigDirectiveSignature");
   return valid;
 }
 
 bool BrigModule::validate(const BrigOperandImmed *operand) const {
-  return true;
+  bool valid = true;
+
+  valid &= check(Brigb1 == operand->type  || Brigb8 == operand->type  ||
+                 Brigb16 == operand->type || Brigb32 == operand->type ||
+                 Brigb64 == operand->type,
+                 "Invalid type, must be b1, b8, b16, b32 or b64");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  long int immedSize = sizeof(BrigOperandImmed) - 2 * sizeof(uint64_t);
+  long int immediateSize = immedSize + getTypeSize(operand->type);
+  valid &= check(immediateSize <= operand->size,
+                 "Operand size too small for immediate");
+  return valid;
 }
 
 bool BrigModule::validate(const BrigOperandIndirect *operand) const {
@@ -945,7 +1037,7 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
   if (operand->reg) {
     oper_iterator regOper(S_.operands + operand->reg);
     valid &= validate(regOper);
-    valid &= check(isa<BrigOperandReg>(regOper), 
+    valid &= check(isa<BrigOperandReg>(regOper),
                    "Invalid reg, should be point BrigOprandReg");
     valid &= check(operand->type == Brigb32 ||
                    operand->type == Brigb64, "Invald datatype, should be "
@@ -958,7 +1050,13 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
-  return true;
+  bool valid = true;
+  dir_iterator directiveDir(S_.directives + operand->labeldirective);
+  valid &= validate(directiveDir);
+  valid &= check(isa<BrigDirectiveLabel>(directiveDir),
+                 "Invalid directive, should point "
+                 "to a BrigDirectiveLabel");
+  return valid;
 }
 bool BrigModule::validate(const BrigOperandOpaque *operand) const {
   return true;
@@ -1019,10 +1117,40 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
 }
 
 bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
-  return true;
+  bool valid = true;
+  for(int i = 0; i < 2; i++) {
+    const oper_iterator oper(S_.operands + operand->regs[i]);
+    if(!validate(oper)) return false;
+    const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
+    valid &= check(bor->type == operand->type,
+                   "should be the same type with BrigOperandReg");
+  }
+  valid &= check(operand->type == Brigb1 ||
+                 operand->type == Brigb32 ||
+                 operand->type == Brigb64,
+                 "Invalid date type");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid;
 }
 bool BrigModule::validate(const BrigOperandRegV4 *operand) const {
-  return true;
+  bool valid = true;
+  for(int i = 0; i < 4; i++) {
+    const oper_iterator oper(S_.operands + operand->regs[i]);
+    if(!validate(oper)) return false;
+    const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
+    valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
+    valid &= check(bor->type == operand->type,
+                   "should be the same type with BrigOperandReg");
+  }
+  valid &= check(operand->type == Brigb1 ||
+                 operand->type == Brigb32 ||
+                 operand->type == Brigb64,
+                 "Invalid date type");
+  valid &= check(operand->reserved == 0,
+                 "reserved must be zero");
+  return valid;
 }
 bool BrigModule::validate(const BrigOperandWaveSz *operand) const {
   return true;

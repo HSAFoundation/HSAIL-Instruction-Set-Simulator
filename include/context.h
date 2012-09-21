@@ -170,17 +170,21 @@ class Context {
     /* Byte-level manipulators */
     // functions to get a sequence of values of a certain buffer
     // at a specific offset.
-    context_error_t get_directive_bytes(unsigned char* value,
+    context_error_t get_directive_bytes(char* value,
                                         uint32_t offset,
                                         uint32_t nBytes);
 
-    context_error_t get_code_bytes(unsigned char* value,
+    context_error_t get_code_bytes(char* value,
                                    uint32_t offset,
                                    uint32_t nBytes);
 
-    context_error_t get_operand_bytes(unsigned char* value,
+    context_error_t get_operand_bytes(char* value,
                                       uint32_t offset,
                                       uint32_t nBytes);
+
+    context_error_t get_string_bytes(char* value,
+                                     uint32_t offset,
+                                     uint32_t nBytes);
 
     // Modify a number of bytes of a buffer at a specific offset
     context_error_t update_directive_bytes(unsigned char* value,
@@ -269,8 +273,8 @@ class Context {
     std::map<std::string, BrigoOffset32_t> label_o_map;
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
     std::map<std::string, BrigdOffset32_t> symbol_map;
-    
-    // contains the type info of functionSignature  
+
+    // contains the type info of functionSignature
     std::vector<BrigDirectiveSignature::BrigProtoType> types;
 
     unsigned int token_to_scan;

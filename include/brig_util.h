@@ -73,11 +73,11 @@ template<class Super> class brig_iterator : private Super {
   typedef brig_iterator<Super> Self;
 
   explicit brig_iterator() : Super(), curr(NULL) {}
-  explicit brig_iterator(const uint8_t *curr) : Super(), curr(curr) {}
+  explicit brig_iterator(const char *curr) : Super(), curr(curr) {}
   brig_iterator(const Self &other) : Super(), curr(other.curr) {}
 
   template<class T> explicit brig_iterator(const T *t) :
-    Super(t), curr(reinterpret_cast<const uint8_t *>(t)) {}
+    Super(t), curr(reinterpret_cast<const char *>(t)) {}
 
   Self operator++(int) {
     brig_iterator other = *this;
@@ -118,10 +118,10 @@ template<class Super> class brig_iterator : private Super {
     return other;
   }
 
-  uintptr_t operator-(const uint8_t *start) const { return curr - start; }
+  uintptr_t operator-(const char *start) const { return curr - start; }
 
   private:
-  const uint8_t *curr;
+  const char *curr;
 };
 
 class dir_super {
@@ -164,18 +164,18 @@ template<class T, class It> inline bool isa(const It it) {
 
 struct BrigSections {
   const char *strings;
-  const uint8_t *directives;
-  const uint8_t *code;
-  const uint8_t *operands;
+  const char *directives;
+  const char *code;
+  const char *operands;
   const size_t stringsSize;
   const size_t directivesSize;
   const size_t codeSize;
   const size_t operandsSize;
 
   BrigSections(const char *strings,
-               const uint8_t *directives,
-               const uint8_t *code,
-               const uint8_t *operands,
+               const char *directives,
+               const char *code,
+               const char *operands,
                const size_t stringsSize,
                const size_t directivesSize,
                const size_t codeSize,
@@ -185,11 +185,11 @@ struct BrigSections {
     stringsSize(stringsSize), directivesSize(directivesSize),
     codeSize(codeSize), operandsSize(operandsSize) {}
 
-  dir_iterator begin() const { return dir_iterator(directives); };
+  dir_iterator begin() const { return dir_iterator(directives + 8); };
   dir_iterator end() const {
     return dir_iterator(directives + directivesSize);
   };
-  inst_iterator code_begin() const { return inst_iterator(code); };
+  inst_iterator code_begin() const { return inst_iterator(code + 8); };
   inst_iterator code_end() const { return inst_iterator(code + codeSize); };
   oper_iterator oper_begin() const { return oper_iterator(operands + 8); };
   oper_iterator oper_end() const {

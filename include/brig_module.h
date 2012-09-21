@@ -3,6 +3,7 @@
 
 #include "brig.h"
 #include "brig_buffer.h"
+#include "brig_reader.h"
 #include "brig_util.h"
 
 // Not included in C++98
@@ -34,6 +35,32 @@ class BrigModule {
        directives.size(),
        code.size(),
        operands.size()),
+    out_(out),
+    valid_(validate()) {}
+
+  BrigModule(const BrigReader &reader, llvm::raw_ostream *out) :
+    S_(reader.getStrings().data(),
+       reader.getDirectives().data() + 4,
+       reader.getCode().data(),
+       reader.getOperands().data(),
+       reader.getStrings().size(),
+       reader.getDirectives().size(),
+       reader.getCode().size(),
+       reader.getOperands().size()
+      ),
+    out_(out),
+    valid_(validate()) {}
+
+  BrigModule(const BrigReader &reader, llvm::raw_ostream *out) :
+    S_(reader.getStrings().data(),
+       reader.getDirectives().data(),
+       reader.getCode().data(),
+       reader.getOperands().data(),
+       reader.getStrings().size(),
+       reader.getDirectives().size(),
+       reader.getCode().size(),
+       reader.getOperands().size()
+      ),
     out_(out),
     valid_(validate()) {}
 
@@ -96,6 +123,7 @@ class BrigModule {
 
   bool validate(const BrigOperandAddress *operand) const;
   bool validate(const BrigOperandArgumentList *operand) const;
+  bool validate(const BrigOperandFunctionList *operand) const;
   bool validate(const BrigOperandArgumentRef *operand) const;
   bool validate(const BrigOperandBase *operand) const;
   bool validate(const BrigOperandCompound *operand) const;

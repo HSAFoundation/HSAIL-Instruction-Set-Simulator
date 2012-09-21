@@ -350,7 +350,7 @@ static llvm::FunctionType *getInstFunType(const inst_iterator inst,
 
   llvm::Type *result = runOnType(C, BrigDataType(inst->type));
   std::vector<llvm::Type *> params;
-  for(unsigned i = 1; inst->o_operands[i] && i < 5; ++i)
+  for(unsigned i = 1; i < 5 && inst->o_operands[i]; ++i)
     params.push_back(result);
 
   return llvm::FunctionType::get(result, params, false);
@@ -367,7 +367,7 @@ static void runOnComplexInst(llvm::BasicBlock &B,
     brigDest = helper.getOperand(inst, operand++);
 
   std::vector<llvm::Value *> sources;
-  for(; inst->o_operands[operand] && operand < 5; ++operand) {
+  for(; operand < 5 && inst->o_operands[operand]; ++operand) {
     const BrigOperandBase *brigSrc = helper.getOperand(inst, operand);
     llvm::Value *srcRaw = getOperand(B, brigSrc, helper, state);
     llvm::Value *srcVal = decodePacking(B, srcRaw, operand, inst);
