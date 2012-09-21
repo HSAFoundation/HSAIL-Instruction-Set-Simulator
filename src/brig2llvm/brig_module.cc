@@ -42,6 +42,7 @@ bool BrigModule::validate(void) const {
   valid &= validateCode();
   valid &= validateOperands();
   valid &= validateStrings();
+  valid &= validateDebug();
   return valid;
 }
 
@@ -200,6 +201,11 @@ bool BrigModule::validateStrings(void) const {
     curr += (len + 1);
   }
 
+  return valid;
+}
+
+bool BrigModule::validateDebug(void) const {
+  bool valid = true;
   return valid;
 }
 

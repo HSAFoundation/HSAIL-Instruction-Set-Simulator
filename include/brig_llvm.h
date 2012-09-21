@@ -18,7 +18,8 @@ class GenLLVM {
   explicit GenLLVM(const StringBuffer &strings,
                    const Buffer &directives,
                    const Buffer &code,
-                   const Buffer &operands);
+                   const Buffer &operands,
+                   const Buffer &debug);
   void operator()(void);
   llvm::Module *getModule() { return brig_frontend_; }
   const std::string &str(void) { return output_; }
@@ -29,6 +30,7 @@ class GenLLVM {
   const Buffer &directives_;
   const Buffer &code_;
   const Buffer &operands_;
+  const Buffer &debug_;
   llvm::LLVMContext *C_;
   llvm::Module *brig_frontend_;
   llvm::Type *gpu_states_type_;
