@@ -1986,7 +1986,7 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
 
     BrigSymbolCommon s = {
       8,                                      // c_code
-      BrigArgSpace,                           // storageClass
+      BrigKernargSpace,                       // storageClass
       BrigNone,                               // attribute
       0,                                      // reserved
       0,                                      // symbolModifier
@@ -7067,7 +7067,7 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
       28                    //arg
     };
     operands.append(&boar);
-    
+
     BrigOperandArgumentList boal = {
       sizeof(boal),
       BrigEOperandArgumentList,
