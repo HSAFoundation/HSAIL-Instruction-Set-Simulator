@@ -8873,7 +8873,7 @@ TEST(CodegenTest,BlockCodegen){
   size_t arraySize = sizeof(BrigBlockNumeric) + 3 * sizeof(uint64_t);
   BrigdOffset32_t bbn1_d_offset = bbs_d_offset - arraySize ;
 
-  uint8_t *array = new uint8_t[arraySize];
+  char *array = new char[arraySize];
   BrigBlockNumeric *bbn1 =
         reinterpret_cast<BrigBlockNumeric*>(array);
   bbn1->size = arraySize;
@@ -8885,9 +8885,9 @@ TEST(CodegenTest,BlockCodegen){
   bbn1->u64[2] = 10;
   bbn1->u64[3] = 23;
 
-  array = new uint8_t[arraySize];
+  array = new char[arraySize];
   BrigBlockNumeric *get = reinterpret_cast<BrigBlockNumeric*>(array);
-  unsigned char *get_charp = reinterpret_cast<unsigned char *>(get);
+  char *get_charp = reinterpret_cast<char *>(get);
   context->get_directive_bytes(get_charp,bbn1_d_offset,arraySize);
 
   EXPECT_EQ(bbn1->size,get->size);
@@ -8904,7 +8904,7 @@ TEST(CodegenTest,BlockCodegen){
  // blocknumeric
   arraySize = sizeof(BrigBlockNumeric) + sizeof(uint64_t);
   BrigdOffset32_t bbn2_d_offset = bbn1_d_offset - arraySize;
-  array = new uint8_t[arraySize];
+  array = new char[arraySize];
   BrigBlockNumeric *bbn2 =
         reinterpret_cast<BrigBlockNumeric*>(array);
   bbn2->size = arraySize;
@@ -8916,9 +8916,9 @@ TEST(CodegenTest,BlockCodegen){
   bbn2->u32[2] = 10;
   bbn2->u32[3] = 23;
 
-  array = new uint8_t[arraySize];
+  array = new char[arraySize];
   get = reinterpret_cast<BrigBlockNumeric*>(array);
-  get_charp = reinterpret_cast<unsigned char *>(get);
+  get_charp = reinterpret_cast<char *>(get);
   context->get_directive_bytes(get_charp,bbn2_d_offset,arraySize);
 
   EXPECT_EQ(bbn2->size,get->size);
@@ -8996,7 +8996,7 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   array = new uint8_t[arraySize];
   BrigDirectiveSignature *get =
       reinterpret_cast<BrigDirectiveSignature*>(array);
-  unsigned char *get_charp =  reinterpret_cast<unsigned char *>(get);
+  char *get_charp =  reinterpret_cast<char *>(get);
 
   context->get_directive_bytes(get_charp,offset,arraySize);
   EXPECT_EQ(ref->size,get->size);
