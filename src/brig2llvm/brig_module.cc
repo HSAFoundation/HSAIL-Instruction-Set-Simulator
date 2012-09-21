@@ -914,7 +914,7 @@ bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
 
   for (unsigned i = 0; i < operand->elementCount; ++i) {
     oper_iterator arg(S_.operands + operand->o_args[i]);
-    valid &= validate(arg);
+    if (!validate(arg)) return false;
     valid &= check(isa<BrigOperandArgumentRef>(arg), 
                    "Invalid o_args, should point to BrigOperandArgumentRef");
   }
