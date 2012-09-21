@@ -216,7 +216,7 @@ class Context {
     uint16_t get_alignment() const;
     BrigAttribute16_t get_attribute() const;
     BrigAluModifier get_alu_modifier() const;
-    BrigSymbolModifier get_symbol_modifier() const;
+    uint32_t get_symbol_modifier() const;
     BrigMachine16_t get_machine() const;
     BrigProfile16_t get_profile() const;
     BrigSftz16_t get_ftz() const;
@@ -231,6 +231,7 @@ class Context {
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
     void set_symbol_modifier(BrigSymbolModifier modifier);
+	void init_symbol_modifier();
     void set_attribute(BrigAttribute16_t attrib);
     void set_alignment(uint16_t align);
     void set_machine(BrigMachine16_t machine);
@@ -313,7 +314,7 @@ class Context {
 
     // context variables
     uint16_t alignment;
-    BrigSymbolModifier symModifier;
+    uint32_t symModifier;
     BrigMachine16_t machine;
     BrigProfile16_t profile;
     BrigSftz16_t ftz;

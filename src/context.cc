@@ -252,7 +252,7 @@ BrigAluModifier Context::get_alu_modifier() const {
   return aluModifier;
 }
 
-BrigSymbolModifier Context::get_symbol_modifier() const {
+uint32_t Context::get_symbol_modifier() const {
   return symModifier;
 }
 
@@ -302,9 +302,12 @@ void Context::set_alu_modifier(BrigAluModifier modifier) {
 }
 
 void Context::set_symbol_modifier(BrigSymbolModifier modifier) {
-  this->symModifier = modifier;
+  this->symModifier |= ((uint32_t)(modifier));
 }
 
+void Context::init_symbol_modifier(){
+	this->symModifier = 0;
+}
 void Context::set_attribute(BrigAttribute16_t attrib) {
   this->attribute = attrib;
 }
