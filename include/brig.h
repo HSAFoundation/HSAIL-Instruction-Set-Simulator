@@ -379,7 +379,8 @@ enum BrigOpcode {
   BrigBitSelect = 119,
   BrigMulHi = 120,
   BrigMul24Hi = 121,
-  BrigMad24Hi = 122
+  BrigMad24Hi = 122,
+  BrigFsqrt = 123
 };
 
 

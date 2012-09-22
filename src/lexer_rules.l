@@ -976,11 +976,13 @@ fexp2               { free_string(context);
 fsqrt               { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFsqrt;
                       return FSQRT; }
 
 frsqrt              { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFrsqrt;
                       return  FRSQRT; }
 
 frcp                { free_string(context);
@@ -1073,161 +1075,193 @@ borrow              { free_string(context);
 
 div                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigDiv;
                       context->yycolno+=yyleng;
                       return DIV; }
 
 rem                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigRem;
                       context->yycolno+=yyleng;
                       return REM; }
 
 sub                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigSub;
                       context->yycolno+=yyleng;
                       return SUB; }
 
 shl                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigShl;
                       context->yycolno+=yyleng;
                       return SHL;}
 
 shr                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigShr;
                       context->yycolno+=yyleng;
                       return SHR;}
 
 and                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigAnd;
                       context->yycolno+=yyleng;
                       return AND;}
 
 xor                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigXor;
                       context->yycolno+=yyleng;
                       return XOR;}
 
 or                  { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigOr;
                       context->yycolno+=yyleng;
                       return OR;}
 
 unpacklo            { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigUnpackLo;
                       context->yycolno+=yyleng;
                       return UNPACKLO;}
 
 unpackhi            { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigUnpackHi;
                       context->yycolno+=yyleng;
                       return UNPACKHI;}
 
 movd_lo             { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigMovdLo;
                       context->yycolno+=yyleng;
                       return MOVD_LO;}
 
 movd_hi             { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigMovdHi;
                       context->yycolno+=yyleng;
                       return MOVD_HI;}
 
 copysign            { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigCopySign;
                       context->yycolno+=yyleng;
                       return COPYSIGN;}
 
 class               { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigClass;
                       context->yycolno+=yyleng;
                       return CLASS;}
 
 send                { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigSend;
                       context->yycolno+=yyleng;
                       return SEND;}
 
 receive             { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE;
+                      context->token_value.opcode = BrigReceive;
                       context->yycolno+=yyleng;
                       return RECEIVE;}
 
 max                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE_FTZ;
+                      context->token_value.opcode = BrigMax;
                       context->yycolno+=yyleng;
                       return MAX;}
 
 min                 { free_string(context);
                       context->token_type = INSTRUCTION3_OPCODE_FTZ;
+                      context->token_value.opcode = BrigMin;
                       context->yycolno+=yyleng;
                       return MIN;}
 
 mad                 { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigMad;
                       context->yycolno+=yyleng;
                       return MAD;}
 
 extract             { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigExtract;
                       context->yycolno+=yyleng;
                       return EXTRACT;}
 
 insert              { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigInsert;
                       context->yycolno+=yyleng;
                       return INSERT;}
 
 shuffle             { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigShuffle;
                       context->yycolno+=yyleng;
                       return SHUFFLE;}
 
 cmov                { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigCmov;
                       context->yycolno+=yyleng;
                       return CMOV;}
 
 fma                 { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigFma;
                       context->yycolno+=yyleng;
                       return FMA;}
 
 bitalign            { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigBitAlign;
                       context->yycolno+=yyleng;
                       return BITALIGN;}
 
 bytealign           { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigByteAlign;
                       context->yycolno+=yyleng;
                       return BYTEALIGN;}
 
 lerp                { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigLerp;
                       context->yycolno+=yyleng;
                       return LERP;}
 
 sad                 { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigSad;
                       context->yycolno+=yyleng;
                       return SAD;}
 
 sad2                { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigSad2;
                       context->yycolno+=yyleng;
                       return SAD2;}
 
 sad4                { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigSad4;
                       context->yycolno+=yyleng;
                       return SAD4;}
 
 sad4hi              { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigSad4Hi;
                       context->yycolno+=yyleng;
                       return  SAD4HI;}
 
 bitselect           { free_string(context);
                       context->token_type = INSTRUCTION4_OPCODE;
+                      context->token_value.opcode = BrigBitSelect;
                       context->yycolno+=yyleng;
                       return BITSELECT;}
 
