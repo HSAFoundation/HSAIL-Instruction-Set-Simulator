@@ -7140,12 +7140,12 @@ TEST(CodegenTest,ControlCodegen){
   BrigDirectiveControl ref = {
     24,
     BrigEDirectiveControl,
-    0,
+    8,
     BrigEMemOpt,
     {1,0,0}
   };
   BrigDirectiveControl get;
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
@@ -7165,11 +7165,11 @@ TEST(CodegenTest,ControlCodegen){
   BrigDirectiveControl ref1 = {
     24,
     BrigEDirectiveControl,
-    0,
+    8,
     BrigEMaxGperC,
     {6,0,0}
   };
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
 
   EXPECT_EQ(ref1.size,get.size);
   EXPECT_EQ(ref1.kind,get.kind);
@@ -7189,11 +7189,11 @@ TEST(CodegenTest,ControlCodegen){
   BrigDirectiveControl ref2 = {
     24,
     BrigEDirectiveControl,
-    0,
+    8,
     BrigEMaxTid,
     {2,3,4}
   };
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
 
   EXPECT_EQ(ref2.size,get.size);
   EXPECT_EQ(ref2.kind,get.kind);
@@ -7291,7 +7291,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(movB1Ref.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(movB1Ref.o_operands[4], getBase.o_operands[4]);
 
-  context->get_code(32, &getBase);
+  context->get_code(40, &getBase);
   // BrigInstBase
   EXPECT_EQ(movB32Ref.size, getBase.size);
   EXPECT_EQ(movB32Ref.kind, getBase.kind);
@@ -7304,7 +7304,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(movB32Ref.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(movB32Ref.o_operands[4], getBase.o_operands[4]);
 
-  context->get_code(64, &getBase);
+  context->get_code(72, &getBase);
   // BrigInstBase
   EXPECT_EQ(movB64Ref1.size, getBase.size);
   EXPECT_EQ(movB64Ref1.kind, getBase.kind);
@@ -7317,7 +7317,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(movB64Ref1.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(movB64Ref1.o_operands[4], getBase.o_operands[4]);
 
-  context->get_code(96, &getBase);
+  context->get_code(104, &getBase);
   // BrigInstBase
   EXPECT_EQ(movB64Ref2.size, getBase.size);
   EXPECT_EQ(movB64Ref2.kind, getBase.kind);
@@ -7330,7 +7330,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(movB64Ref2.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(movB64Ref2.o_operands[4], getBase.o_operands[4]);
 
-  context->get_code(128, &getBase);
+  context->get_code(136, &getBase);
   // BrigInstBase
   EXPECT_EQ(movB128Ref.size, getBase.size);
   EXPECT_EQ(movB128Ref.kind, getBase.kind);
@@ -7357,7 +7357,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(4, getReg.name);
+  EXPECT_EQ(12, getReg.name);
 
   context->get_operand(88, &getReg);
   // BrigOperandReg
@@ -7365,7 +7365,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb64, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(16, getReg.name);
 
   context->get_operand(128, &getReg);
   // BrigOperandReg
@@ -7373,7 +7373,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(12, getReg.name);
+  EXPECT_EQ(20, getReg.name);
 
   context->get_operand(140, &getReg);
   // BrigOperandReg
@@ -7381,7 +7381,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(16, getReg.name);
+  EXPECT_EQ(24, getReg.name);
 
   context->get_operand(168, &getReg);
   // BrigOperandReg
@@ -7389,7 +7389,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(20, getReg.name);
+  EXPECT_EQ(28, getReg.name);
 
   context->get_operand(204, &getReg);
   // BrigOperandReg
@@ -7397,7 +7397,7 @@ TEST(CodegenTest, Mov_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb128, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(24, getReg.name);
+  EXPECT_EQ(32, getReg.name);
 
   context->get_operand(24, &getImm);
   // BrigOperandImmed
@@ -7487,7 +7487,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen_Test) {
   EXPECT_EQ(refCas.storageClass, getAtom.storageClass);
   EXPECT_EQ(refCas.memorySemantic, getAtom.memorySemantic);
 
-  context->get_code(44, &getAtom);
+  context->get_code(52, &getAtom);
   // BrigInstAtomic
   EXPECT_EQ(refMax.size, getAtom.size);
   EXPECT_EQ(refMax.kind, getAtom.kind);
