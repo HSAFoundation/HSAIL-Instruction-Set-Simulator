@@ -58,13 +58,13 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(Extract);
     caseOper(Insert);
     caseOper(Mov);
-    caseOper(Unpacklo);
-    caseOper(Unpackhi);
+    caseOper(UnpackLo);
+    caseOper(UnpackHi);
     caseOper(Shuffle);
-    caseOper(movslo);
-    caseOper(movshi);
-    caseOper(movdlo);
-    caseOper(movdhi);
+    caseOper(MovsLo);
+    caseOper(MovsHi);
+    caseOper(MovdLo);
+    caseOper(MovdHi);
     caseOper(Lda);
     caseOper(Ldc);
     caseOper(Cmov);
@@ -96,7 +96,7 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(Sad);
     caseOper(Sad2);
     caseOper(Sad4);
-    caseOper(Sad4hi);
+    caseOper(Sad4Hi);
     caseOper(Ld);
     caseOper(St);
     caseOper(Atomic);
@@ -118,14 +118,12 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(Brn);
     caseOper(Sync);
     caseOper(Barrier);
-    caseOper(FbarInitSize);
-    caseOper(FbarInitSizeWg);
-    caseOper(FbarInit);
+    caseOper(FbarInitSizeKnown);
+    caseOper(FbarInitSizeDynamic);
     caseOper(FbarWait);
     caseOper(FbarArrive);
     caseOper(FbarSkip);
     caseOper(FbarRelease);
-    caseOper(FbarReleaseCF);
     caseOper(Count);
     caseOper(Countup);
     caseOper(Mask);
@@ -139,8 +137,8 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(WorkItemAId);
     caseOper(WorkGroupId);
     caseOper(WorkGroupSize);
-    caseOper(NDRangesize);
-    caseOper(NDRangegroups);
+    caseOper(NDRangeSize);
+    caseOper(NDRangeGroups);
     caseOper(LaneId);
     caseOper(DynWaveId);
     caseOper(MaxDynWaveId);
@@ -148,10 +146,14 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(CU);
     caseOper(WorkDim);
     caseOper(Clock);
-    caseOper(workitemidflat);
-    caseOper(workitemaidflat);
+    caseOper(WorkItemIdFlat);
+    caseOper(WorkItemAIdFlat);
     caseOper(Nop);
     caseOper(Debugtrap);
+    caseOper(BitSelect);
+    caseOper(MulHi);
+    caseOper(Mul24Hi);
+    caseOper(Mad24Hi);
   default:
     assert(false && "Unknown instruction");
   }

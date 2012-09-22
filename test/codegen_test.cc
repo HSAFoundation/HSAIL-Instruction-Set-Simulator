@@ -2542,7 +2542,7 @@ TEST(CodegenTest, Instruction2Op_CodeGen_movs_lo_b32) {
   BrigInstBase ref = {
     32,
     BrigEInstBase,
-    Brigmovslo,
+    BrigMovsLo,
     Brigb32,
     BrigNoPacking,
     {8, 20, 0, 0, 0}
@@ -2575,7 +2575,7 @@ TEST(CodegenTest, Instruction2Op_CodeGen_movs_hi_b32) {
   BrigInstBase ref = {
     32,
     BrigEInstBase,
-    Brigmovshi,
+    BrigMovsHi,
     Brigb32,
     BrigNoPacking,
     {8, 20, 0, 0, 0}
@@ -2929,7 +2929,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangesize) {
   BrigInstBase ref = {
     32,
     BrigEInstBase,
-    BrigNDRangesize,
+    BrigNDRangeSize,
     Brigb32,
     BrigNoPacking,
     {8, 20, 0, 0, 0}
@@ -2965,7 +2965,7 @@ TEST(CodegenTest, Instrustion2Op_NODT_CodeGen_NDRangegroups) {
   BrigInstBase ref = {
     32,
     BrigEInstBase,
-    BrigNDRangegroups,
+    BrigNDRangeGroups,
     Brigb32,
     BrigNoPacking,
     {8, 20, 0, 0, 0}
@@ -8303,7 +8303,7 @@ TEST(CodegenTest,  Instruction4_BitStringOperation_CodeGen_SimpleTest) {
   BrigInstBase bitsInst = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
-    BrigBitselect,         // opcode
+    BrigBitSelect,         // opcode
     Brigb32,               // type
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0}        // o_operands[5]
@@ -8490,7 +8490,7 @@ TEST(CodegenTest,  Instruction4_MultiMediaOperation_CodeGen_SimpleTest) {
   BrigInstBase sadInst = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
-    BrigSad4hi,           // opcode
+    BrigSad4Hi,           // opcode
     Brigb32,               // type
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0}        // o_operands[5]

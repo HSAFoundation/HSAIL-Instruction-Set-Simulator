@@ -3311,7 +3311,7 @@ int Instruction4MultiMediaOperationPart1(Context* context) {
       mmoInst.opcode = BrigSad4;
       break;
     case SAD4HI:
-      mmoInst.opcode = BrigSad4hi;
+      mmoInst.opcode = BrigSad4Hi;
       break;
     case LERP:
       mmoInst.opcode = BrigLerp;
@@ -3763,7 +3763,7 @@ int Instruction4BitStringOperationPart4(Context* context) {
       bsoInst.opcode = BrigInsert;
       break;
     case BITSELECT:
-      bsoInst.opcode = BrigBitselect;
+      bsoInst.opcode = BrigBitSelect;
       break;
   }
 

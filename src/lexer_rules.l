@@ -347,7 +347,7 @@ unsigned_int32                                 { context->token_type = PROPERTY;
                                                  free_string(context);
                                                  context->yycolno+=yyleng;
                                                  context->token_value.format = BrigUNSIGNED_INT32;
-                                                 return TOKEN_PROPERTY; } 
+                                                 return TOKEN_PROPERTY; }
 
 half_float                                     { context->token_type = PROPERTY;
                                                  free_string(context);
@@ -777,7 +777,7 @@ memopt_off          { free_string(context);
 fbar_initSizeWg     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFbarInitSizeWg;
+                      context->token_value.opcode = BrigFbarInitSizeDynamic;
                       return FBAR_INITSIZEWG; }
 
 fbar_wait           { free_string(context);
@@ -849,13 +849,13 @@ workdim             { free_string(context);
 workitemid_flat     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = Brigworkitemidflat;
+                      context->token_value.opcode = BrigWorkItemIdFlat;
                       return WORKITEMID_FLAT; }
 
 workitemaid_flat    { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = Brigworkitemaidflat;
+                      context->token_value.opcode = BrigWorkItemAIdFlat;
                       return WORKITEMAID_FLAT; }
 
 debugtrap           { free_string(context);
@@ -909,38 +909,20 @@ bitrev              { free_string(context);
 movs_lo             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = Brigmovslo ;
+                      context->token_value.opcode = BrigMovsLo ;
                       return MOVS_LO; }
 
 movs_hi             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = Brigmovshi ;
+                      context->token_value.opcode = BrigMovsHi ;
                       return MOVS_HI; }
-
-fbar_initSize       { free_string(context);
-                      context->token_type = INSTRUCTION2_OPCODE;
-                      context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFbarInitSize ;
-                      return FBAR_INITSIZE; }
-
-fbar_initSizeKnown  { free_string(context);
-                      context->token_type = INSTRUCTION2_OPCODE;
-                      context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFbarInitSizeKnown ;
-                      return FBAR_INITSIZE; }
 
 fbar_init           { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFbarInit ;
+                      context->token_value.opcode = BrigFbarInitSizeKnown ;
                       return FBAR_INIT; }
-
-fbar_releaseCF      { free_string(context);
-                      context->token_type = INSTRUCTION2_OPCODE;
-                      context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFbarReleaseCF;
-                      return FBAR_RELEASECF; }
 
 count               { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
@@ -1055,7 +1037,7 @@ workgroupsize       { free_string(context);
                       return WORKGROUPSIZE;}
 
 workgroupid       { free_string(context);
-                    context->token_type = INSTRUCTION2_OPCODE_NODT;                    
+                    context->token_type = INSTRUCTION2_OPCODE_NODT;
                     context->yycolno+=yyleng;
                     context->token_value.opcode = BrigWorkGroupId ;
                     return WORKGROUPID;}
@@ -1063,13 +1045,13 @@ workgroupid       { free_string(context);
 NDRangesize         { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigNDRangesize;
+                      context->token_value.opcode = BrigNDRangeSize;
                       return NDRANGESIZE;}
 
 NDRangegroups       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigNDRangegroups;
+                      context->token_value.opcode = BrigNDRangeGroups;
                       return NDRANGEGROUPS; }
 
 add                 { free_string(context);
