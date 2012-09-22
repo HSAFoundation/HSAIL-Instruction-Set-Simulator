@@ -225,17 +225,6 @@ public:
     static const uint32_t DEFAULT_PRCNT_SIMD = 100;
 
     /**
-     * API to determine the maximum number of queues that can actually
-     * be created for this platform, including all devices.
-     *
-     * @return the number of queues allowed by the platform including
-     * all devices.
-     *
-     * @note will always return 2 for now.
-     */ 
-    virtual uint32_t getMaxQueues(void) = 0;
-
-    /**
      * Default destructor
      */
 	virtual ~Queue(){};
