@@ -6046,9 +6046,9 @@ TEST(CodegenTest,FileDeclCodegen){
   BrigDirectiveFile ref = {
     16,                   //size
     BrigEDirectiveFile,   //kind
-    0,                    //c_code
+    8,                    //c_code
     1,                    //fileid
-    0                     //s_filename
+    8                     //s_filename
   };
 
   Lexer *lexer = new Lexer(input);
@@ -6056,7 +6056,7 @@ TEST(CodegenTest,FileDeclCodegen){
   EXPECT_EQ(0,FileDecl(context));
 
   BrigDirectiveFile get;
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
@@ -6075,7 +6075,7 @@ TEST(CodegenTest,LocationCodegen){
   BrigDirectiveLoc ref = {
     20,                   //size
     BrigEDirectiveLoc,    //kind
-    0,                    //c_code
+    8,                    //c_code
     1,                    //sourceFile
     10,                   //sourceLine
     5                     //sourceColumn
@@ -6086,7 +6086,7 @@ TEST(CodegenTest,LocationCodegen){
   EXPECT_EQ(0,Location(context));
 
   BrigDirectiveLoc get;
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
@@ -6949,7 +6949,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(cmpNeRef.sourceType, get.sourceType);
   EXPECT_EQ(cmpNeRef.reserved, get.reserved);
 
-  context->get_code(44, &get);
+  context->get_code(52, &get);
 
   EXPECT_EQ(cmpGtRef.size, get.size);
   EXPECT_EQ(cmpGtRef.kind, get.kind);
@@ -6972,7 +6972,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(cmpGtRef.sourceType, get.sourceType);
   EXPECT_EQ(cmpGtRef.reserved, get.reserved);
 
-  context->get_code(88, &get);
+  context->get_code(96, &get);
 
   EXPECT_EQ(cmpEquRef.size, get.size);
   EXPECT_EQ(cmpEquRef.kind, get.kind);
@@ -6995,7 +6995,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(cmpEquRef.sourceType, get.sourceType);
   EXPECT_EQ(cmpEquRef.reserved, get.reserved);
 
-  context->get_code(132, &get);
+  context->get_code(140, &get);
 
   EXPECT_EQ(cmpSltuRef.size, get.size);
   EXPECT_EQ(cmpSltuRef.kind, get.kind);
@@ -7018,7 +7018,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(cmpSltuRef.sourceType, get.sourceType);
   EXPECT_EQ(cmpSltuRef.reserved, get.reserved);
 
-  context->get_code(176, &get);
+  context->get_code(184, &get);
 
   EXPECT_EQ(packedCmpLtRef.size, get.size);
   EXPECT_EQ(packedCmpLtRef.kind, get.kind);
@@ -7055,7 +7055,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb1, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(4, getReg.name);
+  EXPECT_EQ(12, getReg.name);
 
   context->get_operand(56, &getReg);
   // BrigOperandReg
@@ -7063,7 +7063,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(16, getReg.name);
 
   context->get_operand(96, &getReg);
   // BrigOperandReg
@@ -7071,7 +7071,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb1, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(12, getReg.name);
+  EXPECT_EQ(20, getReg.name);
 
   context->get_operand(136, &getReg);
   // BrigOperandReg
@@ -7079,7 +7079,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb64, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(16, getReg.name);
+  EXPECT_EQ(24, getReg.name);
 
   context->get_operand(148, &getReg);
   // BrigOperandReg
@@ -7087,7 +7087,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb64, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(20, getReg.name);
+  EXPECT_EQ(28, getReg.name);
 
   context->get_operand(160, &getReg);
   // BrigOperandReg
@@ -7095,7 +7095,7 @@ TEST(CodegenTest, Cmp_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb64, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(24, getReg.name);
+  EXPECT_EQ(32, getReg.name);
 
   context->get_operand(32, &getImm);
   // BrigOperandImmed
