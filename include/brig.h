@@ -379,7 +379,8 @@ enum BrigOpcode {
   BrigBitSelect = 119,
   BrigMulHi = 120,
   BrigMul24Hi = 121,
-  BrigMad24Hi = 122
+  BrigMad24Hi = 122,
+  BrigFsqrt = 123
 };
 
 
@@ -1129,6 +1130,12 @@ struct BrigOperandIndirect {
   BrigDataType16_t type;
   uint16_t reserved;
   int32_t offset;
+};
+
+struct BrigOperandPad {
+  static const uint16_t OperKind = BrigEOperandPad;
+  uint16_t size;
+  uint16_t kind;
 };
 
 //BrigOperandOpaque

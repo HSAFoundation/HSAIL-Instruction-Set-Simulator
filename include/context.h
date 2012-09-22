@@ -101,9 +101,9 @@ class Context {
       if ((alignment_check(*item) == BrigEAlignment_8) &&
           (operand_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
-        BrigDirectivePad bdp = {
+        BrigOperandPad bdp = {
           4,                 // Size
-          BrigEDirectivePad  // type
+          BrigEOperandPad  // type
         };
         obuf->append(&bdp);
       }

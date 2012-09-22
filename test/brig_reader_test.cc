@@ -97,33 +97,7 @@ TEST(BrigWriterTest, EmptyBRIG) {
   EXPECT_TRUE(existed);
 }
 
-TEST(BrigWriterTest, VectorCopy) {
-
-  std::string source(
-    "version 1:0:$small;\n"
-    "\n"
-    "kernel &__OpenCL_vec_copy_kernel(\n"
-    "        kernarg_u32 %arg_val0, \n"
-    "        kernarg_u32 %arg_val1, \n"
-    "        kernarg_u32 %arg_val2)\n"
-    "{\n"
-    "@__OpenCL_vec_copy_kernel_entry:\n"
-    "        ld_kernarg_u32  $s0, [%arg_val2] ;\n"
-    "        workitemaid     $s1, 0 ;\n"
-    "        cmp_ge_b1_u32    $c0, $s1, $s0 ;\n"
-    "        ld_kernarg_u32  $s0, [%arg_val1] ;\n"
-    "        ld_kernarg_u32  $s2, [%arg_val0] ;\n"
-    "        cbr     $c0, @BB0_2 ;\n"
-    "\n"
-    "        shl_u32  $s1, $s1, 2 ;\n"
-    "        add_u32  $s0, $s0, $s1 ;\n"
-    "        add_u32  $s1, $s2, $s1 ;\n"
-    "        ld_global_f32   $s1, [$s1] ;\n"
-    "        st_global_f32   $s1, [$s0] ;\n"
-    "@BB0_2:\n"
-    "        ret ;\n"
-    "};\n"
-    );
+static void TestHSAIL(const std::string &source) {
 
   Parser parser(source);
   Context *context = parser.get_context();
@@ -180,4 +154,71 @@ TEST(BrigWriterTest, VectorCopy) {
   bool existed;
   llvm::sys::fs::remove(resultPath.c_str(), existed);
   EXPECT_TRUE(existed);
+}
+
+TEST(BrigWriterTest, VectorCopy) {
+  TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__OpenCL_vec_copy_kernel(\n"
+    "        kernarg_u32 %arg_val0, \n"
+    "        kernarg_u32 %arg_val1, \n"
+    "        kernarg_u32 %arg_val2)\n"
+    "{\n"
+    "@__OpenCL_vec_copy_kernel_entry:\n"
+    "        ld_kernarg_u32  $s0, [%arg_val2] ;\n"
+    "        workitemaid     $s1, 0 ;\n"
+    "        cmp_ge_b1_u32    $c0, $s1, $s0 ;\n"
+    "        ld_kernarg_u32  $s0, [%arg_val1] ;\n"
+    "        ld_kernarg_u32  $s2, [%arg_val0] ;\n"
+    "        cbr     $c0, @BB0_2 ;\n"
+    "\n"
+    "        shl_u32  $s1, $s1, 2 ;\n"
+    "        add_u32  $s0, $s0, $s1 ;\n"
+    "        add_u32  $s1, $s2, $s1 ;\n"
+    "        ld_global_f32   $s1, [$s1] ;\n"
+    "        st_global_f32   $s1, [$s0] ;\n"
+    "@BB0_2:\n"
+    "        ret ;\n"
+    "};\n"
+    );
+}
+
+TEST(BrigWriterTest, CosineTest) {
+  TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "//==========================================================\n"
+    "// Function: __Get_fcos\n"
+    "//\n"
+    "// Inputs: arg_val0 - List of values to compute the fcos on\n"
+    "//\n"
+    "// Outputs: arg_val1 - Results\n"
+    "//\n"
+    "//==========================================================\n"
+    "\n"
+    "kernel &__Get_fcos(kernarg_u32 %arg_val0, kernarg_u32 %arg_val1)\n"
+    "{\n"
+    "	// Use workitemaid to get the buffer offset\n"
+    "	workitemaid $s1, 0;\n"
+    "	shl_u32	 $s1, $s1, 2;  // Get offset by Multiplying by 4 because \n"
+    "                        // that is the size of each value in the buffer\n"
+    "	\n"
+    "	// Compute Address of Input Value and store in $s0\n"
+    "	ld_kernarg_u32	$s0, [%arg_val0];\n"
+    "	add_u32	 $s0, $s0, $s1;  // Add offset to Address\n"
+    "\n"
+    "	// Compute Address of Output Value and store in $s3\n"
+    "	ld_kernarg_u32	$s3, [%arg_val1];\n"
+    "	add_u32	 $s3, $s3, $s1;  // Add offset to Address\n"
+    "\n"
+    "	// Execute Trig Opcode\n"
+    "	fcos_f32 $s2, [$s0];\n"
+    "\n"
+    "	// Store Dispatch ID on Kernel Argument\n"
+    "	st_global_u32	$s2, [$s3] ;\n"
+    "\n"
+    "	ret;\n"
+    "};\n"
+    );
 }
