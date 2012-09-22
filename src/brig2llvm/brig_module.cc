@@ -706,7 +706,7 @@ bool BrigModule::validate(const BrigInstBar *code) const {
 
 bool BrigModule::validate(const BrigInstBase *code) const {
   bool valid = true;
-  valid &= check(code->opcode <= BrigFbarInitSizeKnown,
+  valid &= check(code->opcode <= BrigMad24Hi,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");

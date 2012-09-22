@@ -760,13 +760,13 @@ TEST(LexTest, Bug38_Instruction2Opcode) {
   lexer->set_source_string(input);
   EXPECT_EQ(MOVS_HI, lexer->get_next_token());
 
-  input.assign("fbar_initSize");
+  input.assign("fbar_init");
   lexer->set_source_string(input);
-  EXPECT_EQ(FBAR_INITSIZE, lexer->get_next_token());
+  EXPECT_EQ(FBAR_INIT, lexer->get_next_token());
 
-  input.assign("fbar_releaseCF");
+  input.assign("fbar_release");
   lexer->set_source_string(input);
-  EXPECT_EQ(FBAR_RELEASECF, lexer->get_next_token());
+  EXPECT_EQ(FBAR_RELEASE, lexer->get_next_token());
 
   input.assign("count");
   lexer->set_source_string(input);
