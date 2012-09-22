@@ -43,6 +43,19 @@ class BrigModule {
 
   BrigModule(const BrigReader &reader, llvm::raw_ostream *out) :
     S_(reader.getStrings().data(),
+       reader.getDirectives().data() + 4,
+       reader.getCode().data(),
+       reader.getOperands().data(),
+       reader.getStrings().size(),
+       reader.getDirectives().size(),
+       reader.getCode().size(),
+       reader.getOperands().size()
+      ),
+    out_(out),
+    valid_(validate()) {}
+
+  BrigModule(const BrigReader &reader, llvm::raw_ostream *out) :
+    S_(reader.getStrings().data(),
        reader.getDirectives().data(),
        reader.getCode().data(),
        reader.getOperands().data(),
