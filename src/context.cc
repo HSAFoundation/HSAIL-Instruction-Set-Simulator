@@ -80,6 +80,7 @@ void Context::set_default_values(void) {
   yycolno = 0;
   yylineno = 1;
   arg_output = false ;
+  symModifier = 0;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
