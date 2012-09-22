@@ -30,6 +30,10 @@ Context::Context(void) {
   yylineno = 1;
   error_reporter_set = false;
   set_default_values();
+  for(unsigned i = 0; i < 8; ++i) cbuf->append_char(0);
+  for(unsigned i = 0; i < 8; ++i) dbuf->append_char(0);
+  for(unsigned i = 0; i < 8; ++i) obuf->append_char(0);
+  for(unsigned i = 0; i < 8; ++i) sbuf->append_char(0);
 }
 
 // default destructor
@@ -224,8 +228,6 @@ void Context::clear_directive_buffer(void) {
 void Context::clear_operand_buffer(void) {
   obuf->clear();
   // pad the first 8 bytes with 0
-  for (unsigned i = 0; i < sizeof(uint64_t); ++i)
-    obuf->append_char(0);
 }
 
 void Context::clear_string_buffer(void) {
@@ -237,6 +239,10 @@ void Context::clear_all_buffers(void) {
   clear_directive_buffer();
   clear_operand_buffer();
   clear_string_buffer();
+  for(unsigned i = 0; i < 8; ++i) cbuf->append_char(0);
+  for(unsigned i = 0; i < 8; ++i) dbuf->append_char(0);
+  for(unsigned i = 0; i < 8; ++i) obuf->append_char(0);
+  for(unsigned i = 0; i < 8; ++i) sbuf->append_char(0);
 }
 
 // check context

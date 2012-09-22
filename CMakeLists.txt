@@ -51,8 +51,6 @@ endif (ENABLE_TEST_CASE)
 
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
 
-option(ENABLE_BRIG_FE "Build Brig2LLVM" OFF)
-if(ENABLE_BRIG_FE)
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
 include (EnsureLLVMisPresent)
@@ -133,4 +131,3 @@ set(brig_reader_test_SOURCES
   )
 add_executable(brig_reader_test ${brig_reader_test_SOURCES})
 target_link_libraries(brig_reader_test brig2llvm)
-endif(ENABLE_BRIG_FE)

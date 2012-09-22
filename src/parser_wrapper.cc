@@ -31,6 +31,7 @@ namespace brig {
   int Parser::parse(void) {
     // first scan for all symbols in source
     context->clear_context();
+
     scan_symbols();
 
     // restart lexer
