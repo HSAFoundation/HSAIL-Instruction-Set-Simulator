@@ -4649,26 +4649,26 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   BrigDirectiveLabel ref1 = {
     12,                     // size
     BrigEDirectiveLabel,    // kind
-    36,                     // c_code
-    0                       // s_name
+    44,                     // c_code
+    8                       // s_name
   };
   BrigDirectiveLabel ref2 = {
     12,                     // size
     BrigEDirectiveLabel,    // kind
-    68,                     // c_code
-    10                      // s_name
+    76,                     // c_code
+    18                      // s_name
   };
   BrigDirectiveLabel ref3 = {
     12,                     // size
     BrigEDirectiveLabel,    // kind
-    68,                     // c_code
-    16                      // s_name
+    76,                     // c_code
+    24                      // s_name
   };
   BrigDirectiveLabel ref4 = {
     12,                     // size
     BrigEDirectiveLabel,    // kind
-    104,                    // c_code
-    22                      // s_name
+    112,                    // c_code
+    30                      // s_name
   };
 
   BrigDirectiveLabel get1, get2, get3, get4;
@@ -4715,12 +4715,12 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // lab1
   EXPECT_EQ(0, Label(context));
   context->get_operand(8, &getLabRef);
-  EXPECT_EQ(0, getLabRef.labeldirective);
+  EXPECT_EQ(8, getLabRef.labeldirective);
 
   // cbr lab3
   EXPECT_EQ(0, Branch(context));
 
-  context->get_code(36, &getCbrCode);
+  context->get_code(44, &getCbrCode);
 
   EXPECT_EQ(refCbrLab3.size, getCbrCode.size);
   EXPECT_EQ(refCbrLab3.kind, getCbrCode.kind);
@@ -4746,12 +4746,12 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // lab3
   EXPECT_EQ(0, Label(context));
   context->get_operand(28, &getLabRef);
-  EXPECT_EQ(24, getLabRef.labeldirective);
+  EXPECT_EQ(32, getLabRef.labeldirective);
 
   // brn lab2
   EXPECT_EQ(0, Branch(context));
 
-  context->get_code(68, &getBrnCode);
+  context->get_code(76, &getBrnCode);
   context->get_operand(36, &getLabRef);
 
   EXPECT_EQ(refBrnLab2.size, getBrnCode.size);
@@ -4769,7 +4769,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
 
   EXPECT_EQ(8, getLabRef.size);
   EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
-  EXPECT_EQ(12, getLabRef.labeldirective);
+  EXPECT_EQ(20, getLabRef.labeldirective);
 
   // lab4
   EXPECT_EQ(0, Label(context));
@@ -4777,7 +4777,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // cbr lab1
   EXPECT_EQ(0, Branch(context));
 
-  context->get_code(104, &getCbrCode);
+  context->get_code(112, &getCbrCode);
 
   EXPECT_EQ(refCbrLab1.size, getCbrCode.size);
   EXPECT_EQ(refCbrLab1.kind, getCbrCode.kind);
@@ -4793,10 +4793,10 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   context->get_operand(8, &getLabRef);
   EXPECT_EQ(8, getLabRef.size);
   EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
-  EXPECT_EQ(0, getLabRef.labeldirective);
+  EXPECT_EQ(8, getLabRef.labeldirective);
 
 
-  context->get_directive(0, &get1);
+  context->get_directive(8, &get1);
 
   // lab1
   EXPECT_EQ(ref1.size, get1.size);
@@ -4804,7 +4804,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   EXPECT_EQ(ref1.c_code, get1.c_code);
   EXPECT_EQ(ref1.s_name, get1.s_name);
 
-  context->get_directive(12, &get2);
+  context->get_directive(20, &get2);
 
   // lab2
   EXPECT_EQ(ref2.size, get2.size);
@@ -4812,7 +4812,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   EXPECT_EQ(ref2.c_code, get2.c_code);
   EXPECT_EQ(ref2.s_name, get2.s_name);
 
-  context->get_directive(24, &get3);
+  context->get_directive(32, &get3);
 
   // lab3
   EXPECT_EQ(ref3.size, get3.size);
@@ -4820,7 +4820,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   EXPECT_EQ(ref3.c_code, get3.c_code);
   EXPECT_EQ(ref3.s_name, get3.s_name);
 
-  context->get_directive(36, &get4);
+  context->get_directive(44, &get4);
 
   // lab4
   EXPECT_EQ(ref4.size, get4.size);
