@@ -3741,13 +3741,13 @@ TEST(CodegenTest, Segp_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg1.kind);
   EXPECT_EQ(Brigb64, getReg1.type);
   EXPECT_EQ(0, getReg1.reserved);
-  EXPECT_EQ(0, getReg1.name);
+  EXPECT_EQ(8, getReg1.name);
   // BrigOperandReg
   EXPECT_EQ(12, getReg2.size);
   EXPECT_EQ(BrigEOperandReg, getReg2.kind);
   EXPECT_EQ(Brigb64, getReg2.type);
   EXPECT_EQ(0, getReg2.reserved);
-  EXPECT_EQ(4, getReg2.name);
+  EXPECT_EQ(12, getReg2.name);
 
   // BrigInstMem
   EXPECT_EQ(ref1.size, getMem.size);
@@ -3766,20 +3766,20 @@ TEST(CodegenTest, Segp_CodeGen_SimpleTest) {
 
   context->get_operand(32, &getReg1);
   context->get_operand(44, &getReg2);
-  context->get_code(36, &getMem);
+  context->get_code(44, &getMem);
 
   // BrigOperandReg
   EXPECT_EQ(12, getReg1.size);
   EXPECT_EQ(BrigEOperandReg, getReg1.kind);
   EXPECT_EQ(Brigb1, getReg1.type);
   EXPECT_EQ(0, getReg1.reserved);
-  EXPECT_EQ(8, getReg1.name);
+  EXPECT_EQ(16, getReg1.name);
   // BrigOperandReg
   EXPECT_EQ(12, getReg2.size);
   EXPECT_EQ(BrigEOperandReg, getReg2.kind);
   EXPECT_EQ(Brigb64, getReg2.type);
   EXPECT_EQ(0, getReg2.reserved);
-  EXPECT_EQ(12, getReg2.name);
+  EXPECT_EQ(20, getReg2.name);
 
   // BrigInstMem
   EXPECT_EQ(ref2.size, getMem.size);
@@ -3985,7 +3985,7 @@ TEST(CodegenTest, Ldc_CodeGen_SimpleTest) {
   EXPECT_EQ(ref1.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(ref1.o_operands[4], getBase.o_operands[4]);
 
-  context->get_code(32, &getBase);
+  context->get_code(40, &getBase);
   // BrigInstBase
   EXPECT_EQ(ref2.size, getBase.size);
   EXPECT_EQ(ref2.kind, getBase.kind);
@@ -4119,7 +4119,7 @@ TEST(CodegenTest, Atom_CodeGen_SimpleTest) {
   EXPECT_EQ(Brigb32, getImm.type);
   EXPECT_EQ(24, getImm.bits.u);
 
-  context->get_code(44, &getAtom);
+  context->get_code(52, &getAtom);
   // BrigInstAtomic
   EXPECT_EQ(ref2.size, getAtom.size);
   EXPECT_EQ(ref2.kind, getAtom.kind);
@@ -4153,13 +4153,13 @@ TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
     56,                     //size
     BrigEDirectiveImage,    //kind
     {
-      0,                        // c_code
+      8,                        // c_code
       BrigGlobalSpace,          // storag class
       BrigNone ,                // attribut
       0,                        // reserved
       0,                        // symbolModifier
       0,                        // dim
-      0,                        // s_name
+      8,                        // s_name
       BrigROImg,                // type
       1,                        // align
     },
@@ -4173,7 +4173,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDeclCodegen){
   EXPECT_EQ(0,GlobalReadOnlyImageDecl(context));
 
   BrigDirectiveImage get ;
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
