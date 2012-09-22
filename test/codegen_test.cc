@@ -9102,13 +9102,13 @@ TEST(CodegenTest, GlobalSymbolDecl){
 	40,                       // size
   BrigEDirectiveSymbol ,    // kind
     {
-    0,                      // c_code
+    8,                      // c_code
     BrigGroupSpace,         // storag class
     BrigStatic,             // attribute
     0,                      // reserved
     BrigArray,              // symbolModifier
     2,                      // dim
-    0,                      // s_name
+    8,                      // s_name
     Brigs8,                // type
     1,                      // align
      },
@@ -9116,7 +9116,7 @@ TEST(CodegenTest, GlobalSymbolDecl){
   0,                        // reserved
   };
   BrigDirectiveSymbol get;
-  context->get_directive(0, &get);
+  context->get_directive(8, &get);
 
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
@@ -9640,25 +9640,25 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
   context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0, Kernel(context));
-  EXPECT_EQ(172, context->get_directive_offset());
+  EXPECT_EQ(180, context->get_directive_offset());
   EXPECT_EQ(108, context->get_operand_offset());
-  EXPECT_EQ(54, context->get_string_offset());
-  EXPECT_EQ(140, context->get_code_offset());
+  EXPECT_EQ(62, context->get_string_offset());
+  EXPECT_EQ(148, context->get_code_offset());
 
 
   BrigDirectiveKernel ref = {
     sizeof(BrigDirectiveKernel),    // size
     BrigEDirectiveKernel,           // kind
-    0,                              // c_code
-    0,                              // s_name
+    8,                              // c_code
+    8,                              // s_name
     2,                              // inParamCount
-    120,                             // d_firstScopedDirective
+    128,                             // d_firstScopedDirective
     4,                              // operationCount
-    172,                             // d_nextDirective
+    180,                             // d_nextDirective
     BrigNone,                       // attribute
     2,                              // fbar
     0,                              // outParamCount
-    40,                             // d_firstInParam
+    48,                             // d_firstInParam
   };
 
   BrigDirectiveKernel get;
@@ -9684,7 +9684,7 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
       0,                         // reserved
       0,                         // symbolModifier
       0,                         // dim
-      9,                         // s_name
+      17,                         // s_name
       Brigu32,                   // type
       1,                         // align
     },
@@ -9705,13 +9705,13 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
     sizeof(BrigDirectiveSymbol),  // size
     BrigEDirectiveSymbol ,    // kind
     {
-      0,                         // c_code
+      8,                         // c_code
       BrigKernargSpace,         // storag class kernarg
       BrigNone ,                // attribut
       0,                        // reserved
       0,                        // symbolModifier
       0,                        // dim
-      15,                        // s_name
+      23,                        // s_name
       Brigu32,                  // type
       1,                        // align
     },
@@ -9729,8 +9729,8 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
   BrigDirectiveLabel labRef = {
     sizeof(BrigDirectiveLabel),
     BrigEDirectiveLabel,
-    0,
-    21
+    8,
+    29
   };
   BrigDirectiveLabel getLab;
 
@@ -9751,7 +9751,7 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
       0,                        // reserved
       0,                        // symbolModifier
       0,                        // dim
-      28,                       // s_name
+      36,                       // s_name
       Brigs32,                  // type
       1,                        // align
     },
