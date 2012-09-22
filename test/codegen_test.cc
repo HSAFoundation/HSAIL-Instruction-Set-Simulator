@@ -780,18 +780,18 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .directive section size
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(100U, dsize);
+  EXPECT_EQ(108U, dsize);
 
   // test the offset to the .string section
   BrigDirectiveFunction ref = {
     40,                       // size
     BrigEDirectiveFunction,   // kind
-    0,                        // c_code
-    0,                        // s_name
+    8,                        // c_code
+    8,                        // s_name
     0,                        // inParamCount
-    96+4,                       // d_firstScopedDirective
+    96+4+8,                       // d_firstScopedDirective
     1,                        // operationCount
-    96+4,                       // d_nextDirective
+    96+4+8,                       // d_nextDirective
     BrigNone,
     0,
     1,                        // outParamCount
@@ -810,15 +810,15 @@ TEST(CodegenTest, SimplestFunction_CodeGen) {
 
   // test the .string size
   BrigsOffset32_t size = context->get_string_offset();
-  EXPECT_EQ(22U, size);
+  EXPECT_EQ(30U, size);
 
   // find the string.
   std::string func_name("&return_true");
   int str_offset = context->lookup_symbol(func_name);
-  EXPECT_EQ(0, str_offset);
+  EXPECT_EQ(8, str_offset);
 
   BrigcOffset32_t csize = context->get_code_offset();
-  EXPECT_EQ(32U, csize);
+  EXPECT_EQ(40U, csize);
 
   delete lexer;
 }
@@ -985,7 +985,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
 
   name.assign("$d7");
   ref.name = context->lookup_symbol(name);
-  EXPECT_EQ(0U, ref.name);
+  EXPECT_EQ(8U, ref.name);
 
   // get structure from context and compare
   BrigOperandReg get;
