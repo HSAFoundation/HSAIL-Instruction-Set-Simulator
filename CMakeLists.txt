@@ -56,13 +56,13 @@ MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
 include (EnsureLLVMisPresent)
 
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
-
+if (A)
 set(LLVM_TARGETS_TO_BUILD "X86")
 #set(LLVM_BUILD_TOOLS off)
 set(LLVM_INCLUDE_TOOLS off)
 set(LLVM_INCLUDE_EXAMPLES off)
 set(LLVM_INCLUDE_TESTS on)
-
+endif (A)
 # obtain specific information about llvm setup
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 
@@ -85,6 +85,9 @@ else (UNIX)
 
 endif (UNIX)
 
+SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}" )
+
+if (A)
 SET(PROJ_SEARCH_PATH "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}" "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}" "${PROJECT_SOURCE_DIR}/compiler/utils/unittest/googletest/include")
 include_directories( ${PROJ_SEARCH_PATH} )
 
@@ -98,7 +101,7 @@ SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
 include(HandleLLVMOptions)
 
-SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}" )
+
 
 add_subdirectory(src/brig2llvm)
 set(brig2llvm_test_SOURCES
@@ -131,3 +134,4 @@ set(brig_reader_test_SOURCES
   )
 add_executable(brig_reader_test ${brig_reader_test_SOURCES})
 target_link_libraries(brig_reader_test brig2llvm)
+endif (A)

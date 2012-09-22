@@ -3694,6 +3694,7 @@ TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
   delete lexer;
 }
 
+
 TEST(CodegenTest, Segp_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -3741,13 +3742,13 @@ TEST(CodegenTest, Segp_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg1.kind);
   EXPECT_EQ(Brigb64, getReg1.type);
   EXPECT_EQ(0, getReg1.reserved);
-  EXPECT_EQ(8, getReg1.name);
+  EXPECT_EQ(0, getReg1.name);
   // BrigOperandReg
   EXPECT_EQ(12, getReg2.size);
   EXPECT_EQ(BrigEOperandReg, getReg2.kind);
   EXPECT_EQ(Brigb64, getReg2.type);
   EXPECT_EQ(0, getReg2.reserved);
-  EXPECT_EQ(12, getReg2.name);
+  EXPECT_EQ(4, getReg2.name);
 
   // BrigInstMem
   EXPECT_EQ(ref1.size, getMem.size);
@@ -3766,20 +3767,20 @@ TEST(CodegenTest, Segp_CodeGen_SimpleTest) {
 
   context->get_operand(32, &getReg1);
   context->get_operand(44, &getReg2);
-  context->get_code(44, &getMem);
+  context->get_code(36, &getMem);
 
   // BrigOperandReg
   EXPECT_EQ(12, getReg1.size);
   EXPECT_EQ(BrigEOperandReg, getReg1.kind);
   EXPECT_EQ(Brigb1, getReg1.type);
   EXPECT_EQ(0, getReg1.reserved);
-  EXPECT_EQ(16, getReg1.name);
+  EXPECT_EQ(8, getReg1.name);
   // BrigOperandReg
   EXPECT_EQ(12, getReg2.size);
   EXPECT_EQ(BrigEOperandReg, getReg2.kind);
   EXPECT_EQ(Brigb64, getReg2.type);
   EXPECT_EQ(0, getReg2.reserved);
-  EXPECT_EQ(20, getReg2.name);
+  EXPECT_EQ(12, getReg2.name);
 
   // BrigInstMem
   EXPECT_EQ(ref2.size, getMem.size);
