@@ -7614,7 +7614,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(cvtRef1.stype, getCvt.stype);
   EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
 
-  context->get_code(40, &getCvt);
+  context->get_code(48, &getCvt);
 
   EXPECT_EQ(cvtRef2.size, getCvt.size);
   EXPECT_EQ(cvtRef2.kind, getCvt.kind);
@@ -7650,7 +7650,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb64, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(4, getReg.name);
+  EXPECT_EQ(12, getReg.name);
 
   context->get_operand(32, &getReg);
   // BrigOperandReg
@@ -7658,7 +7658,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(16, getReg.name);
 
   delete lexer;
 }
@@ -8717,7 +8717,7 @@ TEST(CodegenTest, Syscall_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(4, getReg.name);
+  EXPECT_EQ(12, getReg.name);
 
   // BrigOperandReg S3
   syscallInst.o_operands[3] = curOpOffset;
@@ -8728,7 +8728,7 @@ TEST(CodegenTest, Syscall_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(16, getReg.name);
 
 
   context->get_code(curCodeOffset, &getBase);
@@ -9021,18 +9021,18 @@ TEST(CodegenTest, FunctionDeclCodeGen){
 
   // test the sizes of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(sizeof(BrigDirectiveFunction), dsize);
+  EXPECT_EQ(sizeof(BrigDirectiveFunction) + 8, dsize);
 
   // test BrigDirectiveFunction, the caller function
   BrigDirectiveFunction ref = {
     sizeof(BrigDirectiveFunction),                       // size
     BrigEDirectiveFunction,   // kind
-    0,                       // c_code
-    0,                        // s_name
+    8,                       // c_code
+    8,                        // s_name
     0,                        // inParamCount
-    sizeof(BrigDirectiveFunction),                      // d_firstScopedDirective
+    sizeof(BrigDirectiveFunction) + 8,                      // d_firstScopedDirective
     0,                        // operationCount
-    sizeof(BrigDirectiveFunction),                      // d_nextDirective
+    sizeof(BrigDirectiveFunction) + 8,                      // d_nextDirective
     BrigNone,
     0,
     0,                        // outParamCount
@@ -9056,12 +9056,12 @@ TEST(CodegenTest, FunctionDeclCodeGen){
 
   EXPECT_EQ(0, FunctionDecl(context));
 
-  BrigdOffset32_t firstInParam = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)* 1;
+  BrigdOffset32_t firstInParam = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)* 1 + 8;
   BrigDirectiveFunction ref2 = {
     sizeof(BrigDirectiveFunction),                       // size
     BrigEDirectiveFunction,   // kind
-    0,                       // c_code
-    0,                        // s_name
+    8,                       // c_code
+    8,                        // s_name
     1,                        // inParamCount
     context->get_directive_offset(),                      // d_firstScopedDirective
     0,                        // operationCount
