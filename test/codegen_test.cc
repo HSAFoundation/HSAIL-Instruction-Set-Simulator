@@ -5034,7 +5034,7 @@ TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
     BrigEOperandReg,       // kind
     Brigb64,               // type
     0,                     // reserved
-    16                     // name
+    24                     // name
   };
 
   EXPECT_EQ(refRegD1.size, getReg.size);
@@ -5056,7 +5056,7 @@ TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
     BrigEOperandReg,       // kind
     Brigb32,               // type
     0,                     // reserved
-    8                      // name
+    16                      // name
   };
 
   EXPECT_EQ(refRegS3.size, getReg.size);
@@ -5076,7 +5076,7 @@ TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
     BrigEOperandReg,       // kind
     Brigb32,               // type
     0,                     // reserved
-    4                      // name
+    12                      // name
   };
 
   EXPECT_EQ(refRegS2.size, getReg.size);
@@ -5294,7 +5294,7 @@ TEST(CodegenTest, Query_CodeGen_Test) {
   EXPECT_EQ(refOrder.o_operands[3], get.o_operands[3]);
   EXPECT_EQ(refOrder.o_operands[4], get.o_operands[4]);
 
-  context->get_code(32, &get);
+  context->get_code(40, &get);
 
   EXPECT_EQ(refData.size, get.size);
   EXPECT_EQ(refData.kind, get.kind);
@@ -5307,7 +5307,7 @@ TEST(CodegenTest, Query_CodeGen_Test) {
   EXPECT_EQ(refData.o_operands[3], get.o_operands[3]);
   EXPECT_EQ(refData.o_operands[4], get.o_operands[4]);
 
-  context->get_code(64, &get);
+  context->get_code(72, &get);
 
   EXPECT_EQ(refWidth.size, get.size);
   EXPECT_EQ(refWidth.kind, get.kind);
@@ -5335,7 +5335,7 @@ TEST(CodegenTest, Query_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(4, getReg.name);
+  EXPECT_EQ(12, getReg.name);
   context->get_operand(48, &getReg);
 
   // BrigOperandReg
@@ -5343,7 +5343,7 @@ TEST(CodegenTest, Query_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(16, getReg.name);
 
   context->get_operand(20, &getImage);
   // BrigOperandOpaque
