@@ -622,7 +622,7 @@ TEST(CodegenTest, Instrustion3Op_CodeGen) {
   };
 
   BrigInstBase get;
-  context->get_code(0, &get);
+  context->get_code(8, &get);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.type, get.type);
