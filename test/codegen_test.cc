@@ -4201,13 +4201,13 @@ TEST(CodegenTest,GlobalImageDeclCodegen){
     sizeof(BrigDirectiveImage),                     //size
     BrigEDirectiveImage,    //kind
     {
-      0,                         // c_code
+      8,                         // c_code
       BrigGlobalSpace,          // storag class
       BrigNone ,                // attribut
       0,                        // reserved
       0,                        // symbolModifier
       0,                        // dim
-      0,                        // s_name
+      8,                        // s_name
       BrigRWImg,                  // type
       1,                        // align
     },
@@ -4221,7 +4221,7 @@ TEST(CodegenTest,GlobalImageDeclCodegen){
   EXPECT_EQ(0,GlobalImageDecl(context));
 
   BrigDirectiveImage get ;
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
@@ -4251,13 +4251,13 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
     sizeof(BrigDirectiveSampler),//size
     BrigEDirectiveSampler,       //kind
     {
-      0,                        // c_code
+      8,                        // c_code
       BrigGlobalSpace,          // storag class
       BrigNone ,                // attribut
       0,                        // reserved
       2,                        // symbolModifier
       0,                        // dim
-      0,                        // s_name
+      8,                        // s_name
       BrigSamp,                 // type
       1,                        // align
     },
@@ -4272,7 +4272,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
   EXPECT_EQ(0,GlobalSamplerDecl(context));
 
   BrigDirectiveSampler get ;
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
 
   EXPECT_EQ(ref.size,get.size);
   EXPECT_EQ(ref.kind,get.kind);
@@ -4304,7 +4304,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
 
   EXPECT_EQ(0,GlobalSamplerDecl(context));
 
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
   ref.normalized=0;
   ref.filter=BrigSamplerFilterNearest;
   ref.boundaryU=BrigSamplerMirrorOnce;
@@ -4333,7 +4333,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
 
   EXPECT_EQ(0,GlobalSamplerDecl(context));
 
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
   ref.normalized=0;
   ref.filter=BrigSamplerFilterNearest;
   ref.boundaryU=BrigSamplerWrap;
@@ -4362,7 +4362,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
 
   EXPECT_EQ(0,GlobalSamplerDecl(context));
 
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
   ref.normalized=0;
   ref.filter=BrigSamplerFilterNearest;
   ref.boundaryU=BrigSamplerMirror;
@@ -4390,7 +4390,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
 
   EXPECT_EQ(0,GlobalSamplerDecl(context));
 
-  context->get_directive(0,&get);
+  context->get_directive(8,&get);
   ref.normalized=0;
   ref.filter=BrigSamplerFilterNearest;
   ref.boundaryU=BrigSamplerBorder;
@@ -4545,7 +4545,7 @@ TEST(CodegenTest, GlobalPrivateDeclCodeGen) {
     0,                        // reserved
     0,                        // symbolModifier
     0,                        // dim
-    0,                        // s_name
+    8,                        // s_name
     Brigf32,                  // type
     1,                        // align
   },
@@ -4555,7 +4555,7 @@ TEST(CodegenTest, GlobalPrivateDeclCodeGen) {
   EXPECT_EQ(0,GlobalPrivateDecl(context));
   BrigDirectiveSymbol get ;
 
-  context->get_directive(0, &get);
+  context->get_directive(8, &get);
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
@@ -4585,7 +4585,7 @@ TEST(CodegenTest, GlobalGroupDeclCodeGen) {
     0,                        // reserved
     0,                        // symbolModifier
     0,                        // dim
-    0,                        // s_name
+    8,                        // s_name
     Brigf32,                  // type
     1,                        // align
   },
@@ -4595,7 +4595,7 @@ TEST(CodegenTest, GlobalGroupDeclCodeGen) {
   EXPECT_EQ(0,GlobalGroupDecl(context));
   BrigDirectiveSymbol get ;
 
-  context->get_directive(0, &get);
+  context->get_directive(8, &get);
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
