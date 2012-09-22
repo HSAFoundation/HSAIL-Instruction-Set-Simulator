@@ -161,6 +161,7 @@ bool BrigModule::validateOperands(void) const {
       caseBrig(OperandIndirect);
       caseBrig(OperandLabelRef);
       caseBrig(OperandOpaque);
+      caseBrig(OperandPad);
       caseBrig(OperandReg);
       caseBrig(OperandRegV2);
       caseBrig(OperandRegV4);
@@ -1106,6 +1107,10 @@ static bool getRegType(char c, BrigDataType *type) {
   } else {
     return false;
   }
+}
+
+bool BrigModule::validate(const BrigOperandPad *operand) const {
+  return true;
 }
 
 bool BrigModule::validate(const BrigOperandReg *operand) const {

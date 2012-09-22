@@ -125,6 +125,7 @@ class BrigModule {
   bool validate(const BrigOperandIndirect *operand) const;
   bool validate(const BrigOperandLabelRef *operand) const;
   bool validate(const BrigOperandOpaque *operand) const;
+  bool validate(const BrigOperandPad *operand) const;
   bool validate(const BrigOperandReg *operand) const;
   bool validate(const BrigOperandRegV2 *operand) const;
   bool validate(const BrigOperandRegV4 *operand) const;

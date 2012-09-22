@@ -1132,6 +1132,12 @@ struct BrigOperandIndirect {
   int32_t offset;
 };
 
+struct BrigOperandPad {
+  static const uint16_t OperKind = BrigEOperandPad;
+  uint16_t size;
+  uint16_t kind;
+};
+
 //BrigOperandOpaque
 //BrigOperandOpaque is used for addressing image and sampler objects.
 struct BrigOperandOpaque {
