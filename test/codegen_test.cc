@@ -462,25 +462,25 @@ TEST(CodegenTest, Example4_Branch) {
 
   // test the sizes of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(124U, dsize);
+  EXPECT_EQ(132U, dsize);
   BrigdOffset32_t csize = context->get_code_offset();
-  EXPECT_EQ(164U, csize);
+  EXPECT_EQ(172U, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
   EXPECT_EQ(84U, osize);
   BrigdOffset32_t ssize = context->get_string_offset();
-  EXPECT_EQ(51U, ssize);
+  EXPECT_EQ(59U, ssize);
   // TODO(Chuange):
   // I don't know why d_first and d_next should be plused 4
   // test BrigDirectiveFunction
   BrigDirectiveFunction ref = {
       40,                       // size
       BrigEDirectiveFunction,   // kind
-      0,                        // c_code
-      0,                        // s_name
+      8,                        // c_code
+      8,                        // s_name
       0,                        // inParamCount
-      100,                      // d_firstScopedDirective
+      108,                      // d_firstScopedDirective
       5,                        // operationCount
-      124,                      // d_nextDirective
+      132,                      // d_nextDirective
       BrigNone,
       0,
       1,                        // outParamCount
@@ -499,18 +499,18 @@ TEST(CodegenTest, Example4_Branch) {
 
   // test BrigDirectiveLabel
   BrigDirectiveLabel label1;
-  context->get_directive(100, &label1);
+  context->get_directive(108, &label1);
   EXPECT_EQ(12U, label1.size);
-  EXPECT_EQ(100U, label1.c_code);
-  EXPECT_EQ(27U, label1.s_name);
+  EXPECT_EQ(108U, label1.c_code);
+  EXPECT_EQ(35U, label1.s_name);
 
-  context->get_directive(112, &label1);
-  EXPECT_EQ(132U, label1.c_code);
-  EXPECT_EQ(41U, label1.s_name);
+  context->get_directive(120, &label1);
+  EXPECT_EQ(140U, label1.c_code);
+  EXPECT_EQ(49U, label1.s_name);
 
   // test BrigCbr
   BrigInstBase cbr_op;
-  context->get_code(0, &cbr_op);
+  context->get_code(8, &cbr_op);
   EXPECT_EQ(32U, cbr_op.size);
   EXPECT_EQ(BrigCbr, cbr_op.opcode);
   EXPECT_EQ(Brigb1, cbr_op.type);
@@ -522,7 +522,7 @@ TEST(CodegenTest, Example4_Branch) {
 
   // test BrigBrn
   BrigInstBar br_op;
-  context->get_code(64, &br_op);
+  context->get_code(72, &br_op);
   EXPECT_EQ(36U, br_op.size);
   EXPECT_EQ(BrigBrn, br_op.opcode);
   EXPECT_EQ(0U, br_op.o_operands[0]);
