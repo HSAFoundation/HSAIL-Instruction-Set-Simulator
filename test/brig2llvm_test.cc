@@ -4018,7 +4018,7 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
     BrigInstBase bcb = {
       sizeof(bcb),
       BrigEInstBase,
-      BrigFbarInitSizeKnown + 1,
+      BrigInvalidOpcode,
       Brigf64x2 + 1,
       BrigPackPsat + 1,
       {20, 0, 0, 0, 0}
@@ -4423,7 +4423,7 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
     BrigInstMod bim = {
       sizeof(bim),
       BrigEInstMod,
-      BrigFbarInitSizeKnown + 1,
+      BrigInvalidOpcode,
       Brigf64x2 + 1,
       BrigPackPsat + 1,
       {20, 0, 0, 0, 0},
@@ -5193,7 +5193,7 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
     BrigInstMem bcm = {
       sizeof(bcm),
       BrigEInstMem,
-      BrigFbarInitSizeKnown + 1,
+      BrigInvalidOpcode,
       Brigf64x2 + 1,
       BrigPackPsat + 1,
       {20, 0, 0, 0, 0},

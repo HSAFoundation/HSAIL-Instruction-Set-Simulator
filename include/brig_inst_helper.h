@@ -14,9 +14,26 @@ class BrigInstHelper {
  public:
   BrigInstHelper(const BrigSections &S) : S_(S) {}
 
+  // Directive methods
+  const BrigDirectiveBase *getDirective(uint32_t offset) const {
+    return reinterpret_cast<const BrigDirectiveBase *>(S_.directives + offset);
+  }
+
+  const char *getName(const BrigDirectiveSymbol *symbol) const {
+    return S_.strings + symbol->s.s_name;
+  }
+
   // Operand methods
   const char *getName(const BrigOperandReg *reg) const {
     return S_.strings + reg->name;
+  }
+
+  const BrigOperandBase *getReg(const BrigOperandIndirect *ind) const {
+    const BrigOperandBase *base =
+      reinterpret_cast<const BrigOperandBase *>(S_.operands + ind->reg);
+    if(!base) return NULL;
+    assert(isa<BrigOperandReg>(base));
+    return base;
   }
 
   const BrigOperandBase *getOperand(const inst_iterator &inst,
@@ -109,7 +126,7 @@ class BrigInstHelper {
         packing == BrigPackPPsat || packing == BrigPackSPsat;
     }
 
-    assert(false && "Illegal opnum for arithmetic operation");
+    return false;
   }
 
 
@@ -126,7 +143,7 @@ class BrigInstHelper {
         packing == BrigPackSSsat || packing == BrigPackPSsat;
     }
 
-    assert(false && "Illegal opnum for arithmetic operation");
+    return false;
   }
 
   static bool isSaturated(BrigPacking packing) {

@@ -50,7 +50,7 @@ class BrigControlBlock {
   uint32_t getCCode() const {
     if(it_ == S_.end()) return S_.codeSize;
 
-    const BrigDirectiveFunction *fun = dyn_cast<BrigDirectiveFunction>(it_);
+    const BrigDirectiveMethod *fun = dyn_cast<BrigDirectiveMethod>(it_);
     const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_);
     if(fun) return fun->c_code;
     else if(label) return label->c_code;

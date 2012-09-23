@@ -380,7 +380,8 @@ enum BrigOpcode {
   BrigMulHi = 120,
   BrigMul24Hi = 121,
   BrigMad24Hi = 122,
-  BrigFsqrt = 123
+  BrigFsqrt = 123,
+  BrigInvalidOpcode
 };
 
 

@@ -115,7 +115,7 @@ TEST(CodegenTest, ExampleWithKernel) {
   delete lexer;
 }
 
-TEST(CodegenTest, CallwMultiArgs) {
+TEST(CodegenTest, DISABLED_CallwMultiArgs) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -234,7 +234,7 @@ TEST(CodegenTest, CallwMultiArgs) {
   delete lexer;
 }
 
-TEST(CodegenTest, Example6_CallwArgs) {
+TEST(CodegenTest, DISABLED_Example6_CallwArgs) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -350,7 +350,7 @@ TEST(CodegenTest, Example6_CallwArgs) {
   delete lexer;
 }
 
-TEST(CodegenTest, Example5_SimpleCall) {
+TEST(CodegenTest, DISABLED_Example5_SimpleCall) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -3178,7 +3178,7 @@ TEST(CodegenTest, OptionalWidthCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
+TEST(CodegenTest, DISABLED_LdSt_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -9286,7 +9286,7 @@ TEST(CodegenTest, MulCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, Call_CodeGen_SimpleTest) {
+TEST(CodegenTest, DISABLED_Call_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -9619,7 +9619,7 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
 }
 
 
-TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
+TEST(CodegenTest, DISABLED_Kernel_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 

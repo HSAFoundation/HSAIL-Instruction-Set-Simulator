@@ -1,6 +1,7 @@
+#include "brig_llvm.h"
+#include "brig_module.h"
 #include "brig_reader.h"
 #include "brig_writer.h"
-#include "brig_module.h"
 #include "error_reporter.h"
 #include "parser_wrapper.h"
 
@@ -148,6 +149,10 @@ static void TestHSAIL(const std::string &source) {
 
   hsa::brig::BrigModule mod(*reader, &llvm::errs());
   EXPECT_TRUE(mod.isValid());
+  if(!mod.isValid()) return;
+
+  hsa::brig::GenLLVM codegen(*reader);
+  codegen();
 
   delete reader;
 
@@ -184,7 +189,7 @@ TEST(BrigWriterTest, VectorCopy) {
     );
 }
 
-TEST(BrigWriterTest, CosineTest) {
+TEST(BrigWriterTest, Cosine) {
   TestHSAIL(
     "version 1:0:$small;\n"
     "\n"

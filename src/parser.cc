@@ -2407,6 +2407,17 @@ int Call(Context* context) {
     } else {
       return 1;
     }
+  } else {
+    BrigOperandImmed op_width = {
+      sizeof(BrigOperandImmed),
+      BrigEOperandImmed,
+      Brigb32,
+      0,
+      { 0 }
+    };
+    BrigoOffset32_t curOpOffset = context->get_operand_offset();
+    context->append_operand(&op_width);
+    callInst.o_operands[0] = curOpOffset;
   }
   if (context->token_to_scan == __FBAR) {
     hasWidthOrFbar = true;
@@ -6108,6 +6119,17 @@ int Ld(Context* context) {
       context->set_error(UNKNOWN_ERROR);
       return 1;
     }
+  } else {
+    BrigOperandImmed op_width = {
+      sizeof(BrigOperandImmed),
+      BrigEOperandImmed,
+      Brigb32,
+      0,
+      { 0 }
+    };
+    BrigoOffset32_t curOpOffset = context->get_operand_offset();
+    context->append_operand(&op_width);
+    ld_op.o_operands[0] = curOpOffset;
   }
   if (!LdModifierPart2(context, &ld_op, &vector_size)) {
   } else {

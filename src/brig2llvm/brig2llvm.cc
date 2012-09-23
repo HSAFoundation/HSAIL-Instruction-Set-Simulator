@@ -115,55 +115,6 @@ static llvm::GlobalValue::LinkageTypes runOnLinkage(BrigAttribute link) {
   assert(false && "Invalid attribute");
 }
 
-static bool isSimpleBinop(const inst_iterator inst) {
-  BrigOpcode opcode = BrigOpcode(inst->opcode);
-  return
-    opcode == BrigAdd || opcode == BrigDiv ||
-    opcode == BrigMul || opcode == BrigRem ||
-    opcode == BrigSub || opcode == BrigAnd ||
-    opcode == BrigOr  || opcode == BrigXor;
-}
-
-static llvm::Instruction::BinaryOps getBinop(const inst_iterator inst) {
-  BrigOpcode opcode = BrigOpcode(inst->opcode);
-  bool isFloat = BrigInstHelper::isFloatTy(BrigDataType(inst->type));
-  bool isSigned = BrigInstHelper::isSignedTy(BrigDataType(inst->type));
-
-  if(opcode == BrigAdd) {
-    if(isFloat) return llvm::Instruction::FAdd;
-    else return llvm::Instruction::Add;
-
-  } else if(opcode == BrigDiv) {
-    if(isFloat) return llvm::Instruction::FDiv;
-    else if(isSigned) return llvm::Instruction::SDiv;
-    else return llvm::Instruction::UDiv;
-
-  } else if(opcode == BrigMul) {
-    if(isFloat) return llvm::Instruction::FMul;
-    else return llvm::Instruction::Mul;
-
-  } else if(opcode == BrigRem) {
-    if(isFloat) return llvm::Instruction::FRem;
-    else if(isSigned) return llvm::Instruction::SRem;
-    else return llvm::Instruction::URem;
-
-  } else if(opcode == BrigSub) {
-    if(isFloat) return llvm::Instruction::FSub;
-    else return llvm::Instruction::Sub;
-
-  } else if(opcode == BrigAnd) {
-    return llvm::Instruction::And;
-
-  } else if(opcode == BrigOr) {
-    return llvm::Instruction::Or;
-
-  } else if(opcode == BrigXor) {
-    return llvm::Instruction::Xor;
-  }
-
-  assert(false && "Unknown binop");
-}
-
 static unsigned getRegField(const char *name) {
   if(name[1] == 'c') return 0;
   if(name[1] == 's') return 1;
@@ -211,7 +162,23 @@ struct FunState {
         regs = new llvm::AllocaInst(regsType, "gpu_reg_p", bb);
       }
     }
+
+    typedef llvm::Function::arg_iterator ArgIt;
+    for(ArgIt arg = llvmFun->arg_begin(),
+          E = llvmFun->arg_end(); arg != E; ++arg) {
+      argMap[arg->getName()] = arg;
+    }
   }
+
+  llvm::Value *lookupSymbol(const char *str) {
+    SymbolMap::iterator it = argMap.find(str);
+    if(it != argMap.end()) return it->second;
+    return NULL;
+  }
+
+ private:
+  typedef std::map<std::string, llvm::Value *> SymbolMap;
+  SymbolMap argMap;
 };
 
 static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
@@ -222,7 +189,6 @@ static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
   llvm::LLVMContext &C = B.getContext();
 
   if(const BrigOperandReg *regOp = dyn_cast<BrigOperandReg>(op)) {
-
     const char *name = helper.getName(regOp);
     unsigned field = getRegField(name);
     unsigned offset = getRegOffset(name);
@@ -235,20 +201,20 @@ static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
     llvm::ArrayRef<llvm::Value *> arrayRef(array, 4);
 
     return llvm::GetElementPtrInst::Create(state.regs, arrayRef, "", &B);
-
-  } else {
-    assert(false && "Unimplemented operand");
   }
+
+  assert(false && "Unimplemented operand");
 }
 
 static bool hasAddr(const BrigOperandBase *op) {
   BrigOperandKinds kind = BrigOperandKinds(op->kind);
   switch(kind) {
-  case BrigEOperandImmed:
-  case BrigEOperandLabelRef:
-  case BrigEOperandFunctionRef:
-    return false;
   case BrigEOperandAddress:
+  case BrigEOperandFunctionRef:
+  case BrigEOperandImmed:
+  case BrigEOperandIndirect:
+  case BrigEOperandLabelRef:
+    return false;
   case BrigEOperandReg:
     return true;
   default:
@@ -260,6 +226,8 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
                                const BrigOperandBase *op,
                                const BrigInstHelper &helper,
                                FunState &state) {
+
+  llvm::LLVMContext &C = B.getContext();
 
   if(hasAddr(op)) {
     llvm::Value *valAddr = getOperandAddr(B, op, helper, state);
@@ -274,6 +242,42 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
   const BrigOperandFunctionRef *func = dyn_cast<BrigOperandFunctionRef>(op);
   if(func) {
     return state.funMap.find(func->fn)->second;
+  }
+
+  if(const BrigOperandImmed *immedOp = dyn_cast<BrigOperandImmed>(op)) {
+    llvm::Type *type = runOnType(C, BrigDataType(immedOp->type));
+    if(type->isIntegerTy(64)) {
+      return llvm::ConstantInt::get(type, immedOp->bits.l[0]);
+    } else if(type->isIntegerTy(32)) {
+      return llvm::ConstantInt::get(type, immedOp->bits.u);
+    } else if(type->isIntegerTy(16)) {
+      return llvm::ConstantInt::get(type, immedOp->bits.h);
+    } else if(type->isIntegerTy(8)) {
+      return llvm::ConstantInt::get(type, immedOp->bits.c);
+    } else if(type->isIntegerTy(1)) {
+      return llvm::ConstantInt::get(type, immedOp->bits.c);
+    }
+    assert(false && "Illegal immediate type");
+  }
+
+  if(const BrigOperandAddress *adderOp = dyn_cast<BrigOperandAddress>(op)) {
+    const BrigDirectiveSymbol *symbol =
+      cast<BrigDirectiveSymbol>(helper.getDirective(adderOp->directive));
+    const char *name = helper.getName(symbol);
+    llvm::Value *address = state.lookupSymbol(name + 1);
+    assert(address && "Symbol not found");
+    return address;
+  }
+
+  if(const BrigOperandIndirect *indOp = dyn_cast<BrigOperandIndirect>(op)) {
+    llvm::Type *type = runOnType(C, BrigDataType(indOp->type));
+    const BrigOperandBase *reg = helper.getReg(indOp);
+    llvm::Value *base = reg ?
+      getOperand(B, reg, helper, state) :
+      llvm::ConstantInt::get(type, 0ULL);
+    llvm::Value *offset = llvm::ConstantInt::get(type, indOp->offset);
+    return llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
+                                        base, offset, "", &B);
   }
 
   assert(false && "Unimplemented");
@@ -308,7 +312,7 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
                                   const inst_iterator inst) {
 
   BrigDataType type = BrigDataType(inst->type);
-  if(BrigInstHelper::isVectorTy(type)) {
+  if(BrigInstHelper::isVectorTy(type) || BrigInstHelper::isFloatTy(type)) {
     llvm::LLVMContext &C = B.getContext();
     llvm::Type *encodedType = runOnType(C, type);
     unsigned bitsize =  encodedType->getPrimitiveSizeInBits();
@@ -320,38 +324,15 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
   return value;
 }
 
-static void runOnSimpleBinopInst(llvm::BasicBlock &B,
-                                 const inst_iterator inst,
-                                 const BrigInstHelper &helper,
-                                 FunState &state) {
-
-
-  const BrigOperandBase *brigDest = helper.getOperand(inst, 0);
-  const BrigOperandBase *brigSrc0 = helper.getOperand(inst, 1);
-  const BrigOperandBase *brigSrc1 = helper.getOperand(inst, 2);
-
-  llvm::Value *src0Raw = getOperand(B, brigSrc0, helper, state);
-  llvm::Value *src1Raw = getOperand(B, brigSrc1, helper, state);
-
-  llvm::Value *src0Val = decodePacking(B, src0Raw, 1, inst);
-  llvm::Value *src1Val = decodePacking(B, src1Raw, 2, inst);
-
-  llvm::Instruction::BinaryOps binop = getBinop(inst);
-  llvm::Value *resultRaw =
-    llvm::BinaryOperator::Create(binop, src0Val, src1Val, "", &B);
-  llvm::Value *resultVal = encodePacking(B, resultRaw, inst);
-
-  llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
-  new llvm::StoreInst(resultVal, destAddr, &B);
-}
-
-static llvm::FunctionType *getInstFunType(const inst_iterator inst,
-                                          llvm::LLVMContext &C) {
+static
+llvm::FunctionType *getInstFunType(const inst_iterator inst,
+                                   const std::vector<llvm::Value *> &sources,
+                                   llvm::LLVMContext &C) {
 
   llvm::Type *result = runOnType(C, BrigDataType(inst->type));
   std::vector<llvm::Type *> params;
-  for(unsigned i = 1; i < 5 && inst->o_operands[i]; ++i)
-    params.push_back(result);
+  for(unsigned i = 0; i < sources.size(); ++i)
+    params.push_back(sources[i]->getType());
 
   return llvm::FunctionType::get(result, params, false);
 }
@@ -362,6 +343,10 @@ static void runOnComplexInst(llvm::BasicBlock &B,
                              FunState &state) {
 
   unsigned operand = 0;
+
+  // Skip the width parameter for loads.
+  if(inst->opcode == BrigLd) ++operand;
+
   const BrigOperandBase *brigDest = NULL;
   if(BrigInstHelper::hasDest(inst))
     brigDest = helper.getOperand(inst, operand++);
@@ -376,14 +361,13 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 
   llvm::Module *M = B.getParent()->getParent();
   std::string name = BrigInstHelper::getInstName(inst);
-  llvm::FunctionType *funTy = getInstFunType(inst, B.getContext());
+  llvm::FunctionType *funTy = getInstFunType(inst, sources, B.getContext());
   llvm::Function *instFun =
     llvm::cast<llvm::Function>(M->getOrInsertFunction(name, funTy));
   llvm::Value *resultRaw = llvm::CallInst::Create(instFun, sources, "", &B);
 
   if(brigDest) {
     llvm::Value *resultVal = encodePacking(B, resultRaw, inst);
-
     llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
     new llvm::StoreInst(resultVal, destAddr, &B);
   }
@@ -461,22 +445,14 @@ static void runOnInstruction(llvm::BasicBlock &B,
                              FunState &state) {
   llvm::LLVMContext &C = B.getContext();
 
-  if(inst->opcode == BrigAbs ||
-     inst->opcode == BrigMax ||
-     inst->opcode == BrigMin) {
-    runOnComplexInst(B, inst, helper, state);
-  } else if(BrigInstHelper::isSaturated(BrigPacking(inst->packing))) {
-    runOnComplexInst(B, inst, helper, state);
-  } else if(isSimpleBinop(inst)) {
-    runOnSimpleBinopInst(B, inst, helper, state);
-  } else if(inst->opcode == BrigRet) {
+  if(inst->opcode == BrigRet) {
     llvm::ReturnInst::Create(C, &B);
   } else if(isBranchInst(inst)) {
     runOnBranchInst(B, inst, helper, state);
   } else if(inst->opcode == BrigCall) {
     runOnCallInst(B, inst, helper, state);
   } else {
-    assert(false && "Unimplemented instruction");
+    runOnComplexInst(B, inst, helper, state);
   }
 }
 
@@ -548,8 +524,11 @@ GenLLVM::GenLLVM(const StringBuffer &strings,
                  const Buffer &code,
                  const Buffer &operands,
                  const Buffer &debug) :
-  strings_(strings), directives_(directives),
-  code_(code), operands_(operands), debug_(debug),
+  mod_(strings, directives, code, operands, debug, &llvm::errs()),
+  brig_frontend_(NULL) {
+}
+GenLLVM::GenLLVM(const BrigReader &reader) :
+  mod_(reader, &llvm::errs()),
   brig_frontend_(NULL) {
 }
 void GenLLVM::operator()(void) {
@@ -557,20 +536,17 @@ void GenLLVM::operator()(void) {
   C_ = new llvm::LLVMContext();
   brig_frontend_ = new llvm::Module("BRIG", *C_);
 
-  BrigModule mod(strings_, directives_, code_, operands_, 
-                 debug_, &llvm::errs());
-  assert(mod.isValid());
+  assert(mod_.isValid());
 
   gen_GPU_states();
 
   FunMap funMap;
-  for(BrigFunction fun = mod.begin(), E = mod.end(); fun != E; ++fun) {
+  for(BrigFunction fun = mod_.begin(), E = mod_.end(); fun != E; ++fun) {
     runOnFunction(*brig_frontend_, fun, funMap);
   }
 
   llvm::raw_string_ostream ros(output_);
   brig_frontend_->print(ros, NULL);
-  brig_frontend_->dump();
 
   llvm::verifyModule(*brig_frontend_);
 }

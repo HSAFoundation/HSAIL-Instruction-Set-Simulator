@@ -707,7 +707,7 @@ bool BrigModule::validate(const BrigInstBar *code) const {
 
 bool BrigModule::validate(const BrigInstBase *code) const {
   bool valid = true;
-  valid &= check(code->opcode <= BrigMad24Hi,
+  valid &= check(code->opcode < BrigInvalidOpcode,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
@@ -790,7 +790,7 @@ bool BrigModule::validate(const BrigInstCvt *code) const {
 }
 bool BrigModule::validate(const BrigInstLdSt *code) const {
   bool valid = true;
-  valid &= check(code->opcode <= BrigFbarInitSizeKnown,
+  valid &= check(code->opcode < BrigInvalidOpcode,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
@@ -820,7 +820,7 @@ bool BrigModule::validate(const BrigInstLdSt *code) const {
 }
 bool BrigModule::validate(const BrigInstMem *code) const {
   bool valid = true;
-  valid &= check(code->opcode <= BrigFbarInitSizeKnown,
+  valid &= check(code->opcode < BrigInvalidOpcode,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
@@ -845,7 +845,7 @@ bool BrigModule::validate(const BrigInstMem *code) const {
 }
 bool BrigModule::validate(const BrigInstMod *code) const {
   bool valid = true;
-  valid &= check(code->opcode <= BrigFbarInitSizeKnown,
+  valid &= check(code->opcode < BrigInvalidOpcode,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
