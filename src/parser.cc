@@ -2407,17 +2407,6 @@ int Call(Context* context) {
     } else {
       return 1;
     }
-  } else {
-    BrigOperandImmed op_width = {
-      sizeof(BrigOperandImmed),
-      BrigEOperandImmed,
-      Brigb32,
-      0,
-      { 0 }
-    };
-    BrigoOffset32_t curOpOffset = context->get_operand_offset();
-    context->append_operand(&op_width);
-    callInst.o_operands[0] = curOpOffset;
   }
   if (context->token_to_scan == __FBAR) {
     hasWidthOrFbar = true;
@@ -6119,17 +6108,6 @@ int Ld(Context* context) {
       context->set_error(UNKNOWN_ERROR);
       return 1;
     }
-  } else {
-    BrigOperandImmed op_width = {
-      sizeof(BrigOperandImmed),
-      BrigEOperandImmed,
-      Brigb32,
-      0,
-      { 0 }
-    };
-    BrigoOffset32_t curOpOffset = context->get_operand_offset();
-    context->append_operand(&op_width);
-    ld_op.o_operands[0] = curOpOffset;
   }
   if (!LdModifierPart2(context, &ld_op, &vector_size)) {
   } else {
@@ -7348,8 +7326,7 @@ int Operation(Context* context) {
 
 int BodyStatementNested(Context* context) {
   if (context->token_to_scan == TOKEN_COMMENT) {
-    context->token_to_scan = yylex();
-    return 0;
+	return Comment(context);
   } else if (context->token_to_scan == PRAGMA) {
     if (!Pragma(context)) {
       return 0;
@@ -7414,11 +7391,25 @@ int ArgStatements(Context* context) {
   return 1;
 }
 
+int Comment(Context* context){
+
+	if(context->token_to_scan == TOKEN_COMMENT){
+	std::string comment(context->token_value.string_val);
+    int comment_offset = context->add_symbol(comment);
+	BrigDirectiveComment dir_com = { sizeof(BrigDirectiveComment), BrigEDirectiveComment, context->get_code_offset(), comment_offset};
+	context->append_directive(&dir_com);
+	context->token_to_scan = yylex();
+	return 0;
+	} else {
+		context->set_error(UNKNOWN_ERROR);
+		return 1;
+	}
+}
+
 int BodyStatement(Context* context) {
 
   if (context->token_to_scan == TOKEN_COMMENT) {
-    context->token_to_scan = yylex();
-    return 0;
+	return Comment(context);
   } else if (context->token_to_scan == PRAGMA) {
     if (!Pragma(context)) {
       return 0;
@@ -9626,7 +9617,11 @@ int LdaMod(Context* context) {
 }
 
 int TopLevelStatement(Context *context){
-  if(!Directive(context)) {
+
+  if(TOKEN_COMMENT==context->token_to_scan){
+	return Comment(context);
+  }
+  else if(!Directive(context)) {
     return 0 ;
   }else if(KERNEL == context->token_to_scan) {
     return Kernel(context) ;
