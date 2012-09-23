@@ -9812,6 +9812,18 @@ TEST(CodegenTest, Instruction0_CodeGen_SimpleTest) {
   delete lexer;
 }
 
+TEST(CodegenTest, Comment_Test){
+	context->set_error_reporter(main_reporter);
+	context->clear_context();
+
+	std::string input("/*This is a comment*/");
+	Lexer* lexer = new Lexer(input);
+	lexer->set_source_string(input);
+	context->token_to_scan = lexer->get_next_token();
+	EXPECT_EQ(0,Comment(context));
+	
+    delete lexer;
+}
 
 TEST(CodegenTest, WAVESIZE_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
