@@ -7,7 +7,6 @@
 #include "lexer.h"
 #include "error_reporter_interface.h"
 
-
 // variables returned by lexer
 namespace hsa {
 namespace brig {
@@ -1293,7 +1292,7 @@ int Instruction3(Context* context) {
 
 int Version(Context* context) {
   // first token must be version keyword
-  BrigDirectiveVersion bdv;
+  BrigDirectiveVersion bdv = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   bdv.kind = BrigEDirectiveVersion;
   bdv.size = sizeof(BrigDirectiveVersion);
   bdv.reserved = 0;
@@ -7766,8 +7765,10 @@ int SingleListSingle(Context * context) {
           n = elementCount ;
           break;
 	  }
+
         size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
         uint8_t *array = new uint8_t[arraySize];
+        for(unsigned i = 0; i < arraySize; ++i) array[i] = 0;
         BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
         uint32_t init_length = 0;
 
@@ -7810,8 +7811,9 @@ int SingleListSingle(Context * context) {
           break;
         case Brigb64:
           for(unsigned i = 0; i < elementCount; i ++ ){
-            memmove(&bdi->initializationData.u64[i],&single_list[i],sizeof(uint64_t));
-	  }
+            double d = single_list[i];
+            memmove(&bdi->initializationData.u64[i],&d,sizeof(uint64_t));
+          }
           break;
         }
 
@@ -8788,6 +8790,8 @@ int LabelList(Context* context) {
       size_t arraySize = sizeof(BrigDirectiveLabelInit) +
                          (elementCount - 1) * sizeof(BrigdOffset32_t);
       uint8_t *array = new uint8_t[arraySize];
+      for(unsigned i = 0; i < arraySize; ++i)
+        array[i] = 0;
       BrigDirectiveLabelInit *bdli = reinterpret_cast<BrigDirectiveLabelInit*>(array);
 
       // update the BrigDirectiveSymbol.d_init and dim
