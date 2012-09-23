@@ -288,20 +288,31 @@ static llvm::Value *decodePacking(llvm::BasicBlock &B,
                                   unsigned opnum,
                                   const inst_iterator inst) {
 
-  BrigPacking packing = BrigPacking(inst->packing);
-  bool packed = BrigInstHelper::isPacked(packing, opnum);
-  bool broadcast = BrigInstHelper::isBroadcast(packing, opnum);
-
-  assert((!packed || !broadcast) && "Illegal packing combination!?");
-
   llvm::LLVMContext &C = B.getContext();
+  llvm::Type *type = runOnType(C, BrigDataType(inst->type));
 
-  if(packed || broadcast) {
-    llvm::Type *type = runOnType(C, BrigDataType(inst->type));
+  if((inst->opcode == BrigLd) ||
+     (inst->opcode == BrigSt && opnum == 1)) {
+    llvm::Type *ptrType = type->getPointerTo();
+    if(value->getType() == ptrType) {
+      return value;
+    } else if(value->getType()->isPointerTy()) {
+      return new llvm::BitCastInst(value, ptrType, "", &B);
+    } else {
+      return new llvm::IntToPtrInst(value, ptrType, "", &B);
+    }
+  }
+
+  BrigPacking packing = BrigPacking(inst->packing);
+  bool isPacked = BrigInstHelper::isPacked(packing, opnum);
+  bool isBroadcast = BrigInstHelper::isBroadcast(packing, opnum);
+  bool isFloat = type->isFloatTy();
+
+  assert(!(isPacked && isBroadcast) && "Illegal packing combination!?");
+
+  if(isPacked || isBroadcast || isFloat) {
     llvm::Value *bitcast = new llvm::BitCastInst(value, type, "", &B);
-    if(packed) return bitcast;
-
-    assert(false && "Unimplemented");
+    return bitcast;
   }
 
   return value;

@@ -1,6 +1,8 @@
 #include "brig_inst_helper.h"
 #include "brig_symbol.h"
 
+#include "llvm/ADT/StringRef.h"
+
 namespace hsa {
 namespace brig {
 
@@ -185,67 +187,109 @@ case BrigPack ## X:                             \
 #undef castPacking
 }
 
-static const char *getTypeName(const inst_iterator inst) {
-#define caseDataType(X)                          \
+static const char *getTypeName(BrigDataType type) {
+#define caseBrig(X)                              \
   case Brig ## X:                                \
   return #X
 
-  switch(inst->type) {
-    caseDataType(s8);
-    caseDataType(s16);
-    caseDataType(s32);
-    caseDataType(s64);
-    caseDataType(u8);
-    caseDataType(u16);
-    caseDataType(u32);
-    caseDataType(u64);
-    caseDataType(f16);
-    caseDataType(f32);
-    caseDataType(f64);
-    caseDataType(b1);
-    caseDataType(b8);
-    caseDataType(b16);
-    caseDataType(b32);
-    caseDataType(b64);
-    caseDataType(b128);
-    caseDataType(ROImg);
-    caseDataType(RWImg);
-    caseDataType(Samp);
-    caseDataType(u8x4);
-    caseDataType(s8x4);
-    caseDataType(u8x8);
-    caseDataType(s8x8);
-    caseDataType(u8x16);
-    caseDataType(s8x16);
-    caseDataType(u16x2);
-    caseDataType(s16x2);
-    caseDataType(f16x2);
-    caseDataType(u16x4);
-    caseDataType(s16x4);
-    caseDataType(f16x4);
-    caseDataType(u16x8);
-    caseDataType(s16x8);
-    caseDataType(f16x8);
-    caseDataType(u32x2);
-    caseDataType(s32x2);
-    caseDataType(f32x2);
-    caseDataType(u32x4);
-    caseDataType(s32x4);
-    caseDataType(f32x4);
-    caseDataType(u64x2);
-    caseDataType(s64x2);
-    caseDataType(f64x2);
+  switch(type) {
+    caseBrig(s8);
+    caseBrig(s16);
+    caseBrig(s32);
+    caseBrig(s64);
+    caseBrig(u8);
+    caseBrig(u16);
+    caseBrig(u32);
+    caseBrig(u64);
+    caseBrig(f16);
+    caseBrig(f32);
+    caseBrig(f64);
+    caseBrig(b1);
+    caseBrig(b8);
+    caseBrig(b16);
+    caseBrig(b32);
+    caseBrig(b64);
+    caseBrig(b128);
+    caseBrig(ROImg);
+    caseBrig(RWImg);
+    caseBrig(Samp);
+    caseBrig(u8x4);
+    caseBrig(s8x4);
+    caseBrig(u8x8);
+    caseBrig(s8x8);
+    caseBrig(u8x16);
+    caseBrig(s8x16);
+    caseBrig(u16x2);
+    caseBrig(s16x2);
+    caseBrig(f16x2);
+    caseBrig(u16x4);
+    caseBrig(s16x4);
+    caseBrig(f16x4);
+    caseBrig(u16x8);
+    caseBrig(s16x8);
+    caseBrig(f16x8);
+    caseBrig(u32x2);
+    caseBrig(s32x2);
+    caseBrig(f32x2);
+    caseBrig(u32x4);
+    caseBrig(s32x4);
+    caseBrig(f32x4);
+    caseBrig(u64x2);
+    caseBrig(s64x2);
+    caseBrig(f64x2);
   default:
     assert(false && "Unknown type");
   }
+}
 
-#undef caseDataType
+const char *getPredName(BrigCompareOperation pred) {
+  switch(pred) {
+    caseBrig(Eq);
+    caseBrig(Ne);
+    caseBrig(Lt);
+    caseBrig(Le);
+    caseBrig(Gt);
+    caseBrig(Ge);
+    caseBrig(Equ);
+    caseBrig(Neu);
+    caseBrig(Ltu);
+    caseBrig(Leu);
+    caseBrig(Gtu);
+    caseBrig(Geu);
+    caseBrig(Num);
+    caseBrig(Nan);
+    caseBrig(Seq);
+    caseBrig(Sne);
+    caseBrig(Slt);
+    caseBrig(Sle);
+    caseBrig(Sgt);
+    caseBrig(Sge);
+    caseBrig(Sequ);
+    caseBrig(Sgeu);
+    caseBrig(Sneu);
+    caseBrig(Sleu);
+    caseBrig(Sltu);
+    caseBrig(Snum);
+    caseBrig(Snan);
+    caseBrig(Sgtu);
+  default:
+    assert(false && "Unknown comparison operation");
+  }
+#undef caseBrig
 }
 
 std::string BrigInstHelper::getInstName(const inst_iterator inst) {
   const char *base = getBaseName(inst);
   const char *packing = getPackingName(inst);
-  const char *type = getTypeName(inst);
+  const char *type = getTypeName(BrigDataType(inst->type));
+
+  if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst)) {
+    const char *srcType = getTypeName(BrigDataType(cmp->sourceType));
+    const char *predRaw =
+      getPredName(BrigCompareOperation(cmp->comparisonOperator));
+    std::string pred = llvm::StringRef(predRaw).lower();
+    return std::string(base) + "_" + pred +  "_" + type + "_" + srcType;
+  }
 
   return std::string(base) + packing + "_" + type;
 }

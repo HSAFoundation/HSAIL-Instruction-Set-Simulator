@@ -711,5 +711,40 @@ defineCvt(Cvt_zero, FE_TOWARDZERO, f32, f64)
 defineCvt(Cvt_near, FE_TONEAREST,  f32, f64)
 // A rounding modifier is illegal in all other cases
 defineCvt(Cvt, ~0, f64, f32)
+
+template<class T> static T Ld(T *x) { return *x; }
+#define defineLd(X)                             \
+  extern "C" X Ld_ ## X(X *x) { return Ld(x); }
+defineLd(u8)
+defineLd(u16)
+defineLd(u32)
+defineLd(u64)
+defineLd(s8)
+defineLd(s16)
+defineLd(s32)
+defineLd(s64)
+// defineLd(f16)
+defineLd(f32)
+defineLd(f64)
+
+template<class T> static void St(T x, T *y) { *y = x; }
+#define defineSt(X)                                         \
+  extern "C" void St_ ## X(X x, X *y) { return St(x, y); }
+defineSt(u8)
+defineSt(u16)
+defineSt(u32)
+defineSt(u64)
+defineSt(s8)
+defineSt(s16)
+defineSt(s32)
+defineSt(s64)
+// defineSt(f16)
+defineSt(f32)
+defineSt(f64)
+
+extern "C" u32 WorkItemAId_b32(u32 x) { return 0U; }
+
 } // namespace brig
 } // namespace hsa
+
+
