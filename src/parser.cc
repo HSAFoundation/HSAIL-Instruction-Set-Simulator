@@ -1050,7 +1050,7 @@ int Instruction2(Context* context) {
     // Optional FTZ
     if (context->token_to_scan == _FTZ) {  // use BrigInstMod
       // has a _ftz
-      BrigAluModifier bam;
+      BrigAluModifier bam = {0, 0, 0, 0, 0, 0, 0};
       bam.ftz = 1;
       context->set_alu_modifier(bam);
 
@@ -3161,7 +3161,7 @@ int FunctionSignature(Context *context) {
         memmove(&bds->types[i],&context->types[i],sizeof(BrigDirectiveSignature::BrigProtoType));
       context->append_directive(bds);
 
-      delete bds ;
+      delete[] reinterpret_cast<char *>(bds);
       context->types.clear();
 
       context->token_to_scan = yylex();
@@ -7823,7 +7823,7 @@ int SingleListSingle(Context * context) {
                                         sizeof(BrigDirectiveSymbol));
 
         context->append_directive(bdi);
-        delete bdi;
+        delete[] reinterpret_cast<char *>(bdi);
         return 0;
       }
     }
@@ -8817,7 +8817,7 @@ int LabelList(Context* context) {
       context->update_directive_bytes(bdli_charp,
                                       bds.d_init,
                                       arraySize);
-      delete bdli;
+      delete[] reinterpret_cast<char *>(bdli);
 
       return 0;
     }
@@ -8926,7 +8926,7 @@ int FloatListSingle(Context* context) {
 
         context->append_directive(bdi);
 
-        delete bdi;
+        delete[] reinterpret_cast<char *>(bdi);
       } else { //blockNumeric
         size_t arraySize = sizeof(BrigBlockNumeric) + (n - 1) * sizeof(uint64_t);
         uint8_t *array = new uint8_t[arraySize];
@@ -9106,7 +9106,7 @@ int DecimalListSingle(Context* context) {
 
         context->append_directive(bdi);
 
-          delete bdi;
+        delete[] reinterpret_cast<char *>(bdi);
 	} else { //blockNumeric
           size_t arraySize = sizeof(BrigBlockNumeric) + (n - 1) * sizeof(uint64_t);
           uint8_t *array = new uint8_t[arraySize];
@@ -9159,7 +9159,7 @@ int DecimalListSingle(Context* context) {
             break;
           }
           context->append_directive(bbn);
-          delete bbn;
+          delete[] reinterpret_cast<char *>(bbn);
 	}
         return 0;
       }  // ','
@@ -9321,7 +9321,8 @@ int SobInit(Context *context){
     ||BOUNDARYU == context->token_to_scan
     ||BOUNDARYV == context->token_to_scan
     ||BOUNDARYW == context->token_to_scan){
-  BrigDirectiveSampler bds ;
+   BrigDirectiveSampler bds = { 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 0,
+                                0, 0, 0, 0, 0 };
   context->get_directive(context->current_samp_offset,&bds);
   bds.valid = 1;
 

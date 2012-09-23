@@ -211,8 +211,8 @@ TEST(BrigWriterTest, VectorCopy) {
   EXPECT_FLOAT_EQ(M_PI, arg_val0[0]);
   EXPECT_FLOAT_EQ(M_PI, arg_val1[0]);
 
-  delete arg_val1;
-  delete arg_val0;
+  delete[] arg_val1;
+  delete[] arg_val0;
 }
 
 TEST(BrigWriterTest, Cosine) {

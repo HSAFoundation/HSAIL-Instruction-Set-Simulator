@@ -47,7 +47,7 @@ class Context {
 
     /* helper function to check alignment requirement of each structure */
     template<class T>
-    static BrigAlignment alignment_check(T item) {
+    static BrigAlignment alignment_check(T &item) {
       switch (item.kind) {
         // directive
         case BrigEDirectiveBlockNumeric:
