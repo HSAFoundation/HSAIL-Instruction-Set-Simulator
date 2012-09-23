@@ -531,10 +531,11 @@ TEST(ParserTest, FunctionDecl) {
 
 TEST(ParserTest, Codeblock) {
   // Create a lexer
+  context->clear_context();
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
-
+  
   // test 1
   std::string input("{ \n");
   input.append("abs_p_s8x4 $s1, $s2; \n");
@@ -557,7 +558,7 @@ TEST(ParserTest, Codeblock) {
       0,                        // inParamCount
       220,                      // d_firstScopedDirective
       1,                        // operationCount
-      316,                      // d_nextDirective
+      0,                      // d_nextDirective
       BrigNone,
       0,
       0,                        // outParamCount

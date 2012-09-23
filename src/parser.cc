@@ -1297,7 +1297,7 @@ int Version(Context* context) {
   bdv.kind = BrigEDirectiveVersion;
   bdv.size = sizeof(BrigDirectiveVersion);
   bdv.reserved = 0;
-
+  bdv.c_code = context->get_code_offset();
   // set default values
   bdv.machine = BrigELarge;
   bdv.profile = BrigEFull;
@@ -2066,33 +2066,38 @@ int CodeBlockEnd(Context* context) {
       return 0;
     } else {
       context->set_error(MISSING_SEMICOLON);
+	  return 1;
     }
-  } else {
-    context->set_error(MISSING_CLOSING_BRACKET);
-  }
-  return 1;
+  }else return 1;
 }
 int Codeblock(Context* context) {
   // first token should be '{'
   context->token_to_scan = yylex();
-  if (!BodyStatements(context)) {
-    if (!CodeBlockEnd(context)) {
-
+  while(context->token_to_scan != '}'){
+	if (!BodyStatements(context)) {
+   
       BrigDirectiveFunction bdf;
       context->get_directive(context->current_bdf_offset, &bdf);
-      bdf.d_nextDirective = context->get_directive_offset();
-
-      unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp,
+	  if(bdf.kind == BrigEDirectiveFunction){
+		
+		bdf.d_nextDirective = context->get_directive_offset();
+		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+		context->update_directive_bytes(bdf_charp,
                                  context->current_bdf_offset,
-                                 sizeof(bdf));
-
-      return 0;
-    } else {
+                                 sizeof(BrigDirectiveFunction));
+	  } else if(bdf.kind == BrigEDirectiveKernel){
+		BrigDirectiveKernel* bdk = reinterpret_cast<BrigDirectiveKernel*> (&bdf); //Since they are the same size
+		bdk->d_nextDirective = context->get_directive_offset();
+		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(bdk);
+		context->update_directive_bytes(bdf_charp,
+                                 context->current_bdf_offset,
+                                 sizeof(BrigDirectiveKernel));
+		
+	  } else return 1;
+    } else 
       return 1;
-    }
-  }
-  return 1;
+  } 
+  return CodeBlockEnd(context);
 }
 int Functionpart2(Context *context){
   if (!Codeblock(context)){
@@ -7454,8 +7459,9 @@ int BodyStatement(Context* context) {
 
 int BodyStatements(Context* context) {
   if (!BodyStatement(context)) {
-    while (!BodyStatement(context)) {
-      ;
+    while (1) {
+      if(BodyStatement(context))
+		return 1;
     }
     return 0;
   }
