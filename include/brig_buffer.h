@@ -64,7 +64,6 @@ class Buffer {
     return SUCCESS;
   }
 
-
   // get a specific item at specific offset
   // input: offset value
   //        a pointer to allocated memory for returned item

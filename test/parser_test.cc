@@ -2340,6 +2340,7 @@ TEST(ParserTest, Operation) {
 TEST(ParserTest, BodyStatementNested) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  context->clear_context();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
   std::string input("//Hello World\n"); //comment

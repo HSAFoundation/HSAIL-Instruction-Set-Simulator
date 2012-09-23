@@ -28,7 +28,17 @@ Context::Context(void) {
   err_reporter = NULL;
   yycolno = 0;
   yylineno = 1;
+  current_bdf_offset = 0;
+  current_argdecl_offset = 0;
+  current_samp_offset = 0;
   error_reporter_set = false;
+  aluModifier.floatOrInt = 0;
+  aluModifier.rounding = 0;
+  aluModifier.hi = 0;
+  aluModifier.ftz = 0;
+  aluModifier.approx = 0;
+  aluModifier.fbar = 0;
+  aluModifier.reserved = 0;
   set_default_values();
   for(unsigned i = 0; i < 8; ++i) cbuf->append_char(0);
   for(unsigned i = 0; i < 8; ++i) dbuf->append_char(0);
@@ -64,6 +74,16 @@ void Context::clear_context(void) {
   }
   set_default_values();
   types.clear();
+  current_bdf_offset = 0;
+  current_argdecl_offset = 0;
+  current_samp_offset = 0;
+  aluModifier.floatOrInt = 0;
+  aluModifier.rounding = 0;
+  aluModifier.hi = 0;
+  aluModifier.ftz = 0;
+  aluModifier.approx = 0;
+  aluModifier.fbar = 0;
+  aluModifier.reserved = 0;
 }
 
 void Context::set_default_values(void) {

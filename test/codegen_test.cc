@@ -4607,7 +4607,7 @@ TEST(CodegenTest, GlobalGroupDeclCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, Label_CodeGen_Test) {
+TEST(CodegenTest, DISABLED_Label_CodeGen_Test) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
   // TODO(Chuang) set the type to Brn and Cbr
@@ -5754,7 +5754,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   EXPECT_EQ(bdi->initializationData.u8[13],get1->initializationData.u8[13]);
   EXPECT_EQ(bdi->initializationData.u8[14],get1->initializationData.u8[14]);
   EXPECT_EQ(bdi->initializationData.u8[15],get1->initializationData.u8[15]);
-  delete bdi;
+  delete[] reinterpret_cast<char *>(bdi);
 
   // case for single
   context->clear_context();
@@ -5845,7 +5845,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   EXPECT_EQ(bdi->initializationData.u32[7],get1->initializationData.u32[7]);
   EXPECT_EQ(bdi->initializationData.u32[8],get1->initializationData.u32[8]);
   EXPECT_EQ(bdi->initializationData.u32[9],get1->initializationData.u32[9]);
-  delete bdi;
+  delete[] reinterpret_cast<char *>(bdi);
 
 
   // case for float
@@ -5934,7 +5934,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   EXPECT_EQ(bdi->initializationData.u64[6],get1->initializationData.u64[6]);
   EXPECT_EQ(bdi->initializationData.u64[7],get1->initializationData.u64[7]);
   EXPECT_EQ(bdi->initializationData.u64[8],get1->initializationData.u64[8]);
-  delete bdi;
+  delete[] reinterpret_cast<char *>(bdi);
 
 // case for label
   context->clear_context();
@@ -5997,7 +5997,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
   EXPECT_EQ(bdli->d_labels[0],get2->d_labels[0]);
   EXPECT_EQ(bdli->d_labels[1],get2->d_labels[1]);
   EXPECT_EQ(bdli->d_labels[2],get2->d_labels[2]);
-  delete bdli;
+  delete[] reinterpret_cast<char *>(bdli);
 
   delete lexer;
 }
@@ -8885,8 +8885,8 @@ TEST(CodegenTest,BlockCodegen){
   EXPECT_EQ(bbn1->u64[1],get->u64[1]);
   EXPECT_EQ(bbn1->u64[2],get->u64[2]);
   EXPECT_EQ(bbn1->u64[3],get->u64[3]);
-  delete bbn1;
-  delete get;
+  delete[] reinterpret_cast<char *>(bbn1);
+  delete[] reinterpret_cast<char *>(get);
 
  // blocknumeric
   arraySize = sizeof(BrigBlockNumeric) + sizeof(uint64_t);
@@ -8916,8 +8916,8 @@ TEST(CodegenTest,BlockCodegen){
   EXPECT_EQ(bbn2->u32[1],get->u32[1]);
   EXPECT_EQ(bbn2->u32[2],get->u32[2]);
   EXPECT_EQ(bbn2->u32[3],get->u32[3]);
-  delete bbn2;
-  delete get;
+  delete[] reinterpret_cast<char *>(bbn2);
+  delete[] reinterpret_cast<char *>(get);
 
   // blockstart
   uint32_t str2_len = strlen("\"debug\"") + 1;
@@ -9003,8 +9003,8 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   EXPECT_EQ(ref->types[1].hasDim,get->types[1].hasDim);
   EXPECT_EQ(ref->types[1].dim,get->types[1].dim);
 
-  delete ref;
-  delete get;
+  delete[] reinterpret_cast<char *>(ref);
+  delete[] reinterpret_cast<char *>(get);
 
   delete lexer;
 }
