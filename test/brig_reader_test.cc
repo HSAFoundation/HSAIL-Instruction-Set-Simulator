@@ -1,3 +1,4 @@
+#include "brig_engine.h"
 #include "brig_llvm.h"
 #include "brig_module.h"
 #include "brig_reader.h"
@@ -5,6 +6,7 @@
 #include "error_reporter.h"
 #include "parser_wrapper.h"
 
+#include "llvm/Module.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/raw_ostream.h"
@@ -98,14 +100,14 @@ TEST(BrigWriterTest, EmptyBRIG) {
   EXPECT_TRUE(existed);
 }
 
-static void TestHSAIL(const std::string &source) {
+llvm::Module *TestHSAIL(const std::string &source) {
 
   Parser parser(source);
   Context *context = parser.get_context();
   context->set_error_reporter(ErrorReporter::get_instance());
   int res = parser.parse();
   EXPECT_TRUE(!res);
-  if(res) return;
+  if(res) return NULL;
 
   BrigcOffset32_t codeSize = context->get_code_offset();
   BrigdOffset32_t dirSize  = context->get_directive_offset();
@@ -127,7 +129,7 @@ static void TestHSAIL(const std::string &source) {
   llvm::error_code ec =
     llvm::sys::fs::unique_file("emptyBrig-%%%%%.o", result_fd, resultPath);
   EXPECT_TRUE(!ec);
-  if(ec) return;
+  if(ec) return NULL;
 
   llvm::raw_fd_ostream out(result_fd, true);
 
@@ -139,17 +141,17 @@ static void TestHSAIL(const std::string &source) {
                       llvm::StringRef("", 0),
                       llvm::StringRef(strings.get(), strSize));
   EXPECT_TRUE(result);
-  if(!result) return;
+  if(!result) return NULL;
   out.close();
 
   BrigReader *reader =
     BrigReader::createBrigReader(resultPath.c_str());
   EXPECT_TRUE(reader);
-  if(!reader) return;
+  if(!reader) return NULL;
 
   hsa::brig::BrigModule mod(*reader, &llvm::errs());
   EXPECT_TRUE(mod.isValid());
-  if(!mod.isValid()) return;
+  if(!mod.isValid()) return NULL;
 
   hsa::brig::GenLLVM codegen(*reader);
   codegen();
@@ -159,10 +161,12 @@ static void TestHSAIL(const std::string &source) {
   bool existed;
   llvm::sys::fs::remove(resultPath.c_str(), existed);
   EXPECT_TRUE(existed);
+
+  return codegen.getModule();
 }
 
 TEST(BrigWriterTest, VectorCopy) {
-  TestHSAIL(
+  llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
     "kernel &__OpenCL_vec_copy_kernel(\n"
@@ -187,6 +191,28 @@ TEST(BrigWriterTest, VectorCopy) {
     "        ret ;\n"
     "};\n"
     );
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  const unsigned arraySize = 16;
+  float *arg_val0 = new float[arraySize];
+  float *arg_val1 = new float[arraySize];
+  for(unsigned i = 0; i < arraySize; ++i) {
+    arg_val0[i] = M_PI;
+    arg_val1[i] = 0;
+  }
+
+  uint32_t arg_val2 = arraySize;
+
+  void *args[] = { &arg_val0, &arg_val1, &arg_val2 };
+  llvm::Function *fun = mod->getFunction("__OpenCL_vec_copy_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_FLOAT_EQ(M_PI, arg_val0[0]);
+  EXPECT_FLOAT_EQ(M_PI, arg_val1[0]);
+
+  delete arg_val1;
+  delete arg_val0;
 }
 
 TEST(BrigWriterTest, Cosine) {
