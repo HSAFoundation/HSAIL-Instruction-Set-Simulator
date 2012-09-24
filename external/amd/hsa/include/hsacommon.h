@@ -1306,7 +1306,7 @@ class UnsupportedOperation: public Exception {};
 // macro to throw base class exception: shoud we remove this in the future?
 #define ERR_THROW_EX(errVal, errMsg, expVal)                        \
     if (errVal){                                                    \
-        Exception exObj;                                            \
+        hsacommon::Exception exObj;                                            \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
@@ -1314,28 +1314,28 @@ class UnsupportedOperation: public Exception {};
 // macros for derived exception classses
 #define ERR_THROW_INVALIDARGUMENT(errVal, errMsg, expVal)           \
     if (errVal){                                                    \
-        InvalidArgument exObj;                                      \
+        hsacommon::InvalidArgument exObj;                                      \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
 
 #define ERR_THROW_RESOURCEFAILURE(errVal, errMsg, expVal)           \
     if (errVal){                                                    \
-        ResourceFailure exObj;                                      \
+        hsacommon::ResourceFailure exObj;                                      \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
 
 #define ERR_THROW_BUILDFAILURE(errVal, errMsg, expVal)              \
     if (errVal){                                                    \
-        BuildFailure exObj;                                         \
+        hsacommon::BuildFailure exObj;                                         \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
 
 #define ERR_THROW_UNSUPPORTEDOPERATION(errVal, errMsg, expVal)      \
     if (errVal){                                                    \
-        UnsupportedOperation exObj;                                 \
+        hsacommon::UnsupportedOperation exObj;                                 \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
