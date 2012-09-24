@@ -2070,12 +2070,12 @@ int CodeBlockEnd(Context* context) {
     }
   }else return 1;
 }
+
 int Codeblock(Context* context) {
   // first token should be '{'
   context->token_to_scan = yylex();
-  while(context->token_to_scan != '}'){
-	if (!BodyStatements(context)) {
-   
+  if(!BodyStatements(context)){
+	   
       BrigDirectiveFunction bdf;
       context->get_directive(context->current_bdf_offset, &bdf);
 	  if(bdf.kind == BrigEDirectiveFunction){
@@ -2093,12 +2093,20 @@ int Codeblock(Context* context) {
                                  context->current_bdf_offset,
                                  sizeof(BrigDirectiveKernel));
 		
-	  } else return 1;
-    } else if (context->token_to_scan != '}')
-      return 1;
-  } 
-  return CodeBlockEnd(context);
+	  } else {
+			context->set_error(UNKNOWN_ERROR);
+			return 1;     
+		}
+   }
+	if (context->token_to_scan == '}')
+      return CodeBlockEnd(context);
+	else if(!context->token_to_scan){
+		context->set_error(MISSING_CLOSING_BRACKET);
+		return 1;
+	} else
+		return 1;
 }
+
 int Functionpart2(Context *context){
   if (!Codeblock(context)){
     return 0;
@@ -7459,13 +7467,20 @@ int BodyStatement(Context* context) {
 
 int BodyStatements(Context* context) {
   if (!BodyStatement(context)) {
-    while (1) {
+    while (context->token_to_scan && (context->token_to_scan != '}')){
       if(BodyStatement(context))
+		break;
+	  //context->token_to_scan = yylex();
+	}
+	if((!context->token_to_scan) || (context->token_to_scan == '}'))
 		return 0;
-    }
+	else 
+		return 1;
+  } else{
+    context->set_error(INVALID_CODEBLOCK); //Codeblock should have atleast one bodyStatement
+    return 1;
   }
-  return 1;
-}
+ }
 
 int ImageLoad(Context* context) {
   // first token is LD_IMAGE
