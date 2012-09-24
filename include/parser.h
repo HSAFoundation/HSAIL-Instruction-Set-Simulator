@@ -136,6 +136,7 @@ int ArrayOperand(Context* context);
 int QueryOp(Context* context);
 int ComparisonId(Context* context);
 int CodeBlockEnd(Context* context);
+int Comment(Context* context);
 
 //Declarations of Helper Functions 
 int GlobalImageDeclPart2(Context *context);

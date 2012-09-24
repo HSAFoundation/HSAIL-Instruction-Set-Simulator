@@ -7,6 +7,7 @@
 #include "lexer.h"
 #include "error_reporter_interface.h"
 
+
 // variables returned by lexer
 namespace hsa {
 namespace brig {
@@ -1292,11 +1293,11 @@ int Instruction3(Context* context) {
 
 int Version(Context* context) {
   // first token must be version keyword
-  BrigDirectiveVersion bdv = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  BrigDirectiveVersion bdv;
   bdv.kind = BrigEDirectiveVersion;
   bdv.size = sizeof(BrigDirectiveVersion);
   bdv.reserved = 0;
-
+  bdv.c_code = context->get_code_offset();
   // set default values
   bdv.machine = BrigELarge;
   bdv.profile = BrigEFull;
@@ -2065,33 +2066,38 @@ int CodeBlockEnd(Context* context) {
       return 0;
     } else {
       context->set_error(MISSING_SEMICOLON);
+	  return 1;
     }
-  } else {
-    context->set_error(MISSING_CLOSING_BRACKET);
-  }
-  return 1;
+  }else return 1;
 }
 int Codeblock(Context* context) {
   // first token should be '{'
   context->token_to_scan = yylex();
-  if (!BodyStatements(context)) {
-    if (!CodeBlockEnd(context)) {
-
+  while(context->token_to_scan != '}'){
+	if (!BodyStatements(context)) {
+   
       BrigDirectiveFunction bdf;
       context->get_directive(context->current_bdf_offset, &bdf);
-      bdf.d_nextDirective = context->get_directive_offset();
-
-      unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp,
+	  if(bdf.kind == BrigEDirectiveFunction){
+		
+		bdf.d_nextDirective = context->get_directive_offset();
+		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+		context->update_directive_bytes(bdf_charp,
                                  context->current_bdf_offset,
-                                 sizeof(bdf));
-
-      return 0;
-    } else {
+                                 sizeof(BrigDirectiveFunction));
+	  } else if(bdf.kind == BrigEDirectiveKernel){
+		BrigDirectiveKernel* bdk = reinterpret_cast<BrigDirectiveKernel*> (&bdf); //Since they are the same size
+		bdk->d_nextDirective = context->get_directive_offset();
+		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(bdk);
+		context->update_directive_bytes(bdf_charp,
+                                 context->current_bdf_offset,
+                                 sizeof(BrigDirectiveKernel));
+		
+	  } else return 1;
+    } else if (context->token_to_scan != '}')
       return 1;
-    }
-  }
-  return 1;
+  } 
+  return CodeBlockEnd(context);
 }
 int Functionpart2(Context *context){
   if (!Codeblock(context)){
@@ -2406,17 +2412,6 @@ int Call(Context* context) {
     } else {
       return 1;
     }
-  } else {
-    BrigOperandImmed op_width = {
-      sizeof(BrigOperandImmed),
-      BrigEOperandImmed,
-      Brigb32,
-      0,
-      { 0 }
-    };
-    BrigoOffset32_t curOpOffset = context->get_operand_offset();
-    context->append_operand(&op_width);
-    callInst.o_operands[0] = curOpOffset;
   }
   if (context->token_to_scan == __FBAR) {
     hasWidthOrFbar = true;
@@ -4349,8 +4344,6 @@ int Kernel(Context *context) {
     }
     if (!Codeblock(context)) {
       return 0;
-    } else {
-      context->set_error(INVALID_CODEBLOCK);
     }
   } else {
     context->set_error(MISSING_IDENTIFIER);
@@ -6120,17 +6113,6 @@ int Ld(Context* context) {
       context->set_error(UNKNOWN_ERROR);
       return 1;
     }
-  } else {
-    BrigOperandImmed op_width = {
-      sizeof(BrigOperandImmed),
-      BrigEOperandImmed,
-      Brigb32,
-      0,
-      { 0 }
-    };
-    BrigoOffset32_t curOpOffset = context->get_operand_offset();
-    context->append_operand(&op_width);
-    ld_op.o_operands[0] = curOpOffset;
   }
   if (!LdModifierPart2(context, &ld_op, &vector_size)) {
   } else {
@@ -7349,8 +7331,7 @@ int Operation(Context* context) {
 
 int BodyStatementNested(Context* context) {
   if (context->token_to_scan == TOKEN_COMMENT) {
-    context->token_to_scan = yylex();
-    return 0;
+	return Comment(context);
   } else if (context->token_to_scan == PRAGMA) {
     if (!Pragma(context)) {
       return 0;
@@ -7415,11 +7396,25 @@ int ArgStatements(Context* context) {
   return 1;
 }
 
+int Comment(Context* context){
+
+	if(context->token_to_scan == TOKEN_COMMENT){
+	std::string comment(context->token_value.string_val);
+    int comment_offset = context->add_symbol(comment);
+	BrigDirectiveComment dir_com = { sizeof(BrigDirectiveComment), BrigEDirectiveComment, context->get_code_offset(), comment_offset};
+	context->append_directive(&dir_com);
+	context->token_to_scan = yylex();
+	return 0;
+	} else {
+		context->set_error(UNKNOWN_ERROR);
+		return 1;
+	}
+}
+
 int BodyStatement(Context* context) {
 
   if (context->token_to_scan == TOKEN_COMMENT) {
-    context->token_to_scan = yylex();
-    return 0;
+	return Comment(context);
   } else if (context->token_to_scan == PRAGMA) {
     if (!Pragma(context)) {
       return 0;
@@ -7458,15 +7453,16 @@ int BodyStatement(Context* context) {
   } else if (!Operation(context)) {
     return 0;
   }
+
   return 1;
 }
 
 int BodyStatements(Context* context) {
   if (!BodyStatement(context)) {
-    while (!BodyStatement(context)) {
-      ;
+    while (1) {
+      if(BodyStatement(context))
+		return 0;
     }
-    return 0;
   }
   return 1;
 }
@@ -7766,10 +7762,8 @@ int SingleListSingle(Context * context) {
           n = elementCount ;
           break;
 	  }
-
         size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t) ;
         uint8_t *array = new uint8_t[arraySize];
-        for(unsigned i = 0; i < arraySize; ++i) array[i] = 0;
         BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
         uint32_t init_length = 0;
 
@@ -7812,9 +7806,8 @@ int SingleListSingle(Context * context) {
           break;
         case Brigb64:
           for(unsigned i = 0; i < elementCount; i ++ ){
-            double d = single_list[i];
-            memmove(&bdi->initializationData.u64[i],&d,sizeof(uint64_t));
-          }
+            memmove(&bdi->initializationData.u64[i],&single_list[i],sizeof(uint64_t));
+	  }
           break;
         }
 
@@ -8791,8 +8784,6 @@ int LabelList(Context* context) {
       size_t arraySize = sizeof(BrigDirectiveLabelInit) +
                          (elementCount - 1) * sizeof(BrigdOffset32_t);
       uint8_t *array = new uint8_t[arraySize];
-      for(unsigned i = 0; i < arraySize; ++i)
-        array[i] = 0;
       BrigDirectiveLabelInit *bdli = reinterpret_cast<BrigDirectiveLabelInit*>(array);
 
       // update the BrigDirectiveSymbol.d_init and dim
@@ -9632,32 +9623,33 @@ int LdaMod(Context* context) {
 }
 
 int TopLevelStatement(Context *context){
-  if (!Directive(context)) {
+
+  if(TOKEN_COMMENT==context->token_to_scan){
+	return Comment(context);
+  }
+  else if(!Directive(context)) {
     return 0 ;
-  } else if (KERNEL == context->token_to_scan) {
-    return Kernel(context);
-  } else if (SIGNATURE == context->token_to_scan) {
-    return GlobalDecl(context);
-  } else if ( (context->token_to_scan == ALIGN) ||
+  }else if(KERNEL == context->token_to_scan) {
+    return Kernel(context) ;
+  }else if(SIGNATURE == context->token_to_scan){
+    return GlobalDecl(context) ;
+  }else if ( (context->token_to_scan == ALIGN) ||
              (context->token_to_scan == CONST) ||
              (context->token_to_scan == EXTERN) ||
              (context->token_to_scan == STATIC) ) {
-    if (DeclPrefix(context)) {
+    if(DeclPrefix(context)){
         return 1;
     }
-  } else if (TOKEN_COMMENT == context->token_to_scan) {
-    context->token_to_scan = yylex();
-    return 0;
   }
 
-  if (FUNCTION == context->token_to_scan){
-	if (!FunctionDefinition(context)){
-		if (';' == context->token_to_scan){
+  if(FUNCTION == context->token_to_scan){
+	if(!FunctionDefinition(context)){
+		if(';' == context->token_to_scan){
 			context->token_to_scan = yylex();
 			return 0;
 		}
 		else {
-			if (!Codeblock(context)){
+			if(!Codeblock(context)){
 				return 0;
 			} else
 				return 1;
