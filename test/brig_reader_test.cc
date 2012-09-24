@@ -216,7 +216,7 @@ TEST(BrigWriterTest, VectorCopy) {
 }
 
 TEST(BrigWriterTest, Cosine) {
-  TestHSAIL(
+  llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
     "//==========================================================\n"
@@ -253,4 +253,23 @@ TEST(BrigWriterTest, Cosine) {
     "	ret;\n"
     "};\n"
     );
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  float *arg_val0 = new float;
+  float *arg_val1 = new float;
+
+  *arg_val0 = M_PI;
+  *arg_val1 = 0.0f;
+
+  void *args[] = { &arg_val0, &arg_val1 };
+  llvm::Function *fun = mod->getFunction("__Get_fcos");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_FLOAT_EQ(M_PI, *arg_val0);
+  EXPECT_FLOAT_EQ(-1.0f, *arg_val1);
+
+  delete arg_val1;
+  delete arg_val0;
 }
