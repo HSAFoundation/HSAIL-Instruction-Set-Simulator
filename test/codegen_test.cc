@@ -9619,7 +9619,7 @@ TEST(CodegenTest, DISABLED_Call_CodeGen_SimpleTest) {
 }
 
 
-TEST(CodegenTest, DISABLED_Kernel_CodeGen_SimpleTest) {
+TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 

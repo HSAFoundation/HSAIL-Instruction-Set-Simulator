@@ -165,7 +165,7 @@ int Instruction4ShufflePart6(Context* context);
 int FunctionDefinitionPart2(Context* context);
 int MemoryOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
-
+int LabelTargetsPart2(Context* context);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
