@@ -76,6 +76,10 @@ int Query(Context* context) {
     // According to Query Image (query) Operations in v1.2 PRM 7.7.1
     // If opcode is width, depth, height. The data type must be Brigu32.
     // If not, it must be Brigb32.
+    if (context->token_type != DATA_TYPE_ID) {
+      context->set_error(MISSING_DATA_TYPE);
+      return 1;
+    }
     if (context->token_value.data_type == query_inst.type) {
       context->token_to_scan = yylex();
       // According to the Data Type , The register must be a 32bit Register.
@@ -110,16 +114,16 @@ int Query(Context* context) {
               context->set_error(MISSING_SEMICOLON);
             }
           } else {
-            context->set_error(INVALID_OPERAND);
+            context->set_error(INVALID_SECOND_OPERAND);
           }
         } else {
           context->set_error(MISSING_COMMA);
         }
       } else {
-        context->set_error(MISSING_OPERAND);
+        context->set_error(INVALID_FIRST_OPERAND);
       }
     } else {
-      context->set_error(MISSING_DATA_TYPE);
+      context->set_error(INVALID_DATA_TYPE);
     }
   }
   return 1;
@@ -135,15 +139,19 @@ int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
   } else if (context->token_type == CONSTANT) {
     opSize += opSize & 0x7;
   }  // else TOKEN_GLOBAL_IDENTIFIER TOKEN_LOCAL_IDENTIFIER
-
-  if (!Identifier(context)) {
-    if (opSize == context->get_operand_offset()) {
-      *pRetOpOffset = context->operand_map[opName];
-    } else {
-      *pRetOpOffset = opSize;
+  if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER ||
+      context->token_to_scan == TOKEN_LOCAL_IDENTIFIER ||
+      context->token_type == REGISTER) {
+    if (!Identifier(context)) {
+      if (opSize == context->get_operand_offset()) {
+        *pRetOpOffset = context->operand_map[opName];
+      } else {
+        *pRetOpOffset = opSize;
+      }
+      context->token_to_scan = yylex();
+      return 0;
     }
-    context->token_to_scan = yylex();
-    return 0;
+    return 1;
   } else if (!BaseOperand(context)) {
     if (opSize == context->get_operand_offset()) {
       *pRetOpOffset = context->operand_map[opName];
@@ -153,6 +161,7 @@ int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
     context->token_to_scan = yylex();
     return 0;
   }
+  context->set_error(INVALID_OPERAND);
   return 1;
 
 }
@@ -199,6 +208,7 @@ int Identifier(Context* context) {
     }
     return 0;
   }
+  context->set_error(INVALID_IDENTIFIER);
   return 1;
 }
 
@@ -380,8 +390,7 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
           BrigEOperandAddress,    // kind
           Brigb32,                // type
           0,                      // reserved
-          0/*,                      // directive
-          0*/
+          0                       // directive
         };
         // TODO(Chuang) name isn't declared in directive.
         // if (!context->symbol_map.count(name)) {
@@ -495,6 +504,8 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
         } else {
           context->set_error(MISSING_CLOSING_BRACKET);
         }
+      } else {
+        context->set_error(MISSING_ADDRESS);
       }
     }
   }
@@ -2545,7 +2556,7 @@ int Initializer(Context* context) {
       case Brigu64:
       case Brigf64:
       case Brigb64: init_type = Brigb64; break;
-	  default: context->set_error(UNKNOWN_ERROR);
+	  default: context->set_error(INVALID_INITIALIZER);
 				return 1;
     }
     context->set_type(init_type);
@@ -3117,7 +3128,7 @@ int FunctionSignature(Context *context) {
           context->set_error(MISSING_CLOSING_PARENTHESIS);
       }
     } else {
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(MISSING_OPENNING_BRACKET);
       return 1;
     }
 
@@ -3134,7 +3145,7 @@ int FunctionSignature(Context *context) {
           context->set_error(MISSING_CLOSING_PARENTHESIS);
       }
     } else {
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(MISSING_OPENNING_BRACKET);
       return 1;
     }
 
@@ -3241,7 +3252,7 @@ int LabelTargets(Context* context) {
         }
       }
     } else {
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(INVALID_LABEL_TARGETS);
     }
   }
   return 1;
@@ -5445,7 +5456,7 @@ int GlobalGroupDecl(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
+  context->set_error(INVALID_GLOBAL_DECL);
   return 1;
 }
 
@@ -6071,7 +6082,6 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
     return 0;
   }
 
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -6108,15 +6118,11 @@ int Ld(Context* context) {
   context->token_to_scan = yylex();
   if (context->token_to_scan == _WIDTH) {
     ld_op.o_operands[0] = context->get_operand_offset();
-    if (!OptionalWidth(context)) {
-    } else {
-      context->set_error(UNKNOWN_ERROR);
+    if (OptionalWidth(context)) {
       return 1;
     }
   }
-  if (!LdModifierPart2(context, &ld_op, &vector_size)) {
-  } else {
-    context->set_error(UNKNOWN_ERROR);
+  if (LdModifierPart2(context, &ld_op, &vector_size)) {
     return 1;
   }
 
@@ -6138,22 +6144,21 @@ int Ld(Context* context) {
             return 1;
           }
         } else {  // Memory Operand
-          context->set_error(UNKNOWN_ERROR);
+          context->set_error(INVALID_SECOND_OPERAND);
           return 1;
         }
       } else {  // ','
         context->set_error(MISSING_COMMA);
         return 1;
       }
-    } else {
-      context->set_error(INVALID_OPERAND);
+    } else {  // ArrayOperand
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
   } else {  // Data Type
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -6173,9 +6178,7 @@ int St(Context* context) {
   int vector_size = 0;
   context->token_to_scan = yylex();
 
-  if (!LdModifierPart2(context, &st_op, &vector_size)) {
-  } else {
-    context->set_error(UNKNOWN_ERROR);
+  if (LdModifierPart2(context, &st_op, &vector_size)) {
     return 1;
   }
 
@@ -6195,7 +6198,7 @@ int St(Context* context) {
             return 1;
           }
         } else {  // Memory Operand
-          context->set_error(UNKNOWN_ERROR);
+          context->set_error(INVALID_SECOND_OPERAND);
           return 1;
         }
       } else {  // ','
@@ -6210,7 +6213,6 @@ int St(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -6287,7 +6289,6 @@ int Lda(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -6971,7 +6972,7 @@ int Instruction1(Context* context) {
             context->token_to_scan = yylex();
             return 0;
           } else {
-            context->set_error(UNKNOWN_ERROR);
+            context->set_error(MISSING_SEMICOLON);
           }
         } else {
           context->set_error(MISSING_OPERAND);
@@ -7103,7 +7104,7 @@ int Segp(Context* context) {
       }
     } else {
       // should be missing ADDRESS_SPACE_IDENTIFIER
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(MISSING_IDENTIFIER);
     }
   } else if (context->token_to_scan == STOF || // stof or ftos
              context->token_to_scan == FTOS) {
@@ -7188,7 +7189,7 @@ int Segp(Context* context) {
       }
     } else {
       // should be missing ADDRESS_SPACE_IDENTIFIER
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(MISSING_IDENTIFIER);
     }
   }
   return 1;
@@ -7398,7 +7399,7 @@ int ArgStatements(Context* context) {
 
 int Comment(Context* context){
 
-	if(context->token_to_scan == TOKEN_COMMENT){
+	if (context->token_to_scan == TOKEN_COMMENT) {
 	std::string comment(context->token_value.string_val);
     int comment_offset = context->add_symbol(comment);
 	BrigDirectiveComment dir_com = { sizeof(BrigDirectiveComment), BrigEDirectiveComment, context->get_code_offset(), comment_offset};
@@ -7406,7 +7407,7 @@ int Comment(Context* context){
 	context->token_to_scan = yylex();
 	return 0;
 	} else {
-		context->set_error(UNKNOWN_ERROR);
+		context->set_error(INVALID_COMMENT);
 		return 1;
 	}
 }
@@ -8309,7 +8310,6 @@ int ImageRead(Context *context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -8435,7 +8435,6 @@ int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass,
     }
     return 0;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -8596,7 +8595,6 @@ int AtomicNoRet(Context* context) {
     context->set_error(MISSING_IDENTIFIER);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 

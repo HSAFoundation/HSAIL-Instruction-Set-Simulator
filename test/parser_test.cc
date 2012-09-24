@@ -1335,7 +1335,7 @@ TEST(ParserTest, LabelTargets) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
-  EXPECT_EQ(UNKNOWN_ERROR, mer.get_last_error());
+  EXPECT_EQ(INVALID_LABEL_TARGETS, mer.get_last_error());
 
   input.assign("@targets: labeltargets;\n");  // number of label is zero
   lexer->set_source_string(input);
