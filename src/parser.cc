@@ -2094,7 +2094,7 @@ int Codeblock(Context* context) {
                                  sizeof(BrigDirectiveKernel));
 		
 	  } else {
-			context->set_error(UNKNOWN_ERROR);
+			context->set_error(INVALID_CODEBLOCK);
 			return 1;     
 		}
    }
@@ -2189,8 +2189,7 @@ int Branch(Context* context) {
   context->token_to_scan = yylex();
   // check for optionalWidth
   if (context->token_to_scan == _WIDTH) {
-    if (!OptionalWidth(context)) {
-    } else {
+    if (OptionalWidth(context)) {
       return 1;
     }
   }
@@ -2553,7 +2552,7 @@ int Initializer(Context* context) {
       case Brigu64:
       case Brigf64:
       case Brigb64: init_type = Brigb64; break;
-	  default: context->set_error(UNKNOWN_ERROR);
+	  default: context->set_error(INVALID_INITIALIZER);
 				return 1;
     }
     context->set_type(init_type);
@@ -3125,7 +3124,7 @@ int FunctionSignature(Context *context) {
           context->set_error(MISSING_CLOSING_PARENTHESIS);
       }
     } else {
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(MISSING_OPENNING_BRACKET);
       return 1;
     }
 
@@ -3142,7 +3141,7 @@ int FunctionSignature(Context *context) {
           context->set_error(MISSING_CLOSING_PARENTHESIS);
       }
     } else {
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(MISSING_OPENNING_BRACKET);
       return 1;
     }
 
@@ -3234,7 +3233,7 @@ int LabelTargets(Context* context) {
 		if(context->token_to_scan == LABELTARGETS)
 			return LabelTargetsPart2(context);
 		else {
-			context->set_error(UNKNOWN_ERROR);
+			context->set_error(INVALID_LABEL_TARGETS);
 			return 1;
 		}
 	}	
@@ -5463,7 +5462,7 @@ int GlobalGroupDecl(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
+  context->set_error(INVALID_GLOBAL_DECL);
   return 1;
 }
 
@@ -6089,7 +6088,6 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
     return 0;
   }
 
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -6126,15 +6124,11 @@ int Ld(Context* context) {
   context->token_to_scan = yylex();
   if (context->token_to_scan == _WIDTH) {
     ld_op.o_operands[0] = context->get_operand_offset();
-    if (!OptionalWidth(context)) {
-    } else {
-      context->set_error(UNKNOWN_ERROR);
+    if (OptionalWidth(context)) {
       return 1;
     }
   }
-  if (!LdModifierPart2(context, &ld_op, &vector_size)) {
-  } else {
-    context->set_error(UNKNOWN_ERROR);
+  if (LdModifierPart2(context, &ld_op, &vector_size)) {
     return 1;
   }
 
@@ -6156,7 +6150,7 @@ int Ld(Context* context) {
             return 1;
           }
         } else {  // Memory Operand
-          context->set_error(UNKNOWN_ERROR);
+          context->set_error(INVALID_FIRST_OPERAND);
           return 1;
         }
       } else {  // ','
@@ -6164,14 +6158,13 @@ int Ld(Context* context) {
         return 1;
       }
     } else {
-      context->set_error(INVALID_OPERAND);
+      context->set_error(INVALID_SECOND_OPERAND);
       return 1;
     }
   } else {  // Data Type
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -6191,9 +6184,7 @@ int St(Context* context) {
   int vector_size = 0;
   context->token_to_scan = yylex();
 
-  if (!LdModifierPart2(context, &st_op, &vector_size)) {
-  } else {
-    context->set_error(UNKNOWN_ERROR);
+  if (LdModifierPart2(context, &st_op, &vector_size)) {
     return 1;
   }
 
@@ -6213,7 +6204,7 @@ int St(Context* context) {
             return 1;
           }
         } else {  // Memory Operand
-          context->set_error(UNKNOWN_ERROR);
+          context->set_error(INVALID_SECOND_OPERAND);
           return 1;
         }
       } else {  // ','
@@ -6221,14 +6212,13 @@ int St(Context* context) {
         return 1;
       }
     } else {
-      context->set_error(INVALID_OPERAND);
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
   } else {  // Data Type
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -6305,7 +6295,6 @@ int Lda(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -6989,7 +6978,7 @@ int Instruction1(Context* context) {
             context->token_to_scan = yylex();
             return 0;
           } else {
-            context->set_error(UNKNOWN_ERROR);
+            context->set_error(MISSING_SEMICOLON);
           }
         } else {
           context->set_error(MISSING_OPERAND);
@@ -7121,7 +7110,7 @@ int Segp(Context* context) {
       }
     } else {
       // should be missing ADDRESS_SPACE_IDENTIFIER
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(MISSING_IDENTIFIER);
     }
   } else if (context->token_to_scan == STOF || // stof or ftos
              context->token_to_scan == FTOS) {
@@ -7206,7 +7195,7 @@ int Segp(Context* context) {
       }
     } else {
       // should be missing ADDRESS_SPACE_IDENTIFIER
-      context->set_error(UNKNOWN_ERROR);
+      context->set_error(MISSING_IDENTIFIER);
     }
   }
   return 1;
@@ -7424,7 +7413,7 @@ int Comment(Context* context){
 	context->token_to_scan = yylex();
 	return 0;
 	} else {
-		context->set_error(UNKNOWN_ERROR);
+		context->set_error(INVALID_COMMENT);
 		return 1;
 	}
 }
@@ -8335,7 +8324,6 @@ int ImageRead(Context *context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -8461,7 +8449,6 @@ int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass,
     }
     return 0;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
@@ -8622,7 +8609,6 @@ int AtomicNoRet(Context* context) {
     context->set_error(MISSING_IDENTIFIER);
     return 1;
   }
-  context->set_error(UNKNOWN_ERROR);
   return 1;
 }
 
