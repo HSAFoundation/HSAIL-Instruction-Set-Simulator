@@ -48,7 +48,8 @@ GTEST_API_ int main(int argc, char **argv) {
       "BrigRuntimeTest.Bytealign_b32:"
       "BrigRuntimeTest.Lerp_b32:"
       "BrigRuntimeTest.Sad*_b32:"
-      "BrigRuntimeTest.Cmp_*:";
+      "BrigRuntimeTest.Cmp_*:"
+      "BrigRuntimeTest.Atomic*Cas_*:";
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
