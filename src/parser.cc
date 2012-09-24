@@ -2094,7 +2094,7 @@ int Codeblock(Context* context) {
                                  sizeof(BrigDirectiveKernel));
 		
 	  } else return 1;
-    } else 
+    } else if (context->token_to_scan != '}')
       return 1;
   } 
   return CodeBlockEnd(context);
@@ -7461,9 +7461,8 @@ int BodyStatements(Context* context) {
   if (!BodyStatement(context)) {
     while (1) {
       if(BodyStatement(context))
-		return 1;
+		return 0;
     }
-    return 0;
   }
   return 1;
 }
