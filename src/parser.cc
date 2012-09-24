@@ -2075,11 +2075,11 @@ int Codeblock(Context* context) {
   // first token should be '{'
   context->token_to_scan = yylex();
   if(!BodyStatements(context)){
-	   
+
       BrigDirectiveFunction bdf;
       context->get_directive(context->current_bdf_offset, &bdf);
 	  if(bdf.kind == BrigEDirectiveFunction){
-		
+
 		bdf.d_nextDirective = context->get_directive_offset();
 		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
 		context->update_directive_bytes(bdf_charp,
@@ -2092,10 +2092,10 @@ int Codeblock(Context* context) {
 		context->update_directive_bytes(bdf_charp,
                                  context->current_bdf_offset,
                                  sizeof(BrigDirectiveKernel));
-		
+
 	  } else {
 			context->set_error(INVALID_CODEBLOCK);
-			return 1;     
+			return 1;
 		}
    }
 	if (context->token_to_scan == '}')
@@ -3238,13 +3238,13 @@ int LabelTargets(Context* context) {
 			context->set_error(INVALID_LABEL_TARGETS);
 			return 1;
 		}
-	}	
+	}
 	else {
 		context->set_error(MISSING_LABEL);
 		return 1;
 	}
 }
-  
+
 int LabelTargetsPart2(Context* context){
       while (1) {
         if (yylex() == TOKEN_LABEL) {
@@ -3263,7 +3263,7 @@ int LabelTargetsPart2(Context* context){
           return 1;
         }
       }
-    
+
 }
 
 int Instruction4(Context* context) {
@@ -5772,7 +5772,7 @@ int Mul24Inst(Context* context) {
     BrigInstBase bib = {
       sizeof(BrigInstBase), //size
       BrigEInstBase,        //kind
-      BrigMul,              //opcode
+      BrigMul24,              //opcode
       Brigb32,              //type
       BrigNoPacking,        //packing
       {0,0,0,0,0}           //o_operands[5]
@@ -5880,7 +5880,7 @@ int Mad24Inst(Context* context) {
     BrigInstBase bib = {
       sizeof(BrigInstBase), //size
       BrigEInstBase,        //kind
-      BrigMul,              //opcode
+      BrigMad24,              //opcode
       Brigb32,              //type
       BrigNoPacking,        //packing
       {0,0,0,0,0}           //o_operands[5]
@@ -7455,10 +7455,10 @@ int BodyStatement(Context* context) {
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
       if (!Label(context)) {
-		if(context->token_to_scan == LABELTARGETS)	
+		if(context->token_to_scan == LABELTARGETS)
 			return LabelTargetsPart2(context);
-		return 0;	
-	  }else 
+		return 0;
+	  }else
 		return 1;
   } else if (!Operation(context)) {
     return 0;
@@ -7476,7 +7476,7 @@ int BodyStatements(Context* context) {
 	}
 	if((!context->token_to_scan) || (context->token_to_scan == '}'))
 		return 0;
-	else 
+	else
 		return 1;
   } else{
     context->set_error(INVALID_CODEBLOCK); //Codeblock should have atleast one bodyStatement
