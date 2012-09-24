@@ -3230,14 +3230,28 @@ int Label(Context* context) {
 }
 
 int LabelTargets(Context* context) {
-  if (!Label(context)) {
-    if (context->token_to_scan == LABELTARGETS) {
+	if (!Label(context)){
+		if(context->token_to_scan == LABELTARGETS)
+			return LabelTargetsPart2(context);
+		else {
+			context->set_error(UNKNOWN_ERROR);
+			return 1;
+		}
+	}	
+	else {
+		context->set_error(MISSING_LABEL);
+		return 1;
+	}
+}
+  
+int LabelTargetsPart2(Context* context){
       while (1) {
         if (yylex() == TOKEN_LABEL) {
           context->token_to_scan = yylex();
           if (context->token_to_scan == ',') {
             continue;
           } else if (context->token_to_scan == ';') {
+			context->token_to_scan = yylex();
             return 0;
           } else {
             context->set_error(MISSING_SEMICOLON);
@@ -3248,11 +3262,7 @@ int LabelTargets(Context* context) {
           return 1;
         }
       }
-    } else {
-      context->set_error(UNKNOWN_ERROR);
-    }
-  }
-  return 1;
+    
 }
 
 int Instruction4(Context* context) {
@@ -7453,11 +7463,12 @@ int BodyStatement(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
-    if (!Label(context)) {
-      return 0;
-    }
-  } else if (!LabelTargets(context)) {
-    return 0;
+      if (!Label(context)) {
+		if(context->token_to_scan == LABELTARGETS)	
+			return LabelTargetsPart2(context);
+		return 0;	
+	  }else 
+		return 1;
   } else if (!Operation(context)) {
     return 0;
   }
