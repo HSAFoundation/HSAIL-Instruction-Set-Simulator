@@ -774,6 +774,8 @@ memopt_off          { free_string(context);
                       return MEMOPT_OFF; }
 
   /* -- Opcode -- */
+  /* TODO(Chuang): "fbar_initSizeDynamic"/"fbar_initSizeKnown" */
+
 fbar_initSizeWg     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;

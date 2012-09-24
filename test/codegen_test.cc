@@ -3822,7 +3822,7 @@ TEST(CodegenTest, Instruction1_CodeGen_SimpleTest) {
     32,                    // size
     BrigEInstBase,         // kind
     BrigClock,             // opcode
-    Brigb32,               // type
+    Brigb64,               // type
     BrigNoPacking,         // packing
     {20, 0, 0, 0, 0},      // o_operands[5]
   };

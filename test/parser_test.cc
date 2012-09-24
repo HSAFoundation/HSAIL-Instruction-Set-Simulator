@@ -2027,13 +2027,13 @@ TEST(ParserTest, Instruction1) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("fbar_wait_upi_s8 $s1;\n");
+  input.assign("fbar_wait_b64 $d1;\n");
   // Instruction1Opcode with optRoundingMode
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("fbar_wait_s8 $s1;\n");
+  input.assign("fbar_wait_b64 $d1;\n");
   // Instruction1Opcode without optRoundingMode
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
