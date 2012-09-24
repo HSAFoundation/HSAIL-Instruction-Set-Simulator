@@ -2657,7 +2657,7 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
         0,                                // d_init = 0 for arg
         0                                 // reserved
       };
-
+      context->symbol_map[var_name] = context->get_directive_offset();
       context->current_argdecl_offset = context->get_directive_offset();
       context->append_directive(&sym_decl);
 
@@ -2731,6 +2731,8 @@ int UninitializableDecl(Context* context) {
         0,                                // d_init = 0 for arg
         0                                 // reserved
       };
+
+      context->symbol_map[var_name] = context->get_directive_offset();
       context->append_directive(&sym_decl);
 /*
       BrigDirectiveFunction bdf;
