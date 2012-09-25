@@ -6030,6 +6030,52 @@ TEST(CodegenTest, ArrayDimensionSetCodeGen) {
   delete lexer;
 }
 
+TEST(CodegenTest, ArgumentDeclCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("align 8 arg_u8 %last[] ;\n");
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgumentDecl(context));
+  
+  BrigDirectiveSymbol ref = {
+        sizeof(BrigDirectiveSymbol),                 // size
+        BrigEDirectiveSymbol,             // kind
+        {
+          8,       // c_code
+          BrigArgSpace,                    // storageClass
+          BrigNone,         // attribute
+          0,                                // reserved
+          BrigFlex,   // symbol modifier
+          0,               // dim
+          8,                  // s_name
+          Brigu8,              // data type
+          8,         // alignment
+        },
+        0,                                // d_init = 0 for arg
+        0                                 // reserved
+        };
+
+	BrigDirectiveSymbol get;
+	context->get_directive(8, &get);
+	EXPECT_EQ(ref.size, get.size);
+	EXPECT_EQ(ref.kind, get.kind);
+	EXPECT_EQ(ref.s.c_code, get.s.c_code);
+	EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+	EXPECT_EQ(ref.s.attribute, get.s.attribute);
+	EXPECT_EQ(ref.s.reserved, get.s.reserved);
+	EXPECT_EQ(ref.s.symbolModifier, get.s.symbolModifier);
+	EXPECT_EQ(ref.s.dim, get.s.dim);
+	EXPECT_EQ(ref.s.s_name, get.s.s_name);
+	EXPECT_EQ(ref.s.type, get.s.type);
+	EXPECT_EQ(ref.s.align, get.s.align);
+	EXPECT_EQ(ref.d_init, get.d_init);
+	EXPECT_EQ(ref.reserved, get.reserved);
+	
+	delete lexer;
+}
+
 TEST(CodegenTest,FileDeclCodegen){
   context->set_error_reporter(main_reporter);
   context->clear_context();
