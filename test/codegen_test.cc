@@ -9769,7 +9769,7 @@ TEST(CodegenTest, Instruction0_CodeGen_SimpleTest) {
   Lexer* lexer = new Lexer(input);
 
   BrigInstBase ref = {
-    sizeof(BrigInstBase),                    // size
+    sizeof(BrigInstBase),   // size
     BrigEInstBase,         // kind
     BrigNop,            // opcode
     Brigb32,               // type

@@ -775,6 +775,7 @@ memopt_off          { free_string(context);
 
   /* -- Opcode -- */
   /* TODO(Chuang): "fbar_initSizeDynamic"/"fbar_initSizeKnown" */
+  /* fbar_release */
 
 fbar_initSizeWg     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
@@ -990,6 +991,7 @@ frsqrt              { free_string(context);
 frcp                { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFrcp;
                       return FRCP; }
 
 unpack3             { free_string(context);

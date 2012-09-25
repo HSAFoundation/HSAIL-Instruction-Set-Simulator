@@ -58,6 +58,7 @@ enum error_code_t {
   INVALID_IDENTIFIER,
   INVALID_GLOBAL_DECL,
   INVALID_COMMENT,
+  INVALID_PACKING,
 
   // missing part
   MISSING_VERSION_STATEMENT,
@@ -184,6 +185,8 @@ class ErrorReporterInterface {
           return std::string("Invalid global declaration.");
         case INVALID_COMMENT:
           return std::string("Invalid comment.");
+        case INVALID_PACKING:
+          return std::string("Invalid packing.");
 
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");

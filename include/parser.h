@@ -67,7 +67,7 @@ int Instruction0(Context* context);
 int Instruction1(Context* context);
 int Operation(Context* context);
 int Segp(Context* context);
-int RIW_Operand(Context* context);
+
 int BodyStatementNested(Context* context);
 int ArgStatement(Context* context);
 int ArgStatements(Context* context);
@@ -166,6 +166,15 @@ int FunctionDefinitionPart2(Context* context);
 int MemoryOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 int LabelTargetsPart2(Context* context);
+
+int Instruction1Part1OpcodeDT(Context* context);
+int Instruction1Part2OpcodeNoDT(Context* context);
+int Instruction1Part3Clock(Context* context);
+
+int Instruction2Part1OpcodeDT(Context* context);
+int Instruction2Part2OpcodeNoDT(Context* context);
+int Instruction2Part3OpcodeFtz(Context* context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
