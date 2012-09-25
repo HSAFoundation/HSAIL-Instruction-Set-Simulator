@@ -59,5 +59,73 @@ void Init_Instruction3TestCases(){
 		BrigNoPacking,
 		{8, 20, 24, 0, 0}
 	};
-	TestCase_Instr3Opcode[2].init(in, out2);		
+	TestCase_Instr3Opcode[2].init(in, out2);
+
+	in.assign( "add_ps_sat_s16x4 $d1, 0x40, WAVESIZE;\n");
+	BrigInstBase out3 = {
+		32,
+		BrigEInstBase, 
+		BrigAdd, 
+		Brigs16x4,
+		BrigPackPSsat,
+		{8, 24, 36, 0, 0}
+	};
+	TestCase_Instr3Opcode[3].init(in, out3);
+
+	in.assign( "div_s32 $s1, 100, 10;\n");
+	BrigInstBase out4 = {
+		32,
+		BrigEInstBase, 
+		BrigDiv, 
+		Brigs32,
+		BrigNoPacking,
+		{8, 24, 40, 0, 0}
+	};
+	TestCase_Instr3Opcode[4].init(in, out4);
+
+	in.assign( "div_u64 $d1, $d3, 0x233412349456;\n");
+	BrigInstBase out5 = {
+		32,
+		BrigEInstBase, 
+		BrigDiv, 
+		Brigu64,
+		BrigNoPacking,
+		{8, 20, 32, 0, 0}
+	};
+	TestCase_Instr3Opcode[5].init(in, out5);	
+	
+	in.assign( "rem_s64 $d1, $d3, WAVESIZE;\n");
+	BrigInstBase out6 = {
+		32,
+		BrigEInstBase, 
+		BrigRem, 
+		Brigs64,
+		BrigNoPacking,
+		{8, 20, 32, 0, 0}
+	};
+	TestCase_Instr3Opcode[6].init(in, out6);
+	
+	in.assign( "rem_u64 $d1, 0x040, 0x233412349456;\n");
+	BrigInstBase out7 = {
+		32,
+		BrigEInstBase, 
+		BrigRem, 
+		Brigu64,
+		BrigNoPacking,
+		{8, 24, 36, 0, 0}
+	};
+	TestCase_Instr3Opcode[7].init(in, out7);
+	
+	in.assign( "shl_u32 $s1, $s1, 2;\n");
+	BrigInstBase out8 = {
+		32,
+		BrigEInstBase, 
+		BrigShl, 
+		Brigu32,
+		BrigNoPacking,
+		{8, 8, 20, 0, 0}
+	};
+	TestCase_Instr3Opcode[8].init(in, out8);
+	
+	
 }

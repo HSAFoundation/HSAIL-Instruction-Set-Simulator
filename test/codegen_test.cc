@@ -602,19 +602,22 @@ TEST(CodegenTest, Example3_CodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, Instrustion3Op_CodeGen) {
+TEST(CodegenTest, Instruction3Op_CodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
   Lexer *lexer = new Lexer();
   Init_Instruction3TestCases();
   
-  for(int i=0; i<3; i++){
+  for(int i=0; i<9; i++){
 	lexer->set_source_string(TestCase_Instr3Opcode[i].Input);
 	context->token_to_scan = lexer->get_next_token();
-	EXPECT_EQ(0, Instruction3(context));
-	BrigInstBase get;
-	context->get_code(8, &get);
-	TestCase_Instr3Opcode[i].validate(get);
+	int ret = Instruction3(context);
+	EXPECT_EQ(0, ret);
+	if(!ret){
+		BrigInstBase get;
+		context->get_code(8, &get);
+		TestCase_Instr3Opcode[i].validate(get);
+	}
 	context->clear_context();
   }
   
