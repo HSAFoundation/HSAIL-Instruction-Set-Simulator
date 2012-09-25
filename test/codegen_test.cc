@@ -9,6 +9,7 @@
 #include "error_reporter.h"
 #include "context.h"
 #include "parser_wrapper.h"
+#include "codegen_test.h"
 
 namespace hsa {
 namespace brig {
@@ -604,31 +605,19 @@ TEST(CodegenTest, Example3_CodeGen) {
 TEST(CodegenTest, Instrustion3Op_CodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
-
-  std::string input("add_pp_sat_u16x2 $s1, $s0, $s3; \n");
-
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, Instruction3(context));
-
-  BrigInstBase ref = {
-    32,
-    BrigEInstBase,
-    BrigAdd,
-    Brigu16x2,
-    BrigPackPPsat,
-    {8, 20, 32, 0, 0}
-  };
-
-  BrigInstBase get;
-  context->get_code(8, &get);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-
+  Lexer *lexer = new Lexer();
+  Init_Instruction3TestCases();
+  
+  for(int i=0; i<3; i++){
+	lexer->set_source_string(TestCase_Instr3Opcode[i].Input);
+	context->token_to_scan = lexer->get_next_token();
+	EXPECT_EQ(0, Instruction3(context));
+	BrigInstBase get;
+	context->get_code(8, &get);
+	TestCase_Instr3Opcode[i].validate(get);
+	context->clear_context();
+  }
+  
   delete lexer;
 }
 
