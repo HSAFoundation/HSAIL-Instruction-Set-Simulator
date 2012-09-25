@@ -9884,5 +9884,24 @@ TEST(CodegenTest, WAVESIZE_CodeGen_SimpleTest) {
   delete lexer;
 }
 
+TEST(CodegenTest, Instruction2_CodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  Lexer *lexer = new Lexer();
+  Init_Instruction2TestCases();
+  
+  for(unsigned int i = 0; i < Inst2TestCase::numCases; i++){
+	lexer->set_source_string(testInst2[i].Input);
+	context->token_to_scan = lexer->get_next_token();
+	EXPECT_EQ(0, Instruction2(context));
+	BrigInstBase get;
+	context->get_code(8, &get);
+	testInst2[i].validate(get);
+	context->clear_context();
+  }
+  
+  delete lexer;
+}
+
 }  // namespace brig
 }  // namespace hsa
