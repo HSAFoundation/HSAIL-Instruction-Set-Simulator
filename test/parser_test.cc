@@ -2027,52 +2027,17 @@ TEST(ParserTest, Instruction1) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("fbar_wait_upi_s8 $s1;\n");
+  input.assign("fbar_wait_b64 $d1;\n");
   // Instruction1Opcode with optRoundingMode
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
 
-  input.assign("fbar_wait_s8 $s1;\n");
+  input.assign("fbar_wait_b64 $d1;\n");
   // Instruction1Opcode without optRoundingMode
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Instruction1(context));
-
-  delete lexer;
-}
-
-// -------------- Test for RIW_Operand rule ---------------
-// this rule specifies operand must be register,immediate value,or WAVESIZE
-TEST(ParserTest, RIW_Operand) {
-  // Create a lexer
-  Lexer* lexer = new Lexer();
-  // register error reporter with context
-  context->set_error_reporter(main_reporter);
-  std::string input("$s0;\n"); // register
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, RIW_Operand(context));
-
-  input.assign("$c5;\n"); // register
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, RIW_Operand(context));
-
-  input.assign("3424;\n"); // Imm
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, RIW_Operand(context));
-
-  input.assign("23.58L;\n"); // Imm
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, RIW_Operand(context));
-
-  input.assign("WAVESIZE;\n"); // wavesize
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, RIW_Operand(context));
 
   delete lexer;
 }

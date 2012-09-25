@@ -3814,7 +3814,7 @@ TEST(CodegenTest, Instruction1_CodeGen_SimpleTest) {
     32,                    // size
     BrigEInstBase,         // kind
     BrigClock,             // opcode
-    Brigb32,               // type
+    Brigb64,               // type
     BrigNoPacking,         // packing
     {20, 0, 0, 0, 0},      // o_operands[5]
   };
@@ -9818,7 +9818,7 @@ TEST(CodegenTest, Instruction0_CodeGen_SimpleTest) {
   Lexer* lexer = new Lexer(input);
 
   BrigInstBase ref = {
-    sizeof(BrigInstBase),                    // size
+    sizeof(BrigInstBase),   // size
     BrigEInstBase,         // kind
     BrigNop,            // opcode
     Brigb32,               // type
@@ -9930,6 +9930,25 @@ TEST(CodegenTest, WAVESIZE_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandWaveSz, get.kind);
 
 
+  delete lexer;
+}
+
+TEST(CodegenTest, Instruction2_CodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  Lexer *lexer = new Lexer();
+  Init_Instruction2TestCases();
+  
+  for(unsigned int i = 0; i < Inst2TestCase::numCases; i++){
+	lexer->set_source_string(testInst2[i].Input);
+	context->token_to_scan = lexer->get_next_token();
+	EXPECT_EQ(0, Instruction2(context));
+	BrigInstBase get;
+	context->get_code(8, &get);
+	testInst2[i].validate(get);
+	context->clear_context();
+  }
+  
   delete lexer;
 }
 
