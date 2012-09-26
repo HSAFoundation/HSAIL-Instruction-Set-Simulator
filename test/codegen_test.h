@@ -16,6 +16,7 @@ public:
 		EXPECT_EQ(Output.type, get.type);
 		EXPECT_EQ(Output.o_operands[0], get.o_operands[0]);
 		EXPECT_EQ(Output.o_operands[1], get.o_operands[1]);
+		EXPECT_EQ(Output.o_operands[2], get.o_operands[2]);
 	}
 	void init(std::string input, BrigInstBase ref){
 		(this->Input).assign(input);
@@ -50,7 +51,7 @@ void Init_Instruction3TestCases(){
 	};
 	TestCase_Instr3Opcode[1].init(in, out1);		
 	
-	in.assign( "add_u64 $d1, WAVESIZE, WAVESIZE;\n");
+	in.assign( "add_u64 $d1, WAVESIZE, $d3;\n");
 	BrigInstBase out2 = {
 		32,
 		BrigEInstBase, 
@@ -68,7 +69,7 @@ void Init_Instruction3TestCases(){
 		BrigAdd, 
 		Brigs16x4,
 		BrigPackPSsat,
-		{8, 24, 36, 0, 0}
+		{8, 24, 24 + sizeof(BrigOperandImmed), 0, 0}
 	};
 	TestCase_Instr3Opcode[3].init(in, out3);
 
@@ -79,7 +80,7 @@ void Init_Instruction3TestCases(){
 		BrigDiv, 
 		Brigs32,
 		BrigNoPacking,
-		{8, 24, 40, 0, 0}
+		{8, 24, 24 + sizeof(BrigOperandImmed), 0, 0}
 	};
 	TestCase_Instr3Opcode[4].init(in, out4);
 
@@ -112,7 +113,7 @@ void Init_Instruction3TestCases(){
 		BrigRem, 
 		Brigu64,
 		BrigNoPacking,
-		{8, 24, 36, 0, 0}
+		{8, 24, 48, 0, 0}
 	};
 	TestCase_Instr3Opcode[7].init(in, out7);
 	
@@ -123,7 +124,7 @@ void Init_Instruction3TestCases(){
 		BrigShl, 
 		Brigu32,
 		BrigNoPacking,
-		{8, 8, 20, 0, 0}
+		{8, 8, 24, 0, 0}
 	};
 	TestCase_Instr3Opcode[8].init(in, out8);
 	
