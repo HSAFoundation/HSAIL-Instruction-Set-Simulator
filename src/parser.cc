@@ -2598,7 +2598,7 @@ int ArgUninitializableDecl(Context* context) {
           context->get_directive_offset()
         };
 
-        context->symbol_map[arg_name]= context->get_operand_offset();
+        context->symbol_map[arg_name]= context->get_directive_offset();
         context->append_directive(&arg_decl);
         // add the operand to the map.
         context->arg_map[arg_name] = context->get_operand_offset();
