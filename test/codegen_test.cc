@@ -10120,9 +10120,9 @@ TEST(CodegenTest, Example6_CodeGen) {
     128,                                         // c_code
     35,                                          // s_name
     0,                                           // inParamCount
-    180,                                         // d_firstScopedDirective
+    188,                                         // d_firstScopedDirective
     3,                                           // operationCount
-    276,                                         // d_nextDirective
+    284,                                         // d_nextDirective
     BrigNone,                                    // attribute
     0,                                           // fbarCount
     0,                                           // outParamCount
@@ -10148,9 +10148,11 @@ TEST(CodegenTest, Example6_CodeGen) {
   BrigDirectiveScope argStart = {
     sizeof(BrigDirectiveScope),
     BrigEDirectiveArgStart,
-    120
+    128
   };
   BrigDirectiveScope getScope;
+  context->get_directive(curDirOffset, &getScope);
+  curDirOffset += sizeof(BrigDirectiveScope);
   EXPECT_EQ(argStart.size, getScope.size);
   EXPECT_EQ(argStart.kind, getScope.kind);
   EXPECT_EQ(argStart.c_code, getScope.c_code);
@@ -10196,9 +10198,9 @@ TEST(CodegenTest, Example6_CodeGen) {
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(248, csize);
   BrigsOffset32_t ssize = context->get_string_offset();
-  EXPECT_EQ(67, ssize);
+  EXPECT_EQ(68, ssize);
   BrigoOffset32_t osize = context->get_operand_offset();
-  EXPECT_EQ(144, osize);
+  EXPECT_EQ(128, osize);
 
 
   delete lexer;

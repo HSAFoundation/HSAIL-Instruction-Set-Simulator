@@ -7104,6 +7104,7 @@ int BodyStatementNested(Context* context) {
 int ArgStatement(Context* context) {
   if (context->token_to_scan == CALL) {
     if (!Call(context)) {
+      context->update_bdf_operation_count();
       return 0;
     }
   } else if (!BodyStatementNested(context)) {
