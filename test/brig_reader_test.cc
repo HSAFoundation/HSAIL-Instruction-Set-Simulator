@@ -277,7 +277,7 @@ TEST(BrigWriterTest, Cosine) {
 TEST(BrigWriterTest, Fib) {
   llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
-    "kernel &fib (arg_u32 %r, arg_s32 %n)\n"
+    "kernel &fib (kernarg_u32 %r, kernarg_s32 %n)\n"
     "{\n"
     "  ld_arg_s32 $s1, [%n];\n"
     "  cmp_lt_b1_s32 $c1, $s1, 3; // if n < 3 go to return\n"

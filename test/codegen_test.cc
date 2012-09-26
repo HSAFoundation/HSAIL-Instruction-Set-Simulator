@@ -9,6 +9,7 @@
 #include "error_reporter.h"
 #include "context.h"
 #include "parser_wrapper.h"
+#include "codegen_test.h"
 
 namespace hsa {
 namespace brig {
@@ -601,34 +602,25 @@ TEST(CodegenTest, Example3_CodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, Instrustion3Op_CodeGen) {
+TEST(CodegenTest, Instruction3Op_CodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
-
-  std::string input("add_pp_sat_u16x2 $s1, $s0, $s3; \n");
-
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, Instruction3(context));
-
-  BrigInstBase ref = {
-    32,
-    BrigEInstBase,
-    BrigAdd,
-    Brigu16x2,
-    BrigPackPPsat,
-    {8, 20, 32, 0, 0}
-  };
-
-  BrigInstBase get;
-  context->get_code(8, &get);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-
+  Lexer *lexer = new Lexer();
+  Init_Instruction3TestCases();
+  
+  for(int i=0; i<9; i++){
+	lexer->set_source_string(TestCase_Instr3Opcode[i].Input);
+	context->token_to_scan = lexer->get_next_token();
+	int ret = Instruction3(context);
+	EXPECT_EQ(0, ret);
+	if(!ret){
+		BrigInstBase get;
+		context->get_code(8, &get);
+		TestCase_Instr3Opcode[i].validate(get);
+	}
+	context->clear_context();
+  }
+  
   delete lexer;
 }
 
@@ -3822,7 +3814,7 @@ TEST(CodegenTest, Instruction1_CodeGen_SimpleTest) {
     32,                    // size
     BrigEInstBase,         // kind
     BrigClock,             // opcode
-    Brigb32,               // type
+    Brigb64,               // type
     BrigNoPacking,         // packing
     {20, 0, 0, 0, 0},      // o_operands[5]
   };
@@ -6036,6 +6028,52 @@ TEST(CodegenTest, ArrayDimensionSetCodeGen) {
   EXPECT_EQ(16, context->get_dim());
 
   delete lexer;
+}
+
+TEST(CodegenTest, ArgumentDeclCodegen){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  std::string input("align 8 arg_u8 %last[] ;\n");
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, ArgumentDecl(context));
+  
+  BrigDirectiveSymbol ref = {
+        sizeof(BrigDirectiveSymbol),                 // size
+        BrigEDirectiveSymbol,             // kind
+        {
+          8,       // c_code
+          BrigArgSpace,                    // storageClass
+          BrigNone,         // attribute
+          0,                                // reserved
+          BrigFlex,   // symbol modifier
+          0,               // dim
+          8,                  // s_name
+          Brigu8,              // data type
+          8,         // alignment
+        },
+        0,                                // d_init = 0 for arg
+        0                                 // reserved
+        };
+
+	BrigDirectiveSymbol get;
+	context->get_directive(8, &get);
+	EXPECT_EQ(ref.size, get.size);
+	EXPECT_EQ(ref.kind, get.kind);
+	EXPECT_EQ(ref.s.c_code, get.s.c_code);
+	EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
+	EXPECT_EQ(ref.s.attribute, get.s.attribute);
+	EXPECT_EQ(ref.s.reserved, get.s.reserved);
+	EXPECT_EQ(ref.s.symbolModifier, get.s.symbolModifier);
+	EXPECT_EQ(ref.s.dim, get.s.dim);
+	EXPECT_EQ(ref.s.s_name, get.s.s_name);
+	EXPECT_EQ(ref.s.type, get.s.type);
+	EXPECT_EQ(ref.s.align, get.s.align);
+	EXPECT_EQ(ref.d_init, get.d_init);
+	EXPECT_EQ(ref.reserved, get.reserved);
+	
+	delete lexer;
 }
 
 TEST(CodegenTest,FileDeclCodegen){
@@ -9780,7 +9818,7 @@ TEST(CodegenTest, Instruction0_CodeGen_SimpleTest) {
   Lexer* lexer = new Lexer(input);
 
   BrigInstBase ref = {
-    sizeof(BrigInstBase),                    // size
+    sizeof(BrigInstBase),   // size
     BrigEInstBase,         // kind
     BrigNop,            // opcode
     Brigb32,               // type
@@ -9894,6 +9932,280 @@ TEST(CodegenTest, WAVESIZE_CodeGen_SimpleTest) {
 
   delete lexer;
 }
+
+TEST(CodegenTest, Instruction2_CodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+  Lexer *lexer = new Lexer();
+  Init_Instruction2TestCases();
+  
+  for(unsigned int i = 0; i < Inst2TestCase::numCases; i++){
+	lexer->set_source_string(testInst2[i].Input);
+	context->token_to_scan = lexer->get_next_token();
+	EXPECT_EQ(0, Instruction2(context));
+	BrigInstBase get;
+	context->get_code(8, &get);
+	testInst2[i].validate(get);
+	context->clear_context();
+  }
+  
+  delete lexer;
+}
+
+
+TEST(CodegenTest, Example6_CodeGen) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+
+  std::string input("version 1:0:$small;\n");
+  input.append("function &callee(arg_f32 %output)(arg_f32 %input)\n");
+  input.append("{\n");
+  input.append("  ld_arg_f32 $s0, [%input];\n");
+  input.append("  st_arg_f32 $s0, [%output];\n");
+  input.append("  ret;\n");
+  input.append("};\n");
+  input.append("function &caller()()\n");
+  input.append("{\n");
+  input.append("  {\n");
+  input.append("    arg_f32 %an_input;\n");
+  input.append("    st_arg_f32 $s1, [%an_input];\n");
+  input.append("    arg_f32 %an_output;\n");
+  input.append("    call &callee (%an_output)(%an_input);\n");
+  input.append("    ld_arg_f32 $s0, [%an_output];\n");
+  input.append("  }\n");
+  input.append("};\n");
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+
+  BrigcOffset32_t curCodOffset = context->get_code_offset();
+
+  BrigdOffset32_t curDirOffset = context->get_directive_offset();
+
+
+  EXPECT_EQ(0, Program(context));
+
+  BrigDirectiveVersion verRef = {
+    sizeof(BrigDirectiveVersion),
+    BrigEDirectiveVersion,
+    curCodOffset,
+    1,                    //  major
+    0,                    //  minor
+    BrigESmall,
+    BrigEFull,
+    BrigENosftz,
+    0
+  };
+  BrigDirectiveVersion verGet;
+  context->get_directive(curDirOffset, &verGet);
+  curDirOffset += sizeof(BrigDirectiveVersion);
+
+  EXPECT_EQ(verRef.size, verGet.size);
+  EXPECT_EQ(verRef.kind, verGet.kind);
+  EXPECT_EQ(verRef.c_code, verGet.c_code);
+  EXPECT_EQ(verRef.major, verGet.major);
+  EXPECT_EQ(verRef.minor, verGet.minor);
+  EXPECT_EQ(verRef.machine, verGet.machine);
+  EXPECT_EQ(verRef.profile, verGet.profile);
+  EXPECT_EQ(verRef.ftz, verGet.ftz);
+  EXPECT_EQ(verRef.reserved, verGet.reserved);
+
+  BrigDirectiveFunction calleeFunRef = {
+    sizeof(BrigDirectiveFunction),               // size
+    BrigEDirectiveFunction,                      // kind
+    8,                                           // c_code
+    8,                                           // s_name
+    1,                                           // inParamCount
+    148,                                         // d_firstScopedDirective
+    3,                                           // operationCount
+    148,                                         // d_nextDirective
+    BrigNone,                                    // attribute
+    0,                                           // fbarCount
+    1,                                           // outParamCount
+    108                                          // d_firstInParam
+  };
+
+  BrigDirectiveFunction funGet;
+  context->get_directive(curDirOffset, &funGet);
+  curDirOffset += sizeof(BrigDirectiveFunction);
+
+  EXPECT_EQ(calleeFunRef.size, funGet.size);
+  EXPECT_EQ(calleeFunRef.kind, funGet.kind);
+  EXPECT_EQ(calleeFunRef.s_name, funGet.s_name);
+  EXPECT_EQ(calleeFunRef.c_code, funGet.c_code);
+  EXPECT_EQ(calleeFunRef.outParamCount, funGet.outParamCount);
+  EXPECT_EQ(calleeFunRef.inParamCount, funGet.inParamCount);
+  EXPECT_EQ(calleeFunRef.operationCount, funGet.operationCount);
+  EXPECT_EQ(calleeFunRef.d_nextDirective, funGet.d_nextDirective);
+  EXPECT_EQ(calleeFunRef.d_firstScopedDirective, funGet.d_firstScopedDirective);
+  EXPECT_EQ(calleeFunRef.d_firstInParam, funGet.d_firstInParam);
+  EXPECT_EQ(calleeFunRef.fbarCount, funGet.fbarCount);
+  EXPECT_EQ(calleeFunRef.attribute, funGet.attribute);
+
+  BrigDirectiveSymbol outputSymbol = {
+  sizeof(BrigDirectiveSymbol),   // size
+  BrigEDirectiveSymbol ,         // kind
+  {
+    curCodOffset,                // c_code
+    BrigArgSpace,                // storag class kernarg
+    BrigNone ,                   // attribut
+    0,                           // reserved
+    0,                           // symbolModifier
+    0,                           // dim
+    16,                          // s_name
+    Brigf32,                     // type
+    1                            // align
+  },
+  0,                             // d_init
+  0,                             // reserved
+  };
+
+  BrigDirectiveSymbol symGet;
+
+  context->get_directive(curDirOffset, &symGet);
+  curDirOffset += sizeof(BrigDirectiveSymbol);
+
+  EXPECT_EQ(outputSymbol.size, symGet.size);
+  EXPECT_EQ(outputSymbol.kind, symGet.kind);
+  EXPECT_EQ(outputSymbol.s.storageClass, symGet.s.storageClass);
+  EXPECT_EQ(outputSymbol.s.s_name, symGet.s.s_name);
+  EXPECT_EQ(outputSymbol.s.c_code, symGet.s.c_code);
+  EXPECT_EQ(outputSymbol.s.attribute, symGet.s.attribute);
+  EXPECT_EQ(outputSymbol.s.dim, symGet.s.dim);
+  EXPECT_EQ(outputSymbol.s.type, symGet.s.type);
+  EXPECT_EQ(outputSymbol.s.reserved, symGet.s.reserved);
+  EXPECT_EQ(outputSymbol.s.symbolModifier, symGet.s.symbolModifier);
+  EXPECT_EQ(outputSymbol.s.align, symGet.s.align);
+  EXPECT_EQ(outputSymbol.d_init, symGet.d_init);
+  EXPECT_EQ(outputSymbol.reserved, symGet.reserved);
+  BrigDirectiveSymbol inputSymbol = {
+  sizeof(BrigDirectiveSymbol),   // size
+  BrigEDirectiveSymbol ,         // kind
+  {
+    curCodOffset,                // c_code
+    BrigArgSpace,                // storag class kernarg
+    BrigNone ,                   // attribut
+    0,                           // reserved
+    0,                           // symbolModifier
+    0,                           // dim
+    24,                          // s_name
+    Brigf32,                     // type
+    1                            // align
+  },
+  0,                             // d_init
+  0,                             // reserved
+  };
+
+  context->get_directive(curDirOffset, &symGet);
+  curDirOffset += sizeof(BrigDirectiveSymbol);
+
+  EXPECT_EQ(inputSymbol.size, symGet.size);
+  EXPECT_EQ(inputSymbol.kind, symGet.kind);
+  EXPECT_EQ(inputSymbol.s.storageClass, symGet.s.storageClass);
+  EXPECT_EQ(inputSymbol.s.s_name, symGet.s.s_name);
+  EXPECT_EQ(inputSymbol.s.c_code, symGet.s.c_code);
+  EXPECT_EQ(inputSymbol.s.attribute, symGet.s.attribute);
+  EXPECT_EQ(inputSymbol.s.dim, symGet.s.dim);
+  EXPECT_EQ(inputSymbol.s.type, symGet.s.type);
+  EXPECT_EQ(inputSymbol.s.reserved, symGet.s.reserved);
+  EXPECT_EQ(inputSymbol.s.symbolModifier, symGet.s.symbolModifier);
+  EXPECT_EQ(inputSymbol.s.align, symGet.s.align);
+  EXPECT_EQ(inputSymbol.d_init, symGet.d_init);
+  EXPECT_EQ(inputSymbol.reserved, symGet.reserved);
+
+  BrigDirectiveFunction callerFunRef = {
+    sizeof(BrigDirectiveFunction),               // size
+    BrigEDirectiveFunction,                      // kind
+    128,                                         // c_code
+    35,                                          // s_name
+    0,                                           // inParamCount
+    188,                                         // d_firstScopedDirective
+    3,                                           // operationCount
+    284,                                         // d_nextDirective
+    BrigNone,                                    // attribute
+    0,                                           // fbarCount
+    0,                                           // outParamCount
+    0                                            // d_firstInParam
+  }; 
+
+  context->get_directive(curDirOffset, &funGet);
+  curDirOffset += sizeof(BrigDirectiveFunction);
+
+  EXPECT_EQ(callerFunRef.size, funGet.size);
+  EXPECT_EQ(callerFunRef.kind, funGet.kind);
+  EXPECT_EQ(callerFunRef.s_name, funGet.s_name);
+  EXPECT_EQ(callerFunRef.c_code, funGet.c_code);
+  EXPECT_EQ(callerFunRef.outParamCount, funGet.outParamCount);
+  EXPECT_EQ(callerFunRef.inParamCount, funGet.inParamCount);
+  EXPECT_EQ(callerFunRef.operationCount, funGet.operationCount);
+  EXPECT_EQ(callerFunRef.d_nextDirective, funGet.d_nextDirective);
+  EXPECT_EQ(callerFunRef.d_firstScopedDirective, funGet.d_firstScopedDirective);
+  EXPECT_EQ(callerFunRef.d_firstInParam, funGet.d_firstInParam);
+  EXPECT_EQ(callerFunRef.fbarCount, funGet.fbarCount);
+  EXPECT_EQ(callerFunRef.attribute, funGet.attribute);
+
+  BrigDirectiveScope argStart = {
+    sizeof(BrigDirectiveScope),
+    BrigEDirectiveArgStart,
+    128
+  };
+  BrigDirectiveScope getScope;
+  context->get_directive(curDirOffset, &getScope);
+  curDirOffset += sizeof(BrigDirectiveScope);
+  EXPECT_EQ(argStart.size, getScope.size);
+  EXPECT_EQ(argStart.kind, getScope.kind);
+  EXPECT_EQ(argStart.c_code, getScope.c_code);
+
+  BrigDirectiveSymbol anInputSymbol = {
+  sizeof(BrigDirectiveSymbol),   // size
+  BrigEDirectiveSymbol ,         // kind
+  {
+    128,                         // c_code
+    BrigArgSpace,                // storag class kernarg
+    BrigNone ,                   // attribut
+    0,                           // reserved
+    0,                           // symbolModifier
+    0,                           // dim
+    43,                          // s_name
+    Brigf32,                     // type
+    1                            // align
+  },
+  0,                             // d_init
+  0,                             // reserved
+  };
+
+  context->get_directive(curDirOffset, &symGet);
+  curDirOffset += sizeof(BrigDirectiveSymbol);
+
+  EXPECT_EQ(anInputSymbol.size, symGet.size);
+  EXPECT_EQ(anInputSymbol.kind, symGet.kind);
+  EXPECT_EQ(anInputSymbol.s.storageClass, symGet.s.storageClass);
+  EXPECT_EQ(anInputSymbol.s.s_name, symGet.s.s_name);
+  EXPECT_EQ(anInputSymbol.s.c_code, symGet.s.c_code);
+  EXPECT_EQ(anInputSymbol.s.attribute, symGet.s.attribute);
+  EXPECT_EQ(anInputSymbol.s.dim, symGet.s.dim);
+  EXPECT_EQ(anInputSymbol.s.type, symGet.s.type);
+  EXPECT_EQ(anInputSymbol.s.reserved, symGet.s.reserved);
+  EXPECT_EQ(anInputSymbol.s.symbolModifier, symGet.s.symbolModifier);
+  EXPECT_EQ(anInputSymbol.s.align, symGet.s.align);
+  EXPECT_EQ(anInputSymbol.d_init, symGet.d_init);
+  EXPECT_EQ(anInputSymbol.reserved, symGet.reserved);
+
+
+  BrigdOffset32_t dsize = context->get_directive_offset();
+  EXPECT_EQ(284, dsize);
+  BrigdOffset32_t csize = context->get_code_offset();
+  EXPECT_EQ(248, csize);
+  BrigsOffset32_t ssize = context->get_string_offset();
+  EXPECT_EQ(68, ssize);
+  BrigoOffset32_t osize = context->get_operand_offset();
+  EXPECT_EQ(128, osize);
+
+
+  delete lexer;
+}
+
 
 }  // namespace brig
 }  // namespace hsa
