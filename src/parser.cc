@@ -877,10 +877,10 @@ int Instruction2Part1OpcodeDT(Context* context) {
     if (inst.packing != BrigPackS && inst.packing != BrigPackP) {
       context->set_error(INVALID_PACKING);
       return 1;
-    } 
+    }
     context->token_to_scan = yylex();
   }
-  // inst.packing == BrigNoPacking 
+  // inst.packing == BrigNoPacking
   // TODO(Chuang): whether can use packed operation without packing.
   if (context->token_type == DATA_TYPE_ID) {
 
@@ -922,13 +922,13 @@ int Instruction2Part1OpcodeDT(Context* context) {
           }
         } else {  // Second Operand
           context->set_error(MISSING_OPERAND);
-        }  
+        }
       } else {  // ','
         context->set_error(MISSING_COMMA);
       }
     } else {  // First Operand
       context->set_error(INVALID_FIRST_OPERAND);
-    }  
+    }
   } else {  // Data Type
     context->set_error(INVALID_DATA_TYPE);
   }
@@ -994,13 +994,13 @@ int Instruction2Part2OpcodeNoDT(Context* context) {
         }
       } else {  // Second Operand
         context->set_error(MISSING_OPERAND);
-      }  
+      }
     } else {  // ','
       context->set_error(MISSING_COMMA);
     }
   } else {  // First Operand
     context->set_error(INVALID_FIRST_OPERAND);
-  }  
+  }
 
   return 1;
 }
@@ -1026,7 +1026,7 @@ int Instruction2Part3OpcodeFtz(Context* context) {
       aluModifier = context->get_alu_modifier();
     }
   }
-  // inst.packing == BrigNoPacking 
+  // inst.packing == BrigNoPacking
   // TODO(Chuang): whether can use packed operation without packing.
   if (context->token_type == DATA_TYPE_ID) {
 
@@ -1068,13 +1068,13 @@ int Instruction2Part3OpcodeFtz(Context* context) {
           }
         } else {  // Second Operand
           context->set_error(MISSING_OPERAND);
-        }  
+        }
       } else {  // ','
         context->set_error(MISSING_COMMA);
       }
     } else {  // First Operand
       context->set_error(INVALID_FIRST_OPERAND);
-    }  
+    }
   } else {  // Data Type
     context->set_error(INVALID_DATA_TYPE);
   }
@@ -1576,7 +1576,7 @@ int ArgumentDecl(Context* context) {
     context->set_dim(0);
     context->init_symbol_modifier();
     BrigStorageClass32_t storage_class = context->token_value.storage_class;
-    
+
     // skip over "arg" in context->token_to_scan
     context->token_to_scan = yylex();
     if ((context->token_type == DATA_TYPE_ID)||
@@ -1595,13 +1595,13 @@ int ArgumentDecl(Context* context) {
         // scan for arrayDimensions
         context->token_to_scan = yylex();
         // set default value(scalar)
-        
+
         if (context->token_to_scan == '[') {
           if (ArrayDimensionSet(context)) {
             // context->token_to_scan has been set in ArrayDimensionSet()
             return 1;
           }
-        } 
+        }
         BrigdOffset32_t dsize = context->get_directive_offset();
         BrigDirectiveSymbol sym_decl = {
         sizeof(BrigDirectiveSymbol),                 // size
@@ -1651,9 +1651,9 @@ int ArgumentDecl(Context* context) {
                                         context->current_bdf_offset,
                                         sizeof(BrigDirectiveFunction));
 
-        }                                
+        }
         return 0;
-        
+
       } else {
         context->set_error(MISSING_IDENTIFIER);
       }
@@ -2478,6 +2478,7 @@ int UninitializableDecl(Context* context) {
 
   context->token_to_scan = yylex();
   if (context->token_type == DATA_TYPE_ID) {
+    BrigDataType type = BrigDataType(context->token_value.data_type);
     context->token_to_scan = yylex();
 
     if (!Identifier(context)) {
@@ -2504,7 +2505,7 @@ int UninitializableDecl(Context* context) {
           context->get_symbol_modifier(),   // symbol modifier
           context->get_dim(),               // dim
           var_name_offset,                  // s_name
-          context->token_value.data_type,   // data type
+          type,                             // data type
           context->get_alignment(),         // alignment
         },
         0,                                // d_init = 0 for arg
@@ -6590,8 +6591,8 @@ int Instruction1Part1OpcodeDT(Context* context) {
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
 
   inst1_op.opcode = context->token_value.opcode;
-  // TODO(Chuang): fbar_wait_segment_b64 
-  // fbar_init_segment_b64 
+  // TODO(Chuang): fbar_wait_segment_b64
+  // fbar_init_segment_b64
   // fbar_release_segment_b64
   // and whether there should be rounding in instruction1opcode.
   context->token_to_scan = yylex();
@@ -6604,8 +6605,8 @@ int Instruction1Part1OpcodeDT(Context* context) {
     }
   }
   if ((context->token_to_scan == _B64 &&
-       inst1_op.opcode != BrigCountup) || 
-      (inst1_op.opcode == BrigCountup && 
+       inst1_op.opcode != BrigCountup) ||
+      (inst1_op.opcode == BrigCountup &&
        context->token_to_scan == _U32)) {
 
     inst1_op.type = context->token_value.data_type;
@@ -6617,9 +6618,9 @@ int Instruction1Part1OpcodeDT(Context* context) {
          inst1_op.opcode == BrigCountup)) {
       if (OperandPart2(context, &inst1_op.o_operands[0])) {
         return 1;
-      }  
+      }
       // Note: Fbar_Release and Fbar_Init may be a instruction2.
-      if (inst1_op.opcode == BrigFbarInitSizeKnown || 
+      if (inst1_op.opcode == BrigFbarInitSizeKnown ||
           inst1_op.opcode == BrigFbarRelease) {
         if (context->token_to_scan == ',')  {
           context->token_to_scan = yylex();
@@ -6664,7 +6665,7 @@ int Instruction1Part1OpcodeDT(Context* context) {
   } else {
     context->set_error(INVALID_DATA_TYPE);
   }
-    
+
   return 1;
 }
 int Instruction1Part2OpcodeNoDT(Context* context) {
@@ -6679,7 +6680,7 @@ int Instruction1Part2OpcodeNoDT(Context* context) {
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
 
   inst1_op.opcode = context->token_value.opcode;
-  
+
   context->token_to_scan = yylex();
   // TODO(Chuang): whether support for rounding
   if (!RoundingMode(context)) {
@@ -6688,7 +6689,7 @@ int Instruction1Part2OpcodeNoDT(Context* context) {
 
   if ((context->token_to_scan == TOKEN_SREGISTER &&
        inst1_op.opcode != BrigDebugtrap) ||
-      (inst1_op.opcode == BrigDebugtrap && 
+      (inst1_op.opcode == BrigDebugtrap &&
        context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
     if (OperandPart2(context, &inst1_op.o_operands[0])) {
       return 1;
@@ -6755,11 +6756,11 @@ int Instruction1(Context* context) {
       return 0;
     }
   } else if (context->token_type == INSTRUCTION1_OPCODE_NODT) {
-    if (!Instruction1Part2OpcodeNoDT(context)) { 
+    if (!Instruction1Part2OpcodeNoDT(context)) {
       return 0;
     }
   } else if (context->token_type == INSTRUCTION1_OPCODE) {
-    if (!Instruction1Part1OpcodeDT(context)) { 
+    if (!Instruction1Part1OpcodeDT(context)) {
       return 0;
     }
   }
@@ -7097,7 +7098,7 @@ int BodyStatementNested(Context* context) {
     context->update_bdf_operation_count();
     return 0;
   }
-  
+
   return 1;
 }
 
