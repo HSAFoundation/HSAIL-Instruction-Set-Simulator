@@ -640,7 +640,63 @@ void Init_Instruction2TestCases(){
   };
   testInst2[Inst2TestCase::numCases++].init(in, out44);
 }
+class LdSt{
+public:
+	std::string Input;
+	BrigInstLdSt Output;
+	void validate(BrigInstLdSt get){
+		EXPECT_EQ(Output.size, get.size);
+		EXPECT_EQ(Output.kind, get.kind);
+		EXPECT_EQ(Output.opcode, get.opcode);
+		EXPECT_EQ(Output.type, get.type);
+		EXPECT_EQ(Output.packing, get.packing);
+		EXPECT_EQ(Output.o_operands[0], get.o_operands[0]);
+		EXPECT_EQ(Output.o_operands[1], get.o_operands[1]);
+		EXPECT_EQ(Output.o_operands[2], get.o_operands[2]);
+		EXPECT_EQ(Output.o_operands[3], get.o_operands[3]);
+		EXPECT_EQ(Output.o_operands[4], get.o_operands[4]);
+		EXPECT_EQ(Output.storageClass, get.storageClass);
+		EXPECT_EQ(Output.memorySemantic, get.memorySemantic);
+		EXPECT_EQ(Output.equivClass, get.equivClass);
+	}
+	void init(std::string input, BrigInstLdSt ref){
+		(this->Input).assign(input);
+		this->Output = ref;
+	}
+};
 
+LdSt TestCase_LdSt[20]; 
+void Init_LdStTestCases(){
 
+	std::string in; 
+	in.assign( "ld_arg_f32 $s0, [%input];\n");
+	BrigInstLdSt out = {
+    44,                // size
+    BrigEInstLdSt,     // kind
+    BrigLd,            // opcode
+    Brigf32,           // type
+    BrigNoPacking,     // packing
+    {0, 8, 20, 0, 0},  // operand[5]
+    BrigArgSpace,      // storageClass
+    BrigRegular,       // memorySemantic
+    0                  // equivClass
+	};
+	TestCase_LdSt[0].init(in, out);	
+	
+	
+	in.assign("st_arg_f32 $s0, [%output][$s2-4];\n");
+	BrigInstLdSt out1 = {
+    44,                // size
+    BrigEInstLdSt,     // kind
+    BrigSt,            // opcode
+    Brigf32,           // type
+    BrigNoPacking,     // packing
+    {0, 56, 0, 0, 0},  // operand[5]
+    BrigArgSpace,      // storageClass
+    BrigRegular,       // memorySemantic
+    0                  // equivClass
+  };
+  TestCase_LdSt[1].init(in, out1);	
+}
 
 

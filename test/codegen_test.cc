@@ -116,7 +116,7 @@ TEST(CodegenTest, ExampleWithKernel) {
   delete lexer;
 }
 
-TEST(CodegenTest, DISABLED_CallwMultiArgs) {
+TEST(CodegenTest, CallwMultiArgs) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -235,7 +235,7 @@ TEST(CodegenTest, DISABLED_CallwMultiArgs) {
   delete lexer;
 }
 
-TEST(CodegenTest, DISABLED_Example6_CallwArgs) {
+TEST(CodegenTest, Example6_CallwArgs) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -351,7 +351,7 @@ TEST(CodegenTest, DISABLED_Example6_CallwArgs) {
   delete lexer;
 }
 
-TEST(CodegenTest, DISABLED_Example5_SimpleCall) {
+TEST(CodegenTest, Example5_SimpleCall) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -3170,78 +3170,38 @@ TEST(CodegenTest, OptionalWidthCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, DISABLED_LdSt_CodeGen_SimpleTest) {
+TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  Lexer* lexer = new Lexer();
+  Init_LdStTestCases();
+  
+  
+	lexer->set_source_string(TestCase_LdSt[0].Input);
+	context->token_to_scan = lexer->get_next_token();
+	context->add_symbol("%input");
+	int ret = Ld(context);
+	EXPECT_EQ(0, ret);
+	if(!ret){
+		BrigInstLdSt get;
+		context->get_code(8, &get);
+		TestCase_LdSt[0].validate(get);
+	}
+	context->clear_context();
+      
+	
+	lexer->set_source_string(TestCase_LdSt[1].Input);
+	context->token_to_scan = lexer->get_next_token();
+	context->add_symbol("%output");
+	ret = St(context);
+	EXPECT_EQ(0, ret);
+	if(!ret){
+		BrigInstLdSt get;
+		context->get_code(8, &get);
+		TestCase_LdSt[1].validate(get);
+	}
 
-  BrigInstLdSt ref = {
-    44,                // size
-    BrigEInstLdSt,     // kind
-    BrigLd,            // opcode
-    Brigf32,           // type
-    BrigNoPacking,     // packing
-    {0, 8, 20, 0, 0},  // operand[5]
-    BrigArgSpace,      // storageClass
-    BrigRegular,       // memorySemantic
-    0                  // equivClass
-  };
-  BrigInstLdSt get;
-
-  std::string input("ld_arg_f32 $s0, [%input];\n");
-  input.append("st_arg_f32 $s0, [%output][$s2-4];\n");
-  Lexer* lexer = new Lexer(input);
-
-  context->add_symbol("%input");
-  context->add_symbol("%output");
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Ld(context));
-  EXPECT_EQ(0, St(context));
-  context->get_code(8, &get);
-
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
-  EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.memorySemantic, get.memorySemantic);
-  EXPECT_EQ(ref.equivClass, get.equivClass);
-
-  BrigInstLdSt tmp = {
-    44,                // size
-    BrigEInstLdSt,     // kind
-    BrigSt,            // opcode
-    Brigf32,           // type
-    BrigNoPacking,     // packing
-    {8, 56, 0, 0, 0},  // operand[5]
-    BrigArgSpace,      // storageClass
-    BrigRegular,       // memorySemantic
-    0                  // equivClass
-  };
-  ref = tmp;
-
-  context->get_code(52, &get);
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
-  EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.memorySemantic, get.memorySemantic);
-  EXPECT_EQ(ref.equivClass, get.equivClass);
-
-  BrigOperandReg getReg;
+/*  BrigOperandReg getReg;
   BrigOperandAddress getAddr;
   BrigOperandCompound getComp;
 
@@ -3298,7 +3258,7 @@ TEST(CodegenTest, DISABLED_LdSt_CodeGen_SimpleTest) {
   EXPECT_EQ(refComp.name, getComp.name);
   EXPECT_EQ(refComp.reg, getComp.reg);
   EXPECT_EQ(refComp.offset, getComp.offset);
-
+*/
   delete lexer;
 }
 
@@ -4599,7 +4559,7 @@ TEST(CodegenTest, GlobalGroupDeclCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, DISABLED_Label_CodeGen_Test) {
+TEST(CodegenTest, Label_CodeGen_Test) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
   // TODO(Chuang) set the type to Brn and Cbr
@@ -9324,7 +9284,7 @@ TEST(CodegenTest, MulCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, DISABLED_Call_CodeGen_SimpleTest) {
+TEST(CodegenTest, Call_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
