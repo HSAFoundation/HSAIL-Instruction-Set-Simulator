@@ -1045,3 +1045,60 @@ MakeCvtF2FdTest(up,   a <= result)
 MakeCvtF2FdTest(down, a >= result)
 MakeCvtF2FdTest(zero, abs(a) >= abs(result))
 MakeCvtF2FdTest(near, (f32) a == result)
+
+template<class T> static void AtomicAndLogic(T result, T *a, T b) {
+  EXPECT_EQ(*a, T(result & b));
+}
+TestAll(AtomicInst, And, Binary)
+
+template<class T> static void AtomicOrLogic(T result, T *a, T b) {
+  EXPECT_EQ(*a, T(result | b));
+}
+TestAll(AtomicInst, Or, Binary)
+
+template<class T> static void AtomicXorLogic(T result, T* a, T b) {
+  EXPECT_EQ((result | b) & ~(result & b), *a);
+}
+TestAll(AtomicInst, Xor, Binary)
+
+template<class T> static void AtomicExchLogic(T result, T* a, T b) {
+  EXPECT_EQ(b, *a);
+}
+TestAll(AtomicInst, Exch, Binary)
+
+template<class T> static void AtomicAddLogic(T result, T* a, T b) {
+  if(isNan(result) || isNan(b)) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isPosInf(*a) && isNegInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isNegInf(result) && isPosInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else {
+    EXPECT_EQ(T(result + b), *a);
+  }
+}
+TestAll(AtomicInst, Add, Binary)
+
+template<class T> static void AtomicSubLogic(T result, T* a, T b) {
+  if(isNan(result) || isNan(b)) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isPosInf(*a) && isNegInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else if((isNegInf(result) && isPosInf(b))) {
+    EXPECT_PRED1(isNan<T>, *a);
+  } else {
+    EXPECT_EQ(T(result - b), *a);
+  }
+}
+TestAll(AtomicInst, Sub, Binary)
+
+template<class T> static void AtomicCasLogic(T result, T* a, T b, T c) {
+  if(result == b) {
+    EXPECT_EQ(c, *a);
+  } else {
+    EXPECT_EQ(result, *a);
+  }
+}
+TestAll(AtomicInst, Cas, Ternary)
+
+

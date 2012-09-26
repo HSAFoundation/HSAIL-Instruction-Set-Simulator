@@ -225,6 +225,12 @@ defineVec(f64, 2)
   /* D ## ShuffleVector(INST, f16x4) */         \
   D ## ShuffleVector(INST, f32x2)
 
+#define AtomicInst(D,INST,NARY)                 \
+  D ## Atomic ## NARY(INST, s32)                \
+  D ## Atomic ## NARY(INST, s64)                \
+  D ## Atomic ## NARY(INST, u32)                \
+  D ## Atomic ## NARY(INST, u64)
+
 #define CmpImpl(FUNC,PRED)                              \
   template<class T> static T Cmp_ ## FUNC (T x, T y) {  \
     return PRED;                                        \
@@ -365,6 +371,25 @@ defineVec(f64, 2)
     return FUNC ## Vector(t, u, shift);                           \
   }
 
+#define defineAtomicBinary(FUNC,TYPE)                                   \
+  extern "C" TYPE Atomic ## FUNC ## _ ## TYPE (TYPE* t, TYPE u) {       \
+    return Atomic ## FUNC(t, u);                                        \
+  }                                                                     \
+  extern "C" void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE* t, TYPE u) {  \
+    Atomic ## FUNC(t, u);                                               \
+  }
+
+#define defineAtomicTernary(FUNC,TYPE)                                  \
+  extern "C"                                                            \
+  TYPE Atomic ## FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) {          \
+    return Atomic ## FUNC(t, u, v);                                     \
+  }                                                                     \
+  extern "C"                                                            \
+  void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) {     \
+    Atomic ## FUNC(t, u, v);                                            \
+  }
+
+
 #define declareUnary(FUNC,TYPE)                 \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t);
 
@@ -391,6 +416,16 @@ defineVec(f64, 2)
 
 #define declareShuffleVector(FUNC,TYPE)                               \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, unsigned shift);
+
+#define declareAtomicBinary(FUNC,TYPE)                                  \
+  extern "C" TYPE Atomic ## FUNC ## _ ## TYPE (TYPE *t, TYPE u);        \
+  extern "C" void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE *t, TYPE u);
+
+#define declareAtomicTernary(FUNC,TYPE)                                 \
+  extern "C"                                                            \
+  TYPE Atomic ## FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);           \
+  extern "C"                                                            \
+  void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);
 
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {

@@ -216,7 +216,7 @@ TEST(BrigWriterTest, VectorCopy) {
 }
 
 TEST(BrigWriterTest, Cosine) {
-  TestHSAIL(
+  llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
     "//==========================================================\n"
@@ -253,4 +253,60 @@ TEST(BrigWriterTest, Cosine) {
     "	ret;\n"
     "};\n"
     );
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  float *arg_val0 = new float;
+  float *arg_val1 = new float;
+
+  *arg_val0 = M_PI;
+  *arg_val1 = 0.0f;
+
+  void *args[] = { &arg_val0, &arg_val1 };
+  llvm::Function *fun = mod->getFunction("__Get_fcos");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_FLOAT_EQ(M_PI, *arg_val0);
+  EXPECT_FLOAT_EQ(-1.0f, *arg_val1);
+
+  delete arg_val1;
+  delete arg_val0;
+}
+
+TEST(BrigWriterTest, Fib) {
+  llvm::Module *mod = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &fib (arg_s32 %r) (arg_s32 %n)\n"
+    "{\n"
+    "  ld_arg_s32 $s1, [%n];\n"
+    "  cmp_lt_b1_s32 $c1, $s1, 3; // if n < 3 go to return\n"
+    "  cbr $c1, @return;\n"
+    "  private_s32 %p; // allocate a private variable\n"
+    "                  // to hold the partial result\n"
+    "  {\n"
+    "    arg_s32 %nm2;\n"
+    "    arg_s32 %res;\n"
+    "    sub_s32 $s2, $s1, 2; // compute fib (n-2)\n"
+    "    st_arg_s32 $s2, [%nm2];\n"
+    "    call &fib (%res)(%nm2);\n"
+    "    ld_arg_s32 $s2, [%res];\n"
+    "  }\n"
+    "  st_private_s32 $s2, [%p]; // save the result in p\n"
+    "  {\n"
+    "    arg_s32 %nm2;\n"
+    "    arg_s32 %res;\n"
+    "    sub_s32 $s2, $s1, 1; // compute fib (n-1)\n"
+    "    st_arg_s32 $s2, [%nm2];\n"
+    "    call &fib (%res)(%nm2);\n"
+    "    ld_arg_u32 $s2, [%res];\n"
+    "  }\n"
+    "  ld_private_u32 $s3, [%p]; // add in the saved result\n"
+    "  add_u32 $s2, $s2, $s3;\n"
+    "  st_arg_s32 $s2, [%r];\n"
+    "@return: ret;\n"
+    "};\n"
+    );
+  EXPECT_TRUE(mod);
+  if(!mod) return;
 }

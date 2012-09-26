@@ -47,6 +47,8 @@ class BrigSymbol {
     return it_ != other.it_;
   }
 
+  const void *getAddr() const { return it_; }
+
   BrigSymbol &operator++();
 
   friend BrigSymbol arg_begin(const BrigFunction &F);
