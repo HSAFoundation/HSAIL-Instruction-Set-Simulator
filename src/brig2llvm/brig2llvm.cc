@@ -133,6 +133,7 @@ static unsigned getRegOffset(const char *name) {
 }
 
 typedef std::map<uint32_t, llvm::Function *> FunMap;
+typedef std::map<const void *, llvm::Value *> SymbolMap;
 
 struct FunState {
   typedef std::map<uint32_t, llvm::BasicBlock *> CBMap ;
@@ -142,8 +143,9 @@ struct FunState {
   llvm::Value *regs;
   CBMap cbMap;
 
-  FunState(const FunMap &funMap, const BrigFunction &brigFun,
-           llvm::Function *llvmFun) : funMap(funMap) {
+  FunState(const FunMap &funMap, SymbolMap &symbolMap,
+           const BrigFunction &brigFun, llvm::Function *llvmFun) :
+    funMap(funMap), symbolMap(symbolMap) {
 
     llvm::LLVMContext &C = llvmFun->getContext();
     const BrigControlBlock E = brigFun.end();
@@ -162,23 +164,22 @@ struct FunState {
         regs = new llvm::AllocaInst(regsType, "gpu_reg_p", bb);
       }
     }
-
-    typedef llvm::Function::arg_iterator ArgIt;
-    for(ArgIt arg = llvmFun->arg_begin(),
-          E = llvmFun->arg_end(); arg != E; ++arg) {
-      argMap[arg->getName()] = arg;
-    }
   }
 
-  llvm::Value *lookupSymbol(const char *str) {
-    SymbolMap::iterator it = argMap.find(str);
-    if(it != argMap.end()) return it->second;
-    return NULL;
+  template<class T>
+  llvm::Value *lookupSymbol(const T *symbol) const {
+    (void) symbol->s;
+    SymbolMap::const_iterator it = symbolMap.find(symbol);
+    return it != symbolMap.end() ? it->second : NULL;
+  }
+
+  llvm::Value *lookupSymbol(const BrigSymbol &symbol) const {
+    SymbolMap::const_iterator it = symbolMap.find(symbol.getAddr());
+    return it != symbolMap.end() ? it->second : NULL;
   }
 
  private:
-  typedef std::map<std::string, llvm::Value *> SymbolMap;
-  SymbolMap argMap;
+  SymbolMap &symbolMap;
 };
 
 static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
@@ -263,8 +264,7 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
   if(const BrigOperandAddress *adderOp = dyn_cast<BrigOperandAddress>(op)) {
     const BrigDirectiveSymbol *symbol =
       cast<BrigDirectiveSymbol>(helper.getDirective(adderOp->directive));
-    const char *name = helper.getName(symbol);
-    llvm::Value *address = state.lookupSymbol(name + 1);
+    llvm::Value *address = state.lookupSymbol(symbol);
     assert(address && "Symbol not found");
     return address;
   }
@@ -420,10 +420,6 @@ static void runOnBranchInst(llvm::BasicBlock &B,
   assert(false && "Unknown branch opcode");
 }
 
-static llvm::Value *getSymbolAddr(const BrigSymbol &symbol) {
-  assert(false && "Unimplemented");
-}
-
 static void runOnCallInst(llvm::BasicBlock &B,
                           const inst_iterator inst,
                           const BrigInstHelper &helper,
@@ -435,14 +431,14 @@ static void runOnCallInst(llvm::BasicBlock &B,
     cast<BrigOperandArgumentList>(helper.getOperand(inst, 1));
   for(unsigned i = 0; i < oArgList->elementCount; ++i) {
     const BrigSymbol symbol = helper.getArgument(oArgList, i);
-    args.push_back(getSymbolAddr(symbol));
+    args.push_back(state.lookupSymbol(symbol));
   }
 
   const BrigOperandArgumentList *iArgList =
     cast<BrigOperandArgumentList>(helper.getOperand(inst, 3));
   for(unsigned i = 0; i < iArgList->elementCount; ++i) {
     const BrigSymbol symbol = helper.getArgument(iArgList, i);
-    args.push_back(getSymbolAddr(symbol));
+    args.push_back(state.lookupSymbol(symbol));
   }
 
   const BrigOperandBase *brigFun = helper.getOperand(inst, 2);
@@ -497,7 +493,7 @@ static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
 }
 
 static void runOnFunction(llvm::Module &M, const BrigFunction &F,
-                          FunMap &funMap) {
+                          FunMap &funMap, SymbolMap &symbolMap) {
 
   llvm::LLVMContext &C = M.getContext();
 
@@ -520,11 +516,12 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   llvm::Function::arg_iterator E = fun->arg_end();
   for(; llvmArg != E; ++brigArg, ++llvmArg) {
     llvmArg->setName(brigArg.getName());
+    symbolMap[brigArg.getAddr()] = llvmArg;
   }
 
   if(F.isDeclaration()) return;
 
-  FunState state(funMap, F, fun);
+  FunState state(funMap, symbolMap, F, fun);
   for(BrigControlBlock cb = F.begin(), E = F.end(); cb != E; ++cb) {
     runOnCB(*fun, cb, state);
   }
@@ -551,9 +548,11 @@ void GenLLVM::operator()(void) {
 
   gen_GPU_states();
 
+  SymbolMap symbolMap;
+
   FunMap funMap;
   for(BrigFunction fun = mod_.begin(), E = mod_.end(); fun != E; ++fun) {
-    runOnFunction(*brig_frontend_, fun, funMap);
+    runOnFunction(*brig_frontend_, fun, funMap, symbolMap);
   }
 
   llvm::raw_string_ostream ros(output_);

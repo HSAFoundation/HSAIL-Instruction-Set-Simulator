@@ -18,6 +18,11 @@
     TestVectorInst(INST, LOGIC);                \
   }
 
+#define MakeAtomicTest(INST,LOGIC,NARY)         \
+  TEST(BrigRuntimeTest, INST) {                 \
+    TestAtomic ## NARY(INST, Atomic ## LOGIC);  \
+  }
+
 #define TestAll(TYPE,INST,NARY)                 \
   TYPE(declare, INST, NARY)                     \
   Test ## TYPE(INST, NARY)
@@ -64,6 +69,16 @@
   /* MakeVectorTest(INST ## _f16x2,  INST ## Logic )*/  \
   /* MakeVectorTest(INST ## _f16x4,  INST ## Logic) */  \
   MakeVectorTest(INST ## _f32x2,  INST ## Logic)
+
+#define TestAtomicInst(INST,NARY)                                   \
+  MakeAtomicTest(Atomic ## INST ## _s32, INST ## Logic, NARY)       \
+  MakeAtomicTest(Atomic ## INST ## _s64, INST ## Logic, NARY)       \
+  MakeAtomicTest(Atomic ## INST ## _u32, INST ## Logic, NARY)       \
+  MakeAtomicTest(Atomic ## INST ## _u64, INST ## Logic, NARY)       \
+  MakeAtomicTest(AtomicNoRet ## INST ## _s32, INST ## Logic, NARY)  \
+  MakeAtomicTest(AtomicNoRet ## INST ## _s64, INST ## Logic, NARY)  \
+  MakeAtomicTest(AtomicNoRet ## INST ## _u32, INST ## Logic, NARY)  \
+  MakeAtomicTest(AtomicNoRet ## INST ## _u64, INST ## Logic, NARY)
 
 #define TestSignedVectorInst(INST,NARY)         \
   Test ## NARY ## SignedVectorInst(INST)
@@ -425,6 +440,63 @@ static void TestVectorInst(R (*Impl)(T, T, unsigned),
       for(unsigned k = 0; k < testVectorB.size(); ++k) {
         unsigned c = testVectorU[k];
         Logic(Impl(a, b, c), a, b, c);
+      }
+    }
+  }
+}
+
+template<class R, class A, class B>
+static void TestAtomicBinary(R (*Impl)(A*, B), void (*Logic)(R, A*, B)) {
+  for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
+    A a = getTestVector<A>()[i];
+    for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      B b = getTestVector<B>()[j];
+      Logic(Impl(&a, b), &a, b);
+    }
+  }
+}
+
+template<class R, class A, class B, class C>
+static void TestAtomicTernary(R (*Impl)(A*, B, C),
+                              void (*Logic)(R, A*, B, C)) {
+  for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
+    A a = getTestVector<A>()[i];
+    for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      B b = getTestVector<B>()[j];
+      for(unsigned k = 0; k < getTestVector<C>().size(); ++k) {
+        C c = getTestVector<C>()[k];
+        Logic(Impl(&a, b, c), &a, b, c);
+      }
+    }
+  }
+}
+
+template<class A, class B>
+static void TestAtomicBinary(void (*Impl)(A*, B),
+                             void (*Logic)(A, A*, B)) {
+  for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
+    A a = getTestVector<A>()[i];
+    for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      B b = getTestVector<B>()[j];
+      A olda = a;
+      Impl(&a, b);
+      Logic(olda, &a, b);
+    }
+  }
+}
+
+template<class A, class B, class C>
+static void TestAtomicTernary(void (*Impl)(A*, B, C),
+                              void (*Logic)(A, A*, B, C)) {
+  for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
+    A a = getTestVector<A>()[i];
+    for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      B b = getTestVector<B>()[j];
+      for(unsigned k = 0; k < getTestVector<C>().size(); ++k) {
+        C c = getTestVector<C>()[k];
+        A olda = a;
+        Impl(&a, b, c);
+        Logic(olda, &a, b, c);
       }
     }
   }

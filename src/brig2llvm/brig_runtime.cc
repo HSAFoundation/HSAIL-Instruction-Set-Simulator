@@ -742,9 +742,42 @@ defineSt(s64)
 defineSt(f32)
 defineSt(f64)
 
+template<class T> static T AtomicAnd(T *x, T y) {
+  return __sync_fetch_and_and(x, y);
+}
+AtomicInst(define, And, Binary)
+
+template<class T> static T AtomicOr(T *x, T y) {
+  return __sync_fetch_and_or(x, y);
+}
+AtomicInst(define, Or, Binary)
+
+template<class T> static T AtomicXor(T *x, T y) {
+  return __sync_fetch_and_xor(x, y);
+}
+AtomicInst(define, Xor, Binary)
+
+template<class T> static T AtomicCas(T *x, T y, T z) {
+  return __sync_val_compare_and_swap(x, y, z);
+}
+AtomicInst(define, Cas, Ternary)
+
+template<class T> static T AtomicExch(T *x, T y) {
+  return __sync_val_compare_and_swap(x, *x, y);
+}
+AtomicInst(define, Exch, Binary)
+
+template<class T> static T AtomicAdd(T *x, T y) {
+  return __sync_fetch_and_add (x, y);
+}
+AtomicInst(define, Add, Binary)
+
+template<class T> static T AtomicSub(T *x, T y) {
+  return __sync_fetch_and_sub (x, y);
+}
+AtomicInst(define, Sub, Binary)
+
 extern "C" u32 WorkItemAId_b32(u32 x) { return 0U; }
 
 } // namespace brig
 } // namespace hsa
-
-

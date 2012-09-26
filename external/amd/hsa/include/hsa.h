@@ -20,8 +20,6 @@
 #endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 
 #include "hsacommon.h"
-#include "hsacorecommon.h"
-
 
 namespace hsa
 {
@@ -33,45 +31,7 @@ namespace hsa
  *
  */
 
-#define MAX_INFO_STRING_LEN 0x40
-
-enum HSAIL_ADDRESS_QUALIFIER{
-HSAIL_ADDRESS_ERROR=0,
-HSAIL_ADDRESS_GLOBAL,
-HSAIL_ADDRESS_LOCAL,
-HSAIL_MAX_ADDRESS_QUALIFIERS
-} ;
-
-enum HSAIL_ARG_TYPE{
-HSAIL_ARGTYPE_ERROR=0,
-HSAIL_ARGTYPE_POINTER,
-HSAIL_ARGTYPE_VALUE,
-HSAIL_ARGTYPE_IMAGE,
-HSAIL_ARGMAX_ARG_TYPES
-};
-
-enum HSAIL_DATA_TYPE{
-HSAIL_DATATYPE_ERROR=0,
-HSAIL_DATATYPE_B1,
-HSAIL_DATATYPE_B8,
-HSAIL_DATATYPE_B16,
-HSAIL_DATATYPE_B32,
-HSAIL_DATATYPE_B64,
-HSAIL_DATATYPE_S8,
-HSAIL_DATATYPE_S16,
-HSAIL_DATATYPE_S32,
-HSAIL_DATATYPE_S64,
-HSAIL_DATATYPE_U8,
-HSAIL_DATATYPE_U16,
-HSAIL_DATATYPE_U32,
-HSAIL_DATATYPE_U64,
-HSAIL_DATATYPE_F16,
-HSAIL_DATATYPE_F32,
-HSAIL_DATATYPE_F64,
-HSAIL_DATATYPE_STRUCT,
-HSAIL_DATATYPE_MAX_TYPES
-};
-
+//#define MAX_INFO_STRING_LEN 0x40
 
 class Queue;
 class Kernel;
@@ -333,7 +293,7 @@ typedef struct LaunchAttributes {
 typedef hsa::vector<hsa::Device*>::const_iterator Device_itr;
 typedef hsa::vector<hsa::Device*> Device_list;
 typedef hsa::vector<hsa::Device*>* Device_list_ptr;
-typedef std::string KernelId;
+//typedef std::string KernelId;
 
 /**
  * @brief Allocate global memory that is shared by all devices 
@@ -412,6 +372,19 @@ public:
                     hsa::Program* prog,
                     const char* kernelName,
                     const char* options)=0;
+
+     /**
+     * @brief Returns the name of the vendor
+     * @return returns the name of the vendor as a hsa::string
+     */
+
+    virtual hsa::string getVendorName()=0;
+
+    /**
+     * @brief Returns the ID of the vendor's device
+     * @return returns the name of the vendor's device ID as a unsigned int
+     */
+    virtual uint32_t getVendorID()=0;
 
     virtual unsigned int getComputeUnitsCount()=0;
 
@@ -838,7 +811,7 @@ public:
     virtual hsa::Event *dispatch(Kernel* kernel, 
                         LaunchAttributes *launchAttr,
                         hsa::Event* depEvent, 
-                        hsacore::vector<KernelArg>& args)=0;
+                        hsa::vector<KernelArg>& args)=0;
     
     virtual void flush()=0;
 
@@ -890,6 +863,9 @@ public:
      *            operation.
      * @return Pointer to allocated memory.
      */
+
+
+
     virtual void* allocateGroupMemory(const size_t size, const size_t alignment = 0) = 0;
 
     /**
@@ -915,6 +891,11 @@ public:
     */
    virtual size_t getSizeOfISA() = 0;
 
+   /* @brief Returns the name of the kernel
+   * @return the name of the string
+   */
+
+   virtual hsa::string& getName()=0;
 };
 
 class RuntimeApi;
@@ -938,15 +919,30 @@ public:
     virtual uint32_t getDeviceCount()=0;
     virtual const hsa::vector<hsa::Device*>& getDevices()=0;
     virtual hsa::Queue* createDeviceQueue(hsa::Device *d, unsigned int size)=0;
-    virtual hsa::Program* createProgram(char *charElf, 
-                                        size_t elfSize,
-                                        Device_list_ptr pDevices)=0;
 
+    /* @ brief Creates a Program object from an ELF
+    * @param charElf - Pointer to an ELF
+    * @param elfSize - size of the ELF
+    * @param pDevices - pointer to a list of devices
+    */
+    virtual hsa::Program* createProgram(char *charElf, 
+        size_t elfSize,
+        Device_list_ptr pDevices)=0;
+
+    /* @ brief Creates a Program object from a File
+    * @param fileName - Name of the file
+    * @param pDevices - pointer to a list of devices
+    */
     virtual hsa::Program* createProgramFromFile(const char* fileName,
         Device_list_ptr pDevices)=0;
+
+    /* @ brief Destroys a a program
+    * @param prog pointer to the program
+    * @param pDevices - pointer to a list of devices
+    */
     virtual void destroyProgram(hsa::Program*)=0;
 
- 
+
 
     /**
      * @brief Get the runtime API version
@@ -978,7 +974,7 @@ public:
 class DLL_PUBLIC Program
 {
 public:
-
+    /* This is experimental */
     /*! @brief Builds and returns a kernel for the list of devices owned 
     * @param kernelName the name of the kernel to build 
     * @param size length of kernel name 
@@ -992,12 +988,6 @@ public:
     */
 
     virtual void addDevice(hsa::Device * device)  = 0;
-
-    /*! @brief Get debug information for the particular device
-    * @param d The device 
-    * @param kid kernel name
-    * @return The pointer to the debug info - Might have to be void*
-    */
 
     /*! @brief Return a pointer to the elf
     *  @return elf pointer
