@@ -277,7 +277,7 @@ TEST(BrigWriterTest, Cosine) {
 TEST(BrigWriterTest, Fib) {
   llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
-    "kernel &fib (kernarg_u32 %r, kernarg_s32 %n)\n"
+    "function &fib (arg_s32 %r) (arg_s32 %n)\n"
     "{\n"
     "  ld_arg_s32 $s1, [%n];\n"
     "  cmp_lt_b1_s32 $c1, $s1, 3; // if n < 3 go to return\n"
@@ -303,10 +303,24 @@ TEST(BrigWriterTest, Fib) {
     "  }\n"
     "  ld_private_u32 $s3, [%p]; // add in the saved result\n"
     "  add_u32 $s2, $s2, $s3;\n"
-    "  ld_arg_u32 $s0, [%r];\n"
-    "  st_arg_s32 $s2, [$s0];\n"
+    "  st_arg_s32 $s2, [%r];\n"
     "@return: ret;\n"
     "};\n"
+    "\n"
+    "kernel &fibKernel(kernarg_s32 %r_ptr, kernarg_s32 %n_ptr)\n"
+    "{\n"
+    "  {\n"
+    "    arg_s32 %r;\n"
+    "    arg_s32 %n;\n"
+    "    ld_kernargs_s32 $s0, [%r_ptr];\n"
+    "    st_arg_s32 $s1, [%n];\n"
+    "    call &fib(%r)(%n);\n"
+    "    ld_arg_s32 $s0, [%n];\n"
+    "    ld_kernargs_s32 $s1, [%n_ptr];\n"
+    "	   st_global_s32 $s0, [$s1];\n"
+    "  }\n"
+    "  ret;\n"
+    "};"
     );
   EXPECT_TRUE(mod);
   if(!mod) return;
