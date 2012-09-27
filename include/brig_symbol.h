@@ -53,6 +53,8 @@ class BrigSymbol {
 
   friend BrigSymbol arg_begin(const BrigFunction &F);
   friend BrigSymbol arg_end(const BrigFunction &F);
+  friend BrigSymbol local_begin(const BrigFunction &F);
+  friend BrigSymbol local_end(const BrigFunction &F);
   friend const BrigSymbol getArgument(const BrigInstHelper &helper,
                                       const BrigOperandArgumentList *argList,
                                       unsigned argNo);
@@ -60,11 +62,13 @@ class BrigSymbol {
   private:
 
   BrigSymbol(const BrigSections &S, const dir_iterator &it) :
-    S_(S), it_(it) {}
+    S_(S), it_(it) { nextValid(); }
 
   const BrigDirectiveSymbolCommon *getSymbol() const {
     return cast<BrigDirectiveSymbolCommon>(it_);
   }
+
+  void nextValid();
 
   const BrigSections &S_;
   dir_iterator it_;

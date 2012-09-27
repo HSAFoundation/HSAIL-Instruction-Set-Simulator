@@ -277,7 +277,7 @@ TEST(BrigWriterTest, Cosine) {
 TEST(BrigWriterTest, Fib) {
   llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
-    "kernel &fib (kernarg_u32 %r, kernarg_s32 %n)\n"
+    "function &fib (arg_s32 %r) (arg_s32 %n)\n"
     "{\n"
     "  ld_arg_s32 $s1, [%n];\n"
     "  cmp_lt_b1_s32 $c1, $s1, 3; // if n < 3 go to return\n"
@@ -303,13 +303,49 @@ TEST(BrigWriterTest, Fib) {
     "  }\n"
     "  ld_private_u32 $s3, [%p]; // add in the saved result\n"
     "  add_u32 $s2, $s2, $s3;\n"
-    "  ld_arg_u32 $s0, [%r];\n"
-    "  st_arg_s32 $s2, [$s0];\n"
-    "@return: ret;\n"
+    "  st_arg_s32 $s2, [%r];\n"
+    "  ret;\n"
+    "@return:"
+    "  st_arg_s32 1, [%r];\n"
+    "  ret;\n"
     "};\n"
+    "\n"
+    "kernel &fibKernel(kernarg_s32 %r_ptr, kernarg_s32 %n_ptr)\n"
+    "{\n"
+    "  {\n"
+    "    arg_s32 %r;\n"
+    "    arg_s32 %n;\n"
+    "    ld_kernarg_s32 $s0, [%n_ptr];\n"
+    "    st_arg_s32 $s0, [%n];\n"
+    "    call &fib(%r)(%n);\n"
+    "    ld_arg_s32 $s0, [%r];\n"
+    "    ld_kernarg_s32 $s1, [%r_ptr];\n"
+    "	   st_global_s32 $s0, [$s1];\n"
+    "  }\n"
+    "  ret;\n"
+    "};"
     );
   EXPECT_TRUE(mod);
   if(!mod) return;
+
+  int *r = new int;
+  int *n = new int;
+  void *args[] = { &r, n };
+  llvm::Function *fun = mod->getFunction("fibKernel");
+
+
+  int fib1 = 1;
+  int fib2 = 0;
+  for(int i = 1; i < 25; ++i) {
+    *n = i;
+    hsa::brig::launchBrig(mod, fun, args);
+    EXPECT_EQ(fib1 + fib2, *r);
+    fib1 = fib2;
+    fib2 = *r;
+  }
+
+  delete n;
+  delete r;
 }
 
 TEST(BrigWriterTest, VectorAbs) {
