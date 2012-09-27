@@ -2275,8 +2275,14 @@ int Call(Context* context) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
-
+	BrigOperandArgumentList emptylist = {
+	sizeof(BrigOperandArgumentList),
+	BrigEOperandArgumentList,
+	0,
+	0
+	};
   // check for twoCallArgs
+  //operands[1] contains output args and [3] contains input args
   if (context->token_to_scan == '(') {
     if (!CallArgs(context)) {
       firstOpOffset = context->current_argList_offset;
@@ -2284,23 +2290,27 @@ int Call(Context* context) {
       context->set_error(INVALID_CALL_ARGS);
       return 1;
     }
+	if (context->token_to_scan == '(') {
+		if (!CallArgs(context)) {
+			secondOpOffset = context->current_argList_offset;
+		} else {
+			context->set_error(INVALID_CALL_ARGS);
+			return 1;
+		}
+	}else{
+		secondOpOffset = firstOpOffset; //contains input args
+		firstOpOffset = context->get_operand_offset(); //contains output args
+		context->append_operand(&emptylist);
+	}
+  } else {
+		firstOpOffset = context->get_operand_offset(); //Assuming both input and output args missing
+		secondOpOffset = firstOpOffset;
+		context->append_operand(&emptylist);
   }
-
-  if (context->token_to_scan == '(') {
-    if (!CallArgs(context)) {
-      secondOpOffset = context->current_argList_offset;
-    } else {
-      context->set_error(INVALID_CALL_ARGS);
-      return 1;
-    }
-  }
-  if (secondOpOffset) {
+ 
     callInst.o_operands[1] = firstOpOffset;
     callInst.o_operands[3] = secondOpOffset;
-  } else {
-    callInst.o_operands[1] = 0;
-    callInst.o_operands[3] = firstOpOffset;
-  }
+  
   // if there is CallTarget, the first operand token must be a s register.
   if (firstOpToken == TOKEN_SREGISTER) {
     if (!CallTargets(context)) {
