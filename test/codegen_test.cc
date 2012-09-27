@@ -3103,7 +3103,7 @@ TEST(CodegenTest, BarCodeGen) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Bar(context));
 
-  ref.o_operands[0] = 8 ;//update
+  ref.o_operands[0] = 0 ;//update
 
   BrigInstBar get_bib;
   context->get_code(8, &get_bib);
@@ -3119,23 +3119,6 @@ TEST(CodegenTest, BarCodeGen) {
   EXPECT_EQ(ref.o_operands[3], get_bib.o_operands[3]);
   EXPECT_EQ(ref.o_operands[4], get_bib.o_operands[4]);
   EXPECT_EQ(ref.syncFlags, get_bib.syncFlags);
-
-  BrigOperandImmed boi = {
-    24,
-    BrigEOperandImmed,
-    Brigb32,
-    0,
-    { 0 }
-  };
-
-  BrigOperandImmed get_boi;
-  context->get_operand(8, &get_boi);
-
-  EXPECT_EQ(boi.size,get_boi.size);
-  EXPECT_EQ(boi.kind,get_boi.kind);
-  EXPECT_EQ(boi.type, get_boi.type);
-  EXPECT_EQ(boi.reserved, get_boi.reserved);
-  EXPECT_EQ(boi.bits.u, get_boi.bits.u);
 
   delete lexer;
 }
@@ -9469,19 +9452,6 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
   EXPECT_EQ(callInst1.o_operands[2], getBase.o_operands[2]);
   EXPECT_EQ(callInst1.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(callInst1.o_operands[4], getBase.o_operands[4]);
-
-  // BrigOperandImmed b32 all
-
-  curOpOffset += curOpOffset & 0x7;
-  callInst2.o_operands[0] = curOpOffset;
-  context->get_operand(curOpOffset, &getImm);
-  curOpOffset += sizeof(BrigOperandImmed);
-
-  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
-  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-  EXPECT_EQ(Brigb32, getImm.type);
-  EXPECT_EQ(0, getImm.reserved);
-  EXPECT_EQ(0, getImm.bits.u);
 
   // BrigOperandArgumentRef output Argument %out
   outOpRefOffset = curOpOffset;

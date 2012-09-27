@@ -1971,14 +1971,17 @@ int Branch(Context* context) {
 
   context->token_to_scan = yylex();
 
-  BrigoOffset32_t offsetWidth = context->get_operand_offset();
+  BrigoOffset32_t widthOffset = context->get_operand_offset();
 
-  offsetWidth += offsetWidth & 0x7;
 
   // check for optionalWidth
   if (context->token_to_scan == _WIDTH) {
     if (OptionalWidth(context)) {
       return 1;
+    } else {
+      if (widthOffset == context->get_operand_offset()) {
+        widthOffset = 0;
+      }
     }
   } else {
     BrigOperandImmed op_width = {
@@ -1991,7 +1994,9 @@ int Branch(Context* context) {
     op_width.bits.u = 0;
     context->append_operand(&op_width);
   }
-
+  if (widthOffset) {
+    widthOffset += widthOffset & 0x7;
+  }
   // check for optional _fbar modifier
   if (context->token_to_scan == __FBAR) {
     mod.fbar = 1;
@@ -2011,7 +2016,7 @@ int Branch(Context* context) {
       BrigNoPacking,
       {0, 0, 0, 0, 0}
     };
-    inst_op.o_operands[0] = offsetWidth;
+    inst_op.o_operands[0] = widthOffset;
 
     if (context->token_to_scan == TOKEN_CREGISTER)
       inst_op.type = Brigb1;
@@ -2116,7 +2121,7 @@ int Branch(Context* context) {
       {0, 0, 0, 0, 0},
       0
     };
-    inst_op.o_operands[0] = offsetWidth;
+    inst_op.o_operands[0] = widthOffset;
 
     if (context->token_to_scan == TOKEN_LABEL) {
       // if the next operand is label, which is the case in example4
@@ -2207,12 +2212,14 @@ int Call(Context* context) {
 
   context->token_to_scan = yylex();
   // optional width
-  callInst.o_operands[0] = context->get_operand_offset();
-  callInst.o_operands[0] += callInst.o_operands[0] & 0x7;
+  BrigoOffset32_t widthOffset = context->get_operand_offset();
 
   if (context->token_to_scan == _WIDTH) {
     if (!OptionalWidth(context)) {
       hasWidthOrFbar = true;
+      if (widthOffset == context->get_operand_offset()) {
+        widthOffset = 0;
+      }
     } else {
       return 1;
     }
@@ -2227,6 +2234,10 @@ int Call(Context* context) {
     op_width.bits.u = 0;
     context->append_operand(&op_width);
   }
+  if (widthOffset) {
+    widthOffset += widthOffset & 0x7;
+  }
+  callInst.o_operands[0] = widthOffset;
   if (context->token_to_scan == __FBAR) {
     hasWidthOrFbar = true;
     hasFbar = true;
@@ -5903,11 +5914,15 @@ int Ld(Context* context) {
   };
   int vector_size = 0;
   context->token_to_scan = yylex();
-  ld_op.o_operands[0] = context->get_operand_offset();
-  ld_op.o_operands[0] += ld_op.o_operands[0] & 0x7;
+  BrigoOffset32_t widthOffset = context->get_operand_offset();
+
   if (context->token_to_scan == _WIDTH) {
     if (OptionalWidth(context)) {
       return 1;
+    } else {
+      if (widthOffset == context->get_operand_offset()) {
+        widthOffset = 0;
+      }
     }
   } else {
    BrigOperandImmed op_width = {
@@ -5916,10 +5931,16 @@ int Ld(Context* context) {
       Brigb32,
       0,
       { 0 }
-    } ;
-	op_width.bits.u = 0;
-	context->append_operand(&op_width);
+    };
+    op_width.bits.u = 0;
+    context->append_operand(&op_width);
   }
+  if (widthOffset) {
+    widthOffset += widthOffset & 0x7;
+  }
+
+  ld_op.o_operands[0] = widthOffset;
+
   if (LdModifierPart2(context, &ld_op, &vector_size)) {
     return 1;
   }
@@ -8134,11 +8155,14 @@ int Bar(Context* context) {
 
   context->token_to_scan = yylex();
   BrigoOffset32_t offset = context->get_operand_offset();
-  offset += offset & 0x7;
 
   if (context->token_to_scan == _WIDTH) {
     if (OptionalWidth(context)) { 
       return 1;
+    } else {
+      if (offset == context->get_operand_offset()) {
+        offset = 0;
+      }
     }
   } else {
    BrigOperandImmed op_width = {
@@ -8150,6 +8174,9 @@ int Bar(Context* context) {
     };
     op_width.bits.u = 0;
     context->append_operand(&op_width);
+  }
+  if (offset) {
+    offset += offset & 0x7;
   }
     if (context->token_to_scan == _GLOBAL) {
       syncFlags = BrigGlobalLevel;
