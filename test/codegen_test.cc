@@ -3175,90 +3175,42 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   context->clear_context();
   Lexer* lexer = new Lexer();
   Init_LdStTestCases();
-  
-  
+   
 	lexer->set_source_string(TestCase_LdSt[0].Input);
 	context->token_to_scan = lexer->get_next_token();
 	context->add_symbol("%input");
 	int ret = Ld(context);
 	EXPECT_EQ(0, ret);
 	if(!ret){
-		BrigInstLdSt get;
+		BrigInstLdSt get;BrigOperandAddress addr; BrigOperandReg reg;
 		context->get_code(8, &get);
+		context->get_operand(32,&reg);
+		context->get_operand(44, &addr);
 		TestCase_LdSt[0].validate(get);
+		TestCase_LdSt[0].validate(reg, 0);
+		TestCase_LdSt[0].validate(addr);
 	}
 	context->clear_context();
-      
-	
+  	
 	lexer->set_source_string(TestCase_LdSt[1].Input);
 	context->token_to_scan = lexer->get_next_token();
 	context->add_symbol("%output");
 	ret = St(context);
 	EXPECT_EQ(0, ret);
 	if(!ret){
-		BrigInstLdSt get;
+		BrigInstLdSt get;BrigOperandAddress addr; BrigOperandReg reg[2]; BrigOperandCompound comp;
 		context->get_code(8, &get);
+		context->get_operand(8, &reg[0]);
+		context->get_operand(20, &addr);
+		context->get_operand(32, &reg[1]);
+		context->get_operand(44, &comp);
 		TestCase_LdSt[1].validate(get);
+		TestCase_LdSt[1].validate(reg[0], 0);
+		TestCase_LdSt[1].validate(reg[1], 1);
+		TestCase_LdSt[1].validate(comp);
+		TestCase_LdSt[1].validate(addr);
 	}
 
-/*  BrigOperandReg getReg;
-  BrigOperandAddress getAddr;
-  BrigOperandCompound getComp;
-
-  BrigOperandCompound refComp = {
-    20,                    // size
-    BrigEOperandCompound,  // kind
-    Brigb64,               // type
-    0,                     // reserved
-    32,                    // name
-    44,                    // reg
-    -4                     // offset
-  };
-
-  context->get_operand(8, &getReg);
-  // BrigOperandReg
-  EXPECT_EQ(12, getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(23, getReg.name);
-
-  context->get_operand(20, &getAddr);
-  // BrigOperandAddress
-  EXPECT_EQ(12, getAddr.size);
-  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb64, getAddr.type);
-  EXPECT_EQ(0, getAddr.reserved);
-  EXPECT_EQ(0, getAddr.directive);
-  //EXPECT_EQ(0, getAddr.offset);
-
-  context->get_operand(32, &getAddr);
-  // BrigOperandAddress
-  EXPECT_EQ(12, getAddr.size);
-  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb64, getAddr.type);
-  EXPECT_EQ(0, getAddr.reserved);
-  EXPECT_EQ(0, getAddr.directive);
-  //EXPECT_EQ(0, getAddr.offset);
-
-  context->get_operand(44, &getReg);
-  // BrigOperandReg
-  EXPECT_EQ(12, getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(27, getReg.name);
-
-  context->get_operand(56, &getComp);
-  // BrigOperandCompoud
-  EXPECT_EQ(refComp.size, getComp.size);
-  EXPECT_EQ(refComp.kind, getComp.kind);
-  EXPECT_EQ(refComp.type, getComp.type);
-  EXPECT_EQ(refComp.reserved, getComp.reserved);
-  EXPECT_EQ(refComp.name, getComp.name);
-  EXPECT_EQ(refComp.reg, getComp.reg);
-  EXPECT_EQ(refComp.offset, getComp.offset);
-*/
   delete lexer;
 }
 
