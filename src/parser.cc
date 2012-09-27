@@ -2244,7 +2244,7 @@ int Call(Context* context) {
       callInst.o_operands[2] = context->func_o_map[opName];
     } else {
       BrigOperandFunctionRef func_o_ref = {
-        8,
+        sizeof(BrigOperandFunctionRef),
         BrigEOperandFunctionRef,
         context->func_map[opName]
       };
@@ -2255,11 +2255,9 @@ int Call(Context* context) {
     }
     context->token_to_scan = yylex();
   } else if (firstOpToken == TOKEN_SREGISTER) {
-    opName.assign(context->token_value.string_val);
-    if (Operand(context)) {
+    if (OperandPart2(context, &callInst.o_operands[2])) {
       return 1;
     }
-    callInst.o_operands[2] = context->operand_map[opName];
   } else {
     context->set_error(MISSING_OPERAND);
     return 1;
@@ -9464,22 +9462,8 @@ int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
       return 1;
     }
   } else {
-    BrigoOffset32_t opSize = context->get_operand_offset();
 
-    if (context->valid_string) {
-      op_name = context->token_value.string_val;
-    } else {
-      if (context->token_type == CONSTANT) {
-        opSize += opSize & 0x7;
-      }
-    }
-
-    if (!Operand(context)) {
-      if (opSize == context->get_operand_offset()) {
-        *pRetOpOffset = context->operand_map[op_name];
-      } else {
-        *pRetOpOffset = opSize;
-      }
+    if (!OperandPart2(context, pRetOpOffset)) {
       return 0;
 
     } else {
