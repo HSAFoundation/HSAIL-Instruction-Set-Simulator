@@ -157,12 +157,19 @@ struct FunState {
       typedef std::pair<uint32_t, llvm::BasicBlock *> Pair;
       bool unique = cbMap.insert(Pair(cb.getOffset(), bb)).second;
       assert(unique && "Labels should be unique in functions");
+    }
 
-      if(cbMap.size() == 1) {
-        llvm::Module *M = llvmFun->getParent();
-        llvm::Type *regsType = M->getTypeByName("struct.regs");
-        regs = new llvm::AllocaInst(regsType, "gpu_reg_p", bb);
-      }
+    llvm::BasicBlock &entry = llvmFun->getEntryBlock();
+
+    llvm::Module *M = llvmFun->getParent();
+    llvm::Type *regsType = M->getTypeByName("struct.regs");
+    regs = new llvm::AllocaInst(regsType, "gpu_reg_p", &entry);
+
+    for(BrigSymbol local = brigFun.local_begin(),
+          E = brigFun.local_end(); local != E; ++local) {
+      const char *name = local.getName();
+      llvm::Type *type = runOnType(C, local);
+      symbolMap[local.getAddr()] = new llvm::AllocaInst(type, name, &entry);
     }
   }
 

@@ -39,6 +39,9 @@ class BrigFunction {
   BrigSymbol arg_begin() const;
   BrigSymbol arg_end() const;
 
+  BrigSymbol local_begin() const;
+  BrigSymbol local_end() const;
+
   BrigControlBlock begin() const;
   BrigControlBlock end() const;
 
@@ -52,6 +55,8 @@ class BrigFunction {
   friend BrigFunction fun_end(const BrigSections &S);
   friend BrigSymbol arg_begin(const BrigFunction &F);
   friend BrigSymbol arg_end(const BrigFunction &F);
+  friend BrigSymbol local_begin(const BrigFunction &F);
+  friend BrigSymbol local_end(const BrigFunction &F);
   friend BrigControlBlock cb_begin(const BrigFunction &F);
   friend BrigControlBlock cb_end(const BrigFunction &F);
 
