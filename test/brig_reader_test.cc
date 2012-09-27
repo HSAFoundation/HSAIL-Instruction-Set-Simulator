@@ -165,7 +165,7 @@ llvm::Module *TestHSAIL(const std::string &source) {
   return codegen.getModule();
 }
 
-TEST(BrigWriterTest, Cosine) {
+TEST(BrigKernelTest, Cosine) {
   llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
@@ -224,7 +224,7 @@ TEST(BrigWriterTest, Cosine) {
   delete arg_val0;
 }
 
-TEST(BrigWriterTest, Fib) {
+TEST(BrigKernelTest, Fib) {
   llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
     "function &fib (arg_s32 %r) (arg_s32 %n)\n"
@@ -298,7 +298,7 @@ TEST(BrigWriterTest, Fib) {
   delete r;
 }
 
-TEST(BrigWriterTest, VectorCopy) {
+TEST(BrigKernelTest, VectorCopy) {
   llvm::Module *mod = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
@@ -428,7 +428,7 @@ static void testInst(const char *inst, const T(&testVec)[N]) {
   delete[] output;
 }
 
-TEST(BrigWriterTest, VectorAbs) {
+TEST(BrigInstTest, VectorAbs) {
   {
     const int32_t testVec[] = { 1, 1 };
     testInst("abs_s32", testVec);
@@ -439,57 +439,57 @@ TEST(BrigWriterTest, VectorAbs) {
   }
 }
 
-TEST(BrigWriterTest, VectorNeg) {
+TEST(BrigInstTest, VectorNeg) {
   const int32_t testVec[] = { -1, 1 };
   testInst("neg_s32", testVec);
 }
 
-TEST(BrigWriterTest, VectorAdd) {
+TEST(BrigInstTest, VectorAdd) {
   const float testVec[] = { M_PI, M_PI, 0 };
   testInst("add_f32", testVec);
 }
 
-TEST(BrigWriterTest, VectorDiv) {
+TEST(BrigInstTest, VectorDiv) {
   const float testVec[] = { 2, 2, 1 };
   testInst("div_f32", testVec);
 }
 
-TEST(BrigWriterTest, VectorMul) {
+TEST(BrigInstTest, VectorMul) {
   const int32_t testVec[] = { 4, 2, 2 };
   testInst("mul_s32", testVec);
 }
 
-TEST(BrigWriterTest, VectorSub) {
+TEST(BrigInstTest, VectorSub) {
   const int32_t testVec[] = { 1, 2, 1 };
   testInst("sub_s32", testVec);
 }
 
-TEST(BrigWriterTest, vectorAddS32) {
+TEST(BrigInstTest, vectorAddS32) {
   const int32_t testVec[] = { 3, 3, 0 };
   testInst("add_s32", testVec);
 }
 
-TEST(BrigWriterTest, vectorAddU32) {
+TEST(BrigInstTest, vectorAddU32) {
   const uint32_t testVec[] = { 3, 3, 0 };
   testInst("add_u32", testVec);
 }
 
-TEST(BrigWriterTest, VectorRem) {
+TEST(BrigInstTest, VectorRem) {
   const int32_t testVec[] = { 1, 3, 2 };
   testInst("rem_s32", testVec);
 }
 
-TEST(BrigWriterTest, VectorCarry) {
+TEST(BrigInstTest, VectorCarry) {
   const int32_t testVec[] = { 1, 0xfffffffe, 2 };
   testInst("carry_s32", testVec);
 }
 
-TEST(BrigWriterTest, VectorBorrow) {
+TEST(BrigInstTest, VectorBorrow) {
   const int32_t testVec[] = { 1, 0, 1 };
   testInst("borrow_s32", testVec);
 }
 
-TEST(BrigWriterTest, VectorMad) {
+TEST(BrigInstTest, VectorMad) {
   const int32_t testVec[] = { 6, 2, 2, 2 };
   testInst("mad_s32", testVec);
 }

@@ -129,8 +129,6 @@ void launchBrig(llvm::Module *Mod,
 
   // Run static destructors.
   EE->runStaticConstructorsDestructors(true);
-
-  delete EE;
 }
 
 } // namespace brig
