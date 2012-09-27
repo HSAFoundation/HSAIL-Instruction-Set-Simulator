@@ -145,7 +145,7 @@ TEST(CodegenTest, CallwMultiArgs) {
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(72U, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
-  EXPECT_EQ(56U+4U, osize);
+  EXPECT_EQ(84, osize);
   BrigdOffset32_t ssize = context->get_string_offset();
   EXPECT_EQ(69U, ssize);
 
@@ -191,15 +191,15 @@ TEST(CodegenTest, CallwMultiArgs) {
   context->get_code(40, &cbr_op);
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCall, cbr_op.opcode);
-  EXPECT_EQ(0U, cbr_op.o_operands[0]);
-  EXPECT_EQ(32U, cbr_op.o_operands[1]);
-  EXPECT_EQ(24U, cbr_op.o_operands[2]);
-  EXPECT_EQ(44U, cbr_op.o_operands[3]);
+  EXPECT_EQ(24, cbr_op.o_operands[0]);
+  EXPECT_EQ(56, cbr_op.o_operands[1]);
+  EXPECT_EQ(48, cbr_op.o_operands[2]);
+  EXPECT_EQ(68, cbr_op.o_operands[3]);
   EXPECT_EQ(0U, cbr_op.o_operands[4]);
 
   // test BrigOperandFunctionRef
   BrigOperandFunctionRef func_o;
-  context->get_operand(24, &func_o);
+  context->get_operand(48, &func_o);
   EXPECT_EQ(8U, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(28U, func_o.fn);
@@ -218,18 +218,18 @@ TEST(CodegenTest, CallwMultiArgs) {
 
   // test BrigOperandArgumentList
   BrigOperandArgumentList arg_l;
-  context->get_operand(32, &arg_l);
+  context->get_operand(56, &arg_l);
   EXPECT_EQ(12U, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(16U, arg_l.o_args[0]);
 
-  context->get_operand(44, &arg_l);
+  context->get_operand(68, &arg_l);
   EXPECT_EQ(16U, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(8U, arg_l.o_args[0]);
 
   BrigoOffset32_t arg_test = 0;
-  context->get_operand(56, &arg_test);
+  context->get_operand(80, &arg_test);
   EXPECT_EQ(8U, arg_test);
 
   delete lexer;
@@ -261,13 +261,13 @@ TEST(CodegenTest, Example6_CallwArgs) {
 
   // test the sizes of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(284U, dsize);
+  EXPECT_EQ(284, dsize);
   BrigdOffset32_t csize = context->get_code_offset();
-  EXPECT_EQ(72U, csize);
+  EXPECT_EQ(72, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
-  EXPECT_EQ(56U, osize);
+  EXPECT_EQ(80, osize);
   BrigdOffset32_t ssize = context->get_string_offset();
-  EXPECT_EQ(60U, ssize);
+  EXPECT_EQ(60, ssize);
 
   BrigDirectiveFunction ref = {
     40,                       // size
@@ -311,15 +311,15 @@ TEST(CodegenTest, Example6_CallwArgs) {
   context->get_code(40, &cbr_op);
   EXPECT_EQ(32U, cbr_op.size);
   EXPECT_EQ(BrigCall, cbr_op.opcode);
-  EXPECT_EQ(0U, cbr_op.o_operands[0]);
-  EXPECT_EQ(32U, cbr_op.o_operands[1]);
-  EXPECT_EQ(24U, cbr_op.o_operands[2]);
-  EXPECT_EQ(44U, cbr_op.o_operands[3]);
+  EXPECT_EQ(24, cbr_op.o_operands[0]);
+  EXPECT_EQ(56, cbr_op.o_operands[1]);
+  EXPECT_EQ(48, cbr_op.o_operands[2]);
+  EXPECT_EQ(68, cbr_op.o_operands[3]);
   EXPECT_EQ(0U, cbr_op.o_operands[4]);
 
   // test BrigOperandFunctionRef
   BrigOperandFunctionRef func_o;
-  context->get_operand(24, &func_o);
+  context->get_operand(48, &func_o);
   EXPECT_EQ(8U, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(28U, func_o.fn);
@@ -338,12 +338,12 @@ TEST(CodegenTest, Example6_CallwArgs) {
 
   // test BrigOperandArgumentList
   BrigOperandArgumentList arg_l;
-  context->get_operand(32, &arg_l);
+  context->get_operand(56, &arg_l);
   EXPECT_EQ(12U, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(16U, arg_l.o_args[0]);
 
-  context->get_operand(44, &arg_l);
+  context->get_operand(68, &arg_l);
   EXPECT_EQ(12U, arg_l.size);
   EXPECT_EQ(BrigEOperandArgumentList, arg_l.kind);
   EXPECT_EQ(8U, arg_l.o_args[0]);
@@ -378,7 +378,7 @@ TEST(CodegenTest, Example5_SimpleCall) {
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(72U, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
-  EXPECT_EQ(16U, osize);
+  EXPECT_EQ(40, osize);
   BrigdOffset32_t ssize = context->get_string_offset();
   EXPECT_EQ(24U, ssize);
 
@@ -422,17 +422,17 @@ TEST(CodegenTest, Example5_SimpleCall) {
   // test BrigCall
   BrigInstBase cbr_op;
   context->get_code(40, &cbr_op);
-  EXPECT_EQ(32U, cbr_op.size);
+  EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCall, cbr_op.opcode);
-  EXPECT_EQ(0U, cbr_op.o_operands[0]);
-  EXPECT_EQ(0U, cbr_op.o_operands[1]);
-  EXPECT_EQ(8U, cbr_op.o_operands[2]);
-  EXPECT_EQ(0U, cbr_op.o_operands[3]);
-  EXPECT_EQ(0U, cbr_op.o_operands[4]);
+  EXPECT_EQ(8, cbr_op.o_operands[0]);
+  EXPECT_EQ(0, cbr_op.o_operands[1]);
+  EXPECT_EQ(32, cbr_op.o_operands[2]);
+  EXPECT_EQ(0, cbr_op.o_operands[3]);
+  EXPECT_EQ(0, cbr_op.o_operands[4]);
 
   // test BrigOperandFunctionRef
   BrigOperandFunctionRef func_o;
-  context->get_operand(8, &func_o);
+  context->get_operand(32, &func_o);
   EXPECT_EQ(8U, func_o.size);
   EXPECT_EQ(BrigEOperandFunctionRef, func_o.kind);
   EXPECT_EQ(28U, func_o.fn);
@@ -467,7 +467,7 @@ TEST(CodegenTest, Example4_Branch) {
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(172U, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
-  EXPECT_EQ(84U, osize);
+  EXPECT_EQ(136, osize);
   BrigdOffset32_t ssize = context->get_string_offset();
   EXPECT_EQ(59U, ssize);
   // TODO(Chuange):
@@ -512,25 +512,25 @@ TEST(CodegenTest, Example4_Branch) {
   // test BrigCbr
   BrigInstBase cbr_op;
   context->get_code(8, &cbr_op);
-  EXPECT_EQ(32U, cbr_op.size);
+  EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCbr, cbr_op.opcode);
   EXPECT_EQ(Brigb1, cbr_op.type);
-  EXPECT_EQ(0U, cbr_op.o_operands[0]);
-  EXPECT_EQ(8U, cbr_op.o_operands[1]);
-  EXPECT_EQ(20U, cbr_op.o_operands[2]);
-  EXPECT_EQ(0U, cbr_op.o_operands[3]);
-  EXPECT_EQ(0U, cbr_op.o_operands[4]);
+  EXPECT_EQ(8, cbr_op.o_operands[0]);
+  EXPECT_EQ(32, cbr_op.o_operands[1]);
+  EXPECT_EQ(44, cbr_op.o_operands[2]);
+  EXPECT_EQ(0, cbr_op.o_operands[3]);
+  EXPECT_EQ(0, cbr_op.o_operands[4]);
 
   // test BrigBrn
   BrigInstBar br_op;
   context->get_code(72, &br_op);
   EXPECT_EQ(36U, br_op.size);
   EXPECT_EQ(BrigBrn, br_op.opcode);
-  EXPECT_EQ(0U, br_op.o_operands[0]);
-  EXPECT_EQ(52U, br_op.o_operands[1]);
-  EXPECT_EQ(0U, br_op.o_operands[2]);
-  EXPECT_EQ(0U, br_op.o_operands[3]);
-  EXPECT_EQ(0U, br_op.o_operands[4]);
+  EXPECT_EQ(80, br_op.o_operands[0]);
+  EXPECT_EQ(104, br_op.o_operands[1]);
+  EXPECT_EQ(0, br_op.o_operands[2]);
+  EXPECT_EQ(0, br_op.o_operands[3]);
+  EXPECT_EQ(0, br_op.o_operands[4]);
 
   delete lexer;
 }
@@ -3070,7 +3070,7 @@ TEST(CodegenTest, BarCodeGen) {
     BrigBarrier,
     Brigb32,
     BrigNoPacking,
-    {0, 0, 0, 0, 0},
+    {8, 0, 0, 0, 0},
     BrigGroupLevel
   };
 
@@ -4569,7 +4569,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     BrigCbr,               // opcode
     Brigb1,               // type
     BrigNoPacking,         // packing
-    {0, 16, 28, 0, 0}        // o_operands[5]
+    {40, 64, 76, 0, 0}        // o_operands[5]
   };
 
   BrigInstBar refBrnLab1 = {
@@ -4578,7 +4578,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     BrigBrn,             // opcode
     0,             // type
     BrigNoPacking,       // packing
-    {0, 8, 0, 0, 0},     // o_operands[5]
+    {8, 32, 0, 0, 0},     // o_operands[5]
     0                    // syncFlags
   };
   BrigInstBase refCbrLab1 = {
@@ -4587,7 +4587,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     BrigCbr,               // opcode
     Brigb1,               // type
     BrigNoPacking,         // packing
-    {0, 16, 8, 0, 0}        // o_operands[5]
+    {120, 64, 32, 0, 0}        // o_operands[5]
   };
   BrigInstBar refBrnLab2 = {
     36,                  // size
@@ -4595,7 +4595,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     BrigBrn,             // opcode
     0,             // type
     BrigNoPacking,       // packing
-    {0, 36, 0, 0, 0},     // o_operands[5]
+    {88, 112, 0, 0, 0},     // o_operands[5]
     0                    // syncFlags
   };
 
@@ -4644,7 +4644,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // brn lab1
   EXPECT_EQ(0, Branch(context));
   context->get_code(8, &getBrnCode);
-  context->get_operand(8, &getLabRef);
+
 
   EXPECT_EQ(refBrnLab1.size, getBrnCode.size);
   EXPECT_EQ(refBrnLab1.kind, getBrnCode.kind);
@@ -4659,16 +4659,33 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // TODO(Chuang) set the value of .syncFlags
   // EXPECT_EQ(refBrn.syncFlags, getBrnCode.syncFlags);
 
-  EXPECT_EQ(8, getLabRef.size);
+  BrigoOffset32_t curOpOffset = 8;
+
+  BrigOperandImmed getImm;
+  
+  curOpOffset += curOpOffset & 0x7;
+  context->get_operand(curOpOffset, &getImm);
+  curOpOffset += sizeof(BrigOperandImmed);
+
+  EXPECT_EQ(24, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(0, getImm.bits.u);
+
+  context->get_operand(curOpOffset, &getLabRef);
+
+  EXPECT_EQ(sizeof(BrigOperandLabelRef), getLabRef.size);
   EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
   // When the label isn't declared.
-  // the value of labeldirective is -1 now.
-  EXPECT_EQ(-1, getLabRef.labeldirective);
+  // the value of labeldirective is 0 now.
+  EXPECT_EQ(0, getLabRef.labeldirective);
 
   // lab1
   EXPECT_EQ(0, Label(context));
-  context->get_operand(8, &getLabRef);
+  context->get_operand(curOpOffset, &getLabRef);
   EXPECT_EQ(8, getLabRef.labeldirective);
+  curOpOffset += sizeof(BrigOperandLabelRef);
 
   // cbr lab3
   EXPECT_EQ(0, Branch(context));
@@ -4686,26 +4703,46 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   EXPECT_EQ(refCbrLab3.o_operands[3], getCbrCode.o_operands[3]);
   EXPECT_EQ(refCbrLab3.o_operands[4], getCbrCode.o_operands[4]);
 
-  context->get_operand(28, &getLabRef);
-  EXPECT_EQ(8, getLabRef.size);
+  curOpOffset += curOpOffset & 0x7;
+  context->get_operand(curOpOffset, &getImm);
+  curOpOffset += sizeof(BrigOperandImmed);
+
+  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(0, getImm.bits.u);
+
+  BrigOperandReg getReg;
+  context->get_operand(curOpOffset, &getReg);
+  curOpOffset += sizeof(BrigOperandReg);
+
+  EXPECT_EQ(12, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb1, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(14, getReg.name);
+
+  context->get_operand(curOpOffset, &getLabRef);
+  EXPECT_EQ(sizeof(BrigOperandLabelRef), getLabRef.size);
   EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
   // When the label isn't declared.
-  // the value of labeldirective is -1 now.
-  EXPECT_EQ(-1, getLabRef.labeldirective);
+  // the value of labeldirective is 0 now.
+  EXPECT_EQ(0, getLabRef.labeldirective);
 
   // lab2
   EXPECT_EQ(0, Label(context));
 
   // lab3
   EXPECT_EQ(0, Label(context));
-  context->get_operand(28, &getLabRef);
+  context->get_operand(curOpOffset, &getLabRef);
   EXPECT_EQ(32, getLabRef.labeldirective);
+  curOpOffset += sizeof(BrigOperandLabelRef);
 
   // brn lab2
   EXPECT_EQ(0, Branch(context));
 
   context->get_code(76, &getBrnCode);
-  context->get_operand(36, &getLabRef);
 
   EXPECT_EQ(refBrnLab2.size, getBrnCode.size);
   EXPECT_EQ(refBrnLab2.kind, getBrnCode.kind);
@@ -4720,7 +4757,20 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // TODO(Chuang) set the value of .syncFlags
   // EXPECT_EQ(refBrn.syncFlags, getBrnCode.syncFlags);
 
-  EXPECT_EQ(8, getLabRef.size);
+  curOpOffset += curOpOffset & 0x7;
+  context->get_operand(curOpOffset, &getImm);
+  curOpOffset += sizeof(BrigOperandImmed);
+
+  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(0, getImm.bits.u);
+
+  context->get_operand(curOpOffset, &getLabRef);
+  curOpOffset += sizeof(BrigOperandLabelRef);
+
+  EXPECT_EQ(sizeof(BrigOperandLabelRef), getLabRef.size);
   EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
   EXPECT_EQ(20, getLabRef.labeldirective);
 
@@ -4743,11 +4793,18 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   EXPECT_EQ(refCbrLab1.o_operands[3], getCbrCode.o_operands[3]);
   EXPECT_EQ(refCbrLab1.o_operands[4], getCbrCode.o_operands[4]);
 
-  context->get_operand(8, &getLabRef);
-  EXPECT_EQ(8, getLabRef.size);
-  EXPECT_EQ(BrigEOperandLabelRef, getLabRef.kind);
-  EXPECT_EQ(8, getLabRef.labeldirective);
+  curOpOffset += curOpOffset & 0x7;
+  context->get_operand(curOpOffset, &getImm);
+  curOpOffset += sizeof(BrigOperandImmed);
 
+  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(0, getImm.bits.u);
+
+
+  EXPECT_EQ(curOpOffset, context->get_operand_offset());
 
   context->get_directive(8, &get1);
 
@@ -5542,7 +5599,6 @@ TEST(CodegenTest, Instruction1op_CodeGen_fbar_Release) {
 
   BrigInstBase getBase;
   BrigOperandReg getReg1,getReg2;
-  //BrigOperandImmed getImm;
 
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -9544,7 +9600,19 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
 
   EXPECT_EQ(*pAluModRef, *pAluModGet);
 
-  callInst3.o_operands[0] = 0;
+  // BrigOperandImmed b32 0
+
+  curOpOffset += curOpOffset & 0x7;
+  callInst3.o_operands[0] = curOpOffset;
+  context->get_operand(curOpOffset, &getImm);
+  curOpOffset += sizeof(BrigOperandImmed);
+
+  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(0, getImm.bits.u);
+
   callInst3.o_operands[4] = 0;
 
   // BrigOperandArgumentList output Argument List
@@ -9583,7 +9651,19 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
   EXPECT_EQ(callInst3.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(callInst3.o_operands[4], getBase.o_operands[4]);
 
-  callInst4.o_operands[0] = 0;
+  // BrigOperandImmed b32 0
+
+  curOpOffset += curOpOffset & 0x7;
+  callInst4.o_operands[0] = curOpOffset;
+  context->get_operand(curOpOffset, &getImm);
+  curOpOffset += sizeof(BrigOperandImmed);
+
+  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.reserved);
+  EXPECT_EQ(0, getImm.bits.u);
+
   callInst4.o_operands[1] = 0;
   callInst4.o_operands[4] = 0;
 
@@ -10160,7 +10240,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   BrigsOffset32_t ssize = context->get_string_offset();
   EXPECT_EQ(68, ssize);
   BrigoOffset32_t osize = context->get_operand_offset();
-  EXPECT_EQ(180, osize);
+  EXPECT_EQ(204, osize);
 
 
   delete lexer;
