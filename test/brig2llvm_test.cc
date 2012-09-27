@@ -2881,6 +2881,62 @@ TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "depth value is wrong for 1DA and 2DA images")));
   }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("&packeed_ops"));
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+    hsa::brig::Buffer operands;
+    hsa::brig::Buffer debug;
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      8,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+    BrigSymbolCommon s = {
+      8,             // c_code
+      BrigArgSpace,  // storageClass
+      BrigNone,      // attribute
+      0,             // reserved
+      0,             // symbolModifier
+      0,             // dim
+      8,            // s_name
+      Brigf32,       // type
+      1,            // align
+    };
+    BrigDirectiveImage bdi = {
+      sizeof(bdi) - 2,
+      BrigEDirectiveImage,
+      s,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    };
+    directives.append(&bdi);
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
+  }
 }
 
 TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
@@ -4016,7 +4072,7 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     BrigInstBase bcb = {
-      sizeof(bcb),
+      sizeof(bcb)+1,
       BrigEInstBase,
       BrigInvalidOpcode,
       Brigf64x2 + 1,
@@ -4043,6 +4099,58 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
     "Invalid packing control")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "o_operands past the operands section")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      8,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+    BrigInstBase bcbd = {
+      sizeof(bcbd) - 7,
+      BrigEInstBase,
+      BrigRet,
+      Brigb32,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0}
+    };
+    code.append(&bcbd);
+    BrigInstBase bcb = {
+      sizeof(bcb) - 7,
+      BrigEInstBase,
+      BrigRet,
+      Brigb32,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0}
+    };
+    code.append(&bcb);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::Buffer debug;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
   }
 }
 
@@ -4145,6 +4253,52 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid memorySemantic, can be regular, acquire, "
     "acquire release, or partial acquire release")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      8,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+    BrigInstAtomic bca = {
+      sizeof(bca) - 10,
+      BrigEInstAtomic,
+      BrigAtomic,
+      Brigb32,
+      BrigNoPacking,
+      {0, 0, 0, 0, 0},
+      BrigAtomicSub,
+      BrigGlobalSpace,
+      BrigAcquire
+    };
+    code.append(&bca);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::Buffer debug;
+
+   std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
   }
 }
 
@@ -4927,6 +5081,54 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid reserved")));
   }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      8,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+    BrigInstCmp bic = {
+      sizeof(bic) - 1,              //size
+      BrigEInstCmp,             //kind
+      BrigCmp,                  //opcode
+      0,                        //type
+      0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      {0, 0, 0, 0, 0, 0, 0},    //aluModifier
+      0,                        //comparisonOperator
+      0,                        //sourceType
+      0                         //reserved
+    };
+    code.append(&bic);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::Buffer debug;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
+  }
 }
 
 TEST(Brig2LLVMTest, validateBrigInstImage) {
@@ -5032,6 +5234,54 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
   }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+
+    BrigInstImage bii = {
+      sizeof(bii) - 1,              //size
+      BrigEInstImage,           //kind
+      BrigRdImage,              //opcode
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      0,                        //geom
+      0,                        //type
+      0,                        //stype
+      0,                        //packing
+      0                         //reserved
+    };
+    code.append(&bii);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::Buffer debug;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
+  }
 }
 
 TEST(Brig2LLVMTest, validateBrigInstBar) {
@@ -5127,6 +5377,51 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid syncFlags, should be either BrigGroupLevel BrigGlobalLevel"
     "or BrigPartialLevel")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+    BrigInstBar bib = {
+      sizeof(bib) - 1,
+      BrigEInstBar,
+      BrigBarrier,
+      Brigu32,
+      0,
+      {0, 0, 0, 0, 0},
+      1
+    };
+    code.append(&bib);
+
+    hsa::brig::Buffer operands;
+
+    hsa::brig::Buffer debug;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
   }
 }
 
@@ -5746,6 +6041,71 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid directive, should point to a BrigDirectiveSymbol")));
   }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("%input"));
+    strings.append(std::string("%an_input"));
+
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      8,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveSymbol bds = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        8,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        7,                               // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bds);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandAddress boa = {
+      sizeof(boa) - 2,
+      BrigEOperandAddress,
+      Brigb32,
+      0,
+      28
+    };
+    operands.append(&boa);
+
+    hsa::brig::Buffer debug;
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
+  }
 }
 
 TEST(Brig2LLVMTest, validateBrigOperandCompound) {
@@ -6233,6 +6593,69 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid directive, should point to a BrigDirectiveFunction "
     "or BrigDirectiveSignature")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append("&callee");
+    strings.append("&caller");
+
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    BrigDirectiveFunction callee = {
+      sizeof(callee),                 // size
+      BrigEDirectiveFunction,         // kind
+      0,                              // c_code
+      0,                              // s_name
+      0,                              // inParamCount
+      directives.size() +
+      sizeof(callee),                 // d_firstSCopedDirective
+      1,                              // operationCount
+      directives.size() +
+      sizeof(callee),                 // d_nextDirective
+      BrigNone,                       // attribute
+      0,                              // fbarCount
+      0,                              // outParamCount
+      0                               // d_firstInParam
+    };
+    directives.append(&callee);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+
+    BrigOperandFunctionRef bofr = {
+      sizeof(bofr) - 1,
+      BrigEOperandFunctionRef,
+      20
+    };
+    operands.append(&bofr);
+
+    hsa::brig::Buffer debug;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
   }
 }
 
@@ -6803,6 +7226,51 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
     "Register name does not match type")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
+  }
+  {
+    hsa::brig::StringBuffer strings;
+    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append("$s21");
+    hsa::brig::Buffer directives;
+    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
+    BrigDirectiveVersion bdv = {
+      sizeof(bdv),
+      BrigEDirectiveVersion,
+      0,
+      1,
+      0,
+      BrigELarge,
+      BrigEFull,
+      BrigENosftz,
+      0
+    };
+    directives.append(&bdv);
+
+    hsa::brig::Buffer code;
+    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
+    hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i)
+      operands.append_char(0);
+
+    BrigOperandReg bor = {
+      sizeof(bor) - 1,
+      BrigEOperandReg,
+      Brigb32,
+      1,
+      8
+    };
+    operands.append(&bor);
+
+    hsa::brig::Buffer debug;
+
+    std::string errorMsg;
+    llvm::raw_string_ostream errMsgOut(errorMsg);
+    hsa::brig::BrigModule mod(strings, directives, code, operands,
+                              debug, &errMsgOut);
+    EXPECT_FALSE(mod.isValid());
+    errMsgOut.flush();
+    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
+    "Brig structure is too small")));
   }
 }
 TEST(Brig2LLVMTest, validateBrigOperandLabelRef) {

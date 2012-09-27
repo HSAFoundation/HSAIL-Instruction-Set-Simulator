@@ -67,6 +67,8 @@ class BrigModule {
   bool check(bool test, const Message &msg,
              const char *filename, unsigned lineno,
              const char *cause) const;
+  template<typename T>
+  bool validateSize(const T *brig) const;
 
   bool validate(void) const;
   bool validateDirectives(void) const;
