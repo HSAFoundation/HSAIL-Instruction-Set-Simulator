@@ -1,5 +1,4 @@
 #include "brig_module.h"
-
 #include "llvm/Support/raw_ostream.h"
 #include <cstring>
 #include <set>
@@ -212,7 +211,7 @@ bool BrigModule::validateDebug(void) const {
 
 bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
   bool valid = true;
-
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
@@ -260,7 +259,7 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
   bool valid = true;
-
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validate(&dir->s);
   valid &= check(!dir->reserved, "Reserved not zero");
@@ -294,6 +293,7 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveImage *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validate(&dir->s);
   if(dir->array > 1) {
@@ -305,6 +305,7 @@ bool BrigModule::validate(const BrigDirectiveImage *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   if(dir->valid == 1) {
     valid &= check(dir->filter <= BrigSamplerFilterNearest,
                    "Invalid filter");
@@ -322,6 +323,7 @@ bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveLabel *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
@@ -331,6 +333,7 @@ bool BrigModule::validate(const BrigDirectiveLabel *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveLabelList *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= check(dir->c_code <= S_.codeSize,
                  "c_code past the code section");
@@ -340,7 +343,7 @@ bool BrigModule::validate(const BrigDirectiveLabelList *dir) const {
 // 20.8.22
 bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
   bool valid = true;
-
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= check(dir->machine == BrigELarge ||
@@ -360,6 +363,7 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveSignature *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
@@ -380,6 +384,7 @@ bool BrigModule::validate(const BrigDirectiveSignature *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveFile *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_filename);
   return valid;
@@ -387,6 +392,7 @@ bool BrigModule::validate(const BrigDirectiveFile *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveComment *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
@@ -395,6 +401,7 @@ bool BrigModule::validate(const BrigDirectiveComment *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveLoc *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
@@ -402,6 +409,7 @@ bool BrigModule::validate(const BrigDirectiveLoc *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveInit *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 8);
   valid &= check(!dir->reserved, "Reserved not zero");
   valid &= check(Brigb1 == dir->type  || Brigb8 == dir->type  ||
@@ -417,6 +425,7 @@ bool BrigModule::validate(const BrigDirectiveInit *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   for (unsigned i = 0; i < dir->elementCount; i++) {
@@ -434,6 +443,7 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveControl *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
@@ -441,6 +451,7 @@ bool BrigModule::validate(const BrigDirectiveControl *dir) const {
 
 bool BrigModule::validate(const BrigDirectivePragma *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
@@ -449,6 +460,7 @@ bool BrigModule::validate(const BrigDirectivePragma *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveExtension *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
@@ -457,6 +469,7 @@ bool BrigModule::validate(const BrigDirectiveExtension *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveArgStart *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
@@ -464,6 +477,7 @@ bool BrigModule::validate(const BrigDirectiveArgStart *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveArgEnd *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   return valid;
@@ -471,6 +485,7 @@ bool BrigModule::validate(const BrigDirectiveArgEnd *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveBlockStart *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateSName(dir->s_name);
   const char *string = S_.strings + dir->s_name;
   valid &= check(0 == strcmp(string, "debug") ||
@@ -483,6 +498,7 @@ bool BrigModule::validate(const BrigDirectiveBlockStart *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= check(0 == dir->size % 8,
                  "Invalid size, must be a multiple of 8");
   valid &= check(Brigb1 == dir->type  || Brigb8 == dir->type  ||
@@ -497,18 +513,21 @@ bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) const {
 
 bool BrigModule::validate(const BrigDirectiveBlockString *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateSName(dir->s_name);
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectivePad *dir) const {
   bool valid = true;
+  if(!validateSize(dir)) return false;
   return valid;
 }
 
@@ -603,6 +622,10 @@ bool BrigModule::validateAlignment(const void *dir, uint8_t alignment) const {
   return valid;
 }
 
+template<typename T> bool BrigModule::validateSize(const T *brig) const{
+  return check(brig->size >= sizeof(T),"Brig structure is too small");
+}
+
 // validating the code section
 bool BrigModule::validate(const BrigAluModifier *c) const {
   bool valid = true;
@@ -625,6 +648,7 @@ bool BrigModule::validate(const BrigAluModifier *c) const {
 
 bool BrigModule::validate(const BrigInstAtomic *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode == BrigAtomic ||
                  code->opcode == BrigAtomicNoRet,
                  "Invalid opcode, should be either BrigAtomic or "
@@ -659,6 +683,7 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
 
 bool BrigModule::validate(const BrigInstAtomicImage *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode == BrigAtomicImage ||
                  code->opcode == BrigAtomicNoRetImage,
                  "Invalid opcode, should be either BrigAtomicImage or "
@@ -686,6 +711,7 @@ bool BrigModule::validate(const BrigInstAtomicImage *code) const {
 
 bool BrigModule::validate(const BrigInstBar *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode == BrigBarrier ||
                  code->opcode == BrigSync    ||
                  code->opcode == BrigBrn,
@@ -707,6 +733,7 @@ bool BrigModule::validate(const BrigInstBar *code) const {
 
 bool BrigModule::validate(const BrigInstBase *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode < BrigInvalidOpcode,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
@@ -724,6 +751,7 @@ bool BrigModule::validate(const BrigInstBase *code) const {
 
 bool BrigModule::validate(const BrigInstCmp *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode == BrigCmp,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
@@ -747,6 +775,7 @@ bool BrigModule::validate(const BrigInstCmp *code) const {
 }
 bool BrigModule::validate(const BrigInstImage *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode == BrigRdImage,
                  "Invalid opcode");
   for (unsigned i = 0; i < 5; i++) {
@@ -769,6 +798,7 @@ bool BrigModule::validate(const BrigInstImage *code) const {
 }
 bool BrigModule::validate(const BrigInstCvt *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode == BrigCvt,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
@@ -790,6 +820,7 @@ bool BrigModule::validate(const BrigInstCvt *code) const {
 }
 bool BrigModule::validate(const BrigInstLdSt *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode < BrigInvalidOpcode,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
@@ -820,6 +851,7 @@ bool BrigModule::validate(const BrigInstLdSt *code) const {
 }
 bool BrigModule::validate(const BrigInstMem *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode < BrigInvalidOpcode,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
@@ -845,6 +877,7 @@ bool BrigModule::validate(const BrigInstMem *code) const {
 }
 bool BrigModule::validate(const BrigInstMod *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode < BrigInvalidOpcode,
                  "Invalid opcode");
   valid &= check(code->type <= Brigf64x2,
@@ -862,6 +895,7 @@ bool BrigModule::validate(const BrigInstMod *code) const {
 }
 bool BrigModule::validate(const BrigInstRead *code) const {
   bool valid = true;
+  if(!validateSize(code)) return false;
   valid &= check(code->opcode == BrigRdImage,
                  "Invalid opcode");
   for (unsigned i = 0; i < 5; i++) {
@@ -907,6 +941,7 @@ bool BrigModule::validate(const inst_iterator inst) const {
 
 bool BrigModule::validate(const BrigOperandAddress *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   valid &= check(operand->type == Brigb32 ||
                  operand->type == Brigb64, "Invald datatype, should be "
                  "Brigb32 and Brigb64");
@@ -922,7 +957,7 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
 
 bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
   bool valid = true;
-
+  if(!validateSize(operand)) return false;
   size_t dirSize =
     sizeof(BrigOperandArgumentList) +
     sizeof(operand->o_args[0]) * (std::max(1U, operand->elementCount) - 1);
@@ -939,6 +974,7 @@ bool BrigModule::validate(const BrigOperandArgumentList *operand) const {
 
 bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   unsigned funRefCount = 0;
   unsigned argRefCount = 0;
 
@@ -982,6 +1018,7 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
 
 bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   dir_iterator argDir(S_.directives + operand->arg);
   if(!validate(argDir)) return false;
   valid &= check(isa<BrigDirectiveSymbol>(argDir),
@@ -991,11 +1028,13 @@ bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
 
 bool BrigModule::validate(const BrigOperandBase *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   return valid;
 }
 
 bool BrigModule::validate(const BrigOperandCompound *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   valid &= check(operand->type == Brigb32 ||
                  operand->type == Brigb64, "Invald datatype, should be "
                  "Brigb32 and Brigb64");
@@ -1022,6 +1061,7 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
 
 bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   dir_iterator fnDir(S_.directives + operand->fn);
   if(!validate(fnDir)) return false;
   valid &= check(isa<BrigDirectiveFunction>(fnDir) ||
@@ -1033,7 +1073,7 @@ bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
 
 bool BrigModule::validate(const BrigOperandImmed *operand) const {
   bool valid = true;
-
+  if(!validateSize(operand)) return false;
   valid &= check(Brigb1 == operand->type  || Brigb8 == operand->type  ||
                  Brigb16 == operand->type || Brigb32 == operand->type ||
                  Brigb64 == operand->type,
@@ -1049,7 +1089,7 @@ bool BrigModule::validate(const BrigOperandImmed *operand) const {
 
 bool BrigModule::validate(const BrigOperandIndirect *operand) const {
   bool valid = true;
-
+  if(!validateSize(operand)) return false;
   if (operand->reg) {
     oper_iterator regOper(S_.operands + operand->reg);
     if(!validate(regOper)) return false;
@@ -1067,6 +1107,7 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
 
 bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   dir_iterator directiveDir(S_.directives + operand->labeldirective);
   if(!validate(directiveDir)) return false;
   valid &= check(isa<BrigDirectiveLabel>(directiveDir),
@@ -1076,6 +1117,7 @@ bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
 }
 bool BrigModule::validate(const BrigOperandOpaque *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   dir_iterator nameDir(S_.directives + operand->name);
   if(!validate(nameDir)) return false;
   valid &= check(isa<BrigDirectiveImage>(nameDir) ||
@@ -1110,12 +1152,13 @@ static bool getRegType(char c, BrigDataType *type) {
 }
 
 bool BrigModule::validate(const BrigOperandPad *operand) const {
+  if(!validateSize(operand)) return false;
   return true;
 }
 
 bool BrigModule::validate(const BrigOperandReg *operand) const {
   bool valid = true;
-
+  if(!validateSize(operand)) return false;
   // Exit early to prevent out-of-bounds access
   if(!validateSName(operand->name))
     return false;
@@ -1151,6 +1194,7 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
 
 bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   for(int i = 0; i < 2; i++) {
     const oper_iterator oper(S_.operands + operand->regs[i]);
     if(!validate(oper)) return false;
@@ -1169,6 +1213,7 @@ bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
 }
 bool BrigModule::validate(const BrigOperandRegV4 *operand) const {
   bool valid = true;
+  if(!validateSize(operand)) return false;
   for(int i = 0; i < 4; i++) {
     const oper_iterator oper(S_.operands + operand->regs[i]);
     if(!validate(oper)) return false;
@@ -1186,6 +1231,7 @@ bool BrigModule::validate(const BrigOperandRegV4 *operand) const {
   return valid;
 }
 bool BrigModule::validate(const BrigOperandWaveSz *operand) const {
+  if(!validateSize(operand)) return false;
   return true;
 }
 
