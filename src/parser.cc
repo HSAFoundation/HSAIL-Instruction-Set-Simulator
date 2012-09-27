@@ -8767,7 +8767,7 @@ int FloatListSingle(Context* context) {
           for (uint32_t i = 0; i < elementCount; i ++ ){
             memmove(&bbn->u16[i],&float_list[i],sizeof(uint16_t));
       }
-          len = 4 * n ;
+		len = 4 * n ;
           for (uint32_t i = elementCount; i < len; i ++){
             bbn->u16[i] = 0;
           }
