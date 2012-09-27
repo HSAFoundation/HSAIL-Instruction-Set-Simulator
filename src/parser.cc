@@ -1930,9 +1930,11 @@ int OptionalWidth(Context* context) {
     if (context->token_to_scan == '(') {
       context->token_to_scan = yylex();
       if (context->token_to_scan == ALL) {
-        op_width.bits.u = 0 ;
-
         context->token_to_scan = yylex();
+		if(context->token_to_scan == ')')
+			context->token_to_scan = yylex();
+			return 0;
+		
       } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         uint32_t n = context->token_value.int_val;
         if((1<= n && n<= 1024) && ((n&0x01) == 0))
@@ -5884,7 +5886,7 @@ int Ld(Context* context) {
    BrigOperandImmed op_width = {
       sizeof(BrigOperandImmed),
       BrigEOperandImmed,
-      Brigu32,
+      Brigb32,
       0,
       { 0 }
     } ;
