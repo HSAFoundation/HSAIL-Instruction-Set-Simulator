@@ -5875,11 +5875,21 @@ int Ld(Context* context) {
   };
   int vector_size = 0;
   context->token_to_scan = yylex();
+  ld_op.o_operands[0] = context->get_operand_offset();
   if (context->token_to_scan == _WIDTH) {
-    ld_op.o_operands[0] = context->get_operand_offset();
     if (OptionalWidth(context)) {
       return 1;
     }
+  } else {
+   BrigOperandImmed op_width = {
+      sizeof(BrigOperandImmed),
+      BrigEOperandImmed,
+      Brigu32,
+      0,
+      { 0 }
+    } ;
+	op_width.bits.u = 0;
+	context->append_operand(&op_width);
   }
   if (LdModifierPart2(context, &ld_op, &vector_size)) {
     return 1;

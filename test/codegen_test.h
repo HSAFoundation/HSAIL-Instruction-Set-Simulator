@@ -676,7 +676,7 @@ void Init_LdStTestCases(){
     BrigLd,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {0, 8, 20, 0, 0},  // operand[5]
+    {8, 32, 44, 0, 0},  // operand[5]
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass
@@ -691,7 +691,7 @@ void Init_LdStTestCases(){
     BrigSt,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {0, 56, 0, 0, 0},  // operand[5]
+    {8, 44, 0, 0, 0},  // operand[5]
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass

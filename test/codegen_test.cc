@@ -9640,7 +9640,7 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
 
   EXPECT_EQ(0, Kernel(context));
   EXPECT_EQ(180, context->get_directive_offset());
-  EXPECT_EQ(108, context->get_operand_offset());
+  EXPECT_EQ(132, context->get_operand_offset());
   EXPECT_EQ(62, context->get_string_offset());
   EXPECT_EQ(148, context->get_code_offset());
 
@@ -10160,7 +10160,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   BrigsOffset32_t ssize = context->get_string_offset();
   EXPECT_EQ(68, ssize);
   BrigoOffset32_t osize = context->get_operand_offset();
-  EXPECT_EQ(128, osize);
+  EXPECT_EQ(180, osize);
 
 
   delete lexer;
