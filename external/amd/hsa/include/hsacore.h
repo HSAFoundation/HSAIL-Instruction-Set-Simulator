@@ -16,6 +16,14 @@
 
 namespace hsacore
 {
+
+/**
+ * Define vector and string as entities from hsa namespace
+ */
+using hsacommon::vector;
+using hsacommon::string;
+using hsacommon::Status;
+
 /**
  * @addtogroup HSACoreRuntime 
  * Core Runtime Interace Documentation
@@ -960,9 +968,9 @@ public:
      * @param timeOut in milliseconds, 0 means non-blocking wait while
      * 0xFFFFFFFF means blocking wait.
      *
-     * @return HsaEventWaitReturn return value indicating success or timeout.
+     * @return hsa::Status return value indicating success or timeout.
      */
-    virtual HsaEventWaitReturn wait(uint32_t timeOut) = 0;
+    virtual hsa::Status wait(uint32_t timeOut) = 0;
 
     /**
      * @brief Returns the status of event i.e. it is signaled or not. If the
