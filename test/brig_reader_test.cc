@@ -794,3 +794,242 @@ TEST(BrigWriterTest, vectorAddU32) {
   delete[] arg_val1;
   delete[] arg_val2;
 }
+
+TEST(BrigWriterTest, VectorRem) {
+  llvm::Module *mod = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__OpenCL_vec_rem_kernel(\n"
+    "        kernarg_u32 %arg_val0, \n"
+    "        kernarg_u32 %arg_val1, \n"
+    "        kernarg_u32 %arg_val2, \n"
+    "        kernarg_u32 %arg_val3)\n"
+    "{\n"
+    "@__OpenCL_vec_rem_kernel_entry:\n"
+    "        ld_kernarg_u32 $s0, [%arg_val3] ;\n"
+    "        workitemaid $s1, 0 ;\n"
+    "        cmp_lt_b1_u32 $c0, $s1, $s0 ;\n"
+    "        ld_kernarg_u32 $s0, [%arg_val2] ;\n"
+    "        ld_kernarg_u32 $s2, [%arg_val1] ;\n"
+    "        ld_kernarg_u32 $s3, [%arg_val0] ;\n"
+    "        cbr $c0, @BB0_2 ;\n"
+    "        brn @BB0_1 ;\n"
+    "@BB0_1:\n"
+    "        ret ;\n"
+    "@BB0_2:\n"
+    "        shl_u32 $s1, $s1, 2 ;\n"
+    "        add_u32 $s2, $s2, $s1 ;\n"
+    "        ld_global_s32 $s2, [$s2] ;\n"
+    "        add_u32 $s3, $s3, $s1 ;\n"
+    "        ld_global_s32 $s3, [$s3] ;\n"
+    "        rem_s32 $s2, $s3, $s2 ;\n"
+    "        add_u32 $s0, $s0, $s1 ;\n"
+    "        st_global_s32 $s2, [$s0] ;\n"
+    "        brn @BB0_1 ;\n"
+    "};\n"
+    );
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  unsigned arraySize = 16;
+  int32_t *arg_val0 = new int32_t[arraySize];
+  int32_t *arg_val1 = new int32_t[arraySize];
+  int32_t *arg_val2 = new int32_t[arraySize];
+  for(unsigned i = 0; i < arraySize; ++i) {
+    arg_val0[i] = 3;
+    arg_val1[i] = 2;
+    arg_val2[i] = 0;
+  }
+
+  void *args[] = { &arg_val0, &arg_val1, &arg_val2, &arraySize};
+  llvm::Function *fun = mod->getFunction("__OpenCL_vec_rem_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_FLOAT_EQ(1, arg_val2[0]);
+
+  delete[] arg_val0;
+  delete[] arg_val1;
+  delete[] arg_val2;
+}
+
+TEST(BrigWriterTest, VectorCarry) {
+  llvm::Module *mod = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__OpenCL_vec_carry_kernel(\n"
+    "        kernarg_u32 %arg_val0, \n"
+    "        kernarg_u32 %arg_val1, \n"
+    "        kernarg_u32 %arg_val2, \n"
+    "        kernarg_u32 %arg_val3)\n"
+    "{\n"
+    "@__OpenCL_vec_carry_kernel_entry:\n"
+    "        ld_kernarg_u32 $s0, [%arg_val3] ;\n"
+    "        workitemaid $s1, 0 ;\n"
+    "        cmp_lt_b1_u32 $c0, $s1, $s0 ;\n"
+    "        ld_kernarg_u32 $s0, [%arg_val2] ;\n"
+    "        ld_kernarg_u32 $s2, [%arg_val1] ;\n"
+    "        ld_kernarg_u32 $s3, [%arg_val0] ;\n"
+    "        cbr $c0, @BB0_2 ;\n"
+    "        brn @BB0_1 ;\n"
+    "@BB0_1:\n"
+    "        ret ;\n"
+    "@BB0_2:\n"
+    "        shl_u32 $s1, $s1, 2 ;\n"
+    "        add_u32 $s2, $s2, $s1 ;\n"
+    "        ld_global_s32 $s2, [$s2] ;\n"
+    "        add_u32 $s3, $s3, $s1 ;\n"
+    "        ld_global_s32 $s3, [$s3] ;\n"
+    "        carry_s32 $s2, $s3, $s2 ;\n"
+    "        add_u32 $s0, $s0, $s1 ;\n"
+    "        st_global_s32 $s2, [$s0] ;\n"
+    "        brn @BB0_1 ;\n"
+    "};\n"
+    );
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  unsigned arraySize = 16;
+  int32_t *arg_val0 = new int32_t[arraySize];
+  int32_t *arg_val1 = new int32_t[arraySize];
+  int32_t *arg_val2 = new int32_t[arraySize];
+  for(unsigned i = 0; i < arraySize; ++i) {
+    arg_val0[i] = 0xfffffffe;
+    arg_val1[i] = 2;
+    arg_val2[i] = 0;
+  }
+
+  void *args[] = { &arg_val0, &arg_val1, &arg_val2, &arraySize};
+  llvm::Function *fun = mod->getFunction("__OpenCL_vec_carry_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_FLOAT_EQ(1, arg_val2[0]);
+
+  delete[] arg_val0;
+  delete[] arg_val1;
+  delete[] arg_val2;
+}
+
+TEST(BrigWriterTest, VectorBorrow) {
+  llvm::Module *mod = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__OpenCL_vec_borrow_kernel(\n"
+    "        kernarg_u32 %arg_val0, \n"
+    "        kernarg_u32 %arg_val1, \n"
+    "        kernarg_u32 %arg_val2, \n"
+    "        kernarg_u32 %arg_val3)\n"
+    "{\n"
+    "@__OpenCL_vec_borrow_kernel_entry:\n"
+    "        ld_kernarg_u32 $s0, [%arg_val3] ;\n"
+    "        workitemaid $s1, 0 ;\n"
+    "        cmp_lt_b1_u32 $c0, $s1, $s0 ;\n"
+    "        ld_kernarg_u32 $s0, [%arg_val2] ;\n"
+    "        ld_kernarg_u32 $s2, [%arg_val1] ;\n"
+    "        ld_kernarg_u32 $s3, [%arg_val0] ;\n"
+    "        cbr $c0, @BB0_2 ;\n"
+    "        brn @BB0_1 ;\n"
+    "@BB0_1:\n"
+    "        ret ;\n"
+    "@BB0_2:\n"
+    "        shl_u32 $s1, $s1, 2 ;\n"
+    "        add_u32 $s2, $s2, $s1 ;\n"
+    "        ld_global_s32 $s2, [$s2] ;\n"
+    "        add_u32 $s3, $s3, $s1 ;\n"
+    "        ld_global_s32 $s3, [$s3] ;\n"
+    "        borrow_s32 $s2, $s3, $s2 ;\n"
+    "        add_u32 $s0, $s0, $s1 ;\n"
+    "        st_global_s32 $s2, [$s0] ;\n"
+    "        brn @BB0_1 ;\n"
+    "};\n"
+    );
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  unsigned arraySize = 16;
+  int32_t *arg_val0 = new int32_t[arraySize];
+  int32_t *arg_val1 = new int32_t[arraySize];
+  int32_t *arg_val2 = new int32_t[arraySize];
+  for(unsigned i = 0; i < arraySize; ++i) {
+    arg_val0[i] = 0;
+    arg_val1[i] = 1;
+    arg_val2[i] = 0;
+  }
+
+  void *args[] = { &arg_val0, &arg_val1, &arg_val2, &arraySize};
+  llvm::Function *fun = mod->getFunction("__OpenCL_vec_borrow_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_FLOAT_EQ(1, arg_val2[0]);
+
+  delete[] arg_val0;
+  delete[] arg_val1;
+  delete[] arg_val2;
+}
+
+TEST(BrigWriterTest, VectorMad) {
+  llvm::Module *mod = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__OpenCL_vec_mad_kernel(\n"
+    "        kernarg_u32 %arg_val0, \n"
+    "        kernarg_u32 %arg_val1, \n"
+    "        kernarg_u32 %arg_val2, \n"
+    "        kernarg_u32 %arg_val3, \n"
+    "        kernarg_u32 %arg_val4)\n"
+    "{\n"
+    "@__OpenCL_vec_abs_kernel_entry:\n"
+    "        workitemaid $s1, 0 ;\n"
+    "        ld_kernarg_u32 $s0, [%arg_val4] ;\n"
+    "        ld_kernarg_u32 $s2, [%arg_val0] ;\n"
+    "        ld_kernarg_u32 $s3, [%arg_val1] ;\n"
+    "        ld_kernarg_u32 $s4, [%arg_val2] ;\n"
+    "        ld_kernarg_u32 $s5, [%arg_val3] ;\n"
+    "        shl_u32 $s1, $s1, 2 ;\n"
+    "        add_u32 $s2, $s2, $s1 ;\n"
+    "        ld_global_s32 $s2, [$s2] ;\n"
+    "        add_u32 $s3, $s3, $s1 ;\n"
+    "        ld_global_s32 $s3, [$s3] ;\n"
+    "        add_u32 $s4, $s4, $s1 ;\n"
+    "        ld_global_s32 $s4, [$s4] ;\n"
+    "        add_u32 $s5, $s5, $s1 ;\n"
+    "        ld_global_s32 $s5, [$s5] ;\n"
+    "        mad_s32 $s2, $s3, $s4, $s5 ;\n"
+    "        add_u32 $s0, $s0, $s1 ;\n"
+    "        st_global_s32 $s2, [$s0] ;\n"
+    "        ret ;\n"
+    "};\n"
+    );
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  unsigned arraySize = 16;
+  int32_t *arg_val0 = new int32_t[arraySize];
+  int32_t *arg_val1 = new int32_t[arraySize];
+  int32_t *arg_val2 = new int32_t[arraySize];
+  int32_t *arg_val3 = new int32_t[arraySize];
+  int32_t *arg_val4 = new int32_t[arraySize];
+
+  for(unsigned i = 0; i < arraySize; ++i) {
+    arg_val0[i] = 1;
+    arg_val1[i] = 2;
+    arg_val2[i] = 2;
+    arg_val3[i] = 2;
+    arg_val4[i] = 0;
+  }
+
+  void *args[] = { &arg_val0, &arg_val1, &arg_val2, &arg_val3, &arg_val4};
+  llvm::Function *fun = mod->getFunction("__OpenCL_vec_mad_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_EQ(6, arg_val4[0]);
+
+  delete[] arg_val0;
+  delete[] arg_val1;
+  delete[] arg_val2;
+  delete[] arg_val3;
+  delete[] arg_val4;
+}
