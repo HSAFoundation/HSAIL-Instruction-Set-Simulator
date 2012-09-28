@@ -167,6 +167,14 @@ class DLL_PUBLIC HsailKernel
           */
           virtual void* getDebugBRIGSourceInfo() = 0;
 
+          /* 
+           * @brief - Returns the size (in bytes) of group memory statically 
+           *          allocated by compiler.
+           * @return Size (in bytes) of compiler's group memory allocation.
+           */
+          virtual size_t 
+          getSizeStaticGroupMemory() const = 0;
+
           virtual ~HsailKernel(){};
 };
 /* @}*/

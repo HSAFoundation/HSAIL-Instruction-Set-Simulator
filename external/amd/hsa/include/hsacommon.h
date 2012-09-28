@@ -1147,11 +1147,12 @@ inline void swap (string& lhs, string& rhs){
  *******************************************************************************
  */
 typedef enum {
+
     /// Operation completed successfully
-    STATUS_SUCCESS = 0,
+    RSTATUS_SUCCESS = 0,
 
     /// Operation timed out
-    STATUS_TIMEDOUT = 1,
+    RSTATUS_TIMEOUT = 1,
 
     /// Failed to complete the operation due to an invalid interface argument
     STATUS_INVALID_ARGUMENT = -1,
@@ -1181,7 +1182,8 @@ typedef enum {
     STATUS_UNSUPPORTED = -9,
 
     /// Not categorized yet!!!
-    STATUS_UNCATEGORIZED = -15,
+    STATUS_UNCATEGORIZED = -15
+
 } Status;
 
 /**
@@ -1306,7 +1308,7 @@ class UnsupportedOperation: public Exception {};
 // macro to throw base class exception: shoud we remove this in the future?
 #define ERR_THROW_EX(errVal, errMsg, expVal)                        \
     if (errVal){                                                    \
-        hsacommon::Exception exObj;                                            \
+        hsacommon::Exception exObj;                                 \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
@@ -1314,28 +1316,28 @@ class UnsupportedOperation: public Exception {};
 // macros for derived exception classses
 #define ERR_THROW_INVALIDARGUMENT(errVal, errMsg, expVal)           \
     if (errVal){                                                    \
-        hsacommon::InvalidArgument exObj;                                      \
+        hsacommon::InvalidArgument exObj;                           \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
 
 #define ERR_THROW_RESOURCEFAILURE(errVal, errMsg, expVal)           \
     if (errVal){                                                    \
-        hsacommon::ResourceFailure exObj;                                      \
+        hsacommon::ResourceFailure exObj;                           \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
 
 #define ERR_THROW_BUILDFAILURE(errVal, errMsg, expVal)              \
     if (errVal){                                                    \
-        hsacommon::BuildFailure exObj;                                         \
+        hsacommon::BuildFailure exObj;                              \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
 
 #define ERR_THROW_UNSUPPORTEDOPERATION(errVal, errMsg, expVal)      \
     if (errVal){                                                    \
-        hsacommon::UnsupportedOperation exObj;                                 \
+        hsacommon::UnsupportedOperation exObj;                      \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
         throw (exObj);                                              \
     }
@@ -1577,7 +1579,7 @@ using hsacommon::Version;
 * @brief This union provides a container for kernel argument types.
 *******************************************************************************
 */
-union KernelArg
+typedef union KernelArg
 {
     void* addr;             ///< pointer to a buffer
     int32_t s32value;       ///< signed 32 bit value
@@ -1586,6 +1588,6 @@ union KernelArg
     double dvalue;          ///< double value
     int64_t s64value;       ///< signed 64 bit value
     uint64_t u64value;      ///< unsigned 64 bit value
-};
+} KernelArg;
 }
 #endif
