@@ -280,8 +280,9 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
     if(!check(bdi || bdli, "Missing initializer")) return false;
 
     uint32_t elementCount = bdi ? bdi->elementCount : bdli->elementCount;
-    valid &= check(elementCount == dir->s.dim,
-                   "Inconsistent array dimensions");
+    if(dir->s.dim)
+      valid &= check(elementCount == dir->s.dim,
+                     "Inconsistent array dimensions");
   }
 
   return valid;
