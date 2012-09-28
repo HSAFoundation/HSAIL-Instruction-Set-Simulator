@@ -282,10 +282,6 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
     uint32_t elementCount = bdi ? bdi->elementCount : bdli->elementCount;
     valid &= check(elementCount == dir->s.dim,
                    "Inconsistent array dimensions");
-
-    if(bdi)
-      valid &= check(bdi->type == dir->s.type,
-                     "Inconsistent array element type");
   }
 
   return valid;
