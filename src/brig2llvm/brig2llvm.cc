@@ -296,11 +296,11 @@ static llvm::Value *decodePacking(llvm::BasicBlock &B,
                                   const inst_iterator inst) {
 
   llvm::LLVMContext &C = B.getContext();
-  llvm::Type *type = runOnType(C, BrigDataType(inst->type));
+  llvm::Type *destType = runOnType(C, BrigDataType(inst->type));
 
   if((inst->opcode == BrigLd) ||
      (inst->opcode == BrigSt && opnum == 1)) {
-    llvm::Type *ptrType = type->getPointerTo();
+    llvm::Type *ptrType = destType->getPointerTo();
     if(value->getType() == ptrType) {
       return value;
     } else if(value->getType()->isPointerTy()) {
@@ -310,16 +310,41 @@ static llvm::Value *decodePacking(llvm::BasicBlock &B,
     }
   }
 
+  llvm::Type *valType = value->getType();
+
+  if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst)) {
+    llvm::Type *srcType = runOnType(C, BrigDataType(cmp->sourceType));
+    if(srcType != valType) {
+      return new llvm::BitCastInst(value, srcType, "", &B);
+    }
+
+    return value;
+  }
+
+  if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst)) {
+    llvm::Type *srcType = runOnType(C, BrigDataType(cvt->stype));
+    if(srcType != valType) {
+      unsigned srcSize = srcType->getPrimitiveSizeInBits();
+      unsigned valSize = valType->getPrimitiveSizeInBits();
+      if(srcSize < valSize) {
+        return new llvm::TruncInst(value, srcType, "", &B);
+      } else {
+        return new llvm::BitCastInst(value, srcType, "", &B);
+      }
+    }
+
+    return value;
+  }
+
   BrigPacking packing = BrigPacking(inst->packing);
   bool isPacked = BrigInstHelper::isPacked(packing, opnum);
   bool isBroadcast = BrigInstHelper::isBroadcast(packing, opnum);
-  bool isFloat = type->isFloatTy();
+  bool isFloat = destType->isFloatTy();
 
   assert(!(isPacked && isBroadcast) && "Illegal packing combination!?");
 
   if(isPacked || isBroadcast || isFloat) {
-    llvm::Value *bitcast = new llvm::BitCastInst(value, type, "", &B);
-    return bitcast;
+    return new llvm::BitCastInst(value, destType, "", &B);
   }
 
   return value;
@@ -327,16 +352,27 @@ static llvm::Value *decodePacking(llvm::BasicBlock &B,
 
 static llvm::Value *encodePacking(llvm::BasicBlock &B,
                                   llvm::Value *value,
-                                  const inst_iterator inst) {
+                                  llvm::Type *destTy,
+                                  const inst_iterator inst,
+                                  const BrigInstHelper &helper) {
 
+  llvm::LLVMContext &C = B.getContext();
   BrigDataType type = BrigDataType(inst->type);
+  llvm::Type *encodedType = runOnType(C, type);
+  unsigned bitsize = encodedType->getPrimitiveSizeInBits();
   if(BrigInstHelper::isVectorTy(type) || BrigInstHelper::isFloatTy(type)) {
     llvm::LLVMContext &C = B.getContext();
-    llvm::Type *encodedType = runOnType(C, type);
-    unsigned bitsize =  encodedType->getPrimitiveSizeInBits();
     llvm::Type *type = llvm::Type::getIntNTy(C, bitsize);
     llvm::Value *bitcast = new llvm::BitCastInst(value, type, "", &B);
     return bitcast;
+  }
+
+  if(bitsize < destTy->getPrimitiveSizeInBits()) {
+    if(helper.isSignedTy(type)) {
+      return new llvm::SExtInst(value, destTy, "", &B);
+    } else {
+      return new llvm::ZExtInst(value, destTy, "", &B);
+    }
   }
 
   return value;
@@ -385,8 +421,10 @@ static void runOnComplexInst(llvm::BasicBlock &B,
   llvm::Value *resultRaw = llvm::CallInst::Create(instFun, sources, "", &B);
 
   if(brigDest) {
-    llvm::Value *resultVal = encodePacking(B, resultRaw, inst);
     llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
+    llvm::PointerType *destPtrTy = cast<llvm::PointerType>(destAddr->getType());
+    llvm::Type *destTy = destPtrTy->getElementType();
+    llvm::Value *resultVal = encodePacking(B, resultRaw, destTy, inst, helper);
     new llvm::StoreInst(resultVal, destAddr, &B);
   }
 }

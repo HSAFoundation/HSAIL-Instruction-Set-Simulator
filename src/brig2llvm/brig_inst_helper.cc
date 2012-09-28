@@ -278,6 +278,47 @@ const char *getPredName(BrigCompareOperation pred) {
 #undef caseBrig
 }
 
+const char *getRoundingName(const BrigAluModifier &aluModifier) {
+  if(aluModifier.floatOrInt) {
+    switch(aluModifier.rounding) {
+    case 0: return "neari";
+    case 1: return "zeroi";
+    case 2: return "upi";
+    case 3: return "downi";
+    default: assert(false && "Unknown rounding mode");
+    }
+  } else {
+    switch(aluModifier.rounding) {
+    case 0: return "near";
+    case 1: return "zero";
+    case 2: return "up";
+    case 3: return "down";
+    default: assert(false && "Unknown rounding mode");
+    }
+  }
+}
+
+const char *getAtomicOpName(BrigAtomicOperation atomicOp) {
+#define caseBrigAtomic(X)                        \
+  case BrigAtomic ## X:                          \
+  return #X
+  switch(atomicOp) {
+    caseBrigAtomic(And);
+    caseBrigAtomic(Or);
+    caseBrigAtomic(Xor);
+    caseBrigAtomic(Cas);
+    caseBrigAtomic(Exch);
+    caseBrigAtomic(Add);
+    caseBrigAtomic(Inc);
+    caseBrigAtomic(Dec);
+    caseBrigAtomic(Min);
+    caseBrigAtomic(Max);
+    caseBrigAtomic(Sub);
+  default: assert(false && "Unknown atomic operation");
+  }
+#undef caseBrigAtomic
+}
+
 std::string BrigInstHelper::getInstName(const inst_iterator inst) {
   const char *base = getBaseName(inst);
   const char *packing = getPackingName(inst);
@@ -289,6 +330,19 @@ std::string BrigInstHelper::getInstName(const inst_iterator inst) {
       getPredName(BrigCompareOperation(cmp->comparisonOperator));
     std::string pred = llvm::StringRef(predRaw).lower();
     return std::string(base) + "_" + pred +  "_" + type + "_" + srcType;
+  }
+
+  if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst)) {
+    const char *srcType = getTypeName(BrigDataType(cvt->stype));
+    const char *roundingRaw = getRoundingName(cvt->aluModifier);
+    std::string rounding = llvm::StringRef(roundingRaw).lower();
+    return std::string(base) + "_" + rounding + "_" + type + "_" + srcType;
+  }
+
+  if(const BrigInstAtomic *atom = dyn_cast<BrigInstAtomic>(inst)) {
+    BrigAtomicOperation atomicOp = BrigAtomicOperation(atom->atomicOperation);
+    const char *atomicOpName = getAtomicOpName(atomicOp);
+    return std::string(base) + "_" + atomicOpName + "_" + type;
   }
 
   return std::string(base) + packing + "_" + type;

@@ -3836,10 +3836,12 @@ int Instruction4ShufflePart6(Context* context) {
 
   context->token_to_scan = yylex();
   // Type: s, u, f.
-  // Length: 8x4, 16x2, 16x4, 32x2
+  // Length: 8x4, 8x8, 16x2, 16x4, 32x2
 
   if (context->token_to_scan == _U8X4 ||
       context->token_to_scan == _S8X4 ||
+      context->token_to_scan == _U8X8 ||
+      context->token_to_scan == _S8X8 ||
       context->token_to_scan == _U16X2 ||
       context->token_to_scan == _S16X2 ||
       context->token_to_scan == _F16X2 ||
@@ -5023,6 +5025,7 @@ int Atom(Context* context) {
   }  // AtomModifiers
   return 1;
 }
+
 int CvtModifier1(Context* context) {
   unsigned int next;
   unsigned int first_token = context->token_to_scan;
