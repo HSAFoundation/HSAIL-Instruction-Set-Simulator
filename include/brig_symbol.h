@@ -8,6 +8,7 @@ namespace brig {
 
 class BrigFunction;
 class BrigInstHelper;
+class BrigModule;
 
 class BrigSymbol {
 
@@ -47,6 +48,23 @@ class BrigSymbol {
     return it_ != other.it_;
   }
 
+  bool hasInitializer() const {
+    const BrigDirectiveSymbol *symbol = dyn_cast<BrigDirectiveSymbol>(it_);
+    return symbol && symbol->d_init;
+  };
+
+  template<class T> const T *getInit() const {
+    assert(isArray() && "Must be an array");
+    const BrigDirectiveSymbol *symbol = cast<BrigDirectiveSymbol>(it_);
+    const BrigDirectiveInit *init =
+      dyn_cast<BrigDirectiveInit>(dir_iterator(S_.directives + symbol->d_init));
+
+    if(init)
+      return reinterpret_cast<const T *>(&init->initializationData);
+
+    assert(false && "Unimplemented");
+  }
+
   const void *getAddr() const { return it_; }
 
   BrigSymbol &operator++();
@@ -55,6 +73,8 @@ class BrigSymbol {
   friend BrigSymbol arg_end(const BrigFunction &F);
   friend BrigSymbol local_begin(const BrigFunction &F);
   friend BrigSymbol local_end(const BrigFunction &F);
+  friend BrigSymbol global_begin(const BrigModule &mod);
+  friend BrigSymbol global_end(const BrigModule &mod);
   friend const BrigSymbol getArgument(const BrigInstHelper &helper,
                                       const BrigOperandArgumentList *argList,
                                       unsigned argNo);

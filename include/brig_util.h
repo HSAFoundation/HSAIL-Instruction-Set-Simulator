@@ -117,7 +117,7 @@ template<class Super> class brig_iterator : private Super {
 
   Self operator+(intptr_t addend) const {
     brig_iterator other = *this;
-    for(unsigned i = 0; i < addend; ++i) {
+    for(intptr_t i = 0; i < addend; ++i) {
       ++other;
     }
     return other;

@@ -491,7 +491,7 @@ TEST(BrigInstTest, VectorRem) {
 }
 
 TEST(BrigInstTest, VectorCarry) {
-  const int32_t testVec[] = { 1, 0xfffffffe, 2 };
+  const int32_t testVec[] = { 1, -2, 2 };
   testInst("carry_s32", testVec);
 }
 
@@ -521,4 +521,82 @@ TEST(BrigWriterTest, GlobalArray) {
 
   EXPECT_TRUE(mod);
   if(!mod) return;
+}
+
+static const char SubwordsInst[] =
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__OpenCL_subwords_kernel(\n"
+    "        kernarg_u32 %%arg_val0)\n"
+    "{\n"
+    "@__OpenCL_subwords_kernel_entry:\n"
+    "        ld_kernarg_u32 $s0, [%%arg_val0] ;\n"
+    "        st_global_%1$s %2$s, [$s0] ;\n"
+    "        ret ;\n"
+    "} ;\n";
+
+template<class T>
+static void testSubwords(const char *type, const T &result, const char *value) {
+  size_t size = snprintf(NULL, 0, SubwordsInst, type, value);
+  char *buffer = new char[size];
+  snprintf(buffer, size, SubwordsInst, type, value);
+  llvm::Module *mod = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  T *arg_val0 = new T;
+  *arg_val0 = 0;
+
+  void *args[] = { &arg_val0 };
+  llvm::Function *fun = mod->getFunction("__OpenCL_subwords_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_EQ(result, *arg_val0);
+
+  delete arg_val0;
+}
+
+TEST(BrigWriterTest, Subwords) {
+  {
+    const int8_t result = 123;
+    const char *value = "123";
+    testSubwords("s8", result, value);
+  }
+  {
+    const int8_t result = 0xFF;
+    const char *value = "0xFF";
+    testSubwords("s8", result, value);
+  }
+  {
+    const int16_t result = 123;
+    const char *value = "123";
+    testSubwords("s16", result, value);
+  }
+  {
+    const int16_t result = 0XFFFF;
+    const char *value = "0xFFFF";
+    testSubwords("s16", result, value);
+  }
+  {
+    const uint8_t result = 123;
+    const char *value = "123";
+    testSubwords("u8", result, value);
+  }
+  {
+    const uint8_t result = 0xFF;
+    const char *value = "0xFF";
+    testSubwords("u8", result, value);
+  }
+  {
+    const uint16_t result = 123;
+    const char *value = "123";
+    testSubwords("u16", result, value);
+  }
+  {
+    const uint16_t result = 0xFFFF;
+    const char *value = "0xFFFF";
+    testSubwords("u16", result, value);
+  }
 }

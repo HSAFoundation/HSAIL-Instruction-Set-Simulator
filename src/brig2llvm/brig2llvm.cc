@@ -572,6 +572,58 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   }
 }
 
+static llvm::Type *getType(llvm::LLVMContext &C,
+                           const BrigSymbol &S) {
+  BrigDataType brigType = S.getType();
+  llvm::Type *llvmType = runOnType(C, brigType);
+  if(!S.isArray()) {
+    return llvmType;
+  } else {
+    return llvm::ArrayType::get(llvmType, S.getArrayDim());
+  }
+}
+
+template<class T>
+static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
+                                        const BrigSymbol &S) {
+  const T *array = S.getInit<T>();
+  uint32_t size = std::max(1U, S.getArrayDim());
+  llvm::ArrayRef<T> arrayRef(array, size);
+  return llvm::ConstantDataArray::get(C, arrayRef);
+}
+
+static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
+                        SymbolMap &symbolMap) {
+  llvm::LLVMContext &C = M.getContext();
+  llvm::Type *type = getType(C, S);
+  bool isConst = S.isConst();
+  llvm::GlobalValue::LinkageTypes linkage = runOnLinkage(S.getLinkage());
+  llvm::Twine name(S.getName());
+
+  llvm::Constant *init = NULL;
+  if(S.hasInitializer()) {
+    llvm::Type *elementTy = type->getArrayElementType();
+    if(elementTy->isIntegerTy(1) || elementTy->isIntegerTy(8)) {
+      init = runOnInitializer<uint8_t>(C, S);
+    } else if(elementTy->isIntegerTy(16)) {
+      init = runOnInitializer<uint16_t>(C, S);
+    } else if(elementTy->isIntegerTy(32)) {
+      init = runOnInitializer<uint32_t>(C, S);
+    } else if(elementTy->isIntegerTy(64)) {
+      init = runOnInitializer<uint64_t>(C, S);
+    } else if(elementTy->isFloatTy()) {
+      init = runOnInitializer<float>(C, S);
+    } else if(elementTy->isDoubleTy()) {
+      init = runOnInitializer<double>(C, S);
+    } else {
+      assert(false && "Unimplemented");
+    }
+  }
+
+  symbolMap[S.getAddr()] =
+    new llvm::GlobalVariable(M, type, isConst, linkage, init, name);
+}
+
 GenLLVM::GenLLVM(const StringBuffer &strings,
                  const Buffer &directives,
                  const Buffer &code,
@@ -594,6 +646,10 @@ void GenLLVM::operator()(void) {
   gen_GPU_states();
 
   SymbolMap symbolMap;
+  for(BrigSymbol symbol = mod_.global_begin(),
+        E = mod_.global_end(); symbol != E; ++symbol) {
+    runOnGlobal(*brig_frontend_, symbol, symbolMap);
+  }
 
   FunMap funMap;
   for(BrigFunction fun = mod_.begin(), E = mod_.end(); fun != E; ++fun) {
