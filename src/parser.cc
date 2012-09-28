@@ -2486,22 +2486,6 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
       context->current_argdecl_offset = context->get_directive_offset();
       context->append_directive(&sym_decl);
 
-      BrigDirectiveFunction bdf;
-      context->get_directive(context->current_bdf_offset, &bdf);
-      BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
-      BrigdOffset32_t next_directive = bdf.d_nextDirective;
-      if (first_scope == next_directive) {
-        bdf.d_nextDirective += sizeof(sym_decl);
-        bdf.d_firstScopedDirective = bdf.d_nextDirective;
-      } else {
-        bdf.d_nextDirective += sizeof(sym_decl);
-      }
-
-      unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp ,
-                                      context->current_bdf_offset,
-                                      sizeof(BrigDirectiveFunction));
-
       if (!Initializer(context)) {
         if (context->token_to_scan == ';') {
             context->token_to_scan = yylex();
@@ -3661,10 +3645,12 @@ int Instruction4ShufflePart6(Context* context) {
 
   context->token_to_scan = yylex();
   // Type: s, u, f.
-  // Length: 8x4, 16x2, 16x4, 32x2
+  // Length: 8x4, 8x8, 16x2, 16x4, 32x2
 
   if (context->token_to_scan == _U8X4 ||
       context->token_to_scan == _S8X4 ||
+      context->token_to_scan == _U8X8 ||
+      context->token_to_scan == _S8X8 ||
       context->token_to_scan == _U16X2 ||
       context->token_to_scan == _S16X2 ||
       context->token_to_scan == _F16X2 ||
@@ -4694,13 +4680,11 @@ int Atom(Context* context) {
           if (!MemoryOperandPart2(context, &atom_op.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-
               if (!OperandPart2(context, &atom_op.o_operands[2])) {
 
                 if (first_token == ATOMIC_CAS) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
-
                     if (!OperandPart2(context, &atom_op.o_operands[3])) {
                     } else {  // 4 Operand
                       context->set_error(INVALID_FOURTH_OPERAND);

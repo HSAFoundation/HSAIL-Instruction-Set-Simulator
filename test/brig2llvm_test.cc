@@ -4224,7 +4224,7 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
       BrigPackPsat,
       {20, 0, 0, 0, 0},
       BrigAtomicSub + 1,
-      BrigFlatSpace,
+      BrigFlatSpace + 1,
       BrigDep
     };
     code.append(&bca);
