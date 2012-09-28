@@ -522,3 +522,55 @@ TEST(BrigWriterTest, GlobalArray) {
   EXPECT_TRUE(mod);
   if(!mod) return;
 }
+
+static const char SubwordsInst[] =
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__OpenCL_subwords_kernel(\n"
+    "        kernarg_u32 %%arg_val0)\n"
+    "{\n"
+    "@__OpenCL_subwords_kernel_entry:\n"
+    "        ld_kernarg_u32 $s0, [%%arg_val0] ;\n"
+    "        st_global_%s 1, [$s0] ;\n"
+    "        ret ;\n"
+    "} ;\n";
+
+template<class T>
+static void testSubwords(const char *type, const T &result) {
+  size_t size = snprintf(NULL, 0, SubwordsInst, type);
+  char *buffer = new char[size];
+  snprintf(buffer, size, SubwordsInst, type);
+  llvm::Module *mod = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  T *arg_val0 = new T;
+  *arg_val0 = result;
+
+  void *args[] = { &arg_val0 };
+  llvm::Function *fun = mod->getFunction("__OpenCL_subwords_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_EQ(1, *arg_val0);
+}
+
+TEST(BrigWriterTest, Subwords) {
+  {
+    const int8_t result = 0;
+    testSubwords("s8", result);
+  }
+  {
+    const int16_t result = 0;
+    testSubwords("s16", result);
+  }
+  {
+    const uint8_t result = 0;
+    testSubwords("u8", result);
+  }
+  {
+    const uint16_t result = 0;
+    testSubwords("u16", result);
+  }
+}
