@@ -128,6 +128,27 @@ void Init_Instruction3TestCases(){
 	};
 	TestCase_Instr3Opcode[8].init(in, out8);
 	
+	in.assign("class_f32 $c1, $s2, 0x10;");
+	BrigInstBase out9 = {
+		32,
+		BrigEInstBase, 
+		BrigClass, 
+		Brigb1,
+		BrigNoPacking,
+		{8, 20, 32, 0, 0}
+	};
+	TestCase_Instr3Opcode[9].init(in, out9);
+	
+	in.assign("class_f64 $c0, $d1, $s1;");
+	BrigInstBase out10 = {
+		32,
+		BrigEInstBase, 
+		BrigClass, 
+		Brigb1,
+		BrigNoPacking,
+		{8, 20, 32, 0, 0}
+	};
+	TestCase_Instr3Opcode[10].init(in, out10);
 	
 }
 

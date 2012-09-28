@@ -608,7 +608,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen) {
   Lexer *lexer = new Lexer();
   Init_Instruction3TestCases();
   
-  for(int i=0; i<9; i++){
+  for(int i=0; i<11; i++){
 	lexer->set_source_string(TestCase_Instr3Opcode[i].Input);
 	context->token_to_scan = lexer->get_next_token();
 	int ret = Instruction3(context);

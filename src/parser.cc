@@ -1136,9 +1136,12 @@ int Instruction3(Context* context) {
     if (context->token_type == DATA_TYPE_ID) {
       // check the operands
       inst_op.type = context->token_value.data_type;
+	  if(inst_op.opcode == BrigClass)
+		inst_op.type = Brigb1;
       context->token_to_scan = yylex();
-
+	  	  
       if (!OperandPart2(context, &inst_op.o_operands[0])) {
+		
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 

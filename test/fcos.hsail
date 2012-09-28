@@ -1,0 +1,35 @@
+version 1:0:$small;
+
+//==========================================================
+// Function: __Get_fcos
+//
+// Inputs: arg_val0 - List of values to compute the fcos on
+//
+// Outputs: arg_val1 - Results
+//
+//==========================================================
+
+kernel &__Get_fcos(kernarg_u32 %arg_val0, kernarg_u32 %arg_val1)
+{
+	// Use workitemaid to get the buffer offset
+	workitemaid $s1, 0;
+	shl_u32	 $s1, $s1, 2;  // Get offset by Multiplying by 4 because
+                               // that is the size of each value in the buffer
+
+	// Compute Address of Input Value and store in $s0
+	ld_kernarg_u32	$s0, [%arg_val0];
+	add_u32	 $s0, $s0, $s1;  // Add offset to Address
+
+	// Compute Address of Output Value and store in $s3
+	ld_kernarg_u32	$s3, [%arg_val1];
+	add_u32	 $s3, $s3, $s1;  // Add offset to Address
+
+	// Execute Trig Opcode
+	ld_f32 $s0, [$s0];
+        fcos_f32 $s2, $s0;
+
+	// Store Dispatch ID on Kernel Argument
+	st_global_u32	$s2, [$s3] ;
+
+	ret;
+};

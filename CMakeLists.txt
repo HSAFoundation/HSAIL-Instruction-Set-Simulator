@@ -165,4 +165,43 @@ set(hsaAssembler_SOURCES
 add_executable(hsaAssembler ${hsaAssembler_SOURCES})
 target_link_libraries(hsaAssembler brig2llvm)
 
+set(vectorCopy_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  demo/vectorCopy.cc
+  )
+add_executable(vectorCopy ${vectorCopy_SOURCES})
+target_link_libraries(vectorCopy hsa brig2llvm)
+
+set(fib_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  demo/fib.cc
+  )
+add_executable(fib ${fib_SOURCES})
+target_link_libraries(fib hsa brig2llvm)
+
+set(fcos_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  demo/fcos.cc
+  )
+add_executable(fcos ${fcos_SOURCES})
+target_link_libraries(fcos hsa brig2llvm)
+
 add_subdirectory(test)
