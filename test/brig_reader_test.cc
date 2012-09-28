@@ -9,6 +9,7 @@
 #include "llvm/Module.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/Support/FileSystem.h"
+#include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/system_error.h"
 #include "gtest/gtest.h"
@@ -346,6 +347,16 @@ TEST(BrigKernelTest, VectorCopy) {
 
   delete[] arg_val1;
   delete[] arg_val0;
+}
+
+TEST(BrigAllUpTest, AllUp) {
+  llvm::OwningPtr<llvm::MemoryBuffer> file;
+  const char filename[] = XSTR(TEST_PATH) "/AllUp.hsail";
+  llvm::error_code ec = llvm::MemoryBuffer::getFile(filename, file);
+  EXPECT_TRUE(!ec);
+
+  llvm::Module *mod = TestHSAIL(file->getBufferStart());
+  EXPECT_TRUE(mod);
 }
 
 static const char InstTest[] =
