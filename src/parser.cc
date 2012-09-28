@@ -7021,10 +7021,14 @@ int SingleListSingle(Context * context) {
         context->get_directive(bds_offset,&bds);
         bds.d_init = context->get_directive_offset();
         bds.d_init += bds.d_init & 0x7;
-        if (0 == context->get_dim() && context->get_isArray())
+        if (0 == context->get_dim() && context->get_isArray()) {
           bds.s.symbolModifier = BrigArray;
-
-        bds.s.dim = init_length;
+          bds.s.dim = elementCount;
+        } else if (elementCount > bds.s.dim) { 
+          context->set_error(INVALID_INITIALIZER);
+          return 1;
+        }
+        context->set_dim(bds.s.dim);
 
         unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
         context->update_directive_bytes(bds_charp,
@@ -7974,8 +7978,16 @@ int LabelList(Context* context) {
       context->get_directive(bds_offset,&bds);
       bds.d_init = context->get_directive_offset();
       bds.d_init += bds.d_init & 0x7;
-     
-      bds.s.dim = elementCount;
+      // TODO(Chuang):  handle to an empty list.     
+      if (bds.s.dim != 0) {
+        if (elementCount > bds.s.dim) { 
+          context->set_error(INVALID_INITIALIZER);
+          return 1;
+        }
+      } else {
+        bds.s.dim = elementCount;
+      }
+      context->set_dim(bds.s.dim);
       if (0 == context->get_dim() && context->get_isArray())
         bds.s.symbolModifier = BrigArray;
 
@@ -8105,10 +8117,15 @@ int FloatListSingle(Context* context) {
         bds.d_init = context->get_directive_offset();
         bds.d_init += bds.d_init & 0x7;
 
-        if (0 == context->get_dim() && context->get_isArray())
+        if (0 == context->get_dim() && context->get_isArray()) {
           bds.s.symbolModifier = BrigArray;
+          bds.s.dim = elementCount;
+        } else if (elementCount > bds.s.dim) { 
+          context->set_error(INVALID_INITIALIZER);
+          return 1;
+        }
+        context->set_dim(bds.s.dim);
 
-        bds.s.dim = init_length;
         unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
         context->update_directive_bytes(bds_charp,
                                         bds_offset,
@@ -8284,9 +8301,12 @@ int DecimalListSingle(Context* context) {
           if (0 == context->get_dim() && context->get_isArray()){
             bds.s.symbolModifier = BrigArray;
             context->set_symbol_modifier(BrigArray);
+            bds.s.dim = elementCount;
+          } else if (elementCount > bds.s.dim) { 
+            context->set_error(INVALID_INITIALIZER);
+            return 1;
           }
-          bds.s.dim = init_length;
-          context->set_dim(init_length);
+          context->set_dim(bds.s.dim);
 
           unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
           context->update_directive_bytes(bds_charp,

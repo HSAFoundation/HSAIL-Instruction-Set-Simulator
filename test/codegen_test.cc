@@ -5618,7 +5618,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
     BrigNone ,                // attribut
     0,                        // reserved
     0,                        // symbolModifier
-    16,                        // dim
+    9,                        // dim
     8,                        // s_name
     Brigb8,                  // type
     1,                        // align
@@ -5715,7 +5715,7 @@ TEST(CodegenTest, InitializableDeclCodeGen) {
     BrigNone ,                // attribut
     0,                        // reserved
     0,                        // symbolModifier
-    10,                        // dim
+    9,                        // dim
     8,                        // s_name
     Brigf32,                  // type
     1,                        // align
@@ -5976,7 +5976,7 @@ TEST(CodegenTest, ArrayDimensionSetCodeGen) {
 
   EXPECT_EQ(0,InitializableDecl(context));
   EXPECT_EQ(BrigFlex | BrigArray,context->get_symbol_modifier());
-  EXPECT_EQ(16, context->get_dim());
+  EXPECT_EQ(9, context->get_dim());
 
   delete lexer;
 }
