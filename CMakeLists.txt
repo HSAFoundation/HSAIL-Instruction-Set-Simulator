@@ -163,3 +163,5 @@ set(hsaAssembler_SOURCES
   )
 add_executable(hsaAssembler ${hsaAssembler_SOURCES})
 target_link_libraries(hsaAssembler brig2llvm)
+
+add_subdirectory(test)
