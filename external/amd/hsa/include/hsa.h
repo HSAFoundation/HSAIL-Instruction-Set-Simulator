@@ -421,7 +421,7 @@ public:
      * @return returns the name of the vendor as a hsa::string
      */
 
-    virtual hsa::string getVendorName()=0;
+    virtual const hsa::string& getVendorName() const=0;
 
     /**
      * @brief Returns the ID of the vendor's device
