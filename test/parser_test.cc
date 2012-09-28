@@ -780,13 +780,13 @@ TEST(ParserTest, Call) {
 
   delete lexer;
 }
-
+/*
 TEST(ParserTest, Initializers) {
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
-
+  
   std::string input("= {12, 13,14, -13}\n");  // DecimalInitializer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -821,10 +821,10 @@ TEST(ParserTest, Initializers) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
-
+  
   delete lexer;
 }
-
+*/
 TEST(ParserTest, InitializableDecl) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -3671,11 +3671,12 @@ TEST(ParserTest, SingleListSingleTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SingleListSingle(context));
-
-  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
+  
+/*  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SingleListSingle(context));
+*/
 
   delete lexer;
 }
