@@ -2440,22 +2440,6 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
       context->current_argdecl_offset = context->get_directive_offset();
       context->append_directive(&sym_decl);
 
-      BrigDirectiveFunction bdf;
-      context->get_directive(context->current_bdf_offset, &bdf);
-      BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
-      BrigdOffset32_t next_directive = bdf.d_nextDirective;
-      if (first_scope == next_directive) {
-        bdf.d_nextDirective += sizeof(sym_decl);
-        bdf.d_firstScopedDirective = bdf.d_nextDirective;
-      } else {
-        bdf.d_nextDirective += sizeof(sym_decl);
-      }
-
-      unsigned char *bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-      context->update_directive_bytes(bdf_charp ,
-                                      context->current_bdf_offset,
-                                      sizeof(BrigDirectiveFunction));
-
       if (!Initializer(context)) {
         if (context->token_to_scan == ';') {
             context->token_to_scan = yylex();
