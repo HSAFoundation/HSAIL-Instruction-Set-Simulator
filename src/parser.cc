@@ -4971,43 +4971,21 @@ int Atom(Context* context) {
       return 1;
     }
   }
-  std::string oper_name;
-  // with AtomModifiers
   if (!AtomModifiersPart2(context, &atom_op.storageClass, &atom_op.memorySemantic)) {
     if (context->token_type == DATA_TYPE_ID) {
       atom_op.type = context->token_value.data_type;
       context->token_to_scan = yylex();
-      if (context->valid_string) {
-        oper_name = context->token_value.string_val;
-      }
-      if (!Operand(context)) {
-        atom_op.o_operands[0] = context->operand_map[oper_name];
+      if (!OperandPart2(context, &atom_op.o_operands[0])) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          atom_op.o_operands[1] = context->get_operand_offset();
-          if (!MemoryOperand(context)) {
+          if (!MemoryOperandPart2(context, &atom_op.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              if (context->valid_string) {
-                oper_name = context->token_value.string_val;
-              }
-              unsigned int cur_op_offset = context->get_operand_offset();
-              if (cur_op_offset & 0x7) {
-                cur_op_offset += 4;
-              }
-              atom_op.o_operands[2] = cur_op_offset;
-              if (!Operand(context)) {
-
-                // atom_op.o_operands[2] = context->operand_map[oper_name];
+              if (!OperandPart2(context, &atom_op.o_operands[2])) {
                 if (first_token == ATOMIC_CAS) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
-                    if (context->valid_string) {
-                      oper_name = context->token_value.string_val;
-                    }
-                    atom_op.o_operands[3] = context->get_operand_offset();
-                    if (!Operand(context)) {
-                    // atom_op.o_operands[3] = context->operand_map[oper_name];
+                    if (!OperandPart2(context, &atom_op.o_operands[3])) {
                     } else {  // 4 Operand
                       context->set_error(INVALID_FOURTH_OPERAND);
                       return 1;
@@ -5045,7 +5023,6 @@ int Atom(Context* context) {
   }  // AtomModifiers
   return 1;
 }
-
 int CvtModifier1(Context* context) {
   unsigned int next;
   unsigned int first_token = context->token_to_scan;
