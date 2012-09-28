@@ -20,7 +20,7 @@ TEST(HSARuntimeTest, VectorCopy) {
   hsa::vector<hsa::Device *> devices = hsaRT->getDevices();
   EXPECT_EQ(numDevices, devices.size());
 
-  char buffer[];
+  char *buffer;
 
   hsa::Program *program =
     hsaRT->createProgram(buffer, sizeof(buffer), &devices);

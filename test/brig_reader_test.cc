@@ -168,7 +168,7 @@ llvm::Module *TestHSAIL(const std::string &source) {
 
 TEST(BrigKernelTest, Cosine) {
   llvm::Module *mod = TestHSAIL(
-    "version 1:0:$small;\n"
+   "version 1:0:$small;\n"
     "\n"
     "//==========================================================\n"
     "// Function: __Get_fcos\n"
