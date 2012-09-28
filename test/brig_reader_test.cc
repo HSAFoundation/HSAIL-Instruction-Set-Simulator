@@ -504,3 +504,21 @@ TEST(BrigInstTest, VectorMad) {
   const int32_t testVec[] = { 6, 2, 2, 2 };
   testInst("mad_s32", testVec);
 }
+
+TEST(BrigWriterTest, GlobalArray) {
+  llvm::Module *mod = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "global_u32 &array[10] = {1,2,3,4,5,6,7,8};\n"
+    "\n"
+    "kernel &__OpenCL_global_array_kernel(\n"
+    "        kernarg_u32 %arg_val0)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%arg_val0] ;\n"
+    "        ret ;\n"
+    "} ;\n"
+    );
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+}
