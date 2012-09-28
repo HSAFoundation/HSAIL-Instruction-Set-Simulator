@@ -33,7 +33,7 @@ class BrigReader {
   ~BrigReader();
 
   static BrigReader *createBrigReader(const char *filename);
-
+  static BrigReader *createBrigReader(const char *buffer, size_t size);
  private:
 
   BrigReader(llvm::object::ObjectFile *objFile,

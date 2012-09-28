@@ -9,6 +9,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-DBIN_PATH=${PROJECT_BINARY_DIR}/test ${CMAKE_CXX_FLAGS}")
 flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
 
@@ -149,7 +150,7 @@ set(hsa_runtime_test_SOURCES
   gtest/gtest_main.cc
   )
 add_executable(hsa_runtime_test ${hsa_runtime_test_SOURCES})
-target_link_libraries(hsa_runtime_test brig2llvm hsa)
+target_link_libraries(hsa_runtime_test hsa brig2llvm)
 
 set(hsaAssembler_SOURCES
   src/parser.cc

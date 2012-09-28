@@ -4,11 +4,72 @@
 
 #include "hsa.h"
 
-#include <cassert>
+#include "brig_engine.h"
+#include "brig_llvm.h"
+#include "brig_module.h"
+#include "brig_reader.h"
 
 #include "llvm/Module.h"
 
+#include <cassert>
+#include <cstdarg>
+
 namespace hsa {
+
+typedef vector<Device *> DeviceList;
+
+class SimKernel : public Kernel {
+ public:
+
+  SimKernel(llvm::Function *F) : F_(F) {}
+
+  virtual void *allocateGroupMemory(size_t, size_t) {
+    return NULL;
+  }
+
+  virtual void freeGroupMemory(const void *) {}
+
+  virtual void *getISA() {
+    return NULL;
+  }
+
+  virtual const void *getGroupMemoryBase() const {
+    return NULL;
+  }
+
+  virtual size_t getSizeOfISA() {
+    return 0;
+  }
+
+  virtual hsacommon::string &getName() {
+    assert(false && "Unimplemented");
+  }
+
+  llvm::Function *F_;
+};
+
+class SimProgram : public Program {
+ public:
+
+  SimProgram(llvm::Module *mod) : mod_(mod) {}
+
+  virtual Kernel *compileKernel(const char *kernelName, const char *) {
+    llvm::Function *fun = mod_->getFunction(kernelName + 1);
+    return fun ? new SimKernel(fun) : NULL;
+  }
+
+  virtual void addDevice(Device *device) {}
+  virtual char *getElf() { return NULL; }
+  virtual size_t getElfSize() { return 0; }
+  virtual void *getGlobalBase() {
+    assert(false && "Unimplemented");
+  }
+
+  virtual ~SimProgram() {}
+
+ private:
+  llvm::Module *mod_;
+};
 
 class SimQueue : public Queue {
 
@@ -20,17 +81,37 @@ class SimQueue : public Queue {
     return device_;
   }
 
-  virtual DispatchEvent* dispatch(Kernel *,
-                                  LaunchAttributes,
-                                  hsacommon::vector<Event *> &,
-                                  uint32_t, ...) {
-    return NULL;
+  virtual DispatchEvent* dispatch(Kernel *kernel,
+                                  LaunchAttributes attrs,
+                                  hsacommon::vector<Event *> &events,
+                                  uint32_t count, ...) {
+
+    hsacommon::vector<KernelArg> kernArgs;
+
+    va_list ap;
+    va_start(ap, count);
+    for(unsigned i = 0; i < count; ++i) {
+      kernArgs.push_back(va_arg(ap, KernelArg));
+    }
+
+    return dispatch(kernel, attrs, events, kernArgs);
   }
 
-  virtual DispatchEvent* dispatch(Kernel*,
+  virtual DispatchEvent* dispatch(Kernel *kernel,
                                   LaunchAttributes,
                                   hsacommon::vector<Event *> &,
-                                  hsacommon::vector<KernelArg> &) {
+                                  hsacommon::vector<KernelArg> &kernArgs) {
+
+    SimKernel *sk = reinterpret_cast<SimKernel *>(kernel);
+
+    std::vector<void *> args;
+    for(unsigned i = 0; i < kernArgs.size(); ++i)
+      args.push_back(&kernArgs[i]);
+
+    llvm::Function *fun = sk->F_;
+    llvm::Module *mod = fun->getParent();
+    hsa::brig::launchBrig(mod, fun, args);
+
     return NULL;
   }
 
@@ -40,7 +121,6 @@ class SimQueue : public Queue {
   Device *device_;
 };
 
-typedef vector<Device *> DeviceList;
 
 class SimDevice : public Device {
   virtual DeviceType getType() const {
@@ -149,52 +229,6 @@ class SimDevice : public Device {
   }
 };
 
-class SimKernel : public Kernel {
- public:
-
-  virtual void *allocateGroupMemory(size_t, size_t) {
-    return NULL;
-  }
-
-  virtual void freeGroupMemory(const void *) {}
-
-  virtual void *getISA() {
-    return NULL;
-  }
-
-  virtual const void *getGroupMemoryBase() const {
-    return NULL;
-  }
-
-  virtual size_t getSizeOfISA() {
-    return 0;
-  }
-
-  virtual hsacommon::string &getName() {
-    assert(false && "Unimplemented");
-  }
-};
-
-class SimProgram : public Program {
- public:
-
-  virtual Kernel *compileKernel(const char *, const char *) {
-    return new SimKernel();
-  }
-
-  virtual void addDevice(Device *device) {}
-  virtual char *getElf() { return NULL; }
-  virtual size_t getElfSize() { return 0; }
-  virtual void *getGlobalBase() {
-    assert(false && "Unimplemented");
-  }
-
-  virtual ~SimProgram() {}
-
- private:
-  llvm::Module *mod;
-};
-
 class SimRuntimeApi : public RuntimeApi {
  public:
 
@@ -207,12 +241,34 @@ class SimRuntimeApi : public RuntimeApi {
 
   virtual const DeviceList &getDevices() { return devices; }
 
-  virtual Program *createProgram(char *, size_t, DeviceList *) {
-    return new SimProgram();
+  virtual Program *createProgram(char *elf, size_t elfSize, DeviceList *) {
+    hsa::brig::BrigReader *reader =
+      hsa::brig::BrigReader::createBrigReader(elf, elfSize);
+    if(!reader) return NULL;
+
+    hsa::brig::BrigModule brigMod(*reader, &llvm::errs());
+    if(!brigMod.isValid()) return NULL;
+
+    hsa::brig::GenLLVM codegen(*reader);
+    codegen();
+    llvm::Module *mod = codegen.getModule();
+
+    return new SimProgram(mod);
   }
 
-  virtual Program *createProgramFromFile(const char *, DeviceList *) {
-    return NULL;
+  virtual Program *createProgramFromFile(const char *filename, DeviceList *) {
+    hsa::brig::BrigReader *reader =
+      hsa::brig::BrigReader::createBrigReader(filename);
+    if(!reader) return NULL;
+
+    hsa::brig::BrigModule brigMod(*reader, &llvm::errs());
+    if(!brigMod.isValid()) return NULL;
+
+    hsa::brig::GenLLVM codegen(*reader);
+    codegen();
+    llvm::Module *mod = codegen.getModule();
+
+    return new SimProgram(mod);
   }
 
   virtual void destroyProgram(Program *) {}
