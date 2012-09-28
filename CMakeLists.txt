@@ -95,6 +95,8 @@ add_subdirectory(src/brig2llvm/compiler)
 # obtain specific information about llvm setup
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 
+SET(LLVM_REQUIRES_EH "true")
+
 include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
 include(HandleLLVMOptions)
 
@@ -131,3 +133,33 @@ set(brig_reader_test_SOURCES
   )
 add_executable(brig_reader_test ${brig_reader_test_SOURCES})
 target_link_libraries(brig_reader_test brig2llvm)
+
+add_subdirectory(src/hsa_runtime)
+
+set(hsa_runtime_test_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  test/hsa_runtime_test.cc
+  gtest/gtest-all.cc
+  gtest/gtest_main.cc
+  )
+add_executable(hsa_runtime_test ${hsa_runtime_test_SOURCES})
+target_link_libraries(hsa_runtime_test brig2llvm hsa)
+
+set(hsaAssembler_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  bin/hsaAssembler
+  )
+add_executable(hsaAssembler ${hsaAssembler_SOURCES})
+target_link_libraries(hsaAssembler brig2llvm)
