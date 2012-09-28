@@ -2021,10 +2021,7 @@ int Branch(Context* context) {
     if (context->token_to_scan == TOKEN_CREGISTER)
       inst_op.type = Brigb1;
 
-    std::string operand_name = context->token_value.string_val;
-
-    if (!Operand(context)) {
-      inst_op.o_operands[1] = context->operand_map[operand_name];
+    if (!OperandPart2(context, &inst_op.o_operands[1])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         if (context->token_to_scan == TOKEN_LABEL) {
@@ -2783,50 +2780,27 @@ int SysCall(Context* context) {
   std::string opName;
   context->token_to_scan = yylex();
 
-  if (context->valid_string) {
-    opName = context->token_value.string_val;
-  } else {
-    context->set_error(INVALID_FIRST_OPERAND);
-    return 1;
-  }
   // Note: dest: Destination. Must be a 32-bit register.
   if (context->token_to_scan == TOKEN_SREGISTER) {
-    if (Operand(context)) {
+    if (OperandPart2(context, &syscallInst.o_operands[0])) {
       return 1;
     }
-    syscallInst.o_operands[0] = context->operand_map[opName];
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
-      BrigoOffset32_t opSize = 0;
       // n: An integer literal. Valid values fit into a u32 data type.
-      opSize = context->get_operand_offset();
-      opSize += opSize & 0x7;
       if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        if (Operand(context)) {
+        if (OperandPart2(context, &syscallInst.o_operands[1])) {
           return 1;
         }
-        syscallInst.o_operands[1] = opSize;
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
           if (((context->token_to_scan == TOKEN_SREGISTER) ||
                (context->token_to_scan == TOKEN_WAVESIZE) ||
                (context->token_to_scan == TOKEN_INTEGER_CONSTANT))) {
-            opSize = context->get_operand_offset();
-            if (context->token_to_scan == TOKEN_SREGISTER) {
-              opName = context->token_value.string_val;
-            } else {
-              if (context->token_type == CONSTANT) {
-                opSize += opSize & 0x7;
-              }
-            }
-            if (Operand(context)) {
+
+            if (OperandPart2(context, &syscallInst.o_operands[2])) {
               return 1;
-            }
-            if (context->get_operand_offset() == opSize) {
-              syscallInst.o_operands[2] = context->operand_map[opName];
-            } else {
-              syscallInst.o_operands[2] = opSize;
             }
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
@@ -2834,21 +2808,8 @@ int SysCall(Context* context) {
               if ((context->token_to_scan == TOKEN_SREGISTER) ||
                   (context->token_to_scan == TOKEN_WAVESIZE) ||
                   (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-                opSize = context->get_operand_offset();
-                if (context->token_to_scan == TOKEN_SREGISTER) {
-                  opName = context->token_value.string_val;
-                } else {
-                  if (context->token_type == CONSTANT) {
-                    opSize += opSize & 0x7;
-                  }
-                }
-                if (Operand(context)) {
+                if (OperandPart2(context, &syscallInst.o_operands[3])) {
                   return 1;
-                }
-                if (context->get_operand_offset() == opSize) {
-                  syscallInst.o_operands[3] = context->operand_map[opName];
-                } else {
-                  syscallInst.o_operands[3] = opSize;
                 }
                 if (context->token_to_scan == ',') {
                   context->token_to_scan = yylex();
@@ -2856,21 +2817,8 @@ int SysCall(Context* context) {
                   if ((context->token_to_scan == TOKEN_SREGISTER) ||
                       (context->token_to_scan == TOKEN_WAVESIZE) ||
                       (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-                    opSize = context->get_operand_offset();
-                    if (context->token_to_scan == TOKEN_SREGISTER) {
-                      opName = context->token_value.string_val;
-                    } else {
-                      if (context->token_type == CONSTANT) {
-                        opSize += opSize & 0x7;
-                      }
-                    }
-                    if (Operand(context)) {
+                    if (OperandPart2(context, &syscallInst.o_operands[4])) {
                       return 1;
-                    }
-                    if (context->get_operand_offset() == opSize) {
-                      syscallInst.o_operands[4] = context->operand_map[opName];
-                    } else {
-                      syscallInst.o_operands[4] = opSize;
                     }
 
                     if (context->token_to_scan == ';') {
@@ -3183,74 +3131,35 @@ int Instruction4MultiMediaOperationPart1(Context* context) {
     context->token_to_scan = yylex();
 
     // TODO(Chuang): dest:  The destination is an f32.
-    std::string opName;
-    BrigoOffset32_t opSize;
 
-    if (context->token_type == REGISTER) {
-      opName = context->token_value.string_val;
-    } else {
+    if (context->token_type != REGISTER) {
       context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
 
-    if (!Operand(context)) {
-      mmoInst.o_operands[0] = context->operand_map[opName];
+    if (!OperandPart2(context, &mmoInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
       // TODO(Chuang):src0, src1, src2, src3: Sources. All are b32
-      opSize = context->get_operand_offset();
-      if (context->token_type == REGISTER) {
-        opName = context->token_value.string_val;
-      } else if (context->token_type == CONSTANT) {
-        opSize += opSize & 0x7;
-      }  // else WaveSize
 
-      if (!Operand(context)) {
-        if (opSize == context->get_operand_offset()) {
-          mmoInst.o_operands[1] = context->operand_map[opName];
-        } else {
-          mmoInst.o_operands[1] = opSize;
-        }
+      if (!OperandPart2(context, &mmoInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
-        opSize = context->get_operand_offset();
-        if (context->token_type == REGISTER) {
-          opName = context->token_value.string_val;
-        } else if (context->token_type == CONSTANT) {
-          opSize += opSize & 0x7;
-        }  // else WaveSize
 
-        if (!Operand(context)) {
-          if (opSize == context->get_operand_offset()) {
-            mmoInst.o_operands[2] = context->operand_map[opName];
-          } else {
-            mmoInst.o_operands[2] = opSize;
-          }
+        if (!OperandPart2(context, &mmoInst.o_operands[2])) {
           if (context->token_to_scan != ',') {
-              context->set_error(MISSING_COMMA);
-              return 1;
+            context->set_error(MISSING_COMMA);
+            return 1;
           }
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (context->token_type == REGISTER) {
-            opName = context->token_value.string_val;
-          } else if (context->token_type == CONSTANT) {
-            opSize += opSize & 0x7;
-          }  // else WaveSize
-
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              mmoInst.o_operands[3] = context->operand_map[opName];
-            } else {
-              mmoInst.o_operands[3] = opSize;
-            }
+          if (!OperandPart2(context, &mmoInst.o_operands[3])) {
             if (context->token_to_scan == ';') {
               context->append_code(&mmoInst);
               context->token_to_scan = yylex();
@@ -3305,83 +3214,52 @@ int Instruction4FmaPart2(Context* context) {
     context->token_to_scan = yylex();
 
     // Note: dest: Destination register.
-    std::string opName;
-    BrigoOffset32_t opSize;
 
-    if (context->token_type == REGISTER) {
-      opName = context->token_value.string_val;
-    } else {
+    if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
 
-    if (!Operand(context)) {
-      fmaInst.o_operands[0] = context->operand_map[opName];
+    if (!OperandPart2(context, &fmaInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
       // Sources. Can be a register or immediate value.
-      opSize = context->get_operand_offset();
-      if (context->token_type == REGISTER) {
-        opName = context->token_value.string_val;
-      } else if (context->token_type == CONSTANT) {
-        opSize += opSize & 0x7;
-      } else {
+      if (context->token_type != REGISTER &&
+          context->token_type != CONSTANT) {
         context->set_error(INVALID_OPERAND);
         return 1;
       }
 
-      if (!Operand(context)) {
-        if (opSize == context->get_operand_offset()) {
-          fmaInst.o_operands[1] = context->operand_map[opName];
-        } else {
-          fmaInst.o_operands[1] = opSize;
-        }
+      if (!OperandPart2(context, &fmaInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
-        opSize = context->get_operand_offset();
-        if (context->token_type == REGISTER) {
-          opName = context->token_value.string_val;
-        } else if (context->token_type == CONSTANT) {
-          opSize += opSize & 0x7;
-        } else {
+        if (context->token_type != REGISTER && 
+            context->token_type != CONSTANT) {
           context->set_error(INVALID_OPERAND);
           return 1;
         }
 
-        if (!Operand(context)) {
-          if (opSize == context->get_operand_offset()) {
-            fmaInst.o_operands[2] = context->operand_map[opName];
-          } else {
-            fmaInst.o_operands[2] = opSize;
-          }
+        if (!OperandPart2(context, &fmaInst.o_operands[2])) {
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
           }
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (context->token_type == REGISTER) {
-            opName = context->token_value.string_val;
-          } else if (context->token_type == CONSTANT) {
-            opSize += opSize & 0x7;
-          } else {
+          if (context->token_type != REGISTER && 
+              context->token_type != CONSTANT) {
             context->set_error(INVALID_OPERAND);
             return 1;
           }
 
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              fmaInst.o_operands[3] = context->operand_map[opName];
-            } else {
-              fmaInst.o_operands[3] = opSize;
-            }
+          if (!OperandPart2(context, &fmaInst.o_operands[3])) {
+
             if (context->token_to_scan == ';') {
               int* pCmp = reinterpret_cast<int*>(&aluModifier);
               if (*pCmp != 0) {
@@ -3462,83 +3340,51 @@ int Instruction4MadPart3(Context* context) {
     context->token_to_scan = yylex();
 
     // Note: dest: Destination register.
-    std::string opName;
-    BrigoOffset32_t opSize;
 
-    if (context->token_type == REGISTER) {
-      opName = context->token_value.string_val;
-    } else {
+    if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
 
-    if (!Operand(context)) {
-      madInst.o_operands[0] = context->operand_map[opName];
+    if (!OperandPart2(context, &madInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
       // Sources. Can be a register or immediate value.
-      opSize = context->get_operand_offset();
-      if (context->token_type == REGISTER) {
-        opName = context->token_value.string_val;
-      } else if (context->token_type == CONSTANT) {
-        opSize += opSize & 0x7;
-      } else {
+      if (context->token_type != REGISTER && 
+          context->token_type != CONSTANT) {
         context->set_error(INVALID_OPERAND);
         return 1;
       }
 
-      if (!Operand(context)) {
-        if (opSize == context->get_operand_offset()) {
-          madInst.o_operands[1] = context->operand_map[opName];
-        } else {
-          madInst.o_operands[1] = opSize;
-        }
+      if (!OperandPart2(context, &madInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
-        opSize = context->get_operand_offset();
-        if (context->token_type == REGISTER) {
-          opName = context->token_value.string_val;
-        } else if (context->token_type == CONSTANT) {
-          opSize += opSize & 0x7;
-        } else {
+        if (context->token_type != REGISTER && 
+            context->token_type != CONSTANT) {
           context->set_error(INVALID_OPERAND);
           return 1;
         }
-
-        if (!Operand(context)) {
-          if (opSize == context->get_operand_offset()) {
-            madInst.o_operands[2] = context->operand_map[opName];
-          } else {
-            madInst.o_operands[2] = opSize;
-          }
+        if (!OperandPart2(context, &madInst.o_operands[2])) {
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
           }
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (context->token_type == REGISTER) {
-            opName = context->token_value.string_val;
-          } else if (context->token_type == CONSTANT) {
-            opSize += opSize & 0x7;
-          } else {
+          if (context->token_type != REGISTER && 
+              context->token_type != CONSTANT) {
             context->set_error(INVALID_OPERAND);
             return 1;
           }
 
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              madInst.o_operands[3] = context->operand_map[opName];
-            } else {
-              madInst.o_operands[3] = opSize;
-            }
+          if (!OperandPart2(context, &madInst.o_operands[3])) {
+
             if (context->token_to_scan == ';') {
               int* pCmp = reinterpret_cast<int*>(&aluModifier);
               if (*pCmp != 0) {
@@ -3632,77 +3478,38 @@ int Instruction4BitStringOperationPart4(Context* context) {
     context->token_to_scan = yylex();
 
     // Note: dest: Destination register.
-    std::string opName;
-    BrigoOffset32_t opSize;
 
-    if (context->token_type == REGISTER) {
-      opName = context->token_value.string_val;
-    } else {
+    if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
 
-    if (!Operand(context)) {
-      bsoInst.o_operands[0] = context->operand_map[opName];
+    if (!OperandPart2(context, &bsoInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
 
-      opSize = context->get_operand_offset();
-      if (context->token_type == REGISTER) {
-        opName = context->token_value.string_val;
-      } else if (context->token_type == CONSTANT) {
-        opSize += opSize & 0x7;
-      }  // else WaveSize
-
-      if (!Operand(context)) {
-        if (opSize == context->get_operand_offset()) {
-          bsoInst.o_operands[1] = context->operand_map[opName];
-        } else {
-          bsoInst.o_operands[1] = opSize;
-        }
+      if (!OperandPart2(context, &bsoInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
-        opSize = context->get_operand_offset();
-        if (context->token_type == REGISTER) {
-          opName = context->token_value.string_val;
-        } else if (context->token_type == CONSTANT) {
-          opSize += opSize & 0x7;
-        }  // else WaveSize
 
         // TODO(Chuang): src1, src2: type follow as the kind of opcode.
         // different opcode will have different rule of types.
 
-        if (!Operand(context)) {
-          if (opSize == context->get_operand_offset()) {
-            bsoInst.o_operands[2] = context->operand_map[opName];
-          } else {
-            bsoInst.o_operands[2] = opSize;
-          }
+        if (!OperandPart2(context, &bsoInst.o_operands[2])) {
+
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
           }
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (context->token_type == REGISTER) {
-            opName = context->token_value.string_val;
-          } else if (context->token_type == CONSTANT) {
-            opSize += opSize & 0x7;
-          }  // else WaveSize
-
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              bsoInst.o_operands[3] = context->operand_map[opName];
-            } else {
-              bsoInst.o_operands[3] = opSize;
-            }
+          if (!OperandPart2(context, &bsoInst.o_operands[3])) {
             if (context->token_to_scan == ';') {
               context->append_code(&bsoInst);
               context->token_to_scan = yylex();
@@ -3759,17 +3566,13 @@ int Instruction4CmovPart5(Context* context) {
 
     // Note: dest: Destination register.
     std::string opName;
-    BrigoOffset32_t opSize;
 
-    if (context->token_type == REGISTER) {
-      opName = context->token_value.string_val;
-    } else {
+    if (context->token_type != REGISTER) {
       context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
 
-    if (!Operand(context)) {
-      cmovInst.o_operands[0] = context->operand_map[opName];
+    if (!OperandPart2(context, &cmovInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
@@ -3782,65 +3585,38 @@ int Instruction4CmovPart5(Context* context) {
       // then src0 must be an s register or literal value; if
       // the Length is 64-bit, then src0 must be a d register or literal value.
 
-      opSize = context->get_operand_offset();
-      if (context->token_type == REGISTER) {
-        opName = context->token_value.string_val;
-      } else if (context->token_type == CONSTANT) {
-        opSize += opSize & 0x7;
-      } else {
+      if (context->token_type != REGISTER && 
+          context->token_type != CONSTANT) {
         context->set_error(INVALID_OPERAND);
         return 1;
       }
 
-      if (!Operand(context)) {
-        if (opSize == context->get_operand_offset()) {
-          cmovInst.o_operands[1] = context->operand_map[opName];
-        } else {
-          cmovInst.o_operands[1] = opSize;
-        }
+      if (!OperandPart2(context ,&cmovInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
-        opSize = context->get_operand_offset();
-        if (context->token_type == REGISTER) {
-          opName = context->token_value.string_val;
-        } else if (context->token_type == CONSTANT) {
-          opSize += opSize & 0x7;
-        } else {
+        if (context->token_type != REGISTER && 
+            context->token_type != CONSTANT) {
           context->set_error(INVALID_OPERAND);
           return 1;
         }
 
-        if (!Operand(context)) {
-          if (opSize == context->get_operand_offset()) {
-            cmovInst.o_operands[2] = context->operand_map[opName];
-          } else {
-            cmovInst.o_operands[2] = opSize;
-          }
+        if (!OperandPart2(context, &cmovInst.o_operands[2])) {
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
           }
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (context->token_type == REGISTER) {
-            opName = context->token_value.string_val;
-          } else if (context->token_type == CONSTANT) {
-            opSize += opSize & 0x7;
-          } else {
+          if (context->token_type != REGISTER && 
+              context->token_type != CONSTANT) {
             context->set_error(INVALID_OPERAND);
             return 1;
           }
 
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              cmovInst.o_operands[3] = context->operand_map[opName];
-            } else {
-              cmovInst.o_operands[3] = opSize;
-            }
+          if (!OperandPart2(context, &cmovInst.o_operands[3])) {
             if (context->token_to_scan == ';') {
               context->append_code(&cmovInst);
               context->token_to_scan = yylex();
@@ -3904,79 +3680,53 @@ int Instruction4ShufflePart6(Context* context) {
 
     // Note: dest: Destination register.
     std::string opName;
-    BrigoOffset32_t opSize;
 
-    if (context->token_type == REGISTER) {
-      opName = context->token_value.string_val;
-    } else {
+    if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
 
-    if (!Operand(context)) {
-      shuffleInst.o_operands[0] = context->operand_map[opName];
+    if (!OperandPart2(context, &shuffleInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
 
-      opSize = context->get_operand_offset();
-      if (context->token_type == REGISTER) {
-        opName = context->token_value.string_val;
-      } else if (context->token_type == CONSTANT) {
-        opSize += opSize & 0x7;
-      } else {
+      if (context->token_type != REGISTER && 
+          context->token_type != CONSTANT) {
         context->set_error(INVALID_OPERAND);
         return 1;
       }
 
-      if (!Operand(context)) {
-        if (opSize == context->get_operand_offset()) {
-          shuffleInst.o_operands[1] = context->operand_map[opName];
-        } else {
-          shuffleInst.o_operands[1] = opSize;
-        }
+      if (!OperandPart2(context, &shuffleInst.o_operands[1])) {
+
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
-        opSize = context->get_operand_offset();
-        if (context->token_type == REGISTER) {
-          opName = context->token_value.string_val;
-        } else if (context->token_type == CONSTANT) {
-          opSize += opSize & 0x7;
-        } else {
+        if (context->token_type != REGISTER && 
+            context->token_type != CONSTANT) {
           context->set_error(INVALID_OPERAND);
           return 1;
         }
 
-        if (!Operand(context)) {
-          if (opSize == context->get_operand_offset()) {
-            shuffleInst.o_operands[2] = context->operand_map[opName];
-          } else {
-            shuffleInst.o_operands[2] = opSize;
-          }
+        if (!OperandPart2(context, &shuffleInst.o_operands[2])) {
+
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
           }
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-
           // src2: Source. Must be a literal value used to select elements
-          if (context->token_type == CONSTANT) {
-            opSize += opSize & 0x7;
-          } else {
+          if (context->token_type != CONSTANT) {
             context->set_error(INVALID_OPERAND);
             return 1;
           }
 
-          if (!Operand(context)) {
-            shuffleInst.o_operands[3] = opSize;
-
+          if (!OperandPart2(context, &shuffleInst.o_operands[3])) {
             if (context->token_to_scan == ';') {
               context->append_code(&shuffleInst);
               context->token_to_scan = yylex();
@@ -4357,45 +4107,17 @@ int Cmp(Context* context) {
       std::string opName;
       // Note: Dest must be a register.
       if (context->token_type == REGISTER) {
-        opName = context->token_value.string_val;
-        if (Operand(context)) {
+        if (OperandPart2(context, &cmpInst.o_operands[0])) {
           return 1;
         }
-        cmpInst.o_operands[0] = context->operand_map[opName];
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          BrigoOffset32_t opSize = 0;
-          opSize = context->get_operand_offset();
-          if (context->valid_string) {
-            opName = context->token_value.string_val;
-          } else {
-            if (context->token_type == CONSTANT) {
-              opSize += opSize & 0x7;
-            }
-          }
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              cmpInst.o_operands[1] = context->operand_map[opName];
-            } else {
-              cmpInst.o_operands[1] = opSize;
-            }
+
+          if (!OperandPart2(context, &cmpInst.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              opSize = context->get_operand_offset();
-              if (context->valid_string) {
-                opName = context->token_value.string_val;
-              } else {
-                if (context->token_type == CONSTANT) {
-                  opSize += opSize & 0x7;
-                }
-              }
 
-              if (!Operand(context)) {
-                if (opSize == context->get_operand_offset()) {
-                  cmpInst.o_operands[2] = context->operand_map[opName];
-                } else {
-                  cmpInst.o_operands[2] = opSize;
-                }
+              if (!OperandPart2(context, &cmpInst.o_operands[2])) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&cmpInst);
                   context->token_to_scan = yylex();
@@ -4701,23 +4423,9 @@ int Instruction5(Context* context) {
   // Note: must be _u32.
   if (context->token_to_scan == _U32) {
     context->token_to_scan = yylex();
-    std::string opName;
-    BrigoOffset32_t opSize = 0;
-
     // Note: dest: The destination is an f32.
-    opSize = context->get_operand_offset();
-    if (context->token_to_scan == TOKEN_SREGISTER) {
-      opName = context->token_value.string_val;
-    } else if (context->token_type == CONSTANT) {
-      opSize += opSize & 0x7;
-    }
 
-    if (!Operand(context)) {
-      if (opSize == context->get_operand_offset()) {
-        f2u4Inst.o_operands[0] = context->operand_map[opName];
-      } else {
-        f2u4Inst.o_operands[0] = opSize;
-      }
+    if (!OperandPart2(context, &f2u4Inst.o_operands[0])) {
 
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
@@ -4725,76 +4433,32 @@ int Instruction5(Context* context) {
       }
       context->token_to_scan = yylex();
 
-      opSize = context->get_operand_offset();
       // Note: Sources. All are b32
-      if (context->token_to_scan == TOKEN_SREGISTER) {
-        opName = context->token_value.string_val;
-      } else if (context->token_type == CONSTANT) {
-        opSize += opSize & 0x7;
-      }
-      if (!Operand(context)) {
-        if (opSize == context->get_operand_offset()) {
-          f2u4Inst.o_operands[1] = context->operand_map[opName];
-        } else {
-          f2u4Inst.o_operands[1] = opSize;
-        }
+      if (!OperandPart2(context, &f2u4Inst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
 
-        opSize = context->get_operand_offset();
         // Note: Sources. All are b32
-        if (context->token_to_scan == TOKEN_SREGISTER) {
-          opName = context->token_value.string_val;
-        } else if (context->token_type == CONSTANT) {
-          opSize += opSize & 0x7;
-        }
-        if (!Operand(context)) {
-          if (opSize == context->get_operand_offset()) {
-            f2u4Inst.o_operands[2] = context->operand_map[opName];
-          } else {
-            f2u4Inst.o_operands[2] = opSize;
-          }
-
+        if (!OperandPart2(context, &f2u4Inst.o_operands[2])) {
           if (context->token_to_scan != ',') {
             context->set_error(MISSING_COMMA);
             return 1;
           }
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
           // Note: Sources. All are b32
-          if (context->token_to_scan == TOKEN_SREGISTER) {
-            opName = context->token_value.string_val;
-          } else if (context->token_type == CONSTANT) {
-            opSize += opSize & 0x7;
-          }
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              f2u4Inst.o_operands[3] = context->operand_map[opName];
-            } else {
-              f2u4Inst.o_operands[3] = opSize;
-            }
+          if (!OperandPart2(context, &f2u4Inst.o_operands[3])) {
             if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
             }
             context->token_to_scan = yylex();
-            opSize = context->get_operand_offset();
             // Note: Sources. All are b32
-            if (context->token_to_scan == TOKEN_SREGISTER) {
-              opName = context->token_value.string_val;
-            } else if (context->token_type == CONSTANT) {
-              opSize += opSize & 0x7;
-            }
-            if (!Operand(context)) {
-              if (opSize == context->get_operand_offset()) {
-                f2u4Inst.o_operands[4] = context->operand_map[opName];
-              } else {
-                f2u4Inst.o_operands[4] = opSize;
-              }
+
+            if (!OperandPart2(context, &f2u4Inst.o_operands[4])) {
               if (context->token_to_scan == ';') {
                 context->append_code(&f2u4Inst);
                 context->token_to_scan = yylex();
@@ -4884,24 +4548,21 @@ int Ldc(Context* context) {
 
     ldc_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
-    std::string oper_name;
     // dest: must be BrigEOperandReg.
     if (context->token_to_scan == TOKEN_SREGISTER ||
         (context->token_to_scan == TOKEN_DREGISTER &&
          ldc_op.type == Brigb64)) {
-      oper_name = context->token_value.string_val;
     } else {
       context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
-    if (!Operand(context)) {
-      ldc_op.o_operands[0] = context->operand_map[oper_name];
+    if (!OperandPart2(context, &ldc_op.o_operands[0])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         // op[1] must be BrigEOperandLabelRef or BrigEOperandFunctionRef
 
         if (context->token_to_scan == TOKEN_LABEL && ldc_op.type != Brigb64) {
-          oper_name = context->token_value.string_val;
+          std::string oper_name = context->token_value.string_val;
           if (!context->label_o_map.count(oper_name)) {
             BrigOperandLabelRef labRef = {
               sizeof(BrigOperandLabelRef), // size
@@ -4920,7 +4581,7 @@ int Ldc(Context* context) {
             ldc_op.o_operands[1] = context->label_o_map[oper_name];
           }
         } else if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
-          oper_name = context->token_value.string_val;
+          std::string oper_name = context->token_value.string_val;
           if (!context->func_o_map.count(oper_name)) {
             BrigOperandFunctionRef funRef = {
               sizeof(BrigOperandFunctionRef),   // size
@@ -5020,43 +4681,27 @@ int Atom(Context* context) {
       return 1;
     }
   }
-  std::string oper_name;
-  // with AtomModifiers
   if (!AtomModifiersPart2(context, &atom_op.storageClass, &atom_op.memorySemantic)) {
     if (context->token_type == DATA_TYPE_ID) {
       atom_op.type = context->token_value.data_type;
       context->token_to_scan = yylex();
-      if (context->valid_string) {
-        oper_name = context->token_value.string_val;
-      }
-      if (!Operand(context)) {
-        atom_op.o_operands[0] = context->operand_map[oper_name];
+
+      if (!OperandPart2(context, &atom_op.o_operands[0])) {
+
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          atom_op.o_operands[1] = context->get_operand_offset();
-          if (!MemoryOperand(context)) {
+
+          if (!MemoryOperandPart2(context, &atom_op.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
-              if (context->valid_string) {
-                oper_name = context->token_value.string_val;
-              }
-              unsigned int cur_op_offset = context->get_operand_offset();
-              if (cur_op_offset & 0x7) {
-                cur_op_offset += 4;
-              }
-              atom_op.o_operands[2] = cur_op_offset;
-              if (!Operand(context)) {
 
-                // atom_op.o_operands[2] = context->operand_map[oper_name];
+              if (!OperandPart2(context, &atom_op.o_operands[2])) {
+
                 if (first_token == ATOMIC_CAS) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
-                    if (context->valid_string) {
-                      oper_name = context->token_value.string_val;
-                    }
-                    atom_op.o_operands[3] = context->get_operand_offset();
-                    if (!Operand(context)) {
-                    // atom_op.o_operands[3] = context->operand_map[oper_name];
+
+                    if (!OperandPart2(context, &atom_op.o_operands[3])) {
                     } else {  // 4 Operand
                       context->set_error(INVALID_FOURTH_OPERAND);
                       return 1;
@@ -5305,36 +4950,18 @@ int MulInst(Context* context) {
         bim.type = context->get_type();
 
         context->token_to_scan = yylex();
-        if (REGISTER == context->token_type){
-          opName = context->token_value.string_val;
-        } else {
+        if (REGISTER != context->token_type){
           context->set_error(INVALID_OPERAND);
           return 1;
         }
-        if (Operand(context)) {
+        if (OperandPart2(context, &bim.o_operands[opCount++])) {
           return 1;
         }
-        bim.o_operands[opCount++] = context->operand_map[opName];
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
-            opSize = context->get_operand_offset();
-            if (REGISTER == context->token_type){
-              opName = context->token_value.string_val;
-            } else if (CONSTANT == context->token_type
-                     || '-' == context->token_to_scan){
-              opSize += opSize & 0x7;
-            } else {
-              context->set_error(INVALID_OPERAND);
+            if (OperandPart2(context, &bim.o_operands[opCount++])) {
               return 1;
-            }
-            if (Operand(context)) {
-              return 1;
-            }
-            if (opSize == context->get_operand_offset()){
-              bim.o_operands[opCount++] = context->operand_map[opName];
-            } else {
-              bim.o_operands[opCount++] = opSize;
             }
 
             if (context->token_to_scan == ',') {
@@ -5387,8 +5014,7 @@ int MulInst(Context* context) {
         bib.packing = context->token_value.packing;
         context->token_to_scan = yylex();
       }
-      BrigoOffset32_t opSize = 0;
-      std::string opName;
+
       size_t opCount = 0;
 
       if (context->token_type == DATA_TYPE_ID) {
@@ -5396,53 +5022,21 @@ int MulInst(Context* context) {
         bib.type = context->get_type();
 
         context->token_to_scan = yylex();
-        if (REGISTER == context->token_type){
-          opName = context->token_value.string_val;
-        } else {
+        if (REGISTER != context->token_type){
           context->set_error(INVALID_OPERAND);
           return 1;
         }
-        if (!Operand(context)) {  // operand reg
-          bib.o_operands[opCount++] = context->operand_map[opName];
+        if (!OperandPart2(context, &bib.o_operands[opCount++])) {  // operand reg
 
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
 
-            opSize = context->get_operand_offset();
-            if (REGISTER == context->token_type){
-              opName = context->token_value.string_val;
-            } else if (CONSTANT == context->token_type
-                     || '-' == context->token_to_scan){
-              opSize += opSize & 0x7;
-            } else {
-              context->set_error(INVALID_OPERAND);
-              return 1;
-            }
-            if (!Operand(context)) {
-              if (opSize == context->get_operand_offset()){
-                bib.o_operands[opCount++] = context->operand_map[opName];
-              } else {
-                bib.o_operands[opCount++] = opSize;
-              }
+            if (!OperandPart2(context, &bib.o_operands[opCount++])) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
 
-                opSize = context->get_operand_offset();
-                if (REGISTER == context->token_type){
-                  opName = context->token_value.string_val;
-                } else if (CONSTANT == context->token_type
-                        || '-' == context->token_to_scan){
-                  opSize += opSize & 0x7;
-                } else {
-                  context->set_error(INVALID_OPERAND);
-                  return 1;
-                }
-                if (!Operand(context)) {
-                  if (opSize == context->get_operand_offset()){
-                    bib.o_operands[opCount++] = context->operand_map[opName];
-                  } else {
-                    bib.o_operands[opCount++] = opSize;
-                  }
+                if (!OperandPart2(context, &bib.o_operands[opCount++])) {
+
                   if (context->token_to_scan == ';') {
                     context->append_code(&bib);
                     context->token_to_scan = yylex();
@@ -5483,8 +5077,6 @@ int MulInst(Context* context) {
       context->token_to_scan = yylex();
     }
 
-    BrigoOffset32_t opSize = 0;
-    std::string opName;
     size_t opCount = 0;
 
     if (context->token_type == DATA_TYPE_ID) {
@@ -5493,53 +5085,21 @@ int MulInst(Context* context) {
 
       context->token_to_scan = yylex();
 
-      if (REGISTER == context->token_type){
-        opName = context->token_value.string_val;
-      } else {
+      if (REGISTER != context->token_type){
         context->set_error(INVALID_OPERAND);
         return 1;
       }
-      if (!Operand(context)) {
-        bib.o_operands[opCount++] = context->operand_map[opName];
+      if (!OperandPart2(context, &bib.o_operands[opCount++])) {
 
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (REGISTER == context->token_type){
-            opName = context->token_value.string_val;
-          } else if (CONSTANT == context->token_type
-                   || '-' == context->token_to_scan){
-            opSize += opSize & 0x7;
-          } else {
-            context->set_error(INVALID_OPERAND);
-            return 1;
-          }
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()){
-              bib.o_operands[opCount++] = context->operand_map[opName];
-            } else {
-              bib.o_operands[opCount++] = opSize;
-            }
+          if (!OperandPart2(context, &bib.o_operands[opCount++])) {
+
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
 
-              opSize = context->get_operand_offset();
-              if (REGISTER == context->token_type){
-                opName = context->token_value.string_val;
-              } else if (CONSTANT == context->token_type
-                        || '-' == context->token_to_scan){
-                opSize += opSize & 0x7;
-              } else {
-                context->set_error(INVALID_OPERAND);
-                return 1;
-              }
-              if (!Operand(context)) {
-                if (opSize == context->get_operand_offset()){
-                  bib.o_operands[opCount++] = context->operand_map[opName];
-                } else {
-                  bib.o_operands[opCount++] = opSize;
-                }
+              if (!OperandPart2(context, &bib.o_operands[opCount++])) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&bib);
                   context->token_to_scan = yylex();
@@ -5581,8 +5141,6 @@ int Mul24Inst(Context* context) {
       {0,0,0,0,0}           //o_operands[5]
     };
 
-    BrigoOffset32_t opSize = 0;
-    std::string opName;
     size_t opCount = 0;
 
     context->token_to_scan = yylex();
@@ -5599,53 +5157,20 @@ int Mul24Inst(Context* context) {
 
       context->token_to_scan = yylex();
 
-      if (REGISTER == context->token_type){
-        opName = context->token_value.string_val;
-      } else {
+      if (REGISTER != context->token_type){
         context->set_error(INVALID_OPERAND);
         return 1;
       }
-      if (!Operand(context)) {
-        bib.o_operands[opCount++] = context->operand_map[opName];
+      if (!OperandPart2(context, &bib.o_operands[opCount++])) {
 
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (REGISTER == context->token_type){
-            opName = context->token_value.string_val;
-          } else if (CONSTANT == context->token_type
-                    || '-' == context->token_to_scan){
-            opSize += opSize & 0x7;
-          } else {
-            context->set_error(INVALID_OPERAND);
-            return 1;
-          }
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()){
-              bib.o_operands[opCount++] = context->operand_map[opName];
-            } else {
-              bib.o_operands[opCount++] = opSize;
-            }
+          if (!OperandPart2(context, &bib.o_operands[opCount++])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
 
-              opSize = context->get_operand_offset();
-              if (REGISTER == context->token_type){
-                opName = context->token_value.string_val;
-              } else if (CONSTANT == context->token_type
-                         || '-' == context->token_to_scan){
-                opSize += opSize & 0x7;
-              } else {
-                context->set_error(INVALID_OPERAND);
-                return 1;
-              }
-              if (!Operand(context)) {
-                if (opSize == context->get_operand_offset()){
-                  bib.o_operands[opCount++] = context->operand_map[opName];
-                } else {
-                  bib.o_operands[opCount++] = opSize;
-                }
+              if (!OperandPart2(context, &bib.o_operands[opCount++])) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&bib);
 
@@ -5688,8 +5213,6 @@ int Mad24Inst(Context* context) {
       {0,0,0,0,0}           //o_operands[5]
     };
 
-    BrigoOffset32_t opSize = 0;
-    std::string opName;
     size_t opCount = 0;
 
     context->token_to_scan = yylex();
@@ -5705,72 +5228,24 @@ int Mad24Inst(Context* context) {
       bib.type = context->get_type();
 
       context->token_to_scan = yylex();
-      if (REGISTER == context->token_type){
-        opName = context->token_value.string_val;
-      } else {
+      if (REGISTER != context->token_type){
         context->set_error(INVALID_OPERAND);
         return 1;
       }
-      if (!Operand(context)) {
-        bib.o_operands[opCount++] = context->operand_map[opName];
+      if (!OperandPart2(context, &bib.o_operands[opCount++])) {
 
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (REGISTER == context->token_type){
-            opName = context->token_value.string_val;
-          } else if (CONSTANT == context->token_type
-                    || '-' == context->token_to_scan){
-            opSize += opSize & 0x7;
-          } else {
-            context->set_error(INVALID_OPERAND);
-            return 1;
-          }
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()){
-              bib.o_operands[opCount++] = context->operand_map[opName];
-            } else {
-              bib.o_operands[opCount++] = opSize;
-            }
+          if (!OperandPart2(context, &bib.o_operands[opCount++])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
 
-              opSize = context->get_operand_offset();
-              if (REGISTER == context->token_type){
-                opName = context->token_value.string_val;
-              } else if (CONSTANT == context->token_type
-                         || '-' == context->token_to_scan){
-                opSize += opSize & 0x7;
-              } else {
-                context->set_error(INVALID_OPERAND);
-                return 1;
-              }
-              if (!Operand(context)) {
-                if (opSize == context->get_operand_offset()){
-                  bib.o_operands[opCount++] = context->operand_map[opName];
-                } else {
-                  bib.o_operands[opCount++] = opSize;
-                }
+              if (!OperandPart2(context, &bib.o_operands[opCount++])) {
                 if (context->token_to_scan == ',') {
                   context->token_to_scan = yylex();
 
-                  opSize = context->get_operand_offset();
-                  if (REGISTER == context->token_type){
-                    opName = context->token_value.string_val;
-                  } else if (CONSTANT == context->token_type
-                             || '-' == context->token_to_scan){
-                    opSize += opSize & 0x7;
-                  } else {
-                    context->set_error(INVALID_OPERAND);
-                    return 1;
-                  }
-                  if (!Operand(context)) {
-                    if (opSize == context->get_operand_offset()){
-                      bib.o_operands[opCount++] = context->operand_map[opName];
-                    } else {
-                      bib.o_operands[opCount++] = opSize;
-                    }
+                 if (!OperandPart2(context, &bib.o_operands[opCount++])) {
                     if (context->token_to_scan == ';') {
                       context->append_code(&bib);
                       context->token_to_scan = yylex();
@@ -6073,19 +5548,16 @@ int Lda(Context* context) {
     lda_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
-    std::string oper_name;
     // dest: must be BrigEOperandReg.
     if ((context->token_to_scan == TOKEN_SREGISTER &&
          (lda_op.type == Brigu32 || lda_op.type == Brigb32)) ||
         (context->token_to_scan == TOKEN_DREGISTER &&
          (lda_op.type == Brigu64 || lda_op.type == Brigb64))) {
-      oper_name = context->token_value.string_val;
     } else {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
-    if (!Operand(context)) {
-      lda_op.o_operands[0] = context->operand_map[oper_name];
+    if (!OperandPart2(context, &lda_op.o_operands[0])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         if (!MemoryOperandPart2(context, &lda_op.o_operands[1])) {
@@ -6227,78 +5699,54 @@ int ImageRet(Context* context) {
     if (context->token_type == DATA_TYPE_ID) {
       img_inst.type = context->token_value.data_type;
 
-      std::string op_name;
       context->token_to_scan = yylex();
-      if (context->valid_string) {
-        op_name = context->token_value.string_val;
-      }
-      if (!Operand(context)) {
-        img_inst.o_operands[0] = context->operand_map[op_name];
+
+      if (!OperandPart2(context, &img_inst.o_operands[0])) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          img_inst.o_operands[1] = context->get_operand_offset();
           if (context->token_to_scan == '[') {
             context->token_to_scan = yylex();
-            if (!AddressableOperand(context)) {
+            if (!AddressableOperandPart2(context, &img_inst.o_operands[1], true)) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
                 unsigned int curOpCount = 2;
-                if (context->token_to_scan == '(') {
-                  if (!ArrayOperandList(context)) {
-                  } else {
-                    context->set_error(MISSING_CLOSING_PARENTHESIS);
-                    return 1;
-                  }
-                } else {
-                  if (context->valid_string) {
-                    op_name = context->token_value.string_val;
-                  }
-                  if (!Operand(context)) {
-                    img_inst.o_operands[curOpCount++] = context->operand_map[op_name];
-                  } else {  // Array Operand
-                    context->set_error(MISSING_OPERAND);
-                    return 1;
-                  }
-               }
+                if (!ArrayOperandPart2(context, &img_inst.o_operands[curOpCount++])) {
+                  if (context->token_to_scan == ',') {
+                    context->token_to_scan = yylex();
 
-                if (context->token_to_scan == ',') {
-                  context->token_to_scan = yylex();
-                  if (context->valid_string) {
-                    op_name = context->token_value.string_val;
-                  }
-                  if (!Operand(context)) {
-                    img_inst.o_operands[curOpCount++] = context->operand_map[op_name];
-                    if (second_token == _CAS) {
-                      if (context->token_to_scan == ',') {
-                        context->token_to_scan = yylex();
-                        if (context->valid_string) {
-                          op_name = context->token_value.string_val;
-                        }
-                        if (!Operand(context)) {
-                          img_inst.o_operands[curOpCount++] = context->operand_map[op_name];
-                        } else {  // Operand
-                          context->set_error(MISSING_OPERAND);
+                    if (!OperandPart2(context, &img_inst.o_operands[curOpCount++])) {
+                      if (second_token == _CAS) {
+                        if (context->token_to_scan == ',') {
+                          context->token_to_scan = yylex();
+  
+                          if (!OperandPart2(context, &img_inst.o_operands[curOpCount++])) {
+                          } else {  // Operand
+                            context->set_error(MISSING_OPERAND);
+                            return 1;
+                          }
+                        } else {  // ','
+                          context->set_error(MISSING_COMMA);
                           return 1;
                         }
-                      } else {  // ','
-                        context->set_error(MISSING_COMMA);
+                      }
+                      if (context->token_to_scan == ';') {
+                        context->append_code(&img_inst);
+                        context->token_to_scan = yylex();
+                        return 0;
+                      } else {  // ';'
+                        context->set_error(MISSING_SEMICOLON);
                         return 1;
                       }
-                    }
-                    if (context->token_to_scan == ';') {
-                      context->append_code(&img_inst);
-                      context->token_to_scan = yylex();
-                      return 0;
-                    } else {  // ';'
-                      context->set_error(MISSING_SEMICOLON);
+                    } else {  // Operand
+                      context->set_error(MISSING_OPERAND);
                       return 1;
                     }
-                  } else {  // Operand
-                    context->set_error(MISSING_OPERAND);
+                  } else {  // ','
+                    context->set_error(MISSING_COMMA);
                     return 1;
                   }
-                } else {  // ','
-                  context->set_error(MISSING_COMMA);
+                } else {  // ArrayOperand
+                  context->set_error(INVALID_OPERAND);
                   return 1;
                 }
               } else {  // ','
@@ -6454,9 +5902,8 @@ int ImageNoRet(Context* context) {
 
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
-        imgNoRet.o_operands[0] = context->get_operand_offset();
         context->token_to_scan = yylex();
-        if (!AddressableOperand(context)) {
+        if (!AddressableOperandPart2(context, &imgNoRet.o_operands[0], true)) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
             if (!ArrayOperandPart2(context, &imgNoRet.o_operands[1])) {
@@ -6464,19 +5911,14 @@ int ImageNoRet(Context* context) {
                 context->token_to_scan = yylex();
                 unsigned int opCount = 2;
 
-                if (context->valid_string) {
-                  op_name = context->token_value.string_val;
-                }
-                if (!Operand(context)) {
-                  imgNoRet.o_operands[opCount++] = context->operand_map[op_name];
+                if (!OperandPart2(context, &imgNoRet.o_operands[opCount++])) {
                   if (second_token == _CAS) {
                     if (context->token_to_scan == ',') {
                       context->token_to_scan = yylex();
                       if (context->valid_string) {
                         op_name = context->token_value.string_val;
                       }
-                      if (!Operand(context)) {
-                        imgNoRet.o_operands[opCount++] = context->operand_map[op_name];
+                      if (!OperandPart2(context, &imgNoRet.o_operands[opCount++])) {
                       } else {  // Operand
                         context->set_error(MISSING_OPERAND);
                         return 1;
@@ -6574,35 +6016,17 @@ int Cvt(Context* context) {
     if (context->token_type == DATA_TYPE_ID) {
       cvtInst.stype = context->token_value.data_type;
       context->token_to_scan = yylex();
-      std::string opName;
-      BrigoOffset32_t opSize = 0;
-
       // Note: dest: Destination register.
-      if (context->token_type == REGISTER) {
-        opName = context->token_value.string_val;
-      } else {
+      if (context->token_type != REGISTER) {
         context->set_error(INVALID_OPERAND);
         return 1;
       }
-      if (!Operand(context)) {
-        cvtInst.o_operands[0] = context->operand_map[opName];
+      if (!OperandPart2(context, &cvtInst.o_operands[0])) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
-          opSize = context->get_operand_offset();
-          if (context->valid_string) {
-            opName = context->token_value.string_val;
-          } else {
-            if (context->token_type == CONSTANT) {
-              opSize += opSize & 0x7;
-            }
-          }
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              cvtInst.o_operands[1] = context->operand_map[opName];
-            } else {
-              cvtInst.o_operands[1] = opSize;
-            }
+          if (!OperandPart2(context, &cvtInst.o_operands[1])) {
+
             if (context->token_to_scan == ';') {
               context->append_code(&cvtInst);
 
@@ -8338,29 +7762,13 @@ int AtomicNoRet(Context* context) {
 
       aNoRetInst.type = context->token_value.data_type;
       context->token_to_scan = yylex();
-      aNoRetInst.o_operands[0] = context->get_operand_offset();
-      if (!MemoryOperand(context)) {
+      if (!MemoryOperandPart2(context, &aNoRetInst.o_operands[0])) {
         unsigned int opCount = 1;
-        BrigoOffset32_t opSize = 0;
-        std::string opName;
 
         if (first_token == ATOMICNORET_CAS) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            opSize = context->get_operand_offset();
-            if (context->valid_string) {
-              opName = context->token_value.string_val;
-            } else {
-              if (context->token_type == CONSTANT) {
-                opSize += opSize & 0x7;
-              }
-            }
-            if (!Operand(context)) {
-              if (opSize == context->get_operand_offset()) {
-                aNoRetInst.o_operands[opCount++] = context->operand_map[opName];
-              } else {
-                aNoRetInst.o_operands[opCount++] = opSize;
-              }
+            if (!OperandPart2(context, &aNoRetInst.o_operands[opCount++])) {
             } else {
               context->set_error(MISSING_OPERAND);
               return 1;
@@ -8372,20 +7780,7 @@ int AtomicNoRet(Context* context) {
         }
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-          opSize = context->get_operand_offset();
-          if (context->valid_string) {
-            opName = context->token_value.string_val;
-          } else {
-            if (context->token_type == CONSTANT) {
-              opSize += opSize & 0x7;
-            }
-          }
-          if (!Operand(context)) {
-            if (opSize == context->get_operand_offset()) {
-              aNoRetInst.o_operands[opCount++] = context->operand_map[opName];
-            } else {
-              aNoRetInst.o_operands[opCount++] = opSize;
-            }
+          if (!OperandPart2(context, &aNoRetInst.o_operands[opCount++])) {
             if (context->token_to_scan == ';') {
               context->append_code(&aNoRetInst);
 

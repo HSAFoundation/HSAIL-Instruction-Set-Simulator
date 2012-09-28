@@ -378,7 +378,7 @@ TEST(CodegenTest, Example5_SimpleCall) {
   BrigdOffset32_t csize = context->get_code_offset();
   EXPECT_EQ(72U, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
-  EXPECT_EQ(40, osize);
+  EXPECT_EQ(52, osize);
   BrigdOffset32_t ssize = context->get_string_offset();
   EXPECT_EQ(24U, ssize);
 
@@ -425,9 +425,9 @@ TEST(CodegenTest, Example5_SimpleCall) {
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCall, cbr_op.opcode);
   EXPECT_EQ(8, cbr_op.o_operands[0]);
-  EXPECT_EQ(0, cbr_op.o_operands[1]);
+  EXPECT_EQ(40, cbr_op.o_operands[1]);
   EXPECT_EQ(32, cbr_op.o_operands[2]);
-  EXPECT_EQ(0, cbr_op.o_operands[3]);
+  EXPECT_EQ(40, cbr_op.o_operands[3]);
   EXPECT_EQ(0, cbr_op.o_operands[4]);
 
   // test BrigOperandFunctionRef
@@ -9364,8 +9364,8 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
   EXPECT_EQ(0, getImm.reserved);
   EXPECT_EQ(64, getImm.bits.u);
 
-  callInst1.o_operands[1] = 0;
-
+  callInst1.o_operands[1] = curOpOffset;
+  
   // BrigOperandReg S1
   callInst1.o_operands[2] = curOpOffset;
   callInst2.o_operands[2] = curOpOffset;
@@ -9392,7 +9392,8 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
   callInst1.o_operands[3] = curOpOffset;
   context->get_operand(curOpOffset, &getArgList);
   curOpOffset += sizeof(BrigOperandArgumentList);
-
+  callInst1.o_operands[1] = curOpOffset;
+  
   EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
   EXPECT_EQ(BrigEOperandArgumentList, getArgList.kind);
   EXPECT_EQ(1, getArgList.elementCount);
@@ -9400,8 +9401,10 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
 
   // BrigOperandFunctionRef func &foo Argument
 
-  fooOpRefOffset = curOpOffset;
+  
+  curOpOffset += sizeof(BrigOperandArgumentList);
   callInst3.o_operands[2] = curOpOffset;
+  fooOpRefOffset = curOpOffset;
   context->get_operand(curOpOffset, &getFunRef);
   curOpOffset += sizeof(BrigOperandFunctionRef);
 
@@ -9440,7 +9443,7 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
 
   context->get_code(curCodeOffset, &getBase);
   curCodeOffset += sizeof(BrigInstBase);
-
+  
   // BrigInstBase Call 1
   EXPECT_EQ(callInst1.size, getBase.size);
   EXPECT_EQ(callInst1.kind, getBase.kind);
@@ -9586,14 +9589,15 @@ TEST(CodegenTest, Call_CodeGen_SimpleTest) {
   EXPECT_EQ(0, getImm.reserved);
   EXPECT_EQ(0, getImm.bits.u);
 
-  callInst4.o_operands[1] = 0;
+  
   callInst4.o_operands[4] = 0;
 
   // BrigOperandArgumentList input Argument List
   callInst4.o_operands[3] = curOpOffset;
   context->get_operand(curOpOffset, &getArgList);
   curOpOffset += sizeof(BrigOperandArgumentList);
-
+  callInst4.o_operands[1] = curOpOffset;
+  
   EXPECT_EQ(sizeof(BrigOperandArgumentList), getArgList.size);
   EXPECT_EQ(BrigEOperandArgumentList, getArgList.kind);
   EXPECT_EQ(1, getArgList.elementCount);
