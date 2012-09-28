@@ -1117,25 +1117,6 @@ public:
 
     virtual void addDevice(hsa::Device * device)  = 0;
 
-    /*! @brief Return a pointer to the elf
-    *  @return elf pointer
-    */
-
-    virtual char* getElf()=0;
-
-    /*! @brief Returns size of the elf
-    *  @return The size of the elf
-    */
-
-    virtual size_t getElfSize()=0;
-
-    /*! @brief Returns the base address for all
-     *  globals associated with this memory
-     *  @return The size of the elf
-     */
-
-    virtual void* getGlobalBase()=0;
-    
     /*! @brief standard destructor */
 
     virtual ~Program(){};
