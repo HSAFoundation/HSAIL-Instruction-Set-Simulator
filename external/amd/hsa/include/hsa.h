@@ -325,6 +325,11 @@ typedef struct LaunchAttributes_ {
     int groupOffsets[3];        /*!< default is 0*/
     bool timestampEnabled;      /*!< default is false*/
 
+    /*!<
+     * @brief Size (in bytes) of group memory used in the kernel parameters.
+     */
+    size_t groupMemorySize;
+
     LaunchAttributes_()
     {
         grid[0] = 1;
@@ -342,6 +347,8 @@ typedef struct LaunchAttributes_ {
         timestampEnabled = false;
         cachePolicy = CACHE_POLICY_FLUSH_ALL;
         blockingPolicy = BLOCKING_POLICY_NONE;
+
+        groupMemorySize = 0;
     }
 
 } LaunchAttributes;
@@ -352,13 +359,13 @@ typedef struct LaunchAttributes_ {
  *        in the platform. 
  *
  * Allocates \c size bytes of linear memory and returns a pointer to 
- * the allocated memory. The memory is not initialized. If \c size 
- * is 0, then this function returns NULL.
+ * the allocated memory. The memory is not initialized. 
  *
  * The allocated memory by default will be a system memory that is pageable, 
  * cache coherent and readable / writeable by both host and devices. 
  *
- * @param size Requested allocation size in bytes.
+ * @param size Requested allocation size in bytes. This parameter needs to be larger
+     *             than zero.
  * @param alignment The alignment size in bytes for the address of resulting 
  *                  allocation. The default value of this parameter is zero, 
  *                  where no particular alignment will be applied. If the value 
@@ -371,19 +378,16 @@ typedef struct LaunchAttributes_ {
  *
  */
 DLL_PUBLIC void* 
-allocateGlobalMemory(const size_t size, 
-                     const size_t alignment = 0);
+allocateGlobalMemory(size_t size, 
+                     size_t alignment = 0);
 
 /**
  * @brief Frees global memory pointed to by \c ptr, which must have been
  *        returned by a previous call to \c hsa::allocateGlobalMemory(). Otherwise, 
  *        or if this function has already been called before, undefined 
- *        behavior may occur. If a null pointer is passed as argument, no 
- *        action occurs.
+ *        behavior may occur. 
  *
  * @param ptr Pointer to the memory to be freed.
- * @exception HsaException if the the runtime is
- *            unable to deallocate the specified memory region.
  */
 DLL_PUBLIC void 
 freeGlobalMemory(void* ptr);
@@ -596,7 +600,8 @@ public:
      *                                  exclusive with MEMORY_OPTION_UNCACHED.
      * @li MEMORY_OPTION_NONPAGEABLE Disables paging on the allocated memory.
      *
-     * @param size Size of the allocation in bytes.
+     * @param size Size of the allocation in bytes. This parameter needs to be larger
+     *             than zero.
      * @param alignment The alignment size in bytes for the address of resulting 
      *                  allocation. The default value of this parameter is zero, 
      *                  where no particular alignment will be applied. If the value 
@@ -608,27 +613,21 @@ public:
      *            unable to allocate enough memory to perform the requested 
      *            operation.
      * @return Pointer to the allocated memory.
-     *
-     * @see MemoryType
-     * @see MemoryOption
      */
     virtual void* 
-    allocateGlobalMemory(const size_t size, 
-                         const size_t alignment = 0,
-                         const HeapType heapType = HEAP_TYPE_SYSTEM,
-                         const uint32_t flag = (MEMORY_OPTION_HOST_READ_WRITE
-                                                | MEMORY_OPTION_DEVICE_READ_WRITE)) = 0;
+    allocateGlobalMemory(size_t size, 
+                         size_t alignment = 0,
+                         HeapType heapType = HEAP_TYPE_SYSTEM,
+                         uint32_t flag = (MEMORY_OPTION_HOST_READ_WRITE
+                                          | MEMORY_OPTION_DEVICE_READ_WRITE)) = 0;
 
     /**
      * @brief Frees a global memory region, which must have been
      *        returned by a previous call to \c hsa::Device::allocateGlobalMemory(). 
      *        Otherwise, or if this function has already been called before, 
-     *        undefined behavior may occur. If a null pointer is passed as 
-     *        argument, no action occurs.
+     *        undefined behavior may occur.
      *
      * @param ptr Pointer to the memory to be freed.
-     * @exception HsaException if the the runtime is
-     *            unable to deallocate the specified memory region.
      */
     virtual void 
     freeGlobalMemory(void* ptr) = 0;
@@ -648,10 +647,13 @@ public:
      * simply be ignored.
      *
      * @param ptr Pointer to a valid system memory.
-     * @param size Requested registration size in bytes.
+     * @param size Requested registration size in bytes. This parameter needs to 
+     *             be larger than zero.
+     * @exception HsaException if the input is invalid, or if the runtime is 
+     *            unable to perform the requested operation.
      */
     virtual void 
-    registerMemory(void* ptr, const size_t size) = 0;
+    registerMemory(void* ptr, size_t size) = 0;
     
     /**
      * @brief Deregister system memory previously registered by the device.
@@ -660,7 +662,6 @@ public:
      * registered by a previous call to hsa::Device::registerMemory(). 
      * Otherwise, undefined behavior ocurrs. A memory region that was registered 
      * multiple times needs to be deregistered for the same amount of time.
-     * If a null pointer is passed as argument, no action occurs.
      *
      * @param ptr Pointer to memory to deregister.
      */
@@ -679,16 +680,15 @@ public:
      *     function is mandatory to make the memory region accessible by the host or the 
      *     calling device. Otherwise, undefined behavior may occurs.
      *
-     * If a null pointer is passed as argument, or size is 0, no action occurs.
-     *
      * @param ptr Pointer to a valid memory.
-     * @param size Requested mapping size in bytes.
-     * @exception HsaException if the runtime is unable to map enough memory to
-     *            perform the requested operation.
+     * @param size Requested mapping size in bytes. This parameter needs to be larger
+     *             than zero.
+     * @exception HsaException if the input is invalid or the runtime is unable to map 
+     *            enough memory to perform the requested operation.
      *
      */
     virtual void 
-    mapMemory(void* ptr, const size_t size) = 0;
+    mapMemory(void* ptr, size_t size) = 0;
     
     /**
      * @brief Indicates that a memory regions will not longer be used 
@@ -696,12 +696,9 @@ public:
      *
      * The memory region to be unmapped must have been
      * mapped by a previous call to hsa::Device::mapMemory(). Otherwise, undefined
-     * behavior ocurrs. If a null pointer is passed as argument, no action
-     * occurs. 
+     * behavior ocurrs.
      *
      * @param ptr Pointer to a valid memory to unmap.
-     * @exception HsaException if the runtime is unable to unmap the specified
-     *            memory region.
      *
      */
     virtual void 
@@ -933,7 +930,7 @@ public:
      *
      * @param kernel pointer to a Compiled Hsail kernel object
      *
-     * @param launchAttr pointer to set of policies to apply in executing kernel.
+     * @param launchAttr a set of policies to apply in executing kernel.
      *
      * @param depEvents list of dependent events on which this kernel must
      * wait prior to starting the execution of kernel.
@@ -945,7 +942,7 @@ public:
      * compiled code and various other parameters.
      */
     virtual hsa::DispatchEvent *dispatch(hsa::Kernel *kernel,
-                                         hsa::LaunchAttributes *launchAttr,
+                                         hsa::LaunchAttributes launchAttr,
                                          hsa::vector<hsa::Event *> &depEvents,
                                          uint32_t numArgs, ...) = 0;
     
@@ -957,7 +954,7 @@ public:
      *
      * @param kernel pointer to a Compiled Hsail kernel object
      *
-     * @param launchAttr pointer to set of policies to apply in executing kernel.
+     * @param launchAttr a set of policies to apply in executing kernel.
      *
      * @param depEvents list of dependent events on which this kernel must
      * wait prior to starting the execution of kernel.
@@ -969,7 +966,7 @@ public:
      * compiled code and various other parameters.
      */
     virtual hsa::DispatchEvent *dispatch(hsa::Kernel *kernel,
-                                         hsa::LaunchAttributes *launchAttr,
+                                         hsa::LaunchAttributes launchAttr,
                                          hsa::vector<hsa::Event *> &depEvents,
                                          hsa::vector<KernelArg> &krnlArgs) = 0;
     
@@ -987,34 +984,6 @@ public:
 
     virtual ~Kernel(){};
 
-    /* @brief Allocates GROUP memory that is going to be used within the kernel.
-     * @param size Requested allocation size in bytes. If \c size 
-     *             is 0, then this function returns NULL.
-     * @param alignment The alignment size in bytes for the address of resulting 
-     *                  allocation. The default value of this parameter is zero, 
-     *                  where no particular alignment will be applied. If the value 
-     *                  is not zero, it needs to be a power of two and minimum of 
-     *                  sizeof(void*). 
-     * @exception HsaException if the input is invalid, or if the runtime is
-     *            unable to allocate enough memory to perform the requested 
-     *            operation.
-     * @return Pointer to allocated memory.
-     */
-    virtual void* allocateGroupMemory(const size_t size, const size_t alignment = 0) = 0;
-
-    /**
-     * @brief Frees GROUP memory pointed to by \c ptr, which must have been
-     *        returned by a previous call to \c hsa::Kernel::allocateGroupMemory(). 
-     *        Otherwise, or if this function has already been called before, 
-     *        undefined behavior may occur. If a null pointer is passed as argument, no 
-     *        action occurs.
-     *
-     * @param ptr Pointer to the memory to be freed.
-     * @exception HsaException if the the runtime is
-     *            unable to deallocate the specified memory region.
-     */
-   virtual void freeGroupMemory(const void* ptr) = 0;
-
     /* @brief Returns a pointer to the ISA.
     * return - returns a void pointer to the location of ISA
     */
@@ -1030,6 +999,19 @@ public:
    */
 
    virtual hsa::string& getName()=0;
+
+   /** @brief Returns the starting address of the group memory 
+     *        in flat memory model.
+     *
+     *        The developer can use this address to calculate 
+     *        the address of each group memory parameter in the kernel.
+     *        To avoid unexpected behavior, the developer needs 
+     *        to check the upper bound of the group memory region of 
+     *        associated device.
+     *
+     * @return Pointer to group memory.
+     */
+    virtual const void* getGroupMemoryBase() const = 0;
 };
 
 class RuntimeApi;
@@ -1087,8 +1069,8 @@ public:
      * @copydoc hsa::allocateGlobalMemory(size_t,size_t)
      */
     virtual void* 
-    allocateGlobalMemory(const size_t size, 
-                         const size_t alignment = 0) = 0;
+    allocateGlobalMemory(size_t size, 
+                         size_t alignment = 0) = 0;
 
     /**
      * @copydoc hsa::freeGlobalMemory(void*)
