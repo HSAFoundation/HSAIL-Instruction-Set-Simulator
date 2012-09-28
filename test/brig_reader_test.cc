@@ -565,7 +565,7 @@ TEST(BrigWriterTest, Subwords) {
     testSubwords("s8", result, value);
   }
   {
-    const int8_t result = 0xFF;
+    const int8_t result = (int8_t)0xFF;
     const char *value = "0xFF";
     testSubwords("s8", result, value);
   }
@@ -575,7 +575,7 @@ TEST(BrigWriterTest, Subwords) {
     testSubwords("s16", result, value);
   }
   {
-    const int16_t result = 0XFFFF;
+    const int16_t result = (int16_t)0XFFFF;
     const char *value = "0xFFFF";
     testSubwords("s16", result, value);
   }
