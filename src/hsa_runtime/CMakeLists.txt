@@ -12,4 +12,5 @@ MESSAGE("INCLUDE SEARCH DIRECTORIES: ${PROJ_SEARCH_PATH}")
 
 add_llvm_library(hsa
   hsa_runtime.cc
+  hsa_debug.cc
   )

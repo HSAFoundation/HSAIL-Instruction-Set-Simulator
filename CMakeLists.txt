@@ -204,4 +204,10 @@ set(fcos_SOURCES
 add_executable(fcos ${fcos_SOURCES})
 target_link_libraries(fcos hsa brig2llvm)
 
+set(debug_SOURCES
+  demo/debug.cc
+  )
+add_executable(debug ${debug_SOURCES})
+target_link_libraries(debug hsa)
+
 add_subdirectory(test)
