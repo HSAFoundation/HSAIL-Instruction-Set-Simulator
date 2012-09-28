@@ -1,5 +1,6 @@
 #include "brig_symbol.h"
 #include "brig_function.h"
+#include "brig_module.h"
 
 namespace hsa {
 namespace brig {
@@ -51,6 +52,16 @@ BrigSymbol local_end(const BrigFunction &fun) {
   return symbol;
 }
 
+BrigSymbol global_begin(const BrigModule &mod) {
+  BrigSymbol symbol(mod.S_, mod.S_.begin());
+  return symbol;
+}
+
+BrigSymbol global_end(const BrigModule &mod) {
+  BrigSymbol symbol(mod.S_, mod.S_.end());
+  return symbol;
+}
+
 BrigSymbol BrigFunction::arg_begin() const {
   return hsa::brig::arg_begin(*this);
 }
@@ -65,6 +76,14 @@ BrigSymbol BrigFunction::local_begin() const {
 
 BrigSymbol BrigFunction::local_end() const {
   return hsa::brig::local_end(*this);
+}
+
+BrigSymbol BrigModule::global_begin() const {
+  return hsa::brig::global_begin(*this);
+}
+
+BrigSymbol BrigModule::global_end() const {
+  return hsa::brig::global_end(*this);
 }
 
 } // namespace brig

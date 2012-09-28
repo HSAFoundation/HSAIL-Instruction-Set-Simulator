@@ -491,7 +491,7 @@ TEST(BrigInstTest, VectorRem) {
 }
 
 TEST(BrigInstTest, VectorCarry) {
-  const int32_t testVec[] = { 1, 0xfffffffe, 2 };
+  const int32_t testVec[] = { 1, -2, 2 };
   testInst("carry_s32", testVec);
 }
 
