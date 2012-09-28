@@ -554,6 +554,8 @@ static void testSubwords(const char *type, const T &result) {
   hsa::brig::launchBrig(mod, fun, args);
 
   EXPECT_EQ(1, *arg_val0);
+
+  delete arg_val0;
 }
 
 TEST(BrigWriterTest, Subwords) {
