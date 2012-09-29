@@ -28,15 +28,15 @@ class Pmu {
 
   Pmu();
   virtual ~Pmu();
-  CounterGroup * getCounterGroupById (uint32_t id);
-  CounterGroup ** getAllCounterGroups (uint32_t &numGrp);
-  PMU_PROFILE_STATES getCurrentState ();
-  virtual bool begin () = 0;
-  virtual bool end () = 0;
-  virtual bool waitForCompletion (uint32_t milliseconds) = 0;
-  bool getParameter (uint32_t param, uint32_t &retSize, void **ppData);
-  bool setParameter (uint32_t param, uint32_t paramSize, void *pData);
-  bool getInfo (uint32_t info, uint32_t &retSize, void **ppData);
+  CounterGroup *getCounterGroupById(uint32_t id);
+  CounterGroup **getAllCounterGroups(uint32_t &numGrp);
+  PMU_PROFILE_STATES getCurrentState();
+  virtual bool begin() = 0;
+  virtual bool end() = 0;
+  virtual bool waitForCompletion(uint32_t milliseconds) = 0;
+  bool getParameter(uint32_t param, uint32_t &retSize, void **ppData);
+  bool setParameter(uint32_t param, uint32_t paramSize, void *pData);
+  bool getInfo(uint32_t info, uint32_t &retSize, void **ppData);
 
  protected:
   void clearCounterGroupMap();
