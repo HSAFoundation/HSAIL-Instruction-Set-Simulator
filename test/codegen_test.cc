@@ -4511,7 +4511,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     36,                  // size
     BrigEInstBar,        // kind
     BrigBrn,             // opcode
-    0,             // type
+    Brigb32,             // type
     BrigNoPacking,       // packing
     {8, 32, 0, 0, 0},     // o_operands[5]
     0                    // syncFlags
@@ -4528,7 +4528,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     36,                  // size
     BrigEInstBar,        // kind
     BrigBrn,             // opcode
-    0,             // type
+    Brigb32,             // type
     BrigNoPacking,       // packing
     {88, 112, 0, 0, 0},     // o_operands[5]
     0                    // syncFlags

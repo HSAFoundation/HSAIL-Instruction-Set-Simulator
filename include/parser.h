@@ -175,6 +175,9 @@ int Instruction2Part1OpcodeDT(Context* context);
 int Instruction2Part2OpcodeNoDT(Context* context);
 int Instruction2Part3OpcodeFtz(Context* context);
 
+int BranchPart1Cbr(Context* context);
+int BranchPart2Brn(Context* context);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

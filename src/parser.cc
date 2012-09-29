@@ -1967,16 +1967,20 @@ int OptionalWidth(Context* context) {
   return 1;
 }
 
-int Branch(Context* context) {
-  unsigned int op = context->token_to_scan;  // CBR or BRN
-
-  BrigAluModifier mod = context->get_alu_modifier();
-
-  context->token_to_scan = yylex();
+int BranchPart1Cbr(Context* context) {
+  // add structures for CBR.
+  // default value.
+  BrigInstBase inst_op = {
+    sizeof(BrigInstBase),
+    BrigEInstBase,
+    BrigCbr,
+    Brigb32,  // no specification of datatype in Brn and Cbr.
+    BrigNoPacking,
+    {0, 0, 0, 0, 0}
+  };
 
   BrigoOffset32_t widthOffset = context->get_operand_offset();
-
-
+  BrigAluModifier mod = context->get_alu_modifier();
   // check for optionalWidth
   if (context->token_to_scan == _WIDTH) {
     if (OptionalWidth(context)) {
@@ -2006,146 +2010,79 @@ int Branch(Context* context) {
     context->set_alu_modifier(mod);
     context->token_to_scan = yylex();
   }
+  inst_op.o_operands[0] = widthOffset;
+  if (context->token_to_scan == TOKEN_CREGISTER)
+    inst_op.type = Brigb1;
 
-  // parse operands
-  if (op == CBR) {
-    // add structures for CBR.
-    // default value.
-    BrigInstBase inst_op = {
-      sizeof(BrigInstBase),
-      BrigEInstBase,
-      BrigCbr,
-      Brigb32,  // no specification of datatype in Brn and Cbr.
-      BrigNoPacking,
-      {0, 0, 0, 0, 0}
-    };
-    inst_op.o_operands[0] = widthOffset;
+  if (!OperandPart2(context, &inst_op.o_operands[1])) {
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == TOKEN_LABEL) {
+        // if the next operand is label, which is the case in example4
+        // 1. check if the label is already defined,
+        // 2. if defined, just set it up
+        // 3. if not, add it to the multimap
 
-    if (context->token_to_scan == TOKEN_CREGISTER)
-      inst_op.type = Brigb1;
+        std::string label_name = context->token_value.string_val;
 
-    if (!OperandPart2(context, &inst_op.o_operands[1])) {
+        if (context->label_o_map.count(label_name)) {
+          inst_op.o_operands[2] = context->label_o_map[label_name];
+        } else {
+          BrigOperandLabelRef opLabelRef = {
+            sizeof(BrigOperandLabelRef),
+            BrigEOperandLabelRef,
+            0
+          };
+          inst_op.o_operands[2] = context->get_operand_offset();
+          context->label_o_map[label_name] = context->get_operand_offset();
+          if (context->symbol_map.count(label_name)) {
+            opLabelRef.labeldirective = context->symbol_map[label_name];
+          }
+          context->append_operand(&opLabelRef);
+        }  
+
+        context->token_to_scan = yylex();  // should be ';'
+      } else if (!Identifier(context)) {
+        context->token_to_scan = yylex();  // should be ';'
+      } else if (!Operand(context)) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_LABEL) {
-          // if the next operand is label, which is the case in example4
-          // 1. check if the label is already defined,
-          // 2. if defined, just set it up
-          // 3. if not, add it to the multimap
-
-              std::string label_name = context->token_value.string_val;
-
-              if (context->label_o_map.count(label_name)) {
-                inst_op.o_operands[2] = context->label_o_map[label_name];
-              } else {
-                BrigOperandLabelRef opLabelRef = {
-                  8,
-                  BrigEOperandLabelRef,
-                  0
-                };
-                inst_op.o_operands[2] = context->get_operand_offset();
-                context->label_o_map[label_name] = context->get_operand_offset();
-                if (context->symbol_map.count(label_name)) {
-                  opLabelRef.labeldirective = context->symbol_map[label_name];
-                }
-                context->append_operand(&opLabelRef);
-              }
-
+        if (context->token_to_scan == TOKEN_LABEL) {  // LABEL
           context->token_to_scan = yylex();  // should be ';'
-        } else if (!Identifier(context)) {
-          context->token_to_scan = yylex();  // should be ';'
-        } else if (!Operand(context)) {
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-
-            if (context->token_to_scan == TOKEN_LABEL) {  // LABEL
-              context->token_to_scan = yylex();  // should be ';'
-            } else if (context->token_to_scan == '[') {
-              context->token_to_scan = yylex();
-              if (!Identifier(context)) {
-                context->token_to_scan = yylex();  // should be ']'
-              } else if (context->token_to_scan == TOKEN_LABEL) {
-                context->token_to_scan = yylex();
-
-                while (context->token_to_scan != ']') {
-                  if (context->token_to_scan == ',') {
-                    if (yylex() == TOKEN_LABEL) {
-                      context->token_to_scan = yylex();  // scan next;
-                    } else {
-                      context->set_error(MISSING_OPERAND);
-                      return 1;
-                    }
-                  } else {
-                    context->set_error(MISSING_COMMA);
-                    return 1;
-                  }
-                }   // while
-              } else {
-                context->set_error(MISSING_OPERAND);
-              }
-              // current token should be ']'
-              context->token_to_scan = yylex();  // should be ';'
-            } else {
-              context->set_error(MISSING_OPERAND);
-            }
-          }  else {  // yylex() = ','
-            context->set_error(MISSING_COMMA);
-          }
-        } else {
-          context->set_error(MISSING_OPERAND);
-          return 1;
-        }
-        if (context->token_to_scan == ';') {
-          context->append_code(&inst_op);
+        } else if (context->token_to_scan == '[') {
           context->token_to_scan = yylex();
-          return 0;
-        } else {
-          context->set_error(MISSING_SEMICOLON);
-        }
-      } else {  // yylex = ','
-        context->set_error(MISSING_COMMA);
-      }
-    } else {  // first operand
-      context->set_error(MISSING_OPERAND);
-    }
-    return 1;
-  } else if (op == BRN) {
-    // add structures for CBR.
-    // default value.
-    BrigInstBar inst_op = {
-      sizeof(BrigInstBar),
-      BrigEInstBar,
-      BrigBrn,
-      0,  // no specification of datatype in Brn and Cbr.
-      BrigNoPacking,
-      {0, 0, 0, 0, 0},
-      0
-    };
-    inst_op.o_operands[0] = widthOffset;
-
-    if (context->token_to_scan == TOKEN_LABEL) {
-      // if the next operand is label, which is the case in example4
-      // 1. check if the label is already defined,
-      // 2. if defined, just set it up
-      // 3. if not, add it to the multimap
-              std::string label_name = context->token_value.string_val;
-
-              if (context->label_o_map.count(label_name)) {
-                inst_op.o_operands[1] = context->label_o_map[label_name];
-              } else {
-                BrigOperandLabelRef opLabelRef = {
-                  sizeof(BrigOperandLabelRef),
-                  BrigEOperandLabelRef,
-                  0
-                };
-                inst_op.o_operands[1] = context->get_operand_offset();
-                context->label_o_map[label_name] = context->get_operand_offset();
-                if (context->symbol_map.count(label_name)) {
-                  opLabelRef.labeldirective = context->symbol_map[label_name];
+          if (!Identifier(context)) {
+            context->token_to_scan = yylex();  // should be ']'
+          } else if (context->token_to_scan == TOKEN_LABEL) {
+            context->token_to_scan = yylex();
+            while (context->token_to_scan != ']') {
+              if (context->token_to_scan == ',') {
+                if (yylex() == TOKEN_LABEL) {
+                  context->token_to_scan = yylex();  // scan next;
+                } else {
+                  context->set_error(MISSING_OPERAND);
+                  return 1;
                 }
-                context->append_operand(&opLabelRef);
+              } else {
+                context->set_error(MISSING_COMMA);
+                return 1;
               }
-      context->token_to_scan = yylex();
+            }   // while
+          } else {
+            context->set_error(MISSING_OPERAND);
+          }
+          // current token should be ']'
+          context->token_to_scan = yylex();  // should be ';'
+          } else {
+            context->set_error(MISSING_OPERAND);
+          } 
+        } else {  // yylex() = ','
+          context->set_error(MISSING_COMMA);
+        }
+      } else {
+        context->set_error(MISSING_OPERAND);
+        return 1;
+      }
       if (context->token_to_scan == ';') {
         context->append_code(&inst_op);
         context->token_to_scan = yylex();
@@ -2153,42 +2090,139 @@ int Branch(Context* context) {
       } else {
         context->set_error(MISSING_SEMICOLON);
       }
-    } else if (!Identifier(context)) {
-        context->token_to_scan = yylex();
+    } else {  // yylex = ','
+      context->set_error(MISSING_COMMA);
+    }
+  } else {  // first operand
+    context->set_error(MISSING_OPERAND);
+  }
+  return 1;
+}
 
-      if (context->token_to_scan == ';') {
-        context->token_to_scan = yylex();
-        return 0;
-      } else if (context->token_to_scan == ',') {
-        if (yylex() == '[') {
-          context->token_to_scan = yylex();
+int BranchPart2Brn(Context* context) {
 
+    BrigInstBar inst_op = {
+      sizeof(BrigInstBar),
+      BrigEInstBar,
+      BrigBrn,
+      Brigb32,  // no specification of datatype in Brn and Cbr.
+      BrigNoPacking,
+      {0, 0, 0, 0, 0},
+      0
+    };
+    BrigoOffset32_t widthOffset = context->get_operand_offset();
+
+    BrigAluModifier mod = context->get_alu_modifier();
+    // check for optionalWidth
+    if (context->token_to_scan == _WIDTH) {
+      if (OptionalWidth(context)) {
+        return 1;
+      } else {
+        if (widthOffset == context->get_operand_offset()) {
+          widthOffset = 0;
+        }
+      }
+    } else {
+      BrigOperandImmed op_width = {
+        sizeof(BrigOperandImmed),
+        BrigEOperandImmed,
+        Brigb32,
+        0,
+        { 0 }
+      };
+      op_width.bits.u = 0;
+      context->append_operand(&op_width);
+    }
+    if (widthOffset) {
+      widthOffset += widthOffset & 0x7;
+    }
+    // check for optional _fbar modifier
+    if (context->token_to_scan == __FBAR) {
+      mod.fbar = 1;
+      context->set_alu_modifier(mod);
+      context->token_to_scan = yylex();
+    }
+
+    inst_op.o_operands[0] = widthOffset;
+
+  if (context->token_to_scan == TOKEN_LABEL) {
+    // if the next operand is label, which is the case in example4
+    // 1. check if the label is already defined,
+    // 2. if defined, just set it up
+    // 3. if not, add it to the multimap
+    std::string label_name = context->token_value.string_val;
+    if (context->label_o_map.count(label_name)) {
+      inst_op.o_operands[1] = context->label_o_map[label_name];
+    } else {
+      BrigOperandLabelRef opLabelRef = {
+        sizeof(BrigOperandLabelRef),
+        BrigEOperandLabelRef,
+        0
+      };
+      inst_op.o_operands[1] = context->get_operand_offset();
+      context->label_o_map[label_name] = context->get_operand_offset();
+      if (context->symbol_map.count(label_name)) {
+        opLabelRef.labeldirective = context->symbol_map[label_name];
+      }
+      context->append_operand(&opLabelRef);
+    }
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ';') {
+      context->append_code(&inst_op);
+      context->token_to_scan = yylex();
+      return 0;
+    } else {
+      context->set_error(MISSING_SEMICOLON);
+    }
+  } else if (!Identifier(context)) {
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ';') {
+      context->token_to_scan = yylex();
+      return 0;
+    } else if (context->token_to_scan == ',') {
+      if (yylex() == '[') {
+        context->token_to_scan = yylex();
         if (context->token_to_scan == TOKEN_LABEL) {
           context->token_to_scan = yylex();    // should be ']'
         } else if (!Identifier(context)) {
           context->token_to_scan = yylex();    // should be ']'
-          }
         }
+      }
+      if (context->token_to_scan == ']') {
+      } else {
+        context->set_error(MISSING_CLOSING_BRACKET);
+      }
 
-        if (context->token_to_scan == ']') {
-        } else {
-          context->set_error(MISSING_CLOSING_BRACKET);
-        }
-
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == ';') {
         context->token_to_scan = yylex();
-        if (context->token_to_scan == ';') {
-          context->token_to_scan = yylex();
-          return 0;
-        } else {
-          context->set_error(MISSING_SEMICOLON);
-        }
+        return 0;
       } else {
         context->set_error(MISSING_SEMICOLON);
       }
     } else {
-      context->set_error(MISSING_OPERAND);
+      context->set_error(MISSING_SEMICOLON);
     }
-    return 1;
+  } else {
+    context->set_error(MISSING_OPERAND);
+  }
+  return 1;
+}
+
+
+int Branch(Context* context) {
+  unsigned int op = context->token_to_scan;  // CBR or BRN
+
+  context->token_to_scan = yylex();
+
+  if (op == CBR) {
+    if (!BranchPart1Cbr(context)) {
+      return 0;
+    }
+  } else if (op == BRN) {
+    if (!BranchPart2Brn(context)) {
+      return 0;
+    }
   }
   return 1;
 }
