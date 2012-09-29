@@ -590,6 +590,7 @@ public:
      */
     virtual const vector<MemoryDescriptor*>& getMemoryDescriptors() const = 0;
 
+
        /**
      * @brief Get the cache descriptors associated with the device. Cache descriptor is the
      * interface exposed to the user to access the HsaCacheProperties structures given by the KFD.
@@ -597,6 +598,7 @@ public:
      * @return reference to a vector of cache descriptor pointers.
      */
     virtual const vector<CacheDescriptor*>& getCacheDescriptors()=0;
+
 
     /**
      * @brief API to check if double precision is supported on the device.
@@ -930,6 +932,8 @@ public:
                         uint32_t       TrapId,
                         void*          msgPtr) = 0;
 
+    virtual ~Device(){};
+
     /**
     * @brief Returns a structure of highly correlated host and device times
     *        as well as the frequency of the device for conversion purposes.
@@ -942,8 +946,6 @@ public:
     *         and device along with device frequency.
     */
     virtual DeviceClockCounterInfo getClockCounterInfo() = 0;    
-
-	virtual ~Device(){};
 };
 
 
@@ -962,15 +964,16 @@ public:
     virtual ~Event(){};
 
     /**
-     * @brief Ensures that the event is generated atleast once after this
-     * call was invoked
+     * @brief Waits on the event object until it is signalled or timeout
+     * occurs. The wait is specified in terms of milliseconds. The literal
+     * 0x00 is specified for indefinite period.
      *
-     * @param timeOut in milliseconds, 0 means non-blocking wait while
-     * 0xFFFFFFFF means blocking wait.
+     * @param timeOut in milliseconds, 0 means blocking wait while values
+     * greater than zero specify the time to wait.
      *
-     * @return hsa::Status return value indicating success or timeout.
+     * @return hsacore::Status return value indicating success or timeout.
      */
-    virtual hsa::Status wait(uint32_t timeOut) = 0;
+    virtual hsacore::Status wait(uint32_t timeOut = 0x00) = 0;
 
     /**
      * @brief Returns the status of event i.e. it is signaled or not. If the
