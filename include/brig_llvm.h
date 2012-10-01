@@ -27,12 +27,9 @@ class GenLLVM {
   llvm::Module *getModule() { return brig_frontend_; }
   const std::string &str(void);
  private:
-  llvm::StructType *create_soa_type(llvm::Type *t, std::string name, int nr);
-  void gen_GPU_states(void);
   llvm::LLVMContext *C_;
   BrigModule mod_;
   llvm::Module *brig_frontend_;
-  llvm::Type *gpu_states_type_;
   std::string output_;
 };
 

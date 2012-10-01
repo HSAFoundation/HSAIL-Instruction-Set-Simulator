@@ -16,37 +16,35 @@
 namespace hsa{
 namespace brig{
 
-llvm::StructType *GenLLVM::create_soa_type(
-  llvm::Type *t, std::string name, int nr) {
+static llvm::StructType *createSOAType(llvm::LLVMContext &C,
+                                       llvm::Type *t,
+                                       std::string name,
+                                       int nr) {
   // [nr x t]
   llvm::ArrayType *tx8 = llvm::ArrayType::get(t, nr);
   std::vector<llvm::Type *> tv(1, tx8);
   // name = {[nr x t]}
-  llvm::StructType *soa_type = llvm::StructType::create(
-    *C_, tv, name, false);
+  llvm::StructType *soa_type = llvm::StructType::create(C, tv, name, false);
   return soa_type;
 }
 
-void GenLLVM::gen_GPU_states(void) {
-  llvm::StructType *c_reg_type = create_soa_type(
-    llvm::Type::getInt1Ty(*C_), "c_regs", 8);
-  llvm::StructType *s_reg_type = create_soa_type(
-    llvm::Type::getInt32Ty(*C_), "s_regs", 32);
-  llvm::StructType *d_reg_type = create_soa_type(
-    llvm::Type::getInt64Ty(*C_), "d_regs", 32);
-  llvm::StructType *q_reg_type = create_soa_type(
-    llvm::Type::getIntNTy(*C_, 128), "q_regs", 8);
-  llvm::StructType *pc_reg_type = create_soa_type(
-    llvm::Type::getIntNTy(*C_, 32), "pc_regs", 3);
-  std::vector<llvm::Type *> tv1;
-  tv1.push_back(c_reg_type);
-  tv1.push_back(s_reg_type);
-  tv1.push_back(d_reg_type);
-  tv1.push_back(q_reg_type);
-  tv1.push_back(pc_reg_type);
-  llvm::StructType *gpu_states_ty = llvm::StructType::create(
-    *C_, tv1, std::string("struct.regs"), false);
-  gpu_states_type_ = gpu_states_ty;
+static void gen_GPU_states(llvm::LLVMContext &C) {
+  llvm::StructType *c_reg_type =
+    createSOAType(C, llvm::Type::getInt1Ty(C), "c_regs", 8);
+  llvm::StructType *s_reg_type =
+    createSOAType(C, llvm::Type::getInt32Ty(C), "s_regs", 32);
+  llvm::StructType *d_reg_type =
+    createSOAType(C, llvm::Type::getInt64Ty(C), "d_regs", 32);
+  llvm::StructType *q_reg_type =
+    createSOAType(C, llvm::Type::getIntNTy(C, 128), "q_regs", 8);
+  llvm::StructType *pc_reg_type =
+    createSOAType(C, llvm::Type::getIntNTy(C, 32), "pc_regs", 3);
+  llvm::Type *tv1[] = { c_reg_type,
+                        s_reg_type,
+                        d_reg_type,
+                        q_reg_type,
+                        pc_reg_type };
+  llvm::StructType::create(C, tv1, std::string("struct.regs"), false);
 }
 
 static llvm::Type *getElementTy(llvm::LLVMContext &C, BrigDataType type) {
@@ -621,7 +619,7 @@ void GenLLVM::operator()(void) {
 
   assert(mod_.isValid());
 
-  gen_GPU_states();
+  gen_GPU_states(*C_);
 
   SymbolMap symbolMap;
   for(BrigSymbol symbol = mod_.global_begin(),
