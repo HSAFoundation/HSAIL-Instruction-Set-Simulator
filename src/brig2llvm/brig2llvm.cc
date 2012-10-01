@@ -410,11 +410,6 @@ static void runOnComplexInst(llvm::BasicBlock &B,
   }
 }
 
-static bool isBranchInst(const inst_iterator inst) {
-  BrigOpcode opcode = BrigOpcode(inst->opcode);
-  return opcode == BrigBrn || opcode == BrigCbr;
-}
-
 static void runOnBranchInst(llvm::BasicBlock &B,
                             const inst_iterator inst,
                             const BrigInstHelper &helper,
@@ -480,7 +475,7 @@ static void runOnInstruction(llvm::BasicBlock &B,
 
   if(inst->opcode == BrigRet) {
     llvm::ReturnInst::Create(C, &B);
-  } else if(isBranchInst(inst)) {
+  } else if(helper.isBranchInst(inst)) {
     runOnBranchInst(B, inst, helper, state);
   } else if(inst->opcode == BrigCall) {
     runOnCallInst(B, inst, helper, state);
@@ -611,12 +606,14 @@ GenLLVM::GenLLVM(const StringBuffer &strings,
                  const Buffer &operands,
                  const Buffer &debug) :
   mod_(strings, directives, code, operands, debug, &llvm::errs()),
-  brig_frontend_(NULL) {
+  brig_frontend_(NULL), output_() {
 }
+
 GenLLVM::GenLLVM(const BrigReader &reader) :
   mod_(reader, &llvm::errs()),
-  brig_frontend_(NULL) {
+  brig_frontend_(NULL), output_() {
 }
+
 void GenLLVM::operator()(void) {
 
   C_ = new llvm::LLVMContext();
@@ -637,10 +634,15 @@ void GenLLVM::operator()(void) {
     runOnFunction(*brig_frontend_, fun, funMap, symbolMap);
   }
 
-  llvm::raw_string_ostream ros(output_);
-  brig_frontend_->print(ros, NULL);
-
   llvm::verifyModule(*brig_frontend_);
+}
+
+const std::string &GenLLVM::str(void) {
+  if(!output_.size()) {
+    llvm::raw_string_ostream ros(output_);
+    brig_frontend_->print(ros, NULL);
+  }
+  return output_;
 }
 
 }

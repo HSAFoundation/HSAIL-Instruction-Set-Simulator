@@ -153,6 +153,11 @@ class BrigInstHelper {
       packing == BrigPackPsat  || packing == BrigPackSsat;
   }
 
+  static bool isBranchInst(const inst_iterator inst) {
+    BrigOpcode opcode = BrigOpcode(inst->opcode);
+    return opcode == BrigBrn || opcode == BrigCbr;
+  }
+
  private:
   const BrigSections &S_;
 };
