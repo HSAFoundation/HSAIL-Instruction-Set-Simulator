@@ -82,6 +82,7 @@ TEST(HSARuntimeTest, VectorCopy) {
     hsacommon::vector<hsa::Event *> deps;
     hsa::DispatchEvent* event =
       queue->dispatch(kernel, la, deps, 3, argA, argB, argLength);
+    (void) event;
 
 		EXPECT_EQ(a[i], b[i]);
 

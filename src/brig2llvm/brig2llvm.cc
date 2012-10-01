@@ -290,64 +290,53 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
   assert(false && "Unimplemented");
 }
 
+static llvm::Type *getOperandTy(llvm::LLVMContext &C,
+                                const inst_iterator inst,
+                                unsigned opnum) {
+
+  llvm::Type *destType = runOnType(C, BrigDataType(inst->type));
+
+  if(opnum == 0) return destType;
+
+  if((inst->opcode == BrigLd          && opnum == 2) ||
+     (inst->opcode == BrigSt          && opnum == 1) ||
+     (inst->opcode == BrigAtomic      && opnum == 1) ||
+     (inst->opcode == BrigAtomicNoRet && opnum == 0))
+    return destType->getPointerTo();
+
+  if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
+    return runOnType(C, BrigDataType(cmp->sourceType));
+
+  if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
+    return runOnType(C, BrigDataType(cvt->stype));
+
+  if((inst->opcode == BrigShr && opnum == 2) ||
+     (inst->opcode == BrigShl && opnum == 2))
+    return runOnType(C, Brigu32);
+
+  if((inst->opcode == BrigShuffle && opnum == 3))
+    return runOnType(C, Brigu64);
+
+  return destType;
+}
+
 static llvm::Value *decodePacking(llvm::BasicBlock &B,
                                   llvm::Value *value,
                                   unsigned opnum,
                                   const inst_iterator inst) {
 
   llvm::LLVMContext &C = B.getContext();
-  llvm::Type *destType = runOnType(C, BrigDataType(inst->type));
+  llvm::Type *destTy = getOperandTy(C, inst, opnum);
 
-  if((inst->opcode == BrigLd) ||
-     (inst->opcode == BrigSt && opnum == 1)) {
-    llvm::Type *ptrType = destType->getPointerTo();
-    if(value->getType() == ptrType) {
-      return value;
-    } else if(value->getType()->isPointerTy()) {
-      return new llvm::BitCastInst(value, ptrType, "", &B);
-    } else {
-      return new llvm::IntToPtrInst(value, ptrType, "", &B);
-    }
-  }
-
-  llvm::Type *valType = value->getType();
-
-  if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst)) {
-    llvm::Type *srcType = runOnType(C, BrigDataType(cmp->sourceType));
-    if(srcType != valType) {
-      return new llvm::BitCastInst(value, srcType, "", &B);
-    }
-
+  if(destTy == value->getType())
     return value;
-  }
 
-  if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst)) {
-    llvm::Type *srcType = runOnType(C, BrigDataType(cvt->stype));
-    if(srcType != valType) {
-      unsigned srcSize = srcType->getPrimitiveSizeInBits();
-      unsigned valSize = valType->getPrimitiveSizeInBits();
-      if(srcSize < valSize) {
-        return new llvm::TruncInst(value, srcType, "", &B);
-      } else {
-        return new llvm::BitCastInst(value, srcType, "", &B);
-      }
-    }
+  if(destTy->isFloatingPointTy())
+    return new llvm::BitCastInst(value, destTy, "", &B);
 
-    return value;
-  }
-
-  BrigPacking packing = BrigPacking(inst->packing);
-  bool isPacked = BrigInstHelper::isPacked(packing, opnum);
-  bool isBroadcast = BrigInstHelper::isBroadcast(packing, opnum);
-  bool isFloat = destType->isFloatTy();
-
-  assert(!(isPacked && isBroadcast) && "Illegal packing combination!?");
-
-  if(isPacked || isBroadcast || isFloat) {
-    return new llvm::BitCastInst(value, destType, "", &B);
-  }
-
-  return value;
+  llvm::Instruction::CastOps castOp =
+    llvm::CastInst::getCastOpcode(value, false, destTy, false);
+  return llvm::CastInst::Create(castOp, value, destTy, "", &B);
 }
 
 static llvm::Value *encodePacking(llvm::BasicBlock &B,
@@ -356,26 +345,18 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
                                   const inst_iterator inst,
                                   const BrigInstHelper &helper) {
 
-  llvm::LLVMContext &C = B.getContext();
-  BrigDataType type = BrigDataType(inst->type);
-  llvm::Type *encodedType = runOnType(C, type);
-  unsigned bitsize = encodedType->getPrimitiveSizeInBits();
-  if(BrigInstHelper::isVectorTy(type) || BrigInstHelper::isFloatTy(type)) {
-    llvm::LLVMContext &C = B.getContext();
-    llvm::Type *type = llvm::Type::getIntNTy(C, bitsize);
-    llvm::Value *bitcast = new llvm::BitCastInst(value, type, "", &B);
-    return bitcast;
-  }
+  llvm::Type *encodedType = value->getType();
 
-  if(bitsize < destTy->getPrimitiveSizeInBits()) {
-    if(helper.isSignedTy(type)) {
-      return new llvm::SExtInst(value, destTy, "", &B);
-    } else {
-      return new llvm::ZExtInst(value, destTy, "", &B);
-    }
-  }
+  if(encodedType == destTy)
+    return value;
 
-  return value;
+  if(encodedType->isFloatingPointTy() || encodedType->isVectorTy())
+    return new llvm::BitCastInst(value, destTy, "", &B);
+
+  bool isSigned = helper.isSignedTy(BrigDataType(inst->type));
+  llvm::Instruction::CastOps castOp =
+    llvm::CastInst::getCastOpcode(value, isSigned, destTy, isSigned);
+  return llvm::CastInst::Create(castOp, value, destTy, "", &B);
 }
 
 static
