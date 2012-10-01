@@ -57,7 +57,7 @@ class BrigModule {
     out_(out),
     valid_(validate()) {}
 
-  bool isValid() { return valid_; }
+  bool isValid() const { return valid_; }
 
   BrigFunction begin() const;
   BrigFunction end() const;

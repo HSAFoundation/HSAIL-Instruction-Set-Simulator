@@ -126,12 +126,13 @@ TEST(Brig2LLVMTest, Example1) {
 
     hsa::brig::Buffer debug;
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
-    codegen();
-    EXPECT_NE(0U, codegen.str().size());
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
+                              &llvm::errs());
+    std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
+    EXPECT_NE(0U, output.size());
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "declare void @get_global_id(i32*, i32*)")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "declare void @abort()")));
   }
 }
@@ -214,33 +215,37 @@ TEST(Brig2LLVMTest, Example2) {
 
     hsa::brig::Buffer debug;
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
-    codegen();
-    EXPECT_NE(0U, codegen.str().size());
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
+                              &llvm::errs());
+    std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
+    EXPECT_NE(0U, output.size());
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @return_true(float* %ret_val)")));
     // HSA-48
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "%c_regs = type { [8 x i1] }")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "%s_regs = type { [32 x i32] }")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "%d_regs = type { [32 x i64] }")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "%q_regs = type { [8 x i128] }")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "%pc_regs = type { [3 x i32] }")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "%struct.regs = type { %c_regs, %s_regs, %d_regs, %q_regs, %pc_regs }")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "%gpu_reg_p = alloca %struct.regs")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "ret void")));
 
-    llvm::Module *mod = codegen.getModule();
+    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(M);
+    if(!M) return;
+
     bool ret_val;
     void *args[] = { &ret_val };
-    hsa::brig::launchBrig(mod, mod->getFunction("return_true"), args);
+    hsa::brig::launchBrig(M, M->getFunction("return_true"), args);
   }
 }
 
@@ -375,33 +380,37 @@ TEST(Brig2LLVMTest, Example3) {
 
     hsa::brig::Buffer debug;
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
-    codegen();
-    EXPECT_NE(0, codegen.str().size());
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
+                              &llvm::errs());
+    std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
+    EXPECT_NE(0, output.size());
 
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @packed_ops(<4 x i8>* %x)")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 2")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 3")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "call <4 x i8> @Abs_P_s8x4")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "call <2 x i16> @AddSat_PP_u16x2")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "%gpu_reg_p = alloca %struct.regs")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "ret void")));
 
-    llvm::Module *mod = codegen.getModule();
+    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(M);
+    if(!M) return;
+
     u8x4 x;
     void *args[] = { &x };
-    hsa::brig::launchBrig(mod, mod->getFunction("packed_ops"), args);
+    hsa::brig::launchBrig(M, M->getFunction("packed_ops"), args);
   }
 }
 
@@ -615,30 +624,34 @@ TEST(Brig2LLVMTest, Example4) {
 
     hsa::brig::Buffer debug;
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
-    codegen();
-    EXPECT_NE(0, codegen.str().size());
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
+                              &llvm::errs());
+    std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
+    EXPECT_NE(0, output.size());
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "outof_IF:")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "then:")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "brig.init.succ:")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     ", label %then, label %brig.init.succ")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "br label %outof_IF")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "; preds = %then, %brig.init.succ")));
 
-    llvm::Module *mod = codegen.getModule();
+    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(M);
+    if(!M) return;
+
     u8x4 x;
     void *args[] = { &x };
-    hsa::brig::launchBrig(mod, mod->getFunction("branch_ops"), args);
+    hsa::brig::launchBrig(M, M->getFunction("branch_ops"), args);
   }
 }
 
@@ -767,19 +780,23 @@ TEST(Brig2LLVMTest, Example5) {
 
     hsa::brig::Buffer debug;
 
-    hsa::brig::GenLLVM codegen(strings, directives, code, operands, debug);
-    codegen();
-    EXPECT_NE(0, codegen.str().size());
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
+                              &llvm::errs());
+    std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
+    EXPECT_NE(0, output.size());
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @callee() {")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @caller() {")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "call void @callee()")));
 
-    llvm::Module *mod = codegen.getModule();
+    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(M);
+    if(!M) return;
+
     llvm::ArrayRef<void *> args;
-    hsa::brig::launchBrig(mod, mod->getFunction("caller"), args);
+    hsa::brig::launchBrig(M, M->getFunction("caller"), args);
   }
 }
 
@@ -1109,12 +1126,12 @@ TEST(Brig2LLVMTest, Example6) {
     hsa::brig::GenLLVM codegen(strings, directives, code, operands);
     codegen();
 
-    EXPECT_NE(0, codegen.str().size());
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(0, output.size());
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @callee(float *%output, float *%input) {")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @caller() {")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "call void @callee(float *%output, float *%input)")));
 
     llvm::Module *mod = codegen.getModule();
@@ -1448,12 +1465,12 @@ TEST(Brig2LLVMTest, Example6) {
 
     hsa::brig::GenLLVM codegen(strings, directives, code, operands);
     codegen();
-    EXPECT_NE(0, codegen.str().size());
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(0, output.size());
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @callee(float *%output, float *%input) {")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @caller() {")));
-    EXPECT_NE(std::string::npos, codegen.str().find(std::string(
+    EXPECT_NE(std::string::npos, output.find(std::string(
     "call void @callee(float *%output, float *%input)")));
 
     llvm::Module *mod = codegen.getModule();

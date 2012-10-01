@@ -598,49 +598,39 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
     new llvm::GlobalVariable(M, type, isConst, linkage, init, name);
 }
 
-GenLLVM::GenLLVM(const StringBuffer &strings,
-                 const Buffer &directives,
-                 const Buffer &code,
-                 const Buffer &operands,
-                 const Buffer &debug) :
-  mod_(strings, directives, code, operands, debug, &llvm::errs()),
-  brig_frontend_(NULL), output_() {
-}
+llvm::Module *GenLLVM::getLLVMModule(const BrigModule &M) {
 
-GenLLVM::GenLLVM(const BrigReader &reader) :
-  mod_(reader, &llvm::errs()),
-  brig_frontend_(NULL), output_() {
-}
+  if(!M.isValid()) return NULL;
 
-void GenLLVM::operator()(void) {
+  llvm::LLVMContext *C = new llvm::LLVMContext();
+  llvm::Module *mod = new llvm::Module("BRIG", *C);
 
-  C_ = new llvm::LLVMContext();
-  brig_frontend_ = new llvm::Module("BRIG", *C_);
-
-  assert(mod_.isValid());
-
-  gen_GPU_states(*C_);
+  gen_GPU_states(*C);
 
   SymbolMap symbolMap;
-  for(BrigSymbol symbol = mod_.global_begin(),
-        E = mod_.global_end(); symbol != E; ++symbol) {
-    runOnGlobal(*brig_frontend_, symbol, symbolMap);
+  for(BrigSymbol symbol = M.global_begin(),
+        E = M.global_end(); symbol != E; ++symbol) {
+    runOnGlobal(*mod, symbol, symbolMap);
   }
 
   FunMap funMap;
-  for(BrigFunction fun = mod_.begin(), E = mod_.end(); fun != E; ++fun) {
-    runOnFunction(*brig_frontend_, fun, funMap, symbolMap);
+  for(BrigFunction fun = M.begin(), E = M.end(); fun != E; ++fun) {
+    runOnFunction(*mod, fun, funMap, symbolMap);
   }
 
-  llvm::verifyModule(*brig_frontend_);
+  return mod;
 }
 
-const std::string &GenLLVM::str(void) {
-  if(!output_.size()) {
-    llvm::raw_string_ostream ros(output_);
-    brig_frontend_->print(ros, NULL);
-  }
-  return output_;
+std::string GenLLVM::getLLVMString(const BrigModule &M) {
+  llvm::Module *mod = getLLVMModule(M);
+  if(!mod) return "";
+
+  std::string output;
+  llvm::raw_string_ostream ros(output);
+  mod->print(ros, NULL);
+  delete mod;
+
+  return output;
 }
 
 }

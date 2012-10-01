@@ -249,11 +249,10 @@ class SimRuntimeApi : public RuntimeApi {
     hsa::brig::BrigModule brigMod(*reader, &llvm::errs());
     if(!brigMod.isValid()) return NULL;
 
-    hsa::brig::GenLLVM codegen(*reader);
-    codegen();
-    llvm::Module *mod = codegen.getModule();
+    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(brigMod);
+    if(!M) return NULL;
 
-    return new SimProgram(mod);
+    return new SimProgram(M);
   }
 
   virtual Program *createProgramFromFile(const char *filename, DeviceList *) {
@@ -264,11 +263,10 @@ class SimRuntimeApi : public RuntimeApi {
     hsa::brig::BrigModule brigMod(*reader, &llvm::errs());
     if(!brigMod.isValid()) return NULL;
 
-    hsa::brig::GenLLVM codegen(*reader);
-    codegen();
-    llvm::Module *mod = codegen.getModule();
+    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(brigMod);
+    if(!M) return NULL;
 
-    return new SimProgram(mod);
+    return new SimProgram(M);
   }
 
   virtual void destroyProgram(Program *) {}

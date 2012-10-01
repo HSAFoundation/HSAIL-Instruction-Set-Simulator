@@ -154,8 +154,8 @@ llvm::Module *TestHSAIL(const std::string &source) {
   EXPECT_TRUE(mod.isValid());
   if(!mod.isValid()) return NULL;
 
-  hsa::brig::GenLLVM codegen(*reader);
-  codegen();
+  llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
+  EXPECT_TRUE(M);
 
   delete reader;
 
@@ -163,7 +163,7 @@ llvm::Module *TestHSAIL(const std::string &source) {
   llvm::sys::fs::remove(resultPath.c_str(), existed);
   EXPECT_TRUE(existed);
 
-  return codegen.getModule();
+  return M;
 }
 
 TEST(BrigKernelTest, Cosine) {

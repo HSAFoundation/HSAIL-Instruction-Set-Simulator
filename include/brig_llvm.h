@@ -17,20 +17,8 @@ namespace hsa {
 namespace brig {
 class GenLLVM {
  public:
-  GenLLVM(const StringBuffer &strings,
-          const Buffer &directives,
-          const Buffer &code,
-          const Buffer &operands,
-          const Buffer &debug);
-  GenLLVM(const BrigReader &reader);
-  void operator()(void);
-  llvm::Module *getModule() { return brig_frontend_; }
-  const std::string &str(void);
- private:
-  llvm::LLVMContext *C_;
-  BrigModule mod_;
-  llvm::Module *brig_frontend_;
-  std::string output_;
+  static llvm::Module *getLLVMModule(const BrigModule &M);
+  static std::string getLLVMString(const BrigModule &M);
 };
 
 } // namespace brig
