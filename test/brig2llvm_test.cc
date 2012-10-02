@@ -245,7 +245,8 @@ TEST(Brig2LLVMTest, Example2) {
 
     bool ret_val;
     void *args[] = { &ret_val };
-    hsa::brig::launchBrig(M, M->getFunction("return_true"), args);
+    hsa::brig::BrigEngine BE(M);
+    BE.launch(M->getFunction("return_true"), args);
   }
 }
 
@@ -410,7 +411,8 @@ TEST(Brig2LLVMTest, Example3) {
 
     u8x4 x;
     void *args[] = { &x };
-    hsa::brig::launchBrig(M, M->getFunction("packed_ops"), args);
+    hsa::brig::BrigEngine BE(M);
+    BE.launch(M->getFunction("packed_ops"), args);
   }
 }
 
@@ -651,7 +653,8 @@ TEST(Brig2LLVMTest, Example4) {
 
     u8x4 x;
     void *args[] = { &x };
-    hsa::brig::launchBrig(M, M->getFunction("branch_ops"), args);
+    hsa::brig::BrigEngine BE(M);
+    BE.launch(M->getFunction("branch_ops"), args);
   }
 }
 
@@ -796,7 +799,8 @@ TEST(Brig2LLVMTest, Example5) {
     if(!M) return;
 
     llvm::ArrayRef<void *> args;
-    hsa::brig::launchBrig(M, M->getFunction("caller"), args);
+    hsa::brig::BrigEngine BE(M);
+    BE.launch(M->getFunction("caller"), args);
   }
 }
 

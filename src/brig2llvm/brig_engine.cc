@@ -56,12 +56,9 @@ namespace brig {
 
 static ForceBrigRuntimeLinkage runtime;
 
-void launchBrig(llvm::Module *Mod,
-                llvm::Function *EntryFn,
-                llvm::ArrayRef<void *> args,
-                bool forceInterpreter,
-                char optLevel) {
-
+BrigEngine::BrigEngine(llvm::Module *Mod,
+                       bool forceInterpreter,
+                       char optLevel) {
   // If we have a native target, initialize it to ensure it is linked in and
   // usable by the JIT.
   llvm::InitializeNativeTarget();
@@ -101,8 +98,8 @@ void launchBrig(llvm::Module *Mod,
   llvm::TargetOptions options;
   builder.setTargetOptions(options);
 
-  llvm::ExecutionEngine *EE = builder.create();
-  if (!EE) {
+  EE_ = builder.create();
+  if (!EE_) {
     if (!errorMsg.empty())
       llvm::errs() << "Error creating EE: " << errorMsg << "\n";
     else
@@ -110,25 +107,25 @@ void launchBrig(llvm::Module *Mod,
     exit(1);
   }
 
-  EE->DisableLazyCompilation(true);
+  EE_->DisableLazyCompilation(true);
 
   // Run static constructors.
-  EE->runStaticConstructorsDestructors(false);
+  EE_->runStaticConstructorsDestructors(false);
 
   for (llvm::Module::iterator I = Mod->begin(), E = Mod->end(); I != E; ++I) {
     llvm::Function *Fn = &*I;
-    if (Fn != EntryFn &&!Fn->isDeclaration())
-      EE->getPointerToFunction(Fn);
+    if (!Fn->isDeclaration())
+      EE_->getPointerToFunction(Fn);
   }
+}
 
+void BrigEngine::launch(llvm::Function *EntryFn,
+                        llvm::ArrayRef<void *> args) {
   std::vector<llvm::GenericValue> GVArgs;
   for(unsigned i = 0; i < args.size(); ++i)
     GVArgs.push_back(llvm::GenericValue(args[i]));
 
-  EE->runFunction(EntryFn, GVArgs);
-
-  // Run static destructors.
-  EE->runStaticConstructorsDestructors(true);
+  EE_->runFunction(EntryFn, GVArgs);
 }
 
 } // namespace brig

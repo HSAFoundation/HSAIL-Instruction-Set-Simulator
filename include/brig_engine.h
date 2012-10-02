@@ -3,21 +3,28 @@
 
 #include "llvm/ADT/ArrayRef.h"
 
-#include <stdbool.h>
-
 namespace llvm {
 class Module;
 class Function;
+class ExecutionEngine;
 }
 
 namespace hsa {
 namespace brig {
 
-void launchBrig(llvm::Module *Mod,
-                llvm::Function *EntryFn,
-                llvm::ArrayRef<void *> args,
-                bool forceInterpreter = false,
-                char optLevel = ' ');
+class BrigEngine {
+
+ public:
+  BrigEngine(llvm::Module *Mod,
+             bool forceInterpreter = false,
+             char optLevel = ' ');
+
+  void launch(llvm::Function *EntryFn,
+              llvm::ArrayRef<void *> args);
+
+ private:
+  llvm::ExecutionEngine *EE_;
+};
 
 } // namespace brig
 } // namespace hsa

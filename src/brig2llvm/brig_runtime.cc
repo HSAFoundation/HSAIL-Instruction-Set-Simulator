@@ -369,6 +369,9 @@ template<class T> static T Lastbit(T x) {
 SignedInst(define, Lastbit, Unary)
 UnsignedInst(define, Lastbit, Unary)
 
+template<class T> static T Mov(T x) { return x; }
+BitInst(define, Mov, Unary)
+
 extern "C" b64 Mov_b64_b32(b32 x, b32 y) { return (b64(x) << 32) | b64(y); }
 extern "C" b64 Mov_b64_b64(b64 x) { return x; }
 
@@ -390,6 +393,9 @@ extern "C" b64 Movd_lo_b64(b64 x, b32 y) { return (x >> 32 << 32) | b64(y); }
 extern "C" b64 Movd_hi_b64(b64 x, b32 y) {
   return (b64(y) << 32) | (x >> 32);
 }
+
+template<class T> static T Lda(T x) { return x; }
+UnsignedInst(define, Lda, Unary)
 
 template<class T> static T ShuffleVector(T x, T y, b32 z) {
 

@@ -868,9 +868,10 @@ bool BrigModule::validate(const BrigInstMem *code) const {
                  code->storageClass == BrigKernargSpace ||
                  code->storageClass == BrigReadonlySpace ||
                  code->storageClass == BrigSpillSpace ||
-                 code->storageClass == BrigArgSpace,
+                 code->storageClass == BrigArgSpace ||
+                 code->storageClass == BrigFlatSpace,
                  "Invalid storage class, can be global, group, "
-                 "private, kernarg, readonly, spill, or arg");
+                 "private, kernarg, readonly, spill, arg, or flat");
     return valid;
 }
 bool BrigModule::validate(const BrigInstMod *code) const {
