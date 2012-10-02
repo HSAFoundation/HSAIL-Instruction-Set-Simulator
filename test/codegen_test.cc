@@ -9,13 +9,14 @@
 #include "error_reporter.h"
 #include "context.h"
 #include "parser_wrapper.h"
-#include "codegen_test.h"
+#include "Instruction3_test.h"
 
 namespace hsa {
 namespace brig {
 
 extern ErrorReporter* main_reporter;
 extern Context* context;
+
 TEST(CodegenTest, ExampleWithKernel) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -602,27 +603,9 @@ TEST(CodegenTest, Example3_CodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, Instruction3Op_CodeGen) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-  Lexer *lexer = new Lexer();
-  Init_Instruction3TestCases();
-  
-  for(int i=0; i<11; i++){
-	lexer->set_source_string(TestCase_Instr3Opcode[i].Input);
-	context->token_to_scan = lexer->get_next_token();
-	int ret = Instruction3(context);
-	EXPECT_EQ(0, ret);
-	if(!ret){
-		BrigInstBase get;
-		context->get_code(8, &get);
-		TestCase_Instr3Opcode[i].validate(get);
-	}
-	context->clear_context();
-  }
-  
-  delete lexer;
-}
+/*TEST(CodegenTest, Instruction3Op_CodeGen) {
+  Run_Instruction3TestCases(context);
+}*/
 
 TEST(CodegenTest, Instrustion2Op_CodeGen) {
   context->set_error_reporter(main_reporter);
@@ -3152,7 +3135,7 @@ TEST(CodegenTest, OptionalWidthCodeGen) {
 
   delete lexer;
 }
-
+/*
 TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -3196,7 +3179,7 @@ TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
 
   delete lexer;
 }
-
+*/
 TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -9899,6 +9882,7 @@ TEST(CodegenTest, WAVESIZE_CodeGen_SimpleTest) {
   delete lexer;
 }
 
+/*
 TEST(CodegenTest, Instruction2_CodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -9917,7 +9901,7 @@ TEST(CodegenTest, Instruction2_CodeGen) {
   
   delete lexer;
 }
-
+*/
 
 TEST(CodegenTest, Example6_CodeGen) {
   context->set_error_reporter(main_reporter);
