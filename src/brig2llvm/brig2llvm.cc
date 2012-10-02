@@ -1,9 +1,3 @@
-#include "llvm/DerivedTypes.h"
-#include "llvm/IRBuilder.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/raw_ostream.h"
 #include "brig.h"
 #include "brig_buffer.h"
 #include "brig_llvm.h"
@@ -12,7 +6,15 @@
 #include "brig_symbol.h"
 #include "brig_control_block.h"
 #include "brig_inst_helper.h"
-#include <iostream>
+
+#include "llvm/DerivedTypes.h"
+#include "llvm/Instructions.h"
+#include "llvm/IRBuilder.h"
+#include "llvm/LLVMContext.h"
+#include "llvm/Module.h"
+#include "llvm/Analysis/Verifier.h"
+#include "llvm/Support/raw_ostream.h"
+
 namespace hsa{
 namespace brig{
 
@@ -223,6 +225,7 @@ static bool hasAddr(const BrigOperandBase *op) {
   BrigOperandKinds kind = BrigOperandKinds(op->kind);
   switch(kind) {
   case BrigEOperandAddress:
+  case BrigEOperandCompound:
   case BrigEOperandFunctionRef:
   case BrigEOperandImmed:
   case BrigEOperandIndirect:
@@ -287,6 +290,29 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
     llvm::Value *offset = llvm::ConstantInt::get(type, indOp->offset);
     return llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
                                         base, offset, "", &B);
+  }
+
+  if(const BrigOperandCompound *comOp = dyn_cast<BrigOperandCompound>(op)) {
+    llvm::Type *type = runOnType(C, BrigDataType(comOp->type));
+    const BrigOperandBase *addrOp = helper.getOperand(comOp->name);
+    llvm::Value *addr = getOperand(B, addrOp, helper, state);
+    if(!comOp->reg && !comOp->offset)
+      return addr;
+
+    llvm::Value *adderInt = new llvm::PtrToIntInst(addr, type, "", &B);
+
+    const BrigOperandBase *reg = helper.getReg(comOp);
+    llvm::Value *base = reg ?
+      getOperand(B, reg, helper, state) :
+      llvm::ConstantInt::get(type, 0ULL);
+
+    llvm::Value *offset = llvm::ConstantInt::get(type, comOp->offset);
+
+    llvm::Value *index =
+      llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
+                                   base, offset, "", &B);
+    return llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
+                                        adderInt, index, "", &B);
   }
 
   assert(false && "Unimplemented");

@@ -16,7 +16,7 @@ class BrigInstHelper {
 
   // Directive methods
   const BrigDirectiveBase *getDirective(uint32_t offset) const {
-    return reinterpret_cast<const BrigDirectiveBase *>(S_.directives + offset);
+    return dir_iterator(S_.directives + offset);
   }
 
   const char *getName(const BrigDirectiveSymbol *symbol) const {
@@ -24,14 +24,18 @@ class BrigInstHelper {
   }
 
   // Operand methods
+  const BrigOperandBase *getOperand(int offset) const {
+    return oper_iterator(S_.operands + offset);
+  }
+
   const char *getName(const BrigOperandReg *reg) const {
     return S_.strings + reg->name;
   }
 
-  const BrigOperandBase *getReg(const BrigOperandIndirect *ind) const {
-    const BrigOperandBase *base =
-      reinterpret_cast<const BrigOperandBase *>(S_.operands + ind->reg);
-    if(!base) return NULL;
+  template<class T>
+  const BrigOperandBase *getReg(const T *t) const {
+    if(!t->reg) return NULL;
+    oper_iterator base(S_.operands + t->reg);
     assert(isa<BrigOperandReg>(base));
     return base;
   }
