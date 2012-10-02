@@ -534,7 +534,7 @@ static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
   }
 
   // Fall through to the next control block
-  if(!llvm::isa<llvm::TerminatorInst>(&bb->back())) {
+  if(bb->empty() || !llvm::isa<llvm::TerminatorInst>(&bb->back())) {
     ++it;
     if(it != state.cbMap.end()) llvm::BranchInst::Create(it->second, bb);
     else llvm::ReturnInst::Create(C, bb);
@@ -622,6 +622,8 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
     } else {
       assert(false && "Unimplemented");
     }
+  } else {
+    init = llvm::Constant::getNullValue(type);
   }
 
   symbolMap[S.getAddr()] =
