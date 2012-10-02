@@ -110,7 +110,8 @@ class SimQueue : public Queue {
 
     llvm::Function *fun = sk->F_;
     llvm::Module *mod = fun->getParent();
-    hsa::brig::launchBrig(mod, fun, args);
+    hsa::brig::BrigEngine BE(mod);
+    BE.launch(fun, args);
 
     return NULL;
   }
