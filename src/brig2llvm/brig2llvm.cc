@@ -135,11 +135,33 @@ typedef std::map<const void *, llvm::Value *> SymbolMap;
 
 struct FunState {
   typedef std::map<uint32_t, llvm::BasicBlock *> CBMap ;
-  typedef CBMap::iterator CBIt;
+  typedef CBMap::const_iterator CBIt;
 
   const FunMap &funMap;
   llvm::Value *regs;
   CBMap cbMap;
+
+  static const FunState Create(const FunMap &funMap,
+                               SymbolMap &symbolMap,
+                               const BrigFunction &brigFun,
+                               llvm::Function *llvmFun) {
+    return FunState(funMap, symbolMap, brigFun, llvmFun);
+  }
+
+  template<class T>
+  llvm::Value *lookupSymbol(const T *symbol) const {
+    (void) symbol->s;
+    SymbolMap::const_iterator it = symbolMap.find(symbol);
+    return it != symbolMap.end() ? it->second : NULL;
+  }
+
+  llvm::Value *lookupSymbol(const BrigSymbol &symbol) const {
+    SymbolMap::const_iterator it = symbolMap.find(symbol.getAddr());
+    return it != symbolMap.end() ? it->second : NULL;
+  }
+
+ private:
+  SymbolMap &symbolMap;
 
   FunState(const FunMap &funMap, SymbolMap &symbolMap,
            const BrigFunction &brigFun, llvm::Function *llvmFun) :
@@ -170,27 +192,12 @@ struct FunState {
       symbolMap[local.getAddr()] = new llvm::AllocaInst(type, name, &entry);
     }
   }
-
-  template<class T>
-  llvm::Value *lookupSymbol(const T *symbol) const {
-    (void) symbol->s;
-    SymbolMap::const_iterator it = symbolMap.find(symbol);
-    return it != symbolMap.end() ? it->second : NULL;
-  }
-
-  llvm::Value *lookupSymbol(const BrigSymbol &symbol) const {
-    SymbolMap::const_iterator it = symbolMap.find(symbol.getAddr());
-    return it != symbolMap.end() ? it->second : NULL;
-  }
-
- private:
-  SymbolMap &symbolMap;
 };
 
 static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
                                    const BrigOperandBase *op,
                                    const BrigInstHelper &helper,
-                                   FunState &state) {
+                                   const FunState &state) {
 
   llvm::LLVMContext &C = B.getContext();
 
@@ -231,7 +238,7 @@ static bool hasAddr(const BrigOperandBase *op) {
 static llvm::Value *getOperand(llvm::BasicBlock &B,
                                const BrigOperandBase *op,
                                const BrigInstHelper &helper,
-                               FunState &state) {
+                               const FunState &state) {
 
   llvm::LLVMContext &C = B.getContext();
 
@@ -241,14 +248,11 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
     return val;
   }
 
-  if(const BrigOperandLabelRef *label = dyn_cast<BrigOperandLabelRef>(op)) {
-    return state.cbMap[label->labeldirective];
-  }
+  if(const BrigOperandLabelRef *label = dyn_cast<BrigOperandLabelRef>(op))
+    return state.cbMap.find(label->labeldirective)->second;
 
-  const BrigOperandFunctionRef *func = dyn_cast<BrigOperandFunctionRef>(op);
-  if(func) {
+  if(const BrigOperandFunctionRef *func = dyn_cast<BrigOperandFunctionRef>(op))
     return state.funMap.find(func->fn)->second;
-  }
 
   if(const BrigOperandImmed *immedOp = dyn_cast<BrigOperandImmed>(op)) {
     llvm::Type *type = runOnType(C, BrigDataType(immedOp->type));
@@ -373,7 +377,7 @@ llvm::FunctionType *getInstFunType(const inst_iterator inst,
 static void runOnComplexInst(llvm::BasicBlock &B,
                              const inst_iterator inst,
                              const BrigInstHelper &helper,
-                             FunState &state) {
+                             const FunState &state) {
 
   unsigned operand = 0;
 
@@ -411,7 +415,7 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 static void runOnBranchInst(llvm::BasicBlock &B,
                             const inst_iterator inst,
                             const BrigInstHelper &helper,
-                            FunState &state) {
+                            const FunState &state) {
 
   // The width of the branch is not necessary for a functional simulator.
   // Similarly, we can ignore the list of possible branch targets for an
@@ -442,7 +446,7 @@ static void runOnBranchInst(llvm::BasicBlock &B,
 static void runOnCallInst(llvm::BasicBlock &B,
                           const inst_iterator inst,
                           const BrigInstHelper &helper,
-                          FunState &state) {
+                          const FunState &state) {
 
   std::vector<llvm::Value *> args;
 
@@ -468,7 +472,7 @@ static void runOnCallInst(llvm::BasicBlock &B,
 static void runOnInstruction(llvm::BasicBlock &B,
                              const inst_iterator inst,
                              const BrigInstHelper &helper,
-                             FunState &state) {
+                             const FunState &state) {
   llvm::LLVMContext &C = B.getContext();
 
   if(inst->opcode == BrigRet) {
@@ -483,7 +487,7 @@ static void runOnInstruction(llvm::BasicBlock &B,
 }
 
 static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
-                    FunState &state) {
+                    const FunState &state) {
 
   llvm::LLVMContext &C = F.getContext();
   BrigInstHelper helper = CB.getInstHelper();
@@ -540,7 +544,7 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
 
   if(F.isDeclaration()) return;
 
-  FunState state(funMap, symbolMap, F, fun);
+  const FunState state = FunState::Create(funMap, symbolMap, F, fun);
   for(BrigControlBlock cb = F.begin(), E = F.end(); cb != E; ++cb) {
     runOnCB(*fun, cb, state);
   }
