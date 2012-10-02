@@ -252,7 +252,7 @@ public:
         if(size_ <= 0) {
             //TODO: In new opencl, use error return instead.
             //throw std::out_of_range("vector::back() called on empty hsa::vector.");
-            std::cout << "vector::back() called on empty hsa::vector." << std::endl;
+            printf("vector::back() called on empty hsa::vector.\n");
         }
         return (items_[size_-1]);
     }
@@ -270,7 +270,7 @@ public:
         if(size_ <= 0) {
             //TODO: In new opencl, use error return instead.
             //throw std::out_of_range("vector::back() called on empty hsa::vector.");
-            std::cout << "vector::back() called on empty hsa::vector." << std::endl;
+            printf("vector::back() called on empty hsa::vector.\n");
         }
         return (items_[size_-1]);
     }
@@ -315,7 +315,7 @@ public:
         if(n >= size_){
             //TODO: In new opencl, use error return instead.
             //throw std::out_of_range("vector::at() called on element outside hsa::vector.");
-            std::cout << "vector::at() called on element outside hsa::vector." << std::endl;
+            printf("vector::at() called on element outside hsa::vector.\n");
         }
         return items_[n];
     }
@@ -334,7 +334,7 @@ public:
         if(n >= size_){
             //TODO: In new opencl, use error return instead.
             //throw std::out_of_range("vector::at() called on element outside hsa::vector.");
-            std::cout << "vector::at() called on element outside hsa::vector." << std::endl;
+            printf("vector::at() called on element outside hsa::vector.\n");
         }
         return items_[n];
     }
@@ -603,7 +603,7 @@ static void *malloc_check(size_t n)
         // throw exception
         //TODO: In new opencl, use error return instead.
         //throw std::bad_alloc();
-        std::cout << __FUNCTION__ << " bad_alloc." << std::endl;
+        printf(" %s bad_alloc.\n", __FUNCTION__);
     }
     return vp;
 }
@@ -615,8 +615,7 @@ static void *realloc_check(void * ptr, size_t size)
         // throw exception
         //TODO: In new opencl, use error return instead.
         //throw std::bad_alloc();
-        std::cout << __FUNCTION__ << " bad_alloc." << std::endl;
-        
+        printf(" %s bad_alloc.\n", __FUNCTION__);
     }
     return vp;
 }
@@ -915,7 +914,7 @@ public:
         if (pos >= size()){
             //TODO: In new opencl, use error return instead.
             //throw std::out_of_range("hsacommon::string::at() called on element outside range.");
-            std::cout << "hsacommon::string::at() called on element outside range." << std::endl;
+            printf("hsacommon::string::at() called on element outside range.\n");
         }
         return cptr[pos];
     }
@@ -937,7 +936,7 @@ public:
         if (pos >= size()){
             //TODO: In new opencl, use error return instead.
             //throw std::out_of_range("hsacommon::string::at() called on element outside range.");
-            std::cout << "hsacommon::string::at() called on element outside range." << std::endl;
+            printf("hsacommon::string::at() called on element outside range.\n");
         }
         return cptr[pos];
     }
