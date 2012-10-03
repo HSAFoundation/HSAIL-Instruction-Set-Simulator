@@ -13,6 +13,7 @@
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
 #include "llvm/Analysis/Verifier.h"
+#include "llvm/Target/TargetData.h"
 #include "llvm/Support/raw_ostream.h"
 
 namespace hsa{
@@ -186,6 +187,15 @@ struct FunState {
     llvm::Module *M = llvmFun->getParent();
     llvm::Type *regsType = M->getTypeByName("struct.regs");
     regs = new llvm::AllocaInst(regsType, "gpu_reg_p", &entry);
+
+    // Use memset to remove a source of non-deterministic behavior. The HSA PRM
+    // does not require that registers are initialized to zero.
+    llvm::IRBuilder<> builder(cast<llvm::Instruction>(regs));
+    llvm::TargetData TD(M);
+    llvm::Value *zero = llvm::ConstantInt::get(C, llvm::APInt(8, 0));
+    builder.CreateMemSet(regs, zero,
+                         TD.getTypeAllocSize(regsType),
+                         TD.getPrefTypeAlignment(regsType));
 
     for(BrigSymbol local = brigFun.local_begin(),
           E = brigFun.local_end(); local != E; ++local) {
