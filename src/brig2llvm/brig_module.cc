@@ -9,17 +9,17 @@ namespace brig {
 #define check(X,Y) check(X, Y, __FILE__, __LINE__, #X)
 
 int getTypeSize(BrigDataType16_t type) {
-  if (Brigb1 == type) {
+  if(Brigb1 == type) {
     return 1;
-  } else if (Brigb8 == type) {
+  } else if(Brigb8 == type) {
     return 1;
-  } else if (Brigb16 == type) {
+  } else if(Brigb16 == type) {
     return 2;
-  } else if (Brigb32 == type) {
+  } else if(Brigb32 == type) {
     return 4;
-  } else if (Brigb64 == type) {
+  } else if(Brigb64 == type) {
     return 8;
-  } else if (Brigb128 == type) {
+  } else if(Brigb128 == type) {
     return 16;
   }
   return 0;
@@ -372,7 +372,7 @@ bool BrigModule::validate(const BrigDirectiveSignature *dir) const {
   for (unsigned i = 0; i < dir->outCount + dir->inCount; i++) {
      valid &= check(dir->types[i].type <= Brigf64x2,
                  "Invalid type");
-     if (dir->types[i].hasDim == 1) {
+     if(dir->types[i].hasDim == 1) {
        valid &= check(dir->types[i].dim, "dimension not set when hasDim is 1");
      }
   }
@@ -653,7 +653,7 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
@@ -689,7 +689,7 @@ bool BrigModule::validate(const BrigInstAtomicImage *code) const {
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                      "o_operands past the operands section");
     }
@@ -717,7 +717,7 @@ bool BrigModule::validate(const BrigInstBar *code) const {
                  "BrigBrn");
   valid &= check(code->type <= Brigf64x2, "Invalid type");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                      "o_operands past the operands section");
     }
@@ -739,7 +739,7 @@ bool BrigModule::validate(const BrigInstBase *code) const {
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                      "o_operands past the operands section");
     }
@@ -757,7 +757,7 @@ bool BrigModule::validate(const BrigInstCmp *code) const {
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
@@ -777,7 +777,7 @@ bool BrigModule::validate(const BrigInstImage *code) const {
   valid &= check(code->opcode == BrigRdImage,
                  "Invalid opcode");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
@@ -804,7 +804,7 @@ bool BrigModule::validate(const BrigInstCvt *code) const {
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
@@ -826,7 +826,7 @@ bool BrigModule::validate(const BrigInstLdSt *code) const {
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
@@ -857,7 +857,7 @@ bool BrigModule::validate(const BrigInstMem *code) const {
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
@@ -884,7 +884,7 @@ bool BrigModule::validate(const BrigInstMod *code) const {
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
@@ -898,7 +898,7 @@ bool BrigModule::validate(const BrigInstRead *code) const {
   valid &= check(code->opcode == BrigRdImage,
                  "Invalid opcode");
   for (unsigned i = 0; i < 5; i++) {
-    if (code->o_operands[i]) {
+    if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
@@ -949,6 +949,7 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
   valid &= check(operand->directive < S_.directivesSize,
                  "directive past the directive section");
   dir_iterator dir(S_.directives + operand->directive);
+  if(!validate(dir)) return false;
   valid &= check(isa<BrigDirectiveSymbol>(dir),
                  "Invalid directive, should point to a BrigDirectiveSymbol");
   return valid;
@@ -989,7 +990,7 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
     if(const BrigOperandFunctionRef *funRef =
        dyn_cast<BrigOperandFunctionRef>(arg)) {
       dir_iterator fun(S_.directives + funRef->fn);
-      if (!validate(fun)) return false;
+      if(!validate(fun)) return false;
       valid &= check(isa<BrigDirectiveFunction>(fun),
                      "should point to BrigOperandFunctionRef, "
                      "refer to BrigDirectiveFunction");
@@ -998,7 +999,7 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
     if(const BrigOperandArgumentRef *argRef =
         dyn_cast<BrigOperandArgumentRef>(arg)) {
       dir_iterator funSig(S_.directives + argRef->arg);
-      if (!validate(funSig)) return false;
+      if(!validate(funSig)) return false;
       //conflict with BrigOperandArgumentRef refer to BrigDirectiveSymbol
       valid &= check(isa<BrigDirectiveSignature>(funSig),
                      "should point to BrigOperandArgumentRef, "
@@ -1089,7 +1090,7 @@ bool BrigModule::validate(const BrigOperandImmed *operand) const {
 bool BrigModule::validate(const BrigOperandIndirect *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  if (operand->reg) {
+  if(operand->reg) {
     oper_iterator regOper(S_.operands + operand->reg);
     if(!validate(regOper)) return false;
     valid &= check(isa<BrigOperandReg>(regOper),
