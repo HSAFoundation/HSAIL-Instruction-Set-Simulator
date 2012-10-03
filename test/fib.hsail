@@ -1,0 +1,48 @@
+version 1:0:$small;
+function &fib (arg_s32 %r) (arg_s32 %n)
+{
+  ld_arg_s32 $s1, [%n];
+  cmp_lt_b1_s32 $c1, $s1, 3; // if n < 3 go to return
+  cbr $c1, @return;
+  private_s32 %p; // allocate a private variable
+                  // to hold the partial result
+  {
+    arg_s32 %nm2;
+    arg_s32 %res;
+    sub_s32 $s2, $s1, 2; // compute fib (n-2)
+    st_arg_s32 $s2, [%nm2];
+    call &fib (%res)(%nm2);
+    ld_arg_s32 $s2, [%res];
+  }
+  st_private_s32 $s2, [%p]; // save the result in p
+  {
+    arg_s32 %nm2;
+    arg_s32 %res;
+    sub_s32 $s2, $s1, 1; // compute fib (n-1)
+    st_arg_s32 $s2, [%nm2];
+    call &fib (%res)(%nm2);
+    ld_arg_u32 $s2, [%res];
+  }
+  ld_private_u32 $s3, [%p]; // add in the saved result
+  add_u32 $s2, $s2, $s3;
+  st_arg_s32 $s2, [%r];
+  ret;
+@return:
+  st_arg_s32 1, [%r];
+  ret;
+};
+
+kernel &fibKernel(kernarg_s32 %r_ptr, kernarg_s32 %n_ptr)
+{
+  {
+    arg_s32 %r;
+    arg_s32 %n;
+    ld_kernarg_s32 $s0, [%n_ptr];
+    st_arg_s32 $s0, [%n];
+    call &fib(%r)(%n);
+    ld_arg_s32 $s0, [%r];
+    ld_kernarg_s32 $s1, [%r_ptr];
+    st_global_s32 $s0, [$s1];
+  }
+  ret;
+};

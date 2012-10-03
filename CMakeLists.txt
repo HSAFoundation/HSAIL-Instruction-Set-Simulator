@@ -9,6 +9,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-DBIN_PATH=${PROJECT_BINARY_DIR}/test ${CMAKE_CXX_FLAGS}")
 flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
 
@@ -95,6 +96,8 @@ add_subdirectory(src/brig2llvm/compiler)
 # obtain specific information about llvm setup
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 
+SET(LLVM_REQUIRES_EH "true")
+
 include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
 include(HandleLLVMOptions)
 
@@ -131,3 +134,80 @@ set(brig_reader_test_SOURCES
   )
 add_executable(brig_reader_test ${brig_reader_test_SOURCES})
 target_link_libraries(brig_reader_test brig2llvm)
+
+add_subdirectory(src/hsa_runtime)
+
+set(hsa_runtime_test_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  test/hsa_runtime_test.cc
+  gtest/gtest-all.cc
+  gtest/gtest_main.cc
+  )
+add_executable(hsa_runtime_test ${hsa_runtime_test_SOURCES})
+target_link_libraries(hsa_runtime_test hsa brig2llvm)
+
+set(hsaAssembler_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  bin/hsaAssembler
+  )
+add_executable(hsaAssembler ${hsaAssembler_SOURCES})
+target_link_libraries(hsaAssembler brig2llvm)
+
+set(vectorCopy_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  demo/vectorCopy.cc
+  )
+add_executable(vectorCopy ${vectorCopy_SOURCES})
+target_link_libraries(vectorCopy hsa brig2llvm)
+
+set(fib_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  demo/fib.cc
+  )
+add_executable(fib ${fib_SOURCES})
+target_link_libraries(fib hsa brig2llvm)
+
+set(fcos_SOURCES
+  src/parser.cc
+  src/brig_buffer.cc
+  src/parser_wrapper.cc
+  src/lexer_wrapper.cc
+  src/error_reporter.cc
+  src/context.cc
+  ${FLEX_lexer_OUTPUTS}
+  demo/fcos.cc
+  )
+add_executable(fcos ${fcos_SOURCES})
+target_link_libraries(fcos hsa brig2llvm)
+
+set(debug_SOURCES
+  demo/debug.cc
+  )
+add_executable(debug ${debug_SOURCES})
+target_link_libraries(debug hsa)
+
+add_subdirectory(test)

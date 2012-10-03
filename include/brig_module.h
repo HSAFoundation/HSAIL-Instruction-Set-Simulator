@@ -17,6 +17,7 @@ namespace hsa {
 namespace brig {
 
 class BrigFunction;
+class BrigSymbol;
 
 class BrigModule {
 
@@ -56,10 +57,13 @@ class BrigModule {
     out_(out),
     valid_(validate()) {}
 
-  bool isValid() { return valid_; }
+  bool isValid() const { return valid_; }
 
   BrigFunction begin() const;
   BrigFunction end() const;
+
+  BrigSymbol global_begin() const;
+  BrigSymbol global_end() const;
 
   private:
 
@@ -147,6 +151,8 @@ class BrigModule {
   const bool valid_;
 
   friend class BrigFunction;
+  friend BrigSymbol global_begin(const BrigModule &mod);
+  friend BrigSymbol global_end(const BrigModule &mod);
 };
 
 } // namespace brig

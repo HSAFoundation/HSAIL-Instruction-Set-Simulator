@@ -154,8 +154,8 @@ llvm::Module *TestHSAIL(const std::string &source) {
   EXPECT_TRUE(mod.isValid());
   if(!mod.isValid()) return NULL;
 
-  hsa::brig::GenLLVM codegen(*reader);
-  codegen();
+  llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
+  EXPECT_TRUE(M);
 
   delete reader;
 
@@ -163,12 +163,12 @@ llvm::Module *TestHSAIL(const std::string &source) {
   llvm::sys::fs::remove(resultPath.c_str(), existed);
   EXPECT_TRUE(existed);
 
-  return codegen.getModule();
+  return M;
 }
 
 TEST(BrigKernelTest, Cosine) {
   llvm::Module *mod = TestHSAIL(
-    "version 1:0:$small;\n"
+   "version 1:0:$small;\n"
     "\n"
     "//==========================================================\n"
     "// Function: __Get_fcos\n"
@@ -491,7 +491,7 @@ TEST(BrigInstTest, VectorRem) {
 }
 
 TEST(BrigInstTest, VectorCarry) {
-  const int32_t testVec[] = { 1, 0xfffffffe, 2 };
+  const int32_t testVec[] = { 1, -2, 2 };
   testInst("carry_s32", testVec);
 }
 
@@ -521,4 +521,146 @@ TEST(BrigWriterTest, GlobalArray) {
 
   EXPECT_TRUE(mod);
   if(!mod) return;
+}
+
+static const char SubwordsInst[] =
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__OpenCL_subwords_kernel(\n"
+    "        kernarg_u32 %%arg_val0)\n"
+    "{\n"
+    "@__OpenCL_subwords_kernel_entry:\n"
+    "        ld_kernarg_u32 $s0, [%%arg_val0] ;\n"
+    "        st_global_%1$s %2$s, [$s0] ;\n"
+    "        ret ;\n"
+    "} ;\n";
+
+template<class T>
+static void testSubwords(const char *type, const T &result, const char *value) {
+  size_t size = snprintf(NULL, 0, SubwordsInst, type, value);
+  char *buffer = new char[size];
+  snprintf(buffer, size, SubwordsInst, type, value);
+  llvm::Module *mod = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  T *arg_val0 = new T;
+  *arg_val0 = 0;
+
+  void *args[] = { &arg_val0 };
+  llvm::Function *fun = mod->getFunction("__OpenCL_subwords_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_EQ(result, *arg_val0);
+
+  delete arg_val0;
+}
+
+TEST(BrigWriterTest, Subwords) {
+  {
+    const int8_t result = 123;
+    const char *value = "123";
+    testSubwords("s8", result, value);
+  }
+  {
+    const int8_t result = int8_t(0xFF);
+    const char *value = "0xFF";
+    testSubwords("s8", result, value);
+  }
+  {
+    const int16_t result = 123;
+    const char *value = "123";
+    testSubwords("s16", result, value);
+  }
+  {
+    const int16_t result = int16_t(0xFFFF);
+    const char *value = "0xFFFF";
+    testSubwords("s16", result, value);
+  }
+  {
+    const uint8_t result = 123;
+    const char *value = "123";
+    testSubwords("u8", result, value);
+  }
+  {
+    const uint8_t result = 0xFF;
+    const char *value = "0xFF";
+    testSubwords("u8", result, value);
+  }
+  {
+    const uint16_t result = 123;
+    const char *value = "123";
+    testSubwords("u16", result, value);
+  }
+  {
+    const uint16_t result = 0xFFFF;
+    const char *value = "0xFFFF";
+    testSubwords("u16", result, value);
+  }
+}
+
+TEST(BrigKernelTest, VectorAddArray) {
+
+  llvm::Module *mod = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0);\n"
+    "\n"
+    "function &abort() ();\n"
+    "\n"
+    "kernel &__OpenCL_vec_add_kernel(\n"
+    "      kernarg_u32 %arg_val0,\n"
+    "      kernarg_u32 %arg_val1,\n"
+    "      kernarg_u32 %arg_val2,\n"
+    "      kernarg_u32 %arg_val3)\n"
+    "{\n"
+    "@__OpenCL_vec_add_kernel_entry:\n"
+    "// BB#0:                                // %entry\n"
+    "      ld_kernarg_u32    $s0, [%arg_val3];\n"
+    "      workitemaid    $s1, 0;\n"
+    "      cmp_lt_b1_u32     $c0, $s1, $s0;\n"
+    "      ld_kernarg_u32    $s0, [%arg_val2];\n"
+    "      ld_kernarg_u32    $s2, [%arg_val1];\n"
+    "      ld_kernarg_u32    $s3, [%arg_val0];\n"
+    "      cbr    $c0, @BB0_2;\n"
+    "      brn    @BB0_1;                    // %if.end\n"
+    "@BB0_1:\n"
+    "      ret;\n"
+    "@BB0_2:\n                               // %if.then\n"
+    "      shl_u32     $s1, $s1, 2;\n"
+    "      add_u32     $s2, $s2, $s1;\n"
+    "      ld_global_f32    $s2, [$s2];\n"
+    "      add_u32     $s3, $s3, $s1;\n"
+    "      ld_global_f32    $s3, [$s3];\n"
+    "      add_f32\n   $s2, $s3, $s2;\n"
+    "      add_u32\n   $s0, $s0, $s1;\n"
+    "      st_global_f32    $s2, [$s0];\n"
+    "      brn    @BB0_1;\n"
+    "};\n"
+    );
+
+  EXPECT_TRUE(mod);
+  if(!mod) return;
+
+  unsigned arraySize = 16;
+  float *arg_val0 = new float[arraySize];
+  float *arg_val1 = new float[arraySize];
+  float *arg_val2 = new float[arraySize];
+  for(unsigned i = 0; i < arraySize; ++i) {
+    arg_val0[i] = 1;
+    arg_val1[i] = 2;
+    arg_val2[i] = 0;
+  }
+
+  void *args[] = { &arg_val0, &arg_val1, &arg_val2, &arraySize };
+  llvm::Function *fun = mod->getFunction("__OpenCL_vec_add_kernel");
+  hsa::brig::launchBrig(mod, fun, args);
+
+  EXPECT_FLOAT_EQ(3, arg_val2[0]);
+
+  delete[] arg_val0;
+  delete[] arg_val1;
+  delete[] arg_val2;
 }

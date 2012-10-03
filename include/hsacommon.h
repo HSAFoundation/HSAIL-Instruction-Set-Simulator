@@ -41,9 +41,9 @@ namespace hsacommon
 {
 
 /**
- * @brief A structure containing absolute wall times from the device which indicate 
+ * @brief A structure containing absolute wall times from the device which indicate
  * when the various states of an event occured in addition to device frequency.
- */ 
+ */
 typedef struct _DeviceClockCounterInfo
 {
     uint64_t hostClockCounter;
@@ -433,31 +433,31 @@ typedef enum {
      * Indicates return from wait due to event object
      * being signalled.
      */
-    HSA_EVENT_WAIT_TIMEOUT = 1,
+    HSA_EVENT_WAIT_TIMEOUT = 1
 
 } HsaEventWaitReturn;
 
 /**
- * @brief Specifies different memory types according to HSAIL spec 
+ * @brief Specifies different memory types according to HSAIL spec
  *        that can be allocated through the runtime.
  */
 typedef enum
 {
     MEMORY_TYPE_UNDEFINED = 0,
 
-    /* 
-     * @brief Memory visible to all work-groups and agents. 
+    /*
+     * @brief Memory visible to all work-groups and agents.
      */
     MEMORY_TYPE_GLOBAL = 1,
 
-    /* 
-     * @brief Memory visible only within a single work-group. 
+    /*
+     * @brief Memory visible only within a single work-group.
      */
-    MEMORY_TYPE_GROUP = 2,
+    MEMORY_TYPE_GROUP = 2
 } MemoryType;
 
 /**
- * @brief Specifies different kinds of backing storage for 
+ * @brief Specifies different kinds of backing storage for
  *        MEMORY_TYPE_GLOBAL.
  */
 typedef enum
@@ -467,7 +467,7 @@ typedef enum
     /*
      * @brief GLOBAL memory is allocated in system physical memory.
      */
-    HEAP_TYPE_SYSTEM = (1U << 0), 
+    HEAP_TYPE_SYSTEM = (1U << 0),
 
     /*
      * @brief GLOBAL memory is allocated in device-global memory.
@@ -479,18 +479,18 @@ typedef enum
 {
     /**
      * Memory option used for requesting memory with caching disabled. This
-     * option is mutually exclusive with the MEMORY_OPTION_WRITE_COMBINED option. 
+     * option is mutually exclusive with the MEMORY_OPTION_WRITE_COMBINED option.
      */
     MEMORY_OPTION_UNCACHED = (1U << 8),
 
     /**
-     * Memory option used for requesting memory that is write combined. 
+     * Memory option used for requesting memory that is write combined.
      */
     MEMORY_OPTION_WRITE_COMBINED = (1U << 9),
 
     /**
      * Memory option used for requesting memory that won't be paged-out to disk.
-     * This option is mutually exclusive with the MEMORY_OPTION_PAGEABLE option. 
+     * This option is mutually exclusive with the MEMORY_OPTION_PAGEABLE option.
      */
     MEMORY_OPTION_NONPAGEABLE = (1U << 10),
 
@@ -498,7 +498,7 @@ typedef enum
      * Memory option used for declaring that the requested memory will be both
      * read and written by the device. This option is mutually exclusive with
      * the MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_ONLY, and
-     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options.
      */
     MEMORY_OPTION_DEVICE_READ_WRITE = (1U << 11),
 
@@ -506,7 +506,7 @@ typedef enum
      * Memory option used for declaring that the requested memory will only be
      * both read by the device. This option is mutually exclusive with the
      * MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_WRITE, and
-     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options.
      */
     MEMORY_OPTION_DEVICE_READ_ONLY = (1U << 12),
 
@@ -514,15 +514,15 @@ typedef enum
      * Memory option used for declaring that the requested memory will only be
      * both written by the device. This option is mutually exclusive with the
      * MEMORY_OPTION_DEVICE_NO_ACCESS, MEMORY_OPTION_DEVICE_READ_WRITE, and
-     * MEMORY_OPTION_DEVICE_READ_ONLY options. 
+     * MEMORY_OPTION_DEVICE_READ_ONLY options.
      */
     MEMORY_OPTION_DEVICE_WRITE_ONLY = (1U << 13),
 
     /**
      * Memory option used for declaring that the requested memory will only be
-     * accessed by the host. This option is mutually exclusive with the 
+     * accessed by the host. This option is mutually exclusive with the
      * MEMORY_OPTION_DEVICE_READ_WRITE, MEMORY_OPTION_DEVICE_READ_ONLY, and
-     * MEMORY_OPTION_DEVICE_WRITE_ONLY options. 
+     * MEMORY_OPTION_DEVICE_WRITE_ONLY options.
      */
     MEMORY_OPTION_DEVICE_NO_ACCESS = (1U << 14),
 
@@ -530,7 +530,7 @@ typedef enum
      * Memory option used for declaring that the requested memory will be both
      * read and written by the host. This option is mutually exclusive with the
      * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_ONLY, and
-     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     * MEMORY_OPTION_HOST_WRITE_ONLY options.
      */
     MEMORY_OPTION_HOST_READ_WRITE = (1U << 15),
 
@@ -538,7 +538,7 @@ typedef enum
      * Memory option used for declaring that the requested memory will only be
      * both read by the host. This option is mutually exclusive with the
      * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_WRITE, and
-     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     * MEMORY_OPTION_HOST_WRITE_ONLY options.
      */
     MEMORY_OPTION_HOST_READ_ONLY = (1U << 16),
 
@@ -546,7 +546,7 @@ typedef enum
      * Memory option used for declaring that the requested memory will only be
      * both written by the host. This option is mutually exclusive with the
      * MEMORY_OPTION_HOST_NO_ACCESS, MEMORY_OPTION_HOST_READ_WRITE, and
-     * MEMORY_OPTION_HOST_READ_ONLY options. 
+     * MEMORY_OPTION_HOST_READ_ONLY options.
      */
     MEMORY_OPTION_HOST_WRITE_ONLY = (1U << 17),
 
@@ -554,9 +554,9 @@ typedef enum
      * Memory option used for declaring that the requested memory will only be
      * accessed by the host. This option is mutually exclusive with the
      * MEMORY_OPTION_HOST_READ_WRITE, MEMORY_OPTION_HOST_READ_ONLY, and
-     * MEMORY_OPTION_HOST_WRITE_ONLY options. 
+     * MEMORY_OPTION_HOST_WRITE_ONLY options.
      */
-    MEMORY_OPTION_HOST_NO_ACCESS = (1U << 18),
+    MEMORY_OPTION_HOST_NO_ACCESS = (1U << 18)
 } MemoryOption;
 
 typedef enum
@@ -1264,7 +1264,7 @@ public:
         string exStack;
         char tmp[40];
         exStack = "Status\tmsg\n";
-        for (size_t i = info_.size() - 1 ; i >= 0; --i)
+        for (std::ptrdiff_t i = info_.size() - 1 ; i >= 0; --i)
         {
             sprintf(tmp, "%d", info_[i].errCode);
             exStack += tmp;
@@ -1517,18 +1517,18 @@ public:
  * @brief Version class.
  * Version is of the form major.minor.patch.
  * Rules for incrementing the major, minor, patch versions:
- * a) major: 
+ * a) major:
  *      i) incremented only when public APIs signatures
  *         are changed, IS NOT backward compatible with
  *         previous major versions.
  *     ii) Reset the minor version to 0.
  *    iii) Reset the patch version to 0.
- * b) minor: 
+ * b) minor:
  *      i) incremented when new feature is added, needs
- *         to be backward compatible with previous minor 
+ *         to be backward compatible with previous minor
  *         versions.
  *     ii) Reset the patch version to 0.
- * c) patch: 
+ * c) patch:
  *      i) incremented only for bug fixes, no user visible
  *         API changes, needs to be backward and forward
  *         compatible with previous patch versions.

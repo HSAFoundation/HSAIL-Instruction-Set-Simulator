@@ -1,0 +1,23 @@
+version 1:0:$small;
+
+kernel &__OpenCL_vec_copy_kernel(
+        kernarg_u32 %arg_val0,
+        kernarg_u32 %arg_val1,
+        kernarg_u32 %arg_val2)
+{
+@__OpenCL_vec_copy_kernel_entry:
+        ld_kernarg_u32  $s0, [%arg_val2] ;
+        workitemaid     $s1, 0 ;
+        cmp_ge_b1_u32    $c0, $s1, $s0 ;
+        ld_kernarg_u32  $s0, [%arg_val1] ;
+        ld_kernarg_u32  $s2, [%arg_val0] ;
+        cbr     $c0, @BB0_2 ;
+
+        shl_u32  $s1, $s1, 2 ;
+        add_u32  $s0, $s0, $s1 ;
+        add_u32  $s1, $s2, $s1 ;
+        ld_global_f32   $s1, [$s1] ;
+        st_global_f32   $s1, [$s0] ;
+@BB0_2:
+        ret ;
+};

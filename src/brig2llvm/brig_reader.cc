@@ -20,6 +20,18 @@ BrigReader *BrigReader::createBrigReader(const char *filename) {
   return reader;
 }
 
+BrigReader *BrigReader::createBrigReader(const char *buffer, size_t size) {
+  llvm::StringRef bufRef(buffer, size);
+  llvm::MemoryBuffer *file =
+    llvm::MemoryBuffer::getMemBuffer(bufRef, "", false);
+  llvm::object::ObjectFile *objFile =
+    llvm::object::ObjectFile::createELFObjectFile(file);
+
+  BrigReader *reader = createBrigReader(objFile);
+  if(!reader) delete objFile;
+  return reader;
+}
+
 BrigReader *BrigReader::createBrigReader(llvm::object::ObjectFile *objFile) {
   llvm::StringRef directives;
   llvm::StringRef code;
