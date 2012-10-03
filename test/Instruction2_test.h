@@ -1,37 +1,112 @@
+#include <iostream>
+#include <string>
+#include "gtest/gtest.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "codegen_validate.h"
 
-class Inst2TestCase {
+namespace hsa{
+namespace brig{
+
+extern ErrorReporter* main_reporter;
+extern Context* context;
+
+template <class T, class T1, class T2> class Instruction2_Test{
 public:
-  std::string Input;
-  BrigInstBase Output;
-  void validate(BrigInstBase get){
-    EXPECT_EQ(Output.opcode, get.opcode);
-    EXPECT_EQ(Output.packing, get.packing);
-    EXPECT_EQ(Output.type, get.type);
-    EXPECT_EQ(Output.o_operands[0], get.o_operands[0]);
-    EXPECT_EQ(Output.o_operands[1], get.o_operands[1]);
-  }
-  void init(std::string input, BrigInstBase ref){
-    (this->Input).assign(input);
-    this->Output = ref;
-  }
-  static unsigned int numCases;
-};
-unsigned int Inst2TestCase::numCases = 0;
-Inst2TestCase testInst2[100];
+	std::string Input;
+	//Instruction in .code buffer
+	T Output;
+	//Operands in .operands buffer
+	T1 dest;
+	T2 src1;
+	
+	//Symbols in .string buffer
+	std::string dest_name;
+	std::string src1_name;
+		
+	//Buffer offsets
+	int code_start;
+	int operand_start;
+	int string_start;
 
-void Init_Instruction2TestCases(){
+	validate_brig<char> Instr2_validate;
+	
+	void assign(std::string in, T ref, T1 Dest, T2 Src1, 
+				std::string op1, std::string op2, int offset){
+		Input.assign(in);
+		Output = ref;
+		dest = Dest;
+		src1 = Src1;
+		dest_name = op1;
+		src1_name = op2;
+		code_start = offset; 
+		operand_start = offset;
+	}
+		
+	void Run_Test(){
+		context->set_error_reporter(main_reporter);
+		context->clear_context();
+		Lexer *lexer = new Lexer();
+		lexer->set_source_string(Input);
+		context->token_to_scan = lexer->get_next_token();
+		int ret = Instruction2(context);
+		EXPECT_EQ(0, ret);
+		if(!ret){
+			T getcode;
+			context->get_code(code_start, &getcode);
+			Instr2_validate.validate(Output, getcode);
+			
+			T1 getreg1;
+			int op_offset = operand_start;
+			context->get_operand(op_offset, &getreg1);
+			Instr2_validate.validate(dest, getreg1);
+			op_offset+=sizeof(getreg1);
+			
+			T2 getreg2;
+			context->get_operand(op_offset, &getreg2);
+			Instr2_validate.validate(src1, getreg2);
+			op_offset+=sizeof(getreg2);
+		}
+		context->clear_context();
+		delete lexer;
+	}
+};
+  
+TEST(CodegenTest, Instruction2_CodeGen){
 
   std::string in; 
-	
   in.assign( "abs_s32 $s1, $s2;\n");
-  BrigInstBase out1 = {
+  std::string op1, op2; op1.assign("$s1"); op2.assign("$s2"); 
+  int buffer_start = 8;
+  int size_reg = sizeof(BrigOperandReg);
+  BrigInstBase out = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigAbs, 
     Brigs32,
     BrigNoPacking,
-    {8, 20, 0, 0, 0}
+    {buffer_start, buffer_start + size_reg, 0, 0, 0}
   };
+  BrigOperandReg reg1 = {
+		sizeof(BrigOperandReg),
+		BrigEOperandReg,
+		Brigb32,
+		0,
+		buffer_start //Offset to string table	
+	};
+	BrigOperandReg reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
+	Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1;
+	TestCase1.assign(in, out, reg1, reg2, op1, op2, buffer_start);
+	TestCase1.Run_Test();
+	
+	
+	
+	
+     /***********************Add mOre tests***********************************/
+/* 
+
   testInst2[Inst2TestCase::numCases++].init(in, out1);
 
   in.assign( "abs_s64 $d1, $d2;\n");
@@ -508,4 +583,7 @@ void Init_Instruction2TestCases(){
   };
   testInst2[Inst2TestCase::numCases++].init(in, out44);
 }
-
+*/
+}
+}
+}

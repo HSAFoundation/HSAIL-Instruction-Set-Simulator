@@ -3,6 +3,8 @@
 #include "gtest/gtest.h"
 #include "brig.h"
 
+#ifndef VALIDATE_BRIG
+#define VALIDATE_BRIG
 template<class T> class validate_brig{
 public:
 	void validate(BrigInstBase Ref, BrigInstBase get){
@@ -53,4 +55,4 @@ public:
 		EXPECT_EQ(ref.kind, get.kind);	
 	}
 };
-
+#endif

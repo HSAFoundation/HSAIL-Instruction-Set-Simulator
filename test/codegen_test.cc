@@ -10,6 +10,7 @@
 #include "context.h"
 #include "parser_wrapper.h"
 #include "Instruction3_test.h"
+#include "Instruction2_test.h"
 
 namespace hsa {
 namespace brig {
@@ -602,10 +603,6 @@ TEST(CodegenTest, Example3_CodeGen) {
 
   delete lexer;
 }
-
-/*TEST(CodegenTest, Instruction3Op_CodeGen) {
-  Run_Instruction3TestCases(context);
-}*/
 
 TEST(CodegenTest, Instrustion2Op_CodeGen) {
   context->set_error_reporter(main_reporter);
@@ -9881,27 +9878,6 @@ TEST(CodegenTest, WAVESIZE_CodeGen_SimpleTest) {
 
   delete lexer;
 }
-
-/*
-TEST(CodegenTest, Instruction2_CodeGen) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-  Lexer *lexer = new Lexer();
-  Init_Instruction2TestCases();
-  
-  for(unsigned int i = 0; i < Inst2TestCase::numCases; i++){
-	lexer->set_source_string(testInst2[i].Input);
-	context->token_to_scan = lexer->get_next_token();
-	EXPECT_EQ(0, Instruction2(context));
-	BrigInstBase get;
-	context->get_code(8, &get);
-	testInst2[i].validate(get);
-	context->clear_context();
-  }
-  
-  delete lexer;
-}
-*/
 
 TEST(CodegenTest, Example6_CodeGen) {
   context->set_error_reporter(main_reporter);
