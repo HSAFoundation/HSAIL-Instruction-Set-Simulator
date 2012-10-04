@@ -1,7 +1,6 @@
 #ifndef _HSA_H_
 #define _HSA_H_
 
-
 // lhowes: Temporary workaround for tool chain issues
 // Once headers finalized we can come up with a cleaner 
 // solution if system includes are still necessary
@@ -20,6 +19,10 @@
 #endif // #if !defined(AMD_AMP_HSA_INCLUDES)
 
 #include "hsacommon.h"
+
+#ifdef HSA_EXPERIMENTAL
+#include "hsaperf.h"
+#endif
 
 namespace hsa
 {
@@ -58,13 +61,16 @@ class TrapHandler;
  *******************************************************************************
  */
 typedef enum {
-    STATE_INITIATED,    /*!< Initial command state */
+    STATE_INITIATED,      /*!< Initial command state */
+    STATE_INITIATED_HOST, /*!< Initial command state int host time*/
 
     STATE_BLOCKED,      /*!< The related command is blocked waiting for all
                           dependencies to be resolved. */
 
-    STATE_SUBMITTED,    /*!< The related command is pending execution by the 
+    STATE_SUBMITTED,      /*!< The related command is pending execution by the 
                           device.  All dependencies have been resolved. */
+    STATE_SUBMITTED_HOST, /*!< The related command is pending execution by the 
+                          device.  All dependencies have been resolved. host time*/
 
     STATE_STARTED,      /*!< Execution of the related command has been started 
                           by the device. */
@@ -72,7 +78,6 @@ typedef enum {
     STATE_COMPLETED     /*!< Execution of the related command has been 
                           completed by the device. */
 } EventState;
- 
 
 /**
  *******************************************************************************
@@ -1075,8 +1080,17 @@ public:
                              uint32_t trapID, 
                              void *msgPtr) = 0;
 
-   /**
+    #ifdef HSA_EXPERIMENTAL
+    /**
      ***************************************************************************
+     * @brief Returns performance monitoring units for a device.
+     ***************************************************************************  
+    */
+    virtual hsaperf::Pmu * getPMU() = 0;
+    #endif
+
+   /**
+     *************************************************hsa*************************
      * @brief Default destructor.
      ***************************************************************************
      */
