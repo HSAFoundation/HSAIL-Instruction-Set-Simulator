@@ -1427,7 +1427,7 @@ public:
         string exStack;
         char tmp[40];
         exStack = "Status\tmsg\n";
-        for (int i = info_.size() - 1 ; i >= 0; --i)
+        for (int i = (int)(info_.size() - 1) ; i >= 0; --i)
         {
             sprintf(tmp, "%d", info_[i].errCode);
             exStack += tmp;
