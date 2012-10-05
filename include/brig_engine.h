@@ -1,6 +1,8 @@
 #ifndef BRIG_ENGINE_H
 #define BRIG_ENGINE_H
 
+#include "brig_llvm.h"
+
 #include "llvm/ADT/ArrayRef.h"
 
 namespace llvm {
@@ -15,6 +17,10 @@ namespace brig {
 class BrigEngine {
 
  public:
+  BrigEngine(BrigProgram &BP,
+             bool forceInterpreter = false,
+             char optLevel = ' ');
+
   BrigEngine(llvm::Module *Mod,
              bool forceInterpreter = false,
              char optLevel = ' ');
@@ -22,8 +28,15 @@ class BrigEngine {
   void launch(llvm::Function *EntryFn,
               llvm::ArrayRef<void *> args);
 
+
+  ~BrigEngine();
+
  private:
   llvm::ExecutionEngine *EE_;
+  llvm::Module *M_;
+
+  void init(bool forceInterpreter = false,
+            char optLevel = ' ');
 };
 
 } // namespace brig

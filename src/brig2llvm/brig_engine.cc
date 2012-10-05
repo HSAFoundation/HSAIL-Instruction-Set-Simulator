@@ -20,7 +20,6 @@
 #include "llvm/ExecutionEngine/JIT.h"
 #include "llvm/ExecutionEngine/JITEventListener.h"
 #include "llvm/ExecutionEngine/JITMemoryManager.h"
-#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/IRReader.h"
 #include "llvm/Support/ManagedStatic.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -56,9 +55,22 @@ namespace brig {
 
 static ForceBrigRuntimeLinkage runtime;
 
+BrigEngine::BrigEngine(hsa::brig::BrigProgram &BP,
+                       bool forceInterpreter,
+                       char optLevel) : EE_(NULL), M_(BP.M.get()) {
+  init(forceInterpreter, optLevel);
+}
+
 BrigEngine::BrigEngine(llvm::Module *Mod,
                        bool forceInterpreter,
-                       char optLevel) {
+                       char optLevel) : EE_(NULL), M_(Mod) {
+  init(forceInterpreter, optLevel);
+}
+
+void BrigEngine::init(bool forceInterpreter, char optLevel) {
+
+  assert(!EE_ && "BrigEngine was already constructed?!");
+
   // If we have a native target, initialize it to ensure it is linked in and
   // usable by the JIT.
   llvm::InitializeNativeTarget();
@@ -66,13 +78,13 @@ BrigEngine::BrigEngine(llvm::Module *Mod,
 
   // load the whole bitcode file eagerly
   std::string errorMsg;
-  if (Mod->MaterializeAllPermanently(&errorMsg)) {
+  if (M_->MaterializeAllPermanently(&errorMsg)) {
     llvm::errs() << "bitcode didn't read correctly.\n";
     llvm::errs() << "Reason: " << errorMsg << "\n";
     exit(1);
   }
 
-  llvm::EngineBuilder builder(Mod);
+  llvm::EngineBuilder builder(M_);
   builder.setErrorStr(&errorMsg);
   builder.setEngineKind(forceInterpreter
                         ? llvm::EngineKind::Interpreter
@@ -112,7 +124,7 @@ BrigEngine::BrigEngine(llvm::Module *Mod,
   // Run static constructors.
   EE_->runStaticConstructorsDestructors(false);
 
-  for (llvm::Module::iterator I = Mod->begin(), E = Mod->end(); I != E; ++I) {
+  for (llvm::Module::iterator I = M_->begin(), E = M_->end(); I != E; ++I) {
     llvm::Function *Fn = &*I;
     if (!Fn->isDeclaration())
       EE_->getPointerToFunction(Fn);
@@ -126,6 +138,11 @@ void BrigEngine::launch(llvm::Function *EntryFn,
     GVArgs.push_back(llvm::GenericValue(args[i]));
 
   EE_->runFunction(EntryFn, GVArgs);
+}
+
+BrigEngine::~BrigEngine() {
+  EE_->removeModule(M_);
+  delete EE_;
 }
 
 } // namespace brig

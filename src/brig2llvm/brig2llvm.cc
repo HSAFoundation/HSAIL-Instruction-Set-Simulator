@@ -19,6 +19,12 @@
 namespace hsa{
 namespace brig{
 
+void BrigProgram::delModule(llvm::Module *M) {
+  llvm::LLVMContext *C = &M->getContext();
+  delete M;
+  delete C;
+}
+
 static llvm::StructType *createSOAType(llvm::LLVMContext &C,
                                        llvm::Type *t,
                                        std::string name,
@@ -190,7 +196,7 @@ struct FunState {
 
     // Use memset to remove a source of non-deterministic behavior. The HSA PRM
     // does not require that registers are initialized to zero.
-    llvm::IRBuilder<> builder(cast<llvm::Instruction>(regs));
+    llvm::IRBuilder<> builder(&entry);
     llvm::TargetData TD(M);
     llvm::Value *zero = llvm::ConstantInt::get(C, llvm::APInt(8, 0));
     builder.CreateMemSet(regs, zero,
@@ -640,7 +646,7 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
     new llvm::GlobalVariable(M, type, isConst, linkage, init, name);
 }
 
-llvm::Module *GenLLVM::getLLVMModule(const BrigModule &M) {
+BrigProgram GenLLVM::getLLVMModule(const BrigModule &M) {
 
   if(!M.isValid()) return NULL;
 
@@ -660,17 +666,16 @@ llvm::Module *GenLLVM::getLLVMModule(const BrigModule &M) {
     runOnFunction(*mod, fun, funMap, symbolMap);
   }
 
-  return mod;
+  return BrigProgram(mod);
 }
 
 std::string GenLLVM::getLLVMString(const BrigModule &M) {
-  llvm::Module *mod = getLLVMModule(M);
-  if(!mod) return "";
+  BrigProgram BP = getLLVMModule(M);
+  if(!BP) return "";
 
   std::string output;
   llvm::raw_string_ostream ros(output);
-  mod->print(ros, NULL);
-  delete mod;
+  BP->print(ros, NULL);
 
   return output;
 }

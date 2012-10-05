@@ -101,7 +101,7 @@ TEST(BrigWriterTest, EmptyBRIG) {
   EXPECT_TRUE(existed);
 }
 
-llvm::Module *TestHSAIL(const std::string &source) {
+hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
 
   Parser parser(source);
   Context *context = parser.get_context();
@@ -154,8 +154,8 @@ llvm::Module *TestHSAIL(const std::string &source) {
   EXPECT_TRUE(mod.isValid());
   if(!mod.isValid()) return NULL;
 
-  llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-  EXPECT_TRUE(M);
+  hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+  EXPECT_TRUE(BP);
 
   delete reader;
 
@@ -163,12 +163,12 @@ llvm::Module *TestHSAIL(const std::string &source) {
   llvm::sys::fs::remove(resultPath.c_str(), existed);
   EXPECT_TRUE(existed);
 
-  return M;
+  return BP;
 }
 
 TEST(BrigKernelTest, Cosine) {
-  llvm::Module *mod = TestHSAIL(
-   "version 1:0:$small;\n"
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
     "\n"
     "//==========================================================\n"
     "// Function: __Get_fcos\n"
@@ -205,8 +205,8 @@ TEST(BrigKernelTest, Cosine) {
     "};\n"
     );
 
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
   float *arg_val0 = new float;
   float *arg_val1 = new float;
@@ -215,8 +215,8 @@ TEST(BrigKernelTest, Cosine) {
   *arg_val1 = 0.0f;
 
   void *args[] = { &arg_val0, &arg_val1 };
-  llvm::Function *fun = mod->getFunction("__Get_fcos");
-  hsa::brig::BrigEngine BE(mod);
+  llvm::Function *fun = BP->getFunction("__Get_fcos");
+  hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
   EXPECT_FLOAT_EQ(M_PI, *arg_val0);
@@ -227,7 +227,7 @@ TEST(BrigKernelTest, Cosine) {
 }
 
 TEST(BrigKernelTest, Fib) {
-  llvm::Module *mod = TestHSAIL(
+  hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "function &fib (arg_s32 %r) (arg_s32 %n)\n"
     "{\n"
@@ -277,20 +277,20 @@ TEST(BrigKernelTest, Fib) {
     "  ret;\n"
     "};"
     );
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
   int *r = new int;
   int *n = new int;
   void *args[] = { &r, n };
-  llvm::Function *fun = mod->getFunction("fibKernel");
+  llvm::Function *fun = BP->getFunction("fibKernel");
 
 
   int fib1 = 1;
   int fib2 = 0;
   for(int i = 1; i < 25; ++i) {
     *n = i;
-    hsa::brig::BrigEngine BE(mod);
+    hsa::brig::BrigEngine BE(BP);
     BE.launch(fun, args);
     EXPECT_EQ(fib1 + fib2, *r);
     fib1 = fib2;
@@ -302,7 +302,7 @@ TEST(BrigKernelTest, Fib) {
 }
 
 TEST(BrigKernelTest, VectorCopy) {
-  llvm::Module *mod = TestHSAIL(
+  hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
     "kernel &__OpenCL_vec_copy_kernel(\n"
@@ -327,8 +327,8 @@ TEST(BrigKernelTest, VectorCopy) {
     "        ret ;\n"
     "};\n"
     );
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
   const unsigned arraySize = 16;
   float *arg_val0 = new float[arraySize];
@@ -341,8 +341,8 @@ TEST(BrigKernelTest, VectorCopy) {
   uint32_t arg_val2 = arraySize;
 
   void *args[] = { &arg_val0, &arg_val1, &arg_val2 };
-  llvm::Function *fun = mod->getFunction("__OpenCL_vec_copy_kernel");
-  hsa::brig::BrigEngine BE(mod);
+  llvm::Function *fun = BP->getFunction("__OpenCL_vec_copy_kernel");
+  hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
   EXPECT_FLOAT_EQ(M_PI, arg_val0[0]);
@@ -358,65 +358,65 @@ TEST(BrigAllUpTest, AllUp) {
   llvm::error_code ec = llvm::MemoryBuffer::getFile(filename, file);
   EXPECT_TRUE(!ec);
 
-  llvm::Module *mod = TestHSAIL(file->getBufferStart());
-  EXPECT_TRUE(mod);
+  hsa::brig::BrigProgram BP = TestHSAIL(file->getBufferStart());
+  EXPECT_TRUE(BP);
 }
 
 static const char InstTest[] =
-    "version 1:0:$small;\n"
-    "\n"
-    "kernel &__OpenCL_vec_test_kernel(\n"
-    "        kernarg_u32 %%arg_val0, \n"
-    "        kernarg_u32 %%arg_val1, \n"
-    "        kernarg_u32 %%arg_val2, \n"
-    "        kernarg_u32 %%result, \n"
-    "        kernarg_u32 %%array_size)\n"
-    "{\n"
-    "@__OpenCL_vec_add_kernel_entry:\n"
-    "        ld_kernarg_u32 $s0, [%%array_size] ;\n"
-    "        workitemaid $s1, 0 ;\n"
-    "        cmp_lt_b1_u32 $c0, $s1, $s0 ;\n"
-    "        ld_kernarg_u32 $s0, [%%result] ;\n"
-    "        ld_kernarg_u32 $s2, [%%arg_val0] ;\n"
-    "        ld_kernarg_u32 $s3, [%%arg_val1] ;\n"
-    "        ld_kernarg_u32 $s4, [%%arg_val2] ;\n"
-    "        cbr $c0, @BB0_2 ;\n"
-    "        brn @BB0_1 ;\n"
-    "@BB0_1:\n"
-    "        ret ;\n"
-    "@BB0_2:\n"
-    "        shl_u32 $s1, $s1, 2 ;\n"
-    "        add_u32 $s2, $s2, $s1 ;\n"
-    "        ld_global_f32 $s2, [$s2] ;\n"
-    "        add_u32 $s3, $s3, $s1 ;\n"
-    "        ld_global_f32 $s3, [$s3] ;\n"
-    "        add_u32 $s4, $s4, $s1 ;\n"
-    "        ld_global_f32 $s4, [$s4] ;\n"
-    "        %1$s %2$s;\n"
-    "        add_u32 $s0, $s0, $s1 ;\n"
-    "        st_global_f32 $s2, [$s0] ;\n"
-    "        brn @BB0_1 ;\n"
-    "};\n";
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__OpenCL_vec_test_kernel(\n"
+  "        kernarg_u32 %%arg_val0, \n"
+  "        kernarg_u32 %%arg_val1, \n"
+  "        kernarg_u32 %%arg_val2, \n"
+  "        kernarg_u32 %%result, \n"
+  "        kernarg_u32 %%array_size)\n"
+  "{\n"
+  "@__OpenCL_vec_add_kernel_entry:\n"
+  "        ld_kernarg_u32 $s0, [%%array_size] ;\n"
+  "        workitemaid $s1, 0 ;\n"
+  "        cmp_lt_b1_u32 $c0, $s1, $s0 ;\n"
+  "        ld_kernarg_u32 $s0, [%%result] ;\n"
+  "        ld_kernarg_u32 $s2, [%%arg_val0] ;\n"
+  "        ld_kernarg_u32 $s3, [%%arg_val1] ;\n"
+  "        ld_kernarg_u32 $s4, [%%arg_val2] ;\n"
+  "        cbr $c0, @BB0_2 ;\n"
+  "        brn @BB0_1 ;\n"
+  "@BB0_1:\n"
+  "        ret ;\n"
+  "@BB0_2:\n"
+  "        shl_u32 $s1, $s1, 2 ;\n"
+  "        add_u32 $s2, $s2, $s1 ;\n"
+  "        ld_global_f32 $s2, [$s2] ;\n"
+  "        add_u32 $s3, $s3, $s1 ;\n"
+  "        ld_global_f32 $s3, [$s3] ;\n"
+  "        add_u32 $s4, $s4, $s1 ;\n"
+  "        ld_global_f32 $s4, [$s4] ;\n"
+  "        %1$s %2$s;\n"
+  "        add_u32 $s0, $s0, $s1 ;\n"
+  "        st_global_f32 $s2, [$s0] ;\n"
+  "        brn @BB0_1 ;\n"
+  "};\n";
 
 static const char *nary[] = { "$s2",
                               "$s2, $s2",
                               "$s2, $s2, $s3",
                               "$s2, $s2, $s3, $s4" };
 
-static llvm::Module *makeTest(unsigned args, const char *inst) {
+static hsa::brig::BrigProgram makeTest(unsigned args, const char *inst) {
   size_t size = snprintf(NULL, 0, InstTest, inst, nary[args]);
   char *buffer = new char[size];
   snprintf(buffer, size, InstTest, inst, nary[args]);
-  llvm::Module *mod = TestHSAIL(buffer);
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
-  return mod;
+  return BP;
 }
 
 template<class T, size_t N>
 static void testInst(const char *inst, const T(&testVec)[N]) {
-  llvm::Module *mod = makeTest(N - 1, inst);
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  hsa::brig::BrigProgram BP = makeTest(N - 1, inst);
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
   unsigned arraySize = 16;
   T *input1 = new T[arraySize];
@@ -431,8 +431,8 @@ static void testInst(const char *inst, const T(&testVec)[N]) {
   }
 
   void *args[] = { &input1, &input2, &input3, &output, &arraySize};
-  llvm::Function *fun = mod->begin();
-  hsa::brig::BrigEngine BE(mod);
+  llvm::Function *fun = BP->begin();
+  hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
   EXPECT_EQ(testVec[0], output[0]);
@@ -510,7 +510,7 @@ TEST(BrigInstTest, VectorMad) {
 }
 
 TEST(BrigWriterTest, GlobalArray) {
-  llvm::Module *mod = TestHSAIL(
+  hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
     "global_u32 &array[10] = {1,2,3,4,5,6,7,8};\n"
@@ -523,39 +523,39 @@ TEST(BrigWriterTest, GlobalArray) {
     "} ;\n"
     );
 
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 }
 
 static const char SubwordsInst[] =
-    "version 1:0:$small;\n"
-    "\n"
-    "kernel &__OpenCL_subwords_kernel(\n"
-    "        kernarg_u32 %%arg_val0)\n"
-    "{\n"
-    "@__OpenCL_subwords_kernel_entry:\n"
-    "        ld_kernarg_u32 $s0, [%%arg_val0] ;\n"
-    "        st_global_%1$s %2$s, [$s0] ;\n"
-    "        ret ;\n"
-    "} ;\n";
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__OpenCL_subwords_kernel(\n"
+  "        kernarg_u32 %%arg_val0)\n"
+  "{\n"
+  "@__OpenCL_subwords_kernel_entry:\n"
+  "        ld_kernarg_u32 $s0, [%%arg_val0] ;\n"
+  "        st_global_%1$s %2$s, [$s0] ;\n"
+  "        ret ;\n"
+  "} ;\n";
 
 template<class T>
 static void testSubwords(const char *type, const T &result, const char *value) {
   size_t size = snprintf(NULL, 0, SubwordsInst, type, value);
   char *buffer = new char[size];
   snprintf(buffer, size, SubwordsInst, type, value);
-  llvm::Module *mod = TestHSAIL(buffer);
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
 
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
   T *arg_val0 = new T;
   *arg_val0 = 0;
 
   void *args[] = { &arg_val0 };
-  llvm::Function *fun = mod->getFunction("__OpenCL_subwords_kernel");
-  hsa::brig::BrigEngine BE(mod);
+  llvm::Function *fun = BP->getFunction("__OpenCL_subwords_kernel");
+  hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
   EXPECT_EQ(result, *arg_val0);
@@ -608,7 +608,7 @@ TEST(BrigWriterTest, Subwords) {
 
 TEST(BrigKernelTest, VectorAddArray) {
 
-  llvm::Module *mod = TestHSAIL(
+  hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
     "function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0);\n"
@@ -646,8 +646,8 @@ TEST(BrigKernelTest, VectorAddArray) {
     "};\n"
     );
 
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
   unsigned arraySize = 16;
   float *arg_val0 = new float[arraySize];
@@ -660,8 +660,8 @@ TEST(BrigKernelTest, VectorAddArray) {
   }
 
   void *args[] = { &arg_val0, &arg_val1, &arg_val2, &arraySize };
-  llvm::Function *fun = mod->getFunction("__OpenCL_vec_add_kernel");
-  hsa::brig::BrigEngine BE(mod);
+  llvm::Function *fun = BP->getFunction("__OpenCL_vec_add_kernel");
+  hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
   EXPECT_FLOAT_EQ(3, arg_val2[0]);
@@ -672,7 +672,7 @@ TEST(BrigKernelTest, VectorAddArray) {
 }
 
 TEST(BrigKernelTest, SExtZExt) {
-  llvm::Module *mod = TestHSAIL(
+  hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;"
     ""
     "kernel &SextZext("
@@ -693,8 +693,8 @@ TEST(BrigKernelTest, SExtZExt) {
     "};"
     );
 
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
   char *input = new char;
   char *sext = new char;
@@ -704,8 +704,8 @@ TEST(BrigKernelTest, SExtZExt) {
   *zext = 7;
 
   void *args[] = { &input, &sext, &zext };
-  llvm::Function *fun = mod->getFunction("SextZext");
-  hsa::brig::BrigEngine BE(mod);
+  llvm::Function *fun = BP->getFunction("SextZext");
+  hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
   EXPECT_EQ(-1, *sext);
@@ -717,7 +717,7 @@ TEST(BrigKernelTest, SExtZExt) {
 }
 
 TEST(BrigKernelTest, SubWordArray) {
-  llvm::Module *mod = TestHSAIL(
+  hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$large;"
     ""
     "global_u8 %array[16];"
@@ -756,16 +756,16 @@ TEST(BrigKernelTest, SubWordArray) {
     "};"
     );
 
-  EXPECT_TRUE(mod);
-  if(!mod) return;
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
-  hsa::brig::BrigEngine BE(mod);
+  hsa::brig::BrigEngine BE(BP);
 
   size_t size = 16;
   char **array = new char *;
   {
     void *args[] = { &array };
-    llvm::Function *fun = mod->getFunction("getArrayPtr");
+    llvm::Function *fun = BP->getFunction("getArrayPtr");
     BE.launch(fun, args);
     EXPECT_TRUE(array);
   }
@@ -776,7 +776,7 @@ TEST(BrigKernelTest, SubWordArray) {
 
   {
     void *args[] = { &size };
-    llvm::Function *fun = mod->getFunction("SubWordArray");
+    llvm::Function *fun = BP->getFunction("SubWordArray");
     BE.launch(fun, args);
 
     for(unsigned i = 0; i < size; ++i) {
@@ -788,7 +788,7 @@ TEST(BrigKernelTest, SubWordArray) {
 }
 
 TEST(BrigKernelTest, EmptyCB) {
-  llvm::Module *mod = TestHSAIL(
+  hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$large;"
     ""
     "kernel &EmptyCB()"
@@ -798,10 +798,10 @@ TEST(BrigKernelTest, EmptyCB) {
     "};"
     );
 
-  EXPECT_TRUE(mod);
-  if(!mod) return;
-  hsa::brig::BrigEngine BE(mod);
-  llvm::Function *fun = mod->getFunction("EmptyCB");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("EmptyCB");
   llvm::ArrayRef<void *> args;
   BE.launch(fun, args);
 }

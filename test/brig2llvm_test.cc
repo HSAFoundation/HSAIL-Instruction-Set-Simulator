@@ -239,14 +239,14 @@ TEST(Brig2LLVMTest, Example2) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "ret void")));
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-    EXPECT_TRUE(M);
-    if(!M) return;
+    hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(BP);
+    if(!BP) return;
 
     bool ret_val;
     void *args[] = { &ret_val };
-    hsa::brig::BrigEngine BE(M);
-    BE.launch(M->getFunction("return_true"), args);
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(BP.M->getFunction("return_true"), args);
   }
 }
 
@@ -405,14 +405,14 @@ TEST(Brig2LLVMTest, Example3) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "ret void")));
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-    EXPECT_TRUE(M);
-    if(!M) return;
+    hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(BP);
+    if(!BP) return;
 
     u8x4 x;
     void *args[] = { &x };
-    hsa::brig::BrigEngine BE(M);
-    BE.launch(M->getFunction("packed_ops"), args);
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(BP.M->getFunction("packed_ops"), args);
   }
 }
 
@@ -647,14 +647,14 @@ TEST(Brig2LLVMTest, Example4) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "; preds = %then, %brig.init.succ")));
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-    EXPECT_TRUE(M);
-    if(!M) return;
+    hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(BP);
+    if(!BP) return;
 
     u8x4 x;
     void *args[] = { &x };
-    hsa::brig::BrigEngine BE(M);
-    BE.launch(M->getFunction("branch_ops"), args);
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(BP.M->getFunction("branch_ops"), args);
   }
 }
 
@@ -794,13 +794,13 @@ TEST(Brig2LLVMTest, Example5) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "call void @callee()")));
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-    EXPECT_TRUE(M);
-    if(!M) return;
+    hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(BP);
+    if(!BP) return;
 
     llvm::ArrayRef<void *> args;
-    hsa::brig::BrigEngine BE(M);
-    BE.launch(M->getFunction("caller"), args);
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(BP.M->getFunction("caller"), args);
   }
 }
 
@@ -1480,6 +1480,7 @@ TEST(Brig2LLVMTest, Example6) {
     llvm::Module *mod = codegen.getModule();
     llvm::ArrayRef<void *> args;
     hsa::brig::launchBrig(mod, mod->getFunction("caller"), args);
+    delete mod;
   }
 #endif  //end of this test case move the seventh operands to the last
 }
@@ -8054,6 +8055,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
+    delete[] arrayFun;
   }
   //invalid test, elementCount be 1
   {
