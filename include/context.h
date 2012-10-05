@@ -299,10 +299,10 @@ class Context {
       bool normalized ;
     } token_value;
 
+    ~Context();
   private:
     /* Buffers */
     Context();
-    ~Context();
     static Context* ctx;
     Buffer* cbuf;  // code buffer
     Buffer* dbuf;  // directive buffer

@@ -12,6 +12,12 @@ namespace hsa {
 namespace brig {
 Context* Context::ctx = NULL;
 
+#define Destructor __attribute__((destructor))
+
+Destructor static void fini(void) {
+  delete Context::get_instance();
+}
+
 Context* Context::get_instance(void) {
      if (ctx == NULL) {
          ctx = new Context();
@@ -50,14 +56,9 @@ Context::Context(void) {
 Context::~Context(void) {
   delete cbuf;
   delete dbuf;
+  delete obuf;
   delete sbuf;
   delete err_reporter;
-  delete &func_map;
-  delete &func_o_map;
-  delete &operand_map;
-  delete &label_c_map;
-  delete &label_o_map;
-  delete ctx;
 }
 
 void Context::clear_context(void) {

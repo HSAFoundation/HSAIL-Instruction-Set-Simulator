@@ -130,6 +130,7 @@ set(brig_reader_test_SOURCES
   src/context.cc
   ${FLEX_lexer_OUTPUTS}
   test/brig_reader_test.cc
+  test/llvm_shutdown.cc
   gtest/gtest-all.cc
   gtest/gtest_main.cc
   )
@@ -147,6 +148,7 @@ set(hsa_runtime_test_SOURCES
   src/context.cc
   ${FLEX_lexer_OUTPUTS}
   test/hsa_runtime_test.cc
+  test/llvm_shutdown.cc
   gtest/gtest-all.cc
   gtest/gtest_main.cc
   )
