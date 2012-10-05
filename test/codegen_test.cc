@@ -11,6 +11,7 @@
 #include "parser_wrapper.h"
 #include "Instruction3_test.h"
 #include "Instruction2_test.h"
+#include "LdSt_test.h"
 
 namespace hsa {
 namespace brig {

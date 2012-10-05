@@ -6,22 +6,22 @@
 #include "error_reporter.h"
 #include "context.h"
 #include "codegen_validate.h"
+#include "codegen_test.h"
 
 namespace hsa{
 namespace brig{
 
-extern ErrorReporter* main_reporter;
-extern Context* context;
+using namespace validate_brig;
 
-template <class T, class T1, class T2, class T3> class Instruction3Opcode_Test{
-public:
+template <typename T, typename T1, typename T2, typename T3> class Instruction3Opcode_Test{
+private:
 	std::string Input;
 	//Instruction in .code buffer
-	T Output;
+	T* Output;
 	//Operands in .operands buffer
-	T1 dest;
-	T2 src1;
-	T3 src2;
+	T1* dest;
+	T2* src1;
+	T3* src2;
 	//Symbols in .string buffer
 	std::string dest_name;
 	std::string src1_name;
@@ -32,9 +32,8 @@ public:
 	int operand_start;
 	int string_start;
 
-	validate_brig<char> Instr3_validate;
-	
-	void assign(std::string in, T ref, T1 Dest, T2 Src1, T3 Src2, 
+public:
+	Instruction3Opcode_Test(std::string in, T* ref, T1* Dest, T2* Src1, T3* Src2, 
 				std::string op1, std::string op2, std::string op3, int offset){
 		Input.assign(in);
 		Output = ref;
@@ -49,6 +48,8 @@ public:
 	}
 		
 	void Run_Test(){
+		ErrorReporter* main_reporter = ErrorReporter::get_instance();
+		Context* context = Context::get_instance();
 		context->set_error_reporter(main_reporter);
 		context->clear_context();
 		Lexer *lexer = new Lexer();
@@ -59,22 +60,22 @@ public:
 		if(!ret){
 			T getcode;
 			context->get_code(code_start, &getcode);
-			Instr3_validate.validate(Output, getcode);
+			validate(Output, &getcode);
 			
 			T1 getreg1;
 			int op_offset = operand_start;
 			context->get_operand(op_offset, &getreg1);
-			Instr3_validate.validate(dest, getreg1);
+			validate(dest, &getreg1);
 			op_offset+=sizeof(getreg1);
 			
 			T2 getreg2;
 			context->get_operand(op_offset, &getreg2);
-			Instr3_validate.validate(src1, getreg2);
+			validate(src1, &getreg2);
 			op_offset+=sizeof(getreg2);
 			
 			T3 getreg3;
 			context->get_operand(op_offset, &getreg3);
-			Instr3_validate.validate(src2, getreg3);
+			validate(src2, &getreg3);
 			op_offset+=sizeof(getreg3);
 		}
 		context->clear_context();
@@ -96,7 +97,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
 	in.assign( "add_pp_sat_u16x2 $s1, $s0, $s3; \n");
 	std::string op1, op2, op3; op1.assign("$s1"); op2.assign("$s0"); op3.assign("$s3");
 		
-	int buffer_start = 8;		//All buffers(.code, .directive, .string) begin at an offset of 8 bytes
+	int buffer_start = BUFFER_OFFSET;		//All buffers(.code, .directive, .string) begin at an offset of 8 bytes
 	int size_reg = sizeof(BrigOperandReg);
 	BrigInstBase Out = {
 		32,
@@ -117,8 +118,8 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
 	reg2 = reg3 = reg1;
 	reg2.name = buffer_start + op1.size()+1; reg3.name = buffer_start + op1.size()+1 + op2.size()+1;
 	
-	Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg> TestCase1;
-	TestCase1.assign(in, Out, reg1, reg2, reg3, op1, op2, op3, buffer_start);
+	Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg> 
+						TestCase1(in, &Out, &reg1, &reg2, &reg3, op1, op2, op3, buffer_start);
 	TestCase1.Run_Test();
 	
 	/***************************Add more Unit Tests************************************/
