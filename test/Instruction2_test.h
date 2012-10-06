@@ -1,89 +1,49 @@
-#include <iostream>
-#include <string>
-#include "gtest/gtest.h"
-#include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "codegen_validate.h"
 #include "codegen_test.h"
 
 namespace hsa{
 namespace brig{
 
-using namespace validate_brig;
-
-template <typename T, typename T1, typename T2> class Instruction2_Test{
+template <typename T, typename T1, typename T2> class Instruction2_Test : public BrigCodeGenTest{
 private:
-	std::string Input;
-	//Instruction in .code buffer - Pointers to brig structures
-	T* Output;
-	//Operands in .operands buffer
-	T1* dest;
-	T2* src1;
-	
-	//Symbols in .string buffer
-	std::string dest_name;
-	std::string src1_name;
-		
-	//Buffer offsets
-	int code_start;
-	int operand_start;
-	int string_start;
-
+ 
+  //Instruction in .code buffer - Pointers to brig structures
+  const T* Output;
+  //Operands in .operands buffer
+  const T1* dest;
+  const T2* src1;
+  
+  //Symbols in .string buffer
+  const std::string dest_name;
+  const std::string src1_name;
+ 
 public:
-	Instruction2_Test(){
-		Output = NULL;
-		dest = NULL;
-		src1 = NULL;
-		code_start = 0;
-		operand_start = 0;
-		string_start = 0;
-		
-	}
-	Instruction2_Test(std::string in, T* ref, T1* Dest, T2* Src1, 
-				std::string op1, std::string op2, int offset){
-		Input.assign(in);
-		Output = ref;
-		dest = Dest;
-		src1 = Src1;
-		dest_name = op1;
-		src1_name = op2;
-		code_start = offset; 
-		operand_start = offset;
-		string_start = offset;
-	}
-		
-	void Run_Test(){
-		ErrorReporter* main_reporter = ErrorReporter::get_instance();
-		Context* context = Context::get_instance();
-		
-		context->set_error_reporter(main_reporter);
-		context->clear_context();
-		Lexer *lexer = new Lexer();
-		lexer->set_source_string(Input);
-		context->token_to_scan = lexer->get_next_token();
-		int ret = Instruction2(context);
-		EXPECT_EQ(0, ret);
-		if(!ret){
-			T getcode;
-			context->get_code(code_start, &getcode);
-			validate(Output, &getcode);
-			
-			T1 getreg1;
-			int op_offset = operand_start;
-			context->get_operand(op_offset, &getreg1);
-			validate(dest, &getreg1);
-			op_offset+=sizeof(getreg1);
-			
-			T2 getreg2;
-			context->get_operand(op_offset, &getreg2);
-			validate(src1, &getreg2);
-			op_offset+=sizeof(getreg2);
-		}
-		context->clear_context();
-		delete lexer;
-	}
+ 
+  Instruction2_Test(std::string& in, T* ref, T1* Dest, T2* Src1, 
+        std::string& op1, std::string& op2) : 
+    BrigCodeGenTest(in),
+    Output(ref),
+    dest(Dest),
+    src1(Src1),
+    dest_name(op1),
+    src1_name(op2)  { }
+    
+  void validate(Context* context){
+    T getcode;
+    context->get_code(code_start, &getcode);
+    validate_brig::validate(Output, &getcode);
+    
+    T1 getreg1;
+    int op_offset = operand_start;
+    context->get_operand(op_offset, &getreg1);
+    validate_brig::validate(dest, &getreg1);
+    op_offset+=sizeof(getreg1);
+    
+    T2 getreg2;
+    context->get_operand(op_offset, &getreg2);
+    validate_brig::validate(src1, &getreg2);
+    op_offset+=sizeof(getreg2);    
+  }
 };
   
 TEST(CodegenTest, Instruction2_CodeGen){
@@ -102,16 +62,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
     {buffer_start, buffer_start + size_reg, 0, 0, 0}
   };
   BrigOperandReg reg1 = {
-		sizeof(BrigOperandReg),
-		BrigEOperandReg,
-		Brigb32,
-		0,
-		buffer_start //Offset to string table	
-	};
-	BrigOperandReg reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-	Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, &out, &reg1, &reg2, op1, op2, buffer_start);
-	TestCase1.Run_Test();
-			
+    sizeof(BrigOperandReg),
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    buffer_start //Offset to string table  
+  };
+  BrigOperandReg reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, &out, &reg1, &reg2, op1, op2);
+  TestCase1.Run_Test(&Instruction2);
+      
      /***********************Add mOre tests***********************************/
 /* 
 
@@ -592,6 +552,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   testInst2[Inst2TestCase::numCases++].init(in, out44);
 }
 */
+
 }
 }
 }
