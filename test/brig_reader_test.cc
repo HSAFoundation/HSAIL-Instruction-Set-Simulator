@@ -392,7 +392,7 @@ static const char InstTest[] =
   "        ld_global_f32 $s3, [$s3] ;\n"
   "        add_u32 $s4, $s4, $s1 ;\n"
   "        ld_global_f32 $s4, [$s4] ;\n"
-  "        %1$s %2$s;\n"
+  "        %s %s;\n"
   "        add_u32 $s0, $s0, $s1 ;\n"
   "        st_global_f32 $s2, [$s0] ;\n"
   "        brn @BB0_1 ;\n"
@@ -535,7 +535,7 @@ static const char SubwordsInst[] =
   "{\n"
   "@__OpenCL_subwords_kernel_entry:\n"
   "        ld_kernarg_u32 $s0, [%%arg_val0] ;\n"
-  "        st_global_%1$s %2$s, [$s0] ;\n"
+  "        st_global_%s %s, [$s0] ;\n"
   "        ret ;\n"
   "} ;\n";
 
