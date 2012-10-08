@@ -3134,51 +3134,7 @@ TEST(CodegenTest, OptionalWidthCodeGen) {
 
   delete lexer;
 }
-/*
-TEST(CodegenTest, LdSt_CodeGen_SimpleTest) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-  Lexer* lexer = new Lexer();
-  Init_LdStTestCases();
-   
-	lexer->set_source_string(TestCase_LdSt[0].Input);
-	context->token_to_scan = lexer->get_next_token();
-	context->add_symbol("%input");
-	int ret = Ld(context);
-	EXPECT_EQ(0, ret);
-	if(!ret){
-		BrigInstLdSt get;BrigOperandAddress addr; BrigOperandReg reg;
-		context->get_code(8, &get);
-		context->get_operand(32,&reg);
-		context->get_operand(44, &addr);
-		TestCase_LdSt[0].validate(get);
-		TestCase_LdSt[0].validate(reg, 0);
-		TestCase_LdSt[0].validate(addr);
-	}
-	context->clear_context();
-  	
-	lexer->set_source_string(TestCase_LdSt[1].Input);
-	context->token_to_scan = lexer->get_next_token();
-	context->add_symbol("%output");
-	ret = St(context);
-	EXPECT_EQ(0, ret);
-	if(!ret){
-		BrigInstLdSt get;BrigOperandAddress addr; BrigOperandReg reg[2]; BrigOperandCompound comp;
-		context->get_code(8, &get);
-		context->get_operand(8, &reg[0]);
-		context->get_operand(20, &addr);
-		context->get_operand(32, &reg[1]);
-		context->get_operand(44, &comp);
-		TestCase_LdSt[1].validate(get);
-		TestCase_LdSt[1].validate(reg[0], 0);
-		TestCase_LdSt[1].validate(reg[1], 1);
-		TestCase_LdSt[1].validate(comp);
-		TestCase_LdSt[1].validate(addr);
-	}
 
-  delete lexer;
-}
-*/
 TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
