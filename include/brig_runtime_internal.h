@@ -13,11 +13,11 @@ struct VecPolicy {
   typedef VecPolicy<T, B, L> Self;
   typedef T Type;
   typedef B Base;
-  static const unsigned Len = L;
-  static const unsigned LogLen =
-    L == 2 ? 1 :
-    L == 4 ? 2 :
-    L == 8 ? 3 : 4;
+  enum { Len = L };
+  enum { LogLen =
+         L == 2 ? 1 :
+         L == 4 ? 2 :
+         L == 8 ? 3 : 4 };
   typedef Base (*UMapFn)(Base);
   typedef Base (*BMapFn)(Base, Base);
   typedef Base (*SMapFn)(Base, unsigned);
@@ -445,12 +445,14 @@ template<> struct IntTypes<false> {
 template<class T, class U, bool S> struct IntPolicy :
     public IntTypes<S> {
   typedef U Unsigned;
-  static const bool isSigned = S;
-  static const unsigned Bits = 8 * sizeof(T);
-  static const unsigned ShiftMask = Bits - 1;
-  static const T HighBit = T(T(1) << (Bits - 1));
-  static const T Min = isSigned ? HighBit :  T(0);
-  static const T Max = ~Min;
+  enum { isSigned = S };
+  enum {
+    Bits = 8 * sizeof(T),
+    ShiftMask = Bits - 1,
+    HighBit = T(T(1) << (Bits - 1)),
+    Min = S ? HighBit : T(0),
+    Max = T(~Min)
+  };
   static bool isNeg(T t) { return isSigned && (t & HighBit); }
   static bool isNegOne(T t) { return isSigned && t == T(~0); }
 };

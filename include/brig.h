@@ -524,7 +524,7 @@ struct BrigDirectiveBase {
 
 // PRM 20.8.4
 struct BrigDirectiveComment {
-  static const uint16_t DirKind = BrigEDirectiveComment;
+  enum { DirKind = BrigEDirectiveComment };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -533,7 +533,7 @@ struct BrigDirectiveComment {
 
 // PRM 20.8.5
 struct BrigDirectiveControl {
-  static const uint16_t DirKind = BrigEDirectiveControl;
+  enum { DirKind = BrigEDirectiveControl };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -543,7 +543,7 @@ struct BrigDirectiveControl {
 
 // PRM 20.8.6
 struct BrigDirectiveExtension {
-  static const uint16_t DirKind = BrigEDirectiveExtension;
+  enum { DirKind = BrigEDirectiveExtension };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -552,7 +552,7 @@ struct BrigDirectiveExtension {
 
 // PRM 20.8.7
 struct BrigDirectiveFile {
-  static const uint16_t DirKind = BrigEDirectiveFile;
+  enum { DirKind = BrigEDirectiveFile };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -563,7 +563,7 @@ struct BrigDirectiveFile {
 
 // PRM 20.8.8
 struct BrigDirectiveFunction {
-  static const uint16_t DirKind = BrigEDirectiveFunction;
+  enum { DirKind = BrigEDirectiveFunction };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -580,7 +580,7 @@ struct BrigDirectiveFunction {
 
 // PRM 20.8.9
 struct BrigDirectiveImage {
-  static const uint16_t DirKind = BrigEDirectiveImage;
+  enum { DirKind = BrigEDirectiveImage };
   uint16_t size;
   uint16_t kind;
   BrigSymbolCommon s;
@@ -594,7 +594,7 @@ struct BrigDirectiveImage {
 
 // PRM 20.8.10
 struct BrigDirectiveInit {
-  static const uint16_t DirKind = BrigEDirectiveInit;
+  enum { DirKind = BrigEDirectiveInit };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -613,7 +613,7 @@ struct BrigDirectiveInit {
 
 // PRM 20.8.11
 struct BrigDirectiveKernel {
-  static const uint16_t DirKind = BrigEDirectiveKernel;
+  enum { DirKind = BrigEDirectiveKernel };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -629,7 +629,7 @@ struct BrigDirectiveKernel {
 };
 
 struct BrigDirectiveMethod {
-  static const uint16_t DirKind = ~0;
+  enum { DirKind = ~0 };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -648,7 +648,7 @@ struct BrigDirectiveMethod {
 // BrigDirectiveLabel
 // BrigDirectiveLabel declares a label.
 struct BrigDirectiveLabel {
-  static const uint16_t DirKind = BrigEDirectiveLabel;
+  enum { DirKind = BrigEDirectiveLabel };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -657,7 +657,7 @@ struct BrigDirectiveLabel {
 
 // PRM 20.8.13
 struct BrigDirectiveLabelInit {
-  static const uint16_t DirKind = BrigEDirectiveLabelInit;
+  enum { DirKind = BrigEDirectiveLabelInit };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -667,7 +667,7 @@ struct BrigDirectiveLabelInit {
 
 // PRM 20.8.14
 struct BrigDirectiveLabelList {
-  static const uint16_t DirKind = BrigEDirectiveLabelList;
+  enum { DirKind = BrigEDirectiveLabelList };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -677,7 +677,7 @@ struct BrigDirectiveLabelList {
 
 // PRM 20.8.15
 struct BrigDirectiveLoc {
-  static const uint16_t DirKind = BrigEDirectiveLoc;
+  enum { DirKind = BrigEDirectiveLoc };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -691,14 +691,14 @@ struct BrigDirectiveLoc {
 // BrigDirectivePad is used to pad out the
 // .directives stream to ensure alignment.
 struct BrigDirectivePad {
-  static const uint16_t DirKind = BrigEDirectivePad;
+  enum { DirKind = BrigEDirectivePad };
   uint16_t size;
   uint16_t kind;
 };
 
 // PRM 20.8.17
 struct BrigDirectivePragma {
-  static const uint16_t DirKind = BrigEDirectivePragma;
+  enum { DirKind = BrigEDirectivePragma };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -707,7 +707,7 @@ struct BrigDirectivePragma {
 
 // PRM 20.8.18
 struct BrigDirectiveSignature {
-  static const uint16_t DirKind = BrigEDirectiveSignature;
+  enum { DirKind = BrigEDirectiveSignature };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -726,7 +726,7 @@ struct BrigDirectiveSignature {
 
 // PRM 20.8.19
 struct BrigDirectiveSampler {
-  static const uint16_t DirKind = BrigEDirectiveSampler;
+  enum { DirKind = BrigEDirectiveSampler };
   uint16_t size;
   uint16_t kind;
   BrigSymbolCommon s;
@@ -749,14 +749,14 @@ struct BrigDirectiveScope {
 };
 
 struct BrigDirectiveArgStart {
-  static const uint16_t DirKind = BrigEDirectiveArgStart;
+  enum { DirKind = BrigEDirectiveArgStart };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
 };
 
 struct BrigDirectiveArgEnd {
-  static const uint16_t DirKind = BrigEDirectiveArgEnd;
+  enum { DirKind = BrigEDirectiveArgEnd };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -768,7 +768,7 @@ struct BrigDirectiveArgEnd {
 // is a uint16_t kind or the second 16-bit word of BrigSymbolCommon's c_code
 // field. This view is supported by Table 20-3 in the HSA PRM.
 struct BrigDirectiveSymbol {
-  static const uint16_t DirKind = BrigEDirectiveSymbol;
+  enum { DirKind = BrigEDirectiveSymbol };
   uint16_t size;
   uint16_t kind;
   BrigSymbolCommon s;
@@ -784,7 +784,7 @@ struct BrigDirectiveSymbolCommon {
 
 // 20.8.22
 struct BrigDirectiveVersion {
-    static const uint16_t DirKind = BrigEDirectiveVersion;
+    enum { DirKind = BrigEDirectiveVersion };
     uint16_t size;
     uint16_t kind;
     BrigcOffset32_t c_code;
@@ -798,7 +798,7 @@ struct BrigDirectiveVersion {
 
 // PRM 20.6.2
 struct BrigBlockEnd {
-  static const uint16_t DirKind = BrigEDirectiveBlockEnd;
+  enum { DirKind = BrigEDirectiveBlockEnd };
   uint16_t size;
   uint16_t kind;
 };
@@ -813,7 +813,7 @@ struct BrigBlockEnd {
 // This structure must be aligned to an 8-byte boundary
 // (because of the uint64_t field).
 struct BrigBlockNumeric {
-  static const uint16_t DirKind = BrigEDirectiveBlockNumeric;
+  enum { DirKind = BrigEDirectiveBlockNumeric };
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -833,7 +833,7 @@ struct BrigBlockNumeric {
 // debuggers or runtimes.
 // More than one BrigBlockStart can have the same name.
 struct BrigBlockStart {
-  static const uint16_t DirKind = BrigEDirectiveBlockStart;
+  enum { DirKind = BrigEDirectiveBlockStart };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
@@ -842,7 +842,7 @@ struct BrigBlockStart {
 
 // PRM 20.6.5
 struct BrigBlockString {
-  static const uint16_t DirKind = BrigEDirectiveBlockString;
+  enum { DirKind = BrigEDirectiveBlockString };
   uint16_t size;
   uint16_t kind;
   BrigsOffset32_t s_name;
@@ -852,7 +852,7 @@ struct BrigBlockString {
 
 // 20.9.9
 struct BrigInstLdSt {
-  static const uint16_t InstKind = BrigEInstLdSt;
+  enum { InstKind = BrigEInstLdSt };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -865,7 +865,7 @@ struct BrigInstLdSt {
 };
 
 struct BrigInstBase {
-  static const uint16_t InstKind = BrigEInstBase;
+  enum { InstKind = BrigEInstBase };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -877,7 +877,7 @@ struct BrigInstBase {
 // BrigInstMod
 // The BrigInstMod format is used for ALU operations with a modifier.
 struct BrigInstMod {
-  static const uint16_t InstKind = BrigEInstMod;
+  enum { InstKind = BrigEInstMod };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -890,7 +890,7 @@ struct BrigInstMod {
 // BrigInstBar
 // The BrigInstBar format is used for the barrier and sync operations.
 struct BrigInstBar {
-  static const uint16_t InstKind = BrigEInstBar;
+  enum { InstKind = BrigEInstBar };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -904,7 +904,7 @@ struct BrigInstBar {
 // The BrigInstAtomic format is used for atomic operations: atomicReturn and
 // atomicNoReturn.
 struct BrigInstAtomic {
-  static const uint16_t InstKind = BrigEInstAtomic;
+  enum { InstKind = BrigEInstAtomic };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -919,7 +919,7 @@ struct BrigInstAtomic {
 // BrigInstAtomicImage
 // The BrigInstAtomicImage format is used for atomicNoReturn image operations.
 struct BrigInstAtomicImage {
-  static const uint16_t InstKind = BrigEInstAtomicImage;
+  enum { InstKind = BrigEInstAtomicImage };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -935,7 +935,7 @@ struct BrigInstAtomicImage {
 // BrigInstCmp
 // The BrigInstCmp format is used for compare operations.
 struct BrigInstCmp {
-  static const uint16_t InstKind = BrigEInstCmp;
+  enum { InstKind = BrigEInstCmp };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -951,7 +951,7 @@ struct BrigInstCmp {
 // BrigInstCvt
 // The BrigInstCvt format is used for convert operations.
 struct BrigInstCvt {
-  static const uint16_t InstKind = BrigEInstCvt;
+  enum { InstKind = BrigEInstCvt };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -967,7 +967,7 @@ struct BrigInstCvt {
 // The BrigInstImage format is used for the load image and store image
 // operations.
 struct BrigInstImage {
-  static const uint16_t InstKind = BrigEInstImage;
+  enum { InstKind = BrigEInstImage };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -982,7 +982,7 @@ struct BrigInstImage {
 // BrigInstMem
 // The BrigInstMem format is used for operations that take a space modifier.
 struct BrigInstMem {
-  static const uint16_t InstKind = BrigEInstMem;
+  enum { InstKind = BrigEInstMem };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -996,7 +996,7 @@ struct BrigInstMem {
 // The BrigInstRead format is a special format used for the read image
 // operation.
 struct BrigInstRead {
-  static const uint16_t InstKind = BrigEInstRead;
+  enum { InstKind = BrigEInstRead };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
@@ -1010,7 +1010,7 @@ struct BrigInstRead {
 
 
 struct BrigOperandBase {
-  static const uint16_t OperKind = BrigEOperandBase;
+  enum { OperKind = BrigEOperandBase };
   uint16_t size;
   uint16_t kind;
 };
@@ -1019,7 +1019,7 @@ struct BrigOperandBase {
 // BrigOperandReg
 // BrigOperandReg is used for a register (c, s, or d).
 struct BrigOperandReg {
-  static const uint16_t OperKind = BrigEOperandReg;
+  enum { OperKind = BrigEOperandReg };
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -1030,7 +1030,7 @@ struct BrigOperandReg {
 // BrigOperandImmed
 // BrigOperandImmed is used for a numeric value.
 struct BrigOperandImmed {
-  static const uint16_t OperKind = BrigEOperandImmed;
+  enum { OperKind = BrigEOperandImmed };
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -1050,7 +1050,7 @@ struct BrigOperandImmed {
 // In the .operands section, BrigOperandAddress must start
 // on an offset divisible by 4.
 struct BrigOperandAddress {
-  static const uint16_t OperKind = BrigEOperandAddress;
+  enum { OperKind = BrigEOperandAddress };
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -1061,7 +1061,7 @@ struct BrigOperandAddress {
 // BrigOperandLabelRef
 // BrigOperandLabelRef is used for a label.
 struct BrigOperandLabelRef {
-  static const uint16_t OperKind = BrigEOperandLabelRef;
+  enum { OperKind = BrigEOperandLabelRef };
   uint16_t size;
   uint16_t kind;
   uint32_t labeldirective;
@@ -1071,7 +1071,7 @@ struct BrigOperandLabelRef {
 // BrigOperandFunctionRef is used for a reference
 // to a function or function signature.
 struct BrigOperandFunctionRef {
-  static const uint16_t OperKind = BrigEOperandFunctionRef;
+  enum { OperKind = BrigEOperandFunctionRef };
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t fn;
@@ -1084,7 +1084,7 @@ struct BrigOperandFunctionRef {
 // Lists of function names or function signatures
 // are needed when the call statement has a list of possible targets.
 struct BrigOperandArgumentList {
-  static const uint16_t OperKind = BrigEOperandArgumentList;
+  enum { OperKind = BrigEOperandArgumentList };
   uint16_t size;
   uint16_t kind;
   uint32_t elementCount;
@@ -1092,7 +1092,7 @@ struct BrigOperandArgumentList {
 };
 
 struct BrigOperandFunctionList {
-  static const uint16_t OperKind = BrigEOperandFunctionList;
+  enum { OperKind = BrigEOperandFunctionList };
   uint16_t size;
   uint16_t kind;
   uint32_t elementCount;
@@ -1102,7 +1102,7 @@ struct BrigOperandFunctionList {
 // BrigOperandArgumentRef
 // BrigOperandArgumentRef is used for a single argument.
 struct BrigOperandArgumentRef {
-  static const uint16_t OperKind = BrigEOperandArgumentRef;
+  enum { OperKind = BrigEOperandArgumentRef };
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t arg;
@@ -1111,7 +1111,7 @@ struct BrigOperandArgumentRef {
 //BrigOperandCompound
 //BrigOperandCompound is used for compound addressing modes.
 struct BrigOperandCompound {
-  static const uint16_t OperKind = BrigEOperandCompound;
+  enum { OperKind = BrigEOperandCompound };
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -1124,7 +1124,7 @@ struct BrigOperandCompound {
 //BrigOperandIndirect
 //BrigOperandIndirect is used for register plus offset addressing modes.
 struct BrigOperandIndirect {
-  static const uint16_t OperKind = BrigEOperandIndirect;
+  enum { OperKind = BrigEOperandIndirect };
   uint16_t size;
   uint16_t kind;
   BrigoOffset32_t reg;
@@ -1134,7 +1134,7 @@ struct BrigOperandIndirect {
 };
 
 struct BrigOperandPad {
-  static const uint16_t OperKind = BrigEOperandPad;
+  enum { OperKind = BrigEOperandPad };
   uint16_t size;
   uint16_t kind;
 };
@@ -1142,7 +1142,7 @@ struct BrigOperandPad {
 //BrigOperandOpaque
 //BrigOperandOpaque is used for addressing image and sampler objects.
 struct BrigOperandOpaque {
-  static const uint16_t OperKind = BrigEOperandOpaque;
+  enum { OperKind = BrigEOperandOpaque };
   uint16_t size;
   uint16_t kind;
   BrigdOffset32_t name;
@@ -1153,7 +1153,7 @@ struct BrigOperandOpaque {
 //BrigOperandRegV2
 //BrigOperandRegV2 is used for certain memory operations.
 struct BrigOperandRegV2 {
-  static const uint16_t OperKind = BrigEOperandRegV2;
+  enum { OperKind = BrigEOperandRegV2 };
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -1164,7 +1164,7 @@ struct BrigOperandRegV2 {
 //BrigOperandRegV4
 //BrigOperandRegV4 is used for certain memory operations.
 struct BrigOperandRegV4 {
-  static const uint16_t OperKind = BrigEOperandRegV4;
+  enum { OperKind = BrigEOperandRegV4 };
   uint16_t size;
   uint16_t kind;
   BrigDataType16_t type;
@@ -1175,7 +1175,7 @@ struct BrigOperandRegV4 {
 //BrigOperandWaveSz
 //BrigOperandWaveSz is a compile-time value equal to the size of a wavefront.
 struct BrigOperandWaveSz {
-  static const uint16_t OperKind = BrigEOperandWaveSz;
+  enum { OperKind = BrigEOperandWaveSz };
   uint16_t size;
   uint16_t kind;
 };

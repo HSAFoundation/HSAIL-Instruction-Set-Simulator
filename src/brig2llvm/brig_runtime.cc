@@ -10,22 +10,6 @@ namespace brig {
 
 ForceBrigRuntimeLinkage::ForceBrigRuntimeLinkage() {}
 
-template<class T, class U, bool S> const bool IntPolicy<T, U, S>::isSigned;
-template<class T, class U, bool S> const unsigned IntPolicy<T, U, S>::Bits;
-template<class T, class U, bool S> const unsigned IntPolicy<T, U, S>::ShiftMask;
-template<class T, class U, bool S> const T IntPolicy<T, U, S>::HighBit;
-template<class T, class U, bool S> const T IntPolicy<T, U, S>::Max;
-template<class T, class U, bool S> const T IntPolicy<T, U, S>::Min;
-
-template struct IntPolicy<u8,  u8,  false>;
-template struct IntPolicy<u16, u16, false>;
-template struct IntPolicy<u32, u32, false>;
-template struct IntPolicy<u64, u64, false>;
-template struct IntPolicy<s8,  u8,  true>;
-template struct IntPolicy<s16, u16, true>;
-template struct IntPolicy<s32, u32, true>;
-template struct IntPolicy<s64, u64, true>;
-
 template<class T> static T Abs(T t) { return std::abs(t); }
 template<class T> static T AbsVector(T t) { return map(Abs, t); }
 SignedInst(define, Abs, Unary)
