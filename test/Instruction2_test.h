@@ -49,6 +49,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   in.assign( "abs_s32 $s1, $s2;\n");
   std::string op1, op2; op1.assign("$s1"); op2.assign("$s2"); 
   int buffer_start = BUFFER_OFFSET;
+  int align;
   int size_reg = sizeof(BrigOperandReg);
 
   BrigInstBase out1 = {
@@ -71,7 +72,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, &out1, &reg1, &reg2, op1, op2);
   TestCase1.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_s64 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
   buffer_start = BUFFER_OFFSET;
@@ -96,7 +97,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase2(in, &out2, &reg1, &reg2, op1, op2);
   TestCase2.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_f32 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -121,7 +122,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase3(in, &out3, &reg1, &reg2, op1, op2);
   TestCase3.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_f64 $d1,$d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
   buffer_start = BUFFER_OFFSET;
@@ -146,7 +147,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase4(in, &out4, &reg1, &reg2, op1, op2);
   TestCase4.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_p_s8x4 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -171,7 +172,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase5(in, &out5, &reg1, &reg2, op1, op2);
   TestCase5.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_p_f32x2 $d1, $d1;\n");
   op1.assign("$d1"); op2.assign(""); 
   buffer_start = BUFFER_OFFSET;
@@ -196,7 +197,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase6(in, &out6, &reg1, &reg2, op1, op2);
   TestCase6.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_s_s8x4 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -220,7 +221,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase7(in, &out7, &reg1, &reg2, op1, op2);
   TestCase7.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_p_s8x8 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
   buffer_start = BUFFER_OFFSET;
@@ -244,7 +245,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase8(in, &out8, &reg1, &reg2, op1, op2);
   TestCase8.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_s_s8x8 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
   buffer_start = BUFFER_OFFSET;
@@ -268,7 +269,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase9(in, &out9, &reg1, &reg2, op1, op2);
   TestCase9.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_p_s16x2 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -292,7 +293,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase10(in, &out10, &reg1, &reg2, op1, op2);
   TestCase10.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "abs_s_s16x2 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -316,13 +317,12 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase11(in, &out11, &reg1, &reg2, op1, op2);
   TestCase11.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "neg_s32 $s1, 100;\n");
   op1.assign("$s1"); op2.assign(""); 
   buffer_start = BUFFER_OFFSET;
   size_reg = sizeof(BrigOperandReg);
 
-  int align;
   align = 8 - ( buffer_start + size_reg ) % 8;
  
   BrigInstBase out12 = {
@@ -350,7 +350,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase12(in, &out12, &reg1, &imm, op1, op2);
   TestCase12.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "neg_s64 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
   buffer_start = BUFFER_OFFSET;
@@ -374,7 +374,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase13(in, &out13, &reg1, &reg2, op1, op2);
   TestCase13.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "neg_f32 $s3,1.0f;\n");
   op1.assign("$s3"); op2.assign(""); 
   buffer_start = BUFFER_OFFSET;
@@ -404,7 +404,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase14(in, &out14, &reg1, &imm, op1, op2);
   TestCase14.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "neg_f64 $d3,1.0;\n");
   op1.assign("$d3"); op2.assign(""); 
   buffer_start = BUFFER_OFFSET;
@@ -434,7 +434,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase15(in, &out15, &reg1, &imm, op1, op2);
   TestCase15.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "neg_p_f16x2 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -458,7 +458,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase16(in, &out16, &reg1, &reg2, op1, op2);
   TestCase16.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "neg_s_u8x4 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -482,7 +482,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase17(in, &out17, &reg1, &reg2, op1, op2);
   TestCase17.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "neg_p_s32x2 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
   buffer_start = BUFFER_OFFSET;
@@ -506,7 +506,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase18(in, &out18, &reg1, &reg2, op1, op2);
   TestCase18.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "not_b1 $c1, $c2;\n");
   op1.assign("$c1"); op2.assign("$c2"); 
   buffer_start = BUFFER_OFFSET;
@@ -530,7 +530,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase19(in, &out19, &reg1, &reg2, op1, op2);
   TestCase19.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "not_b32 $s0, $s2;\n");
   op1.assign("$s0"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -554,7 +554,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase20(in, &out20, &reg1, &reg2, op1, op2);
   TestCase20.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "not_b64 $d0, $d1;\n");
   op1.assign("$d0"); op2.assign("$d1"); 
   buffer_start = BUFFER_OFFSET;
@@ -578,7 +578,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase21(in, &out21, &reg1, &reg2, op1, op2);
   TestCase21.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "popcount_b32 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -602,7 +602,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase22(in, &out22, &reg1, &reg2, op1, op2);
   TestCase22.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "popcount_b64 $s1, $d2;\n");
   op1.assign("$s1"); op2.assign("$d2"); 
   buffer_start = BUFFER_OFFSET;
@@ -628,7 +628,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase23(in, &out23, &reg1, &reg2, op1, op2);
   TestCase23.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "bitrev_s32 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -652,7 +652,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase24(in, &out24, &reg1, &reg2, op1, op2);
   TestCase24.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "bitrev_u64 $d1, 0x234;\n");
   op1.assign("$d1"); op2.assign(""); 
   buffer_start = BUFFER_OFFSET;
@@ -679,12 +679,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   imm.type = Brigb32;
   imm.reserved = 0;
   imm.bits.l[0] = 0x234;
-
   
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase25(in, &out25, &reg1, &imm, op1, op2);
   TestCase25.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "firstbit_s32 $s0, $s0;\n");
   op1.assign("$s0"); op2.assign(""); 
   buffer_start = BUFFER_OFFSET;
@@ -708,7 +707,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase26(in, &out26, &reg1, &reg2, op1, op2);
   TestCase26.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "firstbit_u64 $s0, $d6;\n");
   op1.assign("$s0"); op2.assign("$d6"); 
   buffer_start = BUFFER_OFFSET;
@@ -734,7 +733,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase27(in, &out27, &reg1, &reg2, op1, op2);
   TestCase27.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "lastbit_u32 $s0, $s0;\n");
   op1.assign("$s0"); op2.assign(""); 
   buffer_start = BUFFER_OFFSET;
@@ -758,7 +757,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase28(in, &out28, &reg1, &reg2, op1, op2);
   TestCase28.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "lastbit_s64 $s0, $d6;\n");
   op1.assign("$s0"); op2.assign("$d6"); 
   buffer_start = BUFFER_OFFSET;
@@ -784,7 +783,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase29(in, &out29, &reg1, &reg2, op1, op2);
   TestCase29.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "movs_lo_b32 $s1, $d1;\n");
   op1.assign("$s1"); op2.assign("$d1"); 
   buffer_start = BUFFER_OFFSET;
@@ -810,7 +809,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase30(in, &out30, &reg1, &reg2, op1, op2);
   TestCase30.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "movs_hi_b32 $s1, $d1;\n");
   op1.assign("$s1"); op2.assign("$d1"); 
   buffer_start = BUFFER_OFFSET;
@@ -836,7 +835,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase31(in, &out31, &reg1, &reg2, op1, op2);
   TestCase31.Run_Test(&Instruction2);
 
-
+/**********************************************************************************/
   in.assign( "fract_f32 $s0, 3.2f;\n");
   op1.assign("$s0"); op2.assign(""); 
   buffer_start = BUFFER_OFFSET;
@@ -844,7 +843,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   align = 8 - ( buffer_start + size_reg ) % 8;
  
-   BrigInstBase out32 = {
+  BrigInstBase out32 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigFract, 
