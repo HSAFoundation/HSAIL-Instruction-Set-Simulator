@@ -806,3 +806,104 @@ TEST(BrigKernelTest, EmptyCB) {
   BE.launch(fun, args);
 }
 
+TEST(BrigKernelTest, CRC32) {
+   hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &CRC32Kernel(kernarg_u32 %r, kernarg_u32 %n_ptr, kernarg_u32 %n_len)\n"
+    "{\n"
+    "  // $s0 is for retVal,\n"
+    "  // $s1 is for i\n"
+    "  // $s2 is for j\n"
+    "  // $s3 is for %n_ptr\n"
+    "  // $s4 is for %n_len\n"
+
+    "  ld_kernarg_u32 $s4, [%n_len]; \n"
+    "  ld_kernarg_u32 $s3, [%n_ptr]; \n"
+    "  sub_u32 $s4, $s4, 1;\n"
+    "  add_u32 $s1, 0, 0;\n //i = 0\n"
+    "  add_u32 $s0, 0xF, 0xFFFFFFF0;\n"
+
+    "@loop_i:"
+    "  cmp_lt_b1_u32 $c1, $s4, $s1; // if i > len  go to return\n"
+    "  cbr $c1, @return;\n"
+    
+    "  and_b32 $s5, $s0, 0xFF;\n // $s5 is for CRC32 array index\n"
+    "  ld_arg_u32 $s6, [$s3];\n"
+    "  add_u32 $s3, $s3, 1;\n // n_ptr + 1\n"
+    "  and_b32 $s6, $s6, 0xFF;\n"
+    "  xor_b32 $s5, $s5, $s6;\n //$s5 now is sub index of CRC array\n"
+    
+    "  // get value of CRC32 array $s5 index store in $s5\n"
+    "  add_u32 $s2, 0, 0;\n //j = 0\n"
+    "@loop_j:"
+    "  and_b32 $c2, $s5, 0x1;\n //CRC32 array index\n"
+    "  shr_u32 $s5, $s5, 1;\n"
+    "  cbr $c2, @loop_j_if;\n"
+    "  brn @loop_j_endif;\n"
+    "@loop_j_if:"
+    "  xor_b32 $s5, $s5, 0xEDB88320;\n"
+    "@loop_j_endif:"
+    "  add_u32 $s2, $s2, 1;\n //++j\n"
+    "  cmp_lt_b1_u32 $c3, $s2, 8; //j start at 1; if j < 9 go to @loop_j\n"
+    "  cbr $c3, @loop_j;\n"
+
+    "  shr_u32  $s6, $s0, 8;\n //$s6 now is ret >> 8\n" 
+    "  xor_b32 $s0, $s5, $s6;\n// $s0 is ret\n"
+   
+    "  add_u32 $s1, $s1, 1;\n // ++i\n"
+    "  brn @loop_i;\n"
+
+    "@return:"
+    "  xor_b32 $s0, $s0, 0xFFFFFFFF;\n// ~ret\n"
+    "  ld_kernarg_u32 $s1, [%r];\n"
+    "  st_global_u32 $s0, [$s1];\n"    
+    "  ret;\n"
+    "};"
+    );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  
+  unsigned *r = new unsigned;
+  const unsigned arraySize = 16;
+  char *a = new char[arraySize];
+  for(unsigned i = 0; i < arraySize; ++i) {
+    a[i] = 'a' + i;
+  }
+  unsigned len = 10;
+  unsigned *l = new unsigned(len);  
+  void *args[] = { &r, &a, l};
+  llvm::Function *fun = BP->getFunction("CRC32Kernel");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+  
+  //CRC32 in C++
+  uint   CRC32[256];
+  unsigned   i,j;
+  uint   crc;
+  for(i = 0;i < 256;i++){
+    crc = i;
+    for(j = 0;j < 8;j++){
+      if(crc & 1){
+        crc = (crc >> 1) ^ 0xEDB88320;
+      }else{
+        crc = crc >> 1;
+      }
+    }
+    CRC32[i] = crc;
+  }
+  uint ret = 0xFFFFFFFF;
+  for(i = 0; i < len;i++){
+    ret = CRC32[((ret & 0xFF) ^ a[i])] ^ (ret >> 8);
+  }
+  ret = ~ret;
+  //CRC32 in C++ end
+  
+  EXPECT_EQ(ret, *r);
+
+  delete r;
+  delete a;
+  delete l;
+}
+
+
