@@ -557,6 +557,49 @@ static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
   }
 }
 
+// Work around limitations of MCJIT. MCJIT can call a function if the function's
+// type is similar to main. We create a trampoline with the function signature:
+// void fun(int argc, char **argv)
+// The real function arguments are encoded in the argv array.
+// The argc parameter is ignored.
+static void makeKernelTrampoline(llvm::Function *fun, const char *name) {
+
+  llvm::LLVMContext &C = fun->getContext();
+
+  llvm::Type *voidTy = llvm::Type::getVoidTy(C);
+  llvm::Type *trampArgs[] = {
+    llvm::Type::getInt32Ty(C),
+    llvm::Type::getInt8Ty(C)->getPointerTo()->getPointerTo()
+  };
+  llvm::FunctionType *trampFunTy =
+    llvm::FunctionType::get(voidTy, trampArgs, false);
+  llvm::GlobalValue::LinkageTypes linkage = fun->getLinkage();
+
+  llvm::Function *trampFun =
+    llvm::Function::Create(trampFunTy, linkage, name, fun->getParent());
+  llvm::BasicBlock *bb = llvm::BasicBlock::Create(C, "", trampFun);
+
+  llvm::Value *argArray = ++trampFun->arg_begin();
+  llvm::FunctionType *funTy = fun->getFunctionType();
+  std::vector<llvm::Value *> trampParams;
+  for(unsigned i = 0; i < fun->arg_size(); ++i) {
+
+    llvm::Value *offset =
+      llvm::ConstantInt::get(llvm::Type::getInt32Ty(C), i);
+    llvm::Value *gep =
+      llvm::GetElementPtrInst::Create(argArray, offset, "", bb);
+
+    llvm::Value *load = new llvm::LoadInst(gep, "", bb);
+
+    llvm::Type *paramTy = funTy->getParamType(i);
+    llvm::Value *bitcast = new llvm::BitCastInst(load, paramTy, "", bb);
+    trampParams.push_back(bitcast);
+  }
+
+  llvm::CallInst::Create(fun, trampParams, "", bb);
+  llvm::ReturnInst::Create(C, bb);
+}
+
 static void runOnFunction(llvm::Module &M, const BrigFunction &F,
                           FunMap &funMap, SymbolMap &symbolMap) {
 
@@ -572,6 +615,9 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
 
   llvm::GlobalValue::LinkageTypes linkage = runOnLinkage(F.getLinkage());
   llvm::Twine name(F.getName());
+
+  if(F.isKernel())
+    name = "kernel." + name;
 
   llvm::Function *fun = llvm::Function::Create(funTy, linkage, name, &M);
   funMap[F.getOffset()] = fun;
@@ -590,6 +636,9 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   for(BrigControlBlock cb = F.begin(), E = F.end(); cb != E; ++cb) {
     runOnCB(*fun, cb, state);
   }
+
+  if(F.isKernel())
+    makeKernelTrampoline(fun, F.getName());
 }
 
 static llvm::Type *getType(llvm::LLVMContext &C,
