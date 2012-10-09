@@ -508,6 +508,66 @@ TEST(BrigInstTest, VectorMad) {
   const int32_t testVec[] = { 6, 2, 2, 2 };
   testInst("mad_s32", testVec);
 }
+TEST(BrigKernelTest, Eur) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__run(\n"
+    "      kernarg_u32 %arg_val2,\n"
+    "      kernarg_u32 %arg_val0,\n"
+    "      kernarg_u32 %arg_val1)\n"
+    "{\n"
+    "      ld_kernarg_u32    $s0, [%arg_val0];\n"
+    "      ld_kernarg_u32    $s1, [%arg_val1];\n"
+    "      cmp_eq_b1_u32 $c1, $s0, 0;\n"
+    "      cbr     $c1, @BB0_1;\n"
+    "      cmp_eq_b1_u32 $c2, $s1, 0;\n"
+    "      cbr     $c2, @BB0_1;\n"
+    "@BB0_2:"
+    "      cmp_gt_b1_u32 $c3, $s0, $s1;\n"
+    "      cbr     $c3, @BB1_1;\n"
+    "      cmp_eq_b1_u32 $c4, $s0, $s1;\n"
+    "      cbr     $c4, @BB1_1;\n"
+    "@BB0_3:"
+    "      add_u32 $s3, 0, 0;\n"
+    "      add_u32 $s3, $s0, $s1;\n"
+    "      sub_u32 $s0, $s3, $s0;\n"
+    "      sub_u32 $s1, $s3, $s0;\n"
+    "@BB1_1:"
+    "      sub_u32 $s4, $s0, $s1;\n"
+    "      cmp_eq_b1_u32 $c5, $s4, 0;\n"
+    "      cbr     $c5, @END;\n"
+    "      cmp_gt_b1_u32 $c6, $s4, 0;\n"
+    "      cbr     $c6, @BB1_2;\n"
+    "      brn     @BB0_3;\n"
+    "@BB1_2:"
+    "      add_u32 $s0, 0, 0;\n"
+    "      add_u32 $s0, 0, $s4;\n"
+    "      brn     @BB0_2;\n"
+    "@END:"
+    "      ld_kernarg_u32   $s6, [%arg_val2];\n"
+    "      st_global_u32   $s0, [$s6] ;\n"
+    "@BB0_1:"
+    "ret;\n"
+    "};\n"
+  );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  int *sxt = new int;
+  int *zxt = new int;
+  int *bxt = new int;
+  *sxt = 12;
+  *zxt = 16;
+  *bxt = 0;
+  hsa::brig::BrigEngine BE(BP);
+  void *args[] = { &bxt, sxt, zxt };
+  llvm::Function *fun = BP->getFunction("__run");
+  BE.launch(fun, args);
+  EXPECT_EQ(*bxt,4);
+  delete sxt;
+  delete zxt;
+  delete bxt;
+}
 
 TEST(BrigWriterTest, GlobalArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(
