@@ -34,15 +34,12 @@ public:
     validate_brig::validate(Output, &getcode);
     
     T1 getreg1;
-    int op_offset = operand_start;
-    context->get_operand(op_offset, &getreg1);
+    context->get_operand(Output->o_operands[0], &getreg1);
     validate_brig::validate(dest, &getreg1);
-    op_offset+=sizeof(getreg1);
-    
+        
     T2 getreg2;
-    context->get_operand(op_offset, &getreg2);
-    validate_brig::validate(src1, &getreg2);
-    op_offset+=sizeof(getreg2);    
+    context->get_operand(Output->o_operands[1], &getreg2);
+    validate_brig::validate(src1, &getreg2);    
   }
 };
   
