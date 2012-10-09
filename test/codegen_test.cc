@@ -10515,9 +10515,9 @@ TEST(CodegenTest, InitializableDecl_CodeGen_Part2) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
+
+  /*****************************  Case 1  **********************************/
   std::string input("global_u32 &x0 = {3.0f};\n");
-  input.append("readonly_b8 %x1[] = {1, 3, 0xFF1, 0, -2};\n");
-  input.append("global_b16 &x2[17] = {0xF7F7, 3, 0xFFFF1, 0, -3, 321};\n");
  
   // TODO(Chuang): check the value of c_code again.
   Lexer* lexer = new Lexer(input);
@@ -10526,8 +10526,6 @@ TEST(CodegenTest, InitializableDecl_CodeGen_Part2) {
   BrigdOffset32_t curDirOffset = context->get_directive_offset();
 
   EXPECT_EQ(0, InitializableDecl(context));   // &x0
-  EXPECT_EQ(0, InitializableDecl(context));   // %x1
-  EXPECT_EQ(0, InitializableDecl(context));   // &x2
 
   BrigDirectiveSymbol x0Ref = {
   sizeof(BrigDirectiveSymbol),// size
@@ -10591,6 +10589,16 @@ TEST(CodegenTest, InitializableDecl_CodeGen_Part2) {
   EXPECT_EQ(x0Init.initializationData.u32[1], getInit.initializationData.u32[1]);
 
 
+  /*****************************  Case 2  **********************************/
+
+  context->clear_context();
+  curDirOffset = context->get_directive_offset();
+  input.assign("readonly_b8 %x1[] = {1, 3, 0xFF1, 0, -2};\n");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, InitializableDecl(context));   // %x1
+
   BrigDirectiveSymbol x1Ref = {
     sizeof(BrigDirectiveSymbol), // size
     BrigEDirectiveSymbol ,       // kind
@@ -10601,11 +10609,11 @@ TEST(CodegenTest, InitializableDecl_CodeGen_Part2) {
       0,                         // reserved
       2,                         // symbolModifier
       5,                         // dim
-      12,                        // s_name
+      8,                        // s_name
       Brigb8,                    // type
       1                          // align
     }, 
-    112,                          // d_init
+    48,                          // d_init
     0,                           // reserved
   };
 
@@ -10661,6 +10669,14 @@ TEST(CodegenTest, InitializableDecl_CodeGen_Part2) {
   EXPECT_EQ(x1Init.initializationData.u8[6], getInit.initializationData.u8[6]);
   EXPECT_EQ(x1Init.initializationData.u8[7], getInit.initializationData.u8[7]);
 
+  /*****************************  Case 3  **********************************/
+  context->clear_context();
+  curDirOffset = context->get_directive_offset();
+  input.assign("global_b16 &x2[17] = {0xF7F7, 3, 0xFFFF1, 0, -3, 321};\n");
+
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, InitializableDecl(context));   // &x2
 
   BrigDirectiveSymbol x2Ref = {
     sizeof(BrigDirectiveSymbol),// size
@@ -10672,11 +10688,11 @@ TEST(CodegenTest, InitializableDecl_CodeGen_Part2) {
       0,                        // reserved
       2,                        // symbolModifier
       17,                       // dim
-      16,                       // s_name
+      8,                       // s_name
       Brigb16,                  // type
       1                         // align
     },
-    176,                        // d_init
+    48,                        // d_init
     0                           // reserved
   };
 
