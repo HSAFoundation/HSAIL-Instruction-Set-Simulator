@@ -61,28 +61,28 @@ Steps for Unit Test Generation
   
 TEST(CodegenTest, Instruction3Op_CodeGen){
   
-  std:: string in; 
-  in.assign( "add_pp_sat_u16x2 $s1, $s0, $s3; \n");
-  std::string op1, op2, op3; op1.assign("$s1"); op2.assign("$s0"); op3.assign("$s3");
-    
+  std:: string in; std::string op1, op2, op3; 
+  BrigOperandReg reg1, reg2, reg3;
+  BrigInstBase Out;
   int buffer_start = BUFFER_OFFSET;    //All buffers(.code, .directive, .string) begin at an offset of 8 bytes
   int size_reg = sizeof(BrigOperandReg);
-  BrigInstBase Out = {
-    32,
-    BrigEInstBase, 
-    BrigAdd, 
-    Brigu16x2,
-    BrigPackPPsat,
-    {buffer_start, buffer_start + size_reg, buffer_start + 2*size_reg, 0, 0}
-  };
-  BrigOperandReg reg1 = {
-    sizeof(BrigOperandReg),
-    BrigEOperandReg,
-    Brigb32,
-    0,
-    buffer_start //Offset to string table  
-  };
-  BrigOperandReg reg2, reg3;
+  
+  in.assign( "add_pp_sat_u16x2 $s1, $s0, $s3; \n");
+  op1.assign("$s1"); op2.assign("$s0"); op3.assign("$s3");
+  Out.size = sizeof(BrigInstBase);
+  Out.kind = BrigEInstBase;
+  Out.opcode = BrigAdd;
+  Out.type = Brigu16x2;
+  Out.packing = BrigPackPPsat;
+  Out.o_operands[0] = buffer_start; Out.o_operands[1] = buffer_start + size_reg; 
+  Out.o_operands[2] = buffer_start + 2*size_reg; Out.o_operands[3] = 0; Out.o_operands[4] = 0;
+  
+  reg1.size = sizeof(BrigOperandReg);
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb32;
+  reg1.reserved = 0;
+  reg1.name = buffer_start; //Offset to string table  
+  
   reg2 = reg3 = reg1;
   reg2.name = buffer_start + op1.size()+1; reg3.name = buffer_start + op1.size()+1 + op2.size()+1;
   
