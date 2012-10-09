@@ -47,7 +47,7 @@ public:
         
     T3 getreg3;
     context->get_operand(Output->o_operands[2], &getreg3);
-    validate_brig::validate(src2, &getreg3);    
+    validate_brig::validate(src2, &getreg3);
   }
 };
   
@@ -92,117 +92,201 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   
   /***************************Add more Unit Tests************************************/
   
-/*  
+  /******* case 2 reg , reg , reg *******/
   in.assign( "add_s64 $d1, $d2, $d3;\n");
-  BrigInstBase out1 = {
-    32,
-    BrigEInstBase, 
-    BrigAdd, 
-    Brigs64,
-    BrigNoPacking,
-    {8, 20, 32, 0, 0}
-  };
-  init(in, out1, numTestCases++);    
+  op1.assign("$d1"); op2.assign("$d2"); op3.assign("$d3");
+
+  Out.type = Brigs64,
+  Out.packing = BrigNoPacking,
+
+  reg1.type = reg2.type = reg3.type = Brigb64;
+  reg1.name = buffer_start;
+  reg2.name = buffer_start + op1.size() + 1;
+  reg3.name = buffer_start + op1.size() + op2.size() + 2;
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg> 
+            TestCase2(in, &Out, &reg1, &reg2, &reg3, op1, op2, op3);
+  TestCase2.Run_Test(&Instruction3);
   
+  /******* case 3 reg , WAVESIZE , reg *******/
   in.assign( "add_u64 $d1, WAVESIZE, $d3;\n");
-  BrigInstBase out2 = {
-    32,
-    BrigEInstBase, 
-    BrigAdd, 
-    Brigu64,
-    BrigNoPacking,
-    {8, 20, 24, 0, 0}
-  };
-  init(in, out2, numTestCases++);
+  op1.assign("$d1"); op2.assign(""); op3.assign("$d3");
 
+  uint32_t size_wav = sizeof(BrigOperandWaveSz);
+
+  Out.type = Brigu64;
+  Out.o_operands[2] = buffer_start + size_reg + size_wav;
+
+  reg1.type = reg3.type = Brigb64;
+  reg1.name = buffer_start;
+  BrigOperandWaveSz wav = {
+    sizeof(BrigOperandWaveSz),
+    BrigEOperandWaveSz
+  };
+  reg3.name = buffer_start + op1.size() + 1;
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandWaveSz, BrigOperandReg> 
+            TestCase3(in, &Out, &reg1, &wav, &reg3, op1, op2, op3);
+  TestCase3.Run_Test(&Instruction3);
+
+  /******* case 4 reg , immed , WAVESIZE *******/
   in.assign( "add_ps_sat_s16x4 $d1, 0x40, WAVESIZE;\n");
-  BrigInstBase out3 = {
-    32,
-    BrigEInstBase, 
-    BrigAdd, 
-    Brigs16x4,
-    BrigPackPSsat,
-    {8, 24, 24 + sizeof(BrigOperandImmed), 0, 0}
-  };
-  init(in, out3, numTestCases++);
+  op1.assign("$d1"); op2.assign(""); op3.assign("");
 
+  Out.type = Brigs16x4;
+  Out.packing = BrigPackPSsat;
+  Out.o_operands[1] = buffer_start + size_reg + sizeof(BrigOperandPad);
+  Out.o_operands[2] = buffer_start + size_reg + sizeof(BrigOperandPad) 
+                      + sizeof(BrigOperandImmed);
+
+  BrigOperandImmed imm = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}
+  };
+  imm.bits.u = 0x40;
+  
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed, BrigOperandWaveSz> 
+            TestCase4(in, &Out, &reg1, &imm, &wav, op1, op2, op3);
+  TestCase4.Run_Test(&Instruction3);
+
+  /******* case 5 reg , immed , immed *******/
   in.assign( "div_s32 $s1, 100, 10;\n");
-  BrigInstBase out4 = {
-    32,
-    BrigEInstBase, 
-    BrigDiv, 
-    Brigs32,
-    BrigNoPacking,
-    {8, 24, 24 + sizeof(BrigOperandImmed), 0, 0}
-  };
-  init(in, out4, numTestCases++);
+  op1.assign("$s1"); op2.assign(""); op3.assign("");
 
-  in.assign( "div_u64 $d1, $d3, 0x233412349456;\n");
-  BrigInstBase out5 = {
-    32,
-    BrigEInstBase, 
-    BrigDiv, 
-    Brigu64,
-    BrigNoPacking,
-    {8, 20, 32, 0, 0}
+  Out.opcode = BrigDiv;
+  Out.type = Brigs32;
+  Out.packing = BrigNoPacking;
+
+  reg1.type = Brigb32;
+  reg1.name = buffer_start;
+
+  BrigOperandImmed imm2 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}
   };
-  init(in, out5, numTestCases++);
+  imm2.bits.u = 100;
+
+  BrigOperandImmed imm3 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}
+  };
+  imm3.bits.u = 10;
+
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed, BrigOperandImmed> 
+            TestCase5(in, &Out, &reg1, &imm2, &imm3, op1, op2, op3);
+  TestCase5.Run_Test(&Instruction3);
+
+  /******* case 6 reg , reg , immed *******/
+  in.assign( "div_u64 $d1, $d3, 0x1234945;\n");
+  op1.assign("$d1"); op2.assign("$d3"); op3.assign("");
+
+  Out.type = Brigu64;
+
+  Out.o_operands[1] = buffer_start + size_reg;
+  Out.o_operands[2] = buffer_start + size_reg * 2;
+
+  reg1.type = reg2.type = Brigb64;
+  reg1.name = buffer_start;
+  reg2.name = buffer_start + op1.size() + 1;
+
+  imm3.bits.u = 0x1234945;
+ 
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandImmed> 
+            TestCase6(in, &Out, &reg1, &reg2, &imm3, op1, op2, op3);
+  TestCase6.Run_Test(&Instruction3);
   
+  /******* case 7 reg , reg , WAVESIZE *******/
   in.assign( "rem_s64 $d1, $d3, WAVESIZE;\n");
-  BrigInstBase out6 = {
-    32,
-    BrigEInstBase, 
-    BrigRem, 
-    Brigs64,
-    BrigNoPacking,
-    {8, 20, 32, 0, 0}
-  };
-  init(in, out6, numTestCases++); 
-  
-  in.assign( "rem_u64 $d1, 0x040, 0x233412349456;\n");
-  BrigInstBase out7 = {
-    32,
-    BrigEInstBase, 
-    BrigRem, 
-    Brigu64,
-    BrigNoPacking,
-    {8, 24, 48, 0, 0}
-  };
-  init(in, out7, numTestCases++);
-  
+  op1.assign("$d1"); op2.assign("$d3"); op3.assign("");
+
+  Out.opcode = BrigRem;
+  Out.type = Brigs64;
+
+  reg1.type = reg2.type = Brigb64;
+  reg1.name = buffer_start;
+  reg2.name = buffer_start + op1.size() + 1;
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandWaveSz> 
+            TestCase7(in, &Out, &reg1, &reg2, &wav, op1, op2, op3);
+  TestCase7.Run_Test(&Instruction3);
+
+  /******* case 8 reg , immed , immed *******/
+  in.assign( "rem_u64 $d1, 0x040, 0x12349456;\n");
+
+  Out.type = Brigu64;
+  Out.packing = BrigNoPacking;
+  Out.o_operands[1] = buffer_start + size_reg + sizeof(BrigOperandPad);
+  Out.o_operands[2] = buffer_start + size_reg + sizeof(BrigOperandPad)
+                      + sizeof(BrigOperandImmed);
+
+  imm2.bits.u = 0x040;
+  imm3.bits.u = 0x12349456;
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed, BrigOperandImmed> 
+            TestCase8(in, &Out, &reg1, &imm2, &imm3, op1, op2, op3);
+  TestCase8.Run_Test(&Instruction3);
+
+  /******* case 9 reg , reg , immed *******/
   in.assign( "shl_u32 $s1, $s1, 2;\n");
-  BrigInstBase out8 = {
-    32,
-    BrigEInstBase, 
-    BrigShl, 
-    Brigu32,
-    BrigNoPacking,
-    {8, 8, 24, 0, 0}
-  };
-  init(in, out8, numTestCases++);
+  op1.assign("$s1"); op2.assign(""); op3.assign("");
+
+  Out.opcode = BrigShl;
+  Out.type = Brigu32;
+  Out.o_operands[1] = buffer_start;
+  Out.o_operands[2] = buffer_start + size_reg + sizeof(BrigOperandPad);
   
+  reg2.type = reg1.type = Brigb32;
+  reg2.name = reg1.name = buffer_start;
+
+  imm3.bits.u = 2;
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandImmed> 
+            TestCase9(in, &Out, &reg1, &reg2, &imm3, op1, op2, op3);
+  TestCase9.Run_Test(&Instruction3);
+ 
+  /******* case 10 reg , reg , immed *******/
   in.assign("class_f32 $c1, $s2, 0x10;");
-  BrigInstBase out9 = {
-    32,
-    BrigEInstBase, 
-    BrigClass, 
-    Brigb1,
-    BrigNoPacking,
-    {8, 20, 32, 0, 0}
-  };
-  init(in, out9, numTestCases++);
-  
+  op1.assign("$c1"); op2.assign("$s2"); op3.assign("");
+
+  Out.opcode = BrigClass;
+  Out.type = Brigb1;
+  Out.o_operands[1] = buffer_start + size_reg;
+  Out.o_operands[2] = buffer_start + size_reg * 2;
+
+  reg1.type = Brigb1;
+  reg1.name = buffer_start;
+  reg2.type = Brigb32;
+  reg2.name = buffer_start + op1.size() + 1;
+  imm3.bits.u = 0x10;
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandImmed> 
+            TestCase10(in, &Out, &reg1, &reg2, &imm3, op1, op2, op3);
+  TestCase10.Run_Test(&Instruction3);
+
+  /******* case 11 reg , reg , reg *******/
   in.assign("class_f64 $c0, $d1, $s1;");
-  BrigInstBase out10 = {
-    32,
-    BrigEInstBase, 
-    BrigClass, 
-    Brigb1,
-    BrigNoPacking,
-    {8, 20, 32, 0, 0}
-  };
-  init(in, out10, numTestCases++);
-*/  
+  op1.assign("$c0"); op2.assign("$d1"); op3.assign("$s1");
+
+  reg1.type = Brigb1;
+  reg1.name = buffer_start;  
+  reg2.type = Brigb64;
+  reg2.name = buffer_start + op1.size() + 1;
+  reg3.type = Brigb32;
+  reg3.name = buffer_start + op1.size() + op2.size() + 2;
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg> 
+            TestCase11(in, &Out, &reg1, &reg2, &reg3, op1, op2, op3);
+  TestCase11.Run_Test(&Instruction3);
+
   }
 
 } //namespace hsa
