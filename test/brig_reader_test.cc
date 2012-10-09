@@ -431,7 +431,7 @@ static void testInst(const char *inst, const T(&testVec)[N]) {
   }
 
   void *args[] = { &input1, &input2, &input3, &output, &arraySize};
-  llvm::Function *fun = BP->begin();
+  llvm::Function *fun = BP->getFunction("__OpenCL_vec_test_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
