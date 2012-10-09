@@ -169,54 +169,7 @@ TEST(CodegenTest, Ld_Codegen){
   Ld_Test<BrigOperandReg> TestCase1(in, op1, op2, &out, &width, &dest, &addr);
   TestCase1.Run_Test(&Ld);  
   
-
-
 /********************************Add More Unit tests **********************************/
-/*  
-  in.assign("st_arg_f32 $s0, [%output][$s2-4];\n");
-  BrigInstLdSt out1 = {
-    44,                // size
-    BrigEInstLdSt,     // kind
-    BrigSt,            // opcode
-    Brigf32,           // type
-    BrigNoPacking,     // packing
-    {8, 44, 0, 0, 0},  // operand[5]
-    BrigArgSpace,      // storageClass
-    BrigRegular,       // memorySemantic
-    0                  // equivClass
-  };
-  
-    //Ref to $s0
-    BrigOperandReg reg2 = {
-  sizeof(BrigOperandReg),
-  BrigEOperandReg,
-  Brigb32,
-  0,
-  16
-  };
-    
-  //Ref to $s2
-  BrigOperandReg reg3 = {
-  sizeof(BrigOperandReg),
-  BrigEOperandReg,
-  Brigb32,
-  0,
-  20 
-  };
-  
-  //Ref to Compound Addr
-  BrigOperandCompound comp = {
-  sizeof(BrigOperandCompound),
-  BrigEOperandCompound,
-  Brigb64,
-  0,
-  20,//byte offset to operand addr
-  32, //to operand reg
-  -4  
-  };
-  
-  TestCase_LdSt[1].init(in, out1, reg2, addr, &reg3, &comp);  
-  */
 
 }
 }
