@@ -806,3 +806,49 @@ TEST(BrigKernelTest, EmptyCB) {
   BE.launch(fun, args);
 }
 
+TEST(BrigKernelTest, FizzBuzz) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &__fizzbuzz (kernarg_s32 %r, kernarg_s32 %n)\n"
+    "{\n"
+    "@__fizzbuzz_entry:"
+    "      ld_kernarg_u32   $s3, [%n];\n"
+    "      div_f32     $s2, $s3, 3;\n"      
+    "      mul_s32     $s1, $s2, 3;\n"      
+    "      sub_s32     $s0, $s3, $s1;\n"    
+    "      cmp_eq_b1_u32   $c0, $s0, 0;\n"  
+    "      cbr         $c0, @exit;\n"       // end if
+    "      div_f32     $s8, $s3, 5;\n"      
+    "      mul_s32     $s7, $s8, 5;\n"      
+    "      sub_s32     $s6, $s3, $s7;\n"    
+    "      cmp_eq_b1_u32   $c1, $s6, 0;\n" 
+    "      cbr         $c1, @exit;\n"       //end if
+    "      ld_kernarg_s32 $s5, [%r];\n"
+    "      st_global_s32  0, [$s5];\n"
+    "      ret;\n"
+    "@exit:"
+    "      ld_kernarg_s32 $s4, [%r];\n"
+    "      st_global_s32  $s3, [$s4];\n"
+    "      ret;\n"
+    "};\n"
+  );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  unsigned size = 10;
+  int *r = new int[size];
+  int *n = new int[size];
+  void *args[] = { &r, n };
+  llvm::Function *fun = BP->getFunction("__fizzbuzz");
+
+  for(unsigned i = 0; i < size; ++i) {
+    n[i] = i + 1;
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(fun, args);
+  }
+ 
+  EXPECT_EQ(3, r[2]);
+
+  delete[] r;
+  delete[] n;
+}
