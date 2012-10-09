@@ -85,34 +85,34 @@ public:
     op_offset+=sizeof(getdest);
     
     if(oper_indirect){
+      if(oper_reg){
+        BrigOperandReg getreg;
+        context->get_operand(op_offset, &getreg);
+        validate_brig::validate(oper_reg, &getreg);
+        op_offset+=sizeof(getreg);
+      }   
       BrigOperandIndirect getindir;
       context->get_operand(op_offset, &getindir);
       validate_brig::validate(oper_indirect, &getindir);
-      op_offset+=sizeof(getindir);
-      
-      if(oper_reg){
-        BrigOperandReg getreg;
-        context->get_operand(op_offset, &getreg);
-        validate_brig::validate(oper_reg, &getreg);
-        op_offset+=sizeof(getreg);
-      }          
+      op_offset+=sizeof(getindir);      
+             
     } else if(oper_comp){
-      BrigOperandCompound getcomp;
-      context->get_operand(op_offset, &getcomp);
-      validate_brig::validate(oper_comp, &getcomp);
-      op_offset+=sizeof(getcomp);
-      
       BrigOperandAddress getaddr;
       context->get_operand(op_offset, &getaddr);
       validate_brig::validate(oper_addr, &getaddr);
-      op_offset+=sizeof(getaddr);
+      op_offset+=sizeof(getaddr);      
       
       if(oper_reg){
         BrigOperandReg getreg;
         context->get_operand(op_offset, &getreg);
         validate_brig::validate(oper_reg, &getreg);
         op_offset+=sizeof(getreg);
-      }        
+      } 
+      BrigOperandCompound getcomp;
+      context->get_operand(op_offset, &getcomp);
+      validate_brig::validate(oper_comp, &getcomp);
+      op_offset+=sizeof(getcomp);      
+      
     } else {
       BrigOperandAddress getaddr;
       context->get_operand(op_offset, &getaddr);
@@ -126,7 +126,7 @@ TEST(CodegenTest, Ld_Codegen){
 
   std::string in, op1, op2; 
   in.assign( "ld_arg_f32 $s0, [%input];\n");
-  op1.assign("$s0"); op2.assign("[%input]");
+  op1.assign("$s0"); op2.assign("%input");
   int buffer_start = BUFFER_OFFSET;
   
   BrigOperandReg dest = {
