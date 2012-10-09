@@ -50,21 +50,8 @@ void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
-  // Question: validating uint and float, and double and uint64. No information in type. Check!!  
-  switch(ref->type){
-    case Brigb1: 
-      EXPECT_EQ(ref->bits.c, get->bits.c); break;
-    case Brigb8: 
-      EXPECT_EQ(ref->bits.c, get->bits.c); break;
-    case Brigb16: 
-      EXPECT_EQ(ref->bits.h, get->bits.h); break;
-    case Brigb32: 
-      EXPECT_EQ(ref->bits.u, get->bits.u); break;
-    case Brigb64:
-      EXPECT_EQ(ref->bits.l[0], get->bits.l[0]);
-      EXPECT_EQ(ref->bits.l[1], get->bits.l[1]); 
-      break;
-  }  
+  EXPECT_EQ(ref->bits.l[0], get->bits.l[0]);
+  EXPECT_EQ(ref->bits.l[1], get->bits.l[1]);
 }
 
 void validate(const BrigOperandWaveSz* ref, const BrigOperandWaveSz* get){
@@ -112,6 +99,51 @@ void validate(const BrigOperandIndirect* ref, const BrigOperandIndirect* get){
   EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->offset, get->offset);  
 }
+
+void validate(const BrigDirectiveFunction* ref, const BrigDirectiveFunction* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_EQ(ref->s_name, get->s_name);
+  EXPECT_EQ(ref->inParamCount, get->inParamCount);
+  EXPECT_EQ(ref->d_firstScopedDirective, get->d_firstScopedDirective);
+  EXPECT_EQ(ref->operationCount, get->operationCount);
+  EXPECT_EQ(ref->d_nextDirective, get->d_nextDirective);
+  EXPECT_EQ(ref->attribute, get->attribute);
+  EXPECT_EQ(ref->fbarCount, get->fbarCount);
+  EXPECT_EQ(ref->outParamCount, get->outParamCount);
+  EXPECT_EQ(ref->d_firstInParam, get->d_firstInParam);
+}
+
+void validate(const BrigDirectiveSymbol* ref, const BrigDirectiveSymbol* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->s.c_code, get->s.c_code);
+  EXPECT_EQ(ref->s.storageClass, get->s.storageClass);
+  EXPECT_EQ(ref->s.attribute, get->s.attribute);
+  EXPECT_EQ(ref->s.reserved, get->s.reserved);
+  EXPECT_EQ(ref->s.symbolModifier, get->s.symbolModifier);
+  EXPECT_EQ(ref->s.dim, get->s.dim);
+  EXPECT_EQ(ref->s.s_name, get->s.s_name);
+  EXPECT_EQ(ref->s.type, get->s.type);
+  EXPECT_EQ(ref->s.align, get->s.align);
+  EXPECT_EQ(ref->d_init, get->d_init);
+  EXPECT_EQ(ref->reserved, get->reserved);  
+}
+
+#if 0
+void validate(const BrigDirectiveSignature* ref, const BrigDirectiveSignature* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_EQ(ref->s_name, get->s_name);
+  EXPECT_EQ(ref->fbarCount, get->fbarCount);
+  EXPECT_EQ(ref->reserved, get->reserved);
+  EXPECT_EQ(ref->outCount, get->outCount);
+  EXPECT_EQ(ref->inCount, get->inCount);
+}
+
+#endif
 
 }//namespace validate_brig
 
