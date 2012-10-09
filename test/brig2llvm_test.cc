@@ -162,7 +162,7 @@ TEST(Brig2LLVMTest, Example2) {
     directives.append(&bdv);
 
     BrigDirectiveFunction bdf = {
-      sizeof(bdf), BrigEDirectiveFunction,
+      sizeof(bdf), BrigEDirectiveKernel,
       8,   // c_code
       8,   // s_name
       0,   // inParamCount
@@ -180,7 +180,7 @@ TEST(Brig2LLVMTest, Example2) {
 
     BrigSymbolCommon s = {
       8,             // c_code
-      BrigArgSpace,  // storageClass
+      BrigKernargSpace,  // storageClass
       BrigNone,      // attribute
       0,             // reserved
       0,             // symbolModifier
@@ -220,7 +220,7 @@ TEST(Brig2LLVMTest, Example2) {
     std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
     EXPECT_NE(0U, output.size());
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "define void @return_true(float* %ret_val)")));
+    "define void @kernel.return_true(float* %ret_val)")));
     // HSA-48
     EXPECT_NE(std::string::npos, output.find(std::string(
     "%c_regs = type { [8 x i1] }")));
@@ -278,7 +278,7 @@ TEST(Brig2LLVMTest, Example3) {
     };
     directives.append(&bdv);
     BrigDirectiveFunction bdf = {
-      sizeof(bdf), BrigEDirectiveFunction,
+      sizeof(bdf), BrigEDirectiveKernel,
       8,   // c_code
       8,   // s_name
       0,   // inParamCount
@@ -295,7 +295,7 @@ TEST(Brig2LLVMTest, Example3) {
     directives.append(&bdf);
     BrigSymbolCommon s = {
       8,             // c_code
-      BrigArgSpace,  // storageClass
+      BrigKernargSpace,  // storageClass
       BrigNone,      // attribute
       0,             // reserved
       0,             // symbolModifier
@@ -391,7 +391,7 @@ TEST(Brig2LLVMTest, Example3) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "define void @packed_ops(<4 x i8>* %x)")));
+    "define void @kernel.packed_ops(<4 x i8>* %x)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 2")));
     EXPECT_NE(std::string::npos, output.find(std::string(
@@ -447,7 +447,7 @@ TEST(Brig2LLVMTest, Example4) {
 
     BrigDirectiveFunction bdf = {
       sizeof(bdf),                    // size
-      BrigEDirectiveFunction,         // kind
+      BrigEDirectiveKernel,           // kind
       8,                              // c_code
       8,                              // s_name
       0,                              // inParamCount
@@ -469,7 +469,7 @@ TEST(Brig2LLVMTest, Example4) {
       BrigEDirectiveSymbol, // kind
       {
         8,                    // c_code
-        BrigArgSpace,         // storageClass
+        BrigKernargSpace,     // storageClass
         BrigNone,             // attribute
         0,                    // reserved
         0,                    // symbolModifier
@@ -700,7 +700,7 @@ TEST(Brig2LLVMTest, Example5) {
 
     BrigDirectiveFunction caller = {
       sizeof(caller),                 // size
-      BrigEDirectiveFunction,         // kind
+      BrigEDirectiveKernel,           // kind
       40,                             // c_code
       16,                              // s_name
       0,                              // inParamCount
@@ -790,7 +790,7 @@ TEST(Brig2LLVMTest, Example5) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @callee() {")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "define void @caller() {")));
+    "define void @kernel.caller() {")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "call void @callee()")));
 
