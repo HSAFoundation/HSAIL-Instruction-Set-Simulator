@@ -2482,6 +2482,7 @@ int InitializableDecl(Context* context) {
 int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
 {
   context->init_symbol_modifier();
+  context->set_isArray(false);
   //First token already verified as GLOBAL/READONLY
   if (context->token_type == DATA_TYPE_ID) {
     context->set_type(context->token_value.data_type);
@@ -6994,10 +6995,12 @@ int SingleListSingle(Context * context) {
         BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
         context->get_directive(bds_offset,&bds);
 
-        if (0 == context->get_dim() && context->get_isArray()) {
-          // If array is empty [],  Update dim. 
-          bds.s.symbolModifier = BrigArray;
-          context->set_symbol_modifier(BrigArray);
+        if (0 == context->get_dim()) {
+          if (context->get_isArray()) {
+            // If array is empty [],  Update dim. 
+            bds.s.symbolModifier = BrigArray;
+            context->set_symbol_modifier(BrigArray);
+          }
           bds.s.dim = elementCount;
         } else if (elementCount > bds.s.dim) { 
           context->set_error(INVALID_INITIALIZER);
@@ -8071,10 +8074,12 @@ int FloatListSingle(Context* context) {
         context->get_directive(bds_offset, &bds);
 
 
-        if (0 == context->get_dim() && context->get_isArray()) {
-          // If array is empty [],  Update dim. 
-          bds.s.symbolModifier = BrigArray;
-          context->set_symbol_modifier(BrigArray);
+        if (0 == context->get_dim()) {
+          if (context->get_isArray()) {
+            // If array is empty [],  Update dim. 
+            bds.s.symbolModifier = BrigArray;
+            context->set_symbol_modifier(BrigArray);
+          }
           bds.s.dim = elementCount;
         } else if (elementCount > bds.s.dim) { 
           context->set_error(INVALID_INITIALIZER);
@@ -8176,10 +8181,12 @@ int DecimalListSingle(Context* context) {
         context->get_directive(bds_offset,&bds);
         
 
-        if (0 == context->get_dim() && context->get_isArray()) {
-          // If array is empty [],  Update dim. 
-          bds.s.symbolModifier = BrigArray;
-          context->set_symbol_modifier(BrigArray);
+        if (0 == context->get_dim()) {
+          if (context->get_isArray()) {
+            // If array is empty [],  Update dim. 
+            bds.s.symbolModifier = BrigArray;
+            context->set_symbol_modifier(BrigArray);
+          }
           bds.s.dim = elementCount;
         } else if (elementCount > bds.s.dim) { 
           context->set_error(INVALID_INITIALIZER);
