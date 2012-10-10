@@ -21,7 +21,7 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get){
   EXPECT_EQ(ref->o_operands[4], get->o_operands[4]);
 }
 
-void validate(BrigInstMod* ref, BrigInstMod* get){
+void validate(const BrigInstMod* ref, const BrigInstMod* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->opcode, get->opcode);
@@ -32,8 +32,8 @@ void validate(BrigInstMod* ref, BrigInstMod* get){
   EXPECT_EQ(ref->o_operands[2], get->o_operands[2]);
   EXPECT_EQ(ref->o_operands[3], get->o_operands[3]);
   EXPECT_EQ(ref->o_operands[4], get->o_operands[4]);
-  uint32_t* ref1 = reinterpret_cast<uint32_t *> (&(ref->aluModifier));
-  uint32_t* get1 = reinterpret_cast<uint32_t *> (&(get->aluModifier));
+  const uint32_t* ref1 = reinterpret_cast<const uint32_t* > (&(ref->aluModifier));
+  const uint32_t* get1 = reinterpret_cast<const uint32_t* > (&(get->aluModifier));
   EXPECT_EQ(*ref1, *get1);
 }
 
