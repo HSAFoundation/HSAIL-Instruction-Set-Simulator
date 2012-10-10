@@ -1601,10 +1601,6 @@ TEST(CodegenTest, Instrustion2_With_Modifier_CodeGen) {
 
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, &out5, &reg1, &imm, op1, op2);
   TestCase5.Run_Test(&Instruction2);
-
-
-
-
 }
 }
 }
