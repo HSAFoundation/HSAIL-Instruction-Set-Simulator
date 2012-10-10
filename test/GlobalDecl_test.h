@@ -71,5 +71,56 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   
 }
 
+TEST(CodegenTest, FunctionDecl_Codegen){
+  
+  std::string in, name;
+  int code_start = BUFFER_OFFSET;
+  int string_start = BUFFER_OFFSET;
+  int dir_start = BUFFER_OFFSET;
+  
+  in.assign("function &callee()(); \n");
+  name.assign("&callee");
+  BrigDirectiveFunction ref = {
+    sizeof(BrigDirectiveFunction),                       // size
+    BrigEDirectiveFunction,   // kind
+    code_start,                       // c_code
+    string_start,                        // s_name
+    0,                        // inParamCount
+    sizeof(BrigDirectiveFunction) + dir_start,                      // d_firstScopedDirective
+    0,                        // operationCount
+    sizeof(BrigDirectiveFunction) + dir_start,                      // d_nextDirective
+    BrigNone,
+    0,
+    0,                        // outParamCount
+    0,
+  };
+  GlobalDecl_Test<BrigDirectiveFunction> TestCase1(in, name, &ref);
+  TestCase1.Run_Test(&GlobalDecl); 
+  
+  /***************************************************Test case 2********************************/
+  
+  in.assign("extern function &callee(arg_u32 %val1)(arg_u16 %val2);\n ");
+  name.assign("&callee");
+  
+  int dir_size = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)*2 + dir_start;
+  BrigdOffset32_t firstInParam = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)* 1 + dir_start;
+  BrigDirectiveFunction ref2 = {
+    sizeof(BrigDirectiveFunction),                       // size
+    BrigEDirectiveFunction,   // kind
+    code_start,                       // c_code
+    string_start,                        // s_name
+    1,                        // inParamCount
+    dir_size,                      // d_firstScopedDirective
+    0,                        // operationCount
+    dir_size,                      // d_nextDirective
+    BrigExtern,
+    0,
+    1,                        // outParamCount
+    firstInParam
+  };
+  GlobalDecl_Test<BrigDirectiveFunction> TestCase2(in, name, &ref2);
+  TestCase2.Run_Test(&GlobalDecl);
+}
+
 }
 }
