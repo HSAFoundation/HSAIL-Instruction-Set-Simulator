@@ -856,7 +856,7 @@ TEST(BrigKernelTest, FizzBuzz) {
     "  brn @loop_check;"
     "@loop_check:"
     "  add_u32 $s2, $s2, 1;"
-    "  cmp_le_b1_u32 $c1, $s2, $s1;\n"
+    "  cmp_lt_b1_u32 $c1, $s2, $s1;\n"
     "  cbr $c1, @loop;\n"
     "  ret;\n"
     "};\n"
