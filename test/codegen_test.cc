@@ -13,6 +13,7 @@
 #include "Instruction2_test.h"
 #include "Ld_test.h"
 #include "St_test.h"
+#include "GlobalDecl_test.h"
 
 namespace hsa {
 namespace brig {
@@ -8933,131 +8934,6 @@ TEST(CodegenTest,FunctionSignatureCodegen){
 
   delete lexer;
 }
-
-TEST(CodegenTest, FunctionDeclCodeGen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("function &callee()(); \n");
-
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, FunctionDecl(context));
-
-  // test the sizes of each section
-  BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(sizeof(BrigDirectiveFunction) + 8, dsize);
-
-  // test BrigDirectiveFunction, the caller function
-  BrigDirectiveFunction ref = {
-    sizeof(BrigDirectiveFunction),                       // size
-    BrigEDirectiveFunction,   // kind
-    8,                       // c_code
-    8,                        // s_name
-    0,                        // inParamCount
-    sizeof(BrigDirectiveFunction) + 8,                      // d_firstScopedDirective
-    0,                        // operationCount
-    sizeof(BrigDirectiveFunction) + 8,                      // d_nextDirective
-    BrigNone,
-    0,
-    0,                        // outParamCount
-    0,
-  };
-
-  BrigDirectiveFunction get;
-  context->get_directive(context->current_bdf_offset, &get);
-  EXPECT_EQ(ref.s_name, get.s_name);
-  EXPECT_EQ(ref.c_code, get.c_code);
-  EXPECT_EQ(ref.outParamCount, get.outParamCount);
-  EXPECT_EQ(ref.inParamCount, get.inParamCount);
-  EXPECT_EQ(ref.operationCount, get.operationCount);
-  EXPECT_EQ(ref.d_nextDirective, get.d_nextDirective);
-  EXPECT_EQ(ref.d_firstScopedDirective, get.d_firstScopedDirective);
-
-  context->clear_context();
-  input.assign("extern function &callee(arg_u32 %val1)(arg_u16 %val2); \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, FunctionDecl(context));
-
-  BrigdOffset32_t firstInParam = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)* 1 + 8;
-  BrigDirectiveFunction ref2 = {
-    sizeof(BrigDirectiveFunction),                       // size
-    BrigEDirectiveFunction,   // kind
-    8,                       // c_code
-    8,                        // s_name
-    1,                        // inParamCount
-    context->get_directive_offset(),                      // d_firstScopedDirective
-    0,                        // operationCount
-    context->get_directive_offset(),                      // d_nextDirective
-    BrigExtern,
-    0,
-    1,                        // outParamCount
-    firstInParam,
-  };
-
-  context->get_directive(context->current_bdf_offset, &get);
-  EXPECT_EQ(ref2.s_name, get.s_name);
-  EXPECT_EQ(ref2.c_code, get.c_code);
-  EXPECT_EQ(ref2.outParamCount, get.outParamCount);
-  EXPECT_EQ(ref2.inParamCount, get.inParamCount);
-  EXPECT_EQ(ref2.operationCount, get.operationCount);
-  EXPECT_EQ(ref2.d_nextDirective, get.d_nextDirective);
-  EXPECT_EQ(ref2.d_firstScopedDirective, get.d_firstScopedDirective);
-  EXPECT_EQ(ref2.attribute, get.attribute);
-  EXPECT_EQ(ref2.d_firstInParam, get.d_firstInParam);
-
-  delete lexer;
-}
-
-TEST(CodegenTest, GlobalSymbolDecl){
- context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("align 1 static group_s8 &tmp[2];\n");
-
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, GlobalSymbolDecl(context));
-  BrigDirectiveSymbol ref = {
-//alignment externOrStatic
-//"align 1 static group_s8 &tmp[2];"
-	40,                       // size
-  BrigEDirectiveSymbol ,    // kind
-    {
-    8,                      // c_code
-    BrigGroupSpace,         // storag class
-    BrigStatic,             // attribute
-    0,                      // reserved
-    BrigArray,              // symbolModifier
-    2,                      // dim
-    8,                      // s_name
-    Brigs8,                // type
-    1,                      // align
-     },
-  0,                        // d_init
-  0,                        // reserved
-  };
-  BrigDirectiveSymbol get;
-  context->get_directive(8, &get);
-
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.s.c_code, get.s.c_code);
-  EXPECT_EQ(ref.s.attribute, get.s.attribute);
-  EXPECT_EQ(ref.s.storageClass, get.s.storageClass);
-  EXPECT_EQ(ref.s.symbolModifier, get.s.symbolModifier);
-  EXPECT_EQ(ref.s.dim, get.s.dim);
-  EXPECT_EQ(ref.s.s_name, get.s.s_name);
-  EXPECT_EQ(ref.s.type, get.s.type);
-  EXPECT_EQ(ref.s.align, get.s.align);
-  delete lexer;
-}
-
-
 
 TEST(CodegenTest, MulCodeGen) {
   context->set_error_reporter(main_reporter);

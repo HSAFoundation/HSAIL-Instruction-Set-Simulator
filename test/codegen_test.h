@@ -18,6 +18,7 @@ protected:
   int code_start;
   int operand_start;
   int string_start;
+  int directive_start;
 
 public:
   BrigCodeGenTest(std::string &In){
@@ -27,6 +28,7 @@ public:
     code_start = BUFFER_OFFSET;
     operand_start = BUFFER_OFFSET;
     string_start = BUFFER_OFFSET;
+    directive_start = BUFFER_OFFSET;
   }  
   
   virtual void validate(Context* context) = 0;
