@@ -1138,6 +1138,45 @@ public:
 
     /**
      ***************************************************************************
+     * Create a marker with all previously enqueued commands as implicit
+     * dependencies. Enqueue operations can still be performed on this Queue
+     * after this Marker.
+     *
+     * A marker serves to provide dependency resolution for a hierarchy of
+     * dispatchs. The marker will complete when the dependencies are completed.
+     * The returned event can be used to wait for the marker to complete.
+     *
+     * @param lock If true this will lock the core queue until the marker is
+     * signaled, else this will not lock the core queue.
+     *
+     * @return A pointer to an event that will be signaled when this marker
+     * has completed.
+     ***************************************************************************
+     */
+    virtual hsa::Event* marker(bool lock = false) = 0;
+    
+    /**
+     ***************************************************************************
+     * Create a marker with an explicit list of dependencies. Enqueue operations
+     * can still be performed on this Queue after this Marker.
+     *
+     * A marker serves to provide dependency resolution for a hierarchy of
+     * dispatchs. The marker will complete when the dependencies are completed.
+     * The returned event can be used to wait for the marker to complete.
+     *
+     * @param waitList List of events this marker depends on.
+     *
+     * @param lock If true this will lock the core queue until the marker is
+     * signaled, else this will not lock the core queue.
+     *
+     * @return A pointer to an event that will be signaled when this marker
+     * has completed.
+     ***************************************************************************
+     */
+    virtual hsa::Event* marker(hsa::vector<hsa::Event*>& waitList, bool lock = false) = 0;
+    
+    /**
+     ***************************************************************************
      * @brief Dispatch a kernel with variable arguments
      * @details This HSA queue interface is used to enqueue dispatch of
      *          a specified HSAIL Kernel for execution.  The dispatched
@@ -1160,7 +1199,7 @@ public:
      * @return Pointer to an hsa::DispatchEvent
      *
      ***************************************************************************
-     */
+     */    
     virtual hsa::DispatchEvent *dispatch(hsa::Kernel *kernel,
                                          hsa::LaunchAttributes launchAttr,
                                          hsa::vector<hsa::Event *> &deps,
