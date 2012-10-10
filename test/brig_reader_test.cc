@@ -834,7 +834,7 @@ TEST(BrigKernelTest, CRC32) {
   }
   ret = ~ret;
   //CRC32 in C++ end. ret is CRC32 result.
-  
+
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
@@ -849,13 +849,13 @@ TEST(BrigKernelTest, CRC32) {
     "@loop_i:"
     "  cmp_lt_b1_u32 $c1, $s4, $s1;\n"    // if i > len  go to return
     "  cbr $c1, @return;\n"
-    
+
     "  and_b32 $s5, $s0, 0xFF;\n"         // $s5 is for CRC32 array index
     "  ld_u32 $s6, [$s3];\n"
     "  add_u32 $s3, $s3, 1;\n"            // n_ptr + 1
     "  and_b32 $s6, $s6, 0xFF;\n"
     "  xor_b32 $s5, $s5, $s6;\n"          //$s5 now is sub index of CRC array
-    
+
        // get value of CRC32 array $s5 index. result store in $s5
     "  add_u32 $s2, 0, 0;\n"              // $s2 is for j. j = 0
     "@loop_j:"
@@ -870,34 +870,34 @@ TEST(BrigKernelTest, CRC32) {
     "  cmp_lt_b1_u32 $c3, $s2, 8;\n"      // j start at 1; if j < 9 go to @loop_j
     "  cbr $c3, @loop_j;\n"
 
-    "  shr_u32  $s6, $s0, 8;\n"           // $s6 now is ret >> 8 
+    "  shr_u32  $s6, $s0, 8;\n"           // $s6 now is ret >> 8
     "  xor_b32 $s0, $s5, $s6;\n"          // $s0 is ret
-   
+
     "  add_u32 $s1, $s1, 1;\n"            // ++i
     "  brn @loop_i;\n"
 
     "@return:"
     "  xor_b32 $s0, $s0, 0xFFFFFFFF;\n"   // ~ret
     "  ld_kernarg_u32 $s1, [%r];\n"
-    "  st_global_u32 $s0, [$s1];\n"    
+    "  st_global_u32 $s0, [$s1];\n"
     "  ret;\n"
     "};"
     );
   EXPECT_TRUE(BP);
   if(!BP) return;
-  
-  unsigned *r = new unsigned;  
-  unsigned *l = new unsigned(len);  
+
+  unsigned *r = new unsigned;
+  unsigned *l = new unsigned(len);
   void *args[] = { &r, &a, l};
   llvm::Function *fun = BP->getFunction("CRC32Kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
-  
+
   EXPECT_EQ(ret, *r);
   EXPECT_EQ(0x3981703A, *r);
 
   delete r;
-  delete a;
+  delete[] a;
   delete l;
 }
 
