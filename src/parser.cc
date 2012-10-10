@@ -208,6 +208,7 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
+    boi.bits.l[0] = boi.bits.l[1] = 0;
     boi.bits.d = context->token_value.double_val;
     context->append_operand(&boi);
 
@@ -220,6 +221,7 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
+    boi.bits.l[0] = boi.bits.l[1] = 0;
     boi.bits.f = context->token_value.float_val;
     context->append_operand(&boi);
     return 0;
@@ -232,6 +234,7 @@ int BaseOperand(Context* context) {
       { 0 }
     };
     // TODO(Huy): check context for operation type and decide the type
+    boi.bits.l[0] = boi.bits.l[1] = 0;
     boi.bits.u = context->token_value.int_val;
     context->append_operand(&boi);
 
@@ -257,6 +260,7 @@ int BaseOperand(Context* context) {
       { 0 }
       };
       // TODO(Huy): check context for operation type and decide the type
+      boi.bits.l[0] = boi.bits.l[1] = 0;
       boi.bits.u = -context->token_value.int_val;
       context->append_operand(&boi);
 
@@ -277,6 +281,7 @@ int BaseOperand(Context* context) {
         { 0 }
         };
         // TODO(Huy): check context for operation type and decide the type
+        boi.bits.l[0] = boi.bits.l[1] = 0;
         boi.bits.u = -context->token_value.int_val;
         context->append_operand(&boi);
 
@@ -295,6 +300,7 @@ int BaseOperand(Context* context) {
                 { 0 }
               };
   // TODO(Huy): check context for operation type and decide the type
+              boi.bits.l[0] = boi.bits.l[1] = 0;
               boi.bits.u = context->token_value.int_val;
               context->append_operand(&boi);
 
@@ -319,6 +325,7 @@ int BaseOperand(Context* context) {
         0,                  // reserved
         { 0 }
         };
+        boi.bits.l[0] = boi.bits.l[1] = 0;
         boi.bits.d = context->token_value.double_val;
         context->append_operand(&boi);
 
@@ -336,6 +343,7 @@ int BaseOperand(Context* context) {
                 0,                  // reserved
                 { 0 }
               };
+              boi.bits.l[0] = boi.bits.l[1] = 0;
               boi.bits.d = context->token_value.double_val;
               context->append_operand(&boi);
               context->token_to_scan = yylex();
