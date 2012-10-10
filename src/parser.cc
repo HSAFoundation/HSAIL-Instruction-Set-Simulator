@@ -8604,7 +8604,7 @@ int GlobalInitializable(Context* context){
 int GlobalDeclpart2(Context *context){
   // the header is declPrefix
   if(FUNCTION == context->token_to_scan){
-    if(!FunctionDefinition(context)){
+    if(!FunctionDefinitionPart2(context)){
        if(';'== context->token_to_scan)
           return 0;
         else return 1;
