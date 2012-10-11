@@ -340,13 +340,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.name = buffer_start;
 
   BrigOperandImmed imm = {
-    sizeof(BrigOperandImmed),
+    0,
     BrigEOperandImmed,
     Brigb32,
     0,
     {0} 
   };
+  
   imm.bits.u = 100;
+  imm.size = sizeof(imm);
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase12(in, &out12, &reg1, &imm, op1, op2);
   TestCase12.Run_Test(&Instruction2);
 
@@ -396,11 +398,12 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
+  
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb32;
   imm.reserved = 0;
   imm.bits.f = 1.0f;
+  imm.size = sizeof(imm);
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase14(in, &out14, &reg1, &imm, op1, op2);
   TestCase14.Run_Test(&Instruction2);
 
@@ -426,11 +429,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb64;
   imm.reserved = 0;
   imm.bits.d = 1.0;
+  imm.size = sizeof(imm);
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase15(in, &out15, &reg1, &imm, op1, op2);
   TestCase15.Run_Test(&Instruction2);
 
@@ -674,11 +677,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb32;
   imm.reserved = 0;
   imm.bits.l[0] = 0x234;
+  imm.size = sizeof(imm);
   
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase25(in, &out25, &reg1, &imm, op1, op2);
   TestCase25.Run_Test(&Instruction2);
@@ -857,11 +860,12 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
+  
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb32;
   imm.reserved = 0;
   imm.bits.f = 3.2f;
+  imm.size = sizeof(imm);
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase32(in, &out32, &reg1, &imm, op1, op2);
   TestCase32.Run_Test(&Instruction2);
  
