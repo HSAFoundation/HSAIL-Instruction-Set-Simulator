@@ -1597,7 +1597,7 @@ TEST(CodegenTest, Instrustion2_With_Modifier_CodeGen) {
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb32;
   imm.reserved = 0;
-  imm.bits.l[0] = 99;
+  imm.bits.u = 99;
 
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, &out5, &reg1, &imm, op1, op2);
   TestCase5.Run_Test(&Instruction2);
