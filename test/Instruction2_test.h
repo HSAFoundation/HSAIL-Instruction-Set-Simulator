@@ -1513,16 +1513,16 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  BrigOperandImmed imm = {
+  BrigOperandImmed imm1 = {
     sizeof(BrigOperandImmed),
     BrigEOperandImmed,
     Brigb32,
     0,
     {0} 
   };
-  imm.bits.f = 1.6f;
+  imm1.bits.f = 1.6f;
 
-  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase3(in, &out3, &reg1, &imm, op1, op2);
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase3(in, &out3, &reg1, &imm1, op1, op2);
   TestCase3.Run_Test(&Instruction2);
 
 /**********************************************************************************/
@@ -1557,13 +1557,16 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb64;
-  imm.reserved = 0;
-  imm.bits.d = 1.0;
+  BrigOperandImmed imm2 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb64,
+    0,
+    {0} 
+  };
+  imm2.bits.d = 1.0;
 
-  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase4(in, &out4, &reg1, &imm, op1, op2);
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase4(in, &out4, &reg1, &imm2, op1, op2);
   TestCase4.Run_Test(&Instruction2);
 
 /**********************************************************************************/
@@ -1598,13 +1601,16 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb32;
-  imm.reserved = 0;
-  imm.bits.u = 99;
+  BrigOperandImmed imm3 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0} 
+  };
+  imm3.bits.u = 99;
 
-  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, &out5, &reg1, &imm, op1, op2);
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, &out5, &reg1, &imm3, op1, op2);
   TestCase5.Run_Test(&Instruction2);
 }
 } //namespace brig
