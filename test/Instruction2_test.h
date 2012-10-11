@@ -1405,6 +1405,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase54(in, &out54, &reg1, &reg2, op1, op2);
   TestCase54.Run_Test(&Instruction2);
 
+}
 /**********************************************************************************/
 /**********************************************************************************/
 TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
@@ -1606,5 +1607,5 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, &out5, &reg1, &imm, op1, op2);
   TestCase5.Run_Test(&Instruction2);
 }
-}
-}
+} //namespace brig
+} //namespace hsa
