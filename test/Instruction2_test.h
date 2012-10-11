@@ -339,16 +339,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  BrigOperandImmed imm = {
-    0,
+  BrigOperandImmed imm1 = {
+    sizeof(BrigOperandImmed),
     BrigEOperandImmed,
     Brigb32,
     0,
     {0} 
   };
-  imm.bits.u = 99;
-  imm.size = sizeof(imm);
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase12(in, &out12, &reg1, &imm, op1, op2);
+  imm1.bits.u = 99;
+ 
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase12(in, &out12, &reg1, &imm1, op1, op2);
   TestCase12.Run_Test(&Instruction2);
 
 /**********************************************************************************/
@@ -397,13 +397,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb32;
-  imm.reserved = 0;
-  imm.bits.f = 1.0f;
-  imm.size = sizeof(imm);
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase14(in, &out14, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm2 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0} 
+  };
+  imm2.bits.f = 1.0f;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase14(in, &out14, &reg1, &imm2, op1, op2);
   TestCase14.Run_Test(&Instruction2);
 
 /**********************************************************************************/
@@ -428,12 +431,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb64;
-  imm.reserved = 0;
-  imm.bits.d = 1.0;
-  imm.size = sizeof(imm);
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase15(in, &out15, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm3 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb64,
+    0,
+    {0} 
+  };
+  imm3.bits.d = 1.0;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase15(in, &out15, &reg1, &imm3, op1, op2);
   TestCase15.Run_Test(&Instruction2);
 
 /**********************************************************************************/
@@ -676,13 +683,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb32;
-  imm.reserved = 0;
-  imm.bits.l[0] = 0x234;
-  imm.size = sizeof(imm);
-  
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase25(in, &out25, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm4 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0} 
+  };
+  imm4.bits.u = 0x234;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase25(in, &out25, &reg1, &imm4, op1, op2);
   TestCase25.Run_Test(&Instruction2);
 
 /**********************************************************************************/
@@ -859,13 +869,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb32;
-  imm.reserved = 0;
-  imm.bits.f = 3.2f;
-  imm.size = sizeof(imm);
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase32(in, &out32, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm5 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0} 
+  };
+  imm5.bits.f = 3.2f;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase32(in, &out32, &reg1, &imm5, op1, op2);
   TestCase32.Run_Test(&Instruction2);
 
 /**********************************************************************************/
@@ -1037,12 +1050,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb64;
-  imm.reserved = 0;
-  imm.bits.d = 1.21;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase39(in, &out39, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm6 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb64,
+    0,
+    {0} 
+  };
+  imm6.bits.d = 1.21;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase39(in, &out39, &reg1, &imm6, op1, op2);
   TestCase39.Run_Test(&Instruction2);
 
 /**********************************************************************************/
