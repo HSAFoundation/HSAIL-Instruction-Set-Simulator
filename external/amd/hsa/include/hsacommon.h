@@ -1423,7 +1423,7 @@ public:
      ***************************************************************************
      */
 
-    string getExceptionStack(){
+    string getExceptionStack() const {
         string exStack;
         char tmp[40];
         exStack = "Status\tmsg\n";
