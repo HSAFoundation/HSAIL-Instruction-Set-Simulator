@@ -33,15 +33,17 @@ public:
     const T* getinst = (cast<T>(getcode));
     validate_brig::validate(RefInst, getinst);
     
-    oper_iterator getoper = TestOutput->oper_begin();
-    const T1 *getdest = (cast<T1>(getoper));
+    const T1 *getdest = reinterpret_cast <const T1*> (&(TestOutput->operands[getinst->o_operands[0]]));
     validate_brig::validate(RefDest, refbuf, getdest, getbuf);
         
-    const T2 *getsrc1 = (cast<T2>(++getoper));
+    const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));    
     validate_brig::validate(RefSrc1, refbuf, getsrc1, getbuf);
     
-    const T3 *getsrc2 = (cast<T3>(++getoper));
+    const T3 *getsrc2 = reinterpret_cast <const T3*> (&(TestOutput->operands[getinst->o_operands[2]]));
     validate_brig::validate(RefSrc2, refbuf, getsrc2, getbuf);
+    
+    EXPECT_EQ(0, getinst->o_operands[3]);
+    EXPECT_EQ(0, getinst->o_operands[4]);       
   }
 };
   
@@ -59,14 +61,14 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   //To keep the stack footprint low
   
   std:: string in; std::string op1, op2, op3;
-  StringBuffer* symbols = new StringBuffer();
+  StringBuffer* symbols;
   
   BrigOperandReg reg1, reg2, reg3;
   BrigInstBase Out;
-  int op_buffer_start = OPERAND_BUFFER_OFFSET;
   int size_reg = sizeof(BrigOperandReg);
   
   /************************************* Test Case 1************************************/
+  symbols = new StringBuffer();
   in.assign( "add_pp_sat_u16x2 $s1, $s0, $s3; \n");
   op1.assign("$s1"); op2.assign("$s0"); op3.assign("$s3");
   symbols->append(op1); symbols->append(op2); symbols->append(op3);
@@ -76,8 +78,8 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   Out.opcode = BrigAdd;
   Out.type = Brigu16x2;
   Out.packing = BrigPackPPsat;
-  Out.o_operands[0] = op_buffer_start; Out.o_operands[1] = op_buffer_start + size_reg; 
-  Out.o_operands[2] = op_buffer_start + 2*size_reg; Out.o_operands[3] = 0; Out.o_operands[4] = 0;
+  Out.o_operands[0] = 0; Out.o_operands[1] = size_reg; 
+  Out.o_operands[2] = 2*size_reg; Out.o_operands[3] = 0; Out.o_operands[4] = 0;
   
   reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
