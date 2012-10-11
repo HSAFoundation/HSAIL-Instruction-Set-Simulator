@@ -340,13 +340,14 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.name = buffer_start;
 
   BrigOperandImmed imm = {
-    sizeof(BrigOperandImmed),
+    0,
     BrigEOperandImmed,
     Brigb32,
     0,
     {0} 
   };
   imm.bits.u = 99;
+  imm.size = sizeof(imm);
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase12(in, &out12, &reg1, &imm, op1, op2);
   TestCase12.Run_Test(&Instruction2);
 
@@ -396,11 +397,12 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
+  
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb32;
   imm.reserved = 0;
   imm.bits.f = 1.0f;
+  imm.size = sizeof(imm);
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase14(in, &out14, &reg1, &imm, op1, op2);
   TestCase14.Run_Test(&Instruction2);
 
@@ -426,11 +428,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb64;
   imm.reserved = 0;
   imm.bits.d = 1.0;
+  imm.size = sizeof(imm);
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase15(in, &out15, &reg1, &imm, op1, op2);
   TestCase15.Run_Test(&Instruction2);
 
@@ -674,11 +676,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb32;
   imm.reserved = 0;
   imm.bits.l[0] = 0x234;
+  imm.size = sizeof(imm);
   
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase25(in, &out25, &reg1, &imm, op1, op2);
   TestCase25.Run_Test(&Instruction2);
@@ -857,11 +859,12 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.name = buffer_start;
 
-  imm.size = sizeof(BrigOperandImmed);
+  
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb32;
   imm.reserved = 0;
   imm.bits.f = 3.2f;
+  imm.size = sizeof(imm);
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase32(in, &out32, &reg1, &imm, op1, op2);
   TestCase32.Run_Test(&Instruction2);
 
@@ -958,6 +961,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.name = buffer_start;
 
   reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
+  
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase36(in, &out36, &reg1, &reg2, op1, op2);
   TestCase36.Run_Test(&Instruction2);
  
@@ -985,6 +989,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase37(in, &out37, &reg1, &reg2, op1, op2);
   TestCase37.Run_Test(&Instruction2);
 
+  
 /**********************************************************************************/
  in.assign( "frcp_f32 $s1, $s0;\n");
   op1.assign("$s1"); op2.assign("$s0"); 
@@ -1088,7 +1093,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase41(in, &out41, &reg1, &reg2, op1, op2);
   TestCase41.Run_Test(&Instruction2);
 
-/**********************************************************************************/
+ /**********************************************************************************/
  in.assign( "unpack1 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   buffer_start = BUFFER_OFFSET;
@@ -1399,11 +1404,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase54(in, &out54, &reg1, &reg2, op1, op2);
   TestCase54.Run_Test(&Instruction2);
-}
 
+}
 /**********************************************************************************/
 /**********************************************************************************/
-TEST(CodegenTest, Instrustion2_With_Modifier_CodeGen) {
+TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
 
   std::string in; 
   in.assign( "sqrt_ftz_s8x4 $s1, $s2; \n");
@@ -1602,5 +1607,5 @@ TEST(CodegenTest, Instrustion2_With_Modifier_CodeGen) {
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, &out5, &reg1, &imm, op1, op2);
   TestCase5.Run_Test(&Instruction2);
 }
-}
-}
+} //namespace brig
+} //namespace hsa
