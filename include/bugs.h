@@ -2,6 +2,9 @@
 // Bug Report: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42019
 // Fixed by Jonathon Wakely 11/20/2009 in libstdc++ revision 154377
 #if __GNUC__ == 4 && __GNUC_MINOR__ == 4
+
+#include <cassert>
+
 #define typeid(X) fake::fake()
 
 namespace fake {
