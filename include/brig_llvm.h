@@ -6,8 +6,10 @@
 #include "brig_buffer.h"
 #include "brig_module.h"
 #include "brig_reader.h"
+#include "bugs.h"
 
 #include <tr1/memory>
+
 #include <string>
 
 namespace llvm {

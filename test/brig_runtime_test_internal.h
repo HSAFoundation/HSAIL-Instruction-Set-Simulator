@@ -391,22 +391,22 @@ static void TestInst(R (*Impl)(A, B, C, D), void (*Logic)(R, A, B, C, D)) {
 
 template<class T, class R>
 static void TestVectorInst(R (*Impl)(T), void (*Logic)(R, T)) {
-  typedef typename hsa::brig::Vec<T>::Base Base;
+  typedef typename T::Base Base;
   const std::vector<Base> &testVector = getTestVector<Base>();
   for(unsigned i = 0; i < testVector.size(); ++i) {
-    T a = { testVector[i] };
+    T a = testVector[i];
     Logic(Impl(a), a);
   }
 }
 
 template<class T, class R>
 static void TestVectorInst(R (*Impl)(T, T), void (*Logic)(R, T, T)) {
-  typedef typename hsa::brig::Vec<T>::Base Base;
+  typedef typename T::Base Base;
   const std::vector<Base> &testVector = getTestVector<Base>();
   for(unsigned i = 0; i < testVector.size(); ++i) {
-    T a = { testVector[i] };
+    T a = testVector[i];
     for(unsigned j = 0; j < testVector.size(); ++j) {
-      T b = { testVector[j] };
+      T b = testVector[j];
       Logic(Impl(a, b), a, b);
     }
   }
@@ -415,11 +415,11 @@ static void TestVectorInst(R (*Impl)(T, T), void (*Logic)(R, T, T)) {
 template<class T, class R>
 static void TestVectorInst(R (*Impl)(T, unsigned),
                            void (*Logic)(R, T, unsigned)) {
-  typedef typename hsa::brig::Vec<T>::Base Base;
+  typedef typename T::Base Base;
   const std::vector<Base> &testVectorB = getTestVector<Base>();
   const std::vector<unsigned> &testVectorU = getTestVector<unsigned>();
   for(unsigned i = 0; i < testVectorB.size(); ++i) {
-    T a = { testVectorB[i] };
+    T a = testVectorB[i];
     for(unsigned j = 0; j < testVectorU.size(); ++j) {
       unsigned b = testVectorU[j];
       Logic(Impl(a, b), a, b);
@@ -430,13 +430,13 @@ static void TestVectorInst(R (*Impl)(T, unsigned),
 template<class T, class R>
 static void TestVectorInst(R (*Impl)(T, T, unsigned),
                            void (*Logic)(R, T, T, unsigned)) {
-  typedef typename hsa::brig::Vec<T>::Base Base;
+  typedef typename T::Base Base;
   const std::vector<Base> &testVectorB = getTestVector<Base>();
   const std::vector<unsigned> &testVectorU = getTestVector<unsigned>();
   for(unsigned i = 0; i < testVectorB.size(); ++i) {
-    T a = { testVectorB[i] };
+    T a = testVectorB[i];
     for(unsigned j = 0; j < testVectorB.size(); ++j) {
-      T b = { testVectorB[j] };
+      T b = testVectorB[j];
       for(unsigned k = 0; k < testVectorB.size(); ++k) {
         unsigned c = testVectorU[k];
         Logic(Impl(a, b, c), a, b, c);

@@ -97,8 +97,17 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
   } else if(type == Brigb128) {
     return llvm::Type::getIntNTy(C, 128);
   } else if(BrigInstHelper::isVectorTy(type)) {
+
+    llvm::Type *base = getElementTy(C, type);
     unsigned length = BrigInstHelper::getVectorLength(type);
-    return llvm::VectorType::get(getElementTy(C, type), length);
+
+    if(base->isIntegerTy()) {
+      unsigned bitWidth = base->getIntegerBitWidth() * length;
+      if(bitWidth < 64)
+        return llvm::Type::getIntNTy(C, bitWidth);
+    }
+
+    return llvm::VectorType::get(base, length);
   } else {
     assert(false && "Unimplemented type");
   }

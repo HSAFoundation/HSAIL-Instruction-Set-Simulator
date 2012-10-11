@@ -387,19 +387,19 @@ TEST(Brig2LLVMTest, Example3) {
     EXPECT_NE(0, output.size());
 
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
+    "declare i32 @Abs_P_s8x4(i32)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
+    "declare i32 @AddSat_PP_u16x2(i32, i32)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "define void @kernel.packed_ops(<4 x i8>* %x)")));
+    "define void @kernel.packed_ops(i32* %x)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 2")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 3")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "call <4 x i8> @Abs_P_s8x4")));
+    "call i32 @Abs_P_s8x4")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "call <2 x i16> @AddSat_PP_u16x2")));
+    "call i32 @AddSat_PP_u16x2")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "%gpu_reg_p = alloca %struct.regs")));
     EXPECT_NE(std::string::npos, output.find(std::string(
@@ -631,9 +631,9 @@ TEST(Brig2LLVMTest, Example4) {
     std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
     EXPECT_NE(0, output.size());
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
+    "declare i32 @Abs_P_s8x4(i32)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
+    "declare i32 @AddSat_PP_u16x2(i32, i32)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "outof_IF:")));
     EXPECT_NE(std::string::npos, output.find(std::string(

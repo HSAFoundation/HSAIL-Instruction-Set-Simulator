@@ -509,6 +509,11 @@ TEST(BrigInstTest, VectorMad) {
   testInst("mad_s32", testVec);
 }
 
+TEST(BrigWriterTest, VectorArith) {
+  const uint32_t testVec[] = { 0, 0x01010101, 0xFFFFFFFF };
+  testInst("add_pp_s8x4", testVec);
+}
+
 TEST(BrigWriterTest, GlobalArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
