@@ -10,44 +10,34 @@ template <typename T, typename T1, typename T2, typename T3> class Instruction3O
 private:
   
   //Instruction in .code buffer
-  const T* Output;
+  const T* RefInst;
   //Operands in .operands buffer
-  const T1* dest;
-  const T2* src1;
-  const T3* src2;
-  //Symbols in .string buffer
-  const std::string dest_name;
-  const std::string src1_name;
-  const std::string src2_name;
-  
+  const T1* RefDest;
+  const T2* RefSrc1;
+  const T3* RefSrc2;
+     
 public:
-  Instruction3Opcode_Test(std::string& in, T* ref, T1* Dest, T2* Src1, T3* Src2, 
-        std::string& op1, std::string& op2, std::string& op3) : 
-    BrigCodeGenTest(in),
-    Output(ref),
-    dest(Dest),
-    src1(Src1),
-    src2(Src2),
-    dest_name(op1),
-    src1_name(op2),
-    src2_name(op3) { }
+  Instruction3Opcode_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1, T3* Src2) : 
+    BrigCodeGenTest(in, sbuf),
+    RefInst(ref),
+    RefDest(Dest),
+    RefSrc1(Src1),
+    RefSrc2(Src2) { }
       
-  void validate(Context* context){
-    T getcode;
-    context->get_code(code_start, &getcode);
-    validate_brig::validate(Output, &getcode);
+  void validate(struct BrigSections* TestOutput){
     
-    T1 getreg1;
-    context->get_operand(Output->o_operands[0], &getreg1);
-    validate_brig::validate(dest, &getreg1);
+    inst_iterator getcode = TestOutput->code_begin();
+    validate_brig::validate(RefInst, getcode);//getcode);
+    
+    oper_iterator getoper = TestOutput->oper_begin();
+    const T1 *getdest = (cast<T1>(getoper));
+    validate_brig::validate(RefDest, getdest);
         
-    T2 getreg2;
-    context->get_operand(Output->o_operands[1], &getreg2);
-    validate_brig::validate(src1, &getreg2);
-        
-    T3 getreg3;
-    context->get_operand(Output->o_operands[2], &getreg3);
-    validate_brig::validate(src2, &getreg3);
+    const T2 *getsrc1 = (cast<T2>(++getoper));
+    validate_brig::validate(RefSrc1, getsrc1);
+    
+    const T3 *getsrc2 = (cast<T3>(++getoper));
+    validate_brig::validate(RefSrc2, getsrc2);
   }
 };
   
@@ -61,35 +51,46 @@ Steps for Unit Test Generation
   
 TEST(CodegenTest, Instruction3Op_CodeGen){
   
-  std:: string in; std::string op1, op2, op3; 
+  
+  /********************************** Common variables used by all tests******************************/
+  //To keep the stack footprint low
+  
+  std:: string in; std::string op1, op2, op3;
+  StringBuffer *sbuf = new StringBuffer(); 
   BrigOperandReg reg1, reg2, reg3;
   BrigInstBase Out;
-  int buffer_start = BUFFER_OFFSET;    //All buffers(.code, .directive, .string) begin at an offset of 8 bytes
+  int op_buffer_start = OPERAND_BUFFER_OFFSET;    //All buffers(.code, .directive, .string) begin at an offset of 8 bytes
+  int string_buffer_start = STRING_BUFFER_OFFSET;
   int size_reg = sizeof(BrigOperandReg);
+  
+  /************************************* Test Case 1************************************/
   
   in.assign( "add_pp_sat_u16x2 $s1, $s0, $s3; \n");
   op1.assign("$s1"); op2.assign("$s0"); op3.assign("$s3");
+  sbuf->append(op1); sbuf->append(op2); sbuf->append(op3);
+  
   Out.size = sizeof(BrigInstBase);
   Out.kind = BrigEInstBase;
   Out.opcode = BrigAdd;
   Out.type = Brigu16x2;
   Out.packing = BrigPackPPsat;
-  Out.o_operands[0] = buffer_start; Out.o_operands[1] = buffer_start + size_reg; 
-  Out.o_operands[2] = buffer_start + 2*size_reg; Out.o_operands[3] = 0; Out.o_operands[4] = 0;
+  Out.o_operands[0] = op_buffer_start; Out.o_operands[1] = op_buffer_start + size_reg; 
+  Out.o_operands[2] = op_buffer_start + 2*size_reg; Out.o_operands[3] = 0; Out.o_operands[4] = 0;
   
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start; //Offset to string table  
+  reg1.name = string_buffer_start; //Offset to string table  
   
   reg2 = reg3 = reg1;
-  reg2.name = buffer_start + op1.size()+1; reg3.name = buffer_start + op1.size()+1 + op2.size()+1;
-  
+  reg2.name = string_buffer_start + op1.size()+1; reg3.name = string_buffer_start + op1.size()+1 + op2.size()+1;  
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg> 
-            TestCase1(in, &Out, &reg1, &reg2, &reg3, op1, op2, op3);
+            TestCase1(in, sbuf, &Out, &reg1, &reg2, &reg3);
   TestCase1.Run_Test(&Instruction3);
-  
+  delete sbuf;
+
+#if 0
   /***************************Add more Unit Tests************************************/
   
   /******* case 2 reg , reg , reg *******/
@@ -424,7 +425,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg> 
             TestCase11(in, &out11, &reg1, &reg2, &reg3, op1, op2, op3);
   TestCase11.Run_Test(&Instruction3);
-
+#endif
   }
 
 } //namespace hsa
