@@ -25,19 +25,23 @@ public:
     RefSrc2(Src2) { }
       
   void validate(struct BrigSections* TestOutput){
+  
+    const char* refbuf = reinterpret_cast<const char *>(&Refbuf->get()[0]);
+    const char* getbuf = TestOutput->strings;   
     
     inst_iterator getcode = TestOutput->code_begin();
-    validate_brig::validate(RefInst, getcode);//getcode);
+    const T* getinst = (cast<T>(getcode));
+    validate_brig::validate(RefInst, getinst);
     
     oper_iterator getoper = TestOutput->oper_begin();
     const T1 *getdest = (cast<T1>(getoper));
-    validate_brig::validate(RefDest, getdest);
+    validate_brig::validate(RefDest, refbuf, getdest, getbuf);
         
     const T2 *getsrc1 = (cast<T2>(++getoper));
-    validate_brig::validate(RefSrc1, getsrc1);
+    validate_brig::validate(RefSrc1, refbuf, getsrc1, getbuf);
     
     const T3 *getsrc2 = (cast<T3>(++getoper));
-    validate_brig::validate(RefSrc2, getsrc2);
+    validate_brig::validate(RefSrc2, refbuf, getsrc2, getbuf);
   }
 };
   
@@ -49,25 +53,23 @@ Steps for Unit Test Generation
 4. Assign the appropriate reference values,  and call Run_Test(). 
 */
   
-TEST(CodegenTest, Instruction3Op_CodeGen){
-  
+TEST(CodegenTest, Instruction3Op_CodeGen){  
   
   /********************************** Common variables used by all tests******************************/
   //To keep the stack footprint low
   
   std:: string in; std::string op1, op2, op3;
-  StringBuffer *sbuf = new StringBuffer(); 
+  StringBuffer* symbols = new StringBuffer();
+  
   BrigOperandReg reg1, reg2, reg3;
   BrigInstBase Out;
-  int op_buffer_start = OPERAND_BUFFER_OFFSET;    //All buffers(.code, .directive, .string) begin at an offset of 8 bytes
-  int string_buffer_start = STRING_BUFFER_OFFSET;
+  int op_buffer_start = OPERAND_BUFFER_OFFSET;
   int size_reg = sizeof(BrigOperandReg);
   
   /************************************* Test Case 1************************************/
-  
   in.assign( "add_pp_sat_u16x2 $s1, $s0, $s3; \n");
   op1.assign("$s1"); op2.assign("$s0"); op3.assign("$s3");
-  sbuf->append(op1); sbuf->append(op2); sbuf->append(op3);
+  symbols->append(op1); symbols->append(op2); symbols->append(op3);
   
   Out.size = sizeof(BrigInstBase);
   Out.kind = BrigEInstBase;
@@ -81,14 +83,14 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = string_buffer_start; //Offset to string table  
+  reg1.name = 0;
   
   reg2 = reg3 = reg1;
-  reg2.name = string_buffer_start + op1.size()+1; reg3.name = string_buffer_start + op1.size()+1 + op2.size()+1;  
+  reg2.name = op1.size()+1; reg3.name = op1.size()+1 + op2.size()+1;  
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg> 
-            TestCase1(in, sbuf, &Out, &reg1, &reg2, &reg3);
+            TestCase1(in, symbols, &Out, &reg1, &reg2, &reg3);
   TestCase1.Run_Test(&Instruction3);
-  delete sbuf;
+  delete symbols;
 
 #if 0
   /***************************Add more Unit Tests************************************/

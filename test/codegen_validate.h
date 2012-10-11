@@ -1,11 +1,12 @@
-#include <iostream>
-#include <string>
-#include "gtest/gtest.h"
-#include "brig.h"
-
 #ifndef VALIDATE_BRIG
 #define VALIDATE_BRIG
 
+#include <iostream>
+#include <string>
+#include "gtest/gtest.h"
+
+namespace hsa{
+namespace brig{
 namespace validate_brig{
 
 void validate(const BrigInstBase* ref, const BrigInstBase* get){
@@ -14,11 +15,14 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get){
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
+  
   EXPECT_EQ(ref->o_operands[0], get->o_operands[0]);
   EXPECT_EQ(ref->o_operands[1], get->o_operands[1]);
   EXPECT_EQ(ref->o_operands[2], get->o_operands[2]);
   EXPECT_EQ(ref->o_operands[3], get->o_operands[3]);
   EXPECT_EQ(ref->o_operands[4], get->o_operands[4]);
+
+    
 }
 
 void validate(const BrigInstMod* ref, const BrigInstMod* get){
@@ -28,6 +32,7 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get){
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   EXPECT_EQ(ref->o_operands[0], get->o_operands[0]);
+  
   EXPECT_EQ(ref->o_operands[1], get->o_operands[1]);
   EXPECT_EQ(ref->o_operands[2], get->o_operands[2]);
   EXPECT_EQ(ref->o_operands[3], get->o_operands[3]);
@@ -37,12 +42,12 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get){
   EXPECT_EQ(*ref1, *get1);
 }
 
-void validate(const BrigOperandReg* ref, const BrigOperandReg* get){
+void validate(const BrigOperandReg* ref, const char* refstr, const BrigOperandReg* get, const char* getstr){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
-  EXPECT_EQ(ref->name, get->name);
+  EXPECT_STREQ(&refstr[ref->name], &getstr[get->name]);
 }
 
 void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
@@ -146,5 +151,6 @@ void validate(const BrigDirectiveSignature* ref, const BrigDirectiveSignature* g
 #endif
 
 }//namespace validate_brig
-
+}
+}
 #endif

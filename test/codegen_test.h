@@ -18,7 +18,7 @@ protected:
   Context* context;
   ErrorReporter* main_reporter;
   std::string Input;
-  StringBuffer* sbuf;
+  StringBuffer* Refbuf;
     
   //Buffer offsets
   int code_start;
@@ -27,11 +27,11 @@ protected:
   int directive_start;
 
 public:
-  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf)/* : S_(NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0)*/{  
+  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf){  
     context = NULL;
     main_reporter = NULL;
     Input.assign(In);
-    sbuf = Sbuf;
+    Refbuf = Sbuf;
     code_start = CODE_BUFFER_OFFSET;
     operand_start = OPERAND_BUFFER_OFFSET;
     string_start = STRING_BUFFER_OFFSET;
@@ -53,7 +53,7 @@ public:
     EXPECT_EQ(0, ret);  
     if(!ret){
       
-      Buffer* str = context->get_strings();
+      StringBuffer* str = context->get_strings();
       Buffer* dir = context->get_directive();
       Buffer* oper = context->get_operands();
       Buffer* code = context->get_code();
