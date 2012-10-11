@@ -36,10 +36,10 @@ public:
     const T1 *getdest = reinterpret_cast <const T1*> (&(TestOutput->operands[getinst->o_operands[0]]));
     validate_brig::validate(RefDest, refbuf, getdest, getbuf);
         
-    const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));    
-    const T3 *getsrc2 = reinterpret_cast <const T3*> (&(TestOutput->operands[getinst->o_operands[2]]));
+    const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
+    validate_brig::validate(RefSrc1, refbuf, getsrc1, getbuf);
     
-    validate_brig::validate(RefSrc1, refbuf, getsrc1, getbuf);    
+    const T3 *getsrc2 = reinterpret_cast <const T3*> (&(TestOutput->operands[getinst->o_operands[2]]));
     validate_brig::validate(RefSrc2, refbuf, getsrc2, getbuf);
     
     EXPECT_EQ(0, getinst->o_operands[3]);
@@ -134,12 +134,13 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg> 
             TestCase2(in, symbols, &out2, &reg1, &reg2, &reg3);
   TestCase2.Run_Test(&Instruction3);
+  symbols->clear();
   
-  #if 0
+  
   /******* case 3 reg , WAVESIZE , reg *******/
   in.assign( "add_u64 $d1, WAVESIZE, $d3;\n");
-  op1.assign("$d1"); op2.assign(""); op3.assign("$d3");
-  symbols->append(op1); symbols->append(op2); symbols->append(op3);
+  op1.assign("$d1"); op3.assign("$d3");
+  symbols->append(op1); symbols->append(op3);
   uint32_t size_wav = sizeof(BrigOperandWaveSz);
 
   BrigInstBase out3 = {
@@ -174,8 +175,9 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandWaveSz, BrigOperandReg> 
             TestCase3(in, symbols, &out3, &reg1, &wav, &reg3);
   TestCase3.Run_Test(&Instruction3);
+  symbols->clear();
 
-  
+  #if 0
   /******* case 4 reg , immed , WAVESIZE *******/
   in.assign( "add_ps_sat_s16x4 $d1, 0x40, WAVESIZE;\n");
   op1.assign("$d1"); op2.assign(""); op3.assign("");

@@ -36,7 +36,7 @@ void validate(const BrigOperandReg* ref, const char* refstr, const BrigOperandRe
   EXPECT_STREQ(&refstr[ref->name], &getstr[get->name]);
 }
 
-void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
+void validate(const BrigOperandImmed* ref, const char* refstr, const BrigOperandImmed* get, const char* getstr){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
@@ -45,7 +45,7 @@ void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
   EXPECT_EQ(ref->bits.l[1], get->bits.l[1]);
 }
 
-void validate(const BrigOperandWaveSz* ref, const BrigOperandWaveSz* get){
+void validate(const BrigOperandWaveSz* ref, const char* refstr, const BrigOperandWaveSz* get, const char* getstr){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);  
 }

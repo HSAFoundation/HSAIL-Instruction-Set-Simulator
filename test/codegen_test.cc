@@ -10,7 +10,7 @@
 #include "context.h"
 #include "parser_wrapper.h"
 #include "Instruction3_test.h"
-//#include "Instruction2_test.h"
+#include "Instruction2_test.h"
 //#include "Ld_test.h"
 //#include "St_test.h"
 //#include "GlobalDecl_test.h"
