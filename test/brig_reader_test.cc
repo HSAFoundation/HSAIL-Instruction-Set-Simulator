@@ -883,6 +883,6 @@ for(unsigned i = 0; i < size; ++i) {
     }
   }
  
-  delete r;
-  delete n;
+  delete[] r;
+  delete[] n;
 }
