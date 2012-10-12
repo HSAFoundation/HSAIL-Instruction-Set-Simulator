@@ -509,6 +509,11 @@ TEST(BrigInstTest, VectorMad) {
   testInst("mad_s32", testVec);
 }
 
+TEST(BrigWriterTest, VectorArith) {
+  const uint32_t testVec[] = { 0, 0x01010101, 0xFFFFFFFF };
+  testInst("add_pp_s8x4", testVec);
+}
+
 TEST(BrigWriterTest, GlobalArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
@@ -806,83 +811,98 @@ TEST(BrigKernelTest, EmptyCB) {
   BE.launch(fun, args);
 }
 
-TEST(BrigKernelTest, FizzBuzz) {
+TEST(BrigKernelTest, CRC32) {
+  const unsigned arraySize = 16;
+  char *a = new char[arraySize];
+  for(unsigned i = 0; i < arraySize; ++i) {
+    a[i] = 'a' + i;
+  }
+  unsigned len = 10;
+  //CRC32 in C++
+  uint   CRC32[256];
+  unsigned   i,j;
+  uint   crc;
+  for(i = 0;i < 256;i++){
+    crc = i;
+    for(j = 0;j < 8;j++){
+      if(crc & 1){
+        crc = (crc >> 1) ^ 0xEDB88320;
+      }else{
+        crc = crc >> 1;
+      }
+    }
+    CRC32[i] = crc;
+  }
+  uint ret = 0xFFFFFFFF;
+  for(i = 0; i < len;i++){
+    ret = CRC32[((ret & 0xFF) ^ a[i])] ^ (ret >> 8);
+  }
+  ret = ~ret;
+  //CRC32 in C++ end. ret is CRC32 result.
+
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
-    "kernel &__fizzbuzz (kernarg_s32 %r, kernarg_s32 %n)\n"
+    "\n"
+    "kernel &CRC32Kernel(kernarg_u32 %r, kernarg_u32 %n_ptr, kernarg_u32 %n_len)\n"
     "{\n"
-       //$s0 ret, $s1 %n, $s2 i
-    "  ld_kernarg_u32  $s1, [%n];\n"
-    "  xor_b32 $s2, $s2, $s2;"
-    "@loop:"
-    "  mov_b32 $s4, $s2;\n"
-    "  div_s32 $s5, $s4, 15;\n"      
-    "  mul_s32 $s6, $s5, 15;\n"      
-    "  sub_s32 $s5, $s4, $s6;\n"    
-    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"  
-    "  cbr $c1, @FizzBuzz;\n"       
-    "  div_s32 $s5, $s4, 3;\n"      
-    "  mul_s32 $s6, $s5, 3;\n"      
-    "  sub_s32 $s5, $s4, $s6;\n"    
-    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"  
-    "  cbr $c1, @Fizz;\n"       
-    "  div_s32 $s5, $s4, 5;\n"      
-    "  mul_s32 $s6, $s5, 5;\n"      
-    "  sub_s32 $s5, $s4, $s6;\n"    
-    "  cmp_eq_b1_u32 $c1, $s5, 0;\n" 
-    "  cbr $c1, @Buzz;\n"       
-    "  ld_kernarg_s32 $s5, [%r];\n"
-    "  shl_u32 $s6, $s2, 2;"
-    "  add_u32 $s5, $s5, $s6;"
-    "  st_global_u32 0, [$s5];\n"
-    "  brn @loop_check;"
-    "@FizzBuzz:"
-    "  ld_kernarg_s32  $s5, [%r];\n"
-    "  shl_u32 $s6, $s2, 2;"
-    "  add_u32 $s5, $s5, $s6;"
-    "  st_global_u32 15, [$s5];\n"
-    "  brn @loop_check;"
-    "@Fizz:"
-    "  ld_kernarg_s32  $s5, [%r];\n"
-    "  shl_u32 $s6, $s2, 2;"
-    "  add_u32 $s5, $s5, $s6;"
-    "  st_global_u32 3, [$s5];\n"
-    "  brn @loop_check;"
-    "@Buzz:"
-    "  ld_kernarg_s32  $s5, [%r];\n"
-    "  shl_u32 $s6, $s2, 2;"
-    "  add_u32 $s5, $s5, $s6;"
-    "  st_global_u32 5, [$s5];\n"
-    "  brn @loop_check;"
-    "@loop_check:"
-    "  add_u32 $s2, $s2, 1;"
-    "  cmp_lt_b1_u32 $c1, $s2, $s1;\n"
-    "  cbr $c1, @loop;\n"
+    "  ld_kernarg_u32 $s4, [%n_len]; \n"  // $s4 is for %n_len
+    "  ld_kernarg_u32 $s3, [%n_ptr]; \n"  // $s3 is for %n_ptr
+    "  sub_u32 $s4, $s4, 1;\n"
+    "  xor_b32 $s1, $s1, $s1;\n"          // $s1 is for i. i = 0
+    "  mov_b32 $s0, 0xFFFFFFFF;\n"        // $s0 is for retVal
+
+    "@loop_i:"
+    "  cmp_lt_b1_u32 $c1, $s4, $s1;\n"    // if i > len  go to return
+    "  cbr $c1, @return;\n"
+
+    "  and_b32 $s5, $s0, 0xFF;\n"         // $s5 is for CRC32 array index
+    "  ld_u32 $s6, [$s3];\n"
+    "  add_u32 $s3, $s3, 1;\n"            // n_ptr + 1
+    "  and_b32 $s6, $s6, 0xFF;\n"
+    "  xor_b32 $s5, $s5, $s6;\n"          //$s5 now is sub index of CRC array
+
+       // get value of CRC32 array $s5 index. result store in $s5
+    "  add_u32 $s2, 0, 0;\n"              // $s2 is for j. j = 0
+    "@loop_j:"
+    "  and_b32 $c2, $s5, 0x1;\n"          // CRC32 array index
+    "  shr_u32 $s5, $s5, 1;\n"
+    "  cbr $c2, @loop_j_if;\n"
+    "  brn @loop_j_endif;\n"
+    "@loop_j_if:"
+    "  xor_b32 $s5, $s5, 0xEDB88320;\n"
+    "@loop_j_endif:"
+    "  add_u32 $s2, $s2, 1;\n"            // ++j
+    "  cmp_lt_b1_u32 $c3, $s2, 8;\n"      // j start at 1; if j < 9 go to @loop_j
+    "  cbr $c3, @loop_j;\n"
+
+    "  shr_u32  $s6, $s0, 8;\n"           // $s6 now is ret >> 8
+    "  xor_b32 $s0, $s5, $s6;\n"          // $s0 is ret
+
+    "  add_u32 $s1, $s1, 1;\n"            // ++i
+    "  brn @loop_i;\n"
+
+    "@return:"
+    "  xor_b32 $s0, $s0, 0xFFFFFFFF;\n"   // ~ret
+    "  ld_kernarg_u32 $s1, [%r];\n"
+    "  st_global_u32 $s0, [$s1];\n"
     "  ret;\n"
-    "};\n"
-  );
+    "};"
+    );
   EXPECT_TRUE(BP);
   if(!BP) return;
 
-  unsigned size = 1000;
-  int *r = new int[size];
-  int *n = new int(size);
- 
-  llvm::Function *fun = BP->getFunction("__fizzbuzz");
-  void *args[] = { &r, n };
+  unsigned *r = new unsigned;
+  unsigned *l = new unsigned(len);
+  void *args[] = { &r, &a, l};
+  llvm::Function *fun = BP->getFunction("CRC32Kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
-for(unsigned i = 0; i < size; ++i) {
-  if (i % 15 == 0)
-    EXPECT_EQ(15, r[i]);
-  else {
-    if (i % 3  == 0)
-      EXPECT_EQ(3, r[i]);
-    if (i % 5 == 0)
-      EXPECT_EQ(5, r[i]);
-    }
-  }
- 
-  delete[] r;
-  delete[] n;
+
+  EXPECT_EQ(ret, *r);
+  EXPECT_EQ(0x3981703A, *r);
+
+  delete r;
+  delete[] a;
+  delete l;
 }
+

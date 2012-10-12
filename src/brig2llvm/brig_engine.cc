@@ -298,9 +298,11 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
                         ? llvm::EngineKind::Interpreter
                         : llvm::EngineKind::JIT);
 
-  if(!forceInterpreter)
-    builder.setJITMemoryManager(
-      llvm::JITMemoryManager::CreateDefaultMemManager());
+  LLIMCJITMemoryManager *JMM = NULL;
+  if(!forceInterpreter) {
+    LLIMCJITMemoryManager *JMM = new LLIMCJITMemoryManager();
+    builder.setJITMemoryManager(JMM);
+  }
 
   llvm::CodeGenOpt::Level OLvl = llvm::CodeGenOpt::Default;
   switch (optLevel) {
@@ -316,8 +318,6 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
   builder.setOptLevel(OLvl);
 
   builder.setUseMCJIT(true);
-  LLIMCJITMemoryManager *JMM = new LLIMCJITMemoryManager();
-  builder.setJITMemoryManager(JMM);
 
   llvm::TargetOptions options;
   options.JITEmitDebugInfo = true;
@@ -343,7 +343,8 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
       EE_->getPointerToFunction(Fn);
   }
 
-  JMM->invalidateInstructionCache();
+  if(JMM)
+    JMM->invalidateInstructionCache();
 }
 
 void BrigEngine::launch(llvm::Function *EntryFn,
