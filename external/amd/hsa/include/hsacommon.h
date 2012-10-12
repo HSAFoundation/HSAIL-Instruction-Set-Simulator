@@ -231,6 +231,7 @@ public:
             items_ = reinterpret_cast<T*>(data_);
             for(size_t cpyCount=0; cpyCount < size_; cpyCount++){
                 new (&items_[cpyCount]) T(prevItems[cpyCount]);
+                prevItems[cpyCount].~T();
             }
             // TODO: memory leak in case of exceptions. Make RAII.
             delete[] prevData;
