@@ -53,7 +53,6 @@ TEST(CodegenTest, Instruction2_CodeGen){
   in.assign( "abs_s32 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   symbols->append(op1); symbols->append(op2);
-  int align;
   int size_reg = sizeof(BrigOperandReg);
 
   BrigInstBase out1 = {
@@ -327,15 +326,13 @@ TEST(CodegenTest, Instruction2_CodeGen){
   op1.assign("$s1"); op2.assign(""); 
   symbols->append(op1); symbols->append(op2);
 
-  align = 8 - size_reg % 8;
- 
   BrigInstBase out12 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigNeg, 
     Brigs32,
     BrigNoPacking,
-    {0, size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
   reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
@@ -384,8 +381,6 @@ TEST(CodegenTest, Instruction2_CodeGen){
   in.assign( "neg_f32 $s3,1.0f;\n");
   op1.assign("$s3"); op2.assign(""); 
   symbols->append(op1); symbols->append(op2);
-
-  align = 8 - size_reg % 8;
  
    BrigInstBase out14 = {
     sizeof(BrigInstBase),
@@ -393,7 +388,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNeg, 
     Brigf32,
     BrigNoPacking,
-    {0, size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
   reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
@@ -419,15 +414,13 @@ TEST(CodegenTest, Instruction2_CodeGen){
   op1.assign("$d3"); op2.assign(""); 
   symbols->append(op1); symbols->append(op2);
  
-  align = 8 - size_reg % 8;
- 
   BrigInstBase out15 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigNeg, 
     Brigf64,
     BrigNoPacking,
-    {0, size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
   reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
@@ -671,15 +664,13 @@ TEST(CodegenTest, Instruction2_CodeGen){
   op1.assign("$d1"); op2.assign(""); 
   symbols->append(op1); symbols->append(op2);
 
-  align = 8 - size_reg % 8;
- 
    BrigInstBase out25 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigBitRev, 
     Brigu64,
     BrigNoPacking,
-    {0, size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
   reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
@@ -702,8 +693,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
 /**********************************************************************************/
   in.assign( "firstbit_s32 $s0, $s0;\n");
-  op1.assign("$s0"); op2.assign(""); 
-  symbols->append(op1); symbols->append(op2);
+  op1.assign("$s0"); 
+  symbols->append(op1); 
  
   BrigInstBase out26 = {
     sizeof(BrigInstBase),
@@ -752,8 +743,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
 /**********************************************************************************/
   in.assign( "lastbit_u32 $s0, $s0;\n");
-  op1.assign("$s0"); op2.assign(""); 
-  symbols->append(op1); symbols->append(op2);
+  op1.assign("$s0"); 
+  symbols->append(op1); 
  
   BrigInstBase out28 = {
     sizeof(BrigInstBase),
@@ -854,18 +845,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
 /**********************************************************************************/
   in.assign( "fract_f32 $s0, 3.2f;\n");
-  op1.assign("$s0"); op2.assign(""); 
-  symbols->append(op1); symbols->append(op2);
+  op1.assign("$s0"); 
+  symbols->append(op1); 
 
-  align = 8 - size_reg % 8;
- 
   BrigInstBase out32 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigFract, 
     Brigf32,
     BrigNoPacking,
-    {0, size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
   reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
@@ -1034,18 +1023,16 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
 /**********************************************************************************/
   in.assign( "sqrt_f64 $d1, 1.21;\n");
-  op1.assign("$d1"); op2.assign(""); 
-  symbols->append(op1); symbols->append(op2);
+  op1.assign("$d1"); 
+  symbols->append(op1); 
 
-  align = 8 - size_reg % 8;
- 
   BrigInstBase out39 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigSqrt, 
     Brigf64,
     BrigNoPacking,
-    {0, size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
     
   reg1.size = size_reg;
@@ -1441,7 +1428,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   in.assign( "sqrt_ftz_s8x4 $s1, $s2; \n");
   op1.assign("$s1"); op2.assign("$s2"); 
   symbols->append(op1); symbols->append(op2);
-  int align;
+
   int size_reg = sizeof(BrigOperandReg);
 
   BrigAluModifier bam;
@@ -1509,10 +1496,8 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
 
 /**********************************************************************************/
   in.assign( "fract_ftz_f32 $s0, 1.6f;\n");
-  op1.assign("$s0"); op2.assign("");  
-  symbols->append(op1); symbols->append(op2);
-
-  align = 8 - size_reg % 8;
+  op1.assign("$s0"); 
+  symbols->append(op1); 
 
   bam.ftz = 1;
   bam.floatOrInt = 0;
@@ -1528,7 +1513,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
     BrigFract,           
     Brigf32,          
     BrigNoPacking,     
-    {0, size_reg + align, 0, 0, 0},
+    {0, size_reg, 0, 0, 0},
     bam
   };
 
@@ -1556,8 +1541,6 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   op1.assign("$s1"); op2.assign(""); 
   symbols->append(op1); symbols->append(op2);
 
-  align = 8 - size_reg % 8;
-
   bam.ftz = 1;
   bam.floatOrInt = 0;
   bam.rounding = 0;
@@ -1572,7 +1555,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
     BrigNeg,           
     Brigs32,          
     BrigPackP,     
-    {0, size_reg + align, 0, 0, 0},
+    {0, size_reg, 0, 0, 0},
     bam
   };
 
@@ -1597,10 +1580,8 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
 
 /**********************************************************************************/
   in.assign( "neg_upi_s32 $s1, 99;\n");
-  op1.assign("$s1"); op2.assign(""); 
-  symbols->append(op1); symbols->append(op2);
-
-  align = 8 - size_reg % 8;
+  op1.assign("$s1"); 
+  symbols->append(op1); 
 
   bam.rounding = 2;
   bam.ftz = 0;
@@ -1616,7 +1597,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
     BrigNeg,           
     Brigs32,          
     BrigNoPacking,    
-    {0, size_reg + align, 0, 0, 0},
+    {0, size_reg, 0, 0, 0},
     bam
   };
 
