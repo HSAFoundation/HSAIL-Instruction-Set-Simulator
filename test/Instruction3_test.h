@@ -289,6 +289,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   reg2.reserved = 0;
   reg2.name = op1.size() + 1;
 
+  memset(&imm3, 0, sizeof(imm3));
   imm3.size = size_imm;
   imm3.kind = BrigEOperandImmed;
   imm3.type = Brigb32;
@@ -347,12 +348,14 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
      0, 0}
   };
   
+  memset(&imm2, 0, sizeof(imm2));
   imm2.size = size_imm;
   imm2.kind = BrigEOperandImmed;
   imm2.type = Brigb32;
   imm2.reserved = 0;
   imm2.bits.u = 0x040;
   
+  memset(&imm3, 0, sizeof(imm3));
   imm3.size = size_imm;
   imm3.kind = BrigEOperandImmed;
   imm3.type = Brigb32;
@@ -388,6 +391,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   reg2.reserved = 0;
   reg2.name = 0;
 
+  memset(&imm3, 0, sizeof(imm3));
   imm3.size = size_imm;
   imm3.kind = BrigEOperandImmed;
   imm3.type = Brigb32;
@@ -425,6 +429,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   reg2.reserved = 0;
   reg2.name = op1.size() + 1;
 
+  memset(&imm3, 0, sizeof(imm3));
   imm3.size = size_imm;
   imm3.kind = BrigEOperandImmed;
   imm3.type = Brigb32;
