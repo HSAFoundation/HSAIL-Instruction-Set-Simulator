@@ -986,3 +986,66 @@ TEST(BrigKernelTest, FizzBuzz) {
   delete[] r;
   delete n;
 }
+
+TEST(BrigKernelTest, InsertionSorter) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &insertionsortKernel(kernarg_u32 %r, kernarg_u32 %l)\n"
+    "{\n"
+       //$s0 %l, $s1 %r, $s2 i, $s3 t %r[i], $s4 j, $s5 P_%r[j], $s6 P_%r[j-1]
+    "  ld_kernarg_u32  $s1, [%r];\n"
+    "  ld_kernarg_u32  $s0, [%l];\n"
+    "  mov_b32 $s2, 1;\n"       //i = 0
+    "@loop:"
+    "  mov_b32 $s7, $s2;\n"
+    "  shl_u32 $s7, $s7, 2;\n"
+    "  add_u32 $s7, $s1, $s7;\n"       //$s3 now is addr of %r[i]    
+    "  ld_u32 $s3, [$s7];\n"           //int t = arr[i]
+    "  mov_b32 $s4, $s2;\n"            //int j = i;
+
+    "@loop_while:"
+    "  cmp_le_b1_u32 $c0, $s4, 0;\n"   // if j <= 0 goto endwhile
+    "  cbr $c0, @end_while;\n"
+    "  sub_u32 $s6, $s4, 1;\n"
+    "  shl_u32 $s6, $s6, 2;\n"
+    "  add_u32 $s6, $s6, $s1;\n"
+    "  ld_u32 $s7, [$s6];\n"           // $s7 now is %r[j-1]
+    "  cmp_le_b1_u32 $c0, $s7, $s3;\n" //arr[j-1] > t goto endwhile
+    "  cbr $c0, @end_while;\n"
+    "  add_u32 $s5, $s6, 4;\n"         // $s5 now is addr of %r[j]
+    "  st_global_u32 $s7, [$s5];\n"    // %r[j] = arr[j-1]
+    "  sub_u32 $s4, $s4, 1;\n"         // --j
+    "  brn @loop_while;\n"
+    "@end_while:"
+    "  shl_u32 $s6, $s4, 2;\n"
+    "  add_u32 $s5, $s6, $s1;\n"       //init $s5 
+    "  st_global_u32 $s3, [$s5];\n"
+    "@loop_check:"
+    "  add_u32 $s2, $s2, 1;\n"
+    "  cmp_lt_b1_u32 $c1, $s2, $s0;\n"
+    "  cbr $c1, @loop;\n"
+    "  ret;\n"
+    "};\n"
+  );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  const unsigned arraySize = 1024;
+  unsigned *r = new unsigned[arraySize];
+
+  for(unsigned i = 0; i < arraySize; i++) {
+    r[i] = ((10653245 * i + 3325) % 2048);
+  }  
+    
+  unsigned *l = new unsigned(arraySize);  
+  void *args[] = { &r, l};
+  llvm::Function *fun = BP->getFunction("insertionsortKernel");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+  for(unsigned i = 0; i < arraySize - 1; ++i) { 
+    EXPECT_LE(r[i], r[i+1]);
+  }
+  
+  delete[] r;
+  delete l;
+}
