@@ -156,53 +156,7 @@ TEST(CodegenTest, Ld_Codegen){
   sbuf->clear();
   
 /**********************************************************************************/
-  in.assign( "ld_arg_f32 $s0, [%an_output];\n");
-  op1.assign("$s0"); op2.assign("%an_output");
-  sbuf->append(op1); sbuf->append(op2);
-    
-  BrigOperandReg dest2 = {
-    0,
-    BrigEOperandReg,
-    Brigb32,
-    0, 
-    0
-  };
-  dest2.size = sizeof(dest2);
-  
-  BrigOperandImmed width2 = {
-    0,
-    BrigEOperandImmed,
-    Brigb32,
-    0,
-    {0}  
-  }; 
-  width2.size = sizeof(width2);
-  
-  BrigOperandAddress addr2 = {
-    0,
-    BrigEOperandAddress,
-    Brigb64,
-    0,
-    0  //Offset to .directives, However, no directive in .directives. Ambiguous testing.
-  };
-  addr2.size = sizeof(addr2);
-    
-  BrigInstLdSt out2 = {
-    0,  // size
-    BrigEInstLdSt,         // kind
-    BrigLd,                // opcode
-    Brigf32,               // type
-    BrigNoPacking,         // packing
-    {0, sizeof(width2), sizeof(width2) + sizeof(dest2), 0, 0},  // operand[5]
-    BrigArgSpace,          // storageClass
-    BrigRegular,           // memorySemantic
-    0                      // equivClass
-  };
-  out2.size = sizeof(out2);
-    
-  Ld_Test<BrigOperandReg> TestCase2(in, sbuf, &out2, &width2, &dest2, &addr2);
-  TestCase2.Run_Test(&Ld);  
-  sbuf->clear();
+
 
 
 }
