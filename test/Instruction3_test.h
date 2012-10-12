@@ -64,12 +64,16 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   StringBuffer* symbols;
   
   BrigOperandReg reg1, reg2, reg3;
+  BrigOperandWaveSz wav;
+  BrigOperandImmed imm2, imm3;
   BrigInstBase Out;
+  
+  
 
-  const int size_instBase = sizeof(BrigInstBase);
-  const int size_reg = sizeof(BrigOperandReg);
-  const int size_imm = sizeof(BrigOperandImmed);
-  const int size_wav = sizeof(BrigOperandWaveSz);
+  const int size_instBase = sizeof(Out);
+  const int size_reg = sizeof(reg1);
+  const int size_imm = sizeof(imm2);
+  const int size_wav = sizeof(wav);
   
   /************************************* Test Case 1************************************/
   symbols = new StringBuffer();
@@ -170,10 +174,8 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   reg3.reserved = 0;
   reg3.name = op1.size() + 1;
 
-  BrigOperandWaveSz wav = {
-    size_wav,
-    BrigEOperandWaveSz
-  };
+  wav.size = size_wav;
+  wav.kind = BrigEOperandWaveSz;
 
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandWaveSz, BrigOperandReg> 
             TestCase3(in, symbols, &out3, &reg1, &wav, &reg3);
@@ -201,17 +203,15 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   reg1.reserved = 0;
   reg1.name = 0;
 
-  BrigOperandImmed imm = {
-    size_imm,
-    BrigEOperandImmed,
-    Brigb32,
-    0,
-    {0}
-  };
-  imm.bits.u = 0x40;
+  memset(&imm2, 0, sizeof(imm2));
+  imm2.size = size_imm;
+  imm2.kind = BrigEOperandImmed;
+  imm2.type = Brigb32;
+  imm2.reserved = 0;
+  imm2.bits.u = 0x40;
   
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed, BrigOperandWaveSz> 
-            TestCase4(in, symbols, &out4, &reg1, &imm, &wav);
+            TestCase4(in, symbols, &out4, &reg1, &imm2, &wav);
   TestCase4.Run_Test(&Instruction3);
   symbols->clear();
 
@@ -238,22 +238,18 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   reg1.name = 0;
 
 
-  BrigOperandImmed imm2 = {
-    size_imm,
-    BrigEOperandImmed,
-    Brigb32,
-    0,
-    {0}
-  };
+  memset(&imm2, 0, sizeof(imm2));
+  imm2.size = size_imm;
+  imm2.kind = BrigEOperandImmed;
+  imm2.type = Brigb32;
+  imm2.reserved = 0;
   imm2.bits.u = 100;
 
-  BrigOperandImmed imm3 = {
-    size_imm,
-    BrigEOperandImmed,
-    Brigb32,
-    0,
-    {0}
-  };
+  memset(&imm3, 0, sizeof(imm3));
+  imm3.size = size_imm;
+  imm3.kind = BrigEOperandImmed;
+  imm3.type = Brigb32;
+  imm3.reserved = 0;
   imm3.bits.u = 10;
 
 
