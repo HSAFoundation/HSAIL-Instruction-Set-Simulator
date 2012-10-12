@@ -68,28 +68,22 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   BrigOperandImmed imm2, imm3;
   BrigInstBase Out;
   
-  
-
-  const int size_instBase = sizeof(Out);
-  const int size_reg = sizeof(reg1);
-  const int size_imm = sizeof(imm2);
-  const int size_wav = sizeof(wav);
-  
+   
   /************************************* Test Case 1************************************/
   symbols = new StringBuffer();
   in.assign( "add_pp_sat_u16x2 $s1, $s0, $s3; \n");
   op1.assign("$s1"); op2.assign("$s0"); op3.assign("$s3");
   symbols->append(op1); symbols->append(op2); symbols->append(op3);
   
-  Out.size = size_instBase;
+  Out.size = sizeof(Out);
   Out.kind = BrigEInstBase;
   Out.opcode = BrigAdd;
   Out.type = Brigu16x2;
   Out.packing = BrigPackPPsat;
-  Out.o_operands[0] = 0; Out.o_operands[1] = size_reg; 
-  Out.o_operands[2] = 2*size_reg; Out.o_operands[3] = 0; Out.o_operands[4] = 0;
+  Out.o_operands[0] = 0; Out.o_operands[1] = sizeof(reg1); 
+  Out.o_operands[2] = sizeof(reg1) + sizeof(reg2); Out.o_operands[3] = 0; Out.o_operands[4] = 0;
   
-  reg1.size = size_reg;
+  reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
@@ -103,37 +97,37 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   symbols->clear();
 
 
-  /***************************Add more Unit Tests************************************/
+  /********************************************Test case 2 reg , reg , reg ************/
   
-  /******* case 2 reg , reg , reg *******/
   in.assign( "add_s64 $d1, $d2, $d3;\n");
   op1.assign("$d1"); op2.assign("$d2"); op3.assign("$d3");
   symbols->append(op1); symbols->append(op2); symbols->append(op3);
   BrigInstBase out2 = {
-    size_instBase,
+    0,
     BrigEInstBase,
     BrigAdd,
     Brigs64,
     BrigNoPacking,
     {0,                
-     size_reg, 
-     size_reg * 2, 
+     sizeof(reg1), 
+     sizeof(reg1) + sizeof(reg2), 
      0, 0}
   };
-
-  reg1.size = size_reg;
+  out2.size = sizeof(out2);
+  
+  reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
   reg1.name = 0;
 
-  reg2.size = size_reg;
+  reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb64;
   reg2.reserved = 0;
   reg2.name = op1.size() + 1;
 
-  reg3.size = size_reg;
+  reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
   reg3.type = Brigb64;
   reg3.reserved = 0;
@@ -145,36 +139,37 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   symbols->clear();
   
   
-  /******* case 3 reg , WAVESIZE , reg *******/
+  /*********************************Test case 3 reg , WAVESIZE , reg ***************/
   in.assign( "add_u64 $d1, WAVESIZE, $d3;\n");
   op1.assign("$d1"); op3.assign("$d3");
   symbols->append(op1); symbols->append(op3);
 
   BrigInstBase out3 = {
-    size_instBase,
+    0,
     BrigEInstBase,
     BrigAdd,
     Brigu64,
     BrigNoPacking,
     {0,  
-     size_reg,
-     size_reg + size_wav,
+     sizeof(reg1),
+     sizeof(reg1) + sizeof(wav),
      0, 0}
   };
-
-  reg1.size = size_reg;
+  out3.size = sizeof(out3);
+  
+  reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
   reg1.name = 0;
 
-  reg3.size = size_reg;
+  reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
   reg3.type = Brigb64;
   reg3.reserved = 0;
   reg3.name = op1.size() + 1;
 
-  wav.size = size_wav;
+  wav.size = sizeof(wav);
   wav.kind = BrigEOperandWaveSz;
 
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandWaveSz, BrigOperandReg> 
