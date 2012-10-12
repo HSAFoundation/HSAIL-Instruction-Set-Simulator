@@ -23,7 +23,7 @@ public:
     RefDest(Dest),
     RefSrc1(Src1),
     RefSrc2(Src2) { }
-      
+ 
   void validate(struct BrigSections* TestOutput){
   
     const char* refbuf = reinterpret_cast<const char *>(&Refbuf->get()[0]);
@@ -34,19 +34,19 @@ public:
     validate_brig::validate(RefInst, getinst);
     
     const T1 *getdest = reinterpret_cast <const T1*> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validate(RefDest, refbuf, getdest, getbuf);
+    validate_brig::validateOpType<T1>(RefDest, refbuf, getdest, getbuf);
         
     const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validate(RefSrc1, refbuf, getsrc1, getbuf);
+    validate_brig::validateOpType<T2>(RefSrc1, refbuf, getsrc1, getbuf);
     
     const T3 *getsrc2 = reinterpret_cast <const T3*> (&(TestOutput->operands[getinst->o_operands[2]]));
-    validate_brig::validate(RefSrc2, refbuf, getsrc2, getbuf);
+    validate_brig::validateOpType<T3>(RefSrc2, refbuf, getsrc2, getbuf);
     
     EXPECT_EQ(0, getinst->o_operands[3]);
     EXPECT_EQ(0, getinst->o_operands[4]);       
   }
-};
-  
+ }; 
+    
 /*
 Steps for Unit Test Generation
 1. Declare the HSAIL string, and sub-strings, if any
@@ -467,6 +467,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
             TestCase11(in, symbols, &out11, &reg1, &reg2, &reg3);
   TestCase11.Run_Test(&Instruction3);
   symbols->clear();
+  
   }
 
 } //namespace hsa
