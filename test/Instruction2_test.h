@@ -53,7 +53,6 @@ TEST(CodegenTest, Instruction2_CodeGen){
   in.assign( "abs_s32 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
   symbols->append(op1); symbols->append(op2);
-  int align;
   int size_reg = sizeof(BrigOperandReg);
 
   BrigInstBase out1 = {
@@ -76,13 +75,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out1, &reg1, &reg2);
   TestCase1.Run_Test(&Instruction2);
   symbols->clear();
-  
-  #if 0
+ 
 /**********************************************************************************/
   in.assign( "abs_s64 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out2 = {
     sizeof(BrigInstBase),
@@ -90,24 +87,24 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigs64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
 
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase2(in, &out2, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase2(in, symbols, &out2, &reg1, &reg2);
   TestCase2.Run_Test(&Instruction2);
-
+  symbols->clear();
+ 
 /**********************************************************************************/
   in.assign( "abs_f32 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out3 = {
     sizeof(BrigInstBase),
@@ -115,24 +112,24 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
 
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase3(in, &out3, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase3(in, symbols, &out3, &reg1, &reg2);
   TestCase3.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_f64 $d1,$d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out4 = {
     sizeof(BrigInstBase),
@@ -140,24 +137,24 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigf64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
 
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase4(in, &out4, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase4(in, symbols, &out4, &reg1, &reg2);
   TestCase4.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_p_s8x4 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out5 = {
     sizeof(BrigInstBase),
@@ -165,24 +162,24 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigs8x4,
     BrigPackP,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
 
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase5(in, &out5, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase5(in, symbols, &out5, &reg1, &reg2);
   TestCase5.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_p_f32x2 $d1, $d1;\n");
   op1.assign("$d1"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out6 = {
     sizeof(BrigInstBase),
@@ -190,24 +187,24 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigf32x2,
     BrigPackP,
-    {buffer_start, buffer_start, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
 
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
   reg2 = reg1; 
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase6(in, &out6, &reg1, &reg2, op1, op2);
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase6(in, symbols, &out6, &reg1, &reg2);
   TestCase6.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_s_s8x4 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out7 = {
     sizeof(BrigInstBase),
@@ -215,23 +212,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigs8x4,
     BrigPackS,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase7(in, &out7, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out7, &reg1, &reg2);
   TestCase7.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_p_s8x8 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out8 = {
     sizeof(BrigInstBase),
@@ -239,23 +236,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigs8x8,
     BrigPackP,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase8(in, &out8, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase8(in, symbols, &out8, &reg1, &reg2);
   TestCase8.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_s_s8x8 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out9 = {
     sizeof(BrigInstBase),
@@ -263,23 +260,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigs8x8,
     BrigPackS,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase9(in, &out9, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase9(in, symbols, &out9, &reg1, &reg2);
   TestCase9.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_p_s16x2 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out10 = {
     sizeof(BrigInstBase),
@@ -287,23 +284,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigs16x2,
     BrigPackP,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase10(in, &out10, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase10(in, symbols, &out10, &reg1, &reg2);
   TestCase10.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_s_s16x2 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out11 = {
     sizeof(BrigInstBase),
@@ -311,57 +308,55 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigs16x2,
     BrigPackS,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase11(in, &out11, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase11(in, symbols, &out11, &reg1, &reg2);
   TestCase11.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_s32 $s1, 99;\n");
   op1.assign("$s1"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
 
-  align = 8 - ( buffer_start + size_reg ) % 8;
- 
   BrigInstBase out12 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigNeg, 
     Brigs32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  BrigOperandImmed imm = {
-    0,
+  BrigOperandImmed imm1 = {
+    sizeof(BrigOperandImmed),
     BrigEOperandImmed,
     Brigb32,
     0,
     {0} 
   };
-  imm.bits.u = 99;
-  imm.size = sizeof(imm);
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase12(in, &out12, &reg1, &imm, op1, op2);
+  imm1.bits.u = 99;
+ 
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase12(in, symbols, &out12, &reg1, &imm1);
   TestCase12.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_s64 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out13 = {
     sizeof(BrigInstBase),
@@ -369,25 +364,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNeg, 
     Brigs64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase13(in, &out13, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase13(in, symbols, &out13, &reg1, &reg2);
   TestCase13.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_f32 $s3,1.0f;\n");
   op1.assign("$s3"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
-
-  align = 8 - ( buffer_start + size_reg ) % 8;
+  symbols->append(op1); symbols->append(op2);
  
    BrigInstBase out14 = {
     sizeof(BrigInstBase),
@@ -395,82 +388,87 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNeg, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb32;
-  imm.reserved = 0;
-  imm.bits.f = 1.0f;
-  imm.size = sizeof(imm);
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase14(in, &out14, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm2 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0} 
+  };
+  imm2.bits.f = 1.0f;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase14(in, symbols, &out14, &reg1, &imm2);
   TestCase14.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_f64 $d3,1.0;\n");
   op1.assign("$d3"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
-
-  align = 8 - ( buffer_start + size_reg ) % 8;
+  symbols->append(op1); symbols->append(op2);
  
-   BrigInstBase out15 = {
+  BrigInstBase out15 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigNeg, 
     Brigf64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb64;
-  imm.reserved = 0;
-  imm.bits.d = 1.0;
-  imm.size = sizeof(imm);
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase15(in, &out15, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm3 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb64,
+    0,
+    {0} 
+  };
+  imm3.bits.d = 1.0;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase15(in, symbols, &out15, &reg1, &imm3);
   TestCase15.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_p_f16x2 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
- BrigInstBase out16 = {
+  BrigInstBase out16 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigNeg, 
     Brigf16x2,
     BrigPackP,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase16(in, &out16, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase16(in, symbols, &out16, &reg1, &reg2);
   TestCase16.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_s_u8x4 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out17 = {
     sizeof(BrigInstBase),
@@ -478,23 +476,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNeg, 
     Brigu8x4,
     BrigPackS,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase17(in, &out17, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase17(in, symbols, &out17, &reg1, &reg2);
   TestCase17.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_p_s32x2 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out18 = {
     sizeof(BrigInstBase),
@@ -502,23 +500,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNeg, 
     Brigs32x2,
     BrigPackP,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase18(in, &out18, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase18(in, symbols, &out18, &reg1, &reg2);
   TestCase18.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "not_b1 $c1, $c2;\n");
   op1.assign("$c1"); op2.assign("$c2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out19 = {
     sizeof(BrigInstBase),
@@ -526,23 +524,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNot, 
     Brigb1,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb1;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase19(in, &out19, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase19(in, symbols, &out19, &reg1, &reg2);
   TestCase19.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "not_b32 $s0, $s2;\n");
   op1.assign("$s0"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out20 = {
     sizeof(BrigInstBase),
@@ -550,23 +548,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNot, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase20(in, &out20, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase20(in, symbols, &out20, &reg1, &reg2);
   TestCase20.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "not_b64 $d0, $d1;\n");
   op1.assign("$d0"); op2.assign("$d1"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out21 = {
     sizeof(BrigInstBase),
@@ -574,23 +572,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNot, 
     Brigb64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase21(in, &out21, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase21(in, symbols, &out21, &reg1, &reg2);
   TestCase21.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "popcount_b32 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out22 = {
     sizeof(BrigInstBase),
@@ -598,23 +596,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigPopcount, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase22(in, &out22, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase22(in, symbols, &out22, &reg1, &reg2);
   TestCase22.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "popcount_b64 $s1, $d2;\n");
   op1.assign("$s1"); op2.assign("$d2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out23 = {
     sizeof(BrigInstBase),
@@ -622,25 +620,25 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigPopcount, 
     Brigb64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
   reg2 = reg1; 
   reg2.type = Brigb64;
-  reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase23(in, &out23, &reg1, &reg2, op1, op2);
+  reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase23(in, symbols, &out23, &reg1, &reg2);
   TestCase23.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "bitrev_s32 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out24 = {
     sizeof(BrigInstBase),
@@ -648,54 +646,55 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigBitRev, 
     Brigs32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase24(in, &out24, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase24(in, symbols, &out24, &reg1, &reg2);
   TestCase24.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "bitrev_u64 $d1, 0x234;\n");
   op1.assign("$d1"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
 
-  align = 8 - ( buffer_start + size_reg ) % 8;
- 
    BrigInstBase out25 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigBitRev, 
     Brigu64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb32;
-  imm.reserved = 0;
-  imm.bits.l[0] = 0x234;
-  imm.size = sizeof(imm);
-  
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase25(in, &out25, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm4 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0} 
+  };
+  imm4.bits.u = 0x234;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase25(in, symbols, &out25, &reg1, &imm4);
   TestCase25.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "firstbit_s32 $s0, $s0;\n");
-  op1.assign("$s0"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  op1.assign("$s0"); 
+  symbols->append(op1); 
  
   BrigInstBase out26 = {
     sizeof(BrigInstBase),
@@ -703,23 +702,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigFirstbit, 
     Brigs32,
     BrigNoPacking,
-    {buffer_start, buffer_start, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
   reg2 = reg1; 
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase26(in, &out26, &reg1, &reg2, op1, op2);
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase26(in, symbols, &out26, &reg1, &reg2);
   TestCase26.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "firstbit_u64 $s0, $d6;\n");
   op1.assign("$s0"); op2.assign("$d6"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out27 = {
     sizeof(BrigInstBase),
@@ -727,25 +726,25 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigFirstbit, 
     Brigu64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
   reg2 = reg1; 
-  reg2.name = buffer_start + op1.size() + 1;
+  reg2.name = op1.size() + 1;
   reg2.type = Brigb64;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase27(in, &out27, &reg1, &reg2, op1, op2);
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase27(in, symbols, &out27, &reg1, &reg2);
   TestCase27.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "lastbit_u32 $s0, $s0;\n");
-  op1.assign("$s0"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  op1.assign("$s0"); 
+  symbols->append(op1); 
  
   BrigInstBase out28 = {
     sizeof(BrigInstBase),
@@ -753,23 +752,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigLastbit, 
     Brigu32,
     BrigNoPacking,
-    {buffer_start, buffer_start, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
   reg2 = reg1; 
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase28(in, &out28, &reg1, &reg2, op1, op2);
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase28(in, symbols, &out28, &reg1, &reg2);
   TestCase28.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "lastbit_s64 $s0, $d6;\n");
   op1.assign("$s0"); op2.assign("$d6"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out29 = {
     sizeof(BrigInstBase),
@@ -777,25 +776,25 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigLastbit, 
     Brigs64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
   reg2 = reg1; 
-  reg2.name = buffer_start + op1.size() + 1;
+  reg2.name = op1.size() + 1;
   reg2.type = Brigb64;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase29(in, &out29, &reg1, &reg2, op1, op2);
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase29(in, symbols, &out29, &reg1, &reg2);
   TestCase29.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "movs_lo_b32 $s1, $d1;\n");
   op1.assign("$s1"); op2.assign("$d1"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out30 = {
     sizeof(BrigInstBase),
@@ -803,25 +802,25 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigMovsLo, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
   reg2 = reg1; 
-  reg2.name = buffer_start + op1.size() + 1;
+  reg2.name = op1.size() + 1;
   reg2.type = Brigb64;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase30(in, &out30, &reg1, &reg2, op1, op2);
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase30(in, symbols, &out30, &reg1, &reg2);
   TestCase30.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "movs_hi_b32 $s1, $d1;\n");
   op1.assign("$s1"); op2.assign("$d1"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out31 = {
     sizeof(BrigInstBase),
@@ -829,56 +828,57 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigMovsHi, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
   reg2 = reg1; 
-  reg2.name = buffer_start + op1.size() + 1;
+  reg2.name = op1.size() + 1;
   reg2.type = Brigb64;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase31(in, &out31, &reg1, &reg2, op1, op2);
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase31(in, symbols, &out31, &reg1, &reg2);
   TestCase31.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "fract_f32 $s0, 3.2f;\n");
-  op1.assign("$s0"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  op1.assign("$s0"); 
+  symbols->append(op1); 
 
-  align = 8 - ( buffer_start + size_reg ) % 8;
- 
   BrigInstBase out32 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigFract, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb32;
-  imm.reserved = 0;
-  imm.bits.f = 3.2f;
-  imm.size = sizeof(imm);
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase32(in, &out32, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm5 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0} 
+  };
+  imm5.bits.f = 3.2f;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase32(in, symbols, &out32, &reg1, &imm5);
   TestCase32.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
- in.assign( "fcos_f32 $s1, $s0;\n");
+  in.assign( "fcos_f32 $s1, $s0;\n");
   op1.assign("$s1"); op2.assign("$s0"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out33 = {
     sizeof(BrigInstBase),
@@ -886,23 +886,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigFcos, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase33(in, &out33, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase33(in, symbols, &out33, &reg1, &reg2);
   TestCase33.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
- in.assign( "fsin_f32 $s1, $s0;\n");
+  in.assign( "fsin_f32 $s1, $s0;\n");
   op1.assign("$s1"); op2.assign("$s0"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out34 = {
     sizeof(BrigInstBase),
@@ -910,23 +910,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigFsin, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase34(in, &out34, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase34(in, symbols, &out34, &reg1, &reg2);
   TestCase34.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
- in.assign( "flog2_f32 $s1, $s0;\n");
-  op1.assign("$s1"); op2.assign("$s0"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  in.assign( "flog2_f32 $s1, $s0;\n");
+  op1.assign("$s1"); op2.assign("$s0");  
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out35 = {
     sizeof(BrigInstBase),
@@ -934,23 +934,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigFlog2, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase35(in, &out35, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase35(in, symbols, &out35, &reg1, &reg2);
   TestCase35.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
- in.assign( "fexp2_f32 $s1, $s0;\n");
+  in.assign( "fexp2_f32 $s1, $s0;\n");
   op1.assign("$s1"); op2.assign("$s0"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out36 = {
     sizeof(BrigInstBase),
@@ -958,24 +958,24 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigFexp2, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
+  reg2 = reg1; reg2.name = op1.size() + 1;
   
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase36(in, &out36, &reg1, &reg2, op1, op2);
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase36(in, symbols, &out36, &reg1, &reg2);
   TestCase36.Run_Test(&Instruction2);
+  symbols->clear();
  
 /**********************************************************************************/
- in.assign( "frsqrt_f32 $s1, $s0;\n");
+  in.assign( "frsqrt_f32 $s1, $s0;\n");
   op1.assign("$s1"); op2.assign("$s0"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out37 = {
     sizeof(BrigInstBase),
@@ -983,24 +983,24 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigFrsqrt, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase37(in, &out37, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase37(in, symbols, &out37, &reg1, &reg2);
   TestCase37.Run_Test(&Instruction2);
+  symbols->clear();
 
   
 /**********************************************************************************/
- in.assign( "frcp_f32 $s1, $s0;\n");
+  in.assign( "frcp_f32 $s1, $s0;\n");
   op1.assign("$s1"); op2.assign("$s0"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out38 = {
     sizeof(BrigInstBase),
@@ -1008,102 +1008,104 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigFrcp, 
     Brigf32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase38(in, &out38, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase38(in, symbols, &out38, &reg1, &reg2);
   TestCase38.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "sqrt_f64 $d1, 1.21;\n");
-  op1.assign("$d1"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  op1.assign("$d1"); 
+  symbols->append(op1); 
 
-  align = 8 - ( buffer_start + size_reg ) % 8;
- 
   BrigInstBase out39 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigSqrt, 
     Brigf64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
     
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  imm.size = sizeof(BrigOperandImmed);
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb64;
-  imm.reserved = 0;
-  imm.bits.d = 1.21;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase39(in, &out39, &reg1, &imm, op1, op2);
+  BrigOperandImmed imm6 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb64,
+    0,
+    {0} 
+  };
+  imm6.bits.d = 1.21;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase39(in, symbols, &out39, &reg1, &imm6);
   TestCase39.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
- in.assign( "unpack3 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s0"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  in.assign( "unpack3 $s1, $s2;\n");
+  op1.assign("$s1"); op2.assign("$s2"); 
+  symbols->append(op1); symbols->append(op2);
  
-   BrigInstBase out40 = {
+  BrigInstBase out40 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigUnpack3, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase40(in, &out40, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase40(in, symbols, &out40, &reg1, &reg2);
   TestCase40.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
- in.assign( "unpack2 $s1, $s2;\n");
+  in.assign( "unpack2 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
-   BrigInstBase out41 = {
+  BrigInstBase out41 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigUnpack2, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase41(in, &out41, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase41(in, symbols, &out41, &reg1, &reg2);
   TestCase41.Run_Test(&Instruction2);
+  symbols->clear();
 
  /**********************************************************************************/
- in.assign( "unpack1 $s1, $s2;\n");
+  in.assign( "unpack1 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out42 = {
     sizeof(BrigInstBase),
@@ -1111,23 +1113,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigUnpack1, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase42(in, &out42, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase42(in, symbols, &out42, &reg1, &reg2);
   TestCase42.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
- in.assign( "unpack0 $s1, $s2;\n");
+  in.assign( "unpack0 $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out43 = {
     sizeof(BrigInstBase),
@@ -1135,23 +1137,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigUnpack0, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase43(in, &out43, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase43(in, symbols, &out43, &reg1, &reg2);
   TestCase43.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
- in.assign( "workitemaid $s1, $s2;\n");
+  in.assign( "workitemaid $s1, $s2;\n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out44 = {
     sizeof(BrigInstBase),
@@ -1159,23 +1161,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigWorkItemAId, 
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase44(in, &out44, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase44(in, symbols, &out44, &reg1, &reg2);
   TestCase44.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "sqrt_s8x4 $s1, $s2; \n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out45 = {
     sizeof(BrigInstBase),
@@ -1183,23 +1185,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigSqrt, 
     Brigs8x4,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase45(in, &out45, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase45(in, symbols, &out45, &reg1, &reg2);
   TestCase45.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_s32 $s1, $s2;");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out46 = {
     sizeof(BrigInstBase),
@@ -1207,23 +1209,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNeg,
     Brigs32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase46(in, &out46, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase46(in, symbols, &out46, &reg1, &reg2);
   TestCase46.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "mask_b64 $d1, $d2;");
   op1.assign("$d1"); op2.assign("$d2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out47 = {
     sizeof(BrigInstBase),
@@ -1231,23 +1233,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigMask,
     Brigb64,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase47(in, &out47, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase47(in, symbols, &out47, &reg1, &reg2);
   TestCase47.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "count_u32 $s1, $s2;");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out48 = {
     sizeof(BrigInstBase),
@@ -1255,23 +1257,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigCount,
     Brigu32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase48(in, &out48, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase48(in, symbols, &out48, &reg1, &reg2);
   TestCase48.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "alloca $s1,$s2;");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out49 = {
     sizeof(BrigInstBase),
@@ -1279,23 +1281,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAlloca,
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase49(in, &out49, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase49(in, symbols, &out49, &reg1, &reg2);
   TestCase49.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "workitemid $s1,$s2;");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out50 = {
     sizeof(BrigInstBase),
@@ -1303,23 +1305,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigWorkItemId,
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase50(in, &out50, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase50(in, symbols, &out50, &reg1, &reg2);
   TestCase50.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "workgroupid $s1,$s2;");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out51 = {
     sizeof(BrigInstBase),
@@ -1327,23 +1329,23 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigWorkGroupId,
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase51(in, &out51, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase51(in, symbols, &out51, &reg1, &reg2);
   TestCase51.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "workgroupsize $s1,$s2;");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out52 = {
     sizeof(BrigInstBase),
@@ -1351,47 +1353,47 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigWorkGroupSize,
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase52(in, &out52, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase52(in, symbols, &out52, &reg1, &reg2);
   TestCase52.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "NDRangesize $s1,$s2;");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
- 
+  symbols->append(op1); symbols->append(op2);
+  
   BrigInstBase out53 = {
     sizeof(BrigInstBase),
     BrigEInstBase, 
     BrigNDRangeSize,
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase53(in, &out53, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase53(in, symbols, &out53, &reg1, &reg2);
   TestCase53.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "NDRangegroups $s1,$s2;");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
  
   BrigInstBase out54 = {
     sizeof(BrigInstBase),
@@ -1399,29 +1401,35 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigNDRangeGroups,
     Brigb32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
-  reg1.size = sizeof(BrigOperandReg);
+  reg1.size = size_reg;
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase54(in, &out54, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase54(in, symbols, &out54, &reg1, &reg2);
   TestCase54.Run_Test(&Instruction2);
-
+  symbols->clear();
 }
+
 /**********************************************************************************/
 /**********************************************************************************/
 TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
 
-  std::string in; 
+/*********************Common variables**********************/
+  std::string in; std::string op1, op2;
+  StringBuffer *symbols = new StringBuffer();
+  BrigOperandReg reg1, reg2;
+  
+  /*****************************************************************/
   in.assign( "sqrt_ftz_s8x4 $s1, $s2; \n");
-  std::string op1, op2; op1.assign("$s1"); op2.assign("$s2"); 
-  int buffer_start = BUFFER_OFFSET;
+  op1.assign("$s1"); op2.assign("$s2"); 
+  symbols->append(op1); symbols->append(op2);
+
   int size_reg = sizeof(BrigOperandReg);
-  int align;
 
   BrigAluModifier bam;
   bam.ftz = 1;
@@ -1438,26 +1446,24 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
     BrigSqrt,         
     Brigs8x4,          
     BrigNoPacking,     
-    {buffer_start, buffer_start + size_reg, 0, 0, 0},
+    {0, size_reg, 0, 0, 0},
     bam
   };
+  reg1.size = size_reg;
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb32;
+  reg1.reserved = 0;
+  reg1.name = 0;
 
-  BrigOperandReg reg1 = {
-    sizeof(BrigOperandReg),
-    BrigEOperandReg,
-    Brigb32,
-    0,
-    buffer_start //Offset to string table  
-  };
-  BrigOperandReg reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandReg> TestCase1(in, &out1, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out1, &reg1, &reg2);
   TestCase1.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "abs_ftz_p_s8x4 $s1, $s2; \n");
   op1.assign("$s1"); op2.assign("$s2"); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
+  symbols->append(op1); symbols->append(op2);
 
   bam.ftz = 1;
   bam.floatOrInt = 0;
@@ -1473,7 +1479,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
     BrigAbs,           
     Brigs8x4,          
     BrigPackP,     
-    {buffer_start, buffer_start + size_reg, 0, 0, 0},
+    {0, size_reg, 0, 0, 0},
     bam
   };
 
@@ -1481,19 +1487,17 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandReg> TestCase2(in, &out2, &reg1, &reg2, op1, op2);
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandReg> TestCase2(in, symbols, &out2, &reg1, &reg2);
   TestCase2.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "fract_ftz_f32 $s0, 1.6f;\n");
-  op1.assign("$s0"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
-
-  align = 8 - ( buffer_start + size_reg ) % 8;
+  op1.assign("$s0"); 
+  symbols->append(op1); 
 
   bam.ftz = 1;
   bam.floatOrInt = 0;
@@ -1509,7 +1513,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
     BrigFract,           
     Brigf32,          
     BrigNoPacking,     
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0},
+    {0, size_reg, 0, 0, 0},
     bam
   };
 
@@ -1517,27 +1521,25 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  BrigOperandImmed imm = {
+  BrigOperandImmed imm1 = {
     sizeof(BrigOperandImmed),
     BrigEOperandImmed,
     Brigb32,
     0,
     {0} 
   };
-  imm.bits.f = 1.6f;
+  imm1.bits.f = 1.6f;
 
-  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase3(in, &out3, &reg1, &imm, op1, op2);
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase3(in, symbols, &out3, &reg1, &imm1);
   TestCase3.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_ftz_p_s32 $s1, 1.0;\n");
   op1.assign("$s1"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
-
-  align = 8 - ( buffer_start + size_reg ) % 8;
+  symbols->append(op1); symbols->append(op2);
 
   bam.ftz = 1;
   bam.floatOrInt = 0;
@@ -1553,7 +1555,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
     BrigNeg,           
     Brigs32,          
     BrigPackP,     
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0},
+    {0, size_reg, 0, 0, 0},
     bam
   };
 
@@ -1561,24 +1563,25 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  imm.size = sizeof(BrigOperandImmed);
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb64;
-  imm.reserved = 0;
-  imm.bits.d = 1.0;
+  BrigOperandImmed imm2 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb64,
+    0,
+    {0} 
+  };
+  imm2.bits.d = 1.0;
 
-  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase4(in, &out4, &reg1, &imm, op1, op2);
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase4(in, symbols, &out4, &reg1, &imm2);
   TestCase4.Run_Test(&Instruction2);
+  symbols->clear();
 
 /**********************************************************************************/
   in.assign( "neg_upi_s32 $s1, 99;\n");
-  op1.assign("$s1"); op2.assign(""); 
-  buffer_start = BUFFER_OFFSET;
-  size_reg = sizeof(BrigOperandReg);
-
-  align = 8 - ( buffer_start + size_reg ) % 8;
+  op1.assign("$s1"); 
+  symbols->append(op1); 
 
   bam.rounding = 2;
   bam.ftz = 0;
@@ -1594,7 +1597,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
     BrigNeg,           
     Brigs32,          
     BrigNoPacking,    
-    {buffer_start, buffer_start + size_reg + align, 0, 0, 0},
+    {0, size_reg, 0, 0, 0},
     bam
   };
 
@@ -1602,17 +1605,21 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = buffer_start;
+  reg1.name = 0;
 
-  imm.size = sizeof(BrigOperandImmed);
-  imm.kind = BrigEOperandImmed;
-  imm.type = Brigb32;
-  imm.reserved = 0;
-  imm.bits.u = 99;
+  BrigOperandImmed imm3 = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0} 
+  };
+  imm3.bits.u = 99;
 
-  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, &out5, &reg1, &imm, op1, op2);
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, symbols, &out5, &reg1, &imm3);
   TestCase5.Run_Test(&Instruction2);
-  #endif
+  symbols->clear();
 }
+
 } //namespace brig
 } //namespace hsa
