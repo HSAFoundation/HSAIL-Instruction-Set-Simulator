@@ -8,116 +8,94 @@ namespace brig{
 template <typename T> class Ld_Test : public BrigCodeGenTest{
 private:
   
-  //Symbols in .string buffer
-  const std::string dest_name;
-  const std::string src_name;
-    
-  const BrigInstLdSt* Output;
+  const BrigInstLdSt* RefInst;
   
   //Width operand
   const BrigOperandImmed* OpWidth;
   
   //Dest Operand
-  const T* dest_reg;
+  const T* RefDest;
   //Source operands. Only required structs will be used, the others will stay NULL.
-  const BrigOperandReg* oper_reg;
-  const BrigOperandAddress* oper_addr;
-  const BrigOperandIndirect* oper_indirect;
-  const BrigOperandCompound* oper_comp;
+  const BrigOperandReg* RefSrc_Reg;
+  const BrigOperandAddress* RefSrc_Addr;
+  const BrigOperandIndirect* RefSrc_Indir;
+  const BrigOperandCompound* RefSrc_Comp;
   
 public:
   //TestCase outputs a BrigOperandAddress only
-  Ld_Test(std::string& input, std::string& op1, std::string& op2, BrigInstLdSt* ref, 
+  Ld_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, 
       BrigOperandImmed* width, T* dest, BrigOperandAddress* addr) :
-    BrigCodeGenTest(input), 
-    dest_name(op1), 
-    src_name(op2), 
-    Output(ref),
+    BrigCodeGenTest(input, sbuf), 
+    RefInst(ref),
     OpWidth(width), 
-    dest_reg(dest), 
-    oper_reg(NULL), 
-    oper_addr(addr), 
-    oper_indirect(NULL), 
-    oper_comp(NULL)  { }
+    RefDest(dest), 
+    RefSrc_Reg(NULL), 
+    RefSrc_Addr(addr), 
+    RefSrc_Indir(NULL), 
+    RefSrc_Comp(NULL)  { }
       
   //Testcase output is a BrigOperandIndirect    
-  Ld_Test(std::string& input, std::string& op1, std::string& op2, BrigInstLdSt* ref, 
+  Ld_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, 
       BrigOperandImmed* width, T* dest, BrigOperandIndirect* indir, BrigOperandReg* reg=NULL) : 
-    BrigCodeGenTest(input),
-    dest_name(op1),
-    src_name(op2),
-    Output(ref),
+    BrigCodeGenTest(input, sbuf),
+    RefInst(ref),
     OpWidth(width),
-    dest_reg(dest),
-    oper_reg(reg),
-    oper_addr(NULL),
-    oper_indirect(indir),
-    oper_comp(NULL)  { }
+    RefDest(dest),
+    RefSrc_Reg(reg),
+    RefSrc_Addr(NULL),
+    RefSrc_Indir(indir),
+    RefSrc_Comp(NULL)  { }
   
   //TestCase output is a BrigOperandCompound
-  Ld_Test(std::string& input, std::string& op1, std::string& op2, BrigInstLdSt* ref, 
+  Ld_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, 
       BrigOperandImmed* width, T* dest, BrigOperandCompound* comp, BrigOperandAddress* addr, BrigOperandReg* reg=NULL) : 
-    BrigCodeGenTest(input),
-    dest_name(op1),
-    src_name(op2),
-    Output(ref),
+    BrigCodeGenTest(input, sbuf),
+    RefInst(ref),
     OpWidth(width),
-    dest_reg(dest),
-    oper_reg(reg),
-    oper_indirect(NULL),
-    oper_comp(comp),
-    oper_addr(addr)  { }
+    RefDest(dest),
+    RefSrc_Reg(reg),
+    RefSrc_Indir(NULL),
+    RefSrc_Comp(comp),
+    RefSrc_Addr(addr)  { }
    
-  void validate(Context* context){
-    BrigInstLdSt getcode;
-    context->get_code(code_start, &getcode);
-    validate_brig::validate(Output, &getcode);
-    int op_offset = operand_start;
+  void validate(struct BrigSections* TestOutput){
     
-    BrigOperandImmed getwidth;
-    context->get_operand(op_offset, &getwidth);
-    validate_brig::validate(OpWidth, &getwidth);
-    op_offset+=sizeof(getwidth);
+    const char* refbuf = reinterpret_cast<const char *>(&Refbuf->get()[0]);
+    const char* getbuf = TestOutput->strings;   
     
-    T getdest;
-    context->get_operand(op_offset, &getdest);
-    validate_brig::validate(dest_reg, &getdest);
-    op_offset+=sizeof(getdest);
+    inst_iterator getcode = TestOutput->code_begin();
+    const BrigInstLdSt* getinst = (cast<BrigInstLdSt>(getcode));
+    validate_brig::validate(RefInst, getinst);
     
-    if(oper_indirect){
-      if(oper_reg){
-        BrigOperandReg getreg;
-        context->get_operand(op_offset, &getreg);
-        validate_brig::validate(oper_reg, &getreg);
-        op_offset+=sizeof(getreg);
-      }   
-      BrigOperandIndirect getindir;
-      context->get_operand(op_offset, &getindir);
-      validate_brig::validate(oper_indirect, &getindir);
-      op_offset+=sizeof(getindir);      
-             
-    } else if(oper_comp){
-      BrigOperandAddress getaddr;
-      context->get_operand(op_offset, &getaddr);
-      validate_brig::validate(oper_addr, &getaddr);
-      op_offset+=sizeof(getaddr);      
+   const BrigOperandImmed *getwidth = reinterpret_cast <const BrigOperandImmed *> (&(TestOutput->operands[getinst->o_operands[0]]));
+    validate_brig::validate(OpWidth, refbuf, getwidth, getbuf);
+    
+    const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[1]]));
+    validate_brig::validate(RefDest, refbuf, getdest, getbuf);
+    
+    if(RefSrc_Indir){
+      const BrigOperandIndirect *getsrc_indir = reinterpret_cast <const BrigOperandIndirect*> (&(TestOutput->operands[getinst->o_operands[2]]));
+      validate_brig::validate(RefSrc_Indir, getsrc_indir); 
       
-      if(oper_reg){
-        BrigOperandReg getreg;
-        context->get_operand(op_offset, &getreg);
-        validate_brig::validate(oper_reg, &getreg);
-        op_offset+=sizeof(getreg);
-      } 
-      BrigOperandCompound getcomp;
-      context->get_operand(op_offset, &getcomp);
-      validate_brig::validate(oper_comp, &getcomp);
-      op_offset+=sizeof(getcomp);      
+      if(RefSrc_Reg){
+        const BrigOperandReg *getsrc_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc_indir->reg]));
+        validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf); 
+      }             
+    } else if(RefSrc_Comp){
+      const BrigOperandCompound *getsrc_comp = reinterpret_cast <const BrigOperandCompound*> (&(TestOutput->operands[getinst->o_operands[2]]));
+      validate_brig::validate(RefSrc_Comp, getsrc_comp); 
+      
+      const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getsrc_comp->name]));
+      validate_brig::validate(RefSrc_Addr, getsrc_addr);      
+      
+      if(RefSrc_Reg){
+        const BrigOperandReg *getsrc_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc_comp->reg]));
+        validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf); 
+      }    
       
     } else {
-      BrigOperandAddress getaddr;
-      context->get_operand(op_offset, &getaddr);
-      validate_brig::validate(oper_addr, &getaddr);
-      op_offset+=sizeof(getaddr);
+      const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getinst->o_operands[2]]));
+      validate_brig::validate(RefSrc_Addr, getsrc_addr);      
     }
   }
 };
@@ -125,16 +103,17 @@ public:
 TEST(CodegenTest, Ld_Codegen){
 
   std::string in, op1, op2; 
+  StringBuffer* sbuf = new StringBuffer();
   in.assign( "ld_arg_f32 $s0, [%input];\n");
   op1.assign("$s0"); op2.assign("%input");
-  int buffer_start = BUFFER_OFFSET;
-  
+  sbuf->append(op1); sbuf->append(op2);
+    
   BrigOperandReg dest = {
   sizeof(BrigOperandReg),
   BrigEOperandReg,
   Brigb32,
   0, 
-  buffer_start  //Offset to string table
+  0
   };
   
   BrigOperandImmed width = {
@@ -160,17 +139,18 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {buffer_start, buffer_start + sizeof(width), buffer_start + sizeof(width) + sizeof(dest), 0, 0},  // operand[5]
+    {0, sizeof(width), sizeof(width) + sizeof(dest), 0, 0},  // operand[5]
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass
   };
     
-  Ld_Test<BrigOperandReg> TestCase1(in, op1, op2, &out, &width, &dest, &addr);
+  Ld_Test<BrigOperandReg> TestCase1(in, sbuf, &out, &width, &dest, &addr);
   TestCase1.Run_Test(&Ld);  
   
 /********************************Add More Unit tests **********************************/
 
 }
+
 }
 }
