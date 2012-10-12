@@ -8,47 +8,51 @@ template <typename T, typename T1, typename T2> class Instruction2_Test : public
 private:
  
   //Instruction in .code buffer - Pointers to brig structures
-  const T* Output;
+  const T* RefInst;
   //Operands in .operands buffer
-  const T1* dest;
-  const T2* src1;
+  const T1* RefDest;
+  const T2* RefSrc1;
   
-  //Symbols in .string buffer
-  const std::string dest_name;
-  const std::string src1_name;
- 
 public:
  
-  Instruction2_Test(std::string& in, T* ref, T1* Dest, T2* Src1, 
-        std::string& op1, std::string& op2) : 
-    BrigCodeGenTest(in),
-    Output(ref),
-    dest(Dest),
-    src1(Src1),
-    dest_name(op1),
-    src1_name(op2)  { }
+  Instruction2_Test(std::string& in, StringBuffer *sbuf, T* ref, T1* Dest, T2* Src1) : 
+    BrigCodeGenTest(in, sbuf),
+    RefInst(ref),
+    RefDest(Dest),
+    RefSrc1(Src1)  { }
     
-  void validate(Context* context){
-    T getcode;
-    context->get_code(code_start, &getcode);
-    validate_brig::validate(Output, &getcode);
+  void validate(struct BrigSections* TestOutput){
+  
+    const char* refbuf = reinterpret_cast<const char *>(&Refbuf->get()[0]);
+    const char* getbuf = TestOutput->strings;   
     
-    T1 getreg1;
-    context->get_operand(Output->o_operands[0], &getreg1);
-    validate_brig::validate(dest, &getreg1);
+    inst_iterator getcode = TestOutput->code_begin();
+    const T* getinst = (cast<T>(getcode));
+    validate_brig::validate(RefInst, getinst);
+    
+    const T1 *getdest = reinterpret_cast <const T1*> (&(TestOutput->operands[getinst->o_operands[0]]));
+    validate_brig::validate(RefDest, refbuf, getdest, getbuf);
         
-    T2 getreg2;
-    context->get_operand(Output->o_operands[1], &getreg2);
-    validate_brig::validate(src1, &getreg2);    
+    const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
+    validate_brig::validate(RefSrc1, refbuf, getsrc1, getbuf);
+    
+    EXPECT_EQ(0, getinst->o_operands[2]);    
+    EXPECT_EQ(0, getinst->o_operands[3]);
+    EXPECT_EQ(0, getinst->o_operands[4]);       
   }
 };
   
 TEST(CodegenTest, Instruction2_CodeGen){
 
-  std::string in; 
+/*********************Common variables**********************/
+  std::string in; std::string op1, op2;
+  StringBuffer *symbols = new StringBuffer();
+  BrigOperandReg reg1, reg2;
+  
+  /*****************************************************************/
   in.assign( "abs_s32 $s1, $s2;\n");
-  std::string op1, op2; op1.assign("$s1"); op2.assign("$s2"); 
-  int buffer_start = BUFFER_OFFSET;
+  op1.assign("$s1"); op2.assign("$s2"); 
+  symbols->append(op1); symbols->append(op2);
   int align;
   int size_reg = sizeof(BrigOperandReg);
 
@@ -58,20 +62,22 @@ TEST(CodegenTest, Instruction2_CodeGen){
     BrigAbs, 
     Brigs32,
     BrigNoPacking,
-    {buffer_start, buffer_start + size_reg, 0, 0, 0}
+    {0, size_reg, 0, 0, 0}
   };
 
-  BrigOperandReg reg1 = {
-    sizeof(BrigOperandReg),
-    BrigEOperandReg,
-    Brigb32,
-    0,
-    buffer_start //Offset to string table  
-  };
-  BrigOperandReg reg2 = reg1; reg2.name = buffer_start + op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, &out1, &reg1, &reg2, op1, op2);
+  
+  reg1.size = size_reg;
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb32;
+  reg1.reserved = 0;
+  reg1.name = 0;
+  
+  reg2 = reg1; reg2.name = op1.size() + 1;
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out1, &reg1, &reg2);
   TestCase1.Run_Test(&Instruction2);
-
+  symbols->clear();
+  
+  #if 0
 /**********************************************************************************/
   in.assign( "abs_s64 $d1, $d2;\n");
   op1.assign("$d1"); op2.assign("$d2"); 
@@ -1629,6 +1635,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
 
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, &out5, &reg1, &imm3, op1, op2);
   TestCase5.Run_Test(&Instruction2);
+  #endif
 }
 } //namespace brig
 } //namespace hsa

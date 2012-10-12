@@ -254,6 +254,9 @@ class Context {
 
     //get buffer
     Buffer *get_directive(void) const {return dbuf;}
+    Buffer *get_code(void) const {return cbuf;}
+    Buffer *get_operands(void) const {return obuf;}
+    StringBuffer *get_strings(void) const {return sbuf;}
 
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
