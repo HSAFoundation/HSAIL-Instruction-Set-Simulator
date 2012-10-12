@@ -1,38 +1,44 @@
+/* ============================================================================
+
+  Copyright (c) 2012 Advanced Micro Devices, Inc.  All rights reserved.
+
+============================================================================ */
+
 #ifndef _HSA_H_
 #define _HSA_H_
 
-// lhowes: Temporary workaround for tool chain issues
-// Once headers finalized we can come up with a cleaner 
-// solution if system includes are still necessary
-#if !defined(AMD_AMP_HSA_INCLUDES)
-#include <vector>
-#include <string>
-#endif // #if !defined(AMD_AMP_HSA_INCLUDES)
-
-//#include "hsailutil.h"
-// lhowes: Temporary workaround for tool chain issues
-// Once headers finalized we can come up with a cleaner 
-// solution if system includes are still necessary
-#if !defined(AMD_AMP_HSA_INCLUDES)
-#include <stdint.h>
-#include <assert.h>
-#endif // #if !defined(AMD_AMP_HSA_INCLUDES)
-
 #include "hsacommon.h"
-
-#ifdef HSA_EXPERIMENTAL
 #include "hsaperf.h"
-#endif
-
 namespace hsa
 {
-/** @defgroup HSA_EXPERIMENTAL Experimental HSA Runtime APIs
- */
+
 /**
- * @addtogroup HSA_PUBLIC HSA Runtime APIs
+ *******************************************************************************
+ *******************************************************************************
  *
- * @{
+ * @mainpage HSA Runtime Programmer's Guide
+ * 
+ * @section overview Overview
  *
+ * @subsection overview_subsection_1 HSA software stack
+ *
+ * The HSA software stack is a collection of component interfaces designed for
+ * interacting with heterogeneous system architectures that are built around
+ * the Heterogeneous System Architecture Input Language (HSAIL).  The stack is
+ * architected to provide a policy-free infrastructure that is ideal for
+ * building higher level programming models and lower level applications. 
+ *
+ * @subsection overview_subsection_2 HSA runtime
+ *
+ * The HSA runtime is the device agnostic front-end component of the HSA
+ * software stack.  The runtime provides a full set of C++ interfaces that
+ * allow for higher level interactions with HSA devices.  The runtime is
+ * intended to be the primary interface for programming on HSA devices.  The
+ * runtime is architected to simplify the complexities of programming at the
+ * HSA core level, while introducing minimal policy.
+ *
+ *******************************************************************************
+ *******************************************************************************
  */
 
 /**
@@ -48,10 +54,23 @@ class Device;
 class Program;
 class DispatchEvent;
 
-
+/************************** @cond HSA_EXPERIMENTAL ****************************/
 class TrapEvent;
 class TrapHandler;
 
+/**
+ *******************************************************************************
+ * @brief Time domain enumeration
+ * @details The time domain enumerations are used for specifying the time 
+ *          domain of requested time stamps. 
+ *******************************************************************************
+ */
+typedef enum {
+    TIME_DOMAIN_HOST,   /*!< Domain of the host, typically cpu */
+    TIME_DOMAIN_DEVICE  /*!< Domain of device, can be cpu or gpu */
+} TimeDomain;
+
+/************************* @endcond *******************************************/
 
 /**
  *******************************************************************************
@@ -61,16 +80,13 @@ class TrapHandler;
  *******************************************************************************
  */
 typedef enum {
-    STATE_INITIATED,      /*!< Initial command state */
-    STATE_INITIATED_HOST, /*!< Initial command state int host time*/
+    STATE_INITIATED,    /*!< Initial command state */
 
     STATE_BLOCKED,      /*!< The related command is blocked waiting for all
                           dependencies to be resolved. */
 
-    STATE_SUBMITTED,      /*!< The related command is pending execution by the 
+    STATE_SUBMITTED,    /*!< The related command is pending execution by the 
                           device.  All dependencies have been resolved. */
-    STATE_SUBMITTED_HOST, /*!< The related command is pending execution by the 
-                          device.  All dependencies have been resolved. host time*/
 
     STATE_STARTED,      /*!< Execution of the related command has been started 
                           by the device. */
@@ -78,6 +94,7 @@ typedef enum {
     STATE_COMPLETED     /*!< Execution of the related command has been 
                           completed by the device. */
 } EventState;
+ 
 
 /**
  *******************************************************************************
@@ -91,6 +108,7 @@ typedef enum {
                               that an exception is encountered.  This is the 
                               default behavior.  */
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     WAVE_ACTION_RESUME = 2, /*!< The wave should resume in the event that an 
                               exception is encountered.  The wave is resumed 
                               at the instruction following the exception PC.*/
@@ -108,7 +126,9 @@ typedef enum {
                               
     WAVE_ACTION_TRAP = 5,   /*!< The wave should be sent to the trap handler 
                               in the event that an exception is encountered.*/
+
     WAVE_ACTION_MAX
+/************************* @endcond *******************************************/
 } WaveAction;
 
 /**
@@ -124,6 +144,7 @@ typedef enum {
                                   application will ignore any kernel 
                                   exceptions. */
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     HOST_ACTION_EXIT = 2,       /*!< Exit the host application on a kernel 
                                   exception.  The host application will call
                                   exit() in the event of a kernel exception. */
@@ -132,6 +153,7 @@ typedef enum {
                                   exception. The host application has
                                   registered an event to be signaled in the
                                   event of a kernel exception. */
+/************************* @endcond *******************************************/
 } HostAction;
 
 /**
@@ -145,14 +167,17 @@ typedef enum {
     CACHE_POLICY_FLUSH_ALL = 1,             /*!< Flush all caches that can be
                                               flushed. */
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     CACHE_POLICY_FLUSH_COMPUTE_UNIT = 2,    /*!< Flush the private device 
                                               compute unit caches. */
 
     CACHE_POLICY_FLUSH_SHARED = 4           /*!< Flush the shared device
                                               compute unit caches. */
+/************************* @endcond *******************************************/
 } CachePolicy;
 
 /**
+ ************************** @cond HSA_EXPERIMENTAL *****************************
  *******************************************************************************
  * @brief Wave broadcast level
  * @details The wave mode enumerations are used to specify the desired 
@@ -162,8 +187,7 @@ typedef enum {
 typedef enum {
     WAVE_MODE_SINGLE = 0,                /*!< Send broadcast message to a 
                                            single wave */
-    /* broadcast to all wavefronts of all processes is not supported for HSA 
-     * user mode */
+
     WAVE_MODE_BROADCAST_PROCESS = 2,     /*!< Send broadcast message to all 
                                            waves in the current process */
 
@@ -181,7 +205,7 @@ typedef enum {
  *          on the associated dispatch.
  *******************************************************************************
  */
-typedef struct ExceptionPolicy_ {
+typedef struct ExceptionPolicy {
     uint32_t exceptionType;    /*!< Mask of exception types to handle. */
 
     WaveAction waveAction;     /*!< Expected wave action to take in the event
@@ -196,7 +220,7 @@ typedef struct ExceptionPolicy_ {
 
     WaveMode   waveMode;       /*!< default wave mode is to single */
 
-    ExceptionPolicy_()
+    ExceptionPolicy()
     {
         waveAction = WAVE_ACTION_HALT;
         hostAction = HOST_ACTION_IGNORE;
@@ -204,6 +228,8 @@ typedef struct ExceptionPolicy_ {
         waveMode   = WAVE_MODE_SINGLE;
     }
 } ExceptionPolicy;
+
+/************************* @endcond *******************************************/
 
 /**
  *******************************************************************************
@@ -220,6 +246,7 @@ typedef enum {
                                        is expected to separately wait for 
                                        completion.  */
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     BLOCKING_POLICY_DEPENDENCY  = 1, /*!< The dispatch interface will block 
                                        until all dependencies have succeeded 
                                        before returning from the kernel 
@@ -237,6 +264,7 @@ typedef enum {
     BLOCKING_POLICY_COMPLETED   = 8  /*!< The dispatch interface will block
                                        until the kernel has completed 
                                        execution. */
+/************************* @endcond *******************************************/
 } BlockingPolicy;
 
 /** 
@@ -249,7 +277,7 @@ typedef enum {
  *          group size are specified as part of the descriptor.
  *******************************************************************************
  */
-typedef struct LaunchAttributes_ {
+typedef struct LaunchAttributes {
 
     BlockingPolicy blockingPolicy; /*!< default has none of the
                                             guarantees listed in the
@@ -258,7 +286,7 @@ typedef struct LaunchAttributes_ {
                                           exceptions*/
 
     CachePolicy cachePolicy;    /*!< default is to flush everything */
-	
+  
     union {
       uint32_t NDRangeSize[3];  /*!< 3 dimensional overall size of the NDRange
                                   to be processed on the dispatch */
@@ -280,15 +308,19 @@ typedef struct LaunchAttributes_ {
       int groupOffsets[3];      // Legacy name - deprecated
     };
 
+    size_t groupMemorySize;      /*!< Size (in bytes) of group memory used in 
+                                   the kernel parameters.*/
+
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     TrapHandler *trapHandler;   /*!< trap handler object used for the
-	                             current kernel dispatch */
+                               current kernel dispatch */
     bool debugMode;             /*!< default is NOT executed in the debug
                                  mode */
     bool timestampEnabled;      /*!< default is false*/
 
-    size_t groupMemorySize;      /*!< Size (in bytes) of group memory used in the kernel parameters.*/
+/************************* @endcond *******************************************/
 
-    LaunchAttributes_()
+    LaunchAttributes()
     {
         blockingPolicy = BLOCKING_POLICY_NONE;
         cachePolicy = CACHE_POLICY_FLUSH_ALL;
@@ -302,20 +334,26 @@ typedef struct LaunchAttributes_ {
         AbsoluteOffset[0]=0;
         AbsoluteOffset[1]=0;
         AbsoluteOffset[2]=0;
+        groupMemorySize = 0;
+
+/************************** @cond HSA_EXPERIMENTAL ****************************/
         debugMode = false;
         trapHandler = NULL;
         timestampEnabled = false;
-        groupMemorySize = 0;
+/************************* @endcond *******************************************/
     }
 
 } LaunchAttributes;
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
 /** 
+ *******************************************************************************
  * @brief User event types
  * @details The user event type enumerations are used for indicating the type 
  *          of user event to create in Device::createEvent().
+ *******************************************************************************
  */
-typedef enum UserEventType_ 
+typedef enum
 {
     DEBUG_EVENT         = 1, /*!< Debug event */
     SYSTEM_CALL_EVENT   = 2, /*!< Syscall event with parameter info */
@@ -324,9 +362,11 @@ typedef enum UserEventType_
 } UserEventType;
 
 /** 
+ *******************************************************************************
  * @brief Trap handler types
  * @details The trap handler type enumerations are used for indicating the type
  *          of trap handler for trap operations.
+ *******************************************************************************
  */
 typedef enum {
     DEBUG_TRAP     = 1,     /*!< Debug trap handler index */
@@ -336,17 +376,19 @@ typedef enum {
 } TrapType; 
 
 /** 
+ *******************************************************************************
  * @brief Trap handler descriptor
  * @details The trap handler descriptor contains the details of a given trap 
  *          handler.
+ *******************************************************************************
  */
-typedef struct TrapHandlerInfo_ {
+typedef struct TrapHandlerInfo {
     void *trapHandler;
     void *trapHandlerBuffer;
     size_t trapHandlerSize;
     size_t trapHandlerBufferSize;
 
-    TrapHandlerInfo_()
+    TrapHandlerInfo()
     {
         trapHandler = NULL;
         trapHandlerBuffer = NULL;
@@ -354,6 +396,7 @@ typedef struct TrapHandlerInfo_ {
         trapHandlerBufferSize = 0;
     }
 } TrapHandlerInfo;
+/************************* @endcond *******************************************/
 
 /**
  *******************************************************************************
@@ -378,6 +421,7 @@ public:
      *
      * @return Number of discovered devices
      *
+     * @see hsa:getDeviceCount
      ***************************************************************************
      */
     virtual uint32_t getDeviceCount()=0;
@@ -392,6 +436,7 @@ public:
      *          
      * @return Vector of hsa::Device objects is returned
      *
+     * @see hsa::getDevices
      ***************************************************************************
      */
     virtual const hsa::vector<hsa::Device*> & getDevices()=0;
@@ -403,21 +448,18 @@ public:
      *          object from an in memory ELF binary.  The resulting 
      *          hsa::Program object is dedicated to the specified set of 
      *          devices.  All devices must be specified at creation time.
-     * @note The address pointer must be a BIF 3.0 ELF binary containing HSAIL 
-     *       and/or BRIG sections.
      *
-     * @param address Pointer to the in memory ELF binary
-     * @param size Size of the in memory ELF binary in bytes
+     * @param binary Pointer to the in memory ELF binary
+     * @param binarySize Size of the in memory ELF binary in bytes
      * @param devices Vector of device pointers for the program
      *
      * @return Pointer to the created hsa::Program object is returned
      *
-     * @exception TODO
-     *
+     * @see hsa::createProgram
      ***************************************************************************
      */
-    virtual hsa::Program* createProgram(char *address, 
-                                        size_t size,
+    virtual hsa::Program* createProgram(char *binary, 
+                                        size_t binarySize,
                                         hsa::vector<hsa::Device *> *devices)=0;
 
     /**
@@ -432,16 +474,12 @@ public:
      *          file location.  The filename is specified as a NULL terminated 
      *          charcter string.
      *
-     * @note The file must be a BIF 3.0 ELF binary file containing HSAIL and/or 
-     *       BRIG sections.
-     *
      * @param fileName Filename of the ELF file to load
      * @param devices Vector of device pointers for the program
      *
      * @return Pointer to the create hsa::Program object is returned
      *
-     * @exception TODO
-     *
+     * @see hsa::createProgramFromFile
      ***************************************************************************
      */
     virtual hsa::Program* createProgramFromFile(
@@ -457,6 +495,7 @@ public:
      *          released.  Use of the program object after destruction shall
      *          result in an error.
      *
+     * @see hsa::destroyProgram
      ***************************************************************************
      */
     virtual void destroyProgram(hsa::Program*)=0; 
@@ -474,15 +513,18 @@ public:
      *          major.minor.patch
      *
      *          The runtime versioning follows the below guidelines:
+     *
      *          major
      *          @li Incremented only when public APIs signatures are changed, 
      *              Is NOT backward compatible with previous major versions.
      *          @li Reset the minor version to 0.
      *          @li Reset the patch version to 0.
+     *
      *          minor 
      *          @li Incremented when new feature is added, needs to be 
      *              backward compatible with previous minor versions.
      *          @li Reset the patch version to 0.
+     *
      *          patch 
      *          @li Incremented only for bug fixes, no user visible API 
      *              changes, needs to be backward and forward compatible 
@@ -490,6 +532,7 @@ public:
      *
      * @return Reference to a string containing the runtime API version.
      *
+     * @see hsa::getVersion
      ***************************************************************************
      */
     virtual const hsa::string & getVersion()=0;
@@ -521,8 +564,8 @@ public:
      *            unable to allocate enough memory to perform the requested 
      *            operation.
      *
-     * @see Runtime::FreeGlobalMemory()
-     *
+     * @see Runtime::freeGlobalMemory
+     * @see hsa::allocateGlobalMemory
      ***************************************************************************
      */
     virtual void* 
@@ -542,8 +585,8 @@ public:
      *
      * @param address Pointer to the memory to be freed.
      *
-     * @see Runtime::allocateGlobalMemory()
-     *
+     * @see Runtime::allocateGlobalMemory
+     * @see hsa::freeGlobalMemory
      ***************************************************************************
      */
     virtual void
@@ -577,9 +620,16 @@ public:
      ***************************************************************************
      * @brief Inquire the type of the device object
      * @details This HSA runtime device interface is used to inquire the type 
-     *          of associated device object.
+     *          of associated device object.  The interface returns one of the
+     *          following hsa::DeviceType enumerations:
+     *          @li \c DEVICE_TYPE_LATENCY 
+     *              @copydoc hsacommon::DEVICE_TYPE_LATENCY
+     *          @li \c DEVICE_TYPE_THROUGHPUT 
+     *              @copydoc hsacommon::DEVICE_TYPE_THROUGHPUT
      *
      * @return The associated DeviceType enumeration is returned.
+     *
+     * @see hsa::DeviceType
      ***************************************************************************
      */
     virtual hsa::DeviceType getType() const = 0;
@@ -596,17 +646,12 @@ public:
      *          The follow are valid compiler options to this interface:
      *          @li -optlevel 
      *
-     * @note The address pointer must be a BIF 3.0 ELF binary containing HSAIL 
-     *       and/or BRIG sections.
-     *
      * @param program Pointer to the HSA program object containing the kernel
      *                to be compiled.
      * @param kernelName Pointer to a NULL terminated kernel name string. 
      * @param options Pointer to a NULL terminated string of compile options.
      *
      * @return Pointer to the created hsa::Kernel object is returned.
-     *
-     * @exception TODO
      *
      ***************************************************************************
      */
@@ -651,9 +696,6 @@ public:
      ***************************************************************************
      */
     virtual unsigned int getComputeUnitsCount()=0;
-
-    ///@todo Do we need getCapabilities?
-    virtual uint32_t getCapabilities()=0;
 
     /**
      ***************************************************************************
@@ -744,7 +786,7 @@ public:
      ***************************************************************************
      */
     virtual uint32_t getMaxQueueSize()=0;    
-	
+  
     /**
      ***************************************************************************
      * @brief Inquire the maximum device wavefront size
@@ -777,45 +819,47 @@ public:
      * 
      *          The \c heapType parameter must be specified and contain one of 
      *          the following heap types:  
-     *          @li HEAP_TYPE_SYSTEM The global memory is allocated in the 
+     *          @li \c HEAP_TYPE_SYSTEM The global memory is allocated in the 
      *                               system near the calling device. 
-     *          @li HEAP_TYPE_DEVICE_PUBLIC The global memory is allocated in 
-     *                               host visible part of the device local 
+     *          @li \c HEAP_TYPE_DEVICE_PUBLIC The global memory is allocated
+     *                               in host visible part of the device local 
      *                               memory.
      *
      *          The \c flag parameter must contain one of the following host 
      *          accessibility options:
-     *          @li MEMORY_OPTION_HOST_READ_WRITE The host is able to read and 
-     *                               write to the allocated memory.
-     *          @li MEMORY_OPTION_HOST_READ_ONLY The host can only read the 
+     *          @li \c MEMORY_OPTION_HOST_READ_WRITE The host is able to read 
+     *                               and write to the allocated memory.
+     *          @li \c MEMORY_OPTION_HOST_READ_ONLY The host can only read the 
      *                               allocated memory.
-     *          @li MEMORY_OPTION_HOST_WRITE_ONLY The host can only write to 
+     *          @li \c MEMORY_OPTION_HOST_WRITE_ONLY The host can only write to 
      *                               the allocated memory.
-     *          @li MEMORY_OPTION_HOST_NO_ACCESS The host can not read or 
+     *          @li \c MEMORY_OPTION_HOST_NO_ACCESS The host can not read or 
      *                               write to the allocated memory.
      *
      *          The \c flag parameter must contain one of the following device 
      *          accessibility options:
-     *          @li MEMORY_OPTION_DEVICE_READ_WRITE The calling device is able 
-     *                               to read and write to the allocated memory.
-     *          @li MEMORY_OPTION_DEVICE_READ_ONLY The calling device can only 
-     *                               read the allocated memory.
-     *          @li MEMORY_OPTION_DEVICE_WRITE_ONLY The calling device can 
+     *          @li \c MEMORY_OPTION_DEVICE_READ_WRITE The calling device is 
+     *                               able to read and write to the allocated 
+     *                               memory.
+     *          @li \c MEMORY_OPTION_DEVICE_READ_ONLY The calling device can 
+     *                               only read the allocated memory.
+     *          @li \c MEMORY_OPTION_DEVICE_WRITE_ONLY The calling device can 
      *                               only write to the allcoated memory.
-     *          @li MEMORY_OPTION_DEVICE_NO_ACCESS The calling device can not 
-     *                               read or write to the allocated memory.
+     *          @li \c MEMORY_OPTION_DEVICE_NO_ACCESS The calling device can 
+     *                               not read or write to the allocated memory.
      *
      *          Additionaly, the \c flag parameter can also include the 
      *          following optional performance hints:
-     *          @li MEMORY_OPTION_UNCACHED Sets the allocated memory to be 
+     *          @li \c MEMORY_OPTION_UNCACHED Sets the allocated memory to be 
      *                               non-cachable.  This option is mutually 
      *                               exclusive with 
-     *                               MEMORY_OPTION_WRITE_COMBINED.
-     *          @li MEMORY_OPTION_WRITE_COMBINED Sets the allocated memory to 
-     *                               be write-combined. This option is mutually 
-     *                               exclusive with MEMORY_OPTION_UNCACHED.
-     *          @li MEMORY_OPTION_NONPAGEABLE Disables paging on the allocated 
-     *                               memory.
+     *                               \c MEMORY_OPTION_WRITE_COMBINED.
+     *          @li \c MEMORY_OPTION_WRITE_COMBINED Sets the allocated memory 
+     *                               to be write-combined. This option is 
+     *                               mutually exclusive with 
+     *                               \c MEMORY_OPTION_UNCACHED.
+     *          @li \c MEMORY_OPTION_NONPAGEABLE Disables paging on the 
+     *                               allocated memory.
      *
      * @param size Size of the allocation in bytes, must be greater than zero.
      * @param alignment The alignment size in bytes for the address of 
@@ -860,7 +904,6 @@ public:
      * @param address Pointer to the memory to be freed.
      *
      * @see Device::allocateGlobalMemory
-     * 
      ***************************************************************************
      */
     virtual void 
@@ -891,7 +934,6 @@ public:
      *            unable to perform the requested operation.
      *
      * @see Device::deregisterMemory
-     * 
      ***************************************************************************
      */
     virtual void 
@@ -913,7 +955,6 @@ public:
      * @param address Pointer to a memory region to deregister.
      *
      * @see Device::registerMemory
-     * 
      ***************************************************************************
      */
     virtual void 
@@ -921,7 +962,7 @@ public:
 
     /**
      ***************************************************************************
-     * @brief 
+     * @brief Map a memory region
      * @details Indicate that a memory region will be used by the host or 
      *        within a kernel running on the device.
      *
@@ -940,8 +981,10 @@ public:
      * @param size Requested mapping size in bytes, must be greater than zero.
      *
      * @exception HsaException if the input is invalid or the runtime is 
-     *            unable to map enough memory to perform the requested operation.
+     *            unable to map enough memory to perform the requested 
+     *            operation.
      *
+     * @see Device::unmapMemory
      ***************************************************************************
      */
     virtual void 
@@ -957,6 +1000,7 @@ public:
      * 
      * @param address Pointer to a valid memory region to unmap.
      *
+     * @see Device::mapMemory
      ***************************************************************************
      */
     virtual void 
@@ -986,14 +1030,14 @@ public:
      *                 -3 and 3.  The default value is 0.
      *
      * @see hsa::Queue
-     *
      ***************************************************************************
      */
     virtual hsa::Queue *createQueue(uint32_t size = 0,
-                                    void *address = NULL, 
-                                    uint32_t percent = QUEUE_DEFAULT_PERCENT, 
-                                    uint32_t priority = QUEUE_DEFAULT_PRIORITY) = 0;
+                                  void *address = NULL, 
+                                  uint32_t percent = QUEUE_DEFAULT_PERCENT, 
+                                  uint32_t priority = QUEUE_DEFAULT_PRIORITY)=0;
 
+    /************************ @cond HSA_EXPERIMENTAL **************************/
     /**
      ***************************************************************************
      * @brief Acquire a list of the device cache descriptors
@@ -1035,8 +1079,6 @@ public:
      */
     virtual int getMaxFrequency()=0;
 
-    
-
     /**
      ***************************************************************************
      * @brief Acquire a synchronized set of host/device clock counters.
@@ -1056,8 +1098,11 @@ public:
     
     /**
      ***************************************************************************
-     * @brief Retrieve all the trap handler information in the device
-     * @param trapHandlerInfo pointer to the trap handler info buffer
+     * @brief Acquire the trap handler information
+     * @details This HSA device interface is used for acquiring the trap
+     *          handler information for the associated device.  
+     *
+     * @param trapHandlerInfo Pointer to the trap handler descriptor
      *
      ***************************************************************************
      */
@@ -1065,13 +1110,15 @@ public:
 
     /**
      ***************************************************************************
-     * @brief control the wave front.
-     * @param action actions to be taken on the wavefront
-     * @param mode how the actions are taken, single wave, broadcast, etc.
-     * @param trapID, this is used for just the action of h_trap, in which
-     *  a trap ID is needed.
-     * @param msgPtr, pointer to a message indicate various information. 
-     *  see the KFD design for specific information.
+     * @brief Control a wave on the device
+     * @details This HSA device interface is used for performing a specified 
+     *          control operation on a set of waves associated with the device.
+     *
+     * @param action Action to be taken against the wave.
+     * @param mode Mode of broadcast. 
+     * @param trapID
+     * @param msgPtr Pointer to an actions specific messages for the targeted 
+     *               waves.
      *
      ***************************************************************************
      */
@@ -1080,17 +1127,25 @@ public:
                              uint32_t trapID, 
                              void *msgPtr) = 0;
 
-    #ifdef HSA_EXPERIMENTAL
+    virtual uint32_t getCapabilities()=0;
+
     /**
      ***************************************************************************
-     * @brief Returns performance monitoring units for a device.
-     ***************************************************************************  
+     * @brief Returns performance monitoring units for a given ASIC
+     * @details This HSA device interface is used to get a performance
+     *          monitoring unit.  The PMU contains counter groups and counters
+     *          that are specific to the ASIC type of the device.
+     *
+     * @return A Pmu structure that contains counter groups and counters related
+     *         to the asic of the device.
+     ***************************************************************************
     */
     virtual hsaperf::Pmu * getPMU() = 0;
-    #endif
+
+   /************************ @endcond *****************************************/
 
    /**
-     *************************************************hsa*************************
+     ***************************************************************************
      * @brief Default destructor.
      ***************************************************************************
      */
@@ -1232,6 +1287,7 @@ class DLL_PUBLIC Program
 {
 public:
     /*! 
+     ************************ @cond HSA_EXPERIMENTAL ***************************
      ***************************************************************************
      * @brief Compile a kernel on multiple devices
      * @details This HSA program interface is used to build a specified kernel
@@ -1250,8 +1306,9 @@ public:
      */
     virtual hsa::Kernel *compileKernel(const char* kernelName,
                                        const char* options) = 0;
+    /********************** @endcond ******************************************/
 
-      /**
+    /**
      ***************************************************************************
      * @brief Default destructor.
      ***************************************************************************
@@ -1325,10 +1382,10 @@ public:
 
    
    /** 
-     ****************************************************************************
+     ***************************************************************************
      * @brief Inquire base of kernel group memory
-     * @details This HSA kernel interface is used to inquire the starting address
-     *          of the group memory for the assoicated kernel.
+     * @details This HSA kernel interface is used to inquire the starting 
+     *          address of the group memory for the assoicated kernel.
      *
      *          The returned address may be used to calculate the address of
      *          group memory arguments passed to the kernel.  It is the callers
@@ -1354,8 +1411,8 @@ public:
 /**
  *******************************************************************************
  * @brief HSA runtime event interface class
- * @details The HSA runtime event class provides the a set of interfaces for 
- *          operating on an HSA event object.  Event objects are used for 
+ * @details The HSA runtime event class provides a set of interfaces for 
+ *          operating on the associated event.  Event objects are used for 
  *          blocking on and querying the state of asynchronous operations.  
  *******************************************************************************
  */
@@ -1390,23 +1447,21 @@ public:
  
 /**
  *******************************************************************************
- * @brief HSA runtime event interface class
- * @details The HSA runtime event class provides the a set of interfaces for 
- *          operating on an HSA event object.  Event objects are used for 
- *          blocking on and querying the state of asynchronous operations.  
  * @brief HSA runtime dispatch event interface class
- * @details The HSA runtime dispatch event class is an HSA::event that is
- *          specifically associated with a dispatch queue command.  This 
- *          event variant provides interfaces related to a dispatch operation 
+ * @details The HSA runtime dispatch event class provides a set of interfaces
+ *          for operating on the associated dispatch event.  A dispatch event
+ *          is an HSA::event that is created as a result of initiating a 
+ *          dispatch command on a given command queue.  
  *
- *          Specifically use of the dispatch event allows users to monitor the
+ *          Specifically, use of the dispatch event allows users to monitor the
  *          various states of a kernel dispatch.  As well, information
  *          pertaining to the dispatch may be acquired through interfaces on
  *          the object.
  *
  *******************************************************************************
  */
-class DLL_PUBLIC DispatchEvent : public hsa::Event {
+class DLL_PUBLIC DispatchEvent : public hsa::Event 
+{
 
 public:
     /**
@@ -1477,6 +1532,8 @@ public:
      */
     virtual hsa::LaunchAttributes & getLaunchAttributes(void) = 0;
 
+
+    /************************ @cond HSA_EXPERIMENTAL **************************/
     /**
      ***************************************************************************
      * @brief Acquire a pointer to the dispatched ISA
@@ -1510,21 +1567,31 @@ public:
 
     /**
      ***************************************************************************
-     * @brief  Acquire the event state timestamp
-     * @details This HSA dispatch event interfae is used to inquire the 
+     * @brief  Incquire an event state timestamp
+     * @details This HSA dispatch event interface is used to inquire the 
      *          timestamp of the specified dispatch command state associated
-     *          with the event.  The interface returns a device timestamp
-     *          relative to the device associated with the dispatch queue. 
-     *          The returned timestamp value may be used in conjunction with
-     *          the device clock frequency to determine the corresponding
-     *          real time.  Querying the timestamp for a future event state
-     *          will return a value of 0.
+     *          with the event.  Depending on the the specfied time domain
+     *          the interface either returns a host or device timestamp 
+     *          of the requested event state.  
+     *          If the requested time domain is TIME_DOMAIN_DEVICE then the 
+     *          returned time is relative to the device associated with the 
+     *          dispatch queue.  This returned timestamp value may be used in 
+     *          conjunction with the device clock frequency to determine the 
+     *          corresponding real time.  
+     *          Querying the timestamp for a future event state will result in
+     *          a return value of 0.
+     *
+     * @param state EventState to acquire timestamp
+     * @param domain TimeDomain of timestamp to be returned 
      * 
      * @return 64-bit integer timestamp or 0 if the state has not been reached. 
      *
      ***************************************************************************
      */
-    virtual uint64_t getTimestamp(hsa::EventState state) = 0;
+    virtual uint64_t getTimestamp(hsa::EventState state, 
+                                 hsa::TimeDomain domain = TIME_DOMAIN_DEVICE)=0;
+
+    /********************** @endcond ******************************************/
    
     /**
      ***************************************************************************
@@ -1532,7 +1599,7 @@ public:
      ***************************************************************************
      */
     ~DispatchEvent() {};
-}; /***    hsa::DispatchEvent    ***/
+};
 
 
 
@@ -1550,12 +1617,16 @@ extern "C" {
  *          returned by this function.
  *
  * @return Pointer to the singleton HSA runtime object
+ *
+ *******************************************************************************
  */
 DLL_PUBLIC hsa::Runtime* getRuntime();
 
 /**
+ *******************************************************************************
  * @brief Convenience typedef for typecasting the function pointer as part of 
  *        the dynamic load.
+ *******************************************************************************
  */
 typedef hsa::Runtime* (*fptr_getRuntime)();
  
@@ -1563,29 +1634,100 @@ typedef hsa::Runtime* (*fptr_getRuntime)();
 
 /*!
  *******************************************************************************
- * @brief Global HSA createProgram interface.
- * @details This global HSA interface is the same as 
- *          hsa::Runtime::createProgram()
+ * @brief @copybrief hsa::Runtime::createProgram
+ * @details @copydetails hsa::Runtime::createProgram
+ *          This HSA interface is a global entrypoint for invoking the 
+ *          hsa::Runtime::createProgram() without going through the 
+ *          hsa::Runtime object.
  *******************************************************************************
  */
 DLL_PUBLIC hsa::Program* createProgram(char *binary, 
-                                        size_t binarySize,
-                                        hsa::vector<hsa::Device *> *devices);
+                                       size_t binarySize,
+                                       hsa::vector<hsa::Device *> *devices);
+
+/*!
+ *******************************************************************************
+ * @brief @copybrief hsa::Runtime::createProgramFromFile
+ * @details @copydetails hsa::Runtime::createProgramFromFile
+ *          This HSA interface is a global entrypoint for invoking the 
+ *          hsa::Runtime::createProgramFromFile() without going through the 
+ *          hsa::Runtime object.
+ *******************************************************************************
+ */
 DLL_PUBLIC hsa::Program* createProgramFromFile(
                                 const char* fileName,
                                 hsa::vector<hsa::Device *> *devices);
+
+/*!
+ *******************************************************************************
+ * @brief @copybrief hsa::Runtime::destroyProgram
+ * @details @copydetails hsa::Runtime::destroyProgram
+ *          This HSA interface is a global entrypoint for invoking the 
+ *          hsa::Runtime::destroyProgram() without use of the hsa::Runtime
+ *          object.
+ *******************************************************************************
+ */
 DLL_PUBLIC void destroyProgram(hsa::Program* program);
+
+/*!
+ *******************************************************************************
+ * @brief @copybrief hsa::Runtime::getDeviceCount
+ * @details @copydetails hsa::Runtime::getDeviceCount
+ *          This HSA interface is a global entrypoint for invoking the 
+ *          hsa::Runtime::getDeviceCount() without use of the hsa::Runtime
+ *          object.
+ *******************************************************************************
+ */
 DLL_PUBLIC uint32_t getDeviceCount();
+
+/*!
+ *******************************************************************************
+ * @brief @copybrief hsa::Runtime::getDevices
+ * @details @copydetails hsa::Runtime::getDevices
+ *          This HSA interface is a global entrypoint for invoking the 
+ *          hsa::Runtime::getDevices() without use of the hsa::Runtime
+ *          object.
+ *******************************************************************************
+ */
 DLL_PUBLIC const hsa::vector<hsa::Device*>& getDevices();
+
+/*!
+ *******************************************************************************
+ * @brief @copybrief hsa::Runtime::getVersion
+ * @details @copydetails hsa::Runtime::getVersion
+ *          This HSA interface is a global entrypoint for invoking the 
+ *          hsa::Runtime::getVersion() without use of the hsa::Runtime
+ *          object.
+ *******************************************************************************
+ */
 DLL_PUBLIC const hsa::string& getVersion();
+
+/*!
+ *******************************************************************************
+ * @brief @copybrief hsa::Runtime::allocateGlobalMemory
+ * @details @copydetails hsa::Runtime::allocateGlobalMemory
+ *          This HSA interface is a global entrypoint for invoking the 
+ *          hsa::Runtime::allocateGlobalMemory() without use of the hsa::Runtime
+ *          object.
+ *******************************************************************************
+ */
 DLL_PUBLIC void* allocateGlobalMemory(const size_t size, 
                                       const size_t alignment = 0);
+
+/*!
+ *******************************************************************************
+ * @brief @copybrief hsa::Runtime::freeGlobalMemory
+ * @details @copydetails hsa::Runtime::freeGlobalMemory
+ *          This HSA interface is a global entrypoint for invoking the 
+ *          hsa::Runtime::freeGlobalMemory() without use of the hsa::Runtime
+ *          object.
+ *
+ *******************************************************************************
+ */
 DLL_PUBLIC void freeGlobalMemory(void* address);
 
 
-
-
-
+/************************** @cond HSA_EXPERIMENTAL ****************************/
 /**
  *******************************************************************************
  * @brief HSA runtime trap event interface class
@@ -1625,7 +1767,7 @@ public:
  */
 class TrapHandler {
 public:
-	/**
+  /**
      ***************************************************************************
      * @brief Set up trap handler, When this function is called,
      * trap handler will internally read the runtime trap handler.
@@ -1668,17 +1810,13 @@ public:
      * @brief copy trap handler info from device object to be used by the 
      *        dispatch
      *
-     * @param trapHandlerInfo pointer to the trap handler info to be copied from
-     *
      ***************************************************************************
      */
     virtual void copyTrapHandlerFromDevice(Device *dev) = 0;
-	
+  
     /**
      ***************************************************************************
      * @brief get all the trap handlers 
-     *
-     * @param trapHandlerInfo pointer to the trap handler info to be copied from
      *
      ***************************************************************************
      */
@@ -1691,10 +1829,7 @@ public:
      */
     virtual ~TrapHandler() {}
 };
-
-/**
- * @}
- */
+/************************* @endcond *******************************************/
 }
 
 #endif
