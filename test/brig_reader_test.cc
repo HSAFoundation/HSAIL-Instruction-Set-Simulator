@@ -611,8 +611,74 @@ TEST(BrigWriterTest, Subwords) {
   }
 }
 
-TEST(BrigKernelTest, VectorAddArray) {
+TEST(BrigKernelTest, EuclideanGCD) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__run(\n"
+    "      kernarg_u32 %arg_val2,\n"
+    "      kernarg_u32 %arg_val0,\n"
+    "      kernarg_u32 %arg_val1)\n"
+    "{\n"
+    "      ld_kernarg_u32    $s0, [%arg_val0];\n"
+    "      ld_kernarg_u32    $s1, [%arg_val1];\n"
+    "      cmp_eq_b1_u32 $c1, $s0, 0;\n"          // if a == 0;
+    "      cbr     $c1, @BB0_1_0;\n"              // return b;
+    "@WHILE:"
+    "      cmp_eq_b1_u32 $c2, $s1, 0;\n"          // while b != 0;
+    "      cbr     $c2, @BB0_1_1;\n"
+    "@BB0_2:"
+    "      cmp_gt_b1_u32 $c3, $s0, $s1;\n"        // if (a > b)
+    "      cbr     $c3, @BB1_1;\n"
+    "      brn     @BB1_2;\n"
+    "@BB1_1:"
+    "      sub_u32 $s0, $s0, $s1;\n"              // a = a - b;
+    "      brn     @WHILE;\n"
+    "@BB1_2:"
+    "      sub_u32 $s1, $s1, $s0;\n"              // else b = b - a;
+    "      brn     @WHILE;\n"
+    "@BB0_1_0:"
+    "      ld_kernarg_u32   $s6, [%arg_val2];\n"
+    "      st_global_u32   $s1, [$s6] ;\n"
+    "ret;\n"
+    "@BB0_1_1:"
+    "      ld_kernarg_u32   $s6, [%arg_val2];\n"
+    "      st_global_u32   $s0, [$s6] ;\n"
+    "ret;\n"
+    "};\n"
+  );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 
+  int *number1 = new int[4];
+  int *number2 = new int[4];
+  int *divisor = new int;
+  number1[0] = 12;
+  number1[1] = 4;
+  number1[2] = 0;
+  number1[3] = 3;
+
+  number2[0] = 16;
+  number2[1] = 0;
+  number2[2] = 5;
+  number2[3] = 7;
+
+  int temp[4] = {4,4,5,1};
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__run");
+
+  for(int i = 0; i < 4; i++) {
+    void *args[] = { &divisor, number1 + i, number2 + i };
+    BE.launch(fun, args);
+    EXPECT_EQ(*divisor, temp[i]);
+  }
+  delete[] number1;
+  delete[] number2;
+  delete divisor;
+}
+
+TEST(BrigKernelTest, VectorAddArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
@@ -843,7 +909,9 @@ TEST(BrigKernelTest, CRC32) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
-    "kernel &CRC32Kernel(kernarg_u32 %r, kernarg_u32 %n_ptr, kernarg_u32 %n_len)\n"
+    "kernel &CRC32Kernel(kernarg_u32 %r,\n"
+    "                    kernarg_u32 %n_ptr,\n"
+    "                    kernarg_u32 %n_len)\n"
     "{\n"
     "  ld_kernarg_u32 $s4, [%n_len]; \n"  // $s4 is for %n_len
     "  ld_kernarg_u32 $s3, [%n_ptr]; \n"  // $s3 is for %n_ptr
