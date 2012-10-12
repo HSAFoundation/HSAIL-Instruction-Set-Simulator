@@ -105,6 +105,7 @@ TEST(CodegenTest, Ld_Codegen){
 /*********************Common variables**********************/
   std::string in, op1, op2; 
   StringBuffer* sbuf = new StringBuffer();
+  int reg_size, width_size; 
 
   /*****************************************************************/
   in.assign( "ld_arg_f32 $s0, [%input];\n");
@@ -118,7 +119,8 @@ TEST(CodegenTest, Ld_Codegen){
     0, 
     0
   };
-  dest1.size = sizeof(dest1);  
+  reg_size = dest1.size = sizeof(dest1);  
+  
 
   BrigOperandImmed width1 = {
     0,
@@ -127,7 +129,7 @@ TEST(CodegenTest, Ld_Codegen){
     0,
     {0}  
   }; 
-  width1.size = sizeof(width1);
+  width_size = width1.size = sizeof(width1);
   
   BrigOperandAddress addr1 = {
     0,
@@ -144,7 +146,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,                // opcode
     Brigf32,               // type
     BrigNoPacking,         // packing
-    {0, sizeof(width1), sizeof(width1) + sizeof(dest1), 0, 0},  // operand[5]
+    {0, width_size, width_size + reg_size, 0, 0},  // operand[5]
     BrigArgSpace,          // storageClass
     BrigRegular,           // memorySemantic
     0                      // equivClass
@@ -167,7 +169,7 @@ TEST(CodegenTest, Ld_Codegen){
     0, 
     0
   };
-  dest2.size = sizeof(dest2);
+  reg_size = dest2.size = sizeof(dest2);
   
   BrigOperandImmed width2 = {
     0,
@@ -176,7 +178,7 @@ TEST(CodegenTest, Ld_Codegen){
     0,
     {0}  
   }; 
-  width2.size = sizeof(width2);
+  width_size = width2.size = sizeof(width2);
   
   BrigOperandAddress addr2 = {
     0,
@@ -193,7 +195,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,                // opcode
     Brigf32,               // type
     BrigNoPacking,         // packing
-    {0, sizeof(width2), sizeof(width2) + sizeof(dest2), 0, 0},  // operand[5]
+    {0, width_size, width_size + reg_size, 0, 0},  // operand[5]
     BrigArgSpace,          // storageClass
     BrigRegular,           // memorySemantic
     0                      // equivClass
@@ -204,7 +206,55 @@ TEST(CodegenTest, Ld_Codegen){
   TestCase2.Run_Test(&Ld);  
   sbuf->clear();
 
+/**********************************************************************************/
+  in.assign( "ld_f32 $s1, [$d0];\n");
+  op1.assign("$s1"); op2.assign("$d0");
+  sbuf->append(op1); sbuf->append(op2);
+    
+  BrigOperandReg dest3 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0, 
+    0
+  };
+  reg_size = dest3.size = sizeof(dest3);
 
+  BrigOperandImmed width3 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}  
+  }; 
+  width_size = width3.size = sizeof(width3);
+   
+  BrigOperandIndirect indir3 = {
+    0,
+    BrigEOperandIndirect,
+    36,
+    Brigb64,
+    0,
+    0
+  };
+  indir3.size = sizeof(indir3);
+
+  BrigInstLdSt out3 = {
+    0,  // size
+    BrigEInstLdSt,         // kind
+    BrigLd,                // opcode
+    Brigf32,               // type
+    BrigNoPacking,         // packing
+    {0, width_size, width_size + reg_size, 0, 0},  // operand[5]
+    BrigFlatSpace,          // storageClass
+    BrigRegular,           // memorySemantic
+    0                      // equivClass
+  };
+  out3.size = sizeof(out3); 
+ 
+  Ld_Test<BrigOperandReg> TestCase3(in, sbuf, &out3, &width3, &dest3, &indir3);
+  TestCase3.Run_Test(&Ld);  
+  sbuf->clear();
 }
 
 }
