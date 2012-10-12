@@ -54,7 +54,7 @@ Steps for Unit Test Generation
 3. Create a class with the appropriate type
 4. Assign the appropriate reference values,  and call Run_Test(). 
 */
-  
+#if 0  
 TEST(CodegenTest, Instruction3Op_CodeGen){  
   
   /********************************** Common variables used by all tests******************************/
@@ -469,7 +469,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   symbols->clear();
   
   }
-
+#endif
 } //namespace hsa
 } //namespace brig
 

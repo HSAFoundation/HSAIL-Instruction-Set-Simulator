@@ -10637,6 +10637,5 @@ TEST(CodegenTest, InitializableDecl_CodeGen_Part2) {
   delete lexer;
 }
 
-
 }  // namespace brig
 }  // namespace hsa
