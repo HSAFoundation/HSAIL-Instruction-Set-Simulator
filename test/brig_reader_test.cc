@@ -650,7 +650,7 @@ TEST(BrigKernelTest, EuclideanGCD) {
   EXPECT_TRUE(BP);
   if(!BP) return;
 
-  int *number1 = new int[4];     
+  int *number1 = new int[4];
   int *number2 = new int[4];
   int *divisor = new int;
   number1[0] = 12;
@@ -666,12 +666,12 @@ TEST(BrigKernelTest, EuclideanGCD) {
   int temp[4] = {4,4,5,1};
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__run"); 
+  llvm::Function *fun = BP->getFunction("__run");
 
   for(int i = 0; i < 4; i++) {
     void *args[] = { &divisor, number1 + i, number2 + i };
     BE.launch(fun, args);
-    EXPECT_EQ(*divisor,temp[i]);
+    EXPECT_EQ(*divisor, temp[i]);
   }
   delete[] number1;
   delete[] number2;
@@ -910,7 +910,9 @@ TEST(BrigKernelTest, CRC32) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
-    "kernel &CRC32Kernel(kernarg_u32 %r, kernarg_u32 %n_ptr, kernarg_u32 %n_len)\n"
+    "kernel &CRC32Kernel(kernarg_u32 %r,\n"
+    "                    kernarg_u32 %n_ptr,\n"
+    "                    kernarg_u32 %n_len)\n"
     "{\n"
     "  ld_kernarg_u32 $s4, [%n_len]; \n"  // $s4 is for %n_len
     "  ld_kernarg_u32 $s3, [%n_ptr]; \n"  // $s3 is for %n_ptr
