@@ -509,9 +509,74 @@ TEST(BrigInstTest, VectorMad) {
   testInst("mad_s32", testVec);
 }
 
+<<<<<<< local
 TEST(BrigWriterTest, VectorArith) {
   const uint32_t testVec[] = { 0, 0x01010101, 0xFFFFFFFF };
   testInst("add_pp_s8x4", testVec);
+=======
+TEST(BrigKernelTest, EuclideanGCD) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__run(\n"
+    "      kernarg_u32 %arg_val2,\n"
+    "      kernarg_u32 %arg_val0,\n"
+    "      kernarg_u32 %arg_val1)\n"
+    "{\n"
+    "      ld_kernarg_u32    $s0, [%arg_val0];\n"
+    "      ld_kernarg_u32    $s1, [%arg_val1];\n"
+    "      cmp_eq_b1_u32 $c1, $s0, 0;\n"
+    "      cbr     $c1, @BB0_1_0;\n"
+    "@WHILE:"
+    "      cmp_eq_b1_u32 $c2, $s1, 0;\n"
+    "      cbr     $c2, @BB0_1_1;\n"
+    "@BB0_2:"
+    "      cmp_gt_b1_u32 $c3, $s0, $s1;\n"
+    "      cbr     $c3, @BB1_1;\n"
+    "      brn     @BB1_2;\n"
+    "@BB1_1:"
+    "      sub_u32 $s0, $s0, $s1;\n"
+    "      brn     @WHILE;\n"
+    "@BB1_2:"
+    "      sub_u32 $s1, $s1, $s0;\n"
+    "      brn     @WHILE;\n"
+    "@BB0_1_0:"
+    "      ld_kernarg_u32   $s6, [%arg_val2];\n"
+    "      st_global_u32   $s1, [$s6] ;\n"
+    "ret;\n"
+    "@BB0_1_1:"
+    "      ld_kernarg_u32   $s6, [%arg_val2];\n"
+    "      st_global_u32   $s0, [$s6] ;\n"
+    "ret;\n"
+    "};\n"
+  );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  int *fir_arg = new int[4];     
+  int *sec_arg = new int[4];
+  int *divisor = new int;
+  fir_arg[0] = 12;
+  fir_arg[1] = 4;
+  fir_arg[2] = 0;
+  fir_arg[3] = 3;
+  sec_arg[0] = 16;
+  sec_arg[1] = 0;
+  sec_arg[2] = 5;
+  sec_arg[3] = 7;
+  int temp[4] = {4,4,5,1};
+
+  
+  for(int i = 0; i < 4; i++) {
+  hsa::brig::BrigEngine BE(BP);
+  void *args[] = { &divisor, fir_arg+i, sec_arg+i };
+    llvm::Function *fun = BP->getFunction("__run");
+    BE.launch(fun, args);
+    EXPECT_EQ(*divisor,temp[i]);
+  }
+  delete fir_arg;
+  delete sec_arg;
+  delete divisor;
+>>>>>>> other
 }
 
 TEST(BrigWriterTest, GlobalArray) {
@@ -679,7 +744,6 @@ TEST(BrigKernelTest, EuclideanGCD) {
 }
 
 TEST(BrigKernelTest, VectorAddArray) {
-
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "\n"
