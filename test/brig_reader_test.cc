@@ -906,3 +906,83 @@ TEST(BrigKernelTest, CRC32) {
   delete l;
 }
 
+TEST(BrigKernelTest, FizzBuzz) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &__fizzbuzz (kernarg_s32 %r, kernarg_s32 %n)\n"
+    "{\n"
+       //$s0 ret, $s1 %n, $s2 i
+    "  ld_kernarg_u32  $s1, [%n];\n"
+    "  xor_b32 $s2, $s2, $s2;"
+    "@loop:"
+    "  mov_b32 $s4, $s2;\n"
+    "  div_s32 $s5, $s4, 15;\n"      
+    "  mul_s32 $s6, $s5, 15;\n"      
+    "  sub_s32 $s5, $s4, $s6;\n"    
+    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"  
+    "  cbr $c1, @FizzBuzz;\n"       
+    "  div_s32 $s5, $s4, 3;\n"      
+    "  mul_s32 $s6, $s5, 3;\n"      
+    "  sub_s32 $s5, $s4, $s6;\n"    
+    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"  
+    "  cbr $c1, @Fizz;\n"       
+    "  div_s32 $s5, $s4, 5;\n"      
+    "  mul_s32 $s6, $s5, 5;\n"      
+    "  sub_s32 $s5, $s4, $s6;\n"    
+    "  cmp_eq_b1_u32 $c1, $s5, 0;\n" 
+    "  cbr $c1, @Buzz;\n"       
+    "  ld_kernarg_s32 $s5, [%r];\n"
+    "  shl_u32 $s6, $s2, 2;"
+    "  add_u32 $s5, $s5, $s6;"
+    "  st_global_u32 0, [$s5];\n"
+    "  brn @loop_check;"
+    "@FizzBuzz:"
+    "  ld_kernarg_s32  $s5, [%r];\n"
+    "  shl_u32 $s6, $s2, 2;"
+    "  add_u32 $s5, $s5, $s6;"
+    "  st_global_u32 15, [$s5];\n"
+    "  brn @loop_check;"
+    "@Fizz:"
+    "  ld_kernarg_s32  $s5, [%r];\n"
+    "  shl_u32 $s6, $s2, 2;"
+    "  add_u32 $s5, $s5, $s6;"
+    "  st_global_u32 3, [$s5];\n"
+    "  brn @loop_check;"
+    "@Buzz:"
+    "  ld_kernarg_s32  $s5, [%r];\n"
+    "  shl_u32 $s6, $s2, 2;"
+    "  add_u32 $s5, $s5, $s6;"
+    "  st_global_u32 5, [$s5];\n"
+    "  brn @loop_check;"
+    "@loop_check:"
+    "  add_u32 $s2, $s2, 1;"
+    "  cmp_lt_b1_u32 $c1, $s2, $s1;\n"
+    "  cbr $c1, @loop;\n"
+    "  ret;\n"
+    "};\n"
+  );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  unsigned size = 1000;
+  int *r = new int[size];
+  int *n = new int(size);
+ 
+  llvm::Function *fun = BP->getFunction("__fizzbuzz");
+  void *args[] = { &r, n };
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+  for(unsigned i = 0; i < size; ++i) {
+    if (i % 15 == 0)
+      EXPECT_EQ(15, r[i]);
+    else {
+      if (i % 3  == 0)
+        EXPECT_EQ(3, r[i]);
+      if (i % 5 == 0)
+        EXPECT_EQ(5, r[i]);
+    }
+  }
+ 
+  delete[] r;
+  delete n;
+}
