@@ -5,11 +5,6 @@
 #include "brig_util.h"
 #include "brig_buffer.h"
 
-#define CODE_BUFFER_OFFSET 8
-#define OPERAND_BUFFER_OFFSET 8
-#define DIRECTIVE_BUFFER_OFFSET 8
-#define STRING_BUFFER_OFFSET 8
-
 namespace hsa{
 namespace brig{
 
@@ -18,24 +13,14 @@ protected:
   Context* context;
   ErrorReporter* main_reporter;
   std::string Input;
-  StringBuffer* Refbuf;
+  StringBuffer* Refbuf;  
     
-  //Buffer offsets
-  int code_start;
-  int operand_start;
-  int string_start;
-  int directive_start;
-
 public:
   BrigCodeGenTest(std::string &In, StringBuffer* Sbuf){  
     context = NULL;
     main_reporter = NULL;
     Input.assign(In);
-    Refbuf = Sbuf;
-    code_start = CODE_BUFFER_OFFSET;
-    operand_start = OPERAND_BUFFER_OFFSET;
-    string_start = STRING_BUFFER_OFFSET;
-    directive_start = DIRECTIVE_BUFFER_OFFSET;     
+    Refbuf = Sbuf;    
   }  
   
   virtual void validate(struct BrigSections* BrigOutput) = 0;
