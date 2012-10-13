@@ -1088,8 +1088,9 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   TestCase27.Run_Test(&Instruction3);
   symbols->clear();
 
-  
-  }
+  /***************************************  End of tests *************************************/
+  delete symbols;
+}
 
 } //namespace hsa
 } //namespace brig

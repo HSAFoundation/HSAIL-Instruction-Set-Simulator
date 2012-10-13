@@ -1730,6 +1730,9 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, symbols, &out5, &reg1, &imm3);
   TestCase5.Run_Test(&Instruction2);
   symbols->clear();
+  
+  /******************************  End of tests *****************************************/
+  delete symbols; 
 }
 
 } //namespace brig
