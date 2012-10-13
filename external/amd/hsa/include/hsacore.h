@@ -126,6 +126,26 @@ DLL_PUBLIC Event* createCoreEvent(uint32_t devId,
 DLL_PUBLIC Event* createCoreEvent(EVENTID eventId, bool autoReset, bool initState);
 
 /**
+ *
+ * @brief factory API for abstracting the creation of an event class
+ *
+ * @param device pointer to core device 
+ *
+ * @param eventId for now the class throws and exception event ID is not 
+ * recognized (! (NODE_CHANGE | DEVICE_STATE_CHANGE) )
+ *
+ * @param autoReset if the event object should be reset automatically
+ * or manually. True indicates manual reset, false otherwise.
+ *
+ * @param initState initial state of event if it is SET or not SET.
+ *
+ * @throws HsaExeption if input parameters are illegal or invalid.
+ *
+ * @return a pointer to a new Event class object
+ */
+DLL_PUBLIC Event* createCoreEvent(Device *dev, EVENTID eventId, bool autoReset, bool initState);
+
+/**
  * @brief eventObj destruction API provided, primarily for uniformity. delete e
  * also accomplishes the same thing.
  *
