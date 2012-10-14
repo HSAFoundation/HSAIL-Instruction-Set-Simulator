@@ -13,7 +13,7 @@
 #include "Instruction2_test.h"
 #include "Ld_test.h"
 #include "St_test.h"
-//#include "GlobalDecl_test.h"
+#include "GlobalDecl_test.h"
 
 namespace hsa {
 namespace brig {

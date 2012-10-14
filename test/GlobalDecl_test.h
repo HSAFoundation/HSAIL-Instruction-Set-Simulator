@@ -4,111 +4,123 @@
 namespace hsa{
 namespace brig{
 
-//Handles FunctionDecl, FunctionSignature, GlobalSymbolDecl
 //T = BrigDirectivefunction/BrigDirectiveSymbol/BrigDirectiveSignature
 
 template <typename T> class GlobalDecl_Test: public BrigCodeGenTest{
 private:
-  const std::string Fn_name;
-  T* Output;
-  BrigDirectiveSymbol** arglist;   
+  T* RefDir; 
+  
+  BrigDirectiveSymbol* ArgsList;
+  BrigDirectiveInit* DirInit;
+    
 public:
-  GlobalDecl_Test(std::string& in, std::string& name, T* out, BrigDirectiveSymbol** args = NULL) : 
-    BrigCodeGenTest(in),
-    Fn_name(name),
-    Output(out),
-    arglist(args) { }
+  GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, BrigDirectiveInit* d_init=NULL) : 
+    BrigCodeGenTest(in, sbuf),
+    RefDir(out),
+    ArgsList(NULL),
+    DirInit(d_init)   { }
+  
+  GlobalDecl_Test(std::string& in, StringBuffer* sbuf, T* out, BrigDirectiveSymbol* arglist) : 
+    BrigCodeGenTest(in, sbuf),
+    RefDir(out), 
+    ArgsList(arglist),
+    DirInit(NULL) { }  
 
-  void validate(Context* context){  
-    T getOut;
-    int dir_offset = directive_start;
-    context->get_directive(dir_offset, &getOut);
-    validate_brig::validate(Output, &getOut);
-    dir_offset+=sizeof(getOut);    
+  void validate(struct BrigSections* TestOutput){
+    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
+    const char* getbuf = TestOutput->strings;
+        
+    dir_iterator getdir = TestOutput->begin();
+    const T* getdecl = (cast<T>(getdir));
+    validate_brig::validate(RefDir,refbuf, getdecl, getbuf); 
 
-    if(arglist){ //Functiondecl
-      BrigDirectiveFunction* ref = reinterpret_cast<BrigDirectiveFunction *> (Output);
+    if(ArgsList){
+      const BrigDirectiveFunction* ref = reinterpret_cast<const BrigDirectiveFunction*> (getdecl);
       for(unsigned int i=0; i < (ref->inParamCount + ref->outParamCount); i++){
-        BrigDirectiveSymbol get;
-        context->get_directive(dir_offset, &get);
-        validate_brig::validate(arglist[i], &get);
-        dir_offset += sizeof(get);
-      }
+        const BrigDirectiveSymbol* getarg = (cast<BrigDirectiveSymbol>(++getdir));
+        BrigDirectiveSymbol* refarg = &(ArgsList[i]);
+        validate_brig::validate(refarg, refbuf, getarg, getbuf);
+      }  
     }
   }
 };
 
-
-//Template specialisation for initializabledecl necessary
-
+/*
+In the case of globaldecl, there is a primary output 
+*/
 TEST(CodegenTest, GlobalSymbolDecl_Codegen){
+
   std::string in, name;
-  int buffer_start = BUFFER_OFFSET;
-    
+  StringBuffer *sbuf = new StringBuffer();
+  
   in.assign("align 1 static group_s8 &tmp[2];\n");
-  name.assign("&tmp");
+  name.assign("&tmp"); sbuf->append(name);
+  
   BrigDirectiveSymbol ref = {
-    sizeof(BrigDirectiveSymbol),                       // size
+  
+    0,                       // size
     BrigEDirectiveSymbol ,    // kind
     {
-      buffer_start,                      // c_code
+      0,                      // c_code
       BrigGroupSpace,         // storag class
       BrigStatic,             // attribute
       0,                      // reserved
       BrigArray,              // symbolModifier
       2,                      // dim
-      buffer_start,                      // s_name
+      0,                      // s_name
       Brigs8,                // type
       1,                      // align
     },
     0,                        // d_init
     0,                        // reserved
   };
-  GlobalDecl_Test<BrigDirectiveSymbol> TestCase1(in, name, &ref);
+  ref.size = sizeof(ref);
+  GlobalDecl_Test<BrigDirectiveSymbol> TestCase1(in, sbuf, &ref);
   TestCase1.Run_Test(&GlobalDecl);
-  
+  sbuf->clear();
   /*********************************Add more test cases ********************************/
-  
+  delete sbuf;
 }
+
 
 TEST(CodegenTest, FunctionDecl_Codegen){
   
   std::string in, name;
-  int code_start = BUFFER_OFFSET;
-  int string_start = BUFFER_OFFSET;
-  int dir_start = BUFFER_OFFSET;
-  
+  StringBuffer *sbuf = new StringBuffer();
+   
   in.assign("function &callee()(); \n");
   name.assign("&callee");
+  sbuf->append(name);
   BrigDirectiveFunction ref = {
     sizeof(BrigDirectiveFunction),                       // size
     BrigEDirectiveFunction,   // kind
-    code_start,                       // c_code
-    string_start,                        // s_name
+    0,                       // c_code
+    0,                        // s_name
     0,                        // inParamCount
-    sizeof(BrigDirectiveFunction) + dir_start,                      // d_firstScopedDirective
+    sizeof(BrigDirectiveFunction),                      // d_firstScopedDirective
     0,                        // operationCount
-    sizeof(BrigDirectiveFunction) + dir_start,                      // d_nextDirective
+    sizeof(BrigDirectiveFunction),                      // d_nextDirective
     BrigNone,
     0,
     0,                        // outParamCount
     0,
   };
-  GlobalDecl_Test<BrigDirectiveFunction> TestCase1(in, name, &ref);
+  GlobalDecl_Test<BrigDirectiveFunction> TestCase1(in, sbuf, &ref);
   TestCase1.Run_Test(&GlobalDecl); 
-  
+  sbuf->clear();
   /***************************************************Test case 2********************************/
-  
+
+  std::string arg1, arg2;
   in.assign("extern function &callee(arg_u32 %val1)(arg_u16 %val2);\n ");
-  name.assign("&callee");
-  
-  int dir_size = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)*2 + dir_start;
-  BrigdOffset32_t firstInParam = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)* 1 + dir_start;
+  name.assign("&callee"); arg1.assign("%val1"); arg2.assign("%val2"); 
+  sbuf->append(name); sbuf->append(arg1); sbuf->append(arg2);
+  int dir_size = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)*2;
+  BrigdOffset32_t firstInParam = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)* 1;
   BrigDirectiveFunction ref2 = {
     sizeof(BrigDirectiveFunction),                       // size
     BrigEDirectiveFunction,   // kind
-    code_start,                       // c_code
-    string_start,                        // s_name
+    0,                       // c_code
+    0,                        // s_name
     1,                        // inParamCount
     dir_size,                      // d_firstScopedDirective
     0,                        // operationCount
@@ -118,8 +130,50 @@ TEST(CodegenTest, FunctionDecl_Codegen){
     1,                        // outParamCount
     firstInParam
   };
-  GlobalDecl_Test<BrigDirectiveFunction> TestCase2(in, name, &ref2);
+  BrigDirectiveSymbol args[2] = { 
+    //args[0]
+    {0,
+    BrigEDirectiveSymbol,
+    { 0,
+      BrigArgSpace,
+      BrigNone,
+      0,
+      0,
+      0,
+      name.size()+1,
+      Brigu32,
+      1,
+    },
+    0,
+    0
+    },
+    //args[1]
+    {0,
+    BrigEDirectiveSymbol,
+    { 0,
+      BrigArgSpace,
+      BrigNone,
+      0,
+      0,
+      0,
+      name.size()+arg1.size()+2,
+      Brigu16,
+      1,
+    },
+    0,
+    0 
+    }
+  };
+  args[0].size = sizeof(args[0]);
+  args[1].size = sizeof(args[1]);
+  
+  GlobalDecl_Test<BrigDirectiveFunction> TestCase2(in, sbuf, &ref2, args);
   TestCase2.Run_Test(&GlobalDecl);
+  sbuf->clear();
+  /*********************************   Add more unit tests ****************************************/
+  
+  /************************************End all tests *****************************************/
+  delete sbuf;
 }
 
 }
