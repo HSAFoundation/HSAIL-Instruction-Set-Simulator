@@ -60,7 +60,7 @@ public:
    
   void validate(struct BrigSections* TestOutput){
     
-    const char* refbuf = reinterpret_cast<const char *>(&Refbuf->get()[0]);
+    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
     const char* getbuf = TestOutput->strings;   
     
     inst_iterator getcode = TestOutput->code_begin();

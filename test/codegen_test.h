@@ -13,14 +13,20 @@ protected:
   Context* context;
   ErrorReporter* main_reporter;
   std::string Input;
-  StringBuffer* Refbuf;  
+  StringBuffer* RefStr;  
+  Buffer* RefDir;
+  Buffer* RefCode;
+  Buffer* RefOper;
     
 public:
-  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf){  
+  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf = NULL, Buffer* dir = NULL, Buffer* code = NULL, Buffer* oper = NULL){  
     context = NULL;
     main_reporter = NULL;
     Input.assign(In);
-    Refbuf = Sbuf;    
+    RefStr = Sbuf;
+    RefDir = dir;
+    RefCode = code;
+    RefOper = oper;
   }  
   
   virtual void validate(struct BrigSections* BrigOutput) = 0;

@@ -84,11 +84,11 @@ void validate(const BrigOperandIndirect* ref, const BrigOperandIndirect* get){
   EXPECT_EQ(ref->offset, get->offset);  
 }
 
-void validate(const BrigDirectiveFunction* ref, const BrigDirectiveFunction* get){
+void validate(const BrigDirectiveFunction* ref, const char* refbuf, const BrigDirectiveFunction* get, const char* getbuf){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->c_code, get->c_code);
-  EXPECT_EQ(ref->s_name, get->s_name);
+  EXPECT_STREQ(&refbuf[ref->s_name], &getbuf[get->s_name]);
   EXPECT_EQ(ref->inParamCount, get->inParamCount);
   EXPECT_EQ(ref->d_firstScopedDirective, get->d_firstScopedDirective);
   EXPECT_EQ(ref->operationCount, get->operationCount);
@@ -99,16 +99,16 @@ void validate(const BrigDirectiveFunction* ref, const BrigDirectiveFunction* get
   EXPECT_EQ(ref->d_firstInParam, get->d_firstInParam);
 }
 
-void validate(const BrigDirectiveSymbol* ref, const BrigDirectiveSymbol* get){
+void validate(const BrigDirectiveSymbol* ref, const char* refstr, const BrigDirectiveSymbol* get, const char* getstr){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  EXPECT_EQ(ref->s.c_code, get->s.c_code);
+  //EXPECT_EQ(ref->s.c_code, get->s.c_code);
   EXPECT_EQ(ref->s.storageClass, get->s.storageClass);
   EXPECT_EQ(ref->s.attribute, get->s.attribute);
   EXPECT_EQ(ref->s.reserved, get->s.reserved);
   EXPECT_EQ(ref->s.symbolModifier, get->s.symbolModifier);
   EXPECT_EQ(ref->s.dim, get->s.dim);
-  EXPECT_EQ(ref->s.s_name, get->s.s_name);
+  EXPECT_STREQ(&refstr[ref->s.s_name], &getstr[get->s.s_name]);
   EXPECT_EQ(ref->s.type, get->s.type);
   EXPECT_EQ(ref->s.align, get->s.align);
   EXPECT_EQ(ref->d_init, get->d_init);
