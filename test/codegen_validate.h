@@ -111,7 +111,7 @@ void validate(const BrigDirectiveSymbol* ref, const char* refstr, const BrigDire
   EXPECT_STREQ(&refstr[ref->s.s_name], &getstr[get->s.s_name]);
   EXPECT_EQ(ref->s.type, get->s.type);
   EXPECT_EQ(ref->s.align, get->s.align);
-  EXPECT_EQ(ref->d_init, get->d_init);
+  //EXPECT_EQ(ref->d_init, get->d_init);
   EXPECT_EQ(ref->reserved, get->reserved);  
 }
 
@@ -123,20 +123,26 @@ template <> void validateOpType <BrigOperandReg>(const BrigOperandReg* ref, cons
   validate(ref, refstr, get, getstr);
 }
 
-#if 0
-void validate(const BrigDirectiveSignature* ref, const BrigDirectiveSignature* get){
+void validate(const BrigDirectiveSignature* ref, const char* refbuf, const BrigDirectiveSignature* get, const char* getbuf){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  EXPECT_EQ(ref->c_code, get->c_code);
-  EXPECT_EQ(ref->s_name, get->s_name);
+  //EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_STREQ(&refbuf[ref->s_name], &refbuf[get->s_name]);
   EXPECT_EQ(ref->fbarCount, get->fbarCount);
   EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->outCount, get->outCount);
   EXPECT_EQ(ref->inCount, get->inCount);
 }
 
-#endif
+void validate(const BrigDirectiveInit* ref, const BrigDirectiveInit* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_EQ(ref->elementCount, get->elementCount);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->reserved, get->reserved);
 
+}
 }//namespace validate_brig
 }
 }
