@@ -1714,7 +1714,7 @@ int FunctionDefinitionPart2(Context* context) {
       0,                          // operation count
       bdf_offset + size,          // d_nextDirective
       context->get_attribute(),  // attribute
-      context->get_fbar(),   // fbar count
+      0,    // fbar count
       0,    // out param count
       0     // d_firstInParam
       };
@@ -1791,8 +1791,16 @@ int FunctionDefinitionPart2(Context* context) {
         }
         // check for optional FBar
         if (context->token_to_scan == _FBAR) {
+          context->set_fbar(0);
           if (!FBar(context)) {
-            // context->token_to_scan = yylex();
+            BrigDirectiveFunction bdf;
+            context->get_directive(context->current_bdf_offset, &bdf);
+            bdf.fbarCount = context->get_fbar();
+            unsigned char * bdf_charp =
+            reinterpret_cast<unsigned char*>(&bdf);
+            context->update_directive_bytes(bdf_charp,
+                                        context->current_bdf_offset,
+                                        sizeof(BrigDirectiveFunction));
             return 0;
           } else {
             context->set_error(INVALID_FBAR);
@@ -2757,7 +2765,9 @@ int SignatureType(Context *context) {
       // ignore the local identifier
         context->token_to_scan = yylex();
         if ('[' == context->token_to_scan){
-          return ArrayDimensionSet(context);
+          if (ArrayDimensionSet(context)) {
+            return 1;
+          }
         }
       }
     } else if (_ROIMG == context->token_to_scan
@@ -3940,6 +3950,14 @@ int Kernel(Context *context) {
 
     if (_FBAR == context->token_to_scan) {
       if (!FBar(context)) {
+        BrigDirectiveKernel bdk;
+        context->get_directive(context->current_bdf_offset, &bdk);
+        bdk.fbarCount = context->get_fbar();
+        unsigned char * bdk_charp =
+        reinterpret_cast<unsigned char*>(&bdk);
+        context->update_directive_bytes(bdk_charp,
+                                        context->current_bdf_offset,
+                                        sizeof(BrigDirectiveKernel));
       } else {
         context->set_error(INVALID_FBAR);
         return 1;
@@ -4955,8 +4973,6 @@ int MulInst(Context* context) {
         bim.packing = context->token_value.packing;
         context->token_to_scan = yylex();
       }
-      BrigoOffset32_t opSize = 0;
-      std::string opName;
       size_t opCount = 0;
 
       if (context->token_type == DATA_TYPE_ID) {
@@ -4981,23 +4997,8 @@ int MulInst(Context* context) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
 
-              opSize = context->get_operand_offset();
-              if (REGISTER == context->token_type){
-                opName = context->token_value.string_val;
-              } else if (CONSTANT == context->token_type
-                       || '-' == context->token_to_scan){
-                opSize += opSize & 0x7;
-              } else {
-                context->set_error(INVALID_OPERAND);
+              if (OperandPart2(context, &bim.o_operands[opCount++])) {
                 return 1;
-              }
-              if (Operand(context)) {
-                return 1;
-              }
-              if (opSize == context->get_operand_offset()){
-                bim.o_operands[opCount++] = context->operand_map[opName];
-              } else {
-                bim.o_operands[opCount++] = opSize;
               }
               if (context->token_to_scan == ';') {
                 context->append_code(&bim);
@@ -6300,19 +6301,15 @@ int Segp(Context* context) {
         context->token_to_scan = yylex();
         //dest must be c register
         if (context->token_to_scan == TOKEN_CREGISTER) {
-          std::string oper_name = context->token_value.string_val;
-          if (Operand(context)) {
+          if (OperandPart2(context, &segmentp_op.o_operands[0])) {
             return 1;
           }
-          segmentp_op.o_operands[0] = context->operand_map[oper_name];
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
             if(context->token_type == REGISTER ) {
-              std::string oper_name = context->token_value.string_val;
-              if (Operand(context)) {
+              if (OperandPart2(context, &segmentp_op.o_operands[1])) {
                 return 1;
               }
-              segmentp_op.o_operands[1] = context->operand_map[oper_name];
               if (context->token_to_scan == ';') {
                 context->append_code(&segmentp_op);
 
@@ -6323,8 +6320,7 @@ int Segp(Context* context) {
               }
             } else if (context->token_type == CONSTANT ||
                        context->token_to_scan == TOKEN_WAVESIZE) {
-              segmentp_op.o_operands[1] = context->get_operand_offset();
-              if (Operand(context)) {
+              if (OperandPart2(context, &segmentp_op.o_operands[1])) {
                 return 1;
               }
               if (context->token_to_scan == ';') {
@@ -6382,19 +6378,15 @@ int Segp(Context* context) {
         context->token_to_scan = yylex();
         //dest must be d register
         if (context->token_to_scan == TOKEN_DREGISTER) {
-          std::string oper_name = context->token_value.string_val;
-          if (Operand(context)) {
+          if (OperandPart2(context, &sf_op.o_operands[0])) {
             return 1;
           }
-          sf_op.o_operands[0] = context->operand_map[oper_name];
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
             if(context->token_type == REGISTER ) {
-              std::string oper_name = context->token_value.string_val;
-              if (Operand(context)) {
+              if (OperandPart2(context, &sf_op.o_operands[1])) {
                 return 1;
               }
-              sf_op.o_operands[1] = context->operand_map[oper_name];
               if (context->token_to_scan == ';') {
                 context->append_code(&sf_op);
                 context->token_to_scan = yylex();
@@ -6404,8 +6396,7 @@ int Segp(Context* context) {
               }
             } else if (context->token_type == CONSTANT ||
                        context->token_to_scan == TOKEN_WAVESIZE) {
-              sf_op.o_operands[1] = context->get_operand_offset();
-              if (Operand(context)) {
+              if (OperandPart2(context, &sf_op.o_operands[1])) {
                 return 1;
               }
               if (context->token_to_scan == ';') {
