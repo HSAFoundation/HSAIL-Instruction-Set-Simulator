@@ -73,22 +73,24 @@ public:
     const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[1]]));
     validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
     
-    if(RefSrc_Indir){
-      const BrigOperandIndirect *getsrc_indir = reinterpret_cast <const BrigOperandIndirect*> (&(TestOutput->operands[getinst->o_operands[2]]));
+    const BrigOperandBase *getsrc_op2 = reinterpret_cast <const BrigOperandBase*> (&(TestOutput->operands[getinst->o_operands[2]]));
+    
+    if(getsrc_op2->kind==BrigEOperandIndirect){
+      const BrigOperandIndirect *getsrc_indir = reinterpret_cast <const BrigOperandIndirect*> (getsrc_op2);
       validate_brig::validate(RefSrc_Indir, getsrc_indir); 
       
-      if(RefSrc_Reg){
+      if(getsrc_indir->reg){
         const BrigOperandReg *getsrc_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc_indir->reg]));
         validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf); 
       }             
-    } else if(RefSrc_Comp){
-      const BrigOperandCompound *getsrc_comp = reinterpret_cast <const BrigOperandCompound*> (&(TestOutput->operands[getinst->o_operands[2]]));
+    } else if(getsrc_op2->kind==BrigEOperandCompound){
+      const BrigOperandCompound *getsrc_comp = reinterpret_cast <const BrigOperandCompound*> (getsrc_op2);
       validate_brig::validate(RefSrc_Comp, getsrc_comp); 
       
       const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getsrc_comp->name]));
       validate_brig::validate(RefSrc_Addr, getsrc_addr);      
       
-      if(RefSrc_Reg){
+      if(getsrc_comp->reg){
         const BrigOperandReg *getsrc_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc_comp->reg]));
         validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf); 
       }    
@@ -97,6 +99,8 @@ public:
       const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getinst->o_operands[2]]));
       validate_brig::validate(RefSrc_Addr, getsrc_addr);      
     }
+    EXPECT_EQ(0, getinst->o_operands[3]);
+    EXPECT_EQ(0, getinst->o_operands[4]);
   }
 };
 /*********************** Ld Test ***************************/
