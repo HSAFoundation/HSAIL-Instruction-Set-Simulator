@@ -144,7 +144,15 @@ void validate(const BrigDirectiveInit* ref, const BrigDirectiveInit* get){
   int no_init_bytes = ref->size - sizeof(BrigDirectiveInit) + sizeof(uint64_t);
   for(int i=0; i < no_init_bytes; i++)
     EXPECT_EQ(ref->initializationData.u8[i], get->initializationData.u8[i]);
+}
 
+void validate(const BrigInstMem* ref, const BrigInstMem* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+  EXPECT_EQ(ref->storageClass, get->storageClass);
 }
 }//namespace validate_brig
 }
