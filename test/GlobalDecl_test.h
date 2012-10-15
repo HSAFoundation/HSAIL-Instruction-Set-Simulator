@@ -451,7 +451,7 @@ TEST(CodegenTest, functionSignature_Codegen){
   pRef1->size = sizeof(BrigDirectiveSignature) + sizeof(BrigDirectiveSignature::BrigProtoType) * 2;
   pRef1->kind = BrigEDirectiveSignature;  // kind
   pRef1->c_code = 0;                      // c_code
-  pRef1->s_name = name.size() + 1;        // s_name
+  pRef1->s_name = 0;        // s_name
   pRef1->fbarCount = 0;                   // fbarCount
   pRef1->reserved = 0;                    // reserved
   pRef1->outCount = 1;                    // outCount
@@ -487,7 +487,7 @@ TEST(CodegenTest, functionSignature_Codegen){
   pRef2->size = sizeof(BrigDirectiveSignature) + sizeof(BrigDirectiveSignature::BrigProtoType) * 2;
   pRef2->kind = BrigEDirectiveSignature;  // kind
   pRef2->c_code = 0;                      // c_code
-  pRef2->s_name = name.size() + 1;        // s_name
+  pRef2->s_name = 0;        // s_name
   pRef2->fbarCount = 16;                   // fbarCount
   pRef2->reserved = 0;                    // reserved
   pRef2->outCount = 1;                    // outCount
