@@ -63,25 +63,26 @@ public:
         
     const T *getsrc = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[0]]));
     validate_brig::validateOpType<T>(RefSrc, refbuf, getsrc, getbuf);
+    const BrigOperandBase *getdest_op1 = reinterpret_cast <const BrigOperandBase*> (&(TestOutput->operands[getinst->o_operands[1]]));
     
-    if(RefDest_Indir){
-      const BrigOperandIndirect *getdest_indir = reinterpret_cast <const BrigOperandIndirect*> (&(TestOutput->operands[getinst->o_operands[1]]));
+    if(getdest_op1->kind==BrigEOperandIndirect){
+      const BrigOperandIndirect *getdest_indir = reinterpret_cast <const BrigOperandIndirect*> (getdest_op1);
       validate_brig::validate(RefDest_Indir, getdest_indir); 
       
-      if(RefDest_Reg){
+      if(getdest_indir->reg){
         const BrigOperandReg *getdest_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_indir->reg]));
         validate_brig::validate(RefDest_Reg, refbuf, getdest_reg, getbuf);
       }         
              
-    } else if(RefDest_Comp){
+    } else if(getdest_op1->kind==BrigEOperandCompound){
       
-      const BrigOperandCompound *getdest_comp = reinterpret_cast <const BrigOperandCompound*> (&(TestOutput->operands[getinst->o_operands[1]]));
+      const BrigOperandCompound *getdest_comp = reinterpret_cast <const BrigOperandCompound*> (getdest_op1);
       validate_brig::validate(RefDest_Comp, getdest_comp); 
             
       const BrigOperandAddress *getdest_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getdest_comp->name]));
       validate_brig::validate(RefDest_Addr, getdest_addr);         
       
-      if(RefDest_Reg){
+      if(getdest_comp->reg){
         const BrigOperandReg *getdest_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_comp->reg]));
         validate_brig::validate(RefDest_Reg, refbuf, getdest_reg, getbuf); 
       } 
@@ -90,6 +91,9 @@ public:
       const BrigOperandAddress *getdest_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getinst->o_operands[1]]));
       validate_brig::validate(RefDest_Addr, getdest_addr);
     }
+    EXPECT_EQ(0, getinst->o_operands[2]);
+    EXPECT_EQ(0, getinst->o_operands[3]);
+    EXPECT_EQ(0, getinst->o_operands[4]);
   }
 };
 
