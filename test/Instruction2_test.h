@@ -1234,31 +1234,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   symbols->clear();
 
 /**********************************************************************************/
-  in.assign( "workitemaid $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2"); 
-  symbols->append(op1); symbols->append(op2);
- 
-  BrigInstBase out44 = {
-    0,
-    BrigEInstBase, 
-    BrigWorkItemAId, 
-    Brigb32,
-    BrigNoPacking,
-    {0, sizeof(reg1), 0, 0, 0}
-  };
-  out44.size = sizeof(out44);
-
-  reg1.size = sizeof(reg1);
-  reg1.kind = BrigEOperandReg;
-  reg1.type = Brigb32;
-  reg1.reserved = 0;
-  reg1.name = 0;
-
-  reg2 = reg1; reg2.name = op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase44(in, symbols, &out44, &reg1, &reg2);
-  TestCase44.Run_Test(&Instruction2);
-  symbols->clear();
-
+  
 /**********************************************************************************/
   in.assign( "sqrt_s8x4 $s1, $s2; \n");
   op1.assign("$s1"); op2.assign("$s2"); 
@@ -1390,134 +1366,13 @@ TEST(CodegenTest, Instruction2_CodeGen){
   symbols->clear();
 
 /**********************************************************************************/
-  in.assign( "workitemid $s1,$s2;");
-  op1.assign("$s1"); op2.assign("$s2"); 
-  symbols->append(op1); symbols->append(op2);
- 
-  BrigInstBase out50 = {
-    0,
-    BrigEInstBase, 
-    BrigWorkItemId,
-    Brigb32,
-    BrigNoPacking,
-    {0, sizeof(reg1), 0, 0, 0}
-  };
-  out50.size = sizeof(out50);
-
-  reg1.size = sizeof(reg1);
-  reg1.kind = BrigEOperandReg;
-  reg1.type = Brigb32;
-  reg1.reserved = 0;
-  reg1.name = 0;
-
-  reg2 = reg1; reg2.name = op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase50(in, symbols, &out50, &reg1, &reg2);
-  TestCase50.Run_Test(&Instruction2);
-  symbols->clear();
-
-/**********************************************************************************/
-  in.assign( "workgroupid $s1,$s2;");
-  op1.assign("$s1"); op2.assign("$s2"); 
-  symbols->append(op1); symbols->append(op2);
- 
-  BrigInstBase out51 = {
-    0,
-    BrigEInstBase, 
-    BrigWorkGroupId,
-    Brigb32,
-    BrigNoPacking,
-    {0, sizeof(reg1), 0, 0, 0}
-  };
-  out51.size = sizeof(out51);
-
-  reg1.size = sizeof(reg1);
-  reg1.kind = BrigEOperandReg;
-  reg1.type = Brigb32;
-  reg1.reserved = 0;
-  reg1.name = 0;
-
-  reg2 = reg1; reg2.name = op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase51(in, symbols, &out51, &reg1, &reg2);
-  TestCase51.Run_Test(&Instruction2);
-  symbols->clear();
-
-/**********************************************************************************/
-  in.assign( "workgroupsize $s1,$s2;");
-  op1.assign("$s1"); op2.assign("$s2"); 
-  symbols->append(op1); symbols->append(op2);
- 
-  BrigInstBase out52 = {
-    0,
-    BrigEInstBase, 
-    BrigWorkGroupSize,
-    Brigb32,
-    BrigNoPacking,
-    {0, sizeof(reg1), 0, 0, 0}
-  };
-  out52.size = sizeof(out52);
-
-  reg1.size = sizeof(reg1);
-  reg1.kind = BrigEOperandReg;
-  reg1.type = Brigb32;
-  reg1.reserved = 0;
-  reg1.name = 0;
-
-  reg2 = reg1; reg2.name = op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase52(in, symbols, &out52, &reg1, &reg2);
-  TestCase52.Run_Test(&Instruction2);
-  symbols->clear();
-
-/**********************************************************************************/
-  in.assign( "NDRangesize $s1,$s2;");
-  op1.assign("$s1"); op2.assign("$s2"); 
-  symbols->append(op1); symbols->append(op2);
   
-  BrigInstBase out53 = {
-    0,
-    BrigEInstBase, 
-    BrigNDRangeSize,
-    Brigb32,
-    BrigNoPacking,
-    {0, sizeof(reg1), 0, 0, 0}
-  };
-  out53.size = sizeof(out53);
-
-  reg1.size = sizeof(reg1);
-  reg1.kind = BrigEOperandReg;
-  reg1.type = Brigb32;
-  reg1.reserved = 0;
-  reg1.name = 0;
-
-  reg2 = reg1; reg2.name = op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase53(in, symbols, &out53, &reg1, &reg2);
-  TestCase53.Run_Test(&Instruction2);
-  symbols->clear();
-
 /**********************************************************************************/
-  in.assign( "NDRangegroups $s1,$s2;");
-  op1.assign("$s1"); op2.assign("$s2"); 
-  symbols->append(op1); symbols->append(op2);
  
-  BrigInstBase out54 = {
-    0,
-    BrigEInstBase, 
-    BrigNDRangeGroups,
-    Brigb32,
-    BrigNoPacking,
-    {0, sizeof(reg1), 0, 0, 0}
-  };
-  out54.size = sizeof(out54);
-
-  reg1.size = sizeof(reg1);
-  reg1.kind = BrigEOperandReg;
-  reg1.type = Brigb32;
-  reg1.reserved = 0;
-  reg1.name = 0;
-
-  reg2 = reg1; reg2.name = op1.size() + 1;
-  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase54(in, symbols, &out54, &reg1, &reg2);
-  TestCase54.Run_Test(&Instruction2);
-  symbols->clear();
+/**********************************************************************************/
+ 
+/**********************************************************************************/
+ delete symbols;
 }
 
 /**********************************************************************************/
