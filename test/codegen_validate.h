@@ -154,6 +154,20 @@ void validate(const BrigInstMem* ref, const BrigInstMem* get){
   EXPECT_EQ(ref->packing, get->packing);
   EXPECT_EQ(ref->storageClass, get->storageClass);
 }
+
+void validate(const BrigInstCvt* ref, const BrigInstCvt* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+  const uint32_t* ref1 = reinterpret_cast<const uint32_t* > (&(ref->aluModifier));
+  const uint32_t* get1 = reinterpret_cast<const uint32_t* > (&(get->aluModifier));
+  EXPECT_EQ(*ref1, *get1);
+  EXPECT_EQ(ref->stype, get->stype);
+  EXPECT_EQ(ref->reserved, get->reserved); 
+}
+
 }//namespace validate_brig
 }
 }
