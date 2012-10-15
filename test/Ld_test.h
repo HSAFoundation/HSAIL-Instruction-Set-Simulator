@@ -108,7 +108,7 @@ TEST(CodegenTest, Ld_Codegen){
 
   /*****************************************************************/
   in.assign( "ld_arg_f32 $s0, [%input];\n");
-  op1.assign("$s0"); op2.assign("%input");
+  op1.assign("$s0"); op2.assign("");
   sbuf->append(op1); sbuf->append(op2);
     
   BrigOperandReg dest1 = {
@@ -181,7 +181,7 @@ TEST(CodegenTest, Ld_Codegen){
   BrigOperandIndirect indir2 = {
     0,
     BrigEOperandIndirect,
-    sizeof(width2) + sizeof(dest2),
+    0,
     Brigb64,
     0,
     100
@@ -266,7 +266,7 @@ TEST(CodegenTest, Ld_Codegen){
 
 /**********************************************************************************/
   in.assign( "ld_global_dep_u32 $s1, [&x];\n");
-  op1.assign("$s1"); op2.assign("&x");
+  op1.assign("$s1"); op2.assign("");
   sbuf->append(op1); sbuf->append(op2);
     
   BrigOperandReg dest4 = {
@@ -315,7 +315,7 @@ TEST(CodegenTest, Ld_Codegen){
 
 /**********************************************************************************/
   in.assign( "ld_width(64)_global_f16 $d1, [&x];\n");
-  op1.assign("$d1"); op2.assign("&x");
+  op1.assign("$d1"); op2.assign("");
   sbuf->append(op1); sbuf->append(op2);
     
   BrigOperandReg dest5 = {
@@ -364,7 +364,7 @@ TEST(CodegenTest, Ld_Codegen){
 
 /**********************************************************************************/
   in.assign( "ld_global_f32 $s1, [%g][0];\n");
-  op1.assign("$s1"); op2.assign("%g");
+  op1.assign("$s1"); op2.assign("");
   sbuf->append(op1); sbuf->append(op2);
     
   BrigOperandReg dest6 = {
@@ -411,7 +411,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,                
     Brigf32,               
     BrigNoPacking,         
-    {0, sizeof(width6), sizeof(width6) + sizeof(dest6), sizeof(width6) + sizeof(dest6) + sizeof(addr6), 0},  
+    {0, sizeof(width6), sizeof(width6) + sizeof(dest6) + sizeof(addr6), 0, 0},  
     BrigGlobalSpace,       
     BrigRegular,               
     0                      
@@ -469,7 +469,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandCompound,
     Brigb64,
     0,
-    sizeof(width7) + sizeof(dest7) + sizeof(addr7) + sizeof(reg7), 
+    sizeof(width7) + sizeof(dest7), 
     sizeof(width7) + sizeof(dest7) + sizeof(addr7),
     0
   };
@@ -481,7 +481,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,                
     Brigu32,               
     BrigNoPacking,         
-    {0, sizeof(width7), sizeof(width7) + sizeof(dest7), sizeof(width7) + sizeof(dest7) + sizeof(addr7) + sizeof(reg7), 0},  
+    {0, sizeof(width7), sizeof(width7) + sizeof(dest7) + sizeof(addr7) + sizeof(reg7), 0, 0},  
     BrigGlobalSpace,       
     BrigRegular,               
     0                      
@@ -538,7 +538,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandCompound,
     Brigb64,
     0,
-    sizeof(width8) + sizeof(dest8) + sizeof(addr8) + sizeof(reg8), 
+    sizeof(width8) + sizeof(dest8), 
     sizeof(width8) + sizeof(dest8) + sizeof(addr8),
     4
   };
@@ -550,7 +550,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,                
     Brigu32,               
     BrigNoPacking,         
-    {0, sizeof(width8), sizeof(width8) + sizeof(dest8), sizeof(width8) + sizeof(dest8) + sizeof(addr8) + sizeof(reg8), 0},  
+    {0, sizeof(width8), sizeof(width8) + sizeof(dest8) + sizeof(addr8) + sizeof(reg8), 0, 0},  
     BrigGlobalSpace,       
     BrigRegular,               
     0                      
@@ -562,8 +562,8 @@ TEST(CodegenTest, Ld_Codegen){
   sbuf->clear();
 
 /**********************************************************************************/
-in.assign( "ld_readonly_s32 $s1, [%tbl][12];\n");
-  op1.assign("$s1"); op2.assign("%tbl");
+  in.assign( "ld_readonly_s32 $s1, [%tbl][12];\n");
+  op1.assign("$s1"); op2.assign("");
   sbuf->append(op1); sbuf->append(op2);
     
   BrigOperandReg dest9 = {
@@ -598,7 +598,7 @@ in.assign( "ld_readonly_s32 $s1, [%tbl][12];\n");
     BrigEOperandCompound,
     Brigb64,
     0,
-    sizeof(width9) + sizeof(dest9) + sizeof(addr9), 
+    sizeof(width9) + sizeof(dest9), 
     0,
     12
   };
@@ -610,7 +610,7 @@ in.assign( "ld_readonly_s32 $s1, [%tbl][12];\n");
     BrigLd,                
     Brigs32,               
     BrigNoPacking,         
-    {0, sizeof(width9), sizeof(width9) + sizeof(dest9), sizeof(width9) + sizeof(dest9) + sizeof(addr9), 0},  
+    {0, sizeof(width9), sizeof(width9) + sizeof(dest9) + sizeof(addr9), 0, 0},  
     BrigReadonlySpace,       
     BrigRegular,               
     0                      
@@ -622,8 +622,7 @@ in.assign( "ld_readonly_s32 $s1, [%tbl][12];\n");
   sbuf->clear();
 
 /**********************************************************************************/
-
-
+  
 
   /******************************  End of tests *****************************************/
   delete sbuf;
