@@ -10,21 +10,21 @@ template <typename T> class GlobalDecl_Test: public BrigCodeGenTest{
 private:
   T* RefDir; 
   
-  BrigDirectiveSymbol* ArgsList;
-  BrigDirectiveInit* DirInit;
+  BrigDirectiveSymbol* RefArgsList;
+  BrigDirectiveInit* RefInit;
     
 public:
   GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, BrigDirectiveInit* d_init=NULL) : 
     BrigCodeGenTest(in, sbuf),
     RefDir(out),
-    ArgsList(NULL),
-    DirInit(d_init)   { }
+    RefArgsList(NULL),
+    RefInit(d_init)   { }
   
   GlobalDecl_Test(std::string& in, StringBuffer* sbuf, T* out, BrigDirectiveSymbol* arglist) : 
     BrigCodeGenTest(in, sbuf),
     RefDir(out), 
-    ArgsList(arglist),
-    DirInit(NULL) { }  
+    RefArgsList(arglist),
+    RefInit(NULL) { }  
 
   void validate(struct BrigSections* TestOutput){
     const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
@@ -34,20 +34,20 @@ public:
     const T* getdecl = (cast<T>(getdir));
     validate_brig::validate(RefDir,refbuf, getdecl, getbuf); 
 
-    if(ArgsList){
+    if(RefArgsList){
       const BrigDirectiveFunction* ref = reinterpret_cast<const BrigDirectiveFunction*> (getdecl);
       for(unsigned int i=0; i < (ref->inParamCount + ref->outParamCount); i++){
         const BrigDirectiveSymbol* getarg = (cast<BrigDirectiveSymbol>(++getdir));
-        BrigDirectiveSymbol* refarg = &(ArgsList[i]);
+        BrigDirectiveSymbol* refarg = &(RefArgsList[i]);
         validate_brig::validate(refarg, refbuf, getarg, getbuf);
       }  
+    } else if(RefInit){
+      const BrigDirectiveInit* getarg = (cast<BrigDirectiveInit>(++getdir));
+      validate_brig::validate(RefInit, getarg);
     }
   }
 };
 
-/*
-In the case of globaldecl, there is a primary output 
-*/
 TEST(CodegenTest, GlobalSymbolDecl_Codegen){
 
   std::string in, name;
@@ -79,6 +79,8 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   TestCase1.Run_Test(&GlobalDecl);
   sbuf->clear();
   /*********************************Add more test cases ********************************/
+  
+  /******************************************** End of tests ********************************/
   delete sbuf;
 }
 
@@ -176,5 +178,68 @@ TEST(CodegenTest, FunctionDecl_Codegen){
   delete sbuf;
 }
 
+TEST(CodegenTest, InitializableDecl_Codegen){
+  
+  std::string in, name;
+  StringBuffer* sbuf = new StringBuffer();
+  
+  in.assign("global_b8 &x[9] = { 1,2,3,4,5,6,7,8,9 }; ");
+  name.assign("&x");
+  sbuf->append(name);
+  
+  BrigDirectiveSymbol ref = {
+  0,                       // size
+  BrigEDirectiveSymbol ,    // kind
+  {
+    0,                         // c_code
+    BrigGlobalSpace,         // storag class
+    BrigNone ,                // attribut
+    0,                        // reserved
+    2,                        // symbolModifier
+    9,                        // dim
+    0,                        // s_name
+    Brigb8,                  // type
+    1,                        // align
+  },
+  0,                        // d_init
+  0,                         // reserved
+  };
+  ref.size = sizeof(ref);
+  BrigDirectiveInit* bdi = (BrigDirectiveInit*) (malloc(sizeof(BrigDirectiveInit) + sizeof(uint64_t)));
+  
+  bdi->size = sizeof(BrigDirectiveInit) + sizeof(uint64_t);           //size
+  bdi->kind = BrigEDirectiveInit;  //kind
+  bdi->c_code = 0;                 //c_code
+  bdi->elementCount = 9;           //elementCount
+  bdi->type = Brigb8;              //type
+  bdi->reserved = 0;               //reserved
+  bdi->initializationData.u8[0] = 1;    //initializationData
+  bdi->initializationData.u8[1] = 2;
+  bdi->initializationData.u8[2] = 3;
+  bdi->initializationData.u8[3] = 4;
+  bdi->initializationData.u8[4] = 5;
+  bdi->initializationData.u8[5] = 6;
+  bdi->initializationData.u8[6] = 7;
+  bdi->initializationData.u8[7] = 8;
+
+  bdi->initializationData.u8[8] = 9;    //initializationData
+  bdi->initializationData.u8[9] = 0;
+  bdi->initializationData.u8[10] = 0;
+  bdi->initializationData.u8[11] = 0;
+  bdi->initializationData.u8[12] = 0;
+  bdi->initializationData.u8[13] = 0;
+  bdi->initializationData.u8[14] = 0;
+  bdi->initializationData.u8[15] = 0;
+  
+  GlobalDecl_Test<BrigDirectiveSymbol> TestCase2(in, sbuf, &ref, bdi);
+  TestCase2.Run_Test(&GlobalDecl); 
+  free(bdi);
+  sbuf->clear();
+  /******************************************************* Add more tests *******************************************/
+  
+  /*******************************************************End of tests ***********************************************/
+  delete sbuf;
+
+}
 }
 }
