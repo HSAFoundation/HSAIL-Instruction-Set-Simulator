@@ -403,7 +403,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandCompound,
     Brigb64,
     0,
-    sizeof(width6) + sizeof(dest6) + sizeof(addr6), 
+    sizeof(width6) + sizeof(dest6), 
     0,
     0
   };
