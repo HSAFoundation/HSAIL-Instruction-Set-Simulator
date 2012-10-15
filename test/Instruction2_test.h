@@ -1735,5 +1735,51 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   delete symbols; 
 }
 
+TEST(CodegenTest, MemorySegmentOps){
+  
+  std::string in, op1, op2;
+  StringBuffer* sbuf = new StringBuffer();
+  in.assign("stof_private_u64 $d2, $d1;\n");
+  op1.assign("$d2"); op2.assign("$d1");
+  sbuf->append(op1); sbuf->append(op2);
+  
+  BrigInstMem ref1 = {
+    0,                    // size
+    BrigEInstMem,          // kind
+    BrigStoF,              // opcode
+    Brigu64,               // type
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0},      // o_operands[5]
+    BrigPrivateSpace       // storageClass
+  };
+  ref1.size = sizeof(ref1);
+  
+  BrigOperandReg dest1 = {
+  0,
+  BrigEOperandReg,
+  Brigb64,
+  0,
+  0
+  };
+  dest1.size = sizeof(dest1);
+  ref1.o_operands[1] = sizeof(dest1);
+  
+  BrigOperandReg src1 = {
+  0,
+  BrigEOperandReg,
+  Brigb64,
+  0,
+  op1.size()+1
+  };
+  src1.size = sizeof(src1);
+  
+  Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase1(in, sbuf, &ref1, &dest1, &src1);
+  TestCase1.Run_Test(&Segp);
+  sbuf->clear();
+  
+  delete sbuf;
+  
+}
+
 } //namespace brig
 } //namespace hsa
