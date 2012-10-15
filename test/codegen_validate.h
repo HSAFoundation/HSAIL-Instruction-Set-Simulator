@@ -36,7 +36,7 @@ void validate(const BrigOperandReg* ref, const char* refstr, const BrigOperandRe
   EXPECT_STREQ(&refstr[ref->name], &getstr[get->name]);
 }
 
-void validate(const BrigOperandImmed* ref, const char* refstr, const BrigOperandImmed* get, const char* getstr){
+void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
@@ -45,97 +45,104 @@ void validate(const BrigOperandImmed* ref, const char* refstr, const BrigOperand
   EXPECT_EQ(ref->bits.l[1], get->bits.l[1]);
 }
 
-void validate(const BrigOperandWaveSz* ref, const char* refstr, const BrigOperandWaveSz* get, const char* getstr){
+void validate(const BrigOperandWaveSz* ref, const BrigOperandWaveSz* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);  
 }
+
 void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
-  /*EXPECT_EQ(ref->o_operands[0], get->o_operands[0]);
-  EXPECT_EQ(ref->o_operands[1], get->o_operands[1]);
-  EXPECT_EQ(ref->o_operands[2], get->o_operands[2]);
-  EXPECT_EQ(ref->o_operands[3], get->o_operands[3]);
-  EXPECT_EQ(ref->o_operands[4], get->o_operands[4]);*/
   EXPECT_EQ(ref->storageClass, get->storageClass);
   EXPECT_EQ(ref->memorySemantic, get->memorySemantic);
   EXPECT_EQ(ref->equivClass, get->equivClass);
 }
+
 void validate(const BrigOperandAddress* ref, const BrigOperandAddress* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
-  EXPECT_EQ(ref->directive, get->directive);  
-
 }
+
 void validate(const BrigOperandCompound* ref, const BrigOperandCompound* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
-  //EXPECT_EQ(ref->name, get->name);  
-  //EXPECT_EQ(ref->reg, get->reg);  
   EXPECT_EQ(ref->offset, get->offset);  
 }
 
 void validate(const BrigOperandIndirect* ref, const BrigOperandIndirect* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  EXPECT_EQ(ref->reg, get->reg);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
-  //EXPECT_EQ(ref->offset, get->offset);  
+  EXPECT_EQ(ref->offset, get->offset);  
 }
 
-void validate(const BrigDirectiveFunction* ref, const BrigDirectiveFunction* get){
+void validate(const BrigDirectiveFunction* ref, const char* refbuf, const BrigDirectiveFunction* get, const char* getbuf){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  EXPECT_EQ(ref->c_code, get->c_code);
-  EXPECT_EQ(ref->s_name, get->s_name);
+  //EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_STREQ(&refbuf[ref->s_name], &getbuf[get->s_name]);
   EXPECT_EQ(ref->inParamCount, get->inParamCount);
-  EXPECT_EQ(ref->d_firstScopedDirective, get->d_firstScopedDirective);
+  //EXPECT_EQ(ref->d_firstScopedDirective, get->d_firstScopedDirective);
   EXPECT_EQ(ref->operationCount, get->operationCount);
-  EXPECT_EQ(ref->d_nextDirective, get->d_nextDirective);
+  //EXPECT_EQ(ref->d_nextDirective, get->d_nextDirective);
   EXPECT_EQ(ref->attribute, get->attribute);
   EXPECT_EQ(ref->fbarCount, get->fbarCount);
   EXPECT_EQ(ref->outParamCount, get->outParamCount);
-  EXPECT_EQ(ref->d_firstInParam, get->d_firstInParam);
+  //EXPECT_EQ(ref->d_firstInParam, get->d_firstInParam);
 }
 
-void validate(const BrigDirectiveSymbol* ref, const BrigDirectiveSymbol* get){
+void validate(const BrigDirectiveSymbol* ref, const char* refstr, const BrigDirectiveSymbol* get, const char* getstr){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  EXPECT_EQ(ref->s.c_code, get->s.c_code);
+  //EXPECT_EQ(ref->s.c_code, get->s.c_code);
   EXPECT_EQ(ref->s.storageClass, get->s.storageClass);
   EXPECT_EQ(ref->s.attribute, get->s.attribute);
   EXPECT_EQ(ref->s.reserved, get->s.reserved);
   EXPECT_EQ(ref->s.symbolModifier, get->s.symbolModifier);
   EXPECT_EQ(ref->s.dim, get->s.dim);
-  EXPECT_EQ(ref->s.s_name, get->s.s_name);
+  EXPECT_STREQ(&refstr[ref->s.s_name], &getstr[get->s.s_name]);
   EXPECT_EQ(ref->s.type, get->s.type);
   EXPECT_EQ(ref->s.align, get->s.align);
-  EXPECT_EQ(ref->d_init, get->d_init);
+  //EXPECT_EQ(ref->d_init, get->d_init);
   EXPECT_EQ(ref->reserved, get->reserved);  
 }
 
-#if 0
-void validate(const BrigDirectiveSignature* ref, const BrigDirectiveSignature* get){
+template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
+  validate(ref, get);
+}
+
+template <> void validateOpType <BrigOperandReg>(const BrigOperandReg* ref, const char* refstr, const BrigOperandReg* get, const char* getstr){
+  validate(ref, refstr, get, getstr);
+}
+
+void validate(const BrigDirectiveSignature* ref, const char* refbuf, const BrigDirectiveSignature* get, const char* getbuf){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  EXPECT_EQ(ref->c_code, get->c_code);
-  EXPECT_EQ(ref->s_name, get->s_name);
+  //EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_STREQ(&refbuf[ref->s_name], &refbuf[get->s_name]);
   EXPECT_EQ(ref->fbarCount, get->fbarCount);
   EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->outCount, get->outCount);
   EXPECT_EQ(ref->inCount, get->inCount);
 }
 
-#endif
+void validate(const BrigDirectiveInit* ref, const BrigDirectiveInit* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_EQ(ref->elementCount, get->elementCount);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->reserved, get->reserved);
 
+}
 }//namespace validate_brig
 }
 }
