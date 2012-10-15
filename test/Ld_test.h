@@ -257,7 +257,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,                
     Brigf32,               
     BrigNoPacking,         
-    {0, sizeof(width3), sizeof(width3) + sizeof(dest3), 0, 0},  
+    {0, sizeof(width3), sizeof(width3) + sizeof(dest3) + sizeof(reg3), 0, 0},  
     BrigFlatSpace,         
     BrigRegular,           
     0                      
