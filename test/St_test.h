@@ -100,7 +100,7 @@ public:
 TEST(CodegenTest, St_Codegen){
 
   /***********************************Common variables used by all tests**************************************/
-  std::string in, op1, op2, op3; 
+  std::string in, op1, op2, op3, op4, op5, op6; 
   StringBuffer* sbuf = new StringBuffer();
   
   /*********************************** Test Case 1************************************************************/
@@ -393,19 +393,44 @@ TEST(CodegenTest, St_Codegen){
   TestCase6.Run_Test(&St);   
   sbuf->clear();
 
- /*********************************** Test Case 6************************************************************/
+ /*********************************** Test Case 7************************************************************/
   
-  in.assign( "st_arg_f64 3.1415l, [%output][$s2-4];\n");
-  op1.assign("%output");  op2.assign("$s2"); 
+  in.assign( "st_v2_f32 ($s0,$s1), [%output][$s2-4];\n");
+  op1.assign("$s0");  op2.assign("$s1"); 
+  op3.assign("%output");  op4.assign("$s2");
   sbuf->append(op1);  sbuf->append(op2); 
- 
-  //Reference to immed
-  src1.size = sizeof(src1);
-  src1.kind = BrigEOperandImmed;
-  src1.type = Brigb64;
-  src1.reserved = 0;
-  src1.bits.d = 3.1415l;
-  
+  sbuf->append(op3);  sbuf->append(op4);
+
+  //Reference to reg $s0
+  BrigOperandReg reg0 = {
+   0,         
+   BrigEOperandReg,
+   Brigb32,
+   0,
+   0
+  };
+  reg0.size = sizeof(reg0);
+
+  //Reference to reg $s1
+  BrigOperandReg reg1 = {
+   0,                             //size
+   BrigEOperandReg,  //kind
+   Brigb32,                 //type
+   0,                           //reserved
+   op1.size() + 1         //name
+  };
+  reg1.size = sizeof(reg1);
+
+  //Reference to reg $s0 and $s1
+  BrigOperandRegV2 regv2 = {
+   0,                             //size
+   BrigEOperandRegV2,  //kind
+   Brigb32,                    //type
+   0,                             //reserved
+   {0, sizeof(reg0)}      //regs[2]
+  };
+  regv2.size = sizeof(regv2);
+
   //ref to %output - Not added in symbol table; it is assumed that it was added during variable decl 
   dest1.size = sizeof(dest1);
   dest1.kind = BrigEOperandAddress;
@@ -418,33 +443,137 @@ TEST(CodegenTest, St_Codegen){
   dest2.kind = BrigEOperandReg;
   dest2.type = Brigb32;
   dest2.reserved = 0;
-  dest2.name = op1.size() + 1;
+  dest2.name = op1.size()  + op2.size() + op3.size() + 3;
   
   // ref to comp
   comp.size = sizeof(comp);
   comp.kind = BrigEOperandCompound;
   comp.type = Brigb64;
   comp.reserved = 0;
-  comp.name = sizeof(src1);
-  comp.reg = sizeof(src1) + sizeof(dest1);
+  comp.name = sizeof(reg0) + sizeof(reg1) + sizeof(regv2) ; //for BrigOperandAddress
+  comp.reg = sizeof(reg0) + sizeof(reg1) 
+                + sizeof(regv2) + sizeof(dest1);
   comp.offset = -4 ; 
 
-  BrigInstLdSt out6 = {
+  BrigInstLdSt out7 = {
     0,                // size
     BrigEInstLdSt,     // kind
     BrigSt,            // opcode
-    Brigf64,           // type
+    Brigf32,           // type
     BrigNoPacking,     // packing
-    {0, sizeof(src1) + sizeof(dest1) + sizeof(dest2), 0, 0, 0},  // operand[5]
-    BrigArgSpace,      // storageClass
+    {0, sizeof(reg0) + sizeof(reg1) + sizeof(regv2) 
+         + sizeof(dest1) + sizeof(dest2), 0, 0, 0},  // operand[5]
+    BrigFlatSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass
   };
-  out6.size = sizeof( out6);
+  out7.size = sizeof( out7);
 
 
-  St_Test<BrigOperandImmed> TestCase6(in, sbuf, &out6, &src1, &comp, &dest1, &dest2);
-  TestCase6.Run_Test(&St);   
+  St_Test<BrigOperandRegV2> TestCase7(in, sbuf, &out7, &regv2, &comp, &dest1, &dest2);
+  TestCase7.Run_Test(&St);   
+  sbuf->clear();
+
+ /*********************************** Test Case8************************************************************/
+  
+  in.assign( "st_v4_f32 ($s0,$s1,$s2,$s3), [%output][$s4-4];\n");
+  op1.assign("$s0");  op2.assign("$s1"); 
+  op3.assign("$s2");  op4.assign("$s3"); 
+  op5.assign("%output");  op6.assign("$s4");
+  sbuf->append(op1);  sbuf->append(op2); 
+  sbuf->append(op3);  sbuf->append(op4);
+  sbuf->append(op5);  sbuf->append(op6);
+
+  //Reference to reg $s0
+  reg0.size = sizeof(reg0);
+  reg0.kind = BrigEOperandReg;
+  reg0.type = Brigb32;
+  reg0.reserved = 0;
+  reg0.name = 0;
+
+  //Reference to reg $s1
+  reg1.size = sizeof(reg1);
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb32;
+  reg1.reserved = 0;
+  reg1.name = op1.size() + 1;
+
+  //Reference to reg $s2
+  BrigOperandReg reg2 = {
+   0,         
+   BrigEOperandReg,
+   Brigb32,
+   0,
+   op1.size() + op2.size() +2
+  };
+  reg2.size = sizeof(reg2);
+
+  //Reference to reg $s3
+  BrigOperandReg reg3 = {
+   0,                             //size
+   BrigEOperandReg,  //kind
+   Brigb32,                 //type
+   0,                           //reserved
+   op1.size() + op2.size() + op3.size() + 3         //name
+  };
+  reg3.size = sizeof(reg3);
+
+  //Reference to reg $s0 and $s1 $s2 $s3
+  BrigOperandRegV4 regv4 = {
+   0,                             //size
+   BrigEOperandRegV4,  //kind
+   Brigb32,                    //type
+   0,                             //reserved
+   {0, sizeof(reg0), sizeof(reg0) + sizeof(reg1),
+      sizeof(reg0) + sizeof(reg1) + sizeof(reg2)}      //regs[4]
+  };
+  regv4.size = sizeof(regv4);
+
+  //ref to %output - Not added in symbol table; it is assumed that it was added during variable decl 
+  dest1.size = sizeof(dest1);
+  dest1.kind = BrigEOperandAddress;
+  dest1.type = Brigb64;
+  dest1.reserved = 0;
+  dest1.directive = 0;//Offset to .directives, However, no directive in .directives. Ambiguous testing.
+
+  //Ref to $s4
+  dest2.size = sizeof(dest2);
+  dest2.kind = BrigEOperandReg;
+  dest2.type = Brigb32;
+  dest2.reserved = 0;
+  dest2.name = op1.size()  + op2.size() + 
+           op3.size() + op4.size() + op5.size()+ 5;
+  
+  // ref to comp
+  comp.size = sizeof(comp);
+  comp.kind = BrigEOperandCompound;
+  comp.type = Brigb64;
+  comp.reserved = 0;
+  comp.name = sizeof(reg0) + sizeof(reg1) + 
+                sizeof(reg2) + sizeof(reg3) + sizeof(regv4) ; //for BrigOperandAddress
+  comp.reg = sizeof(reg0) + sizeof(reg1) 
+                + sizeof(reg2) + sizeof(reg3) 
+                + sizeof(regv4) + sizeof(dest1);
+  comp.offset = -4 ; 
+
+  BrigInstLdSt out8 = {
+    0,                // size
+    BrigEInstLdSt,     // kind
+    BrigSt,            // opcode
+    Brigf32,           // type
+    BrigNoPacking,     // packing
+    {0, sizeof(reg0) + sizeof(reg1) + sizeof(reg2) 
+         + sizeof(reg3) + sizeof(regv4) 
+         + sizeof(dest1) + sizeof(dest2), 0, 0, 0},  // operand[5]
+    BrigFlatSpace,      // storageClass
+    BrigRegular,       // memorySemantic
+    0                  // equivClass
+  };
+  out8.size = sizeof( out8);
+
+
+  St_Test<BrigOperandRegV4> TestCase8(in, sbuf, &out8, &regv4, &comp, &dest1, &dest2);
+  TestCase8.Run_Test(&St);   
   sbuf->clear();
 
 /************************************ End of tests*******************************************/
