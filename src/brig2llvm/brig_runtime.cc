@@ -406,7 +406,7 @@ template<class T> static T ShuffleVector(T x, T y, b32 z) {
 ShuffleVectorInst(define, Shuffle, Ternary)
 
 template<class T> static T Cmov(T x, T y, T z) {
-  return (x == 1) ? z : y;
+  return (x == 0) ? z : y;
 }
 BitInst(define, Cmov, Ternary)
 
