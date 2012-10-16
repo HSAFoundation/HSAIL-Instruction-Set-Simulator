@@ -596,13 +596,28 @@ template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
 TestAll(ShuffleVectorInst, Shuffle, Ternary)
 
 template<class T> static void CmovLogic(T result, T a, T b, T c) {
-  if(a & 1) {
-    EXPECT_EQ(b, result);
+  if(a == 0) {
+    if(isNan(c)) {
+      EXPECT_PRED1(isNan<T>, result);
+    } else {
+      EXPECT_EQ(c, result);    
+    } 
   } else {
-    EXPECT_EQ(c, result);
+    if(isNan(b)) {
+      EXPECT_PRED1(isNan<T>, result);
+    } else {
+      EXPECT_EQ(b, result);    
+    }
   }
 }
 TestAll(BitInst, Cmov, Ternary)
+
+template<class T> static void CmovVectorLogic(T result, T a, T b, T c) {
+  ForEach(CmovLogic, result, a, b, c);
+}
+TestAll(SignedVectorInst, Cmov, Ternary)
+TestAll(UnsignedVectorInst, Cmov, Ternary)
+TestAll(FloatVectorInst, Cmov, Ternary)
 
 template<class T> static void FractLogic(T result, T a) {
 

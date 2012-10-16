@@ -25,6 +25,14 @@ inline T map(typename T::BMapFn MapFn, T x, T y) {
 }
 
 template<class T>
+inline T map(typename T::TMapFn MapFn, T x, T y, T z) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    x[i] = MapFn(x[i], y[i], z[i]);
+  }
+  return x;
+}
+
+template<class T>
 inline T map(typename T::SMapFn MapFn, T x, typename T::Base y) {
   for(unsigned i = 0; i < T::Len; ++i) {
     x[i] = MapFn(x[i], y);
@@ -53,6 +61,13 @@ inline void ForEach(typename T::TForEachFn MapFn, T x, T y, T z) {
   }
 }
 
+template<class T>
+inline void ForEach(typename T::QForEachFn MapFn, T x, T y, T z, T w) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    MapFn(x[i], y[i], z[i], w[i]);
+  }
+}
+ 
 template<class T>
 inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   for(unsigned i = 0; i < T::Len; ++i) {
@@ -137,6 +152,9 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## BinaryVectorPacking(FUNC, TYPE, P, S)    \
   D ## BinaryVectorPacking(FUNC, TYPE, S, P)    \
   D ## BinaryVectorPacking(FUNC, TYPE, S, S)
+
+ #define TernaryVector(D,FUNC,TYPE)               \
+  D ## TernaryVectorPacking(FUNC, TYPE)      
 
 #define ShuffleVectorInst(D,INST,NARY)          \
   D ## ShuffleVector(INST, s8x4)                \
@@ -289,6 +307,11 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
     return FUNC ## Vector(t.P1(), u.P2());                              \
   }
 
+#define defineTernaryVectorPacking(FUNC,TYPE)                    \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v) {   \
+    return FUNC ## Vector(t, u, v);                              \
+  }
+
 #define defineShiftVector(FUNC,TYPE)                      \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, b32 shift) { \
     return FUNC ## Vector(t, shift);                      \
@@ -338,6 +361,9 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
 
 #define declareBinaryVectorPacking(FUNC,TYPE,P1,P2)                     \
   extern "C" TYPE FUNC ## _ ## P1 ## P2 ## _ ## TYPE (TYPE t, TYPE u);
+
+#define declareTernaryVectorPacking(FUNC,TYPE)                   \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v);
 
 #define declareShiftVector(FUNC,TYPE)                         \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift);

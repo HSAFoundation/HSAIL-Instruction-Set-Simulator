@@ -410,6 +410,11 @@ template<class T> static T Cmov(T x, T y, T z) {
 }
 BitInst(define, Cmov, Ternary)
 
+template<class T> static T CmovVector(T x, T y, T z) { return 0; }
+SignedVectorInst(define, Cmov, Ternary)
+UnsignedVectorInst(define, Cmov, Ternary)
+FloatVectorInst(define, Cmov, Ternary)
+
 // Neither C++98 nor C++11 implement C99's floating point hexadecimal
 // literals. :(
 // 0x3F7FFFFE == 0x1.fffffep-1f
