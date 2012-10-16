@@ -42,7 +42,7 @@ class Vector {
 
   typedef Vector<B, L> Self;
   typedef B Base;
-  typedef Base Type __attribute__((vector_size(sizeof(Base[Len]))));
+  typedef Base Type[Len];
 
   typedef Base (*UMapFn)(Base);
   typedef Base (*BMapFn)(Base, Base);
@@ -55,11 +55,11 @@ class Vector {
   Vector() {}
   Vector(Base b) {
     for(unsigned i = 0; i < Len; ++i)
-      (*this)[i] = b;
+      t_[i] = b;
   }
 
   Base &operator[](unsigned i) {
-    return reinterpret_cast<Base *>(&t_)[i];
+    return t_[i];
   }
 
   Self S() const {

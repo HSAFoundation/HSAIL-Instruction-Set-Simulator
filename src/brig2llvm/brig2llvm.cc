@@ -456,7 +456,8 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 
   if(brigDest) {
     llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
-    llvm::PointerType *destPtrTy = cast<llvm::PointerType>(destAddr->getType());
+    llvm::PointerType *destPtrTy = 
+      llvm::cast<llvm::PointerType>(destAddr->getType());
     llvm::Type *destTy = destPtrTy->getElementType();
     llvm::Value *resultVal = encodePacking(B, resultRaw, destTy, inst, helper);
     new llvm::StoreInst(resultVal, destAddr, &B);

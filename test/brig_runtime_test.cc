@@ -1019,7 +1019,7 @@ template<class R, class T> static void Cvt_zeroi_Logic(R result, T a) {
   } else if(isNegInf(a)) {
     EXPECT_EQ(getMin<R>(), result);
   } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
-    EXPECT_GE(labs(a), labs(result));
+    EXPECT_GE(llabs((uint64_t) a), llabs((uint64_t) result));
   }
 }
 template<class R, class T> static void Cvt_neari_Logic(R result, T a) {
@@ -1042,7 +1042,7 @@ MakeCvtF2FsTest(f32)
 MakeCvtF2FsTest(f64)
 MakeCvtF2FdTest(up,   a <= result)
 MakeCvtF2FdTest(down, a >= result)
-MakeCvtF2FdTest(zero, abs(a) >= abs(result))
+MakeCvtF2FdTest(zero, std::abs(a) >= std::abs(result))
 MakeCvtF2FdTest(near, (f32) a == result)
 
 template<class T> static void AtomicAndLogic(T result, T *a, T b) {
