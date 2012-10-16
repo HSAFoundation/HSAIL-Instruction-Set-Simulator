@@ -1609,27 +1609,93 @@ TEST(CodegenTest, MemorySegmentOps){
   };
   ref1.size = sizeof(ref1);
   
-  BrigOperandReg dest1 = {
+  BrigOperandReg dest = {
   0,
   BrigEOperandReg,
   Brigb64,
   0,
   0
   };
-  dest1.size = sizeof(dest1);
-  ref1.o_operands[1] = sizeof(dest1);
+  dest.size = sizeof(dest);
+  ref1.o_operands[1] = sizeof(dest);
   
-  BrigOperandReg src1 = {
+  BrigOperandReg src = {
   0,
   BrigEOperandReg,
   Brigb64,
   0,
   op1.size()+1
   };
-  src1.size = sizeof(src1);
+  src.size = sizeof(src);
   
-  Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase1(in, sbuf, &ref1, &dest1, &src1);
+  Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase1(in, sbuf, &ref1, &dest, &src);
   TestCase1.Run_Test(&Segp);
+  sbuf->clear();
+
+  /**************************************** Case 2 ******************************************/
+  in.assign("segmentp_group_b1 $c1, $d0;\n");
+  op1.assign("$c1"); op2.assign("$d0");
+  sbuf->append(op1); sbuf->append(op2);
+  
+  BrigInstMem ref2 = {
+    0,                    // size
+    BrigEInstMem,         // kind
+    BrigSegmentp,         // opcode
+    Brigb1,               // type
+    BrigNoPacking,        // packing
+    {0, 0, 0, 0, 0},      // o_operands[5]
+    BrigGroupSpace        // storageClass
+  };
+  ref2.size = sizeof(ref2);
+  ref2.o_operands[1] = sizeof(dest);
+
+  dest.size = sizeof(dest);
+  dest.kind = BrigEOperandReg;
+  dest.type = Brigb1;
+  dest.reserved = 0;
+  dest.name = 0;
+  
+  src.size = sizeof(src);
+  src.kind = BrigEOperandReg;
+  src.type = Brigb64;
+  src.reserved = 0;
+  src.name = op1.size() + 1;
+  
+  Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase2(in, sbuf, &ref2, &dest, &src);
+  TestCase2.Run_Test(&Segp);
+  sbuf->clear();
+
+  /**************************************** Case 3 ******************************************/
+  in.assign("ftos_group_u64 $d1, $d2;\n");
+  op1.assign("$d1"); op2.assign("$d2");
+  sbuf->append(op1); sbuf->append(op2);
+  
+  BrigInstMem ref3 = {
+    0,                    // size
+    BrigEInstMem,         // kind
+    BrigFtoS,             // opcode
+    Brigu64,              // type
+    BrigNoPacking,        // packing
+    {0, 0, 0, 0, 0},      // o_operands[5]
+    BrigGroupSpace        // storageClass
+  };
+  ref3.size = sizeof(ref3);
+  ref3.o_operands[1] = sizeof(dest);
+
+  dest.size = sizeof(dest);
+  dest.kind = BrigEOperandReg;
+  dest.type = Brigb64;
+  dest.reserved = 0;
+  dest.name = 0;
+  
+  src.size = sizeof(src);
+  src.kind = BrigEOperandReg;
+  src.type = Brigb64;
+  src.reserved = 0;
+  src.name = op1.size() + 1;
+  
+  Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase3(in, sbuf, &ref3, &dest, &src);
+  TestCase3.Run_Test(&Segp);
   sbuf->clear();
   
   delete sbuf;
