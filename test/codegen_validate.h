@@ -36,6 +36,20 @@ void validate(const BrigOperandReg* ref, const char* refstr, const BrigOperandRe
   EXPECT_STREQ(&refstr[ref->name], &getstr[get->name]);
 }
 
+void validate(const BrigOperandRegV2* ref, const BrigOperandRegV2* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->reserved, get->reserved);  
+}
+
+void validate(const BrigOperandRegV4* ref, const BrigOperandRegV4* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->reserved, get->reserved);  
+}
+
 void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
@@ -166,6 +180,47 @@ void validate(const BrigInstCvt* ref, const BrigInstCvt* get){
   EXPECT_EQ(*ref1, *get1);
   EXPECT_EQ(ref->stype, get->stype);
   EXPECT_EQ(ref->reserved, get->reserved); 
+}
+
+void validate(const BrigDirectiveImage* ref, const char* refstr, const BrigDirectiveImage* get, const char* getstr){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  //EXPECT_EQ(ref->s.c_code, get->s.c_code);
+  EXPECT_EQ(ref->s.storageClass, get->s.storageClass);
+  EXPECT_EQ(ref->s.attribute, get->s.attribute);
+  EXPECT_EQ(ref->s.reserved, get->s.reserved);
+  EXPECT_EQ(ref->s.symbolModifier, get->s.symbolModifier);
+  EXPECT_EQ(ref->s.dim, get->s.dim);
+  EXPECT_STREQ(&refstr[ref->s.s_name], &getstr[get->s.s_name]);
+  EXPECT_EQ(ref->s.type, get->s.type);
+  EXPECT_EQ(ref->s.align, get->s.align);
+  EXPECT_EQ(ref->width, get->width);  
+  EXPECT_EQ(ref->height, get->height);  
+  EXPECT_EQ(ref->depth, get->depth);
+  EXPECT_EQ(ref->array, get->array);    
+  EXPECT_EQ(ref->order, get->order);  
+  EXPECT_EQ(ref->format, get->format);  
+}
+
+void validate(const BrigDirectiveSampler* ref, const char* refstr, const BrigDirectiveSampler* get, const char* getstr){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  //EXPECT_EQ(ref->s.c_code, get->s.c_code);
+  EXPECT_EQ(ref->s.storageClass, get->s.storageClass);
+  EXPECT_EQ(ref->s.attribute, get->s.attribute);
+  EXPECT_EQ(ref->s.reserved, get->s.reserved);
+  EXPECT_EQ(ref->s.symbolModifier, get->s.symbolModifier);
+  EXPECT_EQ(ref->s.dim, get->s.dim);
+  EXPECT_STREQ(&refstr[ref->s.s_name], &getstr[get->s.s_name]);
+  EXPECT_EQ(ref->s.type, get->s.type);
+  EXPECT_EQ(ref->s.align, get->s.align);
+  EXPECT_EQ(ref->valid, get->valid);  
+  EXPECT_EQ(ref->normalized, get->normalized);  
+  EXPECT_EQ(ref->filter, get->filter);
+  EXPECT_EQ(ref->boundaryU, get->boundaryU);    
+  EXPECT_EQ(ref->boundaryV, get->boundaryV);  
+  EXPECT_EQ(ref->boundaryW, get->boundaryW);  
+  EXPECT_EQ(ref->reserved1, get->reserved1);  
 }
 
 }//namespace validate_brig
