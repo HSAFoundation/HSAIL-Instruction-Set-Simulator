@@ -223,6 +223,20 @@ void validate(const BrigDirectiveSampler* ref, const char* refstr, const BrigDir
   EXPECT_EQ(ref->reserved1, get->reserved1);  
 }
 
+void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get){
+  
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  //EXPECT_EQ(ref->labeldirective, get->labeldirective);
+}
+
+void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* get){
+  
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  //EXPECT_EQ(ref->fn, get->fn);
+}
+
 }//namespace validate_brig
 }
 }
