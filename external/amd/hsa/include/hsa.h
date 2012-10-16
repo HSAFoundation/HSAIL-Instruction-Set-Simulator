@@ -660,6 +660,41 @@ public:
                     const char* kernelName,
                     const char* options)=0;
 
+ 
+     /* 
+     ***************************************************************************
+     * @brief Copies the binary to a memory buffer allocated by the user
+     *          (Experimental - The usage of function can change later)
+     * @details This HSA device interface is used to copy the binary (Specific 
+     *          to the device)into a buffer allocated by the user. 
+     *          It is up to the user to allocate enough memory for the buffer. 
+     *          The memory required can be queried using the getBinarySize()
+     *          function . 
+     * @param program A pointer to the program object from which the device 
+     *                pulls out it's binary
+     * @param mem Pointer to the memory buffer
+     * @param size size of the memory buffer allocated. If size is lesser than
+     *              required size, an exception is thrown.
+     * @exception Throws exception when value of size is lesser than required
+     *              size
+     ***************************************************************************
+     */
+    virtual void copyBinary(hsa::Program* program, void* mem, size_t size) = 0;
+
+    /*          
+     ***************************************************************************
+     * @brief Acquires the size of the binary
+     *          (Experimental - The usage of function can change later)
+     * @details Returns the size of the binary. The user can allocate sufficient
+     *          memory for the buffer when copyBinary is used
+     *
+     * @param program A pointer to the program object from which the device 
+     *                pulls out it's binary and finds it's size
+     ***************************************************************************
+     */
+    virtual size_t getBinarySize(hsa::Program* program) = 0;
+
+
      /**
      ***************************************************************************
      * @brief Inquire the name of the vendor
@@ -1384,8 +1419,7 @@ public:
     virtual hsa::Kernel *compileKernel(const char* kernelName,
                                        const char* options) = 0;
     /********************** @endcond ******************************************/
-
-    /**
+    /*
      ***************************************************************************
      * @brief Default destructor.
      ***************************************************************************
