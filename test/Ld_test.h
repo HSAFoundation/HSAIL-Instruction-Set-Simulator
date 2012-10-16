@@ -20,6 +20,8 @@ private:
   const BrigOperandAddress* RefSrc_Addr;
   const BrigOperandIndirect* RefSrc_Indir;
   const BrigOperandCompound* RefSrc_Comp;
+  const BrigOperandLabelRef* RefSrc_Label;
+  const BrigOperandFunctionRef* RefSrc_Function;
   
 public:
   //TestCase outputs a BrigOperandAddress only
@@ -32,7 +34,9 @@ public:
     RefSrc_Reg(NULL), 
     RefSrc_Addr(addr), 
     RefSrc_Indir(NULL), 
-    RefSrc_Comp(NULL)  { }
+    RefSrc_Comp(NULL),  
+    RefSrc_Label(NULL),
+    RefSrc_Function(NULL)  { }
       
   //Testcase output is a BrigOperandIndirect    
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, 
@@ -44,7 +48,9 @@ public:
     RefSrc_Reg(reg),
     RefSrc_Addr(NULL),
     RefSrc_Indir(indir),
-    RefSrc_Comp(NULL)  { }
+    RefSrc_Comp(NULL),  
+    RefSrc_Label(NULL),
+    RefSrc_Function(NULL)  { }
   
   //TestCase output is a BrigOperandCompound
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, 
@@ -56,7 +62,9 @@ public:
     RefSrc_Reg(reg),
     RefSrc_Addr(addr),
     RefSrc_Indir(NULL),
-    RefSrc_Comp(comp) { }
+    RefSrc_Comp(comp), 
+    RefSrc_Label(NULL),
+    RefSrc_Function(NULL)  { }
    
   void validate(struct BrigSections* TestOutput){
     
@@ -95,10 +103,19 @@ public:
         validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf); 
       }    
       
-    } else {
+    } else if(getsrc_op2->kind==BrigEOperandAddress){
       const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getinst->o_operands[2]]));
       validate_brig::validate(RefSrc_Addr, getsrc_addr);      
-    }
+    
+    } else if (getsrc_op2->kind==BrigEOperandLabelRef){
+      const BrigOperandLabelRef *getsrc_label = reinterpret_cast <const BrigOperandLabelRef*> (&(TestOutput->operands[getinst->o_operands[2]]));
+      validate_brig::validate(RefSrc_Label, getsrc_label);
+    
+    } else if(getsrc_op2->kind==BrigEOperandFunctionRef){
+      const BrigOperandFunctionRef *getsrc_function = reinterpret_cast <const BrigOperandFunctionRef*> (&(TestOutput->operands[getinst->o_operands[2]]));
+      validate_brig::validate(RefSrc_Function, getsrc_function);
+    }   
+    
     EXPECT_EQ(0, getinst->o_operands[3]);
     EXPECT_EQ(0, getinst->o_operands[4]);
   }
