@@ -5,10 +5,10 @@ namespace hsa{
 namespace brig{
 
 /*Template describes the type of the destination, reg/regv2/regv4*/
-template <typename T> class Ld_Test : public BrigCodeGenTest{
+template <typename Tinst, typename T> class Ld_Test : public BrigCodeGenTest{
 private:
   
-  const BrigInstLdSt* RefInst;
+  const Tinst* RefInst;
   
   //Width operand
   const BrigOperandImmed* OpWidth;
@@ -23,7 +23,7 @@ private:
   
 public:
   //TestCase outputs a BrigOperandAddress only
-  Ld_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, 
+  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, 
       BrigOperandImmed* width, T* dest, BrigOperandAddress* addr) :
     BrigCodeGenTest(input, sbuf), 
     RefInst(ref),
@@ -35,7 +35,7 @@ public:
     RefSrc_Comp(NULL)  { }
       
   //Testcase output is a BrigOperandIndirect    
-  Ld_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, 
+  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, 
       BrigOperandImmed* width, T* dest, BrigOperandIndirect* indir, BrigOperandReg* reg=NULL) : 
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
@@ -47,7 +47,7 @@ public:
     RefSrc_Comp(NULL)  { }
   
   //TestCase output is a BrigOperandCompound
-  Ld_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, 
+  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, 
       BrigOperandImmed* width, T* dest, BrigOperandCompound* comp, BrigOperandAddress* addr, BrigOperandReg* reg=NULL) : 
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
@@ -64,7 +64,7 @@ public:
     const char* getbuf = TestOutput->strings;   
     
     inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstLdSt* getinst = (cast<BrigInstLdSt>(getcode));
+    const Tinst* getinst = (cast<Tinst>(getcode));
     validate_brig::validate(RefInst, getinst);
     
    const BrigOperandImmed *getwidth = reinterpret_cast <const BrigOperandImmed *> (&(TestOutput->operands[getinst->o_operands[0]]));
@@ -155,7 +155,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out1.size = sizeof(out1);
     
-  Ld_Test<BrigOperandReg> TestCase1(in, sbuf, &out1, &width1, &dest1, &addr1);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase1(in, sbuf, &out1, &width1, &dest1, &addr1);
   TestCase1.Run_Test(&Ld);  
   sbuf->clear();
 
@@ -205,7 +205,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out2.size = sizeof(out2); 
  
-  Ld_Test<BrigOperandReg> TestCase2(in, sbuf, &out2, &width2, &dest2, &indir2, NULL);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase2(in, sbuf, &out2, &width2, &dest2, &indir2, NULL);
   TestCase2.Run_Test(&Ld);  
   sbuf->clear();
 
@@ -264,7 +264,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out3.size = sizeof(out3); 
  
-  Ld_Test<BrigOperandReg> TestCase3(in, sbuf, &out3, &width3, &dest3, &indir3, &reg3);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase3(in, sbuf, &out3, &width3, &dest3, &indir3, &reg3);
   TestCase3.Run_Test(&Ld);  
   sbuf->clear();
 
@@ -313,7 +313,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out4.size = sizeof(out4); 
  
-  Ld_Test<BrigOperandReg> TestCase4(in, sbuf, &out4, &width4, &dest4, &addr4);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase4(in, sbuf, &out4, &width4, &dest4, &addr4);
   TestCase4.Run_Test(&Ld);  
   sbuf->clear();
 
@@ -362,7 +362,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out5.size = sizeof(out5); 
  
-  Ld_Test<BrigOperandReg> TestCase5(in, sbuf, &out5, &width5, &dest5, &addr5);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase5(in, sbuf, &out5, &width5, &dest5, &addr5);
   TestCase5.Run_Test(&Ld);  
   sbuf->clear();
 
@@ -422,7 +422,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out6.size = sizeof(out6); 
  
-  Ld_Test<BrigOperandReg> TestCase6(in, sbuf, &out6, &width6, &dest6, &comp6, &addr6, NULL);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase6(in, sbuf, &out6, &width6, &dest6, &comp6, &addr6, NULL);
   TestCase6.Run_Test(&Ld);  
   sbuf->clear();
 
@@ -492,7 +492,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out7.size = sizeof(out7); 
  
-  Ld_Test<BrigOperandReg> TestCase7(in, sbuf, &out7, &width7, &dest7, &comp7, &addr7, &reg7);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase7(in, sbuf, &out7, &width7, &dest7, &comp7, &addr7, &reg7);
   TestCase7.Run_Test(&Ld);  
   sbuf->clear();
 
@@ -561,7 +561,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out8.size = sizeof(out8); 
  
-  Ld_Test<BrigOperandReg> TestCase8(in, sbuf, &out8, &width8, &dest8, &comp8, &addr8, &reg8);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase8(in, sbuf, &out8, &width8, &dest8, &comp8, &addr8, &reg8);
   TestCase8.Run_Test(&Ld); 
   sbuf->clear();
 
@@ -621,7 +621,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out9.size = sizeof(out9); 
  
-  Ld_Test<BrigOperandReg> TestCase9(in, sbuf, &out9, &width9, &dest9, &comp9, &addr9, NULL);
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase9(in, sbuf, &out9, &width9, &dest9, &comp9, &addr9, NULL);
   TestCase9.Run_Test(&Ld);  
   sbuf->clear();
 
