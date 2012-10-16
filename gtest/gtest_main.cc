@@ -40,7 +40,7 @@ GTEST_API_ int main(int argc, char **argv) {
       "BrigRuntimeTest.Bitselect*:"
       "BrigRuntimeTest.Mov_b128_b32:"
       "BrigRuntimeTest.Shuffle*:"
-      //"BrigRuntimeTest.Cmov*:"
+      "BrigRuntimeTest.Cmov*:"
       "BrigRuntimeTest.Fma*:"
       "BrigRuntimeTest.Insert*:"
       "BrigRuntimeTest.F2u4_u32:"
