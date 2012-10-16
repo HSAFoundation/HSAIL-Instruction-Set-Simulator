@@ -65,6 +65,32 @@ public:
     RefSrc_Comp(comp), 
     RefSrc_Label(NULL),
     RefSrc_Function(NULL)  { }
+    
+    Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, 
+            T* dest, BrigOperandLabelRef* src) : 
+    BrigCodeGenTest(input, sbuf),
+    RefInst(ref),
+    OpWidth(NULL),
+    RefDest(dest),
+    RefSrc_Reg(NULL),
+    RefSrc_Addr(NULL),
+    RefSrc_Indir(NULL),
+    RefSrc_Comp(NULL), 
+    RefSrc_Label(src),
+    RefSrc_Function(NULL)  { }
+    
+    Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, 
+            T* dest, BrigOperandFunctionRef* src) : 
+    BrigCodeGenTest(input, sbuf),
+    RefInst(ref),
+    OpWidth(NULL),
+    RefDest(dest),
+    RefSrc_Reg(NULL),
+    RefSrc_Addr(NULL),
+    RefSrc_Indir(NULL),
+    RefSrc_Comp(NULL), 
+    RefSrc_Label(NULL),
+    RefSrc_Function(src)  { }
    
   void validate(struct BrigSections* TestOutput){
     
