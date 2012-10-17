@@ -941,6 +941,8 @@ TEST(CodegenTest, Ld_Codegen){
   delete sbuf;
 }
 
+/**********************************************************************************/
+/*********************** Lda Test ***************************/
 TEST(CodegenTest, Lda_Codegen){
 
 /*********************Common variables**********************/
@@ -983,6 +985,187 @@ TEST(CodegenTest, Lda_Codegen){
   Ld_Test<BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, NULL, &dest1, &addr1);
   TestCase1.Run_Test(&Lda);  
   sbuf->clear();
+
+/**********************************************************************************/
+  in.assign( "lda_u64 $d4, [&x];\n");
+  op1.assign("$d4"); sbuf->append(op1);
+    
+  BrigOperandReg dest2 = {
+    0,
+    BrigEOperandReg,
+    Brigb64,
+    0, 
+    0
+  };
+  dest2.size = sizeof(dest2);
+   
+  BrigOperandAddress addr2 = {
+    0,
+    BrigEOperandAddress,
+    Brigb64,
+    0,
+    0  
+  };
+  addr2.size = sizeof(addr2);
+ 
+  BrigInstBase out2 = {
+    0,
+    BrigEInstBase, 
+    BrigLda,
+    Brigu64,
+    BrigNoPacking,
+    {0, sizeof(dest2), 0, 0, 0}
+  };
+  out2.size = sizeof(out2);
+ 
+  Ld_Test<BrigInstBase, BrigOperandReg> TestCase2(in, sbuf, &out2, NULL, &dest2, &addr2);
+  TestCase2.Run_Test(&Lda);  
+  sbuf->clear();
+
+/**********************************************************************************/
+  in.assign( "lda_u32 $s2, [$s1];\n");
+  op1.assign("$s2"); op2.assign("$s1");
+  sbuf->append(op1); sbuf->append(op2);
+    
+  BrigOperandReg dest3 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0, 
+    0
+  };
+  dest3.size = sizeof(dest3);
+
+  BrigOperandReg reg3 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0, 
+    op1.size() + 1
+  };
+  reg3.size = sizeof(reg3);
+
+  BrigOperandIndirect indir3 = {
+    0,
+    BrigEOperandIndirect,
+    sizeof(dest3),
+    Brigb64,
+    0,
+    0
+  };
+  indir3.size = sizeof(indir3);
+
+  BrigInstBase out3 = {
+    0,                     
+    BrigEInstBase,         
+    BrigLda,                
+    Brigu32,               
+    BrigNoPacking,         
+    {0, sizeof(dest3) + sizeof(reg3), 0, 0, 0},                  
+  };
+  out3.size = sizeof(out3); 
+ 
+  Ld_Test<BrigInstBase, BrigOperandReg> TestCase3(in, sbuf, &out3, NULL, &dest3, &indir3, &reg3);
+  TestCase3.Run_Test(&Lda);  
+  sbuf->clear();
+
+/**********************************************************************************/
+  in.assign( "lda_u64 $d1, [$d0 + 10];\n");
+  op1.assign("$d1"); op2.assign("$d0");
+  sbuf->append(op1); sbuf->append(op2);
+    
+  BrigOperandReg dest4 = {
+    0,
+    BrigEOperandReg,
+    Brigb64,
+    0, 
+    0
+  };
+  dest4.size = sizeof(dest4);
+
+  BrigOperandReg reg4 = {
+    0,
+    BrigEOperandReg,
+    Brigb64,
+    0, 
+    op1.size() + 1
+  };
+  reg4.size = sizeof(reg4);
+
+  BrigOperandIndirect indir4 = {
+    0,
+    BrigEOperandIndirect,
+    sizeof(dest4),
+    Brigb64,
+    0,
+    10
+  };
+  indir4.size = sizeof(indir4);
+
+  BrigInstBase out4 = {
+    0,                     
+    BrigEInstBase,         
+    BrigLda,                
+    Brigu64,               
+    BrigNoPacking,         
+    {0, sizeof(dest4) + sizeof(reg4), 0, 0, 0},                  
+  };
+  out4.size = sizeof(out4); 
+ 
+  Ld_Test<BrigInstBase, BrigOperandReg> TestCase4(in, sbuf, &out4, NULL, &dest4, &indir4, &reg4);
+  TestCase4.Run_Test(&Lda);  
+  sbuf->clear();
+
+/**********************************************************************************/
+  in.assign( "lda_u32 $s1, [&xarray][4];\n");
+  op1.assign("$s1"); sbuf->append(op1); 
+    
+  BrigOperandReg dest5 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0, 
+    0
+  };
+  dest5.size = sizeof(dest5);
+   
+  BrigOperandAddress addr5 = {
+    0,
+    BrigEOperandAddress,
+    Brigb64,
+    0,
+    0  
+  };
+  addr5.size = sizeof(addr5);
+
+  BrigOperandCompound comp5 = {
+    0,  
+    BrigEOperandCompound,
+    Brigb64,
+    0,
+    sizeof(dest5), 
+    0,
+    4
+  };
+  comp5.size = sizeof(comp5);
+ 
+  BrigInstBase out5 = {
+    0,                     
+    BrigEInstBase,         
+    BrigLda,                     
+    Brigu32,               
+    BrigNoPacking,         
+    {0, sizeof(dest5) + sizeof(addr5), 0, 0, 0},                     
+  };
+  out5.size = sizeof(out5); 
+ 
+  Ld_Test<BrigInstBase, BrigOperandReg> TestCase5(in, sbuf, &out5, NULL, &dest5, &comp5, &addr5, NULL);
+  TestCase5.Run_Test(&Lda);  
+  sbuf->clear();
+
+/******************************  End of tests *****************************************/
+  delete sbuf;
+
 }
   
 }
