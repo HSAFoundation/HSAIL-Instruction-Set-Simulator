@@ -4757,84 +4757,6 @@ int Atom(Context* context) {
   return 1;
 }
 
-int CvtModifier1(Context* context) {
-  unsigned int next;
-  unsigned int first_token = context->token_to_scan;
-  // get current alu modifier from context
-  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
-
-  if (first_token == _FTZ) {
-    mod.ftz = 1;
-    next = yylex();
-
-    if (context->token_type == FLOAT_ROUNDING) {
-      // next is floatRounding
-      mod.floatOrInt = 1;
-      switch (next) {
-        case _UP:
-          mod.rounding = 2;
-          break;
-        case _DOWN:
-          mod.rounding = 3;
-          break;
-        case _ZERO:
-          mod.rounding = 1;
-          break;
-        case _NEAR:
-          mod.rounding = 0;
-          break;
-      }
-      context->token_to_scan = yylex();  // set context for following functions
-    } else {
-      context->token_to_scan = next;
-    }
-
-    context->set_alu_modifier(mod);
-    return 0;
-  } else if (context->token_type == INT_ROUNDING) {
-    mod.floatOrInt = 0;
-    switch (first_token) {
-      case _UPI:
-        mod.rounding = 2;
-        break;
-      case _DOWNI:
-        mod.rounding = 3;
-        break;
-      case _ZEROI:
-        mod.rounding = 1;
-        break;
-      case _NEARI:
-        mod.rounding = 0;
-        break;
-    }
-    context->token_to_scan = yylex();  // set context for following functions
-    context->set_alu_modifier(mod);
-    return 0;
-  } else if (context->token_type == FLOAT_ROUNDING) {
-    mod.floatOrInt = 1;
-    switch (first_token) {
-      case _UP:
-        mod.rounding = 2;
-        break;
-      case _DOWN:
-        mod.rounding = 3;
-        break;
-      case _ZERO:
-        mod.rounding = 1;
-        break;
-      case _NEAR:
-        mod.rounding = 0;
-        break;
-    }
-    mod.reserved = 0;
-    context->token_to_scan = yylex();  // set context for following functions
-    context->set_alu_modifier(mod);
-    return 0;
-  } else {
-    return 1;
-  }
-}
-
 int Mov(Context* context) {
   // Chuang
   // first token is MOV "mov"
@@ -5984,7 +5906,7 @@ int Cvt(Context* context) {
   };
   context->token_to_scan = yylex();
 
-  if (!CvtModifier1(context)) {
+  if (!RoundingMode(context)) {
     BrigAluModifier getAluMod = context->get_alu_modifier();
     memcpy(&cvtInst.aluModifier, &getAluMod, sizeof(cvtInst.aluModifier));
   }
