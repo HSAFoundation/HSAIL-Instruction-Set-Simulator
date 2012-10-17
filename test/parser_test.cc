@@ -1816,6 +1816,8 @@ TEST(ParserTest, Instruction5) {
 //                 | "_ftz" floatRounding
 //                 | intRounding
 // correct cases
+
+#if 0
 TEST(ParserTest, CvtModifier1) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -1889,6 +1891,7 @@ TEST(ParserTest, CvtModifier1) {
 
   delete lexer;
 }
+#endif
 
 // -----------------  Test for mov rule -------------------
 // format:
