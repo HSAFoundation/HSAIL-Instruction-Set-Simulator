@@ -291,7 +291,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   delete sbuf;
 }
 
-#if 0
+
 /****************** fbar_initSizeKnown Test ************************/
 TEST(CodegenTest, fbar_initSizeKnown_Codegen){
 
@@ -353,7 +353,7 @@ TEST(CodegenTest, fbar_initSizeKnown_Codegen){
 /******************************  End of tests *****************************************/
   delete sbuf;
 }
-#endif
+
 /****************** fbar_release Test ************************/
 TEST(CodegenTest, fbar_release_Codegen){
 
@@ -435,7 +435,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   std::string in, op1, op2; 
   StringBuffer* sbuf = new StringBuffer();
   /*****************************************************************/
-#if 0
+
   in.assign( "fbar_initSizeDynamic_u32 $s1;\n");
   op1.assign("$s1"); sbuf->append(op1);
  
@@ -461,7 +461,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   Instruction1_Test <BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
   TestCase1.Run_Test(&Instruction1);  
   sbuf->clear();
-#endif
+
 /**********************************************************************************/
   in.assign( "fbar_wait_b64 $d1;\n");
   op1.assign("$d1"); sbuf->append(op1);

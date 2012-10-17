@@ -73,6 +73,8 @@ enum TokenType { TOKEN_CREGISTER= 258,
                  MEMOPT_ON,
                  MEMOPT_OFF,
                  /* opcode */
+                 FBAR_INITSIZEKNOWN,
+                 FBAR_INITSIZEDYNAMIC,
                  FBAR_INITSIZEWG,
                  FBAR_WAIT,
                  FBAR_ARRIVE,

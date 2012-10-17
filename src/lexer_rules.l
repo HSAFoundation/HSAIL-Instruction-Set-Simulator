@@ -776,7 +776,18 @@ memopt_off          { free_string(context);
   /* -- Opcode -- */
   /* TODO(Chuang): "fbar_initSizeDynamic"/"fbar_initSizeKnown" */
   /* fbar_release */
+fbar_initSizeKnown     { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarInitSizeKnown;
+                      return FBAR_INITSIZEKNOWN; }
 
+fbar_initSizeDynamic     { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarInitSizeDynamic;
+                      return FBAR_INITSIZEDYNAMIC; }                      
+                      
 fbar_initSizeWg     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;
