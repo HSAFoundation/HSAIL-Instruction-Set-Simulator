@@ -1167,6 +1167,86 @@ TEST(CodegenTest, Lda_Codegen){
   delete sbuf;
 
 }
+
+/**********************************************************************************/
+/*********************** Ldc Test ***************************/
+TEST(CodegenTest, Ldc_Codegen){
+
+/*********************Common variables**********************/
+  std::string in, op1, op2; 
+  StringBuffer* sbuf = new StringBuffer();
+
+  /*****************************************************************/
+  in.assign( "ldc_b32 $s2, @lab;\n");
+  op1.assign("$s2"); sbuf->append(op1); 
+    
+  BrigOperandReg dest1 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0, 
+    0
+  };
+  dest1.size = sizeof(dest1);  
+  
+  BrigOperandLabelRef label1 = {
+    0,
+    BrigEOperandLabelRef,
+    0,
+  };
+  label1.size = sizeof(label1);
+    
+  BrigInstBase out1 = {
+    0,                     
+    BrigEInstBase,         
+    BrigLdc,                     
+    Brigb32,               
+    BrigNoPacking,         
+    {0, sizeof(dest1), 0, 0, 0},                     
+  };
+  out1.size = sizeof(out1);
+    
+  Ld_Test<BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1, &label1);
+  TestCase1.Run_Test(&Ldc);  
+  sbuf->clear();
+
+/**********************************************************************************/
+  in.assign( "ldc_b64 $s1, &some_function;\n");
+  op1.assign("$s1"); sbuf->append(op1); 
+    
+  BrigOperandReg dest2 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0, 
+    0
+  };
+  dest2.size = sizeof(dest2);  
+
+  BrigOperandFunctionRef function2 = {
+    0,
+    BrigEOperandFunctionRef,
+    0,
+  };
+  function2.size = sizeof(function2);
+    
+  BrigInstBase out2 = {
+    0,                     
+    BrigEInstBase,         
+    BrigLdc,                     
+    Brigb64,               
+    BrigNoPacking,         
+    {0, sizeof(dest2), 0, 0, 0},                     
+  };
+  out2.size = sizeof(out2);
+    
+  Ld_Test<BrigInstBase, BrigOperandReg> TestCase2(in, sbuf, &out2, &dest2, &function2);
+  TestCase2.Run_Test(&Ldc);  
+  sbuf->clear();
+
+/******************************  End of tests *****************************************/
+  delete sbuf;
+}
   
 }
 }
