@@ -5539,20 +5539,15 @@ int Lda(Context* context) {
   // first token is LDA
   context->token_to_scan = yylex();
 
-  BrigInstMem lda_op = {
-    sizeof(BrigInstMem),   // size
-    BrigEInstMem,          // kind
+  BrigInstBase lda_op = {
+    sizeof(BrigInstBase),   // size
+    BrigEInstBase,          // kind
     BrigLda,               // opcode
     Brigb32,               // type
     BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0},       // o_operands[5]
-    BrigFlatSpace          // storageClass
+    {0, 0, 0, 0, 0}       // o_operands[5]
   };
 
-  if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-    lda_op.storageClass = context->token_value.storage_class;
-    context->token_to_scan = yylex();
-  }
   // Note: lda_uLength I think 'b' is also allowed.
   // Length: 1, 32, 64
   if (context->token_to_scan == _U32 ||

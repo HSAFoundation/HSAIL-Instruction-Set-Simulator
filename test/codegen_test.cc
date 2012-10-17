@@ -1573,68 +1573,6 @@ TEST(CodegenTest, PairAddressableOperand_CodeGen_SimpleTest) {
   delete lexer;
 }
 
-TEST(CodegenTest, Lda_CodeGen_SimpleTest) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("lda_group_u32 $s1, [%loc];\n");
-
-  Lexer* lexer = new Lexer(input);
-
-  BrigInstMem ref = {
-    sizeof(BrigInstMem),   // size
-    BrigEInstMem,          // kind
-    BrigLda,               // opcode
-    Brigu32,               // type
-    BrigNoPacking,         // packing
-    {8, 20, 0, 0, 0},      // o_operands[5]
-    BrigGroupSpace         // storageClass
-  };
-  BrigInstMem getMem;
-  BrigOperandReg getReg;
-  BrigOperandAddress getAddr;
-
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  context->add_symbol("%loc");
-
-  EXPECT_EQ(0, Lda(context));
-
-  context->get_operand(8, &getReg);
-  context->get_operand(20, &getAddr);
-  context->get_code(8, &getMem);
-
-  // BrigOperandReg
-  EXPECT_EQ(12, getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(13, getReg.name);
-  // BrigOperandAddress
-  EXPECT_EQ(12, getAddr.size);
-  EXPECT_EQ(BrigEOperandAddress, getAddr.kind);
-  EXPECT_EQ(Brigb64, getAddr.type);
-  EXPECT_EQ(0, getAddr.reserved);
-  EXPECT_EQ(0, getAddr.directive);
-
-  // BrigInstMem
-  EXPECT_EQ(ref.size, getMem.size);
-  EXPECT_EQ(ref.kind, getMem.kind);
-  EXPECT_EQ(ref.opcode, getMem.opcode);
-  EXPECT_EQ(ref.type, getMem.type);
-  EXPECT_EQ(ref.packing, getMem.packing);
-
-  EXPECT_EQ(ref.o_operands[0], getMem.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], getMem.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], getMem.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], getMem.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], getMem.o_operands[4]);
-  EXPECT_EQ(ref.storageClass, getMem.storageClass);
-
-  delete lexer;
-}
-
-
 TEST(CodegenTest, Instruction1_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -5173,6 +5111,9 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
     0                    // reserved
   };
 
+
+  const BrigoOffset32_t oStartOffset = context->get_operand_offset();
+  const BrigcOffset32_t cStartOffset = context->get_code_offset();
   BrigInstCvt getCvt;
   BrigOperandReg getReg;
   unsigned int* pAluModRef,* pAluModGet;
@@ -5250,6 +5191,305 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
   EXPECT_EQ(16, getReg.name);
+
+  /*************************************** Case 3 ************************************/
+  context->clear_context();
+  input.assign("cvt_upi_u32_f32 $s1, $s2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cvt(context));
+
+  context->get_code(cStartOffset, &getCvt);
+  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.kind = BrigEInstCvt;
+  cvtRef1.opcode = BrigCvt;
+  cvtRef1.type = Brigu32;
+  cvtRef1.packing = BrigNoPacking;
+  cvtRef1.o_operands[0] = oStartOffset;
+  cvtRef1.o_operands[1] = sizeof(getReg) + oStartOffset;
+  cvtRef1.o_operands[2] = 0;
+  cvtRef1.o_operands[3] = 0;
+  cvtRef1.o_operands[4] = 0;
+  cvtRef1.stype = Brigf32;
+  cvtRef1.reserved = 0;
+  memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+  cvtRef1.aluModifier.floatOrInt = 0;
+  cvtRef1.aluModifier.rounding = 2;
+
+  context->get_code(cStartOffset, &getCvt);
+
+  EXPECT_EQ(cvtRef1.size, getCvt.size);
+  EXPECT_EQ(cvtRef1.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef1.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef1.type, getCvt.type);
+  EXPECT_EQ(cvtRef1.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef1.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef1.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef1.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef1.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef1.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef1.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef1.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
+  /*************************************** Case 4 ************************************/
+  context->clear_context();
+  input.assign("cvt_neari_f32_f32 $s1, $s2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cvt(context));
+
+  context->get_code(cStartOffset, &getCvt);
+  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.kind = BrigEInstCvt;
+  cvtRef1.opcode = BrigCvt;
+  cvtRef1.type = Brigf32;
+  cvtRef1.packing = BrigNoPacking;
+  cvtRef1.o_operands[0] = oStartOffset;
+  cvtRef1.o_operands[1] = sizeof(getReg) + oStartOffset;
+  cvtRef1.o_operands[2] = 0;
+  cvtRef1.o_operands[3] = 0;
+  cvtRef1.o_operands[4] = 0;
+  cvtRef1.stype = Brigf32;
+  cvtRef1.reserved = 0;
+  memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+  // TODO(Chuang): the value of aluModifier is zero.
+  context->get_code(cStartOffset, &getCvt);
+
+  EXPECT_EQ(cvtRef1.size, getCvt.size);
+  EXPECT_EQ(cvtRef1.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef1.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef1.type, getCvt.type);
+  EXPECT_EQ(cvtRef1.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef1.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef1.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef1.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef1.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef1.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef1.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef1.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
+
+  /*************************************** Case 5 ************************************/
+  context->clear_context();
+  input.assign("cvt_u32_f32 $s1, $s2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cvt(context));
+
+  context->get_code(cStartOffset, &getCvt);
+  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.kind = BrigEInstCvt;
+  cvtRef1.opcode = BrigCvt;
+  cvtRef1.type = Brigu32;
+  cvtRef1.packing = BrigNoPacking;
+  cvtRef1.o_operands[0] = oStartOffset;
+  cvtRef1.o_operands[1] = sizeof(getReg) + oStartOffset;
+  cvtRef1.o_operands[2] = 0;
+  cvtRef1.o_operands[3] = 0;
+  cvtRef1.o_operands[4] = 0;
+  cvtRef1.stype = Brigf32;
+  cvtRef1.reserved = 0;
+  memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+
+  context->get_code(cStartOffset, &getCvt);
+
+  EXPECT_EQ(cvtRef1.size, getCvt.size);
+  EXPECT_EQ(cvtRef1.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef1.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef1.type, getCvt.type);
+  EXPECT_EQ(cvtRef1.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef1.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef1.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef1.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef1.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef1.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef1.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef1.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
+
+
+  /*************************************** Case 6 ************************************/
+  context->clear_context();
+  input.assign("cvt_f16_f32 $s1, $s2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cvt(context));
+
+  context->get_code(cStartOffset, &getCvt);
+  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.kind = BrigEInstCvt;
+  cvtRef1.opcode = BrigCvt;
+  cvtRef1.type = Brigf16;
+  cvtRef1.packing = BrigNoPacking;
+  cvtRef1.o_operands[0] = oStartOffset;
+  cvtRef1.o_operands[1] = sizeof(getReg) + oStartOffset;
+  cvtRef1.o_operands[2] = 0;
+  cvtRef1.o_operands[3] = 0;
+  cvtRef1.o_operands[4] = 0;
+  cvtRef1.stype = Brigf32;
+  cvtRef1.reserved = 0;
+  memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+
+  context->get_code(cStartOffset, &getCvt);
+
+  EXPECT_EQ(cvtRef1.size, getCvt.size);
+  EXPECT_EQ(cvtRef1.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef1.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef1.type, getCvt.type);
+  EXPECT_EQ(cvtRef1.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef1.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef1.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef1.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef1.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef1.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef1.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef1.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
+
+  /*************************************** Case 7 ************************************/
+  context->clear_context();
+  input.assign("cvt_s32_u8 $s1, $s2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cvt(context));
+
+  context->get_code(cStartOffset, &getCvt);
+  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.kind = BrigEInstCvt;
+  cvtRef1.opcode = BrigCvt;
+  cvtRef1.type = Brigs32;
+  cvtRef1.packing = BrigNoPacking;
+  cvtRef1.o_operands[0] = oStartOffset;
+  cvtRef1.o_operands[1] = sizeof(getReg) + oStartOffset;
+  cvtRef1.o_operands[2] = 0;
+  cvtRef1.o_operands[3] = 0;
+  cvtRef1.o_operands[4] = 0;
+  cvtRef1.stype = Brigu8;
+  cvtRef1.reserved = 0;
+  memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+
+  context->get_code(cStartOffset, &getCvt);
+
+  EXPECT_EQ(cvtRef1.size, getCvt.size);
+  EXPECT_EQ(cvtRef1.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef1.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef1.type, getCvt.type);
+  EXPECT_EQ(cvtRef1.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef1.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef1.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef1.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef1.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef1.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef1.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef1.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
+
+  /*************************************** Case 8 ************************************/
+  context->clear_context();
+  input.assign("cvt_f32_f16 $s1, $s2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cvt(context));
+
+  context->get_code(cStartOffset, &getCvt);
+  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.kind = BrigEInstCvt;
+  cvtRef1.opcode = BrigCvt;
+  cvtRef1.type = Brigf32;
+  cvtRef1.packing = BrigNoPacking;
+  cvtRef1.o_operands[0] = oStartOffset;
+  cvtRef1.o_operands[1] = sizeof(getReg) + oStartOffset;
+  cvtRef1.o_operands[2] = 0;
+  cvtRef1.o_operands[3] = 0;
+  cvtRef1.o_operands[4] = 0;
+  cvtRef1.stype = Brigf16;
+  cvtRef1.reserved = 0;
+  memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+
+  context->get_code(cStartOffset, &getCvt);
+
+  EXPECT_EQ(cvtRef1.size, getCvt.size);
+  EXPECT_EQ(cvtRef1.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef1.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef1.type, getCvt.type);
+  EXPECT_EQ(cvtRef1.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef1.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef1.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef1.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef1.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef1.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef1.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef1.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
+
+  /*************************************** Case 9 ************************************/
+  context->clear_context();
+  input.assign("cvt_ftz_up_f32_f32 $s1, $s2;\n");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_EQ(0, Cvt(context));
+
+  context->get_code(cStartOffset, &getCvt);
+  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.kind = BrigEInstCvt;
+  cvtRef1.opcode = BrigCvt;
+  cvtRef1.type = Brigf32;
+  cvtRef1.packing = BrigNoPacking;
+  cvtRef1.o_operands[0] = oStartOffset;
+  cvtRef1.o_operands[1] = sizeof(getReg) + oStartOffset;
+  cvtRef1.o_operands[2] = 0;
+  cvtRef1.o_operands[3] = 0;
+  cvtRef1.o_operands[4] = 0;
+  cvtRef1.stype = Brigf32;
+  cvtRef1.reserved = 0;
+  memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+  cvtRef1.aluModifier.floatOrInt = 1;
+  cvtRef1.aluModifier.rounding = 2;
+  cvtRef1.aluModifier.ftz = 1;
+
+  context->get_code(cStartOffset, &getCvt);
+
+  EXPECT_EQ(cvtRef1.size, getCvt.size);
+  EXPECT_EQ(cvtRef1.kind, getCvt.kind);
+  EXPECT_EQ(cvtRef1.opcode, getCvt.opcode);
+  EXPECT_EQ(cvtRef1.type, getCvt.type);
+  EXPECT_EQ(cvtRef1.packing, getCvt.packing);
+  EXPECT_EQ(cvtRef1.o_operands[0], getCvt.o_operands[0]);
+  EXPECT_EQ(cvtRef1.o_operands[1], getCvt.o_operands[1]);
+  EXPECT_EQ(cvtRef1.o_operands[2], getCvt.o_operands[2]);
+  EXPECT_EQ(cvtRef1.o_operands[3], getCvt.o_operands[3]);
+  EXPECT_EQ(cvtRef1.o_operands[4], getCvt.o_operands[4]);
+
+  pAluModRef = reinterpret_cast<unsigned int*>(&cvtRef1.aluModifier);
+  pAluModGet = reinterpret_cast<unsigned int*>(&getCvt.aluModifier);
+  EXPECT_EQ(*pAluModRef, *pAluModGet);
+
+  EXPECT_EQ(cvtRef1.stype, getCvt.stype);
+  EXPECT_EQ(cvtRef1.reserved, getCvt.reserved);
 
   delete lexer;
 }

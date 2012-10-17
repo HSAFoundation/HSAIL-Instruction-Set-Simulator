@@ -2196,7 +2196,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("lda_group_u32 $s1, [%g];\n"); // lda
+  input.assign("lda_u32 $s1, [%g];\n"); // lda
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
@@ -3306,7 +3306,7 @@ TEST(ParserTest, Lda) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("lda_u64 $d2, [&z];");
+  std::string input("lda_u64 $d2, [%z];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));
@@ -3316,7 +3316,7 @@ TEST(ParserTest, Lda) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));
 
-  input.assign("lda_group_u32 $s1, [%g];");
+  input.assign("lda_u32 $s1, [%g];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));

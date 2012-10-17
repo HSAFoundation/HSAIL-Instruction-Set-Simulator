@@ -101,24 +101,30 @@ public:
     const Tinst* getinst = (cast<Tinst>(getcode));
     validate_brig::validate(RefInst, getinst);
     
-   const BrigOperandImmed *getwidth = reinterpret_cast <const BrigOperandImmed *> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validate(OpWidth, getwidth);
+    const BrigOperandBase* getsrc_op;
+    if(OpWidth){
+      const BrigOperandImmed *getwidth = reinterpret_cast <const BrigOperandImmed *> (&(TestOutput->operands[getinst->o_operands[0]]));
+      validate_brig::validate(OpWidth, getwidth);
+      const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[1]]));
+      validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
+      getsrc_op = reinterpret_cast <const BrigOperandBase*> (&(TestOutput->operands[getinst->o_operands[2]]));
+     } else{
+      const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[0]]));
+      validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
+      getsrc_op = reinterpret_cast <const BrigOperandBase*> (&(TestOutput->operands[getinst->o_operands[1]]));
+      EXPECT_EQ(0, getinst->o_operands[2]);
+     }
     
-    const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
-    
-    const BrigOperandBase *getsrc_op2 = reinterpret_cast <const BrigOperandBase*> (&(TestOutput->operands[getinst->o_operands[2]]));
-    
-    if(getsrc_op2->kind==BrigEOperandIndirect){
-      const BrigOperandIndirect *getsrc_indir = reinterpret_cast <const BrigOperandIndirect*> (getsrc_op2);
+    if(getsrc_op->kind==BrigEOperandIndirect){
+      const BrigOperandIndirect *getsrc_indir = reinterpret_cast <const BrigOperandIndirect*> (getsrc_op);
       validate_brig::validate(RefSrc_Indir, getsrc_indir); 
       
       if(getsrc_indir->reg){
         const BrigOperandReg *getsrc_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc_indir->reg]));
         validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf); 
       }             
-    } else if(getsrc_op2->kind==BrigEOperandCompound){
-      const BrigOperandCompound *getsrc_comp = reinterpret_cast <const BrigOperandCompound*> (getsrc_op2);
+    } else if(getsrc_op->kind==BrigEOperandCompound){
+      const BrigOperandCompound *getsrc_comp = reinterpret_cast <const BrigOperandCompound*> (getsrc_op);
       validate_brig::validate(RefSrc_Comp, getsrc_comp); 
       
       const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getsrc_comp->name]));
@@ -129,16 +135,16 @@ public:
         validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf); 
       }    
       
-    } else if(getsrc_op2->kind==BrigEOperandAddress){
-      const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getinst->o_operands[2]]));
+    } else if(getsrc_op->kind==BrigEOperandAddress){
+      const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (getsrc_op);
       validate_brig::validate(RefSrc_Addr, getsrc_addr);      
     
-    } else if (getsrc_op2->kind==BrigEOperandLabelRef){
-      const BrigOperandLabelRef *getsrc_label = reinterpret_cast <const BrigOperandLabelRef*> (&(TestOutput->operands[getinst->o_operands[2]]));
+    } else if (getsrc_op->kind==BrigEOperandLabelRef){
+      const BrigOperandLabelRef *getsrc_label = reinterpret_cast <const BrigOperandLabelRef*> (getsrc_op);
       validate_brig::validate(RefSrc_Label, getsrc_label);
     
-    } else if(getsrc_op2->kind==BrigEOperandFunctionRef){
-      const BrigOperandFunctionRef *getsrc_function = reinterpret_cast <const BrigOperandFunctionRef*> (&(TestOutput->operands[getinst->o_operands[2]]));
+    } else if(getsrc_op->kind==BrigEOperandFunctionRef){
+      const BrigOperandFunctionRef *getsrc_function = reinterpret_cast <const BrigOperandFunctionRef*> (getsrc_op);
       validate_brig::validate(RefSrc_Function, getsrc_function);
     }   
     
@@ -933,6 +939,50 @@ TEST(CodegenTest, Ld_Codegen){
 
 /******************************  End of tests *****************************************/
   delete sbuf;
+}
+
+TEST(CodegenTest, Lda_Codegen){
+
+/*********************Common variables**********************/
+  std::string in, op1, op2; 
+  StringBuffer* sbuf = new StringBuffer();
+
+  /*****************************************************************/
+  in.assign( "lda_u32 $s1, [%loc];\n");
+  op1.assign("$s1"); 
+  sbuf->append(op1); 
+    
+  BrigOperandReg dest1 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0, 
+    0
+  };
+  dest1.size = sizeof(dest1);
+   
+  BrigOperandAddress addr1 = {
+    0,
+    BrigEOperandAddress,
+    Brigb64,
+    0,
+    0  
+  };
+  addr1.size = sizeof(addr1);
+ 
+  BrigInstBase out1 = {
+    0,
+    BrigEInstBase, 
+    BrigLda,
+    Brigu32,
+    BrigNoPacking,
+    {0, sizeof(dest1), 0, 0, 0}
+  };  
+  out1.size = sizeof(out1);
+ 
+  Ld_Test<BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, NULL, &dest1, &addr1);
+  TestCase1.Run_Test(&Lda);  
+  sbuf->clear();
 }
   
 }
