@@ -1604,7 +1604,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   
   bam.ftz = 1;
   // TODO(Chuang): I think floatOrInt should be 1 ,or ftz should be 0.
-  bam.floatOrInt = 0;
+  bam.floatOrInt = 1;
   bam.rounding = 0;
   bam.hi = 0;
   bam.approx = 0;
@@ -1650,7 +1650,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   bam.rounding = 0;
   bam.ftz = 1;
   // TODO(Chuang): I think floatOrInt should be 1 ,or ftz should be 0.
-  bam.floatOrInt = 0;
+  bam.floatOrInt = 1;
   bam.hi = 0;
   bam.approx = 0;
   bam.fbar = 0;

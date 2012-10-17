@@ -789,31 +789,32 @@ int CallArgs(Context* context) {
 int RoundingMode(Context* context) {
   unsigned int first_token = context->token_to_scan;
   // get current alu modifier from context
-  BrigAluModifier mod = context->get_alu_modifier();
+  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};//context->get_alu_modifier();
 
   if (first_token == _FTZ) {
     mod.ftz = 1;
+    mod.floatOrInt = 1;
     context->token_to_scan = yylex();
-
-    if (context->token_type == FLOAT_ROUNDING) {
+  }
+  
+  if (context->token_type == FLOAT_ROUNDING) {
       // next is floatRounding
-      mod.floatOrInt = 1;
-      switch (context->token_to_scan) {
-        case _UP:
-          mod.rounding = 2;
-          break;
-        case _DOWN:
-          mod.rounding = 3;
-          break;
-        case _ZERO:
-          mod.rounding = 1;
-          break;
-        case _NEAR:
-          mod.rounding = 0;
-          break;
-      }
-      context->token_to_scan = yylex();  // set context for following functions
+    mod.floatOrInt = 1;
+    switch (context->token_to_scan) {
+      case _UP:
+        mod.rounding = 2;
+        break;
+      case _DOWN:
+        mod.rounding = 3;
+        break;
+      case _ZERO:
+        mod.rounding = 1;
+        break;
+      case _NEAR:
+        mod.rounding = 0;
+        break;
     }
+    context->token_to_scan = yylex();  // set context for following functions
     context->set_alu_modifier(mod);
     return 0;
   } else if (context->token_type == INT_ROUNDING) {
@@ -835,30 +836,14 @@ int RoundingMode(Context* context) {
     context->token_to_scan = yylex();  // set context for following functions
     context->set_alu_modifier(mod);
     return 0;
-  } else if (context->token_type == FLOAT_ROUNDING) {
-    mod.floatOrInt = 1;
-    switch (first_token) {
-      case _UP:
-        mod.rounding = 2;
-        break;
-      case _DOWN:
-        mod.rounding = 3;
-        break;
-      case _ZERO:
-        mod.rounding = 1;
-        break;
-      case _NEAR:
-        mod.rounding = 0;
-        break;
-    }
-    context->token_to_scan = yylex();  // set context for following functions
+  } 
+  if(mod.ftz){
     context->set_alu_modifier(mod);
-    return 0;
-  } else {
-    return 1;
-  }
-  return 1;
+    return 0;  
+  } else
+    return 1;    
 }
+
 int Instruction2Part1OpcodeDT(Context* context) {
 
   BrigInstBase inst = {
