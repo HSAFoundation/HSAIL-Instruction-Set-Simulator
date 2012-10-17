@@ -68,6 +68,7 @@ void Context::clear_context(void) {
   label_o_map.clear();
   label_c_map.clear();
   symbol_map.clear();
+  arg_map.clear();
   if (valid_string) {
     free(token_value.string_val);
     valid_string = false;
