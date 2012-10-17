@@ -127,7 +127,7 @@ int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
   std::string opName;
   opSize = context->get_operand_offset();
   if (context->token_type == REGISTER ||
-      context->token_to_scan == WAVESIZE) {
+      context->token_to_scan == TOKEN_WAVESIZE) {
     opName = context->token_value.string_val;
   } else if (context->token_type == CONSTANT) {
     opSize += opSize & 0x7;

@@ -16,6 +16,7 @@
 #include "Ld_test.h"
 #include "St_test.h"
 #include "GlobalDecl_test.h"
+#include "Syscall_test.h"
 
 namespace hsa {
 namespace brig {
@@ -5998,101 +5999,6 @@ TEST(CodegenTest,  Instruction4_MultiMediaOperation_CodeGen_SimpleTest) {
   EXPECT_EQ(lerpInst.o_operands[2], getBase.o_operands[2]);
   EXPECT_EQ(lerpInst.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(lerpInst.o_operands[4], getBase.o_operands[4]);
-
-  delete lexer;
-}
-
-
-TEST(CodegenTest, Syscall_CodeGen_SimpleTest) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstBase syscallInst = {
-    sizeof(BrigInstBase),  // size
-    BrigEInstBase,         // kind
-    BrigSyscall,         // opcode
-    Brigb32,               // type
-    BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0}        // o_operands[5]
-  };
-
-  std::string input("syscall $s1, 3, $s2, $s3, $s1;\n");
-
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, SysCall(context));
-
-  BrigoOffset32_t curOpOffset = 8;
-  BrigcOffset32_t curCodeOffset = 8;
-
-  BrigOperandReg getReg;
-  BrigOperandImmed getImm;
-  BrigInstBase getBase;
-
-  // BrigOperandReg S1
-  syscallInst.o_operands[4] = curOpOffset;
-  syscallInst.o_operands[0] = curOpOffset;
-
-  context->get_operand(curOpOffset, &getReg);
-  curOpOffset += sizeof(BrigOperandReg);
-
-  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
-
-  // BrigOperandImmed b32 3
-  curOpOffset += curOpOffset & 0x7;
-  syscallInst.o_operands[1] = curOpOffset;
-  context->get_operand(curOpOffset, &getImm);
-  curOpOffset += sizeof(BrigOperandImmed);
-
-  EXPECT_EQ(sizeof(BrigOperandImmed), getImm.size);
-  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-  EXPECT_EQ(Brigb32, getImm.type);
-  EXPECT_EQ(0, getImm.reserved);
-  EXPECT_EQ(3, getImm.bits.u);
-
-  // BrigOperandReg S2
-  syscallInst.o_operands[2] = curOpOffset;
-
-  context->get_operand(curOpOffset, &getReg);
-  curOpOffset += sizeof(BrigOperandReg);
-
-  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(12, getReg.name);
-
-  // BrigOperandReg S3
-  syscallInst.o_operands[3] = curOpOffset;
-  context->get_operand(curOpOffset, &getReg);
-  curOpOffset += sizeof(BrigOperandReg);
-
-  EXPECT_EQ(sizeof(BrigOperandReg), getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(16, getReg.name);
-
-
-  context->get_code(curCodeOffset, &getBase);
-  curCodeOffset += sizeof(BrigInstBase);
-
-  // BrigInstBase Syscall
-  EXPECT_EQ(syscallInst.size, getBase.size);
-  EXPECT_EQ(syscallInst.kind, getBase.kind);
-  EXPECT_EQ(syscallInst.opcode, getBase.opcode);
-  EXPECT_EQ(syscallInst.type, getBase.type);
-  EXPECT_EQ(syscallInst.packing, getBase.packing);
-  EXPECT_EQ(syscallInst.o_operands[0], getBase.o_operands[0]);
-  EXPECT_EQ(syscallInst.o_operands[1], getBase.o_operands[1]);
-  EXPECT_EQ(syscallInst.o_operands[2], getBase.o_operands[2]);
-  EXPECT_EQ(syscallInst.o_operands[3], getBase.o_operands[3]);
-  EXPECT_EQ(syscallInst.o_operands[4], getBase.o_operands[4]);
 
   delete lexer;
 }
