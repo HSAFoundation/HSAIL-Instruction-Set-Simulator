@@ -1885,52 +1885,46 @@ int Program(Context* context) {
 }
 
 int OptionalWidth(Context* context) {
-  // first token must be _WIDTH
 
-  if (context->token_to_scan == _WIDTH) {
-    BrigOperandImmed op_width = {
+  uint32_t width_param = 0;
+  // first token must be _WIDTH
+  if (context->token_to_scan != _WIDTH) 
+      return 1;
+  context->token_to_scan = yylex();
+  
+  if (context->token_to_scan != '(') {
+    context->set_error(MISSING_WIDTH_INFO);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  
+  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+    width_param = context->token_value.int_val;
+  } else if (context->token_to_scan == ALL){
+    width_param = 0;
+  } else{
+      context->set_error(INVALID_WIDTH_NUMBER);
+      return 1;
+  }
+  context->token_to_scan = yylex();
+  
+	if(context->token_to_scan != ')'){
+    context->set_error(MISSING_CLOSING_PARENTHESIS);
+    return 1;
+  }
+	BrigOperandImmed op_width = {
       sizeof(BrigOperandImmed),
       BrigEOperandImmed,
       Brigb32,
       0,
       { 0 }
-    } ;
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == '(') {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ALL) {
-        context->token_to_scan = yylex();
-		if(context->token_to_scan == ')')
-			context->token_to_scan = yylex();
-			return 0;
-		
-      } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        uint32_t n = context->token_value.int_val;
-        if((1<= n && n<= 1024) && ((n&0x01) == 0))
-          op_width.bits.u  = n ;
-        else
-          context->set_error(INVALID_WIDTH_NUMBER);
-
-        context->token_to_scan = yylex();
-      } else {
-        context->set_error(MISSING_WIDTH_INFO);
-        return 1;
-      }
-      if (context->token_to_scan == ')') {
-        context->append_operand(&op_width);
-
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_CLOSING_PARENTHESIS);
-        return 1;
-      }
-    } else {
-      context->set_error(MISSING_WIDTH_INFO);
-      return 1;
-    }
-  }
-  return 1;
+  } ;
+  op_width.size = sizeof(op_width);
+  if((width_param<= 1024) && ((width_param&0x01) == 0))
+    op_width.bits.u  = width_param ;
+  context->append_operand(&op_width);
+  context->token_to_scan = yylex();  
+  return 0;  
 }
 
 int BranchPart1Cbr(Context* context) {
