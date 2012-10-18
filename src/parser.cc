@@ -4122,6 +4122,7 @@ int Cmp(Context* context) {
         }
       } else {  // CMP
         cmpInst.opcode = BrigPackedCmp;
+        cmpInst.sourceType = cmpInst.type;
       }
       std::string opName;
       // Note: Dest must be a register.
