@@ -28,9 +28,10 @@ public:
     const TInst* getinst = (cast<TInst>(getcode));
     validate_brig::validate(RefInst, getinst);
     
-    const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
-      
+    if (RefDest != NULL) {   
+      const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[0]]));
+      validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
+    }  
     EXPECT_EQ(0, getinst->o_operands[1]);    
     EXPECT_EQ(0, getinst->o_operands[2]);    
     EXPECT_EQ(0, getinst->o_operands[3]);
@@ -571,6 +572,163 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   TestCase5.Run_Test(&Instruction1);  
   sbuf->clear();
   
+/******************************  End of tests *****************************************/
+  delete sbuf;
+}
+
+/****************** Sync Test ************************/
+TEST(CodegenTest, Sync_Codegen){
+
+/*********************Common variables**********************/
+  std::string in; 
+  StringBuffer* sbuf = new StringBuffer();
+  /*****************************************************************/
+  in.assign( "sync;\n");
+    
+  BrigInstBar out1 = {
+    0,                     
+    BrigEInstBar,         
+    BrigSync,                     
+    Brigb32,               
+    BrigNoPacking,         
+    {0, 0, 0, 0, 0}, 
+    BrigPartialLevel                    
+  };
+  out1.size = sizeof(out1);
+    
+  Instruction1_Test <BrigInstBar, BrigOperandReg> TestCase1(in, sbuf, &out1, NULL);
+  TestCase1.Run_Test(&Sync);
+
+/**********************************************************************************/
+  in.assign( "sync_group;\n");
+    
+  BrigInstBar out2 = {
+    0,                     
+    BrigEInstBar,         
+    BrigSync,                     
+    Brigb32,               
+    BrigNoPacking,         
+    {0, 0, 0, 0, 0}, 
+    BrigGroupLevel                    
+  };
+  out2.size = sizeof(out2);
+    
+  Instruction1_Test <BrigInstBar, BrigOperandReg> TestCase2(in, sbuf, &out2, NULL);
+  TestCase2.Run_Test(&Sync);  
+
+/**********************************************************************************/
+  in.assign( "sync_global;\n");
+    
+  BrigInstBar out3 = {
+    0,                     
+    BrigEInstBar,         
+    BrigSync,                     
+    Brigb32,               
+    BrigNoPacking,         
+    {0, 0, 0, 0, 0}, 
+    BrigGlobalLevel                    
+  };
+  out3.size = sizeof(out3);
+    
+  Instruction1_Test <BrigInstBar, BrigOperandReg> TestCase3(in, sbuf, &out3, NULL);
+  TestCase3.Run_Test(&Sync); 
+   
+/******************************  End of tests *****************************************/
+  delete sbuf;
+}
+
+/****************** Barrier Test ************************/
+TEST(CodegenTest, Barrier_Codegen){
+
+/*********************Common variables**********************/
+  std::string in; 
+  StringBuffer* sbuf = new StringBuffer();
+  /*****************************************************************/
+  in.assign( "barrier;\n");
+    
+  BrigInstBar out1 = {
+    0,                     
+    BrigEInstBar,         
+    BrigBarrier,                     
+    Brigb32,               
+    BrigNoPacking,         
+    {0, 0, 0, 0, 0}, 
+    BrigPartialLevel                    
+  };
+  out1.size = sizeof(out1);
+    
+  Instruction1_Test <BrigInstBar, BrigOperandReg> TestCase1(in, sbuf, &out1, NULL);
+  TestCase1.Run_Test(&Bar);
+
+/**********************************************************************************/
+  in.assign( "barrier_global;\n");
+
+  BrigOperandImmed width2 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}  
+  }; 
+  width2.size = sizeof(width2);
+    
+  BrigInstBar out2 = {
+    0,                     
+    BrigEInstBar,         
+    BrigBarrier,                     
+    Brigb32,               
+    BrigNoPacking,         
+    {0, 0, 0, 0, 0}, 
+    BrigGlobalLevel                    
+  };
+  out2.size = sizeof(out2);
+    
+  Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase2(in, sbuf, &out2, &width2);
+  TestCase2.Run_Test(&Bar);
+
+/**********************************************************************************/
+  in.assign( "barrier_width(all)_group;\n");
+    
+  BrigInstBar out3 = {
+    0,                     
+    BrigEInstBar,         
+    BrigBarrier,                     
+    Brigb32,               
+    BrigNoPacking,         
+    {0, 0, 0, 0, 0}, 
+    BrigGroupLevel                    
+  };
+  out3.size = sizeof(out3);
+    
+  Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase3(in, sbuf, &out3, NULL);
+  TestCase3.Run_Test(&Bar);
+
+/**********************************************************************************/
+  in.assign( "barrier_width(64)_group;\n");
+
+  BrigOperandImmed width4 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {64}  
+  }; 
+  width4.size = sizeof(width4);
+    
+  BrigInstBar out4 = {
+    0,                     
+    BrigEInstBar,         
+    BrigBarrier,                     
+    Brigb32,               
+    BrigNoPacking,         
+    {0, 0, 0, 0, 0}, 
+    BrigGroupLevel                    
+  };
+  out4.size = sizeof(out4);
+    
+  Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase4(in, sbuf, &out4, &width4);
+  TestCase4.Run_Test(&Bar);
+
 /******************************  End of tests *****************************************/
   delete sbuf;
 }
