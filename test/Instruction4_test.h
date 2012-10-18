@@ -59,7 +59,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   StringBuffer* symbols;
   
   BrigOperandReg reg1, reg2, reg3, reg4;
-  BrigOperandWaveSz wav;
+  // BrigOperandWaveSz wav;
   BrigOperandImmed imm2, imm3, imm4;
   
    

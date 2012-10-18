@@ -1325,7 +1325,6 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   TestCase33.Run_Test(&Instruction3);
   symbols->clear();
 
-#if 0
 
   /********************************* case 34 reg , reg , reg *******/ 
   in.assign("max_ftz_u16x2 $s1, $s0, $s3;\n");
@@ -1334,7 +1333,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
 
   BrigInstMod out34 = {
     0,
-    BrigEInstBase, 
+    BrigEInstMod, 
     BrigMax, 
     Brigu16x2,
     BrigNoPacking,
@@ -1373,7 +1372,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
 
   BrigInstMod out35 = {
     0,
-    BrigEInstBase, 
+    BrigEInstMod, 
     BrigMax, 
     Brigu16x2,
     BrigNoPacking,
@@ -1407,18 +1406,18 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   symbols->clear();
 
  /********************************* case 36 reg , immed , reg *******/ 
-  in.assign("max_ftz_near_u16x2 $s1, 3.14f, $s0;\n");
+  in.assign("max_ftz_u16x2 $s1, 3.14f, $s0;\n");
   op1.assign("$s1"); op2.assign("$s0"); 
   symbols->append(op1); symbols->append(op2); 
 
   BrigInstMod out36= {
     0,
-    BrigEInstBase, 
+    BrigEInstMod, 
     BrigMax, 
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(imm2), 0, 0},
-    {1,0,0,1,0,0,0}
+    {1,1,0,1,0,0,0}
   };
   out36.size = sizeof(out36);
  
@@ -1454,7 +1453,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
 
   BrigInstMod out37= {
     0,
-    BrigEInstBase, 
+    BrigEInstMod, 
     BrigMax, 
     Brigu16x2,
     BrigNoPacking,
@@ -1496,7 +1495,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
 
   BrigInstMod out38 = {
     0,
-    BrigEInstBase, 
+    BrigEInstMod, 
     BrigMin, 
     Brigu16x2,
     BrigNoPacking,
@@ -1538,7 +1537,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
 
   BrigInstMod out39 = {
     0,
-    BrigEInstBase, 
+    BrigEInstMod, 
     BrigMin, 
     Brigu16x2,
     BrigNoPacking,
@@ -1572,18 +1571,18 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   symbols->clear();
 
  /********************************* case 40 reg , immed , reg *******/ 
-  in.assign("min_ftz_near_u16x2 $s1, 3.14f, $s0;\n");
+  in.assign("min_ftz_u16x2 $s1, 3.14f, $s0;\n");
   op1.assign("$s1"); op2.assign("$s0"); 
   symbols->append(op1); symbols->append(op2); 
 
   BrigInstMod out40= {
     0,
-    BrigEInstBase, 
+    BrigEInstMod, 
     BrigMin, 
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(imm2), 0, 0},
-    {1,0,0,1,0,0,0}
+    {1,1,0,1,0,0,0}
   };
   out40.size = sizeof(out40);
  
@@ -1619,7 +1618,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
 
   BrigInstMod out41= {
     0,
-    BrigEInstBase, 
+    BrigEInstMod, 
     BrigMin, 
     Brigu16x2,
     BrigNoPacking,
@@ -1654,7 +1653,6 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   TestCase41.Run_Test(&Instruction3);
   symbols->clear();
 
-#endif
   /***************************************  End of tests *************************************/
   delete symbols;
 }
