@@ -64,7 +64,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigLaneId,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                    
   };
   out1.size = sizeof(out1);
     
@@ -91,7 +91,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigDynWaveId,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out2.size = sizeof(out2);
     
@@ -118,7 +118,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigMaxDynWaveId,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                      
   };
   out3.size = sizeof(out3);
     
@@ -145,7 +145,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigDispatchId,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out4.size = sizeof(out4);
     
@@ -172,7 +172,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigCU,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out5.size = sizeof(out5);
     
@@ -199,7 +199,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigWorkDim,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out6.size = sizeof(out6);
     
@@ -226,7 +226,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigWorkItemIdFlat,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out7.size = sizeof(out7);
     
@@ -253,7 +253,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigWorkItemAIdFlat,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out8.size = sizeof(out8);
     
@@ -279,7 +279,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
     BrigDebugtrap,                     
     Brigb32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out9.size = sizeof(out9);
     
@@ -291,7 +291,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   delete sbuf;
 }
 
-
+#if 0
 /****************** fbar_initSizeKnown Test ************************/
 TEST(CodegenTest, fbar_initSizeKnown_Codegen){
 
@@ -316,7 +316,7 @@ TEST(CodegenTest, fbar_initSizeKnown_Codegen){
     BrigFbarInitSizeKnown,                     
     Brigu32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out1.size = sizeof(out1);
     
@@ -342,7 +342,7 @@ TEST(CodegenTest, fbar_initSizeKnown_Codegen){
     BrigFbarInitSizeKnown,                     
     Brigu32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out2.size = sizeof(out2);
     
@@ -353,7 +353,7 @@ TEST(CodegenTest, fbar_initSizeKnown_Codegen){
 /******************************  End of tests *****************************************/
   delete sbuf;
 }
-
+#endif
 /****************** fbar_release Test ************************/
 TEST(CodegenTest, fbar_release_Codegen){
 
@@ -379,7 +379,7 @@ TEST(CodegenTest, fbar_release_Codegen){
     BrigFbarRelease,                     
     Brigb64,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out1.size = sizeof(out1);
     
@@ -416,7 +416,7 @@ TEST(CodegenTest, clock_Codegen){
     BrigClock,                     
     Brigb64,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out1.size = sizeof(out1);
     
@@ -435,7 +435,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   std::string in, op1, op2; 
   StringBuffer* sbuf = new StringBuffer();
   /*****************************************************************/
-
+#if 0
   in.assign( "fbar_initSizeDynamic_b64 $d1;\n");
   op1.assign("$d1"); sbuf->append(op1);
  
@@ -454,14 +454,14 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
     BrigFbarInitSizeDynamic,                     
     Brigb64,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out1.size = sizeof(out1);
     
   Instruction1_Test <BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
   TestCase1.Run_Test(&Instruction1);  
   sbuf->clear();
-
+#endif
 /**********************************************************************************/
   in.assign( "fbar_wait_b64 $d1;\n");
   op1.assign("$d1"); sbuf->append(op1);
@@ -481,7 +481,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
     BrigFbarWait,                     
     Brigb64,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out2.size = sizeof(out2);
 
@@ -509,7 +509,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
     BrigFbarArrive,                     
     Brigb64,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out3.size = sizeof(out3);
     
@@ -536,7 +536,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
     BrigFbarSkip,                     
     Brigb64,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out4.size = sizeof(out4);
     
@@ -563,7 +563,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
     BrigCountup,                     
     Brigu32,               
     BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    {0, 0, 0, 0, 0}                     
   };
   out5.size = sizeof(out5);
     
