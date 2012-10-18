@@ -30,6 +30,15 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get){
   EXPECT_EQ(*ref1, *get1);
 }
 
+void validate(const BrigInstBar* ref, const BrigInstBar* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+  EXPECT_EQ(ref->syncFlags, get->syncFlags);
+}
+
 void validate(const BrigOperandReg* ref, const char* refstr, const BrigOperandReg* get, const char* getstr){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
