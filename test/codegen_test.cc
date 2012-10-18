@@ -9,6 +9,7 @@
 #include "error_reporter.h"
 #include "context.h"
 #include "parser_wrapper.h"
+#include "Instruction0_test.h"
 #include "Instruction1_test.h"
 #include "Instruction2_test.h"
 #include "Instruction3_test.h"
@@ -1117,44 +1118,6 @@ TEST(CodegenTest, RetCodeGen) {
   EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
   EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
   EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
-
-  delete lexer;
-}
-
-TEST(CodegenTest, SyncCodeGen) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstBar ref = {
-    36,
-    BrigEInstBar,
-    BrigSync,
-    Brigb32,
-    BrigNoPacking,
-    {0, 0, 0, 0, 0},
-    BrigGlobalLevel
-  };
-
-  std::string input("sync_global ;");
-  Lexer* lexer = new Lexer(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Sync(context));
-
-  BrigInstBar get;
-  context->get_code(8, &get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
-  EXPECT_EQ(ref.syncFlags, get.syncFlags);
 
   delete lexer;
 }
