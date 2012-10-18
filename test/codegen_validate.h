@@ -237,7 +237,25 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
   //EXPECT_EQ(ref->fn, get->fn);
 }
 
+void validate(const BrigInstCmp* ref, const BrigInstCmp* get) {
+  
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+  // ignore o_operands
+  const uint32_t* ref1 = reinterpret_cast<const uint32_t* > (&(ref->aluModifier));
+  const uint32_t* get1 = reinterpret_cast<const uint32_t* > (&(get->aluModifier));
+  EXPECT_EQ(*ref1, *get1);
+  EXPECT_EQ(ref->comparisonOperator, get->comparisonOperator);
+  EXPECT_EQ(ref->sourceType, get->sourceType);
+  EXPECT_EQ(ref->reserved, get->reserved);
+
+}
+
 }//namespace validate_brig
 }
 }
 #endif
+
