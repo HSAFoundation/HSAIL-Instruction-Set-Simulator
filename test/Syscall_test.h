@@ -112,13 +112,13 @@ TEST(CodegenTest, Syscall_CodeGen) {
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 3;
 
-  reg2.size = sizeof(dest);
+  reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
   reg2.name = destName.size() + 1;
 
-  reg3.size = sizeof(dest);
+  reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
   reg3.type = Brigb32;
   reg3.reserved = 0;
@@ -253,7 +253,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 12;
 
-  reg2.size = sizeof(dest);
+  reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
@@ -266,7 +266,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   memset(&imm3.bits, 0, sizeof(imm3.bits));
   imm3.bits.u = 13;
 
-  wav4.size = sizeof(wav2);
+  wav4.size = sizeof(wav4);
   wav4.kind = BrigEOperandWaveSz;
 
   Syscall_Test<BrigOperandReg, BrigOperandImmed, BrigOperandWaveSz> 

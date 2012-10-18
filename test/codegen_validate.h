@@ -15,6 +15,7 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get){
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing); 
+  //ignore o_operands
 }
 
 void validate(const BrigInstMod* ref, const BrigInstMod* get){
@@ -23,6 +24,7 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get){
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
+  //ignore o_operands
   const uint32_t* ref1 = reinterpret_cast<const uint32_t* > (&(ref->aluModifier));
   const uint32_t* get1 = reinterpret_cast<const uint32_t* > (&(get->aluModifier));
   EXPECT_EQ(*ref1, *get1);
@@ -41,6 +43,7 @@ void validate(const BrigOperandRegV2* ref, const BrigOperandRegV2* get){
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);  
+  //ignore regs
 }
 
 void validate(const BrigOperandRegV4* ref, const BrigOperandRegV4* get){
@@ -48,6 +51,7 @@ void validate(const BrigOperandRegV4* ref, const BrigOperandRegV4* get){
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);  
+  //ignore regs
 }
 
 void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
@@ -70,6 +74,7 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get){
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
+  //ignore o_operands
   EXPECT_EQ(ref->storageClass, get->storageClass);
   EXPECT_EQ(ref->memorySemantic, get->memorySemantic);
   EXPECT_EQ(ref->equivClass, get->equivClass);
@@ -80,6 +85,7 @@ void validate(const BrigOperandAddress* ref, const BrigOperandAddress* get){
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
+  //ignore directive
 }
 
 void validate(const BrigOperandCompound* ref, const BrigOperandCompound* get){
@@ -87,6 +93,7 @@ void validate(const BrigOperandCompound* ref, const BrigOperandCompound* get){
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
+  //ignore name and reg
   EXPECT_EQ(ref->offset, get->offset);  
 }
 
@@ -94,6 +101,7 @@ void validate(const BrigOperandIndirect* ref, const BrigOperandIndirect* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
+  //ignore reg
   EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->offset, get->offset);  
 }
@@ -151,7 +159,7 @@ void validate(const BrigDirectiveSignature* ref, const char* refbuf, const BrigD
 void validate(const BrigDirectiveInit* ref, const BrigDirectiveInit* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  EXPECT_EQ(ref->c_code, get->c_code);
+  //EXPECT_EQ(ref->c_code, get->c_code);
   EXPECT_EQ(ref->elementCount, get->elementCount);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
@@ -166,6 +174,7 @@ void validate(const BrigInstMem* ref, const BrigInstMem* get){
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
+  //ignore operands
   EXPECT_EQ(ref->storageClass, get->storageClass);
 }
 
@@ -175,6 +184,7 @@ void validate(const BrigInstCvt* ref, const BrigInstCvt* get){
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
+  //ignore o_operands
   const uint32_t* ref1 = reinterpret_cast<const uint32_t* > (&(ref->aluModifier));
   const uint32_t* get1 = reinterpret_cast<const uint32_t* > (&(get->aluModifier));
   EXPECT_EQ(*ref1, *get1);
@@ -237,7 +247,40 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
   //EXPECT_EQ(ref->fn, get->fn);
 }
 
+void validate(const BrigInstCmp* ref, const BrigInstCmp* get) {
+  
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+  // ignore o_operands
+  const uint32_t* ref1 = reinterpret_cast<const uint32_t* > (&(ref->aluModifier));
+  const uint32_t* get1 = reinterpret_cast<const uint32_t* > (&(get->aluModifier));
+  EXPECT_EQ(*ref1, *get1);
+  EXPECT_EQ(ref->comparisonOperator, get->comparisonOperator);
+  EXPECT_EQ(ref->sourceType, get->sourceType);
+  EXPECT_EQ(ref->reserved, get->reserved);
+
+}
+
+void validate(const BrigOperandArgumentList* ref, const BrigOperandArgumentList* get){
+  
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->elementCount, get->elementCount);
+  //ignore o_operands
+}
+
+void validate(const BrigOperandArgumentRef* ref, const BrigOperandArgumentRef* get){
+  
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  //ignore o_operands
+}
+
 }//namespace validate_brig
 }
 }
 #endif
+

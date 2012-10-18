@@ -4137,6 +4137,7 @@ int Cmp(Context* context) {
         }
       } else {  // CMP
         cmpInst.opcode = BrigPackedCmp;
+        cmpInst.sourceType = cmpInst.type;
       }
       std::string opName;
       // Note: Dest must be a register.
@@ -6030,9 +6031,11 @@ int Instruction1Part1OpcodeDT(Context* context) {
       aluModifier = context->get_alu_modifier();
     }
   }
+  // TODO(Chuang): What can the type of BrigFbarInitSizeKnown be?
   if ((context->token_to_scan == _B64 &&
        inst1_op.opcode != BrigCountup) ||
-      (inst1_op.opcode == BrigCountup &&
+      ((inst1_op.opcode == BrigCountup || 
+        inst1_op.opcode == BrigFbarInitSizeKnown) &&
        context->token_to_scan == _U32)) {
 
     inst1_op.type = context->token_value.data_type;
@@ -6041,7 +6044,8 @@ int Instruction1Part1OpcodeDT(Context* context) {
     if ((context->token_to_scan == TOKEN_DREGISTER &&
          inst1_op.opcode != BrigCountup) ||
         (context->token_to_scan == TOKEN_SREGISTER &&
-         inst1_op.opcode == BrigCountup)) {
+         (inst1_op.opcode == BrigCountup || 
+          inst1_op.opcode == BrigFbarInitSizeKnown))) {
       if (OperandPart2(context, &inst1_op.o_operands[0])) {
         return 1;
       }
