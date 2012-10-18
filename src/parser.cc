@@ -1101,147 +1101,97 @@ int Instruction2(Context* context) {
 
 int Instruction3(Context* context) {
   // First token must be an Instruction3Opcode
+ 
+  /* Variables for storing Brig struct information */
+  bool has_modifier = false;
+  BrigDataType16_t type = Brigb32;  
   BrigOpcode32_t opcode = context->token_value.opcode;
+  BrigPacking16_t packing = BrigNoPacking;
+  BrigoOffset32_t OpOffset0 = 0, OpOffset1 = 0, OpOffset2 = 0;
 
-  // default value.
-  BrigInstBase inst_op = {
-    sizeof(BrigInstBase),
-    BrigEInstBase,
-    opcode,
-    Brigb32,
-    BrigNoPacking,
-    {0, 0, 0, 0, 0}
-  };
-
-  if (context->token_type == INSTRUCTION3_OPCODE) {
-    context->token_to_scan= yylex();
-    if (!RoundingMode(context)) {
-    }
-
-    // check whether there is a Packing
-    if (context->token_type == PACKING) {
-      // there is packing
-      inst_op.packing = context->token_value.packing;
-      yylex();
-    }
-
-    // now we must have a dataTypeId
-    if (context->token_type == DATA_TYPE_ID) {
-      // check the operands
-      inst_op.type = context->token_value.data_type;
-	  if(inst_op.opcode == BrigClass)
-		inst_op.type = Brigb1;
-      context->token_to_scan = yylex();
-	  	  
-      if (!OperandPart2(context, &inst_op.o_operands[0])) {
-		
-        if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-
-          if (!OperandPart2(context, &inst_op.o_operands[1])) {
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-
-              if (!OperandPart2(context, &inst_op.o_operands[2])) {
-                if (context->token_to_scan == ';') {
-                  context->append_code(&inst_op);
-                  context->token_to_scan = yylex();
-                  return 0;
-                } else {
-                  context->set_error(MISSING_SEMICOLON);
-                }
-              } else {  // 3rd operand
-                context->set_error(MISSING_OPERAND);
-              }
-            } else {  // 2nd comma
-              context->set_error(MISSING_COMMA);
-            }
-          } else {  // 2nd operand
-            context->set_error(MISSING_OPERAND);
-          }
-        } else {  // 1st comma
-          context->set_error(MISSING_COMMA);
-        }
-      } else {  // 1st operand
-        context->set_error(MISSING_OPERAND);
-      }
-    } else {  // DATA_TYPE_ID
-      context->set_error(MISSING_DATA_TYPE);
-    }
-    return 1;
-  } else if (context->token_type == INSTRUCTION3_OPCODE_FTZ) {
-    bool has_ftz = false ;
-    // Optional FTZ
-    if (yylex() == _FTZ) {
-      // has a _ftz
-      has_ftz = true;
-      yylex();
-    }
-
-    // check whether there is a Packing
-    if (context->token_type == PACKING) {
-      // there is packing
-      inst_op.packing = context->token_value.packing;
-      context->token_to_scan = yylex();
-    }
-    // now we must have a dataTypeId
-    if (context->token_type == DATA_TYPE_ID) {
-      // check the operands
-      inst_op.type = context->token_value.data_type;
-
-      context->token_to_scan = yylex();
-
-      if (!OperandPart2(context, &inst_op.o_operands[0])) {
-        if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-
-          if (!OperandPart2(context, &inst_op.o_operands[1])) {
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-
-              if (!OperandPart2(context, &inst_op.o_operands[2])) {
-                if (context->token_to_scan == ';') {
-                  if (has_ftz){ 
-                    // for BrigInstMod structure
-                    BrigInstMod bim ;
-                    memset(&bim, 0, sizeof(bim));
-                    memmove(&bim, &inst_op, sizeof(inst_op));
-                    bim.size = sizeof(bim);
-                    bim.kind = BrigEInstMod;
-                    bim.aluModifier.floatOrInt = 1;
-                    bim.aluModifier.rounding = 1;
-                    bim.aluModifier.ftz = 1;
-                    context->append_code(&bim); 
-                  } else {
-                    context->append_code(&inst_op);                    
-                  }
-                  context->token_to_scan = yylex();
-                  return 0;
-                } else {
-                  context->set_error(MISSING_SEMICOLON);
-                }
-              } else {  // 3rd operand
-                context->set_error(MISSING_OPERAND);
-              }
-            } else {  // 2nd comma
-              context->set_error(MISSING_COMMA);
-            }
-          } else {  // 2nd operand
-            context->set_error(MISSING_OPERAND);
-          }
-        } else {  // 1st comma
-          context->set_error(MISSING_COMMA);
-        }
-      } else {  // 1st operand
-        context->set_error(MISSING_OPERAND);
-      }
-    } else {  // DATA_TYPE_ID
-      context->set_error(MISSING_DATA_TYPE);
-    }
-    return 1;
-  } else {
+  /* Checking for Instruction3 statement  - no error set here*/
+  if ((context->token_type != INSTRUCTION3_OPCODE) 
+    && (context->token_type != INSTRUCTION3_OPCODE_FTZ)) {
     return 1;
   }
+  
+  context->token_to_scan= yylex();
+  
+  /* Rounding Optional*/
+  has_modifier = (!RoundingMode(context)); 
+    
+  /*Packing optional*/
+  if (context->token_type == PACKING) {
+    packing = context->token_value.packing;
+    context->token_to_scan = yylex();
+  }
+  
+  if (context->token_type == DATA_TYPE_ID) {
+    type = context->token_value.data_type;
+    type = (opcode == BrigClass) ? Brigb1 : type;
+  }else{
+     context->set_error(MISSING_DATA_TYPE);
+     return 1;
+  }
+  context->token_to_scan = yylex();
+    
+  if (OperandPart2(context, &OpOffset0)) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  
+  if (OperandPart2(context, &OpOffset1)) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+
+  if (OperandPart2(context, &OpOffset2)) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  if (has_modifier){ 
+    BrigAluModifier mod = context->get_alu_modifier();
+    BrigInstMod bim = {
+      0,
+      BrigEInstMod,
+      opcode,
+      type,
+      packing,
+      {OpOffset0, OpOffset1, OpOffset2, 0, 0},
+      {0,0,0,0,0,0,0}
+    };
+    bim.size = sizeof(bim);
+    bim.aluModifier = mod;
+    context->append_code(&bim);     
+  }else {
+    BrigInstBase bi = {
+      0,
+      BrigEInstBase,
+      opcode,
+      type,
+      packing,
+      {OpOffset0, OpOffset1, OpOffset2, 0, 0}          
+    };
+    bi.size = sizeof(bi);
+    context->append_code(&bi);    
+  }
+  context->token_to_scan = yylex();
+  return 0;  
 }
 
 int Version(Context* context) {
