@@ -1338,7 +1338,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(reg2), 0, 0},
-    {1,1,0,1,0,0,0}
+    {1,0,0,1,0,0,0}
   };
   out34.size = sizeof(out34);
  
@@ -1377,7 +1377,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(reg2), 0, 0},
-    {1,1,0,1,0,0,0}
+    {1,0,0,1,0,0,0}
   };
   out35.size = sizeof(out35);
  
@@ -1417,7 +1417,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(imm2), 0, 0},
-    {1,1,0,1,0,0,0}
+    {1,0,0,1,0,0,0}
   };
   out36.size = sizeof(out36);
  
@@ -1458,7 +1458,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(imm2), 0, 0},
-    {1,1,0,1,0,0,0}
+    {1,0,0,1,0,0,0}
   };
   out37.size = sizeof(out37);
  
@@ -1500,7 +1500,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(reg2), 0, 0},
-    {1,1,0,1,0,0,0}
+    {1,0,0,1,0,0,0}
   };
   out38.size = sizeof(out38);
  
@@ -1542,7 +1542,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(reg2), 0, 0},
-    {1,1,0,1,0,0,0}
+    {1,0,0,1,0,0,0}
   };
   out39.size = sizeof(out39);
  
@@ -1582,7 +1582,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(imm2), 0, 0},
-    {1,1,0,1,0,0,0}
+    {1,0,0,1,0,0,0}
   };
   out40.size = sizeof(out40);
  
@@ -1623,7 +1623,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     Brigu16x2,
     BrigNoPacking,
     {0, sizeof(reg1), sizeof(reg1) + sizeof(imm2), 0, 0},
-    {1,1,0,1,0,0,0}
+    {1,0,0,1,0,0,0}
   };
   out41.size = sizeof(out41);
  
