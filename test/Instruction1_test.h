@@ -4,17 +4,17 @@
 namespace hsa{
 namespace brig{
 
-template <typename T> class Instruction1_Test : public BrigCodeGenTest{
+template <typename TInst, typename T> class Instruction1_Test : public BrigCodeGenTest{
 private:
  
   //Instruction in .code buffer - Pointers to brig structures
-  const BrigInstBase* RefInst;
+  const TInst* RefInst;
   //Operands in .operands buffer
   const T* RefDest;
     
 public:
  
-  Instruction1_Test(std::string& in, StringBuffer *sbuf, BrigInstBase* ref, T* Dest) : 
+  Instruction1_Test(std::string& in, StringBuffer *sbuf, TInst* ref, T* Dest) : 
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
     RefDest(Dest)  { }
@@ -25,7 +25,7 @@ public:
     const char* getbuf = TestOutput->strings;   
     
     inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstBase* getinst = (cast<BrigInstBase>(getcode));
+    const TInst* getinst = (cast<TInst>(getcode));
     validate_brig::validate(RefInst, getinst);
     
     const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[0]]));
@@ -68,7 +68,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out1.size = sizeof(out1);
     
-  Instruction1_Test <BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
   TestCase1.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -95,7 +95,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out2.size = sizeof(out2);
     
-  Instruction1_Test <BrigOperandReg> TestCase2(in, sbuf, &out2, &dest2);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase2(in, sbuf, &out2, &dest2);
   TestCase2.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -122,7 +122,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out3.size = sizeof(out3);
     
-  Instruction1_Test <BrigOperandReg> TestCase3(in, sbuf, &out3, &dest3);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase3(in, sbuf, &out3, &dest3);
   TestCase3.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -149,7 +149,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out4.size = sizeof(out4);
     
-  Instruction1_Test <BrigOperandReg> TestCase4(in, sbuf, &out4, &dest4);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase4(in, sbuf, &out4, &dest4);
   TestCase4.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -176,7 +176,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out5.size = sizeof(out5);
     
-  Instruction1_Test <BrigOperandReg> TestCase5(in, sbuf, &out5, &dest5);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase5(in, sbuf, &out5, &dest5);
   TestCase5.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -203,7 +203,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out6.size = sizeof(out6);
     
-  Instruction1_Test <BrigOperandReg> TestCase6(in, sbuf, &out6, &dest6);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase6(in, sbuf, &out6, &dest6);
   TestCase6.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -230,7 +230,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out7.size = sizeof(out7);
     
-  Instruction1_Test <BrigOperandReg> TestCase7(in, sbuf, &out7, &dest7);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase7(in, sbuf, &out7, &dest7);
   TestCase7.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -257,7 +257,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out8.size = sizeof(out8);
     
-  Instruction1_Test <BrigOperandReg> TestCase8(in, sbuf, &out8, &dest8);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase8(in, sbuf, &out8, &dest8);
   TestCase8.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -283,7 +283,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   };
   out9.size = sizeof(out9);
     
-  Instruction1_Test <BrigOperandImmed> TestCase9(in, sbuf, &out9, &src9);
+  Instruction1_Test <BrigInstBase, BrigOperandImmed> TestCase9(in, sbuf, &out9, &src9);
   TestCase9.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -320,7 +320,7 @@ TEST(CodegenTest, fbar_initSizeKnown_Codegen){
   };
   out1.size = sizeof(out1);
     
-  Instruction1_Test <BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
   TestCase1.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -346,7 +346,7 @@ TEST(CodegenTest, fbar_initSizeKnown_Codegen){
   };
   out2.size = sizeof(out2);
     
-  Instruction1_Test <BrigOperandImmed> TestCase2(in, sbuf, &out2, &dest2);
+  Instruction1_Test <BrigInstBase, BrigOperandImmed> TestCase2(in, sbuf, &out2, &dest2);
   TestCase1.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -383,7 +383,7 @@ TEST(CodegenTest, fbar_release_Codegen){
   };
   out1.size = sizeof(out1);
     
-  Instruction1_Test <BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
   TestCase1.Run_Test(&Instruction1);  
   sbuf->clear();
   
@@ -420,7 +420,7 @@ TEST(CodegenTest, clock_Codegen){
   };
   out1.size = sizeof(out1);
     
-  Instruction1_Test <BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
   TestCase1.Run_Test(&Instruction1);  
   sbuf->clear();
   
@@ -458,7 +458,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   };
   out1.size = sizeof(out1);
     
-  Instruction1_Test <BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, &dest1);
   TestCase1.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -486,7 +486,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   out2.size = sizeof(out2);
 
     
-  Instruction1_Test <BrigOperandReg> TestCase2(in, sbuf, &out2, &dest2);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase2(in, sbuf, &out2, &dest2);
   TestCase2.Run_Test(&Instruction1);  
   sbuf->clear();
   
@@ -513,7 +513,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   };
   out3.size = sizeof(out3);
     
-  Instruction1_Test <BrigOperandReg> TestCase3(in, sbuf, &out3, &dest3);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase3(in, sbuf, &out3, &dest3);
   TestCase3.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -540,7 +540,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   };
   out4.size = sizeof(out4);
     
-  Instruction1_Test <BrigOperandReg> TestCase4(in, sbuf, &out4, &dest4);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase4(in, sbuf, &out4, &dest4);
   TestCase4.Run_Test(&Instruction1);  
   sbuf->clear();
 
@@ -567,7 +567,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   };
   out5.size = sizeof(out5);
     
-  Instruction1_Test <BrigOperandReg> TestCase5(in, sbuf, &out5, &dest5);
+  Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase5(in, sbuf, &out5, &dest5);
   TestCase5.Run_Test(&Instruction1);  
   sbuf->clear();
   
