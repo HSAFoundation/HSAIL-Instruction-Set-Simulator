@@ -314,7 +314,7 @@ TEST(CodegenTest, fbar_initSizeKnown_Codegen){
     0,                     
     BrigEInstBase,         
     BrigFbarInitSizeKnown,                     
-    Brigb32,               
+    Brigu32,               
     BrigNoPacking,         
     {0, 0, 0, 0, 0},                     
   };
@@ -340,7 +340,7 @@ TEST(CodegenTest, fbar_initSizeKnown_Codegen){
     0,                     
     BrigEInstBase,         
     BrigFbarInitSizeKnown,                     
-    Brigb32,               
+    Brigu32,               
     BrigNoPacking,         
     {0, 0, 0, 0, 0},                     
   };
@@ -436,13 +436,13 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   StringBuffer* sbuf = new StringBuffer();
   /*****************************************************************/
 
-  in.assign( "fbar_initSizeDynamic_u32 $s1;\n");
-  op1.assign("$s1"); sbuf->append(op1);
+  in.assign( "fbar_initSizeDynamic_b64 $d1;\n");
+  op1.assign("$d1"); sbuf->append(op1);
  
   BrigOperandReg dest1 = {
     0,
     BrigEOperandReg,
-    Brigb32,
+    Brigb64,
     0, 
     0
   };
@@ -452,7 +452,7 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
     0,                     
     BrigEInstBase,         
     BrigFbarInitSizeDynamic,                     
-    Brigu32,               
+    Brigb64,               
     BrigNoPacking,         
     {0, 0, 0, 0, 0},                     
   };
