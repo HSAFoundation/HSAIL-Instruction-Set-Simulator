@@ -1170,9 +1170,11 @@ int Instruction3(Context* context) {
     }
     return 1;
   } else if (context->token_type == INSTRUCTION3_OPCODE_FTZ) {
+    bool has_ftz = false ;
     // Optional FTZ
     if (yylex() == _FTZ) {
       // has a _ftz
+      has_ftz = true;
       yylex();
     }
 
@@ -1199,7 +1201,20 @@ int Instruction3(Context* context) {
 
               if (!OperandPart2(context, &inst_op.o_operands[2])) {
                 if (context->token_to_scan == ';') {
-                  context->append_code(&inst_op);
+                  if (has_ftz){ 
+                    // for BrigInstMod structure
+                    BrigInstMod bim ;
+                    memset(&bim, 0, sizeof(bim));
+                    memmove(&bim, &inst_op, sizeof(inst_op));
+                    bim.size = sizeof(bim);
+                    bim.kind = BrigEInstMod;
+                    bim.aluModifier.floatOrInt = 1;
+                    bim.aluModifier.rounding = 1;
+                    bim.aluModifier.ftz = 1;
+                    context->append_code(&bim); 
+                  } else {
+                    context->append_code(&inst_op);                    
+                  }
                   context->token_to_scan = yylex();
                   return 0;
                 } else {
