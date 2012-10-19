@@ -1885,52 +1885,46 @@ int Program(Context* context) {
 }
 
 int OptionalWidth(Context* context) {
-  // first token must be _WIDTH
 
-  if (context->token_to_scan == _WIDTH) {
-    BrigOperandImmed op_width = {
+  uint32_t width_param = 0;
+  // first token must be _WIDTH
+  if (context->token_to_scan != _WIDTH) 
+      return 1;
+  context->token_to_scan = yylex();
+  
+  if (context->token_to_scan != '(') {
+    context->set_error(MISSING_WIDTH_INFO);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  
+  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+    width_param = context->token_value.int_val;
+  } else if (context->token_to_scan == ALL){
+    width_param = 0;
+  } else{
+      context->set_error(INVALID_WIDTH_NUMBER);
+      return 1;
+  }
+  context->token_to_scan = yylex();
+  
+	if(context->token_to_scan != ')'){
+    context->set_error(MISSING_CLOSING_PARENTHESIS);
+    return 1;
+  }
+	BrigOperandImmed op_width = {
       sizeof(BrigOperandImmed),
       BrigEOperandImmed,
       Brigb32,
       0,
       { 0 }
-    } ;
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == '(') {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ALL) {
-        context->token_to_scan = yylex();
-		if(context->token_to_scan == ')')
-			context->token_to_scan = yylex();
-			return 0;
-		
-      } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        uint32_t n = context->token_value.int_val;
-        if((1<= n && n<= 1024) && ((n&0x01) == 0))
-          op_width.bits.u  = n ;
-        else
-          context->set_error(INVALID_WIDTH_NUMBER);
-
-        context->token_to_scan = yylex();
-      } else {
-        context->set_error(MISSING_WIDTH_INFO);
-        return 1;
-      }
-      if (context->token_to_scan == ')') {
-        context->append_operand(&op_width);
-
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_CLOSING_PARENTHESIS);
-        return 1;
-      }
-    } else {
-      context->set_error(MISSING_WIDTH_INFO);
-      return 1;
-    }
-  }
-  return 1;
+  } ;
+  op_width.size = sizeof(op_width);
+  if((width_param<= 1024) && ((width_param&0x01) == 0))
+    op_width.bits.u  = width_param ;
+  context->append_operand(&op_width);
+  context->token_to_scan = yylex();  
+  return 0;  
 }
 
 int BranchPart1Cbr(Context* context) {
@@ -3954,12 +3948,7 @@ int OperandList(Context* context) {
   return 1;
 }
 
-int ComparisonId(Context* context) {
-   BrigCompareOperation32_t cmpOperation;
-   return ComparisonIdPart2(context, &cmpOperation);
-}
-
-int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation) {
+int ComparisonId(Context* context, BrigCompareOperation32_t* pCmpOperation) {
   switch(context->token_to_scan) {
     case _EQ:
       *pCmpOperation = BrigEq;
@@ -4052,7 +4041,6 @@ int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation)
   return 0;
 }
 
-
 int Cmp(Context* context) {
   // Chuang
   // first token is PACKEDCMP or CMP
@@ -4070,7 +4058,7 @@ int Cmp(Context* context) {
   };
   const unsigned int first_token = context->token_to_scan;
   context->token_to_scan = yylex();
-  if (!ComparisonIdPart2(context, &cmpInst.comparisonOperator)) {
+  if (!ComparisonId(context, &cmpInst.comparisonOperator)) {
     context->token_to_scan = yylex();
     // 1, 32. Can be 16 if the implementation supports f16.
     if (context->token_type == DATA_TYPE_ID) {
@@ -4138,6 +4126,7 @@ int Cmp(Context* context) {
   }
   return 1;
 }
+
 int GlobalPrivateDecl(Context* context) {
   // first token is PRIVATE
   context->token_to_scan = yylex();
