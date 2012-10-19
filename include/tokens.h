@@ -56,6 +56,7 @@ enum TokenType { TOKEN_CREGISTER= 258,
                  _ARG,
                  _GROUP,
                  _SPILL,
+                 _PARTIAL, /* Segment specifier for sync, barrier operations*/
                  /* vector*/
                  _V2,
                  _V4,
