@@ -1123,69 +1123,6 @@ TEST(CodegenTest, RetCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, BarCodeGen) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstBar ref = {
-    36,
-    BrigEInstBar,
-    BrigBarrier,
-    Brigb32,
-    BrigNoPacking,
-    {8, 0, 0, 0, 0},
-    BrigGroupLevel
-  };
-
-  std::string input("barrier_group ;");
-  Lexer* lexer = new Lexer(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Bar(context));
-
-  BrigInstBar get;
-  context->get_code(8, &get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
-  EXPECT_EQ(ref.syncFlags, get.syncFlags);
-
-  //case 2
-  context->clear_context();
-  input.assign("barrier_width(all)_group ;");
-
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Bar(context));
-
-  ref.o_operands[0] = 0 ;//update
-
-  BrigInstBar get_bib;
-  context->get_code(8, &get_bib);
-
-  EXPECT_EQ(ref.size,get_bib.size);
-  EXPECT_EQ(ref.kind,get_bib.kind);
-  EXPECT_EQ(ref.opcode, get_bib.opcode);
-  EXPECT_EQ(ref.packing, get_bib.packing);
-  EXPECT_EQ(ref.type, get_bib.type);
-  EXPECT_EQ(ref.o_operands[0], get_bib.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get_bib.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], get_bib.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], get_bib.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], get_bib.o_operands[4]);
-  EXPECT_EQ(ref.syncFlags, get_bib.syncFlags);
-
-  delete lexer;
-}
-
 TEST(CodegenTest, OptionalWidthCodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -5401,7 +5338,7 @@ TEST(CodegenTest, MulCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, Call_CodeGen_SimpleTest) {
+TEST(CodegenTest, DISABLED_Call_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
