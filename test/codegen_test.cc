@@ -14,6 +14,7 @@
 #include "Instruction2_test.h"
 #include "Instruction3_test.h"
 #include "Instruction4_test.h"
+#include "Instruction5_test.h"
 #include "Query_test.h"
 #include "Ld_test.h"
 #include "St_test.h"
