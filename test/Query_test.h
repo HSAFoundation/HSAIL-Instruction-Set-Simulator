@@ -6,17 +6,17 @@
 namespace hsa{
 namespace brig{
 
-template <typename T, typename T1, typename T2> class Query_Test : public BrigCodeGenTest{
+class Query_Test : public BrigCodeGenTest{
 private:
   
   //Instruction in .code buffer
-  const T* RefInst;
+  const BrigInstBase* RefInst;
   //Operands in .operands buffer
-  const T1* RefDest;
-  const T2* RefSrc1;
+  const BrigOperandReg* RefDest;
+  const BrigOperandOpaque* RefSrc1;
      
 public:
-  Query_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1) : 
+  Query_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref, BrigOperandReg* Dest, BrigOperandOpaque* Src1) : 
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
     RefDest(Dest),
@@ -28,14 +28,16 @@ public:
     const char* getbuf = TestOutput->strings;   
     
     inst_iterator getcode = TestOutput->code_begin();
-    const T* getinst = (cast<T>(getcode));
+    const BrigInstBase* getinst = (cast<BrigInstBase>(getcode));
     validate_brig::validate(RefInst, getinst);
     
-    const T1 *getdest = reinterpret_cast <const T1*> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validateOpType<T1>(RefDest, refbuf, getdest, getbuf);
+    const BrigOperandReg *getdest = 
+      reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getinst->o_operands[0]]));
+    validate_brig::validateOpType<BrigOperandReg>(RefDest, refbuf, getdest, getbuf);
         
-    const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validateOpType<T2>(RefSrc1, refbuf, getsrc1, getbuf);
+    const BrigOperandOpaque *getsrc1 = 
+      reinterpret_cast <const BrigOperandOpaque*> (&(TestOutput->operands[getinst->o_operands[1]]));
+    validate_brig::validateOpType<BrigOperandOpaque>(RefSrc1, refbuf, getsrc1, getbuf);
     
     EXPECT_EQ(0, getinst->o_operands[2]);
     EXPECT_EQ(0, getinst->o_operands[3]);
@@ -95,8 +97,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   reg1.reserved = 0;
   reg1.name = op1.size() + op2.size() + 2;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase1(in, symbols, &out1, &dest1, &src1);
+  Query_Test TestCase1(in, symbols, &out1, &dest1, &src1);
   TestCase1.Run_Test(&Query);
   symbols->clear();
 
@@ -130,8 +131,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 4;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase2(in, symbols, &out2, &dest1, &src1);
+  Query_Test TestCase2(in, symbols, &out2, &dest1, &src1);
   TestCase2.Run_Test(&Query);
   symbols->clear();
 
@@ -165,8 +165,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 0;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase3(in, symbols, &out3, &dest1, &src1);
+  Query_Test TestCase3(in, symbols, &out3, &dest1, &src1);
   TestCase3.Run_Test(&Query);
   symbols->clear();
 
@@ -200,8 +199,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = 0;
   src1.offset = 0;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase4(in, symbols, &out4, &dest1, &src1);
+  Query_Test TestCase4(in, symbols, &out4, &dest1, &src1);
   TestCase4.Run_Test(&Query);
   symbols->clear();
 
@@ -235,8 +233,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 4;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase5(in, symbols, &out5, &dest1, &src1);
+  Query_Test TestCase5(in, symbols, &out5, &dest1, &src1);
   TestCase5.Run_Test(&Query);
   symbols->clear();
 
@@ -270,8 +267,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 4;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase6(in, symbols, &out6, &dest1, &src1);
+  Query_Test TestCase6(in, symbols, &out6, &dest1, &src1);
   TestCase6.Run_Test(&Query);
   symbols->clear();
 
@@ -305,8 +301,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 4;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase7(in, symbols, &out7, &dest1, &src1);
+  Query_Test TestCase7(in, symbols, &out7, &dest1, &src1);
   TestCase7.Run_Test(&Query);
   symbols->clear();
 
@@ -340,8 +335,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 4;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase8(in, symbols, &out8, &dest1, &src1);
+  Query_Test TestCase8(in, symbols, &out8, &dest1, &src1);
   TestCase8.Run_Test(&Query);
   symbols->clear();
 
@@ -375,8 +369,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 4;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase9(in, symbols, &out9, &dest1, &src1);
+  Query_Test TestCase9(in, symbols, &out9, &dest1, &src1);
   TestCase9.Run_Test(&Query);
   symbols->clear();
 
@@ -410,8 +403,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 4;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase10(in, symbols, &out10, &dest1, &src1);
+  Query_Test TestCase10(in, symbols, &out10, &dest1, &src1);
   TestCase10.Run_Test(&Query);
   symbols->clear();
 
@@ -445,8 +437,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
   src1.reg = sizeof(dest1);
   src1.offset = 4;
 
-  Query_Test<BrigInstBase, BrigOperandReg, BrigOperandOpaque> 
-            TestCase11(in, symbols, &out11, &dest1, &src1);
+  Query_Test TestCase11(in, symbols, &out11, &dest1, &src1);
   TestCase11.Run_Test(&Query);
   symbols->clear();
 
