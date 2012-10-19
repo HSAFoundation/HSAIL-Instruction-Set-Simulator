@@ -20,6 +20,7 @@
 #include "Syscall_test.h"
 #include "Cmp_test.h"
 #include "Atom_test.h"
+#include "Call_test.h"
 
 namespace hsa {
 namespace brig {
