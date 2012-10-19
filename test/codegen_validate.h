@@ -39,6 +39,26 @@ void validate(const BrigInstBar* ref, const BrigInstBar* get){
   EXPECT_EQ(ref->syncFlags, get->syncFlags);
 }
 
+void validate(const BrigInstRead* ref, const BrigInstRead* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->geom, get->geom);
+  EXPECT_EQ(ref->stype, get->stype);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+}
+
+void validate(const BrigInstImage* ref, const BrigInstImage* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->geom, get->geom);
+  EXPECT_EQ(ref->stype, get->stype);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+}
+
 void validate(const BrigOperandReg* ref, const char* refstr, const BrigOperandReg* get, const char* getstr){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
@@ -61,6 +81,13 @@ void validate(const BrigOperandRegV4* ref, const BrigOperandRegV4* get){
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);  
   //ignore regs
+}
+
+void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  //ignore name and reg
+  EXPECT_EQ(ref->offset, get->offset);   
 }
 
 void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){

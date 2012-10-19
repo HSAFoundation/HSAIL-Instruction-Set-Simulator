@@ -7346,10 +7346,7 @@ int ImageRead(Context *context) {
                         context->set_error(INVALID_OPERAND);
                         return 1;
                       }
-                    } else {  // '['
-                      context->set_error(MISSING_OPERAND);
-                      return 1;
-                    }
+                    } 
                     // TODO(Chuang): src: Register source for the coordinates.
                     // A scalar for 1D images; a 2-element vector for 2D images;
                     // a 4-element vector for 3D images, where the fourth element is ignored.
