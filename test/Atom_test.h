@@ -6,7 +6,7 @@
 namespace hsa {
 namespace brig {
 
-template <typename T1, typename T2> 
+template <typename T1, typename T2 = BrigOperandReg> 
 class Atom_Test: public BrigCodeGenTest {
 
 private:
@@ -191,8 +191,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   memset(&imm2.bits, 0, sizeof(imm2.bits));
   imm2.bits.u = 12;
 
-  Atom_Test<BrigOperandImmed, BrigOperandImmed> 
-            TestCase1(in, symbols, &out, &dest, &addr, &imm1, &imm2);
+  Atom_Test<BrigOperandImmed, BrigOperandImmed> TestCase1(in, symbols, &out, &dest, &addr, &imm1, &imm2);
   TestCase1.Run_Test(&Atom);
   symbols->clear();
 
@@ -221,12 +220,6 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.reserved = 0;
   dest.name = 0;
 
-  reg.size = sizeof(reg);
-  reg.kind = BrigEOperandReg;
-  reg.type = Brigb64;
-  reg.reserved = 0;
-  reg.name = 0;
-
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
   imm1.type = Brigb32;
@@ -234,7 +227,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 24;
 
-  Atom_Test<BrigOperandImmed, BrigOperandImmed> TestCase2(in, symbols, &out, &dest, &addr, &imm1);
+  Atom_Test<BrigOperandImmed> TestCase2(in, symbols, &out, &dest, &addr, &imm1);
   TestCase2.Run_Test(&Atom);
   symbols->clear();
 
@@ -283,7 +276,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 23;
 
-  Atom_Test<BrigOperandImmed, BrigOperandImmed> TestCase3(in, symbols, &out, &dest, &indi, &reg, &imm1);
+  Atom_Test<BrigOperandImmed> TestCase3(in, symbols, &out, &dest, &indi, &reg, &imm1);
   TestCase3.Run_Test(&Atom);
   symbols->clear();
 
@@ -334,7 +327,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg1 = dest;
 
-  Atom_Test<BrigOperandReg, BrigOperandReg> TestCase4(in, symbols, &out, &dest, &comp, &addr, &reg, &reg1);
+  Atom_Test<BrigOperandReg> TestCase4(in, symbols, &out, &dest, &comp, &addr, &reg, &reg1);
   TestCase4.Run_Test(&Atom);
   symbols->clear();
 
@@ -482,7 +475,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg1.reserved = 0;
   reg1.name = destName.size() + 1;
 
-  Atom_Test<BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out, &dest, &indi, NULL, &reg1);
+  Atom_Test<BrigOperandReg> TestCase7(in, symbols, &out, &dest, &indi, NULL, &reg1);
   TestCase7.Run_Test(&Atom);
   symbols->clear();
 
@@ -531,7 +524,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg1.reserved = 0;
   reg1.name = destName.size() + 1;
 
-  Atom_Test<BrigOperandReg, BrigOperandReg> TestCase8(in, symbols, &out, &dest, &comp, &addr, NULL, &reg1);
+  Atom_Test<BrigOperandReg> TestCase8(in, symbols, &out, &dest, &comp, &addr, NULL, &reg1);
   TestCase8.Run_Test(&Atom);
   symbols->clear();
 
@@ -589,7 +582,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 0x74;
 
-  Atom_Test<BrigOperandImmed, BrigOperandImmed> TestCase9(in, symbols, &out, &dest, &comp, &addr, &reg, &imm1);
+  Atom_Test<BrigOperandImmed> TestCase9(in, symbols, &out, &dest, &comp, &addr, &reg, &imm1);
   TestCase9.Run_Test(&Atom);
   symbols->clear();
 
@@ -627,8 +620,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   wav1.size = sizeof(wav1);
   wav1.kind = BrigEOperandWaveSz;
 
-  Atom_Test<BrigOperandWaveSz, BrigOperandWaveSz> 
-            TestCase10(in, symbols, &out, &dest, &addr, &wav1);
+  Atom_Test<BrigOperandWaveSz> TestCase10(in, symbols, &out, &dest, &addr, &wav1);
   TestCase10.Run_Test(&Atom);
   symbols->clear();
 
@@ -664,7 +656,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg1 = dest;
 
-  Atom_Test<BrigOperandReg, BrigOperandReg> TestCase11(in, symbols, &out, &dest, &addr, &reg1);
+  Atom_Test<BrigOperandReg> TestCase11(in, symbols, &out, &dest, &addr, &reg1);
   TestCase11.Run_Test(&Atom);
   symbols->clear();
 
@@ -701,7 +693,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg = reg1 = dest;
  
-  Atom_Test<BrigOperandReg, BrigOperandReg> TestCase12(in, symbols, &out, &dest, &indi, &reg, &reg1);
+  Atom_Test<BrigOperandReg> TestCase12(in, symbols, &out, &dest, &indi, &reg, &reg1);
   TestCase12.Run_Test(&Atom);
   symbols->clear();
 
@@ -743,7 +735,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg1.reserved = 0;
   reg1.name = destName.size() + 1;
  
-  Atom_Test<BrigOperandReg, BrigOperandReg> TestCase13(in, symbols, &out, &dest, &indi, NULL, &reg1);
+  Atom_Test<BrigOperandReg> TestCase13(in, symbols, &out, &dest, &indi, NULL, &reg1);
   TestCase13.Run_Test(&Atom);
   symbols->clear();
 
