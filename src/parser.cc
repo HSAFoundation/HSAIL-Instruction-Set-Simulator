@@ -7548,7 +7548,7 @@ int AtomicNoRet(Context* context) {
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0},       // o_operands[5]
     BrigAtomicCas,         // atomicOperation
-    BrigGlobalSpace,       // storageClass
+    BrigFlatSpace,       // storageClass
     0                      // memorySemantic
   };
 
