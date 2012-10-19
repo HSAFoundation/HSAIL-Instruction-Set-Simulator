@@ -4624,7 +4624,7 @@ TEST(CodegenTest, MulCodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, Call_CodeGen_SimpleTest) {
+TEST(CodegenTest, DISABLED_Call_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
