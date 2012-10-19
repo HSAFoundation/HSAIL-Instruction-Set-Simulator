@@ -50,12 +50,13 @@ class Runtime;
 class Queue;
 class Kernel;
 class Event;
-class TrapEvent;
-class TrapHandler;
 class Device;
 class Program;
 class DispatchEvent;
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
+class TrapEvent;
+class TrapHandler;
 
 /**
  *******************************************************************************
@@ -107,6 +108,7 @@ typedef enum {
                               that an exception is encountered.  This is the 
                               default behavior.  */
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     WAVE_ACTION_RESUME = 2, /*!< The wave should resume in the event that an 
                               exception is encountered.  The wave is resumed 
                               at the instruction following the exception PC.*/
@@ -126,6 +128,7 @@ typedef enum {
                               in the event that an exception is encountered.*/
 
     WAVE_ACTION_MAX
+/************************* @endcond *******************************************/
 } WaveAction;
 
 /**
@@ -141,6 +144,7 @@ typedef enum {
                                   application will ignore any kernel 
                                   exceptions. */
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     HOST_ACTION_EXIT = 2,       /*!< Exit the host application on a kernel 
                                   exception.  The host application will call
                                   exit() in the event of a kernel exception. */
@@ -149,6 +153,7 @@ typedef enum {
                                   exception. The host application has
                                   registered an event to be signaled in the
                                   event of a kernel exception. */
+/************************* @endcond *******************************************/
 } HostAction;
 
 /**
@@ -162,11 +167,13 @@ typedef enum {
     CACHE_POLICY_FLUSH_ALL = 1,             /*!< Flush all caches that can be
                                               flushed. */
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     CACHE_POLICY_FLUSH_COMPUTE_UNIT = 2,    /*!< Flush the private device 
                                               compute unit caches. */
 
     CACHE_POLICY_FLUSH_SHARED = 4           /*!< Flush the shared device
                                               compute unit caches. */
+/************************* @endcond *******************************************/
 } CachePolicy;
 
 /**
@@ -241,6 +248,7 @@ typedef enum {
                                        is expected to separately wait for 
                                        completion.  */
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     BLOCKING_POLICY_DEPENDENCY  = 1, /*!< The dispatch interface will block 
                                        until all dependencies have succeeded 
                                        before returning from the kernel 
@@ -258,14 +266,20 @@ typedef enum {
     BLOCKING_POLICY_COMPLETED   = 8  /*!< The dispatch interface will block
                                        until the kernel has completed 
                                        execution. */
+/************************* @endcond *******************************************/
 } BlockingPolicy;
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
 /** 
  *******************************************************************************
  * @brief call back function signature
+ * @details This is the signature of the call back fuction before the kernel
+ *          dispatch. The call back function is to indicate the start of the
+ *          the kernel launch. It is used by the debugger.
  *******************************************************************************
  */
-typedef void * (* CallBackFunction) (void *);
+typedef void * (* PreDispatchCallBackFunction) (DispatchEvent *, void *);
+/************************* @endcond *******************************************/
 
 /** 
  *******************************************************************************
@@ -309,17 +323,24 @@ typedef struct LaunchAttributes {
     size_t groupMemorySize;     /*!< Size (in bytes) of group memory used in 
                                    the kernel parameters.*/
 
+/************************** @cond HSA_EXPERIMENTAL ****************************/
     TrapHandler *trapHandler;   /*!< trap handler object used for the
 	                             current kernel dispatch */
 
-    CallBackFunction functionPtr; /*!<call back function to indicate
-                                    kernel execution start */
+    PreDispatchCallBackFunction functionPtr; 
+                                /*!<call back function to indicate
+                                 kernel execution start */
 
     void *callBackArguments;    /*!< arguments of the callback function */
 
-    bool debugMode;             /*!< default is NOT executed in the debug
-                                 mode */
+    uint32_t debugMode;         /*!< debug mode to indicate whether
+                                 the kernel is executed in debug mode and
+                                 which type of debug mode. 0 means regular
+                                 execution. Users each have their own different
+                                 debug modes. */
+
     bool timestampEnabled;      /*!< default is false*/
+/************************* @endcond *******************************************/
 
     LaunchAttributes()
     {
@@ -336,11 +357,14 @@ typedef struct LaunchAttributes {
         AbsoluteOffset[1]=0;
         AbsoluteOffset[2]=0;
         groupMemorySize = 0;
-        debugMode = false;
+
+/************************** @cond HSA_EXPERIMENTAL ****************************/
+        debugMode = 0;
         trapHandler = NULL;
         functionPtr = NULL;
         callBackArguments = NULL;
         timestampEnabled = false;
+/************************* @endcond *******************************************/
     }
 
 } LaunchAttributes;
@@ -348,9 +372,9 @@ typedef struct LaunchAttributes {
 /************************** @cond HSA_EXPERIMENTAL ****************************/
 /** 
  *******************************************************************************
- * @brief User event types
- * @details The user event type enumerations are used for indicating the type 
- *          of user event to create in Device::createEvent().
+ * @brief Trap event types
+ * @details The Trap event type enumerations are used for indicating the type 
+ *          of Trap event to create in Device::createEvent().
  *******************************************************************************
  */
 typedef enum
@@ -359,7 +383,7 @@ typedef enum
     SYSTEM_CALL_EVENT   = 2, /*!< Syscall event with parameter info */
     HW_EXCEPTION_EVENT  = 3, /*!< Exception event */
     MAX_EVENTS
-} UserEventType;
+} TrapEventType;
 
 /** 
  *******************************************************************************
@@ -1134,7 +1158,9 @@ public:
     /**
      ***************************************************************************
      * @brief Set up trap handler in the current device
-     *
+     * @details This HSA device interface is used to up the trap handler 
+     *          used for the associated device. 
+	 *
      * @param trapType different types of trap handler, currently, support   
      * runtime, debugger, exception, system call.
      *
@@ -1151,7 +1177,9 @@ public:
     /**
      ***************************************************************************
      * @brief Set up trap handler buffer in the current device
-     *
+     * @details This HSA device interface is used to up the trap handler buffer
+     *          corresponding to the trap handler. 
+	 *
      * @param trapType different types of trap handler, currently,
      * support runtime, debugger, exception, system call.
      *
@@ -1172,7 +1200,11 @@ public:
      ***************************************************************************
      * @brief create a trap handler object based on the trap handler 
      * set in the device.
-     *
+     * @details This HSA device interface is used to create a trap handler
+     * object used in a kernel dispatch. The trap handler object contains
+     * the isa code for various trap handlers and the exception policies
+     * used for exception processing.
+     * 
      * @note the trap handler object and all the trap handlers to be used 
      * in a dispatch must be created and set before the kernel dispatch.
      *
@@ -1184,6 +1216,10 @@ public:
     /**
      ***************************************************************************
      * @brief Invalidate all cache on the device.
+     * @details This HSA device interface is used to flush the caches on
+     * on the device. Based on different cache policies, the corresponding
+     * caches will be flushed. The cache flush policies are defined in the 
+     * enum CachePolicy
      *
      * @param dev pointer to device
      *
@@ -1194,9 +1230,16 @@ public:
 	
     /**
      ***************************************************************************
-     * @brief APIs for creating a user trap event
+     * @brief APIs for creating a trap trap event
+     * @details This HSA device interface is used to create the trap
+     * event for various usage corresponding to different event types
+     * To catch the event in a kernel, the trap event must be created before
+     * the kernel dispatch function is called. Also, in each process, there will be
+     * only one trap event for each event type. If multiple trap events are created, 
+     * previously created trap events of the same type will be overwritten by the
+     * latest one.
      *
-     * @param eventType user event type, can be 
+     * @param eventType trap event type, can be 
      * DEBUG_EVENT            = 0, ///< Exception event
      * SYSTEM_CALL_EVENT      = 1, ///< Syscall event with parameter info
      * HW_EXCEPTION_EVENT     = 2, ///< Debug event
@@ -1208,21 +1251,19 @@ public:
      * @param initState if this parameter is true, the initial state of the event
      * is signaled, otherwise is nonsignaled.
      *
-     * @note To catch the event in a kernel, the trap event must be created before
-     * the kernel dispatch function is called. Also, in each process, there will be
-     * only one trap event for each event type. If multiple trap events are created, 
-     * previously created trap events of the same type will be overwritten by the
-     * latest one.
      *
      * @return trap event object pointer
      ***************************************************************************
      */
-    virtual TrapEvent * createUserEvent(UserEventType eventType, 
+    virtual TrapEvent * createTrapEvent(TrapEventType eventType, 
                                         bool autoReset, bool initState) = 0;
 
     /**
      ***************************************************************************
      * @brief control the wave front.
+     * @details This HSA device interface is used to perform various wave
+     * actions on wave fronts. The wave action and the wave mode are defined
+     * in the corresponding enums.
      *
      * @param action actions to be taken on the wavefront
      *
@@ -1236,10 +1277,10 @@ public:
      *
      ***************************************************************************
      */
-    virtual void waveControl(uint32_t action, 
-                             uint32_t mode, 
-                             uint32_t trapID, 
-                             void *msgPtr) = 0;
+    virtual void waveControl(WaveAction action, 
+                             WaveMode   mode, 
+                             uint32_t   trapID, 
+                             void *     msgPtr) = 0;
 
     virtual uint32_t getCapabilities()=0;
 
@@ -1256,7 +1297,9 @@ public:
     */
     virtual hsaperf::Pmu * getPMU() = 0;
 
-   /**
+    /************************ @endcond *****************************************/
+
+    /**
      ***************************************************************************
      * @brief Default destructor.
      ***************************************************************************
@@ -1854,7 +1897,7 @@ public:
      * @brief When this event is signaled, debugger users will need
      * get various information such as scratch memory, which will be
      * available in the debugger dispatch event. To avoid the duplicate
-     * of the APIs, TrapEvent returns the debugger dispach object
+     * of the APIs, TrapEvent returns the debugger dispach event object
      * for users to get those information.
      ***************************************************************************
      */
@@ -1977,28 +2020,12 @@ public:
     virtual ExceptionPolicy & getExceptionPolicy() = 0;
 
     /**
-     * @brief set the SQ debug mode ON/OFF. OFF by default.
-     *
-     * @return void
-     */
-    virtual void setSQDebugMode(bool isOn) = 0;
-
-    /**
-     ***************************************************************************
-     * @brief get the SQ debug mode
-     *
-     * @return void
-     *
-     ***************************************************************************
-     */
-    virtual bool getSQDebugMode() = 0;
-
-    /**
      ***************************************************************************
      * @brief Default destructor.
      ***************************************************************************
      */
     virtual ~TrapHandler() {}
+/************************* @endcond *******************************************/
 };
 
 }
