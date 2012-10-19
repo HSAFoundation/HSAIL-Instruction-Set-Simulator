@@ -592,7 +592,7 @@ TEST(CodegenTest, Sync_Codegen){
     Brigb32,               
     BrigNoPacking,         
     {0, 0, 0, 0, 0}, 
-    BrigPartialLevel                    
+    BrigGlobalLevel | BrigGroupLevel                    
   };
   out1.size = sizeof(out1);
     
@@ -653,7 +653,7 @@ TEST(CodegenTest, Barrier_Codegen){
     Brigb32,               
     BrigNoPacking,         
     {0, 0, 0, 0, 0}, 
-    BrigPartialLevel                    
+    BrigGlobalLevel | BrigGroupLevel                    
   };
   out1.size = sizeof(out1);
     
