@@ -146,14 +146,6 @@ void validate(const BrigDirectiveSymbol* ref, const char* refstr, const BrigDire
   EXPECT_EQ(ref->reserved, get->reserved);  
 }
 
-template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
-  validate(ref, get);
-}
-
-template <> void validateOpType <BrigOperandReg>(const BrigOperandReg* ref, const char* refstr, const BrigOperandReg* get, const char* getstr){
-  validate(ref, refstr, get, getstr);
-}
-
 void validate(const BrigDirectiveSignature* ref, const char* refbuf, const BrigDirectiveSignature* get, const char* getbuf){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
@@ -286,6 +278,27 @@ void validate(const BrigOperandArgumentRef* ref, const BrigOperandArgumentRef* g
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   //ignore o_operands
+}
+
+void validate(const BrigInstAtomic* ref, const BrigInstAtomic* get) {
+  
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+  // ignore o_operands
+  EXPECT_EQ(ref->atomicOperation, get->atomicOperation);
+  EXPECT_EQ(ref->storageClass, get->storageClass);
+  EXPECT_EQ(ref->memorySemantic, get->memorySemantic);
+}
+
+template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
+  validate(ref, get);
+}
+
+template <> void validateOpType <BrigOperandReg>(const BrigOperandReg* ref, const char* refstr, const BrigOperandReg* get, const char* getstr){
+  validate(ref, refstr, get, getstr);
 }
 
 }//namespace validate_brig
