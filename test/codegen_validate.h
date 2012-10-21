@@ -146,6 +146,15 @@ void validate(const BrigDirectiveSymbol* ref, const char* refstr, const BrigDire
   EXPECT_EQ(ref->reserved, get->reserved);  
 }
 
+void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get){
+
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+//  EXPECT_EQ(ref->name, get->name);
+//  EXPECT_EQ(ref->reg, get->reg);
+//  EXPECT_EQ(ref->offset, get->offset); 
+}
+
 void validate(const BrigDirectiveSignature* ref, const char* refbuf, const BrigDirectiveSignature* get, const char* getbuf){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
