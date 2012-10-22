@@ -2025,6 +2025,11 @@ _acq              { free_string(context);
                     context->yycolno+=yyleng;
                     return _ACQ;}
 
+_part_ar          { free_string(context);
+                    context->token_type = COMMON_KEYWORD;
+                    context->yycolno+=yyleng;
+                    return _PART_AR;}                  
+
 _rel              { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
