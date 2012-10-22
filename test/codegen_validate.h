@@ -302,6 +302,21 @@ void validate(const BrigInstAtomic* ref, const BrigInstAtomic* get) {
   EXPECT_EQ(ref->memorySemantic, get->memorySemantic);
 }
 
+void validate(const BrigInstAtomicImage* ref, const BrigInstAtomicImage* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing); 
+  //ignore o_operands
+  EXPECT_EQ(ref->atomicOperation, get->atomicOperation);
+  EXPECT_EQ(ref->storageClass, get->storageClass);
+  EXPECT_EQ(ref->memorySemantic, get->memorySemantic);
+  EXPECT_EQ(ref->geom, get->geom);
+  
+}
+
+
 template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
   validate(ref, get);
 }
