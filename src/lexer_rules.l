@@ -1926,31 +1926,37 @@ syscall             { free_string(context);
   /*-- mul --*/
 mul               { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMul;
                     context->yycolno+=yyleng;
                     return MUL;}
 
 mul_hi            { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMulHi;
                     context->yycolno+=yyleng;
                     return MUL_HI;}
 
 mul24_hi          { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMul24Hi;
                     context->yycolno+=yyleng;
                     return MUL24_HI;}
 
 mul24             { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMul24;
                     context->yycolno+=yyleng;
                     return MUL24;}
 
 mad24             { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMad24;
                     context->yycolno+=yyleng;
                     return MAD24;}
 
 mad24_hi          { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMad24Hi;
                     context->yycolno+=yyleng;
                     return MAD24_HI;}
 

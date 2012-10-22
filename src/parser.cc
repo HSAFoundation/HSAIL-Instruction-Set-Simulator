@@ -4693,187 +4693,84 @@ int GlobalGroupDecl(Context* context) {
 }
 
 int MulInst(Context* context) {
-  if (context->token_to_scan == MUL) {
+  if (context->token_to_scan == MUL ||
+      context->token_to_scan == MUL_HI) {
+    BrigInstBase mulInst = {
+      0,                     // size
+      BrigEInstBase,         // kind
+      0,                     // opcode
+      Brigb32,               // type
+      BrigNoPacking,         // packing
+      {0, 0, 0, 0, 0}        // o_operands
+    };
+    BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
+    mulInst.size = sizeof(mulInst);
+    mulInst.opcode = context->token_value.opcode;
+        
     context->token_to_scan = yylex();
-    if (!RoundingMode(context)) { // with roundingmode
+    if (mulInst.opcode == BrigMul) {
+      if (!RoundingMode(context)) { // with roundingmode
+        BrigAluModifier getAluMod = context->get_alu_modifier();
+        memcpy(&aluModifier, &getAluMod, sizeof(aluModifier));
+      } 
+    }
 
-      BrigInstMod bim = {
-        sizeof(BrigInstMod),     // size
-        BrigEInstMod,       // kind
-        BrigMul,            // opcode
-        Brigb32,            // type
-        BrigNoPacking,      // packing
-        {0, 0, 0, 0, 0},    // o_operands
-        context->get_alu_modifier()   // aluModifier;
-      };
+    if (context->token_type == PACKING) {
+      mulInst.packing = context->token_value.packing;
+      context->token_to_scan = yylex();
+    }
+    size_t opCount = 0;
 
-      if (context->token_type == PACKING) {
-        bim.packing = context->token_value.packing;
-        context->token_to_scan = yylex();
-      }
-      size_t opCount = 0;
+    if (context->token_type == DATA_TYPE_ID) {
+      context->set_type(context->token_value.data_type);
+      mulInst.type = context->get_type();
 
-      if (context->token_type == DATA_TYPE_ID) {
-        context->set_type(context->token_value.data_type);
-        bim.type = context->get_type();
-
-        context->token_to_scan = yylex();
-        if (REGISTER != context->token_type){
+      context->token_to_scan = yylex();
+      if (REGISTER == context->token_type) {
+        if (OperandPart2(context, &mulInst.o_operands[opCount++])) {
           context->set_error(INVALID_OPERAND);
-          return 1;
-        }
-        if (OperandPart2(context, &bim.o_operands[opCount++])) {
           return 1;
         }
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-
-            if (OperandPart2(context, &bim.o_operands[opCount++])) {
+          if (OperandPart2(context, &mulInst.o_operands[opCount++])) {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
+          if (context->token_to_scan == ',') {
+            context->token_to_scan = yylex();
+            if (OperandPart2(context, &mulInst.o_operands[opCount++])) {
               return 1;
             }
-
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-
-              if (OperandPart2(context, &bim.o_operands[opCount++])) {
-                return 1;
-              }
-              if (context->token_to_scan == ';') {
-                context->append_code(&bim);
-                context->token_to_scan = yylex();
-                return 0;
+            if (context->token_to_scan == ';') {
+              if (*(reinterpret_cast<int*>(&aluModifier)) == 0) {
+                context->append_code(&mulInst);
               } else {
-                context->set_error(MISSING_SEMICOLON);
+                BrigInstMod mulMod;   
+                mulMod.size = sizeof(mulMod);
+                mulMod.kind = BrigEInstMod;  
+                mulMod.opcode = mulInst.opcode;
+                mulMod.type = mulInst.type;
+                mulMod.packing = mulInst.packing;
+                for (int i = 0 ; i < 5 ; ++i) {
+                  mulMod.o_operands[i] = mulInst.o_operands[i];
+                }
+                memcpy(&mulMod.aluModifier, &aluModifier, sizeof(&mulMod.aluModifier));
+                context->append_code(&mulMod);
               }
+              context->token_to_scan = yylex();
+              return 0;
             } else {
-              context->set_error(MISSING_COMMA);
+              context->set_error(MISSING_SEMICOLON);
+            }
+          } else {
+            context->set_error(MISSING_COMMA);
           }
         }  else {
           context->set_error(MISSING_COMMA);
         }
       } else {
-        context->set_error(MISSING_DATA_TYPE);
-      }
-    } else { // without roundingmode
-      BrigInstBase bib = {
-        sizeof(BrigInstBase), //size
-        BrigEInstBase,        //kind
-        BrigMul,              //opcode
-        Brigb32,              //type
-        BrigNoPacking,        //packing
-        {0,0,0,0,0}           //o_operands[5]
-      };
-      if (context->token_type == PACKING) {
-        bib.packing = context->token_value.packing;
-        context->token_to_scan = yylex();
-      }
-
-      size_t opCount = 0;
-
-      if (context->token_type == DATA_TYPE_ID) {
-        context->set_type(context->token_value.data_type);
-        bib.type = context->get_type();
-
-        context->token_to_scan = yylex();
-        if (REGISTER != context->token_type){
-          context->set_error(INVALID_OPERAND);
-          return 1;
-        }
-        if (!OperandPart2(context, &bib.o_operands[opCount++])) {  // operand reg
-
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-
-            if (!OperandPart2(context, &bib.o_operands[opCount++])) {
-              if (context->token_to_scan == ',') {
-                context->token_to_scan = yylex();
-
-                if (!OperandPart2(context, &bib.o_operands[opCount++])) {
-
-                  if (context->token_to_scan == ';') {
-                    context->append_code(&bib);
-                    context->token_to_scan = yylex();
-                    return 0;
-                  } else {
-                    context->set_error(MISSING_SEMICOLON);
-                  }
-                } else {
-                  context->set_error(MISSING_OPERAND);
-                }
-              } else {
-                context->set_error(MISSING_COMMA);
-              }
-            } else {
-              context->set_error(MISSING_OPERAND);
-            }
-          } else {
-            context->set_error(MISSING_COMMA);
-          }
-        } else {
-          context->set_error(MISSING_OPERAND);
-        }
-      } else {
-        context->set_error(MISSING_DATA_TYPE);
-      }
-    }
-  } else if (context->token_to_scan == MUL_HI) {
-    BrigInstBase bib = {
-      sizeof(BrigInstBase), //size
-      BrigEInstBase,        //kind
-      BrigMul,              //opcode
-      Brigb32,              //type
-      BrigNoPacking,        //packing
-      {0,0,0,0,0}           //o_operands[5]
-    };
-    context->token_to_scan = yylex();
-    if (context->token_type == PACKING) {
-      context->token_to_scan = yylex();
-    }
-
-    size_t opCount = 0;
-
-    if (context->token_type == DATA_TYPE_ID) {
-      context->set_type(context->token_value.data_type);
-      bib.type = context->get_type();
-
-      context->token_to_scan = yylex();
-
-      if (REGISTER != context->token_type){
         context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-      if (!OperandPart2(context, &bib.o_operands[opCount++])) {
-
-        if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-
-          if (!OperandPart2(context, &bib.o_operands[opCount++])) {
-
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-
-              if (!OperandPart2(context, &bib.o_operands[opCount++])) {
-                if (context->token_to_scan == ';') {
-                  context->append_code(&bib);
-                  context->token_to_scan = yylex();
-                  return 0;
-                } else {
-                    context->set_error(MISSING_SEMICOLON);
-                }
-              } else {
-                context->set_error(MISSING_OPERAND);
-              }
-            } else {
-              context->set_error(MISSING_COMMA);
-            }
-          } else {
-            context->set_error(MISSING_OPERAND);
-          }
-        } else {
-          context->set_error(MISSING_COMMA);
-        }
-      } else {
-        context->set_error(MISSING_OPERAND);
       }
     } else {
       context->set_error(MISSING_DATA_TYPE);
@@ -4888,12 +4785,12 @@ int Mul24Inst(Context* context) {
     BrigInstBase bib = {
       sizeof(BrigInstBase), //size
       BrigEInstBase,        //kind
-      BrigMul24,              //opcode
+      0,                    //opcode
       Brigb32,              //type
       BrigNoPacking,        //packing
       {0,0,0,0,0}           //o_operands[5]
     };
-
+    bib.opcode = context->token_value.opcode;
     size_t opCount = 0;
 
     context->token_to_scan = yylex();
@@ -4960,12 +4857,12 @@ int Mad24Inst(Context* context) {
     BrigInstBase bib = {
       sizeof(BrigInstBase), //size
       BrigEInstBase,        //kind
-      BrigMad24,              //opcode
+      0,                    //opcode
       Brigb32,              //type
       BrigNoPacking,        //packing
       {0,0,0,0,0}           //o_operands[5]
     };
-
+    bib.opcode = context->token_value.opcode;
     size_t opCount = 0;
 
     context->token_to_scan = yylex();
@@ -4975,6 +4872,7 @@ int Mad24Inst(Context* context) {
          || _S32 == context->token_to_scan
          || _S64 == context->token_to_scan)){
          // u or s ,32 or 64
+         context->set_error(INVALID_DATA_TYPE);
          return 1;
       }
       context->set_type(context->token_value.data_type);
@@ -6194,12 +6092,7 @@ int Operation(Context* context) {
     if (!Cmp(context)) {
       return 0;
     }
-  } else if (context->token_to_scan == MUL ||
-             context->token_to_scan == MUL_HI ||
-             context->token_to_scan == MUL24_HI ||
-             context->token_to_scan == MUL24 ||
-             context->token_to_scan == MAD24 ||
-             context->token_to_scan == MAD24_HI) {
+  } else if (context->token_type == MUL_OP) {
     if (!Mul(context)) {
       return 0;
     }
