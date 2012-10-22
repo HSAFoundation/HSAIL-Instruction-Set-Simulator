@@ -14,13 +14,22 @@ private:
   //Operands in .operands buffer
   const T1* RefDest;
   const T2* RefSrc1;
+  const BrigOperandReg *RefReg1, *RefReg2, *RefReg3, *RefReg4;
      
 public:
-    Mov_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1) : 
+    Mov_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1,
+     BrigOperandReg *Reg1 = NULL,
+     BrigOperandReg *Reg2 = NULL,
+     BrigOperandReg *Reg3 = NULL,
+     BrigOperandReg *Reg4 = NULL) : 
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
     RefDest(Dest),
-    RefSrc1(Src1) { }
+    RefSrc1(Src1),
+    RefReg1(Reg1), 
+    RefReg2(Reg2), 
+    RefReg3(Reg3), 
+    RefReg4(Reg4) { }
  
   void validate(struct BrigSections* TestOutput){
   
@@ -36,7 +45,49 @@ public:
         
     const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
     validate_brig::validateOpType<T2>(RefSrc1, refbuf, getsrc1, getbuf);
-    
+
+    if (getdest->kind == BrigEOperandRegV2 ||getdest->kind == BrigEOperandRegV4 ) {
+        const BrigOperandRegV2 *getdest_opv2 = reinterpret_cast <const BrigOperandRegV2*> (getdest);
+        const BrigOperandReg *getreg1 = 
+             reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv2 ->regs[0]]));
+        validate_brig::validateOpType<BrigOperandReg>(RefReg1, refbuf, getreg1, getbuf);
+
+        const BrigOperandReg *getreg2 = 
+              reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv2 ->regs[1]]));
+        validate_brig::validateOpType<BrigOperandReg>(RefReg2, refbuf, getreg2, getbuf);
+
+        if (RefReg3&&RefReg4) {
+          const BrigOperandRegV4 *getdest_opv4 = reinterpret_cast <const BrigOperandRegV4*> (getdest);
+          const BrigOperandReg *getreg3 = 
+               reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv4->regs[2]]));
+          validate_brig::validateOpType<BrigOperandReg>(RefReg3, refbuf, getreg3, getbuf);
+
+          const BrigOperandReg *getreg4 = 
+               reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv4->regs[3]]));
+          validate_brig::validateOpType<BrigOperandReg>(RefReg4, refbuf, getreg4, getbuf);           
+        }
+      } else if (getsrc1->kind == BrigEOperandRegV2 || getsrc1->kind == BrigEOperandRegV4){
+        const BrigOperandRegV2 *getsrc1_opv2 = reinterpret_cast <const BrigOperandRegV2*> (getsrc1);
+        const BrigOperandReg *getreg1 = 
+                reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv2->regs[0]]));
+        validate_brig::validateOpType<BrigOperandReg>(RefReg1, refbuf, getreg1, getbuf);
+
+        const BrigOperandReg *getreg2 = 
+            reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv2->regs[1]]));
+        validate_brig::validateOpType<BrigOperandReg>(RefReg2, refbuf, getreg2, getbuf);
+
+        if (RefReg3&&RefReg4) {
+          const BrigOperandRegV4 *getsrc1_opv4 = reinterpret_cast <const BrigOperandRegV4*> (getsrc1);
+          const BrigOperandReg *getreg3 = 
+               reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv4->regs[2]]));
+          validate_brig::validateOpType<BrigOperandReg>(RefReg3, refbuf, getreg3, getbuf);
+
+          const BrigOperandReg *getreg4 = 
+                 reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv4->regs[3]]));
+          validate_brig::validateOpType<BrigOperandReg>(RefReg4, refbuf, getreg4, getbuf);           
+        }
+    } 
+
     EXPECT_EQ(0, getinst->o_operands[2]);
     EXPECT_EQ(0, getinst->o_operands[3]);
     EXPECT_EQ(0, getinst->o_operands[4]);       
@@ -135,7 +186,7 @@ TEST(CodegenTest,Mov_CodeGen){
 
 
   Mov_Test<BrigInstBase, BrigOperandReg, BrigOperandRegV2> 
-            TestCase2(in, symbols, &out2, &reg1, &regV2);
+            TestCase2(in, symbols, &out2, &reg1, &regV2, &reg2, &reg3);
   TestCase2.Run_Test(&Mov);
   symbols->clear();
 
@@ -182,7 +233,7 @@ TEST(CodegenTest,Mov_CodeGen){
   reg3.name = op1.size() + op2.size() + 2;
 
   Mov_Test<BrigInstBase, BrigOperandRegV2, BrigOperandReg> 
-            TestCase3(in, symbols, &out3, &regV2, &reg3);
+            TestCase3(in, symbols, &out3, &regV2, &reg3, &reg1, &reg2);
   TestCase3.Run_Test(&Mov);
   symbols->clear();
 
@@ -245,7 +296,7 @@ TEST(CodegenTest,Mov_CodeGen){
   regV4.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
 
   Mov_Test<BrigInstBase, BrigOperandReg, BrigOperandRegV4> 
-            TestCase4(in, symbols, &out4, &reg1, &regV4);
+            TestCase4(in, symbols, &out4, &reg1, &regV4, &reg2, &reg3, &reg4, &reg5);
   TestCase4.Run_Test(&Mov);
   symbols->clear();
 
@@ -310,7 +361,7 @@ TEST(CodegenTest,Mov_CodeGen){
 
 
   Mov_Test<BrigInstBase, BrigOperandRegV4, BrigOperandReg> 
-            TestCase5(in, symbols, &out5, &regV4, &reg5);
+            TestCase5(in, symbols, &out5, &regV4, &reg5, &reg1, &reg2, &reg3, &reg4);
   TestCase5.Run_Test(&Mov);
   symbols->clear();
 
