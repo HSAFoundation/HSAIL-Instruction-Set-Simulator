@@ -625,6 +625,7 @@ TEST(CodegenTest, Mul_AluModifier_CodeGen) {
   TestCase2.Run_Test(&Mul);
   symbols->clear();
 
+  delete symbols;
 }
 
 } // namespace hsa
