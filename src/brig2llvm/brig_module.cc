@@ -176,6 +176,153 @@ bool BrigModule::validateOperands(void) const {
   return true;
 }
 
+bool BrigModule::validateInstructions(void) const {
+
+  inst_iterator it = S_.code_begin();
+  const inst_iterator E = S_.code_end();
+
+  for(unsigned i = 0; i < std::min(size_t(8), S_.codeSize); ++i)
+    check(!S_.code[i],
+          "The first eight bytes of the code section must be zero");
+
+#define caseInst(X)                             \
+  case Brig ## X:                               \
+    if(!validate ## X(it)) return false;        \
+    break
+
+  for(; it != E; it++) {
+    switch(it->opcode) {
+      caseInst(Abs);
+      caseInst(Add);
+      caseInst(Borrow);
+      caseInst(Carry);
+      caseInst(CopySign);
+      caseInst(Div);
+      caseInst(Fma);
+      caseInst(Fract);
+      caseInst(Mad);
+      caseInst(Max);
+      caseInst(Min);
+      caseInst(Mul);
+      caseInst(MulHi);
+      caseInst(Neg);
+      caseInst(Rem);
+      caseInst(Sqrt);
+      caseInst(Sub);
+      caseInst(Mad24);
+      caseInst(Mad24Hi);
+      caseInst(Mul24);
+      caseInst(Mul24Hi);
+      caseInst(Shl);
+      caseInst(Shr);
+      caseInst(And);
+      caseInst(Not);
+      caseInst(Or);
+      caseInst(PopCount);
+      caseInst(Xor);
+      caseInst(BitRev);
+      caseInst(BitSelect);
+      caseInst(Extract);
+      caseInst(FirstBit);
+      caseInst(Insert);
+      caseInst(LastBit);
+      caseInst(Lda);
+      caseInst(Ldc);
+      caseInst(Mov);
+      caseInst(MovdHi);
+      caseInst(MovdLo);
+      caseInst(MovsHi);
+      caseInst(MovsLo);
+      caseInst(Shuffle);
+      caseInst(UnpackHi);
+      caseInst(UnpackLo);
+      caseInst(Cmov);
+      caseInst(Class);
+      caseInst(Fcos);
+      caseInst(Fexp2);
+      caseInst(Flog2);
+      caseInst(Frcp);
+      caseInst(Frsqrt);
+      caseInst(Fsin);
+      caseInst(BitAlign);
+      caseInst(ByteAlign);
+      caseInst(F2u4);
+      caseInst(Lerp);
+      caseInst(Sad);
+      caseInst(Sad2);
+      caseInst(Sad4);
+      caseInst(Sad4Hi);
+      caseInst(Unpack0);
+      caseInst(Unpack1);
+      caseInst(Unpack2);
+      caseInst(Unpack3);
+      caseInst(Segmentp);
+      caseInst(FtoS);
+      caseInst(StoF);
+      caseInst(Cmp);
+      caseInst(PackedCmp);
+      caseInst(Cvt);
+      caseInst(Ld);
+      caseInst(St);
+      caseInst(Atomic);
+      caseInst(AtomicNoRet);
+      caseInst(RdImage);
+      caseInst(LdImage);
+      caseInst(StImage);
+      caseInst(AtomicImage);
+      caseInst(AtomicNoRetImage);
+      caseInst(QueryArray);
+      caseInst(QueryData);
+      caseInst(QueryDepth);
+      caseInst(QueryFiltering);
+      caseInst(QueryHeight);
+      caseInst(QueryNormalized);
+      caseInst(QueryOrder);
+      caseInst(QueryWidth);
+      caseInst(Cbr);
+      caseInst(Brn);
+      caseInst(Barrier);
+      caseInst(FbarArrive);
+      caseInst(FbarInit);
+      caseInst(FbarRelease);
+      caseInst(FbarSkip);
+      caseInst(FbarWait);
+      caseInst(Sync);
+      caseInst(Count);
+      caseInst(CountUp);
+      caseInst(Mask);
+      caseInst(Send);
+      caseInst(Receive);
+      caseInst(Call);
+      caseInst(Ret);
+      caseInst(SysCall);
+      caseInst(Alloca);
+      caseInst(Clock);
+      caseInst(CU);
+      caseInst(DebugTrap);
+      caseInst(DispatchId);
+      caseInst(DynWaveId);
+      caseInst(LaneId);
+      caseInst(MaxDynWaveId);
+      caseInst(NDRangeGroups);
+      caseInst(NDRangeSize);
+      caseInst(Nop);
+      caseInst(NullPtr);
+      caseInst(WorkDim);
+      caseInst(WorkGroupId);
+      caseInst(WorkGroupSize);
+      caseInst(WorkItemAId);
+      caseInst(WorkItemAIdFlat);
+      caseInst(WorkItemId);
+      caseInst(WorkItemIdFlat);
+    }
+  }
+
+#undef caseInst
+
+  return true;
+}
+
 bool BrigModule::validateStrings(void) const {
 
   bool valid = true;
@@ -1256,6 +1403,498 @@ bool BrigModule::validate(const oper_iterator operands) const {
   if(!check(operands + 1 <= E, "operands spans the operands section"))
     return false;
 
+  return true;
+}
+
+bool BrigModule::validateAbs(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateAdd(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateBorrow(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCarry(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCopySign(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateDiv(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFma(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFract(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMad(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMax(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMin(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMul(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMulHi(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateNeg(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateRem(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSqrt(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSub(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMad24(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMad24Hi(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMul24(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMul24Hi(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateShl(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateShr(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateAnd(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateNot(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateOr(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validatePopCount(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateXor(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateBitRev(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateBitSelect(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateExtract(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFirstBit(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateInsert(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateLastBit(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateLda(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateLdc(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMov(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMovdHi(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMovdLo(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMovsHi(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMovsLo(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateShuffle(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateUnpackHi(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateUnpackLo(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCmov(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateClass(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFcos(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFexp2(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFlog2(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFrcp(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFrsqrt(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFsin(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateBitAlign(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateByteAlign(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateF2u4(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateLerp(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSad(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSad2(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSad4(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSad4Hi(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateUnpack0(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateUnpack1(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateUnpack2(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateUnpack3(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSegmentp(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFtoS(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateStoF(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCmp(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validatePackedCmp(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCvt(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateLd(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSt(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateAtomic(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateAtomicNoRet(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateRdImage(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateLdImage(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateStImage(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateAtomicImage(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateAtomicNoRetImage(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateQueryArray(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateQueryData(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateQueryDepth(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateQueryFiltering(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateQueryHeight(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateQueryNormalized(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateQueryOrder(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateQueryWidth(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCbr(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateBrn(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateBarrier(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFbarArrive(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFbarInit(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFbarRelease(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFbarSkip(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateFbarWait(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSync(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCount(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCountUp(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMask(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSend(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateReceive(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCall(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateRet(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateSysCall(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateAlloca(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateClock(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateCU(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateDebugTrap(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateDispatchId(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateDynWaveId(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateLaneId(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateMaxDynWaveId(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateNDRangeGroups(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateNDRangeSize(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateNop(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateNullPtr(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateWorkDim(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateWorkGroupId(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateWorkGroupSize(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateWorkItemAId(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateWorkItemAIdFlat(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateWorkItemId(const inst_iterator inst) const{
+  return true;
+}
+
+bool BrigModule::validateWorkItemIdFlat(const inst_iterator inst) const{
   return true;
 }
 
