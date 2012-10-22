@@ -406,9 +406,14 @@ template<class T> static T ShuffleVector(T x, T y, b32 z) {
 ShuffleVectorInst(define, Shuffle, Ternary)
 
 template<class T> static T Cmov(T x, T y, T z) {
-  return (x & 1) ? y : z;
+  return (x == 0) ? z : y;
 }
 BitInst(define, Cmov, Ternary)
+
+template<class T> static T CmovVector(T x, T y, T z) { return map(Cmov, x, y, z); }
+SignedVectorInst(define, Cmov, Ternary)
+UnsignedVectorInst(define, Cmov, Ternary)
+FloatVectorInst(define, Cmov, Ternary)
 
 // Neither C++98 nor C++11 implement C99's floating point hexadecimal
 // literals. :(

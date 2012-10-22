@@ -46,10 +46,12 @@ class Vector {
 
   typedef Base (*UMapFn)(Base);
   typedef Base (*BMapFn)(Base, Base);
+  typedef Base (*TMapFn)(Base, Base, Base);
   typedef Base (*SMapFn)(Base, unsigned);
   typedef void (*UForEachFn)(Base);
   typedef void (*BForEachFn)(Base, Base);
   typedef void (*TForEachFn)(Base, Base, Base);
+  typedef void (*QForEachFn)(Base, Base, Base, Base);
   typedef void (*SForEachFn)(Base, Base, unsigned);
 
   Vector() {}
