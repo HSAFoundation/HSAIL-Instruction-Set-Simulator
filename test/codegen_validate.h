@@ -83,13 +83,6 @@ void validate(const BrigOperandRegV4* ref, const BrigOperandRegV4* get){
   //ignore regs
 }
 
-void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get){
-  EXPECT_EQ(ref->size, get->size);
-  EXPECT_EQ(ref->kind, get->kind);
-  //ignore name and reg
-  EXPECT_EQ(ref->offset, get->offset);   
-}
-
 void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);

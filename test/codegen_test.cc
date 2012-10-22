@@ -23,6 +23,7 @@
 #include "Cmp_test.h"
 #include "Atom_test.h"
 #include "Call_test.h"
+#include "Branch_test.h"
 
 namespace hsa {
 namespace brig {
@@ -3469,86 +3470,6 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   delete lexer;
 }
 
-
-TEST(CodegenTest,ControlCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("memopt_on;");
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0,Control(context));
-
-  BrigDirectiveControl ref = {
-    24,
-    BrigEDirectiveControl,
-    8,
-    BrigEMemOpt,
-    {1,0,0}
-  };
-  BrigDirectiveControl get;
-  context->get_directive(8,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.controlType,get.controlType);
-  EXPECT_EQ(ref.values[0],get.values[0]);
-  EXPECT_EQ(ref.values[1],get.values[1]);
-  EXPECT_EQ(ref.values[2],get.values[2]);
-
-  input.assign("workgroupspercu 6;");
-  context->clear_context();
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0,Control(context));
-
-  BrigDirectiveControl ref1 = {
-    24,
-    BrigEDirectiveControl,
-    8,
-    BrigEMaxGperC,
-    {6,0,0}
-  };
-  context->get_directive(8,&get);
-
-  EXPECT_EQ(ref1.size,get.size);
-  EXPECT_EQ(ref1.kind,get.kind);
-  EXPECT_EQ(ref1.c_code,get.c_code);
-  EXPECT_EQ(ref1.controlType,get.controlType);
-  EXPECT_EQ(ref1.values[0],get.values[0]);
-  EXPECT_EQ(ref1.values[1],get.values[1]);
-  EXPECT_EQ(ref1.values[2],get.values[2]);
-
-  input.assign("itemsperworkgroup 2,3,4;");
-  context->clear_context();
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0,Control(context));
-
-  BrigDirectiveControl ref2 = {
-    24,
-    BrigEDirectiveControl,
-    8,
-    BrigEMaxTid,
-    {2,3,4}
-  };
-  context->get_directive(8,&get);
-
-  EXPECT_EQ(ref2.size,get.size);
-  EXPECT_EQ(ref2.kind,get.kind);
-  EXPECT_EQ(ref2.c_code,get.c_code);
-  EXPECT_EQ(ref2.controlType,get.controlType);
-  EXPECT_EQ(ref2.values[0],get.values[0]);
-  EXPECT_EQ(ref2.values[1],get.values[1]);
-  EXPECT_EQ(ref2.values[2],get.values[2]);
-
-  delete lexer;
-}
 
 TEST(CodegenTest,ControlCodegen){
   context->set_error_reporter(main_reporter);
