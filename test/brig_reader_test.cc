@@ -1111,3 +1111,71 @@ TEST(BrigKernelTest, InsertionSorter) {
   delete[] r;
   delete l;
 }
+
+TEST(BrigKernelTest,  zeller) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &zeller (kernarg_s32 %r, kernarg_s32 %m, kernarg_s32 %d, kernarg_s32 %y)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s1, [%m];\n"
+    "  cmp_gt_b1_u32 $c1, $s1,12;\n" // if n > 12 go to return
+    "  cbr $c1, @break;\n"
+    "  ld_kernarg_u32 $s2, [%d];\n"
+    "  cmp_gt_b1_u32 $c2, $s2,31;\n" // if n > 31 go to return
+    "  cbr $c2, @break;\n"
+    "  ld_kernarg_u32 $s3, [%y];\n"
+    "  add_u32 $s1, $s1, 1;\n"   // (m+1)
+    "  mul_u32 $s1, $s1, 26;\n"  // ((m+1)x26)
+    "  div_u32 $s1, $s1, 10;\n"  // (((m+1)x26)/10)
+    "  div_u32 $s4, $s3, 4;\n"   // (y/4)
+    "  div_u32 $s5, $s3, 100;\n" // (y/100)
+    "  mul_u32 $s5, $s5, 6;\n"   // ((y/100)x6)
+    "  div_u32 $s6, $s3, 400;\n" // (y/400)
+    "  add_u32 $s5, $s4, $s5;\n" // ((y/4)+((y/100)x6))
+    "  add_u32 $s6, $s6, $s5;\n" // (((y/4)+((y/100)x6)+(y/400))
+    "  add_u32 $s3, $s6, $s3;\n" // (((y/4)+((y/100)x6)+(y/400)+y)
+    "  add_u32 $s1, $s1, $s3;\n" // (((y/4)+((y/100)x6)+(y/400)+y+(((m+1)x26)/10))
+    "  add_u32 $s1, $s1, $s2;\n" // (((y/4)+((y/100)x6)+(y/400)+y+(((m+1)x26)/10)+d)
+    "  rem_s32 $s1, $s1, 7;\n"   
+    "  ld_kernarg_s32 $s0, [%r];\n"
+    "  st_global_s32 $s1, [$s0];\n"
+    "  ret;\n"
+    "@break:"                    
+    "  ld_kernarg_s32 $s0, [%r];\n"
+    "  st_global_s32 1234, [$s0];\n" // if month or day is wrong, return 1234
+    "  ret;\n"
+    "};"
+    );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  int *m_arg = new int[4];     
+  int *d_arg = new int[4];
+  int *y_arg = new int[4];
+  int *r_arg = new int;
+  m_arg[0] = 10; 
+  m_arg[1] = 10;
+  m_arg[2] = 4;
+  m_arg[3] = 10;
+  d_arg[0] = 14;
+  d_arg[1] = 21;
+  d_arg[2] = 25;
+  d_arg[3] = 10;
+  y_arg[0] = 1066;
+  y_arg[1] = 1600;
+  y_arg[2] = 1644;
+  y_arg[3] = 2012;
+  int temp[4] = {1,0,2,4};
+
+  for(int i = 0; i < 4; i++) {
+  hsa::brig::BrigEngine BE(BP);
+  void *args[] = { &r_arg, m_arg+i, d_arg+i,y_arg+i };
+    llvm::Function *fun = BP->getFunction("zeller");
+    BE.launch(fun, args);
+    EXPECT_EQ(*r_arg,temp[i]);
+  }
+  delete[] m_arg;
+  delete[] d_arg;
+  delete[] y_arg;
+  delete r_arg;
+
+}
