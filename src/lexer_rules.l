@@ -699,6 +699,12 @@ _group            { free_string(context);
                     context->token_value.storage_class = BrigGroupSpace ;
                     return _GROUP; }
 
+_partial            { free_string(context);
+                    context->token_type = ADDRESS_SPACE_IDENTIFIER;
+                    context->yycolno+=yyleng;
+                    return _PARTIAL; }
+                
+                    
 _spill            { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
                     context->token_value.storage_class = BrigSpillSpace ;

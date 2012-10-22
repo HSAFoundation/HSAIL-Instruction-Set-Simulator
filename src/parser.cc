@@ -997,83 +997,81 @@ int Instruction2Part2OpcodeNoDT(Context* context) {
 
   return 1;
 }
+
 int Instruction2Part3OpcodeFtz(Context* context) {
-
-  BrigInstBase inst = {
-    sizeof(BrigInstBase),
-    BrigEInstBase,
-    0,
-    Brigb32,
-    BrigNoPacking,
-    {0, 0, 0, 0, 0}
-  };
-
+  
+  /* Variables for storing Brig struct information */
+  BrigDataType16_t type = Brigb32;  
+  BrigOpcode32_t opcode = context->token_value.opcode;
+  BrigPacking16_t packing = BrigNoPacking;
+  BrigoOffset32_t OpOffset0 = 0, OpOffset1 = 0;
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
 
-  inst.opcode = context->token_value.opcode;
-
+  /* Check for rounding mode*/
   context->token_to_scan = yylex();
-  // TODO(Chuang): whether support for rounding
-  if (context->token_to_scan == _FTZ) {
-    if (!RoundingMode(context)) {
+  if (!RoundingMode(context)) {
       aluModifier = context->get_alu_modifier();
-    }
   }
-  // inst.packing == BrigNoPacking
-  // TODO(Chuang): whether can use packed operation without packing.
-  if (context->token_type == DATA_TYPE_ID) {
-
-    inst.type = context->token_value.data_type;
-    context->token_to_scan = yylex();
-    if (context->token_type == REGISTER) {
-      if (OperandPart2(context, &inst.o_operands[0])) {
-        return 1;
-      }
-      if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        // TODO(Chuang): judge whether operands is suitable.
-
-        if (!OperandPart2(context, &inst.o_operands[1])) {
-          if (context->token_to_scan == ';') {
-            int* aluValue = reinterpret_cast<int*>(&aluModifier);
-            if (*aluValue != 0) {
-              BrigInstMod mod = {
-                sizeof(BrigInstMod),  // size
-                BrigEInstMod,         // kind
-                inst.opcode,              // opcode
-                inst.type,         // type
-                inst.packing,        // packing
-                {0, 0, 0, 0, 0},      // o_operands[5]
-                {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-              };
-              for (int i = 0 ; i < 5 ; ++i) {
-                mod.o_operands[i] = inst.o_operands[i];
-              }
-              mod.aluModifier = aluModifier;
-              context->append_code(&mod);
-            } else {
-              context->append_code(&inst);
-            }
-            context->token_to_scan = yylex();
-            return 0;
-          } else {  // ';'
-            context->set_error(MISSING_SEMICOLON);
-          }
-        } else {  // Second Operand
-          context->set_error(MISSING_OPERAND);
-        }
-      } else {  // ','
-        context->set_error(MISSING_COMMA);
-      }
-    } else {  // First Operand
-      context->set_error(INVALID_FIRST_OPERAND);
-    }
-  } else {  // Data Type
+  
+  if (context->token_type != DATA_TYPE_ID) {
     context->set_error(INVALID_DATA_TYPE);
+    return 1;
   }
-
-  return 1;
+  type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  
+  if (context->token_type != REGISTER) {
+    context->set_error(INVALID_FIRST_OPERAND);
+    return 1;
+  }
+  if (OperandPart2(context, &OpOffset0)) {
+    context->set_error(INVALID_FIRST_OPERAND);
+    return 1;
+  }
+  
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (OperandPart2(context, &OpOffset1)) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  int* aluValue = reinterpret_cast<int*>(&aluModifier);
+  if (*aluValue != 0) {
+    BrigInstMod mod = {
+      0,  // size
+      BrigEInstMod,         // kind
+      opcode,              // opcode
+      type,         // type
+      packing,        // packing
+      {OpOffset0, OpOffset1, 0, 0, 0},      // o_operands[5]
+      {0, 0, 0, 0, 0, 0, 0}  // aluModifier
+    };
+    mod.size = sizeof(mod);
+    mod.aluModifier = aluModifier;
+    context->append_code(&mod);
+  } else {
+    BrigInstBase inst = {
+      0,
+      BrigEInstBase,
+      opcode,
+      type,
+      packing,
+      {OpOffset0, OpOffset1, 0, 0, 0}
+    };
+    inst.size = sizeof(inst);
+    context->append_code(&inst);
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
+
 int Instruction2(Context* context) {
 
   // First token must be an Instruction2Opcode
@@ -1128,7 +1126,7 @@ int Instruction3(Context* context) {
   
   if (context->token_type == DATA_TYPE_ID) {
     type = context->token_value.data_type;
-    type = (opcode == BrigClass) ? Brigb1 : type;
+    type = (opcode == BrigClass) ? (int)Brigb1 : type;
   }else{
      context->set_error(MISSING_DATA_TYPE);
      return 1;
@@ -1296,129 +1294,7 @@ int Alignment(Context* context) {
     }
 
 }
-/*
-int DeclPrefix(Context* context) {
-  if (context->token_to_scan == ALIGN) {
-    if (!Alignment(context)) {
-      // first is alignment
-      if (context->token_to_scan == CONST) {
-        context->set_symbol_modifier(BrigConst);
-        // alignment const
-        context->token_to_scan = yylex();
 
-        if ((context->token_to_scan == EXTERN) ||
-            (context->token_to_scan == STATIC)) {
-          if (context->token_to_scan == EXTERN)
-            context->set_attribute(BrigExtern);
-          else
-            context->set_attribute(BrigStatic);
-
-          // alignment const externOrStatic
-          context->token_to_scan = yylex();
-        }
-      } else if ((context->token_to_scan == EXTERN) ||
-                 (context->token_to_scan == STATIC)) {
-        // alignment externOrStatic
-        if (context->token_to_scan == EXTERN)
-          context->set_attribute(BrigExtern);
-        else
-          context->set_attribute(BrigStatic);
-
-        context->token_to_scan = yylex();
-
-        if (context->token_to_scan == CONST) {
-          // alignment externOrStatic const
-          context->set_symbol_modifier(BrigConst);
-          context->token_to_scan = yylex();
-        }
-      }
-    } else {
-      context->set_error(INVALID_ALIGNMENT);
-    }
-  } else if (context->token_to_scan == CONST) {
-    // first is const
-    context->set_symbol_modifier(BrigConst);
-    context->token_to_scan = yylex();
-
-    if (context->token_to_scan == ALIGN) {
-      if (!Alignment(context)) {
-        // const alignment
-       if ((context->token_to_scan == EXTERN) ||
-           (context->token_to_scan == STATIC)) {
-         // const alignment externOrStatic
-         if (context->token_to_scan == EXTERN)
-            context->set_attribute(BrigExtern);
-          else
-            context->set_attribute(BrigStatic);
-
-          context->token_to_scan = yylex();
-        }
-      } else {
-        context->set_error(INVALID_ALIGNMENT);
-      }
-    } else if ((context->token_to_scan == EXTERN) ||
-               (context->token_to_scan == STATIC)) {
-      // const externOrStatic
-      if (context->token_to_scan == EXTERN)
-        context->set_attribute(BrigExtern);
-      else
-        context->set_attribute(BrigStatic);
-
-      context->token_to_scan = yylex();
-
-      if (context->token_to_scan == ALIGN) {
-        if (!Alignment(context)) {
-          // const externOrStatic alignment
-        } else {
-          context->set_error(INVALID_ALIGNMENT);
-          return 1;
-        }
-      }
-    } else {  // const does not stand alone
-      return 1;
-    }
-  } else if ((context->token_to_scan == EXTERN) ||
-             (context->token_to_scan == STATIC)) {
-    // externOrStatic first
-    if (context->token_to_scan == EXTERN)
-      context->set_attribute(BrigExtern);
-    else
-      context->set_attribute(BrigStatic);
-
-    context->token_to_scan = yylex();
-
-    if (context->token_to_scan == ALIGN) {
-      if (!Alignment(context)) {
-        // externOrStatic alignment
-        if (context->token_to_scan == CONST) {
-          // externOrStatic alignment const
-          context->set_symbol_modifier(BrigConst);
-          context->token_to_scan = yylex();
-        }
-      } else {
-        context->set_error(INVALID_ALIGNMENT);
-      }
-    } else if (context->token_to_scan == CONST) {
-      // externOrStatic const
-      context->set_symbol_modifier(BrigConst);
-
-      context->token_to_scan = yylex();
-
-      if (context->token_to_scan == ALIGN) {
-        if (!Alignment(context)) {
-        } else {
-          context->set_error(INVALID_ALIGNMENT);
-          return 1;
-        }
-        // externOrStatic const alignment
-      }
-    }
-  }
-  return 0;
-}
-
-
-*/
 int DeclPrefix(Context* context){
 
     context->set_attribute(BrigNone);
@@ -7400,42 +7276,46 @@ int Sync(Context* context) {
     return 1;
 
   BrigOpcode32_t opcode = context->token_value.opcode;
-  uint32_t syncFlags = BrigPartialLevel; //default
+  uint32_t syncFlags = BrigGroupLevel | BrigGlobalLevel;
 
   context->token_to_scan = yylex();
   if (context->token_to_scan == _GLOBAL) {
     syncFlags = BrigGlobalLevel;
     context->token_to_scan = yylex();
   } else if (context->token_to_scan == _GROUP) {
-    syncFlags = BrigGroupLevel;
+    syncFlags = BrigGroupLevel;    
+    context->token_to_scan = yylex();
+  } else if(context->token_to_scan == _PARTIAL){
+    syncFlags = BrigPartialLevel;
     context->token_to_scan = yylex();
   }
-  if (context->token_to_scan == ';') {
-    BrigInstBar op_sync = {
-      sizeof(BrigInstBar),
-      BrigEInstBar,
-      opcode ,
-      Brigb32 ,
-      BrigNoPacking,
-      {0,0,0,0,0},
-      syncFlags
-    };
-    context->append_code(&op_sync);
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
+   
+  if (context->token_to_scan != ';') {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-
+  
+  BrigInstBar op_sync = {
+    sizeof(BrigInstBar),
+    BrigEInstBar,
+    opcode ,
+    Brigb32 ,
+    BrigNoPacking,
+    {0,0,0,0,0},
+    syncFlags
+  };
+  context->append_code(&op_sync);
+  context->token_to_scan = yylex();
+  return 0;
 }
+
 int Bar(Context* context) {
   // first token is BARRIER
   if(BARRIER != context->token_to_scan)
     return 1;
 
   BrigOpcode32_t opcode = context->token_value.opcode;
-  uint32_t syncFlags = BrigPartialLevel; //default
+  uint32_t syncFlags = BrigGlobalLevel | BrigGroupLevel; //default
 
   context->token_to_scan = yylex();
   BrigoOffset32_t offset = context->get_operand_offset();
@@ -7545,7 +7425,7 @@ int AtomicNoRet(Context* context) {
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0},       // o_operands[5]
     BrigAtomicCas,         // atomicOperation
-    BrigGlobalSpace,       // storageClass
+    BrigFlatSpace,       // storageClass
     0                      // memorySemantic
   };
 
