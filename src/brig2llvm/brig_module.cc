@@ -315,6 +315,9 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(WorkItemAIdFlat);
       caseInst(WorkItemId);
       caseInst(WorkItemIdFlat);
+    default:
+      check(false, "Unrecognized opcode");
+      return false;
     }
   }
 
