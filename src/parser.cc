@@ -124,35 +124,26 @@ int Query(Context* context) {
 }
 
 int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
-  BrigoOffset32_t opSize;
+  BrigoOffset32_t current_offset;
   std::string opName;
-  opSize = context->get_operand_offset();
-  if (context->token_type == REGISTER ||
-      context->token_to_scan == TOKEN_WAVESIZE) {
+  current_offset = context->get_operand_offset();
+  
+  if ((context->token_type == REGISTER) || (context->token_to_scan == TOKEN_WAVESIZE)) {
     opName = context->token_value.string_val;
   } else if (context->token_type == CONSTANT) {
-    opSize += opSize & 0x7;
-  }  // else TOKEN_GLOBAL_IDENTIFIER TOKEN_LOCAL_IDENTIFIER
+    current_offset += current_offset & 0x7;
+  } 
 
   if (!Identifier(context)) {
-    if (opSize == context->get_operand_offset()) {
-      *pRetOpOffset = context->operand_map[opName];
-    } else {
-      *pRetOpOffset = opSize;
-    }
-    context->token_to_scan = yylex();
-    return 0;
-  } else if (!BaseOperand(context)) {
-    if (opSize == context->get_operand_offset()) {
-      *pRetOpOffset = context->operand_map[opName];
-    } else {
-      *pRetOpOffset = opSize;
-    }
-    context->token_to_scan = yylex();
-    return 0;
-  }
-  return 1;
-
+    *pRetOpOffset = (current_offset == context->get_operand_offset()) ? context->operand_map[opName] : current_offset; 
+  } else if(!BaseOperand(context)){
+    *pRetOpOffset = (current_offset == context->get_operand_offset()) ? context->operand_map[opName] : current_offset;
+  }else{
+    context->set_error(INVALID_OPERAND);
+    return 1;    
+  }   
+  context->token_to_scan = yylex();
+  return 0;  
 }
 
 int Operand(Context* context) {
