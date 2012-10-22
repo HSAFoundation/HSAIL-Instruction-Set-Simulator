@@ -780,7 +780,7 @@ memopt_off          { free_string(context);
 fbar_initSizeWg     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFbarInitSizeDynamic;
+                      context->token_value.opcode = BrigFbarInit;
                       return FBAR_INITSIZEWG; }
 
 fbar_wait           { free_string(context);
@@ -810,7 +810,7 @@ fbar_release        { free_string(context);
 countup             { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigCountup;
+                      context->token_value.opcode = BrigCountUp;
                       return COUNTUP; }
 
 laneid              { free_string(context);
@@ -864,7 +864,7 @@ workitemaid_flat    { free_string(context);
 debugtrap           { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigDebugtrap;
+                      context->token_value.opcode = BrigDebugTrap;
                       return DEBUGTRAP; }
 
 abs                 { free_string(context);
@@ -888,19 +888,19 @@ not                 { free_string(context);
 popcount            { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigPopcount ;
+                      context->token_value.opcode = BrigPopCount ;
                       return POPCOUNT; }
 
 firstbit            { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFirstbit ;
+                      context->token_value.opcode = BrigFirstBit ;
                       return FIRSTBIT; }
 
 lastbit             { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigLastbit ;
+                      context->token_value.opcode = BrigLastBit ;
                       return LASTBIT; }
 
 bitrev              { free_string(context);
@@ -924,7 +924,7 @@ movs_hi             { free_string(context);
 fbar_init           { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFbarInitSizeKnown ;
+                      context->token_value.opcode = BrigFbarInit ;
                       return FBAR_INIT; }
 
 count               { free_string(context);
@@ -979,7 +979,7 @@ fexp2               { free_string(context);
 fsqrt               { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigFsqrt;
+                      context->token_value.opcode = BrigSqrt;
                       return FSQRT; }
 
 frsqrt              { free_string(context);

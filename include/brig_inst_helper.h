@@ -67,7 +67,7 @@ class BrigInstHelper {
       opcode != BrigBrn       && opcode != BrigCbr              &&
       opcode != BrigSync      && opcode != BrigBarrier          &&
       opcode != BrigRet       && opcode != BrigCall             &&
-      opcode != BrigDebugtrap && opcode != BrigNop;
+      opcode != BrigDebugTrap && opcode != BrigNop;
   }
 
   // Type methods

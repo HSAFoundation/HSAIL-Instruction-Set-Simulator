@@ -1139,9 +1139,9 @@ int Instruction3(Context* context) {
 	  if(inst_op.opcode == BrigClass)
 		inst_op.type = Brigb1;
       context->token_to_scan = yylex();
-	  	  
+
       if (!OperandPart2(context, &inst_op.o_operands[0])) {
-		
+
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
@@ -1937,7 +1937,7 @@ int OptionalWidth(Context* context) {
 		if(context->token_to_scan == ')')
 			context->token_to_scan = yylex();
 			return 0;
-		
+
       } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
         uint32_t n = context->token_value.int_val;
         if((1<= n && n<= 1024) && ((n&0x01) == 0))
@@ -2049,7 +2049,7 @@ int Branch(Context* context) {
               opLabelRef.labeldirective = context->symbol_map[label_name];
             }
             context->append_operand(&opLabelRef);
-          }  
+          }
 
           context->token_to_scan = yylex();  // should be ';'
         } else if (!Identifier(context)) {
@@ -2307,10 +2307,10 @@ int Call(Context* context) {
 		secondOpOffset = firstOpOffset;
 		context->append_operand(&emptylist);
   }
- 
+
     callInst.o_operands[1] = firstOpOffset;
     callInst.o_operands[3] = secondOpOffset;
-  
+
   // if there is CallTarget, the first operand token must be a s register.
   if (firstOpToken == TOKEN_SREGISTER) {
     if (!CallTargets(context)) {
@@ -2361,7 +2361,7 @@ int Initializer(Context* context) {
     switch(data_type){
       case Brigb1: init_type = Brigb1; break;
 
-      case Brigs8: 
+      case Brigs8:
       case Brigu8:
       case Brigb8: init_type = Brigb8; break;
 
@@ -2379,7 +2379,7 @@ int Initializer(Context* context) {
       case Brigu64:
       case Brigf64:
       case Brigb64: init_type = Brigb64; break;
-      default: 
+      default:
         context->set_error(INVALID_INITIALIZER);
         return 1;
     }
@@ -2743,7 +2743,7 @@ int SysCall(Context* context) {
   BrigInstBase syscallInst = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
-    BrigSyscall,         // opcode
+    BrigSysCall,         // opcode
     Brigb32,               // type
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0}        // o_operands[5]
@@ -3210,7 +3210,7 @@ int Instruction4FmaPart2(Context* context) {
           return 1;
         }
         context->token_to_scan = yylex();
-        if (context->token_type != REGISTER && 
+        if (context->token_type != REGISTER &&
             context->token_type != CONSTANT) {
           context->set_error(INVALID_OPERAND);
           return 1;
@@ -3223,7 +3223,7 @@ int Instruction4FmaPart2(Context* context) {
           }
           context->token_to_scan = yylex();
 
-          if (context->token_type != REGISTER && 
+          if (context->token_type != REGISTER &&
               context->token_type != CONSTANT) {
             context->set_error(INVALID_OPERAND);
             return 1;
@@ -3324,7 +3324,7 @@ int Instruction4MadPart3(Context* context) {
       }
       context->token_to_scan = yylex();
       // Sources. Can be a register or immediate value.
-      if (context->token_type != REGISTER && 
+      if (context->token_type != REGISTER &&
           context->token_type != CONSTANT) {
         context->set_error(INVALID_OPERAND);
         return 1;
@@ -3336,7 +3336,7 @@ int Instruction4MadPart3(Context* context) {
           return 1;
         }
         context->token_to_scan = yylex();
-        if (context->token_type != REGISTER && 
+        if (context->token_type != REGISTER &&
             context->token_type != CONSTANT) {
           context->set_error(INVALID_OPERAND);
           return 1;
@@ -3348,7 +3348,7 @@ int Instruction4MadPart3(Context* context) {
           }
           context->token_to_scan = yylex();
 
-          if (context->token_type != REGISTER && 
+          if (context->token_type != REGISTER &&
               context->token_type != CONSTANT) {
             context->set_error(INVALID_OPERAND);
             return 1;
@@ -3556,7 +3556,7 @@ int Instruction4CmovPart5(Context* context) {
       // then src0 must be an s register or literal value; if
       // the Length is 64-bit, then src0 must be a d register or literal value.
 
-      if (context->token_type != REGISTER && 
+      if (context->token_type != REGISTER &&
           context->token_type != CONSTANT) {
         context->set_error(INVALID_OPERAND);
         return 1;
@@ -3568,7 +3568,7 @@ int Instruction4CmovPart5(Context* context) {
           return 1;
         }
         context->token_to_scan = yylex();
-        if (context->token_type != REGISTER && 
+        if (context->token_type != REGISTER &&
             context->token_type != CONSTANT) {
           context->set_error(INVALID_OPERAND);
           return 1;
@@ -3581,7 +3581,7 @@ int Instruction4CmovPart5(Context* context) {
           }
           context->token_to_scan = yylex();
 
-          if (context->token_type != REGISTER && 
+          if (context->token_type != REGISTER &&
               context->token_type != CONSTANT) {
             context->set_error(INVALID_OPERAND);
             return 1;
@@ -3666,7 +3666,7 @@ int Instruction4ShufflePart6(Context* context) {
       }
       context->token_to_scan = yylex();
 
-      if (context->token_type != REGISTER && 
+      if (context->token_type != REGISTER &&
           context->token_type != CONSTANT) {
         context->set_error(INVALID_OPERAND);
         return 1;
@@ -3679,7 +3679,7 @@ int Instruction4ShufflePart6(Context* context) {
           return 1;
         }
         context->token_to_scan = yylex();
-        if (context->token_type != REGISTER && 
+        if (context->token_type != REGISTER &&
             context->token_type != CONSTANT) {
           context->set_error(INVALID_OPERAND);
           return 1;
@@ -5689,7 +5689,7 @@ int ImageRet(Context* context) {
                       if (second_token == _CAS) {
                         if (context->token_to_scan == ',') {
                           context->token_to_scan = yylex();
-  
+
                           if (!OperandPart2(context, &img_inst.o_operands[curOpCount++])) {
                           } else {  // Operand
                             context->set_error(MISSING_OPERAND);
@@ -6062,7 +6062,7 @@ int Instruction1Part1OpcodeDT(Context* context) {
   // and whether there should be rounding in instruction1opcode.
   context->token_to_scan = yylex();
 
-  if (inst1_op.opcode != BrigFbarInitSizeKnown &&
+  if (inst1_op.opcode != BrigFbarInit &&
       inst1_op.opcode != BrigFbarRelease) {
     // TODO(Chuang): whether support for rounding
     if (!RoundingMode(context)) {
@@ -6070,22 +6070,22 @@ int Instruction1Part1OpcodeDT(Context* context) {
     }
   }
   if ((context->token_to_scan == _B64 &&
-       inst1_op.opcode != BrigCountup) ||
-      (inst1_op.opcode == BrigCountup &&
+       inst1_op.opcode != BrigCountUp) ||
+      (inst1_op.opcode == BrigCountUp &&
        context->token_to_scan == _U32)) {
 
     inst1_op.type = context->token_value.data_type;
 
     context->token_to_scan = yylex();
     if ((context->token_to_scan == TOKEN_DREGISTER &&
-         inst1_op.opcode != BrigCountup) ||
+         inst1_op.opcode != BrigCountUp) ||
         (context->token_to_scan == TOKEN_SREGISTER &&
-         inst1_op.opcode == BrigCountup)) {
+         inst1_op.opcode == BrigCountUp)) {
       if (OperandPart2(context, &inst1_op.o_operands[0])) {
         return 1;
       }
       // Note: Fbar_Release and Fbar_Init may be a instruction2.
-      if (inst1_op.opcode == BrigFbarInitSizeKnown ||
+      if (inst1_op.opcode == BrigFbarInit ||
           inst1_op.opcode == BrigFbarRelease) {
         if (context->token_to_scan == ',')  {
           context->token_to_scan = yylex();
@@ -6153,8 +6153,8 @@ int Instruction1Part2OpcodeNoDT(Context* context) {
   }
 
   if ((context->token_to_scan == TOKEN_SREGISTER &&
-       inst1_op.opcode != BrigDebugtrap) ||
-      (inst1_op.opcode == BrigDebugtrap &&
+       inst1_op.opcode != BrigDebugTrap) ||
+      (inst1_op.opcode == BrigDebugTrap &&
        context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
     if (OperandPart2(context, &inst1_op.o_operands[0])) {
       return 1;
@@ -6955,7 +6955,7 @@ int SingleListSingle(Context * context) {
       // Note: the token has been updated
       uint32_t n = 0;
       // elementCount
-        
+
       // update the BrigDirectiveSymbol.d_init and dim
       BrigDirectiveSymbol bds ;
       BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
@@ -6963,11 +6963,11 @@ int SingleListSingle(Context * context) {
 
 
       if (0 == context->get_dim() && context->get_isArray()) {
-        // If array is empty [],  Update dim. 
+        // If array is empty [],  Update dim.
         bds.s.symbolModifier = BrigArray;
         context->set_symbol_modifier(BrigArray);
         bds.s.dim = elementCount;
-      } else if (elementCount > bds.s.dim) { 
+      } else if (elementCount > bds.s.dim) {
         context->set_error(INVALID_INITIALIZER);
         return 1;
       }
@@ -7550,7 +7550,7 @@ int Bar(Context* context) {
   BrigoOffset32_t offset = context->get_operand_offset();
 
   if (context->token_to_scan == _WIDTH) {
-    if (OptionalWidth(context)) { 
+    if (OptionalWidth(context)) {
       return 1;
     } else {
       if (offset == context->get_operand_offset()) {
@@ -7964,9 +7964,9 @@ int LabelList(Context* context) {
       context->get_directive(bds_offset,&bds);
       bds.d_init = context->get_directive_offset();
       bds.d_init += bds.d_init & 0x7;
-      // TODO(Chuang):  handle to an empty list.     
+      // TODO(Chuang):  handle to an empty list.
       if (bds.s.dim != 0) {
-        if (elementCount > bds.s.dim) { 
+        if (elementCount > bds.s.dim) {
           context->set_error(INVALID_INITIALIZER);
           return 1;
         }
@@ -8018,7 +8018,7 @@ int FloatListSingle(Context* context) {
   // TODO(Chuang): the max number is 256
 
   while (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
-    
+
     float_list[elementCount++] = context->token_value.double_val;
     context->token_to_scan = yylex();
 
@@ -8033,7 +8033,7 @@ int FloatListSingle(Context* context) {
         // Note: the token has been updated
         uint32_t n = 0;
         // elementCount
-        
+
         // update the BrigDirectiveSymbol.d_init and dim
         BrigDirectiveSymbol bds ;
         BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
@@ -8041,11 +8041,11 @@ int FloatListSingle(Context* context) {
 
 
         if (0 == context->get_dim() && context->get_isArray()) {
-          // If array is empty [],  Update dim. 
+          // If array is empty [],  Update dim.
           bds.s.symbolModifier = BrigArray;
           context->set_symbol_modifier(BrigArray);
           bds.s.dim = elementCount;
-        } else if (elementCount > bds.s.dim) { 
+        } else if (elementCount > bds.s.dim) {
           context->set_error(INVALID_INITIALIZER);
           return 1;
         }
@@ -8066,7 +8066,7 @@ int FloatListSingle(Context* context) {
 
         BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
         bdi->elementCount = bds.s.dim;
-       
+
         bdi->size = arraySize;
         bdi->kind = BrigEDirectiveInit;
         // c_code It is unused in this structure.
@@ -8139,26 +8139,26 @@ int DecimalListSingle(Context* context) {
         }
         // Note: the token has been updated
         uint32_t n = 0;
-        
+
         // update the BrigDirectiveSymbol.d_init and dim
         BrigDirectiveSymbol bds ;
         BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
         context->get_directive(bds_offset,&bds);
-        
+
 
 
         if (0 == context->get_dim() && context->get_isArray()) {
-          // If array is empty [],  Update dim. 
+          // If array is empty [],  Update dim.
           bds.s.symbolModifier = BrigArray;
           context->set_symbol_modifier(BrigArray);
           bds.s.dim = elementCount;
-        } else if (elementCount > bds.s.dim) { 
+        } else if (elementCount > bds.s.dim) {
           context->set_error(INVALID_INITIALIZER);
           return 1;
         }
         n = bds.s.dim;
         context->set_dim(bds.s.dim);
- 
+
         switch (context->get_type()) {
           case Brigb1:
             context->set_error(INVALID_INITIALIZER);
@@ -8173,7 +8173,7 @@ int DecimalListSingle(Context* context) {
         memset(array, 0, sizeof(uint8_t) * arraySize);
         BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
         bdi->elementCount = bds.s.dim;
-       
+
         bdi->size = arraySize;
         bdi->kind = BrigEDirectiveInit;
         // c_code It is unused in this structure.

@@ -5893,7 +5893,7 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
     BrigInstAtomic bils = {
       sizeof(bils),
       BrigEInstAtomic,
-      BrigFbarInitSizeKnown + 1,
+      BrigInvalidOpcode,
       Brigf64x2 + 1,
       BrigPackPsat,
       {20, 0, 0, 0, 0},
