@@ -21,9 +21,6 @@ SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 
 SET(LLVM_REQUIRES_EH "true")
 
-include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
-include(HandleLLVMOptions)
-
 # obtain specific information about llvm setup
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
@@ -34,12 +31,16 @@ ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
 SET(PROJ_SEARCH_PATH "${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
-"${PROJECT_SOURCE_DIR}/compiler/utils/unittest/googletest/include")
+"${PROJECT_SOURCE_DIR}/compiler/utils/unittest/googletest/include"
+"${PROJECT_SOURCE_DIR}/src")
 include_directories( ${PROJ_SEARCH_PATH} )
 
 LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
 
 add_subdirectory(src/brig2llvm/compiler)
+
+include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
+include(HandleLLVMOptions)
 
 add_subdirectory(src)
 add_subdirectory(src/brig2llvm)
