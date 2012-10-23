@@ -102,7 +102,7 @@ int ImageRead(Context *context);
 int Sync(Context *context);
 int Bar(Context *context);
 int AtomicNoRet(Context *context);
-int AtomModifiers(Context *context);
+
 int Location(Context* context);
 int Control(Context* context);
 int Pragma(Context* context);
@@ -145,8 +145,7 @@ int GlobalSamplerDeclPart2(Context *context);
 int InitializableDeclPart2(Context* context, BrigStorageClass32_t storage_class);
 int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset, BrigoOffset32_t* pRetOpOffset);
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
-int AtomModifiersPart2(Context* context, BrigStorageClass32_t* pStorageClass, 
-                       BrigMemorySemantic32_t* pMemorySemantic);
+int AtomModifiers(Context* context, BrigMemorySemantic32_t* pMemorySemantic);
 int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 
