@@ -46,47 +46,64 @@ public:
     const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
     validate_brig::validateOpType<T2>(RefSrc1, refbuf, getsrc1, getbuf);
 
-    if (getdest->kind == BrigEOperandRegV2 ||getdest->kind == BrigEOperandRegV4 ) {
-        const BrigOperandRegV2 *getdest_opv2 = reinterpret_cast <const BrigOperandRegV2*> (getdest);
+    if (getdest->kind == BrigEOperandRegV4) {
+        const BrigOperandRegV4 *getdest_opv = reinterpret_cast <const BrigOperandRegV4*> (getdest);
+
         const BrigOperandReg *getreg1 = 
-             reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv2 ->regs[0]]));
+             reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv ->regs[0]]));
         validate_brig::validateOpType<BrigOperandReg>(RefReg1, refbuf, getreg1, getbuf);
 
         const BrigOperandReg *getreg2 = 
-              reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv2 ->regs[1]]));
+              reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv ->regs[1]]));
         validate_brig::validateOpType<BrigOperandReg>(RefReg2, refbuf, getreg2, getbuf);
 
-        if (RefReg3&&RefReg4) {
-          const BrigOperandRegV4 *getdest_opv4 = reinterpret_cast <const BrigOperandRegV4*> (getdest);
-          const BrigOperandReg *getreg3 = 
-               reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv4->regs[2]]));
-          validate_brig::validateOpType<BrigOperandReg>(RefReg3, refbuf, getreg3, getbuf);
+        const BrigOperandReg *getreg3 = 
+               reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv->regs[2]]));
+        validate_brig::validateOpType<BrigOperandReg>(RefReg3, refbuf, getreg3, getbuf);
 
-          const BrigOperandReg *getreg4 = 
-               reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv4->regs[3]]));
-          validate_brig::validateOpType<BrigOperandReg>(RefReg4, refbuf, getreg4, getbuf);           
-        }
-      } else if (getsrc1->kind == BrigEOperandRegV2 || getsrc1->kind == BrigEOperandRegV4){
-        const BrigOperandRegV2 *getsrc1_opv2 = reinterpret_cast <const BrigOperandRegV2*> (getsrc1);
+        const BrigOperandReg *getreg4 = 
+               reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv->regs[3]]));
+        validate_brig::validateOpType<BrigOperandReg>(RefReg4, refbuf, getreg4, getbuf);           
+      } else if (getdest->kind == BrigEOperandRegV2 ){
+        const BrigOperandRegV2 *getdest_opv = reinterpret_cast <const BrigOperandRegV2*> (getdest);
+
         const BrigOperandReg *getreg1 = 
-                reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv2->regs[0]]));
+             reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv ->regs[0]]));
         validate_brig::validateOpType<BrigOperandReg>(RefReg1, refbuf, getreg1, getbuf);
 
         const BrigOperandReg *getreg2 = 
-            reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv2->regs[1]]));
+              reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_opv ->regs[1]]));
         validate_brig::validateOpType<BrigOperandReg>(RefReg2, refbuf, getreg2, getbuf);
+      } 
 
-        if (RefReg3&&RefReg4) {
-          const BrigOperandRegV4 *getsrc1_opv4 = reinterpret_cast <const BrigOperandRegV4*> (getsrc1);
-          const BrigOperandReg *getreg3 = 
-               reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv4->regs[2]]));
-          validate_brig::validateOpType<BrigOperandReg>(RefReg3, refbuf, getreg3, getbuf);
+    if (getsrc1->kind == BrigEOperandRegV4){
+      const BrigOperandRegV4 *getsrc1_opv = reinterpret_cast <const BrigOperandRegV4*> (getsrc1);
+      const BrigOperandReg *getreg1 = 
+                reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv->regs[0]]));
+      validate_brig::validateOpType<BrigOperandReg>(RefReg1, refbuf, getreg1, getbuf);
 
-          const BrigOperandReg *getreg4 = 
-                 reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv4->regs[3]]));
-          validate_brig::validateOpType<BrigOperandReg>(RefReg4, refbuf, getreg4, getbuf);           
-        }
-    } 
+      const BrigOperandReg *getreg2 = 
+            reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv->regs[1]]));
+      validate_brig::validateOpType<BrigOperandReg>(RefReg2, refbuf, getreg2, getbuf);
+
+      const BrigOperandReg *getreg3 = 
+             reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv->regs[2]]));
+      validate_brig::validateOpType<BrigOperandReg>(RefReg3, refbuf, getreg3, getbuf);
+
+      const BrigOperandReg *getreg4 = 
+                 reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv->regs[3]]));
+      validate_brig::validateOpType<BrigOperandReg>(RefReg4, refbuf, getreg4, getbuf);           
+    } else if (getsrc1->kind == BrigEOperandRegV2){
+      const BrigOperandRegV2 *getsrc1_opv = reinterpret_cast <const BrigOperandRegV2*> (getsrc1);
+
+      const BrigOperandReg *getreg1 = 
+                reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv->regs[0]]));
+      validate_brig::validateOpType<BrigOperandReg>(RefReg1, refbuf, getreg1, getbuf);
+
+      const BrigOperandReg *getreg2 = 
+            reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1_opv->regs[1]]));
+      validate_brig::validateOpType<BrigOperandReg>(RefReg2, refbuf, getreg2, getbuf);
+    }
 
     EXPECT_EQ(0, getinst->o_operands[2]);
     EXPECT_EQ(0, getinst->o_operands[3]);
