@@ -24,7 +24,7 @@
 #include "Atom_test.h"
 #include "Call_test.h"
 #include "Mul_test.h"
-#include "Image_test.h"
+#include "AtomicImage_test.h"
 
 namespace hsa {
 namespace brig {

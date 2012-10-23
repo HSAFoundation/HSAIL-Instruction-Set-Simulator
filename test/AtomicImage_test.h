@@ -7,7 +7,7 @@ namespace hsa {
 namespace brig {
 
 template <typename T2, typename T3, typename T4 = BrigOperandReg> 
-class ImageRet_Test: public BrigCodeGenTest {
+class AtomicImage_Test: public BrigCodeGenTest {
 
 private:
   const BrigInstAtomicImage* RefInst;
@@ -19,7 +19,7 @@ private:
   const T4* RefSrc4;
 
 public:
-  ImageRet_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomicImage* ref,
+  AtomicImage_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomicImage* ref,
            BrigOperandReg* Dest, BrigOperandOpaque* Src1, T2* Src2, T3* Src3, 
            T4* Src4 = NULL):
     BrigCodeGenTest(in, sbuf),
@@ -134,7 +134,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.reserved = 0;
   reg3.name = destName.size() + src2Name.size() + 2;
   
-  ImageRet_Test<BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out, &dest, &image1, &reg2, &reg3);
+  AtomicImage_Test<BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out, &dest, &image1, &reg2, &reg3);
   TestCase1.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -192,7 +192,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg4.reserved = 0;
   reg4.name = destName.size() + src2Name.size() + src3Name.size() + 3;
   
-  ImageRet_Test<BrigOperandReg, BrigOperandReg, BrigOperandReg> TestCase2(in, symbols, &out, &dest, &image1, &reg2, &reg3, &reg4);
+  AtomicImage_Test<BrigOperandReg, BrigOperandReg, BrigOperandReg> TestCase2(in, symbols, &out, &dest, &image1, &reg2, &reg3, &reg4);
   TestCase2.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -252,7 +252,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.name = destName.size() + reg1Name.size() + reg2Name.size() +
               reg3Name.size() + reg4Name.size() + 5;
   
-  ImageRet_Test<BrigOperandRegV4, BrigOperandReg> TestCase3(in, symbols, &out, &dest, &image1, &regV4, &reg3);
+  AtomicImage_Test<BrigOperandRegV4, BrigOperandReg> TestCase3(in, symbols, &out, &dest, &image1, &regV4, &reg3);
   TestCase3.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -304,7 +304,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.reserved = 0;
   reg3.name = destName.size() + reg1Name.size() + reg2Name.size() + 3;
   
-  ImageRet_Test<BrigOperandRegV2, BrigOperandReg> TestCase4(in, symbols, &out, &dest, &image1, &regV2, &reg3);
+  AtomicImage_Test<BrigOperandRegV2, BrigOperandReg> TestCase4(in, symbols, &out, &dest, &image1, &regV2, &reg3);
   TestCase4.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -356,7 +356,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.reserved = 0;
   reg3.name = destName.size() + reg1Name.size() + reg2Name.size() + 3;
   
-  ImageRet_Test<BrigOperandRegV2, BrigOperandReg> TestCase5(in, symbols, &out, &dest, &image1, &regV2, &reg3);
+  AtomicImage_Test<BrigOperandRegV2, BrigOperandReg> TestCase5(in, symbols, &out, &dest, &image1, &regV2, &reg3);
   TestCase5.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -406,7 +406,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.reserved = 0;
   reg3.name = destName.size() + 1;
   
-  ImageRet_Test<BrigOperandRegV2, BrigOperandReg> TestCase6(in, symbols, &out, &dest, &image1, &regV2, &reg3);
+  AtomicImage_Test<BrigOperandRegV2, BrigOperandReg> TestCase6(in, symbols, &out, &dest, &image1, &regV2, &reg3);
   TestCase6.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -454,7 +454,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
 
   reg3 = reg2;
   
-  ImageRet_Test<BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out, &dest, &image1, &reg2, &reg3);
+  AtomicImage_Test<BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out, &dest, &image1, &reg2, &reg3);
   TestCase7.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -509,7 +509,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.reserved = 0;
   reg3.name = destName.size() + reg2Name.size() + 2;
   
-  ImageRet_Test<BrigOperandRegV4, BrigOperandReg> TestCase8(in, symbols, &out, &dest, &image1, &regV4, &reg3);
+  AtomicImage_Test<BrigOperandRegV4, BrigOperandReg> TestCase8(in, symbols, &out, &dest, &image1, &regV4, &reg3);
   TestCase8.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -569,7 +569,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.name = destName.size() + reg1Name.size() + reg2Name.size() + 
               reg3Name.size() + reg4Name.size() + 5;
   
-  ImageRet_Test<BrigOperandRegV4, BrigOperandReg> TestCase9(in, symbols, &out, &dest, &image1, &regV4, &reg3);
+  AtomicImage_Test<BrigOperandRegV4, BrigOperandReg> TestCase9(in, symbols, &out, &dest, &image1, &regV4, &reg3);
   TestCase9.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -628,7 +628,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.name = destName.size() + reg1Name.size() + reg2Name.size() + 
               reg3Name.size() + reg4Name.size() + 5;
   
-  ImageRet_Test<BrigOperandRegV4, BrigOperandReg> TestCase10(in, symbols, &out, &dest, &image1, &regV4, &reg3);
+  AtomicImage_Test<BrigOperandRegV4, BrigOperandReg> TestCase10(in, symbols, &out, &dest, &image1, &regV4, &reg3);
   TestCase10.Run_Test(&ImageRet);
   symbols->clear();
 
