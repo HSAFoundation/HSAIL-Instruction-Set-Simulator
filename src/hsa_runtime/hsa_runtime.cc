@@ -275,7 +275,8 @@ class SimRuntimeApi : public RuntimeApi {
 
   virtual void *allocateGlobalMemory(size_t size, size_t align) {
     void *memptr;
-    posix_memalign(&memptr, std::max(sizeof(void *), align), size);
+    if(posix_memalign(&memptr, std::max(sizeof(void *), align), size))
+      return NULL;
     return memptr;
   }
 
