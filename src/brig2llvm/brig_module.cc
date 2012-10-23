@@ -1418,8 +1418,7 @@ static unsigned getNumOperands(const inst_iterator inst) {
   return 5;
 }
 
-bool BrigModule::validateAbs(const inst_iterator inst) const{
-
+bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
   if(!check(isa<BrigInstBase>(inst) && !isa<BrigInstMod>(inst),
             "Incorrect instruction kind"))
     return false;
@@ -1439,6 +1438,18 @@ bool BrigModule::validateAbs(const inst_iterator inst) const{
     return false;
 
   BrigDataType type = BrigDataType(inst->type);
+  if(!check(BrigInstHelper::isSignedTy(type) ||
+            BrigInstHelper::isUnsignedTy(type) ||
+            BrigInstHelper::isFloatTy(type),
+            "Invalid type"))
+    return false;
+
+  if(BrigInstHelper::isFloatTy(type)) {
+    if(!check(!isa<BrigOperandWaveSz>(src),
+              "Wave size illegal with floating point"))
+      return false;
+  }
+
   if(isa<BrigInstMod>(inst)) {
     if(!check(BrigInstHelper::isFloatTy(type),
               "BrigInstMod is only valid for floating point"))
@@ -1457,6 +1468,10 @@ bool BrigModule::validateAbs(const inst_iterator inst) const{
   }
 
   return true;
+}
+
+bool BrigModule::validateAbs(const inst_iterator inst) const {
+  return validateUnaryArithmetic(inst);
 }
 
 bool BrigModule::validateAdd(const inst_iterator inst) const{
@@ -1508,7 +1523,7 @@ bool BrigModule::validateMulHi(const inst_iterator inst) const{
 }
 
 bool BrigModule::validateNeg(const inst_iterator inst) const{
-  return true;
+  return validateUnaryArithmetic(inst);
 }
 
 bool BrigModule::validateRem(const inst_iterator inst) const{

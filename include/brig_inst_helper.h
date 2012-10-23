@@ -93,6 +93,16 @@ class BrigInstHelper {
       type == Brigs64x2;
   }
 
+  static bool isUnsignedTy(BrigDataType type) {
+    return
+      type == Brigu8    || type == Brigu16   || type == Brigu32   ||
+      type == Brigu64   ||
+      type == Brigu8x4  || type == Brigu8x8  || type == Brigu8x16 ||
+      type == Brigu16x2 || type == Brigu16x4 || type == Brigu16x8 ||
+      type == Brigu32x2 || type == Brigu32x4 ||
+      type == Brigu64x2;
+  }
+
   static unsigned getVectorLength(BrigDataType type) {
 
     assert(isVectorTy(type) && "Cannot get element of non-vector types");
