@@ -1158,7 +1158,7 @@ public:
     /**
      ***************************************************************************
      * @brief Set up trap handler in the current device
-     * @details This HSA device interface is used to up the trap handler 
+     * @details This HSA device interface is used to set up the trap handler 
      *          used for the associated device. 
 	 *
      * @param trapType different types of trap handler, currently, support   
@@ -1177,8 +1177,8 @@ public:
     /**
      ***************************************************************************
      * @brief Set up trap handler buffer in the current device
-     * @details This HSA device interface is used to up the trap handler buffer
-     *          corresponding to the trap handler. 
+     * @details This HSA device interface is used to set up the trap handler 
+     *          buffer corresponding to the trap handler. 
 	 *
      * @param trapType different types of trap handler, currently,
      * support runtime, debugger, exception, system call.
