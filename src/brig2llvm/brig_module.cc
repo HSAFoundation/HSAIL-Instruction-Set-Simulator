@@ -1,4 +1,5 @@
 #include "brig_module.h"
+#include "brig_inst_helper.h"
 #include "llvm/Support/raw_ostream.h"
 #include <cstring>
 #include <set>
@@ -1409,7 +1410,52 @@ bool BrigModule::validate(const oper_iterator operands) const {
   return true;
 }
 
+static unsigned getNumOperands(const inst_iterator inst) {
+  for(unsigned i = 0; i < 5; ++i) {
+    if(!inst->o_operands[i])
+      return i;
+  }
+  return 5;
+}
+
 bool BrigModule::validateAbs(const inst_iterator inst) const{
+
+  if(!check(isa<BrigInstBase>(inst) && !isa<BrigInstMod>(inst),
+            "Incorrect instruction kind"))
+    return false;
+
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  if(!check(isa<BrigOperandReg>(dest), "Destination must be a register"))
+    return false;
+
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  if(!check(isa<BrigOperandReg>(src) ||
+            isa<BrigOperandImmed>(src) ||
+            isa<BrigOperandWaveSz>(src),
+            "Destination must be a register, immediate, or wave size"))
+    return false;
+
+  BrigDataType type = BrigDataType(inst->type);
+  if(isa<BrigInstMod>(inst)) {
+    if(!check(BrigInstHelper::isFloatTy(type),
+              "BrigInstMod is only valid for floating point"))
+      return false;
+  }
+
+  if(BrigInstHelper::isVectorTy(type)) {
+    if(!check(inst->packing == BrigPackP ||
+              inst->packing == BrigPackS,
+              "Vectors must have a packing"))
+      return false;
+  } else {
+    if(!check(inst->packing == BrigNoPacking,
+              "Non-vectors must not have a packing"))
+      return false;
+  }
+
   return true;
 }
 
