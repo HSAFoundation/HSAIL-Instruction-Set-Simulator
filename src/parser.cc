@@ -4798,75 +4798,75 @@ int MulInst(Context* context) {
 
 
 int Mul24Inst(Context* context) {
-  if (context->token_to_scan == MUL24_HI ||
-      context->token_to_scan == MUL24) {
-    BrigInstBase bib = {
-      sizeof(BrigInstBase), //size
-      BrigEInstBase,        //kind
-      0,                    //opcode
-      Brigb32,              //type
-      BrigNoPacking,        //packing
-      {0,0,0,0,0}           //o_operands[5]
-    };
-    bib.opcode = context->token_value.opcode;
-    size_t opCount = 0;
 
-    context->token_to_scan = yylex();
-    if (context->token_type == DATA_TYPE_ID) {
-      if(!(_U32 == context->token_to_scan
-         || _U64 == context->token_to_scan
-         || _S32 == context->token_to_scan
-         || _S64 == context->token_to_scan)){
-         // u or s ,32 or 64
-         return 1;
-      }
-      context->set_type(context->token_value.data_type);
-      bib.type = context->get_type();
-
-      context->token_to_scan = yylex();
-
-      if (REGISTER != context->token_type){
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-      if (!OperandPart2(context, &bib.o_operands[opCount++])) {
-
-        if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-
-          if (!OperandPart2(context, &bib.o_operands[opCount++])) {
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-
-              if (!OperandPart2(context, &bib.o_operands[opCount++])) {
-                if (context->token_to_scan == ';') {
-                  context->append_code(&bib);
-
-                  context->token_to_scan = yylex();
-                  return 0;
-                } else {
-                  context->set_error(MISSING_SEMICOLON);
-                }
-              } else {
-                context->set_error(MISSING_OPERAND);
-              }
-            } else {
-              context->set_error(MISSING_COMMA);
-            }
-          } else {
-            context->set_error(MISSING_OPERAND);
-          }
-        } else {
-          context->set_error(MISSING_COMMA);
-        }
-      } else {
-        context->set_error(MISSING_OPERAND);
-      }
-    } else {
-      context->set_error(MISSING_DATA_TYPE);
-    }
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigoOffset32_t OpOffset[3] = {0,0,0};
+  if ((context->token_to_scan != MUL24_HI) &&
+      (context->token_to_scan != MUL24)) {
+    return 1;    
   }
-  return 1;
+  opcode = context->token_value.opcode;
+  context->token_to_scan = yylex();
+  size_t opCount = 0;
+
+  if (context->token_type != DATA_TYPE_ID) {
+    context->set_error(MISSING_DATA_TYPE);  
+    return 1;
+  }
+  type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+
+  if (REGISTER != context->token_type){
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+
+  if (OperandPart2(context, &OpOffset[opCount++])) {
+    context->set_error(INVALID_OPERAND);    
+    return 1;
+  }
+
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+
+  if (OperandPart2(context, &OpOffset[opCount++])) {
+    context->set_error(INVALID_OPERAND);    
+    return 1;
+  }
+  
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+
+  if (OperandPart2(context, &OpOffset[opCount++])) {
+    context->set_error(INVALID_OPERAND);    
+    return 1;
+  }  
+  
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  
+  BrigInstBase bib = {
+      0, //size
+      BrigEInstBase,        //kind
+      opcode,                    //opcode
+      type,              //type
+      BrigNoPacking,        //packing
+      {OpOffset[0],OpOffset[1],OpOffset[2],0,0}           //o_operands[5]
+    };
+  bib.size = sizeof(bib);  
+  context->append_code(&bib);
+  return 0;
+                
 }
 
 int Mad24Inst(Context* context) {
