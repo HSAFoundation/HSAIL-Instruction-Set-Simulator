@@ -28,6 +28,8 @@
 #include "AtomicImage_test.h"
 #include "Version_test.h"
 #include "FileDecl_test.h"
+#include "Location_test.h"
+#include "Pragma_test.h"
 
 namespace hsa {
 namespace brig {
@@ -2344,37 +2346,6 @@ TEST(CodegenTest, ArgumentDeclCodegen){
 	delete lexer;
 }
 
-TEST(CodegenTest,LocationCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("loc 1 10 5 ;");
-
-  BrigDirectiveLoc ref = {
-    20,                   //size
-    BrigEDirectiveLoc,    //kind
-    8,                    //c_code
-    1,                    //sourceFile
-    10,                   //sourceLine
-    5                     //sourceColumn
-  };
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0,Location(context));
-
-  BrigDirectiveLoc get;
-  context->get_directive(8,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.sourceFile,get.sourceFile);
-  EXPECT_EQ(ref.sourceLine,get.sourceLine);
-  EXPECT_EQ(ref.sourceColumn,get.sourceColumn);
-
-  delete lexer;
-}
 
 TEST(CodegenTest, ImageStore_CodeGen_Test) {
   context->set_error_reporter(main_reporter);
@@ -4000,36 +3971,6 @@ TEST(CodegenTest,ExtensionCodegen){
   BrigDirectiveExtension get;
   BrigdOffset32_t d_offset = context->get_directive_offset()
            - sizeof(BrigDirectiveExtension);
-  context->get_directive(d_offset,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.s_name,get.s_name);
-
-  delete lexer;
-}
-
-TEST(CodegenTest,PragmaCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("pragma \"once\";");
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0,Pragma(context));
-
-  BrigDirectivePragma ref = {
-    sizeof(BrigDirectivePragma),
-    BrigEDirectivePragma,
-    context->get_code_offset(),
-    context->get_string_offset() - (strlen("\"once\"") + 1)
-  };
-  BrigDirectivePragma get;
-  BrigdOffset32_t d_offset = context->get_directive_offset()
-                       -sizeof(BrigDirectivePragma);
   context->get_directive(d_offset,&get);
 
   EXPECT_EQ(ref.size,get.size);

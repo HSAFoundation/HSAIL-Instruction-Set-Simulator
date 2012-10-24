@@ -337,6 +337,23 @@ void validate(const BrigDirectiveFile* ref, const char* refstr, const BrigDirect
   EXPECT_STREQ(&refstr[ref->s_filename], &getstr[get->s_filename]);
 }
 
+void validate(const BrigDirectiveLoc* ref, const BrigDirectiveLoc* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  // EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_EQ(ref->sourceFile, get->sourceFile);
+  EXPECT_EQ(ref->sourceLine, get->sourceLine);
+  EXPECT_EQ(ref->sourceColumn, get->sourceColumn);
+}
+
+void validate(const BrigDirectivePragma* ref, const char* refstr, const BrigDirectivePragma* get, const char* getstr){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  // EXPECT_EQ(ref->c_code, get->c_code);
+  // EXPECT_EQ(ref->s_name, get->s_name); 
+  EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
+}
+
 template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
   validate(ref, get);
 }
