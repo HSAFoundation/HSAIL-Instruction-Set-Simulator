@@ -8023,56 +8023,55 @@ int Directive(Context* context) {
 
 
 int SobInit(Context *context){
- unsigned int first_token = context->token_to_scan ;
-
- if(COORD == context->token_to_scan
-    ||FILTER == context->token_to_scan
-    ||BOUNDARYU == context->token_to_scan
-    ||BOUNDARYV == context->token_to_scan
-    ||BOUNDARYW == context->token_to_scan){
-   BrigDirectiveSampler bds = { 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 0,
+ 
+  unsigned int first_token = context->token_to_scan ;
+  if(COORD != context->token_to_scan
+    &&FILTER != context->token_to_scan
+    &&BOUNDARYU != context->token_to_scan
+    &&BOUNDARYV != context->token_to_scan
+    &&BOUNDARYW != context->token_to_scan){
+    return 1;
+  }
+    
+  context->token_to_scan = yylex();
+  if('=' != context->token_to_scan){
+    context->set_error(MISSING_OPERATION);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if(TOKEN_PROPERTY != context->token_to_scan){
+    context->set_error(MISSING_PROPERTY);
+    return 1;
+  }
+  
+  BrigDirectiveSampler bds = { 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 0,
                                 0, 0, 0, 0, 0 };
   Context::context_error_t valid_dir = context->get_directive(&bds);
   bds.valid = 1;
-
-    context->token_to_scan = yylex();
-    if('=' == context->token_to_scan){
-      context->token_to_scan = yylex();
-      if(TOKEN_PROPERTY == context->token_to_scan){
-        switch(first_token){
-      case COORD:
-            bds.normalized = context->token_value.normalized;
-            break ;
-          case FILTER:
-            bds.filter = context->token_value.filter;
-            break ;
-      case BOUNDARYU:
-            bds.boundaryU = context->token_value.boundary_mode;
-            break ;
-      case BOUNDARYV:
-            bds.boundaryV = context->token_value.boundary_mode;
-            break ;
-      case BOUNDARYW:
-            bds.boundaryW = context->token_value.boundary_mode;
-            break ;
-    }
-        unsigned char *bds_charp =
-              reinterpret_cast<unsigned char*> (&bds);
-        if(valid_dir == Context::CONTEXT_OK)      
-          context->update_last_directive(bds_charp,
-                                      sizeof(bds));
-
-        context->token_to_scan = yylex();
-        return 0;
-      }else{
-    context->set_error(MISSING_PROPERTY);
-      }
-    }else{ //for '='
-      context->set_error(MISSING_IDENTIFIER);
-    }
+  switch(first_token){
+    case COORD:
+      bds.normalized = context->token_value.normalized;
+      break ;
+    case FILTER:
+      bds.filter = context->token_value.filter;
+      break ;
+    case BOUNDARYU:
+      bds.boundaryU = context->token_value.boundary_mode;
+      break ;
+    case BOUNDARYV:
+      bds.boundaryV = context->token_value.boundary_mode;
+      break ;
+    case BOUNDARYW:
+      bds.boundaryW = context->token_value.boundary_mode;
+      break ;
   }
+  unsigned char *bds_charp = reinterpret_cast<unsigned char*> (&bds);
+  if(valid_dir == Context::CONTEXT_OK)      
+    context->update_last_directive(bds_charp, sizeof(bds));
 
-  return 1;
+  context->token_to_scan = yylex();
+  return 0;
+   
 }
 
 int SobInitializer(Context *context){
@@ -8082,31 +8081,28 @@ int SobInitializer(Context *context){
   }
 
   context->token_to_scan = yylex();
-  if('{' == context->token_to_scan){
-    while(1){
+  if('{' != context->token_to_scan){
+    context->set_error(MISSING_OPENNING_BRACKET);
+    return 1;
+  }
+  
+  while(1){
       context->token_to_scan = yylex();
-      if(!SobInit(context)){
-        if(',' == context->token_to_scan){
-          continue ;
-        }else {
-          break ;
-        }
-      }else {
-        context->set_error(MISSING_IDENTIFIER);
+      if(SobInit(context)){
+        context->set_error(INVALID_INITIALIZER);
         return 1;
       }
-    }//end for while
-
-    if('}' == context->token_to_scan){
-      context->token_to_scan = yylex();
-      return 0 ;
-    }else{
-      context->set_error(MISSING_CLOSING_BRACKET);
-    }
-  }else{
-     context->set_error(MISSING_OPENNING_BRACKET);
+      if(',' != context->token_to_scan)
+        break ;      
   }
-  return 1;
+
+  if('}' != context->token_to_scan){
+    context->set_error(MISSING_CLOSING_BRACKET);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0 ;
+  
 }
 
 int GlobalSamplerDecl(Context *context){
