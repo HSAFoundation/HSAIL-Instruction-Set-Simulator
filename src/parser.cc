@@ -6729,7 +6729,7 @@ int ImageInit(Context *context) {
        context->token_to_scan = yylex();
 
        if (TOKEN_PROPERTY == context->token_to_scan) {
-         context->get_directive(context->current_img_offset,&bdi);
+         context->get_directive(&bdi);
          switch(first_token){
            case FORMAT:
              bdi.format = context->token_value.format;
@@ -6756,7 +6756,7 @@ int ImageInit(Context *context) {
       context->token_to_scan = yylex();
 
       if (TOKEN_INTEGER_CONSTANT == context->token_to_scan) {
-        context->get_directive(context->current_img_offset,&bdi);
+        context->get_directive(&bdi);
         switch(first_token){
           case WIDTH:
             bdi.width  = context->token_value.int_val;
@@ -6780,9 +6780,7 @@ int ImageInit(Context *context) {
   unsigned char *bdi_charp =
       reinterpret_cast<unsigned char *>(&bdi);
 
-  context->update_directive_bytes(bdi_charp,
-                                  context->current_img_offset,
-                                  sizeof(bdi));
+  context->update_last_directive(bdi_charp, sizeof(bdi));
 
   context->token_to_scan = yylex();
   return 0;
@@ -6837,7 +6835,6 @@ int GlobalImageDeclPart2(Context *context){
         BrigImageOrderUnknown,  //order
         BrigImageFormatUnknown  //format
       };
-      context->current_img_offset = context->get_directive_offset();
       context->append_directive(&bdi);
 
       if ('=' == context->token_to_scan) {
@@ -6849,7 +6846,7 @@ int GlobalImageDeclPart2(Context *context){
       }
 
       BrigDirectiveImage get;
-      context->get_directive(context->current_img_offset,&get);
+      context->get_directive(&get);
 
       // array for 1da or 2da,else set 1
       if (context->get_dim()){// a array
@@ -6860,9 +6857,7 @@ int GlobalImageDeclPart2(Context *context){
 
           unsigned char *bdi_charp =
             reinterpret_cast<unsigned char*>(&get);
-          context->update_directive_bytes(bdi_charp,
-                                          context->current_img_offset,
-                                          sizeof(BrigDirectiveImage));
+          context->update_last_directive(bdi_charp, sizeof(BrigDirectiveImage));
         }
       }
 
