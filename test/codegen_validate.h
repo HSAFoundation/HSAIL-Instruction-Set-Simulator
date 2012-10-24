@@ -316,6 +316,17 @@ void validate(const BrigInstAtomicImage* ref, const BrigInstAtomicImage* get){
   
 }
 
+void validate(const BrigDirectiveVersion* ref, const BrigDirectiveVersion* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  // EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_EQ(ref->major, get->major);
+  EXPECT_EQ(ref->minor, get->minor); 
+  EXPECT_EQ(ref->machine, get->machine);
+  EXPECT_EQ(ref->profile, get->profile);
+  EXPECT_EQ(ref->ftz, get->ftz);
+  EXPECT_EQ(ref->reserved, get->reserved);
+}
 
 template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
   validate(ref, get);

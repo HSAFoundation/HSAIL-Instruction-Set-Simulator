@@ -26,6 +26,7 @@
 #include "Mul_test.h"
 #include "Mov_test.h"
 #include "AtomicImage_test.h"
+#include "Version_test.h"
 
 namespace hsa {
 namespace brig {
@@ -718,97 +719,6 @@ TEST(CodegenTest, AlignmentCheck) {
   // this is a 8-byte aligned item and has a size of multiple of 8.
   // so the offset after appending this item should be a multiple of 8.
   EXPECT_EQ(0U, curr_offset%8);
-}
-
-TEST(CodegenTest, VersionCodeGen) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-  std::string input("\n version 1:0; \n");
-
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Version(context));
-
-  uint32_t curr_d_offset = context->get_directive_offset();
-
-  BrigDirectiveVersion ref = {
-    sizeof(ref),
-    BrigEDirectiveVersion,
-    0,            // unknown c_code
-    1,            // major
-    0,            // minor
-    BrigELarge,   // machine
-    BrigEFull,    // profile
-    BrigENosftz,  // ftz
-    0             // reserved
-  };
-
-
-  // get structure back
-  BrigDirectiveVersion get;
-  context->get_directive(curr_d_offset-sizeof(get), &get);
-
-  // compare two structs
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.major, get.major);
-  EXPECT_EQ(ref.minor, get.minor);
-  EXPECT_EQ(ref.machine, get.machine);
-  EXPECT_EQ(ref.profile, get.profile);
-  EXPECT_EQ(ref.ftz, get.ftz);
-
-  /* ---------- TEST 2 ---------*/
-  context->clear_context();
-
-  input.assign("version 2:0:$large;");
-
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Version(context));
-
-  // reference struct
-  ref.major = 2;
-  ref.machine = BrigELarge;
-
-  // get structure back
-  curr_d_offset = context->get_directive_offset();
-  context->get_directive(curr_d_offset-sizeof(get), &get);
-
-  // compare two structs
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.major, get.major);
-  EXPECT_EQ(ref.minor, get.minor);
-  EXPECT_EQ(ref.machine, get.machine);
-  EXPECT_EQ(ref.profile, get.profile);
-  EXPECT_EQ(ref.ftz, get.ftz);
-
-        /* TEST 3, Multi Target */
-  context->clear_context();
-  input.assign("version 2:0:$large, $reduced, $sftz;");
-
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Version(context));
-
-  // reference struct
-  ref.major = 2;
-  ref.machine = BrigELarge;
-  ref.profile = BrigEReduced;
-  ref.ftz = BrigESftz;
-
-  // get structure back
-  curr_d_offset = context->get_directive_offset();
-  context->get_directive(curr_d_offset-sizeof(get), &get);
-
-  // compare two structs
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.major, get.major);
-  EXPECT_EQ(ref.minor, get.minor);
-  EXPECT_EQ(ref.machine, get.machine);
-  EXPECT_EQ(ref.profile, get.profile);
-  EXPECT_EQ(ref.ftz, get.ftz);
-  context->clear_context();
-
-  delete lexer;
 }
 
 TEST(CodegenTest, RegisterOperandCodeGen) {
