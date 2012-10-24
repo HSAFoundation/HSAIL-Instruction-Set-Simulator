@@ -27,6 +27,7 @@
 #include "Mov_test.h"
 #include "AtomicImage_test.h"
 #include "Version_test.h"
+#include "FileDecl_test.h"
 
 namespace hsa {
 namespace brig {
@@ -2341,35 +2342,6 @@ TEST(CodegenTest, ArgumentDeclCodegen){
 	EXPECT_EQ(ref.reserved, get.reserved);
 	
 	delete lexer;
-}
-
-TEST(CodegenTest,FileDeclCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("file 1 \"math.c\" ;");
-
-  BrigDirectiveFile ref = {
-    16,                   //size
-    BrigEDirectiveFile,   //kind
-    8,                    //c_code
-    1,                    //fileid
-    8                     //s_filename
-  };
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0,FileDecl(context));
-
-  BrigDirectiveFile get;
-  context->get_directive(8,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.fileid,get.fileid);
-  EXPECT_EQ(ref.s_filename,get.s_filename);
-  delete lexer;
 }
 
 TEST(CodegenTest,LocationCodegen){

@@ -328,6 +328,15 @@ void validate(const BrigDirectiveVersion* ref, const BrigDirectiveVersion* get){
   EXPECT_EQ(ref->reserved, get->reserved);
 }
 
+void validate(const BrigDirectiveFile* ref, const char* refstr, const BrigDirectiveFile* get, const char* getstr){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  // EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_EQ(ref->fileid, get->fileid);
+  // EXPECT_EQ(ref->s_filename, get->s_filename); 
+  EXPECT_STREQ(&refstr[ref->s_filename], &getstr[get->s_filename]);
+}
+
 template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
   validate(ref, get);
 }
@@ -335,6 +344,7 @@ template <typename T> void validateOpType(const T* ref, const char* refstr, cons
 template <> void validateOpType <BrigOperandReg>(const BrigOperandReg* ref, const char* refstr, const BrigOperandReg* get, const char* getstr){
   validate(ref, refstr, get, getstr);
 }
+
 
 }//namespace validate_brig
 }
