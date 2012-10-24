@@ -39,7 +39,7 @@ TEST(CodegenTest, Extension_CodeGen) {
    
   /************************************* Test Case 1 ************************************/
   in.assign("extension \"\\device\\amd.hsa\";\n");
-  buf->append("\"\\device\\amd.hsa\"");
+  buf->append("\\device\\amd.hsa");
 
   out.size = sizeof(out);
   out.kind = BrigEDirectiveExtension;

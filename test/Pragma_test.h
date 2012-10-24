@@ -39,7 +39,7 @@ TEST(CodegenTest, Pragma_CodeGen) {
    
   /************************************* Test Case 1 ************************************/
   in.assign("pragma \"once\";\n");
-  buf->append("\"once\"");
+  buf->append("once");
 
   out.size = sizeof(out);
   out.kind = BrigEDirectivePragma;

@@ -39,7 +39,7 @@ TEST(CodegenTest, FileDecl_CodeGen) {
    
   /************************************* Test Case 1 ************************************/
   in.assign("file 1 \"math.c\";\n");
-  buf->append("\"math.c\"");
+  buf->append("math.c");
 
   out.size = sizeof(out);
   out.kind = BrigEDirectiveFile;
