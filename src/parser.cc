@@ -8021,6 +8021,7 @@ int Directive(Context* context) {
   }
 }
 
+
 int SobInit(Context *context){
  unsigned int first_token = context->token_to_scan ;
 
@@ -8031,7 +8032,7 @@ int SobInit(Context *context){
     ||BOUNDARYW == context->token_to_scan){
    BrigDirectiveSampler bds = { 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 0,
                                 0, 0, 0, 0, 0 };
-  context->get_directive(context->current_samp_offset,&bds);
+  Context::context_error_t valid_dir = context->get_directive(&bds);
   bds.valid = 1;
 
     context->token_to_scan = yylex();
@@ -8057,9 +8058,9 @@ int SobInit(Context *context){
     }
         unsigned char *bds_charp =
               reinterpret_cast<unsigned char*> (&bds);
-        context->update_directive_bytes(bds_charp,
-                                        context->current_samp_offset,
-                                        sizeof(bds));
+        if(valid_dir == Context::CONTEXT_OK)      
+          context->update_last_directive(bds_charp,
+                                      sizeof(bds));
 
         context->token_to_scan = yylex();
         return 0;
@@ -8119,26 +8120,28 @@ int GlobalSamplerDecl(Context *context){
 
 int GlobalSamplerDeclPart2(Context *context){
   // First token has already been verified as GLOBAL
+  if (_SAMP != context->token_to_scan){
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan){
+     context->set_error(MISSING_IDENTIFIER);
+     return 1;
+  }
+  std::string var_name(context->token_value.string_val);
+  int var_name_offset = context->add_symbol(var_name);
+  context->token_to_scan = yylex();
 
-  if (_SAMP == context->token_to_scan){
-    context->token_to_scan = yylex();
-    if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan){
-      std::string var_name(context->token_value.string_val);
-      int var_name_offset = context->add_symbol(var_name);
+  context->set_dim(0);
 
-      context->token_to_scan = yylex();
+  if ('[' == context->token_to_scan) {
+    if (ArrayDimensionSet(context)) {
+      context->set_error(INVALID_ARRAY_DIMENSIONS);
+      return 1;
+    }
+  }
 
-      // set default value(scalar)
-      context->set_dim(0);
-      //context->set_symbol_modifier(BrigArray);
-      if ('[' == context->token_to_scan) {
-        if (!ArrayDimensionSet(context)) {
-        } else {
-          return 1;
-        }
-      }
-
-      BrigDirectiveSampler bds = {
+  BrigDirectiveSampler bds = {
         sizeof(BrigDirectiveSampler),      //size
         BrigEDirectiveSampler,             //kind
         {
@@ -8159,29 +8162,22 @@ int GlobalSamplerDeclPart2(Context *context){
         0,                      //boundaryV
         0,                      //boundaryW
         0                       //reserved1
-      };
-      context->current_samp_offset = context->get_directive_offset();
-      context->append_directive(&bds);
+  };
+  context->append_directive(&bds);
 
-      if ('=' == context->token_to_scan) {
-        if (!SobInitializer(context)) {
-        } else {
-          context->set_error(INVALID_IMAGE_INIT);
-          return 1;
-        }
-      }
-
-      if (';' == context->token_to_scan) {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
+  if ('=' == context->token_to_scan) {
+    if (SobInitializer(context)) {
+      context->set_error(INVALID_IMAGE_INIT);
+      return 1;
     }
-  } else {
-    context->set_error(MISSING_IDENTIFIER);
   }
-  return 1;
+
+  if (';' != context->token_to_scan){
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }  
+  context->token_to_scan = yylex();
+  return 0;  
 }
 
 int GlobalInitializablePart2(Context* context){
