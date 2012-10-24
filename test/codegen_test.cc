@@ -26,6 +26,7 @@
 #include "Mul_test.h"
 #include "Mov_test.h"
 #include "AtomicImage_test.h"
+#include "Cvt_test.h"
 
 namespace hsa {
 namespace brig {
