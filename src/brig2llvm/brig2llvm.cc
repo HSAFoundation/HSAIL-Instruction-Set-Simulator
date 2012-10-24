@@ -20,6 +20,7 @@ namespace hsa{
 namespace brig{
 
 void BrigProgram::delModule(llvm::Module *M) {
+  if(!M) return;
   llvm::LLVMContext *C = &M->getContext();
   delete M;
   delete C;
@@ -456,7 +457,7 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 
   if(brigDest) {
     llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
-    llvm::PointerType *destPtrTy = 
+    llvm::PointerType *destPtrTy =
       llvm::cast<llvm::PointerType>(destAddr->getType());
     llvm::Type *destTy = destPtrTy->getElementType();
     llvm::Value *resultVal = encodePacking(B, resultRaw, destTy, inst, helper);

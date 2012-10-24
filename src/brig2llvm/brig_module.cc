@@ -1417,6 +1417,54 @@ static unsigned getNumOperands(const inst_iterator inst) {
   return 5;
 }
 
+template<class T> static bool getType(T *oper, BrigDataType *type) {
+  if(!oper) return false;
+  *type = BrigDataType(oper->type);
+  return true;
+}
+
+static bool getType(const oper_iterator oper, BrigDataType *type) {
+
+  if(getType(dyn_cast<BrigOperandAddress>(oper), type))
+    return true;
+
+  if(getType(dyn_cast<BrigOperandCompound>(oper), type))
+    return true;
+
+  if(getType(dyn_cast<BrigOperandImmed>(oper), type))
+    return true;
+
+  if(getType(dyn_cast<BrigOperandIndirect>(oper), type))
+    return true;
+
+  if(getType(dyn_cast<BrigOperandReg>(oper), type))
+    return true;
+
+  if(getType(dyn_cast<BrigOperandRegV2>(oper), type))
+    return true;
+
+  if(getType(dyn_cast<BrigOperandRegV4>(oper), type))
+    return true;
+
+  return false;
+}
+
+static bool isCompatibleSrc(BrigDataType type, const oper_iterator oper) {
+  if(isa<BrigOperandWaveSz>(oper))
+    return
+      BrigInstHelper::isSignedTy(type)   ||
+      BrigInstHelper::isUnsignedTy(type) ||
+      BrigInstHelper::isBitTy(type);
+
+  BrigDataType srcTy;
+  if(!getType(oper, &srcTy))
+    return false;
+
+  const size_t instSize = BrigInstHelper::getTypeSize(type);
+  const size_t srcSize = BrigInstHelper::getTypeSize(srcTy);
+  return instSize == srcSize;
+}
+
 bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
 
   bool valid = true;
@@ -1429,7 +1477,8 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
     return false;
 
   oper_iterator dest(S_.operands + inst->o_operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+    valid &= check(destReg, "Destination must be a register");
 
   oper_iterator src(S_.operands + inst->o_operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
@@ -1463,6 +1512,12 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
   }
 
   valid &= check(BrigInstHelper::getTypeSize(type) <= 64, "Illegal data type");
+
+  valid &= check(BrigInstHelper::getTypeSize(type) <=
+                 BrigInstHelper::getTypeSize(BrigDataType(destReg->type)),
+                 "Destination register is too small");
+
+  valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
 
   return valid;
 }

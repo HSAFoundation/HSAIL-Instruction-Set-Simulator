@@ -103,6 +103,16 @@ class BrigInstHelper {
       type == Brigu64x2;
   }
 
+  static bool isBitTy(BrigDataType type) {
+    return
+      type == Brigb1  ||
+      type == Brigb8  ||
+      type == Brigb16 ||
+      type == Brigb32 ||
+      type == Brigb64 ||
+      type == Brigb128;
+  }
+
   static unsigned getVectorLength(BrigDataType type) {
 
     assert(isVectorTy(type) && "Cannot get length of non-vector types");
@@ -179,7 +189,6 @@ class BrigInstHelper {
 
     return false;
   }
-
 
   static bool isBroadcast(BrigPacking packing, unsigned opnum) {
     if(opnum == 1) {
