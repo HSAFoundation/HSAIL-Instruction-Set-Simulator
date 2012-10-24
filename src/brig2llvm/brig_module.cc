@@ -775,22 +775,21 @@ template<typename T> bool BrigModule::validateSize(const T *brig) const{
 }
 
 // validating the code section
-bool BrigModule::validate(const BrigAluModifier *c) const {
+bool BrigModule::validate(const BrigAluModifier *c, BrigDataType type) const {
   bool valid = true;
-  if(c->approx == 1) {
-    valid &= check(c->floatOrInt == 1,
-                   "Invalid floatOrInt");
-  }
-  if(c->floatOrInt == 1) {
-    valid &= check(c->hi == 0,
-                   "Invalid hi");
-  }
-  if(c->floatOrInt == 0) {
-    valid &= check(c->ftz == 0,
-                   "Invalid ftz");
-  }
-  valid &= check(c->reserved == 0,
-                 "Invalid reserved");
+  if(c->approx == 1)
+    valid &= check(c->floatOrInt == 1, "Invalid floatOrInt");
+
+  if(c->floatOrInt == 1)
+    valid &= check(c->hi == 0, "Invalid hi");
+
+  if(c->floatOrInt == 0)
+    valid &= check(c->ftz == 0, "Invalid ftz");
+
+  if(BrigInstHelper::isFloatTy(type))
+    valid &= check(c->floatOrInt == 1, "Type does not match aluModifier");
+
+  valid &= check(c->reserved == 0, "Invalid reserved");
   return valid;
 }
 
@@ -913,7 +912,7 @@ bool BrigModule::validate(const BrigInstCmp *code) const {
                    "o_operands past the operands section");
     }
   }
-  valid &= validate(&code->aluModifier);
+  valid &= validate(&code->aluModifier, BrigDataType(code->type));
   valid &= check(code->comparisonOperator <= BrigSgtu,
                  "Invalid comparisonOperator");
   valid &= check(code->sourceType <= Brigf64x2,
@@ -960,7 +959,7 @@ bool BrigModule::validate(const BrigInstCvt *code) const {
                    "o_operands past the operands section");
     }
   }
-  valid &= validate(&code->aluModifier);
+  valid &= validate(&code->aluModifier, BrigDataType(code->type));
   valid &= check(code->stype <= Brigf64x2,
                  "Invalid stype");
   valid &= check(code->reserved == 0,
@@ -1040,7 +1039,7 @@ bool BrigModule::validate(const BrigInstMod *code) const {
                    "o_operands past the operands section");
     }
   }
-  valid &= validate(&code->aluModifier);
+  valid &= validate(&code->aluModifier, BrigDataType(code->type));
   return valid;
 }
 bool BrigModule::validate(const BrigInstRead *code) const {
@@ -1419,6 +1418,9 @@ static unsigned getNumOperands(const inst_iterator inst) {
 }
 
 bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
+
+  bool valid = true;
+
   if(!check(isa<BrigInstBase>(inst) && !isa<BrigInstMod>(inst),
             "Incorrect instruction kind"))
     return false;
@@ -1427,47 +1429,42 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
     return false;
 
   oper_iterator dest(S_.operands + inst->o_operands[0]);
-  if(!check(isa<BrigOperandReg>(dest), "Destination must be a register"))
-    return false;
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
 
   oper_iterator src(S_.operands + inst->o_operands[1]);
-  if(!check(isa<BrigOperandReg>(src) ||
-            isa<BrigOperandImmed>(src) ||
-            isa<BrigOperandWaveSz>(src),
-            "Destination must be a register, immediate, or wave size"))
-    return false;
+  valid &= check(isa<BrigOperandReg>(src) ||
+                 isa<BrigOperandImmed>(src) ||
+                 isa<BrigOperandWaveSz>(src),
+                 "Destination must be a register, immediate, or wave size");
 
   BrigDataType type = BrigDataType(inst->type);
-  if(!check(BrigInstHelper::isSignedTy(type) ||
-            BrigInstHelper::isUnsignedTy(type) ||
-            BrigInstHelper::isFloatTy(type),
-            "Invalid type"))
-    return false;
+  valid &= check(BrigInstHelper::isSignedTy(type) ||
+                 BrigInstHelper::isUnsignedTy(type) ||
+                 BrigInstHelper::isFloatTy(type),
+                 "Invalid type");
 
-  if(BrigInstHelper::isFloatTy(type)) {
-    if(!check(!isa<BrigOperandWaveSz>(src),
-              "Wave size illegal with floating point"))
-      return false;
-  }
+  if(BrigInstHelper::isFloatTy(type))
+    valid &= check(!isa<BrigOperandWaveSz>(src),
+                   "Wave size illegal with floating point");
 
-  if(isa<BrigInstMod>(inst)) {
-    if(!check(BrigInstHelper::isFloatTy(type),
-              "BrigInstMod is only valid for floating point"))
-      return false;
+  if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
+    valid &= check(BrigInstHelper::isFloatTy(type),
+                   "BrigInstMod is only valid for floating point");
+    valid &= check(!mod->aluModifier.fbar,
+                   "Unary arithmetic cannot have a barrier");
   }
 
   if(BrigInstHelper::isVectorTy(type)) {
-    if(!check(inst->packing == BrigPackP ||
-              inst->packing == BrigPackS,
-              "Vectors must have a packing"))
-      return false;
+    valid &= check(inst->packing == BrigPackP || inst->packing == BrigPackS,
+                   "Vectors must have a packing");
   } else {
-    if(!check(inst->packing == BrigNoPacking,
-              "Non-vectors must not have a packing"))
-      return false;
+    valid &= check(inst->packing == BrigNoPacking,
+                   "Non-vectors must not have a packing");
   }
 
-  return true;
+  valid &= check(BrigInstHelper::getTypeSize(type) <= 64, "Illegal data type");
+
+  return valid;
 }
 
 bool BrigModule::validateAbs(const inst_iterator inst) const {
