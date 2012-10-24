@@ -1466,7 +1466,7 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
 
   bool valid = true;
 
-  if(!check(isa<BrigInstBase>(inst) && !isa<BrigInstMod>(inst),
+  if(!check(isa<BrigInstBase>(inst) || isa<BrigInstMod>(inst),
             "Incorrect instruction kind"))
     return false;
 
