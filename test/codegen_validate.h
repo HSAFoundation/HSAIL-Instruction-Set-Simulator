@@ -354,6 +354,14 @@ void validate(const BrigDirectivePragma* ref, const char* refstr, const BrigDire
   EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
 }
 
+void validate(const BrigDirectiveExtension* ref, const char* refstr, const BrigDirectiveExtension* get, const char* getstr){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  // EXPECT_EQ(ref->c_code, get->c_code);
+  // EXPECT_EQ(ref->s_name, get->s_name); 
+  EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
+}
+
 template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
   validate(ref, get);
 }

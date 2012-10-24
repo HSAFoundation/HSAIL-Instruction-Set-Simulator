@@ -30,6 +30,7 @@
 #include "FileDecl_test.h"
 #include "Location_test.h"
 #include "Pragma_test.h"
+#include "Extension_test.h"
 
 namespace hsa {
 namespace brig {
@@ -3946,37 +3947,6 @@ TEST(CodegenTest,  Instruction4_Shuffle_CodeGen_SimpleTest) {
   EXPECT_EQ(shuffleRef.o_operands[2], getShuffle.o_operands[2]);
   EXPECT_EQ(shuffleRef.o_operands[3], getShuffle.o_operands[3]);
   EXPECT_EQ(shuffleRef.o_operands[4], getShuffle.o_operands[4]);
-
-  delete lexer;
-}
-
-TEST(CodegenTest,ExtensionCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("extension \"\\device\\amd.hsa\";");
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  size_t str_len = strlen("\"\\device\\amd.hsa\"") + 1;
-  EXPECT_EQ(0,Extension(context));
-
-  BrigDirectiveExtension ref = {
-    sizeof(BrigDirectiveExtension),
-    BrigEDirectiveExtension,
-    context->get_code_offset(),
-    context->get_string_offset() - str_len
-  };
-  BrigDirectiveExtension get;
-  BrigdOffset32_t d_offset = context->get_directive_offset()
-           - sizeof(BrigDirectiveExtension);
-  context->get_directive(d_offset,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.s_name,get.s_name);
 
   delete lexer;
 }
