@@ -1415,36 +1415,43 @@ static unsigned getNumOperands(const inst_iterator inst) {
   return 5;
 }
 
-template<class T> static bool getType(T *oper, BrigDataType *type) {
-  if(!oper) return false;
-  *type = BrigDataType(oper->type);
-  return true;
+static const BrigDataType *getType(const oper_iterator oper) {
+
+  if(const BrigOperandAddress *address = dyn_cast<BrigOperandAddress>(oper))
+    return (const BrigDataType *) &address->type;
+
+  if(const BrigOperandCompound *compound = dyn_cast<BrigOperandCompound>(oper))
+    return (const BrigDataType *) &compound->type;
+
+  if(const BrigOperandImmed *immed = dyn_cast<BrigOperandImmed>(oper))
+    return (const BrigDataType *) &immed->type;
+
+  if(const BrigOperandIndirect *indirect = dyn_cast<BrigOperandIndirect>(oper))
+    return (const BrigDataType *) &indirect->type;
+
+  if(const BrigOperandReg *reg = dyn_cast<BrigOperandReg>(oper))
+    return (const BrigDataType *) &reg->type;
+
+  if(const BrigOperandRegV2 *regV2 = dyn_cast<BrigOperandRegV2>(oper))
+    return (const BrigDataType *) &regV2->type;
+
+  if(const BrigOperandRegV4 *regV4 = dyn_cast<BrigOperandRegV4>(oper))
+    return (const BrigDataType *) &regV4->type;
+
+  return NULL;
 }
 
-static bool getType(const oper_iterator oper, BrigDataType *type) {
+static const BrigAluModifier *getAluModifier(const inst_iterator inst) {
+  if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
+    return &cmp->aluModifier;
 
-  if(getType(dyn_cast<BrigOperandAddress>(oper), type))
-    return true;
+  if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
+    return &cvt->aluModifier;
 
-  if(getType(dyn_cast<BrigOperandCompound>(oper), type))
-    return true;
+  if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst))
+    return &mod->aluModifier;
 
-  if(getType(dyn_cast<BrigOperandImmed>(oper), type))
-    return true;
-
-  if(getType(dyn_cast<BrigOperandIndirect>(oper), type))
-    return true;
-
-  if(getType(dyn_cast<BrigOperandReg>(oper), type))
-    return true;
-
-  if(getType(dyn_cast<BrigOperandRegV2>(oper), type))
-    return true;
-
-  if(getType(dyn_cast<BrigOperandRegV4>(oper), type))
-    return true;
-
-  return false;
+  return NULL;
 }
 
 static bool isCompatibleSrc(BrigDataType type, const oper_iterator oper) {
@@ -1454,12 +1461,11 @@ static bool isCompatibleSrc(BrigDataType type, const oper_iterator oper) {
       BrigInstHelper::isUnsignedTy(type) ||
       BrigInstHelper::isBitTy(type);
 
-  BrigDataType srcTy;
-  if(!getType(oper, &srcTy))
-    return false;
+  const BrigDataType *srcTy = getType(oper);
+  if(!srcTy) return false;
 
   const size_t instSize = BrigInstHelper::getTypeSize(type);
-  const size_t srcSize = BrigInstHelper::getTypeSize(srcTy);
+  const size_t srcSize = BrigInstHelper::getTypeSize(*srcTy);
   return instSize == srcSize;
 }
 
@@ -1493,8 +1499,14 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
     valid &= check(BrigInstHelper::isFloatTy(type),
                    "BrigInstMod is only valid for floating point");
+    valid &= check(!mod->aluModifier.floatOrInt,
+                   "Incompatible ALU modifier");
+    valid &= check(!mod->aluModifier.floatOrInt,
+                   "Incompatible ALU modifier");
+    valid &= check(!mod->aluModifier.approx,
+                   "Incompatible ALU modifier");
     valid &= check(!mod->aluModifier.fbar,
-                   "Unary arithmetic cannot have a barrier");
+                   "Incompatible ALU modifier");
   }
 
   if(BrigInstHelper::isVectorTy(type)) {
@@ -1517,494 +1529,505 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateAbs(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(!getAluModifier(inst),  "Abs may not have an aluModifier");
+  valid &= validateUnaryArithmetic(inst);
+  return valid;
+}
+
+bool BrigModule::validateAdd(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateBorrow(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateCarry(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateCopySign(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateDiv(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateFma(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateFract(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
+                 "Fract is only valid for floating point types");
+  valid &= validateUnaryArithmetic(inst);
+  return valid;
+}
+
+bool BrigModule::validateMad(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateMax(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateMin(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateMul(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateMulHi(const inst_iterator inst) const {
+  return true;
+}
+
+bool BrigModule::validateNeg(const inst_iterator inst) const {
   return validateUnaryArithmetic(inst);
 }
 
-bool BrigModule::validateAdd(const inst_iterator inst) const{
+bool BrigModule::validateRem(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateBorrow(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateCarry(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateCopySign(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateDiv(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateFma(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateFract(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateMad(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateMax(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateMin(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateMul(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateMulHi(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateNeg(const inst_iterator inst) const{
-  return validateUnaryArithmetic(inst);
-}
-
-bool BrigModule::validateRem(const inst_iterator inst) const{
-  return true;
-}
-
-bool BrigModule::validateSqrt(const inst_iterator inst) const{
-  return true;
+bool BrigModule::validateSqrt(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
+                 "Sqrt is only valid for floating point types");
+  valid &= validateUnaryArithmetic(inst);
+  return valid;
 }
 
-bool BrigModule::validateSub(const inst_iterator inst) const{
+bool BrigModule::validateSub(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMad24(const inst_iterator inst) const{
+bool BrigModule::validateMad24(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMad24Hi(const inst_iterator inst) const{
+bool BrigModule::validateMad24Hi(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMul24(const inst_iterator inst) const{
+bool BrigModule::validateMul24(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMul24Hi(const inst_iterator inst) const{
+bool BrigModule::validateMul24Hi(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateShl(const inst_iterator inst) const{
+bool BrigModule::validateShl(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateShr(const inst_iterator inst) const{
+bool BrigModule::validateShr(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateAnd(const inst_iterator inst) const{
+bool BrigModule::validateAnd(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateNot(const inst_iterator inst) const{
+bool BrigModule::validateNot(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateOr(const inst_iterator inst) const{
+bool BrigModule::validateOr(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validatePopCount(const inst_iterator inst) const{
+bool BrigModule::validatePopCount(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateXor(const inst_iterator inst) const{
+bool BrigModule::validateXor(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateBitRev(const inst_iterator inst) const{
+bool BrigModule::validateBitRev(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateBitSelect(const inst_iterator inst) const{
+bool BrigModule::validateBitSelect(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateExtract(const inst_iterator inst) const{
+bool BrigModule::validateExtract(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFirstBit(const inst_iterator inst) const{
+bool BrigModule::validateFirstBit(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateInsert(const inst_iterator inst) const{
+bool BrigModule::validateInsert(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateLastBit(const inst_iterator inst) const{
+bool BrigModule::validateLastBit(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateLda(const inst_iterator inst) const{
+bool BrigModule::validateLda(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateLdc(const inst_iterator inst) const{
+bool BrigModule::validateLdc(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMov(const inst_iterator inst) const{
+bool BrigModule::validateMov(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMovdHi(const inst_iterator inst) const{
+bool BrigModule::validateMovdHi(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMovdLo(const inst_iterator inst) const{
+bool BrigModule::validateMovdLo(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMovsHi(const inst_iterator inst) const{
+bool BrigModule::validateMovsHi(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMovsLo(const inst_iterator inst) const{
+bool BrigModule::validateMovsLo(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateShuffle(const inst_iterator inst) const{
+bool BrigModule::validateShuffle(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateUnpackHi(const inst_iterator inst) const{
+bool BrigModule::validateUnpackHi(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateUnpackLo(const inst_iterator inst) const{
+bool BrigModule::validateUnpackLo(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCmov(const inst_iterator inst) const{
+bool BrigModule::validateCmov(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateClass(const inst_iterator inst) const{
+bool BrigModule::validateClass(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFcos(const inst_iterator inst) const{
+bool BrigModule::validateFcos(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFexp2(const inst_iterator inst) const{
+bool BrigModule::validateFexp2(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFlog2(const inst_iterator inst) const{
+bool BrigModule::validateFlog2(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFrcp(const inst_iterator inst) const{
+bool BrigModule::validateFrcp(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFrsqrt(const inst_iterator inst) const{
+bool BrigModule::validateFrsqrt(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFsin(const inst_iterator inst) const{
+bool BrigModule::validateFsin(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateBitAlign(const inst_iterator inst) const{
+bool BrigModule::validateBitAlign(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateByteAlign(const inst_iterator inst) const{
+bool BrigModule::validateByteAlign(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateF2u4(const inst_iterator inst) const{
+bool BrigModule::validateF2u4(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateLerp(const inst_iterator inst) const{
+bool BrigModule::validateLerp(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSad(const inst_iterator inst) const{
+bool BrigModule::validateSad(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSad2(const inst_iterator inst) const{
+bool BrigModule::validateSad2(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSad4(const inst_iterator inst) const{
+bool BrigModule::validateSad4(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSad4Hi(const inst_iterator inst) const{
+bool BrigModule::validateSad4Hi(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateUnpack0(const inst_iterator inst) const{
+bool BrigModule::validateUnpack0(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateUnpack1(const inst_iterator inst) const{
+bool BrigModule::validateUnpack1(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateUnpack2(const inst_iterator inst) const{
+bool BrigModule::validateUnpack2(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateUnpack3(const inst_iterator inst) const{
+bool BrigModule::validateUnpack3(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSegmentp(const inst_iterator inst) const{
+bool BrigModule::validateSegmentp(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFtoS(const inst_iterator inst) const{
+bool BrigModule::validateFtoS(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateStoF(const inst_iterator inst) const{
+bool BrigModule::validateStoF(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCmp(const inst_iterator inst) const{
+bool BrigModule::validateCmp(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validatePackedCmp(const inst_iterator inst) const{
+bool BrigModule::validatePackedCmp(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCvt(const inst_iterator inst) const{
+bool BrigModule::validateCvt(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateLd(const inst_iterator inst) const{
+bool BrigModule::validateLd(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSt(const inst_iterator inst) const{
+bool BrigModule::validateSt(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateAtomic(const inst_iterator inst) const{
+bool BrigModule::validateAtomic(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateAtomicNoRet(const inst_iterator inst) const{
+bool BrigModule::validateAtomicNoRet(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateRdImage(const inst_iterator inst) const{
+bool BrigModule::validateRdImage(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateLdImage(const inst_iterator inst) const{
+bool BrigModule::validateLdImage(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateStImage(const inst_iterator inst) const{
+bool BrigModule::validateStImage(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateAtomicImage(const inst_iterator inst) const{
+bool BrigModule::validateAtomicImage(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateAtomicNoRetImage(const inst_iterator inst) const{
+bool BrigModule::validateAtomicNoRetImage(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateQueryArray(const inst_iterator inst) const{
+bool BrigModule::validateQueryArray(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateQueryData(const inst_iterator inst) const{
+bool BrigModule::validateQueryData(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateQueryDepth(const inst_iterator inst) const{
+bool BrigModule::validateQueryDepth(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateQueryFiltering(const inst_iterator inst) const{
+bool BrigModule::validateQueryFiltering(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateQueryHeight(const inst_iterator inst) const{
+bool BrigModule::validateQueryHeight(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateQueryNormalized(const inst_iterator inst) const{
+bool BrigModule::validateQueryNormalized(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateQueryOrder(const inst_iterator inst) const{
+bool BrigModule::validateQueryOrder(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateQueryWidth(const inst_iterator inst) const{
+bool BrigModule::validateQueryWidth(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCbr(const inst_iterator inst) const{
+bool BrigModule::validateCbr(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateBrn(const inst_iterator inst) const{
+bool BrigModule::validateBrn(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateBarrier(const inst_iterator inst) const{
+bool BrigModule::validateBarrier(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFbarArrive(const inst_iterator inst) const{
+bool BrigModule::validateFbarArrive(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFbarInit(const inst_iterator inst) const{
+bool BrigModule::validateFbarInit(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFbarRelease(const inst_iterator inst) const{
+bool BrigModule::validateFbarRelease(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFbarSkip(const inst_iterator inst) const{
+bool BrigModule::validateFbarSkip(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateFbarWait(const inst_iterator inst) const{
+bool BrigModule::validateFbarWait(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSync(const inst_iterator inst) const{
+bool BrigModule::validateSync(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCount(const inst_iterator inst) const{
+bool BrigModule::validateCount(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCountUp(const inst_iterator inst) const{
+bool BrigModule::validateCountUp(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMask(const inst_iterator inst) const{
+bool BrigModule::validateMask(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSend(const inst_iterator inst) const{
+bool BrigModule::validateSend(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateReceive(const inst_iterator inst) const{
+bool BrigModule::validateReceive(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCall(const inst_iterator inst) const{
+bool BrigModule::validateCall(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateRet(const inst_iterator inst) const{
+bool BrigModule::validateRet(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateSysCall(const inst_iterator inst) const{
+bool BrigModule::validateSysCall(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateAlloca(const inst_iterator inst) const{
+bool BrigModule::validateAlloca(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateClock(const inst_iterator inst) const{
+bool BrigModule::validateClock(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCU(const inst_iterator inst) const{
+bool BrigModule::validateCU(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateDebugTrap(const inst_iterator inst) const{
+bool BrigModule::validateDebugTrap(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateDispatchId(const inst_iterator inst) const{
+bool BrigModule::validateDispatchId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateDynWaveId(const inst_iterator inst) const{
+bool BrigModule::validateDynWaveId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateLaneId(const inst_iterator inst) const{
+bool BrigModule::validateLaneId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateMaxDynWaveId(const inst_iterator inst) const{
+bool BrigModule::validateMaxDynWaveId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateNDRangeGroups(const inst_iterator inst) const{
+bool BrigModule::validateNDRangeGroups(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateNDRangeSize(const inst_iterator inst) const{
+bool BrigModule::validateNDRangeSize(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateNop(const inst_iterator inst) const{
+bool BrigModule::validateNop(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateNullPtr(const inst_iterator inst) const{
+bool BrigModule::validateNullPtr(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkDim(const inst_iterator inst) const{
+bool BrigModule::validateWorkDim(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkGroupId(const inst_iterator inst) const{
+bool BrigModule::validateWorkGroupId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkGroupSize(const inst_iterator inst) const{
+bool BrigModule::validateWorkGroupSize(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkItemAId(const inst_iterator inst) const{
+bool BrigModule::validateWorkItemAId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkItemAIdFlat(const inst_iterator inst) const{
+bool BrigModule::validateWorkItemAIdFlat(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkItemId(const inst_iterator inst) const{
+bool BrigModule::validateWorkItemId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkItemIdFlat(const inst_iterator inst) const{
+bool BrigModule::validateWorkItemIdFlat(const inst_iterator inst) const {
   return true;
 }
 
