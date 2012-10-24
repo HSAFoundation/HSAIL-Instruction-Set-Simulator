@@ -775,7 +775,7 @@ template<typename T> bool BrigModule::validateSize(const T *brig) const{
 }
 
 // validating the code section
-bool BrigModule::validate(const BrigAluModifier *c, BrigDataType type) const {
+bool BrigModule::validate(const BrigAluModifier *c) const {
   bool valid = true;
   if(c->approx == 1)
     valid &= check(c->floatOrInt == 1, "Invalid floatOrInt");
@@ -785,9 +785,6 @@ bool BrigModule::validate(const BrigAluModifier *c, BrigDataType type) const {
 
   if(c->floatOrInt == 0)
     valid &= check(c->ftz == 0, "Invalid ftz");
-
-  if(BrigInstHelper::isFloatTy(type))
-    valid &= check(c->floatOrInt == 1, "Type does not match aluModifier");
 
   valid &= check(c->reserved == 0, "Invalid reserved");
   return valid;
@@ -912,7 +909,7 @@ bool BrigModule::validate(const BrigInstCmp *code) const {
                    "o_operands past the operands section");
     }
   }
-  valid &= validate(&code->aluModifier, BrigDataType(code->type));
+  valid &= validate(&code->aluModifier);
   valid &= check(code->comparisonOperator <= BrigSgtu,
                  "Invalid comparisonOperator");
   valid &= check(code->sourceType <= Brigf64x2,
@@ -959,7 +956,7 @@ bool BrigModule::validate(const BrigInstCvt *code) const {
                    "o_operands past the operands section");
     }
   }
-  valid &= validate(&code->aluModifier, BrigDataType(code->type));
+  valid &= validate(&code->aluModifier);
   valid &= check(code->stype <= Brigf64x2,
                  "Invalid stype");
   valid &= check(code->reserved == 0,
@@ -1039,7 +1036,7 @@ bool BrigModule::validate(const BrigInstMod *code) const {
                    "o_operands past the operands section");
     }
   }
-  valid &= validate(&code->aluModifier, BrigDataType(code->type));
+  valid &= validate(&code->aluModifier);
   return valid;
 }
 bool BrigModule::validate(const BrigInstRead *code) const {
