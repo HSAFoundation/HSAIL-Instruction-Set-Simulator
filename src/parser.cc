@@ -6798,81 +6798,78 @@ int GlobalImageDecl(Context *context) {
 int GlobalImageDeclPart2(Context *context){
  //First token has been scanned and verified as global. Read next token.
 
-  if (_RWIMG == context->token_to_scan) {
-    context->token_to_scan = yylex();
-    if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
-      std::string var_name(context->token_value.string_val);
-      int var_name_offset = context->add_symbol(var_name);
-
-      context->token_to_scan = yylex();
-      // set default value(scalar)
-      context->set_dim(0);
-      //context->set_symbol_modifier(BrigArray);
-      if ('[' == context->token_to_scan) {
-        if (!ArrayDimensionSet(context)) {
-        } else {
-          return 1;
-        }
-      }
-      BrigDirectiveImage bdi = {
-        sizeof(BrigDirectiveImage),//size
-        BrigEDirectiveImage,    //kind
-        {
-          context->get_code_offset(),      // c_code
-          BrigGlobalSpace,                 // storag class
-          context->get_attribute(),        // attribut
-          0,                               // reserved
-          context->get_symbol_modifier(),  // symbolModifier
-          context->get_dim(),              // dim
-          var_name_offset,                 // s_name
-          BrigRWImg,                       // type
-          context->get_alignment()         // align
-        },
-        0,                      //width
-        0,                      //height
-        0,                      //depth
-        1,                      //array
-        BrigImageOrderUnknown,  //order
-        BrigImageFormatUnknown  //format
-      };
-      context->append_directive(&bdi);
-
-      if ('=' == context->token_to_scan) {
-        if (!ImageInitializer(context)) {
-        } else {
-          context->set_error(INVALID_IMAGE_INIT);
-          return 1;
-        }
-      }
-
-      BrigDirectiveImage get;
-      context->get_directive(&get);
-
-      // array for 1da or 2da,else set 1
-      if (context->get_dim()){// a array
-        if ((0 != get.width && 0 != get.height)
-           ||(0 != get.width && 0 != get.depth)
-           ||(0 != get.height && 0 != get.depth)){
-          get.array = context->get_dim();
-
-          unsigned char *bdi_charp =
-            reinterpret_cast<unsigned char*>(&get);
-          context->update_last_directive(bdi_charp, sizeof(BrigDirectiveImage));
-        }
-      }
-
-      if (';' == context->token_to_scan) {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
-    } else {
+  if (_RWIMG != context->token_to_scan) {
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  
+  if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan) {
     context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  std::string var_name(context->token_value.string_val);
+  int var_name_offset = context->add_symbol(var_name);
+
+  context->token_to_scan = yylex();
+  context->set_dim(0);
+  if ('[' == context->token_to_scan) {
+    if (ArrayDimensionSet(context)) {
+      return 1;
+    }
+  }
+  
+  BrigDirectiveImage bdi = {
+    sizeof(BrigDirectiveImage),//size
+    BrigEDirectiveImage,    //kind
+    {
+      context->get_code_offset(),      // c_code
+      BrigGlobalSpace,                 // storag class
+      context->get_attribute(),        // attribut
+      0,                               // reserved
+      context->get_symbol_modifier(),  // symbolModifier
+      context->get_dim(),              // dim
+      var_name_offset,                 // s_name
+      BrigRWImg,                       // type
+      context->get_alignment()         // align
+    },
+    0,                      //width
+    0,                      //height
+    0,                      //depth
+    1,                      //array
+    BrigImageOrderUnknown,  //order
+    BrigImageFormatUnknown  //format
+  };
+  context->append_directive(&bdi);
+
+  if ('=' == context->token_to_scan) {
+    if (ImageInitializer(context)) {
+      context->set_error(INVALID_IMAGE_INIT);
+      return 1;
     }
   }
 
-  return 1;
+  BrigDirectiveImage get;
+  context->get_directive(&get);
+
+  if (context->get_dim()){// a array
+    if ((0 != get.width && 0 != get.height)
+       ||(0 != get.width && 0 != get.depth)
+       ||(0 != get.height && 0 != get.depth)){
+      get.array = context->get_dim();
+
+      unsigned char *bdi_charp =
+        reinterpret_cast<unsigned char*>(&get);
+      context->update_last_directive(bdi_charp, sizeof(BrigDirectiveImage));
+    }
+  }
+
+  if (';' != context->token_to_scan) {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0;
+      
 }
 
 int GlobalReadOnlyImageDecl(Context *context) {
@@ -6925,7 +6922,6 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
         BrigImageOrderUnknown,  //order
         BrigImageFormatUnknown  //format
       };
-      context->current_img_offset = context->get_directive_offset();
       context->append_directive(&bdi);
 
       if ('=' == context->token_to_scan) {
@@ -6937,7 +6933,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
       }
 
       BrigDirectiveImage get;
-      context->get_directive(context->current_img_offset,&get);
+      context->get_directive(&get);
 
       // array for 1da or 2da,else set 1
       if (context->get_dim()){ // a array
@@ -6948,9 +6944,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
 
           unsigned char *bdi_charp =
             reinterpret_cast<unsigned char*>(&get);
-          context->update_directive_bytes(bdi_charp,
-                                          context->current_img_offset,
-                                          sizeof(BrigDirectiveImage));
+          context->update_last_directive(bdi_charp, sizeof(BrigDirectiveImage));
         }
       }
 
