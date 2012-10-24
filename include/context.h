@@ -292,7 +292,6 @@ class Context {
     BrigdOffset32_t current_bdf_offset;
     BrigoOffset32_t current_argList_offset;
     BrigdOffset32_t current_img_offset ;
-    BrigdOffset32_t current_samp_offset ;
     BrigdOffset32_t current_argdecl_offset;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in an instruction

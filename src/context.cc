@@ -33,7 +33,6 @@ Context::Context(void) {
   
   current_bdf_offset = 0;
   current_argdecl_offset = 0;
-  current_samp_offset = 0;
   error_reporter_set = false;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
@@ -78,9 +77,9 @@ void Context::clear_context(void) {
   }
   set_default_values();
   types.clear();
+  last_directive_offset = 0;
   current_bdf_offset = 0;
   current_argdecl_offset = 0;
-  current_samp_offset = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
   aluModifier.hi = 0;
