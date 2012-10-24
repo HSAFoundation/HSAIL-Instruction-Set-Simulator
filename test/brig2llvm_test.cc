@@ -4538,6 +4538,9 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("$s1"));
+    strings.append(std::string("$s2"));
+
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
 
@@ -4559,15 +4562,33 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
     BrigInstMod bim = {
       sizeof(bim),
       BrigEInstMod,
-      0,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
+      BrigAbs,
+      Brigf32,
+      BrigNoPacking,
+      {8, 20, 0, 0, 0},
       {0, 0, 0, 0, 0, 0, 0}
     };
     code.append(&bim);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      8
+    };
+    operands.append(&bor1);
+
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      12
+    };
+    operands.append(&bor2);
 
     hsa::brig::Buffer debug;
 

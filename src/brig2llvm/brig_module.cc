@@ -43,6 +43,7 @@ bool BrigModule::validate(void) const {
   valid &= validateOperands();
   valid &= validateStrings();
   valid &= validateDebug();
+  if(valid) valid &= validateInstructions();
   return valid;
 }
 
