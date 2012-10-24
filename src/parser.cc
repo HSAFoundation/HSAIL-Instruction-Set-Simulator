@@ -746,26 +746,22 @@ int CallArgs(Context* context) {
 
       delete[] array;
       break;
-    } else if (!Operand(context)) {
-      if ((saved_token == TOKEN_GLOBAL_IDENTIFIER)||
-          (saved_token == TOKEN_LOCAL_IDENTIFIER)) {
-        if (context->arg_map.count(arg_name)) {
-          arg_offset[n_elements] = context->arg_map[arg_name];
-        } else {
-          BrigOperandArgumentRef opArgRef = {
-            sizeof(BrigOperandArgumentRef),
-            BrigEOperandArgumentRef,
-            0
-          };
-          // TODO(Chuang): judge whether the identifier has been defined.
-          opArgRef.arg = context->symbol_map[arg_name];
-          context->arg_map[arg_name] = context->get_operand_offset();
-          context->append_operand(&opArgRef);
-          arg_offset[n_elements] = context->arg_map[arg_name];
-        }
+    } else if (saved_token == TOKEN_GLOBAL_IDENTIFIER ||
+               saved_token == TOKEN_LOCAL_IDENTIFIER) {
+      if (!context->arg_map.count(arg_name)) {
+        BrigOperandArgumentRef opArgRef = {
+          sizeof(BrigOperandArgumentRef),
+          BrigEOperandArgumentRef,
+          0
+        };
+        // TODO(Chuang): judge whether the identifier has been defined.
+        opArgRef.arg = context->symbol_map[arg_name];
+        context->arg_map[arg_name] = context->get_operand_offset();
+        context->append_operand(&opArgRef);
       }
-
+      arg_offset[n_elements] = context->arg_map[arg_name];
       n_elements++;
+      context->token_to_scan = yylex();
       continue;
     } else if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
