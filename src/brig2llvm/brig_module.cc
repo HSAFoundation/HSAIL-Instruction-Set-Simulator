@@ -1469,7 +1469,6 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
 
   if(!check(isa<BrigInstBase>(inst) || isa<BrigInstMod>(inst),
             "Incorrect instruction kind"))
-
     return false;
 
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
@@ -1490,10 +1489,6 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
   valid &= check(BrigInstHelper::isSignedTy(type) ||
                  BrigInstHelper::isFloatTy(type),
                  "Invalid type");
-
-  if(BrigInstHelper::isFloatTy(type))
-    valid &= check(!isa<BrigOperandWaveSz>(src),
-                   "Wave size illegal with floating point");
 
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
     valid &= check(BrigInstHelper::isFloatTy(type),
