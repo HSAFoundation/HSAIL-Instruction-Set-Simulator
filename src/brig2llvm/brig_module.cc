@@ -1468,6 +1468,7 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
 
   if(!check(isa<BrigInstBase>(inst) || isa<BrigInstMod>(inst),
             "Incorrect instruction kind"))
+
     return false;
 
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
@@ -1483,9 +1484,9 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
                  isa<BrigOperandWaveSz>(src),
                  "Destination must be a register, immediate, or wave size");
 
+  // Unary arithmetic requires signed types
   BrigDataType type = BrigDataType(inst->type);
   valid &= check(BrigInstHelper::isSignedTy(type) ||
-                 BrigInstHelper::isUnsignedTy(type) ||
                  BrigInstHelper::isFloatTy(type),
                  "Invalid type");
 
