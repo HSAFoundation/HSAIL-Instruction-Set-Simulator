@@ -2511,6 +2511,7 @@ int FileDecl(Context* context) {
 
     if (context->token_to_scan == TOKEN_STRING) {
       std::string path(context->token_value.string_val);
+      path.assign(path, 1, path.size() - 2);
       BrigsOffset32_t path_offset = context->add_symbol(path);
       context->token_to_scan = yylex();
 
@@ -4345,6 +4346,7 @@ int Extension(Context* context) {
 
   if (context->token_to_scan == TOKEN_STRING) {
     std::string str(context->token_value.string_val);
+    str.assign(str, 1, str.size() - 2);
     context->token_to_scan = yylex();
 
     if (context->token_to_scan == ';') {
@@ -7561,6 +7563,8 @@ int Pragma(Context* context) {
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_STRING) {
     std::string s_name = context->token_value.string_val;
+    s_name.assign(s_name, 1, s_name.size() - 2); 
+
     context->token_to_scan = yylex();
     if (context->token_to_scan == ';') {
       BrigDirectivePragma bdp = {
