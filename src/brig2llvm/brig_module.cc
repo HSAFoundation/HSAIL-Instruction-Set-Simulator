@@ -1604,7 +1604,16 @@ bool BrigModule::validateAbs(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateAdd(const inst_iterator inst) const {
-  return validateBinaryArithmetic(inst);
+  bool valid = true;
+  if(BrigInstHelper::isFloatTy(BrigDataType(inst->type)) &&
+     BrigInstHelper::isVectorTy(BrigDataType(inst->type))) 
+    valid &= check(!(inst->packing == BrigPackPPsat ||
+                     inst->packing == BrigPackPSsat ||
+                     inst->packing == BrigPackSSsat ||
+                     inst->packing == BrigPackSPsat),
+                   "Vectors of Add should not be Sat");
+  valid &= validateBinaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateBorrow(const inst_iterator inst) const {
