@@ -278,7 +278,7 @@ template<> bool Not(bool x) { return !x; }
 BitInst(define, Not, Unary)
 
 static b32 Popcount(b32 x) { return __builtin_popcount(x); }
-static b64 Popcount(b64 x) { return __builtin_popcountl(x); }
+static b64 Popcount(b64 x) { return __builtin_popcountll(x); }
 defineUnary(Popcount, b32)
 defineUnary(Popcount, b64)
 

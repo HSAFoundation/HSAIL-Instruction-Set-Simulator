@@ -600,13 +600,13 @@ template<class T> static void CmovLogic(T result, T a, T b, T c) {
     if(isNan(c)) {
       EXPECT_PRED1(isNan<T>, result);
     } else {
-      EXPECT_EQ(c, result);    
-    } 
+      EXPECT_EQ(c, result);
+    }
   } else {
     if(isNan(b)) {
       EXPECT_PRED1(isNan<T>, result);
     } else {
-      EXPECT_EQ(b, result);    
+      EXPECT_EQ(b, result);
     }
   }
 }
@@ -671,7 +671,7 @@ template<> void CopySignLogic(f64 result, f64 a, f64 b) {
   Conv aConv = { a };
   Conv bConv = { b };
   Conv resultConv = { result };
-  b64 mask = (1UL << 63) - 1;
+  b64 mask = (1ULL << 63) - 1;
   EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
@@ -680,7 +680,7 @@ template<> void CopySignLogic(f32 result, f32 a, f32 b) {
   Conv aConv = { a };
   Conv bConv = { b };
   Conv resultConv = { result };
-  b32 mask = (1UL << 31) - 1;
+  b32 mask = (1U << 31) - 1;
   EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
