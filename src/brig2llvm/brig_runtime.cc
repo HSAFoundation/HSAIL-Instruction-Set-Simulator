@@ -425,7 +425,7 @@ extern "C" f32 Fract_f32(f32 f) {
 }
 
 extern "C" f64 Fract_f64(f64 d) {
-  union { b64 b; f64 d; } AlmostOne = { 0x3FEFFFFFFFFFFFFF };
+  union { b64 b; f64 d; } AlmostOne = { 0x3FEFFFFFFFFFFFFFULL };
   return std::min(d - std::floor(d), AlmostOne.d);
 }
 
