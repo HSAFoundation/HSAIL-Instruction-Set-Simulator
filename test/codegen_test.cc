@@ -26,6 +26,11 @@
 #include "Mul_test.h"
 #include "Mov_test.h"
 #include "AtomicImage_test.h"
+#include "Version_test.h"
+#include "FileDecl_test.h"
+#include "Location_test.h"
+#include "Pragma_test.h"
+#include "Extension_test.h"
 
 namespace hsa {
 namespace brig {
@@ -718,97 +723,6 @@ TEST(CodegenTest, AlignmentCheck) {
   // this is a 8-byte aligned item and has a size of multiple of 8.
   // so the offset after appending this item should be a multiple of 8.
   EXPECT_EQ(0U, curr_offset%8);
-}
-
-TEST(CodegenTest, VersionCodeGen) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-  std::string input("\n version 1:0; \n");
-
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Version(context));
-
-  uint32_t curr_d_offset = context->get_directive_offset();
-
-  BrigDirectiveVersion ref = {
-    sizeof(ref),
-    BrigEDirectiveVersion,
-    0,            // unknown c_code
-    1,            // major
-    0,            // minor
-    BrigELarge,   // machine
-    BrigEFull,    // profile
-    BrigENosftz,  // ftz
-    0             // reserved
-  };
-
-
-  // get structure back
-  BrigDirectiveVersion get;
-  context->get_directive(curr_d_offset-sizeof(get), &get);
-
-  // compare two structs
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.major, get.major);
-  EXPECT_EQ(ref.minor, get.minor);
-  EXPECT_EQ(ref.machine, get.machine);
-  EXPECT_EQ(ref.profile, get.profile);
-  EXPECT_EQ(ref.ftz, get.ftz);
-
-  /* ---------- TEST 2 ---------*/
-  context->clear_context();
-
-  input.assign("version 2:0:$large;");
-
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Version(context));
-
-  // reference struct
-  ref.major = 2;
-  ref.machine = BrigELarge;
-
-  // get structure back
-  curr_d_offset = context->get_directive_offset();
-  context->get_directive(curr_d_offset-sizeof(get), &get);
-
-  // compare two structs
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.major, get.major);
-  EXPECT_EQ(ref.minor, get.minor);
-  EXPECT_EQ(ref.machine, get.machine);
-  EXPECT_EQ(ref.profile, get.profile);
-  EXPECT_EQ(ref.ftz, get.ftz);
-
-        /* TEST 3, Multi Target */
-  context->clear_context();
-  input.assign("version 2:0:$large, $reduced, $sftz;");
-
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Version(context));
-
-  // reference struct
-  ref.major = 2;
-  ref.machine = BrigELarge;
-  ref.profile = BrigEReduced;
-  ref.ftz = BrigESftz;
-
-  // get structure back
-  curr_d_offset = context->get_directive_offset();
-  context->get_directive(curr_d_offset-sizeof(get), &get);
-
-  // compare two structs
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.major, get.major);
-  EXPECT_EQ(ref.minor, get.minor);
-  EXPECT_EQ(ref.machine, get.machine);
-  EXPECT_EQ(ref.profile, get.profile);
-  EXPECT_EQ(ref.ftz, get.ftz);
-  context->clear_context();
-
-  delete lexer;
 }
 
 TEST(CodegenTest, RegisterOperandCodeGen) {
@@ -2352,146 +2266,6 @@ TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
   delete lexer;
 }
 
-TEST(CodegenTest, ImageNoRet_CodeGen_Test) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstAtomicImage ref1 = {
-    48,                     // size
-    BrigEInstAtomicImage,   // kind
-    BrigAtomicNoRetImage,   // opcode
-    Brigb32,                // type
-    BrigNoPacking,          // packing
-    {8, 24, 36, 48, 0},     // o_operands[5]
-    BrigAtomicCas,          // atomicOperation
-    BrigGlobalSpace,        // storageClass
-    BrigRegular,            // memorySemantic
-    Briggeom_1d             // geom
-  };
-
-  BrigInstAtomicImage ref2 = {
-    48,                     // size
-    BrigEInstAtomicImage,   // kind
-    BrigAtomicNoRetImage,   // opcode
-    Brigs32,                // type
-    BrigNoPacking,          // packing
-    {60, 88, 104, 0, 0},    // o_operands[5]
-    BrigAtomicAnd,          // atomicOperation
-    BrigGlobalSpace,        // storageClass
-    BrigAcquireRelease,     // memorySemantic
-    Briggeom_2d             // geom
-  };
-
-  BrigInstAtomicImage get1, get2;
-  BrigOperandReg getReg;
-  BrigOperandOpaque getImg;
-
-  // The register must be an s or d register (c registers are not allowed).
-  std::string input("atomicNoRet_image_cas_1d_b32 [&namedRWImg], $s1, $s3, $s4;\n");
-  input.append("atomicNoRet_image_and_ar_2d_s32 [&namedRWImg], ($s0,$s3), $s2;\n");
-
-  Lexer* lexer = new Lexer(input);
-
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, ImageNoRet(context));
-  EXPECT_EQ(0, ImageNoRet(context));
-
-  context->get_code(8, &get1);
-
-  EXPECT_EQ(ref1.size, get1.size);
-  EXPECT_EQ(ref1.kind, get1.kind);
-  EXPECT_EQ(ref1.opcode, get1.opcode);
-  EXPECT_EQ(ref1.type, get1.type);
-  EXPECT_EQ(ref1.packing, get1.packing);
-  EXPECT_EQ(ref1.o_operands[0], get1.o_operands[0]);
-  EXPECT_EQ(ref1.o_operands[1], get1.o_operands[1]);
-  EXPECT_EQ(ref1.o_operands[2], get1.o_operands[2]);
-  EXPECT_EQ(ref1.o_operands[3], get1.o_operands[3]);
-  EXPECT_EQ(ref1.o_operands[4], get1.o_operands[4]);
-
-  EXPECT_EQ(ref1.atomicOperation, get1.atomicOperation);
-  EXPECT_EQ(ref1.storageClass, get1.storageClass);
-  EXPECT_EQ(ref1.memorySemantic, get1.memorySemantic);
-  EXPECT_EQ(ref1.geom, get1.geom);
-
-  context->get_code(56, &get2);
-
-  EXPECT_EQ(ref2.size, get2.size);
-  EXPECT_EQ(ref2.kind, get2.kind);
-  EXPECT_EQ(ref2.opcode, get2.opcode);
-  EXPECT_EQ(ref2.type, get2.type);
-  EXPECT_EQ(ref2.packing, get2.packing);
-  EXPECT_EQ(ref2.o_operands[0], get2.o_operands[0]);
-  EXPECT_EQ(ref2.o_operands[1], get2.o_operands[1]);
-  EXPECT_EQ(ref2.o_operands[2], get2.o_operands[2]);
-  EXPECT_EQ(ref2.o_operands[3], get2.o_operands[3]);
-  EXPECT_EQ(ref2.o_operands[4], get2.o_operands[4]);
-
-  EXPECT_EQ(ref2.atomicOperation, get2.atomicOperation);
-  EXPECT_EQ(ref2.storageClass, get2.storageClass);
-  EXPECT_EQ(ref2.memorySemantic, get2.memorySemantic);
-  EXPECT_EQ(ref2.geom, get2.geom);
-
-  context->get_operand(24, &getReg);
-  // BrigOperandReg
-  EXPECT_EQ(12, getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
-
-  context->get_operand(36, &getReg);
-  // BrigOperandReg
-  EXPECT_EQ(12, getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(12, getReg.name);
-  context->get_operand(48, &getReg);
-  // BrigOperandReg
-  EXPECT_EQ(12, getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(16, getReg.name);
-  context->get_operand(76, &getReg);
-  // BrigOperandReg
-  EXPECT_EQ(12, getReg.size);
-  EXPECT_EQ(BrigEOperandReg, getReg.kind);
-  EXPECT_EQ(Brigb32, getReg.type);
-  EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(20, getReg.name);
-  BrigOperandRegV2 getRegV2;
-  context->get_operand(88, &getRegV2);
-  // BrigOperandRegV2
-  EXPECT_EQ(16, getRegV2.size);
-  EXPECT_EQ(BrigEOperandRegV2, getRegV2.kind);
-  EXPECT_EQ(Brigb32, getRegV2.type);
-  EXPECT_EQ(0, getRegV2.reserved);
-  EXPECT_EQ(76, getRegV2.regs[0]);
-  EXPECT_EQ(36, getRegV2.regs[1]);
-
-
-  context->get_operand(8, &getImg);
-  // BrigOperandOpaque
-  EXPECT_EQ(16, getImg.size);
-  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
-  EXPECT_EQ(0, getImg.name);
-  EXPECT_EQ(0, getImg.reg);
-  EXPECT_EQ(0, getImg.offset);
-
-  context->get_operand(60, &getImg);
-  // BrigOperandOpaque
-  EXPECT_EQ(16, getImg.size);
-  EXPECT_EQ(BrigEOperandOpaque, getImg.kind);
-  EXPECT_EQ(0, getImg.name);
-  EXPECT_EQ(0, getImg.reg);
-  EXPECT_EQ(0, getImg.offset);
-
-  delete lexer;
-}
-
 TEST(CodegenTest, ArrayDimensionSetCodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -2573,66 +2347,6 @@ TEST(CodegenTest, ArgumentDeclCodegen){
 	delete lexer;
 }
 
-TEST(CodegenTest,FileDeclCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("file 1 \"math.c\" ;");
-
-  BrigDirectiveFile ref = {
-    16,                   //size
-    BrigEDirectiveFile,   //kind
-    8,                    //c_code
-    1,                    //fileid
-    8                     //s_filename
-  };
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0,FileDecl(context));
-
-  BrigDirectiveFile get;
-  context->get_directive(8,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.fileid,get.fileid);
-  EXPECT_EQ(ref.s_filename,get.s_filename);
-  delete lexer;
-}
-
-TEST(CodegenTest,LocationCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("loc 1 10 5 ;");
-
-  BrigDirectiveLoc ref = {
-    20,                   //size
-    BrigEDirectiveLoc,    //kind
-    8,                    //c_code
-    1,                    //sourceFile
-    10,                   //sourceLine
-    5                     //sourceColumn
-  };
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0,Location(context));
-
-  BrigDirectiveLoc get;
-  context->get_directive(8,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.sourceFile,get.sourceFile);
-  EXPECT_EQ(ref.sourceLine,get.sourceLine);
-  EXPECT_EQ(ref.sourceColumn,get.sourceColumn);
-
-  delete lexer;
-}
 
 TEST(CodegenTest, ImageStore_CodeGen_Test) {
   context->set_error_reporter(main_reporter);
@@ -4233,67 +3947,6 @@ TEST(CodegenTest,  Instruction4_Shuffle_CodeGen_SimpleTest) {
   EXPECT_EQ(shuffleRef.o_operands[2], getShuffle.o_operands[2]);
   EXPECT_EQ(shuffleRef.o_operands[3], getShuffle.o_operands[3]);
   EXPECT_EQ(shuffleRef.o_operands[4], getShuffle.o_operands[4]);
-
-  delete lexer;
-}
-
-TEST(CodegenTest,ExtensionCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("extension \"\\device\\amd.hsa\";");
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  size_t str_len = strlen("\"\\device\\amd.hsa\"") + 1;
-  EXPECT_EQ(0,Extension(context));
-
-  BrigDirectiveExtension ref = {
-    sizeof(BrigDirectiveExtension),
-    BrigEDirectiveExtension,
-    context->get_code_offset(),
-    context->get_string_offset() - str_len
-  };
-  BrigDirectiveExtension get;
-  BrigdOffset32_t d_offset = context->get_directive_offset()
-           - sizeof(BrigDirectiveExtension);
-  context->get_directive(d_offset,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.s_name,get.s_name);
-
-  delete lexer;
-}
-
-TEST(CodegenTest,PragmaCodegen){
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("pragma \"once\";");
-
-  Lexer *lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0,Pragma(context));
-
-  BrigDirectivePragma ref = {
-    sizeof(BrigDirectivePragma),
-    BrigEDirectivePragma,
-    context->get_code_offset(),
-    context->get_string_offset() - (strlen("\"once\"") + 1)
-  };
-  BrigDirectivePragma get;
-  BrigdOffset32_t d_offset = context->get_directive_offset()
-                       -sizeof(BrigDirectivePragma);
-  context->get_directive(d_offset,&get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.c_code,get.c_code);
-  EXPECT_EQ(ref.s_name,get.s_name);
 
   delete lexer;
 }

@@ -62,7 +62,7 @@ enum error_code_t {
   INVALID_ARG_BLOCK,
   INVALID_CALL_ARGS,
   INVALID_ARRAY_DIMENSIONS,
-
+  INVALID_CALL_TARGETS,
   // missing part
   MISSING_VERSION_STATEMENT,
   MISSING_WIDTH_INFO,
@@ -195,7 +195,8 @@ class ErrorReporterInterface {
           return std::string("Invalid Arg Block.");
         case INVALID_CALL_ARGS:
           return std::string("Invalid Call Args.");
-
+        case INVALID_CALL_TARGETS:
+          return std::string("Invalid Call Targets.");
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");
         case MISSING_WIDTH_INFO:
