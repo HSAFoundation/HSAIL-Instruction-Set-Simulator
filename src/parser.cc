@@ -2049,9 +2049,6 @@ int Call(Context* context) {
   BrigoOffset32_t OpOffset[5] = {0,0,0,0,0};
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
 
-  bool hasWidth = false;
-  bool hasFbar = false;
-
   context->token_to_scan = yylex();
   // optional width
   BrigoOffset32_t widthOffset = context->get_operand_offset();
@@ -2062,34 +2059,27 @@ int Call(Context* context) {
     if (OptionalWidth(context)) {
       return 1;
     }
-    hasWidth = true;
-  } else {
-   BrigOperandImmed op_width = {
-      sizeof(BrigOperandImmed),
-      BrigEOperandImmed,
-      Brigb32,
-      0,
-      { 0 }
-    };
-    op_width.bits.u = 0;
-    context->append_operand(&op_width);
   }
-
+  
+  BrigOperandImmed op_width = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    { 0 }
+  };
+  op_width.bits.u = 0;
+  context->append_operand(&op_width);
+  
   if (context->token_to_scan == __FBAR) {
-    hasWidth = true;
-    hasFbar = true;
     aluModifier.fbar = 1;
     context->token_to_scan = yylex();
   }
 
-
   std::string opName;
   const unsigned int firstOpToken = context->token_to_scan;;
-  // the operand should be a register or a Func name.
-  // and if isThereWidthOrFbar is true, token must be a global identifier.
-
-
-  if (firstOpToken == TOKEN_GLOBAL_IDENTIFIER && !hasWidth && !hasFbar) {
+  
+  if (firstOpToken == TOKEN_GLOBAL_IDENTIFIER) {
     opName.assign(context->token_value.string_val);
     if (!context->func_o_map.count(opName)) {
       BrigOperandFunctionRef func_o_ref = {
@@ -2111,6 +2101,7 @@ int Call(Context* context) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
+  
   BrigOperandArgumentList emptylist = {
     sizeof(BrigOperandArgumentList),
     BrigEOperandArgumentList,
@@ -2157,7 +2148,8 @@ int Call(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  if (hasFbar) {
+  int* pCmp = reinterpret_cast<int*>(&aluModifier);
+  if (*pCmp!=0) {
     BrigInstMod callMod = {
       0,
       BrigEInstMod,
@@ -2167,7 +2159,7 @@ int Call(Context* context) {
       {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], OpOffset[4]},
       aluModifier
     };
-    callMod.size = sizeof(BrigInstMod);
+    callMod.size = sizeof(callMod);
     context->append_code(&callMod);
   } else {
     BrigInstBase callInst = {
@@ -2178,7 +2170,7 @@ int Call(Context* context) {
       BrigNoPacking,
       {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], OpOffset[4]}
     };
-    callInst.size = sizeof(BrigInstBase);
+    callInst.size = sizeof(callInst);
     context->append_code(&callInst);
   }
   context->token_to_scan = yylex();
