@@ -4562,7 +4562,7 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
     BrigInstMod bim = {
       sizeof(bim),
       BrigEInstMod,
-      BrigAbs,
+      BrigNeg,
       Brigf32,
       BrigNoPacking,
       {8, 20, 0, 0, 0},

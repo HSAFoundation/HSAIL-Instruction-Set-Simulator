@@ -69,6 +69,7 @@ void Context::clear_context(void) {
   label_o_map.clear();
   label_c_map.clear();
   symbol_map.clear();
+  arg_map.clear();
   if (valid_string) {
     free(token_value.string_val);
     valid_string = false;
@@ -304,10 +305,6 @@ BrigDataType16_t Context::get_type() const {
   return type;
 }
 
-BrigOpcode32_t Context::get_opcode() const {
-  return opcode;
-}
-
 char Context::get_operand_loc() const {
   return operand_loc;
 }
@@ -363,10 +360,6 @@ void Context::set_fbar(int fbar) {
 
 void Context::set_type(BrigDataType16_t type) {
   this->type = type;
-}
-
-void Context::set_opcode(BrigOpcode32_t opcode) {
-  this->opcode = opcode;
 }
 
 // let context know the location of current operand

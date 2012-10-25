@@ -1809,87 +1809,6 @@ TEST(ParserTest, Instruction5) {
   delete lexer;
 }
 
-// -----------------  Test for cvtModifier1 rule -----------------
-// format:
-// cvtModifier1 ::= floatRounding
-//                 | "_ftz"
-//                 | "_ftz" floatRounding
-//                 | intRounding
-// correct cases
-TEST(ParserTest, CvtModifier1) {
-  // Create a lexer
-  Lexer* lexer = new Lexer();
-  // register error reporter with context
-  context->set_error_reporter(main_reporter);
-
-  std::string input("_upi \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_downi \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_zeroi \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_neari \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_up \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_down \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_zero \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_near \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_ftz_up \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_ftz_down \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_ftz_zero \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_ftz_near \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  input.assign("_ftz \n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, CvtModifier1(context));
-
-  delete lexer;
-}
-
 // -----------------  Test for mov rule -------------------
 // format:
 // mov ::= "mov" dataTypeId arrayOperand ","
@@ -2196,7 +2115,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("lda_group_u32 $s1, [%g];\n"); // lda
+  input.assign("lda_u32 $s1, [%g];\n"); // lda
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
@@ -3306,7 +3225,7 @@ TEST(ParserTest, Lda) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("lda_u64 $d2, [&z];");
+  std::string input("lda_u64 $d2, [%z];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));
@@ -3316,7 +3235,7 @@ TEST(ParserTest, Lda) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));
 
-  input.assign("lda_group_u32 $s1, [%g];");
+  input.assign("lda_u32 $s1, [%g];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));
@@ -3590,7 +3509,7 @@ TEST(ParserTest, Atom) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Atom(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
   delete lexer;
 }

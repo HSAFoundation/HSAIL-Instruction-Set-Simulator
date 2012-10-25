@@ -699,6 +699,12 @@ _group            { free_string(context);
                     context->token_value.storage_class = BrigGroupSpace ;
                     return _GROUP; }
 
+_partial            { free_string(context);
+                    context->token_type = ADDRESS_SPACE_IDENTIFIER;
+                    context->yycolno+=yyleng;
+                    return _PARTIAL; }
+
+
 _spill            { free_string(context);
                     context->token_type = ADDRESS_SPACE_IDENTIFIER;
                     context->token_value.storage_class = BrigSpillSpace ;
@@ -776,6 +782,17 @@ memopt_off          { free_string(context);
   /* -- Opcode -- */
   /* TODO(Chuang): "fbar_initSizeDynamic"/"fbar_initSizeKnown" */
   /* fbar_release */
+fbar_initSizeKnown     { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarInit;
+                      return FBAR_INITSIZEKNOWN; }
+
+fbar_initSizeDynamic     { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFbarInit;
+                      return FBAR_INITSIZEDYNAMIC; }
 
 fbar_initSizeWg     { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE;
@@ -1909,31 +1926,37 @@ syscall             { free_string(context);
   /*-- mul --*/
 mul               { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMul;
                     context->yycolno+=yyleng;
                     return MUL;}
 
 mul_hi            { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMulHi;
                     context->yycolno+=yyleng;
                     return MUL_HI;}
 
 mul24_hi          { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMul24Hi;
                     context->yycolno+=yyleng;
                     return MUL24_HI;}
 
 mul24             { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMul24;
                     context->yycolno+=yyleng;
                     return MUL24;}
 
 mad24             { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMad24;
                     context->yycolno+=yyleng;
                     return MAD24;}
 
 mad24_hi          { free_string(context);
                     context->token_type = MUL_OP;
+                    context->token_value.opcode = BrigMad24Hi;
                     context->yycolno+=yyleng;
                     return MAD24_HI;}
 
@@ -2007,6 +2030,11 @@ _acq              { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
                     return _ACQ;}
+
+_part_ar          { free_string(context);
+                    context->token_type = COMMON_KEYWORD;
+                    context->yycolno+=yyleng;
+                    return _PART_AR;}
 
 _rel              { free_string(context);
                     context->token_type = COMMON_KEYWORD;

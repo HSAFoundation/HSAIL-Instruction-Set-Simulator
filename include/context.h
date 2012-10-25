@@ -222,7 +222,6 @@ class Context {
     BrigSftz16_t get_ftz() const;
     int get_fbar() const;
     BrigDataType16_t get_type() const;
-    BrigOpcode32_t get_opcode() const;
     char get_operand_loc() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
@@ -239,7 +238,6 @@ class Context {
     void set_ftz(BrigSftz16_t ftz);
     void set_fbar(int fbar);
     void set_type(BrigDataType16_t type);
-    void set_opcode(BrigOpcode32_t opcode);
     // let context know the location of current operand
     void set_operand_loc(char loc);
     void set_dim(uint32_t dim);
@@ -254,12 +252,13 @@ class Context {
 
     //get buffer
     Buffer *get_directive(void) const {return dbuf;}
+    Buffer *get_code(void) const {return cbuf;}
+    Buffer *get_operands(void) const {return obuf;}
+    StringBuffer *get_strings(void) const {return sbuf;}
 
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
 
-    BrigoOffset32_t current_label_offset;
-    BrigcOffset32_t current_inst_offset;
     BrigdOffset32_t current_bdf_offset;
     BrigoOffset32_t current_argList_offset;
     BrigdOffset32_t current_img_offset ;
@@ -321,7 +320,6 @@ class Context {
     int fbar;
     BrigAttribute16_t attribute;
     BrigDataType16_t type;
-    BrigOpcode32_t opcode;
     BrigAluModifier aluModifier;
     char operand_loc;   // 1 -> 5
     bool error_reporter_set;

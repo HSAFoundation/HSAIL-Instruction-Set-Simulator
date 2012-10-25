@@ -913,44 +913,44 @@ TEST(BrigKernelTest, CRC32) {
     "                    kernarg_u32 %n_ptr,\n"
     "                    kernarg_u32 %n_len)\n"
     "{\n"
-    "  ld_kernarg_u32 $s4, [%n_len]; \n"  // $s4 is for %n_len
-    "  ld_kernarg_u32 $s3, [%n_ptr]; \n"  // $s3 is for %n_ptr
+    "  ld_kernarg_u32 $s4, [%n_len]; \n" // $s4 is for %n_len
+    "  ld_kernarg_u32 $s3, [%n_ptr]; \n" // $s3 is for %n_ptr
     "  sub_u32 $s4, $s4, 1;\n"
-    "  xor_b32 $s1, $s1, $s1;\n"          // $s1 is for i. i = 0
-    "  mov_b32 $s0, 0xFFFFFFFF;\n"        // $s0 is for retVal
+    "  xor_b32 $s1, $s1, $s1;\n"         // $s1 is for i. i = 0
+    "  mov_b32 $s0, 0xFFFFFFFF;\n"       // $s0 is for retVal
 
     "@loop_i:"
-    "  cmp_lt_b1_u32 $c1, $s4, $s1;\n"    // if i > len  go to return
+    "  cmp_lt_b1_u32 $c1, $s4, $s1;\n"   // if i > len  go to return
     "  cbr $c1, @return;\n"
 
-    "  and_b32 $s5, $s0, 0xFF;\n"         // $s5 is for CRC32 array index
+    "  and_b32 $s5, $s0, 0xFF;\n"        // $s5 is for CRC32 array index
     "  ld_u32 $s6, [$s3];\n"
-    "  add_u32 $s3, $s3, 1;\n"            // n_ptr + 1
+    "  add_u32 $s3, $s3, 1;\n"           // n_ptr + 1
     "  and_b32 $s6, $s6, 0xFF;\n"
-    "  xor_b32 $s5, $s5, $s6;\n"          //$s5 now is sub index of CRC array
+    "  xor_b32 $s5, $s5, $s6;\n"         //$s5 now is sub index of CRC array
 
        // get value of CRC32 array $s5 index. result store in $s5
-    "  add_u32 $s2, 0, 0;\n"              // $s2 is for j. j = 0
+    "  add_u32 $s2, 0, 0;\n"             // $s2 is for j. j = 0
     "@loop_j:"
-    "  and_b32 $c2, $s5, 0x1;\n"          // CRC32 array index
+    "  and_b32 $c2, $s5, 0x1;\n"         // CRC32 array index
     "  shr_u32 $s5, $s5, 1;\n"
     "  cbr $c2, @loop_j_if;\n"
     "  brn @loop_j_endif;\n"
     "@loop_j_if:"
     "  xor_b32 $s5, $s5, 0xEDB88320;\n"
     "@loop_j_endif:"
-    "  add_u32 $s2, $s2, 1;\n"            // ++j
-    "  cmp_lt_b1_u32 $c3, $s2, 8;\n"      // j start at 1; if j < 9 go to @loop_j
+    "  add_u32 $s2, $s2, 1;\n"           // ++j
+    "  cmp_lt_b1_u32 $c3, $s2, 8;\n"     // j start at 1; if j < 9 go to @loop_j
     "  cbr $c3, @loop_j;\n"
 
-    "  shr_u32  $s6, $s0, 8;\n"           // $s6 now is ret >> 8
-    "  xor_b32 $s0, $s5, $s6;\n"          // $s0 is ret
+    "  shr_u32  $s6, $s0, 8;\n"          // $s6 now is ret >> 8
+    "  xor_b32 $s0, $s5, $s6;\n"         // $s0 is ret
 
-    "  add_u32 $s1, $s1, 1;\n"            // ++i
+    "  add_u32 $s1, $s1, 1;\n"           // ++i
     "  brn @loop_i;\n"
 
     "@return:"
-    "  xor_b32 $s0, $s0, 0xFFFFFFFF;\n"   // ~ret
+    "  xor_b32 $s0, $s0, 0xFFFFFFFF;\n"  // ~ret
     "  ld_kernarg_u32 $s1, [%r];\n"
     "  st_global_u32 $s0, [$s1];\n"
     "  ret;\n"
@@ -984,15 +984,15 @@ TEST(BrigKernelTest, FizzBuzz) {
     "  xor_b32 $s2, $s2, $s2;"
     "@loop:"
     "  mov_b32 $s4, $s2;\n"
-    "  rem_s32 $s5, $s4, 15;\n"    
-    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"  
-    "  cbr $c1, @FizzBuzz;\n"       
-    "  rem_s32 $s5, $s4, 3;\n"   
-    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"  
-    "  cbr $c1, @Fizz;\n"       
-    "  rem_s32 $s5, $s4, 5;\n"    
-    "  cmp_eq_b1_u32 $c1, $s5, 0;\n" 
-    "  cbr $c1, @Buzz;\n"       
+    "  rem_s32 $s5, $s4, 15;\n"
+    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"
+    "  cbr $c1, @FizzBuzz;\n"
+    "  rem_s32 $s5, $s4, 3;\n"
+    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"
+    "  cbr $c1, @Fizz;\n"
+    "  rem_s32 $s5, $s4, 5;\n"
+    "  cmp_eq_b1_u32 $c1, $s5, 0;\n"
+    "  cbr $c1, @Buzz;\n"
     "  ld_kernarg_s32 $s5, [%r];\n"
     "  shl_u32 $s6, $s2, 2;"
     "  add_u32 $s5, $s5, $s6;"
@@ -1029,7 +1029,7 @@ TEST(BrigKernelTest, FizzBuzz) {
   unsigned size = 1000;
   int *r = new int[size];
   int *n = new int(size);
- 
+
   llvm::Function *fun = BP->getFunction("__fizzbuzz");
   void *args[] = { &r, n };
   hsa::brig::BrigEngine BE(BP);
@@ -1044,7 +1044,7 @@ TEST(BrigKernelTest, FizzBuzz) {
         EXPECT_EQ(5, r[i]);
     }
   }
- 
+
   delete[] r;
   delete n;
 }
@@ -1061,7 +1061,7 @@ TEST(BrigKernelTest, InsertionSorter) {
     "@loop:"
     "  mov_b32 $s7, $s2;\n"
     "  shl_u32 $s7, $s7, 2;\n"
-    "  add_u32 $s7, $s1, $s7;\n"       //$s3 now is addr of %r[i]    
+    "  add_u32 $s7, $s1, $s7;\n"       //$s3 now is addr of %r[i]
     "  ld_u32 $s3, [$s7];\n"           //int t = arr[i]
     "  mov_b32 $s4, $s2;\n"            //int j = i;
 
@@ -1080,7 +1080,7 @@ TEST(BrigKernelTest, InsertionSorter) {
     "  brn @loop_while;\n"
     "@end_while:"
     "  shl_u32 $s6, $s4, 2;\n"
-    "  add_u32 $s5, $s6, $s1;\n"       //init $s5 
+    "  add_u32 $s5, $s6, $s1;\n"       //init $s5
     "  st_global_u32 $s3, [$s5];\n"
     "@loop_check:"
     "  add_u32 $s2, $s2, 1;\n"
@@ -1097,17 +1097,17 @@ TEST(BrigKernelTest, InsertionSorter) {
 
   for(unsigned i = 0; i < arraySize; i++) {
     r[i] = ((10653245 * i + 3325) % 2048);
-  }  
-    
-  unsigned *l = new unsigned(arraySize);  
+  }
+
+  unsigned *l = new unsigned(arraySize);
   void *args[] = { &r, l};
   llvm::Function *fun = BP->getFunction("insertionsortKernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
-  for(unsigned i = 0; i < arraySize - 1; ++i) { 
+  for(unsigned i = 0; i < arraySize - 1; ++i) {
     EXPECT_LE(r[i], r[i+1]);
   }
-  
+
   delete[] r;
   delete l;
 }
@@ -1115,7 +1115,8 @@ TEST(BrigKernelTest, InsertionSorter) {
 TEST(BrigKernelTest,  zeller) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
-    "kernel &zeller (kernarg_s32 %r, kernarg_s32 %m, kernarg_s32 %d, kernarg_s32 %y)\n"
+    "kernel &zeller (kernarg_s32 %r, kernarg_s32 %m,\n"
+    "kernarg_s32 %d, kernarg_s32 %y)\n"
     "{\n"
     "  ld_kernarg_u32 $s1, [%m];\n"
     "  cmp_gt_b1_u32 $c1, $s1,12;\n" // if n > 12 go to return
@@ -1134,13 +1135,15 @@ TEST(BrigKernelTest,  zeller) {
     "  add_u32 $s5, $s4, $s5;\n" // ((y/4)+((y/100)x6))
     "  add_u32 $s6, $s6, $s5;\n" // (((y/4)+((y/100)x6)+(y/400))
     "  add_u32 $s3, $s6, $s3;\n" // (((y/4)+((y/100)x6)+(y/400)+y)
-    "  add_u32 $s1, $s1, $s3;\n" // (((y/4)+((y/100)x6)+(y/400)+y+(((m+1)x26)/10))
-    "  add_u32 $s1, $s1, $s2;\n" // (((y/4)+((y/100)x6)+(y/400)+y+(((m+1)x26)/10)+d)
-    "  rem_s32 $s1, $s1, 7;\n"   
+    // (((y/4)+((y/100)x6)+(y/400)+y+(((m+1)x26)/10))
+    "  add_u32 $s1, $s1, $s3;\n"
+    // (((y/4)+((y/100)x6)+(y/400)+y+(((m+1)x26)/10)+d)
+    "  add_u32 $s1, $s1, $s2;\n"
+    "  rem_s32 $s1, $s1, 7;\n"
     "  ld_kernarg_s32 $s0, [%r];\n"
     "  st_global_s32 $s1, [$s0];\n"
     "  ret;\n"
-    "@break:"                    
+    "@break:"
     "  ld_kernarg_s32 $s0, [%r];\n"
     "  st_global_s32 1234, [$s0];\n" // if month or day is wrong, return 1234
     "  ret;\n"
@@ -1148,11 +1151,11 @@ TEST(BrigKernelTest,  zeller) {
     );
   EXPECT_TRUE(BP);
   if(!BP) return;
-  int *m_arg = new int[4];     
+  int *m_arg = new int[4];
   int *d_arg = new int[4];
   int *y_arg = new int[4];
   int *r_arg = new int;
-  m_arg[0] = 10; 
+  m_arg[0] = 10;
   m_arg[1] = 10;
   m_arg[2] = 4;
   m_arg[3] = 10;
