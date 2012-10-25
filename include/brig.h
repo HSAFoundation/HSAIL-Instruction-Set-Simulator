@@ -120,7 +120,7 @@ enum BrigDataType {
     Brigs64x2 = 42,         // two 64-bit signed integers
     Brigf64x2 = 43          // two doubles
 };
-// PRM 20.5.8
+// PRM 19.5.8
 // BrigDirectiveKinds
 // BrigDirectiveKinds is used to specify the kind of directive.
 enum BrigDirectiveKinds {
@@ -150,13 +150,14 @@ enum BrigDirectiveKinds {
   BrigEDirectiveBlockEnd = 23
 };
 
+// PRM 19.5.13
 // BrigMachine
 // BrigMachine is used to specify the type of machine model.
 enum BrigMachine {
-  BrigESmall,  // 32-bit model (all addresses are 32 bits;
-               // a pointer fits into an s register)
-  BrigELarge   // 64-bit model (all addresses are 64 bits;
-               // a pointer fits into a d register)
+  BrigESmall = 0,  // 32-bit model (all addresses are 32 bits;
+                   // a pointer fits into an s register)
+  BrigELarge = 1   // 64-bit model (all addresses are 64 bits;
+                   // a pointer fits into a d register)
 };
 
 // BrigProfile
@@ -174,32 +175,32 @@ enum BrigSftz {
   BrigENosftz
 };
 
-// PRM 20.5.12
+// PRM 19.5.12
 enum BrigInstKinds {
-  BrigEInstBase = 24,
-  BrigEInstMod,
-  BrigEInstCvt,
-  BrigEInstRead,
-  BrigEInstBar,
-  BrigEInstLdSt,
-  BrigEInstCmp,
-  BrigEInstMem,
-  BrigEInstAtomic,
-  BrigEInstAtomicImage,
-  BrigEInstImage = 34
+  BrigEInstBase = 0,
+  BrigEInstMod = 1,
+  BrigEInstCvt = 2,
+  BrigEInstRead = 3,
+  BrigEInstBar = 4,
+  BrigEInstLdSt = 5,
+  BrigEInstCmp = 6,
+  BrigEInstMem = 7,
+  BrigEInstAtomic = 8,
+  BrigEInstAtomicImage = 9,
+  BrigEInstImage = 10
 };
 
-// 20.5.14
+// 19.5.14
 // BrigMemorySemantic is used to specify the semantics for a memory operation.
 enum BrigMemorySemantic {
-  BrigRegular,
-  BrigAcquire,
-  BrigRelease,
-  BrigAcquireRelease,
-  BrigDep,
-  BrigParAcquire,
-  BrigParRelease,
-  BrigParAcquireRelease
+  BrigRegular = 0,
+  BrigAcquire = 1,
+  BrigRelease = 2,
+  BrigAcquireRelease = 3,
+  BrigDep = 4,
+  BrigParAcquire = 5,
+  BrigParRelease = 6,
+  BrigParAcquireRelease = 7
 };
 
 // 20.5.20
@@ -428,7 +429,7 @@ enum BrigImageFormat {
   BrigUNSIGNED_INT32 = 13,
   BrigHALF_FLOAT = 14,
   BrigFLOAT = 15,
-  BrigImageFormatInvalid = 16
+  BrigImageFormatInvalid
 };
 
 enum BrigImageOrder {
@@ -446,7 +447,7 @@ enum BrigImageOrder {
   BrigImage_ARGB = 11,
   BrigImage_INTENSITY = 12,
   BrigImage_LUMINANCE = 13,
-  BrigImageOrderInvalid = 14
+  BrigImageOrderInvalid
 };
 
 //PRM 20.5.1
