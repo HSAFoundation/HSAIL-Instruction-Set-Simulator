@@ -397,54 +397,56 @@ struct BrigAluModifier {
   uint32_t reserved: 25;
 };
 
-//PRM 	20.5.9
+//PRM 	19.5.9
 //BrigGeom
 //BrigGeom is used to specify the number of coordinates needed to access an
 //image.
 enum BrigGeom {
-  Briggeom_1d,  //1D image (1 coordinate needed)
-  Briggeom_2d,  //2D image (2 coordinate needed)
-  Briggeom_3d,  //3D image (3 coordinate needed)
-  Briggeom_1da, //1DA image array (2 coordinates needed)
-  Briggeom_1db, //1DB image  buffer (1 coordinates needed)
-  Briggeom_2da  //2DA image array (3 coordinates needed)
+  Briggeom_1d = 0,  //1D image (1 coordinate needed)
+  Briggeom_2d = 1,  //2D image (2 coordinate needed)
+  Briggeom_3d = 2,  //3D image (3 coordinate needed)
+  Briggeom_1da = 3, //1DA image array (2 coordinates needed)
+  Briggeom_1db = 4, //1DB image  buffer (1 coordinates needed)
+  Briggeom_2da = 5  //2DA image array (3 coordinates needed)
 };
 
-//PRM 	20.5.10
+//PRM 	19.5.10
 enum BrigImageFormat {
-  BrigSNORM_INT8,
-  BrigSNORM_INT16,
-  BrigUNORM_INT8,
-  BrigUNORM_INT16,
-  BrigUNORM_SHORT_565,
-  BrigUNORM_SHORT_555,
-  BrigUNORM_SHORT_101010,
-  BrigSIGNED_INT8,
-  BrigSIGNED_INT16,
-  BrigSIGNED_INT32,
-  BrigUNSIGNED_INT8,
-  BrigUNSIGNED_INT16,
-  BrigUNSIGNED_INT32,
-  BrigHALF_FLOAT,
-  BrigFLOAT,
-  BrigImageFormatUnknown
+  BrigImageFormatUnknown = 0,
+  BrigSNORM_INT8 = 1,
+  BrigSNORM_INT16 = 2,
+  BrigUNORM_INT8 = 3,
+  BrigUNORM_INT16 = 4,
+  BrigUNORM_SHORT_565 = 5,
+  BrigUNORM_SHORT_555 = 6,
+  BrigUNORM_SHORT_101010 = 7,
+  BrigSIGNED_INT8 = 8,
+  BrigSIGNED_INT16 = 9,
+  BrigSIGNED_INT32 = 10,
+  BrigUNSIGNED_INT8 = 11,
+  BrigUNSIGNED_INT16 = 12,
+  BrigUNSIGNED_INT32 = 13,
+  BrigHALF_FLOAT = 14,
+  BrigFLOAT = 15,
+  BrigImageFormatInvalid = 16
 };
 
 enum BrigImageOrder {
-  BrigImage_R,
-  BrigImage_A,
-  BrigImage_RX,
-  BrigImage_RG,
-  BrigImage_RGX,
-  BrigImage_RA,
-  BrigImage_RGB,
-  BrigImage_RGBA,
-  BrigImage_RGBX,
-  BrigImage_BGRA,
-  BrigImage_ARGB,
-  BrigImage_INTENSITY,
-  BrigImage_LUMINANCE,
-  BrigImageOrderUnknown // used when no order is specified
+  BrigImageOrderUnknown = 0, // used when no order is specified
+  BrigImage_R = 1,
+  BrigImage_A = 2,
+  BrigImage_RX = 3,
+  BrigImage_RG = 4,
+  BrigImage_RGX = 5,
+  BrigImage_RA = 6,
+  BrigImage_RGB = 7,
+  BrigImage_RGBA = 8,
+  BrigImage_RGBX = 9,
+  BrigImage_BGRA = 10,
+  BrigImage_ARGB = 11,
+  BrigImage_INTENSITY = 12,
+  BrigImage_LUMINANCE = 13,
+  BrigImageOrderInvalid = 14
 };
 
 //PRM 20.5.1

@@ -445,6 +445,8 @@ bool BrigModule::validate(const BrigDirectiveImage *dir) const {
   if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validate(&dir->s);
+  valid &= check(dir->order < BrigImageOrderInvalid, "Invalid image type");
+  valid &= check(dir->format < BrigImageFormatInvalid, "Invalid format type");
   if(dir->array > 1) {
     valid &= check(dir->depth == 0,
                    "depth value is wrong for 1DA and 2DA images");
