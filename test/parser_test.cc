@@ -694,7 +694,7 @@ TEST(ParserTest, BranchOperation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global; \n");
+  input.assign("brn_width(all)_fbar $s1; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
@@ -704,12 +704,12 @@ TEST(ParserTest, BranchOperation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global, [%local]; \n");
+  input.assign("brn_width(all)_fbar $s1, [%local]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global, [@goto]; \n");
+  input.assign("brn_width(all)_fbar $s1, [@goto]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
