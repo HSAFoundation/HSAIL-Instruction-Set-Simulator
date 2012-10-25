@@ -4434,7 +4434,7 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
-  std::string input("signature &test(arg_u32)(arg_f32) :fbar(2) ;");
+  std::string input("signature &test(arg_u32)(arg_f32) ;");
   Lexer *lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
 
@@ -4451,8 +4451,6 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   ref->kind = BrigEDirectiveSignature;
   ref->c_code = context->get_code_offset();
   ref->s_name = context->get_string_offset()-(strlen("&test") + 1);
-  ref->fbarCount = 2;
-  ref->reserved = 0;
   ref->outCount = 1;
   ref->inCount = 1;
   ref->types[0].type = Brigu32;
@@ -4480,8 +4478,6 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   EXPECT_EQ(ref->kind,get->kind);
   EXPECT_EQ(ref->c_code,get->c_code);
   EXPECT_EQ(ref->s_name,get->s_name);
-  EXPECT_EQ(ref->fbarCount,get->fbarCount);
-  EXPECT_EQ(ref->reserved,get->reserved);
   EXPECT_EQ(ref->outCount,get->outCount);
   EXPECT_EQ(ref->inCount,get->inCount);
   EXPECT_EQ(ref->types[0].type,get->types[0].type);
@@ -4506,7 +4502,7 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
 
   std::string input("kernel &_kernel( \n");
   input.append("kernarg_u32 %arg0, \n");
-  input.append("kernarg_u32 %arg1):fbar(2) \n");
+  input.append("kernarg_u32 %arg1) \n");
   input.append("{ \n");
   input.append("@begin: \n");
   input.append("  private_s32 %arg2;\n");
@@ -4863,7 +4859,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   EXPECT_EQ(calleeFunRef.d_nextDirective, funGet.d_nextDirective);
   EXPECT_EQ(calleeFunRef.d_firstScopedDirective, funGet.d_firstScopedDirective);
   EXPECT_EQ(calleeFunRef.d_firstInParam, funGet.d_firstInParam);
-  EXPECT_EQ(calleeFunRef.fbarCount, funGet.fbarCount);
+  EXPECT_EQ(calleeFunRef.reserved, funGet.reserved);
   EXPECT_EQ(calleeFunRef.attribute, funGet.attribute);
 
   BrigDirectiveSymbol outputSymbol = {
@@ -4965,7 +4961,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   EXPECT_EQ(callerFunRef.d_nextDirective, funGet.d_nextDirective);
   EXPECT_EQ(callerFunRef.d_firstScopedDirective, funGet.d_firstScopedDirective);
   EXPECT_EQ(callerFunRef.d_firstInParam, funGet.d_firstInParam);
-  EXPECT_EQ(callerFunRef.fbarCount, funGet.fbarCount);
+  EXPECT_EQ(callerFunRef.reserved, funGet.reserved);
   EXPECT_EQ(callerFunRef.attribute, funGet.attribute);
 
   BrigDirectiveScope argStart = {

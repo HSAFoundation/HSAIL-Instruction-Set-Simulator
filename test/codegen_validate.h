@@ -125,7 +125,7 @@ void validate(const BrigDirectiveFunction* ref, const char* refbuf, const BrigDi
   EXPECT_EQ(ref->operationCount, get->operationCount);
   //EXPECT_EQ(ref->d_nextDirective, get->d_nextDirective);
   EXPECT_EQ(ref->attribute, get->attribute);
-  EXPECT_EQ(ref->fbarCount, get->fbarCount);
+  EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->outParamCount, get->outParamCount);
   //EXPECT_EQ(ref->d_firstInParam, get->d_firstInParam);
 }
@@ -160,8 +160,6 @@ void validate(const BrigDirectiveSignature* ref, const char* refbuf, const BrigD
   EXPECT_EQ(ref->kind, get->kind);
   //EXPECT_EQ(ref->c_code, get->c_code);
   EXPECT_STREQ(&refbuf[ref->s_name], &getbuf[get->s_name]);
-  EXPECT_EQ(ref->fbarCount, get->fbarCount);
-  EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->outCount, get->outCount);
   EXPECT_EQ(ref->inCount, get->inCount);
 }

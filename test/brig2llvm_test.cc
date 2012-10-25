@@ -1961,8 +1961,6 @@ static void appendBrigDirectiveProto(Buffer &buffer,
   bdp->kind = BrigEDirectiveSignature;
   bdp->c_code = c_code;
   bdp->s_name = s_name;
-  bdp->fbarCount = fbarCount;
-  bdp->reserved = reserved;
   bdp->outCount = outCount;
   bdp->inCount = inCount;
 
@@ -3978,8 +3976,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
     "c_code past the code section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "s_name past the strings section")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Reserved not zero")));
   }
   {
     hsa::brig::StringBuffer strings;

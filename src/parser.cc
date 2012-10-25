@@ -1608,25 +1608,9 @@ int FunctionDefinitionPart2(Context* context) {
           context->set_error(MISSING_ARGUMENT_LIST);
           return 1;
         }
-        // check for optional FBar
-        if (context->token_to_scan == _FBAR) {
-          context->set_fbar(0);
-          if (!FBar(context)) {
-            BrigDirectiveFunction bdf;
-            context->get_directive(context->current_bdf_offset, &bdf);
-            bdf.fbarCount = context->get_fbar();
-            unsigned char * bdf_charp =
-            reinterpret_cast<unsigned char*>(&bdf);
-            context->update_directive_bytes(bdf_charp,
-                                        context->current_bdf_offset,
-                                        sizeof(BrigDirectiveFunction));
-            return 0;
-          } else {
-            context->set_error(INVALID_FBAR);
-          }
-        } else {
-          return 0;
-        }
+
+        return 0;
+
       } else {
         context->set_error(MISSING_IDENTIFIER);
       }
@@ -2762,14 +2746,6 @@ int FunctionSignature(Context *context) {
       return 1;
     }
 
-    if (_FBAR == context->token_to_scan) {
-      if (!FBar(context)) {
-      } else {
-        context->set_error(INVALID_FBAR);
-        return 1;
-      }
-    }
-
     if (';' == context->token_to_scan) {  // end with ;
 
       size_t arraySize = sizeof(BrigDirectiveSignature) +
@@ -2782,8 +2758,6 @@ int FunctionSignature(Context *context) {
       bds->kind = BrigEDirectiveSignature;
       bds->c_code = context->get_code_offset();
       bds->s_name = name_offset;
-      bds->fbarCount = context->get_fbar();
-      bds->reserved = 0;
       bds->outCount = outCount;
       bds->inCount = inCount;
       for(uint32_t i = 0;i < context->types.size();i++)
@@ -3764,31 +3738,6 @@ int Kernel(Context *context) {
       return 1;
     }
 
-    if (_FBAR == context->token_to_scan) {
-      if (!FBar(context)) {
-        BrigDirectiveKernel bdk;
-        context->get_directive(context->current_bdf_offset, &bdk);
-        bdk.fbarCount = context->get_fbar();
-        unsigned char * bdk_charp =
-        reinterpret_cast<unsigned char*>(&bdk);
-        context->update_directive_bytes(bdk_charp,
-                                        context->current_bdf_offset,
-                                        sizeof(BrigDirectiveKernel));
-      } else {
-        context->set_error(INVALID_FBAR);
-        return 1;
-      }
-      BrigDirectiveKernel get;
-      context->get_directive(context->current_bdf_offset,&get);
-
-      get.fbarCount = context->get_fbar();
-      // update
-      unsigned char *bdk_charp =
-         reinterpret_cast<unsigned char*>(&get);
-      context->update_directive_bytes(bdk_charp,
-                                context->current_bdf_offset,
-                                bdk_size);
-    }
     if (!Codeblock(context)) {
       return 0;
     }

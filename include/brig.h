@@ -36,6 +36,8 @@ enum BrigAlignment {
     BrigEAlignment_4,
     BrigEAlignment_8
 };
+
+// PRM 19.5.21
 // BrigSymbolModifier
 enum BrigSymbolModifier {
   BrigConst = 1,  // set means constant; not set means read/write
@@ -160,19 +162,21 @@ enum BrigMachine {
                    // a pointer fits into a d register)
 };
 
+// PRM 19.5.18
 // BrigProfile
 // BrigProfile is used to specify the kind of profile.
 enum BrigProfile {
-  BrigEFull,
-  BrigEReduced
+  BrigEFull = 0,
+  BrigEReduced = 1
 };
 
+// PRM 19.5.19
 // BrigSftz
 // BrigSftz is used to specify the use (or non-use) of single-precision
 // flush to zero.
 enum BrigSftz {
-  BrigESftz,
-  BrigENosftz
+  BrigESftz = 0,
+  BrigENosftz = 1
 };
 
 // PRM 19.5.12
@@ -203,16 +207,18 @@ enum BrigMemorySemantic {
   BrigParAcquireRelease = 7
 };
 
-// 20.5.20
+// 19.5.20
 enum BrigStorageClass {
-    BrigGlobalSpace,
-    BrigGroupSpace,
-    BrigPrivateSpace,
-    BrigKernargSpace,
-    BrigReadonlySpace,
-    BrigSpillSpace,
-    BrigArgSpace,
-    BrigFlatSpace
+  BrigGlobalSpace = 0,
+  BrigGroupSpace = 1,
+  BrigPrivateSpace = 2,
+  BrigKernargSpace = 3,
+  BrigReadonlySpace = 4,
+  BrigSpillSpace = 5,
+  BrigArgSpace = 6,
+  BrigFlatSpace = 7,
+  BrigExtSpace0 = 8,
+  BrigExtSpace1 = 9
 };
 // 8-16 reserved for extensions
 
@@ -237,22 +243,23 @@ enum BrigOperandKinds {
   BrigEOperandOpaque = 50
 };
 
+// PRM 19.5.17
 // BrigPacking
 // BrigPacking is used to specify the packing type of HSAIL operation.
 enum BrigPacking {
-  BrigNoPacking,
-  BrigPackPP,
-  BrigPackPS,
-  BrigPackSP,
-  BrigPackSS,
-  BrigPackS,
-  BrigPackP,
-  BrigPackPPsat,
-  BrigPackPSsat,
-  BrigPackSPsat,
-  BrigPackSSsat,
-  BrigPackSsat,
-  BrigPackPsat
+  BrigNoPacking = 0,
+  BrigPackPP = 1,
+  BrigPackPS = 2,
+  BrigPackSP = 3,
+  BrigPackSS = 4,
+  BrigPackS = 5,
+  BrigPackP = 6,
+  BrigPackPPsat = 7,
+  BrigPackPSsat = 8,
+  BrigPackSPsat = 9,
+  BrigPackSSsat = 10,
+  BrigPackSsat = 11,
+  BrigPackPsat = 12
 };
 
 // BrigOpcode
@@ -384,8 +391,6 @@ enum BrigOpcode {
   BrigInvalidOpcode
 };
 
-
-
 // Brig Support Structures
 // BrigAluModifier specifies arithmetic logic unit controls:
 struct BrigAluModifier {
@@ -497,7 +502,7 @@ enum BrigCompareOperation {
   BrigSgtu = 27
 };
 
-// PRM 20.3.2
+// PRM 19.3.2
 struct BrigSymbolCommon {
   BrigcOffset32_t c_code;
   BrigStorageClass32_t storageClass;
@@ -510,6 +515,7 @@ struct BrigSymbolCommon {
   uint16_t align;
 };
 
+// PRM 19.5.22
 enum BrigSyncFlags {
   BrigGroupLevel = 1,
   BrigGlobalLevel = 2,
@@ -518,13 +524,13 @@ enum BrigSyncFlags {
 
 // Directive structures
 
-// PRM 20.8.3
+// PRM 19.8.3
 struct BrigDirectiveBase {
   uint16_t size;
   uint16_t kind;
 };
 
-// PRM 20.8.4
+// PRM 19.8.4
 struct BrigDirectiveComment {
   enum { DirKind = BrigEDirectiveComment };
   uint16_t size;
@@ -533,7 +539,7 @@ struct BrigDirectiveComment {
   BrigsOffset32_t s_name;
 };
 
-// PRM 20.8.5
+// PRM 19.8.5
 struct BrigDirectiveControl {
   enum { DirKind = BrigEDirectiveControl };
   uint16_t size;
@@ -543,7 +549,7 @@ struct BrigDirectiveControl {
   uint32_t values[3];
 };
 
-// PRM 20.8.6
+// PRM 19.8.6
 struct BrigDirectiveExtension {
   enum { DirKind = BrigEDirectiveExtension };
   uint16_t size;
@@ -552,7 +558,7 @@ struct BrigDirectiveExtension {
   BrigsOffset32_t s_name;
 };
 
-// PRM 20.8.7
+// PRM 19.8.7
 struct BrigDirectiveFile {
   enum { DirKind = BrigEDirectiveFile };
   uint16_t size;
@@ -563,7 +569,7 @@ struct BrigDirectiveFile {
 };
 
 
-// PRM 20.8.8
+// PRM 19.8.8
 struct BrigDirectiveFunction {
   enum { DirKind = BrigEDirectiveFunction };
   uint16_t size;
@@ -575,12 +581,12 @@ struct BrigDirectiveFunction {
   uint32_t operationCount;
   BrigdOffset32_t d_nextDirective;
   BrigAttribute16_t attribute;
-  uint16_t fbarCount;
+  uint16_t reserved;
   uint32_t outParamCount;
   BrigdOffset32_t d_firstInParam;
 };
 
-// PRM 20.8.9
+// PRM 19.8.9
 struct BrigDirectiveImage {
   enum { DirKind = BrigEDirectiveImage };
   uint16_t size;
@@ -594,7 +600,7 @@ struct BrigDirectiveImage {
   BrigImageFormat32_t format;
 };
 
-// PRM 20.8.10
+// PRM 19.8.10
 struct BrigDirectiveInit {
   enum { DirKind = BrigEDirectiveInit };
   uint16_t size;
@@ -613,7 +619,7 @@ struct BrigDirectiveInit {
 };
 
 
-// PRM 20.8.11
+// PRM 19.8.11
 struct BrigDirectiveKernel {
   enum { DirKind = BrigEDirectiveKernel };
   uint16_t size;
@@ -625,7 +631,7 @@ struct BrigDirectiveKernel {
   uint32_t operationCount;
   BrigdOffset32_t d_nextDirective;
   BrigAttribute16_t attribute;
-  uint16_t fbarCount;
+  uint16_t reserved;
   uint32_t outParamCount;
   BrigdOffset32_t d_firstInParam;
 };
@@ -641,12 +647,12 @@ struct BrigDirectiveMethod {
   uint32_t operationCount;
   BrigdOffset32_t d_nextDirective;
   BrigAttribute16_t attribute;
-  uint16_t fbarCount;
+  uint16_t reserved;
   uint32_t outParamCount;
   BrigdOffset32_t d_firstInParam;
 };
 
-// PRM 20.8.12
+// PRM 19.8.12
 // BrigDirectiveLabel
 // BrigDirectiveLabel declares a label.
 struct BrigDirectiveLabel {
@@ -657,7 +663,7 @@ struct BrigDirectiveLabel {
   BrigsOffset32_t s_name;
 };
 
-// PRM 20.8.13
+// PRM 19.8.13
 struct BrigDirectiveLabelInit {
   enum { DirKind = BrigEDirectiveLabelInit };
   uint16_t size;
@@ -667,7 +673,7 @@ struct BrigDirectiveLabelInit {
   BrigdOffset32_t d_labels[1];
 };
 
-// PRM 20.8.14
+// PRM 19.8.14
 struct BrigDirectiveLabelList {
   enum { DirKind = BrigEDirectiveLabelList };
   uint16_t size;
@@ -677,7 +683,7 @@ struct BrigDirectiveLabelList {
   BrigdOffset32_t d_labels[1];
 };
 
-// PRM 20.8.15
+// PRM 19.8.15
 struct BrigDirectiveLoc {
   enum { DirKind = BrigEDirectiveLoc };
   uint16_t size;
@@ -688,7 +694,7 @@ struct BrigDirectiveLoc {
   uint32_t sourceColumn;
 };
 
-// PRM 20.8.16
+// PRM 19.8.16
 // BrigDirectivePad
 // BrigDirectivePad is used to pad out the
 // .directives stream to ensure alignment.
@@ -698,7 +704,7 @@ struct BrigDirectivePad {
   uint16_t kind;
 };
 
-// PRM 20.8.17
+// PRM 19.8.17
 struct BrigDirectivePragma {
   enum { DirKind = BrigEDirectivePragma };
   uint16_t size;
@@ -707,15 +713,13 @@ struct BrigDirectivePragma {
   BrigsOffset32_t s_name;
 };
 
-// PRM 20.8.18
+// PRM 19.8.18
 struct BrigDirectiveSignature {
   enum { DirKind = BrigEDirectiveSignature };
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
   BrigsOffset32_t s_name;
-  uint16_t fbarCount;
-  uint16_t reserved;
   uint32_t outCount;
   uint32_t inCount;
   struct BrigProtoType {
@@ -726,7 +730,7 @@ struct BrigDirectiveSignature {
   } types[1];
 };
 
-// PRM 20.8.19
+// PRM 19.8.19
 struct BrigDirectiveSampler {
   enum { DirKind = BrigEDirectiveSampler };
   uint16_t size;
@@ -741,7 +745,7 @@ struct BrigDirectiveSampler {
   uint32_t reserved1;
 };
 
-// PRM 20.8.20
+// PRM 19.8.20
 // BrigDirectiveScope
 // BrigDirectiveScope is used to start or end a scope.
 struct BrigDirectiveScope {
@@ -764,7 +768,7 @@ struct BrigDirectiveArgEnd {
   BrigcOffset32_t c_code;
 };
 
-// 20.8.21
+// 19.8.21
 // The documentation is in error. The BrigDirectiveSymbol needs size and kind
 // fields to be parsable. Otherwise, there is no way to tell if the second field
 // is a uint16_t kind or the second 16-bit word of BrigSymbolCommon's c_code
@@ -784,7 +788,7 @@ struct BrigDirectiveSymbolCommon {
   BrigSymbolCommon s;
 };
 
-// 20.8.22
+// 19.8.22
 struct BrigDirectiveVersion {
     enum { DirKind = BrigEDirectiveVersion };
     uint16_t size;
@@ -798,14 +802,14 @@ struct BrigDirectiveVersion {
     uint16_t reserved;
 };
 
-// PRM 20.6.2
+// PRM 19.6.2
 struct BrigBlockEnd {
   enum { DirKind = BrigEDirectiveBlockEnd };
   uint16_t size;
   uint16_t kind;
 };
 
-// PRM 20.6.3
+// PRM 19.6.3
 // BrigBlockNumeric
 // BrigBlockNumeric is a variable-size list of numeric values.
 // All the values should have
@@ -828,7 +832,7 @@ struct BrigBlockNumeric {
   };
 };
 
-// PRM 20.6.4
+// PRM 19.6.4
 // BrigBlockStart
 // BrigBlockStart starts a block section.
 // It provides a name that can be used to separate information used by different
@@ -842,7 +846,7 @@ struct BrigBlockStart {
   BrigsOffset32_t s_name;
 };
 
-// PRM 20.6.5
+// PRM 19.6.5
 struct BrigBlockString {
   enum { DirKind = BrigEDirectiveBlockString };
   uint16_t size;
@@ -852,7 +856,7 @@ struct BrigBlockString {
 
 // Code structures
 
-// 20.9.9
+// 19.9.9
 struct BrigInstLdSt {
   enum { InstKind = BrigEInstLdSt };
   uint16_t size;

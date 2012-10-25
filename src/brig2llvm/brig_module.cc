@@ -367,6 +367,7 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
+  valid &= check(!dir->reserved, "Reserved not zero");
 
   const unsigned paramCount = dir->inParamCount + dir->outParamCount;
   dir_iterator argIt = dir_iterator(dir) + 1;
@@ -518,7 +519,6 @@ bool BrigModule::validate(const BrigDirectiveSignature *dir) const {
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
-  valid &= check(!dir->reserved, "Reserved not zero");
   valid &= check(sizeof(BrigDirectiveSignature) +
                  sizeof(BrigDirectiveSignature::BrigProtoType) *
                  (dir->outCount + dir->inCount - 1) <= dir->size,

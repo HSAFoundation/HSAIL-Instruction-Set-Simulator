@@ -32,8 +32,6 @@ class BrigFunction {
   bool isKernel() const { return isa<BrigDirectiveKernel>(it_); }
   bool isFunction() const { return isa<BrigDirectiveFunction>(it_); }
 
-  uint16_t getFBarCount() const { return getMethod()->fbarCount; }
-
   uint32_t getOffset() const { return it_ - S_.directives; }
 
   BrigSymbol arg_begin() const;
