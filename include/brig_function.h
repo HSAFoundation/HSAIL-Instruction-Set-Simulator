@@ -62,7 +62,7 @@ class BrigFunction {
 
   private:
   BrigFunction(const BrigSections &S, const dir_iterator it) :
-    S_(S), it_(it), ver_(NULL), maxTID_(0), maxGPerC_(0), memOpt_(true) {}
+    S_(S), it_(it), ver_(NULL), maxWIPerG_(0), maxGPerC_(0), memOpt_(true) {}
 
   const BrigDirectiveMethod *getMethod() const {
     return cast<BrigDirectiveMethod>(it_);
@@ -80,7 +80,7 @@ class BrigFunction {
   dir_iterator it_;
 
   const BrigDirectiveVersion *ver_;
-  uint32_t maxTID_, maxGPerC_, memOpt_;
+  uint32_t maxWIPerG_, maxGPerC_, memOpt_;
 };
 
 inline BrigFunction fun_begin(const BrigSections &S) {

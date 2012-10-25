@@ -535,7 +535,7 @@ TEST(ParserTest, Codeblock) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
-  
+
   // test 1
   std::string input("{ \n");
   input.append("abs_p_s8x4 $s1, $s2; \n");
@@ -547,7 +547,7 @@ TEST(ParserTest, Codeblock) {
 
 // initialize fake values
   // which should be set in real case when parser parses a function def
-  context->current_bdf_offset = 0;
+  context->current_bdf_offset = 8;
   context->set_arg_output(false);
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
@@ -786,7 +786,7 @@ TEST(ParserTest, Initializers) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
-  
+
   std::string input("= {12, 13,14, -13}\n");  // DecimalInitializer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -821,7 +821,7 @@ TEST(ParserTest, Initializers) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
-  
+
   delete lexer;
 }
 */
@@ -3590,7 +3590,7 @@ TEST(ParserTest, SingleListSingleTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SingleListSingle(context));
-  
+
 /*  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();

@@ -778,11 +778,11 @@ template<typename T> bool BrigModule::validateSize(const T *brig) const{
 // validating the code section
 bool BrigModule::validate(const BrigAluModifier *c) const {
   bool valid = true;
+  if(!c->valid)
+    return true;
+
   if(c->approx == 1)
     valid &= check(c->floatOrInt == 1, "Invalid floatOrInt");
-
-  if(c->floatOrInt == 1)
-    valid &= check(c->hi == 0, "Invalid hi");
 
   if(c->floatOrInt == 0)
     valid &= check(c->ftz == 0, "Invalid ftz");

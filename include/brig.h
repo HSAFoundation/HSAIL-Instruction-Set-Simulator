@@ -46,108 +46,108 @@ enum BrigSymbolModifier {
 // 20.5.2
 // BrigAtomicOperation is used to specify the type of atomic operation.
 enum BrigAtomicOperation {
-  BrigAtomicAnd,
-  BrigAtomicOr,
-  BrigAtomicXor,
-  BrigAtomicCas,
-  BrigAtomicExch,
-  BrigAtomicAdd,
-  BrigAtomicInc,
-  BrigAtomicDec,
-  BrigAtomicMin,
-  BrigAtomicMax,
-  BrigAtomicSub
+  BrigAtomicAnd = 0,
+  BrigAtomicOr = 1,
+  BrigAtomicXor = 2,
+  BrigAtomicCas = 3,
+  BrigAtomicExch = 4,
+  BrigAtomicAdd = 5,
+  BrigAtomicInc = 6,
+  BrigAtomicDec = 7,
+  BrigAtomicMin = 8,
+  BrigAtomicMax = 9,
+  BrigAtomicSub = 10
 };
 
 // 20.5.3
 enum BrigAttribute {
-    BrigExtern,
-    BrigStatic,
-    BrigNone
+    BrigExtern = 0,
+    BrigStatic = 1,
+    BrigNone = 2
 };
 
-// 20.5.6
+// 19.5.6
 enum BrigControlType {
-  BrigEMaxTid,
-  BrigEMaxGperC,
-  BrigEMemOpt
+  BrigEMaxWIperG = 0, // work-items per work-group
+  BrigEMaxGperC = 1, // groups per compute unit
+  BrigEMemOpt = 2 // values[0] = 1 if on
 };
 
-// 20.5.7
+// 19.5.7
 enum BrigDataType {
-    Brigs8,            // signed integer 8 bits
-    Brigs16,           // signed integer 16 bits
-    Brigs32,           // signed integer 32 bits
-    Brigs64,           // signed integer 64 bits
-    Brigu8,            // unsigned integer 8 bits
-    Brigu16,           // unsigned integer 16 bits
-    Brigu32,           // unsigned integer 32 bits
-    Brigu64,           // unsigned integer 64 bits
-    Brigf16,           // floating-point 16 bits
-    Brigf32,           // floating-point 32 bits
-    Brigf64,           // floating-point 64 bits
-    Brigb1,            // uninterpreted bit string of length 1 bit
-    Brigb8,            // uninterpreted bit string of length 8 bits
-    Brigb16,           // uninterpreted bit string of length 16 bits
-    Brigb32,           // uninterpreted bit string of length 32 bits
-    Brigb64,           // uninterpreted bit string of length 64 bits
-    Brigb128,          // uninterpreted bit string of length 128 bits
-    BrigROImg,         // read-only image object
-    BrigRWImg,         // read/write image object
-    BrigSamp,          // sampler object
-    Brigu8x4,          // four bytes unsigned
-    Brigs8x4,          // four bytes signed
-    Brigu8x8,          // eight bytes unsigned
-    Brigs8x8,          // eight bytes signed
-    Brigu8x16,         // 16 bytes unsigned
-    Brigs8x16,         // 16 bytes signed
-    Brigu16x2,         // two short unsigned integers
-    Brigs16x2,         // two short signed integer
-    Brigf16x2,         // two half-floats
-    Brigu16x4,         // four short unsigned integers
-    Brigs16x4,         // four short signed integers
-    Brigf16x4,         // four half-floats
-    Brigu16x8,         // eight short unsigned integers
-    Brigs16x8,         // eight short signed integers
-    Brigf16x8,         // eight half-floats
-    Brigu32x2,         // two unsigned integers
-    Brigs32x2,         // two signed integers
-    Brigf32x2,         // two floats
-    Brigu32x4,         // four unsigned integers
-    Brigs32x4,         // four signed integers
-    Brigf32x4,         // four floats
-    Brigu64x2,         // two 64-bit unsigned integers
-    Brigs64x2,         // two 64-bit signed integers
-    Brigf64x2          // two doubles
+    Brigs8 = 0,            // signed integer 8 bits
+    Brigs16 = 1,           // signed integer 16 bits
+    Brigs32 = 2,           // signed integer 32 bits
+    Brigs64 = 3,           // signed integer 64 bits
+    Brigu8 = 4,            // unsigned integer 8 bits
+    Brigu16 = 5,           // unsigned integer 16 bits
+    Brigu32 = 6,           // unsigned integer 32 bits
+    Brigu64 = 7,           // unsigned integer 64 bits
+    Brigf16 = 8,           // floating-point 16 bits
+    Brigf32 = 9,           // floating-point 32 bits
+    Brigf64 = 10,          // floating-point 64 bits
+    Brigb1 = 11,           // uninterpreted bit string of length 1 bit
+    Brigb8 = 12,           // uninterpreted bit string of length 8 bits
+    Brigb16 = 13,          // uninterpreted bit string of length 16 bits
+    Brigb32 = 14,          // uninterpreted bit string of length 32 bits
+    Brigb64 = 15,          // uninterpreted bit string of length 64 bits
+    Brigb128 = 16,         // uninterpreted bit string of length 128 bits
+    BrigROImg = 17,        // read-only image object
+    BrigRWImg = 18,        // read/write image object
+    BrigSamp = 19,         // sampler object
+    Brigu8x4 = 20,         // four bytes unsigned
+    Brigs8x4 = 21,         // four bytes signed
+    Brigu8x8 = 22,         // eight bytes unsigned
+    Brigs8x8 = 23,         // eight bytes signed
+    Brigu8x16 = 24,        // 16 bytes unsigned
+    Brigs8x16 = 25,        // 16 bytes signed
+    Brigu16x2 = 26,         // two short unsigned integers
+    Brigs16x2 = 27,         // two short signed integer
+    Brigf16x2 = 28,         // two half-floats
+    Brigu16x4 = 29,         // four short unsigned integers
+    Brigs16x4 = 30,         // four short signed integers
+    Brigf16x4 = 31,         // four half-floats
+    Brigu16x8 = 32,         // eight short unsigned integers
+    Brigs16x8 = 33,         // eight short signed integers
+    Brigf16x8 = 34,         // eight half-floats
+    Brigu32x2 = 35,         // two unsigned integers
+    Brigs32x2 = 36,         // two signed integers
+    Brigf32x2 = 37,         // two floats
+    Brigu32x4 = 38,         // four unsigned integers
+    Brigs32x4 = 39,         // four signed integers
+    Brigf32x4 = 40,         // four floats
+    Brigu64x2 = 41,         // two 64-bit unsigned integers
+    Brigs64x2 = 42,         // two 64-bit signed integers
+    Brigf64x2 = 43          // two doubles
 };
 // PRM 20.5.8
 // BrigDirectiveKinds
 // BrigDirectiveKinds is used to specify the kind of directive.
 enum BrigDirectiveKinds {
-  BrigEDirectiveFunction = 0,
-  BrigEDirectiveKernel,
-  BrigEDirectiveSymbol,
-  BrigEDirectiveImage,
-  BrigEDirectiveSampler,
-  BrigEDirectiveLabel,
-  BrigEDirectiveLabelList,
-  BrigEDirectiveVersion,
-  BrigEDirectiveSignature,
-  BrigEDirectiveFile,
-  BrigEDirectiveComment,
-  BrigEDirectiveLoc,
-  BrigEDirectiveInit,
-  BrigEDirectiveLabelInit,
-  BrigEDirectiveControl,
-  BrigEDirectivePragma,
-  BrigEDirectiveExtension,
-  BrigEDirectiveArgStart,
-  BrigEDirectiveArgEnd,
-  BrigEDirectiveBlockStart,
-  BrigEDirectiveBlockNumeric,
-  BrigEDirectiveBlockString,
-  BrigEDirectiveBlockEnd,
-  BrigEDirectivePad = 23
+  BrigEDirectivePad = 0,
+  BrigEDirectiveFunction = 1,
+  BrigEDirectiveKernel = 2,
+  BrigEDirectiveSymbol = 3,
+  BrigEDirectiveImage = 4,
+  BrigEDirectiveSampler = 5,
+  BrigEDirectiveLabel = 6,
+  BrigEDirectiveLabelList = 7,
+  BrigEDirectiveVersion = 8,
+  BrigEDirectiveSignature = 9,
+  BrigEDirectiveFile = 10,
+  BrigEDirectiveComment = 11,
+  BrigEDirectiveLoc = 12,
+  BrigEDirectiveInit = 13,
+  BrigEDirectiveLabelInit = 14,
+  BrigEDirectiveControl = 15,
+  BrigEDirectivePragma = 16,
+  BrigEDirectiveExtension = 17,
+  BrigEDirectiveArgStart = 18,
+  BrigEDirectiveArgEnd = 19,
+  BrigEDirectiveBlockStart = 20,
+  BrigEDirectiveBlockNumeric = 21,
+  BrigEDirectiveBlockString = 22,
+  BrigEDirectiveBlockEnd = 23
 };
 
 // BrigMachine
@@ -388,9 +388,9 @@ enum BrigOpcode {
 // Brig Support Structures
 // BrigAluModifier specifies arithmetic logic unit controls:
 struct BrigAluModifier {
+  uint32_t valid: 1;
   uint32_t floatOrInt: 1;
   uint32_t rounding: 2;
-  uint32_t hi: 1;
   uint32_t ftz: 1;
   uint32_t approx: 1;
   uint32_t fbar: 1;
@@ -449,50 +449,50 @@ enum BrigImageOrder {
 
 //PRM 20.5.1
 enum BrigAddrFilter {
-  BrigSamplerFilterLinear,
-  BrigSamplerFilterNearest
+  BrigSamplerFilterLinear = 0,
+  BrigSamplerFilterNearest = 1
 };
 
 //PRM 20.5.4
 enum BrigBoundaryMode {
-  BrigSamplerClamp,
-  BrigSamplerWrap,
-  BrigSamplerMirror,
-  BrigSamplerMirrorOnce,
-  BrigSamplerBorder
+  BrigSamplerClamp = 0,
+  BrigSamplerWrap = 1,
+  BrigSamplerMirror = 2,
+  BrigSamplerMirrorOnce = 3,
+  BrigSamplerBorder = 4
 };
 
+//PRM 19.5.5
 enum BrigCompareOperation {
-  BrigEq,
-  BrigNe,
-  BrigLt,
-  BrigLe,
-  BrigGt,
-  BrigGe,
-  BrigEqu,
-  BrigNeu,
-  BrigLtu,
-  BrigLeu,
-  BrigGtu,
-  BrigGeu,
-  BrigNum,
-  BrigNan,
-  BrigSeq,
-  BrigSne,
-  BrigSlt,
-  BrigSle,
-  BrigSgt,
-  BrigSge,
-  BrigSgeu,
-  BrigSequ,
-  BrigSneu,
-  BrigSltu,
-  BrigSleu,
-  BrigSnum,
-  BrigSnan,
-  BrigSgtu
+  BrigEq = 0,
+  BrigNe = 1,
+  BrigLt = 2,
+  BrigLe = 3,
+  BrigGt = 4,
+  BrigGe = 5,
+  BrigEqu = 6,
+  BrigNeu = 7,
+  BrigLtu = 8,
+  BrigLeu = 9,
+  BrigGtu = 10,
+  BrigGeu = 11,
+  BrigNum = 12,
+  BrigNan = 13,
+  BrigSeq = 14,
+  BrigSne = 15,
+  BrigSlt = 16,
+  BrigSle = 17,
+  BrigSgt = 18,
+  BrigSge = 19,
+  BrigSgeu = 20,
+  BrigSequ = 21,
+  BrigSneu = 22,
+  BrigSltu = 23,
+  BrigSleu = 24,
+  BrigSnum = 25,
+  BrigSnan = 26,
+  BrigSgtu = 27
 };
-
 
 // PRM 20.3.2
 struct BrigSymbolCommon {
@@ -1178,50 +1178,5 @@ struct BrigOperandWaveSz {
   uint16_t size;
   uint16_t kind;
 };
-/*
-enum BrigAddrFilter {
-  BrigSamplerFilterLinear,
-  BrigSamplerFilterNearest
-};
 
-enum BrigBoundaryMode {
-  BrigSamplerClamp,
-  BrigSamplerWrap,
-  BrigSamplerMirror,
-  BrigSamplerMirrorOnce,
-  BrigSamplerBorder
-};
-
-
-enum BrigCompareOperation {
-  BrigEq,
-  BrigNe,
-  BrigLt,
-  BrigLe,
-  BrigGt,
-  BrigGe,
-  BrigEqu,
-  BrigNeu,
-  BrigLtu,
-  BrigLeu,
-  BrigGtu,
-  BrigGeu,
-  BrigNum,
-  BrigNan,
-  BrigSeq,
-  BrigSne,
-  BrigSlt,
-  BrigSle,
-  BrigSgt,
-  BrigSge,
-  BrigSgeu,
-  BrigSequ,
-  BrigSneu,
-  BrigSltu,
-  BrigSleu,
-  BrigSnum,
-  BrigSnan,
-  BrigSgtu
-};
-*/
 #endif  // INCLUDE_BRIG_H_

@@ -4675,7 +4675,7 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       0,
       {0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 1, 0, 0}
+      {1, 0, 0, 0, 1, 0, 0}
     };
     code.append(&bim);
 
@@ -4720,52 +4720,7 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       0,
       {0, 0, 0, 0, 0},
-      {1, 0, 1, 0, 0, 0, 0}
-    };
-    code.append(&bim);
-
-    hsa::brig::Buffer operands;
-
-    hsa::brig::Buffer debug;
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
-                              debug, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid hi")));
-  }
-  {
-    hsa::brig::StringBuffer strings;
-    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    hsa::brig::Buffer directives;
-    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-
-    hsa::brig::Buffer code;
-    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstMod bim = {
-      sizeof(bim),
-      BrigEInstMod,
-      0,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
-      {0, 0, 0, 1, 0, 0, 0}
+      {1, 0, 0, 1, 0, 0, 0}
     };
     code.append(&bim);
 
@@ -4810,7 +4765,7 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       0,
       {0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 0, 0, 1}
+      {1, 0, 0, 0, 0, 0, 1}
     };
     code.append(&bim);
 
@@ -4960,7 +4915,7 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 0, 1, 0, 0},    //aluModifier
+      {1, 0, 0, 0, 1, 0, 0},    //aluModifier
       0,                        //comparisonOperator
       0,                        //sourceType
       0                         //reserved
@@ -5008,55 +4963,7 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {1, 0, 1, 0, 0, 0, 0},    //aluModifier
-      0,                        //comparisonOperator
-      0,                        //sourceType
-      0                         //reserved
-    };
-    code.append(&bic);
-
-    hsa::brig::Buffer operands;
-
-    hsa::brig::Buffer debug;
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
-                              debug, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid hi")));
-  }
-  {
-    hsa::brig::StringBuffer strings;
-    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    hsa::brig::Buffer directives;
-    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-
-    hsa::brig::Buffer code;
-    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstCmp bic = {
-      sizeof(bic),              //size
-      BrigEInstCmp,             //kind
-      0,                        //opcode
-      0,                        //type
-      0,                        //packing
-      {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 1, 0, 0, 0},    //aluModifier
+      {1, 0, 0, 1, 0, 0, 0},    //aluModifier
       0,                        //comparisonOperator
       0,                        //sourceType
       0                         //reserved
@@ -5104,7 +5011,7 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 0, 0, 0, 1},    //aluModifier
+      {1, 0, 0, 0, 0, 0, 1},    //aluModifier
       0,                        //comparisonOperator
       0,                        //sourceType
       0                         //reserved
@@ -5687,7 +5594,7 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 0, 1, 0, 0},    //aluModifier
+      {1, 0, 0, 0, 1, 0, 0},    //aluModifier
       0,                        //stype
       0                         //reserved
     };
@@ -5734,54 +5641,7 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {1, 0, 1, 0, 0, 0, 0},    //aluModifier
-      0,                        //stype
-      0                         //reserved
-    };
-    code.append(&bic);
-
-    hsa::brig::Buffer operands;
-
-    hsa::brig::Buffer debug;
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
-                              debug, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid hi")));
-  }
-  {
-    hsa::brig::StringBuffer strings;
-    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    hsa::brig::Buffer directives;
-    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-
-    hsa::brig::Buffer code;
-    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstCvt bic = {
-      sizeof(bic),              //size
-      BrigEInstCvt,             //kind
-      0,                        //opcode
-      0,                        //type
-      0,                        //packing
-      {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 1, 0, 0, 0},    //aluModifier
+      {1, 0, 0, 1, 0, 0, 0},    //aluModifier
       0,                        //stype
       0                         //reserved
     };
@@ -5828,7 +5688,7 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 0, 0, 0, 1},    //aluModifier
+      {1, 0, 0, 0, 0, 0, 1},    //aluModifier
       0,                        //stype
       0                         //reserved
     };
@@ -6554,7 +6414,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     BrigOperandFunctionRef bofr = {
       sizeof(bofr),
       BrigEOperandFunctionRef,
-      20
+      sizeof(BrigDirectiveVersion) + 8
     };
     operands.append(&bofr);
 
@@ -6619,7 +6479,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     BrigOperandFunctionRef bofr = {
       sizeof(bofr),
       BrigEOperandFunctionRef,
-      68
+      directives.size() - sizeof(BrigDirectiveFunction)
     };
     operands.append(&bofr);
 
@@ -8048,14 +7908,14 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     BrigOperandFunctionRef bofr1 = {
       sizeof(bofr1),
       BrigEOperandFunctionRef,
-      20                    //arg
+      sizeof(BrigDirectiveVersion) + 8         //arg
     };
     operands.append(&bofr1);
 
     BrigOperandFunctionRef bofr2 = {
       sizeof(bofr2),
       BrigEOperandFunctionRef,
-      60                    //arg
+      directives.size() - sizeof(BrigDirectiveFunction) //arg
     };
     operands.append(&bofr2);
 

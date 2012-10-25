@@ -784,13 +784,14 @@ int RoundingMode(Context* context) {
   BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};//context->get_alu_modifier();
 
   if (first_token == _FTZ) {
+    mod.valid = 1;
     mod.ftz = 1;
-    mod.floatOrInt = 1;
     context->token_to_scan = yylex();
   }
 
   if (context->token_type == FLOAT_ROUNDING) {
       // next is floatRounding
+    mod.valid = 1;
     mod.floatOrInt = 1;
     switch (context->token_to_scan) {
       case _UP:
@@ -810,6 +811,7 @@ int RoundingMode(Context* context) {
     context->set_alu_modifier(mod);
     return 0;
   } else if (context->token_type == INT_ROUNDING) {
+    mod.valid = 1;
     mod.floatOrInt = 0;
     switch (first_token) {
       case _UPI:
@@ -1833,6 +1835,7 @@ int BranchPart1Cbr(Context* context) {
   }
   // check for optional _fbar modifier
   if (context->token_to_scan == __FBAR) {
+    mod.valid = 1;
     mod.fbar = 1;
     context->set_alu_modifier(mod);
     context->token_to_scan = yylex();
@@ -1965,6 +1968,7 @@ int BranchPart2Brn(Context* context) {
     }
     // check for optional _fbar modifier
     if (context->token_to_scan == __FBAR) {
+      mod.valid = 1;
       mod.fbar = 1;
       context->set_alu_modifier(mod);
       context->token_to_scan = yylex();
@@ -2192,6 +2196,7 @@ int Call(Context* context) {
         callMod.o_operands[i] = callInst.o_operands[i];
       }
       memset(&callMod.aluModifier, 0, sizeof(BrigAluModifier));
+      callMod.aluModifier.valid = 1;
       callMod.aluModifier.fbar = 1;
       context->append_code(&callMod);
     } else {
@@ -7496,7 +7501,7 @@ int Control(Context* context) {
       return 1;
     }
   } else if (context->token_to_scan == ITEMS_PER_WORKGROUP) {
-    controlType = BrigEMaxTid;
+    controlType = BrigEMaxWIperG;
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       values[0] = context->token_value.int_val;
