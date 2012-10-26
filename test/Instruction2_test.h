@@ -1567,6 +1567,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   symbols->append(op1); symbols->append(op2);
 
   BrigAluModifier bam;
+  bam.valid = 1;
   bam.ftz = 1;
   bam.floatOrInt = 1;
   bam.rounding = 2;
@@ -1601,7 +1602,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   in.assign( "fract_ftz_f32 $s0, 1.6f;\n");
   op1.assign("$s0");
   symbols->append(op1);
-
+  bam.valid = 1;
   bam.ftz = 1;
   bam.floatOrInt = 0;
   bam.rounding = 0;
@@ -1645,7 +1646,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   in.assign( "neg_ftz_f32 $s1, 99.0f;\n");
   op1.assign("$s1");
   symbols->append(op1);
-
+  bam.valid = 1;
   bam.rounding = 0;
   bam.ftz = 1;
   bam.floatOrInt = 0;

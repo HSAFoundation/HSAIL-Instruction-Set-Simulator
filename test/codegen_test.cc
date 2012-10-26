@@ -32,6 +32,7 @@
 #include "Location_test.h"
 #include "Pragma_test.h"
 #include "Extension_test.h"
+#include "Branch_test.h"
 
 namespace hsa {
 namespace brig {
@@ -486,9 +487,9 @@ TEST(CodegenTest, Example4_Branch) {
 
   // test the sizes of each section
   BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(132U, dsize);
+  EXPECT_EQ(132, dsize);
   BrigdOffset32_t csize = context->get_code_offset();
-  EXPECT_EQ(172U, csize);
+  EXPECT_EQ(168, csize);
   BrigdOffset32_t osize = context->get_operand_offset();
   EXPECT_EQ(136, osize);
   BrigdOffset32_t ssize = context->get_string_offset();
@@ -523,11 +524,11 @@ TEST(CodegenTest, Example4_Branch) {
   BrigDirectiveLabel label1;
   context->get_directive(108, &label1);
   EXPECT_EQ(12U, label1.size);
-  EXPECT_EQ(108U, label1.c_code);
+  EXPECT_EQ(104, label1.c_code);
   EXPECT_EQ(35U, label1.s_name);
 
   context->get_directive(120, &label1);
-  EXPECT_EQ(140U, label1.c_code);
+  EXPECT_EQ(136, label1.c_code);
   EXPECT_EQ(49U, label1.s_name);
 
   // test BrigCbr
@@ -535,7 +536,7 @@ TEST(CodegenTest, Example4_Branch) {
   context->get_code(8, &cbr_op);
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCbr, cbr_op.opcode);
-  EXPECT_EQ(Brigb1, cbr_op.type);
+  EXPECT_EQ(Brigb32, cbr_op.type);
   EXPECT_EQ(8, cbr_op.o_operands[0]);
   EXPECT_EQ(32, cbr_op.o_operands[1]);
   EXPECT_EQ(44, cbr_op.o_operands[2]);
@@ -545,7 +546,7 @@ TEST(CodegenTest, Example4_Branch) {
   // test BrigBrn
   BrigInstBar br_op;
   context->get_code(72, &br_op);
-  EXPECT_EQ(36U, br_op.size);
+  EXPECT_EQ(32, br_op.size);
   EXPECT_EQ(BrigBrn, br_op.opcode);
   EXPECT_EQ(80, br_op.o_operands[0]);
   EXPECT_EQ(104, br_op.o_operands[1]);
@@ -1598,67 +1599,65 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     32,                    // size
     BrigEInstBase,         // kind
     BrigCbr,               // opcode
-    Brigb1,               // type
+    Brigb32,               // type
     BrigNoPacking,         // packing
     {40, 64, 76, 0, 0}        // o_operands[5]
   };
 
-  BrigInstBar refBrnLab1 = {
-    36,                  // size
-    BrigEInstBar,        // kind
+  BrigInstBase refBrnLab1 = {
+    32,                  // size
+    BrigEInstBase,        // kind
     BrigBrn,             // opcode
     Brigb32,             // type
     BrigNoPacking,       // packing
-    {8, 32, 0, 0, 0},     // o_operands[5]
-    0                    // syncFlags
+    {8, 32, 0, 0, 0}     // o_operands[5]
   };
   BrigInstBase refCbrLab1 = {
     32,                    // size
     BrigEInstBase,         // kind
     BrigCbr,               // opcode
-    Brigb1,               // type
+    Brigb32,               // type
     BrigNoPacking,         // packing
     {120, 64, 32, 0, 0}        // o_operands[5]
   };
-  BrigInstBar refBrnLab2 = {
-    36,                  // size
-    BrigEInstBar,        // kind
+  BrigInstBase refBrnLab2 = {
+    32,                  // size
+    BrigEInstBase,        // kind
     BrigBrn,             // opcode
     Brigb32,             // type
     BrigNoPacking,       // packing
-    {88, 112, 0, 0, 0},     // o_operands[5]
-    0                    // syncFlags
+    {88, 112, 0, 0, 0}   // o_operands[5]
   };
 
   BrigDirectiveLabel ref1 = {
     12,                     // size
     BrigEDirectiveLabel,    // kind
-    44,                     // c_code
+    40,                     // c_code
     8                       // s_name
   };
   BrigDirectiveLabel ref2 = {
     12,                     // size
     BrigEDirectiveLabel,    // kind
-    76,                     // c_code
+    72,                     // c_code
     18                      // s_name
   };
   BrigDirectiveLabel ref3 = {
     12,                     // size
     BrigEDirectiveLabel,    // kind
-    76,                     // c_code
+    72,                     // c_code
     24                      // s_name
   };
   BrigDirectiveLabel ref4 = {
     12,                     // size
     BrigEDirectiveLabel,    // kind
-    112,                    // c_code
+    104,                    // c_code
     30                      // s_name
   };
 
   BrigDirectiveLabel get1, get2, get3, get4;
   BrigOperandLabelRef getLabRef;
   BrigInstBase getCbrCode;
-  BrigInstBar getBrnCode;
+  BrigInstBase getBrnCode;
 
   std::string input("brn @lab1;\n");  // brn lab1
   input.append("@lab1:\n");
@@ -1687,8 +1686,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   EXPECT_EQ(refBrnLab1.o_operands[2], getBrnCode.o_operands[2]);
   EXPECT_EQ(refBrnLab1.o_operands[3], getBrnCode.o_operands[3]);
   EXPECT_EQ(refBrnLab1.o_operands[4], getBrnCode.o_operands[4]);
-  // TODO(Chuang) set the value of .syncFlags
-  // EXPECT_EQ(refBrn.syncFlags, getBrnCode.syncFlags);
+
 
   BrigoOffset32_t curOpOffset = 8;
 
@@ -1721,7 +1719,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // cbr lab3
   EXPECT_EQ(0, Branch(context));
 
-  context->get_code(44, &getCbrCode);
+  context->get_code(40, &getCbrCode);
 
   EXPECT_EQ(refCbrLab3.size, getCbrCode.size);
   EXPECT_EQ(refCbrLab3.kind, getCbrCode.kind);
@@ -1773,7 +1771,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // brn lab2
   EXPECT_EQ(0, Branch(context));
 
-  context->get_code(76, &getBrnCode);
+  context->get_code(72, &getBrnCode);
 
   EXPECT_EQ(refBrnLab2.size, getBrnCode.size);
   EXPECT_EQ(refBrnLab2.kind, getBrnCode.kind);
@@ -1811,7 +1809,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   // cbr lab1
   EXPECT_EQ(0, Branch(context));
 
-  context->get_code(112, &getCbrCode);
+  context->get_code(104, &getCbrCode);
 
   EXPECT_EQ(refCbrLab1.size, getCbrCode.size);
   EXPECT_EQ(refCbrLab1.kind, getCbrCode.kind);
