@@ -14,10 +14,12 @@ extern int yylineno;
 
 namespace hsa {
 namespace brig {
+
+
 // context for code generation
 class Context {
   public:
-    enum context_error_t {
+    enum context_error_t{
       CONTEXT_OK = 0,
       INVALID_POINTER = 1,
       EMPTY_BUFFER,
@@ -81,15 +83,16 @@ class Context {
     // append directive
     template <class T>
     void append_directive(const T* item) {
-      uint32_t directive_offset = dbuf->size();
+      this->last_directive_offset = dbuf->size();
       if ((alignment_check(*item) == BrigEAlignment_8) &&
-          (directive_offset%8)) {
+          (this->last_directive_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
           4,                 // Size
           BrigEDirectivePad  // type
         };
         dbuf->append(&bdp);
+        this->last_directive_offset += sizeof(bdp);
       }
       dbuf->append(item);
     }
@@ -129,6 +132,28 @@ class Context {
       assert(false && "Unreachable");
     }
 
+    template <class T>
+    context_error_t get_directive(T* item) {
+      // check for valid pointer
+      if (item == NULL)
+        return INVALID_POINTER;
+      uint32_t offset = this->last_directive_offset;
+      Buffer::error_t result = Buffer::EMPTY_BUFFER;
+      if(offset)
+       result = dbuf->get(offset, item);
+      else
+        return EMPTY_BUFFER;
+
+      if (result == Buffer::INVALID_OFFSET)
+        return INVALID_OFFSET;
+      else if (result == Buffer::EMPTY_BUFFER)
+        return EMPTY_BUFFER;
+      else if (result == Buffer::SUCCESS)
+        return CONTEXT_OK;
+
+      assert(false && "Unreachable");
+    }
+    
     // get code at a specific offset
     template <class T>
     context_error_t get_code(uint32_t offset, T* item) {
@@ -191,6 +216,9 @@ class Context {
                                            uint32_t offset,
                                            uint32_t nBytes);
 
+    context_error_t update_last_directive(unsigned char* value,
+                                            uint32_t nBytes);                                           
+                                           
     context_error_t update_code_bytes(unsigned char* value,
                                       uint32_t offset,
                                       uint32_t nBytes);
@@ -258,11 +286,11 @@ class Context {
 
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
+    
+    
 
     BrigdOffset32_t current_bdf_offset;
     BrigoOffset32_t current_argList_offset;
-    BrigdOffset32_t current_img_offset ;
-    BrigdOffset32_t current_samp_offset ;
     BrigdOffset32_t current_argdecl_offset;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in an instruction
@@ -327,6 +355,7 @@ class Context {
     uint32_t dim;
     bool is_array;
     bool is_blockNumeric;
+    BrigdOffset32_t last_directive_offset;
 };
 
 }  // namespace brig
