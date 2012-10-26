@@ -78,13 +78,13 @@ TEST(CodegenTest, Cvt_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb64;
   reg2.reserved = 0;
-  reg2.name = op1.size() + 1;
+  reg2.s_name = op1.size() + 1;
 
   Cvt_Test<BrigOperandReg> 
             TestCase1(in, symbols, &out1, &reg1, &reg2);
@@ -103,7 +103,7 @@ TEST(CodegenTest, Cvt_CodeGen){
     Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0},
-    {0,3,0,0,0,0,0},
+    {1,0,3,0,0,0,0},
     Brigf32,
     0
   };
@@ -113,13 +113,13 @@ TEST(CodegenTest, Cvt_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = op1.size() + 1;
+  reg2.s_name = op1.size() + 1;
 
   Cvt_Test<BrigOperandReg> 
             TestCase2(in, symbols, &out2, &reg1, &reg2);
@@ -138,7 +138,7 @@ TEST(CodegenTest, Cvt_CodeGen){
     Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0},
-    {0,2,0,0,0,0,0},
+    {1,0,2,0,0,0,0},
     Brigf32,
     0
   };
@@ -148,7 +148,7 @@ TEST(CodegenTest, Cvt_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   memset(&imm2, 0, sizeof(imm2));
   imm2.size = sizeof(imm2);
@@ -174,7 +174,7 @@ TEST(CodegenTest, Cvt_CodeGen){
     Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0},
-    {0,3,0,0,0,0,0},
+    {1,1,3,0,0,0,0},
     Brigf32,
     0
   };
@@ -184,7 +184,7 @@ TEST(CodegenTest, Cvt_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   wav.size = sizeof(wav);
   wav.kind = BrigEOperandWaveSz;
@@ -206,7 +206,7 @@ TEST(CodegenTest, Cvt_CodeGen){
     Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0},
-    {1,2,0,1,0,0,0},
+    {1,1,2,1,0,0,0},
     Brigf16,
     0
   };
@@ -216,7 +216,7 @@ TEST(CodegenTest, Cvt_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   memset(&imm2, 0, sizeof(imm2));
   imm2.size = sizeof(imm2);
@@ -242,7 +242,7 @@ TEST(CodegenTest, Cvt_CodeGen){
     Brigu32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0},
-    {1,2,0,0,0,0,0},
+    {1,1,2,0,0,0,0},
     Brigf32,
     0
   };
@@ -252,7 +252,7 @@ TEST(CodegenTest, Cvt_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   memset(&imm2, 0, sizeof(imm2));
   imm2.size = sizeof(imm2);
@@ -278,7 +278,7 @@ TEST(CodegenTest, Cvt_CodeGen){
     Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0},
-    {0,2,0,0,0,0,0},
+    {1,0,2,0,0,0,0},
     Brigs32,
     0
   };
@@ -288,7 +288,7 @@ TEST(CodegenTest, Cvt_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   memset(&imm2, 0, sizeof(imm2));
   imm2.size = sizeof(imm2);
