@@ -1651,11 +1651,7 @@ bool BrigModule::validateDiv(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateFma(const inst_iterator inst) const {
-  bool valid = true;
-  valid &= check(BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
-                 "Fma is only valid for floating point types");
-  valid &= validateBinaryArithmetic(inst);
-  return valid;
+  return true;
 }
 
 bool BrigModule::validateFract(const inst_iterator inst) const {
@@ -1667,11 +1663,7 @@ bool BrigModule::validateFract(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateMad(const inst_iterator inst) const {
-  bool valid = true;
-  valid &= check(BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
-                 "Mad is only valid for floating point types");
-  valid &= validateBinaryArithmetic(inst);
-  return valid;
+  return true;
 }
 
 bool BrigModule::validateMax(const inst_iterator inst) const {
