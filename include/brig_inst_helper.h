@@ -29,7 +29,7 @@ class BrigInstHelper {
   }
 
   const char *getName(const BrigOperandReg *reg) const {
-    return S_.strings + reg->name;
+    return S_.strings + reg->s_name;
   }
 
   template<class T>

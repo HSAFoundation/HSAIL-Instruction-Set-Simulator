@@ -6,7 +6,7 @@
 namespace hsa {
 namespace brig {
 
-template <typename T1, typename T2 = BrigOperandReg> 
+template <typename T1, typename T2 = BrigOperandReg>
 class Atom_Test: public BrigCodeGenTest {
 
 private:
@@ -22,8 +22,8 @@ private:
   const T2* RefSrc2;
 
 public:
-  Atom_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomic* ref, 
-            BrigOperandReg* Dest, BrigOperandCompound* Compound, BrigOperandAddress* Addr, 
+  Atom_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomic* ref,
+            BrigOperandReg* Dest, BrigOperandCompound* Compound, BrigOperandAddress* Addr,
             BrigOperandReg* Reg, T1* Src1, T2* Src2 = NULL):
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
@@ -35,7 +35,7 @@ public:
     RefSrc1(Src1),
     RefSrc2(Src2) { }
 
-  Atom_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomic* ref, 
+  Atom_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomic* ref,
             BrigOperandReg* Dest, BrigOperandIndirect* Indirect,
             BrigOperandReg* Reg, T1* Src1, T2* Src2 = NULL):
     BrigCodeGenTest(in, sbuf),
@@ -48,7 +48,7 @@ public:
     RefSrc1(Src1),
     RefSrc2(Src2) { }
 
-  Atom_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomic* ref, 
+  Atom_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomic* ref,
             BrigOperandReg* Dest, BrigOperandAddress* Addr, T1* Src1, T2* Src2 = NULL):
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
@@ -59,18 +59,18 @@ public:
     RefReg(NULL),
     RefSrc1(Src1),
     RefSrc2(Src2) { }
- 
+
   void validate(struct BrigSections* TestOutput) {
     const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;   
+    const char* getbuf = TestOutput->strings;
     unsigned int opCount = 0;
 
     inst_iterator getcode = TestOutput->code_begin();
     const BrigInstAtomic* getinst = (cast<BrigInstAtomic>(getcode));
     validate_brig::validate(RefInst, getinst);
-    
+
     if (RefDest != NULL) {
-      const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*> 
+      const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*>
                                       (&(TestOutput->operands[getinst->o_operands[opCount++]]));
       validate_brig::validate(RefDest, refbuf, getdest, getbuf);
     }
@@ -79,41 +79,41 @@ public:
     const BrigOperandReg* getreg = NULL;
 
     if (RefCompound != NULL) {
-      const BrigOperandCompound* getcomp = reinterpret_cast <const BrigOperandCompound*> 
+      const BrigOperandCompound* getcomp = reinterpret_cast <const BrigOperandCompound*>
                                            (&(TestOutput->operands[getinst->o_operands[opCount++]]));
       validate_brig::validate(RefCompound, getcomp);
-      
-      getaddr = reinterpret_cast <const BrigOperandAddress*> 
+
+      getaddr = reinterpret_cast <const BrigOperandAddress*>
                                  (&(TestOutput->operands[getcomp->name]));
       validate_brig::validate(RefAddr, getaddr);
-      
+
       if (RefReg != NULL) {
-        getreg = reinterpret_cast <const BrigOperandReg*> 
+        getreg = reinterpret_cast <const BrigOperandReg*>
                                    (&(TestOutput->operands[getcomp->reg]));
         validate_brig::validate(RefReg, refbuf, getreg, getbuf);
       }
     } else if (RefIndirect != NULL) {
-      const BrigOperandIndirect* getindi = reinterpret_cast <const BrigOperandIndirect*> 
+      const BrigOperandIndirect* getindi = reinterpret_cast <const BrigOperandIndirect*>
                                            (&(TestOutput->operands[getinst->o_operands[opCount++]]));
       validate_brig::validate(RefIndirect, getindi);
 
       if (RefReg != NULL) {
-        getreg = reinterpret_cast <const BrigOperandReg*> 
+        getreg = reinterpret_cast <const BrigOperandReg*>
                                   (&(TestOutput->operands[getindi->reg]));
         validate_brig::validate(RefReg, refbuf, getreg, getbuf);
       }
     } else if (RefAddr != NULL) {
-      getaddr = reinterpret_cast <const BrigOperandAddress*> 
+      getaddr = reinterpret_cast <const BrigOperandAddress*>
                                  (&(TestOutput->operands[getinst->o_operands[opCount++]]));
       validate_brig::validate(RefAddr, getaddr);
     }
 
-    const T1 *getsrc1 = reinterpret_cast <const T1*> 
+    const T1 *getsrc1 = reinterpret_cast <const T1*>
                         (&(TestOutput->operands[getinst->o_operands[opCount++]]));
     validate_brig::validateOpType<T1>(RefSrc1, refbuf, getsrc1, getbuf);
 
     if (RefSrc2 != NULL) {
-      const T2 *getsrc2 = reinterpret_cast <const T2*> 
+      const T2 *getsrc2 = reinterpret_cast <const T2*>
                           (&(TestOutput->operands[getinst->o_operands[opCount++]]));
       validate_brig::validateOpType<T2>(RefSrc2, refbuf, getsrc2, getbuf);
     } else {
@@ -128,20 +128,20 @@ public:
   }
 };
 
-TEST(CodegenTest, Atom_CodeGen) {  
-  
+TEST(CodegenTest, Atom_CodeGen) {
+
   /********************************** Common variables used by all tests******************************/
   //To keep the stack footprint low
-  
-  std::string in; 
+
+  std::string in;
   std::string regName, destName, op1Name, op2Name;
   StringBuffer* symbols;
-  
+
   BrigOperandReg dest;
   BrigInstAtomic out;
   BrigOperandCompound comp;
   BrigOperandIndirect indi;
-  BrigOperandReg reg; 
+  BrigOperandReg reg;
   BrigOperandAddress addr;
 
   BrigOperandReg reg1, reg2;
@@ -150,10 +150,10 @@ TEST(CodegenTest, Atom_CodeGen) {
 
 
   symbols = new StringBuffer();
-  
+
   /************************************* Test Case 1 ************************************/
   in.assign("atomic_cas_global_ar_b64 $d1, [&x1], 23, 12;\n");
-  destName.assign("$d1");  
+  destName.assign("$d1");
   symbols->append(destName);
 
   out.size = sizeof(out);
@@ -174,7 +174,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   addr.size = sizeof(addr);
   addr.kind = BrigEOperandAddress;
@@ -203,7 +203,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   /************************************* Test Case 2 ************************************/
   in.assign("atomic_and_global_ar_u32 $s1, [&x2], 24;\n");
-  destName.assign("$s1");  
+  destName.assign("$s1");
   symbols->append(destName);
 
   out.size = sizeof(out);
@@ -224,7 +224,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -260,7 +260,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
@@ -273,7 +273,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = destName.size() + 1;
+  reg.s_name = destName.size() + 1;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -309,7 +309,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   comp.size = sizeof(comp);
   comp.kind = BrigEOperandCompound;
@@ -323,7 +323,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = destName.size() + 1;
+  reg.s_name = destName.size() + 1;
 
   addr.size = sizeof(addr);
   addr.kind = BrigEOperandAddress;
@@ -339,7 +339,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   /************************************* Test Case 5 ************************************/
   in.assign("atomic_cas_global_b32 $s1, [&map][$s1 + 0x7], WAVESIZE, WAVESIZE;\n");
-  destName.assign("$s1");  
+  destName.assign("$s1");
   symbols->append(destName);
 
   out.size = sizeof(out);
@@ -360,7 +360,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   comp.size = sizeof(comp);
   comp.kind = BrigEOperandCompound;
@@ -412,7 +412,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
@@ -425,19 +425,19 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = destName.size() + 1;
+  reg.s_name = destName.size() + 1;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + regName.size() + 2;
+  reg1.s_name = destName.size() + regName.size() + 2;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = reg1.name + op1Name.size() + 1;
+  reg2.s_name = reg1.s_name + op1Name.size() + 1;
 
   Atom_Test<BrigOperandReg, BrigOperandReg> TestCase6(in, symbols, &out, &dest, &indi, &reg, &reg1, &reg2);
   TestCase6.Run_Test(&Atom);
@@ -445,8 +445,8 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   /************************************* Test Case 7 ************************************/
   in.assign("atomic_max_group_f32 $s1, [0x77], $s14;\n");
-  destName.assign("$s1");  op1Name.assign("$s14");  
-  symbols->append(destName);  symbols->append(op1Name); 
+  destName.assign("$s1");  op1Name.assign("$s14");
+  symbols->append(destName);  symbols->append(op1Name);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -466,7 +466,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
@@ -479,7 +479,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   Atom_Test<BrigOperandReg> TestCase7(in, symbols, &out, &dest, &indi, NULL, &reg1);
   TestCase7.Run_Test(&Atom);
@@ -487,8 +487,8 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   /************************************* Test Case 8 ************************************/
   in.assign("atomic_exch_s64 $d2, [%loc][0x7777], $d3;\n");
-  destName.assign("$d2");  op1Name.assign("$d3");  
-  symbols->append(destName);  symbols->append(op1Name); 
+  destName.assign("$d2");  op1Name.assign("$d3");
+  symbols->append(destName);  symbols->append(op1Name);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -508,7 +508,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   comp.size = sizeof(comp);
   comp.kind = BrigEOperandCompound;
@@ -528,7 +528,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   Atom_Test<BrigOperandReg> TestCase8(in, symbols, &out, &dest, &comp, &addr, NULL, &reg1);
   TestCase8.Run_Test(&Atom);
@@ -536,8 +536,8 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   /************************************* Test Case 9 ************************************/
   in.assign("atomic_xor_global_u64 $d2, [&glo][$s2], 0x74;\n");
-  destName.assign("$d2");  regName.assign("$s2");  
-  symbols->append(destName);  symbols->append(regName); 
+  destName.assign("$d2");  regName.assign("$s2");
+  symbols->append(destName);  symbols->append(regName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -557,7 +557,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   comp.size = sizeof(comp);
   comp.kind = BrigEOperandCompound;
@@ -571,7 +571,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = destName.size() + 1;
+  reg.s_name = destName.size() + 1;
 
   addr.size = sizeof(addr);
   addr.kind = BrigEOperandAddress;
@@ -594,7 +594,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   /************************************* Test Case 10 ************************************/
   in.assign("atomic_add_global_ar_b64 $d1, [&x], WAVESIZE;\n");
-  destName.assign("$d1");  
+  destName.assign("$d1");
   symbols->append(destName);
 
   out.size = sizeof(out);
@@ -615,7 +615,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   addr.size = sizeof(addr);
   addr.kind = BrigEOperandAddress;
@@ -652,7 +652,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   addr.size = sizeof(addr);
   addr.kind = BrigEOperandAddress;
@@ -668,7 +668,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   /************************************* Test Case 12 ************************************/
   in.assign("atomic_inc_group_u32 $s1, [$s1], $s1;\n");
-  destName.assign("$s1");  symbols->append(destName); 
+  destName.assign("$s1");  symbols->append(destName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -688,7 +688,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
@@ -698,7 +698,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   indi.offset = 0;
 
   reg = reg1 = dest;
- 
+
   Atom_Test<BrigOperandReg> TestCase12(in, symbols, &out, &dest, &indi, &reg, &reg1);
   TestCase12.Run_Test(&Atom);
   symbols->clear();
@@ -726,7 +726,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
@@ -739,8 +739,8 @@ TEST(CodegenTest, Atom_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
- 
+  reg1.s_name = destName.size() + 1;
+
   Atom_Test<BrigOperandReg> TestCase13(in, symbols, &out, &dest, &indi, NULL, &reg1);
   TestCase13.Run_Test(&Atom);
   symbols->clear();
@@ -750,18 +750,18 @@ TEST(CodegenTest, Atom_CodeGen) {
 
 }
 
-TEST(CodegenTest, AtomicNoRet_CodeGen) {  
-  
+TEST(CodegenTest, AtomicNoRet_CodeGen) {
+
   /********************************** Common variables used by all tests******************************/
-  
-  std::string in; 
+
+  std::string in;
   std::string regName, destName, op1Name, op2Name;
   StringBuffer* symbols;
-  
+
   BrigInstAtomic out;
   BrigOperandCompound comp;
   BrigOperandIndirect indi;
-  BrigOperandReg reg; 
+  BrigOperandReg reg;
   BrigOperandAddress addr;
 
   BrigOperandReg reg1, reg2;
@@ -769,7 +769,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   BrigOperandImmed imm1, imm2;
 
   symbols = new StringBuffer();
-  
+
   /************************************* Test Case 1 ************************************/
   in.assign("atomicNoRet_cas_global_ar_b64 [&x], 23, 12;\n");
 
@@ -913,13 +913,13 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = 0;
+  reg.s_name = 0;
 
   reg2.size = sizeof(reg);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb64;
   reg2.reserved = 0;
-  reg2.name = regName.size() + 1;
+  reg2.s_name = regName.size() + 1;
 
 
   Atom_Test<BrigOperandReg> TestCase4(in, symbols, &out, NULL, &indi, &reg, &reg2);
@@ -957,7 +957,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = destName.size() + 1;
+  reg.s_name = destName.size() + 1;
 
   addr.size = sizeof(addr);
   addr.kind = BrigEOperandAddress;
@@ -969,7 +969,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   Atom_Test<BrigOperandReg> TestCase5(in, symbols, &out, NULL, &comp, &addr, &reg, &reg1);
   TestCase5.Run_Test(&AtomicNoRet);
@@ -977,7 +977,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   /************************************* Test Case 6 ************************************/
   in.assign("atomicNoRet_cas_global_b32 [&map][$s1 + 0x7], WAVESIZE, WAVESIZE;\n");
-  destName.assign("$s1");  
+  destName.assign("$s1");
   symbols->append(destName);
 
   out.size = sizeof(out);
@@ -1007,7 +1007,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = 0;
+  reg.s_name = 0;
 
   addr.size = sizeof(addr);
   addr.kind = BrigEOperandAddress;
@@ -1054,19 +1054,19 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = 0;
+  reg.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = regName.size() + 1;
+  reg1.s_name = regName.size() + 1;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = reg1.name + op1Name.size() + 1;
+  reg2.s_name = reg1.s_name + op1Name.size() + 1;
 
   Atom_Test<BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out, NULL, &indi, &reg, &reg1, &reg2);
   TestCase7.Run_Test(&AtomicNoRet);
@@ -1074,7 +1074,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   /************************************* Test Case 8 ************************************/
   in.assign("atomicNoRet_max_group_f32 [0x77], $s14;\n");
-  op1Name.assign("$s14");   symbols->append(op1Name); 
+  op1Name.assign("$s14");   symbols->append(op1Name);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -1101,7 +1101,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   Atom_Test<BrigOperandReg> TestCase8(in, symbols, &out, NULL, &indi, NULL, &reg1);
   TestCase8.Run_Test(&AtomicNoRet);
@@ -1109,7 +1109,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   /************************************* Test Case 9 ************************************/
   in.assign("atomicNoRet_exch_s64 [%loc][0x7777], $d3;\n");
-  op1Name.assign("$d3");  symbols->append(op1Name); 
+  op1Name.assign("$d3");  symbols->append(op1Name);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -1143,7 +1143,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   Atom_Test<BrigOperandReg> TestCase9(in, symbols, &out, NULL, &comp, &addr, NULL, &reg1);
   TestCase9.Run_Test(&AtomicNoRet);
@@ -1151,7 +1151,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   /************************************* Test Case 10 ************************************/
   in.assign("atomicNoRet_xor_global_u64 [&glo][$s2], 0x74;\n");
-  regName.assign("$s2");  symbols->append(regName); 
+  regName.assign("$s2");  symbols->append(regName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -1179,7 +1179,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = 0;
+  reg.s_name = 0;
 
   addr.size = sizeof(addr);
   addr.kind = BrigEOperandAddress;
@@ -1202,7 +1202,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   /************************************* Test Case 11 ************************************/
   in.assign("atomicNoRet_add_global_ar_b64 [&x], WAVESIZE;\n");
-  destName.assign("$d1");  
+  destName.assign("$d1");
   symbols->append(destName);
 
   out.size = sizeof(out);
@@ -1260,7 +1260,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   Atom_Test<BrigOperandReg> TestCase12(in, symbols, &out, NULL, &addr, &reg1);
   TestCase12.Run_Test(&AtomicNoRet);
@@ -1268,7 +1268,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   /************************************* Test Case 12 ************************************/
   in.assign("atomicNoRet_inc_group_u32 [$s1], $s1;\n");
-  destName.assign("$s1");  symbols->append(destName); 
+  destName.assign("$s1");  symbols->append(destName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -1295,10 +1295,10 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg = reg1;
- 
+
   Atom_Test<BrigOperandReg> TestCase13(in, symbols, &out, NULL, &indi, &reg, &reg1);
   TestCase13.Run_Test(&AtomicNoRet);
   symbols->clear();
@@ -1332,8 +1332,8 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
- 
+  reg1.s_name = 0;
+
   Atom_Test<BrigOperandReg> TestCase14(in, symbols, &out, NULL, &indi, NULL, &reg1);
   TestCase14.Run_Test(&AtomicNoRet);
   symbols->clear();

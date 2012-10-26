@@ -670,6 +670,7 @@ struct BrigDirectiveLabelInit {
   uint16_t kind;
   BrigcOffset32_t c_code;
   uint32_t elementCount;
+  BrigsOffset32_t s_name;
   BrigdOffset32_t d_labels[1];
 };
 
@@ -679,6 +680,7 @@ struct BrigDirectiveLabelList {
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
+  BrigdOffset32_t label;
   uint32_t elementCount;
   BrigdOffset32_t d_labels[1];
 };
@@ -742,7 +744,7 @@ struct BrigDirectiveSampler {
   uint8_t boundaryU;
   uint8_t boundaryV;
   uint8_t boundaryW;
-  uint32_t reserved1;
+  uint32_t reserved;
 };
 
 // PRM 19.8.20
@@ -977,12 +979,12 @@ struct BrigInstImage {
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
-  BrigoOffset32_t o_operands[5];
-  BrigGeom32_t geom;
   BrigDataType16_t type;
   BrigDataType16_t stype;
   BrigPacking16_t packing;
   uint16_t reserved;
+  BrigoOffset32_t o_operands[5];
+  BrigGeom32_t geom;
 };
 
 // BrigInstMem
@@ -1006,11 +1008,11 @@ struct BrigInstRead {
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigDataType16_t stype;
+  BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
   BrigGeom32_t geom;
-  BrigDataType16_t stype;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
   uint16_t reserved;
 };
 
@@ -1030,7 +1032,7 @@ struct BrigOperandReg {
   uint16_t kind;
   BrigDataType16_t type;
   uint16_t reserved;
-  uint32_t name;
+  BrigsOffset32_t s_name;
 };
 
 // BrigOperandImmed
@@ -1070,7 +1072,7 @@ struct BrigOperandLabelRef {
   enum { OperKind = BrigEOperandLabelRef };
   uint16_t size;
   uint16_t kind;
-  uint32_t labeldirective;
+  BrigdOffset32_t labeldirective;
 };
 
 // BrigOperandFunctionRef
@@ -1151,7 +1153,7 @@ struct BrigOperandOpaque {
   enum { OperKind = BrigEOperandOpaque };
   uint16_t size;
   uint16_t kind;
-  BrigdOffset32_t name;
+  BrigdOffset32_t directive;
   BrigoOffset32_t reg;
   int32_t offset;
 };

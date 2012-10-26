@@ -44,7 +44,7 @@ void validate(const BrigOperandReg* ref, const char* refstr, const BrigOperandRe
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
-  EXPECT_STREQ(&refstr[ref->name], &getstr[get->name]);
+  EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
 }
 
 void validate(const BrigOperandRegV2* ref, const BrigOperandRegV2* get){
@@ -238,7 +238,7 @@ void validate(const BrigDirectiveSampler* ref, const char* refstr, const BrigDir
   EXPECT_EQ(ref->boundaryU, get->boundaryU);
   EXPECT_EQ(ref->boundaryV, get->boundaryV);
   EXPECT_EQ(ref->boundaryW, get->boundaryW);
-  EXPECT_EQ(ref->reserved1, get->reserved1);
+  EXPECT_EQ(ref->reserved, get->reserved);
 }
 
 void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get){

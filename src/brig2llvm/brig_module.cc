@@ -467,8 +467,8 @@ bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
                    "Invalid boundaryV");
     valid &= check(dir->boundaryW <= BrigSamplerBorder,
                    "Invalid boundaryW");
-    valid &= check(dir->reserved1 == 0 ,
-                   "The value of reserved1 must be zero");
+    valid &= check(dir->reserved == 0 ,
+                   "The value of reserved must be zero");
   }
   return valid;
 }
@@ -477,8 +477,7 @@ bool BrigModule::validate(const BrigDirectiveLabel *dir) const {
   bool valid = true;
   if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
   return valid;
 }
@@ -487,8 +486,19 @@ bool BrigModule::validate(const BrigDirectiveLabelList *dir) const {
   bool valid = true;
   if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
-  valid &= check(dir->c_code <= S_.codeSize,
-                 "c_code past the code section");
+  valid &= validateCCode(dir->c_code);
+  const dir_iterator label(S_.directives + dir->label);
+  if(!validate(label)) return false;
+  if(!check(dyn_cast<BrigDirectiveLabel>(label),
+            "label of a label list is not a label"))
+    return false;
+  for (unsigned i = 0; i < dir->elementCount; i++) {
+    const dir_iterator init(S_.directives + dir->d_labels[i]);
+    if(!validate(init)) return false;
+    const BrigDirectiveLabel *bcl = dyn_cast<BrigDirectiveLabel>(init);
+    if(!check(bcl, "d_labels offset is wrong, not a BrigDirectiveLabel"))
+      return false;
+  }
   return valid;
 }
 
@@ -579,10 +589,8 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
   if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
+  valid &= validateSName(dir->s_name);
   for (unsigned i = 0; i < dir->elementCount; i++) {
-    valid &= check(dir->d_labels[i] < S_.directivesSize,
-                   "d_labels past the directives section");
-
     const dir_iterator init(S_.directives + dir->d_labels[i]);
     if(!validate(init)) return false;
     const BrigDirectiveLabel *bcl = dyn_cast<BrigDirectiveLabel>(init);
@@ -1096,8 +1104,6 @@ bool BrigModule::validate(const BrigOperandAddress *operand) const {
                  "Brigb32 and Brigb64");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
-  valid &= check(operand->directive < S_.directivesSize,
-                 "directive past the directive section");
   dir_iterator dir(S_.directives + operand->directive);
   if(!validate(dir)) return false;
   valid &= check(isa<BrigDirectiveSymbol>(dir),
@@ -1268,7 +1274,7 @@ bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
 bool BrigModule::validate(const BrigOperandOpaque *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  dir_iterator nameDir(S_.directives + operand->name);
+  dir_iterator nameDir(S_.directives + operand->directive);
   if(!validate(nameDir)) return false;
   valid &= check(isa<BrigDirectiveImage>(nameDir) ||
                  isa<BrigDirectiveSampler>(nameDir),
@@ -1310,10 +1316,10 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
   // Exit early to prevent out-of-bounds access
-  if(!validateSName(operand->name))
+  if(!validateSName(operand->s_name))
     return false;
 
-  const char *name = S_.strings + operand->name;
+  const char *name = S_.strings + operand->s_name;
 
   // Exit early to prevent out-of-bounds access
   if(!check(name[0] == '$', "Register names must begin with '$'"))

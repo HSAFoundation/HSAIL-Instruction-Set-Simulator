@@ -173,7 +173,7 @@ TEST(CodegenTest, Call_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = 0;
+  reg.s_name = 0;
 
   unsigned char mem1[sizeof(funList) + sizeof(BrigoOffset32_t)];
   pFunList = reinterpret_cast<BrigOperandArgumentList*>(mem1);
@@ -248,7 +248,7 @@ TEST(CodegenTest, Call_CodeGen) {
   reg.kind = BrigEOperandReg;
   reg.type = Brigb32;
   reg.reserved = 0;
-  reg.name = 0;
+  reg.s_name = 0;
 
   funList.size = sizeof(funList);
   funList.kind = BrigEOperandFunctionList;

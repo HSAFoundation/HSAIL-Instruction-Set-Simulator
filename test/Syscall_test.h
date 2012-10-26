@@ -103,7 +103,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -116,13 +116,13 @@ TEST(CodegenTest, Syscall_CodeGen) {
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = destName.size() + 1;
+  reg2.s_name = destName.size() + 1;
 
   reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
   reg3.type = Brigb32;
   reg3.reserved = 0;
-  reg3.name = destName.size() + op2Name.size() + 2;
+  reg3.s_name = destName.size() + op2Name.size() + 2;
 
   reg4 = dest;
 
@@ -151,7 +151,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -205,7 +205,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -244,7 +244,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -257,7 +257,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = destName.size() + 1;
+  reg2.s_name = destName.size() + 1;
 
   imm3.size = sizeof(imm3);
   imm3.kind = BrigEOperandImmed;

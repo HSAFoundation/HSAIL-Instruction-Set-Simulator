@@ -100,19 +100,19 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = destName.size() + src1Name.size() + 2;
+  reg2.s_name = destName.size() + src1Name.size() + 2;
 
   Mul_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out, &dest, &reg1, &reg2);
   TestCase1.Run_Test(&Mul);
@@ -141,19 +141,19 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = destName.size() + src1Name.size() + 2;
+  reg2.s_name = destName.size() + src1Name.size() + 2;
 
   Mul_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase2(in, symbols, &out, &dest, &reg1, &reg2);
   TestCase2.Run_Test(&Mul);
@@ -179,7 +179,7 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -192,7 +192,7 @@ TEST(CodegenTest, Mul_CodeGen) {
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = destName.size() + 1;
+  reg2.s_name = destName.size() + 1;
 
   Mul_Test<BrigInstBase, BrigOperandImmed, BrigOperandReg> TestCase3(in, symbols, &out, &dest, &imm1, &reg2);
   TestCase3.Run_Test(&Mul);
@@ -218,13 +218,13 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -259,19 +259,19 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb64;
   reg2.reserved = 0;
-  reg2.name = destName.size() + src1Name.size() + 2;
+  reg2.s_name = destName.size() + src1Name.size() + 2;
 
   Mul_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase5(in, symbols, &out, &dest, &reg1, &reg2);
   TestCase5.Run_Test(&Mul);
@@ -299,19 +299,19 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb64;
   reg2.reserved = 0;
-  reg2.name = destName.size() + src1Name.size() + 2;
+  reg2.s_name = destName.size() + src1Name.size() + 2;
 
   Mul_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase6(in, symbols, &out, &dest, &reg1, &reg2);
   TestCase6.Run_Test(&Mul);
@@ -337,13 +337,13 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -376,13 +376,13 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -415,13 +415,13 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
 
   // TODO(Chuang): the type of immediate should be Brigb64.
@@ -463,13 +463,13 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -508,7 +508,7 @@ TEST(CodegenTest, Mul_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   wav1.size = sizeof(wav1);
   wav1.kind = BrigEOperandWaveSz;
@@ -566,19 +566,19 @@ TEST(CodegenTest, Mul_AluModifier_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = destName.size() + 1;
+  reg1.s_name = destName.size() + 1;
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = destName.size() + src1Name.size() + 2;
+  reg2.s_name = destName.size() + src1Name.size() + 2;
 
   Mul_Test<BrigInstMod, BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out, &dest, &reg1, &reg2);
   TestCase1.Run_Test(&Mul);
@@ -607,7 +607,7 @@ TEST(CodegenTest, Mul_AluModifier_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
