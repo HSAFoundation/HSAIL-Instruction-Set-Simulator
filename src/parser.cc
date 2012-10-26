@@ -2040,6 +2040,7 @@ int Call(Context* context) {
   context->token_to_scan = yylex();
   // optional width
   BrigoOffset32_t widthOffset = context->get_operand_offset();
+  bool has_width = false;
   widthOffset += widthOffset & 0x7;
   OpOffset[0] = widthOffset;
 
@@ -2047,17 +2048,18 @@ int Call(Context* context) {
     if (OptionalWidth(context)) {
       return 1;
     }
+    has_width = true;
+  } else{  
+    BrigOperandImmed op_width = {
+      sizeof(BrigOperandImmed),
+      BrigEOperandImmed,
+      Brigb32,
+      0,
+      { 0 }
+    };
+    op_width.bits.u = 0;
+    context->append_operand(&op_width);
   }
-  
-  BrigOperandImmed op_width = {
-    sizeof(BrigOperandImmed),
-    BrigEOperandImmed,
-    Brigb32,
-    0,
-    { 0 }
-  };
-  op_width.bits.u = 0;
-  context->append_operand(&op_width);
   
   if (context->token_to_scan == __FBAR) {
     aluModifier.fbar = 1;
@@ -2067,7 +2069,8 @@ int Call(Context* context) {
   std::string opName;
   const unsigned int firstOpToken = context->token_to_scan;;
   
-  if (firstOpToken == TOKEN_GLOBAL_IDENTIFIER) {
+  int* paluModifier = reinterpret_cast<int*>(&aluModifier);
+  if (firstOpToken == TOKEN_GLOBAL_IDENTIFIER && (*paluModifier==0) && !has_width) {
     opName.assign(context->token_value.string_val);
     if (!context->func_o_map.count(opName)) {
       BrigOperandFunctionRef func_o_ref = {
@@ -2136,8 +2139,8 @@ int Call(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* pCmp = reinterpret_cast<int*>(&aluModifier);
-  if (*pCmp!=0) {
+  
+  if (*paluModifier!=0) {
     BrigInstMod callMod = {
       0,
       BrigEInstMod,
