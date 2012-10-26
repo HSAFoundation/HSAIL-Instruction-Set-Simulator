@@ -669,27 +669,27 @@ TEST(ParserTest, BranchOperation) {
   context->append_directive(&fake);
 
 
-  std::string input("cbr_width(all)_fbar $s1, @then;\n");
+  std::string input("cbr_width(all)_fbar $c1, @then;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("\n cbr_width(all)_fbar $c1, 10 , [@first, @then];\n");
+  input.assign("\n cbr_width(all)_fbar $c1, $s1 , [@first];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, &global;\n");
+  input.assign("cbr_width(all)_fbar $c1, $s2;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, 5, [%local]; \n");
+  input.assign("cbr_width(all)_fbar $c1, $s3, [%local]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, 10, @label; \n");
+  input.assign("cbr_width(all)_fbar $c1, $s2, [@label]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
@@ -714,7 +714,7 @@ TEST(ParserTest, BranchOperation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr $s1, @then; \n");
+  input.assign("cbr $c1, @then; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
@@ -2183,7 +2183,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("cbr $s1, @then; \n"); // branch
+  input.assign("cbr $c1, @then; \n"); // branch
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));

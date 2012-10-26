@@ -535,7 +535,7 @@ TEST(CodegenTest, Example4_Branch) {
   context->get_code(8, &cbr_op);
   EXPECT_EQ(32, cbr_op.size);
   EXPECT_EQ(BrigCbr, cbr_op.opcode);
-  EXPECT_EQ(Brigb1, cbr_op.type);
+  EXPECT_EQ(Brigb32, cbr_op.type);
   EXPECT_EQ(8, cbr_op.o_operands[0]);
   EXPECT_EQ(32, cbr_op.o_operands[1]);
   EXPECT_EQ(44, cbr_op.o_operands[2]);
@@ -1872,7 +1872,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     32,                    // size
     BrigEInstBase,         // kind
     BrigCbr,               // opcode
-    Brigb1,               // type
+    Brigb32,               // type
     BrigNoPacking,         // packing
     {40, 64, 76, 0, 0}        // o_operands[5]
   };
@@ -1889,7 +1889,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
     32,                    // size
     BrigEInstBase,         // kind
     BrigCbr,               // opcode
-    Brigb1,               // type
+    Brigb32,               // type
     BrigNoPacking,         // packing
     {120, 64, 32, 0, 0}        // o_operands[5]
   };
