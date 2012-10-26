@@ -933,6 +933,38 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
   TestCase2.Run_Test(&GlobalImageDecl);
   sbuf->clear();
 
+  /************************Test Case 3****************************/
+  in.assign("global_RWImg &demo");
+  in.append("={format = signed_int32 ,order = r,width = 2,height = 3,depth = 4 };\n");
+  name.assign("&demo"); sbuf->append(name);
+  
+  BrigDirectiveImage out3 = {
+    0,                      //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigConst,                // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      BrigRWImg,                  // type
+      1,                        // align
+    },
+    2,                      //width
+    3,                      //height
+    4,                      //depth
+    1,                      //array
+    BrigImage_R,             //order
+    BrigSIGNED_INT32        //format
+  };
+  out3.size = sizeof(out3);
+
+  GlobalDecl_Test<BrigDirectiveImage> TestCase3(in, sbuf, &out1);
+  TestCase3.Run_Test(&GlobalImageDecl);
+  sbuf->clear();
+
   /********************************/
   delete sbuf;
 }
