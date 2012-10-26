@@ -753,8 +753,8 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   };
 
   name.assign("$d7");
-  ref.name = context->lookup_symbol(name);
-  EXPECT_EQ(8U, ref.name);
+  ref.s_name = context->lookup_symbol(name);
+  EXPECT_EQ(8U, ref.s_name);
 
   // get structure from context and compare
   BrigOperandReg get;
@@ -764,7 +764,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.name, get.name);
+  EXPECT_EQ(ref.s_name, get.s_name);
 
   // second register
   input.assign("$q7");
@@ -778,7 +778,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   EXPECT_EQ(0, Operand(context));
 
   name.assign("$q7");
-  ref.name = context->lookup_symbol(name);
+  ref.s_name = context->lookup_symbol(name);
   ref.type = Brigb128;
   curr_o_offset = context->get_operand_offset();
   context->get_operand(curr_o_offset-sizeof(get), &get);
@@ -786,7 +786,7 @@ TEST(CodegenTest, RegisterOperandCodeGen) {
   EXPECT_EQ(ref.size, get.size);
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.name, get.name);
+  EXPECT_EQ(ref.s_name, get.s_name);
 
   delete lexer;
   delete parser;
@@ -1101,7 +1101,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(8, getReg.s_name);
 
   context->get_operand(20, &get);
   // BrigOperandIndirect
@@ -1166,7 +1166,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(15, getReg.name);
+  EXPECT_EQ(15, getReg.s_name);
   // BrigOperandCompoud
   EXPECT_EQ(ref2.size, get2.size);
   EXPECT_EQ(ref2.kind, get2.kind);
@@ -1229,7 +1229,7 @@ TEST(CodegenTest, MemoryOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(20, getReg.name);
+  EXPECT_EQ(20, getReg.s_name);
 
   context->get_operand(44, &get3);
   // BrigOperandCompoud
@@ -1335,7 +1335,7 @@ TEST(CodegenTest, ArrayOperandList_CodeGen_SimpleTest) {
   EXPECT_EQ(ref.kind, getReg.kind);
   EXPECT_EQ(ref.type, getReg.type);
   EXPECT_EQ(ref.reserved, getReg.reserved);
-  EXPECT_EQ(ref.name, getReg.name);
+  EXPECT_EQ(ref.s_name, getReg.s_name);
 
   delete lexer;
 }
@@ -1384,7 +1384,7 @@ TEST(CodegenTest, PairAddressableOperand_CodeGen_SimpleTest) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(15, getReg.name);
+  EXPECT_EQ(15, getReg.s_name);
   // BrigOperandCompoud
   EXPECT_EQ(ref.size, getComp.size);
   EXPECT_EQ(ref.kind, getComp.kind);
@@ -1693,7 +1693,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   BrigoOffset32_t curOpOffset = 8;
 
   BrigOperandImmed getImm;
-  
+
   curOpOffset += curOpOffset & 0x7;
   context->get_operand(curOpOffset, &getImm);
   curOpOffset += sizeof(BrigOperandImmed);
@@ -1752,7 +1752,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb1, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(14, getReg.name);
+  EXPECT_EQ(14, getReg.s_name);
 
   context->get_operand(curOpOffset, &getLabRef);
   EXPECT_EQ(sizeof(BrigOperandLabelRef), getLabRef.size);
@@ -1944,7 +1944,7 @@ TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
   EXPECT_EQ(refRegD1.kind, getReg.kind);
   EXPECT_EQ(refRegD1.type, getReg.type);
   EXPECT_EQ(refRegD1.reserved, getReg.reserved);
-  EXPECT_EQ(refRegD1.name, getReg.name);
+  EXPECT_EQ(refRegD1.s_name, getReg.s_name);
 
   EXPECT_EQ(108, context->get_operand_offset());
 
@@ -1966,7 +1966,7 @@ TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
   EXPECT_EQ(refRegS3.kind, getReg.kind);
   EXPECT_EQ(refRegS3.type, getReg.type);
   EXPECT_EQ(refRegS3.reserved, getReg.reserved);
-  EXPECT_EQ(refRegS3.name, getReg.name);
+  EXPECT_EQ(refRegS3.s_name, getReg.s_name);
 
   input.assign("$s2\n");
   lexer->set_source_string(input);
@@ -1986,7 +1986,7 @@ TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
   EXPECT_EQ(refRegS2.kind, getReg.kind);
   EXPECT_EQ(refRegS2.type, getReg.type);
   EXPECT_EQ(refRegS2.reserved, getReg.reserved);
-  EXPECT_EQ(refRegS2.name, getReg.name);
+  EXPECT_EQ(refRegS2.s_name, getReg.s_name);
 
   EXPECT_EQ(108, context->get_operand_offset());
 
@@ -2036,7 +2036,7 @@ TEST(CodegenTest, ArgumentDeclCodegen){
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgumentDecl(context));
-  
+
   BrigDirectiveSymbol ref = {
         sizeof(BrigDirectiveSymbol),                 // size
         BrigEDirectiveSymbol,             // kind
@@ -2070,7 +2070,7 @@ TEST(CodegenTest, ArgumentDeclCodegen){
 	EXPECT_EQ(ref.s.align, get.s.align);
 	EXPECT_EQ(ref.d_init, get.d_init);
 	EXPECT_EQ(ref.reserved, get.reserved);
-	
+
 	delete lexer;
 }
 
@@ -2083,36 +2083,36 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
     40,                    // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
-    {56, 80, 108, 0, 0},   // o_operands[5]
-    Briggeom_2da,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {56, 80, 108, 0, 0},   // o_operands[5]
+    Briggeom_2da          // geom
   };
 
   BrigInstImage ref1da = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
-    {132, 156, 172, 0, 0},   // o_operands[5]
-    Briggeom_1da,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {132, 156, 172, 0, 0},   // o_operands[5]
+    Briggeom_1da          // geom
   };
 
   BrigInstImage ref1db = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
-    {188, 212, 44, 0, 0},   // o_operands[5]
-    Briggeom_1db,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {188, 212, 44, 0, 0},   // o_operands[5]
+    Briggeom_1db          // geom
   };
 
   BrigInstImage get;
@@ -2190,7 +2190,7 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(8, getReg.s_name);
 
   context->get_operand(20, &getReg);
   // BrigOperandReg
@@ -2198,7 +2198,7 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(12, getReg.name);
+  EXPECT_EQ(12, getReg.s_name);
 
   context->get_operand(32, &getReg);
   // BrigOperandReg
@@ -2206,7 +2206,7 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(16, getReg.name);
+  EXPECT_EQ(16, getReg.s_name);
 
   context->get_operand(44, &getReg);
   // BrigOperandReg
@@ -2214,7 +2214,7 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(20, getReg.name);
+  EXPECT_EQ(20, getReg.s_name);
 
   context->get_operand(96, &getReg);
   // BrigOperandReg
@@ -2222,13 +2222,13 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(24, getReg.name);
+  EXPECT_EQ(24, getReg.s_name);
 
   context->get_operand(80, &getImage);
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(30, getImage.name);
+  EXPECT_EQ(30, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2236,7 +2236,7 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(30, getImage.name);
+  EXPECT_EQ(30, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2244,7 +2244,7 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(30, getImage.name);
+  EXPECT_EQ(30, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2315,36 +2315,36 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
     40,                    // size
     BrigEInstImage,        // kind
     BrigLdImage,           // opcode
-    {56, 80, 108, 0, 0},   // o_operands[5]
-    Briggeom_2da,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {56, 80, 108, 0, 0},   // o_operands[5]
+    Briggeom_2da          // geom
   };
 
   BrigInstImage ref1da = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigLdImage,           // opcode
-    {132, 156, 172, 0, 0},   // o_operands[5]
-    Briggeom_1da,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {132, 156, 172, 0, 0},   // o_operands[5]
+    Briggeom_1da          // geom
   };
 
   BrigInstImage ref1db = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigLdImage,           // opcode
-    {188, 212, 44, 0, 0},   // o_operands[5]
-    Briggeom_1db,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {188, 212, 44, 0, 0},   // o_operands[5]
+    Briggeom_1db          // geom
   };
 
   BrigInstImage get;
@@ -2422,7 +2422,7 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(8, getReg.s_name);
 
   context->get_operand(20, &getReg);
   // BrigOperandReg
@@ -2430,7 +2430,7 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(12, getReg.name);
+  EXPECT_EQ(12, getReg.s_name);
 
   context->get_operand(32, &getReg);
   // BrigOperandReg
@@ -2438,7 +2438,7 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(16, getReg.name);
+  EXPECT_EQ(16, getReg.s_name);
 
   context->get_operand(44, &getReg);
   // BrigOperandReg
@@ -2446,7 +2446,7 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(20, getReg.name);
+  EXPECT_EQ(20, getReg.s_name);
 
   context->get_operand(96, &getReg);
   // BrigOperandReg
@@ -2454,13 +2454,13 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(24, getReg.name);
+  EXPECT_EQ(24, getReg.s_name);
 
   context->get_operand(80, &getImage);
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(30, getImage.name);
+  EXPECT_EQ(30, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2468,7 +2468,7 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(30, getImage.name);
+  EXPECT_EQ(30, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2476,7 +2476,7 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(30, getImage.name);
+  EXPECT_EQ(30, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2543,38 +2543,38 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   context->clear_context();
 
   BrigInstRead ref1d = {
-    40,                    // size
+    sizeof(BrigInstRead),                    // size
     BrigEInstRead,        // kind
     BrigRdImage,           // opcode
+    Brigs32,               // type
+    Brigf32,               // stype
+    BrigNoPacking,         // packing
     {56, 80, 96, 112, 0},   // o_operands[5]
     Briggeom_1d,           // geom
-    Brigf32,               // stype
-    Brigs32,               // type
-    BrigNoPacking,         // packing
     0                      // reserved
   };
 
   BrigInstRead ref1da = {
-    40,                    // size
+    sizeof(BrigInstRead),                    // size
     BrigEInstRead,        // kind
     BrigRdImage,           // opcode
+    Brigs32,               // type
+    Brigf32,               // stype
+    BrigNoPacking,         // packing
     {136, 160, 176, 192, 0}, // o_operands[5]
     Briggeom_1da,          // geom
-    Brigf32,               // stype
-    Brigs32,               // type
-    BrigNoPacking,         // packing
     0                      // reserved
   };
 
   BrigInstRead ref2da = {
-    40,                    // size
+    sizeof(BrigInstRead),                    // size
     BrigEInstRead,        // kind
     BrigRdImage,           // opcode
+    Brigs32,               // type
+    Brigf32,               // stype
+    BrigNoPacking,         // packing
     {220, 244, 260, 276, 0},  // o_operands[5]
     Briggeom_2da,          // geom
-    Brigf32,               // stype
-    Brigs32,               // type
-    BrigNoPacking,         // packing
     0                      // reserved
   };
 
@@ -2617,7 +2617,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(ref1d.stype, get.stype);
   EXPECT_EQ(ref1d.packing, get.packing);
   EXPECT_EQ(ref1d.reserved, get.reserved);
-  context->get_code(48, &get);
+  context->get_code(8 + sizeof(BrigInstRead), &get);
 
   EXPECT_EQ(ref1da.size, get.size);
   EXPECT_EQ(ref1da.kind, get.kind);
@@ -2633,7 +2633,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(ref1da.packing, get.packing);
   EXPECT_EQ(ref1da.reserved, get.reserved);
 
-  context->get_code(88, &get);
+  context->get_code(8 + sizeof(BrigInstRead) * 2, &get);
 
   EXPECT_EQ(ref2da.size, get.size);
   EXPECT_EQ(ref2da.kind, get.kind);
@@ -2656,7 +2656,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(8, getReg.name);
+  EXPECT_EQ(8, getReg.s_name);
 
   context->get_operand(20, &getReg);
   // BrigOperandReg
@@ -2664,7 +2664,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(12, getReg.name);
+  EXPECT_EQ(12, getReg.s_name);
 
   context->get_operand(32, &getReg);
   // BrigOperandReg
@@ -2672,7 +2672,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(16, getReg.name);
+  EXPECT_EQ(16, getReg.s_name);
 
   context->get_operand(44, &getReg);
   // BrigOperandReg
@@ -2680,7 +2680,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(20, getReg.name);
+  EXPECT_EQ(20, getReg.s_name);
 
   context->get_operand(112, &getReg);
   // BrigOperandReg
@@ -2688,7 +2688,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(24, getReg.name);
+  EXPECT_EQ(24, getReg.s_name);
 
   context->get_operand(124, &getReg);
   // BrigOperandReg
@@ -2696,7 +2696,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(28, getReg.name);
+  EXPECT_EQ(28, getReg.s_name);
 
   context->get_operand(208, &getReg);
   // BrigOperandReg
@@ -2704,13 +2704,13 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(BrigEOperandReg, getReg.kind);
   EXPECT_EQ(Brigb32, getReg.type);
   EXPECT_EQ(0, getReg.reserved);
-  EXPECT_EQ(32, getReg.name);
+  EXPECT_EQ(32, getReg.s_name);
 
   context->get_operand(80, &getImage);
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(0xf7, getImage.name);
+  EXPECT_EQ(0xf7, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2718,7 +2718,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(0xf1, getImage.name);
+  EXPECT_EQ(0xf1, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2726,7 +2726,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(0xf7, getImage.name);
+  EXPECT_EQ(0xf7, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2734,7 +2734,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(0xf1, getImage.name);
+  EXPECT_EQ(0xf1, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2742,7 +2742,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(0xf7, getImage.name);
+  EXPECT_EQ(0xf7, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2750,7 +2750,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   // BrigOperandOpaque
   EXPECT_EQ(16, getImage.size);
   EXPECT_EQ(BrigEOperandOpaque, getImage.kind);
-  EXPECT_EQ(0xf1, getImage.name);
+  EXPECT_EQ(0xf1, getImage.directive);
   EXPECT_EQ(0, getImage.reg);
   EXPECT_EQ(0, getImage.offset);
 
@@ -2876,7 +2876,7 @@ TEST(CodegenTest,ControlCodegen){
     24,
     BrigEDirectiveControl,
     8,
-    BrigEMaxTid,
+    BrigEMaxWIperG,
     {2,3,4}
   };
   context->get_directive(8,&get);
@@ -3025,7 +3025,7 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
-  std::string input("signature &test(arg_u32)(arg_f32) :fbar(2) ;");
+  std::string input("signature &test(arg_u32)(arg_f32) ;");
   Lexer *lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
 
@@ -3042,8 +3042,6 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   ref->kind = BrigEDirectiveSignature;
   ref->c_code = context->get_code_offset();
   ref->s_name = context->get_string_offset()-(strlen("&test") + 1);
-  ref->fbarCount = 2;
-  ref->reserved = 0;
   ref->outCount = 1;
   ref->inCount = 1;
   ref->types[0].type = Brigu32;
@@ -3071,8 +3069,6 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   EXPECT_EQ(ref->kind,get->kind);
   EXPECT_EQ(ref->c_code,get->c_code);
   EXPECT_EQ(ref->s_name,get->s_name);
-  EXPECT_EQ(ref->fbarCount,get->fbarCount);
-  EXPECT_EQ(ref->reserved,get->reserved);
   EXPECT_EQ(ref->outCount,get->outCount);
   EXPECT_EQ(ref->inCount,get->inCount);
   EXPECT_EQ(ref->types[0].type,get->types[0].type);
@@ -3097,7 +3093,7 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
 
   std::string input("kernel &_kernel( \n");
   input.append("kernarg_u32 %arg0, \n");
-  input.append("kernarg_u32 %arg1):fbar(2) \n");
+  input.append("kernarg_u32 %arg1) \n");
   input.append("{ \n");
   input.append("@begin: \n");
   input.append("  private_s32 %arg2;\n");
@@ -3295,22 +3291,22 @@ TEST(CodegenTest, Comment_Test){
 	EXPECT_EQ(0, Instruction0(context));
 	EXPECT_EQ(0, Comment(context));
 	EXPECT_EQ(0, Instruction0(context));
-	
+
 	BrigDirectiveComment get;
 	context->get_directive(8, &get);
-	
+
 	BrigDirectiveComment ref = {
 	sizeof(BrigDirectiveComment),
 	BrigEDirectiveComment,
 	8 + sizeof(BrigInstBase),
 	8
 	};
-	
+
 	EXPECT_EQ(ref.size, get.size);
 	EXPECT_EQ(ref.kind, get.kind);
 	EXPECT_EQ(ref.c_code, get.c_code);
 	EXPECT_EQ(ref.s_name, get.s_name);
-	
+
 	context->clear_context();
 	input.assign("nop;\n //This is a comment\n nop;");
 	lexer->set_source_string(input);
@@ -3318,21 +3314,21 @@ TEST(CodegenTest, Comment_Test){
 	EXPECT_EQ(0, Instruction0(context));
 	EXPECT_EQ(0, Comment(context));
 	EXPECT_EQ(0, Instruction0(context));
-	
+
 	context->get_directive(8, &get);
-	
+
 	BrigDirectiveComment ref2 = {
 	sizeof(BrigDirectiveComment),
 	BrigEDirectiveComment,
 	8 + sizeof(BrigInstBase),
 	8
 	};
-	
+
 	EXPECT_EQ(ref2.size, get.size);
 	EXPECT_EQ(ref2.kind, get.kind);
 	EXPECT_EQ(ref2.c_code, get.c_code);
 	EXPECT_EQ(ref2.s_name, get.s_name);
-	
+
     delete lexer;
 }
 
@@ -3454,7 +3450,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   EXPECT_EQ(calleeFunRef.d_nextDirective, funGet.d_nextDirective);
   EXPECT_EQ(calleeFunRef.d_firstScopedDirective, funGet.d_firstScopedDirective);
   EXPECT_EQ(calleeFunRef.d_firstInParam, funGet.d_firstInParam);
-  EXPECT_EQ(calleeFunRef.fbarCount, funGet.fbarCount);
+  EXPECT_EQ(calleeFunRef.reserved, funGet.reserved);
   EXPECT_EQ(calleeFunRef.attribute, funGet.attribute);
 
   BrigDirectiveSymbol outputSymbol = {
@@ -3541,7 +3537,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     0,                                           // fbarCount
     0,                                           // outParamCount
     0                                            // d_firstInParam
-  }; 
+  };
 
   context->get_directive(curDirOffset, &funGet);
   curDirOffset += sizeof(BrigDirectiveFunction);
@@ -3556,7 +3552,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   EXPECT_EQ(callerFunRef.d_nextDirective, funGet.d_nextDirective);
   EXPECT_EQ(callerFunRef.d_firstScopedDirective, funGet.d_firstScopedDirective);
   EXPECT_EQ(callerFunRef.d_firstInParam, funGet.d_firstInParam);
-  EXPECT_EQ(callerFunRef.fbarCount, funGet.fbarCount);
+  EXPECT_EQ(callerFunRef.reserved, funGet.reserved);
   EXPECT_EQ(callerFunRef.attribute, funGet.attribute);
 
   BrigDirectiveScope argStart = {
@@ -3617,7 +3613,7 @@ TEST(CodegenTest, Example6_CodeGen) {
       0,
       0,
       57,
-      Brigf32, 
+      Brigf32,
       1
     },
     0,
@@ -3722,7 +3718,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0}        // o_operands[5]
   };
-  
+
   BrigInstBase baseGet;
   context->get_code(curCodOffset, &baseGet);
   curCodOffset += sizeof(BrigInstBase);
@@ -3778,7 +3774,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     BrigNoPacking,         // packing
     {112, 144, 136, 156, 0}        // o_operands[5]
   };
-  
+
   context->get_code(curCodOffset, &baseGet);
   curCodOffset += sizeof(BrigInstBase);
   EXPECT_EQ(instCall.size, baseGet.size);
@@ -3842,7 +3838,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     0,                // reserved
     31                 // name
   };
-  
+
   BrigOperandReg regGet;
   context->get_operand(curOpeOffset, &regGet);
   curOpeOffset += sizeof(BrigOperandReg);
@@ -3851,7 +3847,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   EXPECT_EQ(s0Reg.kind, regGet.kind);
   EXPECT_EQ(s0Reg.type, regGet.type);
   EXPECT_EQ(s0Reg.reserved, regGet.reserved);
-  EXPECT_EQ(s0Reg.name, regGet.name);
+  EXPECT_EQ(s0Reg.s_name, regGet.s_name);
 
   BrigOperandAddress inputAddr = {
     sizeof(BrigOperandAddress),
@@ -3860,7 +3856,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     0,
     108
   };
-  
+
   BrigOperandAddress getAddr;
   context->get_operand(curOpeOffset, &getAddr);
   curOpeOffset += sizeof(BrigOperandAddress);
@@ -3878,7 +3874,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     0,
     68
   };
-  
+
   context->get_operand(curOpeOffset, &getAddr);
   curOpeOffset += sizeof(BrigOperandAddress);
   // BrigOperandAddress
@@ -3893,7 +3889,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     BrigEOperandArgumentRef,
     196
   };
-  
+
   BrigOperandArgumentRef getRef;
   context->get_operand(curOpeOffset, &getRef);
   curOpeOffset += sizeof(BrigOperandArgumentRef);
@@ -3909,7 +3905,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     0,                // reserved
     53                 // name
   };
-  
+
   context->get_operand(curOpeOffset, &regGet);
   curOpeOffset += sizeof(BrigOperandReg);
 
@@ -3917,7 +3913,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   EXPECT_EQ(s1Reg.kind, regGet.kind);
   EXPECT_EQ(s1Reg.type, regGet.type);
   EXPECT_EQ(s1Reg.reserved, regGet.reserved);
-  EXPECT_EQ(s1Reg.name, regGet.name);
+  EXPECT_EQ(s1Reg.s_name, regGet.s_name);
 
   BrigOperandAddress anInputAddr = {
     sizeof(BrigOperandAddress),
@@ -3926,7 +3922,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     0,
     196
   };
-  
+
   context->get_operand(curOpeOffset, &getAddr);
   curOpeOffset += sizeof(BrigOperandAddress);
   // BrigOperandAddress
@@ -3941,7 +3937,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     BrigEOperandArgumentRef,
     236
   };
-  
+
   context->get_operand(curOpeOffset, &getRef);
   curOpeOffset += sizeof(BrigOperandArgumentRef);
 
@@ -3964,7 +3960,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     BrigEOperandFunctionRef,
     28
   };
-  
+
   BrigOperandFunctionRef getFunRef;
   context->get_operand(curOpeOffset, &getFunRef);
   curOpeOffset += sizeof(BrigOperandFunctionRef);
@@ -3979,9 +3975,9 @@ TEST(CodegenTest, Example6_CodeGen) {
     1,
     { 100 }
   };
-  
+
   BrigOperandArgumentList getArgList;
-  context->get_operand(curOpeOffset, &getArgList); 
+  context->get_operand(curOpeOffset, &getArgList);
   curOpeOffset += sizeof(BrigOperandArgumentList);
 
   EXPECT_EQ(outputList.size, getArgList.size);
@@ -3995,8 +3991,8 @@ TEST(CodegenTest, Example6_CodeGen) {
     1,
     { 68 }
   };
-  
-  context->get_operand(curOpeOffset, &getArgList); 
+
+  context->get_operand(curOpeOffset, &getArgList);
   curOpeOffset += sizeof(BrigOperandArgumentList);
 
   EXPECT_EQ(inputList.size, getArgList.size);
@@ -4021,7 +4017,7 @@ TEST(CodegenTest, Example6_CodeGen) {
     0,
     236
   };
-  
+
   context->get_operand(curOpeOffset, &getAddr);
   curOpeOffset += sizeof(BrigOperandAddress);
   // BrigOperandAddress

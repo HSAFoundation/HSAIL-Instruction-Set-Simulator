@@ -162,7 +162,7 @@ TEST(Brig2LLVMTest, Example2) {
     directives.append(&bdv);
 
     BrigDirectiveFunction bdf = {
-      sizeof(bdf), BrigEDirectiveFunction,
+      sizeof(bdf), BrigEDirectiveKernel,
       8,   // c_code
       8,   // s_name
       0,   // inParamCount
@@ -180,7 +180,7 @@ TEST(Brig2LLVMTest, Example2) {
 
     BrigSymbolCommon s = {
       8,             // c_code
-      BrigArgSpace,  // storageClass
+      BrigKernargSpace,  // storageClass
       BrigNone,      // attribute
       0,             // reserved
       0,             // symbolModifier
@@ -220,7 +220,7 @@ TEST(Brig2LLVMTest, Example2) {
     std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
     EXPECT_NE(0U, output.size());
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "define void @return_true(float* %ret_val)")));
+    "define void @kernel.return_true(float* %ret_val)")));
     // HSA-48
     EXPECT_NE(std::string::npos, output.find(std::string(
     "%c_regs = type { [8 x i1] }")));
@@ -239,13 +239,14 @@ TEST(Brig2LLVMTest, Example2) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "ret void")));
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-    EXPECT_TRUE(M);
-    if(!M) return;
+    hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(BP);
+    if(!BP) return;
 
     bool ret_val;
     void *args[] = { &ret_val };
-    hsa::brig::launchBrig(M, M->getFunction("return_true"), args);
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(BP.M->getFunction("return_true"), args);
   }
 }
 
@@ -277,7 +278,7 @@ TEST(Brig2LLVMTest, Example3) {
     };
     directives.append(&bdv);
     BrigDirectiveFunction bdf = {
-      sizeof(bdf), BrigEDirectiveFunction,
+      sizeof(bdf), BrigEDirectiveKernel,
       8,   // c_code
       8,   // s_name
       0,   // inParamCount
@@ -294,7 +295,7 @@ TEST(Brig2LLVMTest, Example3) {
     directives.append(&bdf);
     BrigSymbolCommon s = {
       8,             // c_code
-      BrigArgSpace,  // storageClass
+      BrigKernargSpace,  // storageClass
       BrigNone,      // attribute
       0,             // reserved
       0,             // symbolModifier
@@ -386,31 +387,32 @@ TEST(Brig2LLVMTest, Example3) {
     EXPECT_NE(0, output.size());
 
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
+    "declare i32 @Abs_P_s8x4(i32)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
+    "declare i32 @AddSat_PP_u16x2(i32, i32)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "define void @packed_ops(<4 x i8>* %x)")));
+    "define void @kernel.packed_ops(i32* %x)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 2")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "getelementptr %struct.regs* %gpu_reg_p, i32 0, i32 1, i32 0, i32 3")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "call <4 x i8> @Abs_P_s8x4")));
+    "call i32 @Abs_P_s8x4")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "call <2 x i16> @AddSat_PP_u16x2")));
+    "call i32 @AddSat_PP_u16x2")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "%gpu_reg_p = alloca %struct.regs")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "ret void")));
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-    EXPECT_TRUE(M);
-    if(!M) return;
+    hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(BP);
+    if(!BP) return;
 
     u8x4 x;
     void *args[] = { &x };
-    hsa::brig::launchBrig(M, M->getFunction("packed_ops"), args);
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(BP.M->getFunction("packed_ops"), args);
   }
 }
 
@@ -445,7 +447,7 @@ TEST(Brig2LLVMTest, Example4) {
 
     BrigDirectiveFunction bdf = {
       sizeof(bdf),                    // size
-      BrigEDirectiveFunction,         // kind
+      BrigEDirectiveKernel,           // kind
       8,                              // c_code
       8,                              // s_name
       0,                              // inParamCount
@@ -467,7 +469,7 @@ TEST(Brig2LLVMTest, Example4) {
       BrigEDirectiveSymbol, // kind
       {
         8,                    // c_code
-        BrigArgSpace,         // storageClass
+        BrigKernargSpace,     // storageClass
         BrigNone,             // attribute
         0,                    // reserved
         0,                    // symbolModifier
@@ -629,9 +631,9 @@ TEST(Brig2LLVMTest, Example4) {
     std::string output = hsa::brig::GenLLVM::getLLVMString(mod);
     EXPECT_NE(0, output.size());
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "declare <4 x i8> @Abs_P_s8x4(<4 x i8>)")));
+    "declare i32 @Abs_P_s8x4(i32)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "declare <2 x i16> @AddSat_PP_u16x2(<2 x i16>, <2 x i16>)")));
+    "declare i32 @AddSat_PP_u16x2(i32, i32)")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "outof_IF:")));
     EXPECT_NE(std::string::npos, output.find(std::string(
@@ -645,13 +647,14 @@ TEST(Brig2LLVMTest, Example4) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "; preds = %then, %brig.init.succ")));
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-    EXPECT_TRUE(M);
-    if(!M) return;
+    hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(BP);
+    if(!BP) return;
 
     u8x4 x;
     void *args[] = { &x };
-    hsa::brig::launchBrig(M, M->getFunction("branch_ops"), args);
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(BP.M->getFunction("branch_ops"), args);
   }
 }
 
@@ -697,7 +700,7 @@ TEST(Brig2LLVMTest, Example5) {
 
     BrigDirectiveFunction caller = {
       sizeof(caller),                 // size
-      BrigEDirectiveFunction,         // kind
+      BrigEDirectiveKernel,           // kind
       40,                             // c_code
       16,                              // s_name
       0,                              // inParamCount
@@ -787,16 +790,17 @@ TEST(Brig2LLVMTest, Example5) {
     EXPECT_NE(std::string::npos, output.find(std::string(
     "define void @callee() {")));
     EXPECT_NE(std::string::npos, output.find(std::string(
-    "define void @caller() {")));
+    "define void @kernel.caller() {")));
     EXPECT_NE(std::string::npos, output.find(std::string(
     "call void @callee()")));
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(mod);
-    EXPECT_TRUE(M);
-    if(!M) return;
+    hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+    EXPECT_TRUE(BP);
+    if(!BP) return;
 
     llvm::ArrayRef<void *> args;
-    hsa::brig::launchBrig(M, M->getFunction("caller"), args);
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(BP.M->getFunction("caller"), args);
   }
 }
 
@@ -1476,6 +1480,7 @@ TEST(Brig2LLVMTest, Example6) {
     llvm::Module *mod = codegen.getModule();
     llvm::ArrayRef<void *> args;
     hsa::brig::launchBrig(mod, mod->getFunction("caller"), args);
+    delete mod;
   }
 #endif  //end of this test case move the seventh operands to the last
 }
@@ -1956,8 +1961,6 @@ static void appendBrigDirectiveProto(Buffer &buffer,
   bdp->kind = BrigEDirectiveSignature;
   bdp->c_code = c_code;
   bdp->s_name = s_name;
-  bdp->fbarCount = fbarCount;
-  bdp->reserved = reserved;
   bdp->outCount = outCount;
   bdp->inCount = inCount;
 
@@ -3286,7 +3289,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "The value of reserved1 must be zero")));
+    "The value of reserved must be zero")));
   }
 }
 
@@ -3410,7 +3413,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    strings.append(std::string("&return_true"));
+    strings.append(std::string("@Label1"));
+    strings.append(std::string("@Label2"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
     hsa::brig::Buffer code;
@@ -3430,14 +3434,29 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
       0
     };
     directives.append(&bdv);
+    BrigDirectiveLabel bdl1 = {
+      sizeof(bdl1),
+      BrigEDirectiveLabel,
+      8,
+      8
+    };
+    directives.append(&bdl1);
     BrigDirectiveLabelList bdll = {
       sizeof(bdll),
       BrigEDirectiveLabelList,
       8,
+      sizeof(bdv) + 8,
       1,
-      { 8 }
+      { directives.size() + sizeof(BrigDirectiveLabelList) }
     };
     directives.append(&bdll);
+    BrigDirectiveLabel bdl2 = {
+      sizeof(bdl2),
+      BrigEDirectiveLabel,
+      8,
+      16
+    };
+    directives.append(&bdl2);
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
@@ -3470,6 +3489,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
       BrigEDirectiveLabelList,
       10,
       0,
+      0,
       { 0 }
     };
     directives.append(&bdll);
@@ -3488,9 +3508,10 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    strings.append(std::string("Label1"));
-    strings.append(std::string("Label2"));
-    strings.append(std::string("Label3"));
+    strings.append(std::string("@Label1"));
+    strings.append(std::string("@Label2"));
+    strings.append(std::string("@Label3"));
+    strings.append(std::string("@Label4"));
 
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
@@ -3515,30 +3536,31 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
     bdli->kind = BrigEDirectiveLabelInit;
     bdli->c_code = 0;
     bdli->elementCount = 3;
-    bdli->d_labels[0] = 52;
-    bdli->d_labels[1] = 64;
-    bdli->d_labels[2] = 76;
+    bdli->s_name = 32;
+    bdli->d_labels[0] = directives.size() + arraySize;
+    bdli->d_labels[1] = bdli->d_labels[0] + sizeof(BrigDirectiveLabel);
+    bdli->d_labels[2] = bdli->d_labels[1] + sizeof(BrigDirectiveLabel);
     directives.append(bdli);
     delete[] array;
     BrigDirectiveLabel bdl1 = {
       sizeof(bdl1), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
       0,
-      0,
+      8,
     };
     directives.append(&bdl1);
     BrigDirectiveLabel bdl2 = {
       sizeof(bdl2), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
       0,
-      7,
+      16,
     };
     directives.append(&bdl2);
     BrigDirectiveLabel bdl3 = {
       sizeof(bdl3), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
       0,
-      14,
+      24,
     };
     directives.append(&bdl3);
 
@@ -3973,8 +3995,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
     "c_code past the code section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "s_name past the strings section")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Reserved not zero")));
   }
   {
     hsa::brig::StringBuffer strings;
@@ -4451,10 +4471,10 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       sizeof(bir),
       BrigEInstRead,
       BrigRdImage,
+      0,
+      0,
+      0,
       {0, 0, 0, 0, 0},
-      0,
-      0,
-      0,
       0,
       0
     };
@@ -4493,10 +4513,10 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       sizeof(bir),
       BrigEInstRead,
       BrigRdImage + 1,
-      {20, 0, 0, 0, 0},
       Briggeom_2da + 1,
       Brigf64x2 + 1,
       Brigf64x2 + 1,
+      {20, 0, 0, 0, 0},
       BrigPackPsat + 1,
       1
     };
@@ -4533,6 +4553,9 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("$s1"));
+    strings.append(std::string("$s2"));
+
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
 
@@ -4554,15 +4577,33 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
     BrigInstMod bim = {
       sizeof(bim),
       BrigEInstMod,
-      0,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
+      BrigNeg,
+      Brigf32,
+      BrigNoPacking,
+      {8, 20, 0, 0, 0},
       {0, 0, 0, 0, 0, 0, 0}
     };
     code.append(&bim);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      8
+    };
+    operands.append(&bor1);
+
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      12
+    };
+    operands.append(&bor2);
 
     hsa::brig::Buffer debug;
 
@@ -4649,7 +4690,7 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       0,
       {0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 1, 0, 0}
+      {1, 0, 0, 0, 1, 0, 0}
     };
     code.append(&bim);
 
@@ -4694,52 +4735,7 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       0,
       {0, 0, 0, 0, 0},
-      {1, 0, 1, 0, 0, 0, 0}
-    };
-    code.append(&bim);
-
-    hsa::brig::Buffer operands;
-
-    hsa::brig::Buffer debug;
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
-                              debug, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid hi")));
-  }
-  {
-    hsa::brig::StringBuffer strings;
-    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    hsa::brig::Buffer directives;
-    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-
-    hsa::brig::Buffer code;
-    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstMod bim = {
-      sizeof(bim),
-      BrigEInstMod,
-      0,
-      0,
-      0,
-      {0, 0, 0, 0, 0},
-      {0, 0, 0, 1, 0, 0, 0}
+      {1, 0, 0, 1, 0, 0, 0}
     };
     code.append(&bim);
 
@@ -4784,7 +4780,7 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       0,
       {0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 0, 0, 1}
+      {1, 0, 0, 0, 0, 0, 1}
     };
     code.append(&bim);
 
@@ -4934,7 +4930,7 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 0, 1, 0, 0},    //aluModifier
+      {1, 0, 0, 0, 1, 0, 0},    //aluModifier
       0,                        //comparisonOperator
       0,                        //sourceType
       0                         //reserved
@@ -4982,55 +4978,7 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {1, 0, 1, 0, 0, 0, 0},    //aluModifier
-      0,                        //comparisonOperator
-      0,                        //sourceType
-      0                         //reserved
-    };
-    code.append(&bic);
-
-    hsa::brig::Buffer operands;
-
-    hsa::brig::Buffer debug;
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
-                              debug, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid hi")));
-  }
-  {
-    hsa::brig::StringBuffer strings;
-    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    hsa::brig::Buffer directives;
-    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-
-    hsa::brig::Buffer code;
-    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstCmp bic = {
-      sizeof(bic),              //size
-      BrigEInstCmp,             //kind
-      0,                        //opcode
-      0,                        //type
-      0,                        //packing
-      {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 1, 0, 0, 0},    //aluModifier
+      {1, 0, 0, 1, 0, 0, 0},    //aluModifier
       0,                        //comparisonOperator
       0,                        //sourceType
       0                         //reserved
@@ -5078,7 +5026,7 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 0, 0, 0, 1},    //aluModifier
+      {1, 0, 0, 0, 0, 0, 1},    //aluModifier
       0,                        //comparisonOperator
       0,                        //sourceType
       0                         //reserved
@@ -5175,11 +5123,11 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       sizeof(bii),              //size
       BrigEInstImage,           //kind
       BrigRdImage,              //opcode
-      {0, 0, 0, 0, 0},          //o_operands[5]
       0,                        //geom
       0,                        //type
       0,                        //stype
       0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
       0                         //reserved
     };
     code.append(&bii);
@@ -5217,12 +5165,12 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       sizeof(bii),              //size
       BrigEInstImage,           //kind
       BrigRdImage + 1,          //opcode
-      {20, 0, 0, 0, 0},         //o_operands[5]
-      Briggeom_2da + 1,         //geom
       Brigf64x2 + 1,            //type
       Brigf64x2 + 1,            //stype
       BrigPackPsat + 1,         //packing
-      1                         //reserved
+      1,                        //reserved
+      {20, 0, 0, 0, 0},         //o_operands[5]
+      Briggeom_2da + 1          //geom
     };
     code.append(&bii);
 
@@ -5277,12 +5225,13 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       sizeof(bii) - 1,              //size
       BrigEInstImage,           //kind
       BrigRdImage,              //opcode
-      {0, 0, 0, 0, 0},          //o_operands[5]
-      0,                        //geom
       0,                        //type
       0,                        //stype
       0,                        //packing
-      0                         //reserved
+      0,                        //reserved
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      0                         //geom
+
     };
     code.append(&bii);
 
@@ -5661,7 +5610,7 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 0, 1, 0, 0},    //aluModifier
+      {1, 0, 0, 0, 1, 0, 0},    //aluModifier
       0,                        //stype
       0                         //reserved
     };
@@ -5708,54 +5657,7 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {1, 0, 1, 0, 0, 0, 0},    //aluModifier
-      0,                        //stype
-      0                         //reserved
-    };
-    code.append(&bic);
-
-    hsa::brig::Buffer operands;
-
-    hsa::brig::Buffer debug;
-
-    std::string errorMsg;
-    llvm::raw_string_ostream errMsgOut(errorMsg);
-    hsa::brig::BrigModule mod(strings, directives, code, operands,
-                              debug, &errMsgOut);
-    EXPECT_FALSE(mod.isValid());
-    errMsgOut.flush();
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid hi")));
-  }
-  {
-    hsa::brig::StringBuffer strings;
-    for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    hsa::brig::Buffer directives;
-    for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
-
-    BrigDirectiveVersion bdv = {
-      sizeof(bdv),
-      BrigEDirectiveVersion,
-      0,
-      1,
-      0,
-      BrigELarge,
-      BrigEFull,
-      BrigENosftz,
-      0
-    };
-    directives.append(&bdv);
-
-    hsa::brig::Buffer code;
-    for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstCvt bic = {
-      sizeof(bic),              //size
-      BrigEInstCvt,             //kind
-      0,                        //opcode
-      0,                        //type
-      0,                        //packing
-      {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 1, 0, 0, 0},    //aluModifier
+      {1, 0, 0, 1, 0, 0, 0},    //aluModifier
       0,                        //stype
       0                         //reserved
     };
@@ -5802,7 +5704,7 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,                        //type
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
-      {0, 0, 0, 0, 0, 0, 1},    //aluModifier
+      {1, 0, 0, 0, 0, 0, 1},    //aluModifier
       0,                        //stype
       0                         //reserved
     };
@@ -5888,7 +5790,7 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
     BrigInstAtomic bils = {
       sizeof(bils),
       BrigEInstAtomic,
-      BrigFbarInitSizeKnown + 1,
+      BrigInvalidOpcode,
       Brigf64x2 + 1,
       BrigPackPsat,
       {20, 0, 0, 0, 0},
@@ -6037,7 +5939,7 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       BrigEOperandAddress,
       Brigu32,
       1,
-      68
+      8
     };
     operands.append(&boa);
 
@@ -6053,8 +5955,6 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
     "Invald datatype, should be Brigb32 and Brigb64")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
-    EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "directive past the directive section")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid directive, should point to a BrigDirectiveSymbol")));
   }
@@ -6530,7 +6430,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     BrigOperandFunctionRef bofr = {
       sizeof(bofr),
       BrigEOperandFunctionRef,
-      20
+      sizeof(BrigDirectiveVersion) + 8
     };
     operands.append(&bofr);
 
@@ -6595,7 +6495,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     BrigOperandFunctionRef bofr = {
       sizeof(bofr),
       BrigEOperandFunctionRef,
-      68
+      directives.size() - sizeof(BrigDirectiveFunction)
     };
     operands.append(&bofr);
 
@@ -8024,14 +7924,14 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     BrigOperandFunctionRef bofr1 = {
       sizeof(bofr1),
       BrigEOperandFunctionRef,
-      20                    //arg
+      sizeof(BrigDirectiveVersion) + 8         //arg
     };
     operands.append(&bofr1);
 
     BrigOperandFunctionRef bofr2 = {
       sizeof(bofr2),
       BrigEOperandFunctionRef,
-      60                    //arg
+      directives.size() - sizeof(BrigDirectiveFunction) //arg
     };
     operands.append(&bofr2);
 
@@ -8052,6 +7952,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
     EXPECT_TRUE(mod.isValid());
+    delete[] arrayFun;
   }
   //invalid test, elementCount be 1
   {

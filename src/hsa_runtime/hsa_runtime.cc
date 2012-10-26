@@ -51,10 +51,11 @@ class SimKernel : public Kernel {
 class SimProgram : public Program {
  public:
 
-  SimProgram(llvm::Module *mod) : mod_(mod) {}
+  SimProgram(hsa::brig::BrigModule &mod) :
+    BP_(hsa::brig::GenLLVM::getLLVMModule(mod)) {}
 
   virtual Kernel *compileKernel(const char *kernelName, const char *) {
-    llvm::Function *fun = mod_->getFunction(kernelName + 1);
+    llvm::Function *fun = BP_->getFunction(kernelName + 1);
     return fun ? new SimKernel(fun) : NULL;
   }
 
@@ -68,7 +69,7 @@ class SimProgram : public Program {
   virtual ~SimProgram() {}
 
  private:
-  llvm::Module *mod_;
+  hsa::brig::BrigProgram BP_;
 };
 
 class SimQueue : public Queue {
@@ -110,7 +111,8 @@ class SimQueue : public Queue {
 
     llvm::Function *fun = sk->F_;
     llvm::Module *mod = fun->getParent();
-    hsa::brig::launchBrig(mod, fun, args);
+    hsa::brig::BrigEngine BE(mod);
+    BE.launch(fun, args);
 
     return NULL;
   }
@@ -249,10 +251,7 @@ class SimRuntimeApi : public RuntimeApi {
     hsa::brig::BrigModule brigMod(*reader, &llvm::errs());
     if(!brigMod.isValid()) return NULL;
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(brigMod);
-    if(!M) return NULL;
-
-    return new SimProgram(M);
+    return new SimProgram(brigMod);
   }
 
   virtual Program *createProgramFromFile(const char *filename, DeviceList *) {
@@ -263,10 +262,7 @@ class SimRuntimeApi : public RuntimeApi {
     hsa::brig::BrigModule brigMod(*reader, &llvm::errs());
     if(!brigMod.isValid()) return NULL;
 
-    llvm::Module *M = hsa::brig::GenLLVM::getLLVMModule(brigMod);
-    if(!M) return NULL;
-
-    return new SimProgram(M);
+    return new SimProgram(brigMod);
   }
 
   virtual void destroyProgram(Program *) {}
@@ -279,7 +275,8 @@ class SimRuntimeApi : public RuntimeApi {
 
   virtual void *allocateGlobalMemory(size_t size, size_t align) {
     void *memptr;
-    posix_memalign(&memptr, std::max(sizeof(void *), align), size);
+    if(posix_memalign(&memptr, std::max(sizeof(void *), align), size))
+      return NULL;
     return memptr;
   }
 

@@ -8,31 +8,31 @@ namespace brig{
 
 template <typename T> class GlobalDecl_Test: public BrigCodeGenTest{
 private:
-  T* RefDir; 
-  
+  T* RefDir;
+
   BrigDirectiveSymbol* RefArgsList;
   BrigDirectiveInit* RefInit;
-    
+
 public:
-  GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, BrigDirectiveInit* d_init=NULL) : 
+  GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, BrigDirectiveInit* d_init=NULL) :
     BrigCodeGenTest(in, sbuf),
     RefDir(out),
     RefArgsList(NULL),
     RefInit(d_init)   { }
-  
-  GlobalDecl_Test(std::string& in, StringBuffer* sbuf, T* out, BrigDirectiveSymbol* arglist) : 
+
+  GlobalDecl_Test(std::string& in, StringBuffer* sbuf, T* out, BrigDirectiveSymbol* arglist) :
     BrigCodeGenTest(in, sbuf),
-    RefDir(out), 
+    RefDir(out),
     RefArgsList(arglist),
-    RefInit(NULL) { }  
+    RefInit(NULL) { }
 
   void validate(struct BrigSections* TestOutput){
     const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
     const char* getbuf = TestOutput->strings;
-        
+
     dir_iterator getdir = TestOutput->begin();
     const T* getdecl = (cast<T>(getdir));
-    validate_brig::validate(RefDir,refbuf, getdecl, getbuf); 
+    validate_brig::validate(RefDir,refbuf, getdecl, getbuf);
 
     if(RefArgsList){
       const BrigDirectiveFunction* ref = reinterpret_cast<const BrigDirectiveFunction*> (getdecl);
@@ -40,7 +40,7 @@ public:
         const BrigDirectiveSymbol* getarg = (cast<BrigDirectiveSymbol>(++getdir));
         BrigDirectiveSymbol* refarg = &(RefArgsList[i]);
         validate_brig::validate(refarg, refbuf, getarg, getbuf);
-      }  
+      }
     } else if(RefInit){
       const BrigDirectiveInit* getarg = (cast<BrigDirectiveInit>(++getdir));
       validate_brig::validate(RefInit, getarg);
@@ -52,12 +52,12 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
 
   std::string in, name;
   StringBuffer *sbuf = new StringBuffer();
-  
+
   in.assign("align 1 static group_s8 &tmp[2];\n");
   name.assign("&tmp"); sbuf->append(name);
-  
+
   BrigDirectiveSymbol ref = {
-  
+
     0,                       // size
     BrigEDirectiveSymbol ,    // kind
     {
@@ -79,7 +79,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   TestCase1.Run_Test(&GlobalDecl);
   sbuf->clear();
   /*********************************Add more test cases ********************************/
-  
+
 
   /********************************* Case 2 Group ********************************/
   in.assign("align 4 group_f32 &x2[4][1024];\n");
@@ -193,10 +193,10 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
 
 
 TEST(CodegenTest, FunctionDecl_Codegen){
-  
+
   std::string in, name;
   StringBuffer *sbuf = new StringBuffer();
-   
+
   in.assign("function &callee()(); \n");
   name.assign("&callee");
   sbuf->append(name);
@@ -215,13 +215,13 @@ TEST(CodegenTest, FunctionDecl_Codegen){
     0,
   };
   GlobalDecl_Test<BrigDirectiveFunction> TestCase1(in, sbuf, &ref);
-  TestCase1.Run_Test(&GlobalDecl); 
+  TestCase1.Run_Test(&GlobalDecl);
   sbuf->clear();
   /***************************************************Test case 2********************************/
 
   std::string arg1, arg2;
   in.assign("extern function &callee(arg_u32 %val1)(arg_u16 %val2);\n ");
-  name.assign("&callee"); arg1.assign("%val1"); arg2.assign("%val2"); 
+  name.assign("&callee"); arg1.assign("%val1"); arg2.assign("%val2");
   sbuf->append(name); sbuf->append(arg1); sbuf->append(arg2);
   int dir_size = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)*2;
   BrigdOffset32_t firstInParam = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)* 1;
@@ -239,7 +239,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
     1,                        // outParamCount
     firstInParam
   };
-  BrigDirectiveSymbol args[2] = { 
+  BrigDirectiveSymbol args[2] = {
     //args[0]
     {0,
     BrigEDirectiveSymbol,
@@ -270,17 +270,17 @@ TEST(CodegenTest, FunctionDecl_Codegen){
       1,
     },
     0,
-    0 
+    0
     }
   };
   args[0].size = sizeof(args[0]);
   args[1].size = sizeof(args[1]);
-  
+
   GlobalDecl_Test<BrigDirectiveFunction> TestCase2(in, sbuf, &ref2, args);
   TestCase2.Run_Test(&GlobalDecl);
   sbuf->clear();
   /*********************************   Add more unit tests ****************************************/
-   
+
   /********************************* Case 3 ****************************************/
   in.assign("extern function &foo ()();\n");
   name.assign("&foo");  sbuf->append(name);
@@ -308,7 +308,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
 
   /********************************* Case 4 ****************************************/
   in.assign("function &foo4 (arg_u32 %x[64])(arg_u32 %z1, arg_b8 %map[64][64] ,");
-  in.append("arg_b32 %value[64], arg_b1 %jud1, arg_b1 %jud2) :fbar(128);\n");
+  in.append("arg_b32 %value[64], arg_b1 %jud1, arg_b1 %jud2);\n");
   std::string argsName[6];
 
   name.assign("&foo4");             sbuf->append(name);
@@ -318,7 +318,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
   argsName[3].assign("%value");     sbuf->append(argsName[3]);
   argsName[4].assign("%jud1");      sbuf->append(argsName[4]);
   argsName[5].assign("%jud2");      sbuf->append(argsName[5]);
-  
+
   BrigDirectiveSymbol args4[6];  // One output arg, Five input args
   // args[0] is the output arg.
   BrigDirectiveFunction ref4 = {
@@ -331,7 +331,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
     0,                                // operationCount
     0,                                // d_nextDirective
     BrigNone,                         // attribute
-    128,                              // fbarCount
+    0,                                // reserved
     1,                                // outParamCount
     0                                 // d_firstInParam
   };
@@ -436,7 +436,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
 }
 
 TEST(CodegenTest, functionSignature_Codegen){
-  
+
   std::string in, name;
   StringBuffer *sbuf = new StringBuffer();
 
@@ -444,7 +444,7 @@ TEST(CodegenTest, functionSignature_Codegen){
   in.assign("signature &bar_t (arg_u32 ) (align 8 arg_f32, arg_f32 %x[10]);\n");
   name.assign("&bar_t");  sbuf->append(name);
 
-  char* pMem1 = new char[sizeof(BrigDirectiveSignature) + 
+  char* pMem1 = new char[sizeof(BrigDirectiveSignature) +
                 sizeof(BrigDirectiveSignature::BrigProtoType) * 2];
 
   BrigDirectiveSignature* pRef1 = reinterpret_cast<BrigDirectiveSignature*>(pMem1);
@@ -453,8 +453,6 @@ TEST(CodegenTest, functionSignature_Codegen){
   pRef1->kind = BrigEDirectiveSignature;  // kind
   pRef1->c_code = 0;                      // c_code
   pRef1->s_name = 0;                      // s_name
-  pRef1->fbarCount = 0;                   // fbarCount
-  pRef1->reserved = 0;                    // reserved
   pRef1->outCount = 1;                    // outCount
   pRef1->inCount = 2;                     // inCount
   pRef1->types[0].type = Brigu32;         // type
@@ -473,12 +471,12 @@ TEST(CodegenTest, functionSignature_Codegen){
   pRef1->types[2].dim = 10;               // dim
 
   GlobalDecl_Test<BrigDirectiveSignature> TestCase1(in, sbuf, pRef1);
-  TestCase1.Run_Test(&GlobalDecl); 
+  TestCase1.Run_Test(&GlobalDecl);
   delete []pMem1;  pMem1 = NULL; pRef1 = NULL;
   sbuf->clear();
 
   /********************************* Case 2 ****************************************/
-  in.assign("signature &fun_t (arg_u32) (arg_u32, arg_u32) :fbar(16);\n");
+  in.assign("signature &fun_t (arg_u32) (arg_u32, arg_u32);\n");
   name.assign("&fun_t");  sbuf->append(name);
 
   char* pMem2 = new char[sizeof(BrigDirectiveSignature) + sizeof(BrigDirectiveSignature::BrigProtoType) * 2];
@@ -489,8 +487,6 @@ TEST(CodegenTest, functionSignature_Codegen){
   pRef2->kind = BrigEDirectiveSignature;  // kind
   pRef2->c_code = 0;                      // c_code
   pRef2->s_name = 0;                      // s_name
-  pRef2->fbarCount = 16;                  // fbarCount
-  pRef2->reserved = 0;                    // reserved
   pRef2->outCount = 1;                    // outCount
   pRef2->inCount = 2;                     // inCount
   pRef2->types[0].type = Brigu32;         // type
@@ -509,7 +505,7 @@ TEST(CodegenTest, functionSignature_Codegen){
   pRef2->types[2].dim = 0;                // dim
 
   GlobalDecl_Test<BrigDirectiveSignature> TestCase2(in, sbuf, pRef2);
-  TestCase2.Run_Test(&GlobalDecl); 
+  TestCase2.Run_Test(&GlobalDecl);
   delete []pMem2;  pMem2 = NULL;  pRef2 = NULL;
   sbuf->clear();
 
@@ -518,14 +514,14 @@ TEST(CodegenTest, functionSignature_Codegen){
 }
 
 TEST(CodegenTest, InitializableDecl_Codegen){
-  
+
   std::string in, name;
   StringBuffer* sbuf = new StringBuffer();
-  
+
   in.assign("global_b8 &x[9] = { 1,2,3,4,5,6,7,8,9 }; ");
   name.assign("&x");
   sbuf->append(name);
-  
+
   BrigDirectiveSymbol ref = {
   0,                          // size
   BrigEDirectiveSymbol,       // kind
@@ -546,7 +542,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   ref.size = sizeof(ref);
   ref.d_init = sizeof(ref);
   BrigDirectiveInit* bdi = (BrigDirectiveInit*) (malloc(sizeof(BrigDirectiveInit) + sizeof(uint64_t)));
-  
+
   bdi->size = sizeof(BrigDirectiveInit) + sizeof(uint64_t);   // size
   bdi->kind = BrigEDirectiveInit;                             // kind
   bdi->c_code = 0;                                            // c_code
@@ -570,16 +566,16 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdi->initializationData.u8[13] = 0;
   bdi->initializationData.u8[14] = 0;
   bdi->initializationData.u8[15] = 0;
-  
+
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase1(in, sbuf, &ref, bdi);
-  TestCase1.Run_Test(&GlobalDecl); 
+  TestCase1.Run_Test(&GlobalDecl);
   free(bdi);
   sbuf->clear();
   /******************************************************* Add more tests *******************************************/
   /************************************************ Case 2 ***************************************/
   in.assign("global_f32 &x[9] = { 1.1f,2.2f,3.3f,4.4f,5.5f,6.6f,7.7f,8.8f,9.9f };");
   name.assign("&x"); sbuf->append(name);
-  
+
   BrigDirectiveSymbol ref2 = {
   0,                        // size
   BrigEDirectiveSymbol,     // kind
@@ -601,14 +597,14 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   ref2.d_init = sizeof(ref2);
 
   BrigDirectiveInit* bdi2 = (BrigDirectiveInit*) (malloc(sizeof(BrigDirectiveInit) + sizeof(uint64_t) * 4));
-  
+
   bdi2->size = sizeof(BrigDirectiveInit) + sizeof(uint64_t) * 4;  // size
   bdi2->kind = BrigEDirectiveInit;                                // kind
   bdi2->c_code = 0;                                               // c_code
   bdi2->elementCount = 9;                                         // elementCount
   bdi2->type = Brigb32;                                           // type
   bdi2->reserved = 0;                                             // reserved
-  
+
   *(float*)&bdi2->initializationData.u32[0] = 1.1f;               // initializationData
 
   *(float*)&bdi2->initializationData.u32[1] = 2.2f;
@@ -622,16 +618,16 @@ TEST(CodegenTest, InitializableDecl_Codegen){
 
   *(float*)&bdi2->initializationData.u32[8] = 9.9f;               // initializationData
   bdi2->initializationData.u32[9] = 0;
-  
+
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase2(in, sbuf, &ref2, bdi2);
-  TestCase2.Run_Test(&GlobalDecl); 
+  TestCase2.Run_Test(&GlobalDecl);
   free(bdi2);  bdi2 = NULL;
   sbuf->clear();
 
   /************************************************ Case 3 ***************************************/
   in.assign("global_f64 &x[9] = { 1.1l,2.2l,3.3l,4.4l,5.5l,6.6l,7.7l,8.8l,9.9l };");
   name.assign("&x"); sbuf->append(name);
-  
+
   BrigDirectiveSymbol ref3 = {
   0,                        // size
   BrigEDirectiveSymbol,     // kind
@@ -653,14 +649,14 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   ref3.d_init = sizeof(ref3);
 
   BrigDirectiveInit* bdi3 = (BrigDirectiveInit*) (malloc(sizeof(BrigDirectiveInit) + sizeof(uint64_t) * 8));
-  
+
   bdi3->size = sizeof(BrigDirectiveInit) + sizeof(uint64_t) * 8;   // size
   bdi3->kind = BrigEDirectiveInit;                                 // kind
   bdi3->c_code = 0;                                                // c_code
   bdi3->elementCount = 9;                                          // elementCount
   bdi3->type = Brigb64;                                            // type
   bdi3->reserved = 0;                                              // reserved
-  
+
   *(double*)&bdi3->initializationData.u64[0] = 1.1l;               // initializationData
 
   *(double*)&bdi3->initializationData.u64[1] = 2.2l;
@@ -705,14 +701,14 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   ref4.d_init = sizeof(ref4);
 
   BrigDirectiveInit* bdi4 = (BrigDirectiveInit*) (malloc(sizeof(BrigDirectiveInit)));
-  
+
   bdi4->size = sizeof(BrigDirectiveInit);                          // size
   bdi4->kind = BrigEDirectiveInit;                                 // kind
   bdi4->c_code = 0;                                                // c_code
   bdi4->elementCount = 1;                                          // elementCount
   bdi4->type = Brigb32;                                            // type
   bdi4->reserved = 0;                                              // reserved
-  
+
   bdi4->initializationData.u32[0] = 0x40400000;                    // initializationData
   bdi4->initializationData.u32[1] = 0;
 
@@ -747,14 +743,14 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   ref5.d_init = sizeof(ref5);
 
   BrigDirectiveInit* bdi5 = (BrigDirectiveInit*) (malloc(sizeof(BrigDirectiveInit)));
-  
+
   bdi5->size = sizeof(BrigDirectiveInit);                          // size
   bdi5->kind = BrigEDirectiveInit;                                 // kind
   bdi5->c_code = 0;                                                // c_code
   bdi5->elementCount = 5;                                          // elementCount
   bdi5->type = Brigb8;                                             // type
   bdi5->reserved = 0;                                              // reserved
-  
+
   bdi5->initializationData.u8[0] = 1;    // initializationData
   bdi5->initializationData.u8[1] = 3;
   bdi5->initializationData.u8[2] = 0xF1;
@@ -795,14 +791,14 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   ref6.d_init = sizeof(ref6);
 
   BrigDirectiveInit* bdi6 = (BrigDirectiveInit*) (malloc(sizeof(BrigDirectiveInit) + sizeof(uint64_t) * 4));
-  
+
   bdi6->size = sizeof(BrigDirectiveInit) + sizeof(uint64_t) * 4;   // size
   bdi6->kind = BrigEDirectiveInit;                                 // kind
   bdi6->c_code = 0;                                                // c_code
   bdi6->elementCount = 17;                                         // elementCount
   bdi6->type = Brigb16;                                            // type
   bdi6->reserved = 0;                                              // reserved
-  
+
   bdi6->initializationData.u16[0] = 0xF7F7;                     // initializationData
   bdi6->initializationData.u16[1] = 3;
   bdi6->initializationData.u16[2] = 0xFFF1;
@@ -845,7 +841,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
 
   size_t arraySize = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t) * 2;
   BrigDirectiveLabelInit* bdli7 = (BrigDirectiveLabelInit*) (malloc(arraySize));
-  
+
   bdli7->size = arraySize;                              // size
   bdli7->kind = BrigEDirectiveLabelInit;                // kind
   bdli7->c_code = 0;                                    // c_code

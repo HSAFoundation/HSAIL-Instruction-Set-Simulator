@@ -12,6 +12,12 @@ namespace hsa {
 namespace brig {
 Context* Context::ctx = NULL;
 
+#define Destructor __attribute__((destructor))
+
+Destructor static void fini(void) {
+  delete Context::get_instance();
+}
+
 Context* Context::get_instance(void) {
      if (ctx == NULL) {
          ctx = new Context();
@@ -36,7 +42,7 @@ Context::Context(void) {
   error_reporter_set = false;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
-  aluModifier.hi = 0;
+  aluModifier.valid = 0;
   aluModifier.ftz = 0;
   aluModifier.approx = 0;
   aluModifier.fbar = 0;
@@ -52,14 +58,9 @@ Context::Context(void) {
 Context::~Context(void) {
   delete cbuf;
   delete dbuf;
+  delete obuf;
   delete sbuf;
   delete err_reporter;
-  delete &func_map;
-  delete &func_o_map;
-  delete &operand_map;
-  delete &label_c_map;
-  delete &label_o_map;
-  delete ctx;
 }
 
 void Context::clear_context(void) {
@@ -82,7 +83,7 @@ void Context::clear_context(void) {
   current_argdecl_offset = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
-  aluModifier.hi = 0;
+  aluModifier.valid = 0;
   aluModifier.ftz = 0;
   aluModifier.approx = 0;
   aluModifier.fbar = 0;

@@ -19,9 +19,9 @@ class ErrorReporter: public ErrorReporterInterface {
                       unsigned int LineNo,
                       unsigned int ColNo);
 
+    virtual ~ErrorReporter() {}
   private:
     ErrorReporter();
-    ~ErrorReporter();
     static ErrorReporter* er;
 
     // these methods are not implemented
