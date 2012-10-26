@@ -1116,6 +1116,40 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
   TestCase2.Run_Test(&GlobalSamplerDecl);
   sbuf->clear();
 
+  /************************Test Case 3****************************/
+  in.assign("global_Samp &demo={coord = unnormalized, filter = nearest,");
+  in.append("boundaryU = mirroronce, boundaryV = border, boundaryW = clamp } ;\n");
+
+  name.assign("&demo"); sbuf->append(name);
+  
+   BrigDirectiveSampler out3 = {
+    0,                           //size
+    BrigEDirectiveSampler,       //kind
+    {
+      0,                        // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigConst,                // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      BrigSamp,                 // type
+      1,                        // align
+    },
+    1,                      //valid
+    0,                      //normalized
+    BrigSamplerFilterNearest,//filter
+    BrigSamplerMirrorOnce,       //boundaryU
+    BrigSamplerBorder,           //boundaryV
+    BrigSamplerClamp,            //boundaryW
+    0                            //reserved1
+  };
+  out3.size = sizeof(out3);
+
+  GlobalDecl_Test<BrigDirectiveSampler> TestCase3(in, sbuf, &out2);
+  TestCase3.Run_Test(&GlobalSamplerDecl);
+  sbuf->clear();
+
   /********************************/
   delete sbuf;
 }
