@@ -942,7 +942,7 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
       BrigGlobalSpace,          // storag class
       BrigNone ,                // attribut
       0,                        // reserved
-      BrigConst,                // symbolModifier
+      0,                // symbolModifier
       0,                        // dim
       0,                        // s_name
       BrigRWImg,                  // type
@@ -1047,7 +1047,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
       BrigGlobalSpace,          // storag class
       BrigNone ,                // attribut
       0,                        // reserved
-      BrigConst,                // symbolModifier
+      0,                // symbolModifier
       0,                        // dim
       0,                        // s_name
       BrigROImg,                  // type
@@ -1158,7 +1158,7 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
       BrigGlobalSpace,          // storag class
       BrigNone ,                // attribut
       0,                        // reserved
-      BrigConst,                // symbolModifier
+      0,                // symbolModifier
       0,                        // dim
       0,                        // s_name
       BrigSamp,                 // type
