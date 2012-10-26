@@ -891,7 +891,7 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
     2,                      //width
     3,                      //height
     4,                      //depth
-    9,                      //array
+    1,                      //array
     BrigImage_R,             //order
     BrigSIGNED_INT32        //format
   };
@@ -964,7 +964,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
     4,                      //width
     5,                      //height
     6,                      //depth
-    9,                      //array
+    1,                      //array
     BrigImage_R,             //order
     BrigUNSIGNED_INT32        //format
   };
@@ -976,7 +976,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
 
   
   /************************Test Case 2****************************/
-  in.assign("global_ROImg &demo[9][9]={order = rx};");
+  in.assign("global_ROImg &demo[9][9]={format = unorm_short_101010, order = rgbx, width = 4 ,height = 5,depth = 6};");
   name.assign("&demo"); sbuf->append(name);
   
   BrigDirectiveImage out2 = {
@@ -993,17 +993,49 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
       BrigROImg,                  // type
       1,                        // align
     },
-    0,                      //width
-    0,                      //height
-    0,                      //depth
+    4,                      //width
+    5,                      //height
+    6,                      //depth
     1,                      //array
-    BrigImage_RX,                  //order
-    BrigImageFormatUnknown        //format
+    BrigImage_RGBX,                  //order
+    BrigUNORM_SHORT_101010        //format
   };
   out2.size = sizeof(out2);
 
   GlobalDecl_Test<BrigDirectiveImage> TestCase2(in, sbuf, &out2);
   TestCase2.Run_Test(&GlobalReadOnlyImageDecl);
+  sbuf->clear();
+
+/***************************test case 3********************************************/
+  in.assign("global_ROImg &demo");
+  in.append("={format = unsigned_int32 ,order = r,width = 4 ,height = 5,depth = 6 };\n");
+  name.assign("&demo"); sbuf->append(name);
+  
+  BrigDirectiveImage out3 = {
+    0,                      //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigConst,                // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      BrigROImg,                  // type
+      1,                        // align
+    },
+    4,                      //width
+    5,                      //height
+    6,                      //depth
+    1,                      //array
+    BrigImage_R,             //order
+    BrigUNSIGNED_INT32        //format
+  };
+  out3.size = sizeof(out3);
+
+  GlobalDecl_Test<BrigDirectiveImage> TestCase3(in, sbuf, &out1);
+  TestCase3.Run_Test(&GlobalReadOnlyImageDecl);
   sbuf->clear();
 
   /********************************/
