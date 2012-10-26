@@ -6773,21 +6773,6 @@ int GlobalImageDeclPart2(Context *context){
     }
   }
 
-  BrigDirectiveImage get;
-  context->get_directive(&get);
-
-  if (context->get_dim()){// a array
-    if ((0 != get.width && 0 != get.height)
-       ||(0 != get.width && 0 != get.depth)
-       ||(0 != get.height && 0 != get.depth)){
-      get.array = context->get_dim();
-
-      unsigned char *bdi_charp =
-        reinterpret_cast<unsigned char*>(&get);
-      context->update_last_directive(bdi_charp, sizeof(BrigDirectiveImage));
-    }
-  }
-
   if (';' != context->token_to_scan) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
@@ -6854,22 +6839,6 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
         } else {
           context->set_error(INVALID_IMAGE_INIT);
           return 1;
-        }
-      }
-
-      BrigDirectiveImage get;
-      context->get_directive(&get);
-
-      // array for 1da or 2da,else set 1
-      if (context->get_dim()){ // a array
-        if ((0 != get.width && 0 != get.height)
-           ||(0 != get.width && 0 != get.depth)
-           ||(0 != get.height && 0 != get.depth)){
-          get.array = context->get_dim();
-
-          unsigned char *bdi_charp =
-            reinterpret_cast<unsigned char*>(&get);
-          context->update_last_directive(bdi_charp, sizeof(BrigDirectiveImage));
         }
       }
 

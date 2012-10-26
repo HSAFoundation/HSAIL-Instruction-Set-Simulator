@@ -859,5 +859,328 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   delete sbuf;
 
 }
+
+TEST(CodegenTest,GlobalImageDecl_Codegen){
+
+  std::string in, name;
+  StringBuffer *sbuf = new StringBuffer();
+  
+  /************************Test Case 1****************************/
+  in.assign("global_RWImg &demo[9]");
+  in.append("={format = signed_int32 ,order = r,width = 2,height = 3,depth = 4 };\n");
+  name.assign("&demo"); sbuf->append(name);
+  
+  BrigDirectiveImage out1 = {
+    0,                      //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigArray,                // symbolModifier
+      9,                        // dim
+      0,                        // s_name
+      BrigRWImg,                  // type
+      1,                        // align
+    },
+    2,                      //width
+    3,                      //height
+    4,                      //depth
+    1,                      //array
+    BrigImage_R,             //order
+    BrigSIGNED_INT32        //format
+  };
+  out1.size = sizeof(out1);
+
+  GlobalDecl_Test<BrigDirectiveImage> TestCase1(in, sbuf, &out1);
+  TestCase1.Run_Test(&GlobalImageDecl);
+  sbuf->clear();
+
+  
+  /************************Test Case 2****************************/
+  in.assign("global_RWImg &demo[9][9]={order = a};");
+  name.assign("&demo"); sbuf->append(name);
+  
+  BrigDirectiveImage out2 = {
+    0,                      //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigArray,                // symbolModifier
+      81,                        // dim
+      0,                        // s_name
+      BrigRWImg,                  // type
+      1,                        // align
+    },
+    0,                      //width
+    0,                      //height
+    0,                      //depth
+    1,                      //array
+    BrigImage_A,                  //order
+    BrigImageFormatUnknown        //format
+  };
+  out2.size = sizeof(out2);
+
+  GlobalDecl_Test<BrigDirectiveImage> TestCase2(in, sbuf, &out2);
+  TestCase2.Run_Test(&GlobalImageDecl);
+  sbuf->clear();
+
+  /************************Test Case 3****************************/
+  in.assign("global_RWImg &demo");
+  in.append("={format = signed_int32 ,order = r,width = 2,height = 3,depth = 4 };\n");
+  name.assign("&demo"); sbuf->append(name);
+  
+  BrigDirectiveImage out3 = {
+    0,                      //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigConst,                // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      BrigRWImg,                  // type
+      1,                        // align
+    },
+    2,                      //width
+    3,                      //height
+    4,                      //depth
+    1,                      //array
+    BrigImage_R,             //order
+    BrigSIGNED_INT32        //format
+  };
+  out3.size = sizeof(out3);
+
+  GlobalDecl_Test<BrigDirectiveImage> TestCase3(in, sbuf, &out3);
+  TestCase3.Run_Test(&GlobalImageDecl);
+  sbuf->clear();
+
+  /********************************/
+  delete sbuf;
+}
+
+TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
+
+  std::string in, name;
+  StringBuffer *sbuf = new StringBuffer();
+  
+  /************************Test Case 1****************************/
+  in.assign("global_ROImg &demo[9]");
+  in.append("={format = unsigned_int32 ,order = r,width = 4 ,height = 5,depth = 6 };\n");
+  name.assign("&demo"); sbuf->append(name);
+  
+  BrigDirectiveImage out1 = {
+    0,                      //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigArray,                // symbolModifier
+      9,                        // dim
+      0,                        // s_name
+      BrigROImg,                  // type
+      1,                        // align
+    },
+    4,                      //width
+    5,                      //height
+    6,                      //depth
+    1,                      //array
+    BrigImage_R,             //order
+    BrigUNSIGNED_INT32        //format
+  };
+  out1.size = sizeof(out1);
+
+  GlobalDecl_Test<BrigDirectiveImage> TestCase1(in, sbuf, &out1);
+  TestCase1.Run_Test(&GlobalReadOnlyImageDecl);
+  sbuf->clear();
+
+  
+  /************************Test Case 2****************************/
+  in.assign("global_ROImg &demo[9][9]={format = unorm_short_101010, order = rgbx, width = 4 ,height = 5,depth = 6};");
+  name.assign("&demo"); sbuf->append(name);
+  
+  BrigDirectiveImage out2 = {
+    0,                      //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigArray,                // symbolModifier
+      81,                        // dim
+      0,                        // s_name
+      BrigROImg,                  // type
+      1,                        // align
+    },
+    4,                      //width
+    5,                      //height
+    6,                      //depth
+    1,                      //array
+    BrigImage_RGBX,                  //order
+    BrigUNORM_SHORT_101010        //format
+  };
+  out2.size = sizeof(out2);
+
+  GlobalDecl_Test<BrigDirectiveImage> TestCase2(in, sbuf, &out2);
+  TestCase2.Run_Test(&GlobalReadOnlyImageDecl);
+  sbuf->clear();
+
+/***************************test case 3********************************************/
+  in.assign("global_ROImg &demo");
+  in.append("={format = unsigned_int32 ,order = r,width = 4 ,height = 5,depth = 6 };\n");
+  name.assign("&demo"); sbuf->append(name);
+  
+  BrigDirectiveImage out3 = {
+    0,                      //size
+    BrigEDirectiveImage,    //kind
+    {
+      0,                         // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigConst,                // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      BrigROImg,                  // type
+      1,                        // align
+    },
+    4,                      //width
+    5,                      //height
+    6,                      //depth
+    1,                      //array
+    BrigImage_R,             //order
+    BrigUNSIGNED_INT32        //format
+  };
+  out3.size = sizeof(out3);
+
+  GlobalDecl_Test<BrigDirectiveImage> TestCase3(in, sbuf, &out3);
+  TestCase3.Run_Test(&GlobalReadOnlyImageDecl);
+  sbuf->clear();
+
+  /********************************/
+  delete sbuf;
+}
+
+TEST(CodegenTest,GlobalSamplerDecl_Codegen){
+
+  std::string in, name;
+  StringBuffer *sbuf = new StringBuffer();
+  
+  /************************Test Case 1****************************/
+  in.assign("global_Samp &demo[9]={coord = normalized, filter = linear,");
+  in.append("boundaryU = clamp, boundaryV = wrap, boundaryW = mirror } ;\n");
+
+  name.assign("&demo"); sbuf->append(name);
+  
+   BrigDirectiveSampler out1 = {
+    0,                           //size
+    BrigEDirectiveSampler,       //kind
+    {
+      0,                        // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigArray,                // symbolModifier
+      9,                        // dim
+      0,                        // s_name
+      BrigSamp,                 // type
+      1,                        // align
+    },
+    1,                      //valid
+    1,                      //normalized
+    BrigSamplerFilterLinear,//filter
+    BrigSamplerClamp,       //boundaryU
+    BrigSamplerWrap,        //boundaryV
+    BrigSamplerMirror,      //boundaryW
+    0                       //reserved1
+  };
+  out1.size = sizeof(out1);
+
+  GlobalDecl_Test<BrigDirectiveSampler> TestCase1(in, sbuf, &out1);
+  TestCase1.Run_Test(&GlobalSamplerDecl);
+  sbuf->clear();
+
+  
+  /************************Test Case 2****************************/
+  in.assign("global_Samp &demo[9]={coord = unnormalized, filter = nearest,");
+  in.append("boundaryU = mirroronce, boundaryV = border, boundaryW = clamp } ;\n");
+
+  name.assign("&demo"); sbuf->append(name);
+  
+   BrigDirectiveSampler out2 = {
+    0,                           //size
+    BrigEDirectiveSampler,       //kind
+    {
+      0,                        // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigArray,                // symbolModifier
+      9,                        // dim
+      0,                        // s_name
+      BrigSamp,                 // type
+      1,                        // align
+    },
+    1,                      //valid
+    0,                      //normalized
+    BrigSamplerFilterNearest,//filter
+    BrigSamplerMirrorOnce,       //boundaryU
+    BrigSamplerBorder,           //boundaryV
+    BrigSamplerClamp,            //boundaryW
+    0                            //reserved1
+  };
+  out2.size = sizeof(out2);
+
+  GlobalDecl_Test<BrigDirectiveSampler> TestCase2(in, sbuf, &out2);
+  TestCase2.Run_Test(&GlobalSamplerDecl);
+  sbuf->clear();
+
+  /************************Test Case 3****************************/
+  in.assign("global_Samp &demo={coord = unnormalized, filter = nearest,");
+  in.append("boundaryU = mirroronce, boundaryV = border, boundaryW = clamp } ;\n");
+
+  name.assign("&demo"); sbuf->append(name);
+  
+   BrigDirectiveSampler out3 = {
+    0,                           //size
+    BrigEDirectiveSampler,       //kind
+    {
+      0,                        // c_code
+      BrigGlobalSpace,          // storag class
+      BrigNone ,                // attribut
+      0,                        // reserved
+      BrigConst,                // symbolModifier
+      0,                        // dim
+      0,                        // s_name
+      BrigSamp,                 // type
+      1,                        // align
+    },
+    1,                      //valid
+    0,                      //normalized
+    BrigSamplerFilterNearest,//filter
+    BrigSamplerMirrorOnce,       //boundaryU
+    BrigSamplerBorder,           //boundaryV
+    BrigSamplerClamp,            //boundaryW
+    0                            //reserved1
+  };
+  out3.size = sizeof(out3);
+
+  GlobalDecl_Test<BrigDirectiveSampler> TestCase3(in, sbuf, &out3);
+  TestCase3.Run_Test(&GlobalSamplerDecl);
+  sbuf->clear();
+
+  /********************************/
+  delete sbuf;
+}
+
 }
 }
