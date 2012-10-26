@@ -1131,7 +1131,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
      sizeof(reg1), 
      sizeof(reg1) + sizeof(reg2), 
      sizeof(reg1) + sizeof(reg2) + sizeof(reg3), 0},
-    {1,0,0,1,0,0,0}
+    {1,1,0,1,0,0,0}
   };
   out23.size = sizeof(out23);
   
@@ -1230,7 +1230,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
      sizeof(reg1), 
      sizeof(reg1) + sizeof(reg2), 
      sizeof(reg1) + sizeof(reg2) + sizeof(reg3), 0},
-    {1,0,0,1,0,0,0}
+    {1,1,0,1,0,0,0}
   };
   out25.size = sizeof(out25);
   

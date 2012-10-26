@@ -1604,7 +1604,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   symbols->append(op1);
   bam.valid = 1;
   bam.ftz = 1;
-  bam.floatOrInt = 0;
+  bam.floatOrInt = 1;
   bam.rounding = 0;
   bam.valid = 1;
   bam.approx = 0;
@@ -1649,7 +1649,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   bam.valid = 1;
   bam.rounding = 0;
   bam.ftz = 1;
-  bam.floatOrInt = 0;
+  bam.floatOrInt = 1;
   bam.valid = 1;
   bam.approx = 0;
   bam.fbar = 0;

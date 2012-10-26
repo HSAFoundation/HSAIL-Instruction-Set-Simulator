@@ -782,6 +782,7 @@ int RoundingMode(Context* context) {
   if (first_token == _FTZ) {
     mod.valid = 1;
     mod.ftz = 1;
+    mod.floatOrInt = 1;
     context->token_to_scan = yylex();
   }
 
