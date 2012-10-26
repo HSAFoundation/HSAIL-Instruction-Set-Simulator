@@ -1274,7 +1274,7 @@ bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
 bool BrigModule::validate(const BrigOperandOpaque *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  dir_iterator nameDir(S_.directives + operand->name);
+  dir_iterator nameDir(S_.directives + operand->directive);
   if(!validate(nameDir)) return false;
   valid &= check(isa<BrigDirectiveImage>(nameDir) ||
                  isa<BrigDirectiveSampler>(nameDir),
@@ -1316,10 +1316,10 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
   // Exit early to prevent out-of-bounds access
-  if(!validateSName(operand->name))
+  if(!validateSName(operand->s_name))
     return false;
 
-  const char *name = S_.strings + operand->name;
+  const char *name = S_.strings + operand->s_name;
 
   // Exit early to prevent out-of-bounds access
   if(!check(name[0] == '$', "Register names must begin with '$'"))

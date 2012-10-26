@@ -181,7 +181,7 @@ int Identifier(Context* context) {
     }
     bor.reserved = 0;
     std::string name(context->token_value.string_val);
-    bor.name = context->add_symbol(name);
+    bor.s_name = context->add_symbol(name);
     if (!context->operand_map.count(name)) {
       context->operand_map[name] = context->get_operand_offset();
       context->append_operand(&bor);
@@ -405,7 +405,7 @@ int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, boo
         //   context->set_error(MISSING_OPERAND);
         //   return 1;
         // }
-        boo.name = context->symbol_map[name];
+        boo.directive = context->symbol_map[name];
         *pRetOpOffset = context->get_operand_offset();
         context->append_operand(&boo);
       }

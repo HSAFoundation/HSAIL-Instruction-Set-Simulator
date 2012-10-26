@@ -1032,7 +1032,7 @@ struct BrigOperandReg {
   uint16_t kind;
   BrigDataType16_t type;
   uint16_t reserved;
-  uint32_t name;
+  BrigsOffset32_t s_name;
 };
 
 // BrigOperandImmed
@@ -1072,7 +1072,7 @@ struct BrigOperandLabelRef {
   enum { OperKind = BrigEOperandLabelRef };
   uint16_t size;
   uint16_t kind;
-  uint32_t labeldirective;
+  BrigdOffset32_t labeldirective;
 };
 
 // BrigOperandFunctionRef
@@ -1153,7 +1153,7 @@ struct BrigOperandOpaque {
   enum { OperKind = BrigEOperandOpaque };
   uint16_t size;
   uint16_t kind;
-  BrigdOffset32_t name;
+  BrigdOffset32_t directive;
   BrigoOffset32_t reg;
   int32_t offset;
 };

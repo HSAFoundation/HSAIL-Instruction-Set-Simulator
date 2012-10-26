@@ -68,9 +68,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out1, &reg1, &reg2);
   TestCase1.Run_Test(&Instruction2);
   symbols->clear();
@@ -94,9 +94,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase2(in, symbols, &out2, &reg1, &reg2);
   TestCase2.Run_Test(&Instruction2);
   symbols->clear();
@@ -120,9 +120,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase3(in, symbols, &out3, &reg1, &reg2);
   TestCase3.Run_Test(&Instruction2);
   symbols->clear();
@@ -146,9 +146,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase4(in, symbols, &out4, &reg1, &reg2);
   TestCase4.Run_Test(&Instruction2);
   symbols->clear();
@@ -172,9 +172,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase5(in, symbols, &out5, &reg1, &reg2);
   TestCase5.Run_Test(&Instruction2);
   symbols->clear();
@@ -198,7 +198,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2 = reg1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase6(in, symbols, &out6, &reg1, &reg2);
@@ -224,9 +224,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out7, &reg1, &reg2);
   TestCase7.Run_Test(&Instruction2);
   symbols->clear();
@@ -250,9 +250,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase8(in, symbols, &out8, &reg1, &reg2);
   TestCase8.Run_Test(&Instruction2);
   symbols->clear();
@@ -276,9 +276,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase9(in, symbols, &out9, &reg1, &reg2);
   TestCase9.Run_Test(&Instruction2);
   symbols->clear();
@@ -302,9 +302,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase10(in, symbols, &out10, &reg1, &reg2);
   TestCase10.Run_Test(&Instruction2);
   symbols->clear();
@@ -328,9 +328,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase11(in, symbols, &out11, &reg1, &reg2);
   TestCase11.Run_Test(&Instruction2);
   symbols->clear();
@@ -354,7 +354,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   BrigOperandImmed imm1 = {
     0,
@@ -389,9 +389,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase13(in, symbols, &out13, &reg1, &reg2);
   TestCase13.Run_Test(&Instruction2);
   symbols->clear();
@@ -415,7 +415,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   BrigOperandImmed imm2 = {
     0,
@@ -450,7 +450,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   BrigOperandImmed imm3 = {
     0,
@@ -485,9 +485,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase16(in, symbols, &out16, &reg1, &reg2);
   TestCase16.Run_Test(&Instruction2);
   symbols->clear();
@@ -511,9 +511,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase17(in, symbols, &out17, &reg1, &reg2);
   TestCase17.Run_Test(&Instruction2);
   symbols->clear();
@@ -537,9 +537,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase18(in, symbols, &out18, &reg1, &reg2);
   TestCase18.Run_Test(&Instruction2);
   symbols->clear();
@@ -563,9 +563,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb1;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase19(in, symbols, &out19, &reg1, &reg2);
   TestCase19.Run_Test(&Instruction2);
   symbols->clear();
@@ -589,9 +589,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase20(in, symbols, &out20, &reg1, &reg2);
   TestCase20.Run_Test(&Instruction2);
   symbols->clear();
@@ -615,9 +615,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase21(in, symbols, &out21, &reg1, &reg2);
   TestCase21.Run_Test(&Instruction2);
   symbols->clear();
@@ -641,9 +641,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase22(in, symbols, &out22, &reg1, &reg2);
   TestCase22.Run_Test(&Instruction2);
   symbols->clear();
@@ -667,11 +667,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2 = reg1;
   reg2.type = Brigb64;
-  reg2.name = op1.size() + 1;
+  reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase23(in, symbols, &out23, &reg1, &reg2);
   TestCase23.Run_Test(&Instruction2);
   symbols->clear();
@@ -695,9 +695,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase24(in, symbols, &out24, &reg1, &reg2);
   TestCase24.Run_Test(&Instruction2);
   symbols->clear();
@@ -721,7 +721,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   BrigOperandImmed imm4 = {
     0,
@@ -756,7 +756,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2 = reg1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase26(in, symbols, &out26, &reg1, &reg2);
@@ -782,10 +782,10 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2 = reg1;
-  reg2.name = op1.size() + 1;
+  reg2.s_name = op1.size() + 1;
   reg2.type = Brigb64;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase27(in, symbols, &out27, &reg1, &reg2);
   TestCase27.Run_Test(&Instruction2);
@@ -810,7 +810,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2 = reg1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase28(in, symbols, &out28, &reg1, &reg2);
@@ -836,10 +836,10 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2 = reg1;
-  reg2.name = op1.size() + 1;
+  reg2.s_name = op1.size() + 1;
   reg2.type = Brigb64;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase29(in, symbols, &out29, &reg1, &reg2);
   TestCase29.Run_Test(&Instruction2);
@@ -864,10 +864,10 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2 = reg1;
-  reg2.name = op1.size() + 1;
+  reg2.s_name = op1.size() + 1;
   reg2.type = Brigb64;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase30(in, symbols, &out30, &reg1, &reg2);
   TestCase30.Run_Test(&Instruction2);
@@ -892,10 +892,10 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   reg2 = reg1;
-  reg2.name = op1.size() + 1;
+  reg2.s_name = op1.size() + 1;
   reg2.type = Brigb64;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase31(in, symbols, &out31, &reg1, &reg2);
   TestCase31.Run_Test(&Instruction2);
@@ -920,7 +920,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   BrigOperandImmed imm5 = {
     0,
@@ -955,9 +955,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase33(in, symbols, &out33, &reg1, &reg2);
   TestCase33.Run_Test(&Instruction2);
   symbols->clear();
@@ -981,9 +981,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase34(in, symbols, &out34, &reg1, &reg2);
   TestCase34.Run_Test(&Instruction2);
   symbols->clear();
@@ -1007,9 +1007,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase35(in, symbols, &out35, &reg1, &reg2);
   TestCase35.Run_Test(&Instruction2);
   symbols->clear();
@@ -1033,9 +1033,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
 
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase36(in, symbols, &out36, &reg1, &reg2);
   TestCase36.Run_Test(&Instruction2);
@@ -1060,9 +1060,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase37(in, symbols, &out37, &reg1, &reg2);
   TestCase37.Run_Test(&Instruction2);
   symbols->clear();
@@ -1087,9 +1087,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase38(in, symbols, &out38, &reg1, &reg2);
   TestCase38.Run_Test(&Instruction2);
   symbols->clear();
@@ -1113,7 +1113,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   BrigOperandImmed imm6 = {
     0,
@@ -1148,9 +1148,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase40(in, symbols, &out40, &reg1, &reg2);
   TestCase40.Run_Test(&Instruction2);
   symbols->clear();
@@ -1174,9 +1174,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase41(in, symbols, &out41, &reg1, &reg2);
   TestCase41.Run_Test(&Instruction2);
   symbols->clear();
@@ -1200,9 +1200,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase42(in, symbols, &out42, &reg1, &reg2);
   TestCase42.Run_Test(&Instruction2);
   symbols->clear();
@@ -1226,9 +1226,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase43(in, symbols, &out43, &reg1, &reg2);
   TestCase43.Run_Test(&Instruction2);
   symbols->clear();
@@ -1252,9 +1252,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase44(in, symbols, &out44, &reg1, &reg2);
   TestCase44.Run_Test(&Instruction2);
   symbols->clear();
@@ -1278,9 +1278,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb64;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase45(in, symbols, &out45, &reg1, &reg2);
   TestCase45.Run_Test(&Instruction2);
   symbols->clear();
@@ -1304,9 +1304,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase46(in, symbols, &out46, &reg1, &reg2);
   TestCase46.Run_Test(&Instruction2);
   symbols->clear();
@@ -1330,9 +1330,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase47(in, symbols, &out47, &reg1, &reg2);
   TestCase47.Run_Test(&Instruction2);
   symbols->clear();
@@ -1355,7 +1355,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -1387,9 +1387,9 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase49(in, symbols, &out49, &reg1, &reg2);
   TestCase49.Run_Test(&Instruction2);
   symbols->clear();
@@ -1412,7 +1412,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -1443,7 +1443,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -1474,7 +1474,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -1505,7 +1505,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -1536,7 +1536,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
@@ -1590,9 +1590,9 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
-  reg2 = reg1; reg2.name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = op1.size() + 1;
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out1, &reg1, &reg2);
   TestCase1.Run_Test(&Instruction2);
   symbols->clear();
@@ -1625,7 +1625,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   BrigOperandImmed imm1 = {
     0,
@@ -1669,7 +1669,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = 0;
+  reg1.s_name = 0;
 
   BrigOperandImmed imm3 = {
     0,
@@ -1751,13 +1751,13 @@ TEST(CodegenTest, MemorySegmentOps){
   dest.kind = BrigEOperandReg;
   dest.type = Brigb1;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   src.size = sizeof(src);
   src.kind = BrigEOperandReg;
   src.type = Brigb64;
   src.reserved = 0;
-  src.name = op1.size() + 1;
+  src.s_name = op1.size() + 1;
 
   Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase2(in, sbuf, &ref2, &dest, &src);
   TestCase2.Run_Test(&Segp);
@@ -1784,13 +1784,13 @@ TEST(CodegenTest, MemorySegmentOps){
   dest.kind = BrigEOperandReg;
   dest.type = Brigb64;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   src.size = sizeof(src);
   src.kind = BrigEOperandReg;
   src.type = Brigb64;
   src.reserved = 0;
-  src.name = op1.size() + 1;
+  src.s_name = op1.size() + 1;
 
   Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase3(in, sbuf, &ref3, &dest, &src);
   TestCase3.Run_Test(&Segp);

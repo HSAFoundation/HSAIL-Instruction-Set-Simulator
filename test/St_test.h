@@ -178,14 +178,14 @@ TEST(CodegenTest, St_Codegen){
   src.kind = BrigEOperandReg;
   src.type = Brigb32;
   src.reserved = 0;
-  src.name = 0;
+  src.s_name = 0;
 
   //Ref to $s2
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
   dest2.type = Brigb32;
   dest2.reserved = 0;
-  dest2.name = op1.size() + 1;
+  dest2.s_name = op1.size() + 1;
 
   BrigOperandIndirect indirect = {
   0,
@@ -225,7 +225,7 @@ TEST(CodegenTest, St_Codegen){
   src.kind = BrigEOperandReg;
   src.type = Brigb32;
   src.reserved = 0;
-  src.name = 0;
+  src.s_name = 0;
 
   //ref to %output - Not added in symbol table; it is assumed that it was added during variable decl
   dest1.size = sizeof(dest1);
@@ -313,7 +313,7 @@ TEST(CodegenTest, St_Codegen){
   dest2.kind = BrigEOperandReg;
   dest2.type = Brigb32;
   dest2.reserved = 0;
-  dest2.name = 0;
+  dest2.s_name = 0;
 
   indirect.size = sizeof(indirect);
   indirect.kind = BrigEOperandIndirect;
@@ -364,7 +364,7 @@ TEST(CodegenTest, St_Codegen){
   dest2.kind = BrigEOperandReg;
   dest2.type = Brigb32;
   dest2.reserved = 0;
-  dest2.name = op1.size() + 1;
+  dest2.s_name = op1.size() + 1;
 
   // ref to comp
   comp.size = sizeof(comp);
@@ -443,7 +443,7 @@ TEST(CodegenTest, St_Codegen){
   dest2.kind = BrigEOperandReg;
   dest2.type = Brigb32;
   dest2.reserved = 0;
-  dest2.name = op1.size()  + op2.size() + op3.size() + 3;
+  dest2.s_name = op1.size()  + op2.size() + op3.size() + 3;
 
   // ref to comp
   comp.size = sizeof(comp);
@@ -489,14 +489,14 @@ TEST(CodegenTest, St_Codegen){
   reg0.kind = BrigEOperandReg;
   reg0.type = Brigb32;
   reg0.reserved = 0;
-  reg0.name = 0;
+  reg0.s_name = 0;
 
   //Reference to reg $s1
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
   reg1.type = Brigb32;
   reg1.reserved = 0;
-  reg1.name = op1.size() + 1;
+  reg1.s_name = op1.size() + 1;
 
   //Reference to reg $s2
   BrigOperandReg reg2 = {
@@ -541,7 +541,7 @@ TEST(CodegenTest, St_Codegen){
   dest2.kind = BrigEOperandReg;
   dest2.type = Brigb32;
   dest2.reserved = 0;
-  dest2.name = op1.size()  + op2.size() +
+  dest2.s_name = op1.size()  + op2.size() +
            op3.size() + op4.size() + op5.size()+ 5;
 
   // ref to comp
