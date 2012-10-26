@@ -40,7 +40,7 @@ Context::Context(void) {
   error_reporter_set = false;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
-  aluModifier.hi = 0;
+  aluModifier.valid = 0;
   aluModifier.ftz = 0;
   aluModifier.approx = 0;
   aluModifier.fbar = 0;
@@ -81,7 +81,7 @@ void Context::clear_context(void) {
   current_samp_offset = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
-  aluModifier.hi = 0;
+  aluModifier.valid = 0;
   aluModifier.ftz = 0;
   aluModifier.approx = 0;
   aluModifier.fbar = 0;

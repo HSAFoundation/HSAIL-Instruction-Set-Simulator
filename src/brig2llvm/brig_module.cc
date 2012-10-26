@@ -367,6 +367,7 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
+  valid &= check(!dir->reserved, "Reserved not zero");
 
   const unsigned paramCount = dir->inParamCount + dir->outParamCount;
   dir_iterator argIt = dir_iterator(dir) + 1;
@@ -445,6 +446,8 @@ bool BrigModule::validate(const BrigDirectiveImage *dir) const {
   if(!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validate(&dir->s);
+  valid &= check(dir->order < BrigImageOrderInvalid, "Invalid image type");
+  valid &= check(dir->format < BrigImageFormatInvalid, "Invalid format type");
   if(dir->array > 1) {
     valid &= check(dir->depth == 0,
                    "depth value is wrong for 1DA and 2DA images");
@@ -516,7 +519,6 @@ bool BrigModule::validate(const BrigDirectiveSignature *dir) const {
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->c_code);
   valid &= validateSName(dir->s_name);
-  valid &= check(!dir->reserved, "Reserved not zero");
   valid &= check(sizeof(BrigDirectiveSignature) +
                  sizeof(BrigDirectiveSignature::BrigProtoType) *
                  (dir->outCount + dir->inCount - 1) <= dir->size,
@@ -778,11 +780,11 @@ template<typename T> bool BrigModule::validateSize(const T *brig) const{
 // validating the code section
 bool BrigModule::validate(const BrigAluModifier *c) const {
   bool valid = true;
+  if(!c->valid)
+    return true;
+
   if(c->approx == 1)
     valid &= check(c->floatOrInt == 1, "Invalid floatOrInt");
-
-  if(c->floatOrInt == 1)
-    valid &= check(c->hi == 0, "Invalid hi");
 
   if(c->floatOrInt == 0)
     valid &= check(c->ftz == 0, "Invalid ftz");

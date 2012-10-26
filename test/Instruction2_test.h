@@ -1570,7 +1570,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   bam.ftz = 1;
   bam.floatOrInt = 1;
   bam.rounding = 2;
-  bam.hi = 0;
+  bam.valid = 1;
   bam.approx = 0;
   bam.fbar = 0;
   bam.reserved = 0;
@@ -1603,9 +1603,9 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   symbols->append(op1);
 
   bam.ftz = 1;
-  bam.floatOrInt = 1;
+  bam.floatOrInt = 0;
   bam.rounding = 0;
-  bam.hi = 0;
+  bam.valid = 1;
   bam.approx = 0;
   bam.fbar = 0;
   bam.reserved = 0;
@@ -1648,8 +1648,8 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
 
   bam.rounding = 0;
   bam.ftz = 1;
-  bam.floatOrInt = 1;
-  bam.hi = 0;
+  bam.floatOrInt = 0;
+  bam.valid = 1;
   bam.approx = 0;
   bam.fbar = 0;
   bam.reserved = 0;

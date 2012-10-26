@@ -308,7 +308,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
 
   /********************************* Case 4 ****************************************/
   in.assign("function &foo4 (arg_u32 %x[64])(arg_u32 %z1, arg_b8 %map[64][64] ,");
-  in.append("arg_b32 %value[64], arg_b1 %jud1, arg_b1 %jud2) :fbar(128);\n");
+  in.append("arg_b32 %value[64], arg_b1 %jud1, arg_b1 %jud2);\n");
   std::string argsName[6];
 
   name.assign("&foo4");             sbuf->append(name);
@@ -331,7 +331,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
     0,                                // operationCount
     0,                                // d_nextDirective
     BrigNone,                         // attribute
-    128,                              // fbarCount
+    0,                                // reserved
     1,                                // outParamCount
     0                                 // d_firstInParam
   };
@@ -453,8 +453,6 @@ TEST(CodegenTest, functionSignature_Codegen){
   pRef1->kind = BrigEDirectiveSignature;  // kind
   pRef1->c_code = 0;                      // c_code
   pRef1->s_name = 0;                      // s_name
-  pRef1->fbarCount = 0;                   // fbarCount
-  pRef1->reserved = 0;                    // reserved
   pRef1->outCount = 1;                    // outCount
   pRef1->inCount = 2;                     // inCount
   pRef1->types[0].type = Brigu32;         // type
@@ -478,7 +476,7 @@ TEST(CodegenTest, functionSignature_Codegen){
   sbuf->clear();
 
   /********************************* Case 2 ****************************************/
-  in.assign("signature &fun_t (arg_u32) (arg_u32, arg_u32) :fbar(16);\n");
+  in.assign("signature &fun_t (arg_u32) (arg_u32, arg_u32);\n");
   name.assign("&fun_t");  sbuf->append(name);
 
   char* pMem2 = new char[sizeof(BrigDirectiveSignature) + sizeof(BrigDirectiveSignature::BrigProtoType) * 2];
@@ -489,8 +487,6 @@ TEST(CodegenTest, functionSignature_Codegen){
   pRef2->kind = BrigEDirectiveSignature;  // kind
   pRef2->c_code = 0;                      // c_code
   pRef2->s_name = 0;                      // s_name
-  pRef2->fbarCount = 16;                  // fbarCount
-  pRef2->reserved = 0;                    // reserved
   pRef2->outCount = 1;                    // outCount
   pRef2->inCount = 2;                     // inCount
   pRef2->types[0].type = Brigu32;         // type

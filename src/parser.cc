@@ -784,13 +784,14 @@ int RoundingMode(Context* context) {
   BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};//context->get_alu_modifier();
 
   if (first_token == _FTZ) {
+    mod.valid = 1;
     mod.ftz = 1;
-    mod.floatOrInt = 1;
     context->token_to_scan = yylex();
   }
 
   if (context->token_type == FLOAT_ROUNDING) {
       // next is floatRounding
+    mod.valid = 1;
     mod.floatOrInt = 1;
     switch (context->token_to_scan) {
       case _UP:
@@ -810,6 +811,7 @@ int RoundingMode(Context* context) {
     context->set_alu_modifier(mod);
     return 0;
   } else if (context->token_type == INT_ROUNDING) {
+    mod.valid = 1;
     mod.floatOrInt = 0;
     switch (first_token) {
       case _UPI:
@@ -1606,25 +1608,9 @@ int FunctionDefinitionPart2(Context* context) {
           context->set_error(MISSING_ARGUMENT_LIST);
           return 1;
         }
-        // check for optional FBar
-        if (context->token_to_scan == _FBAR) {
-          context->set_fbar(0);
-          if (!FBar(context)) {
-            BrigDirectiveFunction bdf;
-            context->get_directive(context->current_bdf_offset, &bdf);
-            bdf.fbarCount = context->get_fbar();
-            unsigned char * bdf_charp =
-            reinterpret_cast<unsigned char*>(&bdf);
-            context->update_directive_bytes(bdf_charp,
-                                        context->current_bdf_offset,
-                                        sizeof(BrigDirectiveFunction));
-            return 0;
-          } else {
-            context->set_error(INVALID_FBAR);
-          }
-        } else {
-          return 0;
-        }
+
+        return 0;
+
       } else {
         context->set_error(MISSING_IDENTIFIER);
       }
@@ -1833,6 +1819,7 @@ int BranchPart1Cbr(Context* context) {
   }
   // check for optional _fbar modifier
   if (context->token_to_scan == __FBAR) {
+    mod.valid = 1;
     mod.fbar = 1;
     context->set_alu_modifier(mod);
     context->token_to_scan = yylex();
@@ -1965,6 +1952,7 @@ int BranchPart2Brn(Context* context) {
     }
     // check for optional _fbar modifier
     if (context->token_to_scan == __FBAR) {
+      mod.valid = 1;
       mod.fbar = 1;
       context->set_alu_modifier(mod);
       context->token_to_scan = yylex();
@@ -2192,6 +2180,7 @@ int Call(Context* context) {
         callMod.o_operands[i] = callInst.o_operands[i];
       }
       memset(&callMod.aluModifier, 0, sizeof(BrigAluModifier));
+      callMod.aluModifier.valid = 1;
       callMod.aluModifier.fbar = 1;
       context->append_code(&callMod);
     } else {
@@ -2757,14 +2746,6 @@ int FunctionSignature(Context *context) {
       return 1;
     }
 
-    if (_FBAR == context->token_to_scan) {
-      if (!FBar(context)) {
-      } else {
-        context->set_error(INVALID_FBAR);
-        return 1;
-      }
-    }
-
     if (';' == context->token_to_scan) {  // end with ;
 
       size_t arraySize = sizeof(BrigDirectiveSignature) +
@@ -2777,8 +2758,6 @@ int FunctionSignature(Context *context) {
       bds->kind = BrigEDirectiveSignature;
       bds->c_code = context->get_code_offset();
       bds->s_name = name_offset;
-      bds->fbarCount = context->get_fbar();
-      bds->reserved = 0;
       bds->outCount = outCount;
       bds->inCount = inCount;
       for(uint32_t i = 0;i < context->types.size();i++)
@@ -3759,31 +3738,6 @@ int Kernel(Context *context) {
       return 1;
     }
 
-    if (_FBAR == context->token_to_scan) {
-      if (!FBar(context)) {
-        BrigDirectiveKernel bdk;
-        context->get_directive(context->current_bdf_offset, &bdk);
-        bdk.fbarCount = context->get_fbar();
-        unsigned char * bdk_charp =
-        reinterpret_cast<unsigned char*>(&bdk);
-        context->update_directive_bytes(bdk_charp,
-                                        context->current_bdf_offset,
-                                        sizeof(BrigDirectiveKernel));
-      } else {
-        context->set_error(INVALID_FBAR);
-        return 1;
-      }
-      BrigDirectiveKernel get;
-      context->get_directive(context->current_bdf_offset,&get);
-
-      get.fbarCount = context->get_fbar();
-      // update
-      unsigned char *bdk_charp =
-         reinterpret_cast<unsigned char*>(&get);
-      context->update_directive_bytes(bdk_charp,
-                                context->current_bdf_offset,
-                                bdk_size);
-    }
     if (!Codeblock(context)) {
       return 0;
     }
@@ -7496,7 +7450,7 @@ int Control(Context* context) {
       return 1;
     }
   } else if (context->token_to_scan == ITEMS_PER_WORKGROUP) {
-    controlType = BrigEMaxTid;
+    controlType = BrigEMaxWIperG;
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       values[0] = context->token_value.int_val;

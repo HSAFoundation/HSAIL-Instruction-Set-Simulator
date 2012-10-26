@@ -216,6 +216,7 @@ TEST(CodegenTest, Call_CodeGen) {
   outMod.o_operands[3] = sizeof(outputArgs) + outMod.o_operands[1] + sizeof(argRef);
   outMod.o_operands[4] = outMod.o_operands[3] + sizeof(inputArgs) + sizeof(argRef);
   memset(&outMod.aluModifier, 0, sizeof(outMod.aluModifier));
+  outMod.aluModifier.valid = 1;
   outMod.aluModifier.fbar = 1;
 
   outputArgs.size = sizeof(outputArgs);

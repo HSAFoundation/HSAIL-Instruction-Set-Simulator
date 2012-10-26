@@ -13,15 +13,15 @@ BrigFunction &BrigFunction::operator++() {
   for(++it_; it_ != E; ++it_) {
     const uint16_t kind = it_->kind;
     if(kind == BrigEDirectiveControl)
-       updateControl(cast<BrigDirectiveControl>(it_));
+      updateControl(cast<BrigDirectiveControl>(it_));
     else if(kind == BrigEDirectiveExtension)
-       updateExtension(cast<BrigDirectiveExtension>(it_));
+      updateExtension(cast<BrigDirectiveExtension>(it_));
     else if(kind == BrigEDirectiveFunction || kind == BrigEDirectiveKernel)
-       return *this;
+      return *this;
     else if(kind == BrigEDirectivePragma)
-       updatePragma(cast<BrigDirectivePragma>(it_));
+      updatePragma(cast<BrigDirectivePragma>(it_));
     else if(kind == BrigEDirectiveVersion)
-       updateVersion(cast<BrigDirectiveVersion>(it_));
+      updateVersion(cast<BrigDirectiveVersion>(it_));
   }
 
   return *this;
@@ -32,14 +32,14 @@ void BrigFunction::updateVersion(const BrigDirectiveVersion *ver) {
 }
 
 void BrigFunction::updateControl(const BrigDirectiveControl *control) {
-  if(control->controlType == BrigEMaxTid)
-     maxTID_ = control->values[0] * control->values[1] * control->values[2];
+  if(control->controlType == BrigEMaxWIperG )
+    maxWIPerG_ = control->values[0] * control->values[1] * control->values[2];
   else if(control->controlType == BrigEMaxGperC)
-     maxGPerC_ = control->values[0];
+    maxGPerC_ = control->values[0];
   else if(control->controlType == BrigEMemOpt)
-     memOpt_ = control->values[0];
+    memOpt_ = control->values[0];
   else
-     assert(false && "Invalid control type");
+    assert(false && "Invalid control type");
 }
 
 void BrigFunction::updatePragma(const BrigDirectivePragma *pragma) {

@@ -2052,7 +2052,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
   BrigoOffset32_t curOpOffset = 8;
 
   BrigOperandImmed getImm;
-  
+
   curOpOffset += curOpOffset & 0x7;
   context->get_operand(curOpOffset, &getImm);
   curOpOffset += sizeof(BrigOperandImmed);
@@ -2535,7 +2535,7 @@ TEST(CodegenTest, ArgumentDeclCodegen){
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgumentDecl(context));
-  
+
   BrigDirectiveSymbol ref = {
         sizeof(BrigDirectiveSymbol),                 // size
         BrigEDirectiveSymbol,             // kind
@@ -2569,7 +2569,7 @@ TEST(CodegenTest, ArgumentDeclCodegen){
 	EXPECT_EQ(ref.s.align, get.s.align);
 	EXPECT_EQ(ref.d_init, get.d_init);
 	EXPECT_EQ(ref.reserved, get.reserved);
-	
+
 	delete lexer;
 }
 
@@ -3435,7 +3435,7 @@ TEST(CodegenTest,ControlCodegen){
     24,
     BrigEDirectiveControl,
     8,
-    BrigEMaxTid,
+    BrigEMaxWIperG,
     {2,3,4}
   };
   context->get_directive(8,&get);
@@ -3479,7 +3479,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
     Brigf32,               // type
     BrigNoPacking,         // packing
     {8, 32, 0, 0, 0},     // o_operands[5]
-    {1, 3, 0, 0, 0, 0, 0},     // aluModifier
+    {1, 1, 3, 0, 0, 0, 0},     // aluModifier
     Brigf32,                   // stype
     0                    // reserved
   };
@@ -3573,7 +3573,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(0, Cvt(context));
 
   context->get_code(cStartOffset, &getCvt);
-  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.size = sizeof(cvtRef1);
   cvtRef1.kind = BrigEInstCvt;
   cvtRef1.opcode = BrigCvt;
   cvtRef1.type = Brigu32;
@@ -3586,6 +3586,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   cvtRef1.stype = Brigf32;
   cvtRef1.reserved = 0;
   memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+  cvtRef1.aluModifier.valid = 1;
   cvtRef1.aluModifier.floatOrInt = 0;
   cvtRef1.aluModifier.rounding = 2;
 
@@ -3616,7 +3617,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(0, Cvt(context));
 
   context->get_code(cStartOffset, &getCvt);
-  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.size = sizeof(cvtRef1);
   cvtRef1.kind = BrigEInstCvt;
   cvtRef1.opcode = BrigCvt;
   cvtRef1.type = Brigf32;
@@ -3629,7 +3630,8 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   cvtRef1.stype = Brigf32;
   cvtRef1.reserved = 0;
   memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
-  // TODO(Chuang): the value of aluModifier is zero.
+  cvtRef1.aluModifier.valid = 1;
+  // TODO(Chuang): the value of aluModifier is 1.
   context->get_code(cStartOffset, &getCvt);
 
   EXPECT_EQ(cvtRef1.size, getCvt.size);
@@ -3658,7 +3660,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(0, Cvt(context));
 
   context->get_code(cStartOffset, &getCvt);
-  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.size = sizeof(cvtRef1);
   cvtRef1.kind = BrigEInstCvt;
   cvtRef1.opcode = BrigCvt;
   cvtRef1.type = Brigu32;
@@ -3701,7 +3703,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(0, Cvt(context));
 
   context->get_code(cStartOffset, &getCvt);
-  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.size = sizeof(cvtRef1);
   cvtRef1.kind = BrigEInstCvt;
   cvtRef1.opcode = BrigCvt;
   cvtRef1.type = Brigf16;
@@ -3743,7 +3745,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(0, Cvt(context));
 
   context->get_code(cStartOffset, &getCvt);
-  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.size = sizeof(cvtRef1);
   cvtRef1.kind = BrigEInstCvt;
   cvtRef1.opcode = BrigCvt;
   cvtRef1.type = Brigs32;
@@ -3785,7 +3787,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(0, Cvt(context));
 
   context->get_code(cStartOffset, &getCvt);
-  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.size = sizeof(cvtRef1);
   cvtRef1.kind = BrigEInstCvt;
   cvtRef1.opcode = BrigCvt;
   cvtRef1.type = Brigf32;
@@ -3827,7 +3829,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   EXPECT_EQ(0, Cvt(context));
 
   context->get_code(cStartOffset, &getCvt);
-  cvtRef1.size = sizeof(cvtRef1);     
+  cvtRef1.size = sizeof(cvtRef1);
   cvtRef1.kind = BrigEInstCvt;
   cvtRef1.opcode = BrigCvt;
   cvtRef1.type = Brigf32;
@@ -3840,6 +3842,7 @@ TEST(CodegenTest, Cvt_CodeGen_SimpleTest) {
   cvtRef1.stype = Brigf32;
   cvtRef1.reserved = 0;
   memset(&cvtRef1.aluModifier, 0, sizeof(cvtRef1.aluModifier));
+  cvtRef1.aluModifier.valid = 1;
   cvtRef1.aluModifier.floatOrInt = 1;
   cvtRef1.aluModifier.rounding = 2;
   cvtRef1.aluModifier.ftz = 1;
@@ -3878,7 +3881,7 @@ TEST(CodegenTest,  Instruction4_Fma_CodeGen_SimpleTest) {
     Brigf32,               // type
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0},      // o_operands[5]
-    {1, 2, 0, 1, 0, 0 ,0}
+    {1, 1, 2, 1, 0, 0 ,0}
   };
 
   BrigInstBase fmaF64Ref = {
@@ -4431,7 +4434,7 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
-  std::string input("signature &test(arg_u32)(arg_f32) :fbar(2) ;");
+  std::string input("signature &test(arg_u32)(arg_f32) ;");
   Lexer *lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
 
@@ -4448,8 +4451,6 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   ref->kind = BrigEDirectiveSignature;
   ref->c_code = context->get_code_offset();
   ref->s_name = context->get_string_offset()-(strlen("&test") + 1);
-  ref->fbarCount = 2;
-  ref->reserved = 0;
   ref->outCount = 1;
   ref->inCount = 1;
   ref->types[0].type = Brigu32;
@@ -4477,8 +4478,6 @@ TEST(CodegenTest,FunctionSignatureCodegen){
   EXPECT_EQ(ref->kind,get->kind);
   EXPECT_EQ(ref->c_code,get->c_code);
   EXPECT_EQ(ref->s_name,get->s_name);
-  EXPECT_EQ(ref->fbarCount,get->fbarCount);
-  EXPECT_EQ(ref->reserved,get->reserved);
   EXPECT_EQ(ref->outCount,get->outCount);
   EXPECT_EQ(ref->inCount,get->inCount);
   EXPECT_EQ(ref->types[0].type,get->types[0].type);
@@ -4503,7 +4502,7 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
 
   std::string input("kernel &_kernel( \n");
   input.append("kernarg_u32 %arg0, \n");
-  input.append("kernarg_u32 %arg1):fbar(2) \n");
+  input.append("kernarg_u32 %arg1) \n");
   input.append("{ \n");
   input.append("@begin: \n");
   input.append("  private_s32 %arg2;\n");
@@ -4860,7 +4859,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   EXPECT_EQ(calleeFunRef.d_nextDirective, funGet.d_nextDirective);
   EXPECT_EQ(calleeFunRef.d_firstScopedDirective, funGet.d_firstScopedDirective);
   EXPECT_EQ(calleeFunRef.d_firstInParam, funGet.d_firstInParam);
-  EXPECT_EQ(calleeFunRef.fbarCount, funGet.fbarCount);
+  EXPECT_EQ(calleeFunRef.reserved, funGet.reserved);
   EXPECT_EQ(calleeFunRef.attribute, funGet.attribute);
 
   BrigDirectiveSymbol outputSymbol = {
@@ -4962,7 +4961,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   EXPECT_EQ(callerFunRef.d_nextDirective, funGet.d_nextDirective);
   EXPECT_EQ(callerFunRef.d_firstScopedDirective, funGet.d_firstScopedDirective);
   EXPECT_EQ(callerFunRef.d_firstInParam, funGet.d_firstInParam);
-  EXPECT_EQ(callerFunRef.fbarCount, funGet.fbarCount);
+  EXPECT_EQ(callerFunRef.reserved, funGet.reserved);
   EXPECT_EQ(callerFunRef.attribute, funGet.attribute);
 
   BrigDirectiveScope argStart = {

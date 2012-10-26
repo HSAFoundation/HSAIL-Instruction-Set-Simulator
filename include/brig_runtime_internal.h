@@ -436,7 +436,7 @@ template<> inline bool isSNan(f32 f) {
 template<> inline bool isSNan(f64 f) {
   if(!isNan(f)) return false;
   union { f64 f; b64 b; } Conv = { f };
-  b64 mask = (1UL << 51);
+  b64 mask = (1ULL << 51);
   return Conv.b & mask;
 }
 

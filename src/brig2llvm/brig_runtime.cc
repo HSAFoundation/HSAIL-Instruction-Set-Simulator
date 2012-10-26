@@ -278,7 +278,7 @@ template<> bool Not(bool x) { return !x; }
 BitInst(define, Not, Unary)
 
 static b32 Popcount(b32 x) { return __builtin_popcount(x); }
-static b64 Popcount(b64 x) { return __builtin_popcountl(x); }
+static b64 Popcount(b64 x) { return __builtin_popcountll(x); }
 defineUnary(Popcount, b32)
 defineUnary(Popcount, b64)
 
@@ -425,7 +425,7 @@ extern "C" f32 Fract_f32(f32 f) {
 }
 
 extern "C" f64 Fract_f64(f64 d) {
-  union { b64 b; f64 d; } AlmostOne = { 0x3FEFFFFFFFFFFFFF };
+  union { b64 b; f64 d; } AlmostOne = { 0x3FEFFFFFFFFFFFFFULL };
   return std::min(d - std::floor(d), AlmostOne.d);
 }
 
