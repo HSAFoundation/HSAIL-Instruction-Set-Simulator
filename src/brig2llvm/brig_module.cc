@@ -1748,6 +1748,7 @@ bool BrigModule::validateNeg(const inst_iterator inst) const {
 
 bool BrigModule::validateRem(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Rem must be BrigInstBase");
   valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
                  BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
                  "Rem is only valid for signed and unsigned point types");
