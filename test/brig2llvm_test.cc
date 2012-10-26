@@ -3289,7 +3289,7 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "The value of reserved1 must be zero")));
+    "The value of reserved must be zero")));
   }
 }
 
@@ -4471,10 +4471,10 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       sizeof(bir),
       BrigEInstRead,
       BrigRdImage,
+      0,
+      0,
+      0,
       {0, 0, 0, 0, 0},
-      0,
-      0,
-      0,
       0,
       0
     };
@@ -4513,10 +4513,10 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       sizeof(bir),
       BrigEInstRead,
       BrigRdImage + 1,
-      {20, 0, 0, 0, 0},
       Briggeom_2da + 1,
       Brigf64x2 + 1,
       Brigf64x2 + 1,
+      {20, 0, 0, 0, 0},
       BrigPackPsat + 1,
       1
     };
@@ -5123,11 +5123,11 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       sizeof(bii),              //size
       BrigEInstImage,           //kind
       BrigRdImage,              //opcode
-      {0, 0, 0, 0, 0},          //o_operands[5]
       0,                        //geom
       0,                        //type
       0,                        //stype
       0,                        //packing
+      {0, 0, 0, 0, 0},          //o_operands[5]
       0                         //reserved
     };
     code.append(&bii);
@@ -5165,12 +5165,12 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       sizeof(bii),              //size
       BrigEInstImage,           //kind
       BrigRdImage + 1,          //opcode
-      {20, 0, 0, 0, 0},         //o_operands[5]
-      Briggeom_2da + 1,         //geom
       Brigf64x2 + 1,            //type
       Brigf64x2 + 1,            //stype
       BrigPackPsat + 1,         //packing
-      1                         //reserved
+      1,                        //reserved
+      {20, 0, 0, 0, 0},         //o_operands[5]
+      Briggeom_2da + 1          //geom
     };
     code.append(&bii);
 
@@ -5225,12 +5225,13 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       sizeof(bii) - 1,              //size
       BrigEInstImage,           //kind
       BrigRdImage,              //opcode
-      {0, 0, 0, 0, 0},          //o_operands[5]
-      0,                        //geom
       0,                        //type
       0,                        //stype
       0,                        //packing
-      0                         //reserved
+      0,                        //reserved
+      {0, 0, 0, 0, 0},          //o_operands[5]
+      0                         //geom
+
     };
     code.append(&bii);
 

@@ -744,7 +744,7 @@ struct BrigDirectiveSampler {
   uint8_t boundaryU;
   uint8_t boundaryV;
   uint8_t boundaryW;
-  uint32_t reserved1;
+  uint32_t reserved;
 };
 
 // PRM 19.8.20
@@ -979,12 +979,12 @@ struct BrigInstImage {
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
-  BrigoOffset32_t o_operands[5];
-  BrigGeom32_t geom;
   BrigDataType16_t type;
   BrigDataType16_t stype;
   BrigPacking16_t packing;
   uint16_t reserved;
+  BrigoOffset32_t o_operands[5];
+  BrigGeom32_t geom;
 };
 
 // BrigInstMem
@@ -1008,11 +1008,11 @@ struct BrigInstRead {
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
+  BrigDataType16_t type;
+  BrigDataType16_t stype;
+  BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
   BrigGeom32_t geom;
-  BrigDataType16_t stype;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
   uint16_t reserved;
 };
 

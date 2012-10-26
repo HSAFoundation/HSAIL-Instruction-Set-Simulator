@@ -238,7 +238,7 @@ void validate(const BrigDirectiveSampler* ref, const char* refstr, const BrigDir
   EXPECT_EQ(ref->boundaryU, get->boundaryU);
   EXPECT_EQ(ref->boundaryV, get->boundaryV);
   EXPECT_EQ(ref->boundaryW, get->boundaryW);
-  EXPECT_EQ(ref->reserved1, get->reserved1);
+  EXPECT_EQ(ref->reserved, get->reserved);
 }
 
 void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get){

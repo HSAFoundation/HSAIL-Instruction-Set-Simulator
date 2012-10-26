@@ -1634,7 +1634,7 @@ TEST(CodegenTest,GlobalSamplerDeclCodegen){
   EXPECT_EQ(ref.boundaryU, get.boundaryU);
   EXPECT_EQ(ref.boundaryV, get.boundaryV);
   EXPECT_EQ(ref.boundaryW, get.boundaryW);
-  EXPECT_EQ(ref.reserved1, get.reserved1);
+  EXPECT_EQ(ref.reserved, get.reserved);
 
 
   context->set_error_reporter(main_reporter);
@@ -2642,36 +2642,36 @@ TEST(CodegenTest, ImageStore_CodeGen_Test) {
     40,                    // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
-    {56, 80, 108, 0, 0},   // o_operands[5]
-    Briggeom_2da,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {56, 80, 108, 0, 0},   // o_operands[5]
+    Briggeom_2da          // geom
   };
 
   BrigInstImage ref1da = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
-    {132, 156, 172, 0, 0},   // o_operands[5]
-    Briggeom_1da,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {132, 156, 172, 0, 0},   // o_operands[5]
+    Briggeom_1da          // geom
   };
 
   BrigInstImage ref1db = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
-    {188, 212, 44, 0, 0},   // o_operands[5]
-    Briggeom_1db,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {188, 212, 44, 0, 0},   // o_operands[5]
+    Briggeom_1db          // geom
   };
 
   BrigInstImage get;
@@ -2874,36 +2874,36 @@ TEST(CodegenTest, ImageLoad_CodeGen_Test) {
     40,                    // size
     BrigEInstImage,        // kind
     BrigLdImage,           // opcode
-    {56, 80, 108, 0, 0},   // o_operands[5]
-    Briggeom_2da,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {56, 80, 108, 0, 0},   // o_operands[5]
+    Briggeom_2da          // geom
   };
 
   BrigInstImage ref1da = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigLdImage,           // opcode
-    {132, 156, 172, 0, 0},   // o_operands[5]
-    Briggeom_1da,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {132, 156, 172, 0, 0},   // o_operands[5]
+    Briggeom_1da          // geom
   };
 
   BrigInstImage ref1db = {
     40,                    // size
     BrigEInstImage,        // kind
     BrigLdImage,           // opcode
-    {188, 212, 44, 0, 0},   // o_operands[5]
-    Briggeom_1db,          // geom
     Brigf32,               // type
     Brigu32,               // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {188, 212, 44, 0, 0},   // o_operands[5]
+    Briggeom_1db          // geom
   };
 
   BrigInstImage get;
@@ -3102,38 +3102,38 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   context->clear_context();
 
   BrigInstRead ref1d = {
-    40,                    // size
+    sizeof(BrigInstRead),                    // size
     BrigEInstRead,        // kind
     BrigRdImage,           // opcode
+    Brigs32,               // type
+    Brigf32,               // stype
+    BrigNoPacking,         // packing
     {56, 80, 96, 112, 0},   // o_operands[5]
     Briggeom_1d,           // geom
-    Brigf32,               // stype
-    Brigs32,               // type
-    BrigNoPacking,         // packing
     0                      // reserved
   };
 
   BrigInstRead ref1da = {
-    40,                    // size
+    sizeof(BrigInstRead),                    // size
     BrigEInstRead,        // kind
     BrigRdImage,           // opcode
+    Brigs32,               // type
+    Brigf32,               // stype
+    BrigNoPacking,         // packing
     {136, 160, 176, 192, 0}, // o_operands[5]
     Briggeom_1da,          // geom
-    Brigf32,               // stype
-    Brigs32,               // type
-    BrigNoPacking,         // packing
     0                      // reserved
   };
 
   BrigInstRead ref2da = {
-    40,                    // size
+    sizeof(BrigInstRead),                    // size
     BrigEInstRead,        // kind
     BrigRdImage,           // opcode
+    Brigs32,               // type
+    Brigf32,               // stype
+    BrigNoPacking,         // packing
     {220, 244, 260, 276, 0},  // o_operands[5]
     Briggeom_2da,          // geom
-    Brigf32,               // stype
-    Brigs32,               // type
-    BrigNoPacking,         // packing
     0                      // reserved
   };
 
@@ -3176,7 +3176,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(ref1d.stype, get.stype);
   EXPECT_EQ(ref1d.packing, get.packing);
   EXPECT_EQ(ref1d.reserved, get.reserved);
-  context->get_code(48, &get);
+  context->get_code(8 + sizeof(BrigInstRead), &get);
 
   EXPECT_EQ(ref1da.size, get.size);
   EXPECT_EQ(ref1da.kind, get.kind);
@@ -3192,7 +3192,7 @@ TEST(CodegenTest, ImageRead_CodeGen_Test) {
   EXPECT_EQ(ref1da.packing, get.packing);
   EXPECT_EQ(ref1da.reserved, get.reserved);
 
-  context->get_code(88, &get);
+  context->get_code(8 + sizeof(BrigInstRead) * 2, &get);
 
   EXPECT_EQ(ref2da.size, get.size);
   EXPECT_EQ(ref2da.kind, get.kind);

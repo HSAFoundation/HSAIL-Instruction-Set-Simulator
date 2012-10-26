@@ -6323,12 +6323,12 @@ int ImageLoad(Context* context) {
     sizeof(BrigInstImage), // size
     BrigEInstImage,        // kind
     BrigLdImage,           // opcode
-    {0, 0, 0, 0, 0},   // o_operands[5]
-    0,                 // geom
     0,                 // type
     0,                 // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {0, 0, 0, 0, 0},   // o_operands[5]
+    0                 // geom
   };
   context->token_to_scan = yylex();
   if (context->token_to_scan == _V4) {
@@ -6449,12 +6449,12 @@ int ImageStore(Context* context) {
     sizeof(BrigInstImage), // size
     BrigEInstImage,        // kind
     BrigStImage,           // opcode
-    {0, 0, 0, 0, 0},   // o_operands[5]
-    0,                 // geom
     0,                 // type
     0,                 // stype
     BrigNoPacking,         // packing
-    0                      // reserved
+    0,                      // reserved
+    {0, 0, 0, 0, 0},   // o_operands[5]
+    0                 // geom
   };
   context->token_to_scan = yylex();
   if (context->token_to_scan == _V4) {
@@ -6996,11 +6996,11 @@ int ImageRead(Context *context) {
     sizeof(BrigInstRead),  // size
     BrigEInstRead,         // kind
     BrigRdImage,           // opcode
+    0,                     // type
+    0,                     // stype
+    BrigNoPacking,         // packing
     {0, 0, 0, 0, 0},       // o_operands[5]
     0,                     // geom
-    0,                     // stype
-    0,                     // type
-    BrigNoPacking,         // packing
     0                      // reserved
   };
   context->token_to_scan = yylex();

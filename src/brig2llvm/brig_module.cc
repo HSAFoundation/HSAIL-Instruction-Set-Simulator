@@ -467,8 +467,8 @@ bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
                    "Invalid boundaryV");
     valid &= check(dir->boundaryW <= BrigSamplerBorder,
                    "Invalid boundaryW");
-    valid &= check(dir->reserved1 == 0 ,
-                   "The value of reserved1 must be zero");
+    valid &= check(dir->reserved == 0 ,
+                   "The value of reserved must be zero");
   }
   return valid;
 }
