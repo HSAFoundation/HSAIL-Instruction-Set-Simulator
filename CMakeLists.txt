@@ -1,6 +1,5 @@
 project(hsail2brig)
 cmake_minimum_required(VERSION 2.8)
-find_package(FLEX)
 include_directories(.)
 include_directories(include)
 include_directories(${CMAKE_BINARY_DIR})
@@ -10,8 +9,42 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 endif (CMAKE_COMPILER_IS_GNUCXX)
 set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DBIN_PATH=${PROJECT_BINARY_DIR}/test ${CMAKE_CXX_FLAGS}")
-flex_target(lexer src/lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
-	COMPILE_FLAGS --header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.h)
+
+set(LLVM_TARGETS_TO_BUILD "X86")
+#set(LLVM_BUILD_TOOLS off)
+set(LLVM_INCLUDE_TOOLS off)
+set(LLVM_INCLUDE_EXAMPLES off)
+set(LLVM_INCLUDE_TESTS on)
+
+# obtain specific information about llvm setup
+SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
+
+SET(LLVM_REQUIRES_EH "true")
+
+# obtain specific information about llvm setup
+SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
+MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
+include (EnsureLLVMisPresent)
+ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
+
+SET(PROJ_SEARCH_PATH "${PROJECT_SOURCE_DIR}/include"
+"${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
+"${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
+"${PROJECT_SOURCE_DIR}/compiler/utils/unittest/googletest/include"
+"${PROJECT_SOURCE_DIR}/src")
+include_directories( ${PROJ_SEARCH_PATH} )
+
+LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
+
+add_subdirectory(src/brig2llvm/compiler)
+
+include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
+include(HandleLLVMOptions)
+
+add_subdirectory(src)
+add_subdirectory(src/brig2llvm)
+add_subdirectory(src/hsa_runtime)
 
 option(ENABLE_TEST_CASE "Run test cases" OFF)
 if (ENABLE_TEST_CASE)
@@ -23,49 +56,21 @@ set(hsail2brig_test_SOURCES
     testcase/version_test.cc
     testcase/operation_test.cc
     testcase/operand_test.cc
-	 gmock/gmock_main.cc
-	 gmock/gmock-gtest-all.cc
-	 src/parser.cc
-    src/brig_buffer.cc
-    src/parser_wrapper.cc
-    src/lexer_wrapper.cc
-    src/error_reporter.cc
-    src/context.cc
-	  ${FLEX_lexer_OUTPUTS}
-	  )
+    gmock/gmock_main.cc
+    gmock/gmock-gtest-all.cc
+    )
 else (ENABLE_TEST_CASE)
   set(hsail2brig_test_SOURCES
     test/lexer_test.cc
     test/parser_test.cc
     test/codegen_test.cc
-	 gmock/gmock_main.cc
-	 gmock/gmock-gtest-all.cc
-	 src/parser.cc
-    src/brig_buffer.cc
-    src/parser_wrapper.cc
-    src/lexer_wrapper.cc
-    src/error_reporter.cc
-    src/context.cc
-	  ${FLEX_lexer_OUTPUTS}
-	  )
+    gmock/gmock_main.cc
+    gmock/gmock-gtest-all.cc
+    )
 endif (ENABLE_TEST_CASE)
 
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
-
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
-MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
-include (EnsureLLVMisPresent)
-
-ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
-
-set(LLVM_TARGETS_TO_BUILD "X86")
-#set(LLVM_BUILD_TOOLS off)
-set(LLVM_INCLUDE_TOOLS off)
-set(LLVM_INCLUDE_EXAMPLES off)
-set(LLVM_INCLUDE_TESTS on)
-
-# obtain specific information about llvm setup
-SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
+target_link_libraries(hsail2brig_test hsa2brig)
 
 # setup compilation environment
 if (UNIX)
@@ -86,26 +91,11 @@ else (UNIX)
 
 endif (UNIX)
 
-SET(PROJ_SEARCH_PATH "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}" "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}" "${PROJECT_SOURCE_DIR}/compiler/utils/unittest/googletest/include")
-include_directories( ${PROJ_SEARCH_PATH} )
-
-LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
-
-add_subdirectory(src/brig2llvm/compiler)
-
-# obtain specific information about llvm setup
-SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
-
-SET(LLVM_REQUIRES_EH "true")
-
-include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
-include(HandleLLVMOptions)
-
 SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}" )
 
-add_subdirectory(src/brig2llvm)
 set(brig2llvm_test_SOURCES
   test/brig2llvm_test.cc
+  test/llvm_shutdown.cc
   gtest/gtest-all.cc
   gtest/gtest_main.cc
   )
@@ -121,92 +111,40 @@ add_executable(brig_runtime_test ${brig_runtime_test_SOURCES})
 target_link_libraries(brig_runtime_test brig2llvm)
 
 set(brig_reader_test_SOURCES
-  src/parser.cc
-  src/brig_buffer.cc
-  src/parser_wrapper.cc
-  src/lexer_wrapper.cc
-  src/error_reporter.cc
-  src/context.cc
-  ${FLEX_lexer_OUTPUTS}
   test/brig_reader_test.cc
+  test/llvm_shutdown.cc
   gtest/gtest-all.cc
   gtest/gtest_main.cc
   )
 add_executable(brig_reader_test ${brig_reader_test_SOURCES})
-target_link_libraries(brig_reader_test brig2llvm)
-
-add_subdirectory(src/hsa_runtime)
+target_link_libraries(brig_reader_test hsa2brig brig2llvm)
 
 set(hsa_runtime_test_SOURCES
-  src/parser.cc
-  src/brig_buffer.cc
-  src/parser_wrapper.cc
-  src/lexer_wrapper.cc
-  src/error_reporter.cc
-  src/context.cc
-  ${FLEX_lexer_OUTPUTS}
   test/hsa_runtime_test.cc
+  test/llvm_shutdown.cc
   gtest/gtest-all.cc
   gtest/gtest_main.cc
   )
 add_executable(hsa_runtime_test ${hsa_runtime_test_SOURCES})
-target_link_libraries(hsa_runtime_test hsa brig2llvm)
+target_link_libraries(hsa_runtime_test hsa hsa2brig brig2llvm)
 
-set(hsaAssembler_SOURCES
-  src/parser.cc
-  src/brig_buffer.cc
-  src/parser_wrapper.cc
-  src/lexer_wrapper.cc
-  src/error_reporter.cc
-  src/context.cc
-  ${FLEX_lexer_OUTPUTS}
-  bin/hsaAssembler
-  )
+set(hsaAssembler_SOURCES bin/hsaAssembler)
 add_executable(hsaAssembler ${hsaAssembler_SOURCES})
-target_link_libraries(hsaAssembler brig2llvm)
+target_link_libraries(hsaAssembler hsa2brig brig2llvm)
 
-set(vectorCopy_SOURCES
-  src/parser.cc
-  src/brig_buffer.cc
-  src/parser_wrapper.cc
-  src/lexer_wrapper.cc
-  src/error_reporter.cc
-  src/context.cc
-  ${FLEX_lexer_OUTPUTS}
-  demo/vectorCopy.cc
-  )
+set(vectorCopy_SOURCES demo/vectorCopy.cc)
 add_executable(vectorCopy ${vectorCopy_SOURCES})
-target_link_libraries(vectorCopy hsa brig2llvm)
+target_link_libraries(vectorCopy hsa hsa2brig brig2llvm)
 
-set(fib_SOURCES
-  src/parser.cc
-  src/brig_buffer.cc
-  src/parser_wrapper.cc
-  src/lexer_wrapper.cc
-  src/error_reporter.cc
-  src/context.cc
-  ${FLEX_lexer_OUTPUTS}
-  demo/fib.cc
-  )
+set(fib_SOURCES demo/fib.cc)
 add_executable(fib ${fib_SOURCES})
-target_link_libraries(fib hsa brig2llvm)
+target_link_libraries(fib hsa hsa2brig brig2llvm)
 
-set(fcos_SOURCES
-  src/parser.cc
-  src/brig_buffer.cc
-  src/parser_wrapper.cc
-  src/lexer_wrapper.cc
-  src/error_reporter.cc
-  src/context.cc
-  ${FLEX_lexer_OUTPUTS}
-  demo/fcos.cc
-  )
+set(fcos_SOURCES demo/fcos.cc)
 add_executable(fcos ${fcos_SOURCES})
-target_link_libraries(fcos hsa brig2llvm)
+target_link_libraries(fcos hsa hsa2brig brig2llvm)
 
-set(debug_SOURCES
-  demo/debug.cc
-  )
+set(debug_SOURCES demo/debug.cc)
 add_executable(debug ${debug_SOURCES})
 target_link_libraries(debug hsa)
 

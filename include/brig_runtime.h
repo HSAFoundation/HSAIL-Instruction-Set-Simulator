@@ -31,10 +31,56 @@ typedef  int64_t   s64;
 typedef float  f32;
 typedef double f64;
 
-#define vector(X) __attribute__((vector_size(X)))
+template<class B, unsigned L>
+class Vector {
+ public:
+  enum { Len = L };
+  enum { LogLen =
+         L == 2 ? 1 :
+         L == 4 ? 2 :
+         L == 8 ? 3 : 4 };
 
-#define declareVector(TYPE,LEN)                             \
-  typedef TYPE TYPE ## x ## LEN vector(sizeof(TYPE) * LEN)
+  typedef Vector<B, L> Self;
+  typedef B Base;
+  typedef Base Type[Len];
+
+  typedef Base (*UMapFn)(Base);
+  typedef Base (*BMapFn)(Base, Base);
+  typedef Base (*TMapFn)(Base, Base, Base);
+  typedef Base (*SMapFn)(Base, unsigned);
+  typedef void (*UForEachFn)(Base);
+  typedef void (*BForEachFn)(Base, Base);
+  typedef void (*TForEachFn)(Base, Base, Base);
+  typedef void (*QForEachFn)(Base, Base, Base, Base);
+  typedef void (*SForEachFn)(Base, Base, unsigned);
+
+  Vector() {}
+  Vector(Base b) {
+    for(unsigned i = 0; i < Len; ++i)
+      t_[i] = b;
+  }
+
+  Base &operator[](unsigned i) {
+    return t_[i];
+  }
+
+  Self S() const {
+    Self other = *this;
+    for(unsigned i = 1; i < Len; ++i)
+      other[i] = other[0];
+    return other;
+  }
+
+  Self P() const {
+    return *this;
+  }
+
+ private:
+  Type t_;
+};
+
+#define declareVector(TYPE,LEN)                 \
+  typedef Vector<TYPE, LEN> TYPE ## x ## LEN
 
 declareVector(u8,  4);
 declareVector(s8,  4);

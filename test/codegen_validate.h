@@ -14,7 +14,7 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get){
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
-  EXPECT_EQ(ref->packing, get->packing); 
+  EXPECT_EQ(ref->packing, get->packing);
   //ignore o_operands
 }
 
@@ -44,14 +44,14 @@ void validate(const BrigOperandReg* ref, const char* refstr, const BrigOperandRe
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
-  EXPECT_STREQ(&refstr[ref->name], &getstr[get->name]);
+  EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
 }
 
 void validate(const BrigOperandRegV2* ref, const BrigOperandRegV2* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
-  EXPECT_EQ(ref->reserved, get->reserved);  
+  EXPECT_EQ(ref->reserved, get->reserved);
   //ignore regs
 }
 
@@ -59,7 +59,7 @@ void validate(const BrigOperandRegV4* ref, const BrigOperandRegV4* get){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
-  EXPECT_EQ(ref->reserved, get->reserved);  
+  EXPECT_EQ(ref->reserved, get->reserved);
   //ignore regs
 }
 
@@ -74,7 +74,7 @@ void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get){
 
 void validate(const BrigOperandWaveSz* ref, const BrigOperandWaveSz* get){
   EXPECT_EQ(ref->size, get->size);
-  EXPECT_EQ(ref->kind, get->kind);  
+  EXPECT_EQ(ref->kind, get->kind);
 }
 
 void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get){
@@ -103,7 +103,7 @@ void validate(const BrigOperandCompound* ref, const BrigOperandCompound* get){
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
   //ignore name and reg
-  EXPECT_EQ(ref->offset, get->offset);  
+  EXPECT_EQ(ref->offset, get->offset);
 }
 
 void validate(const BrigOperandIndirect* ref, const BrigOperandIndirect* get){
@@ -112,7 +112,7 @@ void validate(const BrigOperandIndirect* ref, const BrigOperandIndirect* get){
   EXPECT_EQ(ref->type, get->type);
   //ignore reg
   EXPECT_EQ(ref->reserved, get->reserved);
-  EXPECT_EQ(ref->offset, get->offset);  
+  EXPECT_EQ(ref->offset, get->offset);
 }
 
 void validate(const BrigDirectiveFunction* ref, const char* refbuf, const BrigDirectiveFunction* get, const char* getbuf){
@@ -125,7 +125,7 @@ void validate(const BrigDirectiveFunction* ref, const char* refbuf, const BrigDi
   EXPECT_EQ(ref->operationCount, get->operationCount);
   //EXPECT_EQ(ref->d_nextDirective, get->d_nextDirective);
   EXPECT_EQ(ref->attribute, get->attribute);
-  EXPECT_EQ(ref->fbarCount, get->fbarCount);
+  EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->outParamCount, get->outParamCount);
   //EXPECT_EQ(ref->d_firstInParam, get->d_firstInParam);
 }
@@ -143,7 +143,7 @@ void validate(const BrigDirectiveSymbol* ref, const char* refstr, const BrigDire
   EXPECT_EQ(ref->s.type, get->s.type);
   EXPECT_EQ(ref->s.align, get->s.align);
   //EXPECT_EQ(ref->d_init, get->d_init);
-  EXPECT_EQ(ref->reserved, get->reserved);  
+  EXPECT_EQ(ref->reserved, get->reserved);
 }
 
 void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get){
@@ -152,7 +152,7 @@ void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get){
   EXPECT_EQ(ref->kind, get->kind);
   //EXPECT_EQ(ref->name, get->name);
   //EXPECT_EQ(ref->reg, get->reg);
-  EXPECT_EQ(ref->offset, get->offset); 
+  EXPECT_EQ(ref->offset, get->offset);
 }
 
 void validate(const BrigDirectiveSignature* ref, const char* refbuf, const BrigDirectiveSignature* get, const char* getbuf){
@@ -160,8 +160,6 @@ void validate(const BrigDirectiveSignature* ref, const char* refbuf, const BrigD
   EXPECT_EQ(ref->kind, get->kind);
   //EXPECT_EQ(ref->c_code, get->c_code);
   EXPECT_STREQ(&refbuf[ref->s_name], &getbuf[get->s_name]);
-  EXPECT_EQ(ref->fbarCount, get->fbarCount);
-  EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->outCount, get->outCount);
   EXPECT_EQ(ref->inCount, get->inCount);
 }
@@ -199,7 +197,7 @@ void validate(const BrigInstCvt* ref, const BrigInstCvt* get){
   const uint32_t* get1 = reinterpret_cast<const uint32_t* > (&(get->aluModifier));
   EXPECT_EQ(*ref1, *get1);
   EXPECT_EQ(ref->stype, get->stype);
-  EXPECT_EQ(ref->reserved, get->reserved); 
+  EXPECT_EQ(ref->reserved, get->reserved);
 }
 
 void validate(const BrigDirectiveImage* ref, const char* refstr, const BrigDirectiveImage* get, const char* getstr){
@@ -214,12 +212,12 @@ void validate(const BrigDirectiveImage* ref, const char* refstr, const BrigDirec
   EXPECT_STREQ(&refstr[ref->s.s_name], &getstr[get->s.s_name]);
   EXPECT_EQ(ref->s.type, get->s.type);
   EXPECT_EQ(ref->s.align, get->s.align);
-  EXPECT_EQ(ref->width, get->width);  
-  EXPECT_EQ(ref->height, get->height);  
+  EXPECT_EQ(ref->width, get->width);
+  EXPECT_EQ(ref->height, get->height);
   EXPECT_EQ(ref->depth, get->depth);
-  EXPECT_EQ(ref->array, get->array);    
-  EXPECT_EQ(ref->order, get->order);  
-  EXPECT_EQ(ref->format, get->format);  
+  EXPECT_EQ(ref->array, get->array);
+  EXPECT_EQ(ref->order, get->order);
+  EXPECT_EQ(ref->format, get->format);
 }
 
 void validate(const BrigDirectiveSampler* ref, const char* refstr, const BrigDirectiveSampler* get, const char* getstr){
@@ -234,31 +232,31 @@ void validate(const BrigDirectiveSampler* ref, const char* refstr, const BrigDir
   EXPECT_STREQ(&refstr[ref->s.s_name], &getstr[get->s.s_name]);
   EXPECT_EQ(ref->s.type, get->s.type);
   EXPECT_EQ(ref->s.align, get->s.align);
-  EXPECT_EQ(ref->valid, get->valid);  
-  EXPECT_EQ(ref->normalized, get->normalized);  
+  EXPECT_EQ(ref->valid, get->valid);
+  EXPECT_EQ(ref->normalized, get->normalized);
   EXPECT_EQ(ref->filter, get->filter);
-  EXPECT_EQ(ref->boundaryU, get->boundaryU);    
-  EXPECT_EQ(ref->boundaryV, get->boundaryV);  
-  EXPECT_EQ(ref->boundaryW, get->boundaryW);  
-  EXPECT_EQ(ref->reserved1, get->reserved1);  
+  EXPECT_EQ(ref->boundaryU, get->boundaryU);
+  EXPECT_EQ(ref->boundaryV, get->boundaryV);
+  EXPECT_EQ(ref->boundaryW, get->boundaryW);
+  EXPECT_EQ(ref->reserved, get->reserved);
 }
 
 void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get){
-  
+
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   //EXPECT_EQ(ref->labeldirective, get->labeldirective);
 }
 
 void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* get){
-  
+
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   //EXPECT_EQ(ref->fn, get->fn);
 }
 
 void validate(const BrigInstCmp* ref, const BrigInstCmp* get) {
-  
+
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->opcode, get->opcode);
@@ -275,7 +273,7 @@ void validate(const BrigInstCmp* ref, const BrigInstCmp* get) {
 }
 
 void validate(const BrigOperandArgumentList* ref, const BrigOperandArgumentList* get){
-  
+
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->elementCount, get->elementCount);
@@ -283,14 +281,14 @@ void validate(const BrigOperandArgumentList* ref, const BrigOperandArgumentList*
 }
 
 void validate(const BrigOperandArgumentRef* ref, const BrigOperandArgumentRef* get){
-  
+
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   //ignore o_operands
 }
 
 void validate(const BrigInstAtomic* ref, const BrigInstAtomic* get) {
-  
+
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->opcode, get->opcode);
@@ -307,13 +305,13 @@ void validate(const BrigInstAtomicImage* ref, const BrigInstAtomicImage* get){
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
-  EXPECT_EQ(ref->packing, get->packing); 
+  EXPECT_EQ(ref->packing, get->packing);
   //ignore o_operands
   EXPECT_EQ(ref->atomicOperation, get->atomicOperation);
   EXPECT_EQ(ref->storageClass, get->storageClass);
   EXPECT_EQ(ref->memorySemantic, get->memorySemantic);
   EXPECT_EQ(ref->geom, get->geom);
-  
+
 }
 
 void validate(const BrigDirectiveVersion* ref, const BrigDirectiveVersion* get){

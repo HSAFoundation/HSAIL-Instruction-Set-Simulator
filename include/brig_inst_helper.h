@@ -29,7 +29,7 @@ class BrigInstHelper {
   }
 
   const char *getName(const BrigOperandReg *reg) const {
-    return S_.strings + reg->name;
+    return S_.strings + reg->s_name;
   }
 
   template<class T>
@@ -67,7 +67,7 @@ class BrigInstHelper {
       opcode != BrigBrn       && opcode != BrigCbr              &&
       opcode != BrigSync      && opcode != BrigBarrier          &&
       opcode != BrigRet       && opcode != BrigCall             &&
-      opcode != BrigDebugtrap && opcode != BrigNop;
+      opcode != BrigDebugTrap && opcode != BrigNop;
   }
 
   // Type methods
@@ -93,9 +93,29 @@ class BrigInstHelper {
       type == Brigs64x2;
   }
 
+  static bool isUnsignedTy(BrigDataType type) {
+    return
+      type == Brigu8    || type == Brigu16   || type == Brigu32   ||
+      type == Brigu64   ||
+      type == Brigu8x4  || type == Brigu8x8  || type == Brigu8x16 ||
+      type == Brigu16x2 || type == Brigu16x4 || type == Brigu16x8 ||
+      type == Brigu32x2 || type == Brigu32x4 ||
+      type == Brigu64x2;
+  }
+
+  static bool isBitTy(BrigDataType type) {
+    return
+      type == Brigb1  ||
+      type == Brigb8  ||
+      type == Brigb16 ||
+      type == Brigb32 ||
+      type == Brigb64 ||
+      type == Brigb128;
+  }
+
   static unsigned getVectorLength(BrigDataType type) {
 
-    assert(isVectorTy(type) && "Cannot get element of non-vector types");
+    assert(isVectorTy(type) && "Cannot get length of non-vector types");
 
     switch(type) {
     case Brigu16x2: case Brigs16x2: case Brigf16x2:
@@ -116,6 +136,43 @@ class BrigInstHelper {
     }
   }
 
+  static BrigDataType getElementTy(BrigDataType type) {
+
+    assert(isVectorTy(type) && "Cannot get element of non-vector types");
+
+    switch(type) {
+    case Brigu8x4:  case Brigu8x8:  case Brigu8x16: return Brigu8;
+    case Brigs8x4:  case Brigs8x8:  case Brigs8x16: return Brigs8;
+    case Brigu16x2: case Brigu16x4: case Brigu16x8: return Brigu16;
+    case Brigs16x2: case Brigs16x4: case Brigs16x8: return Brigs16;
+    case Brigf16x2: case Brigf16x4: case Brigf16x8: return Brigf16;
+    case Brigu32x2: case Brigu32x4:                 return Brigu32;
+    case Brigs32x2: case Brigs32x4:                 return Brigs32;
+    case Brigf32x2: case Brigf32x4:                 return Brigf32;
+    case Brigu64x2:                                 return Brigu64;
+    case Brigs64x2:                                 return Brigs64;
+    case Brigf64x2:                                 return Brigf64;
+    default: assert(false && "Unknown type");
+    }
+  }
+
+  static size_t getTypeSize(BrigDataType type) {
+
+    if(isVectorTy(type))
+      return getVectorLength(type) * getTypeSize(getElementTy(type));
+
+    switch(type) {
+    case Brigb1:                                                return 1;
+    case Brigs8:    case Brigu8:    case Brigb8:                return 8;
+    case Brigs16:   case Brigu16:   case Brigf16: case Brigb16: return 16;
+    case Brigs32:   case Brigu32:   case Brigf32: case Brigb32: return 32;
+    case Brigs64:   case Brigu64:   case Brigf64: case Brigb64: return 64;
+    case Brigb128:                                              return 128;
+    case BrigROImg: case BrigRWImg: case BrigSamp:              return 0;
+    default: assert(false && "Unknown type");
+    }
+  }
+
   // Arithmetic methods
   static bool isPacked(BrigPacking packing, unsigned opnum) {
     if(opnum == 1) {
@@ -132,7 +189,6 @@ class BrigInstHelper {
 
     return false;
   }
-
 
   static bool isBroadcast(BrigPacking packing, unsigned opnum) {
     if(opnum == 1) {
