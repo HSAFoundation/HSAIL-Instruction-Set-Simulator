@@ -31,11 +31,12 @@ MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
 include (EnsureLLVMisPresent)
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
 
-SET(PROJ_SEARCH_PATH "${PROJECT_SOURCE_DIR}/include"
+SET(PROJ_SEARCH_PATH
+"${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
-"${PROJECT_SOURCE_DIR}/compiler/utils/unittest/googletest/include"
-"${PROJECT_SOURCE_DIR}/src")
+"${PROJECT_BINARY_DIR}/src"
+)
 include_directories( ${PROJ_SEARCH_PATH} )
 
 LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
