@@ -670,6 +670,7 @@ struct BrigDirectiveLabelInit {
   uint16_t kind;
   BrigcOffset32_t c_code;
   uint32_t elementCount;
+  BrigsOffset32_t s_name;
   BrigdOffset32_t d_labels[1];
 };
 
@@ -679,6 +680,7 @@ struct BrigDirectiveLabelList {
   uint16_t size;
   uint16_t kind;
   BrigcOffset32_t c_code;
+  BrigdOffset32_t label;
   uint32_t elementCount;
   BrigdOffset32_t d_labels[1];
 };

@@ -3413,7 +3413,8 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    strings.append(std::string("&return_true"));
+    strings.append(std::string("@Label1"));
+    strings.append(std::string("@Label2"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
     hsa::brig::Buffer code;
@@ -3433,14 +3434,29 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
       0
     };
     directives.append(&bdv);
+    BrigDirectiveLabel bdl1 = {
+      sizeof(bdl1),
+      BrigEDirectiveLabel,
+      8,
+      8
+    };
+    directives.append(&bdl1);
     BrigDirectiveLabelList bdll = {
       sizeof(bdll),
       BrigEDirectiveLabelList,
       8,
+      sizeof(bdv) + 8,
       1,
-      { 8 }
+      { directives.size() + sizeof(BrigDirectiveLabelList) }
     };
     directives.append(&bdll);
+    BrigDirectiveLabel bdl2 = {
+      sizeof(bdl2),
+      BrigEDirectiveLabel,
+      8,
+      16
+    };
+    directives.append(&bdl2);
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
                               &llvm::errs());
@@ -3473,6 +3489,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
       BrigEDirectiveLabelList,
       10,
       0,
+      0,
       { 0 }
     };
     directives.append(&bdll);
@@ -3491,9 +3508,10 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-    strings.append(std::string("Label1"));
-    strings.append(std::string("Label2"));
-    strings.append(std::string("Label3"));
+    strings.append(std::string("@Label1"));
+    strings.append(std::string("@Label2"));
+    strings.append(std::string("@Label3"));
+    strings.append(std::string("@Label4"));
 
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
@@ -3518,30 +3536,31 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
     bdli->kind = BrigEDirectiveLabelInit;
     bdli->c_code = 0;
     bdli->elementCount = 3;
-    bdli->d_labels[0] = 52;
-    bdli->d_labels[1] = 64;
-    bdli->d_labels[2] = 76;
+    bdli->s_name = 32;
+    bdli->d_labels[0] = directives.size() + arraySize;
+    bdli->d_labels[1] = bdli->d_labels[0] + sizeof(BrigDirectiveLabel);
+    bdli->d_labels[2] = bdli->d_labels[1] + sizeof(BrigDirectiveLabel);
     directives.append(bdli);
     delete[] array;
     BrigDirectiveLabel bdl1 = {
       sizeof(bdl1), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
       0,
-      0,
+      8,
     };
     directives.append(&bdl1);
     BrigDirectiveLabel bdl2 = {
       sizeof(bdl2), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
       0,
-      7,
+      16,
     };
     directives.append(&bdl2);
     BrigDirectiveLabel bdl3 = {
       sizeof(bdl3), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
       0,
-      14,
+      24,
     };
     directives.append(&bdl3);
 
