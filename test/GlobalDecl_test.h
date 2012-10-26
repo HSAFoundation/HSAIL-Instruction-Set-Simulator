@@ -961,7 +961,7 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
   };
   out3.size = sizeof(out3);
 
-  GlobalDecl_Test<BrigDirectiveImage> TestCase3(in, sbuf, &out1);
+  GlobalDecl_Test<BrigDirectiveImage> TestCase3(in, sbuf, &out3);
   TestCase3.Run_Test(&GlobalImageDecl);
   sbuf->clear();
 
@@ -1066,7 +1066,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
   };
   out3.size = sizeof(out3);
 
-  GlobalDecl_Test<BrigDirectiveImage> TestCase3(in, sbuf, &out1);
+  GlobalDecl_Test<BrigDirectiveImage> TestCase3(in, sbuf, &out3);
   TestCase3.Run_Test(&GlobalReadOnlyImageDecl);
   sbuf->clear();
 
@@ -1178,7 +1178,7 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
   };
   out3.size = sizeof(out3);
 
-  GlobalDecl_Test<BrigDirectiveSampler> TestCase3(in, sbuf, &out2);
+  GlobalDecl_Test<BrigDirectiveSampler> TestCase3(in, sbuf, &out3);
   TestCase3.Run_Test(&GlobalSamplerDecl);
   sbuf->clear();
 
