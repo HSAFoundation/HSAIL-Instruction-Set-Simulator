@@ -752,7 +752,7 @@ TEST(ParserTest, ParseCallArgs) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallArgs(context));
 
-  input.assign("(1,2,3)\n");
+  input.assign("(&fun1,&fun2,&fun3)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallArgs(context));
@@ -772,7 +772,7 @@ TEST(ParserTest, Call) {
   EXPECT_EQ(0, Call(context));
 
   input.assign("call_width(all) $s1 \n");
-  input.append("(%output1,&output2)(%input1, $d7) [&id1, &id2];\n");
+  input.append("(%output1,&output2)(%input1, %input2) [&id1, &id2];\n");
 
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();

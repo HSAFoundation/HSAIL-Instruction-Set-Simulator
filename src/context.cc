@@ -28,9 +28,11 @@ Context::Context(void) {
   err_reporter = NULL;
   yycolno = 0;
   yylineno = 1;
+  dim = 0;
+  last_directive_offset = 0;
+  
   current_bdf_offset = 0;
   current_argdecl_offset = 0;
-  current_samp_offset = 0;
   error_reporter_set = false;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
@@ -75,9 +77,9 @@ void Context::clear_context(void) {
   }
   set_default_values();
   types.clear();
+  last_directive_offset = 0;
   current_bdf_offset = 0;
   current_argdecl_offset = 0;
-  current_samp_offset = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
   aluModifier.hi = 0;
@@ -198,6 +200,20 @@ Context::context_error_t Context::update_directive_bytes(unsigned char* value,
   else
     return UNKNOWN_ERROR;
 }
+
+Context::context_error_t Context::update_last_directive(unsigned char* value,
+                                       uint32_t nBytes) {
+  uint32_t offset = this->last_directive_offset;                                     
+  Buffer::error_t err = dbuf->modify(value, offset, nBytes);
+
+  if (err == Buffer::SUCCESS)
+    return CONTEXT_OK;
+  else if (err == Buffer::INVALID_OFFSET)
+    return INVALID_OFFSET;
+  else
+    return UNKNOWN_ERROR;
+}
+
 
 Context::context_error_t Context::get_string_bytes(char* value,
                                   uint32_t offset,
