@@ -93,7 +93,6 @@ void Context::clear_context(void) {
 void Context::set_default_values(void) {
   machine = BrigELarge;
   profile = BrigEFull;
-  ftz = BrigENosftz;
   attribute = BrigNone;
   alignment = 1;
   fbar = 0;
@@ -309,20 +308,12 @@ BrigProfile16_t Context::get_profile() const {
   return profile;
 }
 
-BrigSftz16_t Context::get_ftz() const {
-  return ftz;
-}
-
 int Context::get_fbar() const {
   return fbar;
 }
 
 BrigDataType16_t Context::get_type() const {
   return type;
-}
-
-char Context::get_operand_loc() const {
-  return operand_loc;
 }
 
 uint32_t Context::get_dim() const {
@@ -366,21 +357,12 @@ void Context::set_profile(BrigProfile16_t profile) {
   this->profile = profile;
 }
 
-void Context::set_ftz(BrigSftz16_t ftz) {
-  this->ftz = ftz;
-}
-
 void Context::set_fbar(int fbar) {
   this->fbar = fbar;
 }
 
 void Context::set_type(BrigDataType16_t type) {
   this->type = type;
-}
-
-// let context know the location of current operand
-void Context::set_operand_loc(char loc) {
-  this->operand_loc = loc;
 }
 
 void Context::set_dim(uint32_t dim) {

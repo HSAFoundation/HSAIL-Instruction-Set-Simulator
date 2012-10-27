@@ -1228,8 +1228,7 @@ int Version(Context* context) {
               // update context
               context->set_machine(bdv.machine);
               context->set_profile(bdv.profile);
-              context->set_ftz(bdv.ftz);
-
+              
               context->token_to_scan = yylex();
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();      // next target

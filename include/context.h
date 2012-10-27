@@ -247,10 +247,8 @@ class Context {
     uint32_t get_symbol_modifier() const;
     BrigMachine16_t get_machine() const;
     BrigProfile16_t get_profile() const;
-    BrigSftz16_t get_ftz() const;
     int get_fbar() const;
     BrigDataType16_t get_type() const;
-    char get_operand_loc() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
     bool get_isBlockNumeric() const;
@@ -258,16 +256,13 @@ class Context {
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
     void set_symbol_modifier(BrigSymbolModifier modifier);
-	void init_symbol_modifier();
+    void init_symbol_modifier();
     void set_attribute(BrigAttribute16_t attrib);
     void set_alignment(uint16_t align);
     void set_machine(BrigMachine16_t machine);
     void set_profile(BrigProfile16_t profile);
-    void set_ftz(BrigSftz16_t ftz);
     void set_fbar(int fbar);
     void set_type(BrigDataType16_t type);
-    // let context know the location of current operand
-    void set_operand_loc(char loc);
     void set_dim(uint32_t dim);
     void set_isArray(bool is_array);
     void set_isBlockNumeric(bool is_blockNumeric);
@@ -344,12 +339,11 @@ class Context {
     uint32_t symModifier;
     BrigMachine16_t machine;
     BrigProfile16_t profile;
-    BrigSftz16_t ftz;
     int fbar;
     BrigAttribute16_t attribute;
     BrigDataType16_t type;
     BrigAluModifier aluModifier;
-    char operand_loc;   // 1 -> 5
+    
     bool error_reporter_set;
     bool arg_output;
     uint32_t dim;
