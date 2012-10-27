@@ -1392,97 +1392,96 @@ int ArrayDimensionSet(Context* context) {
 }
 
 int ArgumentDecl(Context* context) {
-  if (!DeclPrefix(context)) {
-    context->set_dim(0);
-    context->init_symbol_modifier();
-    BrigStorageClass32_t storage_class = context->token_value.storage_class;
 
-    // skip over "arg" in context->token_to_scan
-    context->token_to_scan = yylex();
-    if ((context->token_type == DATA_TYPE_ID)||
-        (context->token_to_scan == _RWIMG) ||
-        (context->token_to_scan == _SAMP) ||
-        (context->token_to_scan == _ROIMG)) {
-      context->set_type(context->token_value.data_type);
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
-        // for argument, we need to set a BrigDirectiveSymbol
-        // and write the corresponding string into .string section.
+  BrigDataType16_t type;
+  if (DeclPrefix(context)) {
+    return 1;
+  }
+  context->set_dim(0);
+  context->init_symbol_modifier();
+  BrigStorageClass32_t storage_class = context->token_value.storage_class;
+  
+  if(context->token_to_scan != ARG){
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if ((context->token_type != DATA_TYPE_ID)&&
+        (context->token_to_scan != _RWIMG) &&
+        (context->token_to_scan != _SAMP) &&
+        (context->token_to_scan != _ROIMG)) {
+        
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  type = (context->token_value.data_type);
+  
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_LOCAL_IDENTIFIER) {
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  // for argument, we need to set a BrigDirectiveSymbol
+  // and write the corresponding string into .string section.
 
-        std::string arg_name = context->token_value.string_val;
-        int arg_name_offset = context->add_symbol(arg_name);
+  std::string arg_name = context->token_value.string_val;
+  int arg_name_offset = context->add_symbol(arg_name);
 
-        // scan for arrayDimensions
-        context->token_to_scan = yylex();
-        // set default value(scalar)
+  // scan for arrayDimensions
+  context->token_to_scan = yylex();
 
-        if (context->token_to_scan == '[') {
-          if (ArrayDimensionSet(context)) {
-            // context->token_to_scan has been set in ArrayDimensionSet()
-            return 1;
-          }
-        }
-        BrigdOffset32_t dsize = context->get_directive_offset();
-        BrigDirectiveSymbol sym_decl = {
-        sizeof(BrigDirectiveSymbol),                 // size
-        BrigEDirectiveSymbol,             // kind
-        {
-          context->get_code_offset(),       // c_code
-          storage_class,                    // storageClass
-          context->get_attribute(),         // attribute
-          0,                                // reserved
-          context->get_symbol_modifier(),   // symbol modifier
-          context->get_dim(),               // dim
-          arg_name_offset,                  // s_name
-          context->get_type(),              // data type
-          context->get_alignment(),         // alignment
-        },
-        0,                                // d_init = 0 for arg
-        0                                 // reserved
-        };
-        // append the DirectiveSymbol to .directive section.
-        context->append_directive(&sym_decl);
-        context->symbol_map[arg_name] = dsize;
-
-        // update the current DirectiveFunction.
-        // 1. update the directive offset.
-        if(context->current_bdf_offset){
-            BrigDirectiveFunction bdf;
-            context->get_directive(context->current_bdf_offset, &bdf);
-            BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
-            BrigdOffset32_t next_directive = bdf.d_nextDirective;
-            if (first_scope == next_directive) {
+  if (context->token_to_scan == '[') {
+    if (ArrayDimensionSet(context)) {
+      // context->token_to_scan has been set in ArrayDimensionSet()
+      return 1;
+    }
+  }
+  BrigdOffset32_t dsize = context->get_directive_offset();
+  BrigDirectiveSymbol sym_decl = {
+    sizeof(BrigDirectiveSymbol),                 // size
+    BrigEDirectiveSymbol,             // kind
+    {
+      context->get_code_offset(),       // c_code
+      storage_class,                    // storageClass
+      context->get_attribute(),         // attribute
+      0,                                // reserved
+      context->get_symbol_modifier(),   // symbol modifier
+      context->get_dim(),               // dim
+      arg_name_offset,                  // s_name
+      type,              // data type
+      context->get_alignment(),         // alignment
+    },
+    0,                                // d_init = 0 for arg
+    0                                 // reserved
+  };
+  
+  // append the DirectiveSymbol to .directive section.
+  context->append_directive(&sym_decl);
+  //Mapping symbol names to declarations in .dir
+  context->symbol_map[arg_name] = dsize;
+        
+  if(!context->current_bdf_offset){
+    context->set_error(MISSING_FUNCTION_DIRECTIVE);    
+    return 0;
+  }
+  BrigDirectiveFunction bdf;
+  context->get_directive(context->current_bdf_offset, &bdf);
+  BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
+  BrigdOffset32_t next_directive = bdf.d_nextDirective;
+  //bdf.d_nextDirective += sizeof(sym_decl);
+  
+  if (first_scope == next_directive) {
                 bdf.d_nextDirective += sizeof(sym_decl);
                 bdf.d_firstScopedDirective = bdf.d_nextDirective;
             } else {
                 bdf.d_nextDirective += sizeof(sym_decl);
             }
-            // update param count
-            if (context->is_arg_output()) {
-                bdf.outParamCount++;
-            } else {
-                if (!bdf.inParamCount)
-                    bdf.d_firstInParam = dsize;
-                    bdf.inParamCount++;
-            }
-            unsigned char * bdf_charp =
-            reinterpret_cast<unsigned char*>(&bdf);
-            context->update_directive_bytes(bdf_charp,
-                                        context->current_bdf_offset,
-                                        sizeof(BrigDirectiveFunction));
 
-        }
-        return 0;
-
-      } else {
-        context->set_error(MISSING_IDENTIFIER);
-      }
-    } else {
-      context->set_error(MISSING_DATA_TYPE);
-    }
-  }
-
-  return 1;
+  // update param count
+  
+  unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+  context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+                                  sizeof(BrigDirectiveFunction));
+  return 0;
 }
 
 int ArgumentListBody(Context* context) {
@@ -1501,111 +1500,116 @@ int ArgumentListBody(Context* context) {
   return 0;
 }
 
+int ArgumentListBody(Context* context, int* paramCount) {
+  *paramCount = 0;
+  while (1) {
+    if (!ArgumentDecl(context)) {
+      (*paramCount)++;
+      if (context->token_to_scan == ',') {
+          context->token_to_scan = yylex();
+      } else {
+        break;  // context was set in ArgumentDecl
+      }
+    } else {
+      context->set_error(MISSING_ARGUMENT);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+
 int FunctionDefinition(Context* context){
     if(!DeclPrefix(context)){
         return FunctionDefinitionPart2(context);
     } else return 1;
 }
+
 int FunctionDefinitionPart2(Context* context) {
 
-    if (context->token_to_scan == FUNCTION) {
-
-      context->current_bdf_offset = context->get_directive_offset();
-      BrigdOffset32_t bdf_offset = context->current_bdf_offset;
-      uint16_t size = sizeof(BrigDirectiveFunction);
-      BrigDirectiveFunction bdf = {
-      size,                      // size
-      BrigEDirectiveFunction,    // kind
-      context->get_code_offset(),   // c_code
-      0,                            // name
-      0,                          // in param count
-      bdf_offset + size,          // d_firstScopedDirective
-      0,                          // operation count
-      bdf_offset + size,          // d_nextDirective
-      context->get_attribute(),  // attribute
-      0,    // fbar count
-      0,    // out param count
-      0     // d_firstInParam
-      };
-
-
-      // update it when necessary.
-      // the later functions should have a entry point of bdf
-      // just update it in time.
-      //
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
-        // should have meaning of Global_Identifier,
-        // and check if there is existing global identifier
-        // if there is, just use the current string,
-        // if not write into string.
-
-        std::string func_name = context->token_value.string_val;
-
-        BrigsOffset32_t check_result = context->add_symbol(func_name);
-
-        // add the func_name to the func_map.
-        context->func_map[func_name] = context->current_bdf_offset;
-
-        bdf.s_name = check_result;
-        context->append_directive(&bdf);
-
-        /* Debug */
-        // BrigDirectiveFunction get;
-
-        // check return argument list
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == '(') {
-          context->set_arg_output(true);
-          context->token_to_scan = yylex();
-
-          if (context->token_to_scan == ')') {   // empty argument list body
-            context->token_to_scan = yylex();
-          } else if (!ArgumentListBody(context)) {
-            if (context->token_to_scan == ')') {
-              context->token_to_scan = yylex();
-            } else {
-              context->set_error(MISSING_CLOSING_PARENTHESIS);
-              return 1;
-            }
-          } else {
-            context->set_error(INVALID_ARGUMENT_LIST);
-            return 1;
-          }
-        } else {
-          context->set_error(MISSING_ARGUMENT_LIST);
-          return 1;
-        }
-        // check argument list
-        if (context->token_to_scan == '(') {
-          context->set_arg_output(false);
-          context->token_to_scan = yylex();
-
-          if (context->token_to_scan == ')') {   // empty argument list body
-              context->token_to_scan = yylex();
-          } else if (!ArgumentListBody(context)) {
-            if (context->token_to_scan == ')') {
-              context->token_to_scan = yylex();
-            } else {
-              context->set_error(MISSING_CLOSING_PARENTHESIS);
-              return 1;
-            }
-          } else {
-            context->set_error(INVALID_ARGUMENT_LIST);
-            return 1;
-          }
-        } else {
-          context->set_error(MISSING_ARGUMENT_LIST);
-          return 1;
-        }
-
-        return 0;
-
-      } else {
-        context->set_error(MISSING_IDENTIFIER);
-      }
-    }
+  if (context->token_to_scan!= FUNCTION) {
     return 1;
+  }
+  context->current_bdf_offset = context->get_directive_offset();
+  BrigdOffset32_t bdf_offset = context->current_bdf_offset;
+
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_GLOBAL_IDENTIFIER) {
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  
+  std::string func_name = context->token_value.string_val;
+  BrigsOffset32_t str_offset = context->add_symbol(func_name);
+  context->func_map[func_name] = bdf_offset;
+  uint16_t size = sizeof(BrigDirectiveFunction);
+  BrigDirectiveFunction bdf = {
+    size,                      // size
+    BrigEDirectiveFunction,    // kind
+    context->get_code_offset(),   // c_code
+    str_offset,                            // name
+    0,                          // in param count
+    bdf_offset + size,          // d_firstScopedDirective
+    0,                          // operation count
+    bdf_offset + size,          // d_nextDirective
+    context->get_attribute(),  // attribute
+    0,    // fbar count
+    0,    // out param count
+    0     // d_firstInParam
+  };
+  context->append_directive(&bdf);
+  
+  /*Check output argument list*/
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != '(') {
+    context->set_error(MISSING_ARGUMENT_LIST);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  int paramCount = 0;
+  if(ArgumentListBody(context), &paramCount){
+    context->set_error(INVALID_ARGUMENT_LIST);
+    return 1;
+  }  
+  if (context->token_to_scan != ')') {
+    context->set_error(MISSING_CLOSING_PARENTHESIS);
+    return 1;
+  }
+  if(paramCount){
+    context->get_directive(bdf_offset, &bdf);
+    bdf.outParamCount = paramCount;
+    unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+    context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+                                  sizeof(BrigDirectiveFunction));
+  }
+  context->token_to_scan = yylex();
+  
+  /* Check input argument list*/
+  
+  if (context->token_to_scan != '(') {
+    context->set_error(MISSING_ARGUMENT_LIST);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  paramCount = 0;
+  if(ArgumentListBody(context, &paramCount)){
+    context->set_error(INVALID_ARGUMENT_LIST);
+    return 1;
+  }  
+  if (context->token_to_scan != ')') {
+    context->set_error(MISSING_CLOSING_PARENTHESIS);
+    return 1;
+  }
+  if(paramCount){
+    context->get_directive(bdf_offset, &bdf);
+    bdf.inParamCount = paramCount;
+    unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+    context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+                                  sizeof(BrigDirectiveFunction));
+  }
+  
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int FunctionDecl(Context *context){

@@ -77,6 +77,7 @@ enum error_code_t {
   MISSING_BLOCK_TYPE,
   MISSING_ADDRESS,
   MISSING_OPERATION,
+  MISSING_FUNCTION_DIRECTIVE,
 
   UNKNOWN_ERROR
 };
@@ -223,7 +224,10 @@ class ErrorReporterInterface {
           return std::string("Missing block type.");
         case MISSING_ADDRESS:
           return std::string("Missing Address.");
-
+        case MISSING_OPERATION:
+          return std::string("Missing operation");
+        case MISSING_FUNCTION_DIRECTIVE:
+          return std::string("Invalid argument space. No function/kernel specified");
         case UNKNOWN_ERROR:
         default:
           return std::string("Unknown error.");

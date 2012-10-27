@@ -2483,7 +2483,7 @@ TEST(ParserTest, KernelArgumentList) {
   input.assign("extern kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, ArgumentDecl(context));
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
     // test 5
   input.assign("const align 8 kernarg_u32 %local_id[2][2] ");

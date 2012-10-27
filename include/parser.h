@@ -33,6 +33,8 @@ int FBar(Context* context);
 int ArrayDimensionSet(Context* context);
 int ArgumentDecl(Context* context);
 int ArgumentListBody(Context* context);
+int ArgumentListBody(Context* context, int* paramCount);
+
 int FunctionDefinition(Context* context);
 int FunctionDecl(Context* context);
 int Codeblock(Context* context);
