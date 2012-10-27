@@ -1459,17 +1459,6 @@ int ArgumentDecl(Context* context) {
   //Mapping symbol names to declarations in .dir
   context->symbol_map[arg_name] = dsize;
         
-  if(!context->current_bdf_offset){
-    context->set_error(MISSING_FUNCTION_DIRECTIVE);    
-    return 0;
-  }
-  BrigDirectiveFunction bdf;
-  context->get_directive(context->current_bdf_offset, &bdf);
-  bdf.d_nextDirective += sizeof(sym_decl);
-    
-  unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-  context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
-                                  sizeof(BrigDirectiveFunction));
   return 0;
 }
 
@@ -1557,6 +1546,7 @@ int FunctionDefinitionPart2(Context* context) {
   if(paramCount){
     context->get_directive(bdf_offset, &bdf);
     bdf.outParamCount = paramCount;
+    bdf.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
     context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
                                   sizeof(BrigDirectiveFunction));
@@ -1583,6 +1573,7 @@ int FunctionDefinitionPart2(Context* context) {
     context->get_directive(bdf_offset, &bdf);
     bdf.inParamCount = paramCount;
     bdf.d_firstInParam = bdf_offset + sizeof(BrigDirectiveFunction);
+    bdf.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
     context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
                                   sizeof(BrigDirectiveFunction));
