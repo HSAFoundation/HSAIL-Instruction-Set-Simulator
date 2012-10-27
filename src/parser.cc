@@ -13,7 +13,7 @@
 namespace hsa {
 namespace brig {
 
-int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode) {
+int QueryOp(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode) {
   switch (context->token_to_scan) {
     case QUERY_ORDER:
       *pOpcode = BrigQueryOrder;
@@ -56,71 +56,65 @@ int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* 
 int QueryOp(Context* context) {
   BrigDataType16_t dataType;
   BrigOpcode32_t opcode;
-  return QueryOpPart2(context, &dataType, &opcode);
+  return QueryOp(context, &dataType, &opcode);
 }
 
 
 int Query(Context* context) {
-  // Chuang
+  
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type; 
+  BrigoOffset32_t OpOffset[2] = {0,0};
+  
+
+  if (QueryOp(context, &type, &opcode)) {
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_value.data_type != type) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_SREGISTER) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  std::string opName = context->token_value.string_val;
+  if (Identifier(context)) {
+    return 1;
+  }
+  OpOffset[0] = context->operand_map[opName];
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != '[') {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  } 
+  context->token_to_scan = yylex();
+  if (AddressableOperandPart2(context, &OpOffset[1], true)) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
   BrigInstBase query_inst = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
-    0,                     // opcode
-    Brigb32,               // type
+    opcode,                     // opcode
+    type,               // type
     BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0}        // o_operands[5]
+    {OpOffset[0], OpOffset[1], 0, 0, 0}        // o_operands[5]
   };
-
-  if (!QueryOpPart2(context, &query_inst.type, &query_inst.opcode)) {
-    context->token_to_scan = yylex();
-
-    // According to Query Image (query) Operations in v1.2 PRM 7.7.1
-    // If opcode is width, depth, height. The data type must be Brigu32.
-    // If not, it must be Brigb32.
-    if (context->token_value.data_type == query_inst.type) {
-      context->token_to_scan = yylex();
-      // According to the Data Type , The register must be a 32bit Register.
-      if (context->token_to_scan == TOKEN_SREGISTER) {
-        // just use Idenifier rule to fill $s register to operand section.
-        std::string opName = context->token_value.string_val;
-        if (Identifier(context)) {
-          return 1;
-        }
-        query_inst.o_operands[0] = context->operand_map[opName];
-
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-          if (context->token_to_scan != '[') {
-            context->set_error(MISSING_OPERAND);
-          } else {
-            context->token_to_scan = yylex();
-          }
-
-          if (!AddressableOperandPart2(context, &query_inst.o_operands[1], true)) {
-            if (context->token_to_scan == ';') {
-
-              context->append_code(&query_inst);
-
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-            }
-          } else {
-            context->set_error(INVALID_OPERAND);
-          }
-        } else {
-          context->set_error(MISSING_COMMA);
-        }
-      } else {
-        context->set_error(MISSING_OPERAND);
-      }
-    } else {
-      context->set_error(MISSING_DATA_TYPE);
-    }
-  }
-  return 1;
+  context->append_code(&query_inst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
