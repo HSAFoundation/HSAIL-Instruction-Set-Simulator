@@ -39,7 +39,6 @@ Context::Context(void) {
   
   current_bdf_offset = 0;
   current_argdecl_offset = 0;
-  error_reporter_set = false;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
   aluModifier.valid = 0;
@@ -64,6 +63,7 @@ Context::~Context(void) {
 }
 
 void Context::clear_context(void) {
+
   clear_all_buffers();
   func_map.clear();
   func_o_map.clear();
@@ -88,6 +88,8 @@ void Context::clear_context(void) {
   aluModifier.approx = 0;
   aluModifier.fbar = 0;
   aluModifier.reserved = 0;
+  /*Error Reported not cleared - clear_context typically used between unit tests*/
+  
 }
 
 void Context::set_default_values(void) {
@@ -95,7 +97,6 @@ void Context::set_default_values(void) {
   profile = BrigEFull;
   attribute = BrigNone;
   alignment = 1;
-  fbar = 0;
   token_type = UNKNOWN;
   token_to_scan = 0;
   token_value.int_val = 0;
@@ -111,13 +112,12 @@ ErrorReporterInterface* Context::get_error_reporter(void) const {
 }
 
 void Context::set_error_reporter(ErrorReporterInterface* error_reporter) {
-  this->err_reporter = error_reporter;
-  this->error_reporter_set = true;
+  this->err_reporter = error_reporter;  
 }
 
 void Context::set_error(error_code_t error) {
   // try to free string if the token contains string
-  if (error_reporter_set)
+  if (err_reporter)
     err_reporter->report_error(error, yylineno, yycolno);
   else
     printf("Error reporter has not been set up\n");
@@ -308,10 +308,6 @@ BrigProfile16_t Context::get_profile() const {
   return profile;
 }
 
-int Context::get_fbar() const {
-  return fbar;
-}
-
 BrigDataType16_t Context::get_type() const {
   return type;
 }
@@ -355,10 +351,6 @@ void Context::set_machine(BrigMachine16_t machine) {
 
 void Context::set_profile(BrigProfile16_t profile) {
   this->profile = profile;
-}
-
-void Context::set_fbar(int fbar) {
-  this->fbar = fbar;
 }
 
 void Context::set_type(BrigDataType16_t type) {

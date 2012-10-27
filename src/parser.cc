@@ -1341,7 +1341,7 @@ int FBar(Context* context) {
   if (context->token_to_scan == '(') {
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      context->set_fbar(context->token_value.int_val);
+      //context->set_fbar(context->token_value.int_val);
       context->token_to_scan = yylex();
       if (context->token_to_scan == ')') {
         context->token_to_scan = yylex();

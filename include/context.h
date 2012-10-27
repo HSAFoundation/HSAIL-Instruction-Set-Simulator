@@ -247,7 +247,6 @@ class Context {
     uint32_t get_symbol_modifier() const;
     BrigMachine16_t get_machine() const;
     BrigProfile16_t get_profile() const;
-    int get_fbar() const;
     BrigDataType16_t get_type() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
@@ -261,7 +260,6 @@ class Context {
     void set_alignment(uint16_t align);
     void set_machine(BrigMachine16_t machine);
     void set_profile(BrigProfile16_t profile);
-    void set_fbar(int fbar);
     void set_type(BrigDataType16_t type);
     void set_dim(uint32_t dim);
     void set_isArray(bool is_array);
@@ -323,33 +321,34 @@ class Context {
 
     ~Context();
   private:
-    /* Buffers */
-    Context();
+    
     static Context* ctx;
-    Buffer* cbuf;  // code buffer
-    Buffer* dbuf;  // directive buffer
-    Buffer* obuf;  // operand buffer
-    StringBuffer* sbuf;  // string buffer
+    Context();
+    
+    /*Buffers for code, directives, operands, and symbols */
+    Buffer* cbuf;  
+    Buffer* dbuf;  
+    Buffer* obuf;  
+    StringBuffer* sbuf; 
 
     /* Error reporter */
-    ErrorReporterInterface* err_reporter;  // error reporter
+    ErrorReporterInterface* err_reporter;
 
-    // context variables
-    uint16_t alignment;
-    uint32_t symModifier;
+    /* Global context variables */
     BrigMachine16_t machine;
     BrigProfile16_t profile;
-    int fbar;
+    uint16_t alignment;
+    uint32_t symModifier;
     BrigAttribute16_t attribute;
     BrigDataType16_t type;
     BrigAluModifier aluModifier;
-    
-    bool error_reporter_set;
-    bool arg_output;
     uint32_t dim;
+    BrigdOffset32_t last_directive_offset;
+    
+    bool arg_output;
     bool is_array;
     bool is_blockNumeric;
-    BrigdOffset32_t last_directive_offset;
+    
 };
 
 }  // namespace brig
