@@ -1465,19 +1465,8 @@ int ArgumentDecl(Context* context) {
   }
   BrigDirectiveFunction bdf;
   context->get_directive(context->current_bdf_offset, &bdf);
-  BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
-  BrigdOffset32_t next_directive = bdf.d_nextDirective;
-  //bdf.d_nextDirective += sizeof(sym_decl);
-  
-  if (first_scope == next_directive) {
-                bdf.d_nextDirective += sizeof(sym_decl);
-                bdf.d_firstScopedDirective = bdf.d_nextDirective;
-            } else {
-                bdf.d_nextDirective += sizeof(sym_decl);
-            }
-
-  // update param count
-  
+  bdf.d_nextDirective += sizeof(sym_decl);
+    
   unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
   context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
                                   sizeof(BrigDirectiveFunction));
@@ -1485,37 +1474,27 @@ int ArgumentDecl(Context* context) {
 }
 
 int ArgumentListBody(Context* context) {
-  while (1) {
-    if (!ArgumentDecl(context)) {
-      if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-      } else {
-        break;  // context was set in ArgumentDecl
-      }
-    } else {
-      context->set_error(MISSING_ARGUMENT);
-      return 1;
-    }
+  int paramCount = 0;
+  if(context->token_to_scan == '('){
+    context->token_to_scan = yylex();
+    return ArgumentListBody(context, &paramCount);    
   }
-  return 0;
+  else return 1;
 }
 
 int ArgumentListBody(Context* context, int* paramCount) {
   *paramCount = 0;
+  
   while (1) {
-    if (!ArgumentDecl(context)) {
-      (*paramCount)++;
-      if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-      } else {
-        break;  // context was set in ArgumentDecl
-      }
-    } else {
-      context->set_error(MISSING_ARGUMENT);
+    if(context->token_to_scan == ')')
+      return 0;
+    if (ArgumentDecl(context)) 
       return 1;
-    }
-  }
-  return 0;
+    (*paramCount)++;
+    if (context->token_to_scan == ',') {    
+      context->token_to_scan = yylex();        
+    } 
+  }  
 }
 
 
@@ -1567,7 +1546,7 @@ int FunctionDefinitionPart2(Context* context) {
   }
   context->token_to_scan = yylex();
   int paramCount = 0;
-  if(ArgumentListBody(context), &paramCount){
+  if(ArgumentListBody(context, &paramCount)){
     context->set_error(INVALID_ARGUMENT_LIST);
     return 1;
   }  
@@ -1603,6 +1582,7 @@ int FunctionDefinitionPart2(Context* context) {
   if(paramCount){
     context->get_directive(bdf_offset, &bdf);
     bdf.inParamCount = paramCount;
+    bdf.d_firstInParam = bdf_offset + sizeof(BrigDirectiveFunction);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
     context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
                                   sizeof(BrigDirectiveFunction));

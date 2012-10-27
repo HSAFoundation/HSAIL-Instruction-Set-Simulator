@@ -466,8 +466,8 @@ TEST(ParserTest, ArgumentListBody) {
   context->set_error_reporter(main_reporter);
 
   // test 1
-  std::string input("const static arg_u32 %local_id[2][2],\n");
-  input.append("static arg_f16 %local_id[], align 8 arg_u64 %test \n");
+  std::string input("(const static arg_u32 %local_id[2][2],\n");
+  input.append("static arg_f16 %local_id[], align 8 arg_u64 %test )\n");
   lexer->set_source_string(input);
   context->clear_context();
   // initialize fake values
