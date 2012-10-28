@@ -14,19 +14,15 @@ protected:
   ErrorReporter* main_reporter;
   std::string Input;
   StringBuffer* RefStr;  
-  Buffer* RefDir;
-  Buffer* RefCode;
-  Buffer* RefOper;
+  struct BrigSections* RefOutput;
     
 public:
-  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf = NULL, Buffer* dir = NULL, Buffer* code = NULL, Buffer* oper = NULL){  
+  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf = NULL, BrigSections* RefOut = NULL){  
     context = NULL;
     main_reporter = NULL;
     Input.assign(In);
     RefStr = Sbuf;
-    RefDir = dir;
-    RefCode = code;
-    RefOper = oper;
+    RefOutput = RefOut;
   }  
   
   virtual void validate(struct BrigSections* BrigOutput) = 0;
