@@ -706,7 +706,7 @@ TEST(CodegenTest, AlignmentCheck) {
   curr_offset = context->get_directive_offset();
 
   EXPECT_EQ(0U, curr_offset%4);
-  EXPECT_EQ(BrigEAlignment_4, Context::alignment_check(bbs));
+  EXPECT_EQ(BrigEAlignment_4, Context::dir_alignment_check(bbs));
 
   // Next append a 8-byte aligned item  such as BrigBlockNumeric
   BrigBlockNumeric bbn = {
@@ -721,7 +721,7 @@ TEST(CodegenTest, AlignmentCheck) {
   context->append_directive(&bbn);
   curr_offset = context->get_directive_offset();
 
-  EXPECT_EQ(BrigEAlignment_8, Context::alignment_check(bbn));
+  EXPECT_EQ(BrigEAlignment_8, Context::dir_alignment_check(bbn));
   // this is a 8-byte aligned item and has a size of multiple of 8.
   // so the offset after appending this item should be a multiple of 8.
   EXPECT_EQ(0U, curr_offset%8);

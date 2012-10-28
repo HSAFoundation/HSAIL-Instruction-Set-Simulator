@@ -225,22 +225,22 @@ enum BrigStorageClass {
 // BrigOperandKinds
 // BrigOperandKinds is used to specify the kind of operand.
 enum BrigOperandKinds {
-  BrigEOperandBase = 35,
-  BrigEOperandReg,
-  BrigEOperandImmed,
-  BrigEOperandRegV2,
-  BrigEOperandRegV4,
-  BrigEOperandAddress,
-  BrigEOperandLabelRef,
-  BrigEOperandIndirect,
-  BrigEOperandCompound,
-  BrigEOperandArgumentList,
-  BrigEOperandFunctionList,
-  BrigEOperandArgumentRef,
-  BrigEOperandWaveSz,
-  BrigEOperandFunctionRef,
-  BrigEOperandPad,
-  BrigEOperandOpaque = 50
+  BrigEOperandPad = 0,
+  BrigEOperandBase = 1,
+  BrigEOperandReg = 2,
+  BrigEOperandImmed = 3,
+  BrigEOperandRegV2 = 4,
+  BrigEOperandRegV4 = 5,
+  BrigEOperandAddress = 6,
+  BrigEOperandLabelRef = 7,
+  BrigEOperandIndirect = 8,
+  BrigEOperandCompound = 9,
+  BrigEOperandArgumentList = 10,
+  BrigEOperandFunctionList = 11,
+  BrigEOperandArgumentRef = 12,
+  BrigEOperandWaveSz = 13,
+  BrigEOperandFunctionRef = 14,
+  BrigEOperandOpaque = 15
 };
 
 // PRM 19.5.17

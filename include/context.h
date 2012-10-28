@@ -49,26 +49,37 @@ class Context {
 
     /* helper function to check alignment requirement of each structure */
     template<class T>
-    static BrigAlignment alignment_check(T &item) {
+    static BrigAlignment dir_alignment_check(T &item) {
       switch (item.kind) {
         // directive
         case BrigEDirectiveBlockNumeric:
         case BrigEDirectiveInit:
-        // operand
-        case BrigEOperandImmed:
-          return BrigEAlignment_8;
+            return BrigEAlignment_8;
         default:
           return BrigEAlignment_4;
       }
     }
 
+    template<class T>
+    static BrigAlignment oper_alignment_check(T &item) {
+      if(item.kind == BrigEOperandImmed)
+        return BrigEAlignment_8;
+      else 
+        return BrigEAlignment_4;
+    }
+    
+    template<class T>
+    static BrigAlignment code_alignment_check(T &item) {
+      return BrigEAlignment_4;
+    }
+    
     /* code to append Brig structures to buffers */
 
     // append code
     template <class T>
     void append_code(const T* item) {
       uint32_t code_offset = cbuf->size();
-      if ((alignment_check(*item) == BrigEAlignment_8) &&
+      if ((code_alignment_check(*item) == BrigEAlignment_8) &&
           (code_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
@@ -84,7 +95,7 @@ class Context {
     template <class T>
     void append_directive(const T* item) {
       this->last_directive_offset = dbuf->size();
-      if ((alignment_check(*item) == BrigEAlignment_8) &&
+      if ((dir_alignment_check(*item) == BrigEAlignment_8) &&
           (this->last_directive_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
@@ -101,7 +112,7 @@ class Context {
     template <class T>
     void append_operand(const T* item) {
     uint32_t operand_offset = obuf->size();
-      if ((alignment_check(*item) == BrigEAlignment_8) &&
+      if ((oper_alignment_check(*item) == BrigEAlignment_8) &&
           (operand_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigOperandPad bdp = {
