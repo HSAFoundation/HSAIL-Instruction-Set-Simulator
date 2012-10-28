@@ -1547,6 +1547,7 @@ int FunctionDefinitionPart2(Context* context) {
     context->get_directive(bdf_offset, &bdf);
     bdf.outParamCount = paramCount;
     bdf.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
+    bdf.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
     context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
                                   sizeof(BrigDirectiveFunction));
@@ -1572,8 +1573,9 @@ int FunctionDefinitionPart2(Context* context) {
   if(paramCount){
     context->get_directive(bdf_offset, &bdf);
     bdf.inParamCount = paramCount;
-    bdf.d_firstInParam = bdf_offset + sizeof(BrigDirectiveFunction);
+    bdf.d_firstInParam = bdf.d_nextDirective;
     bdf.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
+    bdf.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
     context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
                                   sizeof(BrigDirectiveFunction));
