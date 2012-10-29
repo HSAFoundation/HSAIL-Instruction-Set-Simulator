@@ -3604,110 +3604,94 @@ int Instruction4ShufflePart6(Context* context) {
 
 
 int KernelArgumentDecl(Context *context) {
-  if (!DeclPrefix(context)) {
-    BrigStorageClass32_t storage_class = context->token_value.storage_class;
+  if (DeclPrefix(context))
+    return 1;
 
-    // skip over "arg" in context->token_to_scan
-    context->token_to_scan = yylex();
-    if ((context->token_type == DATA_TYPE_ID)||
-        (context->token_to_scan == _RWIMG) ||
-        (context->token_to_scan == _SAMP) ||
-        (context->token_to_scan == _ROIMG)) {
-      context->set_type(context->token_value.data_type);
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
-        // for argument, we need to set a BrigDirectiveSymbol
-        // and write the corresponding string into .string section.
+  context->set_dim(0);
+  context->init_symbol_modifier();
+  BrigStorageClass32_t storage_class = context->token_value.storage_class;
+  
+  if (KERNARG != context->token_to_scan)
+    return 1;
 
-        std::string arg_name = context->token_value.string_val;
-        int arg_name_offset = context->add_symbol(arg_name);
-
-        // scan for arrayDimensions
-        context->token_to_scan = yylex();
-        // set default value(scalar)
-        context->set_dim(0);
-        //context->set_symbol_modifier(BrigArray);
-        if (context->token_to_scan == '[') {
-          if (!ArrayDimensionSet(context)) {
-            // context->token_to_scan has been set in ArrayDimensionSet()
-            return 0;
-          }
-        }
-        BrigdOffset32_t dsize = context->get_directive_offset();
-        BrigDirectiveSymbol sym_decl = {
-        sizeof(sym_decl),                 // size
-        BrigEDirectiveSymbol,             // kind
-        {
-          context->get_code_offset(),       // c_code
-          storage_class,                    // storageClass
-          context->get_attribute(),         // attribute
-          0,                                // reserved
-          context->get_symbol_modifier(),   // symbol modifier
-          context->get_dim(),               // dim
-          arg_name_offset,                  // s_name
-          context->get_type(),              // data type
-          context->get_alignment(),         // alignment
-        },
-        0,                                // d_init = 0 for arg
-        0                                 // reserved
-        };
-        // append the DirectiveSymbol to .directive section.
-        context->append_directive(&sym_decl);
-        context->symbol_map[arg_name] = dsize;
-
-        // update the current DirectiveKernel.
-        // 1. update the directive offset.
-        BrigDirectiveKernel bdk;
-        context->get_directive(context->current_bdf_offset, &bdk);
-        BrigdOffset32_t first_scope = bdk.d_firstScopedDirective;
-        BrigdOffset32_t next_directive = bdk.d_nextDirective;
-        if (first_scope == next_directive) {
-          bdk.d_nextDirective += sizeof(sym_decl);
-          bdk.d_firstScopedDirective = bdk.d_nextDirective;
-        } else {
-          bdk.d_nextDirective += sizeof(sym_decl);
-        }
-
-        // update param count
-        if (context->is_arg_output()) {
-          bdk.outParamCount++;
-        } else {
-          if (!bdk.inParamCount)
-            bdk.d_firstInParam = dsize;
-          bdk.inParamCount++;
-        }
-        unsigned char * bdk_charp =
-          reinterpret_cast<unsigned char*>(&bdk);
-        context->update_directive_bytes(bdk_charp,
-                                        context->current_bdf_offset,
-                                        sizeof(BrigDirectiveKernel));
-        return 0;
-
-      } else {
-        context->set_error(MISSING_IDENTIFIER);
-      }
-    } else {
-      context->set_error(MISSING_DATA_TYPE);
-    }
+  context->token_to_scan = yylex();
+  if ((DATA_TYPE_ID != context->token_type)&&
+      (_RWIMG != context->token_to_scan) &&
+      (_SAMP  != context->token_to_scan) &&
+      (_ROIMG != context->token_to_scan)) {
+        
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
   }
+  context->set_type(context->token_value.data_type);
 
-  return 1;
-}
+  context->token_to_scan = yylex();
+  if (TOKEN_LOCAL_IDENTIFIER != context->token_to_scan) {
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  // for argument, we need to set a BrigDirectiveSymbol
+  // and write the corresponding string into .string section.
 
-int KernelArgumentListBody(Context *context) {
-  while (1) {
-    if (!KernelArgumentDecl(context)) {
-      if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-      } else {
-        break;  // context was set in ArgumentDecl
-      }
-    } else {
-      context->set_error(MISSING_ARGUMENT);
+  std::string arg_name = context->token_value.string_val;
+  int arg_name_offset = context->add_symbol(arg_name);
+
+  // scan for arrayDimensions
+  context->token_to_scan = yylex();
+
+  if ('[' == context->token_to_scan) {
+    if (ArrayDimensionSet(context)) {
+      // context->token_to_scan has been set in ArrayDimensionSet()
       return 1;
     }
   }
+  BrigdOffset32_t dsize = context->get_directive_offset();
+  BrigDirectiveSymbol sym_decl = {
+    sizeof(BrigDirectiveSymbol),                 // size
+    BrigEDirectiveSymbol,             // kind
+    {
+      context->get_code_offset(),       // c_code
+      storage_class,                    // storageClass
+      context->get_attribute(),         // attribute
+      0,                                // reserved
+      context->get_symbol_modifier(),   // symbol modifier
+      context->get_dim(),               // dim
+      arg_name_offset,                  // s_name
+      context->get_type(),              // data type
+      context->get_alignment(),         // alignment
+    },
+    0,                                // d_init = 0 for arg
+    0                                 // reserved
+  };
+  
+  // append the DirectiveSymbol to .directive section.
+  context->append_directive(&sym_decl);
+  //Mapping symbol names to declarations in .dir
+  context->symbol_map[arg_name] = dsize;
+        
   return 0;
+}
+
+int KernelArgumentListBody(Context *context){
+  uint32_t paramCount = 0;
+  if ('(' == context->token_to_scan){
+    context->token_to_scan = yylex();
+    return KernelArgumentListBody(context,&paramCount);
+  } else { 
+    return 1;
+  }
+}
+
+int KernelArgumentListBody(Context *context,uint32_t *paramCount) {
+  while (1) {
+    if(')' == context->token_to_scan)
+      return 0;
+    if (KernelArgumentDecl(context)) 
+      return 1;
+    (*paramCount)++;
+    if (',' == context->token_to_scan )
+      context->token_to_scan = yylex();
+  }
 }
 
 int Kernel(Context *context) {
