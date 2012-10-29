@@ -108,9 +108,6 @@ public:
       ++getdirective;
       ref = ref->next;
     }
-
-    //validate_brig::validate(&strList[i], refbuf, getstr, getbuf);
-    
   }
 };
 
@@ -161,6 +158,7 @@ TEST(CodegenTest, Block_CodeGen) {
 
   push = blockList.head;
 
+  // frist numeric block
   blockList.size++;
   push->next = new BrigBlockNode();
   push = push->next;
@@ -177,6 +175,7 @@ TEST(CodegenTest, Block_CodeGen) {
   push->num->u32[2] = 10;
   push->num->u32[3] = 23;
 
+  // second numeric block
   blockList.size++;
   push->next = new BrigBlockNode();
   push = push->next;
@@ -193,6 +192,7 @@ TEST(CodegenTest, Block_CodeGen) {
   push->num->u64[2] = 10;
   push->num->u64[3] = 23;
   
+  // third string block
   blockList.size++;
   push->next = new BrigBlockNode();
   push = push->next;
@@ -202,6 +202,7 @@ TEST(CodegenTest, Block_CodeGen) {
   push->str->kind = BrigEDirectiveBlockString;
   push->str->s_name = blockName.size() + 1;
 
+  // forth numeric block
   blockList.size++;
   push->next = new BrigBlockNode();
   push = push->next;
@@ -222,6 +223,7 @@ TEST(CodegenTest, Block_CodeGen) {
   push->num->u8[6] = 0;
   push->num->u8[7] = 0;
 
+  // fifth string block
   blockList.size++;
   push->next = new BrigBlockNode();
   push = push->next;
