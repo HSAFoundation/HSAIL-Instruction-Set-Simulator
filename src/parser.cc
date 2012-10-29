@@ -6607,10 +6607,6 @@ int SingleListSingle(Context * context) {
           return 1;
         }
       } else {
-        // TODO(Chuang): handle to BlockNumeric.
-        if (context->get_isBlockNumeric()) {
-          return 0;
-        }
         uint32_t n = 0;
         // elementCount
 
@@ -7597,6 +7593,58 @@ int LabelList(Context* context) {
 
   return 1;
 }
+int FloatListSinglePart2Block(Context* context, const std::vector<double> &float_list,
+                              const uint32_t elementCount) {
+  uint32_t n = elementCount;
+  switch (context->get_type()) {
+    case Brigb1:
+      context->set_error(INVALID_INITIALIZER);
+      return 1;
+    case Brigb8:    n = (n + 7) >> 3; break;  // (n+7)/8
+    case Brigb16:   n = (n + 3) >> 2; break;  // (n+3)/4
+    case Brigb32:   n = (n + 1) >> 1; break;  // (n+1)/2
+    case Brigb64:   break;
+  }
+  size_t arraySize = sizeof(BrigBlockNumeric) + (n - 1) * sizeof(uint64_t);
+  uint8_t *array = new uint8_t[arraySize];
+  memset(array, 0, sizeof(uint8_t) * arraySize);
+  BrigBlockNumeric *blockNumeric = reinterpret_cast<BrigBlockNumeric*>(array);
+
+  switch(context->get_type()) {
+    case Brigb8:
+      for (uint32_t i = 0; i < float_list.size(); i++ ) {
+        *(double*)&blockNumeric->u8[i] = float_list[i];
+      }
+      break;
+    case Brigb16:
+      for (uint32_t i = 0; i < float_list.size(); i++ ) {
+        *(double*)&blockNumeric->u16[i] = float_list[i];
+      }
+      break;
+    case Brigb32:
+      for (uint32_t i = 0; i < float_list.size(); i++ ) {
+        *(double*)&blockNumeric->u32[i] = float_list[i];
+      }
+      break;
+    case Brigb64:
+      // TODO(Chuang): Loss of precision
+      for (uint32_t i = 0; i < float_list.size(); i++ ) {
+        *(double*)&blockNumeric->u64[i] = float_list[i];
+      }
+      break;
+  }
+
+  blockNumeric->size = arraySize;
+  blockNumeric->kind = BrigEDirectiveBlockNumeric;
+  blockNumeric->type = context->get_type();
+  blockNumeric->elementCount = elementCount;
+
+  context->append_directive(blockNumeric);
+
+  delete []array;
+  array = NULL;
+  return 0;
+}
 int FloatListSingle(Context* context) {
   uint32_t elementCount = 0;
   std::vector<double> float_list;
@@ -7610,11 +7658,12 @@ int FloatListSingle(Context* context) {
       context->token_to_scan = yylex();
       continue;
     } else {
-        // TODO(Chuang): handle to BlockNumeric.
         if (context->get_isBlockNumeric()) {
+          if (FloatListSinglePart2Block(context, float_list, elementCount)) {
+            return 1;
+          }
           return 0;
         }
-        // Note: the token has been updated
         uint32_t n = 0;
         // elementCount
 
@@ -7622,7 +7671,6 @@ int FloatListSingle(Context* context) {
         BrigDirectiveSymbol bds ;
         BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
         context->get_directive(bds_offset, &bds);
-
 
         if (0 == context->get_dim()) {
           if (context->get_isArray()) {
@@ -7696,7 +7744,58 @@ int FloatListSingle(Context* context) {
   context->set_error(MISSING_DOUBLE_CONSTANT);
   return 1;
 }
+int DecimalListSinglePart2Block(Context* context, const std::vector<int32_t> &decimal_list,
+                                const uint32_t elementCount) {
+  uint32_t n = elementCount;
+  switch (context->get_type()) {
+    case Brigb1:
+      context->set_error(INVALID_INITIALIZER);
+      return 1;
+    case Brigb8:    n = (n + 7) >> 3; break;  // (n+7)/8
+    case Brigb16:   n = (n + 3) >> 2; break;  // (n+3)/4
+    case Brigb32:   n = (n + 1) >> 1; break;  // (n+1)/2
+    case Brigb64:   break;
+  }
+  size_t arraySize = sizeof(BrigBlockNumeric) + (n - 1) * sizeof(uint64_t);
+  uint8_t *array = new uint8_t[arraySize];
+  memset(array, 0, sizeof(uint8_t) * arraySize);
+  BrigBlockNumeric *blockNumeric = reinterpret_cast<BrigBlockNumeric*>(array);
 
+  switch(context->get_type()) {
+    case Brigb8:
+      for (uint32_t i = 0; i < decimal_list.size(); i++ ){
+        blockNumeric->u8[i] = (uint8_t)decimal_list[i];
+      }
+      break;
+    case Brigb16:
+      for (uint32_t i = 0; i < decimal_list.size(); i++ ){
+        blockNumeric->u16[i] = (uint16_t)decimal_list[i];
+      }
+      break;
+    case Brigb32:
+      for (uint32_t i = 0; i < decimal_list.size(); i++ ){
+        *(int32_t*)&blockNumeric->u32[i] = decimal_list[i];
+      }
+      break;
+    case Brigb64:
+      // TODO(Chuang): Loss of precision
+      for (uint32_t i = 0; i < decimal_list.size(); i++ ) {
+        *(int32_t*)&blockNumeric->u64[i] = decimal_list[i];
+      }
+      break;
+  }
+
+  blockNumeric->size = arraySize;
+  blockNumeric->kind = BrigEDirectiveBlockNumeric;
+  blockNumeric->type = context->get_type();
+  blockNumeric->elementCount = elementCount;
+
+  context->append_directive(blockNumeric);
+
+  delete []array;
+  array = NULL;
+  return 0;
+}
 int DecimalListSingle(Context* context) {
   uint32_t elementCount = 0;
   std::vector<int32_t> decimal_list;
@@ -7719,8 +7818,11 @@ int DecimalListSingle(Context* context) {
         context->token_to_scan = yylex();
         continue;
       } else {
-        // TODO(Chuang): handle to BlockNumeric.
+
         if (context->get_isBlockNumeric()) {
+          if (DecimalListSinglePart2Block(context, decimal_list, elementCount)) {
+            return 1;
+          }
           return 0;
         }
         uint32_t n = 0;
@@ -7729,7 +7831,6 @@ int DecimalListSingle(Context* context) {
         BrigDirectiveSymbol bds ;
         BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
         context->get_directive(bds_offset,&bds);
-
 
         if (0 == context->get_dim()) {
           if (context->get_isArray()) {
@@ -7857,8 +7958,15 @@ int Block(Context* context) {
           context->token_to_scan = yylex();
           if (context->token_to_scan == TOKEN_LABEL) {
             context->token_to_scan = yylex();
-          } else if (!DecimalListSingle(context)) {
-          } else if (!FloatListSingle(context)) {
+          } else if (context->token_to_scan == '-' ||
+                     context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+            if (DecimalListSingle(context)) {
+              return 1;
+            }
+          } else if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
+            if (FloatListSingle(context)) {
+              return 1;
+            }
           } else {
             context->set_error(INVALID_SECTION_ITEM);
             return 1;
