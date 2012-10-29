@@ -3696,65 +3696,70 @@ int KernelArgumentListBody(Context *context,uint32_t *paramCount) {
 
 int Kernel(Context *context) {
   // first must be KERNEL
+  if(KERNEL != context->token_to_scan)
+    return 1;
+  
+  context->current_bdf_offset = context->get_directive_offset();
+  BrigdOffset32_t bdk_offset = context->current_bdf_offset;
+
   context->token_to_scan = yylex();
-  if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
-    context->current_bdf_offset = context->get_directive_offset();
-    BrigdOffset32_t bdk_offset = context->current_bdf_offset;
-
-
-    std::string kern_name = context->token_value.string_val;
-    BrigsOffset32_t check_result = context->add_symbol(kern_name);
-
-    size_t bdk_size = sizeof(BrigDirectiveKernel);
-    BrigDirectiveKernel bdk = {
-      bdk_size,                    // size
-      BrigEDirectiveKernel,        // kind
-      context->get_code_offset(),  // c_code
-      check_result,                // s_name
-      0,                           // in param count
-      bdk_offset + bdk_size,       // d_firstScopedDirective
-      0,                           // operation count
-      bdk_offset + bdk_size,       // d_nextDirective
-      context->get_attribute(),    // attribute
-      0,                           // fbar count
-      0,                           // out param count
-      0                            // d_firstInParam
-    };
-
-    context->append_directive(&bdk);
-    context->func_map[kern_name] = context->current_bdf_offset;
-
-    // check the input argumentlist
-    context->token_to_scan = yylex();
-    if ('(' == context->token_to_scan) {
-      context->token_to_scan = yylex();
-
-      if (')' == context->token_to_scan) {  // empty arguments
-        context->token_to_scan = yylex();
-      } else if (!KernelArgumentListBody(context)) {  // not empty arguments
-        if (')' == context->token_to_scan) {
-          context->token_to_scan = yylex();
-        } else {
-          context->set_error(MISSING_CLOSING_PARENTHESIS);
-          return 1;
-        }
-      } else {
-        context->set_error(INVALID_ARGUMENT_LIST);
-        return 1;
-      }
-
-    } else {
-      context->set_error(MISSING_ARGUMENT_LIST);
-      return 1;
-    }
-
-    if (!Codeblock(context)) {
-      return 0;
-    }
-  } else {
+  if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan) {
     context->set_error(MISSING_IDENTIFIER);
+    return 1;
   }
-  return 1;
+
+  std::string kern_name = context->token_value.string_val;
+  BrigsOffset32_t str_offset = context->add_symbol(kern_name);
+  context->func_map[kern_name] = context->current_bdf_offset;
+
+  size_t bdk_size = sizeof(BrigDirectiveKernel);
+  BrigDirectiveKernel bdk = {
+    bdk_size,                    // size
+    BrigEDirectiveKernel,        // kind
+    context->get_code_offset(),  // c_code
+    str_offset,                  // s_name
+    0,                           // in param count
+    bdk_offset + bdk_size,       // d_firstScopedDirective
+    0,                           // operation count
+    bdk_offset + bdk_size,       // d_nextDirective
+    context->get_attribute(),    // attribute
+    0,                           // fbar count
+    0,                           // out param count
+    0                            // d_firstInParam
+  };
+
+  context->append_directive(&bdk);
+
+  context->token_to_scan = yylex();
+  if ('(' != context->token_to_scan) {
+    context->set_error(MISSING_ARGUMENT_LIST);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  uint32_t paramCount = 0;
+  if(KernelArgumentListBody(context, &paramCount)){
+    context->set_error(INVALID_ARGUMENT_LIST);
+    return 1;
+  }  
+  if (')' != context->token_to_scan) {
+    context->set_error(MISSING_CLOSING_PARENTHESIS);
+    return 1;
+  }
+  if(paramCount){
+    context->get_directive(bdk_offset, &bdk);
+    bdk.inParamCount = paramCount;
+    bdk.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
+    bdk.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
+    unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdk);
+    context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+                                  sizeof(BrigDirectiveKernel));
+  }
+
+  context->token_to_scan = yylex();
+  if (Codeblock(context))
+    return  1;
+
+  return 0;
 }
 
 int OperandList(Context* context) {
