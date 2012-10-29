@@ -2521,7 +2521,7 @@ TEST(ParserTest, KernelArgumentList) {
 TEST(ParserTest, KernelArgumentListBody) {
   Lexer *lexer = new Lexer();
 
-  std::string input("kernarg_f32 %x");
+  std::string input("(kernarg_f32 %x)");
 
   lexer->set_source_string(input);
   context->clear_context();
@@ -2551,7 +2551,7 @@ TEST(ParserTest, KernelArgumentListBody) {
 
 
 
-  input.assign("kernarg_u32 %y , kernarg_f32 %x");
+  input.assign("(kernarg_u32 %y , kernarg_f32 %x)");
   lexer->set_source_string(input);
 
   context->clear_context();
