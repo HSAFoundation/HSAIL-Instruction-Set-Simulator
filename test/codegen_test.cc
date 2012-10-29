@@ -2934,7 +2934,7 @@ TEST(CodegenTest,BlockCodegen){
   EXPECT_EQ(bbs.size,get_bbs.size);
   EXPECT_EQ(bbs.kind,get_bbs.kind);
   EXPECT_EQ(bbs.s_name,get_bbs.s_name);
-/*
+
   // blocknumeric
   size_t arraySize = sizeof(BrigBlockNumeric) + 3 * sizeof(uint64_t);
   BrigdOffset32_t bbn1_d_offset = bbs_d_offset - arraySize ;
@@ -2967,7 +2967,7 @@ TEST(CodegenTest,BlockCodegen){
   delete[] reinterpret_cast<char *>(bbn1);
   delete[] reinterpret_cast<char *>(get);
 
- // blocknumeric
+  // blocknumeric
   arraySize = sizeof(BrigBlockNumeric) + sizeof(uint64_t);
   BrigdOffset32_t bbn2_d_offset = bbn1_d_offset - arraySize;
   array = new uint8_t[arraySize];
@@ -3015,7 +3015,7 @@ TEST(CodegenTest,BlockCodegen){
   EXPECT_EQ(start.kind,get_start.kind);
   EXPECT_EQ(start.c_code,get_start.c_code);
   EXPECT_EQ(start.s_name,get_start.s_name);
-*/
+
   delete lexer;
 }
 
