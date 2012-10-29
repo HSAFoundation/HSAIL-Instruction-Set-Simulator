@@ -360,6 +360,16 @@ void validate(const BrigDirectiveExtension* ref, const char* refstr, const BrigD
   EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
 }
 
+void validate(const BrigDirectiveControl* ref, const BrigDirectiveControl* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  // EXPECT_EQ(ref->c_code, get->c_code);
+  EXPECT_EQ(ref->controlType, get->controlType);
+  EXPECT_EQ(ref->values[0], get->values[0]);
+  EXPECT_EQ(ref->values[1], get->values[1]);
+  EXPECT_EQ(ref->values[2], get->values[2]);
+}
+
 template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
   validate(ref, get);
 }

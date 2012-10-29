@@ -33,6 +33,7 @@
 #include "Pragma_test.h"
 #include "Extension_test.h"
 #include "Branch_test.h"
+#include "Control_test.h"
 
 namespace hsa {
 namespace brig {
