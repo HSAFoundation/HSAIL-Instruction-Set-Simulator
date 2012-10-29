@@ -932,7 +932,8 @@ TEST(BrigKernelTest, CRC32) {
        // get value of CRC32 array $s5 index. result store in $s5
     "  add_u32 $s2, 0, 0;\n"             // $s2 is for j. j = 0
     "@loop_j:"
-    "  and_b32 $c2, $s5, 0x1;\n"         // CRC32 array index
+    "  and_b32 $s7, $s5, 0x1;\n"         // CRC32 array index
+    "  cmp_eq_b1_u32 $c2, $s7, 0x1;\n"
     "  shr_u32 $s5, $s5, 1;\n"
     "  cbr $c2, @loop_j_if;\n"
     "  brn @loop_j_endif;\n"
