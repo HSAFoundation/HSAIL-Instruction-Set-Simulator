@@ -1501,7 +1501,8 @@ bool BrigModule::validateUnaryArithmetic(const inst_iterator inst) const {
   // Unary arithmetic requires signed types
   BrigDataType type = BrigDataType(inst->type);
   valid &= check(BrigInstHelper::isSignedTy(type) ||
-                 BrigInstHelper::isFloatTy(type),
+                 BrigInstHelper::isFloatTy(type) ||
+                 BrigInstHelper::isBitTy(type),
                  "Invalid type");
 
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
@@ -1539,7 +1540,8 @@ bool BrigModule::validateBinaryArithmetic(const inst_iterator inst) const {
   BrigDataType type = BrigDataType(inst->type);
   valid &= check(BrigInstHelper::isSignedTy(type)   ||
                  BrigInstHelper::isUnsignedTy(type) ||
-                 BrigInstHelper::isFloatTy(type),
+                 BrigInstHelper::isFloatTy(type) ||
+                 BrigInstHelper::isBitTy(type),
                  "Invalid type");
   if(!check(isa<BrigInstBase>(inst) || (isa<BrigInstMod>(inst) && 
             BrigInstHelper::isFloatTy(type)), "Incorrect instruction kind"))
@@ -1603,8 +1605,86 @@ bool BrigModule::validateBinaryArithmetic(const inst_iterator inst) const {
   return valid;
 }
 
+bool BrigModule::validateTernaryOptimization(const inst_iterator inst) const {
+  bool valid = true;
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(BrigInstHelper::isSignedTy(type)   ||
+                 BrigInstHelper::isUnsignedTy(type) ||
+                 BrigInstHelper::isFloatTy(type) ||
+                 BrigInstHelper::isBitTy(type),
+                 "Invalid type");
+  if(!check(isa<BrigInstBase>(inst) || (isa<BrigInstMod>(inst) && 
+            BrigInstHelper::isFloatTy(type)), "Incorrect instruction kind"))
+    return false;
+
+  if(!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
+    return false;
+
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(destReg, "Destination must be a register");
+
+  oper_iterator src1(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(src1)   ||
+                 isa<BrigOperandImmed>(src1) ||
+                 isa<BrigOperandWaveSz>(src1),
+                 "Destination must be a register, immediate, or wave size");
+
+  oper_iterator src2(S_.operands + inst->o_operands[2]);
+  valid &= check(isa<BrigOperandReg>(src2)   ||
+                 isa<BrigOperandImmed>(src2) ||
+                 isa<BrigOperandWaveSz>(src2),
+                 "Destination must be a register, immediate, or wave size");
+
+  oper_iterator src3(S_.operands + inst->o_operands[3]);
+  valid &= check(isa<BrigOperandReg>(src3)   ||
+                 isa<BrigOperandImmed>(src3) ||
+                 isa<BrigOperandWaveSz>(src3),
+                 "Destination must be a register, immediate, or wave size");
+
+  if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
+    valid &= check(BrigInstHelper::isFloatTy(type),
+                   "BrigInstMod is only valid for floating point");
+    valid &= check(!mod->aluModifier.floatOrInt,
+                   "Incompatible ALU modifier");
+    valid &= check(!mod->aluModifier.approx,
+                   "Incompatible ALU modifier");
+    valid &= check(!mod->aluModifier.fbar,
+                   "Incompatible ALU modifier");
+  }
+
+  if(BrigInstHelper::isVectorTy(type)) {
+      valid &= check(inst->packing == BrigPackPP    || 
+                     inst->packing == BrigPackPS    || 
+                     inst->packing == BrigPackSS    || 
+                     inst->packing == BrigPackSP    ||
+                     inst->packing == BrigPackPPsat ||
+                     inst->packing == BrigPackPSsat ||
+                     inst->packing == BrigPackSSsat ||
+                     inst->packing == BrigPackSPsat,
+                     "Vectors must have a packing");
+  } else {
+    if(!check(inst->packing == BrigNoPacking,
+              "Non-vectors must not have a packing"))
+      return false;
+  } 
+
+  valid &= check(BrigInstHelper::getTypeSize(type) <= 64, "Illegal data type");
+
+  valid &= check(BrigInstHelper::getTypeSize(type) <=
+                 BrigInstHelper::getTypeSize(BrigDataType(destReg->type)),
+                 "Destination register is too small");
+
+  valid &= check(isCompatibleSrc(type, src1), "Incompatible source operand");
+  valid &= check(isCompatibleSrc(type, src2), "Incompatible source operand");
+  valid &= check(isCompatibleSrc(type, src3), "Incompatible source operand");
+  return valid;
+}
+
 bool BrigModule::validateAbs(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Abs is not valid for bit point types");
   valid &= check(!getAluModifier(inst),  "Abs may not have an aluModifier");
   valid &= validateUnaryArithmetic(inst);
   return valid;
@@ -1612,6 +1692,8 @@ bool BrigModule::validateAbs(const inst_iterator inst) const {
 
 bool BrigModule::validateAdd(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Add is not valid for bit point types");
   if(BrigInstHelper::isFloatTy(BrigDataType(inst->type)) &&
      BrigInstHelper::isVectorTy(BrigDataType(inst->type))) 
     valid &= check(!(inst->packing == BrigPackPPsat ||
@@ -1661,6 +1743,8 @@ bool BrigModule::validateCopySign(const inst_iterator inst) const {
 
 bool BrigModule::validateDiv(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Div is not valid for bit point types");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Div cannot accept vector types");
   valid &= validateBinaryArithmetic(inst);
@@ -1668,7 +1752,13 @@ bool BrigModule::validateDiv(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateFma(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
+                 "Fma is only valid for floating point type");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Fma cannot accept vector types");
+  valid &= validateTernaryOptimization(inst);
+  return valid;
 }
 
 bool BrigModule::validateFract(const inst_iterator inst) const {
@@ -1682,11 +1772,19 @@ bool BrigModule::validateFract(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateMad(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Mad is not valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Mad cannot accept vector types");
+  valid &= validateTernaryOptimization(inst);
+  return valid;
 }
 
 bool BrigModule::validateMax(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Max is not valid for bit point types");
   if(BrigInstHelper::isVectorTy(BrigDataType(inst->type))) 
     valid &= check(!(inst->packing == BrigPackPPsat ||
                      inst->packing == BrigPackPSsat ||
@@ -1699,6 +1797,8 @@ bool BrigModule::validateMax(const inst_iterator inst) const {
 
 bool BrigModule::validateMin(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Min is not valid for bit point types");
   if(BrigInstHelper::isVectorTy(BrigDataType(inst->type))) 
     valid &= check(!(inst->packing == BrigPackPPsat ||
                      inst->packing == BrigPackPSsat ||
@@ -1711,6 +1811,8 @@ bool BrigModule::validateMin(const inst_iterator inst) const {
 
 bool BrigModule::validateMul(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Mul is not valid for bit point types");
   if(BrigInstHelper::isFloatTy(BrigDataType(inst->type)) &&
      BrigInstHelper::isVectorTy(BrigDataType(inst->type))) 
     valid &= check(!(inst->packing == BrigPackPPsat ||
@@ -1743,7 +1845,11 @@ bool BrigModule::validateMulHi(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateNeg(const inst_iterator inst) const {
-  return validateUnaryArithmetic(inst);
+  bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Neg is not valid for bit point types");
+  valid &= validateUnaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateRem(const inst_iterator inst) const {
@@ -1770,6 +1876,8 @@ bool BrigModule::validateSqrt(const inst_iterator inst) const {
 
 bool BrigModule::validateSub(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Sub is not valid for bit point types");
   if(BrigInstHelper::isFloatTy(BrigDataType(inst->type)) &&
      BrigInstHelper::isVectorTy(BrigDataType(inst->type))) 
     valid &= check(!(inst->packing == BrigPackPPsat ||
@@ -1782,19 +1890,51 @@ bool BrigModule::validateSub(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateMad24(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Mad24 must be BrigInstBase");
+  valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
+                 BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
+                 "Mad24 is only valid for signed and unsigned point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Mad24 cannot accept vector types");
+  valid &= validateTernaryOptimization(inst);
+  return valid;
 }
 
 bool BrigModule::validateMad24Hi(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Mad24Hi must be BrigInstBase");
+  valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
+                 BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
+                 "Mad24Hi is only valid for signed and unsigned point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Mad24Hi cannot accept vector types");
+  valid &= validateTernaryOptimization(inst);
+  return valid;
 }
 
 bool BrigModule::validateMul24(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Mul24 must be BrigInstBase");
+  valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
+                 BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
+                 "Mul24 is only valid for signed and unsigned point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Mul24 cannot accept vector types");
+  valid &= validateBinaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateMul24Hi(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Mul24Hi must be BrigInstBase");
+  valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
+                 BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
+                 "Mul24Hi is only valid for signed and unsigned point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Mul24Hi cannot accept vector types");
+  valid &= validateBinaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateShl(const inst_iterator inst) const {
@@ -1806,47 +1946,162 @@ bool BrigModule::validateShr(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateAnd(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "And must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "And is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "And cannot accept vector types");
+  valid &= validateBinaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateNot(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Not must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Not is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Not cannot accept vector types");
+  valid &= validateUnaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateOr(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Or must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Or is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Or cannot accept vector types");
+  valid &= validateBinaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validatePopCount(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "PopCount must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "PopCount is only valid for bit point types");
+  valid &= check(inst->type == Brigb32 || inst->type ==Brigb64, 
+                 "Type of PopCount shoud be Brigb32 and Brigb64");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "PopCount cannot accept vector types");
+
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(destReg, "Destination must be a register");
+  valid &= check(destReg->type == Brigb32, "Type Destination of PopCount "
+                 "must be Brigb32");
+
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  const BrigOperandReg *srcReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(srcReg, "Destination must be a register");
+  valid &= check(srcReg->type == Brigb32 || srcReg->type == Brigb64, 
+                 "Type Destination of PopCount must be Brigb32");
+
+  return valid;
 }
 
 bool BrigModule::validateXor(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Xor must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Xor is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Xor cannot accept vector types");
+  valid &= validateBinaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateBitRev(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "BitRev must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "BitRev is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "BitRev cannot accept vector types");
+  valid &= validateUnaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateBitSelect(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "BitSelect must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "BitSelect is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "BitSelect cannot accept vector types");
+  valid &= validateTernaryOptimization(inst);
+  return valid;
 }
 
 bool BrigModule::validateExtract(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Extract must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Extract is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Extract cannot accept vector types");
+
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(destReg, "Destination must be a register");
+  valid &= check(destReg->type == inst->type, "Type Destination of Extract "
+                 "must equal with inst->type");
+
+  oper_iterator src0(S_.operands + inst->o_operands[1]);
+  const BrigOperandReg *src0Reg = dyn_cast<BrigOperandReg>(src0);
+  valid &= check(src0Reg, "Destination must be a register");
+  valid &= check(src0Reg->type == inst->type, "Type Destination of Extract "
+                 "must equal with inst->type");
+
+  oper_iterator src1(S_.operands + inst->o_operands[2]);
+  const BrigOperandReg *src1Reg = dyn_cast<BrigOperandReg>(src1);
+  valid &= check(src1Reg, "Destination must be a register");
+  valid &= check(src1Reg->type == Brigb32, "Type Destination of Extract "
+                 "must be Brigb32");
+
+  oper_iterator src2(S_.operands + inst->o_operands[3]);
+  const BrigOperandReg *src2Reg = dyn_cast<BrigOperandReg>(src2);
+  valid &= check(src2Reg, "Destination must be a register");
+  valid &= check(src2Reg->type == Brigb32, "Type Destination of Extract "
+                 "must be Brigb32");
+
+  return valid;
 }
 
 bool BrigModule::validateFirstBit(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "FirstBit must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "FirstBit is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "FirstBit cannot accept vector types");
+  valid &= validateUnaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateInsert(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Insert must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "Insert is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Insert cannot accept vector types");
+  valid &= validateTernaryOptimization(inst);
+  return valid;
 }
 
 bool BrigModule::validateLastBit(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "LastBit must be BrigInstBase");
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(inst->type)),
+                 "LastBit is only valid for bit point types");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "LastBit cannot accept vector types");
+  valid &= validateUnaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateLda(const inst_iterator inst) const {
