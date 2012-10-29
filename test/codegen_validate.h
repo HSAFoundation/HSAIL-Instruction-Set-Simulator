@@ -360,6 +360,33 @@ void validate(const BrigDirectiveExtension* ref, const char* refstr, const BrigD
   EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
 }
 
+void validate(const BrigBlockStart* ref, const char* refstr, const BrigBlockStart* get, const char* getstr){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  // EXPECT_EQ(ref->c_code, get->c_code);
+  // EXPECT_EQ(ref->s_name, get->s_name); 
+  EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
+}
+
+void validate(const BrigBlockNumeric* ref, const BrigBlockNumeric* get) {
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->elementCount, get->elementCount);
+  int dataSize = ref->size - sizeof(BrigBlockNumeric) + sizeof(uint64_t);
+  for(int i = 0; i < dataSize; i++) {
+    EXPECT_EQ(ref->u8[i], get->u8[i]);
+  }
+}
+
+void validate(const BrigBlockString* ref, const char* refstr, const BrigBlockString* get, const char* getstr){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  // EXPECT_EQ(ref->s_name, get->s_name); 
+  EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
+}
+
 template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
   validate(ref, get);
 }
