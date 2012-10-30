@@ -1266,16 +1266,18 @@ int Version(Context* context) {
 
 int Alignment(Context* context) {
   // first token must be "align" keyword
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        context->set_alignment(context->token_value.int_val);
-        context->token_to_scan = yylex();
-        return 0;
-    } else {
-        context->set_error(MISSING_INTEGER_CONSTANT);
-        return 1;
-    }
+  if ( ALIGN != context->token_to_scan)
+    return 1;
 
+  context->token_to_scan = yylex();
+  if (TOKEN_INTEGER_CONSTANT != context->token_to_scan){
+    context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+
+  context->set_alignment(context->token_value.int_val);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int DeclPrefix(Context* context){
