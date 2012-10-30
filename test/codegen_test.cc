@@ -1010,42 +1010,6 @@ TEST(CodegenTest, BrigOperandAddressGeneration) {
   delete parser;
 }
 
-TEST(CodegenTest, RetCodeGen) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  BrigInstBase ref = {
-    32,
-    BrigEInstBase,
-    BrigRet,
-    Brigb32,
-    BrigNoPacking,
-    {0, 0, 0, 0, 0}
-  };
-
-  std::string input("ret ;");
-  Lexer* lexer = new Lexer(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Ret(context));
-
-  BrigInstBase get;
-  context->get_code(8, &get);
-
-  EXPECT_EQ(ref.size,get.size);
-  EXPECT_EQ(ref.kind,get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.packing, get.packing);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
-
-  delete lexer;
-}
-
 TEST(CodegenTest, OptionalWidthCodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -3153,47 +3117,6 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
   EXPECT_EQ(arg2.s.storageClass, getArg.s.storageClass);
   EXPECT_EQ(arg2.s.s_name, getArg.s.s_name);
 
-
-  delete lexer;
-}
-
-TEST(CodegenTest, Instruction0_CodeGen_SimpleTest) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("nop;\n");
-
-  Lexer* lexer = new Lexer(input);
-
-  BrigInstBase ref = {
-    sizeof(BrigInstBase),   // size
-    BrigEInstBase,         // kind
-    BrigNop,            // opcode
-    Brigb32,               // type
-    BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0}        // o_operands[5]
-  };
-
-  BrigInstBase get;
-
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-
-  EXPECT_EQ(0, Instruction0(context));
-
-  context->get_code(8, &get);
-  // BrigInstBase Nop
-  EXPECT_EQ(ref.size, get.size);
-  EXPECT_EQ(ref.kind, get.kind);
-  EXPECT_EQ(ref.opcode, get.opcode);
-  EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.packing, get.packing);
-
-  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
 
   delete lexer;
 }
