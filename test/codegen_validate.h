@@ -387,6 +387,30 @@ void validate(const BrigBlockString* ref, const char* refstr, const BrigBlockStr
   EXPECT_STREQ(&refstr[ref->s_name], &getstr[get->s_name]);
 }
 
+void validate(const BrigInstImage* ref, const BrigInstImage* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->stype, get->stype);
+  EXPECT_EQ(ref->packing, get->packing);
+  EXPECT_EQ(ref->reserved, get->reserved);
+  //ignore o_operands
+  EXPECT_EQ(ref->geom, get->geom);
+}
+
+void validate(const BrigInstRead* ref, const BrigInstRead* get){
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->stype, get->stype);
+  EXPECT_EQ(ref->packing, get->packing);
+  EXPECT_EQ(ref->reserved, get->reserved);
+  //ignore o_operands
+  EXPECT_EQ(ref->geom, get->geom);
+}
+
 template <typename T> void validateOpType(const T* ref, const char* refstr, const T* get, const char* getstr){
   validate(ref, get);
 }
