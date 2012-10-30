@@ -1336,28 +1336,6 @@ int DeclPrefix(Context* context){
     return 0;
 }
 
-
-int FBar(Context* context) {
-  // first token must be _FBAR
-  context->token_to_scan = yylex();
-  if (context->token_to_scan == '(') {
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      //context->set_fbar(context->token_value.int_val);
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ')') {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_CLOSING_PARENTHESIS);
-      }
-    } else {
-      context->set_error(MISSING_INTEGER_CONSTANT);
-    }
-  }
-  return 1;
-}
-
 int ArrayDimensionSet(Context* context) {
   // first token must be '['
   uint32_t dim = 1;

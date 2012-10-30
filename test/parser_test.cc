@@ -358,20 +358,6 @@ TEST(ParserTest, DeclPrefix) {
   delete lexer;
 }
 
-TEST(ParserTest, FBar) {
-  // Create a lexer
-  Lexer* lexer = new Lexer();
-  // register error reporter with context
-  context->set_error_reporter(main_reporter);
-
-  std::string input(":fbar(1)\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, FBar(context));
-
-  delete lexer;
-}
-
 TEST(ParserTest, ArrayDimensionSet) {
   // Create a lexer
   Lexer* lexer = new Lexer();
