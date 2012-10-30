@@ -4598,59 +4598,61 @@ int Mov(Context* context) {
 
 int GlobalGroupDecl(Context* context) {
   // first token is Group
+  if (GROUP != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
-  if (context->token_type == DATA_TYPE_ID) {
-
-    BrigDataType16_t data_type = context->token_value.data_type ;
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
-
-      BrigsOffset32_t var_name_offset = context->add_symbol(context->token_value.string_val);
-      context->token_to_scan = yylex();
-      // set default value(scalar)
-      context->set_dim(0);
-      //context->set_symbol_modifier(BrigArray);
-      if (context->token_to_scan == '[') {
-        if (!ArrayDimensionSet(context)) {}
-      }
-      if (context->token_to_scan == ';') {
-
-        BrigDirectiveSymbol bds = {
-        sizeof(BrigDirectiveSymbol),// size
-        BrigEDirectiveSymbol ,    // kind
-        {
-          context->get_code_offset(),     // c_code
-          BrigGroupSpace,                 // storag class
-          context->get_attribute() ,                      // attribut
-          0,                              // reserved
-          context->get_symbol_modifier(), // symbolModifier
-          context->get_dim(),             // dim
-          var_name_offset,                // s_name
-          data_type,                      // type
-          context->get_alignment(),       // align
-        },
-        0,                         // d_init
-        0,                         // reserved
-        };
-        context->append_directive(&bds);
-
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-        return 1;
-      }
-    } else {
-      context->set_error(MISSING_GLOBAL_IDENTIFIER);
-      return 1;
-    }
-  } else {
+  if (DATA_TYPE_ID != context->token_type) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  context->set_error(INVALID_GLOBAL_DECL);
-  return 1;
-}
+
+  context->set_type(context->token_value.data_type);
+  context->token_to_scan = yylex();
+  
+  if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan){
+    context->set_error(MISSING_GLOBAL_IDENTIFIER);
+    return 1;
+  }
+  
+  BrigsOffset32_t str_offset = context->add_symbol(context->token_value.string_val);
+  context->set_dim(0);
+  context->init_symbol_modifier();
+
+  context->token_to_scan = yylex();
+  if ('[' == context->token_to_scan) {
+    if (ArrayDimensionSet(context)) {
+      return 1;
+    }
+  }
+
+  if (';' != context->token_to_scan){
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+
+  BrigDirectiveSymbol bds = {
+    sizeof(BrigDirectiveSymbol),    // size
+    BrigEDirectiveSymbol ,          // kind
+    {
+      context->get_code_offset(),        // c_code
+      BrigGroupSpace,                    // storag class
+      context->get_attribute() ,         // attribut
+      0,                                 // reserved
+      context->get_symbol_modifier(),    // symbolModifier
+      context->get_dim(),                // dim
+      str_offset,                        // s_name
+      context->get_type(),               // type
+      context->get_alignment(),          // align
+    },
+    0,                             // d_init
+    0,                             // reserved
+  };
+  context->append_directive(&bds);
+
+  context->token_to_scan = yylex();
+  return 0;
+} 
 
 int MulInst(Context* context) {
 
