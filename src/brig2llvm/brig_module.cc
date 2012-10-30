@@ -1995,10 +1995,17 @@ bool BrigModule::validatePopCount(const inst_iterator inst) const {
                  "must be Brigb32");
 
   oper_iterator src(S_.operands + inst->o_operands[1]);
-  const BrigOperandReg *srcReg = dyn_cast<BrigOperandReg>(dest);
-  valid &= check(srcReg, "Destination must be a register");
-  valid &= check(srcReg->type == Brigb32 || srcReg->type == Brigb64, 
-                 "Type Destination of PopCount must be Brigb32");
+  if(isa<BrigOperandReg>(src)) {
+    const BrigOperandReg *srcReg = dyn_cast<BrigOperandReg>(src);
+    valid &= check(srcReg, "Destination could be a register");
+    valid &= check(srcReg->type == Brigb32 || srcReg->type == Brigb64, 
+                   "Type Destination of PopCount must be Brigb32 or Brigb64");
+  } else if(isa<BrigOperandImmed>(src)) {
+    const BrigOperandImmed *srcImm = dyn_cast<BrigOperandImmed>(src);
+    valid &= check(srcImm, "Destination could be a immediate");
+    valid &= check(srcImm->type == Brigb32 || srcImm->type == Brigb64, 
+                   "Type Destination of PopCount must be Brigb32 or Brigb64");
+  }
 
   return valid;
 }
@@ -2051,22 +2058,50 @@ bool BrigModule::validateExtract(const inst_iterator inst) const {
                  "must equal with inst->type");
 
   oper_iterator src0(S_.operands + inst->o_operands[1]);
-  const BrigOperandReg *src0Reg = dyn_cast<BrigOperandReg>(src0);
-  valid &= check(src0Reg, "Destination must be a register");
-  valid &= check(src0Reg->type == inst->type, "Type Destination of Extract "
-                 "must equal with inst->type");
+  if(isa<BrigOperandReg>(src0)) {
+    const BrigOperandReg *src0Reg = dyn_cast<BrigOperandReg>(src0);
+    valid &= check(src0Reg, "Destination could be a register");
+    valid &= check(src0Reg->type == inst->type, "Type Destination of Extract "
+                   "must equal with inst->type");
+  } else if(isa<BrigOperandImmed>(src0)) {
+    const BrigOperandImmed *src0Imm = dyn_cast<BrigOperandImmed>(src0);
+    valid &= check(src0Imm, "Destination could be a immediate");
+    valid &= check(src0Imm->type == inst->type, "Type Destination of Extract "
+                   "must equal with inst->type");
+  }
 
   oper_iterator src1(S_.operands + inst->o_operands[2]);
-  const BrigOperandReg *src1Reg = dyn_cast<BrigOperandReg>(src1);
-  valid &= check(src1Reg, "Destination must be a register");
-  valid &= check(src1Reg->type == Brigb32, "Type Destination of Extract "
-                 "must be Brigb32");
+  if(isa<BrigOperandReg>(src1)) {
+    const BrigOperandReg *src1Reg = dyn_cast<BrigOperandReg>(src1);
+    valid &= check(src1Reg, "Destination could be a register");
+    valid &= check(src1Reg->type == Brigb32, "Type Destination of Extract "
+                   "must equal with inst->type");
+  } else if(isa<BrigOperandImmed>(src1)) {
+    const BrigOperandImmed *src1Imm = dyn_cast<BrigOperandImmed>(src1);
+    valid &= check(src1Imm, "Destination could be a immediate");
+    valid &= check(src1Imm->type == inst->type, "Type Destination of Extract "
+                   "must equal with inst->type");
+  }
 
   oper_iterator src2(S_.operands + inst->o_operands[3]);
-  const BrigOperandReg *src2Reg = dyn_cast<BrigOperandReg>(src2);
-  valid &= check(src2Reg, "Destination must be a register");
-  valid &= check(src2Reg->type == Brigb32, "Type Destination of Extract "
-                 "must be Brigb32");
+  if(isa<BrigOperandReg>(src2)) {
+    const BrigOperandReg *src2Reg = dyn_cast<BrigOperandReg>(src2);
+    valid &= check(src2Reg, "Destination could be a register");
+    valid &= check(src2Reg->type == Brigb32, "Type Destination of Extract "
+                   "must equal with inst->type");
+  } else if(isa<BrigOperandImmed>(src2)) {
+    const BrigOperandImmed *src2Imm = dyn_cast<BrigOperandImmed>(src2);
+    valid &= check(src2Imm, "Destination could be a immediate");
+    valid &= check(src2Imm->type == inst->type, "Type Destination of Extract "
+                   "must equal with inst->type");
+  }
+
+  valid &= check(BrigInstHelper::getTypeSize(BrigDataType(inst->type)) <= 64, 
+                 "Illegal data type");
+
+  valid &= check(BrigInstHelper::getTypeSize(BrigDataType(inst->type)) <=
+                 BrigInstHelper::getTypeSize(BrigDataType(destReg->type)),
+                 "Destination register is too small");
 
   return valid;
 }
