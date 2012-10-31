@@ -19,7 +19,6 @@ using hsa::brig::isPosZero;
 using hsa::brig::isQNan;
 using hsa::brig::isSNan;
 using hsa::brig::isUnordered;
-using hsa::brig::Vec;
 
 template<class T> static void AbsLogic(T result, T a) {
   if(!isNan(result) && !isNan(a))  {
@@ -348,36 +347,36 @@ template<class T> static void ShrVectorLogic(T result, T a, unsigned b) {
 TestAll(ShiftInst, Shr, Binary)
 
 template<class T> static void UnpackLoLogic(T result, T a, T b) {
-  for(unsigned i = 0; i < Vec<T>::Len / 2; ++i) {
-    if(!isNan(((Vec<T>) a)[i]) &&
-       !isNan(((Vec<T>) result)[i * 2]))
+  for(unsigned i = 0; i < T::Len / 2; ++i) {
+    if(!isNan(a[i]) &&
+       !isNan(result[i * 2]))
     {
-      EXPECT_EQ(((Vec<T>) a)[i],
-                      ((Vec<T>) result)[i * 2]);
+      EXPECT_EQ(a[i],
+                      result[i * 2]);
     }
-    if(!isNan(((Vec<T>) b)[i]) &&
-       !isNan(((Vec<T>) result)[i * 2 + 1]))
+    if(!isNan(b[i]) &&
+       !isNan(result[i * 2 + 1]))
     {
-      EXPECT_EQ(((Vec<T>) b)[i],
-                      ((Vec<T>) result)[i * 2 + 1]);
+      EXPECT_EQ(b[i],
+                      result[i * 2 + 1]);
     }
   }
 }
 TestAll(UnpackInst, UnpackLo, Binary)
 
 template<class T> static void UnpackHiLogic(T result, T a, T b) {
-  for(unsigned i = 0; i < Vec<T>::Len / 2; ++i) {
-    if(!isNan(((Vec<T>) a)[i + Vec<T>::Len /2]) &&
-         !isNan(((Vec<T>) result)[i * 2]))
+  for(unsigned i = 0; i < T::Len / 2; ++i) {
+    if(!isNan(a[i + T::Len /2]) &&
+         !isNan(result[i * 2]))
     {
-      EXPECT_EQ(((Vec<T>) a)[i + Vec<T>::Len / 2],
-                      ((Vec<T>) result)[i * 2]);
+      EXPECT_EQ(a[i + T::Len / 2],
+                      result[i * 2]);
     }
-    if(!isNan(((Vec<T>) b)[i + Vec<T>::Len / 2]) &&
-       !isNan(((Vec<T>) result)[i * 2 + 1]))
+    if(!isNan(b[i + T::Len / 2]) &&
+       !isNan(result[i * 2 + 1]))
     {
-      EXPECT_EQ(((Vec<T>) b)[i + Vec<T>::Len / 2],
-                      ((Vec<T>) result)[i * 2 + 1]);
+      EXPECT_EQ(b[i + T::Len / 2],
+                      result[i * 2 + 1]);
     }
   }
 }
@@ -531,10 +530,10 @@ MakeTest(Mov_b64_b64, Mov_b64_b64_Logic)
 
 // Assumes little-endian
 static void Mov_b128_b32_Logic(b128 result, b32 a, b32 b, b32 c, b32 d) {
-  EXPECT_EQ(d, ((Vec<b128>) result)[0]);
-  EXPECT_EQ(c, ((Vec<b128>) result)[1]);
-  EXPECT_EQ(b, ((Vec<b128>) result)[2]);
-  EXPECT_EQ(a, ((Vec<b128>) result)[3]);
+  EXPECT_EQ(d, result[0]);
+  EXPECT_EQ(c, result[1]);
+  EXPECT_EQ(b, result[2]);
+  EXPECT_EQ(a, result[3]);
 }
 extern "C" b128 Mov_b128_b32(b32, b32, b32, b32);
 MakeTest(Mov_b128_b32, Mov_b128_b32_Logic)
@@ -567,29 +566,29 @@ MakeTest(Movd_hi_b64, Movd_hi_b64_Logic)
 
 template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
 
-  typedef typename Vec<T>::Base Base;
+  typedef typename T::Base Base;
 
-  unsigned len   = Vec<T>::Len;
+  unsigned len   = T::Len;
   unsigned mask  = len - 1;
-  unsigned shift = Vec<T>::LogLen;
+  unsigned shift = T::LogLen;
   b32 shuffle = c;
 
   for(unsigned i = 0; i < len / 2; ++i) {
     unsigned offset = shuffle & mask;
-    if(isNan(((Vec<T>) a)[offset])) {
-      EXPECT_PRED1(isNan<Base>, ((Vec<T>) result)[i]);
+    if(isNan(a[offset])) {
+      EXPECT_PRED1(isNan<Base>, result[i]);
     } else {
-      EXPECT_EQ(((Vec<T>) a)[offset], ((Vec<T>) result)[i]);
+      EXPECT_EQ(a[offset], result[i]);
     }
     shuffle >>= shift;
   }
 
   for(unsigned i = len / 2; i < len; ++i) {
     unsigned offset = shuffle & mask;
-    if(isNan(((Vec<T>) b)[offset])) {
-      EXPECT_PRED1(isNan<Base>, ((Vec<T>) result)[i]);
+    if(isNan(b[offset])) {
+      EXPECT_PRED1(isNan<Base>, result[i]);
     } else {
-      EXPECT_EQ(((Vec<T>) b)[offset], ((Vec<T>) result)[i]);
+      EXPECT_EQ(b[offset], result[i]);
     }
     shuffle >>= shift;
   }
@@ -597,13 +596,28 @@ template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
 TestAll(ShuffleVectorInst, Shuffle, Ternary)
 
 template<class T> static void CmovLogic(T result, T a, T b, T c) {
-  if(a & 1) {
-    EXPECT_EQ(b, result);
+  if(a == 0) {
+    if(isNan(c)) {
+      EXPECT_PRED1(isNan<T>, result);
+    } else {
+      EXPECT_EQ(c, result);
+    }
   } else {
-    EXPECT_EQ(c, result);
+    if(isNan(b)) {
+      EXPECT_PRED1(isNan<T>, result);
+    } else {
+      EXPECT_EQ(b, result);
+    }
   }
 }
 TestAll(BitInst, Cmov, Ternary)
+
+template<class T> static void CmovVectorLogic(T result, T a, T b, T c) {
+  ForEach(CmovLogic, result, a, b, c);
+}
+TestAll(SignedVectorInst, Cmov, Ternary)
+TestAll(UnsignedVectorInst, Cmov, Ternary)
+TestAll(FloatVectorInst, Cmov, Ternary)
 
 template<class T> static void FractLogic(T result, T a) {
 
@@ -657,7 +671,7 @@ template<> void CopySignLogic(f64 result, f64 a, f64 b) {
   Conv aConv = { a };
   Conv bConv = { b };
   Conv resultConv = { result };
-  b64 mask = (1UL << 63) - 1;
+  b64 mask = (1ULL << 63) - 1;
   EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
@@ -666,7 +680,7 @@ template<> void CopySignLogic(f32 result, f32 a, f32 b) {
   Conv aConv = { a };
   Conv bConv = { b };
   Conv resultConv = { result };
-  b32 mask = (1UL << 31) - 1;
+  b32 mask = (1U << 31) - 1;
   EXPECT_EQ(resultConv.b &  mask, aConv.b &  mask);
   EXPECT_EQ(resultConv.b & ~mask, bConv.b & ~mask);
 }
@@ -1020,7 +1034,7 @@ template<class R, class T> static void Cvt_zeroi_Logic(R result, T a) {
   } else if(isNegInf(a)) {
     EXPECT_EQ(getMin<R>(), result);
   } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
-    EXPECT_GE(std::abs(a), std::abs(result));
+    EXPECT_GE(llabs((uint64_t) a), llabs((uint64_t) result));
   }
 }
 template<class R, class T> static void Cvt_neari_Logic(R result, T a) {
@@ -1043,7 +1057,7 @@ MakeCvtF2FsTest(f32)
 MakeCvtF2FsTest(f64)
 MakeCvtF2FdTest(up,   a <= result)
 MakeCvtF2FdTest(down, a >= result)
-MakeCvtF2FdTest(zero, abs(a) >= abs(result))
+MakeCvtF2FdTest(zero, std::abs(a) >= std::abs(result))
 MakeCvtF2FdTest(near, (f32) a == result)
 
 template<class T> static void AtomicAndLogic(T result, T *a, T b) {

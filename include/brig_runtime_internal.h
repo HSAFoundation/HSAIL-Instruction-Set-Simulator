@@ -8,129 +8,72 @@
 namespace hsa {
 namespace brig {
 
-template<class T, class B, unsigned L>
-struct VecPolicy {
-  typedef VecPolicy<T, B, L> Self;
-  typedef T Type;
-  typedef B Base;
-  static const unsigned Len = L;
-  static const unsigned LogLen =
-    L == 2 ? 1 :
-    L == 4 ? 2 :
-    L == 8 ? 3 : 4;
-  typedef Base (*UMapFn)(Base);
-  typedef Base (*BMapFn)(Base, Base);
-  typedef Base (*SMapFn)(Base, unsigned);
-  typedef void (*UForEachFn)(Base);
-  typedef void (*BForEachFn)(Base, Base);
-  typedef void (*TForEachFn)(Base, Base, Base);
-  typedef void (*SForEachFn)(Base, Base, unsigned);
-
-  VecPolicy(Type &t) : t_(t) {}
-
-  Base &operator[](unsigned i) {
-    return reinterpret_cast<Base *>(&t_)[i];
-  }
-
-  static Type &S(Type &t) {
-    for(unsigned i = 1; i < Len; ++i) {
-      ((Self) t)[i] = ((Self) t)[0];
-    }
-    return t;
-  }
-
-  static Type &P(Type &t) {
-    return t;
-  }
-
- private:
-  Type &t_;
-};
-
-template<class T> struct Vec;
-
 template<class T>
-inline T map(typename Vec<T>::UMapFn MapFn, T t) {
-  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
-    ((Vec<T>) t)[i] = MapFn(((Vec<T>) t)[i]);
+inline T map(typename T::UMapFn MapFn, T t) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    t[i] = MapFn(t[i]);
   }
   return t;
 }
 
 template<class T>
-inline T map(typename Vec<T>::BMapFn MapFn, T x, T y) {
-  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
-    ((Vec<T>) x)[i] = MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i]);
+inline T map(typename T::BMapFn MapFn, T x, T y) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    x[i] = MapFn(x[i], y[i]);
   }
   return x;
 }
 
 template<class T>
-inline T map(typename Vec<T>::SMapFn MapFn, T x, typename Vec<T>::Base y) {
-  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
-    ((Vec<T>) x)[i] = MapFn(((Vec<T>) x)[i], y);
+inline T map(typename T::TMapFn MapFn, T x, T y, T z) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    x[i] = MapFn(x[i], y[i], z[i]);
   }
   return x;
 }
 
 template<class T>
-inline void ForEach(typename Vec<T>::UForEachFn MapFn, T t) {
-  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
-    MapFn(((Vec<T>) t)[i]);
+inline T map(typename T::SMapFn MapFn, T x, typename T::Base y) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    x[i] = MapFn(x[i], y);
+  }
+  return x;
+}
+
+template<class T>
+inline void ForEach(typename T::UForEachFn MapFn, T t) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    MapFn(t[i]);
   }
 }
 
 template<class T>
-inline void ForEach(typename Vec<T>::BForEachFn MapFn, T x, T y) {
-  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
-    MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i]);
+inline void ForEach(typename T::BForEachFn MapFn, T x, T y) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    MapFn(x[i], y[i]);
   }
 }
 
 template<class T>
-inline void ForEach(typename Vec<T>::TForEachFn MapFn, T x, T y, T z) {
-  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
-    MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i], ((Vec<T>) z)[i]);
+inline void ForEach(typename T::TForEachFn MapFn, T x, T y, T z) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    MapFn(x[i], y[i], z[i]);
   }
 }
 
 template<class T>
-inline void ForEach(typename Vec<T>::SForEachFn MapFn, T x, T y, unsigned z) {
-  for(unsigned i = 0; i < Vec<T>::Len; ++i) {
-    MapFn(((Vec<T>) x)[i], ((Vec<T>) y)[i], z);
+inline void ForEach(typename T::QForEachFn MapFn, T x, T y, T z, T w) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    MapFn(x[i], y[i], z[i], w[i]);
   }
 }
 
-#define defineVec(T,LEN)                                            \
-  template<> struct Vec<T ## x ## LEN> :                            \
-    public VecPolicy<T ## x ## LEN, T, LEN> {                       \
-    Vec(T ## x ## LEN &t) : VecPolicy<T ## x ## LEN, T, LEN>(t) {}  \
-  };
-
-defineVec(u8, 4)
-defineVec(s8, 4)
-defineVec(u8, 8)
-defineVec(s8, 8)
-defineVec(u8, 16)
-defineVec(s8, 16)
-defineVec(u16, 2)
-defineVec(s16, 2)
-// defineVec(f16, 2)
-defineVec(u16, 4)
-defineVec(s16, 4)
-// defineVec(f16, 4)
-defineVec(u16, 8)
-defineVec(s16, 8)
-// defineVec(f16, 8)
-defineVec(u32, 2)
-defineVec(s32, 2)
-defineVec(f32, 2)
-defineVec(u32, 4)
-defineVec(s32, 4)
-defineVec(f32, 4)
-defineVec(u64, 2)
-defineVec(s64, 2)
-defineVec(f64, 2)
+template<class T>
+inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
+  for(unsigned i = 0; i < T::Len; ++i) {
+    MapFn(x[i], y[i], z);
+  }
+}
 
 #define BitInst(D,INST,NARY)                    \
   D ## NARY(INST, b1)                           \
@@ -209,6 +152,9 @@ defineVec(f64, 2)
   D ## BinaryVectorPacking(FUNC, TYPE, P, S)    \
   D ## BinaryVectorPacking(FUNC, TYPE, S, P)    \
   D ## BinaryVectorPacking(FUNC, TYPE, S, S)
+
+#define TernaryVector(D,FUNC,TYPE)              \
+  D ## TernaryVectorPacking(FUNC, TYPE)
 
 #define ShuffleVectorInst(D,INST,NARY)          \
   D ## ShuffleVector(INST, s8x4)                \
@@ -353,12 +299,17 @@ defineVec(f64, 2)
 
 #define defineUnaryVectorPacking(FUNC,TYPE,PACKING)             \
   extern "C" TYPE FUNC ## _ ## PACKING ## _ ## TYPE (TYPE t) {  \
-    return FUNC ## Vector(Vec<TYPE>::PACKING(t));               \
+    return FUNC ## Vector(t.PACKING());                         \
   }
 
 #define defineBinaryVectorPacking(FUNC,TYPE,P1,P2)                      \
   extern "C" TYPE FUNC ## _ ## P1 ## P2 ## _ ## TYPE (TYPE t, TYPE u) { \
-    return FUNC ## Vector(Vec<TYPE>::P1(t), Vec<TYPE>::P2(u));          \
+    return FUNC ## Vector(t.P1(), u.P2());                              \
+  }
+
+#define defineTernaryVectorPacking(FUNC,TYPE)                   \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v) {  \
+    return FUNC ## Vector(t, u, v);                             \
   }
 
 #define defineShiftVector(FUNC,TYPE)                      \
@@ -372,20 +323,20 @@ defineVec(f64, 2)
   }
 
 #define defineAtomicBinary(FUNC,TYPE)                                   \
-  extern "C" TYPE Atomic ## FUNC ## _ ## TYPE (TYPE* t, TYPE u) {       \
+  extern "C" TYPE Atomic ## FUNC ## _ ## TYPE (TYPE *t, TYPE u) {       \
     return Atomic ## FUNC(t, u);                                        \
   }                                                                     \
-  extern "C" void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE* t, TYPE u) {  \
+  extern "C" void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE *t, TYPE u) {  \
     Atomic ## FUNC(t, u);                                               \
   }
 
 #define defineAtomicTernary(FUNC,TYPE)                                  \
   extern "C"                                                            \
-  TYPE Atomic ## FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) {          \
+  TYPE Atomic ## FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v) {          \
     return Atomic ## FUNC(t, u, v);                                     \
   }                                                                     \
   extern "C"                                                            \
-  void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE* t, TYPE u, TYPE v) {     \
+  void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v) {     \
     Atomic ## FUNC(t, u, v);                                            \
   }
 
@@ -410,6 +361,9 @@ defineVec(f64, 2)
 
 #define declareBinaryVectorPacking(FUNC,TYPE,P1,P2)                     \
   extern "C" TYPE FUNC ## _ ## P1 ## P2 ## _ ## TYPE (TYPE t, TYPE u);
+
+#define declareTernaryVectorPacking(FUNC,TYPE)                \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v);
 
 #define declareShiftVector(FUNC,TYPE)                         \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift);
@@ -445,12 +399,14 @@ template<> struct IntTypes<false> {
 template<class T, class U, bool S> struct IntPolicy :
     public IntTypes<S> {
   typedef U Unsigned;
-  static const bool isSigned = S;
-  static const unsigned Bits = 8 * sizeof(T);
-  static const unsigned ShiftMask = Bits - 1;
-  static const T HighBit = T(T(1) << (Bits - 1));
-  static const T Min = isSigned ? HighBit :  T(0);
-  static const T Max = ~Min;
+  enum { isSigned = S };
+  enum {
+    Bits = 8 * sizeof(T),
+    ShiftMask = Bits - 1,
+    HighBit = T(T(1) << (Bits - 1)),
+    Min = S ? HighBit : T(0),
+    Max = T(~Min)
+  };
   static bool isNeg(T t) { return isSigned && (t & HighBit); }
   static bool isNegOne(T t) { return isSigned && t == T(~0); }
 };
@@ -480,7 +436,7 @@ template<> inline bool isSNan(f32 f) {
 template<> inline bool isSNan(f64 f) {
   if(!isNan(f)) return false;
   union { f64 f; b64 b; } Conv = { f };
-  b64 mask = (1UL << 51);
+  b64 mask = (1ULL << 51);
   return Conv.b & mask;
 }
 

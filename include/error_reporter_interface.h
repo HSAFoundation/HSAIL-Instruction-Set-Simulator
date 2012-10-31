@@ -61,7 +61,8 @@ enum error_code_t {
   INVALID_PACKING,
   INVALID_ARG_BLOCK,
   INVALID_CALL_ARGS,
-
+  INVALID_ARRAY_DIMENSIONS,
+  INVALID_CALL_TARGETS,
   // missing part
   MISSING_VERSION_STATEMENT,
   MISSING_WIDTH_INFO,
@@ -75,6 +76,8 @@ enum error_code_t {
   MISSING_SECTION_ITEM,
   MISSING_BLOCK_TYPE,
   MISSING_ADDRESS,
+  MISSING_OPERATION,
+  MISSING_FUNCTION_DIRECTIVE,
 
   UNKNOWN_ERROR
 };
@@ -193,7 +196,10 @@ class ErrorReporterInterface {
           return std::string("Invalid Arg Block.");
         case INVALID_CALL_ARGS:
           return std::string("Invalid Call Args.");
-
+        case INVALID_CALL_TARGETS:
+          return std::string("Invalid Call Targets.");
+        case INVALID_ARRAY_DIMENSIONS:
+          return std::string("Invalid Array Dimensions");
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");
         case MISSING_WIDTH_INFO:
@@ -218,7 +224,10 @@ class ErrorReporterInterface {
           return std::string("Missing block type.");
         case MISSING_ADDRESS:
           return std::string("Missing Address.");
-
+        case MISSING_OPERATION:
+          return std::string("Missing operation");
+        case MISSING_FUNCTION_DIRECTIVE:
+          return std::string("Invalid argument space. No function/kernel specified");
         case UNKNOWN_ERROR:
         default:
           return std::string("Unknown error.");

@@ -6,7 +6,7 @@
 namespace hsa {
 namespace brig {
 
-template <typename T1, typename T2, typename T3> 
+template <typename T1, typename T2, typename T3>
 class Syscall_Test: public BrigCodeGenTest {
 
 private:
@@ -19,7 +19,7 @@ private:
   const T3* RefSrc4;
 
 public:
-  Syscall_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref, 
+  Syscall_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref,
                BrigOperandReg* Dest, BrigOperandImmed* Src1, T1* Src2, T2* Src3, T3* Src4):
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
@@ -28,49 +28,49 @@ public:
     RefSrc2(Src2),
     RefSrc3(Src3),
     RefSrc4(Src4) { }
- 
+
   void validate(struct BrigSections* TestOutput) {
-  
+
     const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;   
-    
+    const char* getbuf = TestOutput->strings;
+
     inst_iterator getcode = TestOutput->code_begin();
     const BrigInstBase* getinst = (cast<BrigInstBase>(getcode));
     validate_brig::validate(RefInst, getinst);
 
-    const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*> 
+    const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*>
                                     (&(TestOutput->operands[getinst->o_operands[0]]));
     validate_brig::validate(RefDest, refbuf, getdest, getbuf);
 
-    const BrigOperandImmed* getsrc1 = reinterpret_cast <const BrigOperandImmed*> 
+    const BrigOperandImmed* getsrc1 = reinterpret_cast <const BrigOperandImmed*>
                                       (&(TestOutput->operands[getinst->o_operands[1]]));
     validate_brig::validate(RefSrc1, getsrc1);
-    
-    const T1 *getsrc2 = reinterpret_cast <const T1*> 
+
+    const T1 *getsrc2 = reinterpret_cast <const T1*>
                         (&(TestOutput->operands[getinst->o_operands[2]]));
     validate_brig::validateOpType<T1>(RefSrc2, refbuf, getsrc2, getbuf);
 
-    const T2 *getsrc3 = reinterpret_cast <const T2*> 
+    const T2 *getsrc3 = reinterpret_cast <const T2*>
                         (&(TestOutput->operands[getinst->o_operands[3]]));
     validate_brig::validateOpType<T2>(RefSrc3, refbuf, getsrc3, getbuf);
-    
-    const T3 *getsrc4 = reinterpret_cast <const T3*> 
+
+    const T3 *getsrc4 = reinterpret_cast <const T3*>
                         (&(TestOutput->operands[getinst->o_operands[4]]));
     validate_brig::validateOpType<T3>(RefSrc4, refbuf, getsrc4, getbuf);
-         
+
   }
 };
 
 
-TEST(CodegenTest, Syscall_CodeGen) {  
-  
+TEST(CodegenTest, Syscall_CodeGen) {
+
   /********************************** Common variables used by all tests******************************/
   //To keep the stack footprint low
-  
-  std:: string in; 
+
+  std:: string in;
   std::string destName, op2Name, op3Name, op4Name;
   StringBuffer* symbols;
-  
+
   BrigOperandReg dest;
   BrigOperandImmed imm1;
   BrigInstBase out;
@@ -80,17 +80,17 @@ TEST(CodegenTest, Syscall_CodeGen) {
   BrigOperandImmed imm2, imm3, imm4;
 
   symbols = new StringBuffer();
-   
+
   /************************************* Test Case 1 ************************************/
   in.assign("syscall $s1, 3, $s2, $s3, $s1;\n");
   destName.assign("$s1");   op2Name.assign("$s2");
-  op3Name.assign("$s3"); 
+  op3Name.assign("$s3");
   symbols->append(destName);  symbols->append(op2Name);
   symbols->append(op3Name);
 
   out.size = sizeof(out);
   out.kind = BrigEInstBase;
-  out.opcode = BrigSyscall;
+  out.opcode = BrigSysCall;
   out.type = Brigb32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
@@ -103,7 +103,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -116,29 +116,29 @@ TEST(CodegenTest, Syscall_CodeGen) {
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = destName.size() + 1;
+  reg2.s_name = destName.size() + 1;
 
   reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
   reg3.type = Brigb32;
   reg3.reserved = 0;
-  reg3.name = destName.size() + op2Name.size() + 2;
+  reg3.s_name = destName.size() + op2Name.size() + 2;
 
   reg4 = dest;
-  
-  Syscall_Test<BrigOperandReg, BrigOperandReg, BrigOperandReg> 
+
+  Syscall_Test<BrigOperandReg, BrigOperandReg, BrigOperandReg>
                TestCase1(in, symbols, &out, &dest, &imm1, &reg2, &reg3, &reg4);
   TestCase1.Run_Test(&SysCall);
   symbols->clear();
 
   /************************************* Test Case 2 ************************************/
   in.assign("syscall $s1, 0x7, 0x8, 0x9, 0xa;\n");
-  destName.assign("$s1"); 
+  destName.assign("$s1");
   symbols->append(destName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstBase;
-  out.opcode = BrigSyscall;
+  out.opcode = BrigSysCall;
   out.type = Brigb32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
@@ -151,7 +151,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -181,7 +181,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   memset(&imm4.bits, 0, sizeof(imm4.bits));
   imm4.bits.u = 10;
 
-  Syscall_Test<BrigOperandImmed, BrigOperandImmed, BrigOperandImmed> 
+  Syscall_Test<BrigOperandImmed, BrigOperandImmed, BrigOperandImmed>
                TestCase2(in, symbols, &out, &dest, &imm1, &imm2, &imm3, &imm4);
   TestCase2.Run_Test(&SysCall);
   symbols->clear();
@@ -192,7 +192,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
 
   out.size = sizeof(out);
   out.kind = BrigEInstBase;
-  out.opcode = BrigSyscall;
+  out.opcode = BrigSysCall;
   out.type = Brigb32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
@@ -205,7 +205,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -219,7 +219,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
 
   wav4 = wav3 = wav2;
 
-  Syscall_Test<BrigOperandWaveSz, BrigOperandWaveSz, BrigOperandWaveSz> 
+  Syscall_Test<BrigOperandWaveSz, BrigOperandWaveSz, BrigOperandWaveSz>
                TestCase3(in, symbols, &out, &dest, &imm1, &wav2, &wav3, &wav4);
   TestCase3.Run_Test(&SysCall);
   symbols->clear();
@@ -228,10 +228,10 @@ TEST(CodegenTest, Syscall_CodeGen) {
   in.assign("syscall $s14, 12, $s11, 13, WAVESIZE;\n");
   destName.assign("$s14");   op2Name.assign("$s11");
   symbols->append(destName);  symbols->append(op2Name);
-  
+
   out.size = sizeof(out);
   out.kind = BrigEInstBase;
-  out.opcode = BrigSyscall;
+  out.opcode = BrigSysCall;
   out.type = Brigb32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
@@ -244,7 +244,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   dest.kind = BrigEOperandReg;
   dest.type = Brigb32;
   dest.reserved = 0;
-  dest.name = 0;
+  dest.s_name = 0;
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
@@ -257,7 +257,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
   reg2.reserved = 0;
-  reg2.name = destName.size() + 1;
+  reg2.s_name = destName.size() + 1;
 
   imm3.size = sizeof(imm3);
   imm3.kind = BrigEOperandImmed;
@@ -269,7 +269,7 @@ TEST(CodegenTest, Syscall_CodeGen) {
   wav4.size = sizeof(wav4);
   wav4.kind = BrigEOperandWaveSz;
 
-  Syscall_Test<BrigOperandReg, BrigOperandImmed, BrigOperandWaveSz> 
+  Syscall_Test<BrigOperandReg, BrigOperandImmed, BrigOperandWaveSz>
                TestCase4(in, symbols, &out, &dest, &imm1, &reg2, &imm3, &wav4);
   TestCase4.Run_Test(&SysCall);
   symbols->clear();

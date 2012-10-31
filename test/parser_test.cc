@@ -466,8 +466,8 @@ TEST(ParserTest, ArgumentListBody) {
   context->set_error_reporter(main_reporter);
 
   // test 1
-  std::string input("const static arg_u32 %local_id[2][2],\n");
-  input.append("static arg_f16 %local_id[], align 8 arg_u64 %test \n");
+  std::string input("(const static arg_u32 %local_id[2][2],\n");
+  input.append("static arg_f16 %local_id[], align 8 arg_u64 %test )\n");
   lexer->set_source_string(input);
   context->clear_context();
   // initialize fake values
@@ -505,7 +505,7 @@ TEST(ParserTest, FunctionDefinition) {
 
   // test 1
   std::string input("function &get_global_id(arg_u32 %ret_val) ");
-  input.append("(arg_u32 %arg_val0):fbar(1)\n");
+  input.append("(arg_u32 %arg_val0)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionDefinition(context));
@@ -521,7 +521,7 @@ TEST(ParserTest, FunctionDecl) {
 
   // test 1
   std::string input("function &get_global_id(arg_u32 %ret_val)");
-  input.append("(arg_u32 %arg_val0) :fbar(1);\n");
+  input.append("(arg_u32 %arg_val0);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionDecl(context));
@@ -535,7 +535,7 @@ TEST(ParserTest, Codeblock) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
-  
+
   // test 1
   std::string input("{ \n");
   input.append("abs_p_s8x4 $s1, $s2; \n");
@@ -547,7 +547,7 @@ TEST(ParserTest, Codeblock) {
 
 // initialize fake values
   // which should be set in real case when parser parses a function def
-  context->current_bdf_offset = 0;
+  context->current_bdf_offset = 8;
   context->set_arg_output(false);
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
@@ -578,7 +578,7 @@ TEST(ParserTest, Function) {
   context->set_error_reporter(main_reporter);
 
   std::string input("function &get_global_id(arg_u32 %ret_val) ");
-  input.append(" (arg_u32 %arg_val0) :fbar(1) { \n");
+  input.append(" (arg_u32 %arg_val0) { \n");
   input.append(" abs_p_s8x4 $s1, $s2; \n");
   input.append(" abs_s8x4 $s1, $s2; \n");
   input.append("};\n");
@@ -669,32 +669,32 @@ TEST(ParserTest, BranchOperation) {
   context->append_directive(&fake);
 
 
-  std::string input("cbr_width(all)_fbar $s1, @then;\n");
+  std::string input("cbr_width(all)_fbar $c1, @then;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("\n cbr_width(all)_fbar $c1, 10 , [@first, @then];\n");
+  input.assign("\n cbr_width(all)_fbar $c1, $s1 , [@first];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, &global;\n");
+  input.assign("cbr_width(all)_fbar $c1, $s2;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, 5, [%local]; \n");
+  input.assign("cbr_width(all)_fbar $c1, $s3, [%local]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, 10, @label; \n");
+  input.assign("cbr_width(all)_fbar $c1, $s2, [@label]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global; \n");
+  input.assign("brn_width(all)_fbar $s1; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
@@ -704,17 +704,17 @@ TEST(ParserTest, BranchOperation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global, [%local]; \n");
+  input.assign("brn_width(all)_fbar $s1, [%local]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global, [@goto]; \n");
+  input.assign("brn_width(all)_fbar $s1, [@goto]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr $s1, @then; \n");
+  input.assign("cbr $c1, @then; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
@@ -752,7 +752,7 @@ TEST(ParserTest, ParseCallArgs) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallArgs(context));
 
-  input.assign("(1,2,3)\n");
+  input.assign("(&fun1,&fun2,&fun3)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallArgs(context));
@@ -772,7 +772,7 @@ TEST(ParserTest, Call) {
   EXPECT_EQ(0, Call(context));
 
   input.assign("call_width(all) $s1 \n");
-  input.append("(%output1,&output2)(%input1, $d7) [&id1, &id2];\n");
+  input.append("(%output1,&output2)(%input1, %input2) [&id1, &id2];\n");
 
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -786,7 +786,7 @@ TEST(ParserTest, Initializers) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
-  
+
   std::string input("= {12, 13,14, -13}\n");  // DecimalInitializer
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -821,7 +821,7 @@ TEST(ParserTest, Initializers) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Initializer(context));
-  
+
   delete lexer;
 }
 */
@@ -1467,7 +1467,7 @@ TEST(ParserTest, FunctionSignature) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
 
-  input.assign("signature &test()(arg_u32) :fbar(2) ;\n");
+  input.assign("signature &test()(arg_u32);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
@@ -1477,7 +1477,7 @@ TEST(ParserTest, FunctionSignature) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
 
-  input.assign("signature &test(arg_u32)(arg_u32) :fbar(2) ;\n");
+  input.assign("signature &test(arg_u32)(arg_u32);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
@@ -2183,7 +2183,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("cbr $s1, @then; \n"); // branch
+  input.assign("cbr $c1, @then; \n"); // branch
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
@@ -2483,7 +2483,7 @@ TEST(ParserTest, KernelArgumentList) {
   input.assign("extern kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, ArgumentDecl(context));
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
     // test 5
   input.assign("const align 8 kernarg_u32 %local_id[2][2] ");
@@ -3509,7 +3509,7 @@ TEST(ParserTest, Atom) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Atom(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
   delete lexer;
 }
@@ -3590,7 +3590,7 @@ TEST(ParserTest, SingleListSingleTest) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SingleListSingle(context));
-  
+
 /*  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -4263,7 +4263,7 @@ TEST(ParserTest,GlobalDecl){
 
   //for functionDecl
   input.assign("const extern function &get_global_id(arg_u32 %ret_val)");
-  input.append("(arg_u32 %arg_val0) :fbar(1);\n");
+  input.append("(arg_u32 %arg_val0);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
@@ -4284,7 +4284,7 @@ TEST(ParserTest,GlobalDecl){
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
 
-  input.assign("signature &test()(arg_u32) :fbar(2) ;\n");
+  input.assign("signature &test()(arg_u32);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
@@ -4294,7 +4294,7 @@ TEST(ParserTest,GlobalDecl){
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
-  input.assign("signature &test(arg_u32)(arg_u32) :fbar(2) ;\n");
+  input.assign("signature &test(arg_u32)(arg_u32);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));

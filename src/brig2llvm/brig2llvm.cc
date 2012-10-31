@@ -13,10 +13,18 @@
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
 #include "llvm/Analysis/Verifier.h"
+#include "llvm/Target/TargetData.h"
 #include "llvm/Support/raw_ostream.h"
 
 namespace hsa{
 namespace brig{
+
+void BrigProgram::delModule(llvm::Module *M) {
+  if(!M) return;
+  llvm::LLVMContext *C = &M->getContext();
+  delete M;
+  delete C;
+}
 
 static llvm::StructType *createSOAType(llvm::LLVMContext &C,
                                        llvm::Type *t,
@@ -90,8 +98,17 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
   } else if(type == Brigb128) {
     return llvm::Type::getIntNTy(C, 128);
   } else if(BrigInstHelper::isVectorTy(type)) {
+
+    llvm::Type *base = getElementTy(C, type);
     unsigned length = BrigInstHelper::getVectorLength(type);
-    return llvm::VectorType::get(getElementTy(C, type), length);
+
+    if(base->isIntegerTy()) {
+      unsigned bitWidth = base->getIntegerBitWidth() * length;
+      if(bitWidth < 64)
+        return llvm::Type::getIntNTy(C, bitWidth);
+    }
+
+    return llvm::VectorType::get(base, length);
   } else {
     assert(false && "Unimplemented type");
   }
@@ -186,6 +203,15 @@ struct FunState {
     llvm::Module *M = llvmFun->getParent();
     llvm::Type *regsType = M->getTypeByName("struct.regs");
     regs = new llvm::AllocaInst(regsType, "gpu_reg_p", &entry);
+
+    // Use memset to remove a source of non-deterministic behavior. The HSA PRM
+    // does not require that registers are initialized to zero.
+    llvm::IRBuilder<> builder(&entry);
+    llvm::TargetData TD(M);
+    llvm::Value *zero = llvm::ConstantInt::get(C, llvm::APInt(8, 0));
+    builder.CreateMemSet(regs, zero,
+                         TD.getTypeAllocSize(regsType),
+                         TD.getPrefTypeAlignment(regsType));
 
     for(BrigSymbol local = brigFun.local_begin(),
           E = brigFun.local_end(); local != E; ++local) {
@@ -431,7 +457,8 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 
   if(brigDest) {
     llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
-    llvm::PointerType *destPtrTy = cast<llvm::PointerType>(destAddr->getType());
+    llvm::PointerType *destPtrTy =
+      llvm::cast<llvm::PointerType>(destAddr->getType());
     llvm::Type *destTy = destPtrTy->getElementType();
     llvm::Value *resultVal = encodePacking(B, resultRaw, destTy, inst, helper);
     new llvm::StoreInst(resultVal, destAddr, &B);
@@ -534,11 +561,54 @@ static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
   }
 
   // Fall through to the next control block
-  if(!llvm::isa<llvm::TerminatorInst>(&bb->back())) {
+  if(bb->empty() || !llvm::isa<llvm::TerminatorInst>(&bb->back())) {
     ++it;
     if(it != state.cbMap.end()) llvm::BranchInst::Create(it->second, bb);
     else llvm::ReturnInst::Create(C, bb);
   }
+}
+
+// Work around limitations of MCJIT. MCJIT can call a function if the function's
+// type is similar to main. We create a trampoline with the function signature:
+// void fun(int argc, char **argv)
+// The real function arguments are encoded in the argv array.
+// The argc parameter is ignored.
+static void makeKernelTrampoline(llvm::Function *fun, const char *name) {
+
+  llvm::LLVMContext &C = fun->getContext();
+
+  llvm::Type *voidTy = llvm::Type::getVoidTy(C);
+  llvm::Type *trampArgs[] = {
+    llvm::Type::getInt32Ty(C),
+    llvm::Type::getInt8Ty(C)->getPointerTo()->getPointerTo()
+  };
+  llvm::FunctionType *trampFunTy =
+    llvm::FunctionType::get(voidTy, trampArgs, false);
+  llvm::GlobalValue::LinkageTypes linkage = fun->getLinkage();
+
+  llvm::Function *trampFun =
+    llvm::Function::Create(trampFunTy, linkage, name, fun->getParent());
+  llvm::BasicBlock *bb = llvm::BasicBlock::Create(C, "", trampFun);
+
+  llvm::Value *argArray = ++trampFun->arg_begin();
+  llvm::FunctionType *funTy = fun->getFunctionType();
+  std::vector<llvm::Value *> trampParams;
+  for(unsigned i = 0; i < fun->arg_size(); ++i) {
+
+    llvm::Value *offset =
+      llvm::ConstantInt::get(llvm::Type::getInt32Ty(C), i);
+    llvm::Value *gep =
+      llvm::GetElementPtrInst::Create(argArray, offset, "", bb);
+
+    llvm::Value *load = new llvm::LoadInst(gep, "", bb);
+
+    llvm::Type *paramTy = funTy->getParamType(i);
+    llvm::Value *bitcast = new llvm::BitCastInst(load, paramTy, "", bb);
+    trampParams.push_back(bitcast);
+  }
+
+  llvm::CallInst::Create(fun, trampParams, "", bb);
+  llvm::ReturnInst::Create(C, bb);
 }
 
 static void runOnFunction(llvm::Module &M, const BrigFunction &F,
@@ -557,6 +627,9 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   llvm::GlobalValue::LinkageTypes linkage = runOnLinkage(F.getLinkage());
   llvm::Twine name(F.getName());
 
+  if(F.isKernel())
+    name = "kernel." + name;
+
   llvm::Function *fun = llvm::Function::Create(funTy, linkage, name, &M);
   funMap[F.getOffset()] = fun;
 
@@ -574,6 +647,9 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   for(BrigControlBlock cb = F.begin(), E = F.end(); cb != E; ++cb) {
     runOnCB(*fun, cb, state);
   }
+
+  if(F.isKernel())
+    makeKernelTrampoline(fun, F.getName());
 }
 
 static llvm::Type *getType(llvm::LLVMContext &C,
@@ -622,13 +698,15 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
     } else {
       assert(false && "Unimplemented");
     }
+  } else {
+    init = llvm::Constant::getNullValue(type);
   }
 
   symbolMap[S.getAddr()] =
     new llvm::GlobalVariable(M, type, isConst, linkage, init, name);
 }
 
-llvm::Module *GenLLVM::getLLVMModule(const BrigModule &M) {
+BrigProgram GenLLVM::getLLVMModule(const BrigModule &M) {
 
   if(!M.isValid()) return NULL;
 
@@ -648,17 +726,16 @@ llvm::Module *GenLLVM::getLLVMModule(const BrigModule &M) {
     runOnFunction(*mod, fun, funMap, symbolMap);
   }
 
-  return mod;
+  return BrigProgram(mod);
 }
 
 std::string GenLLVM::getLLVMString(const BrigModule &M) {
-  llvm::Module *mod = getLLVMModule(M);
-  if(!mod) return "";
+  BrigProgram BP = getLLVMModule(M);
+  if(!BP) return "";
 
   std::string output;
   llvm::raw_string_ostream ros(output);
-  mod->print(ros, NULL);
-  delete mod;
+  BP->print(ros, NULL);
 
   return output;
 }

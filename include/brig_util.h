@@ -70,19 +70,19 @@ template<class T, class Base> inline bool isa(const Base *base) {
   return dyn_cast<T>(base);
 }
 
-template<class Super> class brig_iterator : private Super {
+template<class Super> class brig_iterator {
 
   public:
 
   typedef typename Super::Base Base;
   typedef brig_iterator<Super> Self;
 
-  explicit brig_iterator() : Super(), curr(NULL) {}
-  explicit brig_iterator(const char *curr) : Super(), curr(curr) {}
-  brig_iterator(const Self &other) : Super(), curr(other.curr) {}
+  explicit brig_iterator() : super(), curr(NULL) {}
+  explicit brig_iterator(const char *curr) : super(), curr(curr) {}
+  brig_iterator(const Self &other) : super(), curr(other.curr) {}
 
   template<class T> explicit brig_iterator(const T *t) :
-    Super(t), curr(reinterpret_cast<const char *>(t)) {}
+    super(t), curr(reinterpret_cast<const char *>(t)) {}
 
   Self operator++(int) {
     brig_iterator other = *this;
@@ -126,25 +126,23 @@ template<class Super> class brig_iterator : private Super {
   uintptr_t operator-(const char *start) const { return curr - start; }
 
   private:
+  Super super;
   const char *curr;
 };
 
-class dir_super {
-  protected:
+struct dir_super {
   typedef BrigDirectiveBase Base;
   dir_super() {}
   template<class T> dir_super(const T *t) { (void) T::DirKind; }
 };
 
-class inst_super {
-  protected:
+struct inst_super {
   typedef BrigInstBase Base;
   inst_super() {}
   template<class T> inst_super(const T *t) { (void) T::InstKind; }
 };
 
-class oper_super {
-  protected:
+struct oper_super {
   typedef BrigOperandBase Base;
   oper_super() {}
   template<class T> oper_super(const T *t) { (void) T::OperKind; }

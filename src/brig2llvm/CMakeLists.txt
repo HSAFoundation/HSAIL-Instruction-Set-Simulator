@@ -18,7 +18,7 @@ MESSAGE("INCLUDE SEARCH DIRECTORIES: ${PROJ_SEARCH_PATH}")
 include("${PROJECT_BINARY_DIR}/compiler/share/llvm/cmake/LLVMConfig.cmake")
 include(HandleLLVMOptions)
 
-set(LLVM_LINK_COMPONENTS core jit nativecodegen)
+set(LLVM_LINK_COMPONENTS core jit mcjit nativecodegen)
 add_llvm_library(brig2llvm
   brig2llvm.cc
   brig_module.cc

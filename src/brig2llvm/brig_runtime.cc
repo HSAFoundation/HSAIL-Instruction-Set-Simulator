@@ -10,22 +10,6 @@ namespace brig {
 
 ForceBrigRuntimeLinkage::ForceBrigRuntimeLinkage() {}
 
-template<class T, class U, bool S> const bool IntPolicy<T, U, S>::isSigned;
-template<class T, class U, bool S> const unsigned IntPolicy<T, U, S>::Bits;
-template<class T, class U, bool S> const unsigned IntPolicy<T, U, S>::ShiftMask;
-template<class T, class U, bool S> const T IntPolicy<T, U, S>::HighBit;
-template<class T, class U, bool S> const T IntPolicy<T, U, S>::Max;
-template<class T, class U, bool S> const T IntPolicy<T, U, S>::Min;
-
-template struct IntPolicy<u8,  u8,  false>;
-template struct IntPolicy<u16, u16, false>;
-template struct IntPolicy<u32, u32, false>;
-template struct IntPolicy<u64, u64, false>;
-template struct IntPolicy<s8,  u8,  true>;
-template struct IntPolicy<s16, u16, true>;
-template struct IntPolicy<s32, u32, true>;
-template struct IntPolicy<s64, u64, true>;
-
 template<class T> static T Abs(T t) { return std::abs(t); }
 template<class T> static T AbsVector(T t) { return map(Abs, t); }
 SignedInst(define, Abs, Unary)
@@ -97,7 +81,7 @@ template<class T> static T MulSat(T x, T y) {
     if(res > (s64) Int<T>::Max) return Int<T>::Max;
     if(res < (s64) Int<T>::Min) return Int<T>::Min;
     return res;
-   } else {
+  } else {
     u64 res = (u64) x * (u64) y;
     if(res > (u64) Int<T>::Max) return Int<T>::Max;
     return res;
@@ -260,10 +244,10 @@ template<class T> static T ShrVector(T x, unsigned y) { return map(Shr, x, y); }
 ShiftInst(define, Shr, Binary)
 
 template<class T> static T UnpackLo(T x, T y) {
- T result;
-  for(unsigned i = 0; i < Vec<T>::Len; i += 2) {
-    ((Vec<T>) result)[i]     = ((Vec<T>) x)[i / 2];
-    ((Vec<T>) result)[i + 1] = ((Vec<T>) y)[i / 2];
+  T result;
+  for(unsigned i = 0; i < T::Len; i += 2) {
+    result[i]     = x[i / 2];
+    result[i + 1] = y[i / 2];
   }
   return result;
 }
@@ -271,10 +255,10 @@ UnpackInst(define, UnpackLo, Binary)
 
 template<class T> static T UnpackHi(T x, T y) {
   T result;
-  unsigned Len = Vec<T>::Len;
+  unsigned Len = T::Len;
   for(unsigned i = 0; i < Len; i += 2) {
-    ((Vec<T>) result)[i]     = ((Vec<T>) x)[i / 2 + Len / 2];
-    ((Vec<T>) result)[i + 1] = ((Vec<T>) y)[i / 2 + Len / 2];
+    result[i]     = x[i / 2 + Len / 2];
+    result[i + 1] = y[i / 2 + Len / 2];
   }
   return result;
 }
@@ -294,7 +278,7 @@ template<> bool Not(bool x) { return !x; }
 BitInst(define, Not, Unary)
 
 static b32 Popcount(b32 x) { return __builtin_popcount(x); }
-static b64 Popcount(b64 x) { return __builtin_popcountl(x); }
+static b64 Popcount(b64 x) { return __builtin_popcountll(x); }
 defineUnary(Popcount, b32)
 defineUnary(Popcount, b64)
 
@@ -369,16 +353,19 @@ template<class T> static T Lastbit(T x) {
 SignedInst(define, Lastbit, Unary)
 UnsignedInst(define, Lastbit, Unary)
 
+template<class T> static T Mov(T x) { return x; }
+BitInst(define, Mov, Unary)
+
 extern "C" b64 Mov_b64_b32(b32 x, b32 y) { return (b64(x) << 32) | b64(y); }
 extern "C" b64 Mov_b64_b64(b64 x) { return x; }
 
 // Assumes little-endian
 extern "C" b128 Mov_b128_b32(b32 w, b32 x, b32 y, b32 z) {
   b128 result;
-  ((Vec<b128>) result)[0] = z;
-  ((Vec<b128>) result)[1] = y;
-  ((Vec<b128>) result)[2] = x;
-  ((Vec<b128>) result)[3] = w;
+  result[0] = z;
+  result[1] = y;
+  result[2] = x;
+  result[3] = w;
   return result;
 }
 extern "C" b128 Mov_b128_b128(b128 x) { return x; }
@@ -391,23 +378,26 @@ extern "C" b64 Movd_hi_b64(b64 x, b32 y) {
   return (b64(y) << 32) | (x >> 32);
 }
 
+template<class T> static T Lda(T x) { return x; }
+UnsignedInst(define, Lda, Unary)
+
 template<class T> static T ShuffleVector(T x, T y, b32 z) {
 
-  unsigned len   = Vec<T>::Len;
+  unsigned len   = T::Len;
   unsigned mask  = len - 1;
-  unsigned shift = Vec<T>::LogLen;
+  unsigned shift = T::LogLen;
   b32 shuffle = z;
-  T result = { 0 };
+  T result;
 
   for(unsigned i = 0; i < len / 2; ++i) {
     unsigned offset = shuffle & mask;
-    ((Vec<T>) result)[i] = ((Vec<T>) x)[offset];
+    result[i] = x[offset];
     shuffle >>= shift;
   }
 
   for(unsigned i = len / 2; i < len; ++i) {
     unsigned offset = shuffle & mask;
-    ((Vec<T>) result)[i] = ((Vec<T>) y)[offset];
+    result[i] = y[offset];
     shuffle >>= shift;
   }
 
@@ -416,9 +406,14 @@ template<class T> static T ShuffleVector(T x, T y, b32 z) {
 ShuffleVectorInst(define, Shuffle, Ternary)
 
 template<class T> static T Cmov(T x, T y, T z) {
-  return (x & 1) ? y : z;
+  return (x == 0) ? z : y;
 }
 BitInst(define, Cmov, Ternary)
+
+template<class T> static T CmovVector(T x, T y, T z) { return map(Cmov, x, y, z); }
+SignedVectorInst(define, Cmov, Ternary)
+UnsignedVectorInst(define, Cmov, Ternary)
+FloatVectorInst(define, Cmov, Ternary)
 
 // Neither C++98 nor C++11 implement C99's floating point hexadecimal
 // literals. :(
@@ -430,7 +425,7 @@ extern "C" f32 Fract_f32(f32 f) {
 }
 
 extern "C" f64 Fract_f64(f64 d) {
-  union { b64 b; f64 d; } AlmostOne = { 0x3FEFFFFFFFFFFFFF };
+  union { b64 b; f64 d; } AlmostOne = { 0x3FEFFFFFFFFFFFFFULL };
   return std::min(d - std::floor(d), AlmostOne.d);
 }
 
@@ -520,10 +515,10 @@ template<class T> static T Frcp(T x) {
 FloatInst(define, Frcp, Unary)
 
 extern "C" u32 F2u4_u32(f32 w, f32 x, f32 y, f32 z){
-  return u32(((lrint(w) & 0xFF) << 24)
-           + ((lrint(x) & 0xFF) << 16)
-           + ((lrint(y) & 0xFF) << 8)
-           +  (lrint(z) & 0xFF));
+  return u32(((lrint(w) & 0xFF) << 24) +
+             ((lrint(x) & 0xFF) << 16) +
+             ((lrint(y) & 0xFF) << 8) +
+             (lrint(z) & 0xFF));
 }
 
 extern "C" f32 Unpack3(b32 w) {
@@ -544,16 +539,16 @@ extern "C" f32 Unpack0(b32 w) {
 
 extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
   switch(y) {
-    case 0:
-      return w;
-    case 8:
-    case 16:
-    case 24:
-      return (w << y) | (x >> (32 - y));
-    case 32:
-      return x;
-    default :
-      return 0;
+  case 0:
+    return w;
+  case 8:
+  case 16:
+  case 24:
+    return (w << y) | (x >> (32 - y));
+  case 32:
+    return x;
+  default :
+    return 0;
   }
 }
 
@@ -565,8 +560,8 @@ extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
   for(unsigned i = 0; i < 4; ++i) {
     result |= (((((w >> 8 * i) & 0xFF)
-               + ((x >> 8 * i) & 0xFF)
-               + ((y >> 8 * i) & 0x1)) >> 1) & 0xFF) << 8 * i;
+                 + ((x >> 8 * i) & 0xFF)
+                 + ((y >> 8 * i) & 0x1)) >> 1) & 0xFF) << 8 * i;
   }
   return result;
 }
