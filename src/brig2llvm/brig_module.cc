@@ -1987,6 +1987,8 @@ bool BrigModule::validatePopCount(const inst_iterator inst) const {
                  "Type of PopCount shoud be Brigb32 and Brigb64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "PopCount cannot accept vector types");
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
 
   oper_iterator dest(S_.operands + inst->o_operands[0]);
   const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
@@ -2050,6 +2052,8 @@ bool BrigModule::validateExtract(const inst_iterator inst) const {
                  "Extract is only valid for bit point types");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Extract cannot accept vector types");
+  if(!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
+    return false;
 
   oper_iterator dest(S_.operands + inst->o_operands[0]);
   const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
