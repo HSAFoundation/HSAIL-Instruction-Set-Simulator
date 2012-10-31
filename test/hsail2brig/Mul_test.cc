@@ -1,7 +1,16 @@
 #include <iostream>
 #include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+
+#include <iostream>
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa {
 namespace brig {

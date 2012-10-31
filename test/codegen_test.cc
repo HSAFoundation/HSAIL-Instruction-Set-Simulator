@@ -9,7 +9,7 @@
 #include "error_reporter.h"
 #include "context.h"
 #include "parser_wrapper.h"
-#include "codegen_test.h"
+
 
 //#include "Instruction0_test.h"
 //#include "Instruction1_test.h"
@@ -25,7 +25,7 @@
 //#include "Cmp_test.h"
 //#include "Atom_test.h"
 //#include "Call_test.h"
-#include "Mul_test.h"
+//#include "Mul_test.h"
 //#include "Mov_test.h"
 //#include "AtomicImage_test.h"
 //#include "Cvt_test.h"

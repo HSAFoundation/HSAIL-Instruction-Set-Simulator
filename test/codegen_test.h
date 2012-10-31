@@ -1,7 +1,13 @@
 #ifndef BRIG_CODEGEN_TEST
 #define BRIG_CODEGEN_TEST
+
+#include <iostream>
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
 #include "error_reporter.h"
 #include "context.h"
+#include "brig.h"
 #include "brig_util.h"
 #include "brig_buffer.h"
 #include "codegen_validate.h"
