@@ -15,22 +15,20 @@ protected:
   ErrorReporter* main_reporter;
   std::string Input;
   StringBuffer* RefStr;  
-  struct BrigSections* RefOutput;
-    
+     
 public:
 
-  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf = NULL, BrigSections* RefOut = NULL){  
+  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf = NULL){  
     context = NULL;
     main_reporter = NULL;
     Input.assign(In);
-    RefStr = Sbuf;
-    RefOutput = RefOut;
+    RefStr = Sbuf;    
   }  
   
-  void validate(struct BrigSections* GetOutput){
+  void validate(struct BrigSections* RefOutput, struct BrigSections* GetOutput){
   
     inst_iterator getinst = GetOutput->code_begin();
-    inst_iterator refinst = RefOutput->code_begin();
+    inst_iterator refinst = RefOutput->ref_code_begin();
     const inst_iterator getinst_end = GetOutput->code_end();
     //const inst_iterator refinst_end = RefOutput->code_end();
     for(; (getinst != getinst_end) && (GetOutput->codeSize>8); getinst++, refinst++){
@@ -53,12 +51,13 @@ public:
     }
     
     dir_iterator getdir = GetOutput->begin();
-    dir_iterator refdir = RefOutput->begin();
+    dir_iterator refdir = RefOutput->ref_begin();
     const dir_iterator getdir_end = GetOutput->end();
     //const dir_iterator refdir_end = RefOutput->end();  
     for(; (getdir != getdir_end) && (GetOutput->directivesSize>8) ; getdir++, refdir++){
+    if(getdir->kind==BrigEDirectivePad)
+        getdir++;
       switch(getdir->kind){
-        caseDirBrig(DirectivePad);        
         caseDirBrig(DirectiveFunction) ;        
         caseDirBrig(DirectiveKernel);        
         caseDirBrig(DirectiveSymbol);        
@@ -91,12 +90,13 @@ public:
     }  
     
     oper_iterator getoper = GetOutput->oper_begin();
-    oper_iterator refoper = RefOutput->oper_begin();
+    oper_iterator refoper = RefOutput->ref_oper_begin();
     const oper_iterator getoper_end = GetOutput->oper_end();
     //const oper_iterator refoper_end = RefOutput->oper_end();
     for(; (getoper != getoper_end) && (GetOutput->operandsSize>8); getoper++, refoper++){
-      switch(refoper->kind){
-        case(BrigEOperandPad): break;
+      if(getoper->kind==BrigEOperandPad)
+        getoper++;
+      switch(getoper->kind){
         case(BrigEOperandBase): break;
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
@@ -119,7 +119,7 @@ public:
     }
   }
   
-  void Run_Test(int (*Rule)(Context*)){
+  void Parse_Validate(int (*Rule)(Context*), struct BrigSections* RefOutput){
     main_reporter = ErrorReporter::get_instance();
     context = Context::get_instance();
     
@@ -136,9 +136,9 @@ public:
       Buffer* dir = context->get_directive();
       Buffer* oper = context->get_operands();
       Buffer* code = context->get_code();
-      struct BrigSections S_(reinterpret_cast<const char *>(&str->get()[0]), reinterpret_cast<const char *> (&dir->get()[0]), reinterpret_cast<const char *>(&code->get()[0]), reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      struct BrigSections GetOutput(reinterpret_cast<const char *>(&str->get()[0]), reinterpret_cast<const char *> (&dir->get()[0]), reinterpret_cast<const char *>(&code->get()[0]), reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
          str->size(), dir->size(), code->size(), oper->size(), (size_t)0);
-      validate(&S_);
+      validate(RefOutput, &GetOutput);
       
     }
     context->clear_context();        

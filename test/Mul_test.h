@@ -25,19 +25,26 @@ public:
     RefDest(Dest),
     RefSrc1(Src1),
     RefSrc2(Src2),
-    RefSrc3(Src3) {
+    RefSrc3(Src3) {}
+  
+  void Run_Test(int (*Rule)(Context*)){  
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
-    Buffer* dir = new Buffer();
     code->append(RefInst);
     oper->append(RefDest);
     oper->append(RefSrc1);
     oper->append(RefSrc2);
     if(RefSrc3)
       oper->append(RefSrc3);
-    struct BrigSections S_(reinterpret_cast<const char *>(&sbuf->get()[0]), reinterpret_cast<const char *> (&dir->get()[0]), reinterpret_cast<const char *>(&code->get()[0]), reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-         sbuf->size(), dir->size(), code->size(), oper->size(), (size_t)0);
-    RefOutput = &S_;     
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
   }  
 };
 
