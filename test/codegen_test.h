@@ -4,32 +4,120 @@
 #include "context.h"
 #include "brig_util.h"
 #include "brig_buffer.h"
+#include "codegen_validate.h"
 
 namespace hsa{
 namespace brig{
-
+    
 class BrigCodeGenTest {
 protected:
   Context* context;
   ErrorReporter* main_reporter;
   std::string Input;
   StringBuffer* RefStr;  
-  Buffer* RefDir;
-  Buffer* RefCode;
-  Buffer* RefOper;
+  struct BrigSections* RefOutput;
     
 public:
-  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf = NULL, Buffer* dir = NULL, Buffer* code = NULL, Buffer* oper = NULL){  
+
+  BrigCodeGenTest(std::string &In, StringBuffer* Sbuf = NULL, BrigSections* RefOut = NULL){  
     context = NULL;
     main_reporter = NULL;
     Input.assign(In);
     RefStr = Sbuf;
-    RefDir = dir;
-    RefCode = code;
-    RefOper = oper;
+    RefOutput = RefOut;
   }  
   
-  virtual void validate(struct BrigSections* BrigOutput) = 0;
+  void validate(struct BrigSections* GetOutput){
+  
+    inst_iterator getinst = GetOutput->code_begin();
+    inst_iterator refinst = RefOutput->code_begin();
+    const inst_iterator getinst_end = GetOutput->code_end();
+    //const inst_iterator refinst_end = RefOutput->code_end();
+    for(; (getinst != getinst_end) && (GetOutput->codeSize>8); getinst++, refinst++){
+      switch(getinst->kind){
+        caseInstBrig(InstBase);
+        caseInstBrig(InstMod) ;
+        caseInstBrig(InstCvt) ;
+        caseInstBrig(InstRead);
+        caseInstBrig(InstBar) ; 
+        caseInstBrig(InstLdSt);
+        caseInstBrig(InstCmp);
+        caseInstBrig(InstMem);
+        caseInstBrig(InstAtomic); 
+        caseInstBrig(InstAtomicImage);  
+        caseInstBrig(InstImage); 
+        default: 
+            printf("Invalid instruction\n");
+            exit(1);
+      }
+    }
+    
+    dir_iterator getdir = GetOutput->begin();
+    dir_iterator refdir = RefOutput->begin();
+    const dir_iterator getdir_end = GetOutput->end();
+    //const dir_iterator refdir_end = RefOutput->end();  
+    for(; (getdir != getdir_end) && (GetOutput->directivesSize>8) ; getdir++, refdir++){
+      switch(getdir->kind){
+        caseDirBrig(DirectivePad);        
+        caseDirBrig(DirectiveFunction) ;        
+        caseDirBrig(DirectiveKernel);        
+        caseDirBrig(DirectiveSymbol);        
+        caseDirBrig(DirectiveImage) ;        
+        caseDirBrig(DirectiveSampler);        
+        caseDirBrig(DirectiveLabel) ;       
+        caseDirBrig(DirectiveLabelList) ;        
+        caseDirBrig(DirectiveVersion);         
+        caseDirBrig(DirectiveSignature);          
+        caseDirBrig(DirectiveFile) ;        
+        caseDirBrig(DirectiveComment);        
+        caseDirBrig(DirectiveLoc);        
+        caseDirBrig(DirectiveInit);        
+        caseDirBrig(DirectiveLabelInit);        
+        caseDirBrig(DirectiveControl);        
+        caseDirBrig(DirectivePragma);       
+        caseDirBrig(DirectiveExtension);        
+        case(BrigEDirectiveArgStart):        
+        case(BrigEDirectiveArgEnd): /*validate_brig::validate((cast<BrigDirectiveScope>(refdir)), (cast<BrigDirectiveScope>(getdir)), 
+                                      RefOutput, GetOutput);*/
+                                    break;
+        caseDirBrig(DirectiveBlockStart);        
+        caseDirBrig(DirectiveBlockNumeric);       
+        caseDirBrig(DirectiveBlockString);        
+        caseDirBrig(DirectiveBlockEnd);
+        default: 
+            printf("Invalid instruction\n");
+            exit(1);        
+      }      
+    }  
+    
+    oper_iterator getoper = GetOutput->oper_begin();
+    oper_iterator refoper = RefOutput->oper_begin();
+    const oper_iterator getoper_end = GetOutput->oper_end();
+    //const oper_iterator refoper_end = RefOutput->oper_end();
+    for(; (getoper != getoper_end) && (GetOutput->operandsSize>8); getoper++, refoper++){
+      switch(refoper->kind){
+        case(BrigEOperandPad): break;
+        case(BrigEOperandBase): break;
+        caseOperBrig(OperandReg);
+        caseOperBrig(OperandImmed);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandLabelRef);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
+        case(BrigEOperandFunctionList):
+        caseOperBrig(OperandArgumentList);
+        caseOperBrig(OperandArgumentRef);
+        caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandFunctionRef);
+        caseOperBrig(OperandOpaque);
+        default: 
+          printf("Invalid Operand\n");
+          exit(1);
+      }
+    }
+  }
   
   void Run_Test(int (*Rule)(Context*)){
     main_reporter = ErrorReporter::get_instance();

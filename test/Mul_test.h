@@ -25,38 +25,20 @@ public:
     RefDest(Dest),
     RefSrc1(Src1),
     RefSrc2(Src2),
-    RefSrc3(Src3) { }
-
-  void validate(struct BrigSections* TestOutput) {
-
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const TInst* getinst = (cast<TInst>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-    const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*>
-                                    (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validate(RefDest, refbuf, getdest, getbuf);
-
-    const T1 *getsrc1 = reinterpret_cast <const T1*>
-                        (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validateOpType<T1>(RefSrc1, refbuf, getsrc1, getbuf);
-
-    const T2 *getsrc2 = reinterpret_cast <const T2*>
-                        (&(TestOutput->operands[getinst->o_operands[2]]));
-    validate_brig::validateOpType<T2>(RefSrc2, refbuf, getsrc2, getbuf);
-
-    if (RefSrc3 != NULL) {
-      const T3 *getsrc3 = reinterpret_cast <const T3*>
-                          (&(TestOutput->operands[getinst->o_operands[3]]));
-      validate_brig::validateOpType<T3>(RefSrc3, refbuf, getsrc3, getbuf);
-    } else {
-      EXPECT_EQ(0, getinst->o_operands[3]);
-    }
-    EXPECT_EQ(0, getinst->o_operands[4]);
-  }
+    RefSrc3(Src3) {
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
+    code->append(RefInst);
+    oper->append(RefDest);
+    oper->append(RefSrc1);
+    oper->append(RefSrc2);
+    if(RefSrc3)
+      oper->append(RefSrc3);
+    struct BrigSections S_(reinterpret_cast<const char *>(&sbuf->get()[0]), reinterpret_cast<const char *> (&dir->get()[0]), reinterpret_cast<const char *>(&code->get()[0]), reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+         sbuf->size(), dir->size(), code->size(), oper->size(), (size_t)0);
+    RefOutput = &S_;     
+  }  
 };
 
 
