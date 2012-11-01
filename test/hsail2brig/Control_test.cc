@@ -1,6 +1,15 @@
+#include <iostream>
 #include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
@@ -16,12 +25,18 @@ public:
     BrigCodeGenTest(in, sbuf),
     RefDir(ref)  { }
 
-  void validate(struct BrigSections* TestOutput){
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* dir = new Buffer();
+    dir->append(RefDir);
+   
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),NULL,NULL, NULL, 
+      RefStr->size(), dir->size(), 0, 0, (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete dir;
+  }  
 
-    dir_iterator getdir = TestOutput->begin();
-    const BrigDirectiveControl* getDir = (cast<BrigDirectiveControl>(getdir));
-    validate_brig::validate(RefDir, getDir);
-  }
  };
 
 TEST(CodegenTest,Control_CodeGen){
