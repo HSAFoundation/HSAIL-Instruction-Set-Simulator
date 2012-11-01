@@ -2325,59 +2325,60 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
   context->init_symbol_modifier();
   context->set_isArray(false);
   //First token already verified as GLOBAL/READONLY
-  if (context->token_type == DATA_TYPE_ID) {
-    context->set_type(context->token_value.data_type);
+  if (context->token_type != DATA_TYPE_ID) {
+    return 1;
+  }
+  context->set_type(context->token_value.data_type);
+  context->token_to_scan = yylex();
 
-    context->token_to_scan = yylex();
+  if (Identifier(context)) {
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  std::string var_name = context->token_value.string_val;
+  int var_name_offset = context->add_symbol(var_name);
 
-    if (!Identifier(context)) {
-      std::string var_name = context->token_value.string_val;
-      int var_name_offset = context->add_symbol(var_name);
-
-      // scan for arrayDimensions
-      context->token_to_scan = yylex();
-
-      // set default value(scalar)
-      context->set_dim(0);
-      //context->set_symbol_modifier(BrigArray);
-      if (context->token_to_scan == '[') {
-        if (!ArrayDimensionSet(context)) {
-        }
-      }
-      BrigDirectiveSymbol sym_decl = {
-        sizeof(sym_decl),                 // size
-        BrigEDirectiveSymbol,             // kind
-        {
-          context->get_code_offset(),       // c_code
-          storage_class,                    // storageClass ??
-          context->get_attribute(),         // attribute
-          0,                                // reserved
-          context->get_symbol_modifier(),   // symbol modifier
-          context->get_dim(),                                // dim
-          var_name_offset,                  // s_name
-          context->get_type(),                        // data type
-          context->get_alignment(),         // alignment
-        },
-        0,                                // d_init = 0 for arg
-        0                                 // reserved
-      };
-      context->symbol_map[var_name] = context->get_directive_offset();
-      context->current_argdecl_offset = context->get_directive_offset();
-      context->append_directive(&sym_decl);
-
-      if (!Initializer(context)) {
-        if (context->token_to_scan == ';') {
-            context->token_to_scan = yylex();
-          return 0;
-        } else {
-          context->set_error(MISSING_SEMICOLON);
-        }
-      }
-    } else {
-      context->set_error(MISSING_IDENTIFIER);
+  context->token_to_scan = yylex();
+  // set default value(scalar)
+  context->set_dim(0);
+  if (context->token_to_scan == '[') {
+    if (ArrayDimensionSet(context)) {
+      return 1;
     }
   }
-  return 1;
+  
+  BrigDirectiveSymbol sym_decl = {
+    sizeof(sym_decl),                 // size
+    BrigEDirectiveSymbol,             // kind
+    {
+      context->get_code_offset(),       // c_code
+      storage_class,                    // storageClass ??
+      context->get_attribute(),         // attribute
+      0,                                // reserved
+      context->get_symbol_modifier(),   // symbol modifier
+      context->get_dim(),                                // dim
+      var_name_offset,                  // s_name
+      context->get_type(),                        // data type
+      context->get_alignment(),         // alignment
+    },
+    0,                                // d_init = 0 for arg
+    0                                 // reserved
+  };
+  context->symbol_map[var_name] = context->get_directive_offset();
+  context->current_argdecl_offset = context->get_directive_offset();
+  context->append_directive(&sym_decl);
+
+  if (Initializer(context)) {
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;   
+  }
+    
+  context->token_to_scan = yylex();
+  return 0;
+  
 }
 
 int UninitializableDecl(Context* context) {
