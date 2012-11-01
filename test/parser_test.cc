@@ -466,8 +466,8 @@ TEST(ParserTest, ArgumentListBody) {
   context->set_error_reporter(main_reporter);
 
   // test 1
-  std::string input("const static arg_u32 %local_id[2][2],\n");
-  input.append("static arg_f16 %local_id[], align 8 arg_u64 %test \n");
+  std::string input("(const static arg_u32 %local_id[2][2],\n");
+  input.append("static arg_f16 %local_id[], align 8 arg_u64 %test )\n");
   lexer->set_source_string(input);
   context->clear_context();
   // initialize fake values
@@ -669,32 +669,32 @@ TEST(ParserTest, BranchOperation) {
   context->append_directive(&fake);
 
 
-  std::string input("cbr_width(all)_fbar $s1, @then;\n");
+  std::string input("cbr_width(all)_fbar $c1, @then;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("\n cbr_width(all)_fbar $c1, 10 , [@first, @then];\n");
+  input.assign("\n cbr_width(all)_fbar $c1, $s1 , [@first];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, &global;\n");
+  input.assign("cbr_width(all)_fbar $c1, $s2;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, 5, [%local]; \n");
+  input.assign("cbr_width(all)_fbar $c1, $s3, [%local]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr_width(all)_fbar $c1, 10, @label; \n");
+  input.assign("cbr_width(all)_fbar $c1, $s2, [@label]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global; \n");
+  input.assign("brn_width(all)_fbar $s1; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
@@ -704,17 +704,17 @@ TEST(ParserTest, BranchOperation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global, [%local]; \n");
+  input.assign("brn_width(all)_fbar $s1, [%local]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("brn_width(all)_fbar &global, [@goto]; \n");
+  input.assign("brn_width(all)_fbar $s1, [@goto]; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
 
-  input.assign("cbr $s1, @then; \n");
+  input.assign("cbr $c1, @then; \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Branch(context));
@@ -752,7 +752,7 @@ TEST(ParserTest, ParseCallArgs) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallArgs(context));
 
-  input.assign("(1,2,3)\n");
+  input.assign("(&fun1,&fun2,&fun3)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, CallArgs(context));
@@ -772,7 +772,7 @@ TEST(ParserTest, Call) {
   EXPECT_EQ(0, Call(context));
 
   input.assign("call_width(all) $s1 \n");
-  input.append("(%output1,&output2)(%input1, $d7) [&id1, &id2];\n");
+  input.append("(%output1,&output2)(%input1, %input2) [&id1, &id2];\n");
 
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2183,7 +2183,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("cbr $s1, @then; \n"); // branch
+  input.assign("cbr $c1, @then; \n"); // branch
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
@@ -2483,7 +2483,7 @@ TEST(ParserTest, KernelArgumentList) {
   input.assign("extern kernarg_u32 %local_id[2][2] ");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, ArgumentDecl(context));
+  EXPECT_EQ(0, KernelArgumentDecl(context));
 
     // test 5
   input.assign("const align 8 kernarg_u32 %local_id[2][2] ");

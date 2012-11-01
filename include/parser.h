@@ -9,6 +9,10 @@ namespace hsa {
 namespace brig {
 
 int Query(Context* context);
+int QueryOp(Context* context);
+int QueryOp(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode);
+
+
 int Operand(Context* context);
 int Identifier(Context* context);
 int BaseOperand(Context* context);
@@ -29,6 +33,8 @@ int FBar(Context* context);
 int ArrayDimensionSet(Context* context);
 int ArgumentDecl(Context* context);
 int ArgumentListBody(Context* context);
+int ArgumentListBody(Context* context, int* paramCount);
+
 int FunctionDefinition(Context* context);
 int FunctionDecl(Context* context);
 int Codeblock(Context* context);
@@ -133,7 +139,7 @@ int TopLevelStatements(Context *context);
 int Optacqreg(Context* context);
 
 int ArrayOperand(Context* context);
-int QueryOp(Context* context);
+
 int CodeBlockEnd(Context* context);
 int Comment(Context* context);
 
@@ -150,7 +156,7 @@ int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand);
-int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode);
+
 int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
 int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
 
