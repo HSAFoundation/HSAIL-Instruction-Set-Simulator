@@ -52,6 +52,7 @@ set(hsail2brig_test_SOURCES
     test/lexer_test.cc
     test/parser_test.cc
     test/codegen_test.cc
+    test/codegen_validate.cc
     #test/hsail2brig/Atom_test.cc
     #test/hsail2brig/AtomicImage_test.cc
     #test/hsail2brig/Branch_test.cc
@@ -88,6 +89,7 @@ else (ENABLE_TEST_CASE)
     test/lexer_test.cc
     test/parser_test.cc
     test/codegen_test.cc
+    test/codegen_validate.cc
     #test/hsail2brig/Atom_test.cc
     #test/hsail2brig/AtomicImage_test.cc
     #test/hsail2brig/Branch_test.cc
