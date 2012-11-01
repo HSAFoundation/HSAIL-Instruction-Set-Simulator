@@ -1,58 +1,72 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include <iostream>
+#include <string>
 
-namespace hsa{
-namespace brig{
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
-template <typename T, typename T1, typename T2> class Instruction2_Test : public BrigCodeGenTest{
+namespace hsa {
+namespace brig {
+
+template <typename TInst, typename T1, typename T2>
+class Instruction2_Test: public BrigCodeGenTest {
+
 private:
-
-  //Instruction in .code buffer - Pointers to brig structures
-  const T* RefInst;
-  //Operands in .operands buffer
+  const TInst* RefInst;
+  // Operands in .operands buffer
   const T1* RefDest;
-  const T2* RefSrc1;
+  const T2* RefSrc;
 
 public:
-
-  Instruction2_Test(std::string& in, StringBuffer *sbuf, T* ref, T1* Dest, T2* Src1) :
+  Instruction2_Test(std::string& in, StringBuffer* sbuf, TInst* ref,
+           T1* Dest, T2* Src):
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
     RefDest(Dest),
-    RefSrc1(Src1)  { }
+    RefSrc(Src) {}
+  
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    code->append(RefInst);
+    oper->append(RefDest);
+    oper->append(RefSrc);
 
-  void validate(struct BrigSections* TestOutput){
-
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const T* getinst = (cast<T>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-    const T1 *getdest = reinterpret_cast <const T1*> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validateOpType<T1>(RefDest, refbuf, getdest, getbuf);
-
-    const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validateOpType<T2>(RefSrc1, refbuf, getsrc1, getbuf);
-
-    EXPECT_EQ(0, getinst->o_operands[2]);
-    EXPECT_EQ(0, getinst->o_operands[3]);
-    EXPECT_EQ(0, getinst->o_operands[4]);
-  }
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+  }  
 };
+
 
 TEST(CodegenTest, Instruction2_CodeGen){
 
-  /*********************Common variables**********************/
-  std::string in; std::string op1, op2;
-  StringBuffer *symbols = new StringBuffer();
-  BrigOperandReg reg1, reg2;
+/********************************** Common variables used by all tests******************************/
+  //To keep the stack footprint low
 
+  std:: string in;
+  std::string destName, srcName;
+  StringBuffer* symbols;
+  symbols = new StringBuffer();
+
+  BrigOperandReg reg1, reg2;
   /*****************************************************************/
-  in.assign( "abs_s32 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+ 
+  in.assign("abs_s32 $s1, $s2;\n");
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out1 = {
     0,
@@ -70,15 +84,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase1(in, symbols, &out1, &reg1, &reg2);
   TestCase1.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_s64 $d1, $d2;\n");
-  op1.assign("$d1"); op2.assign("$d2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d1");   srcName.assign("$d2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out2 = {
     0,
@@ -96,15 +110,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase2(in, symbols, &out2, &reg1, &reg2);
   TestCase2.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_f32 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out3 = {
     0,
@@ -122,15 +136,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase3(in, symbols, &out3, &reg1, &reg2);
   TestCase3.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_f64 $d1,$d2;\n");
-  op1.assign("$d1"); op2.assign("$d2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d1");   srcName.assign("$d2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out4 = {
     0,
@@ -148,15 +162,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase4(in, symbols, &out4, &reg1, &reg2);
   TestCase4.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_p_s8x4 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out5 = {
     0,
@@ -174,15 +188,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase5(in, symbols, &out5, &reg1, &reg2);
   TestCase5.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_p_f32x2 $d1, $d1;\n");
-  op1.assign("$d1"); op2.assign("");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d1");   
+  symbols->append(destName);  
 
   BrigInstBase out6 = {
     0,
@@ -205,10 +219,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   TestCase6.Run_Test(&Instruction2);
   symbols->clear();
 
+
   /**********************************************************************************/
   in.assign( "abs_s_s8x4 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out7 = {
     0,
@@ -226,15 +241,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out7, &reg1, &reg2);
   TestCase7.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_p_s8x8 $d1, $d2;\n");
-  op1.assign("$d1"); op2.assign("$d2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d1");   srcName.assign("$d2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out8 = {
     0,
@@ -252,15 +267,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase8(in, symbols, &out8, &reg1, &reg2);
   TestCase8.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_s_s8x8 $d1, $d2;\n");
-  op1.assign("$d1"); op2.assign("$d2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d1");   srcName.assign("$d2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out9 = {
     0,
@@ -278,15 +293,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase9(in, symbols, &out9, &reg1, &reg2);
   TestCase9.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_p_s16x2 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out10 = {
     0,
@@ -304,15 +319,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase10(in, symbols, &out10, &reg1, &reg2);
   TestCase10.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "abs_s_s16x2 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out11 = {
     0,
@@ -330,15 +345,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase11(in, symbols, &out11, &reg1, &reg2);
   TestCase11.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "neg_s32 $s1, 99;\n");
-  op1.assign("$s1");
-  symbols->append(op1);
+  destName.assign("$s1");   
+  symbols->append(destName);  
 
   BrigInstBase out12 = {
     0,
@@ -372,8 +387,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "neg_s64 $d1, $d2;\n");
-  op1.assign("$d1"); op2.assign("$d2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d1");   srcName.assign("$d2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out13 = {
     0,
@@ -391,16 +406,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase13(in, symbols, &out13, &reg1, &reg2);
   TestCase13.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "neg_f32 $s3,1.0f;\n");
-  op1.assign("$s3");
-  symbols->append(op1); symbols->append(op2);
-
+  destName.assign("$s3");   
+  symbols->append(destName);  
    BrigInstBase out14 = {
     0,
     BrigEInstBase,
@@ -433,8 +447,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "neg_f64 $d3,1.0;\n");
-  op1.assign("$d3");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d3");   
+  symbols->append(destName);  
 
   BrigInstBase out15 = {
     0,
@@ -468,9 +482,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "neg_p_f16x2 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
-
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
   BrigInstBase out16 = {
     0,
     BrigEInstBase,
@@ -487,15 +500,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase16(in, symbols, &out16, &reg1, &reg2);
   TestCase16.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "neg_s_u8x4 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out17 = {
     0,
@@ -513,21 +526,21 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase17(in, symbols, &out17, &reg1, &reg2);
   TestCase17.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
-  in.assign( "neg_p_s32x2 $d1, $d2;\n");
-  op1.assign("$d1"); op2.assign("$d2");
-  symbols->append(op1); symbols->append(op2);
+  in.assign( "neg_p_f16x2 $s1, $s2;\n");
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out18 = {
     0,
     BrigEInstBase,
     BrigNeg,
-    Brigs32x2,
+    Brigf16x2,
     BrigPackP,
     {0, sizeof(reg1), 0, 0, 0}
   };
@@ -535,19 +548,19 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   reg1.size = sizeof(reg1);
   reg1.kind = BrigEOperandReg;
-  reg1.type = Brigb64;
+  reg1.type = Brigb32;
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase18(in, symbols, &out18, &reg1, &reg2);
   TestCase18.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "not_b1 $c1, $c2;\n");
-  op1.assign("$c1"); op2.assign("$c2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$c1");   srcName.assign("$c2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out19 = {
     0,
@@ -565,15 +578,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase19(in, symbols, &out19, &reg1, &reg2);
   TestCase19.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "not_b32 $s0, $s2;\n");
-  op1.assign("$s0"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s0");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out20 = {
     0,
@@ -591,15 +604,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase20(in, symbols, &out20, &reg1, &reg2);
   TestCase20.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "not_b64 $d0, $d1;\n");
-  op1.assign("$d0"); op2.assign("$d1");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d0");   srcName.assign("$d1");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out21 = {
     0,
@@ -617,15 +630,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase21(in, symbols, &out21, &reg1, &reg2);
   TestCase21.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "popcount_b32 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out22 = {
     0,
@@ -643,15 +656,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase22(in, symbols, &out22, &reg1, &reg2);
   TestCase22.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "popcount_b64 $s1, $d2;\n");
-  op1.assign("$s1"); op2.assign("$d2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$d2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out23 = {
     0,
@@ -671,15 +684,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   reg2 = reg1;
   reg2.type = Brigb64;
-  reg2.s_name = op1.size() + 1;
+  reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase23(in, symbols, &out23, &reg1, &reg2);
   TestCase23.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "bitrev_b32 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out24 = {
     0,
@@ -697,15 +710,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase24(in, symbols, &out24, &reg1, &reg2);
   TestCase24.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "bitrev_b64 $d1, 0x234;\n");
-  op1.assign("$d1");
-  symbols->append(op1);
+  destName.assign("$d1");   
+  symbols->append(destName); 
 
    BrigInstBase out25 = {
     0,
@@ -739,8 +752,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "firstbit_b32 $s0, $s0;\n");
-  op1.assign("$s0");
-  symbols->append(op1);
+  destName.assign("$s0");   
+  symbols->append(destName);  
 
   BrigInstBase out26 = {
     0,
@@ -765,8 +778,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "firstbit_b64 $s0, $d6;\n");
-  op1.assign("$s0"); op2.assign("$d6");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s0");   srcName.assign("$d6");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out27 = {
     0,
@@ -785,7 +798,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.s_name = 0;
 
   reg2 = reg1;
-  reg2.s_name = op1.size() + 1;
+  reg2.s_name = destName.size() + 1;
   reg2.type = Brigb64;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase27(in, symbols, &out27, &reg1, &reg2);
   TestCase27.Run_Test(&Instruction2);
@@ -793,8 +806,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "lastbit_b32 $s0, $s0;\n");
-  op1.assign("$s0");
-  symbols->append(op1);
+  destName.assign("$s0");   
+  symbols->append(destName);  
 
   BrigInstBase out28 = {
     0,
@@ -819,8 +832,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "lastbit_b64 $s0, $d6;\n");
-  op1.assign("$s0"); op2.assign("$d6");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s0");   srcName.assign("$d6");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out29 = {
     0,
@@ -839,7 +852,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.s_name = 0;
 
   reg2 = reg1;
-  reg2.s_name = op1.size() + 1;
+  reg2.s_name = destName.size() + 1;
   reg2.type = Brigb64;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase29(in, symbols, &out29, &reg1, &reg2);
   TestCase29.Run_Test(&Instruction2);
@@ -847,8 +860,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "movs_lo_b32 $s1, $d1;\n");
-  op1.assign("$s1"); op2.assign("$d1");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$d1");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out30 = {
     0,
@@ -867,7 +880,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.s_name = 0;
 
   reg2 = reg1;
-  reg2.s_name = op1.size() + 1;
+  reg2.s_name = destName.size() + 1;
   reg2.type = Brigb64;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase30(in, symbols, &out30, &reg1, &reg2);
   TestCase30.Run_Test(&Instruction2);
@@ -875,8 +888,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "movs_hi_b32 $s1, $d1;\n");
-  op1.assign("$s1"); op2.assign("$d1");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$d1");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out31 = {
     0,
@@ -895,7 +908,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.s_name = 0;
 
   reg2 = reg1;
-  reg2.s_name = op1.size() + 1;
+  reg2.s_name = destName.size() + 1;
   reg2.type = Brigb64;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase31(in, symbols, &out31, &reg1, &reg2);
   TestCase31.Run_Test(&Instruction2);
@@ -903,8 +916,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "fract_f32 $s0, 3.2f;\n");
-  op1.assign("$s0");
-  symbols->append(op1);
+  destName.assign("$s0");   
+  symbols->append(destName);  
 
   BrigInstBase out32 = {
     0,
@@ -938,8 +951,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "fcos_f32 $s1, $s0;\n");
-  op1.assign("$s1"); op2.assign("$s0");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s0");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out33 = {
     0,
@@ -957,15 +970,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase33(in, symbols, &out33, &reg1, &reg2);
   TestCase33.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "fsin_f32 $s1, $s0;\n");
-  op1.assign("$s1"); op2.assign("$s0");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s0");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out34 = {
     0,
@@ -983,15 +996,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase34(in, symbols, &out34, &reg1, &reg2);
   TestCase34.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "flog2_f32 $s1, $s0;\n");
-  op1.assign("$s1"); op2.assign("$s0");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s0");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out35 = {
     0,
@@ -1009,15 +1022,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase35(in, symbols, &out35, &reg1, &reg2);
   TestCase35.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "fexp2_f32 $s1, $s0;\n");
-  op1.assign("$s1"); op2.assign("$s0");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s0");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out36 = {
     0,
@@ -1035,7 +1048,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
 
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase36(in, symbols, &out36, &reg1, &reg2);
   TestCase36.Run_Test(&Instruction2);
@@ -1043,8 +1056,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "frsqrt_f32 $s1, $s0;\n");
-  op1.assign("$s1"); op2.assign("$s0");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s0");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out37 = {
     0,
@@ -1062,7 +1075,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase37(in, symbols, &out37, &reg1, &reg2);
   TestCase37.Run_Test(&Instruction2);
   symbols->clear();
@@ -1070,8 +1083,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "frcp_f32 $s1, $s0;\n");
-  op1.assign("$s1"); op2.assign("$s0");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s0");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out38 = {
     0,
@@ -1089,15 +1102,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase38(in, symbols, &out38, &reg1, &reg2);
   TestCase38.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "sqrt_f64 $d1, 1.21;\n");
-  op1.assign("$d1");
-  symbols->append(op1);
+  destName.assign("$d1");   
+  symbols->append(destName);  
 
   BrigInstBase out39 = {
     0,
@@ -1131,8 +1144,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "unpack3 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out40 = {
     0,
@@ -1150,15 +1163,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase40(in, symbols, &out40, &reg1, &reg2);
   TestCase40.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "unpack2 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out41 = {
     0,
@@ -1176,15 +1189,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase41(in, symbols, &out41, &reg1, &reg2);
   TestCase41.Run_Test(&Instruction2);
   symbols->clear();
 
  /**********************************************************************************/
   in.assign( "unpack1 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out42 = {
     0,
@@ -1202,15 +1215,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase42(in, symbols, &out42, &reg1, &reg2);
   TestCase42.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "unpack0 $s1, $s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out43 = {
     0,
@@ -1228,15 +1241,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase43(in, symbols, &out43, &reg1, &reg2);
   TestCase43.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "neg_s32 $s1, $s2;");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out44 = {
     0,
@@ -1254,15 +1267,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase44(in, symbols, &out44, &reg1, &reg2);
   TestCase44.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "mask_b64 $d1, $d2;");
-  op1.assign("$d1"); op2.assign("$d2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$d1");   srcName.assign("$d2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out45 = {
     0,
@@ -1280,15 +1293,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase45(in, symbols, &out45, &reg1, &reg2);
   TestCase45.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "count_u32 $s1, $s2;");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out46 = {
     0,
@@ -1306,15 +1319,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase46(in, symbols, &out46, &reg1, &reg2);
   TestCase46.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "alloca $s1,$s2;");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out47 = {
     0,
@@ -1332,14 +1345,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase47(in, symbols, &out47, &reg1, &reg2);
   TestCase47.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "alloca $s1, 24;");
-  op1.assign("$s1");  symbols->append(op1);
+  destName.assign("$s1");   
+  symbols->append(destName);  
 
   BrigInstBase out48 = {
     0,
@@ -1370,8 +1384,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "workitemid $s1,$s2;");
-  op1.assign("$s1"); op2.assign("$s2");
-  symbols->append(op1); symbols->append(op2);
+  destName.assign("$s1");   srcName.assign("$s2");
+  symbols->append(destName);  symbols->append(srcName);
 
   BrigInstBase out49 = {
     0,
@@ -1389,14 +1403,15 @@ TEST(CodegenTest, Instruction2_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = 0;
 
-  reg2 = reg1; reg2.s_name = op1.size() + 1;
+  reg2 = reg1; reg2.s_name = destName.size() + 1;
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase49(in, symbols, &out49, &reg1, &reg2);
   TestCase49.Run_Test(&Instruction2);
   symbols->clear();
 
   /**********************************************************************************/
   in.assign( "workitemaid $s1, 0;");
-  op1.assign("$s1");  symbols->append(op1);
+  destName.assign("$s1");   
+  symbols->append(destName);  
 
   BrigInstBase out50 = {
     0,
@@ -1427,7 +1442,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "workgroupid $s1, 0;");
-  op1.assign("$s1");  symbols->append(op1);
+  destName.assign("$s1");   
+  symbols->append(destName);  
 
   BrigInstBase out51 = {
     0,
@@ -1458,7 +1474,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign("workgroupsize $s1, 0;");
-  op1.assign("$s1");  symbols->append(op1);
+  destName.assign("$s1");   
+  symbols->append(destName);  
 
   BrigInstBase out52 = {
     0,
@@ -1489,7 +1506,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign("NDRangesize $s2, 2;");
-  op1.assign("$s2");  symbols->append(op1);
+  destName.assign("$s2");  
+  symbols->append(destName);  
 
   BrigInstBase out53 = {
     0,
@@ -1520,7 +1538,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign("NDRangegroups $s2, 2;");
-  op1.assign("$s2");  symbols->append(op1);
+  destName.assign("$s2");   
+  symbols->append(destName);  
 
   BrigInstBase out54 = {
     0,
@@ -1558,7 +1577,8 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
 
   /*********************Common variables**********************/
   std::string in; std::string op1, op2;
-  StringBuffer *symbols = new StringBuffer();
+  StringBuffer* symbols;
+  symbols = new StringBuffer();
   BrigOperandReg reg1, reg2;
 
   /*****************************************************************/
