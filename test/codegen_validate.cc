@@ -568,8 +568,6 @@ void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, 
   inst_iterator refinst(RefOutput->code + refoffset); 
   inst_iterator getinst(GetOutput->code + getoffset); 
   if(refinst!=NULL && getinst!=NULL){
-    return;
-  }
     switch(getinst->kind){ 
       caseInstBrig(InstBase); 
       caseInstBrig(InstMod) ;
@@ -593,8 +591,6 @@ void validate_DIR_OFFSET(BrigdOffset32_t refoffset, BrigdOffset32_t getoffset, B
   dir_iterator refdir(RefOutput->directives + refoffset);
   dir_iterator getdir(GetOutput->directives + getoffset);
   if(refdir!= NULL && getdir!=NULL){
-    return ;
-  }
     switch(getdir->kind){
       caseDirBrig(DirectivePad);        
           caseDirBrig(DirectiveFunction) ;        

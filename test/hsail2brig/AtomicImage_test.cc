@@ -167,7 +167,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   out.o_operands[1] = sizeof(dest);
   out.o_operands[2] = sizeof(dest) + sizeof(image1);
   out.o_operands[3] = sizeof(dest) + sizeof(image1) + sizeof(reg2);
-  out.o_operands[4] = 0;
+  out.o_operands[4] = sizeof(dest) + sizeof(image1) + sizeof(reg2) + sizeof(reg3);
 
   out.atomicOperation = BrigAtomicCas;
   out.storageClass = BrigGlobalSpace;
