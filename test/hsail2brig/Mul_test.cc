@@ -39,6 +39,7 @@ public:
   void Run_Test(int (*Rule)(Context*)){  
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
     code->append(RefInst);
     oper->append(RefDest);
     oper->append(RefSrc1);
@@ -47,13 +48,15 @@ public:
       oper->append(RefSrc3);
     
     struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
-      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
       reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
       RefStr->size(), 0, code->size(), oper->size(), (size_t)0);    
     
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
+    delete dir;
   }  
 };
 
