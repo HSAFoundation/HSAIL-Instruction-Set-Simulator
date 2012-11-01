@@ -299,16 +299,16 @@ template<class T> static T BitRev(T x) {
 
   return T(r);
 }
-SignedInst(define, BitRev, Unary)
-UnsignedInst(define, BitRev, Unary)
+defineUnary(BitRev, b32)
+defineUnary(BitRev, b64)
 
 template<class T> static T Extract(T x, b32 y, b32 z) {
   unsigned offset = Int<T>::ShiftMask & y;
   unsigned width  = Int<T>::ShiftMask & z;
   return (x << offset) >> (Int<T>::Bits - width);
 }
-SignedInst(define, Extract, Ternary)
-UnsignedInst(define, Extract, Ternary)
+defineTernary(Extract, b32)
+defineTernary(Extract, b64)
 
 template<class T> static T Insert(T w, T x, b32 y, b32 z) {
   typedef typename Int<T>::Unsigned Unsigned;
@@ -319,14 +319,14 @@ template<class T> static T Insert(T w, T x, b32 y, b32 z) {
   w &= mask;
   return w | (x << offset);
 }
-SignedInst(define, Insert, Quaternary)
-UnsignedInst(define, Insert, Quaternary)
+defineQuaternary(Insert, b32)
+defineQuaternary(Insert, b64)
 
 template<class T> static T Bitselect(T x, T y, T z) {
   return (y & x) | (z & ~x);
 }
-SignedInst(define, Bitselect, Ternary)
-UnsignedInst(define, Bitselect, Ternary)
+defineTernary(Bitselect, b32)
+defineTernary(Bitselect, b64)
 
 template<class T> static T Firstbit(T x) {
   if(Int<T>::isNeg(x)) x = ~x;
@@ -338,8 +338,8 @@ template<class T> static T Firstbit(T x) {
   }
   return pos;
 }
-SignedInst(define, Firstbit, Unary)
-UnsignedInst(define, Firstbit, Unary)
+defineUnary(Firstbit, b32)
+defineUnary(Firstbit, b64)
 
 template<class T> static T Lastbit(T x) {
   if(!x) return ~T(0);
@@ -350,8 +350,8 @@ template<class T> static T Lastbit(T x) {
   }
   return pos;
 }
-SignedInst(define, Lastbit, Unary)
-UnsignedInst(define, Lastbit, Unary)
+defineUnary(Lastbit, b32)
+defineUnary(Lastbit, b64)
 
 template<class T> static T Mov(T x) { return x; }
 BitInst(define, Mov, Unary)
