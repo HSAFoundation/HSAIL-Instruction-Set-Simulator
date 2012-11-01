@@ -1886,7 +1886,7 @@ bool BrigModule::validateSub(const inst_iterator inst) const {
                      inst->packing == BrigPackSPsat),
                    "Vectors of Sub should not be Sat");
   valid &= validateBinaryArithmetic(inst);
-  return validateBinaryArithmetic(inst);
+  return valid;
 }
 
 bool BrigModule::validateMad24(const inst_iterator inst) const {
