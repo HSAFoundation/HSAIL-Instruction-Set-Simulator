@@ -9,8 +9,7 @@
 #include "error_reporter.h"
 #include "context.h"
 #include "parser_wrapper.h"
-#include "Block_test.h"
-#include "ImageInstruction_test.h"
+
 
 namespace hsa {
 namespace brig {

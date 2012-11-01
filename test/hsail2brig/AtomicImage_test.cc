@@ -1,7 +1,7 @@
-#include <iostream>
-#include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
+
 
 namespace hsa {
 namespace brig {
@@ -34,68 +34,45 @@ public:
     RegList(regList),
     ImageReg(imageReg) { }
 
-  void validate(struct BrigSections* TestOutput) {
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
 
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-    unsigned int opCount = 0;
-    const BrigOperandReg *getreg;
+    code->append(RefInst);
 
-    inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstAtomicImage* getinst = (cast<BrigInstAtomicImage>(getcode));
-    validate_brig::validate(RefInst, getinst);
     if (RefDest != NULL) {
-      const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*> 
-                                      (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validate(RefDest, refbuf, getdest, getbuf);
+      oper->append(RefDest);
     }
-
-    const BrigOperandOpaque *getsrc1 = reinterpret_cast <const BrigOperandOpaque*>
-                        (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validate(RefSrc1, getsrc1);
-
     if (ImageReg != NULL) {
-      getreg = reinterpret_cast <const BrigOperandReg*>
-               (&(TestOutput->operands[getsrc1->reg]));
-      validate_brig::validate(ImageReg, refbuf, getreg, getbuf);
+      oper->append(ImageReg);
     }
+    oper->append(RefSrc1);
 
-    const T2 *getsrc2 = reinterpret_cast <const T2*>
-                        (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validateOpType<T2>(RefSrc2, refbuf, getsrc2, getbuf);
-
-
-    if (RefSrc2->kind == BrigEOperandRegV2) {
-      const BrigOperandRegV2* GetRegV2 = reinterpret_cast<const BrigOperandRegV2*>(getsrc2);
-      for (int i = 0 ; i < 2 ; ++i) {
-        getreg = reinterpret_cast <const BrigOperandReg*>
-                 (&(TestOutput->operands[GetRegV2->regs[i]]));
-        validate_brig::validate(&RegList[i], refbuf, getreg, getbuf);
-      }
-    } else if (RefSrc2->kind == BrigEOperandRegV4) {
-      const BrigOperandRegV4* GetRegV4 = reinterpret_cast<const BrigOperandRegV4*>(getsrc2);
+    if (RegList != NULL) {
       for (int i = 0 ; i < 4 ; ++i) {
-        getreg = reinterpret_cast <const BrigOperandReg*>
-                 (&(TestOutput->operands[GetRegV4->regs[i]]));
-        validate_brig::validate(&RegList[i], refbuf, getreg, getbuf);
+        if (RegList[i].size != 0) {
+          oper->append(&RegList[i]);
+        }
       }
     }
-
-    const T3 *getsrc3 = reinterpret_cast <const T3*>
-                        (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validateOpType<T3>(RefSrc3, refbuf, getsrc3, getbuf);
-
+    oper->append(RefSrc2);
+    if (RefSrc3 != NULL) {
+      oper->append(RefSrc3);
+    }
 
     if (RefSrc4 != NULL) {
-      const T4 *getsrc4 = reinterpret_cast <const T4*>
-                          (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validateOpType<T4>(RefSrc4, refbuf, getsrc4, getbuf);
-    } else {
-      EXPECT_EQ(0, getinst->o_operands[opCount++]);
+      oper->append(RefSrc4);
     }
-    while (opCount < 5) {
-      EXPECT_EQ(0, getinst->o_operands[opCount++]);
-    }
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), 0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+
+    delete code;
+    delete oper;
   }
 };
 
@@ -344,6 +321,8 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   regList[1] = regList[0];
   regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
 
+  memset(&regList[2], 0, sizeof(regList[2]) + sizeof(regList[3]));
+
 
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
@@ -420,6 +399,8 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   regList[1] = regList[0];
   regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
 
+  memset(&regList[2], 0, sizeof(regList[2]) + sizeof(regList[3]));
+
   regV2.size = sizeof(regV2);
   regV2.kind = BrigEOperandRegV2;
   regV2.type = Brigb32;
@@ -470,14 +451,15 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   image1.reg = 0;
   image1.offset = 4;
 
-  regList[0].size = sizeof(regList[0]);
-  regList[0].kind = BrigEOperandReg;
-  regList[0].type = Brigb32;
-  regList[0].reserved = 0;
-  regList[0].s_name = 0;
-  
-  regList[1] = regList[0];
-  regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
+  memset(&regList[0], 0, sizeof(regList[0]));
+
+  regList[1].size = sizeof(regList[1]);
+  regList[1].kind = BrigEOperandReg;
+  regList[1].type = Brigb32;
+  regList[1].reserved = 0;
+  regList[1].s_name = dest.s_name + reg1Name.size() + 1;
+
+  memset(&regList[2], 0, sizeof(regList[2]) + sizeof(regList[3]));
 
   regV2.size = sizeof(regV2);
   regV2.kind = BrigEOperandRegV2;
@@ -492,7 +474,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.reserved = 0;
   reg3.s_name = destName.size() + 1;
 
-  AtomicImage_Test<BrigOperandRegV2, BrigOperandReg> TestCase6(in, symbols, &out, &dest, &image1, &regV2, &reg3, NULL, regList);
+  AtomicImage_Test<BrigOperandRegV2, BrigOperandReg> TestCase6(in, symbols, &out, &dest, &image1, &regV2, NULL, NULL, regList);
   TestCase6.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -589,14 +571,13 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   image1.reg = 0;
   image1.offset = 0;
 
-  regList[0].size = sizeof(regList[0]);
-  regList[0].kind = BrigEOperandReg;
-  regList[0].type = Brigb32;
-  regList[0].reserved = 0;
-  regList[0].s_name = 0;
-  
-  regList[1] = regList[0];
-  regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
+  memset(&regList[0], 0, sizeof(regList[0]));
+
+  regList[1].size = sizeof(regList[1]);
+  regList[1].kind = BrigEOperandReg;
+  regList[1].type = Brigb32;
+  regList[1].reserved = 0;
+  regList[1].s_name = dest.s_name + reg1Name.size() + 1;
 
   regList[2] = regList[1];
   regList[2].s_name = regList[1].s_name + reg2Name.size() + 1;
@@ -619,7 +600,7 @@ TEST(CodegenTest, ImageRet_CodeGen) {
   reg3.reserved = 0;
   reg3.s_name = destName.size() + reg2Name.size() + 2;
 
-  AtomicImage_Test<BrigOperandRegV4, BrigOperandReg> TestCase8(in, symbols, &out, &dest, &image1, &regV4, &reg3, NULL, regList, &reg);
+  AtomicImage_Test<BrigOperandRegV4, BrigOperandReg> TestCase8(in, symbols, &out, &dest, &image1, &regV4, NULL, NULL, regList);
   TestCase8.Run_Test(&ImageRet);
   symbols->clear();
 
@@ -885,6 +866,8 @@ TEST(CodegenTest, ImageNoRet_CodeGen) {
   regList[1] = regList[0];
   regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
 
+  memset(&regList[2], 0, sizeof(regList[2]) + sizeof(regList[3]));
+
   regV2.size = sizeof(regV2);
   regV2.kind = BrigEOperandRegV2;
   regV2.type = Brigb32;
@@ -1006,6 +989,8 @@ TEST(CodegenTest, ImageNoRet_CodeGen) {
   regList[1] = regList[0];
   regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
 
+  memset(&regList[2], 0, sizeof(regList[2]) + sizeof(regList[3]));
+
   regV2.size = sizeof(regV2);
   regV2.kind = BrigEOperandRegV2;
   regV2.type = Brigb32;
@@ -1067,14 +1052,16 @@ TEST(CodegenTest, ImageNoRet_CodeGen) {
   regList[1] = regList[0];
   regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
 
+  memset(&regList[2], 0, sizeof(regList[2]) + sizeof(regList[3]));
+
   regV2.size = sizeof(regV2);
   regV2.kind = BrigEOperandRegV2;
   regV2.type = Brigb32;
   regV2.reserved = 0;
-  regV2.regs[0] = sizeof(image1);
-  regV2.regs[1] = sizeof(reg3) + regV2.regs[0];
+  regV2.regs[0] = sizeof(image1) + sizeof(reg);
+  regV2.regs[1] = sizeof(reg) + regV2.regs[0];
 
-  reg3.size = sizeof(reg4);
+  reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
   reg3.type = Brigb32;
   reg3.reserved = 0;
@@ -1126,20 +1113,16 @@ TEST(CodegenTest, ImageNoRet_CodeGen) {
   regList[1] = regList[0];
   regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
 
+  memset(&regList[2], 0, sizeof(regList[2]) + sizeof(regList[3]));
+
   regV2.size = sizeof(regV2);
   regV2.kind = BrigEOperandRegV2;
   regV2.type = Brigb32;
   regV2.reserved = 0;
   regV2.regs[0] = sizeof(reg) + sizeof(image1);
   regV2.regs[1] = sizeof(reg) * 2 + sizeof(image1);
-
-  reg3.size = sizeof(reg3);
-  reg3.kind = BrigEOperandReg;
-  reg3.type = Brigb32;
-  reg3.reserved = 0;
-  reg3.s_name = regName.size() + reg1Name.size() + 2;
   
-  AtomicImage_Test<BrigOperandRegV2, BrigOperandReg> TestCase6(in, symbols, &out, NULL, &image1, &regV2, &reg3, NULL, regList, &reg);
+  AtomicImage_Test<BrigOperandRegV2, BrigOperandReg> TestCase6(in, symbols, &out, NULL, &image1, &regV2, NULL, NULL, regList, &reg);
   TestCase6.Run_Test(&ImageNoRet);
   symbols->clear();
 
@@ -1176,9 +1159,8 @@ TEST(CodegenTest, ImageNoRet_CodeGen) {
   reg2.reserved = 0;
   reg2.s_name = 0;
 
-  reg3 = reg2;
   
-  AtomicImage_Test<BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out, NULL, &image1, &reg2, &reg3);
+  AtomicImage_Test<BrigOperandReg, BrigOperandReg> TestCase7(in, symbols, &out, NULL, &image1, &reg2, NULL);
   TestCase7.Run_Test(&ImageNoRet);
   symbols->clear();
 
@@ -1218,14 +1200,13 @@ TEST(CodegenTest, ImageNoRet_CodeGen) {
   reg.reserved = 0;
   reg.s_name = 0;
 
-  regList[0].size = sizeof(regList[0]);
-  regList[0].kind = BrigEOperandReg;
-  regList[0].type = Brigb32;
-  regList[0].reserved = 0;
-  regList[0].s_name = 0;
+  memset(&regList[0], 0, sizeof(regList[0]));
   
-  regList[1] = regList[0];
-  regList[1].s_name = regList[0].s_name + reg1Name.size() + 1;
+  regList[1].size = sizeof(regList[1]);
+  regList[1].kind = BrigEOperandReg;
+  regList[1].type = Brigb32;
+  regList[1].reserved = 0;
+  regList[1].s_name = reg.s_name + reg1Name.size() + 1;
 
   regList[2] = regList[1];
   regList[2].s_name = regList[1].s_name + reg2Name.size() + 1;
@@ -1241,14 +1222,8 @@ TEST(CodegenTest, ImageNoRet_CodeGen) {
   regV4.regs[1] = sizeof(reg) + sizeof(image1);
   regV4.regs[2] = sizeof(reg) + regV4.regs[1];
   regV4.regs[3] = sizeof(reg) + regV4.regs[2];
-
-  reg3.size = sizeof(reg3);
-  reg3.kind = BrigEOperandReg;
-  reg3.type = Brigb32;
-  reg3.reserved = 0;
-  reg3.s_name = regName.size() + reg2Name.size() + 2;
   
-  AtomicImage_Test<BrigOperandRegV4, BrigOperandReg> TestCase8(in, symbols, &out, NULL, &image1, &regV4, &reg3, NULL, regList, &reg);
+  AtomicImage_Test<BrigOperandRegV4, BrigOperandReg> TestCase8(in, symbols, &out, NULL, &image1, &regV4, NULL, NULL, regList, &reg);
   TestCase8.Run_Test(&ImageNoRet);
   symbols->clear();
 
