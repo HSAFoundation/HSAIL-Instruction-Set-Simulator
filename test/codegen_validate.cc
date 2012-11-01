@@ -17,7 +17,7 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);    
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -42,7 +42,7 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -70,7 +70,7 @@ void validate(const BrigInstCvt* ref, const BrigInstCvt* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -101,7 +101,7 @@ void validate(const BrigInstRead* ref, const BrigInstRead*get,
   EXPECT_EQ(ref->stype, get->stype);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -128,7 +128,7 @@ void validate(const BrigInstBar* ref, const BrigInstBar* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -154,7 +154,7 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -182,7 +182,7 @@ void validate(const BrigInstCmp* ref, const BrigInstCmp* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -214,7 +214,7 @@ void validate(const BrigInstMem* ref, const BrigInstMem* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -241,7 +241,7 @@ void validate(const BrigInstAtomic* ref, const BrigInstAtomic* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -269,7 +269,7 @@ void validate(const BrigInstAtomicImage* ref, const BrigInstAtomicImage* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -304,7 +304,7 @@ void validate(const BrigInstImage* ref, const BrigInstImage* get,
   EXPECT_EQ(ref->packing, get->packing);
   EXPECT_EQ(ref->reserved, get->reserved);      
   for(int i=0; i<5; i++){
-    if((ref->o_operands[i]!=0) && (get->o_operands[i]!=0)){
+    if(get->o_operands[i]!=0){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -567,64 +567,66 @@ void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get,
 void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, BrigSections* RefOutput, BrigSections* GetOutput){
   inst_iterator refinst(RefOutput->code + refoffset); 
   inst_iterator getinst(GetOutput->code + getoffset); 
-  if(refinst==NULL || getinst==NULL) {
+  if(refinst!=NULL && getinst!=NULL){
     return;
   }
-  switch(getinst->kind){ 
-    caseInstBrig(InstBase); 
-    caseInstBrig(InstMod) ;
-    caseInstBrig(InstCvt) ;
-    caseInstBrig(InstRead);
-    caseInstBrig(InstBar) ;
-    caseInstBrig(InstLdSt);
-    caseInstBrig(InstCmp);
-    caseInstBrig(InstMem);
-    caseInstBrig(InstAtomic);
-    caseInstBrig(InstAtomicImage);
-    caseInstBrig(InstImage);
-    default:
-        printf("Invalid instruction\n");
-        exit(1);
-  }
+    switch(getinst->kind){ 
+      caseInstBrig(InstBase); 
+      caseInstBrig(InstMod) ;
+      caseInstBrig(InstCvt) ;
+      caseInstBrig(InstRead);
+      caseInstBrig(InstBar) ;
+      caseInstBrig(InstLdSt);
+      caseInstBrig(InstCmp);
+      caseInstBrig(InstMem);
+      caseInstBrig(InstAtomic);
+      caseInstBrig(InstAtomicImage);
+      caseInstBrig(InstImage);
+      default:
+          printf("Invalid instruction\n");
+          exit(1);
+    }
+  }  
 }  
   
 void validate_DIR_OFFSET(BrigdOffset32_t refoffset, BrigdOffset32_t getoffset, BrigSections* RefOutput, BrigSections* GetOutput){
   dir_iterator refdir(RefOutput->directives + refoffset);
   dir_iterator getdir(GetOutput->directives + getoffset);
-  if (refdir == NULL || getdir == NULL) {
+  if(refdir!= NULL && getdir!=NULL){
     return ;
   }
-  switch(getdir->kind){
-    caseDirBrig(DirectivePad);        
-        caseDirBrig(DirectiveFunction) ;        
-        caseDirBrig(DirectiveKernel);        
-        caseDirBrig(DirectiveSymbol);        
-        caseDirBrig(DirectiveImage) ;        
-        caseDirBrig(DirectiveSampler);        
-        caseDirBrig(DirectiveLabel) ;       
-        caseDirBrig(DirectiveLabelList) ;        
-        caseDirBrig(DirectiveVersion);         
-        caseDirBrig(DirectiveSignature);          
-        caseDirBrig(DirectiveFile) ;        
-        caseDirBrig(DirectiveComment);        
-        caseDirBrig(DirectiveLoc);        
-        caseDirBrig(DirectiveInit);        
-        caseDirBrig(DirectiveLabelInit);        
-        caseDirBrig(DirectiveControl);        
-        caseDirBrig(DirectivePragma);       
-        caseDirBrig(DirectiveExtension);        
-        case(BrigEDirectiveArgStart):        
-        case(BrigEDirectiveArgEnd): /*validate_brig::validate((reinterpret_cast<BrigDirectiveScope>(refdir)), (reinterpret_cast<BrigDirectiveScope>(getdir)), 
-                                      RefOutput, GetOutput);*/
-                                    break;
-        caseDirBrig(DirectiveBlockStart);        
-        caseDirBrig(DirectiveBlockNumeric);       
-        caseDirBrig(DirectiveBlockString);        
-        caseDirBrig(DirectiveBlockEnd);
-        default:
-            printf("Invalid instruction\n");
-            exit(1);
-  }
+    switch(getdir->kind){
+      caseDirBrig(DirectivePad);        
+          caseDirBrig(DirectiveFunction) ;        
+          caseDirBrig(DirectiveKernel);        
+          caseDirBrig(DirectiveSymbol);        
+          caseDirBrig(DirectiveImage) ;        
+          caseDirBrig(DirectiveSampler);        
+          caseDirBrig(DirectiveLabel) ;       
+          caseDirBrig(DirectiveLabelList) ;        
+          caseDirBrig(DirectiveVersion);         
+          caseDirBrig(DirectiveSignature);          
+          caseDirBrig(DirectiveFile) ;        
+          caseDirBrig(DirectiveComment);        
+          caseDirBrig(DirectiveLoc);        
+          caseDirBrig(DirectiveInit);        
+          caseDirBrig(DirectiveLabelInit);        
+          caseDirBrig(DirectiveControl);        
+          caseDirBrig(DirectivePragma);       
+          caseDirBrig(DirectiveExtension);        
+          case(BrigEDirectiveArgStart):        
+          case(BrigEDirectiveArgEnd): /*validate_brig::validate((reinterpret_cast<BrigDirectiveScope>(refdir)), (reinterpret_cast<BrigDirectiveScope>(getdir)), 
+                                        RefOutput, GetOutput);*/
+                                      break;
+          caseDirBrig(DirectiveBlockStart);        
+          caseDirBrig(DirectiveBlockNumeric);       
+          caseDirBrig(DirectiveBlockString);        
+          caseDirBrig(DirectiveBlockEnd);
+          default:
+              printf("Invalid instruction\n");
+              exit(1);
+    }
+  }  
 }
 
 void validate(const BrigDirectiveBase* ref, const BrigDirectiveBase* get,
