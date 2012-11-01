@@ -13,7 +13,7 @@
 namespace hsa {
 namespace brig {
 
-int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode) {
+int QueryOp(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpcode) {
   switch (context->token_to_scan) {
     case QUERY_ORDER:
       *pOpcode = BrigQueryOrder;
@@ -56,71 +56,65 @@ int QueryOpPart2(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* 
 int QueryOp(Context* context) {
   BrigDataType16_t dataType;
   BrigOpcode32_t opcode;
-  return QueryOpPart2(context, &dataType, &opcode);
+  return QueryOp(context, &dataType, &opcode);
 }
 
 
 int Query(Context* context) {
-  // Chuang
+  
+  BrigOpcode32_t opcode;
+  BrigDataType16_t type; 
+  BrigoOffset32_t OpOffset[2] = {0,0};
+  
+
+  if (QueryOp(context, &type, &opcode)) {
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_value.data_type != type) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_SREGISTER) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  std::string opName = context->token_value.string_val;
+  if (Identifier(context)) {
+    return 1;
+  }
+  OpOffset[0] = context->operand_map[opName];
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != '[') {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  } 
+  context->token_to_scan = yylex();
+  if (AddressableOperandPart2(context, &OpOffset[1], true)) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
   BrigInstBase query_inst = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
-    0,                     // opcode
-    Brigb32,               // type
+    opcode,                     // opcode
+    type,               // type
     BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0}        // o_operands[5]
+    {OpOffset[0], OpOffset[1], 0, 0, 0}        // o_operands[5]
   };
-
-  if (!QueryOpPart2(context, &query_inst.type, &query_inst.opcode)) {
-    context->token_to_scan = yylex();
-
-    // According to Query Image (query) Operations in v1.2 PRM 7.7.1
-    // If opcode is width, depth, height. The data type must be Brigu32.
-    // If not, it must be Brigb32.
-    if (context->token_value.data_type == query_inst.type) {
-      context->token_to_scan = yylex();
-      // According to the Data Type , The register must be a 32bit Register.
-      if (context->token_to_scan == TOKEN_SREGISTER) {
-        // just use Idenifier rule to fill $s register to operand section.
-        std::string opName = context->token_value.string_val;
-        if (Identifier(context)) {
-          return 1;
-        }
-        query_inst.o_operands[0] = context->operand_map[opName];
-
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-          if (context->token_to_scan != '[') {
-            context->set_error(MISSING_OPERAND);
-          } else {
-            context->token_to_scan = yylex();
-          }
-
-          if (!AddressableOperandPart2(context, &query_inst.o_operands[1], true)) {
-            if (context->token_to_scan == ';') {
-
-              context->append_code(&query_inst);
-
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-            }
-          } else {
-            context->set_error(INVALID_OPERAND);
-          }
-        } else {
-          context->set_error(MISSING_COMMA);
-        }
-      } else {
-        context->set_error(MISSING_OPERAND);
-      }
-    } else {
-      context->set_error(MISSING_DATA_TYPE);
-    }
-  }
-  return 1;
+  context->append_code(&query_inst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
@@ -746,26 +740,22 @@ int CallArgs(Context* context) {
 
       delete[] array;
       break;
-    } else if (!Operand(context)) {
-      if ((saved_token == TOKEN_GLOBAL_IDENTIFIER)||
-          (saved_token == TOKEN_LOCAL_IDENTIFIER)) {
-        if (context->arg_map.count(arg_name)) {
-          arg_offset[n_elements] = context->arg_map[arg_name];
-        } else {
-          BrigOperandArgumentRef opArgRef = {
-            sizeof(BrigOperandArgumentRef),
-            BrigEOperandArgumentRef,
-            0
-          };
-          // TODO(Chuang): judge whether the identifier has been defined.
-          opArgRef.arg = context->symbol_map[arg_name];
-          context->arg_map[arg_name] = context->get_operand_offset();
-          context->append_operand(&opArgRef);
-          arg_offset[n_elements] = context->arg_map[arg_name];
-        }
+    } else if (saved_token == TOKEN_GLOBAL_IDENTIFIER ||
+               saved_token == TOKEN_LOCAL_IDENTIFIER) {
+      if (!context->arg_map.count(arg_name)) {
+        BrigOperandArgumentRef opArgRef = {
+          sizeof(BrigOperandArgumentRef),
+          BrigEOperandArgumentRef,
+          0
+        };
+        // TODO(Chuang): judge whether the identifier has been defined.
+        opArgRef.arg = context->symbol_map[arg_name];
+        context->arg_map[arg_name] = context->get_operand_offset();
+        context->append_operand(&opArgRef);
       }
-
+      arg_offset[n_elements] = context->arg_map[arg_name];
       n_elements++;
+      context->token_to_scan = yylex();
       continue;
     } else if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
@@ -786,6 +776,7 @@ int RoundingMode(Context* context) {
   if (first_token == _FTZ) {
     mod.valid = 1;
     mod.ftz = 1;
+    mod.floatOrInt = 1;
     context->token_to_scan = yylex();
   }
 
@@ -1237,8 +1228,7 @@ int Version(Context* context) {
               // update context
               context->set_machine(bdv.machine);
               context->set_profile(bdv.profile);
-              context->set_ftz(bdv.ftz);
-
+              
               context->token_to_scan = yylex();
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();      // next target
@@ -1351,7 +1341,7 @@ int FBar(Context* context) {
   if (context->token_to_scan == '(') {
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      context->set_fbar(context->token_value.int_val);
+      //context->set_fbar(context->token_value.int_val);
       context->token_to_scan = yylex();
       if (context->token_to_scan == ')') {
         context->token_to_scan = yylex();
@@ -1402,220 +1392,197 @@ int ArrayDimensionSet(Context* context) {
 }
 
 int ArgumentDecl(Context* context) {
-  if (!DeclPrefix(context)) {
-    context->set_dim(0);
-    context->init_symbol_modifier();
-    BrigStorageClass32_t storage_class = context->token_value.storage_class;
 
-    // skip over "arg" in context->token_to_scan
-    context->token_to_scan = yylex();
-    if ((context->token_type == DATA_TYPE_ID)||
-        (context->token_to_scan == _RWIMG) ||
-        (context->token_to_scan == _SAMP) ||
-        (context->token_to_scan == _ROIMG)) {
-      context->set_type(context->token_value.data_type);
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
-        // for argument, we need to set a BrigDirectiveSymbol
-        // and write the corresponding string into .string section.
-
-        std::string arg_name = context->token_value.string_val;
-        int arg_name_offset = context->add_symbol(arg_name);
-
-        // scan for arrayDimensions
-        context->token_to_scan = yylex();
-        // set default value(scalar)
-
-        if (context->token_to_scan == '[') {
-          if (ArrayDimensionSet(context)) {
-            // context->token_to_scan has been set in ArrayDimensionSet()
-            return 1;
-          }
-        }
-        BrigdOffset32_t dsize = context->get_directive_offset();
-        BrigDirectiveSymbol sym_decl = {
-        sizeof(BrigDirectiveSymbol),                 // size
-        BrigEDirectiveSymbol,             // kind
-        {
-          context->get_code_offset(),       // c_code
-          storage_class,                    // storageClass
-          context->get_attribute(),         // attribute
-          0,                                // reserved
-          context->get_symbol_modifier(),   // symbol modifier
-          context->get_dim(),               // dim
-          arg_name_offset,                  // s_name
-          context->get_type(),              // data type
-          context->get_alignment(),         // alignment
-        },
-        0,                                // d_init = 0 for arg
-        0                                 // reserved
-        };
-        // append the DirectiveSymbol to .directive section.
-        context->append_directive(&sym_decl);
-        context->symbol_map[arg_name] = dsize;
-
-        // update the current DirectiveFunction.
-        // 1. update the directive offset.
-        if(context->current_bdf_offset){
-            BrigDirectiveFunction bdf;
-            context->get_directive(context->current_bdf_offset, &bdf);
-            BrigdOffset32_t first_scope = bdf.d_firstScopedDirective;
-            BrigdOffset32_t next_directive = bdf.d_nextDirective;
-            if (first_scope == next_directive) {
-                bdf.d_nextDirective += sizeof(sym_decl);
-                bdf.d_firstScopedDirective = bdf.d_nextDirective;
-            } else {
-                bdf.d_nextDirective += sizeof(sym_decl);
-            }
-            // update param count
-            if (context->is_arg_output()) {
-                bdf.outParamCount++;
-            } else {
-                if (!bdf.inParamCount)
-                    bdf.d_firstInParam = dsize;
-                    bdf.inParamCount++;
-            }
-            unsigned char * bdf_charp =
-            reinterpret_cast<unsigned char*>(&bdf);
-            context->update_directive_bytes(bdf_charp,
-                                        context->current_bdf_offset,
-                                        sizeof(BrigDirectiveFunction));
-
-        }
-        return 0;
-
-      } else {
-        context->set_error(MISSING_IDENTIFIER);
-      }
-    } else {
-      context->set_error(MISSING_DATA_TYPE);
-    }
+  BrigDataType16_t type;
+  if (DeclPrefix(context)) {
+    return 1;
   }
+  context->set_dim(0);
+  context->init_symbol_modifier();
+  BrigStorageClass32_t storage_class = context->token_value.storage_class;
+  
+  if(context->token_to_scan != ARG){
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if ((context->token_type != DATA_TYPE_ID)&&
+        (context->token_to_scan != _RWIMG) &&
+        (context->token_to_scan != _SAMP) &&
+        (context->token_to_scan != _ROIMG)) {
+        
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  type = (context->token_value.data_type);
+  
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_LOCAL_IDENTIFIER) {
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  // for argument, we need to set a BrigDirectiveSymbol
+  // and write the corresponding string into .string section.
 
-  return 1;
-}
+  std::string arg_name = context->token_value.string_val;
+  int arg_name_offset = context->add_symbol(arg_name);
 
-int ArgumentListBody(Context* context) {
-  while (1) {
-    if (!ArgumentDecl(context)) {
-      if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-      } else {
-        break;  // context was set in ArgumentDecl
-      }
-    } else {
-      context->set_error(MISSING_ARGUMENT);
+  // scan for arrayDimensions
+  context->token_to_scan = yylex();
+
+  if (context->token_to_scan == '[') {
+    if (ArrayDimensionSet(context)) {
+      // context->token_to_scan has been set in ArrayDimensionSet()
       return 1;
     }
   }
+  BrigdOffset32_t dsize = context->get_directive_offset();
+  BrigDirectiveSymbol sym_decl = {
+    sizeof(BrigDirectiveSymbol),                 // size
+    BrigEDirectiveSymbol,             // kind
+    {
+      context->get_code_offset(),       // c_code
+      storage_class,                    // storageClass
+      context->get_attribute(),         // attribute
+      0,                                // reserved
+      context->get_symbol_modifier(),   // symbol modifier
+      context->get_dim(),               // dim
+      arg_name_offset,                  // s_name
+      type,              // data type
+      context->get_alignment(),         // alignment
+    },
+    0,                                // d_init = 0 for arg
+    0                                 // reserved
+  };
+  
+  // append the DirectiveSymbol to .directive section.
+  context->append_directive(&sym_decl);
+  //Mapping symbol names to declarations in .dir
+  context->symbol_map[arg_name] = dsize;
+        
   return 0;
 }
+
+int ArgumentListBody(Context* context) {
+  int paramCount = 0;
+  if(context->token_to_scan == '('){
+    context->token_to_scan = yylex();
+    return ArgumentListBody(context, &paramCount);    
+  }
+  else return 1;
+}
+
+int ArgumentListBody(Context* context, int* paramCount) {
+  *paramCount = 0;
+  
+  while (1) {
+    if(context->token_to_scan == ')')
+      return 0;
+    if (ArgumentDecl(context)) 
+      return 1;
+    (*paramCount)++;
+    if (context->token_to_scan == ',') {    
+      context->token_to_scan = yylex();        
+    } 
+  }  
+}
+
 
 int FunctionDefinition(Context* context){
     if(!DeclPrefix(context)){
         return FunctionDefinitionPart2(context);
     } else return 1;
 }
+
 int FunctionDefinitionPart2(Context* context) {
 
-    if (context->token_to_scan == FUNCTION) {
-
-      context->current_bdf_offset = context->get_directive_offset();
-      BrigdOffset32_t bdf_offset = context->current_bdf_offset;
-      uint16_t size = sizeof(BrigDirectiveFunction);
-      BrigDirectiveFunction bdf = {
-      size,                      // size
-      BrigEDirectiveFunction,    // kind
-      context->get_code_offset(),   // c_code
-      0,                            // name
-      0,                          // in param count
-      bdf_offset + size,          // d_firstScopedDirective
-      0,                          // operation count
-      bdf_offset + size,          // d_nextDirective
-      context->get_attribute(),  // attribute
-      0,    // fbar count
-      0,    // out param count
-      0     // d_firstInParam
-      };
-
-
-      // update it when necessary.
-      // the later functions should have a entry point of bdf
-      // just update it in time.
-      //
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
-        // should have meaning of Global_Identifier,
-        // and check if there is existing global identifier
-        // if there is, just use the current string,
-        // if not write into string.
-
-        std::string func_name = context->token_value.string_val;
-
-        BrigsOffset32_t check_result = context->add_symbol(func_name);
-
-        // add the func_name to the func_map.
-        context->func_map[func_name] = context->current_bdf_offset;
-
-        bdf.s_name = check_result;
-        context->append_directive(&bdf);
-
-        /* Debug */
-        // BrigDirectiveFunction get;
-
-        // check return argument list
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == '(') {
-          context->set_arg_output(true);
-          context->token_to_scan = yylex();
-
-          if (context->token_to_scan == ')') {   // empty argument list body
-            context->token_to_scan = yylex();
-          } else if (!ArgumentListBody(context)) {
-            if (context->token_to_scan == ')') {
-              context->token_to_scan = yylex();
-            } else {
-              context->set_error(MISSING_CLOSING_PARENTHESIS);
-              return 1;
-            }
-          } else {
-            context->set_error(INVALID_ARGUMENT_LIST);
-            return 1;
-          }
-        } else {
-          context->set_error(MISSING_ARGUMENT_LIST);
-          return 1;
-        }
-        // check argument list
-        if (context->token_to_scan == '(') {
-          context->set_arg_output(false);
-          context->token_to_scan = yylex();
-
-          if (context->token_to_scan == ')') {   // empty argument list body
-              context->token_to_scan = yylex();
-          } else if (!ArgumentListBody(context)) {
-            if (context->token_to_scan == ')') {
-              context->token_to_scan = yylex();
-            } else {
-              context->set_error(MISSING_CLOSING_PARENTHESIS);
-              return 1;
-            }
-          } else {
-            context->set_error(INVALID_ARGUMENT_LIST);
-            return 1;
-          }
-        } else {
-          context->set_error(MISSING_ARGUMENT_LIST);
-          return 1;
-        }
-
-        return 0;
-
-      } else {
-        context->set_error(MISSING_IDENTIFIER);
-      }
-    }
+  if (context->token_to_scan!= FUNCTION) {
     return 1;
+  }
+  context->current_bdf_offset = context->get_directive_offset();
+  BrigdOffset32_t bdf_offset = context->current_bdf_offset;
+
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_GLOBAL_IDENTIFIER) {
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  
+  std::string func_name = context->token_value.string_val;
+  BrigsOffset32_t str_offset = context->add_symbol(func_name);
+  context->func_map[func_name] = bdf_offset;
+  uint16_t size = sizeof(BrigDirectiveFunction);
+  BrigDirectiveFunction bdf = {
+    size,                      // size
+    BrigEDirectiveFunction,    // kind
+    context->get_code_offset(),   // c_code
+    str_offset,                            // name
+    0,                          // in param count
+    bdf_offset + size,          // d_firstScopedDirective
+    0,                          // operation count
+    bdf_offset + size,          // d_nextDirective
+    context->get_attribute(),  // attribute
+    0,    // fbar count
+    0,    // out param count
+    0     // d_firstInParam
+  };
+  context->append_directive(&bdf);
+  
+  /*Check output argument list*/
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != '(') {
+    context->set_error(MISSING_ARGUMENT_LIST);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  int paramCount = 0;
+  if(ArgumentListBody(context, &paramCount)){
+    context->set_error(INVALID_ARGUMENT_LIST);
+    return 1;
+  }  
+  if (context->token_to_scan != ')') {
+    context->set_error(MISSING_CLOSING_PARENTHESIS);
+    return 1;
+  }
+  if(paramCount){
+    context->get_directive(bdf_offset, &bdf);
+    bdf.outParamCount = paramCount;
+    bdf.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
+    bdf.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
+    unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+    context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+                                  sizeof(BrigDirectiveFunction));
+  }
+  context->token_to_scan = yylex();
+  
+  /* Check input argument list*/
+  
+  if (context->token_to_scan != '(') {
+    context->set_error(MISSING_ARGUMENT_LIST);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  paramCount = 0;
+  if(ArgumentListBody(context, &paramCount)){
+    context->set_error(INVALID_ARGUMENT_LIST);
+    return 1;
+  }  
+  if (context->token_to_scan != ')') {
+    context->set_error(MISSING_CLOSING_PARENTHESIS);
+    return 1;
+  }
+  if(paramCount){
+    context->get_directive(bdf_offset, &bdf);
+    bdf.inParamCount = paramCount;
+    bdf.d_firstInParam = bdf.d_nextDirective;
+    bdf.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
+    bdf.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
+    unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+    context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+                                  sizeof(BrigDirectiveFunction));
+  }
+  
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int FunctionDecl(Context *context){
@@ -1781,27 +1748,17 @@ int OptionalWidth(Context* context) {
 }
 
 int BranchPart1Cbr(Context* context) {
-  // add structures for CBR.
-  // default value.
-  BrigInstBase inst_op = {
-    sizeof(BrigInstBase),
-    BrigEInstBase,
-    BrigCbr,
-    Brigb32,  // no specification of datatype in Brn and Cbr.
-    BrigNoPacking,
-    {0, 0, 0, 0, 0}
-  };
+
+  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
+  BrigoOffset32_t OpOffset[4] = {0,0,0,0};
 
   BrigoOffset32_t widthOffset = context->get_operand_offset();
-  BrigAluModifier mod = context->get_alu_modifier();
+  widthOffset += widthOffset & 0x7;
+
   // check for optionalWidth
   if (context->token_to_scan == _WIDTH) {
     if (OptionalWidth(context)) {
       return 1;
-    } else {
-      if (widthOffset == context->get_operand_offset()) {
-        widthOffset = 0;
-      }
     }
   } else {
     BrigOperandImmed op_width = {
@@ -1814,9 +1771,7 @@ int BranchPart1Cbr(Context* context) {
     op_width.bits.u = 0;
     context->append_operand(&op_width);
   }
-  if (widthOffset) {
-    widthOffset += widthOffset & 0x7;
-  }
+  
   // check for optional _fbar modifier
   if (context->token_to_scan == __FBAR) {
     mod.valid = 1;
@@ -1824,30 +1779,60 @@ int BranchPart1Cbr(Context* context) {
     context->set_alu_modifier(mod);
     context->token_to_scan = yylex();
   }
-  inst_op.o_operands[0] = widthOffset;
-  if (context->token_to_scan == TOKEN_CREGISTER)
-    inst_op.type = Brigb1;
 
-  if (!OperandPart2(context, &inst_op.o_operands[1])) {
+  OpOffset[0] = widthOffset;
+  if (context->token_to_scan != TOKEN_CREGISTER) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+
+  // Generate $c register brig code
+  if (OperandPart2(context, &OpOffset[1])) {
+    context->set_error(INVALID_OPERAND);
+    return 1;  
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == TOKEN_LABEL) {
+    std::string label_name = context->token_value.string_val;
+    if (!context->label_o_map.count(label_name)) {
+      BrigOperandLabelRef opLabelRef = {
+        sizeof(BrigOperandLabelRef),
+        BrigEOperandLabelRef,
+        0
+      };
+      context->label_o_map[label_name] = context->get_operand_offset();
+      if (context->symbol_map.count(label_name)) {
+        opLabelRef.labeldirective = context->symbol_map[label_name];
+      }
+      context->append_operand(&opLabelRef);
+    }
+    OpOffset[2] = context->label_o_map[label_name];
+    context->token_to_scan = yylex();  // should be ';'
+  } else if (context->token_to_scan == TOKEN_SREGISTER) {
+    if (OperandPart2(context, &OpOffset[2])) {
+      context->set_error(INVALID_OPERAND);
+      return 1;  
+    } 
+
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
+      if (context->token_to_scan != '[') {
+        context->set_error(MISSING_OPENNING_BRACKET);
+        return 1;
+      }
+      context->token_to_scan = yylex();
       if (context->token_to_scan == TOKEN_LABEL) {
-        // if the next operand is label, which is the case in example4
-        // 1. check if the label is already defined,
-        // 2. if defined, just set it up
-        // 3. if not, add it to the multimap
-
         std::string label_name = context->token_value.string_val;
-
-        if (context->label_o_map.count(label_name)) {
-          inst_op.o_operands[2] = context->label_o_map[label_name];
-        } else {
+        if (!context->label_o_map.count(label_name)) {
           BrigOperandLabelRef opLabelRef = {
             sizeof(BrigOperandLabelRef),
             BrigEOperandLabelRef,
             0
           };
-          inst_op.o_operands[2] = context->get_operand_offset();
           context->label_o_map[label_name] = context->get_operand_offset();
           if (context->symbol_map.count(label_name)) {
             opLabelRef.labeldirective = context->symbol_map[label_name];
@@ -1855,173 +1840,225 @@ int BranchPart1Cbr(Context* context) {
           context->append_operand(&opLabelRef);
         }
 
-        context->token_to_scan = yylex();  // should be ';'
-      } else if (!Identifier(context)) {
-        context->token_to_scan = yylex();  // should be ';'
-      } else if (!Operand(context)) {
-      if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_LABEL) {  // LABEL
-          context->token_to_scan = yylex();  // should be ';'
-        } else if (context->token_to_scan == '[') {
-          context->token_to_scan = yylex();
-          if (!Identifier(context)) {
-            context->token_to_scan = yylex();  // should be ']'
-          } else if (context->token_to_scan == TOKEN_LABEL) {
-            context->token_to_scan = yylex();
-            while (context->token_to_scan != ']') {
-              if (context->token_to_scan == ',') {
-                if (yylex() == TOKEN_LABEL) {
-                  context->token_to_scan = yylex();  // scan next;
-                } else {
-                  context->set_error(MISSING_OPERAND);
-                  return 1;
-                }
-              } else {
-                context->set_error(MISSING_COMMA);
-                return 1;
-              }
-            }   // while
-          } else {
-            context->set_error(MISSING_OPERAND);
-          }
-          // current token should be ']'
-          context->token_to_scan = yylex();  // should be ';'
-          } else {
-            context->set_error(MISSING_OPERAND);
-          }
-        } else {  // yylex() = ','
-          context->set_error(MISSING_COMMA);
+        OpOffset[3] = context->label_o_map[label_name];
+
+      } else if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER ||
+                 context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
+        std::string idenName(context->token_value.string_val);
+        BrigOperandAddress boa = {
+          sizeof(boa),            // size
+          BrigEOperandAddress,    // kind
+          Brigb32,                // type
+          0,                      // reserved
+          0                       // directive
+        };
+
+        boa.directive = context->symbol_map[idenName];
+  
+        if (context->get_machine() == BrigELarge) {
+          boa.type = Brigb64;
         }
-      } else {
-        context->set_error(MISSING_OPERAND);
+        OpOffset[3] = context->get_operand_offset();
+        context->append_operand(&boa);
+      } else {  // Identifier or Label
+         context->set_error(MISSING_OPERAND);
+        return 1;      
+      }
+      context->token_to_scan = yylex(); 
+      if (context->token_to_scan != ']') {
+        context->set_error(MISSING_CLOSING_BRACKET);
         return 1;
       }
-      if (context->token_to_scan == ';') {
-        context->append_code(&inst_op);
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
-    } else {  // yylex = ','
-      context->set_error(MISSING_COMMA);
-    }
-  } else {  // first operand
+      context->token_to_scan = yylex();
+    }  // ','
+  } else {  // S register or Label
     context->set_error(MISSING_OPERAND);
+    return 1;
   }
-  return 1;
+
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+
+  if (mod.fbar == 1) {
+    BrigInstMod cbrMod = {
+      0,
+      BrigEInstMod,
+      BrigCbr,
+      Brigb32,  
+      BrigNoPacking,
+      {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], 0},
+      mod
+    };
+    cbrMod.size = sizeof(cbrMod);  
+    context->append_code(&cbrMod);
+  } else {
+    BrigInstBase cbrInst = {
+      0,
+      BrigEInstBase,
+      BrigCbr,
+      Brigb32,  
+      BrigNoPacking,
+      {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], 0}
+    };
+
+    cbrInst.size = sizeof(cbrInst);
+    context->append_code(&cbrInst);
+  }
+  context->token_to_scan = yylex();
+  return 0;
+
 }
 
 int BranchPart2Brn(Context* context) {
 
-    BrigInstBar inst_op = {
-      sizeof(BrigInstBar),
-      BrigEInstBar,
-      BrigBrn,
-      Brigb32,  // no specification of datatype in Brn and Cbr.
-      BrigNoPacking,
-      {0, 0, 0, 0, 0},
-      0
-    };
-    BrigoOffset32_t widthOffset = context->get_operand_offset();
+  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
+  BrigoOffset32_t OpOffset[3] = {0,0,0};
 
-    BrigAluModifier mod = context->get_alu_modifier();
-    // check for optionalWidth
-    if (context->token_to_scan == _WIDTH) {
-      if (OptionalWidth(context)) {
-        return 1;
-      } else {
-        if (widthOffset == context->get_operand_offset()) {
-          widthOffset = 0;
-        }
-      }
-    } else {
-      BrigOperandImmed op_width = {
-        sizeof(BrigOperandImmed),
-        BrigEOperandImmed,
-        Brigb32,
-        0,
-        { 0 }
-      };
-      op_width.bits.u = 0;
-      context->append_operand(&op_width);
-    }
-    if (widthOffset) {
-      widthOffset += widthOffset & 0x7;
-    }
-    // check for optional _fbar modifier
-    if (context->token_to_scan == __FBAR) {
-      mod.valid = 1;
-      mod.fbar = 1;
-      context->set_alu_modifier(mod);
-      context->token_to_scan = yylex();
-    }
+  BrigoOffset32_t widthOffset = context->get_operand_offset();
+  widthOffset += widthOffset & 0x7;
 
-    inst_op.o_operands[0] = widthOffset;
+  OpOffset[0] = widthOffset;
 
-  if (context->token_to_scan == TOKEN_LABEL) {
-    // if the next operand is label, which is the case in example4
-    // 1. check if the label is already defined,
-    // 2. if defined, just set it up
-    // 3. if not, add it to the multimap
-    std::string label_name = context->token_value.string_val;
-      if (context->label_o_map.count(label_name)) {
-        inst_op.o_operands[1] = context->label_o_map[label_name];
-      } else {
-        BrigOperandLabelRef opLabelRef = {
-          sizeof(BrigOperandLabelRef),
-          BrigEOperandLabelRef,
-          0
-        };
-        inst_op.o_operands[1] = context->get_operand_offset();
-        context->label_o_map[label_name] = context->get_operand_offset();
-        if (context->symbol_map.count(label_name)) {
-          opLabelRef.labeldirective = context->symbol_map[label_name];
-        }
-        context->append_operand(&opLabelRef);
-      }
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ';') {
-      context->append_code(&inst_op);
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_SEMICOLON);
-    }
-  } else if (!Identifier(context)) {
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ';') {
-      context->token_to_scan = yylex();
-      return 0;
-    } else if (context->token_to_scan == ',') {
-      if (yylex() == '[') {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_LABEL) {
-          context->token_to_scan = yylex();    // should be ']'
-        } else if (!Identifier(context)) {
-          context->token_to_scan = yylex();    // should be ']'
-        }
-      }
-      if (context->token_to_scan == ']') {
-      } else {
-        context->set_error(MISSING_CLOSING_BRACKET);
-      }
-
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ';') {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
-    } else {
-      context->set_error(MISSING_SEMICOLON);
+  // check for optionalWidth
+  if (context->token_to_scan == _WIDTH) {
+    if (OptionalWidth(context)) {
+      return 1;
     }
   } else {
-    context->set_error(MISSING_OPERAND);
+    BrigOperandImmed op_width = {
+      sizeof(BrigOperandImmed),
+      BrigEOperandImmed,
+      Brigb32,
+      0,
+      { 0 }
+    };
+    op_width.bits.u = 0;
+    context->append_operand(&op_width);
   }
-  return 1;
+  // check for optional _fbar modifier
+  if (context->token_to_scan == __FBAR) {
+      mod.valid = 1;
+    mod.fbar = 1;
+    context->set_alu_modifier(mod);
+    context->token_to_scan = yylex();
+  }
+
+  if (context->token_to_scan == TOKEN_LABEL) {
+
+    std::string label_name = context->token_value.string_val;
+    if (!context->label_o_map.count(label_name)) {
+      BrigOperandLabelRef opLabelRef = {
+        sizeof(BrigOperandLabelRef),
+        BrigEOperandLabelRef,
+        0
+      };
+      context->label_o_map[label_name] = context->get_operand_offset();
+      if (context->symbol_map.count(label_name)) {
+        opLabelRef.labeldirective = context->symbol_map[label_name];
+      }
+      context->append_operand(&opLabelRef);
+    }
+    OpOffset[1] = context->label_o_map[label_name];
+    context->token_to_scan = yylex();
+  } else if (!Identifier(context)) {
+    // Must be an s register.
+    if (context->token_to_scan != TOKEN_SREGISTER) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    std::string regName = context->token_value.string_val;
+    OpOffset[1] = context->operand_map[regName];
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan != '[') {
+        context->set_error(MISSING_OPENNING_BRACKET);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == TOKEN_LABEL) {
+
+        std::string label_name = context->token_value.string_val;
+        if (!context->label_o_map.count(label_name)) {
+          BrigOperandLabelRef opLabelRef = {
+            sizeof(BrigOperandLabelRef),
+            BrigEOperandLabelRef,
+            0
+          };
+          context->label_o_map[label_name] = context->get_operand_offset();
+          if (context->symbol_map.count(label_name)) {
+            opLabelRef.labeldirective = context->symbol_map[label_name];
+          }
+          context->append_operand(&opLabelRef);
+        }
+        OpOffset[2] = context->label_o_map[label_name];
+      } else if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER ||
+                 context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
+        std::string idenName(context->token_value.string_val);
+        BrigOperandAddress boa = {
+          sizeof(boa),            // size
+          BrigEOperandAddress,    // kind
+          Brigb32,                // type
+          0,                      // reserved
+          0                       // directive
+        };
+
+        boa.directive = context->symbol_map[idenName];
+  
+        if (context->get_machine() == BrigELarge) {
+          boa.type = Brigb64;
+        }
+        OpOffset[2] = context->get_operand_offset();
+        context->append_operand(&boa);
+      } else {  // Identifier or Label
+        context->set_error(MISSING_OPERAND);
+        return 1;      
+      }
+      context->token_to_scan = yylex(); 
+      if (context->token_to_scan != ']') {
+        context->set_error(MISSING_CLOSING_BRACKET);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+    }
+  } else {  // Identifier or Label
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+
+
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+
+  if (*reinterpret_cast<uint32_t*>(&mod) == 0) {
+    BrigInstBase brnInst = {
+      sizeof(BrigInstBase),
+      BrigEInstBase,
+      BrigBrn,
+      Brigb32,  
+      BrigNoPacking,
+      {OpOffset[0], OpOffset[1], OpOffset[2], 0, 0}
+    };
+    context->append_code(&brnInst);
+  } else {
+    BrigInstMod brnMod = {
+      sizeof(BrigInstMod),
+      BrigEInstMod,
+      BrigBrn,
+      Brigb32,  
+      BrigNoPacking,
+      {OpOffset[0], OpOffset[1], OpOffset[2], 0, 0},
+      mod
+    };
+    context->append_code(&brnMod);
+  }
+  context->token_to_scan = yylex();
+  return 0;
+
 }
 
 
@@ -2047,33 +2084,23 @@ int Call(Context* context) {
   BrigoOffset32_t firstOpOffset = 0;
   BrigoOffset32_t secondOpOffset = 0;
 
-  bool hasWidthOrFbar = false;
-  bool hasFbar = false;
-
-  BrigInstBase callInst = {
-    sizeof(BrigInstBase),
-    BrigEInstBase,
-    BrigCall,
-    Brigb32,
-    BrigNoPacking,
-    {0, 0, 0, 0, 0}
-  };
+  BrigoOffset32_t OpOffset[5] = {0,0,0,0,0};
+  BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
 
   context->token_to_scan = yylex();
   // optional width
   BrigoOffset32_t widthOffset = context->get_operand_offset();
+  bool has_width = false;
+  widthOffset += widthOffset & 0x7;
+  OpOffset[0] = widthOffset;
 
   if (context->token_to_scan == _WIDTH) {
-    if (!OptionalWidth(context)) {
-      hasWidthOrFbar = true;
-      if (widthOffset == context->get_operand_offset()) {
-        widthOffset = 0;
-      }
-    } else {
+    if (OptionalWidth(context)) {
       return 1;
     }
-  } else {
-   BrigOperandImmed op_width = {
+    has_width = true;
+  } else{  
+    BrigOperandImmed op_width = {
       sizeof(BrigOperandImmed),
       BrigEOperandImmed,
       Brigb32,
@@ -2083,28 +2110,19 @@ int Call(Context* context) {
     op_width.bits.u = 0;
     context->append_operand(&op_width);
   }
-  if (widthOffset) {
-    widthOffset += widthOffset & 0x7;
-  }
-  callInst.o_operands[0] = widthOffset;
+  
   if (context->token_to_scan == __FBAR) {
-    hasWidthOrFbar = true;
-    hasFbar = true;
+    aluModifier.fbar = 1;
     context->token_to_scan = yylex();
   }
 
-
   std::string opName;
   const unsigned int firstOpToken = context->token_to_scan;;
-  // the operand should be a register or a Func name.
-  // and if isThereWidthOrFbar is true, token must be a global identifier.
-
-
-  if (firstOpToken == TOKEN_GLOBAL_IDENTIFIER && !hasWidthOrFbar) {
+  
+  int* paluModifier = reinterpret_cast<int*>(&aluModifier);
+  if (firstOpToken == TOKEN_GLOBAL_IDENTIFIER && (*paluModifier==0) && !has_width) {
     opName.assign(context->token_value.string_val);
-    if (context->func_o_map.count(opName)) {
-      callInst.o_operands[2] = context->func_o_map[opName];
-    } else {
+    if (!context->func_o_map.count(opName)) {
       BrigOperandFunctionRef func_o_ref = {
         sizeof(BrigOperandFunctionRef),
         BrigEOperandFunctionRef,
@@ -2112,86 +2130,93 @@ int Call(Context* context) {
       };
       context->func_o_map[opName] = context->get_operand_offset();
       context->append_operand(&func_o_ref);
-      callInst.o_operands[2] = context->func_o_map[opName];
-
     }
+    OpOffset[2] = context->func_o_map[opName];
     context->token_to_scan = yylex();
   } else if (firstOpToken == TOKEN_SREGISTER) {
-    if (OperandPart2(context, &callInst.o_operands[2])) {
+    if (OperandPart2(context, &OpOffset[2])) {
+      context->set_error(INVALID_OPERAND);
       return 1;
     }
   } else {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
-	BrigOperandArgumentList emptylist = {
-	sizeof(BrigOperandArgumentList),
-	BrigEOperandArgumentList,
-	0,
-	{0}
-	};
+  
+  BrigOperandArgumentList emptylist = {
+    sizeof(BrigOperandArgumentList),
+    BrigEOperandArgumentList,
+    0,
+    {0}
+  };
   // check for twoCallArgs
   //operands[1] contains output args and [3] contains input args
   if (context->token_to_scan == '(') {
-    if (!CallArgs(context)) {
-      firstOpOffset = context->current_argList_offset;
-    } else {
+    if (CallArgs(context)) {
       context->set_error(INVALID_CALL_ARGS);
       return 1;
     }
-	if (context->token_to_scan == '(') {
-		if (!CallArgs(context)) {
-			secondOpOffset = context->current_argList_offset;
-		} else {
-			context->set_error(INVALID_CALL_ARGS);
-			return 1;
-		}
-	}else{
-		secondOpOffset = firstOpOffset; //contains input args
-		firstOpOffset = context->get_operand_offset(); //contains output args
-		context->append_operand(&emptylist);
-	}
+    firstOpOffset = context->current_argList_offset;
+    if (context->token_to_scan == '(') {
+      if (CallArgs(context)) {
+        context->set_error(INVALID_CALL_ARGS);
+        return 1;
+      }
+      secondOpOffset = context->current_argList_offset;
+    } else {
+      secondOpOffset = firstOpOffset; //contains input args
+      firstOpOffset = context->get_operand_offset(); //contains output args
+      context->append_operand(&emptylist);
+    }
   } else {
-		firstOpOffset = context->get_operand_offset(); //Assuming both input and output args missing
-		secondOpOffset = firstOpOffset;
-		context->append_operand(&emptylist);
+    firstOpOffset = context->get_operand_offset(); //Assuming both input and output args missing
+    secondOpOffset = firstOpOffset;
+    context->append_operand(&emptylist);
   }
 
-    callInst.o_operands[1] = firstOpOffset;
-    callInst.o_operands[3] = secondOpOffset;
+  OpOffset[1] = firstOpOffset;
+  OpOffset[3] = secondOpOffset;
 
   // if there is CallTarget, the first operand token must be a s register.
   if (firstOpToken == TOKEN_SREGISTER) {
-    if (!CallTargets(context)) {
-      callInst.o_operands[4] = context->current_argList_offset;
-    } else {
+    if (CallTargets(context)) {
+      context->set_error(INVALID_CALL_TARGETS);
       return 1;
     }
+    OpOffset[4] = context->current_argList_offset;
   }
-  if (context->token_to_scan == ';') {
-    if (hasFbar) {
-      BrigInstMod callMod;
-      callMod.size = sizeof(BrigInstMod);
-      callMod.kind = BrigEInstMod;
-      callMod.opcode = callInst.opcode;
-      callMod.type = callInst.type;
-      callMod.packing = callInst.packing;
-      for (int i = 0 ; i < 5 ; ++i) {
-        callMod.o_operands[i] = callInst.o_operands[i];
-      }
-      memset(&callMod.aluModifier, 0, sizeof(BrigAluModifier));
-      callMod.aluModifier.valid = 1;
-      callMod.aluModifier.fbar = 1;
-      context->append_code(&callMod);
-    } else {
-      context->append_code(&callInst);
-    }
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
+  if (context->token_to_scan != ';') {
     context->set_error(MISSING_SEMICOLON);
+    return 1;
   }
-  return 1;
+  
+  if (*paluModifier!=0) {
+    BrigInstMod callMod = {
+      0,
+      BrigEInstMod,
+      BrigCall,
+      Brigb32,
+      BrigNoPacking,
+      {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], OpOffset[4]},
+      aluModifier
+    };
+    callMod.aluModifier.valid = 1;
+    callMod.size = sizeof(callMod);
+    context->append_code(&callMod);
+  } else {
+    BrigInstBase callInst = {
+      0,
+      BrigEInstBase,
+      BrigCall,
+      Brigb32,
+      BrigNoPacking,
+      {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], OpOffset[4]}
+    };
+    callInst.size = sizeof(callInst);
+    context->append_code(&callInst);
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Initializer(Context* context) {
@@ -2500,6 +2525,7 @@ int FileDecl(Context* context) {
 
     if (context->token_to_scan == TOKEN_STRING) {
       std::string path(context->token_value.string_val);
+      path.assign(path, 1, path.size() - 2);
       BrigsOffset32_t path_offset = context->add_symbol(path);
       context->token_to_scan = yylex();
 
@@ -4299,6 +4325,7 @@ int Extension(Context* context) {
 
   if (context->token_to_scan == TOKEN_STRING) {
     std::string str(context->token_value.string_val);
+    str.assign(str, 1, str.size() - 2);
     context->token_to_scan = yylex();
 
     if (context->token_to_scan == ';') {
@@ -5026,14 +5053,12 @@ int Ld(Context* context) {
   int vector_size = 0;
   context->token_to_scan = yylex();
   BrigoOffset32_t widthOffset = context->get_operand_offset();
+  widthOffset += widthOffset & 0x7;
+  ld_op.o_operands[0] = widthOffset;
 
   if (context->token_to_scan == _WIDTH) {
     if (OptionalWidth(context)) {
       return 1;
-    } else {
-      if (widthOffset == context->get_operand_offset()) {
-        widthOffset = 0;
-      }
     }
   } else {
    BrigOperandImmed op_width = {
@@ -5046,11 +5071,7 @@ int Ld(Context* context) {
     op_width.bits.u = 0;
     context->append_operand(&op_width);
   }
-  if (widthOffset) {
-    widthOffset += widthOffset & 0x7;
-  }
 
-  ld_op.o_operands[0] = widthOffset;
 
   if (LdModifierPart2(context, &ld_op, &vector_size)) {
     return 1;
@@ -6683,7 +6704,7 @@ int ImageInit(Context *context) {
        context->token_to_scan = yylex();
 
        if (TOKEN_PROPERTY == context->token_to_scan) {
-         context->get_directive(context->current_img_offset,&bdi);
+         context->get_directive(&bdi);
          switch(first_token){
            case FORMAT:
              bdi.format = context->token_value.format;
@@ -6710,7 +6731,7 @@ int ImageInit(Context *context) {
       context->token_to_scan = yylex();
 
       if (TOKEN_INTEGER_CONSTANT == context->token_to_scan) {
-        context->get_directive(context->current_img_offset,&bdi);
+        context->get_directive(&bdi);
         switch(first_token){
           case WIDTH:
             bdi.width  = context->token_value.int_val;
@@ -6734,9 +6755,7 @@ int ImageInit(Context *context) {
   unsigned char *bdi_charp =
       reinterpret_cast<unsigned char *>(&bdi);
 
-  context->update_directive_bytes(bdi_charp,
-                                  context->current_img_offset,
-                                  sizeof(bdi));
+  context->update_last_directive(bdi_charp, sizeof(bdi));
 
   context->token_to_scan = yylex();
   return 0;
@@ -6754,84 +6773,63 @@ int GlobalImageDecl(Context *context) {
 int GlobalImageDeclPart2(Context *context){
  //First token has been scanned and verified as global. Read next token.
 
-  if (_RWIMG == context->token_to_scan) {
-    context->token_to_scan = yylex();
-    if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
-      std::string var_name(context->token_value.string_val);
-      int var_name_offset = context->add_symbol(var_name);
-
-      context->token_to_scan = yylex();
-      // set default value(scalar)
-      context->set_dim(0);
-      //context->set_symbol_modifier(BrigArray);
-      if ('[' == context->token_to_scan) {
-        if (!ArrayDimensionSet(context)) {
-        } else {
-          return 1;
-        }
-      }
-      BrigDirectiveImage bdi = {
-        sizeof(BrigDirectiveImage),//size
-        BrigEDirectiveImage,    //kind
-        {
-          context->get_code_offset(),      // c_code
-          BrigGlobalSpace,                 // storag class
-          context->get_attribute(),        // attribut
-          0,                               // reserved
-          context->get_symbol_modifier(),  // symbolModifier
-          context->get_dim(),              // dim
-          var_name_offset,                 // s_name
-          BrigRWImg,                       // type
-          context->get_alignment()         // align
-        },
-        0,                      //width
-        0,                      //height
-        0,                      //depth
-        1,                      //array
-        BrigImageOrderUnknown,  //order
-        BrigImageFormatUnknown  //format
-      };
-      context->current_img_offset = context->get_directive_offset();
-      context->append_directive(&bdi);
-
-      if ('=' == context->token_to_scan) {
-        if (!ImageInitializer(context)) {
-        } else {
-          context->set_error(INVALID_IMAGE_INIT);
-          return 1;
-        }
-      }
-
-      BrigDirectiveImage get;
-      context->get_directive(context->current_img_offset,&get);
-
-      // array for 1da or 2da,else set 1
-      if (context->get_dim()){// a array
-        if ((0 != get.width && 0 != get.height)
-           ||(0 != get.width && 0 != get.depth)
-           ||(0 != get.height && 0 != get.depth)){
-          get.array = context->get_dim();
-
-          unsigned char *bdi_charp =
-            reinterpret_cast<unsigned char*>(&get);
-          context->update_directive_bytes(bdi_charp,
-                                          context->current_img_offset,
-                                          sizeof(BrigDirectiveImage));
-        }
-      }
-
-      if (';' == context->token_to_scan) {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
-    } else {
+  if (_RWIMG != context->token_to_scan) {
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  
+  if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan) {
     context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  std::string var_name(context->token_value.string_val);
+  int var_name_offset = context->add_symbol(var_name);
+
+  context->token_to_scan = yylex();
+  context->set_dim(0);
+  if ('[' == context->token_to_scan) {
+    if (ArrayDimensionSet(context)) {
+      return 1;
+    }
+  }
+  
+  BrigDirectiveImage bdi = {
+    sizeof(BrigDirectiveImage),//size
+    BrigEDirectiveImage,    //kind
+    {
+      context->get_code_offset(),      // c_code
+      BrigGlobalSpace,                 // storag class
+      context->get_attribute(),        // attribut
+      0,                               // reserved
+      context->get_symbol_modifier(),  // symbolModifier
+      context->get_dim(),              // dim
+      var_name_offset,                 // s_name
+      BrigRWImg,                       // type
+      context->get_alignment()         // align
+    },
+    0,                      //width
+    0,                      //height
+    0,                      //depth
+    1,                      //array
+    BrigImageOrderUnknown,  //order
+    BrigImageFormatUnknown  //format
+  };
+  context->append_directive(&bdi);
+
+  if ('=' == context->token_to_scan) {
+    if (ImageInitializer(context)) {
+      context->set_error(INVALID_IMAGE_INIT);
+      return 1;
     }
   }
 
-  return 1;
+  if (';' != context->token_to_scan) {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0;
+      
 }
 
 int GlobalReadOnlyImageDecl(Context *context) {
@@ -6884,7 +6882,6 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
         BrigImageOrderUnknown,  //order
         BrigImageFormatUnknown  //format
       };
-      context->current_img_offset = context->get_directive_offset();
       context->append_directive(&bdi);
 
       if ('=' == context->token_to_scan) {
@@ -6892,24 +6889,6 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
         } else {
           context->set_error(INVALID_IMAGE_INIT);
           return 1;
-        }
-      }
-
-      BrigDirectiveImage get;
-      context->get_directive(context->current_img_offset,&get);
-
-      // array for 1da or 2da,else set 1
-      if (context->get_dim()){ // a array
-        if ((0 != get.width && 0 != get.height)
-           ||(0 != get.width && 0 != get.depth)
-           ||(0 != get.height && 0 != get.depth)){
-          get.array = context->get_dim();
-
-          unsigned char *bdi_charp =
-            reinterpret_cast<unsigned char*>(&get);
-          context->update_directive_bytes(bdi_charp,
-                                          context->current_img_offset,
-                                          sizeof(BrigDirectiveImage));
         }
       }
 
@@ -7190,14 +7169,11 @@ int Bar(Context* context) {
 
   context->token_to_scan = yylex();
   BrigoOffset32_t offset = context->get_operand_offset();
+  offset += offset & 0x7;
 
   if (context->token_to_scan == _WIDTH) {
     if (OptionalWidth(context)) {
       return 1;
-    } else {
-      if (offset == context->get_operand_offset()) {
-        offset = 0;
-      }
     }
   } else {
    BrigOperandImmed op_width = {
@@ -7210,9 +7186,7 @@ int Bar(Context* context) {
     op_width.bits.u = 0;
     context->append_operand(&op_width);
   }
-  if (offset) {
-    offset += offset & 0x7;
-  }
+
     if (context->token_to_scan == _GLOBAL) {
       syncFlags = BrigGlobalLevel;
       context->token_to_scan = yylex();
@@ -7515,6 +7489,8 @@ int Pragma(Context* context) {
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_STRING) {
     std::string s_name = context->token_value.string_val;
+    s_name.assign(s_name, 1, s_name.size() - 2); 
+
     context->token_to_scan = yylex();
     if (context->token_to_scan == ';') {
       BrigDirectivePragma bdp = {
@@ -7975,57 +7951,57 @@ int Directive(Context* context) {
   }
 }
 
+
 int SobInit(Context *context){
- unsigned int first_token = context->token_to_scan ;
-
- if(COORD == context->token_to_scan
-    ||FILTER == context->token_to_scan
-    ||BOUNDARYU == context->token_to_scan
-    ||BOUNDARYV == context->token_to_scan
-    ||BOUNDARYW == context->token_to_scan){
-   BrigDirectiveSampler bds = { 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 0,
-                                0, 0, 0, 0, 0 };
-  context->get_directive(context->current_samp_offset,&bds);
-  bds.valid = 1;
-
-    context->token_to_scan = yylex();
-    if('=' == context->token_to_scan){
-      context->token_to_scan = yylex();
-      if(TOKEN_PROPERTY == context->token_to_scan){
-        switch(first_token){
-      case COORD:
-            bds.normalized = context->token_value.normalized;
-            break ;
-          case FILTER:
-            bds.filter = context->token_value.filter;
-            break ;
-      case BOUNDARYU:
-            bds.boundaryU = context->token_value.boundary_mode;
-            break ;
-      case BOUNDARYV:
-            bds.boundaryV = context->token_value.boundary_mode;
-            break ;
-      case BOUNDARYW:
-            bds.boundaryW = context->token_value.boundary_mode;
-            break ;
-    }
-        unsigned char *bds_charp =
-              reinterpret_cast<unsigned char*> (&bds);
-        context->update_directive_bytes(bds_charp,
-                                        context->current_samp_offset,
-                                        sizeof(bds));
-
-        context->token_to_scan = yylex();
-        return 0;
-      }else{
-    context->set_error(MISSING_PROPERTY);
-      }
-    }else{ //for '='
-      context->set_error(MISSING_IDENTIFIER);
-    }
+ 
+  unsigned int first_token = context->token_to_scan ;
+  if(COORD != context->token_to_scan
+    &&FILTER != context->token_to_scan
+    &&BOUNDARYU != context->token_to_scan
+    &&BOUNDARYV != context->token_to_scan
+    &&BOUNDARYW != context->token_to_scan){
+    return 1;
   }
+    
+  context->token_to_scan = yylex();
+  if('=' != context->token_to_scan){
+    context->set_error(MISSING_OPERATION);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if(TOKEN_PROPERTY != context->token_to_scan){
+    context->set_error(MISSING_PROPERTY);
+    return 1;
+  }
+  
+  BrigDirectiveSampler bds = { 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 0,
+                                0, 0, 0, 0, 0 };
+  Context::context_error_t valid_dir = context->get_directive(&bds);
+  bds.valid = 1;
+  switch(first_token){
+    case COORD:
+      bds.normalized = context->token_value.normalized;
+      break ;
+    case FILTER:
+      bds.filter = context->token_value.filter;
+      break ;
+    case BOUNDARYU:
+      bds.boundaryU = context->token_value.boundary_mode;
+      break ;
+    case BOUNDARYV:
+      bds.boundaryV = context->token_value.boundary_mode;
+      break ;
+    case BOUNDARYW:
+      bds.boundaryW = context->token_value.boundary_mode;
+      break ;
+  }
+  unsigned char *bds_charp = reinterpret_cast<unsigned char*> (&bds);
+  if(valid_dir == Context::CONTEXT_OK)      
+    context->update_last_directive(bds_charp, sizeof(bds));
 
-  return 1;
+  context->token_to_scan = yylex();
+  return 0;
+   
 }
 
 int SobInitializer(Context *context){
@@ -8035,31 +8011,28 @@ int SobInitializer(Context *context){
   }
 
   context->token_to_scan = yylex();
-  if('{' == context->token_to_scan){
-    while(1){
+  if('{' != context->token_to_scan){
+    context->set_error(MISSING_OPENNING_BRACKET);
+    return 1;
+  }
+  
+  while(1){
       context->token_to_scan = yylex();
-      if(!SobInit(context)){
-        if(',' == context->token_to_scan){
-          continue ;
-        }else {
-          break ;
-        }
-      }else {
-        context->set_error(MISSING_IDENTIFIER);
+      if(SobInit(context)){
+        context->set_error(INVALID_INITIALIZER);
         return 1;
       }
-    }//end for while
-
-    if('}' == context->token_to_scan){
-      context->token_to_scan = yylex();
-      return 0 ;
-    }else{
-      context->set_error(MISSING_CLOSING_BRACKET);
-    }
-  }else{
-     context->set_error(MISSING_OPENNING_BRACKET);
+      if(',' != context->token_to_scan)
+        break ;      
   }
-  return 1;
+
+  if('}' != context->token_to_scan){
+    context->set_error(MISSING_CLOSING_BRACKET);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0 ;
+  
 }
 
 int GlobalSamplerDecl(Context *context){
@@ -8073,26 +8046,28 @@ int GlobalSamplerDecl(Context *context){
 
 int GlobalSamplerDeclPart2(Context *context){
   // First token has already been verified as GLOBAL
+  if (_SAMP != context->token_to_scan){
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan){
+     context->set_error(MISSING_IDENTIFIER);
+     return 1;
+  }
+  std::string var_name(context->token_value.string_val);
+  int var_name_offset = context->add_symbol(var_name);
+  context->token_to_scan = yylex();
 
-  if (_SAMP == context->token_to_scan){
-    context->token_to_scan = yylex();
-    if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan){
-      std::string var_name(context->token_value.string_val);
-      int var_name_offset = context->add_symbol(var_name);
+  context->set_dim(0);
 
-      context->token_to_scan = yylex();
+  if ('[' == context->token_to_scan) {
+    if (ArrayDimensionSet(context)) {
+      context->set_error(INVALID_ARRAY_DIMENSIONS);
+      return 1;
+    }
+  }
 
-      // set default value(scalar)
-      context->set_dim(0);
-      //context->set_symbol_modifier(BrigArray);
-      if ('[' == context->token_to_scan) {
-        if (!ArrayDimensionSet(context)) {
-        } else {
-          return 1;
-        }
-      }
-
-      BrigDirectiveSampler bds = {
+  BrigDirectiveSampler bds = {
         sizeof(BrigDirectiveSampler),      //size
         BrigEDirectiveSampler,             //kind
         {
@@ -8113,29 +8088,22 @@ int GlobalSamplerDeclPart2(Context *context){
         0,                      //boundaryV
         0,                      //boundaryW
         0                       //reserved1
-      };
-      context->current_samp_offset = context->get_directive_offset();
-      context->append_directive(&bds);
+  };
+  context->append_directive(&bds);
 
-      if ('=' == context->token_to_scan) {
-        if (!SobInitializer(context)) {
-        } else {
-          context->set_error(INVALID_IMAGE_INIT);
-          return 1;
-        }
-      }
-
-      if (';' == context->token_to_scan) {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
+  if ('=' == context->token_to_scan) {
+    if (SobInitializer(context)) {
+      context->set_error(INVALID_IMAGE_INIT);
+      return 1;
     }
-  } else {
-    context->set_error(MISSING_IDENTIFIER);
   }
-  return 1;
+
+  if (';' != context->token_to_scan){
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }  
+  context->token_to_scan = yylex();
+  return 0;  
 }
 
 int GlobalInitializablePart2(Context* context){

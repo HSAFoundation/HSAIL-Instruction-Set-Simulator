@@ -55,11 +55,10 @@ public:
     const TInst* getinst = (cast<TInst>(getcode));
     validate_brig::validate(RefInst, getinst);
 
-    if (OpWidth != NULL) {
-      const BrigOperandImmed* getwidth = reinterpret_cast <const BrigOperandImmed*>
-                                         (&(TestOutput->operands[getinst->o_operands[0]]));
-      validate_brig::validate(OpWidth, getwidth);
-    }
+
+    const BrigOperandImmed* getwidth = reinterpret_cast <const BrigOperandImmed*> 
+                                       (&(TestOutput->operands[getinst->o_operands[0]]));
+    validate_brig::validate(OpWidth, getwidth);
 
     const BrigOperandArgumentList* getsrc1 = reinterpret_cast <const BrigOperandArgumentList*>
                                              (&(TestOutput->operands[getinst->o_operands[1]]));
@@ -211,13 +210,20 @@ TEST(CodegenTest, Call_CodeGen) {
   outMod.type = Brigb32;
   outMod.packing = BrigNoPacking;
   outMod.o_operands[0] = 0;
-  outMod.o_operands[1] = sizeof(reg) + sizeof(argRef);
-  outMod.o_operands[2] = 0;
-  outMod.o_operands[3] = sizeof(outputArgs) + outMod.o_operands[1] + sizeof(argRef);
+  outMod.o_operands[1] = sizeof(width) + sizeof(reg) + sizeof(argRef);
+  outMod.o_operands[2] = sizeof(width);
+  outMod.o_operands[3] = sizeof(width) + sizeof(outputArgs) + 
+                         outMod.o_operands[1] + sizeof(argRef);
   outMod.o_operands[4] = outMod.o_operands[3] + sizeof(inputArgs) + sizeof(argRef);
   memset(&outMod.aluModifier, 0, sizeof(outMod.aluModifier));
   outMod.aluModifier.valid = 1;
   outMod.aluModifier.fbar = 1;
+
+  width.size = sizeof(width);
+  width.kind = BrigEOperandImmed;
+  width.type = Brigb32;
+  width.reserved = 0;
+  memset(&width.bits, 0, sizeof(width.bits));
 
   outputArgs.size = sizeof(outputArgs);
   outputArgs.kind = BrigEOperandArgumentList;
@@ -263,7 +269,7 @@ TEST(CodegenTest, Call_CodeGen) {
   }
 
   Call_Test<BrigInstMod, BrigOperandReg, BrigOperandArgumentRef>
-  TestCase2(in, symbols, &outMod, NULL, &outputArgs, &reg, &inputArgs, &funList, outputArgsList2, inputArgsList2, funcList2);
+  TestCase2(in, symbols, &outMod, &width, &outputArgs, &reg, &inputArgs, &funList, outputArgsList2, inputArgsList2, funcList2);
   TestCase2.Run_Test(&Call);
 
   delete []outputArgsList2;  outputArgsList2 = NULL;

@@ -14,10 +14,12 @@ extern int yylineno;
 
 namespace hsa {
 namespace brig {
+
+
 // context for code generation
 class Context {
   public:
-    enum context_error_t {
+    enum context_error_t{
       CONTEXT_OK = 0,
       INVALID_POINTER = 1,
       EMPTY_BUFFER,
@@ -47,26 +49,37 @@ class Context {
 
     /* helper function to check alignment requirement of each structure */
     template<class T>
-    static BrigAlignment alignment_check(T &item) {
+    static BrigAlignment dir_alignment_check(T &item) {
       switch (item.kind) {
         // directive
         case BrigEDirectiveBlockNumeric:
         case BrigEDirectiveInit:
-        // operand
-        case BrigEOperandImmed:
-          return BrigEAlignment_8;
+            return BrigEAlignment_8;
         default:
           return BrigEAlignment_4;
       }
     }
 
+    template<class T>
+    static BrigAlignment oper_alignment_check(T &item) {
+      if(item.kind == BrigEOperandImmed)
+        return BrigEAlignment_8;
+      else 
+        return BrigEAlignment_4;
+    }
+    
+    template<class T>
+    static BrigAlignment code_alignment_check(T &item) {
+      return BrigEAlignment_4;
+    }
+    
     /* code to append Brig structures to buffers */
 
     // append code
     template <class T>
     void append_code(const T* item) {
       uint32_t code_offset = cbuf->size();
-      if ((alignment_check(*item) == BrigEAlignment_8) &&
+      if ((code_alignment_check(*item) == BrigEAlignment_8) &&
           (code_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
@@ -81,15 +94,16 @@ class Context {
     // append directive
     template <class T>
     void append_directive(const T* item) {
-      uint32_t directive_offset = dbuf->size();
-      if ((alignment_check(*item) == BrigEAlignment_8) &&
-          (directive_offset%8)) {
+      this->last_directive_offset = dbuf->size();
+      if ((dir_alignment_check(*item) == BrigEAlignment_8) &&
+          (this->last_directive_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigDirectivePad bdp = {
           4,                 // Size
           BrigEDirectivePad  // type
         };
         dbuf->append(&bdp);
+        this->last_directive_offset += sizeof(bdp);
       }
       dbuf->append(item);
     }
@@ -98,7 +112,7 @@ class Context {
     template <class T>
     void append_operand(const T* item) {
     uint32_t operand_offset = obuf->size();
-      if ((alignment_check(*item) == BrigEAlignment_8) &&
+      if ((oper_alignment_check(*item) == BrigEAlignment_8) &&
           (operand_offset%8)) {
         // need padding to ensure code_offset is a multiple of 8
         BrigOperandPad bdp = {
@@ -129,6 +143,28 @@ class Context {
       assert(false && "Unreachable");
     }
 
+    template <class T>
+    context_error_t get_directive(T* item) {
+      // check for valid pointer
+      if (item == NULL)
+        return INVALID_POINTER;
+      uint32_t offset = this->last_directive_offset;
+      Buffer::error_t result = Buffer::EMPTY_BUFFER;
+      if(offset)
+       result = dbuf->get(offset, item);
+      else
+        return EMPTY_BUFFER;
+
+      if (result == Buffer::INVALID_OFFSET)
+        return INVALID_OFFSET;
+      else if (result == Buffer::EMPTY_BUFFER)
+        return EMPTY_BUFFER;
+      else if (result == Buffer::SUCCESS)
+        return CONTEXT_OK;
+
+      assert(false && "Unreachable");
+    }
+    
     // get code at a specific offset
     template <class T>
     context_error_t get_code(uint32_t offset, T* item) {
@@ -191,6 +227,9 @@ class Context {
                                            uint32_t offset,
                                            uint32_t nBytes);
 
+    context_error_t update_last_directive(unsigned char* value,
+                                            uint32_t nBytes);                                           
+                                           
     context_error_t update_code_bytes(unsigned char* value,
                                       uint32_t offset,
                                       uint32_t nBytes);
@@ -219,10 +258,7 @@ class Context {
     uint32_t get_symbol_modifier() const;
     BrigMachine16_t get_machine() const;
     BrigProfile16_t get_profile() const;
-    BrigSftz16_t get_ftz() const;
-    int get_fbar() const;
     BrigDataType16_t get_type() const;
-    char get_operand_loc() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
     bool get_isBlockNumeric() const;
@@ -230,16 +266,12 @@ class Context {
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
     void set_symbol_modifier(BrigSymbolModifier modifier);
-	void init_symbol_modifier();
+    void init_symbol_modifier();
     void set_attribute(BrigAttribute16_t attrib);
     void set_alignment(uint16_t align);
     void set_machine(BrigMachine16_t machine);
     void set_profile(BrigProfile16_t profile);
-    void set_ftz(BrigSftz16_t ftz);
-    void set_fbar(int fbar);
     void set_type(BrigDataType16_t type);
-    // let context know the location of current operand
-    void set_operand_loc(char loc);
     void set_dim(uint32_t dim);
     void set_isArray(bool is_array);
     void set_isBlockNumeric(bool is_blockNumeric);
@@ -258,11 +290,11 @@ class Context {
 
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
+    
+    
 
     BrigdOffset32_t current_bdf_offset;
     BrigoOffset32_t current_argList_offset;
-    BrigdOffset32_t current_img_offset ;
-    BrigdOffset32_t current_samp_offset ;
     BrigdOffset32_t current_argdecl_offset;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in an instruction
@@ -300,33 +332,34 @@ class Context {
 
     ~Context();
   private:
-    /* Buffers */
-    Context();
+    
     static Context* ctx;
-    Buffer* cbuf;  // code buffer
-    Buffer* dbuf;  // directive buffer
-    Buffer* obuf;  // operand buffer
-    StringBuffer* sbuf;  // string buffer
+    Context();
+    
+    /*Buffers for code, directives, operands, and symbols */
+    Buffer* cbuf;  
+    Buffer* dbuf;  
+    Buffer* obuf;  
+    StringBuffer* sbuf; 
 
     /* Error reporter */
-    ErrorReporterInterface* err_reporter;  // error reporter
+    ErrorReporterInterface* err_reporter;
 
-    // context variables
-    uint16_t alignment;
-    uint32_t symModifier;
+    /* Global context variables */
     BrigMachine16_t machine;
     BrigProfile16_t profile;
-    BrigSftz16_t ftz;
-    int fbar;
+    uint16_t alignment;
+    uint32_t symModifier;
     BrigAttribute16_t attribute;
     BrigDataType16_t type;
     BrigAluModifier aluModifier;
-    char operand_loc;   // 1 -> 5
-    bool error_reporter_set;
-    bool arg_output;
     uint32_t dim;
+    BrigdOffset32_t last_directive_offset;
+    
+    bool arg_output;
     bool is_array;
     bool is_blockNumeric;
+    
 };
 
 }  // namespace brig

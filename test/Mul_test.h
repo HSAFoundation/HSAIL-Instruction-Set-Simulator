@@ -600,7 +600,7 @@ TEST(CodegenTest, Mul_AluModifier_CodeGen) {
   out.o_operands[4] = 0;
   memset(&out.aluModifier, 0, sizeof(out.aluModifier));
   out.aluModifier.valid = 1;
-  out.aluModifier.floatOrInt = 0;
+  out.aluModifier.floatOrInt = 1;
   out.aluModifier.ftz = 1;
 
   dest.size = sizeof(dest);

@@ -34,10 +34,11 @@ Context::Context(void) {
   err_reporter = NULL;
   yycolno = 0;
   yylineno = 1;
+  dim = 0;
+  last_directive_offset = 0;
+  
   current_bdf_offset = 0;
   current_argdecl_offset = 0;
-  current_samp_offset = 0;
-  error_reporter_set = false;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
   aluModifier.valid = 0;
@@ -62,6 +63,7 @@ Context::~Context(void) {
 }
 
 void Context::clear_context(void) {
+
   clear_all_buffers();
   func_map.clear();
   func_o_map.clear();
@@ -76,9 +78,9 @@ void Context::clear_context(void) {
   }
   set_default_values();
   types.clear();
+  last_directive_offset = 0;
   current_bdf_offset = 0;
   current_argdecl_offset = 0;
-  current_samp_offset = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
   aluModifier.valid = 0;
@@ -86,15 +88,15 @@ void Context::clear_context(void) {
   aluModifier.approx = 0;
   aluModifier.fbar = 0;
   aluModifier.reserved = 0;
+  /*Error Reported not cleared - clear_context typically used between unit tests*/
+  
 }
 
 void Context::set_default_values(void) {
   machine = BrigELarge;
   profile = BrigEFull;
-  ftz = BrigENosftz;
   attribute = BrigNone;
   alignment = 1;
-  fbar = 0;
   token_type = UNKNOWN;
   token_to_scan = 0;
   token_value.int_val = 0;
@@ -110,13 +112,12 @@ ErrorReporterInterface* Context::get_error_reporter(void) const {
 }
 
 void Context::set_error_reporter(ErrorReporterInterface* error_reporter) {
-  this->err_reporter = error_reporter;
-  this->error_reporter_set = true;
+  this->err_reporter = error_reporter;  
 }
 
 void Context::set_error(error_code_t error) {
   // try to free string if the token contains string
-  if (error_reporter_set)
+  if (err_reporter)
     err_reporter->report_error(error, yylineno, yycolno);
   else
     printf("Error reporter has not been set up\n");
@@ -199,6 +200,20 @@ Context::context_error_t Context::update_directive_bytes(unsigned char* value,
   else
     return UNKNOWN_ERROR;
 }
+
+Context::context_error_t Context::update_last_directive(unsigned char* value,
+                                       uint32_t nBytes) {
+  uint32_t offset = this->last_directive_offset;                                     
+  Buffer::error_t err = dbuf->modify(value, offset, nBytes);
+
+  if (err == Buffer::SUCCESS)
+    return CONTEXT_OK;
+  else if (err == Buffer::INVALID_OFFSET)
+    return INVALID_OFFSET;
+  else
+    return UNKNOWN_ERROR;
+}
+
 
 Context::context_error_t Context::get_string_bytes(char* value,
                                   uint32_t offset,
@@ -293,20 +308,8 @@ BrigProfile16_t Context::get_profile() const {
   return profile;
 }
 
-BrigSftz16_t Context::get_ftz() const {
-  return ftz;
-}
-
-int Context::get_fbar() const {
-  return fbar;
-}
-
 BrigDataType16_t Context::get_type() const {
   return type;
-}
-
-char Context::get_operand_loc() const {
-  return operand_loc;
 }
 
 uint32_t Context::get_dim() const {
@@ -350,21 +353,8 @@ void Context::set_profile(BrigProfile16_t profile) {
   this->profile = profile;
 }
 
-void Context::set_ftz(BrigSftz16_t ftz) {
-  this->ftz = ftz;
-}
-
-void Context::set_fbar(int fbar) {
-  this->fbar = fbar;
-}
-
 void Context::set_type(BrigDataType16_t type) {
   this->type = type;
-}
-
-// let context know the location of current operand
-void Context::set_operand_loc(char loc) {
-  this->operand_loc = loc;
 }
 
 void Context::set_dim(uint32_t dim) {
