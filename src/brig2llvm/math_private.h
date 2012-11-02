@@ -19,9 +19,6 @@
 
 #include <sys/types.h>
 
-#define BIT_ENDIAN 0
-#define LITTLE_ENDIAN 1
-
 /*
  * The original fdlibm code used statements like:
  *	n0 = ((*(int*)&one)>>29)^1;		* index of high word *
