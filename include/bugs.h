@@ -1,8 +1,8 @@
-#if !defined(__ICC) && !defined(__clang__) && defined(GCC)
+#if !defined(__ICC) && !defined(__clang__) && defined(__GNUC__)
 #define __IS_GCC__ 1
-#else // !defined(__ICC) && !defined(__clang__) && defined(GCC)
+#else // !defined(__ICC) && !defined(__clang__) && defined(__GNUC__)
 #define __IS_GCC__ 0
-#endif // !defined(__ICC) && !defined(__clang__) && defined(GCC)
+#endif // !defined(__ICC) && !defined(__clang__) && defined(__GNUC__)
 
 // Work around bug in gcc 4.4's implementation of shared_ptr
 // Bug Report: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42019
