@@ -31,7 +31,7 @@ public:
    
     struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
       reinterpret_cast<const char *>(&dir->get()[0]),NULL,NULL, NULL, 
-      RefStr->size(), dir->size(), 0, 0, (size_t)0);    
+      RefStr->size(), dir->size(), (size_t)0, (size_t)0, (size_t)0);    
     
     Parse_Validate(Rule, &RefOutput);
     delete dir;

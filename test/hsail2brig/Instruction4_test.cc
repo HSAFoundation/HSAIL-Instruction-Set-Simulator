@@ -1,7 +1,15 @@
 #include <iostream>
 #include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
@@ -26,29 +34,24 @@ public:
     RefSrc2(Src2),
     RefSrc3(Src3)  { }
 
-  void validate(struct BrigSections* TestOutput){
-
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const T* getinst = (cast<T>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-    const T1 *getdest = reinterpret_cast <const T1*> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validateOpType<T1>(RefDest, refbuf, getdest, getbuf);
-
-    const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validateOpType<T2>(RefSrc1, refbuf, getsrc1, getbuf);
-
-    const T3 *getsrc2 = reinterpret_cast <const T3*> (&(TestOutput->operands[getinst->o_operands[2]]));
-    validate_brig::validateOpType<T3>(RefSrc2, refbuf, getsrc2, getbuf);
-
-    const T4 *getsrc3 = reinterpret_cast <const T4*> (&(TestOutput->operands[getinst->o_operands[3]]));
-    validate_brig::validateOpType<T4>(RefSrc3, refbuf, getsrc3, getbuf);
-
-    EXPECT_EQ(0, getinst->o_operands[4]);
-  }
+   void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    code->append(RefInst);
+    oper->append(RefDest);
+    oper->append(RefSrc1);
+    oper->append(RefSrc2);
+    oper->append(RefSrc3);
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+  }  
  };
 
 TEST(CodegenTest,Instruction4Op_CodeGen){
@@ -1475,8 +1478,8 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
     BrigNoPacking,
     {0,                
      sizeof(reg1), 
-     sizeof(reg1) + sizeof(reg2), 
-     sizeof(reg1) + sizeof(reg2) + sizeof(reg3), 0}
+     sizeof(reg1) + sizeof(imm2), 
+     sizeof(reg1) + sizeof(imm2) + sizeof(reg3), 0}
   };
   out30.size = sizeof(out30);
   
