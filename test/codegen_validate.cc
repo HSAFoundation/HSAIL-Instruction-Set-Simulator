@@ -26,6 +26,14 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
+        caseOperBrig(OperandLabelRef);
+        caseOperBrig(OperandFunctionRef);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
+        
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -163,6 +171,15 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
+        caseOperBrig(OperandLabelRef);
+        caseOperBrig(OperandFunctionRef);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
+        
+
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -388,13 +405,16 @@ void validate(const BrigOperandAddress* ref, const BrigOperandAddress* get,
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->reserved, get->reserved);
-  dir_iterator refdir(RefOutput->directives + ref->directive);
-  dir_iterator getdir(GetOutput->directives + get->directive);
-  switch(getdir->kind){
-    caseDirBrig(DirectiveSymbol);
-    default:
-      printf("Offset to invalid directive");
-      exit(1);
+  if (get->directive != 0) {
+    dir_iterator refdir(RefOutput->directives + ref->directive);
+    dir_iterator getdir(GetOutput->directives + get->directive);
+    switch(getdir->kind){
+      caseDirBrig(DirectiveSymbol);
+    
+      default:
+        printf("Offset to invalid directive");
+        exit(1);
+    }
   }
 }
 
@@ -402,14 +422,16 @@ void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  dir_iterator refdir(RefOutput->directives + ref->labeldirective);
-  dir_iterator getdir(GetOutput->directives + get->labeldirective);
-  switch(getdir->kind){
-    caseDirBrig(DirectiveLabel);
-    caseDirBrig(DirectiveLabelList);
-    default:
-      printf("Offset to invalid directive");
-      exit(1);
+  if (get->labeldirective != 0) {
+    dir_iterator refdir(RefOutput->directives + ref->labeldirective);
+    dir_iterator getdir(GetOutput->directives + get->labeldirective);
+    switch(getdir->kind){
+      caseDirBrig(DirectiveLabel);
+      caseDirBrig(DirectiveLabelList);
+      default:
+        printf("Offset to invalid directive");
+        exit(1);
+    }
   }
 }
 
@@ -519,14 +541,16 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
     BrigSections* RefOutput, BrigSections* GetOutput){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  dir_iterator refdir(RefOutput->directives + ref->fn);
-  dir_iterator getdir(GetOutput->directives + get->fn);
-  switch(getdir->kind){
-    caseDirBrig(DirectiveFunction);
-    caseDirBrig(DirectiveSignature);
-    default:
-      printf("Offset to invalid directive");
-      exit(1);
+  if (get->fn != 0) {
+    dir_iterator refdir(RefOutput->directives + ref->fn);
+    dir_iterator getdir(GetOutput->directives + get->fn);
+    switch(getdir->kind){
+      caseDirBrig(DirectiveFunction);
+      caseDirBrig(DirectiveSignature);
+      default:
+        printf("Offset to invalid directive");
+        exit(1);
+    }
   }
 }
 
