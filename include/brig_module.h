@@ -141,7 +141,7 @@ class BrigModule {
 
   bool validateUnaryArithmetic(const inst_iterator inst) const;
   bool validateBinaryArithmetic(const inst_iterator inst) const;
-  bool validateTernaryOptimization(const inst_iterator inst) const;
+  bool validateTernaryArithmetic(const inst_iterator inst) const;
 
   bool validateAbs(const inst_iterator inst) const;
   bool validateAdd(const inst_iterator inst) const;
