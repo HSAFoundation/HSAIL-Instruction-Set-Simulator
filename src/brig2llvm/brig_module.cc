@@ -1998,7 +1998,7 @@ bool BrigModule::validateFcos(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigf32, "Type should be f32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "Fcos can not accept the vector");
+                 "Fcos can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2007,7 +2007,7 @@ bool BrigModule::validateFexp2(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigf32, "Type should be f32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "Fexp2 can not accept the vector");
+                 "Fexp2 can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2016,7 +2016,7 @@ bool BrigModule::validateFlog2(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigf32, "Type should be f32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "Flog2 can not accept the vector");
+                 "Flog2 can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2026,7 +2026,7 @@ bool BrigModule::validateFrcp(const inst_iterator inst) const {
   valid &= check(inst->type == Brigf32 || inst->type == Brigf64,
                  "Type should be f32 or f64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "Frcp can not accept the vector");
+                 "Frcp can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2036,7 +2036,7 @@ bool BrigModule::validateFrsqrt(const inst_iterator inst) const {
   valid &= check(inst->type == Brigf32 || inst->type == Brigf64,
                  "Type should be f32 or f64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "Frsqrt can not accept the vector");
+                 "Frsqrt can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2045,7 +2045,7 @@ bool BrigModule::validateFsin(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigf32, "Type should be f32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "Fsin can not accept the vector");
+                 "Fsin can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
