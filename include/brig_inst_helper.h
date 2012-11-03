@@ -213,6 +213,29 @@ class BrigInstHelper {
       packing == BrigPackPsat  || packing == BrigPackSsat;
   }
 
+  static bool isValidPacking(BrigPacking packing, unsigned opnum) {
+    switch(packing) {
+    case BrigNoPacking:
+      return false;
+    case BrigPackS:
+    case BrigPackP:
+    case BrigPackSsat:
+    case BrigPackPsat:
+      return opnum == 1;
+    case BrigPackPP:
+    case BrigPackPS:
+    case BrigPackSP:
+    case BrigPackSS:
+    case BrigPackPPsat:
+    case BrigPackPSsat:
+    case BrigPackSPsat:
+    case BrigPackSSsat:
+      return opnum == 2;
+    default:
+      assert(false && "Invalid packing");
+    }
+  }
+
   static bool isBranchInst(const inst_iterator inst) {
     BrigOpcode opcode = BrigOpcode(inst->opcode);
     return opcode == BrigBrn || opcode == BrigCbr;
