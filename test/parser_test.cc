@@ -2433,8 +2433,8 @@ TEST(ParserTest, BodyStatements) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, BodyStatements(context));
 
-  input.assign("extern const"); // three bodyStatements
-  input.append("private_f32 %f[3];\n");
+  input.assign("{ extern const"); // three bodyStatements
+  input.append("arg_f32 %f[3];\n } ");
   input.append("pragma \"this is string!\";\n");
   input.append("pragma \"this is string!\";\n");
   lexer->set_source_string(input);

@@ -2302,7 +2302,8 @@ int InitializableDecl(Context* context) {
 }
 
 int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
-{
+{  
+  int var_name_offset;
   context->init_symbol_modifier();
   context->set_isArray(false);
   //First token already verified as GLOBAL/READONLY
@@ -2317,7 +2318,7 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
     return 1;
   }
   std::string var_name = context->token_value.string_val;
-  int var_name_offset = context->add_symbol(var_name);
+  var_name_offset = context->add_symbol(var_name);
 
   context->token_to_scan = yylex();
   // set default value(scalar)
@@ -2363,13 +2364,16 @@ int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
 }
 
 int UninitializableDecl(Context* context) {
+
+  BrigStorageClass32_t storage_class;
+  BrigsOffset32_t str_offset;
   // first_token is PRIVATE, GROUP or SPILL
   if ((PRIVATE != context->token_to_scan)
      &&(GROUP != context->token_to_scan)
      &&(SPILL != context->token_to_scan))
     return 1;
 
-  BrigStorageClass32_t storage_class = context->token_value.storage_class;
+  storage_class = context->token_value.storage_class;
   context->token_to_scan = yylex();
 
   if (DATA_TYPE_ID != context->token_type) {
@@ -2385,7 +2389,7 @@ int UninitializableDecl(Context* context) {
   }
 
   std::string var_name = context->token_value.string_val;
-  BrigsOffset32_t str_offset = context->add_symbol(var_name);
+  str_offset = context->add_symbol(var_name);
 
   context->token_to_scan = yylex();
   context->set_dim(0);
@@ -3732,6 +3736,7 @@ int Kernel(Context *context) {
   if(paramCount){
     context->get_directive(bdk_offset, &bdk);
     bdk.inParamCount = paramCount;
+    bdk.d_firstInParam = bdk.d_nextDirective;
     bdk.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
     bdk.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdk);
@@ -3949,6 +3954,10 @@ int Cmp(Context* context) {
 
 int GlobalPrivateDecl(Context* context) {
   // first token is PRIVATE
+  BrigsOffset32_t str_offset;
+  context->set_dim(0);
+  context->init_symbol_modifier();
+  
   if (PRIVATE != context->token_to_scan)
     return 1;
 
@@ -3966,9 +3975,8 @@ int GlobalPrivateDecl(Context* context) {
     return 1;
   }
   
-  BrigsOffset32_t str_offset = context->add_symbol(context->token_value.string_val);
-  context->set_dim(0);
-  context->init_symbol_modifier();
+  str_offset = context->add_symbol(context->token_value.string_val);
+  
 
   context->token_to_scan = yylex();
   if ('[' == context->token_to_scan) {
@@ -4601,6 +4609,10 @@ int Mov(Context* context) {
 }
 
 int GlobalGroupDecl(Context* context) {
+  
+  BrigsOffset32_t str_offset;
+  context->set_dim(0);
+  context->init_symbol_modifier();
   // first token is Group
   if (GROUP != context->token_to_scan)
     return 1;
@@ -4619,7 +4631,7 @@ int GlobalGroupDecl(Context* context) {
     return 1;
   }
   
-  BrigsOffset32_t str_offset = context->add_symbol(context->token_value.string_val);
+  str_offset = context->add_symbol(context->token_value.string_val);
   context->set_dim(0);
   context->init_symbol_modifier();
 
