@@ -53,12 +53,12 @@ int QueryOp(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpco
   }
   return 1;
 }
+
 int QueryOp(Context* context) {
   BrigDataType16_t dataType;
   BrigOpcode32_t opcode;
   return QueryOp(context, &dataType, &opcode);
 }
-
 
 int Query(Context* context) {
   
@@ -117,7 +117,7 @@ int Query(Context* context) {
   return 0;
 }
 
-int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
+int Operand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   BrigoOffset32_t current_offset;
   std::string opName;
   current_offset = context->get_operand_offset();
@@ -141,8 +141,8 @@ int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
 }
 
 int Operand(Context* context) {
-  BrigoOffset32_t retOpOffset;
-  return OperandPart2(context, &retOpOffset);
+  BrigoOffset32_t retOpOffset = 0;
+  return Operand(context, &retOpOffset);
 }
 
 int Identifier(Context* context) {
@@ -845,14 +845,14 @@ int Instruction2Part1OpcodeDT(Context* context) {
     inst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
     if (context->token_type == REGISTER) {
-      if (OperandPart2(context, &inst.o_operands[0])) {
+      if (Operand(context, &inst.o_operands[0])) {
         return 1;
       }
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         // TODO(Chuang): judge whether operands is suitable.
 
-        if (!OperandPart2(context, &inst.o_operands[1])) {
+        if (!Operand(context, &inst.o_operands[1])) {
           if (context->token_to_scan == ';') {
             int* aluValue = reinterpret_cast<int*>(&aluModifier);
             if (*aluValue != 0) {
@@ -917,14 +917,14 @@ int Instruction2Part2OpcodeNoDT(Context* context) {
 
   // TODO(Chuang): judge whether operands is suitable.
   if (context->token_type == REGISTER) {
-    if (OperandPart2(context, &inst.o_operands[0])) {
+    if (Operand(context, &inst.o_operands[0])) {
       return 1;
     }
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
       // TODO(Chuang): judge whether operands is suitable.
 
-      if (!OperandPart2(context, &inst.o_operands[1])) {
+      if (!Operand(context, &inst.o_operands[1])) {
         if (context->token_to_scan == ';') {
           int* aluValue = reinterpret_cast<int*>(&aluModifier);
           if (*aluValue != 0) {
@@ -989,7 +989,7 @@ int Instruction2Part3OpcodeFtz(Context* context) {
     context->set_error(INVALID_FIRST_OPERAND);
     return 1;
   }
-  if (OperandPart2(context, &OpOffset0)) {
+  if (Operand(context, &OpOffset0)) {
     context->set_error(INVALID_FIRST_OPERAND);
     return 1;
   }
@@ -999,7 +999,7 @@ int Instruction2Part3OpcodeFtz(Context* context) {
     return 1;
   }
   context->token_to_scan = yylex();
-  if (OperandPart2(context, &OpOffset1)) {
+  if (Operand(context, &OpOffset1)) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
@@ -1097,7 +1097,7 @@ int Instruction3(Context* context) {
   type = (opcode == BrigClass) ? (int)Brigb1 : type;
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset0)) {
+  if (Operand(context, &OpOffset0)) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
@@ -1107,7 +1107,7 @@ int Instruction3(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset1)) {
+  if (Operand(context, &OpOffset1)) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
@@ -1117,7 +1117,7 @@ int Instruction3(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset2)) {
+  if (Operand(context, &OpOffset2)) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
@@ -1747,7 +1747,7 @@ int BranchPart1Cbr(Context* context) {
   }
 
   // Generate $c register brig code
-  if (OperandPart2(context, &OpOffset[1])) {
+  if (Operand(context, &OpOffset[1])) {
     context->set_error(INVALID_OPERAND);
     return 1;  
   }
@@ -1773,7 +1773,7 @@ int BranchPart1Cbr(Context* context) {
     OpOffset[2] = context->label_o_map[label_name];
     context->token_to_scan = yylex();  // should be ';'
   } else if (context->token_to_scan == TOKEN_SREGISTER) {
-    if (OperandPart2(context, &OpOffset[2])) {
+    if (Operand(context, &OpOffset[2])) {
       context->set_error(INVALID_OPERAND);
       return 1;  
     } 
@@ -2094,7 +2094,7 @@ int Call(Context* context) {
     OpOffset[2] = context->func_o_map[opName];
     context->token_to_scan = yylex();
   } else if (firstOpToken == TOKEN_SREGISTER) {
-    if (OperandPart2(context, &OpOffset[2])) {
+    if (Operand(context, &OpOffset[2])) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
@@ -2600,14 +2600,14 @@ int SysCall(Context* context) {
 
   // Note: dest: Destination. Must be a 32-bit register.
   if (context->token_to_scan == TOKEN_SREGISTER) {
-    if (OperandPart2(context, &syscallInst.o_operands[0])) {
+    if (Operand(context, &syscallInst.o_operands[0])) {
       return 1;
     }
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
       // n: An integer literal. Valid values fit into a u32 data type.
       if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        if (OperandPart2(context, &syscallInst.o_operands[1])) {
+        if (Operand(context, &syscallInst.o_operands[1])) {
           return 1;
         }
         if (context->token_to_scan == ',') {
@@ -2617,7 +2617,7 @@ int SysCall(Context* context) {
                (context->token_to_scan == TOKEN_WAVESIZE) ||
                (context->token_to_scan == TOKEN_INTEGER_CONSTANT))) {
 
-            if (OperandPart2(context, &syscallInst.o_operands[2])) {
+            if (Operand(context, &syscallInst.o_operands[2])) {
               return 1;
             }
             if (context->token_to_scan == ',') {
@@ -2626,7 +2626,7 @@ int SysCall(Context* context) {
               if ((context->token_to_scan == TOKEN_SREGISTER) ||
                   (context->token_to_scan == TOKEN_WAVESIZE) ||
                   (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-                if (OperandPart2(context, &syscallInst.o_operands[3])) {
+                if (Operand(context, &syscallInst.o_operands[3])) {
                   return 1;
                 }
                 if (context->token_to_scan == ',') {
@@ -2635,7 +2635,7 @@ int SysCall(Context* context) {
                   if ((context->token_to_scan == TOKEN_SREGISTER) ||
                       (context->token_to_scan == TOKEN_WAVESIZE) ||
                       (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-                    if (OperandPart2(context, &syscallInst.o_operands[4])) {
+                    if (Operand(context, &syscallInst.o_operands[4])) {
                       return 1;
                     }
 
@@ -2946,7 +2946,7 @@ int Instruction4MultiMediaOperationPart1(Context* context) {
       return 1;
     }
 
-    if (!OperandPart2(context, &mmoInst.o_operands[0])) {
+    if (!Operand(context, &mmoInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
@@ -2954,21 +2954,21 @@ int Instruction4MultiMediaOperationPart1(Context* context) {
       context->token_to_scan = yylex();
       // TODO(Chuang):src0, src1, src2, src3: Sources. All are b32
 
-      if (!OperandPart2(context, &mmoInst.o_operands[1])) {
+      if (!Operand(context, &mmoInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
         }
         context->token_to_scan = yylex();
 
-        if (!OperandPart2(context, &mmoInst.o_operands[2])) {
+        if (!Operand(context, &mmoInst.o_operands[2])) {
           if (context->token_to_scan != ',') {
             context->set_error(MISSING_COMMA);
             return 1;
           }
           context->token_to_scan = yylex();
 
-          if (!OperandPart2(context, &mmoInst.o_operands[3])) {
+          if (!Operand(context, &mmoInst.o_operands[3])) {
             if (context->token_to_scan == ';') {
               context->append_code(&mmoInst);
               context->token_to_scan = yylex();
@@ -3030,7 +3030,7 @@ int Instruction4FmaPart2(Context* context) {
       return 1;
     }
 
-    if (!OperandPart2(context, &fmaInst.o_operands[0])) {
+    if (!Operand(context, &fmaInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
@@ -3043,7 +3043,7 @@ int Instruction4FmaPart2(Context* context) {
         return 1;
       }
 
-      if (!OperandPart2(context, &fmaInst.o_operands[1])) {
+      if (!Operand(context, &fmaInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
@@ -3055,7 +3055,7 @@ int Instruction4FmaPart2(Context* context) {
           return 1;
         }
 
-        if (!OperandPart2(context, &fmaInst.o_operands[2])) {
+        if (!Operand(context, &fmaInst.o_operands[2])) {
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
@@ -3068,7 +3068,7 @@ int Instruction4FmaPart2(Context* context) {
             return 1;
           }
 
-          if (!OperandPart2(context, &fmaInst.o_operands[3])) {
+          if (!Operand(context, &fmaInst.o_operands[3])) {
 
             if (context->token_to_scan == ';') {
               int* pCmp = reinterpret_cast<int*>(&aluModifier);
@@ -3157,7 +3157,7 @@ int Instruction4MadPart3(Context* context) {
       return 1;
     }
 
-    if (!OperandPart2(context, &madInst.o_operands[0])) {
+    if (!Operand(context, &madInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
@@ -3170,7 +3170,7 @@ int Instruction4MadPart3(Context* context) {
         return 1;
       }
 
-      if (!OperandPart2(context, &madInst.o_operands[1])) {
+      if (!Operand(context, &madInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
@@ -3181,7 +3181,7 @@ int Instruction4MadPart3(Context* context) {
           context->set_error(INVALID_OPERAND);
           return 1;
         }
-        if (!OperandPart2(context, &madInst.o_operands[2])) {
+        if (!Operand(context, &madInst.o_operands[2])) {
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
@@ -3194,7 +3194,7 @@ int Instruction4MadPart3(Context* context) {
             return 1;
           }
 
-          if (!OperandPart2(context, &madInst.o_operands[3])) {
+          if (!Operand(context, &madInst.o_operands[3])) {
 
             if (context->token_to_scan == ';') {
               int* pCmp = reinterpret_cast<int*>(&aluModifier);
@@ -3295,14 +3295,14 @@ int Instruction4BitStringOperationPart4(Context* context) {
       return 1;
     }
 
-    if (!OperandPart2(context, &bsoInst.o_operands[0])) {
+    if (!Operand(context, &bsoInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
       }
       context->token_to_scan = yylex();
 
-      if (!OperandPart2(context, &bsoInst.o_operands[1])) {
+      if (!Operand(context, &bsoInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
@@ -3312,7 +3312,7 @@ int Instruction4BitStringOperationPart4(Context* context) {
         // TODO(Chuang): src1, src2: type follow as the kind of opcode.
         // different opcode will have different rule of types.
 
-        if (!OperandPart2(context, &bsoInst.o_operands[2])) {
+        if (!Operand(context, &bsoInst.o_operands[2])) {
 
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
@@ -3320,7 +3320,7 @@ int Instruction4BitStringOperationPart4(Context* context) {
           }
           context->token_to_scan = yylex();
 
-          if (!OperandPart2(context, &bsoInst.o_operands[3])) {
+          if (!Operand(context, &bsoInst.o_operands[3])) {
             if (context->token_to_scan == ';') {
               context->append_code(&bsoInst);
               context->token_to_scan = yylex();
@@ -3384,7 +3384,7 @@ int Instruction4CmovPart5(Context* context) {
       return 1;
     }
 
-    if (!OperandPart2(context, &cmovInst.o_operands[0])) {
+    if (!Operand(context, &cmovInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
@@ -3403,7 +3403,7 @@ int Instruction4CmovPart5(Context* context) {
         return 1;
       }
 
-      if (!OperandPart2(context ,&cmovInst.o_operands[1])) {
+      if (!Operand(context ,&cmovInst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
@@ -3415,7 +3415,7 @@ int Instruction4CmovPart5(Context* context) {
           return 1;
         }
 
-        if (!OperandPart2(context, &cmovInst.o_operands[2])) {
+        if (!Operand(context, &cmovInst.o_operands[2])) {
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
@@ -3428,7 +3428,7 @@ int Instruction4CmovPart5(Context* context) {
             return 1;
           }
 
-          if (!OperandPart2(context, &cmovInst.o_operands[3])) {
+          if (!Operand(context, &cmovInst.o_operands[3])) {
             if (context->token_to_scan == ';') {
               context->append_code(&cmovInst);
               context->token_to_scan = yylex();
@@ -3501,7 +3501,7 @@ int Instruction4ShufflePart6(Context* context) {
       return 1;
     }
 
-    if (!OperandPart2(context, &shuffleInst.o_operands[0])) {
+    if (!Operand(context, &shuffleInst.o_operands[0])) {
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
@@ -3514,7 +3514,7 @@ int Instruction4ShufflePart6(Context* context) {
         return 1;
       }
 
-      if (!OperandPart2(context, &shuffleInst.o_operands[1])) {
+      if (!Operand(context, &shuffleInst.o_operands[1])) {
 
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
@@ -3527,7 +3527,7 @@ int Instruction4ShufflePart6(Context* context) {
           return 1;
         }
 
-        if (!OperandPart2(context, &shuffleInst.o_operands[2])) {
+        if (!Operand(context, &shuffleInst.o_operands[2])) {
 
           if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
@@ -3541,7 +3541,7 @@ int Instruction4ShufflePart6(Context* context) {
             return 1;
           }
 
-          if (!OperandPart2(context, &shuffleInst.o_operands[3])) {
+          if (!Operand(context, &shuffleInst.o_operands[3])) {
             if (context->token_to_scan == ';') {
               context->append_code(&shuffleInst);
               context->token_to_scan = yylex();
@@ -3891,17 +3891,17 @@ int Cmp(Context* context) {
       std::string opName;
       // Note: Dest must be a register.
       if (context->token_type == REGISTER) {
-        if (OperandPart2(context, &cmpInst.o_operands[0])) {
+        if (Operand(context, &cmpInst.o_operands[0])) {
           return 1;
         }
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
-          if (!OperandPart2(context, &cmpInst.o_operands[1])) {
+          if (!Operand(context, &cmpInst.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
 
-              if (!OperandPart2(context, &cmpInst.o_operands[2])) {
+              if (!Operand(context, &cmpInst.o_operands[2])) {
                 if (context->token_to_scan == ';') {
                   context->append_code(&cmpInst);
                   context->token_to_scan = yylex();
@@ -4219,7 +4219,7 @@ int Instruction5(Context* context) {
     context->token_to_scan = yylex();
     // Note: dest: The destination is an f32.
 
-    if (!OperandPart2(context, &f2u4Inst.o_operands[0])) {
+    if (!Operand(context, &f2u4Inst.o_operands[0])) {
 
       if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
@@ -4228,7 +4228,7 @@ int Instruction5(Context* context) {
       context->token_to_scan = yylex();
 
       // Note: Sources. All are b32
-      if (!OperandPart2(context, &f2u4Inst.o_operands[1])) {
+      if (!Operand(context, &f2u4Inst.o_operands[1])) {
         if (context->token_to_scan != ',') {
           context->set_error(MISSING_COMMA);
           return 1;
@@ -4236,7 +4236,7 @@ int Instruction5(Context* context) {
         context->token_to_scan = yylex();
 
         // Note: Sources. All are b32
-        if (!OperandPart2(context, &f2u4Inst.o_operands[2])) {
+        if (!Operand(context, &f2u4Inst.o_operands[2])) {
           if (context->token_to_scan != ',') {
             context->set_error(MISSING_COMMA);
             return 1;
@@ -4244,7 +4244,7 @@ int Instruction5(Context* context) {
           context->token_to_scan = yylex();
 
           // Note: Sources. All are b32
-          if (!OperandPart2(context, &f2u4Inst.o_operands[3])) {
+          if (!Operand(context, &f2u4Inst.o_operands[3])) {
             if (context->token_to_scan != ',') {
               context->set_error(MISSING_COMMA);
               return 1;
@@ -4252,7 +4252,7 @@ int Instruction5(Context* context) {
             context->token_to_scan = yylex();
             // Note: Sources. All are b32
 
-            if (!OperandPart2(context, &f2u4Inst.o_operands[4])) {
+            if (!Operand(context, &f2u4Inst.o_operands[4])) {
               if (context->token_to_scan == ';') {
                 context->append_code(&f2u4Inst);
                 context->token_to_scan = yylex();
@@ -4351,7 +4351,7 @@ int Ldc(Context* context) {
       context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
-    if (!OperandPart2(context, &ldc_op.o_operands[0])) {
+    if (!Operand(context, &ldc_op.o_operands[0])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         // op[1] must be BrigEOperandLabelRef or BrigEOperandFunctionRef
@@ -4494,7 +4494,7 @@ int Atom(Context* context) {
   DataType = context->token_value.data_type;
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[0])) {
+  if (Operand(context, &OpOffset[0])) {
     return 1;
   }
 
@@ -4513,7 +4513,7 @@ int Atom(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[2])) {
+  if (Operand(context, &OpOffset[2])) {
     return 1;
   }
 
@@ -4523,7 +4523,7 @@ int Atom(Context* context) {
       return 1;
     }
     context->token_to_scan = yylex();
-    if (OperandPart2(context, &OpOffset[3])) {
+    if (Operand(context, &OpOffset[3])) {
       return 1;
     }
   }
@@ -4699,7 +4699,7 @@ int MulInst(Context* context) {
     return 1;
   }
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4710,7 +4710,7 @@ int MulInst(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4721,7 +4721,7 @@ int MulInst(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4786,7 +4786,7 @@ int Mul24Inst(Context* context) {
     return 1;
   }
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4797,7 +4797,7 @@ int Mul24Inst(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4808,7 +4808,7 @@ int Mul24Inst(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4860,7 +4860,7 @@ int Mad24Inst(Context* context) {
     return 1;
   }
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4871,7 +4871,7 @@ int Mad24Inst(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4882,7 +4882,7 @@ int Mad24Inst(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -4893,7 +4893,7 @@ int Mad24Inst(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -5186,7 +5186,7 @@ int Lda(Context* context) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
-    if (!OperandPart2(context, &lda_op.o_operands[0])) {
+    if (!Operand(context, &lda_op.o_operands[0])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         if (!MemoryOperandPart2(context, &lda_op.o_operands[1])) {
@@ -5331,7 +5331,7 @@ int ImageRet(Context* context) {
 
       context->token_to_scan = yylex();
 
-      if (!OperandPart2(context, &img_inst.o_operands[0])) {
+      if (!Operand(context, &img_inst.o_operands[0])) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
           if (context->token_to_scan == '[') {
@@ -5344,12 +5344,12 @@ int ImageRet(Context* context) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
 
-                    if (!OperandPart2(context, &img_inst.o_operands[curOpCount++])) {
+                    if (!Operand(context, &img_inst.o_operands[curOpCount++])) {
                       if (second_token == _CAS) {
                         if (context->token_to_scan == ',') {
                           context->token_to_scan = yylex();
 
-                          if (!OperandPart2(context, &img_inst.o_operands[curOpCount++])) {
+                          if (!Operand(context, &img_inst.o_operands[curOpCount++])) {
                           } else {  // Operand
                             context->set_error(MISSING_OPERAND);
                             return 1;
@@ -5541,14 +5541,14 @@ int ImageNoRet(Context* context) {
                 context->token_to_scan = yylex();
                 unsigned int opCount = 2;
 
-                if (!OperandPart2(context, &imgNoRet.o_operands[opCount++])) {
+                if (!Operand(context, &imgNoRet.o_operands[opCount++])) {
                   if (second_token == _CAS) {
                     if (context->token_to_scan == ',') {
                       context->token_to_scan = yylex();
                       if (context->valid_string) {
                         op_name = context->token_value.string_val;
                       }
-                      if (!OperandPart2(context, &imgNoRet.o_operands[opCount++])) {
+                      if (!Operand(context, &imgNoRet.o_operands[opCount++])) {
                       } else {  // Operand
                         context->set_error(MISSING_OPERAND);
                         return 1;
@@ -5652,11 +5652,11 @@ int Cvt(Context* context) {
         context->set_error(INVALID_OPERAND);
         return 1;
       }
-      if (!OperandPart2(context, &cvtInst.o_operands[0])) {
+      if (!Operand(context, &cvtInst.o_operands[0])) {
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
 
-          if (!OperandPart2(context, &cvtInst.o_operands[1])) {
+          if (!Operand(context, &cvtInst.o_operands[1])) {
 
             if (context->token_to_scan == ';') {
               context->append_code(&cvtInst);
@@ -5745,7 +5745,7 @@ int Instruction1Part1OpcodeDT(Context* context) {
         (context->token_to_scan == TOKEN_SREGISTER &&
          (inst1_op.opcode == BrigCountUp ||
           inst1_op.opcode == BrigFbarInit))) {
-      if (OperandPart2(context, &inst1_op.o_operands[0])) {
+      if (Operand(context, &inst1_op.o_operands[0])) {
         return 1;
       }
       // Note: Fbar_Release and Fbar_Init may be a instruction2.
@@ -5754,7 +5754,7 @@ int Instruction1Part1OpcodeDT(Context* context) {
         if (context->token_to_scan == ',')  {
           context->token_to_scan = yylex();
           if (context->token_to_scan == TOKEN_DREGISTER) {
-            if (OperandPart2(context, &inst1_op.o_operands[1])) {
+            if (Operand(context, &inst1_op.o_operands[1])) {
               return 1;
             }
           } else {  // Second Operand
@@ -5820,7 +5820,7 @@ int Instruction1Part2OpcodeNoDT(Context* context) {
        inst1_op.opcode != BrigDebugTrap) ||
       (inst1_op.opcode == BrigDebugTrap &&
        context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-    if (OperandPart2(context, &inst1_op.o_operands[0])) {
+    if (Operand(context, &inst1_op.o_operands[0])) {
       return 1;
     }
     if (context->token_to_scan == ';') {
@@ -5864,7 +5864,7 @@ int Instruction1Part3Clock(Context* context) {
   };
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_DREGISTER) {
-    if (OperandPart2(context, &inst1_op.o_operands[0])) {
+    if (Operand(context, &inst1_op.o_operands[0])) {
       return 1;
     }
     if (context->token_to_scan == ';') {
@@ -5922,13 +5922,13 @@ int Segp(Context* context) {
         context->token_to_scan = yylex();
         //dest must be c register
         if (context->token_to_scan == TOKEN_CREGISTER) {
-          if (OperandPart2(context, &segmentp_op.o_operands[0])) {
+          if (Operand(context, &segmentp_op.o_operands[0])) {
             return 1;
           }
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
             if(context->token_type == REGISTER ) {
-              if (OperandPart2(context, &segmentp_op.o_operands[1])) {
+              if (Operand(context, &segmentp_op.o_operands[1])) {
                 return 1;
               }
               if (context->token_to_scan == ';') {
@@ -5941,7 +5941,7 @@ int Segp(Context* context) {
               }
             } else if (context->token_type == CONSTANT ||
                        context->token_to_scan == TOKEN_WAVESIZE) {
-              if (OperandPart2(context, &segmentp_op.o_operands[1])) {
+              if (Operand(context, &segmentp_op.o_operands[1])) {
                 return 1;
               }
               if (context->token_to_scan == ';') {
@@ -6000,13 +6000,13 @@ int Segp(Context* context) {
         context->token_to_scan = yylex();
         //dest must be d register
         if (context->token_to_scan == TOKEN_DREGISTER) {
-          if (OperandPart2(context, &sf_op.o_operands[0])) {
+          if (Operand(context, &sf_op.o_operands[0])) {
             return 1;
           }
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
             if(context->token_type == REGISTER ) {
-              if (OperandPart2(context, &sf_op.o_operands[1])) {
+              if (Operand(context, &sf_op.o_operands[1])) {
                 return 1;
               }
               if (context->token_to_scan == ';') {
@@ -6018,7 +6018,7 @@ int Segp(Context* context) {
               }
             } else if (context->token_type == CONSTANT ||
                        context->token_to_scan == TOKEN_WAVESIZE) {
-              if (OperandPart2(context, &sf_op.o_operands[1])) {
+              if (Operand(context, &sf_op.o_operands[1])) {
                 return 1;
               }
               if (context->token_to_scan == ';') {
@@ -7315,7 +7315,7 @@ int AtomicNoRet(Context* context) {
       return 1;
     }
     context->token_to_scan = yylex();
-    if (OperandPart2(context, &OpOffset[opCount++])) {
+    if (Operand(context, &OpOffset[opCount++])) {
       return 1;
     }
   }
@@ -7326,7 +7326,7 @@ int AtomicNoRet(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (OperandPart2(context, &OpOffset[opCount++])) {
+  if (Operand(context, &OpOffset[opCount++])) {
     return 1;
   }
 
@@ -8304,7 +8304,7 @@ int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
     }
   } else {
 
-    if (!OperandPart2(context, pRetOpOffset)) {
+    if (!Operand(context, pRetOpOffset)) {
       return 0;
 
     } else {

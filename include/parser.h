@@ -14,6 +14,8 @@ int QueryOp(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpco
 
 
 int Operand(Context* context);
+int Operand(Context* context, BrigoOffset32_t* pRetOpOffset);
+
 int Identifier(Context* context);
 int BaseOperand(Context* context);
 int AddressableOperand(Context* context);
@@ -169,7 +171,7 @@ int Instruction4CmovPart5(Context* context);
 int Instruction4ShufflePart6(Context* context);
 int FunctionDefinitionPart2(Context* context);
 int MemoryOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
-int OperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
+
 int LabelTargetsPart2(Context* context);
 
 int Instruction1Part1OpcodeDT(Context* context);
