@@ -299,7 +299,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm4, 0, sizeof(imm4));
   imm4.size = sizeof(imm4);
   imm4.kind = BrigEOperandImmed;
-  imm4.type = Brigb32;
+  imm4.type = Brigb64;
   imm4.reserved = 0;
   imm4.bits.u = 33;
 
@@ -388,14 +388,14 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm3, 0, sizeof(imm3));
   imm3.size = sizeof(imm3);
   imm3.kind = BrigEOperandImmed;
-  imm3.type = Brigb32;
+  imm3.type = Brigb64;
   imm3.reserved = 0;
   imm3.bits.u = 10;
 
   memset(&imm4, 0, sizeof(imm4));
   imm4.size = sizeof(imm4);
   imm4.kind = BrigEOperandImmed;
-  imm4.type = Brigb32;
+  imm4.type = Brigb64;
   imm4.reserved = 0;
   imm4.bits.u = 33;
 
@@ -1196,7 +1196,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm2, 0, sizeof(imm2));
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
-  imm2.type = Brigb32;
+  imm2.type = Brigb64;
   imm2.reserved = 0;
   imm2.bits.f = 1.0f;
 
@@ -1209,7 +1209,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm4, 0, sizeof(imm4));
   imm4.size = sizeof(imm4);
   imm4.kind = BrigEOperandImmed;
-  imm4.type = Brigb32;
+  imm4.type = Brigb64;
   imm4.reserved = 0;
   imm4.bits.f = 23.0f;
 
@@ -1295,7 +1295,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm2, 0, sizeof(imm2));
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
-  imm2.type = Brigb32;
+  imm2.type = Brigb64;
   imm2.reserved = 0;
   imm2.bits.f = 1.0f;
 
@@ -1308,7 +1308,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm4, 0, sizeof(imm4));
   imm4.size = sizeof(imm4);
   imm4.kind = BrigEOperandImmed;
-  imm4.type = Brigb32;
+  imm4.type = Brigb64;
   imm4.reserved = 0;
   imm4.bits.f = 23.0f;
 
@@ -1391,7 +1391,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm2, 0, sizeof(imm2));
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
-  imm2.type = Brigb32;
+  imm2.type = Brigb64;
   imm2.reserved = 0;
   imm2.bits.u = 42;
 
@@ -1404,7 +1404,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm4, 0, sizeof(imm4));
   imm4.size = sizeof(imm4);
   imm4.kind = BrigEOperandImmed;
-  imm4.type = Brigb32;
+  imm4.type = Brigb64;
   imm4.reserved = 0;
   imm4.bits.u = 23;
 
@@ -1692,14 +1692,14 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm3, 0, sizeof(imm3));
   imm3.size = sizeof(imm3);
   imm3.kind = BrigEOperandImmed;
-  imm3.type = Brigb32;
+  imm3.type = Brigb64;
   imm3.reserved = 0;
   imm3.bits.u = 100;
 
   memset(&imm4, 0, sizeof(imm4));
   imm4.size = sizeof(imm4);
   imm4.kind = BrigEOperandImmed;
-  imm4.type = Brigb32;
+  imm4.type = Brigb64;
   imm4.reserved = 0;
   imm4.bits.u = 0;
 
