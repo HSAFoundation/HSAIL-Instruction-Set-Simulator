@@ -186,6 +186,52 @@ int Identifier(Context* context) {
 }
 
 int BaseOperand(Context* context) {
+  
+  BrigDataType16_t type = context->get_type();
+  switch(type){
+    case Brigb1: type = Brigb1; break; 
+    case Brigs8:
+    case Brigu8:
+    case Brigb8: type = Brigb8; break;
+    case Brigs16:
+    case Brigu16:
+    case Brigf16:
+    case Brigb16: type = Brigb16; break;
+    case Brigs32:
+    case Brigu32:
+    case Brigf32:
+    case Brigb32: 
+    case Brigu8x4:
+    case Brigs8x4:
+    case Brigu16x2:
+    case Brigs16x2:
+    case Brigf16x2: type = Brigb32; break;
+    case Brigs64:
+    case Brigu64:
+    case Brigf64:
+    case Brigb64: 
+    case Brigu8x8:
+    case Brigs8x8:
+    case Brigu16x4:
+    case Brigs16x4:
+    case Brigf16x4:
+    case Brigu32x2:
+    case Brigs32x2:
+    case Brigf32x2: type = Brigb64; break;
+    case Brigb128:
+    case Brigs8x16:
+    case Brigu8x16:
+    case Brigs16x8:
+    case Brigu16x8:
+    case Brigf16x8:
+    case Brigs32x4:
+    case Brigu32x4:
+    case Brigf32x4:
+    case Brigs64x2:
+    case Brigu64x2:
+    case Brigf64x2: type = Brigb128; break;    
+  }
+  
   if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
     BrigOperandImmed boi = {
       sizeof(boi),        // size
@@ -194,12 +240,14 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
+    boi.type = type;
     boi.bits.l[0] = boi.bits.l[1] = 0;
     boi.bits.d = context->token_value.double_val;
     context->append_operand(&boi);
-
     return 0;
-  } else if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+  } 
+  
+  if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
     BrigOperandImmed boi = {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
@@ -207,11 +255,14 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
+    boi.type = type;
     boi.bits.l[0] = boi.bits.l[1] = 0;
     boi.bits.f = context->token_value.float_val;
     context->append_operand(&boi);
     return 0;
-  } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+  } 
+  
+  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
     BrigOperandImmed boi = {
       sizeof(boi),        // size
       BrigEOperandImmed,  // kind
@@ -219,13 +270,16 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
-    // TODO(Huy): check context for operation type and decide the type
+    
+    boi.type = type;
     boi.bits.l[0] = boi.bits.l[1] = 0;
     boi.bits.u = context->token_value.int_val;
     context->append_operand(&boi);
 
     return 0;
-  } else if (context->token_to_scan == TOKEN_WAVESIZE) {
+  } 
+  
+  if (context->token_to_scan == TOKEN_WAVESIZE) {
     if (!context->operand_map.count("WAVESIZE")) {
       BrigOperandWaveSz waveOp = {
         sizeof(BrigOperandWaveSz),
@@ -234,8 +288,10 @@ int BaseOperand(Context* context) {
       context->operand_map["WAVESIZE"] = context->get_operand_offset();
       context->append_operand(&waveOp);
     }
-    return 0;  // currently not supported
-  } else if (context->token_to_scan == '-') {
+    return 0;  
+  }
+
+  if (context->token_to_scan == '-') {
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       BrigOperandImmed boi = {
@@ -245,109 +301,33 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
       };
-      // TODO(Huy): check context for operation type and decide the type
+    
+      boi.type = type;
       boi.bits.l[0] = boi.bits.l[1] = 0;
       boi.bits.u = -context->token_value.int_val;
       context->append_operand(&boi);
 
      return 0;
     }
-  } else if (context->token_type == DATA_TYPE_ID) {
-    // scan next token
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == '(') {   // should be '('
-      // check if we have a decimal list single or float list single
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        BrigOperandImmed boi = {
-        sizeof(boi),        // size
-        BrigEOperandImmed,  // kind
-        Brigb32,            // type
-        0,                  // reserved
-        { 0 }
-        };
-        // TODO(Huy): check context for operation type and decide the type
-        boi.bits.l[0] = boi.bits.l[1] = 0;
-        boi.bits.u = -context->token_value.int_val;
-        context->append_operand(&boi);
-
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == ')') {
-          return 0;
-        } else {
-          while (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-              BrigOperandImmed boi = {
-                sizeof(boi),        // size
-                BrigEOperandImmed,  // kind
-                Brigb32,            // type
-                0,                  // reserved
-                { 0 }
-              };
-  // TODO(Huy): check context for operation type and decide the type
-              boi.bits.l[0] = boi.bits.l[1] = 0;
-              boi.bits.u = context->token_value.int_val;
-              context->append_operand(&boi);
-
-              context->token_to_scan = yylex();
-              if (context->token_to_scan == ')') {
-                return 0;
-              } else if (context->token_to_scan != ',') {
-                context->set_error(MISSING_COMMA);
-                return 1;
-              }
-            } else {
-              context->set_error(MISSING_INTEGER_CONSTANT);
-              return 1;
-            }
-          }  // while
-        }
-      } else if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT)   {
-        BrigOperandImmed boi = {
-        sizeof(boi),        // size
-        BrigEOperandImmed,  // kind
-        Brigb64,            // type
-        0,                  // reserved
-        { 0 }
-        };
-        boi.bits.l[0] = boi.bits.l[1] = 0;
-        boi.bits.d = context->token_value.double_val;
-        context->append_operand(&boi);
-
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == ')') {
-          return 0;
-        } else {
-          while (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
-              BrigOperandImmed boi = {
-                sizeof(boi),        // size
-                BrigEOperandImmed,  // kind
-                Brigb64,            // type
-                0,                  // reserved
-                { 0 }
-              };
-              boi.bits.l[0] = boi.bits.l[1] = 0;
-              boi.bits.d = context->token_value.double_val;
-              context->append_operand(&boi);
-              context->token_to_scan = yylex();
-              if (context->token_to_scan == ')') {
-                return 0;
-              } else if (context->token_to_scan != ',') {
-                context->set_error(MISSING_COMMA);
-                return 1;
-              }
-            } else {
-              context->set_error(MISSING_DOUBLE_CONSTANT);
-              return 1;
-            }
-          }  // while
-        }
-      }
-    }
   }
+  
+//TODO: Deepthi - This part needs to be tested - is there any instruction which uses datatypeid list as an operand  
+  if (context->token_type == DATA_TYPE_ID) {
+  // scan next token
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == '(') {
+      context->token_to_scan = yylex();
+      if(!DecimalListSingle(context)){
+        context->token_to_scan = yylex();
+        return 0;
+      }  
+      else if(!FloatListSingle(context)){
+        context->token_to_scan = yylex();
+        return 0;
+      }        
+    } else
+      return 1;
+  }  
   return 1;
 }
 
@@ -2955,6 +2935,7 @@ int Instruction4MultiMediaOperationPart1(Context* context) {
   // Note: must be b32
   if (context->token_to_scan == _B32) {
 
+    context->set_type(context->token_value.data_type);
     mmoInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
@@ -3038,6 +3019,7 @@ int Instruction4FmaPart2(Context* context) {
   // TODO(Chuang):Type Length: 16 (in some implementations), 32, 64
   if (context->token_to_scan == _F32 ||
       context->token_to_scan == _F64) {
+    context->set_type(context->token_value.data_type);
     fmaInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
@@ -3164,6 +3146,7 @@ int Instruction4MadPart3(Context* context) {
       context->token_to_scan == _S32 ||
       context->token_to_scan == _S64) {
 
+    context->set_type(context->token_value.data_type);
     madInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
@@ -3301,7 +3284,7 @@ int Instruction4BitStringOperationPart4(Context* context) {
       context->token_to_scan == _U64 ||
       context->token_to_scan == _B32 ||
       context->token_to_scan == _B64) {
-
+    context->set_type(context->token_value.data_type);
     bsoInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
@@ -3389,6 +3372,7 @@ int Instruction4CmovPart5(Context* context) {
   // operation, Length can be any packed type.
 
   if (context->token_type == DATA_TYPE_ID) {
+    context->set_type(context->token_value.data_type);
     cmovInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
@@ -3505,6 +3489,7 @@ int Instruction4ShufflePart6(Context* context) {
       context->token_to_scan == _S32X2 ||
       context->token_to_scan == _F32X2) {
 
+    context->set_type(context->token_value.data_type);
     shuffleInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
@@ -3887,6 +3872,7 @@ int Cmp(Context* context) {
     context->token_to_scan = yylex();
     // 1, 32. Can be 16 if the implementation supports f16.
     if (context->token_type == DATA_TYPE_ID) {
+      context->set_type(context->token_value.data_type);
       cmpInst.type = context->token_value.data_type;
       context->token_to_scan = yylex();
       if (first_token == CMP) {
@@ -4229,6 +4215,7 @@ int Instruction5(Context* context) {
   context->token_to_scan = yylex();
   // Note: must be _u32.
   if (context->token_to_scan == _U32) {
+    context->set_type(context->token_value.data_type);
     context->token_to_scan = yylex();
     // Note: dest: The destination is an f32.
 
@@ -4353,7 +4340,7 @@ int Ldc(Context* context) {
     // the machine model. For large, the destination must be 64 bits;
     // for small, the destination must be 32 bits. For
     // more information
-
+    context->set_type(context->token_value.data_type);
     ldc_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
     // dest: must be BrigEOperandReg.
@@ -4503,6 +4490,7 @@ int Atom(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
+  context->set_type(context->token_value.data_type);
   DataType = context->token_value.data_type;
   context->token_to_scan = yylex();
 
@@ -4580,6 +4568,7 @@ int Mov(Context* context) {
       context->token_to_scan == _B64 ||
       context->token_to_scan == _B128) {
 
+    context->set_type(context->token_value.data_type);  
     movInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
     if (!ArrayOperandPart2(context, &movInst.o_operands[0])) {
@@ -4701,6 +4690,7 @@ int MulInst(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
+  context->set_type(context->token_value.data_type);
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
 
@@ -4787,6 +4777,7 @@ int Mul24Inst(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
+  context->set_type(context->token_value.data_type);
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
 
@@ -4860,6 +4851,7 @@ int Mad24Inst(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
+  context->set_type(context->token_value.data_type);
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
 
@@ -5071,6 +5063,7 @@ int Ld(Context* context) {
 
   if (context->token_type == DATA_TYPE_ID) {
     // Get Type value in here
+    context->set_type(context->token_value.data_type);
     ld_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
     if (!ArrayOperandPart2(context, &ld_op.o_operands[1])) {
@@ -5126,6 +5119,7 @@ int St(Context* context) {
   }
 
   if (context->token_type == DATA_TYPE_ID) {
+    context->set_type(context->token_value.data_type);
     st_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
     if (!ArrayOperandPart2(context, &st_op.o_operands[0])) {
@@ -5179,6 +5173,7 @@ int Lda(Context* context) {
       context->token_to_scan == _B32 ||
       context->token_to_scan == _B64) {
 
+    context->set_type(context->token_value.data_type);  
     lda_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
@@ -5331,6 +5326,7 @@ int ImageRet(Context* context) {
     }
     context->token_to_scan = yylex();
     if (context->token_type == DATA_TYPE_ID) {
+      context->set_type(context->token_value.data_type);
       img_inst.type = context->token_value.data_type;
 
       context->token_to_scan = yylex();
@@ -5532,7 +5528,7 @@ int ImageNoRet(Context* context) {
 
       std::string op_name;
       imgNoRet.type = context->token_value.data_type;
-
+      context->set_type(context->token_value.data_type);
 
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
@@ -5644,6 +5640,7 @@ int Cvt(Context* context) {
       context->token_to_scan == _F32 ||
       context->token_to_scan == _F64) {
 
+    context->set_type(context->token_value.data_type);  
     cvtInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
@@ -5740,7 +5737,8 @@ int Instruction1Part1OpcodeDT(Context* context) {
        context->token_to_scan == _U32)) {
 
     inst1_op.type = context->token_value.data_type;
-
+    context->set_type(context->token_value.data_type);
+    
     context->token_to_scan = yylex();
     if ((context->token_to_scan == TOKEN_DREGISTER &&
          inst1_op.opcode != BrigCountUp) ||
@@ -5919,6 +5917,7 @@ int Segp(Context* context) {
 
       context->token_to_scan = yylex();
       if (context->token_to_scan == _B1) { //datatypeId must be b1
+        context->set_type(context->token_value.data_type);
         segmentp_op.type = context->token_value.data_type;
         context->token_to_scan = yylex();
         //dest must be c register
@@ -5996,6 +5995,7 @@ int Segp(Context* context) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == _U32 ||
           context->token_to_scan == _U64) { //datatypeId must be u32 or u64
+        context->set_type(context->token_value.data_type);
         sf_op.type = context->token_value.data_type;
         context->token_to_scan = yylex();
         //dest must be d register
@@ -6375,11 +6375,12 @@ int ImageLoad(Context* context) {
       if (context->token_to_scan == _F32 ||
           context->token_to_scan == _U32 ||
           context->token_to_scan == _S32) {
-
+        
         imgLdInst.type = context->token_value.data_type;
         context->token_to_scan = yylex();
         // Note: srcLength: Source length: 32 srcType: u32.
         if (context->token_to_scan == _U32) {
+          context->set_type(context->token_value.data_type);
           imgLdInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
           if (!ArrayOperandPart2(context, &imgLdInst.o_operands[0])) {
@@ -6506,6 +6507,7 @@ int ImageStore(Context* context) {
         context->token_to_scan = yylex();
         // Note: srcLength: Source length: 32 srcType: u32.
         if (context->token_to_scan == _U32) {
+          context->set_type(context->token_value.data_type);
           imgStInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
           if (!ArrayOperandPart2(context, &imgStInst.o_operands[0])) {
@@ -7011,7 +7013,7 @@ int ImageRead(Context *context) {
         // Note: srcLength: Source length: 32 srcType: f32 or u32.
         if (context->token_to_scan == _F32 ||
             context->token_to_scan == _U32) {
-
+          context->set_type(context->token_value.data_type);
           imgRdInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
 
@@ -7297,6 +7299,7 @@ int AtomicNoRet(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
+  context->set_type(context->token_value.data_type);
   DataType = context->token_value.data_type;
   context->token_to_scan = yylex();
 
