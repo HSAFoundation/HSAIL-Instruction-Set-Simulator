@@ -1,7 +1,15 @@
 #include <iostream>
 #include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
@@ -24,30 +32,24 @@ public:
     RefOpaque(Src1),
     RefOpaqueReg(Src2){ }
 
-  void validate(struct BrigSections* TestOutput){
-
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstBase* getinst = (cast<BrigInstBase>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-    const BrigOperandReg *getdest = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validateOpType<BrigOperandReg>(RefDest, refbuf, getdest, getbuf);
-
-    const BrigOperandOpaque *getsrc1 = reinterpret_cast <const BrigOperandOpaque*> (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validateOpType<BrigOperandOpaque>(RefOpaque, refbuf, getsrc1, getbuf);
-
-    if(RefOpaqueReg){
-      const BrigOperandReg *getsrc2 = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc1->reg]));
-      validate_brig::validateOpType<BrigOperandReg>(RefOpaqueReg, refbuf, getsrc2, getbuf);
-    }
-
-    EXPECT_EQ(0, getinst->o_operands[2]);
-    EXPECT_EQ(0, getinst->o_operands[3]);
-    EXPECT_EQ(0, getinst->o_operands[4]);
-  }
+   void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    code->append(RefInst);
+    oper->append(RefDest);
+    oper->append(RefOpaque);
+    if (RefOpaqueReg)
+      oper->append(RefOpaqueReg);
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+  }  
 };
 
 TEST(CodegenTest, QueryOp_CodeGen){

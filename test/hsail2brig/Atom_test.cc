@@ -182,17 +182,16 @@ TEST(CodegenTest, Atom_CodeGen) {
   addr.reserved = 0;
   addr.directive = 0;
 
-  // TODO(Chuang): the type of immed should be b64.
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
-  imm1.type = Brigb32;
+  imm1.type = Brigb64;
   imm1.reserved = 0;
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 23;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
-  imm2.type = Brigb32;
+  imm2.type = Brigb64;
   imm2.reserved = 0;
   memset(&imm2.bits, 0, sizeof(imm2.bits));
   imm2.bits.u = 12;
@@ -277,7 +276,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
-  imm1.type = Brigb32;
+  imm1.type = Brigb64;
   imm1.reserved = 0;
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 23;
@@ -583,7 +582,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   imm1.size = sizeof(imm1);
 
   imm1.kind = BrigEOperandImmed;
-  imm1.type = Brigb32;
+  imm1.type = Brigb64;
   imm1.reserved = 0;
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 0x74;
@@ -796,14 +795,14 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   // TODO(Chuang): the type of immed should be b64.
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
-  imm1.type = Brigb32;
+  imm1.type = Brigb64;
   imm1.reserved = 0;
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 23;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
-  imm2.type = Brigb32;
+  imm2.type = Brigb64;
   imm2.reserved = 0;
   memset(&imm2.bits, 0, sizeof(imm2.bits));
   imm2.bits.u = 12;
@@ -1191,7 +1190,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   imm1.size = sizeof(imm1);
 
   imm1.kind = BrigEOperandImmed;
-  imm1.type = Brigb32;
+  imm1.type = Brigb64;
   imm1.reserved = 0;
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 0x74;

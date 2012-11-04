@@ -1,5 +1,15 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include <iostream>
+#include <string>
+
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
@@ -26,26 +36,22 @@ public:
     RefArgsList(arglist),
     RefInit(NULL) { }
 
-  void validate(struct BrigSections* TestOutput){
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* dir = new Buffer();
 
-    dir_iterator getdir = TestOutput->begin();
-    const T* getdecl = (cast<T>(getdir));
-    validate_brig::validate(RefDir,refbuf, getdecl, getbuf);
-
-    if(RefArgsList){
-      const BrigDirectiveFunction* ref = reinterpret_cast<const BrigDirectiveFunction*> (getdecl);
-      for(unsigned int i=0; i < (ref->inParamCount + ref->outParamCount); i++){
-        const BrigDirectiveSymbol* getarg = (cast<BrigDirectiveSymbol>(++getdir));
-        BrigDirectiveSymbol* refarg = &(RefArgsList[i]);
-        validate_brig::validate(refarg, refbuf, getarg, getbuf);
-      }
-    } else if(RefInit){
-      const BrigDirectiveInit* getarg = (cast<BrigDirectiveInit>(++getdir));
-      validate_brig::validate(RefInit, getarg);
-    }
-  }
+    dir->append(RefDir);
+    if (RefArgsList)
+      dir->append(RefArgsList);
+    if (RefInit)
+      dir->append(RefInit);
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]), NULL, NULL, NULL, 
+      RefStr->size(), dir->size(), (size_t)0, (size_t)0, (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete dir;
+  } 
 };
 
 TEST(CodegenTest, GlobalSymbolDecl_Codegen){
