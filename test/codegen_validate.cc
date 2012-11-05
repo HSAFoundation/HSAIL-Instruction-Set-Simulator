@@ -436,16 +436,7 @@ void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get,
     }
   }
 }
-  dir_iterator refdir(RefOutput->directives + ref->labeldirective);
-  dir_iterator getdir(GetOutput->directives + get->labeldirective);
-  switch(getdir->kind){
-    caseDirBrig(DirectiveLabel);
-    caseDirBrig(DirectiveLabelList);
-    default:
-      printf("Offset to invalid directive");
-      exit(1);
-  }
-}
+
 
 void validate(const BrigOperandIndirect* ref, const BrigOperandIndirect* get,
     BrigSections* RefOutput, BrigSections* GetOutput){

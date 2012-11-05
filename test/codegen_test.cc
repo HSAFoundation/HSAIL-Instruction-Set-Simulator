@@ -1317,8 +1317,6 @@ TEST(CodegenTest, ArgumentDeclCodegen){
 	delete lexer;
 }
 
-  delete lexer;
-}
 
 TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
