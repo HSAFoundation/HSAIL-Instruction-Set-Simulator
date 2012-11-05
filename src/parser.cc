@@ -1435,7 +1435,6 @@ int ArgumentListBody(Context* context, int* paramCount) {
   }  
 }
 
-
 int FunctionDefinition(Context* context){
     if(!DeclPrefix(context)){
         return FunctionDefinitionPart2(context);
@@ -1698,7 +1697,7 @@ int OptionalWidth(Context* context) {
   return 0;
 }
 
-int BranchPart1Cbr(Context* context) {
+int BranchCbr(Context* context) {
 
   BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
   BrigoOffset32_t OpOffset[4] = {0,0,0,0};
@@ -1862,7 +1861,7 @@ int BranchPart1Cbr(Context* context) {
 
 }
 
-int BranchPart2Brn(Context* context) {
+int BranchBrn(Context* context) {
 
   BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
   BrigoOffset32_t OpOffset[3] = {0,0,0};
@@ -2018,11 +2017,11 @@ int Branch(Context* context) {
   context->token_to_scan = yylex();
 
   if (op == CBR) {
-    if (!BranchPart1Cbr(context)) {
+    if (!BranchCbr(context)) {
       return 0;
     }
   } else if (op == BRN) {
-    if (!BranchPart2Brn(context)) {
+    if (!BranchBrn(context)) {
       return 0;
     }
   }
@@ -2848,34 +2847,34 @@ int Instruction4(Context* context) {
     case LERP:
     case BITALIGN:
     case BYTEALIGN:
-      if (!Instruction4MultiMediaOperationPart1(context)) {
+      if (!Instruction4MultiMediaOperation(context)) {
         return 0;
       }
       return 1;
     case FMA:
-      if (!Instruction4FmaPart2(context)) {
+      if (!Instruction4Fma(context)) {
         return 0;
       }
       return 1;
     case MAD:
-      if (!Instruction4MadPart3(context)) {
+      if (!Instruction4Mad(context)) {
         return 0;
       }
       return 1;
     case EXTRACT:
     case INSERT:
     case BITSELECT:
-      if (!Instruction4BitStringOperationPart4(context)) {
+      if (!Instruction4BitOperation(context)) {
         return 0;
       }
       return 1;
     case CMOV:
-      if (!Instruction4CmovPart5(context)) {
+      if (!Instruction4Cmov(context)) {
         return 0;
       }
       return 1;
     case SHUFFLE:
-      if (!Instruction4ShufflePart6(context)) {
+      if (!Instruction4Shuffle(context)) {
         return 0;
       }
       return 1;
@@ -2884,7 +2883,7 @@ int Instruction4(Context* context) {
   return 1;
 }
 
-int Instruction4MultiMediaOperationPart1(Context* context) {
+int Instruction4MultiMediaOperation(Context* context) {
   const unsigned int first_token = context->token_to_scan;
 
   BrigInstBase mmoInst = {
@@ -2989,7 +2988,7 @@ int Instruction4MultiMediaOperationPart1(Context* context) {
   return 1;
 }
 
-int Instruction4FmaPart2(Context* context) {
+int Instruction4Fma(Context* context) {
   BrigInstBase fmaInst = {
     sizeof(BrigInstBase),   // size
     BrigEInstBase,         // kind
@@ -3110,7 +3109,7 @@ int Instruction4FmaPart2(Context* context) {
 
 }
 
-int Instruction4MadPart3(Context* context) {
+int Instruction4Mad(Context* context) {
   BrigInstBase madInst = {
     sizeof(BrigInstBase),   // size
     BrigEInstBase,         // kind
@@ -3240,7 +3239,7 @@ int Instruction4MadPart3(Context* context) {
   return 1;
 }
 
-int Instruction4BitStringOperationPart4(Context* context) {
+int Instruction4BitOperation(Context* context) {
   const unsigned int first_token = context->token_to_scan;
 
   BrigInstBase bsoInst = {
@@ -3341,8 +3340,7 @@ int Instruction4BitStringOperationPart4(Context* context) {
   return 1;
 }
 
-
-int Instruction4CmovPart5(Context* context) {
+int Instruction4Cmov(Context* context) {
   BrigInstBase cmovInst = {
     sizeof(BrigInstBase),                    // size
     BrigEInstBase,         // kind
@@ -3450,7 +3448,7 @@ int Instruction4CmovPart5(Context* context) {
 
 }
 
-int Instruction4ShufflePart6(Context* context) {
+int Instruction4Shuffle(Context* context) {
   BrigInstBase shuffleInst = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
@@ -3562,8 +3560,6 @@ int Instruction4ShufflePart6(Context* context) {
   return 1;
 
 }
-
-
 
 int KernelArgumentDecl(Context *context) {
   if (DeclPrefix(context))
@@ -4159,13 +4155,12 @@ int OffsetAddressableOperand(Context* context) {
   return OffsetAddressableOperandPart2(context, 0, &retOpOffset);
 }
 
-
 int MemoryOperand(Context* context) {
   BrigoOffset32_t retOpOffset;
-  return MemoryOperandPart2(context, &retOpOffset);
+  return MemoryOperand(context, &retOpOffset);
 }
 
-int MemoryOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
+int MemoryOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   // Chuang
   // this judge(first token == '[') is necessary in here
   if (context->token_to_scan == '[') {
@@ -4493,7 +4488,7 @@ int Atom(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (MemoryOperandPart2(context, &OpOffset[1])) {
+  if (MemoryOperand(context, &OpOffset[1])) {
     return 1;
   }
   if (context->token_to_scan != ',') {
@@ -4560,10 +4555,10 @@ int Mov(Context* context) {
     context->set_type(context->token_value.data_type);  
     movInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
-    if (!ArrayOperandPart2(context, &movInst.o_operands[0])) {
+    if (!ArrayOperand(context, &movInst.o_operands[0])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (!ArrayOperandPart2(context, &movInst.o_operands[1])) {
+        if (!ArrayOperand(context, &movInst.o_operands[1])) {
           if (context->token_to_scan == ';') {
             context->append_code(&movInst);
             context->token_to_scan = yylex();
@@ -4747,7 +4742,6 @@ int MulInst(Context* context) {
   context->token_to_scan = yylex();
   return 0;
 }
-
 
 int Mul24Inst(Context* context) {
 
@@ -5055,11 +5049,11 @@ int Ld(Context* context) {
     context->set_type(context->token_value.data_type);
     ld_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
-    if (!ArrayOperandPart2(context, &ld_op.o_operands[1])) {
+    if (!ArrayOperand(context, &ld_op.o_operands[1])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
 
-        if (!MemoryOperandPart2(context, &ld_op.o_operands[2])) {
+        if (!MemoryOperand(context, &ld_op.o_operands[2])) {
           if (context->token_to_scan == ';') {
             context->append_code(&ld_op);
             context->token_to_scan = yylex();
@@ -5111,10 +5105,10 @@ int St(Context* context) {
     context->set_type(context->token_value.data_type);
     st_op.type = context->token_value.data_type;
     context->token_to_scan = yylex();
-    if (!ArrayOperandPart2(context, &st_op.o_operands[0])) {
+    if (!ArrayOperand(context, &st_op.o_operands[0])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (!MemoryOperandPart2(context, &st_op.o_operands[1])) {
+        if (!MemoryOperand(context, &st_op.o_operands[1])) {
           if (context->token_to_scan == ';') {
             context->token_to_scan = yylex();
             context->append_code(&st_op);
@@ -5178,7 +5172,7 @@ int Lda(Context* context) {
     if (!Operand(context, &lda_op.o_operands[0])) {
       if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
-        if (!MemoryOperandPart2(context, &lda_op.o_operands[1])) {
+        if (!MemoryOperand(context, &lda_op.o_operands[1])) {
           if (context->token_to_scan == ';') {
             context->append_code(&lda_op);
             context->token_to_scan = yylex();
@@ -5219,6 +5213,7 @@ int OptacqregPart2(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
   }
   return 0;
 }
+
 int Optacqreg(Context* context) {
   BrigMemorySemantic32_t temp;
   return OptacqregPart2(context, &temp);
@@ -5329,7 +5324,7 @@ int ImageRet(Context* context) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
                 unsigned int curOpCount = 2;
-                if (!ArrayOperandPart2(context, &img_inst.o_operands[curOpCount++])) {
+                if (!ArrayOperand(context, &img_inst.o_operands[curOpCount++])) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
 
@@ -5393,6 +5388,7 @@ int ImageRet(Context* context) {
   }
   return 1;
 }
+
 int ImageNoRet(Context* context) {
   // first token is ATOMICNORET_IMAGE
   BrigInstAtomicImage imgNoRet = {
@@ -5525,7 +5521,7 @@ int ImageNoRet(Context* context) {
         if (!AddressableOperand(context, &imgNoRet.o_operands[0], true)) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
-            if (!ArrayOperandPart2(context, &imgNoRet.o_operands[1])) {
+            if (!ArrayOperand(context, &imgNoRet.o_operands[1])) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
                 unsigned int opCount = 2;
@@ -5693,6 +5689,7 @@ int Instruction0(Context* context) {
   }
   return 1;
 }
+
 int Instruction1Part1OpcodeDT(Context* context) {
   BrigInstBase inst1_op = {
     sizeof(inst1_op),
@@ -5786,6 +5783,7 @@ int Instruction1Part1OpcodeDT(Context* context) {
 
   return 1;
 }
+
 int Instruction1Part2OpcodeNoDT(Context* context) {
   BrigInstBase inst1_op = {
     sizeof(inst1_op),
@@ -5842,6 +5840,7 @@ int Instruction1Part2OpcodeNoDT(Context* context) {
   }
   return 0;
 }
+
 int Instruction1Part3Clock(Context* context) {
   BrigInstBase inst1_op = {
     sizeof(inst1_op),
@@ -5868,6 +5867,7 @@ int Instruction1Part3Clock(Context* context) {
   }
   return 1;
 }
+
 int Instruction1(Context* context) {
   if (context->token_to_scan == CLOCK) {
     if (!Instruction1Part3Clock(context)) {
@@ -5884,8 +5884,6 @@ int Instruction1(Context* context) {
   }
   return 1;
 }
-
-
 
 int Segp(Context* context) {
   if (context->token_to_scan == SEGMENTP) { //segmentp
@@ -6372,7 +6370,7 @@ int ImageLoad(Context* context) {
           context->set_type(context->token_value.data_type);
           imgLdInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
-          if (!ArrayOperandPart2(context, &imgLdInst.o_operands[0])) {
+          if (!ArrayOperand(context, &imgLdInst.o_operands[0])) {
             // Note: dest: Destination. Must be a vector of four s registers.
             uint16_t kind;
             context->get_operand(imgLdInst.o_operands[0] + sizeof(uint16_t), &kind);
@@ -6394,7 +6392,7 @@ int ImageLoad(Context* context) {
                     // a 4-element vector for 3D images, where the fourth element is ignored.
                     // Each coordinate must be in an s register
 
-                    if (!ArrayOperandPart2(context, &imgLdInst.o_operands[2])) {
+                    if (!ArrayOperand(context, &imgLdInst.o_operands[2])) {
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgLdInst);
                         context->token_to_scan = yylex();
@@ -6499,7 +6497,7 @@ int ImageStore(Context* context) {
           context->set_type(context->token_value.data_type);
           imgStInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
-          if (!ArrayOperandPart2(context, &imgStInst.o_operands[0])) {
+          if (!ArrayOperand(context, &imgStInst.o_operands[0])) {
             // Note: dest: Destination. Must be a vector of four s registers.
             uint16_t kind;
             context->get_operand(imgStInst.o_operands[0] + sizeof(uint16_t), &kind);
@@ -6520,7 +6518,7 @@ int ImageStore(Context* context) {
                     // A scalar for 1D images; a 2-element vector for 2D images;
                     // a 4-element vector for 3D images, where the fourth element is ignored.
                     // Each coordinate must be in an s register
-                    if (!ArrayOperandPart2(context, &imgStInst.o_operands[2])) {
+                    if (!ArrayOperand(context, &imgStInst.o_operands[2])) {
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgStInst);
                         context->token_to_scan = yylex();
@@ -7006,7 +7004,7 @@ int ImageRead(Context *context) {
           imgRdInst.stype = context->token_value.data_type;
           context->token_to_scan = yylex();
 
-          if (!ArrayOperandPart2(context, &imgRdInst.o_operands[0])) {
+          if (!ArrayOperand(context, &imgRdInst.o_operands[0])) {
             // Note: dest: Destination. Must be a vector of four s registers.
             uint16_t kind;
             context->get_operand(imgRdInst.o_operands[0] + sizeof(uint16_t), &kind);
@@ -7050,7 +7048,7 @@ int ImageRead(Context *context) {
                     // a 4-element vector for 3D images, where the fourth element is ignored.
                     // Each coordinate must be in an s register
 
-                    if (!ArrayOperandPart2(context, &imgRdInst.o_operands[opCount])) {
+                    if (!ArrayOperand(context, &imgRdInst.o_operands[opCount])) {
 
                       if (context->token_to_scan == ';') {
                         context->append_code(&imgRdInst);
@@ -7292,7 +7290,7 @@ int AtomicNoRet(Context* context) {
   DataType = context->token_value.data_type;
   context->token_to_scan = yylex();
 
-  if (MemoryOperandPart2(context, &OpOffset[0])) {
+  if (MemoryOperand(context, &OpOffset[0])) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
@@ -7497,8 +7495,6 @@ int Pragma(Context* context) {
   }
 }
 
-// the type must be u or s
-// size must 32 or 64
 int LabelList(Context* context) {
   uint32_t elementCount = 0;
   std::vector<BrigDirectiveLabel> label_list;
@@ -7581,6 +7577,7 @@ int LabelList(Context* context) {
 
   return 1;
 }
+
 int FloatListSingle(Context* context) {
   uint32_t elementCount = 0;
   std::vector<double> float_list;
@@ -7790,7 +7787,6 @@ int DecimalListSingle(Context* context) {
   return 1;
 }
 
-
 int Block(Context* context) {
   // first token is BLOCK
   if (BLOCK != context->token_to_scan)
@@ -7934,7 +7930,6 @@ int Directive(Context* context) {
       return 1;
   }
 }
-
 
 int SobInit(Context *context){
  
@@ -8282,7 +8277,7 @@ int TopLevelStatements(Context *context){
   return 0;
 }
 
-int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
+int ArrayOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   std::string op_name;
   if (context->token_to_scan == '(') {
     if (!ArrayOperandList(context ,pRetOpOffset)) {
@@ -8303,9 +8298,10 @@ int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
   }
   return 1;
 }
+
 int ArrayOperand(Context* context) {
-  BrigoOffset32_t opOffset;
-  return ArrayOperandPart2(context, &opOffset);
+  BrigoOffset32_t opOffset = 0;
+  return ArrayOperand(context, &opOffset);
 }
 
 }  // namespace brig

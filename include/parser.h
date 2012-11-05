@@ -158,19 +158,19 @@ int AtomModifiers(Context* context, BrigMemorySemantic32_t* pMemorySemantic);
 int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset);
 
-int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand);
+int ArrayOperand(Context* context, BrigoOffset32_t* pOperand);
 
 int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
 int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
 
-int Instruction4MultiMediaOperationPart1(Context* context);
-int Instruction4FmaPart2(Context* context);
-int Instruction4MadPart3(Context* context);
-int Instruction4BitStringOperationPart4(Context* context);
-int Instruction4CmovPart5(Context* context);
-int Instruction4ShufflePart6(Context* context);
+int Instruction4MultiMediaOperation(Context* context);
+int Instruction4Fma(Context* context);
+int Instruction4Mad(Context* context);
+int Instruction4BitOperation(Context* context);
+int Instruction4Cmov(Context* context);
+int Instruction4Shuffle(Context* context);
 int FunctionDefinitionPart2(Context* context);
-int MemoryOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
+int MemoryOperand(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int LabelTargetsPart2(Context* context);
 
@@ -182,8 +182,8 @@ int Instruction2OpcodeDT(Context* context);
 int Instruction2OpcodeNoDT(Context* context);
 int Instruction2OpcodeFtz(Context* context);
 
-int BranchPart1Cbr(Context* context);
-int BranchPart2Brn(Context* context);
+int BranchCbr(Context* context);
+int BranchBrn(Context* context);
 
 }  // namespace brig
 }  // namespace hsa
