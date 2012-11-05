@@ -739,7 +739,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   BrigOperandImmed imm4 = {
     0,
     BrigEOperandImmed,
-    Brigb32,
+    Brigb64,
     0,
     {0}
   };
