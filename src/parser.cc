@@ -468,10 +468,10 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
 
 int ArrayOperandList(Context* context) {
   BrigoOffset32_t opOffset;
-  return ArrayOperandListPart2(context, &opOffset);
+  return ArrayOperandList(context, &opOffset);
 }
 
-int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
+int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
   // assumed first_token is '('
   unsigned int count_op = 0;
   BrigoOffset32_t regs[4] = {0};
@@ -481,33 +481,32 @@ int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
     context->token_to_scan = yylex();
     // set context for Identifier()
     iden_name = context->token_value.string_val;
-    if (!Identifier(context)) {
-      if (count_op <= 3) {
-        regs[count_op] = context->operand_map[iden_name];
-      } else {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-      if (count_op == 0) {
-        type = context->get_type();
-      } else if (type != context->get_type()) {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-      ++count_op;
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ')') {
-        break;
-      } else if (context->token_to_scan == ',') {
-        continue;
-      } else {
-        context->set_error(MISSING_CLOSING_PARENTHESIS);
-        return 1;
-      }
-    } else {
+    if (Identifier(context)) {
       context->set_error(MISSING_IDENTIFIER);
       return 1;
     }
+    if (count_op <= 3) {
+      regs[count_op] = context->operand_map[iden_name];
+    } else {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+    }
+    if (count_op == 0) {
+      type = context->get_type();
+    } else if (type != context->get_type()) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    ++count_op;
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ')') {
+      break;
+    } else if (context->token_to_scan == ',') {
+      continue;
+    } else {
+      context->set_error(MISSING_CLOSING_PARENTHESIS);
+      return 1;
+    }   
   }
   switch (count_op) {
     case 0:
@@ -567,6 +566,7 @@ int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
   context->token_to_scan = yylex();
   return 0;
 }
+
 int CallTargets(Context* context) {
   // assumed first_token is '['
   // TODO(Chuang): the max size is 256
@@ -803,7 +803,7 @@ int RoundingMode(Context* context) {
     return 1;
 }
 
-int Instruction2Part1OpcodeDT(Context* context) {
+int Instruction2OpcodeDT(Context* context) {
 
   BrigInstBase inst = {
     sizeof(BrigInstBase),
@@ -887,7 +887,8 @@ int Instruction2Part1OpcodeDT(Context* context) {
 
   return 1;
 }
-int Instruction2Part2OpcodeNoDT(Context* context) {
+
+int Instruction2OpcodeNoDT(Context* context) {
 
   BrigInstBase inst = {
     sizeof(BrigInstBase),
@@ -957,7 +958,7 @@ int Instruction2Part2OpcodeNoDT(Context* context) {
   return 1;
 }
 
-int Instruction2Part3OpcodeFtz(Context* context) {
+int Instruction2OpcodeFtz(Context* context) {
 
   /* Variables for storing Brig struct information */
   BrigDataType16_t type = Brigb32;
@@ -1036,17 +1037,17 @@ int Instruction2(Context* context) {
   // First token must be an Instruction2Opcode
   switch (context->token_type) {
     case INSTRUCTION2_OPCODE:
-      if (!Instruction2Part1OpcodeDT(context)) {
+      if (!Instruction2OpcodeDT(context)) {
         return 0;
       }
       break;
     case INSTRUCTION2_OPCODE_NODT:
-      if (!Instruction2Part2OpcodeNoDT(context)) {
+      if (!Instruction2OpcodeNoDT(context)) {
         return 0;
       }
       break;
     case INSTRUCTION2_OPCODE_FTZ:
-      if (!Instruction2Part3OpcodeFtz(context)) {
+      if (!Instruction2OpcodeFtz(context)) {
         return 0;
       }
       break;
@@ -1582,6 +1583,7 @@ int ArgBlock(Context* context) {
   }
   return 1;
 }
+
 int CodeBlockEnd(Context* context) {
   if (context->token_to_scan == '}') {
     context->token_to_scan = yylex();
@@ -1637,6 +1639,7 @@ int Functionpart2(Context *context){
   }
   return 1;
 }
+
 int Function(Context* context) {
   if (!FunctionDefinition(context)) {
     return Functionpart2(context);
@@ -2015,7 +2018,6 @@ int BranchPart2Brn(Context* context) {
 
 }
 
-
 int Branch(Context* context) {
   unsigned int op = context->token_to_scan;  // CBR or BRN
 
@@ -2271,12 +2273,11 @@ int InitializableDecl(Context* context) {
   BrigStorageClass32_t storage_class = context->token_value.storage_class;
   context->token_to_scan = yylex();
 
-  return (InitializableDeclPart2(context, storage_class));
+  return (InitializableDecl(context, storage_class));
 
 }
 
-int InitializableDeclPart2(Context *context, BrigStorageClass32_t storage_class)
-{  
+int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){  
   int var_name_offset;
   context->init_symbol_modifier();
   context->set_isArray(false);
@@ -8109,7 +8110,7 @@ int GlobalInitializablePart2(Context* context){
         return(GlobalSamplerDeclPart2(context));
       default:
         if (context->token_type==DATA_TYPE_ID)
-          return (InitializableDeclPart2(context, storage_class));
+          return (InitializableDecl(context, storage_class));
         else {
           context->set_error(MISSING_IDENTIFIER);
           return 1;
@@ -8290,7 +8291,7 @@ int TopLevelStatements(Context *context){
 int ArrayOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
   std::string op_name;
   if (context->token_to_scan == '(') {
-    if (!ArrayOperandListPart2(context ,pRetOpOffset)) {
+    if (!ArrayOperandList(context ,pRetOpOffset)) {
       return 0;
     } else {
       context->set_error(MISSING_CLOSING_PARENTHESIS);
