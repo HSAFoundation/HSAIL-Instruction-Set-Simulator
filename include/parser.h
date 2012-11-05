@@ -187,8 +187,6 @@ int BranchBrn(Context* context);
 
 int DecimalListSinglePart2BLock(Context* context, const std::vector<int32_t> &decimal_list,
                                 const uint32_t elementCount);
-int FloatListSinglePart2Block(Context* context, const std::vector<double> &float_list,
-                                const uint32_t elementCount);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
