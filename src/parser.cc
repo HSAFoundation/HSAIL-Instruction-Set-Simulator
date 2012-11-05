@@ -3448,37 +3448,6 @@ int Instruction4Cmov(Context* context) {
 
 }
 
-            if (context->token_to_scan == ';') {
-              context->append_code(&cmovInst);
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-              return 1;
-            }  // ';'
-          } else {  // 4 operand
-              context->set_error(INVALID_FOURTH_OPERAND);
-              return 1;
-          }
-        } else {  // 3 operand
-          context->set_error(INVALID_THIRD_OPERAND);
-          return 1;
-        }
-      } else {  // 2 operand
-        context->set_error(INVALID_SECOND_OPERAND);
-        return 1;
-      }
-    } else {  // 1 operand
-      context->set_error(INVALID_FIRST_OPERAND);
-      return 1;
-    }
-  } else {  // DATA_TYPE_ID
-    context->set_error(MISSING_DATA_TYPE);
-    return 1;
-  }
-  return 1;
-
-}
 
 int Instruction4Shuffle(Context* context) {
   BrigInstBase shuffleInst = {
@@ -7619,12 +7588,6 @@ int FloatListSingle(Context* context) {
       context->token_to_scan = yylex();
       continue;
     } else {
-        if (context->get_isBlockNumeric()) {
-          if (FloatListSinglePart2Block(context, float_list, elementCount)) {
-            return 1;
-          }
-          return 0;
-        }
         uint32_t n = 0;
         // elementCount
 
