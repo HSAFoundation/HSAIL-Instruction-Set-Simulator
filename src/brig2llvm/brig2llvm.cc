@@ -432,7 +432,7 @@ static void insertEnableFtz(llvm::BasicBlock &B) {
   llvm::FunctionType *enableFtzTy =
     llvm::FunctionType::get(llvm::Type::getVoidTy(C), false);
   llvm::Constant *enableFtz =
-    M->getOrInsertFunction("enableFtz", enableFtzTy);
+    M->getOrInsertFunction("enableFtzMode", enableFtzTy);
   llvm::CallInst::Create(enableFtz, "", &B);
 }
 
@@ -442,7 +442,7 @@ static void insertDisableFtz(llvm::BasicBlock &B) {
   llvm::FunctionType *disableFtzTy =
     llvm::FunctionType::get(llvm::Type::getVoidTy(C), false);
   llvm::Constant *disableFtz =
-    M->getOrInsertFunction("disableFtz", disableFtzTy);
+    M->getOrInsertFunction("disableFtzMode", disableFtzTy);
   llvm::CallInst::Create(disableFtz, "", &B);
 }
 

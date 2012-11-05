@@ -509,6 +509,31 @@ TEST(BrigInstTest, VectorMad) {
   testInst("mad_s32", testVec);
 }
 
+TEST(BrigInstTest, Ftz) {
+
+  {
+    const float testVec[] = { 2 * 1.0E-45f, 1.0E-45f, 1.0E-45f };
+    testInst("add_f32", testVec);
+  }
+
+  {
+    const float testVec[] = { 0.0, 1.0E-45f, 1.0E-45f };
+    testInst("add_ftz_f32", testVec);
+  }
+
+  {
+    const float testVec[] = { 1.191E-38f - 1.190E-38f,
+                              1.191E-38f, -1.190E-38f };
+    testInst("add_f32", testVec);
+  }
+
+  {
+    const float testVec[] = { 0,
+                              1.191E-38f, -1.190E-38f };
+    testInst("add_ftz_f32", testVec);
+  }
+}
+
 TEST(BrigWriterTest, VectorArith) {
   const uint32_t testVec[] = { 0, 0x01010101, 0xFFFFFFFF };
   testInst("add_pp_s8x4", testVec);
