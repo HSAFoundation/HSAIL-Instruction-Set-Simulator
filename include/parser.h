@@ -58,6 +58,7 @@ int ArgBlock(Context* context);
 int Extension(Context* context);
 int KernelArgumentDecl(Context *context);
 int KernelArgumentListBody(Context *context);
+int KernelArgumentListBody(Context *context,uint32_t *paramCount);
 int Kernel(Context *context);
 int OperandList(Context* context);
 int Cmp(Context* context);

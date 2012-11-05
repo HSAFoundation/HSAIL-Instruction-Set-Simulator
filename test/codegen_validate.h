@@ -88,8 +88,7 @@ void validate(const BrigDirectiveLabelList* ref, const BrigDirectiveLabelList* g
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigDirectiveLabelInit* ref, const BrigDirectiveLabelInit* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigDirectiveControl* ref, const BrigDirectiveControl* get,
-    BrigSections* RefOutput, BrigSections* GetOutput);
+
 void validate(const BrigDirectiveKernel* ref, const BrigDirectiveKernel* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigDirectiveLoc* ref, const BrigDirectiveLoc* get,

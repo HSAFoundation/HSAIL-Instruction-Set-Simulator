@@ -1,5 +1,15 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include <iostream>
+#include <string>
+
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
@@ -52,49 +62,29 @@ public:
     RefDest_Indir(NULL),
     RefDest_Comp(comp)   { }
 
-  void validate(struct BrigSections* TestOutput){
-
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstLdSt* getinst = (cast<BrigInstLdSt>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-    const T *getsrc = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validateOpType<T>(RefSrc, refbuf, getsrc, getbuf);
-    const BrigOperandBase *getdest_op1 = reinterpret_cast <const BrigOperandBase*> (&(TestOutput->operands[getinst->o_operands[1]]));
-
-    if(getdest_op1->kind==BrigEOperandIndirect){
-      const BrigOperandIndirect *getdest_indir = reinterpret_cast <const BrigOperandIndirect*> (getdest_op1);
-      validate_brig::validate(RefDest_Indir, getdest_indir);
-
-      if(getdest_indir->reg){
-        const BrigOperandReg *getdest_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_indir->reg]));
-        validate_brig::validate(RefDest_Reg, refbuf, getdest_reg, getbuf);
-      }
-
-    } else if(getdest_op1->kind==BrigEOperandCompound){
-
-      const BrigOperandCompound *getdest_comp = reinterpret_cast <const BrigOperandCompound*> (getdest_op1);
-      validate_brig::validate(RefDest_Comp, getdest_comp);
-
-      const BrigOperandAddress *getdest_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getdest_comp->name]));
-      validate_brig::validate(RefDest_Addr, getdest_addr);
-
-      if(getdest_comp->reg){
-        const BrigOperandReg *getdest_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getdest_comp->reg]));
-        validate_brig::validate(RefDest_Reg, refbuf, getdest_reg, getbuf);
-      }
-
-    } else {
-      const BrigOperandAddress *getdest_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getinst->o_operands[1]]));
-      validate_brig::validate(RefDest_Addr, getdest_addr);
-    }
-    EXPECT_EQ(0, getinst->o_operands[2]);
-    EXPECT_EQ(0, getinst->o_operands[3]);
-    EXPECT_EQ(0, getinst->o_operands[4]);
-  }
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    code->append(RefInst);
+    oper->append(RefSrc);
+    if (RefDest_Reg)
+      oper->append(RefDest_Reg);
+    if (RefDest_Addr)
+      oper->append(RefDest_Addr);
+    if (RefDest_Indir)
+      oper->append(RefDest_Indir);
+    if (RefDest_Comp)
+      oper->append(RefDest_Comp);
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+  } 
 };
 
 TEST(CodegenTest, St_Codegen){

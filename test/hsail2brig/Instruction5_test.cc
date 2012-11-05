@@ -1,7 +1,15 @@
 #include <iostream>
 #include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
@@ -28,31 +36,25 @@ public:
     RefSrc3(Src3),
     RefSrc4(Src4)  { }
 
-  void validate(struct BrigSections* TestOutput){
-
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const T* getinst = (cast<T>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-    const T1 *getdest = reinterpret_cast <const T1*> (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validateOpType<T1>(RefDest, refbuf, getdest, getbuf);
-
-    const T2 *getsrc1 = reinterpret_cast <const T2*> (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validateOpType<T2>(RefSrc1, refbuf, getsrc1, getbuf);
-
-    const T3 *getsrc2 = reinterpret_cast <const T3*> (&(TestOutput->operands[getinst->o_operands[2]]));
-    validate_brig::validateOpType<T3>(RefSrc2, refbuf, getsrc2, getbuf);
-
-    const T4 *getsrc3 = reinterpret_cast <const T4*> (&(TestOutput->operands[getinst->o_operands[3]]));
-    validate_brig::validateOpType<T4>(RefSrc3, refbuf, getsrc3, getbuf);
-
-    const T5 *getsrc4 = reinterpret_cast <const T5*> (&(TestOutput->operands[getinst->o_operands[4]]));
-    validate_brig::validateOpType<T5>(RefSrc4, refbuf, getsrc4, getbuf);
-
-  }
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    code->append(RefInst);
+    oper->append(RefDest);
+    oper->append(RefSrc1);
+    oper->append(RefSrc2);
+    oper->append(RefSrc3);
+    oper->append(RefSrc4);
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+  }  
  };
 
 TEST(CodegenTest,Instruction5Op_CodeGen){
