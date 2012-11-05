@@ -428,14 +428,14 @@ TEST(CodegenTest, Mul_CodeGen) {
   // TODO(Chuang): the type of immediate should be Brigb64.
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
-  imm1.type = Brigb32;
+  imm1.type = Brigb64;
   imm1.reserved = 0;
   memset(&imm1.bits, 0, sizeof(imm1.bits));
   imm1.bits.u = 12;
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
-  imm2.type = Brigb32;
+  imm2.type = Brigb64;
   imm2.reserved = 0;
   memset(&imm2.bits, 0, sizeof(imm2.bits));
   imm2.bits.u = 2;

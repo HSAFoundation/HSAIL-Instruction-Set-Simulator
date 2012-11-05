@@ -26,6 +26,9 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandOpaque);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandLabelRef);
         case BrigEOperandFunctionList:
@@ -431,6 +434,16 @@ void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get,
         printf("Offset to invalid directive");
         exit(1);
     }
+  }
+}
+  dir_iterator refdir(RefOutput->directives + ref->labeldirective);
+  dir_iterator getdir(GetOutput->directives + get->labeldirective);
+  switch(getdir->kind){
+    caseDirBrig(DirectiveLabel);
+    caseDirBrig(DirectiveLabelList);
+    default:
+      printf("Offset to invalid directive");
+      exit(1);
   }
 }
 
