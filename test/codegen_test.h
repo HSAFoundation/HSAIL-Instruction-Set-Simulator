@@ -34,7 +34,7 @@ public:
   void validate(struct BrigSections* RefOutput, struct BrigSections* GetOutput){
   
     inst_iterator getinst = GetOutput->code_begin();
-    inst_iterator refinst = RefOutput->ref_code_begin();
+    inst_iterator refinst(RefOutput->code);
     const inst_iterator getinst_end = GetOutput->code_end();
     const inst_iterator refinst_end = RefOutput->code_end();
     for(; (getinst != getinst_end) && (refinst!= refinst_end) 
@@ -58,7 +58,7 @@ public:
     }
     
     dir_iterator getdir = GetOutput->begin();
-    dir_iterator refdir = RefOutput->ref_begin();
+    dir_iterator refdir(RefOutput->directives);
     const dir_iterator getdir_end = GetOutput->end();
     const dir_iterator refdir_end = RefOutput->end();  
     for(; (getdir != getdir_end) && (refdir != refdir_end) &&
@@ -98,7 +98,7 @@ public:
     }  
     
     oper_iterator getoper = GetOutput->oper_begin();
-    oper_iterator refoper = RefOutput->ref_oper_begin();
+    oper_iterator refoper(RefOutput->operands);
     const oper_iterator getoper_end = GetOutput->oper_end();
     const oper_iterator refoper_end = RefOutput->oper_end();
     for(; (getoper != getoper_end) && (refoper != refoper_end) &&

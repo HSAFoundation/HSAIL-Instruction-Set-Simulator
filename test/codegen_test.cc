@@ -1114,7 +1114,7 @@ TEST(CodegenTest, Label_CodeGen_Test) {
 
   delete lexer;
 }
-
+/*
 TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
@@ -1234,6 +1234,7 @@ TEST(CodegenTest, ArrayOperand_CodeGen_Test) {
 
   delete lexer;
 }
+*/
 
 TEST(CodegenTest, ArrayDimensionSetCodeGen) {
   context->set_error_reporter(main_reporter);
