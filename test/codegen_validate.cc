@@ -122,6 +122,9 @@ void validate(const BrigInstRead* ref, const BrigInstRead*get,
       ASSERT_EQ(refoper->kind, getoper->kind);
       switch(getoper->kind){
         caseOperBrig(OperandReg);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
+        caseOperBrig(OperandOpaque);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
         default:
@@ -328,6 +331,9 @@ void validate(const BrigInstImage* ref, const BrigInstImage* get,
       ASSERT_EQ(refoper->kind, getoper->kind);
       switch(getoper->kind){
         caseOperBrig(OperandReg);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
+        caseOperBrig(OperandOpaque);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
         default:

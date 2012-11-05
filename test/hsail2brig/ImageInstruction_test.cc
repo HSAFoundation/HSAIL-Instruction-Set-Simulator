@@ -1,5 +1,7 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
+
 
 namespace hsa{
 namespace brig{
@@ -17,11 +19,15 @@ private:
   const TSrc* RefSrc;
   const BrigOperandReg* RefSrcList;
 
+  const BrigOperandReg* ImgReg;
+  const BrigOperandReg* SmpReg;
+
 public:
   ImageInst_Test(std::string& input, StringBuffer* sbuf, TInst* ref,
                  BrigOperandRegV4* dest, BrigOperandReg* destList, 
                  BrigOperandOpaque* image, BrigOperandOpaque* sample, 
-                 TSrc* src, BrigOperandReg* srcList = NULL):
+                 TSrc* src, BrigOperandReg* srcList = NULL, 
+                 BrigOperandReg* imgReg = NULL, BrigOperandReg* smpReg = NULL):
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     RefDest(dest),
@@ -29,63 +35,66 @@ public:
     RefImage(image),
     RefSample(sample),
     RefSrc(src),
-    RefSrcList(srcList) { }
+    RefSrcList(srcList) ,
+    ImgReg(imgReg),
+    SmpReg(smpReg) { }
 
-  void validate(struct BrigSections* TestOutput) {
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
 
-    inst_iterator getcode = TestOutput->code_begin();
-    const TInst* getinst = (cast<TInst>(getcode));
-    validate_brig::validate(RefInst, getinst);
-    uint32_t opCount = 0;
+    code->append(RefInst);
 
-    const BrigOperandRegV4 *getdest = reinterpret_cast <const BrigOperandRegV4*>
-                                      (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validate(RefDest, getdest);
-
-    const BrigOperandReg* getreg;
     for (uint32_t i = 0 ; i < 4 ; ++i) {
-      getreg = reinterpret_cast <const BrigOperandReg*>
-               (&(TestOutput->operands[getdest->regs[i]]));
-      validate_brig::validateOpType<BrigOperandReg>(&RefDestList[i], refbuf, getreg, getbuf);
+      oper->append(&RefDestList[i]);
     }
 
-    const BrigOperandOpaque* getimage = reinterpret_cast <const BrigOperandOpaque*>
-                                        (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validate(RefImage, getimage);
+    oper->append(RefDest);
+   
+    if (ImgReg != NULL) {
+      oper->append(ImgReg);
+    }
+
+    oper->append(RefImage);
 
     if (RefSample != NULL) {
-      const BrigOperandOpaque* getsample = reinterpret_cast <const BrigOperandOpaque*>
-                                           (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validate(RefSample, getsample);
+      if (SmpReg != NULL) {
+        oper->append(SmpReg);
+      }
+      oper->append(RefSample);
     }
 
-    const TSrc* getsrc = reinterpret_cast <const TSrc*>
-                        (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validateOpType<TSrc>(RefSrc, refbuf, getsrc, getbuf);
-    
     if (RefSrcList != NULL) {
-      if (getsrc->kind == BrigEOperandRegV2) {
-        const BrigOperandRegV2* getregV2 = reinterpret_cast<const BrigOperandRegV2*>(getsrc);
+      if (RefSrc->kind == BrigEOperandRegV2) {
         for (uint32_t i = 0 ; i < 2 ; ++i) {
-          getreg = reinterpret_cast <const BrigOperandReg*>
-                   (&(TestOutput->operands[getregV2->regs[i]]));
-          validate_brig::validateOpType<BrigOperandReg>(&RefSrcList[i], refbuf, getreg, getbuf); 
+          // If the structure is empty in srcList, the reg will be generated in other places.
+          if (RefSrcList[i].size != 0) {
+            oper->append(&RefSrcList[i]);
+          }
         }
-      } else if (getsrc->kind == BrigEOperandRegV4) {
-        const BrigOperandRegV4* getregV4 = reinterpret_cast<const BrigOperandRegV4*>(getsrc);
+      } else if (RefSrc->kind == BrigEOperandRegV4) {
         for (uint32_t i = 0 ; i < 4 ; ++i) {
-          getreg = reinterpret_cast <const BrigOperandReg*>
-                   (&(TestOutput->operands[getregV4->regs[i]]));
-          validate_brig::validateOpType<BrigOperandReg>(&RefSrcList[i], refbuf, getreg, getbuf); 
+          // If the structure is empty in srcList, the reg will be generated in other places.
+          if (RefSrcList[i].size != 0) {
+            oper->append(&RefSrcList[i]);
+          }
         }
       }
     }
 
-    while (opCount <= 4) {
-      EXPECT_EQ(0, getinst->o_operands[opCount++]);
-    }
+    oper->append(RefSrc);
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), 0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+    delete dir;
   }
 };
 
@@ -143,7 +152,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg2.s_name = reg1Name.size() + 1;
 
   destList[1] = reg2;
-  srcList[0] = reg2;
+  // If the structure is empty in srcList, the reg will be generated in other places.
+  memset(&srcList[0], 0, sizeof(srcList[0]));
 
   reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
@@ -152,7 +162,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
   
   destList[2] = reg3;
-  srcList[1] = reg3;
+  // If the structure is empty in srcList, the reg will be generated in other places.
+  memset(&srcList[1], 0, sizeof(srcList[1]));
 
   reg4.size = sizeof(reg4);
   reg4.kind = BrigEOperandReg;
@@ -162,7 +173,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
                 reg3Name.size() + 3;
 
   destList[3] = reg4;
-  srcList[2] = reg4;
+  // If the structure is empty in srcList, the reg will be generated in other places.
+  memset(&srcList[2], 0, sizeof(srcList[2]));
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandRegV4;
@@ -260,7 +272,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
                 reg3Name.size() + 3;
 
   destList[3] = reg4;
-  srcList[0] = reg4;
+  // If the structure is empty in srcList, the reg will be generated in other places.
+  memset(&srcList[0], 0, sizeof(srcList[0]));
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandRegV4;
@@ -443,7 +456,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   reg2.s_name = reg1Name.size() + 1;
 
   destList[1] = reg2;
-  srcList[2] = reg2;
+  memset(&srcList[2], 0, sizeof(srcList[2]));
 
   reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
@@ -452,7 +465,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
   
   destList[2] = reg3;
-  srcList[3] = reg3;
+  memset(&srcList[3], 0, sizeof(srcList[3]));
 
   reg4.size = sizeof(reg4);
   reg4.kind = BrigEOperandReg;
@@ -462,7 +475,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
                 reg3Name.size() + 3;
 
   destList[3] = reg4;
-  srcList[0] = reg4;
+  memset(&srcList[0], 0, sizeof(srcList[0]));
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandRegV4;
@@ -561,7 +574,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
                 reg3Name.size() + 3;
 
   destList[3] = reg4;
-  srcList[0] = reg4;
+  memset(&srcList[0], 0, sizeof(srcList[0]));
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandRegV4;
@@ -699,7 +712,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   StringBuffer* sbuf = new StringBuffer();
 
   BrigInstRead out;
-  BrigOperandReg reg1, reg2, reg3, reg4, reg5;
+  BrigOperandReg reg1, reg2, reg3, reg4, reg5, reg6;
   BrigOperandRegV4 dest, srcRegV4;
   BrigOperandRegV2 srcRegV2;
   BrigOperandReg destList[4], srcList[4];
@@ -724,8 +737,8 @@ TEST(CodegenTest, ImageRead_Codegen) {
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
   out.o_operands[1] = out.o_operands[0] + sizeof(dest);
-  out.o_operands[2] = out.o_operands[1] + sizeof(image1) + sizeof(reg4);
-  out.o_operands[3] = 0;
+  out.o_operands[2] = out.o_operands[1] + sizeof(image1);
+  out.o_operands[3] = out.o_operands[2] + sizeof(samp2) + sizeof(reg5) + sizeof(reg6);
   out.o_operands[4] = 0;
   out.geom = Briggeom_2da;
 
@@ -744,7 +757,6 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg2.s_name = reg1Name.size() + 1;
 
   destList[1] = reg2;
-  srcList[2] = reg2;
 
   reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
@@ -753,7 +765,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
   
   destList[2] = reg3;
-  srcList[3] = reg3;
+  memset(&srcList[3], 0, sizeof(srcList[3]));
 
   reg4.size = sizeof(reg4);
   reg4.kind = BrigEOperandReg;
@@ -763,7 +775,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
                 reg3Name.size() + 3;
 
   destList[3] = reg4;
-  srcList[2] = reg4;
+  memset(&srcList[2], 0, sizeof(srcList[2]));
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandRegV4;
@@ -790,11 +802,10 @@ TEST(CodegenTest, ImageRead_Codegen) {
   srcRegV4.kind = BrigEOperandRegV4;
   srcRegV4.type = Brigb32;
   srcRegV4.reserved = 0;
-  srcRegV4.regs[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  srcRegV4.regs[1] = sizeof(reg1) + sizeof(reg2) + 
-                      sizeof(reg3) + sizeof(reg4) + 
-                      sizeof(dest) + sizeof(image1);
-  srcRegV4.regs[2] = sizeof(reg1);
+  srcRegV4.regs[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4) +
+                     sizeof(dest) + sizeof(image1) + sizeof(samp2);
+  srcRegV4.regs[1] = srcRegV4.regs[0] + sizeof(reg4);
+  srcRegV4.regs[2] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
   srcRegV4.regs[3] = sizeof(reg1) + sizeof(reg2);
 
 
@@ -838,9 +849,9 @@ TEST(CodegenTest, ImageRead_Codegen) {
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
-  out.o_operands[1] = out.o_operands[0] + sizeof(dest);
-  out.o_operands[2] = out.o_operands[1] + sizeof(image1) + sizeof(reg4);
-  out.o_operands[3] = 0;
+  out.o_operands[1] = out.o_operands[0] + sizeof(dest) + sizeof(reg5);
+  out.o_operands[2] = out.o_operands[1] + sizeof(image1) + sizeof(reg6);
+  out.o_operands[3] = out.o_operands[2] + sizeof(samp2);
   out.o_operands[4] = 0;
   out.geom = Briggeom_1da;
 
@@ -851,7 +862,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg1.s_name = 0;
 
   destList[0] = reg1;
-  srcList[0] = reg1;
+  memset(&srcList[0], 0 , sizeof(srcList[0]));
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
@@ -860,7 +871,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg2.s_name = reg1Name.size() + 1;
 
   destList[1] = reg2;
-  srcList[1] = reg2;
+  memset(&srcList[1], 0, sizeof(srcList[1]));
 
   reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
@@ -878,6 +889,22 @@ TEST(CodegenTest, ImageRead_Codegen) {
                 reg3Name.size() + 3;
 
   destList[3] = reg4;
+
+  reg5.size = sizeof(reg5);
+  reg5.kind = BrigEOperandReg;
+  reg5.type = Brigb32;
+  reg5.reserved = 0;
+  reg5.s_name = reg1Name.size() + reg2Name.size() +
+                reg3Name.size() + reg4Name.size() + 4;
+
+  reg6.size = sizeof(reg6);
+  reg6.kind = BrigEOperandReg;
+  reg6.type = Brigb32;
+  reg6.reserved = 0;
+  reg6.s_name = reg1Name.size() + reg2Name.size() +
+                reg3Name.size() + reg4Name.size() + 
+                reg5Name.size() + 5;
+
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandRegV4;
@@ -912,7 +939,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   srcRegV2.regs[1] = sizeof(reg1);
 
   ImageInst_Test<BrigInstRead, BrigOperandRegV2> 
-  TestCase2(in, sbuf, &out, &dest, destList, &image1, &samp2, &srcRegV2, srcList);
+  TestCase2(in, sbuf, &out, &dest, destList, &image1, &samp2, &srcRegV2, srcList, &reg5, &reg6);
   TestCase2.Run_Test(&ImageRead);
   
   sbuf->clear();
@@ -936,7 +963,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
   out.o_operands[1] = out.o_operands[0] + sizeof(dest);
   out.o_operands[2] = out.o_operands[1] + sizeof(image1);
-  out.o_operands[3] = 0;
+  out.o_operands[3] = out.o_operands[2] + sizeof(samp2);
   out.o_operands[4] = 0;
   out.geom = Briggeom_1d;
 
