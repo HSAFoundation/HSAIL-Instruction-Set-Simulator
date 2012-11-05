@@ -70,6 +70,24 @@ class BrigInstHelper {
       opcode != BrigDebugTrap && opcode != BrigNop;
   }
 
+  static const BrigAluModifier *getAluModifier(const inst_iterator inst) {
+    if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
+      return &cmp->aluModifier;
+
+    if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
+      return &cvt->aluModifier;
+
+    if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst))
+      return &mod->aluModifier;
+
+    return NULL;
+  }
+
+  static bool isFtz(const inst_iterator inst) {
+    const BrigAluModifier *aluMod = getAluModifier(inst);
+    return aluMod && aluMod->valid && aluMod->ftz;
+  }
+
   // Type methods
   static bool isFloatTy(BrigDataType type) {
     return

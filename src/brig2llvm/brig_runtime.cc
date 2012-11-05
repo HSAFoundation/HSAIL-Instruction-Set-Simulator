@@ -1,6 +1,8 @@
 #include "brig_runtime.h"
 #include "brig_runtime_internal.h"
 
+#include <pmmintrin.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -9,6 +11,16 @@ namespace hsa {
 namespace brig {
 
 ForceBrigRuntimeLinkage::ForceBrigRuntimeLinkage() {}
+
+extern "C" void enableFtzMode(void) {
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+}
+
+extern "C" void disableFtzMode(void) {
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF);
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
+}
 
 template<class T> static T Abs(T t) { return std::abs(t); }
 template<class T> static T AbsVector(T t) { return map(Abs, t); }

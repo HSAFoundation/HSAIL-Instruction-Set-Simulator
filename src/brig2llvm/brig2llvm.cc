@@ -426,12 +426,35 @@ llvm::FunctionType *getInstFunType(const inst_iterator inst,
   return llvm::FunctionType::get(result, params, false);
 }
 
+static void insertEnableFtz(llvm::BasicBlock &B) {
+  llvm::Module *M = B.getParent()->getParent();
+  llvm::LLVMContext &C = M->getContext();
+  llvm::FunctionType *enableFtzTy =
+    llvm::FunctionType::get(llvm::Type::getVoidTy(C), false);
+  llvm::Constant *enableFtz =
+    M->getOrInsertFunction("enableFtz", enableFtzTy);
+  llvm::CallInst::Create(enableFtz, "", &B);
+}
+
+static void insertDisableFtz(llvm::BasicBlock &B) {
+  llvm::Module *M = B.getParent()->getParent();
+  llvm::LLVMContext &C = M->getContext();
+  llvm::FunctionType *disableFtzTy =
+    llvm::FunctionType::get(llvm::Type::getVoidTy(C), false);
+  llvm::Constant *disableFtz =
+    M->getOrInsertFunction("disableFtz", disableFtzTy);
+  llvm::CallInst::Create(disableFtz, "", &B);
+}
+
 static void runOnComplexInst(llvm::BasicBlock &B,
                              const inst_iterator inst,
                              const BrigInstHelper &helper,
                              const FunState &state) {
 
   unsigned operand = 0;
+
+  bool ftz = BrigInstHelper::isFtz(inst);
+  if(ftz) insertEnableFtz(B);
 
   // Skip the width parameter for loads.
   if(inst->opcode == BrigLd) ++operand;
@@ -463,6 +486,8 @@ static void runOnComplexInst(llvm::BasicBlock &B,
     llvm::Value *resultVal = encodePacking(B, resultRaw, destTy, inst, helper);
     new llvm::StoreInst(resultVal, destAddr, &B);
   }
+
+  if(ftz) insertDisableFtz(B);
 }
 
 static void runOnBranchInst(llvm::BasicBlock &B,

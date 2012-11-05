@@ -1437,19 +1437,6 @@ static const BrigDataType *getType(const oper_iterator oper) {
   return NULL;
 }
 
-static const BrigAluModifier *getAluModifier(const inst_iterator inst) {
-  if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
-    return &cmp->aluModifier;
-
-  if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
-    return &cvt->aluModifier;
-
-  if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst))
-    return &mod->aluModifier;
-
-  return NULL;
-}
-
 static bool isCompatibleSrc(BrigDataType type, const oper_iterator oper) {
   if(isa<BrigOperandWaveSz>(oper))
     return
@@ -1579,8 +1566,6 @@ bool BrigModule::validateCarry(const inst_iterator inst) const {
 
 bool BrigModule::validateCopySign(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(!getAluModifier(inst),
-                 "CopySign may not have an aluModifier");
   valid &= check(BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
                  "CopySign is only valid for floating point types");
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
