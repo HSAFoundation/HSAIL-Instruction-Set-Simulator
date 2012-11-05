@@ -446,6 +446,31 @@ static void insertDisableFtz(llvm::BasicBlock &B) {
   llvm::CallInst::Create(disableFtz, "", &B);
 }
 
+static void insertSetRoundingMode(llvm::BasicBlock &B,
+                                  const inst_iterator inst) {
+  llvm::Module *M = B.getParent()->getParent();
+  llvm::LLVMContext &C = M->getContext();
+  llvm::FunctionType *setRoundTy =
+    llvm::FunctionType::get(llvm::Type::getVoidTy(C), false);
+  const BrigAluModifier *aluMod = BrigInstHelper::getAluModifier(inst);
+  assert(aluMod->floatOrInt && "Integer rounding illegal on float arithmetic");
+  const char *roundName = BrigInstHelper::getRoundingName(*aluMod);
+  std::string setRoundName = std::string("setRoundingMode_") + roundName;
+  llvm::Constant *setRoundMode =
+    M->getOrInsertFunction(setRoundName, setRoundTy);
+  llvm::CallInst::Create(setRoundMode, "", &B);
+}
+
+static void insertRestoreRoundingMode(llvm::BasicBlock &B) {
+  llvm::Module *M = B.getParent()->getParent();
+  llvm::LLVMContext &C = M->getContext();
+  llvm::FunctionType *restoreRoundTy =
+    llvm::FunctionType::get(llvm::Type::getVoidTy(C), false);
+  llvm::Constant *restoreRound =
+    M->getOrInsertFunction("setRoundingMode_near", restoreRoundTy);
+  llvm::CallInst::Create(restoreRound, "", &B);
+}
+
 static void runOnComplexInst(llvm::BasicBlock &B,
                              const inst_iterator inst,
                              const BrigInstHelper &helper,
@@ -455,6 +480,9 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 
   bool ftz = BrigInstHelper::isFtz(inst);
   if(ftz) insertEnableFtz(B);
+
+  bool rounding = BrigInstHelper::hasRoundingMode(inst);
+  if(rounding) insertSetRoundingMode(B, inst);
 
   // Skip the width parameter for loads.
   if(inst->opcode == BrigLd) ++operand;
@@ -486,6 +514,8 @@ static void runOnComplexInst(llvm::BasicBlock &B,
     llvm::Value *resultVal = encodePacking(B, resultRaw, destTy, inst, helper);
     new llvm::StoreInst(resultVal, destAddr, &B);
   }
+
+  if(rounding) insertRestoreRoundingMode(B);
 
   if(ftz) insertDisableFtz(B);
 }

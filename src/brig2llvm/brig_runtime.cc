@@ -22,6 +22,22 @@ extern "C" void disableFtzMode(void) {
   _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
 }
 
+extern "C" void setRoundingMode_near(void) {
+  fesetround(FE_TONEAREST);
+}
+
+extern "C" void setRoundingMode_zero(void) {
+  fesetround(FE_TOWARDZERO);
+}
+
+extern "C" void setRoundingMode_up(void) {
+  fesetround(FE_UPWARD);
+}
+
+extern "C" void setRoundingMode_down(void) {
+  fesetround(FE_DOWNWARD);
+}
+
 template<class T> static T Abs(T t) { return std::abs(t); }
 template<class T> static T AbsVector(T t) { return map(Abs, t); }
 SignedInst(define, Abs, Unary)

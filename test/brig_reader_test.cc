@@ -510,7 +510,6 @@ TEST(BrigInstTest, VectorMad) {
 }
 
 TEST(BrigInstTest, Ftz) {
-
   {
     const float testVec[] = { 2 * 1.0E-45f, 1.0E-45f, 1.0E-45f };
     testInst("add_f32", testVec);
@@ -531,6 +530,60 @@ TEST(BrigInstTest, Ftz) {
     const float testVec[] = { 0,
                               1.191E-38f, -1.190E-38f };
     testInst("add_ftz_f32", testVec);
+  }
+}
+
+TEST(BrigInstTest, Round) {
+  union { uint32_t u32; float f32; } result;
+  {
+    result.u32 = 0x3EAAAAAB;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAB;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_f32", testVec);
+  }
+  {
+    result.u32 = 0x3EAAAAAB;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_near_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAB;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_near_f32", testVec);
+  }
+  {
+    result.u32 = 0x3EAAAAAA;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_zero_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAA;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_zero_f32", testVec);
+  }
+  {
+    result.u32 = 0x3EAAAAAB;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_up_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAA;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_up_f32", testVec);
+  }
+  {
+    result.u32 = 0x3EAAAAAA;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_down_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAB;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_down_f32", testVec);
   }
 }
 

@@ -88,6 +88,16 @@ class BrigInstHelper {
     return aluMod && aluMod->valid && aluMod->ftz;
   }
 
+  static bool hasRoundingMode(const inst_iterator inst) {
+    // Cvt instructions are handled as a special case
+    if(isa<BrigInstCvt>(inst)) return false;
+    // Ignore near mode, since it is the default anway
+    const BrigAluModifier *aluMod = getAluModifier(inst);
+    return aluMod && aluMod->valid && aluMod->rounding;
+  }
+
+  static const char *getRoundingName(const BrigAluModifier &aluMod);
+
   // Type methods
   static bool isFloatTy(BrigDataType type) {
     return
