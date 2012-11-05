@@ -96,7 +96,7 @@ int Query(Context* context) {
     return 1;
   } 
   context->token_to_scan = yylex();
-  if (AddressableOperandPart2(context, &OpOffset[1], true)) {
+  if (AddressableOperand(context, &OpOffset[1], true)) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
@@ -332,144 +332,138 @@ int BaseOperand(Context* context) {
 }
 
 int AddressableOperand(Context* context) {
-  BrigoOffset32_t opOffset;
-  return AddressableOperandPart2(context, &opOffset, true);
+  BrigoOffset32_t opOffset = 0;
+  return AddressableOperand(context, &opOffset, true);
 }
 
-int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler){
+int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler){
   // context->token_to_scan must be non register
-  if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
-      (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
-    std::string name(context->token_value.string_val);
+  if ((context->token_to_scan != TOKEN_GLOBAL_IDENTIFIER) &&
+      (context->token_to_scan != TOKEN_LOCAL_IDENTIFIER)) {
+    return 1;    
+  }
+  std::string name(context->token_value.string_val);
+  context->token_to_scan = yylex();
 
-    context->token_to_scan = yylex();
-
-    if (context->token_to_scan == ']') {
-      if (!IsImageOrSampler) {
-        BrigOperandAddress boa = {
-          sizeof(boa),            // size
-          BrigEOperandAddress,    // kind
-          Brigb32,                // type
-          0,                      // reserved
-          0/*,                      // directive
-          0*/
-        };
-        // TODO(Chuang) name isn't declared in directive.
-        // if (!context->symbol_map.count(name)) {
-        //   context->set_error(MISSING_OPERAND);
-        //   return 1;
-        // }
-        boa.directive = context->symbol_map[name];
-
-        if (context->get_machine() == BrigELarge) {
-          boa.type = Brigb64;
-        }
-        *pRetOpOffset = context->get_operand_offset();
-        context->append_operand(&boa);
-      } else {
-        BrigOperandOpaque boo = {
-          sizeof(BrigOperandOpaque),
-          BrigEOperandOpaque,
-          0,                      // name
-          0,                      // reg
-          0                       // offset
-        };
-        // TODO(Chuang) name isn't declared in directive.
-        // if (!context->symbol_map.count(name)) {
-        //   context->set_error(MISSING_OPERAND);
-        //   return 1;
-        // }
-        boo.directive = context->symbol_map[name];
-        *pRetOpOffset = context->get_operand_offset();
-        context->append_operand(&boo);
-      }
-      context->token_to_scan = yylex();
-      return 0;
-    } else if (context->token_to_scan == '<') {
-      if (!IsImageOrSampler) {
-        context->set_error(INVALID_OPERATION);
+  if (context->token_to_scan == ']') {
+    if (!IsImageOrSampler) {
+      BrigOperandAddress boa = {
+        sizeof(boa),            // size
+        BrigEOperandAddress,    // kind
+        Brigb32,                // type
+        0,                      // reserved
+        0
+      };
+      /*if (!context->symbol_map.count(name)) {
+        context->set_error(MISSING_OPERAND);
         return 1;
+      }*/
+      boa.directive = context->symbol_map[name];
+
+      if (context->get_machine() == BrigELarge) {
+        boa.type = Brigb64;
       }
-      // TODO(Chuang) name isn't declared in directive.
-      // if (!context->symbol_map.count(name)) {
-      //   context->set_error(MISSING_OPERAND);
-      //   return 1;
-      // }
+      *pRetOpOffset = context->get_operand_offset();
+      context->append_operand(&boa);
+    } else {
       BrigOperandOpaque boo = {
         sizeof(BrigOperandOpaque),
         BrigEOperandOpaque,
-        context->symbol_map[name], // name
-        0,                         // reg
-        0                          // offset
+        0,                      // name
+        0,                      // reg
+        0                       // offset
       };
+      /*if (!context->symbol_map.count(name)) {
+        context->set_error(MISSING_OPERAND);
+        return 1;
+      }*/
+      boo.directive = context->symbol_map[name];
+      *pRetOpOffset = context->get_operand_offset();
+      context->append_operand(&boo);
+    }
+    context->token_to_scan = yylex();
+    return 0;
+  } else  if (context->token_to_scan == '<') {
+    if (!IsImageOrSampler) {
+      context->set_error(INVALID_OPERATION);
+      return 1;
+    }
+    BrigOperandOpaque boo = {
+      sizeof(BrigOperandOpaque),
+      BrigEOperandOpaque,
+      context->symbol_map[name], // name
+      0,                         // reg
+      0                          // offset
+    };
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      boo.offset = context->token_value.int_val;
       context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        boo.offset = context->token_value.int_val;
-
+      if (context->token_to_scan != '>') {
+        context->set_error(MISSING_CLOSING_BRACKET);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+      if (context->token_to_scan != ']') {
+        context->set_error(MISSING_CLOSING_BRACKET);
+        return 1;
+      }
+      *pRetOpOffset = context->get_operand_offset();
+      context->append_operand(&boo);
+      context->token_to_scan = yylex();
+      return 0;      
+    } else if (context->token_to_scan == TOKEN_SREGISTER) {
+      name = context->token_value.string_val;
+      if (Identifier(context)) {
+          return 1;
+      }
+      boo.reg = context->operand_map[name];
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == '>') {
         context->token_to_scan = yylex();
-        if (context->token_to_scan == '>') {
-          context->token_to_scan = yylex();
-          if (context->token_to_scan == ']') {
-            *pRetOpOffset = context->get_operand_offset();
-            context->append_operand(&boo);
-            context->token_to_scan = yylex();
-            return 0;
-          } else {
-            context->set_error(MISSING_CLOSING_BRACKET);
-          }
-        } else {
+        if (context->token_to_scan != ']') {
           context->set_error(MISSING_CLOSING_BRACKET);
-        }
-      } else if (context->token_to_scan == TOKEN_SREGISTER) {
-        name = context->token_value.string_val;
-        if (Identifier(context)) {
           return 1;
         }
-        boo.reg = context->operand_map[name];
+        *pRetOpOffset = context->get_operand_offset();
+        context->append_operand(&boo);
         context->token_to_scan = yylex();
-        if (context->token_to_scan == '>') {
-          context->token_to_scan = yylex();
-          if (context->token_to_scan == ']') {
-            *pRetOpOffset = context->get_operand_offset();
-            context->append_operand(&boo);
-            context->token_to_scan = yylex();
-            return 0;
-          } else {
-            context->set_error(MISSING_CLOSING_BRACKET);
-          }
-        } else if ((context->token_to_scan == '+') ||
+        return 0;
+      } else if ((context->token_to_scan == '+') ||
                    (context->token_to_scan == '-')) {
-          int sign = 1;
-          if (context->token_to_scan == '-') {
-            sign = -1;
-          }
-          context->token_to_scan = yylex();
-          if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-            boo.offset = context->token_value.int_val * sign;
-            context->token_to_scan = yylex();
-            if (context->token_to_scan == '>') {
-              context->token_to_scan = yylex();
-              if (context->token_to_scan == ']') {
-                *pRetOpOffset = context->get_operand_offset();
-                context->append_operand(&boo);
-                context->token_to_scan = yylex();
-                return 0;
-              } else {
-                context->set_error(MISSING_CLOSING_BRACKET);
-              }
-            } else {
-              context->set_error(MISSING_CLOSING_BRACKET);
-            }
-          } else {
-            context->set_error(MISSING_INTEGER_CONSTANT);
-          }
-        } else {
-          context->set_error(MISSING_CLOSING_BRACKET);
+        int sign = 1;
+        if (context->token_to_scan == '-') {
+          sign = -1;
         }
-      }
+        context->token_to_scan = yylex();
+        if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+          context->set_error(MISSING_INTEGER_CONSTANT);
+          return 1;   
+        }
+        boo.offset = context->token_value.int_val * sign;
+        context->token_to_scan = yylex();
+        if (context->token_to_scan != '>') {
+          context->set_error(MISSING_CLOSING_BRACKET);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+        if (context->token_to_scan != ']') {
+          context->set_error(MISSING_CLOSING_BRACKET);
+          return 1;
+        }
+        *pRetOpOffset = context->get_operand_offset();
+        context->append_operand(&boo);
+        context->token_to_scan = yylex();
+        return 0;
+      } 
+    }else {
+        context->set_error(MISSING_OPERAND);
+        return 1;
     }
+  } else{
+    context->set_error(MISSING_OPERAND);
+    return 1;
   }
-  return 1;
 }
 
 int ArrayOperandList(Context* context) {
@@ -4183,7 +4177,7 @@ int MemoryOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset) {
     BrigoOffset32_t currentToOffset = 0;
     context->token_to_scan = yylex();
     // AddressableOperand
-    if (!AddressableOperandPart2(context, &currentToOffset, false)) {
+    if (!AddressableOperand(context, &currentToOffset, false)) {
       if (context->token_to_scan == '[') {
         context->token_to_scan = yylex();
         if (!OffsetAddressableOperandPart2(context, currentToOffset, pRetOpOffset)) {
@@ -5336,7 +5330,7 @@ int ImageRet(Context* context) {
           context->token_to_scan = yylex();
           if (context->token_to_scan == '[') {
             context->token_to_scan = yylex();
-            if (!AddressableOperandPart2(context, &img_inst.o_operands[1], true)) {
+            if (!AddressableOperand(context, &img_inst.o_operands[1], true)) {
               if (context->token_to_scan == ',') {
                 context->token_to_scan = yylex();
                 unsigned int curOpCount = 2;
@@ -5533,7 +5527,7 @@ int ImageNoRet(Context* context) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == '[') {
         context->token_to_scan = yylex();
-        if (!AddressableOperandPart2(context, &imgNoRet.o_operands[0], true)) {
+        if (!AddressableOperand(context, &imgNoRet.o_operands[0], true)) {
           if (context->token_to_scan == ',') {
             context->token_to_scan = yylex();
             if (!ArrayOperandPart2(context, &imgNoRet.o_operands[1])) {
@@ -6397,7 +6391,7 @@ int ImageLoad(Context* context) {
               // TODO(Chuang): [image]: The image. Must be a read-write or read-only image.
               if (context->token_to_scan == '[') {
                 context->token_to_scan = yylex();
-                if (!AddressableOperandPart2(context, &imgLdInst.o_operands[1], true)) {
+                if (!AddressableOperand(context, &imgLdInst.o_operands[1], true)) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
                     // TODO(Chuang): src: Register source for the coordinates.
@@ -6524,7 +6518,7 @@ int ImageStore(Context* context) {
               // TODO(Chuang): [image]: Destination image. A read-write image.
               if (context->token_to_scan == '[') {
                 context->token_to_scan = yylex();
-                if (!AddressableOperandPart2(context, &imgStInst.o_operands[1], true)) {
+                if (!AddressableOperand(context, &imgStInst.o_operands[1], true)) {
                   if (context->token_to_scan == ',') {
                     context->token_to_scan = yylex();
                     // TODO(Chuang): src: Register source for the coordinates.
@@ -7035,13 +7029,13 @@ int ImageRead(Context *context) {
 
               if (context->token_to_scan == '[') {
                 context->token_to_scan = yylex();
-                if (!AddressableOperandPart2(context, &imgRdInst.o_operands[1], true)) {
+                if (!AddressableOperand(context, &imgRdInst.o_operands[1], true)) {
                   if (context->token_to_scan == ',') {
                     unsigned int opCount = 2;
                     context->token_to_scan = yylex();
                     if (context->token_to_scan == '[') {
                       context->token_to_scan = yylex();
-                      if (!AddressableOperandPart2(context, &imgRdInst.o_operands[opCount++], true)) {
+                      if (!AddressableOperand(context, &imgRdInst.o_operands[opCount++], true)) {
                         if (context->token_to_scan == ',') {
                           context->token_to_scan = yylex();
                         } else {  // ','

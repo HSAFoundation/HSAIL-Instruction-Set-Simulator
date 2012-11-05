@@ -160,7 +160,7 @@ int ArrayOperandListPart2(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperandPart2(Context* context, BrigoOffset32_t* pOperand);
 
-int AddressableOperandPart2(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
+int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
 int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
 
 int Instruction4MultiMediaOperationPart1(Context* context);
