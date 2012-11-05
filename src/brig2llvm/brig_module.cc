@@ -1538,10 +1538,10 @@ bool BrigModule::validateAbs(const inst_iterator inst) const {
   valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
                  "Abs is not valid for bit types");
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
-    valid &= check(mod->aluModifier.rounding == 0, 
-                   "Abs does not support the rounding");
-    valid &= check(mod->aluModifier.ftz == 0, 
-                   "Abs does not support the ftz");
+    valid &= check(mod->aluModifier.rounding == 0,
+                   "Abs does not support rounding");
+    valid &= check(mod->aluModifier.ftz == 0,
+                   "Abs does not support ftz");
   }
   valid &= validateArithmeticInst(inst, 1);
   return valid;
@@ -1584,10 +1584,10 @@ bool BrigModule::validateCopySign(const inst_iterator inst) const {
   valid &= check(BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
                  "CopySign is only valid for floating point types");
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
-    valid &= check(mod->aluModifier.rounding == 0, 
-                   "CopySign does not support the rounding");
-    valid &= check(mod->aluModifier.ftz == 0, 
-                   "CopySign does not support the ftz");
+    valid &= check(mod->aluModifier.rounding == 0,
+                   "CopySign does not support rounding");
+    valid &= check(mod->aluModifier.ftz == 0,
+                   "CopySign does not support ftz");
   }
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "CopySign cannot accept vector types");
@@ -1622,8 +1622,8 @@ bool BrigModule::validateFract(const inst_iterator inst) const {
   valid &= check(BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
                  "Fract is only valid for floating point type");
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
-    valid &= check(mod->aluModifier.rounding == 0, 
-                   "Fract does not support the rounding");
+    valid &= check(mod->aluModifier.rounding == 0,
+                   "Fract does not support rounding");
   }
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Fract cannot accept vector types");
@@ -1646,8 +1646,8 @@ bool BrigModule::validateMax(const inst_iterator inst) const {
   valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
                  "Max is not valid for bit types");
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
-    valid &= check(mod->aluModifier.rounding == 0, 
-                   "Max does not support the rounding");
+    valid &= check(mod->aluModifier.rounding == 0,
+                   "Max does not support rounding");
   }
   valid &= check(!BrigInstHelper::isSaturated(BrigPacking(inst->packing)),
                  "Max cannot saturate");
@@ -1660,8 +1660,8 @@ bool BrigModule::validateMin(const inst_iterator inst) const {
   valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
                  "Min is not valid for bit types");
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
-    valid &= check(mod->aluModifier.rounding == 0, 
-                   "Min does not support the rounding");
+    valid &= check(mod->aluModifier.rounding == 0,
+                   "Min does not support rounding");
   }
   valid &= check(!BrigInstHelper::isSaturated(BrigPacking(inst->packing)),
                  "Min cannot saturate");
@@ -1687,7 +1687,7 @@ bool BrigModule::validateMulHi(const inst_iterator inst) const {
   if(!BrigInstHelper::isVectorTy(BrigDataType(inst->type))) {
     valid &= check(inst->type == Brigu32 || inst->type == Brigs32,
                    "MulHi should be u32 and s32");
-  }				
+  }
   valid &= validateArithmeticInst(inst, 2);
   return valid;
 }
@@ -1698,8 +1698,8 @@ bool BrigModule::validateNeg(const inst_iterator inst) const {
                  BrigInstHelper::isFloatTy(BrigDataType(inst->type)),
                  "Neg is only valid for signed and floating point types");
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
-    valid &= check(mod->aluModifier.rounding == 0, 
-                   "Neg does not support the rounding");
+    valid &= check(mod->aluModifier.rounding == 0,
+                   "Neg does not support rounding");
   }
   valid &= check(!BrigInstHelper::isSaturated(BrigPacking(inst->packing)),
                  "Neg cannot saturate");
@@ -1791,9 +1791,9 @@ bool BrigModule::validateShr(const inst_iterator inst) const {
 
 bool BrigModule::validateAnd(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 || 
-                 inst->type == Brigb64, 
-                 "Type of And should be b1, b32 and b64");
+  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
+                 inst->type == Brigb64,
+                 "Type of And should be b1, b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "And cannot accept vector types");
   valid &= validateArithmeticInst(inst, 2);
@@ -1802,9 +1802,9 @@ bool BrigModule::validateAnd(const inst_iterator inst) const {
 
 bool BrigModule::validateNot(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 || 
-                 inst->type == Brigb64, 
-                 "Type of Not should be b1, b32 and b64");
+  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
+                 inst->type == Brigb64,
+                 "Type of Not should be b1, b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Not cannot accept vector types");
   valid &= validateArithmeticInst(inst, 1);
@@ -1813,9 +1813,9 @@ bool BrigModule::validateNot(const inst_iterator inst) const {
 
 bool BrigModule::validateOr(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 || 
-                 inst->type == Brigb64, 
-                 "Type of Or should be b1, b32 and b64");
+  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
+                 inst->type == Brigb64,
+                 "Type of Or should be b1, b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Or cannot accept vector types");
   valid &= validateArithmeticInst(inst, 2);
@@ -1826,7 +1826,7 @@ bool BrigModule::validatePopCount(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(isa<BrigInstBase>(inst), "PopCount must be BrigInstBase");
   valid &= check(inst->type == Brigb32 || inst->type ==Brigb64,
-                 "Type of PopCount shoud be Brigb32 and Brigb64");
+                 "Type of PopCount shoud be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "PopCount cannot accept vector types");
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
@@ -1852,9 +1852,9 @@ bool BrigModule::validatePopCount(const inst_iterator inst) const {
 
 bool BrigModule::validateXor(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 || 
-                 inst->type == Brigb64, 
-                 "Type of Xor should be b1, b32 and b64");
+  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
+                 inst->type == Brigb64,
+                 "Type of Xor should be b1, b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Xor cannot accept vector types");
   valid &= validateArithmeticInst(inst, 2);
@@ -1864,7 +1864,7 @@ bool BrigModule::validateXor(const inst_iterator inst) const {
 bool BrigModule::validateBitRev(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of BitRev should be b32 and b64");
+                 "Type of BitRev should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "BitRev cannot accept vector types");
   valid &= validateArithmeticInst(inst, 1);
@@ -1874,7 +1874,7 @@ bool BrigModule::validateBitRev(const inst_iterator inst) const {
 bool BrigModule::validateBitSelect(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of BitSelect should be b32 and b64");
+                 "Type of BitSelect should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "BitSelect cannot accept vector types");
   valid &= validateArithmeticInst(inst, 3);
@@ -1885,7 +1885,7 @@ bool BrigModule::validateExtract(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(isa<BrigInstBase>(inst), "Extract must be BrigInstBase");
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of Extract should be b32 and b64");
+                 "Type of Extract should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Extract cannot accept vector types");
   if(!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
@@ -1949,7 +1949,7 @@ bool BrigModule::validateExtract(const inst_iterator inst) const {
 bool BrigModule::validateFirstBit(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of FirstBit should be b32 and b64");
+                 "Type of FirstBit should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "FirstBit cannot accept vector types");
   valid &= validateArithmeticInst(inst, 1);
@@ -1959,7 +1959,7 @@ bool BrigModule::validateFirstBit(const inst_iterator inst) const {
 bool BrigModule::validateInsert(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of Insert should be b32 and b64");
+                 "Type of Insert should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Insert cannot accept vector types");
   valid &= validateArithmeticInst(inst, 3);
@@ -1969,7 +1969,7 @@ bool BrigModule::validateInsert(const inst_iterator inst) const {
 bool BrigModule::validateLastBit(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of LastBit should be b32 and b64");
+                 "Type of LastBit should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "LastBit cannot accept vector types");
   valid &= validateArithmeticInst(inst, 1);
