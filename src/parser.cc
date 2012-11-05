@@ -380,9 +380,7 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
       boo.directive = context->symbol_map[name];
       *pRetOpOffset = context->get_operand_offset();
       context->append_operand(&boo);
-    }
-    context->token_to_scan = yylex();
-    return 0;
+    }   
   } else  if (context->token_to_scan == '<') {
     if (!IsImageOrSampler) {
       context->set_error(INVALID_OPERATION);
@@ -409,9 +407,7 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
         return 1;
       }
       *pRetOpOffset = context->get_operand_offset();
-      context->append_operand(&boo);
-      context->token_to_scan = yylex();
-      return 0;      
+      context->append_operand(&boo);          
     } else if (context->token_to_scan == TOKEN_SREGISTER) {
       name = context->token_value.string_val;
       if (Identifier(context)) {
@@ -426,9 +422,7 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
           return 1;
         }
         *pRetOpOffset = context->get_operand_offset();
-        context->append_operand(&boo);
-        context->token_to_scan = yylex();
-        return 0;
+        context->append_operand(&boo);        
       } else if ((context->token_to_scan == '+') ||
                    (context->token_to_scan == '-')) {
         int sign = 1;
@@ -452,9 +446,7 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
           return 1;
         }
         *pRetOpOffset = context->get_operand_offset();
-        context->append_operand(&boo);
-        context->token_to_scan = yylex();
-        return 0;
+        context->append_operand(&boo);        
       } 
     }else {
         context->set_error(MISSING_OPERAND);
@@ -464,6 +456,8 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
     context->set_error(MISSING_OPERAND);
     return 1;
   }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int ArrayOperandList(Context* context) {
