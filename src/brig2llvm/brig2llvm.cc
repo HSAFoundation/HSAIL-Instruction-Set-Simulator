@@ -104,8 +104,7 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
 
     if(base->isIntegerTy()) {
       unsigned bitWidth = base->getIntegerBitWidth() * length;
-      if(bitWidth < 64)
-        return llvm::Type::getIntNTy(C, bitWidth);
+      return llvm::Type::getIntNTy(C, bitWidth);
     }
 
     return llvm::VectorType::get(base, length);
