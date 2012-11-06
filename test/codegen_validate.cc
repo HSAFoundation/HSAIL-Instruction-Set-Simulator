@@ -597,7 +597,8 @@ void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get,
 void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, BrigSections* RefOutput, BrigSections* GetOutput){
   inst_iterator refinst(RefOutput->code + refoffset); 
   inst_iterator getinst(GetOutput->code + getoffset); 
-  if(refinst!=NULL && getinst!=NULL){
+  bool validOffset = (getoffset>=8) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
+  if(refinst!=NULL && getinst!=NULL && validOffset){
     switch(getinst->kind){ 
       caseInstBrig(InstBase); 
       caseInstBrig(InstMod) ;
@@ -620,7 +621,8 @@ void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, 
 void validate_DIR_OFFSET(BrigdOffset32_t refoffset, BrigdOffset32_t getoffset, BrigSections* RefOutput, BrigSections* GetOutput){
   dir_iterator refdir(RefOutput->directives + refoffset);
   dir_iterator getdir(GetOutput->directives + getoffset);
-  if(refdir!= NULL && getdir!=NULL){
+  bool validOffset = (getoffset>=8) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
+  if(refdir!= NULL && getdir!=NULL && validOffset){
     switch(getdir->kind){
       caseDirBrig(DirectivePad);        
           caseDirBrig(DirectiveFunction) ;        

@@ -62,7 +62,7 @@ public:
     const dir_iterator getdir_end = GetOutput->end();
     const dir_iterator refdir_end = RefOutput->end();  
     for(; (getdir != getdir_end) && (refdir != refdir_end) &&
-        GetOutput->directivesSize>8; getdir++, refdir++){
+        GetOutput->directivesSize>8 && RefOutput->directivesSize>0; getdir++, refdir++){
     if(getdir->kind==BrigEDirectivePad)
         getdir++;
       switch(getdir->kind){
@@ -102,7 +102,7 @@ public:
     const oper_iterator getoper_end = GetOutput->oper_end();
     const oper_iterator refoper_end = RefOutput->oper_end();
     for(; (getoper != getoper_end) && (refoper != refoper_end) &&
-      (GetOutput->operandsSize >8) && (RefOutput->codeSize > 0); getoper++, refoper++){
+      (GetOutput->operandsSize >8) && (RefOutput->operandsSize > 0); getoper++, refoper++){
       if(getoper->kind==BrigEOperandPad)
         getoper++;
       switch(getoper->kind){

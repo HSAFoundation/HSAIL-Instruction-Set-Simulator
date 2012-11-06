@@ -75,8 +75,8 @@ TEST(CodegenTest, Syscall_CodeGen) {
   BrigOperandImmed imm1;
   BrigInstBase out;
 
-  BrigOperandReg reg2, reg3, reg4;
-  BrigOperandWaveSz wav2, wav3, wav4;
+  BrigOperandReg reg2, reg3;
+  BrigOperandWaveSz wav2, wav4;
   BrigOperandImmed imm2, imm3, imm4;
 
   symbols = new StringBuffer();
