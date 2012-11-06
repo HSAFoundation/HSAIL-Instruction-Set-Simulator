@@ -456,36 +456,28 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
 }
 
 int ArrayOperandList(Context* context) {
-  BrigoOffset32_t opOffset;
+  BrigoOffset32_t opOffset = 0;
   return ArrayOperandList(context, &opOffset);
 }
 
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
   // assumed first_token is '('
   unsigned int count_op = 0;
-  BrigoOffset32_t regs[4] = {0};
-  BrigDataType16_t type = Brigb32;
+  BrigoOffset32_t offsets[4] = {0};
+  
   std::string iden_name;
   while (1) {
     context->token_to_scan = yylex();
-    // set context for Identifier()
+    if (count_op > 3){
+        context->set_error(INVALID_OPERAND);
+        return 1;
+    }
     iden_name = context->token_value.string_val;
     if (Identifier(context)) {
       context->set_error(MISSING_IDENTIFIER);
       return 1;
-    }
-    if (count_op <= 3) {
-      regs[count_op] = context->operand_map[iden_name];
-    } else {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-    }
-    if (count_op == 0) {
-      type = context->get_type();
-    } else if (type != context->get_type()) {
-      context->set_error(INVALID_OPERAND);
-      return 1;
-    }
+    }    
+    offsets[count_op] = context->operand_map[iden_name];
     ++count_op;
     context->token_to_scan = yylex();
     if (context->token_to_scan == ')') {
@@ -506,7 +498,7 @@ int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
     case 1: {
       // just have one operand.
       // e.g. ($s1)
-      *pRetOpOffset = regs[0];
+      *pRetOpOffset = offsets[0];
       break;
     }
     case 2: {
@@ -517,9 +509,16 @@ int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
         0,                     // reserved
         {0, 0}                 // regs
       };
-      oper_regV2.regs[0] = regs[0];
-      oper_regV2.regs[1] = regs[1];
-      oper_regV2.type = type;
+      BrigOperandReg elements[2];
+      context->get_operand_bytes((char *)(&elements[0]), offsets[0], sizeof(BrigOperandReg));
+      context->get_operand_bytes((char *)(&elements[1]), offsets[1], sizeof(BrigOperandReg));
+      if(elements[0].type != elements[1].type){
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }  
+      oper_regV2.regs[0] = offsets[0];
+      oper_regV2.regs[1] = offsets[1];
+      oper_regV2.type = elements[0].type;
 
       *pRetOpOffset = context->get_operand_offset();
       context->append_operand(&oper_regV2);
@@ -534,12 +533,21 @@ int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
         0,                     // reserved
         {0, 0, 0, 0}           // regs
       };
-
-      oper_regV4.regs[0] = regs[0];
-      oper_regV4.regs[1] = regs[1];
-      oper_regV4.regs[2] = regs[2];
-      oper_regV4.regs[3] = regs[3];
-      oper_regV4.type = type;
+      BrigOperandReg elements[4];
+      context->get_operand_bytes((char *)(&elements[0]), offsets[0], sizeof(BrigOperandReg));
+      context->get_operand_bytes((char *)(&elements[1]), offsets[1], sizeof(BrigOperandReg));
+      context->get_operand_bytes((char *)(&elements[2]), offsets[2], sizeof(BrigOperandReg));
+      context->get_operand_bytes((char *)(&elements[3]), offsets[3], sizeof(BrigOperandReg));
+      if((elements[0].type != elements[1].type) && (elements[3].type!=elements[4].type) 
+        && (elements[0].type != elements[3].type)){
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }  
+      oper_regV4.regs[0] = offsets[0];
+      oper_regV4.regs[1] = offsets[1];
+      oper_regV4.regs[2] = offsets[2];
+      oper_regV4.regs[3] = offsets[3];
+      oper_regV4.type = elements[0].type;
 
       *pRetOpOffset = context->get_operand_offset();
       context->append_operand(&oper_regV4);
