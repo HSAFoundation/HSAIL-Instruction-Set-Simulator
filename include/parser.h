@@ -185,6 +185,8 @@ int Instruction2OpcodeFtz(Context* context);
 int BranchCbr(Context* context);
 int BranchBrn(Context* context);
 
+int DecimalListSinglePart2BLock(Context* context, const std::vector<int32_t> &decimal_list,
+                                const uint32_t elementCount);
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

@@ -26,14 +26,15 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
-        caseOperBrig(OperandAddress);
-        caseOperBrig(OperandIndirect);
-        caseOperBrig(OperandCompound);
-        caseOperBrig(OperandLabelRef);
-        caseOperBrig(OperandFunctionRef);
+        caseOperBrig(OperandOpaque);
         caseOperBrig(OperandRegV2);
         caseOperBrig(OperandRegV4);
-        
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandLabelRef);
+        case BrigEOperandFunctionList:
+        caseOperBrig(OperandArgumentList);
+        caseOperBrig(OperandFunctionRef);
+        caseOperBrig(OperandArgumentRef);
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -59,6 +60,11 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandLabelRef);
+        caseOperBrig(OperandArgumentList);
+        caseOperBrig(OperandFunctionRef);
+        caseOperBrig(OperandArgumentRef);
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -171,15 +177,6 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
-        caseOperBrig(OperandAddress);
-        caseOperBrig(OperandIndirect);
-        caseOperBrig(OperandCompound);
-        caseOperBrig(OperandLabelRef);
-        caseOperBrig(OperandFunctionRef);
-        caseOperBrig(OperandRegV2);
-        caseOperBrig(OperandRegV4);
-        
-
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -265,6 +262,9 @@ void validate(const BrigInstAtomic* ref, const BrigInstAtomic* get,
       ASSERT_EQ(refoper->kind, getoper->kind);
       switch(getoper->kind){
         caseOperBrig(OperandReg);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
         default:
@@ -294,7 +294,10 @@ void validate(const BrigInstAtomicImage* ref, const BrigInstAtomicImage* get,
       switch(getoper->kind){
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
+        caseOperBrig(OperandOpaque);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandRegV4);
+        caseOperBrig(OperandRegV2);
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -410,7 +413,6 @@ void validate(const BrigOperandAddress* ref, const BrigOperandAddress* get,
     dir_iterator getdir(GetOutput->directives + get->directive);
     switch(getdir->kind){
       caseDirBrig(DirectiveSymbol);
-    
       default:
         printf("Offset to invalid directive");
         exit(1);
@@ -422,7 +424,7 @@ void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  if (get->labeldirective != 0) {
+  if (get->labeldirective) {
     dir_iterator refdir(RefOutput->directives + ref->labeldirective);
     dir_iterator getdir(GetOutput->directives + get->labeldirective);
     switch(getdir->kind){
@@ -434,6 +436,7 @@ void validate(const BrigOperandLabelRef* ref, const BrigOperandLabelRef* get,
     }
   }
 }
+
 
 void validate(const BrigOperandIndirect* ref, const BrigOperandIndirect* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
@@ -519,15 +522,17 @@ void validate(const BrigOperandArgumentRef* ref, const BrigOperandArgumentRef* g
     BrigSections* RefOutput, BrigSections* GetOutput){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  dir_iterator refdir(RefOutput->directives + ref->arg);
-  dir_iterator getdir(GetOutput->directives + get->arg);
-  switch(getdir->kind){
-    caseDirBrig(DirectiveSymbol);
-    caseDirBrig(DirectiveImage);
-    caseDirBrig(DirectiveSampler);
-    default:
-      printf("Offset to invalid directive");
-      exit(1);
+  if (get->arg != 0) {
+    dir_iterator refdir(RefOutput->directives + ref->arg);
+    dir_iterator getdir(GetOutput->directives + get->arg);
+    switch(getdir->kind){
+     caseDirBrig(DirectiveSymbol);
+      caseDirBrig(DirectiveImage);
+      caseDirBrig(DirectiveSampler);
+      default:
+        printf("Offset to invalid directive");
+        exit(1);
+    }
   }
 }
 
@@ -541,16 +546,14 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
     BrigSections* RefOutput, BrigSections* GetOutput){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  if (get->fn != 0) {
-    dir_iterator refdir(RefOutput->directives + ref->fn);
-    dir_iterator getdir(GetOutput->directives + get->fn);
-    switch(getdir->kind){
-      caseDirBrig(DirectiveFunction);
-      caseDirBrig(DirectiveSignature);
-      default:
-        printf("Offset to invalid directive");
-        exit(1);
-    }
+  dir_iterator refdir(RefOutput->directives + ref->fn);
+  dir_iterator getdir(GetOutput->directives + get->fn);
+  switch(getdir->kind){
+    caseDirBrig(DirectiveFunction);
+    caseDirBrig(DirectiveSignature);
+    default:
+      printf("Offset to invalid directive");
+      exit(1);
   }
 }
 
@@ -561,11 +564,13 @@ void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get,
   EXPECT_EQ(ref->kind, get->kind);
   dir_iterator refdir(RefOutput->directives + ref->directive);
   dir_iterator getdir(GetOutput->directives + get->directive);
-  switch(getdir->kind){
-    caseDirBrig(DirectiveSymbol);
-    default:
-      printf("Offset to invalid directive");
-      exit(1);
+  if (refdir != NULL) {
+    switch(getdir->kind){
+      caseDirBrig(DirectiveSymbol);
+      default:
+        printf("Offset to invalid directive");
+        exit(1);
+    }
   }
   if((ref->reg!=0) && (get->reg!=0)){
     oper_iterator refoper(RefOutput->operands + ref->reg);
