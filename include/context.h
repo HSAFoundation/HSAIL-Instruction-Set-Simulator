@@ -315,7 +315,7 @@ class Context {
     bool  valid_string;
 
     union token_val {
-      int               int_val;
+      unsigned long long          int_val;
       float             float_val;
       double            double_val;
       char*             string_val;
