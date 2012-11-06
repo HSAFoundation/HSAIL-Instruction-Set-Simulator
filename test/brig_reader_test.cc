@@ -1346,3 +1346,140 @@ TEST(BrigKernelTest,  zeller) {
   delete r_arg;
 
 }
+
+TEST(BrigKernelTest, indirectBranches) {
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 1:0:$small;\n"
+      "\n"
+      "kernel &indirectBranchesKernel(kernarg_u32 %r,\n"
+      "                               kernarg_u32 %n)\n"
+      "{\n"
+      "  ld_kernarg_u32 $s0, [%n];\n"
+      "  and_b32 $s1, $s0, 0x1;\n"         //$s1 is for odd or even
+      "  mov_b32 $s2, 0xF;\n"              //set 15 to $s2 
+
+      "  ldc_b32 $s4, @even;\n"
+      "  ldc_b32 $s5, @ge;\n"
+
+      "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"   //if $s0 >= $s2 goto @ge
+      "  cbr $c0, $s5;\n"
+      "  mov_b32 $s2, 0xD;\n"              //else set 13 to $s2   
+      "@ge:"
+      "  cmp_eq_b1_u32 $c1, $s1, 0;\n"     //if %n is even number goto @even
+      "  cbr $c1, $s4;\n"       
+      "@odd:"
+      "  add_u32 $s2, $s2, 2;\n"
+      "  brn @return;\n"
+      "@even:"
+      "  add_u32 $s2, $s2, 1;\n"
+      "  brn @return;\n"
+      "@return:" 
+      "  ld_kernarg_u32 $s1, [%r];\n"
+      "  st_global_u32 $s2, [$s1];\n"
+      "  ret;\n"
+      "};"
+    );
+    EXPECT_TRUE(BP);
+    if(!BP) return;
+
+    unsigned *r = new unsigned;
+    unsigned *n = new unsigned(19);
+    void *args[] = { &r, &n};
+    llvm::Function *fun = BP->getFunction("indirectBranchesKernel");
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(fun, args);
+
+    EXPECT_EQ(17, *r);
+
+    delete r;
+    delete n;
+  }
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 1:0:$small;\n"
+      "\n"
+      "kernel &indirectBranchesKernel(kernarg_u32 %r,\n"
+      "                               kernarg_u32 %n)\n"
+      "{\n"
+      "  ld_kernarg_u32 $s0, [%n];\n"
+      "  and_b32 $s1, $s0, 0x1;\n"        //$s1 is for odd or even
+      "  mov_b32 $s2, 0xF;\n"             //set 15 to $s2
+      "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
+      "@tab: labeltargets @even, @odd;\n"
+      "  cbr $c0, $s1, [@tab];\n"         //in the case of $s0 >= $s2
+                                          //if %n is even goto @even esle goto @odd
+      "  mov_b32 $s2, 0xD;\n"             //or: set 13 to $s2
+      "  brn $s1, [@tab];\n"              //if %n is even goto @even esle goto @odd
+      "@odd:"
+      "  add_u32 $s2, $s2, 2;\n"
+      "  brn @return;\n"
+      "@even:"
+      "  add_u32 $s2, $s2, 1;\n"
+      "  brn @return;\n"
+      "@return:" 
+      "  ld_kernarg_u32 $s1, [%r];\n"
+      "  st_global_u32 $s2, [$s1];\n"
+      "  ret;\n"
+      "};"
+    );
+    EXPECT_TRUE(BP);
+    if(!BP) return;
+
+    unsigned *r = new unsigned;
+    unsigned *n = new unsigned(19);
+    void *args[] = { &r, &n};
+    llvm::Function *fun = BP->getFunction("indirectBranchesKernel");
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(fun, args);
+
+    EXPECT_EQ(17, *r);
+
+    delete r;
+    delete n;
+  }
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 1:0:$small;\n"
+      "\n"
+      "kernel &indirectBranchesKernel(kernarg_u32 %r,\n"
+      "                               kernarg_u32 %n)\n"
+      "{\n"
+      "  ld_kernarg_u32 $s0, [%n];\n"
+      "  and_b32 $s1, $s0, 0x1;\n"             //$s1 is for odd or even
+      "  mov_b32 $s2, 0xF;\n"                  //set 15 to $s2
+      "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
+      "  global_u32 %tab[] =  {@even, @odd};\n"
+      "  cbr $c0, $s1, [%tab];\n"              //in the case of $s0 >= $s2
+                                               //if %n is even goto @even esle goto @odd
+      "  mov_b32 $s2, 0xD;\n"                  //or: set 13 to $s2
+      "  brn $s1, [%tab];\n"                   //if %n is even goto @even esle goto @odd
+      "@odd:"
+      "  add_u32 $s2, $s2, 2;\n"
+      "  brn @return;\n"
+      "@even:"
+      "  add_u32 $s2, $s2, 1;\n"
+      "  brn @return;\n"
+      "@return:" 
+      "  ld_kernarg_u32 $s1, [%r];\n"
+      "  st_global_u32 $s2, [$s1];\n"
+      "  ret;\n"
+      "};"
+    );
+    EXPECT_TRUE(BP);
+    if(!BP) return;
+
+    unsigned *r = new unsigned;
+    unsigned *n = new unsigned(19);
+    void *args[] = { &r, &n};
+    llvm::Function *fun = BP->getFunction("indirectBranchesKernel");
+    hsa::brig::BrigEngine BE(BP);
+    BE.launch(fun, args);
+
+    EXPECT_EQ(17, *r);
+
+    delete r;
+    delete n;
+  }  
+}
+
