@@ -490,7 +490,12 @@ TEST(LexTest, Bug26_DecDoubleConstant) {
   EXPECT_EQ(2.33, context->token_value.double_val);
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(0.33, context->token_value.double_val);
-
+  
+  input.assign("0xFFFFFFFF");
+  lexer->set_source_string(input);
+  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0xffffffff, context->token_value.int_val);
+    
   input.assign("L");
   lexer->set_source_string(input);
   EXPECT_NE(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
