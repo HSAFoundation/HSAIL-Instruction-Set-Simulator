@@ -155,7 +155,7 @@ int InitializableDecl(Context* context, BrigStorageClass32_t storage_class);
 int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset, BrigoOffset32_t* pRetOpOffset);
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int AtomModifiers(Context* context, BrigMemorySemantic32_t* pMemorySemantic);
-int OptacqregPart2(Context* context, BrigMemorySemantic32_t* memSemantic);
+int Optacqreg(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperand(Context* context, BrigoOffset32_t* pOperand);
@@ -174,9 +174,9 @@ int MemoryOperand(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int LabelTargetsPart2(Context* context);
 
-int Instruction1Part1OpcodeDT(Context* context);
-int Instruction1Part2OpcodeNoDT(Context* context);
-int Instruction1Part3Clock(Context* context);
+int Instruction1OpcodeDT(Context* context);
+int Instruction1OpcodeNoDT(Context* context);
+int Instruction1Clock(Context* context);
 
 int Instruction2OpcodeDT(Context* context);
 int Instruction2OpcodeNoDT(Context* context);
@@ -185,7 +185,7 @@ int Instruction2OpcodeFtz(Context* context);
 int BranchCbr(Context* context);
 int BranchBrn(Context* context);
 
-int DecimalListSinglePart2BLock(Context* context, const std::vector<int32_t> &decimal_list,
+int DecimalListSingleBLock(Context* context, const std::vector<int32_t> &decimal_list,
                                 const uint32_t elementCount);
 }  // namespace brig
 }  // namespace hsa

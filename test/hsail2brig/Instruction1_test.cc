@@ -40,6 +40,8 @@ public:
     delete code;
     delete oper;
     delete dir;
+    RefInst = NULL;
+    RefDest = NULL;
   }
 };
 

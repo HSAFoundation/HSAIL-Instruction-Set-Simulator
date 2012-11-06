@@ -116,7 +116,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   BrigOperandAddress addr;
 
   BrigOperandReg reg1, reg2;
-  BrigOperandWaveSz wav1, wav2;
+  BrigOperandWaveSz wav1;
   BrigOperandImmed imm1, imm2;
 
 
@@ -727,7 +727,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   BrigOperandAddress addr;
 
   BrigOperandReg reg1, reg2;
-  BrigOperandWaveSz wav1, wav2;
+  BrigOperandWaveSz wav1;
   BrigOperandImmed imm1, imm2;
 
   symbols = new StringBuffer();

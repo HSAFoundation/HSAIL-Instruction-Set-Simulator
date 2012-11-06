@@ -13,6 +13,11 @@
 
 namespace hsa{
 namespace brig{
+
+#define OPERANDSBUFFER_OFFSET 8
+#define CODEBUFFER_OFFSET 8
+#define DIRECTIVESBUFFER_OFFSET 8
+
 namespace validate_brig{
 
 void validate(const BrigInstBase* ref, const BrigInstBase* get, 

@@ -1661,175 +1661,150 @@ depth               { free_string(context);
 _u32                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu32;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U32;}
 
 _s32                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs32;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S32;}
 
 _s64                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs64;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S64;}
 
 _u64                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu64;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U64;}
 
 _b1                 { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigb1;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _B1;}
 
 _b32                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigb32;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _B32;}
 
 _f64                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf64;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F64;}
 
 _f32                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf32;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F32;}
 
 _b64                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigb64;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _B64;}
 
 _b8                 { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigb8;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _B8;}
 
 _b16                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigb16;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _B16;}
 
 _s8                 { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs8;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S8;}
 
 _s16                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs16;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S16;}
 
 _u8                 { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu8;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U8;}
 
 _u16                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu16;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U16;}
 
 _f16                { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf16;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F16;}
 
 _b128               { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigb128;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _B128;}
 
 _u8x4               { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu8x4;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U8X4;}
 
 _s8x4               { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs8x4;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S8X4;}
 
 _u16x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu16x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U16X2;}
 
 _s16x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs16x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S16X2;}
 
 _f16x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf16x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F16X2;}
 
 _f32x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf32x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F32X2;}
 
 _u32x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu32x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U32X2;}
 
 _s32x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs32x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S32X2;}
 
@@ -1837,112 +1812,93 @@ _s32x2              { free_string(context);
 _u8x8               { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu8x8;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U8X8;}
 
 _s8x8               { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs8x8;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S8X8;}
 
 _u16x4              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
-                      context->token_value.data_type = Brigu16x4; 
-                      context->set_type(context->token_value.data_type);
-                      context->yycolno+=yyleng;  
-                      return  _U16X4;}
-
+                      context->token_value.data_type = Brigu16x4; context->yycolno+=yyleng;  return  _U16X4;}
 _s16x4              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs16x4;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S16X4;}
 
 _f16x4              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf16x4;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F16X4;}
 
 _u8x16              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu8x16;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U8X16;}
 
 _s8x16              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs8x16;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S8X16;}
 
 _u16x8              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu16x8;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U16X8;}
 
 _s16x8              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs16x8;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S16X8;}
 
 _f16x8              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf16x8;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F16X8;}
 
 _f32x4              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf32x4;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F32X4;}
 
 _s32x4              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs32x4;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S32X4;}
 
 _u32x4              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu32x4;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U32X4;}
 
 _f64x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigf64x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _F64X2;}
 
 _s64x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigs64x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _S64X2;}
 
 _u64x2              { free_string(context);
                       context->token_type = DATA_TYPE_ID;
                       context->token_value.data_type = Brigu64x2;
-                      context->set_type(context->token_value.data_type);
                       context->yycolno+=yyleng;
                       return  _U64X2;}
 
