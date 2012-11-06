@@ -157,20 +157,15 @@ int Identifier(Context* context) {
     switch (context->token_to_scan) {
       case TOKEN_CREGISTER:
         bor.type = Brigb1;
-        // refresh context type.
-        context->set_type(Brigb1);
         break;
       case TOKEN_DREGISTER:
         bor.type = Brigb64;
-        context->set_type(Brigb64);
         break;
       case TOKEN_SREGISTER:
         bor.type = Brigb32;
-        context->set_type(Brigb32);
         break;
       case TOKEN_QREGISTER:
         bor.type = Brigb128;
-        context->set_type(Brigb128);
         break;
     }
     bor.reserved = 0;
@@ -3447,7 +3442,6 @@ int Instruction4Cmov(Context* context) {
   return 1;
 
 }
-
 
 int Instruction4Shuffle(Context* context) {
   BrigInstBase shuffleInst = {
