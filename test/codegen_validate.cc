@@ -17,11 +17,15 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);    
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+    bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
       ASSERT_EQ(refoper->kind, getoper->kind);
+      
       switch(getoper->kind){
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
@@ -51,7 +55,10 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -84,7 +91,10 @@ void validate(const BrigInstCvt* ref, const BrigInstCvt* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -115,7 +125,10 @@ void validate(const BrigInstRead* ref, const BrigInstRead*get,
   EXPECT_EQ(ref->stype, get->stype);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -145,7 +158,10 @@ void validate(const BrigInstBar* ref, const BrigInstBar* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -171,7 +187,10 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -199,7 +218,10 @@ void validate(const BrigInstCmp* ref, const BrigInstCmp* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -231,7 +253,10 @@ void validate(const BrigInstMem* ref, const BrigInstMem* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -258,7 +283,10 @@ void validate(const BrigInstAtomic* ref, const BrigInstAtomic* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -289,7 +317,10 @@ void validate(const BrigInstAtomicImage* ref, const BrigInstAtomicImage* get,
   EXPECT_EQ(ref->type, get->type);
   EXPECT_EQ(ref->packing, get->packing);
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -324,7 +355,10 @@ void validate(const BrigInstImage* ref, const BrigInstImage* get,
   EXPECT_EQ(ref->packing, get->packing);
   EXPECT_EQ(ref->reserved, get->reserved);      
   for(int i=0; i<5; i++){
-    if(get->o_operands[i]!=0){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
       oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
       oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
       ASSERT_EQ(refoper->size, getoper->size);
@@ -597,7 +631,7 @@ void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get,
 void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, BrigSections* RefOutput, BrigSections* GetOutput){
   inst_iterator refinst(RefOutput->code + refoffset); 
   inst_iterator getinst(GetOutput->code + getoffset); 
-  bool validOffset = (getoffset>=8) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
+  bool validOffset = (getoffset>=CODEBUFFER_OFFSET) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
   if(refinst!=NULL && getinst!=NULL && validOffset){
     switch(getinst->kind){ 
       caseInstBrig(InstBase); 
@@ -621,7 +655,7 @@ void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, 
 void validate_DIR_OFFSET(BrigdOffset32_t refoffset, BrigdOffset32_t getoffset, BrigSections* RefOutput, BrigSections* GetOutput){
   dir_iterator refdir(RefOutput->directives + refoffset);
   dir_iterator getdir(GetOutput->directives + getoffset);
-  bool validOffset = (getoffset>=8) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
+  bool validOffset = (getoffset>=DIRECTIVESBUFFER_OFFSET) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
   if(refdir!= NULL && getdir!=NULL && validOffset){
     switch(getdir->kind){
       caseDirBrig(DirectivePad);        
