@@ -2321,9 +2321,12 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
   context->current_argdecl_offset = context->get_directive_offset();
   context->append_directive(&sym_decl);
 
-  if (Initializer(context)) {
-    return 1;
+  if(context->token_to_scan == '='){
+    if (Initializer(context)) {
+      return 1;
+    }
   }
+  
   if (context->token_to_scan != ';') {
     context->set_error(MISSING_SEMICOLON);
     return 1;   
@@ -2331,7 +2334,6 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
     
   context->token_to_scan = yylex();
   return 0;
-  
 }
 
 int UninitializableDecl(Context* context) {
@@ -7670,6 +7672,7 @@ int FloatListSingle(Context* context) {
   context->set_error(MISSING_DOUBLE_CONSTANT);
   return 1;
 }
+
 int DecimalListSinglePart2Block(Context* context, const std::vector<int32_t> &decimal_list,
                                 const uint32_t elementCount) {
   uint32_t n = elementCount;
@@ -7722,6 +7725,7 @@ int DecimalListSinglePart2Block(Context* context, const std::vector<int32_t> &de
   array = NULL;
   return 0;
 }
+
 int DecimalListSingle(Context* context) {
   uint32_t elementCount = 0;
   std::vector<int32_t> decimal_list;
@@ -7731,106 +7735,102 @@ int DecimalListSingle(Context* context) {
       if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
         context->set_error(MISSING_INTEGER_CONSTANT);
         return 1;
-      } else {
-        context->token_value.int_val *= (-1);
-      }
+      }     
+      context->token_value.int_val *= (-1);      
     }
+    
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
       elementCount++;
       decimal_list.push_back(context->token_value.int_val);
-
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ',') {
+    }
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
         context->token_to_scan = yylex();
         continue;
-      } else {
+    } else 
+      break;
+  }
+  if (context->get_isBlockNumeric()) {
+    if (DecimalListSinglePart2Block(context, decimal_list, elementCount)) {
+      return 1;
+    }
+    return 0;
+  }
+  uint32_t n = 0;
 
-        if (context->get_isBlockNumeric()) {
-          if (DecimalListSinglePart2Block(context, decimal_list, elementCount)) {
-            return 1;
-          }
-          return 0;
-        }
-        uint32_t n = 0;
+  // update the BrigDirectiveSymbol.d_init and dim
+  BrigDirectiveSymbol bds ;
+  BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+  context->get_directive(bds_offset,&bds);
 
-        // update the BrigDirectiveSymbol.d_init and dim
-        BrigDirectiveSymbol bds ;
-        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-        context->get_directive(bds_offset,&bds);
+  if (0 == context->get_dim()) {
+    if (context->get_isArray()) {
+      // If array is empty [],  Update dim.
+      bds.s.symbolModifier = BrigArray;
+      context->set_symbol_modifier(BrigArray);
+    }
+    bds.s.dim = elementCount;
+  } else if (elementCount > bds.s.dim) {
+    context->set_error(INVALID_INITIALIZER);
+    return 1;
+  }
+  n = bds.s.dim;
+  context->set_dim(bds.s.dim);
 
-        if (0 == context->get_dim()) {
-          if (context->get_isArray()) {
-            // If array is empty [],  Update dim.
-            bds.s.symbolModifier = BrigArray;
-            context->set_symbol_modifier(BrigArray);
-          }
-          bds.s.dim = elementCount;
-        } else if (elementCount > bds.s.dim) {
-          context->set_error(INVALID_INITIALIZER);
-          return 1;
-        }
-        n = bds.s.dim;
-        context->set_dim(bds.s.dim);
+  switch (context->get_type()) {
+    case Brigb1:
+      context->set_error(INVALID_INITIALIZER);
+      return 1;
+    case Brigb8:    n = (n + 7) >> 3; break;  // (n+7)/8
+    case Brigb16:   n = (n + 3) >> 2; break;  // (n+3)/4
+    case Brigb32:   n = (n + 1) >> 1; break;  // (n+1)/2
+    case Brigb64:   break;
+  }
+  size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t);
+  uint8_t *array = new uint8_t[arraySize];
+  memset(array, 0, sizeof(uint8_t) * arraySize);
 
-        switch (context->get_type()) {
-          case Brigb1:
-            context->set_error(INVALID_INITIALIZER);
-            return 1;
-          case Brigb8:    n = (n + 7) >> 3; break;  // (n+7)/8
-          case Brigb16:   n = (n + 3) >> 2; break;  // (n+3)/4
-          case Brigb32:   n = (n + 1) >> 1; break;  // (n+1)/2
-          case Brigb64:   break;
-        }
-        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t);
-        uint8_t *array = new uint8_t[arraySize];
-        memset(array, 0, sizeof(uint8_t) * arraySize);
+  BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+  bdi->elementCount = bds.s.dim;
 
-        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-        bdi->elementCount = bds.s.dim;
+  bdi->size = arraySize;
+  bdi->kind = BrigEDirectiveInit;
+  bdi->c_code = 0;
+  bdi->type = context->get_type();
+  bdi->reserved = 0;
+  switch(context->get_type()) {
+    case Brigb8:
+      for (uint32_t i = 0; i < decimal_list.size(); i++ ){
+        bdi->initializationData.u8[i] = (uint8_t)decimal_list[i];
+      }
+      break;
+    case Brigb16:
+      for (uint32_t i = 0; i < decimal_list.size(); i++ ){
+        bdi->initializationData.u16[i] = (uint16_t)decimal_list[i];
+      }
+      break;
+    case Brigb32:
+      for (uint32_t i = 0; i < decimal_list.size(); i++ ){
+        *(int32_t*)&bdi->initializationData.u32[i] = decimal_list[i];
+      }
+      break;
+    case Brigb64:
+      // TODO(Chuang): Loss of precision
+      for (uint32_t i = 0; i < decimal_list.size(); i++ ) {
+        *(int32_t*)&bdi->initializationData.u64[i] = decimal_list[i];
+      }
+      break;
+  }
+  bds.d_init = context->get_directive_offset();
+  bds.d_init += bds.d_init & 0x7;
+  unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+  context->update_directive_bytes(bds_charp, bds_offset,
+                                  sizeof(BrigDirectiveSymbol));
 
-        bdi->size = arraySize;
-        bdi->kind = BrigEDirectiveInit;
-        // c_code It is unused in this structure.
-        bdi->c_code = 0;
-        bdi->type = context->get_type();
-        bdi->reserved = 0;
-        switch(context->get_type()) {
-        case Brigb8:
-          for (uint32_t i = 0; i < decimal_list.size(); i++ ){
-            bdi->initializationData.u8[i] = (uint8_t)decimal_list[i];
-          }
-          break;
-        case Brigb16:
-          for (uint32_t i = 0; i < decimal_list.size(); i++ ){
-            bdi->initializationData.u16[i] = (uint16_t)decimal_list[i];
-          }
-          break;
-        case Brigb32:
-          for (uint32_t i = 0; i < decimal_list.size(); i++ ){
-            *(int32_t*)&bdi->initializationData.u32[i] = decimal_list[i];
-          }
-          break;
-        case Brigb64:
-          // TODO(Chuang): Loss of precision
-          for (uint32_t i = 0; i < decimal_list.size(); i++ ) {
-            *(int32_t*)&bdi->initializationData.u64[i] = decimal_list[i];
-          }
-          break;
-        }
-        bds.d_init = context->get_directive_offset();
-        bds.d_init += bds.d_init & 0x7;
-        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-        context->update_directive_bytes(bds_charp, bds_offset,
-                                        sizeof(BrigDirectiveSymbol));
-
-        context->append_directive(bdi);
-        delete[] reinterpret_cast<uint8_t *>(bdi);
-        bdi = NULL;
-        return 0;
-      }  // ','
-    }  // integer constant
-  }  // While
-  return 1;
+  context->append_directive(bdi);
+  delete[] reinterpret_cast<uint8_t *>(bdi);
+  bdi = NULL;
+  return 0;  
 }
 
 int Block(Context* context) {
