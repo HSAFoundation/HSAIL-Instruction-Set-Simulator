@@ -1087,6 +1087,7 @@ int Instruction3(Context* context) {
   }
   type = context->token_value.data_type;
   type = (opcode == BrigClass) ? (int)Brigb1 : type;
+  context->set_type(type);
   context->token_to_scan = yylex();
 
   if (Operand(context, &OpOffset0)) {
@@ -2590,7 +2591,7 @@ int SysCall(Context* context) {
   };
   std::string opName;
   context->token_to_scan = yylex();
-
+  context->set_type(Brigb32);
   // Note: dest: Destination. Must be a 32-bit register.
   if (context->token_to_scan == TOKEN_SREGISTER) {
     if (Operand(context, &syscallInst.o_operands[0])) {
@@ -3886,7 +3887,9 @@ int Cmp(Context* context) {
         }
         if (context->token_to_scan == ',') {
           context->token_to_scan = yylex();
-
+          
+          context->set_type(cmpInst.sourceType);
+          
           if (!Operand(context, &cmpInst.o_operands[1])) {
             if (context->token_to_scan == ',') {
               context->token_to_scan = yylex();
@@ -5799,9 +5802,9 @@ int Instruction1OpcodeNoDT(Context* context) {
     {0, 0, 0, 0, 0}
   };
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
-
+  context->set_type(Brigb32);
   inst1_op.opcode = context->token_value.opcode;
-
+  
   context->token_to_scan = yylex();
   // TODO(Chuang): whether support for rounding
   if (!RoundingMode(context)) {
@@ -5855,6 +5858,7 @@ int Instruction1Clock(Context* context) {
     BrigNoPacking,
     {0, 0, 0, 0, 0}
   };
+  context->set_type(Brigb64);
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_DREGISTER) {
     if (Operand(context, &inst1_op.o_operands[0])) {
