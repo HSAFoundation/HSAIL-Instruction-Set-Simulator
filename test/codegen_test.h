@@ -62,7 +62,7 @@ public:
     const dir_iterator getdir_end = GetOutput->end();
     const dir_iterator refdir_end = RefOutput->end();  
     for(; (getdir != getdir_end) && (refdir != refdir_end) &&
-      (GetOutput->directivesSize>8) && (RefOutput->codeSize > 0); getdir++, refdir++){
+        GetOutput->directivesSize>8; getdir++, refdir++){
     if(getdir->kind==BrigEDirectivePad)
         getdir++;
       switch(getdir->kind){
