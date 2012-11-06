@@ -611,9 +611,19 @@ TEST(BrigInstTest, Round) {
 
 TEST(BrigWriterTest, VectorArith) {
   {
+    const uint32_t testVec[] = { 0x03030303, 0x01010101, 0x02020202 };
+    testInst("add_pp_s8x4", testVec);
+    testInst("add_pp_u8x4", testVec);
+  }
+  {
     const uint32_t testVec[] = { 0, 0x01010101, 0xFFFFFFFF };
     testInst("add_pp_s8x4", testVec);
     testInst("add_pp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x00030003, 0x00010001, 0x00020002 };
+    testInst("add_pp_s16x2", testVec);
+    testInst("add_pp_u16x2", testVec);
   }
   {
     const uint32_t testVec[] = { 0, 0x00010001, 0xFFFFFFFF };
@@ -621,14 +631,35 @@ TEST(BrigWriterTest, VectorArith) {
     testInst("add_pp_u16x2", testVec);
   }
   {
+    const uint64_t testVec[] = { 0x0303030303030303,
+                                 0x0101010101010101,
+                                 0x0202020202020202 };
+    testInst("add_pp_s8x8", testVec);
+    testInst("add_pp_u8x8", testVec);
+  }
+  {
     const uint64_t testVec[] = { 0, 0x0101010101010101, 0xFFFFFFFFFFFFFFFF };
     testInst("add_pp_s8x8", testVec);
     testInst("add_pp_u8x8", testVec);
   }
   {
+    const uint64_t testVec[] = { 0x0003000300030003,
+                                 0x0001000100010001,
+                                 0x0002000200020002 };
+    testInst("add_pp_s16x4", testVec);
+    testInst("add_pp_u16x4", testVec);
+  }
+  {
     const uint64_t testVec[] = { 0, 0x0001000100010001, 0xFFFFFFFFFFFFFFFF };
     testInst("add_pp_s16x4", testVec);
     testInst("add_pp_u16x4", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x0000000300000003,
+                                 0x0000000100000001,
+                                 0x0000000200000002 };
+    testInst("add_pp_s32x2", testVec);
+    testInst("add_pp_u32x2", testVec);
   }
   {
     const uint64_t testVec[] = { 0, 0x0000000100000001, 0xFFFFFFFFFFFFFFFF };
@@ -917,6 +948,9 @@ TEST(BrigKernelTest, SExtZExt) {
 }
 
 TEST(BrigKernelTest, SubWordArray) {
+
+  if(sizeof(void *) == 4) return;
+
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$large;"
     ""

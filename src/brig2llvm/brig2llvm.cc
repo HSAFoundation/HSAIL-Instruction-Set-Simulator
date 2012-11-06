@@ -7,6 +7,7 @@
 #include "brig_control_block.h"
 #include "brig_inst_helper.h"
 
+#include "llvm/Attributes.h"
 #include "llvm/DerivedTypes.h"
 #include "llvm/Instructions.h"
 #include "llvm/IRBuilder.h"
@@ -102,8 +103,8 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
     llvm::Type *base = getElementTy(C, type);
     unsigned length = BrigInstHelper::getVectorLength(type);
 
-    if(base->isIntegerTy()) {
-      unsigned bitWidth = base->getIntegerBitWidth() * length;
+    if(base->isIntegerTy() || sizeof(void *) == 4) {
+      unsigned bitWidth = base->getScalarSizeInBits() * length;
       return llvm::Type::getIntNTy(C, bitWidth);
     }
 
@@ -183,7 +184,8 @@ struct FunState {
 
   FunState(const FunMap &funMap, SymbolMap &symbolMap,
            const BrigFunction &brigFun, llvm::Function *llvmFun) :
-    funMap(funMap), symbolMap(symbolMap) {
+    funMap(funMap),
+    symbolMap(symbolMap) {
 
     llvm::LLVMContext &C = llvmFun->getContext();
     const BrigControlBlock E = brigFun.end();
@@ -412,17 +414,39 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
   return llvm::CastInst::Create(castOp, value, destTy, "", &B);
 }
 
-static
-llvm::FunctionType *getInstFunType(const inst_iterator inst,
-                                   const std::vector<llvm::Value *> &sources,
-                                   llvm::LLVMContext &C) {
+static bool isSRet(const inst_iterator inst) {
+  return sizeof(void *) == 4 &&
+    BrigInstHelper::hasDest(inst) &&
+    BrigInstHelper::isVectorTy(BrigDataType(inst->type));
+}
 
-  llvm::Type *result = runOnType(C, BrigDataType(inst->type));
+static llvm::Function *getInstFun(const inst_iterator inst,
+                                  const std::vector<llvm::Value *> &sources,
+                                  llvm::Module *M) {
+
+  bool sret = isSRet(inst);
+  llvm::LLVMContext &C = M->getContext();
+
+  llvm::Type *result =
+    sret ? llvm::Type::getVoidTy(C) : runOnType(C, BrigDataType(inst->type));
   std::vector<llvm::Type *> params;
   for(unsigned i = 0; i < sources.size(); ++i)
     params.push_back(sources[i]->getType());
 
-  return llvm::FunctionType::get(result, params, false);
+  llvm::FunctionType *instFunTy =
+    llvm::FunctionType::get(result, params, false);
+
+  std::string name = BrigInstHelper::getInstName(inst);
+  llvm::Function *instFun =
+    llvm::cast<llvm::Function>(M->getOrInsertFunction(name, instFunTy));
+
+  if(sret) {
+    instFun->addAttribute(1, llvm::Attribute::StructRet);
+    instFun->addAttribute(1, llvm::Attribute::NoAlias);
+    instFun->addAttribute(1, llvm::Attribute::NoCapture);
+  }
+
+  return instFun;
 }
 
 static void insertEnableFtz(llvm::BasicBlock &B) {
@@ -483,14 +507,20 @@ static void runOnComplexInst(llvm::BasicBlock &B,
   bool rounding = BrigInstHelper::hasRoundingMode(inst);
   if(rounding) insertSetRoundingMode(B, inst);
 
+  bool sret = isSRet(inst);
+
   // Skip the width parameter for loads.
   if(inst->opcode == BrigLd) ++operand;
 
-  const BrigOperandBase *brigDest = NULL;
-  if(BrigInstHelper::hasDest(inst))
-    brigDest = helper.getOperand(inst, operand++);
-
   std::vector<llvm::Value *> sources;
+
+  llvm::Value *destAddr = NULL;
+  if(BrigInstHelper::hasDest(inst)) {
+    const BrigOperandBase *brigDest = helper.getOperand(inst, operand++);
+    destAddr = getOperandAddr(B, brigDest, helper, state);
+    if(sret) sources.push_back(destAddr);
+  }
+
   for(; operand < 5 && inst->o_operands[operand]; ++operand) {
     const BrigOperandBase *brigSrc = helper.getOperand(inst, operand);
     llvm::Value *srcRaw = getOperand(B, brigSrc, helper, state);
@@ -499,14 +529,10 @@ static void runOnComplexInst(llvm::BasicBlock &B,
   }
 
   llvm::Module *M = B.getParent()->getParent();
-  std::string name = BrigInstHelper::getInstName(inst);
-  llvm::FunctionType *funTy = getInstFunType(inst, sources, B.getContext());
-  llvm::Function *instFun =
-    llvm::cast<llvm::Function>(M->getOrInsertFunction(name, funTy));
+  llvm::Function *instFun = getInstFun(inst, sources, M);
   llvm::Value *resultRaw = llvm::CallInst::Create(instFun, sources, "", &B);
 
-  if(brigDest) {
-    llvm::Value *destAddr = getOperandAddr(B, brigDest, helper, state);
+  if(destAddr && !sret) {
     llvm::PointerType *destPtrTy =
       llvm::cast<llvm::PointerType>(destAddr->getType());
     llvm::Type *destTy = destPtrTy->getElementType();

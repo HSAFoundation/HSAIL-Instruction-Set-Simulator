@@ -147,7 +147,7 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 {HEX_INT}     { context->token_type = CONSTANT;
                 free_string(context);
                 context->yycolno+=yyleng;
-                context->token_value.int_val = strtol(yytext, NULL, 16);
+                context->token_value.int_val = strtoull(yytext, NULL, 16);
                 return TOKEN_INTEGER_CONSTANT; }
 
 {DEC_SINGLE}  { context->token_type = CONSTANT;
