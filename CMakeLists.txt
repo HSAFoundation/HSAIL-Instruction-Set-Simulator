@@ -55,7 +55,7 @@ set(hsail2brig_test_SOURCES
     test/codegen_test.cc
     test/codegen_validate.cc
     test/hsail2brig/Atom_test.cc
-    #test/hsail2brig/AtomicImage_test.cc
+    test/hsail2brig/AtomicImage_test.cc
     test/hsail2brig/Branch_test.cc
     #test/hsail2brig/Call_test.cc
     #test/hsail2brig/Cmp_test.cc
@@ -93,7 +93,7 @@ else (ENABLE_TEST_CASE)
     test/codegen_test.cc
     test/codegen_validate.cc
     test/hsail2brig/Atom_test.cc
-    #test/hsail2brig/AtomicImage_test.cc
+    test/hsail2brig/AtomicImage_test.cc
     test/hsail2brig/Branch_test.cc
     #test/hsail2brig/Call_test.cc
     #test/hsail2brig/Cmp_test.cc

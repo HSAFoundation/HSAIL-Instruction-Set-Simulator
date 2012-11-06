@@ -704,7 +704,7 @@ TEST(CodegenTest, AlignmentCheck) {
   EXPECT_EQ(0U, curr_offset%8);
 }
 
-TEST(CodegenTest, DISABLED_ArrayOperandList_CodeGen_SimpleTest) {
+TEST(CodegenTest, ArrayOperandList_CodeGen_SimpleTest) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
