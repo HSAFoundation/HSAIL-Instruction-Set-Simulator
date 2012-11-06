@@ -92,7 +92,6 @@ TEST(CodegenTest, Example2_CodeGen) {
 
   dir->append(&funRef);
 
-
   symRef.size = sizeof(symRef);
   symRef.kind = BrigEDirectiveSymbol;
   symRef.s.c_code = 0;
