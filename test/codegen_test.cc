@@ -502,66 +502,6 @@ TEST(CodegenTest, Example3_CodeGen) {
   delete lexer;
 }
 
-TEST(CodegenTest, SimplestFunction_CodeGen) {
-  context->set_error_reporter(main_reporter);
-  context->clear_context();
-
-  std::string input("version 1:0:$small; \n");
-  input.append("function &return_true(arg_f32 %ret_val)(){ \n");
-  input.append(" ret; \n");
-  input.append("};");
-
-  // test the rule
-  Lexer* lexer = new Lexer(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Version(context));
-  EXPECT_EQ(0, Function(context));
-
-  // test the .directive section size
-  BrigdOffset32_t dsize = context->get_directive_offset();
-  EXPECT_EQ(108U, dsize);
-
-  // test the offset to the .string section
-  BrigDirectiveFunction ref = {
-    40,                       // size
-    BrigEDirectiveFunction,   // kind
-    8,                        // c_code
-    8,                        // s_name
-    0,                        // inParamCount
-    96+4+8,                       // d_firstScopedDirective
-    1,                        // operationCount
-    96+4+8,                       // d_nextDirective
-    BrigNone,
-    0,
-    1,                        // outParamCount
-    0,
-  };
-
-  BrigDirectiveFunction get;
-  context->get_directive(context->current_bdf_offset, &get);
-  EXPECT_EQ(ref.s_name, get.s_name);
-  EXPECT_EQ(ref.c_code, get.c_code);
-  EXPECT_EQ(ref.outParamCount, get.outParamCount);
-  EXPECT_EQ(ref.inParamCount, get.inParamCount);
-  EXPECT_EQ(ref.operationCount, get.operationCount);
-  EXPECT_EQ(ref.d_nextDirective, get.d_nextDirective);
-  EXPECT_EQ(ref.d_firstScopedDirective, get.d_firstScopedDirective);
-
-  // test the .string size
-  BrigsOffset32_t size = context->get_string_offset();
-  EXPECT_EQ(30U, size);
-
-  // find the string.
-  std::string func_name("&return_true");
-  int str_offset = context->lookup_symbol(func_name);
-  EXPECT_EQ(8, str_offset);
-
-  BrigcOffset32_t csize = context->get_code_offset();
-  EXPECT_EQ(40U, csize);
-
-  delete lexer;
-}
-
 TEST(CodegenTest, AlignmentCheck) {
   // Try the situation in PRM 20.2 (pg. 226)
 
