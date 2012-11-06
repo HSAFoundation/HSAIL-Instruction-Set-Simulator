@@ -26,7 +26,7 @@ bool BrigWriter::write(const char *filename,
   std::string errMsg;
   llvm::raw_fd_ostream out(filename, errMsg, llvm::raw_fd_ostream::F_Binary);
   if(!errMsg.empty())
-    return NULL;
+    return false;
 
   bool success = write(out, directives, code, operands, debug, strings);
 
