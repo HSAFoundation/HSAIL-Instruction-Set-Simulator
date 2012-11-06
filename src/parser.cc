@@ -5205,7 +5205,7 @@ int Lda(Context* context) {
   return 1;
 }
 
-int OptacqregPart2(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
+int Optacqreg(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
   if (context->token_to_scan == _REL) {
     *pMemSemantic = BrigRelease;
     context->token_to_scan = yylex();
@@ -5221,7 +5221,7 @@ int OptacqregPart2(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
 
 int Optacqreg(Context* context) {
   BrigMemorySemantic32_t temp;
-  return OptacqregPart2(context, &temp);
+  return Optacqreg(context, &temp);
 }
 
 int ImageRet(Context* context) {
@@ -5286,7 +5286,7 @@ int ImageRet(Context* context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  if (!OptacqregPart2(context, &img_inst.memorySemantic)) {
+  if (!Optacqreg(context, &img_inst.memorySemantic)) {
   }
 
   if (context->token_type == GEOMETRY_ID) {
@@ -5467,7 +5467,7 @@ int ImageNoRet(Context* context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  if (!OptacqregPart2(context, &imgNoRet.memorySemantic)) {
+  if (!Optacqreg(context, &imgNoRet.memorySemantic)) {
   }
 
   if (context->token_type == GEOMETRY_ID) {
@@ -5695,7 +5695,7 @@ int Instruction0(Context* context) {
   return 1;
 }
 
-int Instruction1Part1OpcodeDT(Context* context) {
+int Instruction1OpcodeDT(Context* context) {
   BrigInstBase inst1_op = {
     sizeof(inst1_op),
     BrigEInstBase,
@@ -5789,7 +5789,7 @@ int Instruction1Part1OpcodeDT(Context* context) {
   return 1;
 }
 
-int Instruction1Part2OpcodeNoDT(Context* context) {
+int Instruction1OpcodeNoDT(Context* context) {
   BrigInstBase inst1_op = {
     sizeof(inst1_op),
     BrigEInstBase,
@@ -5846,7 +5846,7 @@ int Instruction1Part2OpcodeNoDT(Context* context) {
   return 0;
 }
 
-int Instruction1Part3Clock(Context* context) {
+int Instruction1Clock(Context* context) {
   BrigInstBase inst1_op = {
     sizeof(inst1_op),
     BrigEInstBase,
@@ -5875,15 +5875,15 @@ int Instruction1Part3Clock(Context* context) {
 
 int Instruction1(Context* context) {
   if (context->token_to_scan == CLOCK) {
-    if (!Instruction1Part3Clock(context)) {
+    if (!Instruction1Clock(context)) {
       return 0;
     }
   } else if (context->token_type == INSTRUCTION1_OPCODE_NODT) {
-    if (!Instruction1Part2OpcodeNoDT(context)) {
+    if (!Instruction1OpcodeNoDT(context)) {
       return 0;
     }
   } else if (context->token_type == INSTRUCTION1_OPCODE) {
-    if (!Instruction1Part1OpcodeDT(context)) {
+    if (!Instruction1OpcodeDT(context)) {
       return 0;
     }
   }
@@ -7673,7 +7673,7 @@ int FloatListSingle(Context* context) {
   return 1;
 }
 
-int DecimalListSinglePart2Block(Context* context, const std::vector<int32_t> &decimal_list,
+int DecimalListSingleBlock(Context* context, const std::vector<int32_t> &decimal_list,
                                 const uint32_t elementCount) {
   uint32_t n = elementCount;
   switch (context->get_type()) {
@@ -7751,7 +7751,7 @@ int DecimalListSingle(Context* context) {
       break;
   }
   if (context->get_isBlockNumeric()) {
-    if (DecimalListSinglePart2Block(context, decimal_list, elementCount)) {
+    if (DecimalListSingleBlock(context, decimal_list, elementCount)) {
       return 1;
     }
     return 0;
