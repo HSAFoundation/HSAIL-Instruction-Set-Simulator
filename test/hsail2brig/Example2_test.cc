@@ -44,13 +44,18 @@ TEST(CodegenTest, Example2_CodeGen) {
   BrigDirectiveFunction funRef;
   BrigDirectiveSymbol symRef;
 
+  std::string funName, argName;
+
   in.append("version 1:0:$small; \n");
   in.append("function &return_true(arg_f32 %ret_val)(){ \n");
   in.append(" ret; \n");
   in.append("};");
 
-  symbols->append("&return_true");
-  symbols->append("%ret_val");
+  funName.append("&return_true");
+  argName.append("%ret_val");
+
+  symbols->append(funName);
+  symbols->append(argName);
 
   BrigInstBase instRet = {
     0,                      // size
@@ -100,7 +105,7 @@ TEST(CodegenTest, Example2_CodeGen) {
   symRef.s.reserved = 0;
   symRef.s.symbolModifier = 0;
   symRef.s.dim = 0;
-  symRef.s.s_name = 13;
+  symRef.s.s_name = funName.size() + 1;
   symRef.s.type = Brigf32;
   symRef.s.align = 1;
   symRef.d_init = 0;

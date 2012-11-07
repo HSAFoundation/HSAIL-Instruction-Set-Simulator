@@ -45,15 +45,21 @@ TEST(CodegenTest, Example1_CodeGen) {
   BrigDirectiveSymbol kerSymRef;
   BrigDirectiveSymbol priSymRef;
 
+  std::string funName, kerSymName, priSymName;
+
   in.append("version 1:0:$large; \n");
   in.append("kernel &demo(kernarg_f32 %x) { \n");
   in.append("private_u32 %z; \n");
   in.append("ret; \n");
   in.append("};\n");
 
-  symbols->append("&demo");
-  symbols->append("%x");
-  symbols->append("%z");
+  funName.append("&demo");
+  kerSymName.append("%x");
+  priSymName.append("%z");
+
+  symbols->append(funName);
+  symbols->append(kerSymName);
+  symbols->append(priSymName);
 
   BrigInstBase instRet = {
     sizeof(BrigInstBase),   // size
@@ -104,7 +110,7 @@ TEST(CodegenTest, Example1_CodeGen) {
   kerSymRef.s.reserved = 0;
   kerSymRef.s.symbolModifier = 0;
   kerSymRef.s.dim = 0;
-  kerSymRef.s.s_name = 6;
+  kerSymRef.s.s_name = funName.size() + 1;
   kerSymRef.s.type = Brigf32;
   kerSymRef.s.align = 1;
   kerSymRef.d_init = 0;
@@ -120,7 +126,7 @@ TEST(CodegenTest, Example1_CodeGen) {
   priSymRef.s.reserved = 0;
   priSymRef.s.symbolModifier = 0;
   priSymRef.s.dim = 0;
-  priSymRef.s.s_name = 9;
+  priSymRef.s.s_name = funName.size() + kerSymName.size() + 2;
   priSymRef.s.type = Brigu32;
   priSymRef.s.align = 1;
   priSymRef.d_init = 0;
