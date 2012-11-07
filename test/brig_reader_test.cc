@@ -1365,6 +1365,7 @@ TEST(BrigKernelTest, indirectBranches) {
       "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"   //if $s0 >= $s2 goto @ge
       "  cbr $c0, $s5;\n"
       "  mov_b32 $s2, 0xD;\n"              //else set 13 to $s2   
+      "  brn $s5;\n"
       "@ge:"
       "  cmp_eq_b1_u32 $c1, $s1, 0;\n"     //if %n is even number goto @even
       "  cbr $c1, $s4;\n"       
