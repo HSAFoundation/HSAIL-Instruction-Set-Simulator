@@ -1483,4 +1483,69 @@ TEST(BrigKernelTest, indirectBranches) {
     delete n;
   }  
 }
+TEST(BrigKernelTest, indirectCall) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "function &foo (arg_u32 %r) (arg_u32 %n)\n"
+    "{\n"
+    "  ld_arg_u32 $s1, [%n];\n"     //add 1 to %n and set result to %r
+    "  add_u32 $s1, $s1, 1;\n"
+    "  st_arg_u32 $s1, [%r];\n"
+    "  ret;\n"
+    "};\n"
+    "\n"
+    "signature &barone_t (arg_u32 %r) (arg_u32 %n);\n"
+
+    "function &bar (arg_u32 %r) (arg_u32 %n)\n"
+    "{\n"
+    "  ld_arg_u32 $s1, [%n];\n"     //add 2 to %n and set result to %r
+    "  add_u32 $s1, $s1, 2;\n"
+    "  st_arg_u32 $s1, [%r];\n"
+    "  ret;\n"
+    "};\n"
+    "\n"
+    
+    "kernel &indirectCallKernel(kernarg_u32 %r_ptr, kernarg_u32 %n_ptr)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s0, [%n_ptr];\n"
+    
+    "  ldc_b32 $s3, &foo;\n"
+    "  {\n"
+    "    arg_u32 %r;\n"
+    "    arg_u32 %n;\n"
+    "    st_arg_u32 $s0, [%n];\n"
+    "    call $s3 (%r)(%n) [&foo, &bar];\n"
+    "    ld_arg_u32 $s0, [%r];\n"
+    "  }\n"
+    
+    "  ldc_b32 $s3, &bar;\n"
+    "  {\n"
+    "    arg_u32 %r;\n"
+    "    arg_u32 %n;\n"
+    "    st_arg_u32 $s0, [%n];\n"
+    "    call $s3 (%r)(%n) &barone_t;\n"
+    "    ld_arg_u32 $s0, [%r];\n"
+    "  }\n"
+    
+    "@return:"
+    "  ld_kernarg_u32 $s1, [%r_ptr];\n"
+    "  st_global_u32 $s0, [$s1];\n"
+    "  ret;\n"
+    "};"
+    );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  int *r = new int;
+  int *n = new int(5);
+  void *args[] = { &r, n };
+  llvm::Function *fun = BP->getFunction("indirectCallKernel");
+
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+  EXPECT_EQ(8, *r);
+
+  delete n;
+  delete r;
+}
 
