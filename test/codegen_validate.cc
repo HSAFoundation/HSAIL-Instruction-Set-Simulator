@@ -754,7 +754,9 @@ void validate(const BrigDirectiveFunction* ref, const BrigDirectiveFunction* get
   EXPECT_EQ(ref->inParamCount, get->inParamCount);
   validate_DIR_OFFSET(ref->d_firstScopedDirective, get->d_firstScopedDirective, RefOutput, GetOutput);
   EXPECT_EQ(ref->operationCount, get->operationCount);
-  validate_DIR_OFFSET(ref->d_nextDirective, get->d_nextDirective, RefOutput, GetOutput);
+  if (get->d_nextDirective != GetOutput->directivesSize) {
+    validate_DIR_OFFSET(ref->d_nextDirective, get->d_nextDirective, RefOutput, GetOutput);
+  }
   EXPECT_EQ(ref->attribute, get->attribute);
   EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->outParamCount, get->outParamCount);
@@ -821,7 +823,9 @@ void validate(const BrigDirectiveKernel* ref, const BrigDirectiveKernel* get,
   EXPECT_EQ(ref->inParamCount, get->inParamCount);
   validate_DIR_OFFSET(ref->d_firstScopedDirective, get->d_firstScopedDirective, RefOutput, GetOutput);
   EXPECT_EQ(ref->operationCount, get->operationCount);
-  validate_DIR_OFFSET(ref->d_nextDirective, get->d_nextDirective, RefOutput, GetOutput);
+  if (get->d_nextDirective != GetOutput->directivesSize) {
+    validate_DIR_OFFSET(ref->d_nextDirective, get->d_nextDirective, RefOutput, GetOutput);
+  }
   EXPECT_EQ(ref->attribute, get->attribute);
   EXPECT_EQ(ref->reserved, get->reserved);
   EXPECT_EQ(ref->outParamCount, get->outParamCount);
