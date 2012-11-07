@@ -40,15 +40,26 @@ TEST(CodegenTest, Example1_CodeGen) {
   Buffer* oper = new Buffer();
   Buffer* dir = new Buffer();
 
+  BrigDirectiveVersion verRef;
+  BrigDirectiveKernel kerRef;
+  BrigDirectiveSymbol kerSymRef;
+  BrigDirectiveSymbol priSymRef;
+
+  std::string funName, kerSymName, priSymName;
+
   in.append("version 1:0:$large; \n");
   in.append("kernel &demo(kernarg_f32 %x) { \n");
   in.append("private_u32 %z; \n");
   in.append("ret; \n");
   in.append("};\n");
 
-  symbols->append("&demo");
-  symbols->append("%x");
-  symbols->append("%z");
+  funName.append("&demo");
+  kerSymName.append("%x");
+  priSymName.append("%z");
+
+  symbols->append(funName);
+  symbols->append(kerSymName);
+  symbols->append(priSymName);
 
   BrigInstBase instRet = {
     sizeof(BrigInstBase),   // size
@@ -61,76 +72,67 @@ TEST(CodegenTest, Example1_CodeGen) {
   
   code->append(&instRet);
 
-  BrigDirectiveVersion verRef = {
-    sizeof(BrigDirectiveVersion),
-    BrigEDirectiveVersion,
-    0,
-    1,                    //  major
-    0,                    //  minor
-    BrigELarge,
-    BrigEFull,
-    BrigENosftz,
-    0
-  };
+  verRef.size = sizeof(verRef);
+  verRef.kind = BrigEDirectiveVersion;
+  verRef.c_code = 0;
+  verRef.major = 1;
+  verRef.minor = 0;
+  verRef.machine = BrigELarge;
+  verRef.profile = BrigEFull;
+  verRef.ftz = BrigENosftz;
+  verRef.reserved = 0;
 
   dir->append(&verRef);
 
-  BrigDirectiveKernel ref = {
-    40,                       // size
-    BrigEDirectiveKernel,     // kind
-    0,                        // c_code
-    0,                        // s_name
-    1,                        // inParamCount
-    100,                      // d_firstScopedDirective
-    1,                        // operationCount
-    140,                      // d_nextDirective
-    BrigNone,                 // attribute
-    0,                        // fbar
-    0,                        // outParamCount
-    60,                       // d_firstInParam
-  };
+  kerRef.size = sizeof(kerRef);
+  kerRef.kind = BrigEDirectiveKernel;
+  kerRef.c_code = 0;
+  kerRef.s_name = 0;
+  kerRef.inParamCount = 1;
+  kerRef.d_firstScopedDirective = sizeof(verRef) + sizeof(kerRef) +
+                                  sizeof(kerSymRef);
+  kerRef.operationCount = 1;
+  kerRef.d_nextDirective = sizeof(verRef) + sizeof(kerRef) +
+                           sizeof(kerSymRef) + sizeof(priSymRef);
+  kerRef.attribute = BrigNone;
+  kerRef.reserved = 0;
+  kerRef.outParamCount = 0;
+  kerRef.d_firstInParam = 0;
 
-  dir->append(&ref);
+  dir->append(&kerRef);
 
-  BrigDirectiveSymbol kernarg = {
-  40,                       // size
-  BrigEDirectiveSymbol ,    // kind
-  {
-    0,                         // c_code
-    BrigKernargSpace,         // storag class kernarg
-    BrigNone ,                // attribut
-    0,                        // reserved
-    0,                        // symbolModifier
-    0,                        // dim
-    6,                       // s_name
-    Brigf32,                  // type
-    1,                        // align
-  },
-  0,                        // d_init
-  0,                         // reserved
-  };
 
-  dir->append(&kernarg);
+  kerSymRef.size = sizeof(kerSymRef);
+  kerSymRef.kind = BrigEDirectiveSymbol;
+  kerSymRef.s.c_code = 0;
+  kerSymRef.s.storageClass = BrigKernargSpace;
+  kerSymRef.s.attribute = BrigNone;
+  kerSymRef.s.reserved = 0;
+  kerSymRef.s.symbolModifier = 0;
+  kerSymRef.s.dim = 0;
+  kerSymRef.s.s_name = funName.size() + 1;
+  kerSymRef.s.type = Brigf32;
+  kerSymRef.s.align = 1;
+  kerSymRef.d_init = 0;
+  kerSymRef.reserved = 0;
 
-  BrigDirectiveSymbol private_var = {
-  40,                       // size
-  BrigEDirectiveSymbol ,    // kind
-  {
-    0,                         // c_code
-    BrigPrivateSpace,         // storag class kernarg
-    BrigNone ,                // attribut
-    0,                        // reserved
-    0,                        // symbolModifier
-    0,                        // dim
-    9,                        // s_name
-    Brigu32,                  // type
-    1,                        // align
-  },
-  0,                        // d_init
-  0,                         // reserved
-  };
+  dir->append(&kerSymRef);
 
-  dir->append(&private_var);
+  priSymRef.size = sizeof(priSymRef);
+  priSymRef.kind = BrigEDirectiveSymbol;
+  priSymRef.s.c_code = 0;
+  priSymRef.s.storageClass = BrigPrivateSpace;
+  priSymRef.s.attribute = BrigNone;
+  priSymRef.s.reserved = 0;
+  priSymRef.s.symbolModifier = 0;
+  priSymRef.s.dim = 0;
+  priSymRef.s.s_name = funName.size() + kerSymName.size() + 2;
+  priSymRef.s.type = Brigu32;
+  priSymRef.s.align = 1;
+  priSymRef.d_init = 0;
+  priSymRef.reserved = 0;
+
+  dir->append(&priSymRef);
 
   Example1_Test TestCase(in, symbols, dir, code, oper);
   TestCase.Run_Test(&Program);
