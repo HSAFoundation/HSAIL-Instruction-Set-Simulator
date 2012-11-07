@@ -1,11 +1,11 @@
 #ifndef _HSACORE_H_
 #define _HSACORE_H_
 
-#if defined(__WIN32)
+/*#if defined(__WIN32)
 #pragma comment( lib, "hsacore" )
 #elif defined(__WIN64)
 #pragma comment( lib, "hsacore64" )
-#endif // #if defined(__WIN32)
+#endif // #if defined(__WIN32)*/
 
 
 #if !defined(AMD_AMP_HSA_INCLUDES)
