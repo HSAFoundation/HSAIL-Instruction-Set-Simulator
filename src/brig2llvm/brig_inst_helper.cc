@@ -278,21 +278,21 @@ const char *getPredName(BrigCompareOperation pred) {
 #undef caseBrig
 }
 
-const char *getRoundingName(const BrigAluModifier &aluModifier) {
-  if(aluModifier.floatOrInt) {
-    switch(aluModifier.rounding) {
-    case 0: return "neari";
-    case 1: return "zeroi";
-    case 2: return "upi";
-    case 3: return "downi";
-    default: assert(false && "Unknown rounding mode");
-    }
-  } else {
-    switch(aluModifier.rounding) {
+const char *BrigInstHelper::getRoundingName(const BrigAluModifier &aluMod) {
+  if(aluMod.floatOrInt) {
+    switch(aluMod.rounding) {
     case 0: return "near";
     case 1: return "zero";
     case 2: return "up";
     case 3: return "down";
+    default: assert(false && "Unknown rounding mode");
+    }
+  } else {
+    switch(aluMod.rounding) {
+    case 0: return "neari";
+    case 1: return "zeroi";
+    case 2: return "upi";
+    case 3: return "downi";
     default: assert(false && "Unknown rounding mode");
     }
   }

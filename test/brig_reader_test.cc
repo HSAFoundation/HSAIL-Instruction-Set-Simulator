@@ -385,28 +385,50 @@ static const char InstTest[] =
   "@BB0_1:\n"
   "        ret ;\n"
   "@BB0_2:\n"
-  "        shl_u32 $s1, $s1, 2 ;\n"
-  "        add_u32 $s2, $s2, $s1 ;\n"
-  "        ld_global_f32 $s2, [$s2] ;\n"
-  "        add_u32 $s3, $s3, $s1 ;\n"
-  "        ld_global_f32 $s3, [$s3] ;\n"
-  "        add_u32 $s4, $s4, $s1 ;\n"
-  "        ld_global_f32 $s4, [$s4] ;\n"
+  "        shl_u32 $s1, $s1, %u ;\n"
+  "        shl_u32 $s0, $s0, $s1 ;\n"
+  "        shl_u32 $s2, $s2, $s1 ;\n"
+  "        shl_u32 $s3, $s3, $s1 ;\n"
+  "        shl_u32 $s4, $s4, $s1 ;\n"
+  "        ld_global_f%u $%c2, [$s2] ;\n"
+  "        ld_global_f%u $%c3, [$s3] ;\n"
+  "        ld_global_f%u $%c4, [$s4] ;\n"
   "        %s %s;\n"
-  "        add_u32 $s0, $s0, $s1 ;\n"
-  "        st_global_f32 $s2, [$s0] ;\n"
+  "        st_global_f%u $%c2, [$s0] ;\n"
   "        brn @BB0_1 ;\n"
   "};\n";
 
-static const char *nary[] = { "$s2",
-                              "$s2, $s2",
-                              "$s2, $s2, $s3",
-                              "$s2, $s2, $s3, $s4" };
+static const char *nary32[] = { "$s2",
+                                "$s2, $s2",
+                                "$s2, $s2, $s3",
+                                "$s2, $s2, $s3, $s4" };
 
-static hsa::brig::BrigProgram makeTest(unsigned args, const char *inst) {
-  size_t size = snprintf(NULL, 0, InstTest, inst, nary[args]);
+static const char *nary64[] = { "$d2",
+                                "$d2, $d2",
+                                "$d2, $d2, $d3",
+                                "$d2, $d2, $d3, $d4" };
+
+static hsa::brig::BrigProgram makeTest(unsigned args, const char *inst,
+                                       unsigned bits) {
+  unsigned logBytes = bits == 32 ? 2 : 3;
+  char c = bits == 32 ? 's' : 'd';
+  const char **nary = bits == 32 ? nary32 : nary64;
+  size_t size =
+    snprintf(NULL, 0, InstTest,
+             logBytes,
+             bits, c,
+             bits, c,
+             bits, c,
+             inst, nary[args],
+             bits, c);
   char *buffer = new char[size];
-  snprintf(buffer, size, InstTest, inst, nary[args]);
+  snprintf(buffer, size, InstTest,
+           logBytes,
+           bits, c,
+           bits, c,
+           bits, c,
+           inst, nary[args],
+           bits, c);
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
   return BP;
@@ -414,7 +436,7 @@ static hsa::brig::BrigProgram makeTest(unsigned args, const char *inst) {
 
 template<class T, size_t N>
 static void testInst(const char *inst, const T(&testVec)[N]) {
-  hsa::brig::BrigProgram BP = makeTest(N - 1, inst);
+  hsa::brig::BrigProgram BP = makeTest(N - 1, inst, sizeof(T) * 8);
   EXPECT_TRUE(BP);
   if(!BP) return;
 
@@ -509,9 +531,147 @@ TEST(BrigInstTest, VectorMad) {
   testInst("mad_s32", testVec);
 }
 
+TEST(BrigInstTest, Ftz) {
+  {
+    const float testVec[] = { 2 * 1.0E-45f, 1.0E-45f, 1.0E-45f };
+    testInst("add_f32", testVec);
+  }
+
+  {
+    const float testVec[] = { 0.0, 1.0E-45f, 1.0E-45f };
+    testInst("add_ftz_f32", testVec);
+  }
+
+  {
+    const float testVec[] = { 1.191E-38f - 1.190E-38f,
+                              1.191E-38f, -1.190E-38f };
+    testInst("add_f32", testVec);
+  }
+
+  {
+    const float testVec[] = { 0,
+                              1.191E-38f, -1.190E-38f };
+    testInst("add_ftz_f32", testVec);
+  }
+}
+
+TEST(BrigInstTest, Round) {
+  union { uint32_t u32; float f32; } result;
+  {
+    result.u32 = 0x3EAAAAAB;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAB;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_f32", testVec);
+  }
+  {
+    result.u32 = 0x3EAAAAAB;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_near_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAB;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_near_f32", testVec);
+  }
+  {
+    result.u32 = 0x3EAAAAAA;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_zero_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAA;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_zero_f32", testVec);
+  }
+  {
+    result.u32 = 0x3EAAAAAB;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_up_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAA;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_up_f32", testVec);
+  }
+  {
+    result.u32 = 0x3EAAAAAA;
+    const float testVec[] = { result.f32, 1.0f, 3.0 };
+    testInst("div_down_f32", testVec);
+  }
+  {
+    result.u32 = 0xBEAAAAAB;
+    const float testVec[] = { result.f32, -1.0f, 3.0 };
+    testInst("div_down_f32", testVec);
+  }
+}
+
 TEST(BrigWriterTest, VectorArith) {
-  const uint32_t testVec[] = { 0, 0x01010101, 0xFFFFFFFF };
-  testInst("add_pp_s8x4", testVec);
+  {
+    const uint32_t testVec[] = { 0x03030303, 0x01010101, 0x02020202 };
+    testInst("add_pp_s8x4", testVec);
+    testInst("add_pp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0, 0x01010101, 0xFFFFFFFF };
+    testInst("add_pp_s8x4", testVec);
+    testInst("add_pp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x00030003, 0x00010001, 0x00020002 };
+    testInst("add_pp_s16x2", testVec);
+    testInst("add_pp_u16x2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0, 0x00010001, 0xFFFFFFFF };
+    testInst("add_pp_s16x2", testVec);
+    testInst("add_pp_u16x2", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x0303030303030303,
+                                 0x0101010101010101,
+                                 0x0202020202020202 };
+    testInst("add_pp_s8x8", testVec);
+    testInst("add_pp_u8x8", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0, 0x0101010101010101, 0xFFFFFFFFFFFFFFFF };
+    testInst("add_pp_s8x8", testVec);
+    testInst("add_pp_u8x8", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x0003000300030003,
+                                 0x0001000100010001,
+                                 0x0002000200020002 };
+    testInst("add_pp_s16x4", testVec);
+    testInst("add_pp_u16x4", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0, 0x0001000100010001, 0xFFFFFFFFFFFFFFFF };
+    testInst("add_pp_s16x4", testVec);
+    testInst("add_pp_u16x4", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x0000000300000003,
+                                 0x0000000100000001,
+                                 0x0000000200000002 };
+    testInst("add_pp_s32x2", testVec);
+    testInst("add_pp_u32x2", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0, 0x0000000100000001, 0xFFFFFFFFFFFFFFFF };
+    testInst("add_pp_s32x2", testVec);
+    testInst("add_pp_u32x2", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x3f8000003f800000,
+                                 0x402df854402df854,
+                                 0x3ebc5ab23ebc5ab2 };
+    testInst("mul_pp_f32x2", testVec);
+  }
 }
 
 TEST(BrigWriterTest, GlobalArray) {
@@ -788,6 +948,9 @@ TEST(BrigKernelTest, SExtZExt) {
 }
 
 TEST(BrigKernelTest, SubWordArray) {
+
+  if(sizeof(void *) == 4) return;
+
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$large;"
     ""
@@ -932,7 +1095,8 @@ TEST(BrigKernelTest, CRC32) {
        // get value of CRC32 array $s5 index. result store in $s5
     "  add_u32 $s2, 0, 0;\n"             // $s2 is for j. j = 0
     "@loop_j:"
-    "  and_b32 $c2, $s5, 0x1;\n"         // CRC32 array index
+    "  and_b32 $s7, $s5, 0x1;\n"         // CRC32 array index
+    "  cmp_eq_b1_u32 $c2, $s7, 0x1;\n"
     "  shr_u32 $s5, $s5, 1;\n"
     "  cbr $c2, @loop_j_if;\n"
     "  brn @loop_j_endif;\n"

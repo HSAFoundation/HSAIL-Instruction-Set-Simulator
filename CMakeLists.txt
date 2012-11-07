@@ -5,8 +5,13 @@ include_directories(include)
 include_directories(${CMAKE_BINARY_DIR})
 add_definitions(-DGTEST_HAS_PTHREAD=0)
 if (CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "-fabi-version=0 ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpmath=sse")
 endif (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpmath=sse")
+endif (CMAKE_COMPILER_IS_GNUCC)
+set(CMAKE_C_FLAGS "-std=gnu99 -msse3 ${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "-msse3 ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DBIN_PATH=${PROJECT_BINARY_DIR}/test ${CMAKE_CXX_FLAGS}")
 
@@ -28,10 +33,11 @@ MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
 include (EnsureLLVMisPresent)
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
 
-SET(PROJ_SEARCH_PATH "${PROJECT_SOURCE_DIR}/include"
+SET(PROJ_SEARCH_PATH
+"${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
-"${PROJECT_SOURCE_DIR}/compiler/utils/unittest/googletest/include"
+"${PROJECT_BINARY_DIR}/src"
 "${PROJECT_SOURCE_DIR}/src"
 "${PROJECT_BINARY_DIR}/src")
 include_directories( ${PROJ_SEARCH_PATH} )
@@ -66,7 +72,7 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/GlobalDecl_test.cc
     test/hsail2brig/ImageInstruction_test.cc
     #test/hsail2brig/Instruction0_test.cc
-    #test/hsail2brig/Instruction1_test.cc
+    test/hsail2brig/Instruction1_test.cc
     #test/hsail2brig/Instruction2_test.cc
     #test/hsail2brig/Instruction3_test.cc
     test/hsail2brig/Instruction4_test.cc
@@ -104,6 +110,7 @@ else (ENABLE_TEST_CASE)
     test/hsail2brig/Extension_test.cc
     test/hsail2brig/FileDecl_test.cc
     test/hsail2brig/GlobalDecl_test.cc
+    test/hsail2brig/ImageInstruction_test.cc
     #test/hsail2brig/Instruction0_test.cc
     test/hsail2brig/Instruction1_test.cc
     #test/hsail2brig/Instruction2_test.cc
