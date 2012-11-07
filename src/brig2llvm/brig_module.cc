@@ -1520,6 +1520,96 @@ bool BrigModule::validateArithmeticInst(const inst_iterator inst,
   return valid;
 }
 
+bool BrigModule::validateShiftInst(const inst_iterator inst) const {
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
+    return false;
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(BrigInstHelper::isSignedTy(type) ||
+                 BrigInstHelper::isUnsignedTy(type),
+                 "Type is only valid for signed and unsigned point types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(destReg, "Destination must be a register");
+  oper_iterator src0(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(src0) ||
+                 isa<BrigOperandImmed>(src0) ||
+                 isa<BrigOperandWaveSz>(src0), 
+                 "Source must be a register, immediate, or wave size");
+  oper_iterator src1(S_.operands + inst->o_operands[2]);
+  valid &= check(isa<BrigOperandReg>(src1) ||
+                 isa<BrigOperandImmed>(src1) ||
+                 isa<BrigOperandWaveSz>(src1), 
+                 "Source must be a register, immediate, or wave size");
+  if(const BrigOperandReg *src1Reg = dyn_cast<BrigOperandReg>(src1)) {
+    valid &= check(src1Reg, "Destination must be a register");
+    valid &= check(src1Reg->type == Brigb32, "Type of src1 should be Brigb32");
+  }
+  if(const BrigOperandImmed *src1Imm = dyn_cast<BrigOperandImmed>(src1)) {
+
+    valid &= check(src1Imm, "Destination must be a immediate");
+    valid &= check(src1Imm->type == Brigb32, "Type of src1 should be Brigb32");
+  }
+  if(BrigInstHelper::isVectorTy(type)) {
+    BrigDataType elementTy = BrigDataType(BrigInstHelper::getElementTy(type));
+    valid &= check(inst->type == Brigu8x4 || inst->type == Brigu16x2 ||
+                   inst->type == Brigs8x4 || inst->type == Brigs16x2 || 
+                   inst->type == Brigu8x8 || inst->type == Brigu16x4 || 
+                   inst->type == Brigs8x8 || inst->type == Brigs16x4 ||
+                   inst->type == Brigs32x2 || inst->type == Brigu32x2, 
+                   "If pack form, length should be 8x4, 8x8, 16x2, 16x4 or 32x2");
+    valid &= check(BrigInstHelper::getTypeSize(BrigDataType(destReg->type)) ==
+                   BrigInstHelper::getTypeSize(elementTy) * 
+                   BrigInstHelper::getVectorLength(type), 
+                   "Length of destination should equal with inst->type");
+
+    if(const BrigOperandReg *src0Reg = dyn_cast<BrigOperandReg>(src0)) {
+      BrigDataType regType = BrigDataType(src0Reg->type);
+      valid &= check(BrigInstHelper::getTypeSize(regType) ==
+                     BrigInstHelper::getTypeSize(elementTy) * 
+                     BrigInstHelper::getVectorLength(type), 
+                     "Length of src0 should equal with inst->type");
+    }
+
+    if(const BrigOperandImmed *src0Imm = dyn_cast<BrigOperandImmed>(src0)) {
+      BrigDataType immType = BrigDataType(src0Imm->type);
+      valid &= check(BrigInstHelper::getTypeSize(immType) ==
+                     BrigInstHelper::getTypeSize(elementTy) * 
+                     BrigInstHelper::getVectorLength(type), 
+                     "Length of src0 should equal with inst->type");
+    }
+
+    valid &= check(inst->packing == BrigPackPS, 
+                   "Packing should be BrigPackPS");
+  } else {
+    valid &= check(BrigInstHelper::getTypeSize(type) == 32 ||
+                   BrigInstHelper::getTypeSize(type) == 64, 
+                   "If regular form, length should be 32 or 64");
+
+    valid &= check(BrigInstHelper::getTypeSize(BrigDataType(destReg->type)) == 
+                   BrigInstHelper::getTypeSize(type), 
+                   "Length of destination should equal with inst->type");
+
+    if(const BrigOperandReg *src0Reg = dyn_cast<BrigOperandReg>(src0)) {
+      BrigDataType regType = BrigDataType(src0Reg->type);
+      valid &= check(BrigInstHelper::getTypeSize(regType) ==
+                     BrigInstHelper::getTypeSize(type), 
+                     "Length of src0 should equal with inst->type");
+    }
+
+    if(const BrigOperandImmed *src0Imm = dyn_cast<BrigOperandImmed>(src0)) {
+      BrigDataType immType = BrigDataType(src0Imm->type);
+      valid &= check(BrigInstHelper::getTypeSize(immType) ==
+                     BrigInstHelper::getTypeSize(type), 
+                     "Length of src0 should equal with inst->type");
+    }
+
+    valid &= check(inst->packing == BrigNoPacking, 
+                   "Packing should be BrigNoPacking");
+  }  
+  return valid;
+}
+
 bool BrigModule::validateAbs(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
@@ -1767,11 +1857,11 @@ bool BrigModule::validateMul24Hi(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateShl(const inst_iterator inst) const {
-  return true;
+  return validateShiftInst(inst);
 }
 
 bool BrigModule::validateShr(const inst_iterator inst) const {
-  return true;
+  return validateShiftInst(inst);
 }
 
 bool BrigModule::validateAnd(const inst_iterator inst) const {
@@ -1962,11 +2052,59 @@ bool BrigModule::validateLastBit(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateLda(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  valid &= check(inst->type ==Brigu32 || inst->type == Brigu64, 
+                 "Length should be 32 or 64");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Lda cannot accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(isa<BrigOperandReg>(dest), 
+                 "Destination should be BrigOperandReg");
+  valid &= check(BrigInstHelper::getTypeSize(BrigDataType(inst->type)) ==
+                 BrigInstHelper::getTypeSize(BrigDataType(destReg->type)),
+                 "Length of dest should equal with inst->type");
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandAddress>(src) ||
+                 isa<BrigOperandIndirect>(src) ||
+                 isa<BrigOperandCompound>(src), 
+                 "Src should be BrigOperandAddress, BrigOperandIndirect "
+                 "and BrigOPerandCompound");
+  return valid;
 }
 
 bool BrigModule::validateLdc(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  valid &= check(inst->type == Brigb32 || inst->type == Brigb64, 
+                 "Length should be 32 or 64");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Ldc cannot accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(isa<BrigOperandReg>(dest), 
+                 "Destination should be BrigOperandReg");
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandLabelRef>(src) ||
+                 isa<BrigOperandFunctionRef>(src), 
+                 "Src should be LabelRef and FunctionRef");
+  if(isa<BrigOperandLabelRef>(src)) 
+    valid &= check(destReg->type == Brigb32, 
+                   "Type of dest should be b32 if the source is label");
+  if(isa<BrigOperandFunctionRef>(src)) {
+    const dir_iterator version(S_.directives + 8);
+    const BrigDirectiveVersion *bdv = dyn_cast<BrigDirectiveVersion>(version);
+    if(bdv->machine == BrigELarge)
+      valid &= check(destReg->type == Brigb64, 
+                     "Type of dest should be b64 if machine model is large");
+    else if(bdv->machine == BrigESmall)
+      valid &= check(destReg->type == Brigb32, 
+                     "Type of dest should be b32 if machine model is small");
+  }
+  return valid;
 }
 
 bool BrigModule::validateMov(const inst_iterator inst) const {
