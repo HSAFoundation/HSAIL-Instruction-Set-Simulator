@@ -65,7 +65,7 @@ TEST(CodegenTest, Example5_SimpleCall) {
   };
 
   BrigDirectiveFunction get;
-  context->get_directive(context->current_bdf_offset, &get);
+  context->get_directive(context->get_bdf_offset(), &get);
   EXPECT_EQ(ref.s_name, get.s_name);
   EXPECT_EQ(ref.c_code, get.c_code);
   EXPECT_EQ(ref.outParamCount, get.outParamCount);
@@ -808,7 +808,7 @@ TEST(CodegenTest, Kernel_CodeGen_SimpleTest) {
   };
 
   BrigDirectiveKernel get;
-  curDirOffset = context->current_bdf_offset;
+  curDirOffset = context->get_bdf_offset();
   context->get_directive(curDirOffset, &get);
   curDirOffset += sizeof(BrigDirectiveKernel);
 

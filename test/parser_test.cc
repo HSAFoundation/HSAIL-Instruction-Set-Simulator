@@ -458,7 +458,6 @@ TEST(ParserTest, ArgumentListBody) {
   context->clear_context();
   // initialize fake values
   // which should be set in real case when parser parses a function def
-  context->current_bdf_offset = 0;
   context->set_arg_output(false);
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
@@ -533,7 +532,7 @@ TEST(ParserTest, Codeblock) {
 
 // initialize fake values
   // which should be set in real case when parser parses a function def
-  context->current_bdf_offset = 8;
+  context->set_bdf_offset(context->get_directive_offset());
   context->set_arg_output(false);
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
@@ -635,7 +634,6 @@ TEST(ParserTest, BranchOperation) {
 
   // initialize fake values
   // which should be set in real case when parser parses a function def
-  context->current_bdf_offset = 0;
   context->set_arg_output(false);
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
@@ -2513,7 +2511,6 @@ TEST(ParserTest, KernelArgumentListBody) {
   context->clear_context();
   // initialize fake values
   // which should be set in real case when parser parses a function def
-  context->current_bdf_offset = 0;
   context->set_arg_output(false);
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
@@ -2543,7 +2540,6 @@ TEST(ParserTest, KernelArgumentListBody) {
   context->clear_context();
   // initialize fake values
   // which should be set in real case when parser parses a function def
-  context->current_bdf_offset = 0;
   context->set_arg_output(false);
   context->append_directive(&fake);
   context->token_to_scan = lexer->get_next_token();
