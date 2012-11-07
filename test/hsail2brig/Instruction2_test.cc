@@ -714,7 +714,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase24(in, symbols, &out24, &reg1, &reg2);
   TestCase24.Run_Test(&Instruction2);
   symbols->clear();
-
+ 
   /**********************************************************************************/
   in.assign( "bitrev_b64 $d1, 0x234;\n");
   destName.assign("$d1");   
@@ -1570,6 +1570,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   delete symbols;
 }
+
 
 /**********************************************************************************/
 /**********************************************************************************/

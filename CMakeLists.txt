@@ -71,13 +71,13 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/FileDecl_test.cc
     test/hsail2brig/GlobalDecl_test.cc
     test/hsail2brig/ImageInstruction_test.cc
-    #test/hsail2brig/Instruction0_test.cc
+    test/hsail2brig/Instruction0_test.cc
     test/hsail2brig/Instruction1_test.cc
-    #test/hsail2brig/Instruction2_test.cc
+    test/hsail2brig/Instruction2_test.cc
     #test/hsail2brig/Instruction3_test.cc
     test/hsail2brig/Instruction4_test.cc
     test/hsail2brig/Instruction5_test.cc
-    #test/hsail2brig/Ld_test.cc
+    test/hsail2brig/Ld_test.cc
     test/hsail2brig/Location_test.cc
     #test/hsail2brig/Mov_test.cc
     test/hsail2brig/Mul_test.cc
@@ -111,13 +111,13 @@ else (ENABLE_TEST_CASE)
     test/hsail2brig/FileDecl_test.cc
     test/hsail2brig/GlobalDecl_test.cc
     test/hsail2brig/ImageInstruction_test.cc
-    #test/hsail2brig/Instruction0_test.cc
+    test/hsail2brig/Instruction0_test.cc
     test/hsail2brig/Instruction1_test.cc
-    #test/hsail2brig/Instruction2_test.cc
+    test/hsail2brig/Instruction2_test.cc
     #test/hsail2brig/Instruction3_test.cc
     test/hsail2brig/Instruction4_test.cc
     test/hsail2brig/Instruction5_test.cc
-    #test/hsail2brig/Ld_test.cc
+    test/hsail2brig/Ld_test.cc
     test/hsail2brig/Location_test.cc
     #test/hsail2brig/Mov_test.cc
     test/hsail2brig/Mul_test.cc
