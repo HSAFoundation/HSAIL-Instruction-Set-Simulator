@@ -443,8 +443,10 @@ template<class T> static void BitRevLogic(T result, T a) {
 
   EXPECT_EQ(rev.t, result);
 }
-TestAll(SignedInst,   BitRev, Unary)
-TestAll(UnsignedInst, BitRev, Unary)
+declareUnary(BitRev, b32)
+declareUnary(BitRev, b64)
+MakeTest(BitRev_b32, BitRevLogic)
+MakeTest(BitRev_b64, BitRevLogic)
 
 template<class T> static void ExtractLogic(T result, T a, T b, T c) {
 
@@ -458,8 +460,10 @@ template<class T> static void ExtractLogic(T result, T a, T b, T c) {
     EXPECT_EQ(signEx, result);
   }
 }
-TestAll(SignedInst,   Extract, Ternary)
-TestAll(UnsignedInst, Extract, Ternary)
+declareTernary(Extract, b32)
+declareTernary(Extract, b64)
+MakeTest(Extract_b32, ExtractLogic)
+MakeTest(Extract_b64, ExtractLogic)
 
 template<class T> static void InsertLogic(T result, T a, T b, T c, T d) {
 
@@ -473,15 +477,19 @@ template<class T> static void InsertLogic(T result, T a, T b, T c, T d) {
   resultNe |= (b & (~T(0) << width)) << offset;
   EXPECT_EQ(resultNe, result);
 }
-TestAll(SignedInst,   Insert, Quaternary)
-TestAll(UnsignedInst, Insert, Quaternary)
+declareQuaternary(Insert, b32)
+declareQuaternary(Insert, b64)
+MakeTest(Insert_b32, InsertLogic)
+MakeTest(Insert_b64, InsertLogic)
 
 template<class T> static void BitselectLogic(T result, T a, T b, T c) {
   EXPECT_EQ(b &  a, result &  a);
   EXPECT_EQ(c & ~a, result & ~a);
 }
-TestAll(SignedInst,   Bitselect, Ternary)
-TestAll(UnsignedInst, Bitselect, Ternary)
+declareTernary(Bitselect, b32)
+declareTernary(Bitselect, b64)
+MakeTest(Bitselect_b32, BitselectLogic)
+MakeTest(Bitselect_b64, BitselectLogic)
 
 template<class T> static void FirstbitLogic(T result, T a) {
 
@@ -497,8 +505,10 @@ template<class T> static void FirstbitLogic(T result, T a) {
   while(!(a & mask)) mask >>= 1;
   EXPECT_EQ(mask, T(1) << (Int<T>::Bits - result - 1));
 }
-TestAll(SignedInst,   Firstbit, Unary)
-TestAll(UnsignedInst, Firstbit, Unary)
+declareUnary(Firstbit, b32)
+declareUnary(Firstbit, b64)
+MakeTest(Firstbit_b32, FirstbitLogic)
+MakeTest(Firstbit_b64, FirstbitLogic)
 
 template<class T> static void LastbitLogic(T result, T a) {
 
@@ -512,8 +522,10 @@ template<class T> static void LastbitLogic(T result, T a) {
   while(!(a & mask)) mask <<= 1;
   EXPECT_EQ(mask, T(1) << result);
 }
-TestAll(SignedInst,   Lastbit, Unary)
-TestAll(UnsignedInst, Lastbit, Unary)
+declareUnary(Lastbit, b32)
+declareUnary(Lastbit, b64)
+MakeTest(Lastbit_b32, LastbitLogic)
+MakeTest(Lastbit_b64, LastbitLogic)
 
 static void Mov_b64_b32_Logic(b64 result, b32 a, b32 b) {
   EXPECT_EQ(b, b32(result));

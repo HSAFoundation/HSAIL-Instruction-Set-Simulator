@@ -36,7 +36,7 @@ Context::Context(void) {
   yylineno = 1;
   dim = 0;
   last_directive_offset = 0;
-  
+  type = Brigb32;
   current_bdf_offset = 0;
   current_argdecl_offset = 0;
   aluModifier.floatOrInt = 0;

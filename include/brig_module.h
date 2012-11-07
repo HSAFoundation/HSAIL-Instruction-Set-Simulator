@@ -139,7 +139,7 @@ class BrigModule {
   bool validate(const oper_iterator operands) const;
   bool validate(const inst_iterator inst) const;
 
-  bool validateUnaryArithmetic(const inst_iterator inst) const;
+  bool validateArithmeticInst(const inst_iterator inst, unsigned nary) const;
 
   bool validateAbs(const inst_iterator inst) const;
   bool validateAdd(const inst_iterator inst) const;

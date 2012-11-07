@@ -1,7 +1,6 @@
-#include <iostream>
-#include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa {
 namespace brig {
@@ -25,31 +24,31 @@ public:
     RefSrc1(Src1),
     RefSrc2(Src2) { }
 
-  void validate(struct BrigSections* TestOutput) {
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
 
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
+    code->append(RefInst);
 
-    inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstCmp* getinst = (cast<BrigInstCmp>(getcode));
-    validate_brig::validate(RefInst, getinst);
+    oper->append(RefDest);
 
-    const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*>
-                                    (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validate(RefDest, refbuf, getdest, getbuf);
+    oper->append(RefSrc1);
 
-    const T1 *getsrc1 = reinterpret_cast <const T1*>
-                        (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validateOpType<T1>(RefSrc1, refbuf, getsrc1, getbuf);
+    oper->append(RefSrc2);
 
-    const T2 *getsrc2 = reinterpret_cast <const T2*>
-                        (&(TestOutput->operands[getinst->o_operands[2]]));
-    validate_brig::validateOpType<T2>(RefSrc2, refbuf, getsrc2, getbuf);
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), 0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+    delete dir;
+  }  
 
-    EXPECT_EQ(0, getinst->o_operands[3]);
-    EXPECT_EQ(0, getinst->o_operands[4]);
-
-  }
 };
 
 
@@ -104,10 +103,9 @@ TEST(CodegenTest, Cmp_CodeGen) {
   reg1.reserved = 0;
   reg1.s_name = destName.size() + 1;
 
-  // TODO(Chuang): the imm2.type should be Brigb1.
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
-  imm2.type = Brigb32;
+  imm2.type = Brigb1;
   imm2.reserved = 0;
   memset(&imm2.bits, 0, sizeof(imm2.bits));
   imm2.bits.u = 0;

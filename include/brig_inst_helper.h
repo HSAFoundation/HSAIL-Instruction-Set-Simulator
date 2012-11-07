@@ -70,6 +70,34 @@ class BrigInstHelper {
       opcode != BrigDebugTrap && opcode != BrigNop;
   }
 
+  static const BrigAluModifier *getAluModifier(const inst_iterator inst) {
+    if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
+      return &cmp->aluModifier;
+
+    if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
+      return &cvt->aluModifier;
+
+    if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst))
+      return &mod->aluModifier;
+
+    return NULL;
+  }
+
+  static bool isFtz(const inst_iterator inst) {
+    const BrigAluModifier *aluMod = getAluModifier(inst);
+    return aluMod && aluMod->valid && aluMod->ftz;
+  }
+
+  static bool hasRoundingMode(const inst_iterator inst) {
+    // Cvt instructions are handled as a special case
+    if(isa<BrigInstCvt>(inst)) return false;
+    // Ignore near mode, since it is the default anway
+    const BrigAluModifier *aluMod = getAluModifier(inst);
+    return aluMod && aluMod->valid && aluMod->rounding;
+  }
+
+  static const char *getRoundingName(const BrigAluModifier &aluMod);
+
   // Type methods
   static bool isFloatTy(BrigDataType type) {
     return
@@ -211,6 +239,29 @@ class BrigInstHelper {
       packing == BrigPackPPsat || packing == BrigPackPSsat ||
       packing == BrigPackSPsat || packing == BrigPackSSsat ||
       packing == BrigPackPsat  || packing == BrigPackSsat;
+  }
+
+  static bool isValidPacking(BrigPacking packing, unsigned opnum) {
+    switch(packing) {
+    case BrigNoPacking:
+      return false;
+    case BrigPackS:
+    case BrigPackP:
+    case BrigPackSsat:
+    case BrigPackPsat:
+      return opnum == 1;
+    case BrigPackPP:
+    case BrigPackPS:
+    case BrigPackSP:
+    case BrigPackSS:
+    case BrigPackPPsat:
+    case BrigPackPSsat:
+    case BrigPackSPsat:
+    case BrigPackSSsat:
+      return opnum == 2;
+    default:
+      assert(false && "Invalid packing");
+    }
   }
 
   static bool isBranchInst(const inst_iterator inst) {

@@ -1,5 +1,6 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
@@ -19,23 +20,28 @@ public:
     RefInst(ref),
     RefDest(Dest)  { }
 
-  void validate(struct BrigSections* TestOutput){
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
 
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const TInst* getinst = (cast<TInst>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
+    code->append(RefInst);
     if (RefDest != NULL) {
-      const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[0]]));
-      validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
-    }
-    EXPECT_EQ(0, getinst->o_operands[1]);
-    EXPECT_EQ(0, getinst->o_operands[2]);
-    EXPECT_EQ(0, getinst->o_operands[3]);
-    EXPECT_EQ(0, getinst->o_operands[4]);
+      oper->append(RefDest);
+    } 
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), 0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+    delete dir;
+    RefInst = NULL;
+    RefDest = NULL;
   }
 };
 
@@ -657,7 +663,17 @@ TEST(CodegenTest, Barrier_Codegen){
   };
   out1.size = sizeof(out1);
 
-  Instruction1_Test <BrigInstBar, BrigOperandReg> TestCase1(in, sbuf, &out1, NULL);
+  BrigOperandImmed width1 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}
+  };
+  width1.size = sizeof(width1);
+
+
+  Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase1(in, sbuf, &out1, &width1);
   TestCase1.Run_Test(&Bar);
 
 /**********************************************************************************/
@@ -700,7 +716,16 @@ TEST(CodegenTest, Barrier_Codegen){
   };
   out3.size = sizeof(out3);
 
-  Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase3(in, sbuf, &out3, NULL);
+  BrigOperandImmed width3 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}
+  };
+  width3.size = sizeof(width3);
+
+  Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase3(in, sbuf, &out3, &width3);
   TestCase3.Run_Test(&Bar);
 
 /**********************************************************************************/

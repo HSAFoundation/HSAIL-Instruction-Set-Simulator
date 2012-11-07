@@ -1,7 +1,6 @@
-#include <iostream>
-#include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa {
 namespace brig {
@@ -79,35 +78,34 @@ public:
     blockList(blockList),
     blockEnd(blockEnd) { }
 
-  void validate(struct BrigSections* TestOutput) {
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
 
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    dir_iterator getdirective = TestOutput->begin();
-    const BrigBlockStart* getstart = cast<BrigBlockStart>(getdirective);
-    validate_brig::validate(blockStart, refbuf, getstart, getbuf);
-  
-    ++getdirective;
+    dir->append(blockStart);
 
     BrigBlockNode* ref = blockList->head->next;
-    const BrigBlockNumeric* getnum;
-    const BrigBlockString* getstr;
 
     for (uint32_t i = 0 ; i < blockList->size ; ++i) {
-      if (getdirective->kind == BrigEDirectivePad) {
-        ++getdirective;
-      }
       if (ref->num != NULL) {
-        getnum = cast<BrigBlockNumeric>(getdirective);
-        validate_brig::validate(ref->num, getnum);
+        dir->append(ref->num);
       } else if (ref->str != NULL) {
-        getstr = cast<BrigBlockString>(getdirective);
-        validate_brig::validate(ref->str, refbuf, getstr, getbuf);
+        dir->append(ref->str);
       }
-      ++getdirective;
       ref = ref->next;
     }
+    dir->append(blockEnd);
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), dir->size(), 0, 0, 0);
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+    delete dir;
   }
 };
 
