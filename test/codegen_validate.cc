@@ -35,10 +35,12 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
         caseOperBrig(OperandRegV4);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandLabelRef);
-        case BrigEOperandFunctionList:
+        caseBrigEOperandFunctionList:
         caseOperBrig(OperandArgumentList);
         caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandArgumentRef);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -202,13 +204,16 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
       ASSERT_EQ(refoper->kind, getoper->kind);
       switch(getoper->kind){
         caseOperBrig(OperandReg);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
-        caseOperBrig(OperandIndirect);
-        caseOperBrig(OperandAddress);
-        caseOperBrig(OperandCompound);
-        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandLabelRef);
+        caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandRegV4);
+        caseOperBrig(OperandRegV2);
+   
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -596,14 +601,16 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
     BrigSections* RefOutput, BrigSections* GetOutput){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  dir_iterator refdir(RefOutput->directives + ref->fn);
-  dir_iterator getdir(GetOutput->directives + get->fn);
-  switch(getdir->kind){
-    caseDirBrig(DirectiveFunction);
-    caseDirBrig(DirectiveSignature);
-    default:
-      printf("Offset to invalid directive");
-      exit(1);
+  if (get->fn != 0) {
+    dir_iterator refdir(RefOutput->directives + ref->fn);
+    dir_iterator getdir(GetOutput->directives + get->fn);
+    switch(getdir->kind){
+      caseDirBrig(DirectiveFunction);
+      caseDirBrig(DirectiveSignature);
+      default:
+        printf("Offset to invalid directive");
+        exit(1);
+    }
   }
 }
 

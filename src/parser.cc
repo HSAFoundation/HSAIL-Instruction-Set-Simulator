@@ -833,6 +833,7 @@ int Instruction2OpcodeDT(Context* context) {
   // TODO(Chuang): whether can use packed operation without packing.
   if (context->token_type == DATA_TYPE_ID) {
 
+    context->set_type(context->token_value.data_type);
     inst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
     if (context->token_type == REGISTER) {
@@ -974,6 +975,7 @@ int Instruction2OpcodeFtz(Context* context) {
     context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
+  context->set_type(context->token_value.data_type);
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
 
