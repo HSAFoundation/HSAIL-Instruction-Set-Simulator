@@ -2108,7 +2108,64 @@ bool BrigModule::validateLdc(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateMov(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  valid &= check(inst->type == Brigb1 || inst->type == Brigb32 || 
+                 inst->type == Brigb64 || inst->type == Brigb128,
+                 "Length should be 1, 32, 64 or 128");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "Mov cannot accept vector types");
+
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest) || 
+                 isa<BrigOperandRegV2>(dest) ||
+                 isa<BrigOperandRegV4>(dest), 
+                 "Destination of Mov should be reg, regv2 or regv4");
+
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(src) || 
+                 isa<BrigOperandRegV2>(src) ||
+                 isa<BrigOperandRegV4>(src) ||
+                 isa<BrigOperandImmed>(src), 
+                 "Src of Mov should be reg, regv2, regv4 or immediate");
+
+
+  if(const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest))
+    valid &= check(BrigInstHelper::getTypeSize(BrigDataType(destReg->type)) == 
+                   BrigInstHelper::getTypeSize(BrigDataType(inst->type)), 
+                   "Destination should equal with inst->type");
+
+  if(const BrigOperandReg *srcReg = dyn_cast<BrigOperandReg>(src))
+    valid &= check(BrigInstHelper::getTypeSize(BrigDataType(srcReg->type)) == 
+                   BrigInstHelper::getTypeSize(BrigDataType(inst->type)), 
+                   "Source should equal with inst->type");
+
+  if(isa<BrigOperandRegV2>(dest)) 
+    valid &= check(isa<BrigOperandReg>(src) && 
+                   *getType(src) == Brigb64 && 
+                   *getType(dest) == Brigb32,
+                   "Src should point to d reg and type of dest should be b32");
+
+
+  if(isa<BrigOperandRegV2>(src))
+    valid &= check(isa<BrigOperandReg>(dest) && 
+                   *getType(dest) == Brigb64 && 
+                   *getType(src) == Brigb32,
+                   "Dest should point to d reg and type of src should be b32");
+
+  if(isa<BrigOperandRegV4>(dest))
+    valid &= check(isa<BrigOperandReg>(src) && 
+                   *getType(src) == Brigb128 && 
+                   *getType(dest) == Brigb32,
+                   "Src should point to q reg and type of dest should be b32");
+
+  if(isa<BrigOperandRegV4>(src)) 
+    valid &= check(isa<BrigOperandReg>(dest) && 
+                   *getType(dest) == Brigb128 && 
+                   *getType(src) == Brigb32,
+                   "Dest should point to d reg and type of src should be b32");
+  return valid;
 }
 
 bool BrigModule::validateMovdHi(const inst_iterator inst) const {
