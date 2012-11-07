@@ -1,5 +1,4 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{

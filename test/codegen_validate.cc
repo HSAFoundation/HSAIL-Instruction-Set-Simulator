@@ -170,6 +170,11 @@ void validate(const BrigInstBar* ref, const BrigInstBar* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -199,6 +204,11 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandCompound);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
         default:
           printf("Offset to invalid operand");
           exit(1);
