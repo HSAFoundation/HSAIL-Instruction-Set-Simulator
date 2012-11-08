@@ -8,9 +8,9 @@ namespace brig {
 class Example5_Test: public BrigCodeGenTest {
 
 private:
-  Buffer* RefCode;
-  Buffer* RefOper;
   Buffer* RefDir;
+  Buffer* RefOper;
+  Buffer* RefCode;
 
 public:
   Example5_Test(std::string& in, StringBuffer* sbuf, Buffer* dir,
@@ -96,7 +96,7 @@ TEST(CodegenTest, Example5_CodeGen) {
     0,
     BrigEOperandArgumentList,
     0,
-    0
+    {0}
   };
   argumentlist.size = sizeof(argumentlist);
 

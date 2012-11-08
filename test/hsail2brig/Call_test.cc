@@ -1,7 +1,6 @@
-#include <iostream>
-#include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa {
 namespace brig {
@@ -45,60 +44,50 @@ public:
     InArgsList(inList),
     FuncList(funcList) { }
 
-  void validate(struct BrigSections* TestOutput) {
+  void Run_Test(int (*Rule)(Context*)) {
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
+    code->append(RefInst);
+    oper->append(OpWidth);
 
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-    const BrigOperandArgumentRef* getArgRef;
+    oper->append(RefSrc2);
 
-    inst_iterator getcode = TestOutput->code_begin();
-    const TInst* getinst = (cast<TInst>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-
-    const BrigOperandImmed* getwidth = reinterpret_cast <const BrigOperandImmed*> 
-                                       (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validate(OpWidth, getwidth);
-
-    const BrigOperandArgumentList* getsrc1 = reinterpret_cast <const BrigOperandArgumentList*>
-                                             (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validate(RefSrc1, getsrc1);
-
-    for (uint32_t i = 0 ; i < getsrc1->elementCount ; ++i) {
-      getArgRef = reinterpret_cast <const BrigOperandArgumentRef*>
-                  (&(TestOutput->operands[getsrc1->o_args[i]]));
-
-      validate_brig::validate(&OutArgsList[i], getArgRef);
-    }
-
-    const TSrc2* getsrc2 = reinterpret_cast <const TSrc2*>
-                           (&(TestOutput->operands[getinst->o_operands[2]]));
-    validate_brig::validateOpType<TSrc2>(RefSrc2, refbuf, getsrc2, getbuf);
-
-    const BrigOperandArgumentList* getsrc3 = reinterpret_cast <const BrigOperandArgumentList*>
-                                             (&(TestOutput->operands[getinst->o_operands[3]]));
-    validate_brig::validate(RefSrc3, getsrc3);
-
-    for (uint32_t i = 0 ; i < getsrc3->elementCount ; ++i) {
-      getArgRef = reinterpret_cast <const BrigOperandArgumentRef*>
-                  (&(TestOutput->operands[getsrc3->o_args[i]]));
-
-      validate_brig::validate(&InArgsList[i], getArgRef);
-    }
-    if (RefSrc4 != NULL) {
-      const BrigOperandArgumentList* getsrc4 = reinterpret_cast <const BrigOperandArgumentList*>
-                                               (&(TestOutput->operands[getinst->o_operands[4]]));
-      validate_brig::validate(RefSrc4, getsrc4);
-
-      for (uint32_t i = 0 ; i < getsrc4->elementCount ; ++i) {
-        const TFuncList* getFunRef = reinterpret_cast <const TFuncList*>
-                                     (&(TestOutput->operands[getsrc4->o_args[i]]));
-
-        validate_brig::validate(&FuncList[i], getFunRef);
+    if (RefSrc1->elementCount == 0) {
+      for (uint32_t i = 0 ; i < RefSrc3->elementCount ; ++i) {
+        oper->append(&InArgsList[i]);
       }
+      oper->append(RefSrc3);
+      oper->append(RefSrc1);
     } else {
-      EXPECT_EQ(0, getinst->o_operands[4]);
+      for (uint32_t i = 0 ; i < RefSrc1->elementCount ; ++i) {
+        oper->append(&OutArgsList[i]);
+      }      
+      oper->append(RefSrc1);
+      for (uint32_t i = 0 ; i < RefSrc3->elementCount ; ++i) {
+        oper->append(&InArgsList[i]);
+      }
+      oper->append(RefSrc3);
     }
+
+
+    if (RefSrc4 != NULL) {
+      for (uint32_t i = 0 ; i < RefSrc4->elementCount ; ++i) {
+        oper->append(&FuncList[i]);
+      }
+      oper->append(RefSrc4);
+    }
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), 0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+    delete dir;
   }
 };
 
@@ -212,8 +201,7 @@ TEST(CodegenTest, Call_CodeGen) {
   outMod.o_operands[0] = 0;
   outMod.o_operands[1] = sizeof(width) + sizeof(reg) + sizeof(argRef);
   outMod.o_operands[2] = sizeof(width);
-  outMod.o_operands[3] = sizeof(width) + sizeof(outputArgs) + 
-                         outMod.o_operands[1] + sizeof(argRef);
+  outMod.o_operands[3] = sizeof(outputArgs) + outMod.o_operands[1] + sizeof(argRef);
   outMod.o_operands[4] = outMod.o_operands[3] + sizeof(inputArgs) + sizeof(argRef);
   memset(&outMod.aluModifier, 0, sizeof(outMod.aluModifier));
   outMod.aluModifier.valid = 1;
@@ -228,7 +216,7 @@ TEST(CodegenTest, Call_CodeGen) {
   outputArgs.size = sizeof(outputArgs);
   outputArgs.kind = BrigEOperandArgumentList;
   outputArgs.elementCount = 1;
-  outputArgs.o_args[0] = sizeof(reg);
+  outputArgs.o_args[0] = sizeof(reg) + sizeof(width);
 
   BrigOperandArgumentRef* outputArgsList2 = new BrigOperandArgumentRef[outputArgs.elementCount * sizeof(argRef)];
   for (uint32_t i = 0 ; i < inputArgs.elementCount ; ++i) {
@@ -236,7 +224,6 @@ TEST(CodegenTest, Call_CodeGen) {
     outputArgsList2[i].kind = BrigEOperandArgumentRef;
     outputArgsList2[i].arg = 0;
   }
-
 
   inputArgs.size = sizeof(inputArgs);
   inputArgs.kind = BrigEOperandArgumentList;
@@ -369,7 +356,7 @@ TEST(CodegenTest, Call_CodeGen) {
   inputArgs.size = sizeof(inputArgs);
   inputArgs.kind = BrigEOperandArgumentList;
   inputArgs.elementCount = 1;
-  inputArgs.o_args[0] = sizeof(width) + sizeof(reg);
+  inputArgs.o_args[0] = sizeof(width) + sizeof(func);
 
   BrigOperandArgumentRef* inputArgsList4 = new BrigOperandArgumentRef[inputArgs.elementCount * sizeof(argRef)];
   for (uint32_t i = 0 ; i < inputArgs.elementCount ; ++i) {

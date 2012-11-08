@@ -8,9 +8,9 @@ namespace brig {
 class Example1_Test: public BrigCodeGenTest {
 
 private:
-  Buffer* RefCode;
-  Buffer* RefOper;
   Buffer* RefDir;
+  Buffer* RefOper;
+  Buffer* RefCode;
 
 public:
   Example1_Test(std::string& in, StringBuffer* sbuf, Buffer* dir,

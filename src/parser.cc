@@ -2447,18 +2447,19 @@ int ArgUninitializableDecl(Context* context) {
     0,                             // d_init
     0,                             // reserved
   };
+
+  context->symbol_map[var_name] = context->get_directive_offset();
+  context->append_directive(&bds);
+/*
   BrigOperandArgumentRef boar = {
     sizeof(BrigOperandArgumentRef),
     BrigEOperandArgumentRef,
     context->get_directive_offset()
   };
 
-  context->symbol_map[var_name] = context->get_directive_offset();
-  context->append_directive(&bds);
- 
   context->arg_map[var_name] = context->get_operand_offset();
   context->append_operand(&boar);
-
+*/
   if (';' != context->token_to_scan) {
     context->set_error(MISSING_SEMICOLON);
     return 1;

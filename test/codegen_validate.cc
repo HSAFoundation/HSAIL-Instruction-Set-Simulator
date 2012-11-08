@@ -35,7 +35,7 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
         caseOperBrig(OperandRegV4);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandLabelRef);
-        case BrigEOperandFunctionList:
+        case BrigEOperandFunctionList: break;
         caseOperBrig(OperandArgumentList);
         caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandArgumentRef);
@@ -71,6 +71,7 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get,
         caseOperBrig(OperandWaveSz);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandLabelRef);
+        case BrigEOperandFunctionList: break;
         caseOperBrig(OperandArgumentList);
         caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandArgumentRef);
@@ -620,7 +621,6 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
     }
   }
 }
-
 void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
 
@@ -658,17 +658,21 @@ void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, 
   bool validOffset = (getoffset>=CODEBUFFER_OFFSET) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
   if(refinst!=NULL && getinst!=NULL && validOffset){
     switch(getinst->kind){ 
-      caseInstBrig(InstBase); 
-      caseInstBrig(InstMod) ;
-      caseInstBrig(InstCvt) ;
-      caseInstBrig(InstRead);
-      caseInstBrig(InstBar) ;
-      caseInstBrig(InstLdSt);
-      caseInstBrig(InstCmp);
-      caseInstBrig(InstMem);
-      caseInstBrig(InstAtomic);
-      caseInstBrig(InstAtomicImage);
-      caseInstBrig(InstImage);
+      case BrigEInstBase: 
+      case BrigEInstMod:
+      case BrigEInstCvt:
+      case BrigEInstRead:
+      case BrigEInstBar:
+      case BrigEInstLdSt:
+      case BrigEInstCmp:
+      case BrigEInstMem:
+      case BrigEInstAtomic:
+      case BrigEInstAtomicImage:
+      case BrigEInstImage:
+        EXPECT_EQ(refinst->size, getinst->size);
+        EXPECT_EQ(refinst->kind, getinst->kind);
+        EXPECT_EQ(refinst->opcode, getinst->opcode);
+        break;
       default:
           printf("Invalid instruction\n");
           exit(1);
@@ -815,7 +819,10 @@ void validate(const BrigDirectiveInit* ref, const BrigDirectiveInit* get,
 
 void validate(const BrigDirectiveLabel* ref, const BrigDirectiveLabel* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
-    
+  EXPECT_EQ(ref->size, ref->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
+  EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
 }
 
 void validate(const BrigDirectiveLabelList* ref, const BrigDirectiveLabelList* get,
