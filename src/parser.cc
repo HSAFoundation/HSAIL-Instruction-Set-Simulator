@@ -307,8 +307,8 @@ int BaseOperand(Context* context) {
   }
   
 //TODO: Deepthi - This part needs to be tested - is there any instruction which uses datatypeid list as an operand  
+#if 0
   if (context->token_type == DATA_TYPE_ID) {
-  // scan next token
     context->token_to_scan = yylex();
     if (context->token_to_scan == '(') {
       context->token_to_scan = yylex();
@@ -322,7 +322,8 @@ int BaseOperand(Context* context) {
       }        
     } else
       return 1;
-  }  
+  }
+#endif  
   return 1;
 }
 
@@ -2176,92 +2177,81 @@ int Call(Context* context) {
   return 0;
 }
 
-int Initializer(Context* context) {
+int Initializer(Context* context, BrigdOffset32_t sym_offset) {
   // first token should be '='
-  if (context->token_to_scan == '=') {
-    bool hasCurlyBrackets = false;
+  if (context->token_to_scan != '=') {
+    return 1;
+  }
+  bool hasCurlyBrackets = false;
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == '{') {
     context->token_to_scan = yylex();
-    if (context->token_to_scan == '{') {
-      context->token_to_scan = yylex();
-      hasCurlyBrackets = true;
-    }
-    BrigDirectiveSymbol bds ;
-    BrigdOffset32_t sym_offset = context->current_argdecl_offset;
-    context->get_directive(sym_offset,&bds);
-    BrigDataType16_t init_type ;
-    BrigDataType16_t data_type = context->get_type();
-    switch(data_type){
-      case Brigb1: init_type = Brigb1; break;
+    hasCurlyBrackets = true;
+  }
+  BrigDirectiveSymbol bds ;
+  context->get_directive(sym_offset,&bds);
+  BrigDataType16_t init_type ;
+  BrigDataType16_t data_type = context->get_type();
+  switch(data_type){
+    case Brigb1: init_type = Brigb1; break;
 
-      case Brigs8:
-      case Brigu8:
-      case Brigb8: init_type = Brigb8; break;
+    case Brigs8:
+    case Brigu8:
+    case Brigb8: init_type = Brigb8; break;
 
-      case Brigs16:
-      case Brigu16:
-      case Brigf16:
-      case Brigb16: init_type = Brigb16; break;
+    case Brigs16:
+    case Brigu16:
+    case Brigf16:
+    case Brigb16: init_type = Brigb16; break;
 
-      case Brigs32:
-      case Brigu32:
-      case Brigf32:
-      case Brigb32: init_type = Brigb32; break;
+    case Brigs32:
+    case Brigu32:
+    case Brigf32:
+    case Brigb32: init_type = Brigb32; break;
 
-      case Brigs64:
-      case Brigu64:
-      case Brigf64:
-      case Brigb64: init_type = Brigb64; break;
-      default:
-        context->set_error(INVALID_INITIALIZER);
-        return 1;
-    }
-    context->set_type(init_type);
+    case Brigs64:
+    case Brigu64:
+    case Brigf64:
+    case Brigb64: init_type = Brigb64; break;
+    default:
+      context->set_error(INVALID_INITIALIZER);
+      return 1;
+  }
+  context->set_type(init_type);
 
-    context->set_isBlockNumeric(false);
-    switch (context->token_to_scan) {
-      case TOKEN_DOUBLE_CONSTANT:
-        if (!FloatListSingle(context)) {
-          break;
-        } else {
-          return 1;
-        }
-      case TOKEN_INTEGER_CONSTANT:
-      case '-':
-        if (!DecimalListSingle(context)) {
-          break;
-        } else {
-          return 1;
-        }
-      case TOKEN_SINGLE_CONSTANT:
-        if (!SingleListSingle(context)) {
-          break;
-        } else {
-          return 1;
-        }
-      case TOKEN_LABEL:
-        if (hasCurlyBrackets) {
-          if (!LabelList(context)) {
-            break;
-          }
-        } else {
-          return 1;
-        }
-      default:
-        context->set_error(INVALID_INITIALIZER);
-        return 1;
-    }
-    if (hasCurlyBrackets) {
-      if (context->token_to_scan == '}') {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_CLOSING_BRACKET);
+  switch (context->token_to_scan) {
+    case TOKEN_DOUBLE_CONSTANT:
+      if (FloatInitializer(context, sym_offset)) {
         return 1;
       }
-    } else {
-      return 0;
+      break;
+    case TOKEN_INTEGER_CONSTANT:
+    case '-':
+      if (DecimalInitializer(context, sym_offset)) {
+        return 1;
+      } 
+      break;
+    case TOKEN_SINGLE_CONSTANT:
+      if (SingleInitializer(context, sym_offset)) {
+        return 1;
+      }
+      break;
+    case TOKEN_LABEL:
+      if (LabelList(context, sym_offset)) {
+        return 1;
+      }
+      break;
+    default:
+      context->set_error(INVALID_INITIALIZER);
+      return 1;
+  }
+  if (hasCurlyBrackets){
+    if (context->token_to_scan != '}') {
+      context->set_error(MISSING_CLOSING_BRACKET);
+      return 1;
     }
-  } // '='
+    context->token_to_scan = yylex();
+  } 
   return 0;
 }
 
@@ -2323,11 +2313,11 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
     0                                 // reserved
   };
   context->symbol_map[var_name] = context->get_directive_offset();
-  context->current_argdecl_offset = context->get_directive_offset();
+  BrigdOffset32_t argdecl_offset = context->get_directive_offset();
   context->append_directive(&sym_decl);
 
   if(context->token_to_scan == '='){
-    if (Initializer(context)) {
+    if (Initializer(context, argdecl_offset)) {
       return 1;
     }
   }
@@ -6583,34 +6573,18 @@ int ImageStore(Context* context) {
   return 1;
 }
 
-int SingleListSingle(Context * context) {
+int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
   if (context->token_to_scan != TOKEN_SINGLE_CONSTANT) {
     return 1;
   }
-  uint32_t elementCount = 0;
   std::vector<float> single_list;
-  while (1) {
-    elementCount++;
-    single_list.push_back(context->token_value.float_val);
-
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
-        continue;
-      } else {
-        context->set_error(MISSING_SINGLE_CONSTANT);
-        return 1;
-      }
-    } else 
-      break;
+  if(SingleListSingle(context, &single_list)){
+    return 1;
   }
-    
+  uint32_t elementCount = single_list.size();
   uint32_t n = 0;
   BrigDirectiveSymbol bds ;
-  BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-  context->get_directive(bds_offset,&bds);
-
+  context->get_directive(sym_offset,&bds);
   if (0 == context->get_dim()) {
     if (context->get_isArray()) {
       bds.s.symbolModifier = BrigArray;
@@ -6623,7 +6597,7 @@ int SingleListSingle(Context * context) {
   }
   n = bds.s.dim;
   context->set_dim(bds.s.dim);
-
+  
   switch (context->get_type()) {
     case Brigb1:
       context->set_error(INVALID_INITIALIZER);
@@ -6669,13 +6643,37 @@ int SingleListSingle(Context * context) {
   bds.d_init = context->get_directive_offset();
   bds.d_init += bds.d_init & 0x7;
   unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-  context->update_directive_bytes(bds_charp, bds_offset,
+  context->update_directive_bytes(bds_charp, sym_offset,
                                   sizeof(BrigDirectiveSymbol));
   context->append_directive(bdi);
   delete[] reinterpret_cast<uint8_t *>(bdi);
   bdi = NULL;
+ 
   return 0;
-      
+
+}
+
+int SingleListSingle(Context * context, std::vector<float>* single_list) {
+ 
+  uint32_t elementCount = 0;
+    
+  while (1) {
+    elementCount++;
+    single_list->push_back(context->token_value.float_val);
+
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+        continue;
+      } else {
+        context->set_error(MISSING_SINGLE_CONSTANT);
+        return 1;
+      }
+    } else 
+      break;
+  }
+  return 0;      
 }
 
 int ImageInit(Context *context) {
@@ -7501,7 +7499,7 @@ int Pragma(Context* context) {
   }
 }
 
-int LabelList(Context* context) {
+int LabelList(Context* context, BrigdOffset32_t bds_offset) {
   uint32_t elementCount = 0;
   std::vector<BrigDirectiveLabel> label_list;
 
@@ -7531,7 +7529,6 @@ int LabelList(Context* context) {
 
       // update the BrigDirectiveSymbol.d_init and dim
       BrigDirectiveSymbol bds ;
-      BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
       context->get_directive(bds_offset,&bds);
       bds.d_init = context->get_directive_offset();
       bds.d_init += bds.d_init & 0x7;
@@ -7584,102 +7581,113 @@ int LabelList(Context* context) {
   return 1;
 }
 
-int FloatListSingle(Context* context) {
-  uint32_t elementCount = 0;
+int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
+ 
+  if(context->token_to_scan != TOKEN_DOUBLE_CONSTANT){
+    return 1;
+  }
   std::vector<double> float_list;
+  if(FloatListSingle(context, &float_list))
+    return 1;
+  uint32_t elementCount = float_list.size();
+  uint32_t n = 0;
 
+  BrigDirectiveSymbol bds ;
+  context->get_directive(symbol_offset, &bds);
+
+  if (0 == context->get_dim()) {
+    if (context->get_isArray()) {
+      // If array is empty [],  Update dim.
+      bds.s.symbolModifier = BrigArray;
+      context->set_symbol_modifier(BrigArray);
+    }
+    bds.s.dim = elementCount;
+  } else if (elementCount > bds.s.dim) {
+    context->set_error(INVALID_INITIALIZER);
+    return 1;
+  }
+  n = bds.s.dim;
+  context->set_dim(bds.s.dim);
+  switch (context->get_type()) {
+    case Brigb1:
+      context->set_error(INVALID_INITIALIZER);
+      return 1;
+    case Brigb8:    n = (n + 7) >> 3; break;
+    case Brigb16:   n = (n + 3) >> 2; break;
+    case Brigb32:   n = (n + 1) >> 1; break;
+    case Brigb64:   break;
+  }
+  size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t);
+  uint8_t *array = new uint8_t[arraySize];
+  memset(array, 0, sizeof(uint8_t) * arraySize);
+
+  BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+  bdi->elementCount = bds.s.dim;
+
+  bdi->size = arraySize;
+  bdi->kind = BrigEDirectiveInit;
+  bdi->c_code = 0;
+  bdi->type = context->get_type();
+  bdi->reserved = 0;
+  switch(context->get_type()) {
+    case Brigb8:
+      for (uint32_t i = 0; i < float_list.size(); i++ ) {
+        *(double*)&bdi->initializationData.u8[i] = float_list[i];
+      }
+      break;
+    case Brigb16:
+      for (uint32_t i = 0; i < float_list.size(); i++ ) {
+        *(double*)&bdi->initializationData.u16[i] = float_list[i];
+      }
+      break;
+    case Brigb32:
+      for (uint32_t i = 0; i < float_list.size(); i++ ) {
+        *(double*)&bdi->initializationData.u32[i] = float_list[i];
+      }
+      break;
+    case Brigb64:
+      // TODO(Chuang): Loss of precision
+      for (uint32_t i = 0; i < float_list.size(); i++ ) {
+        *(double*)&bdi->initializationData.u64[i] = float_list[i];
+      }
+      break;
+  }
+  bds.d_init = context->get_directive_offset();
+  bds.d_init += bds.d_init & 0x7;
+  unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+  context->update_directive_bytes(bds_charp, symbol_offset,
+                                  sizeof(BrigDirectiveSymbol));
+  context->append_directive(bdi);
+  delete[] reinterpret_cast<uint8_t *>(bdi);
+  bdi = NULL;
+  return 0;
+}
+
+int FloatListSingle(Context* context, std::vector <double>* float_list) {
+    
   while (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
-    elementCount++;
-    float_list.push_back(context->token_value.double_val);
+    float_list->push_back(context->token_value.double_val);
     context->token_to_scan = yylex();
 
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
-      continue;
-    } else {
-        uint32_t n = 0;
-        // elementCount
-
-        // update the BrigDirectiveSymbol.d_init and dim
-        BrigDirectiveSymbol bds ;
-        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-        context->get_directive(bds_offset, &bds);
-
-        if (0 == context->get_dim()) {
-          if (context->get_isArray()) {
-            // If array is empty [],  Update dim.
-            bds.s.symbolModifier = BrigArray;
-            context->set_symbol_modifier(BrigArray);
-          }
-          bds.s.dim = elementCount;
-        } else if (elementCount > bds.s.dim) {
-          context->set_error(INVALID_INITIALIZER);
-          return 1;
-        }
-        n = bds.s.dim;
-        context->set_dim(bds.s.dim);
-        switch (context->get_type()) {
-          case Brigb1:
-            context->set_error(INVALID_INITIALIZER);
-            return 1;
-          case Brigb8:    n = (n + 7) >> 3; break;
-          case Brigb16:   n = (n + 3) >> 2; break;
-          case Brigb32:   n = (n + 1) >> 1; break;
-          case Brigb64:   break;
-        }
-        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t);
-        uint8_t *array = new uint8_t[arraySize];
-        memset(array, 0, sizeof(uint8_t) * arraySize);
-
-        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-        bdi->elementCount = bds.s.dim;
-
-        bdi->size = arraySize;
-        bdi->kind = BrigEDirectiveInit;
-        // c_code It is unused in this structure.
-        bdi->c_code = 0;
-        bdi->type = context->get_type();
-        bdi->reserved = 0;
-        switch(context->get_type()) {
-        case Brigb8:
-          for (uint32_t i = 0; i < float_list.size(); i++ ) {
-            *(double*)&bdi->initializationData.u8[i] = float_list[i];
-          }
-          break;
-        case Brigb16:
-          for (uint32_t i = 0; i < float_list.size(); i++ ) {
-            *(double*)&bdi->initializationData.u16[i] = float_list[i];
-          }
-          break;
-        case Brigb32:
-          for (uint32_t i = 0; i < float_list.size(); i++ ) {
-            *(double*)&bdi->initializationData.u32[i] = float_list[i];
-          }
-          break;
-        case Brigb64:
-          // TODO(Chuang): Loss of precision
-          for (uint32_t i = 0; i < float_list.size(); i++ ) {
-            *(double*)&bdi->initializationData.u64[i] = float_list[i];
-          }
-          break;
-      }
-      bds.d_init = context->get_directive_offset();
-      bds.d_init += bds.d_init & 0x7;
-      unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-      context->update_directive_bytes(bds_charp, bds_offset,
-                                      sizeof(BrigDirectiveSymbol));
-      context->append_directive(bdi);
-      delete[] reinterpret_cast<uint8_t *>(bdi);
-      bdi = NULL;
-      return 0;
-    }  // ','
-  }  // While
-  context->set_error(MISSING_DOUBLE_CONSTANT);
-  return 1;
+      if(context->token_to_scan != TOKEN_DOUBLE_CONSTANT){
+        context->set_error(MISSING_DOUBLE_CONSTANT);
+        return 1;
+      } else
+        continue;
+    } else 
+      break;
+  }
+  return 0;  
 }
 
-int DecimalListSingleBlock(Context* context, const std::vector<int32_t> &decimal_list,
-                                const uint32_t elementCount) {
+int DecimalListSingleBlock(Context* context) {
+  
+  std::vector<int32_t> decimal_list;
+  if(DecimalListSingle(context, &decimal_list))
+    return 1;
+  uint32_t elementCount = decimal_list.size();  
   uint32_t n = elementCount;
   switch (context->get_type()) {
     case Brigb1:
@@ -7731,42 +7739,16 @@ int DecimalListSingleBlock(Context* context, const std::vector<int32_t> &decimal
   return 0;
 }
 
-int DecimalListSingle(Context* context) {
-  uint32_t elementCount = 0;
-  std::vector<int32_t> decimal_list;
-  while (1) {
-    if (context->token_to_scan == '-') {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
-        context->set_error(MISSING_INTEGER_CONSTANT);
-        return 1;
-      }     
-      context->token_value.int_val *= (-1);      
-    }
-    
-    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      elementCount++;
-      decimal_list.push_back(context->token_value.int_val);
-    }
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        continue;
-    } else 
-      break;
-  }
-  if (context->get_isBlockNumeric()) {
-    if (DecimalListSingleBlock(context, decimal_list, elementCount)) {
-      return 1;
-    }
-    return 0;
-  }
-  uint32_t n = 0;
+int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
 
-  // update the BrigDirectiveSymbol.d_init and dim
+  std::vector<int32_t> decimal_list;
+  if(DecimalListSingle(context, &decimal_list))
+    return 1;
+  uint32_t n = 0;
+  uint32_t elementCount = decimal_list.size();
+  
   BrigDirectiveSymbol bds ;
-  BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-  context->get_directive(bds_offset,&bds);
+  context->get_directive(symbol_offset,&bds);
 
   if (0 == context->get_dim()) {
     if (context->get_isArray()) {
@@ -7829,13 +7811,41 @@ int DecimalListSingle(Context* context) {
   bds.d_init = context->get_directive_offset();
   bds.d_init += bds.d_init & 0x7;
   unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-  context->update_directive_bytes(bds_charp, bds_offset,
+  context->update_directive_bytes(bds_charp, symbol_offset,
                                   sizeof(BrigDirectiveSymbol));
 
   context->append_directive(bdi);
   delete[] reinterpret_cast<uint8_t *>(bdi);
   bdi = NULL;
   return 0;  
+
+}
+
+int DecimalListSingle(Context* context, std::vector<int32_t>* decimal_list) {
+  
+  uint32_t elementCount = 0;
+   while (1) {
+    if (context->token_to_scan == '-') {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+        context->set_error(MISSING_INTEGER_CONSTANT);
+        return 1;
+      }     
+      context->token_value.int_val *= (-1);      
+    }
+    
+    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+      elementCount++;
+      decimal_list->push_back(context->token_value.int_val);
+    }
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        continue;
+    } else 
+      break;
+  }
+  return 0;
 }
 
 int Block(Context* context) {
@@ -7890,11 +7900,7 @@ int Block(Context* context) {
             context->token_to_scan = yylex();
           } else if (context->token_to_scan == '-' ||
                      context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-            if (DecimalListSingle(context)) {
-              return 1;
-            }
-          } else if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
-            if (FloatListSingle(context)) {
+            if (DecimalListSingleBlock(context)) {
               return 1;
             }
           } else {

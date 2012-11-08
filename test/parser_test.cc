@@ -46,11 +46,11 @@ TEST(ParserTest, OperandTest) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
-  input.assign("_u32(12, 13 ,14) \n");  // decimalListSingle
+  /*input.assign("_u32(12, 13 ,14) \n");  // decimalListSingle
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
-
+*/
   delete lexer;
 }
 
@@ -3571,16 +3571,18 @@ TEST(ParserTest, SingleListSingleTest) {
   std::string input("0.5e3f \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SingleListSingle(context));
+  std::vector<float> list;
+  EXPECT_EQ(0, SingleListSingle(context, &list));
 
-/*  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
+  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SingleListSingle(context));
-*/
+  std::vector<float> list2;
+  EXPECT_EQ(0, SingleListSingle(context, &list2));
 
   delete lexer;
 }
+
 
 TEST(ParserTest, GlobalImageDecl) {
   Lexer* lexer = new Lexer();
