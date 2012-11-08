@@ -35,10 +35,12 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
         caseOperBrig(OperandRegV4);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandLabelRef);
-        case BrigEOperandFunctionList:
+        caseBrigEOperandFunctionList:
         caseOperBrig(OperandArgumentList);
         caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandArgumentRef);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -207,6 +209,8 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
         caseOperBrig(OperandIndirect);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandCompound);
+        caseOperBrig(OperandLabelRef);
+        caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandRegV2);
         caseOperBrig(OperandRegV4);
         default:
@@ -596,14 +600,16 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
     BrigSections* RefOutput, BrigSections* GetOutput){
   EXPECT_EQ(ref->size, get->size);
   EXPECT_EQ(ref->kind, get->kind);
-  dir_iterator refdir(RefOutput->directives + ref->fn);
-  dir_iterator getdir(GetOutput->directives + get->fn);
-  switch(getdir->kind){
-    caseDirBrig(DirectiveFunction);
-    caseDirBrig(DirectiveSignature);
-    default:
-      printf("Offset to invalid directive");
-      exit(1);
+  if (get->fn != 0) {
+    dir_iterator refdir(RefOutput->directives + ref->fn);
+    dir_iterator getdir(GetOutput->directives + get->fn);
+    switch(getdir->kind){
+      caseDirBrig(DirectiveFunction);
+      caseDirBrig(DirectiveSignature);
+      default:
+        printf("Offset to invalid directive");
+        exit(1);
+    }
   }
 }
 
@@ -750,7 +756,9 @@ void validate(const BrigDirectiveFunction* ref, const BrigDirectiveFunction* get
   validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
   EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
   EXPECT_EQ(ref->inParamCount, get->inParamCount);
-  validate_DIR_OFFSET(ref->d_firstScopedDirective, get->d_firstScopedDirective, RefOutput, GetOutput);
+  if (get->d_firstScopedDirective != GetOutput->directivesSize) {
+    validate_DIR_OFFSET(ref->d_firstScopedDirective, get->d_firstScopedDirective, RefOutput, GetOutput);
+  }
   EXPECT_EQ(ref->operationCount, get->operationCount);
   if (get->d_nextDirective != GetOutput->directivesSize) {
     validate_DIR_OFFSET(ref->d_nextDirective, get->d_nextDirective, RefOutput, GetOutput);
@@ -819,7 +827,9 @@ void validate(const BrigDirectiveKernel* ref, const BrigDirectiveKernel* get,
   validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
   EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
   EXPECT_EQ(ref->inParamCount, get->inParamCount);
-  validate_DIR_OFFSET(ref->d_firstScopedDirective, get->d_firstScopedDirective, RefOutput, GetOutput);
+  if (get->d_firstScopedDirective != GetOutput->directivesSize) { 
+    validate_DIR_OFFSET(ref->d_firstScopedDirective, get->d_firstScopedDirective, RefOutput, GetOutput);
+  }
   EXPECT_EQ(ref->operationCount, get->operationCount);
   if (get->d_nextDirective != GetOutput->directivesSize) {
     validate_DIR_OFFSET(ref->d_nextDirective, get->d_nextDirective, RefOutput, GetOutput);

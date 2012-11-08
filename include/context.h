@@ -275,7 +275,9 @@ class Context {
     void set_dim(uint32_t dim);
     void set_isArray(bool is_array);
     void set_isBlockNumeric(bool is_blockNumeric);
-
+    void set_bdf_offset(BrigdOffset32_t offset) { this->current_bdf_offset = offset;};
+    BrigdOffset32_t get_bdf_offset(){ return this->current_bdf_offset;};
+    
     // get current offset
     BrigcOffset32_t get_code_offset(void) const {return cbuf->size();}
     BrigdOffset32_t get_directive_offset(void) const {return dbuf->size();}
@@ -291,9 +293,6 @@ class Context {
     bool is_arg_output(void) const {return arg_output;}
     void set_arg_output(bool output) { this->arg_output = output; }
     
-    
-
-    BrigdOffset32_t current_bdf_offset;
     BrigoOffset32_t current_argList_offset;
     BrigdOffset32_t current_argdecl_offset;
     // label_o_map contains the info for OperandLabelRef,
@@ -355,6 +354,7 @@ class Context {
     BrigAluModifier aluModifier;
     uint32_t dim;
     BrigdOffset32_t last_directive_offset;
+    BrigdOffset32_t current_bdf_offset;
     
     bool arg_output;
     bool is_array;

@@ -833,6 +833,7 @@ int Instruction2OpcodeDT(Context* context) {
   // TODO(Chuang): whether can use packed operation without packing.
   if (context->token_type == DATA_TYPE_ID) {
 
+    context->set_type(context->token_value.data_type);
     inst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
     if (context->token_type == REGISTER) {
@@ -974,6 +975,7 @@ int Instruction2OpcodeFtz(Context* context) {
     context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
+  context->set_type(context->token_value.data_type);
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
 
@@ -1450,8 +1452,10 @@ int FunctionDefinitionPart2(Context* context) {
   if (context->token_to_scan!= FUNCTION) {
     return 1;
   }
-  context->current_bdf_offset = context->get_directive_offset();
-  BrigdOffset32_t bdf_offset = context->current_bdf_offset;
+  
+  
+  BrigdOffset32_t bdf_offset = context->get_directive_offset();
+  context->set_bdf_offset(bdf_offset);
 
   context->token_to_scan = yylex();
   if (context->token_to_scan != TOKEN_GLOBAL_IDENTIFIER) {
@@ -1501,7 +1505,7 @@ int FunctionDefinitionPart2(Context* context) {
     bdf.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
     bdf.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-    context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+    context->update_directive_bytes(bdf_charp, bdf_offset,
                                   sizeof(BrigDirectiveFunction));
   }
   context->token_to_scan = yylex();
@@ -1529,7 +1533,7 @@ int FunctionDefinitionPart2(Context* context) {
     bdf.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
     bdf.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-    context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+    context->update_directive_bytes(bdf_charp, bdf_offset,
                                   sizeof(BrigDirectiveFunction));
   }
   
@@ -1600,20 +1604,20 @@ int Codeblock(Context* context) {
   if(!BodyStatements(context)){
 
       BrigDirectiveFunction bdf;
-      context->get_directive(context->current_bdf_offset, &bdf);
+      context->get_directive(context->get_bdf_offset(), &bdf);
 	  if(bdf.kind == BrigEDirectiveFunction){
 
 		bdf.d_nextDirective = context->get_directive_offset();
 		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
 		context->update_directive_bytes(bdf_charp,
-                                 context->current_bdf_offset,
+                                 context->get_bdf_offset(),
                                  sizeof(BrigDirectiveFunction));
 	  } else if(bdf.kind == BrigEDirectiveKernel){
 		BrigDirectiveKernel* bdk = reinterpret_cast<BrigDirectiveKernel*> (&bdf); //Since they are the same size
 		bdk->d_nextDirective = context->get_directive_offset();
 		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(bdk);
 		context->update_directive_bytes(bdf_charp,
-                                 context->current_bdf_offset,
+                                 context->get_bdf_offset(),
                                  sizeof(BrigDirectiveKernel));
 
 	  } else {
@@ -3663,8 +3667,8 @@ int Kernel(Context *context) {
   if(KERNEL != context->token_to_scan)
     return 1;
   
-  context->current_bdf_offset = context->get_directive_offset();
-  BrigdOffset32_t bdk_offset = context->current_bdf_offset;
+  BrigdOffset32_t bdk_offset = context->get_directive_offset();
+  context->set_bdf_offset(bdk_offset);
 
   context->token_to_scan = yylex();
   if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan) {
@@ -3674,7 +3678,7 @@ int Kernel(Context *context) {
 
   std::string kern_name = context->token_value.string_val;
   BrigsOffset32_t str_offset = context->add_symbol(kern_name);
-  context->func_map[kern_name] = context->current_bdf_offset;
+  context->func_map[kern_name] = bdk_offset;
 
   size_t bdk_size = sizeof(BrigDirectiveKernel);
   BrigDirectiveKernel bdk = {
@@ -3716,7 +3720,7 @@ int Kernel(Context *context) {
     bdk.d_nextDirective += paramCount*sizeof(BrigDirectiveSymbol);
     bdk.d_firstScopedDirective += paramCount*sizeof(BrigDirectiveSymbol);
     unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdk);
-    context->update_directive_bytes(bdf_charp, context->current_bdf_offset,
+    context->update_directive_bytes(bdf_charp, bdk_offset,
                                   sizeof(BrigDirectiveKernel));
   }
 
