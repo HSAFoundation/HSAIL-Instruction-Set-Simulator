@@ -38,7 +38,6 @@ Context::Context(void) {
   last_directive_offset = 0;
   type = Brigb32;
   current_bdf_offset = 0;
-  current_argdecl_offset = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
   aluModifier.valid = 0;
@@ -80,7 +79,6 @@ void Context::clear_context(void) {
   types.clear();
   last_directive_offset = 0;
   current_bdf_offset = 0;
-  current_argdecl_offset = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
   aluModifier.valid = 0;
@@ -103,7 +101,6 @@ void Context::set_default_values(void) {
   valid_string = false;
   yycolno = 0;
   yylineno = 1;
-  arg_output = false ;
   symModifier = 0;
 }
   /* Error reporter set/get */
@@ -320,10 +317,6 @@ bool Context::get_isArray() const {
   return is_array;
 }
 
-bool Context::get_isBlockNumeric() const {
-  return is_blockNumeric;
-}
-
 // set context
 void Context::set_alu_modifier(BrigAluModifier modifier) {
   this->aluModifier = modifier;
@@ -363,10 +356,6 @@ void Context::set_dim(uint32_t dim) {
 
 void Context::set_isArray(bool is_array) {
   this->is_array = is_array;
-}
-
-void Context::set_isBlockNumeric(bool is_blockNumeric) {
-  this->is_blockNumeric = is_blockNumeric;
 }
 
 // the operationCount of BrigDirectiveFunction add by 1

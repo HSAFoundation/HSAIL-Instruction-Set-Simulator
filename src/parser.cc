@@ -7889,8 +7889,7 @@ int Block(Context* context) {
           return 1;
         }
       } else if (context->token_to_scan == BLOCKNUMERIC) {
-        context->set_isBlockNumeric(true);
-
+        
         context->token_to_scan = yylex();
         if (context->token_type == DATA_TYPE_ID) {
           context->set_type(context->token_value.data_type);
