@@ -27,50 +27,84 @@ private:
   const BrigOperandAddress* RefDest_Addr;
   const BrigOperandIndirect* RefDest_Indir;
   const BrigOperandCompound* RefDest_Comp;
+  const BrigOperandReg *RefReg1, *RefReg2, *RefReg3, *RefReg4;
 
 public:
   //TestCase outputs a BrigOperandAddress only
   St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref,
-      T* src, BrigOperandAddress* addr) :
+      T* src, BrigOperandAddress* addr,
+      BrigOperandReg *Reg1 = NULL,
+      BrigOperandReg *Reg2 = NULL,
+      BrigOperandReg *Reg3 = NULL,
+      BrigOperandReg *Reg4 = NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     RefSrc(src),
     RefDest_Reg(NULL),
     RefDest_Addr(addr),
     RefDest_Indir(NULL),
-    RefDest_Comp(NULL)  { }
+    RefDest_Comp(NULL),
+    RefReg1(Reg1),
+    RefReg2(Reg2),
+    RefReg3(Reg3),
+    RefReg4(Reg4) { }
 
   //Testcase output is a BrigOperandIndirect
   St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref,
-      T* src, BrigOperandIndirect* indir, BrigOperandReg* reg=NULL) :
+      T* src, BrigOperandIndirect* indir, BrigOperandReg* reg=NULL,
+      BrigOperandReg *Reg1 = NULL,
+      BrigOperandReg *Reg2 = NULL,
+      BrigOperandReg *Reg3 = NULL,
+      BrigOperandReg *Reg4 = NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     RefSrc(src),
     RefDest_Reg(reg),
     RefDest_Addr(NULL),
     RefDest_Indir(indir),
-    RefDest_Comp(NULL)  { }
+    RefDest_Comp(NULL),
+    RefReg1(Reg1),
+    RefReg2(Reg2),
+    RefReg3(Reg3),
+    RefReg4(Reg4)  { }
 
   //TestCase output is a BrigOperandCompound
   St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref,
-     T* src, BrigOperandCompound* comp, BrigOperandAddress* addr, BrigOperandReg* reg=NULL) :
+     T* src, BrigOperandCompound* comp, BrigOperandAddress* addr, BrigOperandReg* reg=NULL,
+      BrigOperandReg *Reg1 = NULL,
+      BrigOperandReg *Reg2 = NULL,
+      BrigOperandReg *Reg3 = NULL,
+      BrigOperandReg *Reg4 = NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     RefSrc(src),
     RefDest_Reg(reg),
     RefDest_Addr(addr),
     RefDest_Indir(NULL),
-    RefDest_Comp(comp)   { }
+    RefDest_Comp(comp),
+    RefReg1(Reg1),
+    RefReg2(Reg2),
+    RefReg3(Reg3),
+    RefReg4(Reg4)   { }
 
   void Run_Test(int (*Rule)(Context*)){  
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
     code->append(RefInst);
+    if (RefReg1)
+      oper->append(RefReg1);
+    if (RefReg2)
+      oper->append(RefReg2);
+    if (RefReg3)
+      oper->append(RefReg3);
+    if (RefReg4)
+      oper->append(RefReg4);
+
     oper->append(RefSrc);
-    if (RefDest_Reg)
-      oper->append(RefDest_Reg);
     if (RefDest_Addr)
       oper->append(RefDest_Addr);
+    if (RefDest_Reg)
+      oper->append(RefDest_Reg);
     if (RefDest_Indir)
       oper->append(RefDest_Indir);
     if (RefDest_Comp)
@@ -180,7 +214,7 @@ TEST(CodegenTest, St_Codegen){
   BrigOperandIndirect indirect = {
   0,
   BrigEOperandIndirect,
-  sizeof(src) + sizeof(dest2), //to operand reg
+  sizeof(src), //to operand reg
   Brigb64,
   0,
   -4  //Offset in the included test case
@@ -230,7 +264,7 @@ TEST(CodegenTest, St_Codegen){
     BrigSt,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {0, sizeof(src) + sizeof(dest1) , 0, 0, 0},  // operand[5]
+    {0, sizeof(src) , 0, 0, 0},  // operand[5]
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass
@@ -273,7 +307,7 @@ TEST(CodegenTest, St_Codegen){
     Brigf32,           // type
     BrigNoPacking,     // packing
 
-    {0, sizeof(src1) + sizeof(dest1) , 0, 0, 0},  // operand[5]
+    {0, sizeof(src1) , 0, 0, 0},  // operand[5]
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
 
@@ -307,7 +341,7 @@ TEST(CodegenTest, St_Codegen){
 
   indirect.size = sizeof(indirect);
   indirect.kind = BrigEOperandIndirect;
-  indirect.reg = sizeof(src1) + sizeof(dest2);
+  indirect.reg = sizeof(src1);
   indirect.type = Brigb64;
   indirect.reserved = 0;
   indirect.offset = -4 ;
@@ -318,7 +352,7 @@ TEST(CodegenTest, St_Codegen){
     BrigSt,            // opcode
     Brigf64,           // type
     BrigNoPacking,     // packing
-    {0, sizeof(src1) + sizeof(dest2) , 0, 0, 0},  // operand[5]
+    {0, sizeof(src1) + sizeof(dest2), 0, 0, 0},  // operand[5]
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass
@@ -404,20 +438,20 @@ TEST(CodegenTest, St_Codegen){
   //Reference to reg $s1
   BrigOperandReg reg1 = {
    0,                             //size
-   BrigEOperandReg,  //kind
-   Brigb32,                 //type
-   0,                           //reserved
-   op1.size() + 1         //name
+   BrigEOperandReg,               //kind
+   Brigb32,                       //type
+   0,                             //reserved
+   op1.size() + 1                 //name
   };
   reg1.size = sizeof(reg1);
 
   //Reference to reg $s0 and $s1
   BrigOperandRegV2 regv2 = {
    0,                             //size
-   BrigEOperandRegV2,  //kind
-   Brigb32,                    //type
+   BrigEOperandRegV2,             //kind
+   Brigb32,                       //type
    0,                             //reserved
-   {0, sizeof(reg0)}      //regs[2]
+   {0, sizeof(reg0)}              //regs[2]
   };
   regv2.size = sizeof(regv2);
 
@@ -451,7 +485,7 @@ TEST(CodegenTest, St_Codegen){
     BrigSt,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {0, sizeof(reg0) + sizeof(reg1) + sizeof(regv2)
+    {sizeof(reg0) + sizeof(reg1), sizeof(reg0) + sizeof(reg1) + sizeof(regv2)
          + sizeof(dest1) + sizeof(dest2), 0, 0, 0},  // operand[5]
     BrigFlatSpace,      // storageClass
     BrigRegular,       // memorySemantic
@@ -460,7 +494,8 @@ TEST(CodegenTest, St_Codegen){
   out7.size = sizeof( out7);
 
 
-  St_Test<BrigOperandRegV2> TestCase7(in, sbuf, &out7, &regv2, &comp, &dest1, &dest2);
+  St_Test<BrigOperandRegV2> TestCase7(in, sbuf, &out7, &regv2, &comp, &dest1, &dest2,
+                              &reg0, &reg1);
   TestCase7.Run_Test(&St);
   sbuf->clear();
 
@@ -500,22 +535,22 @@ TEST(CodegenTest, St_Codegen){
 
   //Reference to reg $s3
   BrigOperandReg reg3 = {
-   0,                             //size
-   BrigEOperandReg,  //kind
-   Brigb32,                 //type
-   0,                           //reserved
-   op1.size() + op2.size() + op3.size() + 3         //name
+   0,                                       // size
+   BrigEOperandReg,                         // kind
+   Brigb32,                                 // type
+   0,                                       // reserved
+   op1.size() + op2.size() + op3.size() + 3 // name
   };
   reg3.size = sizeof(reg3);
 
   //Reference to reg $s0 and $s1 $s2 $s3
   BrigOperandRegV4 regv4 = {
-   0,                             //size
-   BrigEOperandRegV4,  //kind
-   Brigb32,                    //type
-   0,                             //reserved
+   0,                                             //size
+   BrigEOperandRegV4,                             //kind
+   Brigb32,                                       //type
+   0,                                             //reserved
    {0, sizeof(reg0), sizeof(reg0) + sizeof(reg1),
-      sizeof(reg0) + sizeof(reg1) + sizeof(reg2)}      //regs[4]
+      sizeof(reg0) + sizeof(reg1) + sizeof(reg2)} //regs[4]
   };
   regv4.size = sizeof(regv4);
 
@@ -552,8 +587,8 @@ TEST(CodegenTest, St_Codegen){
     BrigSt,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {0, sizeof(reg0) + sizeof(reg1) + sizeof(reg2)
-         + sizeof(reg3) + sizeof(regv4)
+    {sizeof(reg0) + sizeof(reg1) + sizeof(reg2) + sizeof(reg3), 
+     sizeof(reg0) + sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(regv4)
          + sizeof(dest1) + sizeof(dest2), 0, 0, 0},  // operand[5]
     BrigFlatSpace,      // storageClass
     BrigRegular,       // memorySemantic
@@ -562,7 +597,8 @@ TEST(CodegenTest, St_Codegen){
   out8.size = sizeof( out8);
 
 
-  St_Test<BrigOperandRegV4> TestCase8(in, sbuf, &out8, &regv4, &comp, &dest1, &dest2);
+  St_Test<BrigOperandRegV4> TestCase8(in, sbuf, &out8, &regv4, &comp, &dest1, &dest2,
+                                &reg0, &reg1, &reg2, &reg3);
   TestCase8.Run_Test(&St);
   sbuf->clear();
 

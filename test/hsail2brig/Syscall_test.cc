@@ -1,7 +1,6 @@
-#include <iostream>
-#include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa {
 namespace brig {
@@ -28,36 +27,37 @@ public:
     RefSrc2(Src2),
     RefSrc3(Src3),
     RefSrc4(Src4) { }
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
 
-  void validate(struct BrigSections* TestOutput) {
+    code->append(RefInst);
+    oper->append(RefDest);
 
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
+    if (RefSrc1 != NULL) {
+      oper->append(RefSrc1);
+    }
+    if (RefSrc2 != NULL) {
+      oper->append(RefSrc2);
+    }
+    if (RefSrc3 != NULL) {
+      oper->append(RefSrc3);
+    }
+    if (RefSrc4 != NULL) {
+      oper->append(RefSrc4);
+    }
 
-    inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstBase* getinst = (cast<BrigInstBase>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-    const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*>
-                                    (&(TestOutput->operands[getinst->o_operands[0]]));
-    validate_brig::validate(RefDest, refbuf, getdest, getbuf);
-
-    const BrigOperandImmed* getsrc1 = reinterpret_cast <const BrigOperandImmed*>
-                                      (&(TestOutput->operands[getinst->o_operands[1]]));
-    validate_brig::validate(RefSrc1, getsrc1);
-
-    const T1 *getsrc2 = reinterpret_cast <const T1*>
-                        (&(TestOutput->operands[getinst->o_operands[2]]));
-    validate_brig::validateOpType<T1>(RefSrc2, refbuf, getsrc2, getbuf);
-
-    const T2 *getsrc3 = reinterpret_cast <const T2*>
-                        (&(TestOutput->operands[getinst->o_operands[3]]));
-    validate_brig::validateOpType<T2>(RefSrc3, refbuf, getsrc3, getbuf);
-
-    const T3 *getsrc4 = reinterpret_cast <const T3*>
-                        (&(TestOutput->operands[getinst->o_operands[4]]));
-    validate_brig::validateOpType<T3>(RefSrc4, refbuf, getsrc4, getbuf);
-
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), 0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+    delete dir;
   }
 };
 
@@ -75,8 +75,8 @@ TEST(CodegenTest, Syscall_CodeGen) {
   BrigOperandImmed imm1;
   BrigInstBase out;
 
-  BrigOperandReg reg2, reg3, reg4;
-  BrigOperandWaveSz wav2, wav3, wav4;
+  BrigOperandReg reg2, reg3;
+  BrigOperandWaveSz wav2, wav4;
   BrigOperandImmed imm2, imm3, imm4;
 
   symbols = new StringBuffer();
@@ -124,10 +124,8 @@ TEST(CodegenTest, Syscall_CodeGen) {
   reg3.reserved = 0;
   reg3.s_name = destName.size() + op2Name.size() + 2;
 
-  reg4 = dest;
-
   Syscall_Test<BrigOperandReg, BrigOperandReg, BrigOperandReg>
-               TestCase1(in, symbols, &out, &dest, &imm1, &reg2, &reg3, &reg4);
+               TestCase1(in, symbols, &out, &dest, &imm1, &reg2, &reg3, NULL);
   TestCase1.Run_Test(&SysCall);
   symbols->clear();
 
@@ -217,10 +215,8 @@ TEST(CodegenTest, Syscall_CodeGen) {
   wav2.size = sizeof(wav2);
   wav2.kind = BrigEOperandWaveSz;
 
-  wav4 = wav3 = wav2;
-
   Syscall_Test<BrigOperandWaveSz, BrigOperandWaveSz, BrigOperandWaveSz>
-               TestCase3(in, symbols, &out, &dest, &imm1, &wav2, &wav3, &wav4);
+               TestCase3(in, symbols, &out, &dest, &imm1, &wav2, NULL, NULL);
   TestCase3.Run_Test(&SysCall);
   symbols->clear();
 

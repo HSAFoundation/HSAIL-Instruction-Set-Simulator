@@ -1,33 +1,41 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include <iostream>
+#include <string>
 
-namespace hsa{
-namespace brig{
+#include "gtest/gtest.h"
+#include "tokens.h"
+#include "lexer.h"
+#include "parser.h"
+#include "brig.h"
+#include "error_reporter.h"
+#include "context.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
-class Instruction0_Test : public BrigCodeGenTest{
+namespace hsa {
+namespace brig {
+
+class Instruction0_Test: public BrigCodeGenTest {
+
 private:
- 
-  //Instruction in .code buffer - Pointers to brig structures
   const BrigInstBase* RefInst;
-    
+
 public:
- 
-  Instruction0_Test(std::string& in, BrigInstBase* ref) : 
+  Instruction0_Test(std::string& in, BrigInstBase* ref):
     BrigCodeGenTest(in),
-    RefInst(ref) { }
+    RefInst(ref) {}
+  
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    code->append(RefInst);
+ 
     
-  void validate(struct BrigSections* TestOutput){   
+    struct BrigSections RefOutput(NULL, NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      NULL, NULL, 0, 0, code->size(), 0, (size_t)0);    
     
-    inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstBase* getinst = (cast<BrigInstBase>(getcode));
-    validate_brig::validate(RefInst, getinst);
-      
-    EXPECT_EQ(0, getinst->o_operands[0]);
-    EXPECT_EQ(0, getinst->o_operands[1]);    
-    EXPECT_EQ(0, getinst->o_operands[2]);    
-    EXPECT_EQ(0, getinst->o_operands[3]);
-    EXPECT_EQ(0, getinst->o_operands[4]);       
-  }
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    
+  }  
 };
 
 /****************** Nop Test ************************/

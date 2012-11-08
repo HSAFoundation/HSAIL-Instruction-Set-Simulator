@@ -34,11 +34,11 @@ public:
   void validate(struct BrigSections* RefOutput, struct BrigSections* GetOutput){
 
     inst_iterator getinst = GetOutput->code_begin();
-    inst_iterator refinst = RefOutput->code_begin();
+    inst_iterator refinst(RefOutput->code);
     const inst_iterator getinst_end = GetOutput->code_end();
     const inst_iterator refinst_end = RefOutput->code_end();
     for(; (getinst != getinst_end) && (refinst!= refinst_end)
-      && (GetOutput->codeSize>8) && (RefOutput->codeSize>0); getinst++, refinst++){
+      && (GetOutput->codeSize>CODEBUFFER_OFFSET) && (RefOutput->codeSize>0); getinst++, refinst++){
       switch(getinst->kind){
         caseInstBrig(InstBase);
         caseInstBrig(InstMod) ;
@@ -58,11 +58,11 @@ public:
     }
 
     dir_iterator getdir = GetOutput->begin();
-    dir_iterator refdir = RefOutput->begin();
+    dir_iterator refdir(RefOutput->directives);
     const dir_iterator getdir_end = GetOutput->end();
     const dir_iterator refdir_end = RefOutput->end();
     for(; (getdir != getdir_end) && (refdir != refdir_end) &&
-      (GetOutput->directivesSize>8) && (RefOutput->codeSize > 0); getdir++, refdir++){
+        GetOutput->directivesSize>DIRECTIVESBUFFER_OFFSET && RefOutput->directivesSize>0; getdir++, refdir++){
     if(getdir->kind==BrigEDirectivePad)
         getdir++;
       switch(getdir->kind){
@@ -98,11 +98,11 @@ public:
     }
 
     oper_iterator getoper = GetOutput->oper_begin();
-    oper_iterator refoper = RefOutput->oper_begin();
+    oper_iterator refoper(RefOutput->operands);
     const oper_iterator getoper_end = GetOutput->oper_end();
     const oper_iterator refoper_end = RefOutput->oper_end();
     for(; (getoper != getoper_end) && (refoper != refoper_end) &&
-      (GetOutput->operandsSize >8) && (RefOutput->codeSize > 0); getoper++, refoper++){
+      (GetOutput->operandsSize >OPERANDSBUFFER_OFFSET) && (RefOutput->operandsSize > 0); getoper++, refoper++){
       if(getoper->kind==BrigEOperandPad)
         getoper++;
       switch(getoper->kind){

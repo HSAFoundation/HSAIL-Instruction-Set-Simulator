@@ -43,16 +43,33 @@ public:
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
     code->append(RefInst);
-    oper->append(RefDest);
-    oper->append(RefSrc1);
-    if (RefReg1)
-      oper->append(RefReg1);
-    if (RefReg2)
-      oper->append(RefReg2);
-    if (RefReg3)
-      oper->append(RefReg3);
-    if (RefReg4)
-      oper->append(RefReg4);
+
+    if (BrigEOperandRegV2 == RefDest->kind || BrigEOperandRegV4 == RefDest->kind) {
+      if (RefReg1)
+        oper->append(RefReg1);
+      if (RefReg2)
+        oper->append(RefReg2);
+      if (RefReg3)
+        oper->append(RefReg3);
+      if (RefReg4)
+        oper->append(RefReg4);
+      oper->append(RefDest);
+      oper->append(RefSrc1);
+    } else if (BrigEOperandRegV2 == RefSrc1->kind || BrigEOperandRegV4 == RefSrc1->kind) {
+      oper->append(RefDest);
+      if (RefReg1)
+        oper->append(RefReg1);
+      if (RefReg2)
+        oper->append(RefReg2);
+      if (RefReg3)
+        oper->append(RefReg3);
+      if (RefReg4)
+        oper->append(RefReg4);
+      oper->append(RefSrc1);
+    } else {
+      oper->append(RefDest);
+      oper->append(RefSrc1);
+    }
     
     struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
       NULL, reinterpret_cast<const char *>(&code->get()[0]), 
