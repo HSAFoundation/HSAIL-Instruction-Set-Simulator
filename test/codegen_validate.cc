@@ -204,16 +204,15 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
       ASSERT_EQ(refoper->kind, getoper->kind);
       switch(getoper->kind){
         caseOperBrig(OperandReg);
-        caseOperBrig(OperandAddress);
-        caseOperBrig(OperandIndirect);
-        caseOperBrig(OperandCompound);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandCompound);
         caseOperBrig(OperandLabelRef);
         caseOperBrig(OperandFunctionRef);
-        caseOperBrig(OperandRegV4);
         caseOperBrig(OperandRegV2);
-   
+        caseOperBrig(OperandRegV4);
         default:
           printf("Offset to invalid operand");
           exit(1);

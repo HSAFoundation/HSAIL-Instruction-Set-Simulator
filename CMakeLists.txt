@@ -86,7 +86,9 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/St_test.cc
     test/hsail2brig/Syscall_test.cc
     test/hsail2brig/Version_test.cc
-    #test/hsail2brig/Control_test.cc
+    test/hsail2brig/Control_test.cc
+    test/hsail2brig/Kernel_test.cc
+    test/hsail2brig/Comment_test.cc
     testcase/globaldecl_test.cc
     testcase/version_test.cc
     testcase/operation_test.cc
@@ -126,7 +128,9 @@ else (ENABLE_TEST_CASE)
     test/hsail2brig/St_test.cc
     test/hsail2brig/Syscall_test.cc
     test/hsail2brig/Version_test.cc
-    #test/hsail2brig/Control_test.cc
+    test/hsail2brig/Control_test.cc
+    test/hsail2brig/Kernel_test.cc
+    test/hsail2brig/Comment_test.cc
     gmock/gmock_main.cc
     gmock/gmock-gtest-all.cc
     )
