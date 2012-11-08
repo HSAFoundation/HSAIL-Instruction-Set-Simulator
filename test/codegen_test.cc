@@ -763,58 +763,6 @@ TEST(CodegenTest, ArgumentDeclCodegen){
 	delete lexer;
 }
 
-TEST(CodegenTest, Comment_Test){
-	context->set_error_reporter(main_reporter);
-	context->clear_context();
-
-	std::string input("nop;\n /*This is a comment*/\n nop;");
-	Lexer* lexer = new Lexer(input);
-	lexer->set_source_string(input);
-	context->token_to_scan = lexer->get_next_token();
-	EXPECT_EQ(0, Instruction0(context));
-	EXPECT_EQ(0, Comment(context));
-	EXPECT_EQ(0, Instruction0(context));
-
-	BrigDirectiveComment get;
-	context->get_directive(8, &get);
-
-	BrigDirectiveComment ref = {
-	sizeof(BrigDirectiveComment),
-	BrigEDirectiveComment,
-	8 + sizeof(BrigInstBase),
-	8
-	};
-
-	EXPECT_EQ(ref.size, get.size);
-	EXPECT_EQ(ref.kind, get.kind);
-	EXPECT_EQ(ref.c_code, get.c_code);
-	EXPECT_EQ(ref.s_name, get.s_name);
-
-	context->clear_context();
-	input.assign("nop;\n //This is a comment\n nop;");
-	lexer->set_source_string(input);
-	context->token_to_scan = lexer->get_next_token();
-	EXPECT_EQ(0, Instruction0(context));
-	EXPECT_EQ(0, Comment(context));
-	EXPECT_EQ(0, Instruction0(context));
-
-	context->get_directive(8, &get);
-
-	BrigDirectiveComment ref2 = {
-	sizeof(BrigDirectiveComment),
-	BrigEDirectiveComment,
-	8 + sizeof(BrigInstBase),
-	8
-	};
-
-	EXPECT_EQ(ref2.size, get.size);
-	EXPECT_EQ(ref2.kind, get.kind);
-	EXPECT_EQ(ref2.c_code, get.c_code);
-	EXPECT_EQ(ref2.s_name, get.s_name);
-
-    delete lexer;
-}
-
 TEST(CodegenTest, Example6_CodeGen) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
