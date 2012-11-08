@@ -6584,101 +6584,98 @@ int ImageStore(Context* context) {
 }
 
 int SingleListSingle(Context * context) {
-  if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
-    uint32_t elementCount = 0;
-    std::vector<float> single_list;
-    while (1) {
-      elementCount++;
-      single_list.push_back(context->token_value.float_val);
+  if (context->token_to_scan != TOKEN_SINGLE_CONSTANT) {
+    return 1;
+  }
+  uint32_t elementCount = 0;
+  std::vector<float> single_list;
+  while (1) {
+    elementCount++;
+    single_list.push_back(context->token_value.float_val);
 
+    context->token_to_scan = yylex();
+    if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
-      if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
-          continue;
-        } else {
-          context->set_error(MISSING_SINGLE_CONSTANT);
-          return 1;
-        }
+      if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
+        continue;
       } else {
-        uint32_t n = 0;
-        // elementCount
+        context->set_error(MISSING_SINGLE_CONSTANT);
+        return 1;
+      }
+    } else 
+      break;
+  }
+    
+  uint32_t n = 0;
+  BrigDirectiveSymbol bds ;
+  BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
+  context->get_directive(bds_offset,&bds);
 
-        // update the BrigDirectiveSymbol.d_init and dim
-        BrigDirectiveSymbol bds ;
-        BrigdOffset32_t bds_offset = context->current_argdecl_offset ;
-        context->get_directive(bds_offset,&bds);
+  if (0 == context->get_dim()) {
+    if (context->get_isArray()) {
+      bds.s.symbolModifier = BrigArray;
+      context->set_symbol_modifier(BrigArray);
+    }
+    bds.s.dim = elementCount;
+  } else if (elementCount > bds.s.dim) {
+    context->set_error(INVALID_INITIALIZER);
+    return 1;
+  }
+  n = bds.s.dim;
+  context->set_dim(bds.s.dim);
 
-        if (0 == context->get_dim()) {
-          if (context->get_isArray()) {
-            // If array is empty [],  Update dim.
-            bds.s.symbolModifier = BrigArray;
-            context->set_symbol_modifier(BrigArray);
-          }
-          bds.s.dim = elementCount;
-        } else if (elementCount > bds.s.dim) {
-          context->set_error(INVALID_INITIALIZER);
-          return 1;
-        }
-        n = bds.s.dim;
-        context->set_dim(bds.s.dim);
-
-        switch (context->get_type()) {
-          case Brigb1:
-            context->set_error(INVALID_INITIALIZER);
-            return 1;
-          case Brigb8:    n = (n + 7) >> 3; break;
-          case Brigb16:   n = (n + 3) >> 2; break;
-          case Brigb32:   n = (n + 1) >> 1; break;
-          case Brigb64:   break;
-        }
-        size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t);
-        uint8_t *array = new uint8_t[arraySize];
-        memset(array, 0 , sizeof(uint8_t) * arraySize);
-        BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-        bdi->elementCount = bds.s.dim;
-        bdi->size = arraySize;
-        bdi->kind = BrigEDirectiveInit;
-        // c_code It is unused in this structure.
-        bdi->c_code = 0;
-        bdi->type = context->get_type();
-        bdi->reserved = 0;
-        switch (context->get_type()) {
-          case Brigb8:
-            for (uint32_t i = 0; i < single_list.size(); i++ ) {
-              *(float*)&bdi->initializationData.u8[i] = single_list[i];
-            }
-            break;
-          case Brigb16:
-            for (uint32_t i = 0; i < single_list.size(); i++ ) {
-              *(float*)&bdi->initializationData.u16[i] = single_list[i];
-            }
-            break;
-          case Brigb32:
-            for (uint32_t i = 0; i < single_list.size(); i++ ) {
-              *(float*)&bdi->initializationData.u32[i] = single_list[i];
-            }
-            break;
-          case Brigb64:
-            // TODO(Chuang): Loss of precision
-            for (uint32_t i = 0; i < single_list.size(); i++ ) {
-              *(double*)&bdi->initializationData.u64[i] = (double)single_list[i];
-            }
-            break;
-        }
-        bds.d_init = context->get_directive_offset();
-        bds.d_init += bds.d_init & 0x7;
-        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-        context->update_directive_bytes(bds_charp, bds_offset,
-                                        sizeof(BrigDirectiveSymbol));
-        context->append_directive(bdi);
-        delete[] reinterpret_cast<uint8_t *>(bdi);
-        bdi = NULL;
-        return 0;
-      }  // ','
-    }  // while
-  }  // Single Constant
+  switch (context->get_type()) {
+    case Brigb1:
+      context->set_error(INVALID_INITIALIZER);
+      return 1;
+    case Brigb8:    n = (n + 7) >> 3; break;
+    case Brigb16:   n = (n + 3) >> 2; break;
+    case Brigb32:   n = (n + 1) >> 1; break;
+    case Brigb64:   break;
+  }
+  size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t);
+  uint8_t *array = new uint8_t[arraySize];
+  memset(array, 0 , sizeof(uint8_t) * arraySize);
+  BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
+  bdi->elementCount = bds.s.dim;
+  bdi->size = arraySize;
+  bdi->kind = BrigEDirectiveInit;
+  bdi->c_code = 0;
+  bdi->type = context->get_type();
+  bdi->reserved = 0;
+  switch (context->get_type()) {
+    case Brigb8:
+      for (uint32_t i = 0; i < single_list.size(); i++ ) {
+        *(float*)&bdi->initializationData.u8[i] = single_list[i];
+      }
+      break;
+    case Brigb16:
+      for (uint32_t i = 0; i < single_list.size(); i++ ) {
+        *(float*)&bdi->initializationData.u16[i] = single_list[i];
+      }
+      break;
+    case Brigb32:
+      for (uint32_t i = 0; i < single_list.size(); i++ ) {
+        *(float*)&bdi->initializationData.u32[i] = single_list[i];
+      }
+      break;
+    case Brigb64:
+      // TODO(Chuang): Loss of precision
+      for (uint32_t i = 0; i < single_list.size(); i++ ) {
+        *(double*)&bdi->initializationData.u64[i] = (double)single_list[i];
+      }
+      break;
+  }
+  bds.d_init = context->get_directive_offset();
+  bds.d_init += bds.d_init & 0x7;
+  unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+  context->update_directive_bytes(bds_charp, bds_offset,
+                                  sizeof(BrigDirectiveSymbol));
+  context->append_directive(bdi);
+  delete[] reinterpret_cast<uint8_t *>(bdi);
+  bdi = NULL;
   return 0;
+      
 }
 
 int ImageInit(Context *context) {
