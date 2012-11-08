@@ -1092,7 +1092,9 @@ int Instruction3(Context* context) {
   type = (opcode == BrigClass) ? (int)Brigb1 : type;
   context->set_type(type);
   context->token_to_scan = yylex();
-
+  if((opcode==BrigShr) || (opcode==BrigShl))
+    packing = (type >= Brigu8x4) ? BrigPackPS : packing;
+    
   if (Operand(context, &OpOffset0)) {
     context->set_error(MISSING_OPERAND);
     return 1;
@@ -3361,9 +3363,13 @@ int Instruction4Cmov(Context* context) {
 
   if (context->token_type == DATA_TYPE_ID) {
     context->set_type(context->token_value.data_type);
+    
     cmovInst.type = context->token_value.data_type;
+    cmovInst.packing = cmovInst.type >= Brigu8x4 ? BrigPackPP : cmovInst.packing;
     context->token_to_scan = yylex();
 
+    
+  
     // Note: dest: Destination register.
     std::string opName;
 
