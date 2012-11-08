@@ -1,7 +1,6 @@
-#include <iostream>
-#include <string>
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
 namespace hsa {
 namespace brig {
@@ -59,73 +58,45 @@ public:
     RefReg(NULL),
     RefSrc1(Src1),
     RefSrc2(Src2) { }
-
-  void validate(struct BrigSections* TestOutput) {
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-    unsigned int opCount = 0;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const BrigInstAtomic* getinst = (cast<BrigInstAtomic>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
+    code->append(RefInst);
     if (RefDest != NULL) {
-      const BrigOperandReg* getdest = reinterpret_cast <const BrigOperandReg*>
-                                      (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validate(RefDest, refbuf, getdest, getbuf);
+      oper->append(RefDest);
     }
-
-    const BrigOperandAddress* getaddr = NULL;
-    const BrigOperandReg* getreg = NULL;
-
     if (RefCompound != NULL) {
-      const BrigOperandCompound* getcomp = reinterpret_cast <const BrigOperandCompound*>
-                                           (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validate(RefCompound, getcomp);
-
-      getaddr = reinterpret_cast <const BrigOperandAddress*>
-                                 (&(TestOutput->operands[getcomp->name]));
-      validate_brig::validate(RefAddr, getaddr);
-
+      oper->append(RefAddr);
       if (RefReg != NULL) {
-        getreg = reinterpret_cast <const BrigOperandReg*>
-                                   (&(TestOutput->operands[getcomp->reg]));
-        validate_brig::validate(RefReg, refbuf, getreg, getbuf);
+        oper->append(RefReg);
       }
+      oper->append(RefCompound);
     } else if (RefIndirect != NULL) {
-      const BrigOperandIndirect* getindi = reinterpret_cast <const BrigOperandIndirect*>
-                                           (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validate(RefIndirect, getindi);
-
       if (RefReg != NULL) {
-        getreg = reinterpret_cast <const BrigOperandReg*>
-                                  (&(TestOutput->operands[getindi->reg]));
-        validate_brig::validate(RefReg, refbuf, getreg, getbuf);
+        oper->append(RefReg);
       }
+      oper->append(RefIndirect);
     } else if (RefAddr != NULL) {
-      getaddr = reinterpret_cast <const BrigOperandAddress*>
-                                 (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validate(RefAddr, getaddr);
+      oper->append(RefAddr);
     }
-
-    const T1 *getsrc1 = reinterpret_cast <const T1*>
-                        (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validateOpType<T1>(RefSrc1, refbuf, getsrc1, getbuf);
-
+    if (RefSrc1 != NULL) {
+      oper->append(RefSrc1);
+    }
     if (RefSrc2 != NULL) {
-      const T2 *getsrc2 = reinterpret_cast <const T2*>
-                          (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validateOpType<T2>(RefSrc2, refbuf, getsrc2, getbuf);
-    } else {
-      EXPECT_EQ(0, getinst->o_operands[opCount++]);
+      oper->append(RefSrc2);
     }
-
-    EXPECT_EQ(0, getinst->o_operands[opCount++]);
-    while (opCount <= 4) {
-      EXPECT_EQ(0, getinst->o_operands[opCount++]);
-    }
-
-  }
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), 0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+    delete dir;
+  }  
 };
 
 TEST(CodegenTest, Atom_CodeGen) {
@@ -145,7 +116,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   BrigOperandAddress addr;
 
   BrigOperandReg reg1, reg2;
-  BrigOperandWaveSz wav1, wav2;
+  BrigOperandWaveSz wav1;
   BrigOperandImmed imm1, imm2;
 
 
@@ -297,7 +268,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
   out.o_operands[1] = sizeof(dest) + sizeof(reg) + sizeof(addr);
-  out.o_operands[2] = out.o_operands[1] + sizeof(comp);
+  out.o_operands[2] = 0;
   out.o_operands[3] = 0;
   out.o_operands[4] = 0;
   out.atomicOperation = BrigAtomicOr;
@@ -330,9 +301,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   addr.reserved = 0;
   addr.directive = 0;
 
-  reg1 = dest;
-
-  Atom_Test<BrigOperandReg> TestCase4(in, symbols, &out, &dest, &comp, &addr, &reg, &reg1);
+  Atom_Test<BrigOperandReg> TestCase4(in, symbols, &out, &dest, &comp, &addr, &reg, NULL);
   TestCase4.Run_Test(&Atom);
   symbols->clear();
 
@@ -349,7 +318,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   out.o_operands[0] = 0;
   out.o_operands[1] = sizeof(dest) + sizeof(addr);
   out.o_operands[2] = out.o_operands[1] + sizeof(comp);
-  out.o_operands[3] = out.o_operands[2] + sizeof(wav1);
+  out.o_operands[3] = out.o_operands[2];
   out.o_operands[4] = 0;
   out.atomicOperation = BrigAtomicCas;
   out.storageClass = BrigGlobalSpace;
@@ -366,7 +335,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   comp.type = Brigb64;
   comp.reserved = 0;
   comp.name = sizeof(dest);
-  comp.reg = sizeof(dest) + sizeof(addr);
+  comp.reg = 0;
   comp.offset = 7;
 
   reg = dest;
@@ -380,9 +349,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   wav1.size = sizeof(wav1);
   wav1.kind = BrigEOperandWaveSz;
 
-  wav2 = wav1;
-
-  Atom_Test<BrigOperandWaveSz, BrigOperandWaveSz> TestCase5(in, symbols, &out, &dest, &comp, &addr, &reg, &wav1, &wav2);
+  Atom_Test<BrigOperandWaveSz, BrigOperandWaveSz> TestCase5(in, symbols, &out, &dest, &comp, &addr, NULL, &wav1, NULL);
   TestCase5.Run_Test(&Atom);
   symbols->clear();
 
@@ -659,9 +626,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   addr.reserved = 0;
   addr.directive = 0;
 
-  reg1 = dest;
-
-  Atom_Test<BrigOperandReg> TestCase11(in, symbols, &out, &dest, &addr, &reg1);
+  Atom_Test<BrigOperandReg> TestCase11(in, symbols, &out, &dest, &addr, NULL);
   TestCase11.Run_Test(&Atom);
   symbols->clear();
 
@@ -696,9 +661,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   indi.reserved = 0;
   indi.offset = 0;
 
-  reg = reg1 = dest;
-
-  Atom_Test<BrigOperandReg> TestCase12(in, symbols, &out, &dest, &indi, &reg, &reg1);
+  Atom_Test<BrigOperandReg> TestCase12(in, symbols, &out, &dest, &indi, NULL, NULL);
   TestCase12.Run_Test(&Atom);
   symbols->clear();
 
@@ -764,7 +727,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   BrigOperandAddress addr;
 
   BrigOperandReg reg1, reg2;
-  BrigOperandWaveSz wav1, wav2;
+  BrigOperandWaveSz wav1;
   BrigOperandImmed imm1, imm2;
 
   symbols = new StringBuffer();
@@ -986,7 +949,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   out.packing = BrigNoPacking;
   out.o_operands[0] = sizeof(addr) + sizeof(reg);
   out.o_operands[1] = out.o_operands[0] + sizeof(comp);
-  out.o_operands[2] = out.o_operands[1] + sizeof(wav1);
+  out.o_operands[2] = out.o_operands[1];
   out.o_operands[3] = 0;
   out.o_operands[4] = 0;
   out.atomicOperation = BrigAtomicCas;
@@ -1017,9 +980,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   wav1.size = sizeof(wav1);
   wav1.kind = BrigEOperandWaveSz;
 
-  wav2 = wav1;
-
-  Atom_Test<BrigOperandWaveSz, BrigOperandWaveSz> TestCase6(in, symbols, &out, NULL, &comp, &addr, &reg, &wav1, &wav2);
+  Atom_Test<BrigOperandWaveSz, BrigOperandWaveSz> TestCase6(in, symbols, &out, NULL, &comp, &addr, &reg, &wav1, NULL);
   TestCase6.Run_Test(&AtomicNoRet);
   symbols->clear();
 
@@ -1241,7 +1202,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   out.type = Brigs32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
-  out.o_operands[1] = out.o_operands[0];
+  out.o_operands[1] = sizeof(addr);
   out.o_operands[2] = 0;
   out.o_operands[3] = 0;
   out.o_operands[4] = 0;
@@ -1265,7 +1226,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   TestCase12.Run_Test(&AtomicNoRet);
   symbols->clear();
 
-  /************************************* Test Case 12 ************************************/
+  /************************************* Test Case 13 ************************************/
   in.assign("atomicNoRet_inc_group_u32 [$s1], $s1;\n");
   destName.assign("$s1");  symbols->append(destName);
 
@@ -1274,8 +1235,8 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   out.opcode = BrigAtomicNoRet;
   out.type = Brigu32;
   out.packing = BrigNoPacking;
-  out.o_operands[0] = 0;
-  out.o_operands[1] = out.o_operands[0];
+  out.o_operands[0] = sizeof(reg);
+  out.o_operands[1] = 0;
   out.o_operands[2] = 0;
   out.o_operands[3] = 0;
   out.o_operands[4] = 0;
@@ -1290,19 +1251,17 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   indi.reserved = 0;
   indi.offset = 0;
 
-  reg1.size = sizeof(reg1);
-  reg1.kind = BrigEOperandReg;
-  reg1.type = Brigb32;
-  reg1.reserved = 0;
-  reg1.s_name = 0;
+  reg.size = sizeof(reg);
+  reg.kind = BrigEOperandReg;
+  reg.type = Brigb32;
+  reg.reserved = 0;
+  reg.s_name = 0;
 
-  reg = reg1;
-
-  Atom_Test<BrigOperandReg> TestCase13(in, symbols, &out, NULL, &indi, &reg, &reg1);
+  Atom_Test<BrigOperandReg> TestCase13(in, symbols, &out, NULL, &indi, &reg, NULL);
   TestCase13.Run_Test(&AtomicNoRet);
   symbols->clear();
 
-  /************************************* Test Case 13 ************************************/
+  /************************************* Test Case 14 ************************************/
   in.assign("atomicNoRet_sub_u32 [0x100], $s2;\n");
   op1Name.assign("$s2");   symbols->append(op1Name);
 

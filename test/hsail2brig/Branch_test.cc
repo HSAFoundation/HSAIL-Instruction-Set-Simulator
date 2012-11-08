@@ -1,5 +1,6 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
  
 namespace hsa {
 namespace brig {
@@ -27,42 +28,32 @@ public:
     RefSrc1(src1),
     RefSrc2(src2),
     RefSrc3(src3) { }
-    
-  void validate(struct BrigSections* TestOutput){   
 
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-    uint32_t opCount = 0;
-    inst_iterator getcode = TestOutput->code_begin();   
-    const Tinst* getinst = (cast<Tinst>(getcode));
-
-    validate_brig::validate(RefInst, getinst);
-
-    const BrigOperandImmed *getwidth = reinterpret_cast <const BrigOperandImmed *> 
-                                       (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validate(RefWidth, getwidth);
-
-    const T1* getsrc1 = reinterpret_cast <const T1*> 
-                        (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-    validate_brig::validateOpType<T1>(RefSrc1, refbuf, getsrc1, getbuf);
-
+  void Run_Test(int (*Rule)(Context*)){  
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    Buffer* dir = new Buffer();
+    code->append(RefInst);
+    oper->append(RefWidth);
+    oper->append(RefSrc1);
     if (RefSrc2 != NULL) {
-      const T2 *getsrc2 = reinterpret_cast <const T2*> 
-                         (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validateOpType<T2>(RefSrc2, refbuf, getsrc2, getbuf);
+      oper->append(RefSrc2);
     }
-
     if (RefSrc3 != NULL) {
-      const T3 *getsrc3 = reinterpret_cast <const T3*> 
-                         (&(TestOutput->operands[getinst->o_operands[opCount++]]));
-      validate_brig::validateOpType(RefSrc3, refbuf, getsrc3, getbuf);
+      oper->append(RefSrc3);
     }
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), 0);    
     
-    while (opCount <= 4) {
-      EXPECT_EQ(0, getinst->o_operands[opCount++]);       
-    }       
-     
-  }
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+    delete dir;
+  }  
+    
 };
 
 TEST(CodegenTest, Brn_Codegen){
@@ -137,6 +128,7 @@ TEST(CodegenTest, Brn_Codegen){
   Branch_Test<BrigInstMod, BrigOperandLabelRef> TestCase2(in, sbuf, &outMod, &width, &labRef);
   TestCase2.Run_Test(&Branch);  
   sbuf->clear();
+
   /*************************** Case 3 ********************************/
   in.assign("brn_width(0)_fbar $s1;\n");
   regName.assign("$s1");  sbuf->append(regName);

@@ -30,6 +30,7 @@ SET(LLVM_REQUIRES_EH "true")
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
+include (EnsureAtomicOps)
 include (EnsureLLVMisPresent)
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
 
@@ -37,8 +38,7 @@ SET(PROJ_SEARCH_PATH
 "${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
-"${PROJECT_BINARY_DIR}/src"
-)
+"${PROJECT_BINARY_DIR}/src")
 include_directories( ${PROJ_SEARCH_PATH} )
 
 LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
@@ -59,30 +59,32 @@ set(hsail2brig_test_SOURCES
     test/parser_test.cc
     test/codegen_test.cc
     test/codegen_validate.cc
-    #test/hsail2brig/Atom_test.cc
-    #test/hsail2brig/AtomicImage_test.cc
-    #test/hsail2brig/Branch_test.cc
+    test/hsail2brig/Atom_test.cc
+    test/hsail2brig/AtomicImage_test.cc
+    test/hsail2brig/Block_test.cc
+    test/hsail2brig/Branch_test.cc
     #test/hsail2brig/Call_test.cc
-    #test/hsail2brig/Cmp_test.cc
-    #test/hsail2brig/Cvt_test.cc
-    #test/hsail2brig/Extension_test.cc
-    #test/hsail2brig/FileDecl_test.cc
+    test/hsail2brig/Cmp_test.cc
+    test/hsail2brig/Cvt_test.cc
+    test/hsail2brig/Extension_test.cc
+    test/hsail2brig/FileDecl_test.cc
     test/hsail2brig/GlobalDecl_test.cc
-    #test/hsail2brig/Instruction0_test.cc
-    #test/hsail2brig/Instruction1_test.cc
-    #test/hsail2brig/Instruction2_test.cc
-    #test/hsail2brig/Instruction3_test.cc
+    test/hsail2brig/ImageInstruction_test.cc
+    test/hsail2brig/Instruction0_test.cc
+    test/hsail2brig/Instruction1_test.cc
+    test/hsail2brig/Instruction2_test.cc
+    test/hsail2brig/Instruction3_test.cc
     test/hsail2brig/Instruction4_test.cc
     test/hsail2brig/Instruction5_test.cc
-    #test/hsail2brig/Ld_test.cc
-    #test/hsail2brig/Location_test.cc
-    #test/hsail2brig/Mov_test.cc
+    test/hsail2brig/Ld_test.cc
+    test/hsail2brig/Location_test.cc
+    test/hsail2brig/Mov_test.cc
     test/hsail2brig/Mul_test.cc
-    #test/hsail2brig/Pragma_test.cc
-    #test/hsail2brig/Query_test.cc
-    #test/hsail2brig/St_test.cc
-    #test/hsail2brig/Syscall_test.cc
-    #test/hsail2brig/Version_test.cc
+    test/hsail2brig/Pragma_test.cc
+    test/hsail2brig/Query_test.cc
+    test/hsail2brig/St_test.cc
+    test/hsail2brig/Syscall_test.cc
+    test/hsail2brig/Version_test.cc
     #test/hsail2brig/Control_test.cc
     testcase/globaldecl_test.cc
     testcase/version_test.cc
@@ -97,30 +99,32 @@ else (ENABLE_TEST_CASE)
     test/parser_test.cc
     test/codegen_test.cc
     test/codegen_validate.cc
-    #test/hsail2brig/Atom_test.cc
-    #test/hsail2brig/AtomicImage_test.cc
-    #test/hsail2brig/Branch_test.cc
+    test/hsail2brig/Atom_test.cc
+    test/hsail2brig/AtomicImage_test.cc
+    test/hsail2brig/Branch_test.cc
+    test/hsail2brig/Block_test.cc
     #test/hsail2brig/Call_test.cc
-    #test/hsail2brig/Cmp_test.cc
+    test/hsail2brig/Cmp_test.cc
     test/hsail2brig/Cvt_test.cc
-    #test/hsail2brig/Extension_test.cc
-    #test/hsail2brig/FileDecl_test.cc
+    test/hsail2brig/Extension_test.cc
+    test/hsail2brig/FileDecl_test.cc
     test/hsail2brig/GlobalDecl_test.cc
-    #test/hsail2brig/Instruction0_test.cc
-    #test/hsail2brig/Instruction1_test.cc
-    #test/hsail2brig/Instruction2_test.cc
-    #test/hsail2brig/Instruction3_test.cc
+    test/hsail2brig/ImageInstruction_test.cc
+    test/hsail2brig/Instruction0_test.cc
+    test/hsail2brig/Instruction1_test.cc
+    test/hsail2brig/Instruction2_test.cc
+    test/hsail2brig/Instruction3_test.cc
     test/hsail2brig/Instruction4_test.cc
     test/hsail2brig/Instruction5_test.cc
-    #test/hsail2brig/Ld_test.cc
-    #test/hsail2brig/Location_test.cc
-    #test/hsail2brig/Mov_test.cc
+    test/hsail2brig/Ld_test.cc
+    test/hsail2brig/Location_test.cc
+    test/hsail2brig/Mov_test.cc
     test/hsail2brig/Mul_test.cc
-    #test/hsail2brig/Pragma_test.cc
-    #test/hsail2brig/Query_test.cc
-    #test/hsail2brig/St_test.cc
-    #test/hsail2brig/Syscall_test.cc
-    #test/hsail2brig/Version_test.cc
+    test/hsail2brig/Pragma_test.cc
+    test/hsail2brig/Query_test.cc
+    test/hsail2brig/St_test.cc
+    test/hsail2brig/Syscall_test.cc
+    test/hsail2brig/Version_test.cc
     #test/hsail2brig/Control_test.cc
     gmock/gmock_main.cc
     gmock/gmock-gtest-all.cc

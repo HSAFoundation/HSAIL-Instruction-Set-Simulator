@@ -333,7 +333,7 @@ template<> void initTestVector(std::vector<double> &testVector) {
   testVector.push_back(INFINITY);
   testVector.push_back(NAN);
 
-  union { b64 b; f64 f; } SNAN = { 0x7FF8000000000000UL };
+  union { b64 b; f64 f; } SNAN = { 0x7FF8000000000000ULL };
   testVector.push_back(SNAN.f);
 
   for(double d = 1.0; d != INFINITY; d *= 2)

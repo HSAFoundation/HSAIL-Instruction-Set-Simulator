@@ -1,13 +1,14 @@
-#include "codegen_validate.h"
-#include "codegen_test.h"
+#include "parser.h"
+#include "parser_wrapper.h"
+#include "../codegen_test.h"
 
-namespace hsa{
-namespace brig{
+namespace hsa {
+namespace brig {
 
-/*Template describes the type of the destination, reg/regv2/regv4*/
-template <typename Tinst, typename T> class Ld_Test : public BrigCodeGenTest{
+template <typename Tinst, typename T>
+class Ld_Test: public BrigCodeGenTest {
+
 private:
-
   const Tinst* RefInst;
 
   //Width operand
@@ -22,11 +23,13 @@ private:
   const BrigOperandCompound* RefSrc_Comp;
   const BrigOperandLabelRef* RefSrc_Label;
   const BrigOperandFunctionRef* RefSrc_Function;
-
+  BrigOperandReg RefSrc_RegList[4];
+  
 public:
+
   //TestCase outputs a BrigOperandAddress only
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
-      BrigOperandImmed* width, T* dest, BrigOperandAddress* addr) :
+      BrigOperandImmed* width, T* dest, BrigOperandAddress* addr, BrigOperandReg *regList=NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     OpWidth(width),
@@ -36,11 +39,19 @@ public:
     RefSrc_Indir(NULL),
     RefSrc_Comp(NULL),
     RefSrc_Label(NULL),
-    RefSrc_Function(NULL)  { }
+    RefSrc_Function(NULL) { 
+      if (regList != NULL) {
+        for (uint32_t i = 0 ; i < 4 ; ++i) {
+          RefSrc_RegList[i] = regList[i];
+        } 
+      } else {
+        memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
+      }
+    }
 
   //Testcase output is a BrigOperandIndirect
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
-      BrigOperandImmed* width, T* dest, BrigOperandIndirect* indir, BrigOperandReg* reg=NULL) :
+      BrigOperandImmed* width, T* dest, BrigOperandIndirect* indir, BrigOperandReg* reg=NULL, BrigOperandReg *regList=NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     OpWidth(width),
@@ -50,11 +61,19 @@ public:
     RefSrc_Indir(indir),
     RefSrc_Comp(NULL),
     RefSrc_Label(NULL),
-    RefSrc_Function(NULL)  { }
+    RefSrc_Function(NULL)  { 
+      if (regList != NULL) {
+        for (uint32_t i = 0 ; i < 4 ; ++i) {
+          RefSrc_RegList[i] = regList[i];
+        } 
+      } else {
+        memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
+      }
+    }
 
   //TestCase output is a BrigOperandCompound
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
-      BrigOperandImmed* width, T* dest, BrigOperandCompound* comp, BrigOperandAddress* addr, BrigOperandReg* reg=NULL) :
+      BrigOperandImmed* width, T* dest, BrigOperandCompound* comp, BrigOperandAddress* addr, BrigOperandReg* reg=NULL, BrigOperandReg *regList=NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     OpWidth(width),
@@ -64,10 +83,18 @@ public:
     RefSrc_Indir(NULL),
     RefSrc_Comp(comp),
     RefSrc_Label(NULL),
-    RefSrc_Function(NULL)  { }
+    RefSrc_Function(NULL)  { 
+      if (regList != NULL) {
+        for (uint32_t i = 0 ; i < 4 ; ++i) {
+          RefSrc_RegList[i] = regList[i];
+        } 
+      } else {
+        memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
+      }
+    }
 
-    Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
-            T* dest, BrigOperandLabelRef* src) :
+  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
+            T* dest, BrigOperandLabelRef* src, BrigOperandReg *regList=NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     OpWidth(NULL),
@@ -77,10 +104,18 @@ public:
     RefSrc_Indir(NULL),
     RefSrc_Comp(NULL),
     RefSrc_Label(src),
-    RefSrc_Function(NULL)  { }
+    RefSrc_Function(NULL) { 
+      if (regList != NULL) {
+        for (uint32_t i = 0 ; i < 4 ; ++i) {
+          RefSrc_RegList[i] = regList[i];
+        } 
+      } else {
+        memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
+      }
+    }
 
-    Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
-            T* dest, BrigOperandFunctionRef* src) :
+  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
+            T* dest, BrigOperandFunctionRef* src, BrigOperandReg *regList=NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
     OpWidth(NULL),
@@ -90,67 +125,60 @@ public:
     RefSrc_Indir(NULL),
     RefSrc_Comp(NULL),
     RefSrc_Label(NULL),
-    RefSrc_Function(src)  { }
-
-  void validate(struct BrigSections* TestOutput){
-
-    const char* refbuf = reinterpret_cast<const char *>(&RefStr->get()[0]);
-    const char* getbuf = TestOutput->strings;
-
-    inst_iterator getcode = TestOutput->code_begin();
-    const Tinst* getinst = (cast<Tinst>(getcode));
-    validate_brig::validate(RefInst, getinst);
-
-    const BrigOperandBase* getsrc_op;
-    if(OpWidth){
-      const BrigOperandImmed *getwidth = reinterpret_cast <const BrigOperandImmed *> (&(TestOutput->operands[getinst->o_operands[0]]));
-      validate_brig::validate(OpWidth, getwidth);
-      const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[1]]));
-      validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
-      getsrc_op = reinterpret_cast <const BrigOperandBase*> (&(TestOutput->operands[getinst->o_operands[2]]));
-     } else{
-      const T *getdest = reinterpret_cast <const T*> (&(TestOutput->operands[getinst->o_operands[0]]));
-      validate_brig::validateOpType<T>(RefDest, refbuf, getdest, getbuf);
-      getsrc_op = reinterpret_cast <const BrigOperandBase*> (&(TestOutput->operands[getinst->o_operands[1]]));
-      EXPECT_EQ(0, getinst->o_operands[2]);
-     }
-
-    if(getsrc_op->kind==BrigEOperandIndirect){
-      const BrigOperandIndirect *getsrc_indir = reinterpret_cast <const BrigOperandIndirect*> (getsrc_op);
-      validate_brig::validate(RefSrc_Indir, getsrc_indir);
-
-      if(getsrc_indir->reg){
-        const BrigOperandReg *getsrc_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc_indir->reg]));
-        validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf);
+    RefSrc_Function(src)  { 
+      if (regList != NULL) {
+        for (uint32_t i = 0 ; i < 4 ; ++i) {
+          RefSrc_RegList[i] = regList[i];
+        }  
+      } else {
+        memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
       }
-    } else if(getsrc_op->kind==BrigEOperandCompound){
-      const BrigOperandCompound *getsrc_comp = reinterpret_cast <const BrigOperandCompound*> (getsrc_op);
-      validate_brig::validate(RefSrc_Comp, getsrc_comp);
-
-      const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (&(TestOutput->operands[getsrc_comp->name]));
-      validate_brig::validate(RefSrc_Addr, getsrc_addr);
-
-      if(getsrc_comp->reg){
-        const BrigOperandReg *getsrc_reg = reinterpret_cast <const BrigOperandReg*> (&(TestOutput->operands[getsrc_comp->reg]));
-        validate_brig::validate(RefSrc_Reg, refbuf, getsrc_reg, getbuf);
-      }
-
-    } else if(getsrc_op->kind==BrigEOperandAddress){
-      const BrigOperandAddress *getsrc_addr = reinterpret_cast <const BrigOperandAddress*> (getsrc_op);
-      validate_brig::validate(RefSrc_Addr, getsrc_addr);
-
-    } else if (getsrc_op->kind==BrigEOperandLabelRef){
-      const BrigOperandLabelRef *getsrc_label = reinterpret_cast <const BrigOperandLabelRef*> (getsrc_op);
-      validate_brig::validate(RefSrc_Label, getsrc_label);
-
-    } else if(getsrc_op->kind==BrigEOperandFunctionRef){
-      const BrigOperandFunctionRef *getsrc_function = reinterpret_cast <const BrigOperandFunctionRef*> (getsrc_op);
-      validate_brig::validate(RefSrc_Function, getsrc_function);
     }
 
-    EXPECT_EQ(0, getinst->o_operands[3]);
-    EXPECT_EQ(0, getinst->o_operands[4]);
-  }
+  
+  void Run_Test(int (*Rule)(Context*)){  
+
+    Buffer* code = new Buffer();
+    Buffer* oper = new Buffer();
+    code->append(RefInst);
+    if (OpWidth != NULL) {
+      oper->append(OpWidth);
+    }
+    for (uint32_t i = 0 ; i < 4 ; ++i) {
+      if (RefSrc_RegList[i].size != 0) { 
+        oper->append(&RefSrc_RegList[i]);
+      }
+    }
+    oper->append(RefDest);
+    if (RefSrc_Addr != NULL) { 
+      oper->append(RefSrc_Addr);
+    }
+    if (RefSrc_Reg != NULL) { 
+      oper->append(RefSrc_Reg);
+    }
+    if (RefSrc_Indir != NULL) { 
+      oper->append(RefSrc_Indir);
+    }
+    if (RefSrc_Comp != NULL) { 
+      oper->append(RefSrc_Comp);
+    }
+    if (RefSrc_Label != NULL) { 
+      oper->append(RefSrc_Label);
+    }
+    if (RefSrc_Function != NULL) { 
+      oper->append(RefSrc_Function);
+    }
+    
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
+      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);    
+    
+    Parse_Validate(Rule, &RefOutput);
+    delete code;
+    delete oper;
+
+  }  
 };
 /*********************** Ld Test ***************************/
 TEST(CodegenTest, Ld_Codegen){
@@ -158,6 +186,7 @@ TEST(CodegenTest, Ld_Codegen){
 /*********************Common variables**********************/
   std::string in, op1, op2;
   StringBuffer* sbuf = new StringBuffer();
+  BrigOperandReg regList[4]; 
 
   /*****************************************************************/
   in.assign( "ld_arg_f32 $s0, [%input];\n");
@@ -701,6 +730,11 @@ TEST(CodegenTest, Ld_Codegen){
   };
   reg_v2.size = sizeof(reg_v2);
 
+  regList[0] = reg_v1;
+  regList[1] = reg_v2;
+  memset(&regList[2], 0, sizeof(regList[2]));
+  memset(&regList[3], 0, sizeof(regList[3])); 
+
   BrigOperandRegV2 dest10 = {
     0,
     BrigEOperandRegV2,
@@ -743,7 +777,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out10.size = sizeof(out10);
 
-  Ld_Test<BrigInstLdSt, BrigOperandRegV2> TestCase10(in, sbuf, &out10, &width10, &dest10, &indir10, &reg10);
+  Ld_Test<BrigInstLdSt, BrigOperandRegV2> TestCase10(in, sbuf, &out10, &width10, &dest10, &indir10, &reg10, regList);
   TestCase10.Run_Test(&Ld);
   sbuf->clear();
 
@@ -799,6 +833,11 @@ TEST(CodegenTest, Ld_Codegen){
   };
   regv4_11.size = sizeof(regv4_11);
 
+  regList[0] = regv1_11;
+  regList[1] = regv2_11;
+  regList[2] = regv3_11;
+  regList[3] = regv4_11; 
+
   BrigOperandRegV4 dest11 = {
     0,
     BrigEOperandRegV4,
@@ -832,7 +871,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out11.size = sizeof(out11);
 
-  Ld_Test<BrigInstLdSt, BrigOperandRegV4> TestCase11(in, sbuf, &out11, &width11, &dest11, &addr11);
+  Ld_Test<BrigInstLdSt, BrigOperandRegV4> TestCase11(in, sbuf, &out11, &width11, &dest11, &addr11, regList);
   TestCase11.Run_Test(&Ld);
   sbuf->clear();
 
@@ -888,6 +927,11 @@ TEST(CodegenTest, Ld_Codegen){
   };
   regv4_12.size = sizeof(regv4_12);
 
+  regList[0] = regv1_12;
+  regList[1] = regv2_12;
+  regList[2] = regv3_12;
+  regList[3] = regv4_12; 
+
   BrigOperandRegV4 dest12 = {
     0,
     BrigEOperandRegV4,
@@ -925,7 +969,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,
     Brigf32,
     BrigNoPacking,
-    {0, sizeof(width12),
+    {0, sizeof(width12) + sizeof(regv1_12) + sizeof(regv2_12) + sizeof(regv3_12) + sizeof(regv4_12),
     sizeof(width12) + sizeof(regv1_12) + sizeof(regv2_12) + sizeof(regv3_12) + sizeof(regv4_12) + sizeof(dest12) + sizeof(addr12), 0, 0},
      BrigReadonlySpace,
     BrigRegular,
@@ -933,7 +977,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out12.size = sizeof(out12);
 
-  Ld_Test<BrigInstLdSt, BrigOperandRegV4> TestCase12(in, sbuf, &out12, &width12, &dest12, &comp12, &addr12, NULL);
+  Ld_Test<BrigInstLdSt, BrigOperandRegV4> TestCase12(in, sbuf, &out12, &width12, &dest12, &comp12, &addr12, NULL, regList);
   TestCase12.Run_Test(&Ld);
   sbuf->clear();
 
@@ -1245,6 +1289,7 @@ TEST(CodegenTest, Ldc_Codegen){
   sbuf->clear();
 
 /******************************  End of tests *****************************************/
+
   delete sbuf;
 }
 

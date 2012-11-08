@@ -21,8 +21,8 @@ float ieee754tof(char* text) {
   first2[0] = text[2];
   first2[1] = text[3];
   first2[2] = '\0';
-  first = strtol(first2, NULL, 16);
-  mem_single = strtol(text+4, NULL, 16);
+  first = strtoull(first2, NULL, 16);
+  mem_single = strtoull(text+4, NULL, 16);
   first = first << 24;
   mem_single += first;
   memcpy(&floatval, &mem_single, sizeof(float));
@@ -46,13 +46,13 @@ double ieee754tod(char* text) {
     first4[i] = text[i+2];
 
   first4[4] = '\0';
-  first_int = strtol(first4, NULL, 16);
+  first_int = strtoull(first4, NULL, 16);
 
   // get the next 2 bytes;
   for (i=0;i<4;i++)
     temp_str[i] = text[i+6];
   temp_str[4] = '\0';
-  temp = strtol(temp_str,NULL,16);
+  temp = strtoull(temp_str,NULL,16);
   first_int <<= 16;
 
   temp += first_int;
@@ -68,13 +68,13 @@ double ieee754tod(char* text) {
     first4[i] = text[i+10];
 
   first4[4] = '\0';
-  second_int = strtol(first4, NULL, 16);
+  second_int = strtoull(first4, NULL, 16);
 
   // get the last 2 bytes;
   for (i=0;i<4;i++)
     temp_str[i] = text[i+14];
   temp_str[4] = '\0';
-  temp = strtol(temp_str,NULL,16);
+  temp = strtoull(temp_str,NULL,16);
   second_int <<= 16;
   temp += second_int;
 
@@ -135,13 +135,13 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 {OCT_INT}     { context->token_type = CONSTANT;
                 free_string(context);
                 context->yycolno+=yyleng;
-                context->token_value.int_val = strtol(yytext, NULL, 8);
+                context->token_value.int_val = strtoull(yytext, NULL, 8);
                 return TOKEN_INTEGER_CONSTANT; }
 
 {DEC_INT}     { context->token_type = CONSTANT;
                 free_string(context);
                 context->yycolno+=yyleng;
-                context->token_value.int_val = strtol(yytext, NULL, 10);
+                context->token_value.int_val = strtoull(yytext, NULL, 10);
                 return TOKEN_INTEGER_CONSTANT; }
 
 {HEX_INT}     { context->token_type = CONSTANT;
