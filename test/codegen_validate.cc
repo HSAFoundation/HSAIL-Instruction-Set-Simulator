@@ -605,15 +605,22 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
     dir_iterator refdir(RefOutput->directives + ref->fn);
     dir_iterator getdir(GetOutput->directives + get->fn);
     switch(getdir->kind){
-      caseDirBrig(DirectiveFunction);
+      case BrigEDirectiveFunction: {
+        const BrigDirectiveFunction* refFun = cast<BrigDirectiveFunction>(refdir);
+        const BrigDirectiveFunction* getFun = cast<BrigDirectiveFunction>(getdir);
+        EXPECT_EQ(refFun->size, getFun->size);
+        EXPECT_EQ(refFun->kind, getFun->kind);
+        EXPECT_STREQ(&RefOutput->strings[refFun->s_name], &GetOutput->strings[getFun->s_name]);
+        break;
+      }
       caseDirBrig(DirectiveSignature);
       default:
         printf("Offset to invalid directive");
         exit(1);
+
     }
   }
 }
-
 void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
 
@@ -651,17 +658,21 @@ void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, 
   bool validOffset = (getoffset>=CODEBUFFER_OFFSET) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
   if(refinst!=NULL && getinst!=NULL && validOffset){
     switch(getinst->kind){ 
-      caseInstBrig(InstBase); 
-      caseInstBrig(InstMod) ;
-      caseInstBrig(InstCvt) ;
-      caseInstBrig(InstRead);
-      caseInstBrig(InstBar) ;
-      caseInstBrig(InstLdSt);
-      caseInstBrig(InstCmp);
-      caseInstBrig(InstMem);
-      caseInstBrig(InstAtomic);
-      caseInstBrig(InstAtomicImage);
-      caseInstBrig(InstImage);
+      case BrigEInstBase: 
+      case BrigEInstMod:
+      case BrigEInstCvt:
+      case BrigEInstRead:
+      case BrigEInstBar:
+      case BrigEInstLdSt:
+      case BrigEInstCmp:
+      case BrigEInstMem:
+      case BrigEInstAtomic:
+      case BrigEInstAtomicImage:
+      case BrigEInstImage:
+        EXPECT_EQ(refinst->size, getinst->size);
+        EXPECT_EQ(refinst->kind, getinst->kind);
+        EXPECT_EQ(refinst->opcode, getinst->opcode);
+        break;
       default:
           printf("Invalid instruction\n");
           exit(1);
