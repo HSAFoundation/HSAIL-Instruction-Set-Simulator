@@ -1917,14 +1917,14 @@ bool BrigModule::validatePopCount(const inst_iterator inst) const {
                  isa<BrigOperandImmed>(src) ||
                  isa<BrigOperandWaveSz>(src), 
                  "Source should be reg, immediate or WaveSz");
-  if(const BrigOperandReg *srcReg = dyn_cast<BrigOperandReg>(src)) {
+  if(const BrigOperandReg *srcReg = dyn_cast<BrigOperandReg>(src)) 
     valid &= check(srcReg->type == inst->type,
                    "Type Destination of PopCount must be Brigb32 or Brigb64");
-  } 
-  if(const BrigOperandImmed *srcImm = dyn_cast<BrigOperandImmed>(src)) {
+  
+  if(const BrigOperandImmed *srcImm = dyn_cast<BrigOperandImmed>(src)) 
     valid &= check(srcImm->type == inst->type,
                    "Type Destination of PopCount must be Brigb32 or Brigb64");
-  }
+  
 
   return valid;
 }
@@ -1984,33 +1984,31 @@ bool BrigModule::validateExtract(const inst_iterator inst) const {
   }
 
   oper_iterator src0(S_.operands + inst->o_operands[1]);
-  if(isa<BrigOperandReg>(src0)) {
+  if(isa<BrigOperandReg>(src0)) 
     valid &= check(*getType(src0) == inst->type, "Type src0 of Extract "
                    "must equal with inst->type");
-  } else if(isa<BrigOperandImmed>(src0)) {
+  if(isa<BrigOperandImmed>(src0)) 
     valid &= check(*getType(src0) == inst->type, "Type src0 of Extract "
                    "must equal with inst->type");
-  }
+  
 
   oper_iterator src1(S_.operands + inst->o_operands[2]);
-  if(isa<BrigOperandReg>(src1)) {
+  if(isa<BrigOperandReg>(src1)) 
     valid &= check(*getType(src1) == Brigb32,"Type src1 of Extract "
                    "should be b32");
-  }  
-  if(isa<BrigOperandImmed>(src1)) {
+  if(isa<BrigOperandImmed>(src1)) 
     valid &= check(*getType(src1) == Brigb32,"Type src1 of Extract "
                    "should be b32");
-  }
+  
 
   oper_iterator src2(S_.operands + inst->o_operands[3]);
-  if(isa<BrigOperandReg>(src2)) {
+  if(isa<BrigOperandReg>(src2)) 
     valid &= check(*getType(src2) == Brigb32,"Type src2 of Extract "
                    "should be b32");
-  }  
-  if(isa<BrigOperandImmed>(src2)) {
+  if(isa<BrigOperandImmed>(src2)) 
     valid &= check(*getType(src2) == Brigb32,"Type src2 of Extract "
                    "should be b32");
-  }
+  
   return valid;
 }
 
