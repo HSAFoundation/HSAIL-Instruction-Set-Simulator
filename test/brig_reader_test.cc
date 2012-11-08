@@ -631,45 +631,51 @@ TEST(BrigWriterTest, VectorArith) {
     testInst("add_pp_u16x2", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x0303030303030303,
-                                 0x0101010101010101,
-                                 0x0202020202020202 };
+    const uint64_t testVec[] = { 0x0303030303030303ULL,
+                                 0x0101010101010101ULL,
+                                 0x0202020202020202ULL };
     testInst("add_pp_s8x8", testVec);
     testInst("add_pp_u8x8", testVec);
   }
   {
-    const uint64_t testVec[] = { 0, 0x0101010101010101, 0xFFFFFFFFFFFFFFFF };
+    const uint64_t testVec[] = { 0ULL,
+                                 0x0101010101010101ULL,
+                                 0xFFFFFFFFFFFFFFFFULL };
     testInst("add_pp_s8x8", testVec);
     testInst("add_pp_u8x8", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x0003000300030003,
-                                 0x0001000100010001,
-                                 0x0002000200020002 };
+    const uint64_t testVec[] = { 0x0003000300030003ULL,
+                                 0x0001000100010001ULL,
+                                 0x0002000200020002ULL };
     testInst("add_pp_s16x4", testVec);
     testInst("add_pp_u16x4", testVec);
   }
   {
-    const uint64_t testVec[] = { 0, 0x0001000100010001, 0xFFFFFFFFFFFFFFFF };
+    const uint64_t testVec[] = { 0ULL,
+                                 0x0001000100010001ULL,
+                                 0xFFFFFFFFFFFFFFFFULL };
     testInst("add_pp_s16x4", testVec);
     testInst("add_pp_u16x4", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x0000000300000003,
-                                 0x0000000100000001,
-                                 0x0000000200000002 };
+    const uint64_t testVec[] = { 0x0000000300000003ULL,
+                                 0x0000000100000001ULL,
+                                 0x0000000200000002ULL };
     testInst("add_pp_s32x2", testVec);
     testInst("add_pp_u32x2", testVec);
   }
   {
-    const uint64_t testVec[] = { 0, 0x0000000100000001, 0xFFFFFFFFFFFFFFFF };
+    const uint64_t testVec[] = { 0ULL,
+                                 0x0000000100000001ULL,
+                                 0xFFFFFFFFFFFFFFFFULL };
     testInst("add_pp_s32x2", testVec);
     testInst("add_pp_u32x2", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x3f8000003f800000,
-                                 0x402df854402df854,
-                                 0x3ebc5ab23ebc5ab2 };
+    const uint64_t testVec[] = { 0x3f8000003f800000ULL,
+                                 0x402df854402df854ULL,
+                                 0x3ebc5ab23ebc5ab2ULL };
     testInst("mul_pp_f32x2", testVec);
   }
 }

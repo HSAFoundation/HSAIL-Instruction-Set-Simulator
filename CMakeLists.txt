@@ -30,6 +30,7 @@ SET(LLVM_REQUIRES_EH "true")
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
+include (EnsureAtomicOps)
 include (EnsureLLVMisPresent)
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
 
