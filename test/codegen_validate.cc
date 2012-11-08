@@ -172,6 +172,11 @@ void validate(const BrigInstBar* ref, const BrigInstBar* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -831,7 +836,9 @@ void validate(const BrigDirectiveKernel* ref, const BrigDirectiveKernel* get,
   validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
   EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
   EXPECT_EQ(ref->inParamCount, get->inParamCount);
-  validate_DIR_OFFSET(ref->d_firstScopedDirective, get->d_firstScopedDirective, RefOutput, GetOutput);
+  if (get->d_firstScopedDirective != GetOutput->directivesSize) { 
+    validate_DIR_OFFSET(ref->d_firstScopedDirective, get->d_firstScopedDirective, RefOutput, GetOutput);
+  }
   EXPECT_EQ(ref->operationCount, get->operationCount);
   if (get->d_nextDirective != GetOutput->directivesSize) {
     validate_DIR_OFFSET(ref->d_nextDirective, get->d_nextDirective, RefOutput, GetOutput);

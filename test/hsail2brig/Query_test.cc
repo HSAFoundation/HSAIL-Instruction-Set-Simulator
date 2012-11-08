@@ -37,9 +37,9 @@ public:
     Buffer* oper = new Buffer();
     code->append(RefInst);
     oper->append(RefDest);
-    oper->append(RefOpaque);
     if (RefOpaqueReg)
       oper->append(RefOpaqueReg);
+    oper->append(RefOpaque);
     
     struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
       NULL, reinterpret_cast<const char *>(&code->get()[0]), 
@@ -52,7 +52,7 @@ public:
   }  
 };
 
-TEST(CodegenTest, QueryOp_CodeGen){
+TEST(CodegenTest, Query_CodeGen){
   /********************************** Common variables used by all tests******************************/
   //To keep the stack footprint low
 
@@ -115,7 +115,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigu32,
     BrigNoPacking,
     {0,
-     sizeof(dest1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out2.size = sizeof(out2);
@@ -156,7 +156,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigu32,
     BrigNoPacking,
     {0,
-     sizeof(dest1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out3.size = sizeof(out3);
@@ -230,7 +230,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigu32,
     BrigNoPacking,
     {0,
-     sizeof(reg1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out5.size = sizeof(out5);
@@ -270,7 +270,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigu32,
     BrigNoPacking,
     {0,
-     sizeof(reg1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out6.size = sizeof(out6);
@@ -310,7 +310,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigb32,
     BrigNoPacking,
     {0,
-     sizeof(reg1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out7.size = sizeof(out7);
@@ -350,7 +350,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigb32,
     BrigNoPacking,
     {0,
-     sizeof(reg1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out8.size = sizeof(out8);
@@ -390,7 +390,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigb32,
     BrigNoPacking,
     {0,
-     sizeof(reg1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out9.size = sizeof(out9);
@@ -430,7 +430,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigb32,
     BrigNoPacking,
     {0,
-     sizeof(reg1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out10.size = sizeof(out10);
@@ -470,7 +470,7 @@ TEST(CodegenTest, QueryOp_CodeGen){
     Brigb32,
     BrigNoPacking,
     {0,
-     sizeof(reg1),
+     sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out11.size = sizeof(out11);
