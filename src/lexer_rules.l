@@ -189,25 +189,25 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 
 
 "/*"                          { BEGIN (COMMENT); }
+
 <COMMENT>"*/"                 { context->token_type = CODE_COMMENTS;
-                                free_string(context);
-                                context->token_value.string_val = strdup(yytext);
-                                context->valid_string = true;
                                 BEGIN (INITIAL);
                                 return TOKEN_COMMENT; }
 
-<COMMENT>([^*]|\n)+|./"*/"    {}
+<COMMENT>([^*]|\n)+|./"*/"    { free_string(context);
+                                context->token_value.string_val = strdup(yytext);
+                                context->valid_string = true;}
+
 <COMMENT><<EOF>>              { printf("%d: Unterminated comment\n", yylineno);
                                 return 0; }
 
 "//"                          { BEGIN(INLINE_COMMENT); }
 
-<INLINE_COMMENT>.             {}
+<INLINE_COMMENT>.+            { free_string(context);
+                                context->token_value.string_val = strdup(yytext);
+                                context->valid_string = true;}
 
 <INLINE_COMMENT>\n            { context->token_type = CODE_COMMENTS;
-                                free_string(context);
-                                context->token_value.string_val = strdup(yytext);
-                                context->valid_string = true;
                                 BEGIN(INITIAL);
                                 return TOKEN_COMMENT;}
 
@@ -2214,3 +2214,4 @@ query_filtering   { free_string(context);
 Destructor static void fini(void) {
   yylex_destroy();
 }
+
