@@ -605,11 +605,19 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
     dir_iterator refdir(RefOutput->directives + ref->fn);
     dir_iterator getdir(GetOutput->directives + get->fn);
     switch(getdir->kind){
-      caseDirBrig(DirectiveFunction);
+      case BrigEDirectiveFunction: {
+        const BrigDirectiveFunction* refFun = cast<BrigDirectiveFunction>(refdir);
+        const BrigDirectiveFunction* getFun = cast<BrigDirectiveFunction>(getdir);
+        EXPECT_EQ(refFun->size, getFun->size);
+        EXPECT_EQ(refFun->kind, getFun->kind);
+        EXPECT_STREQ(&RefOutput->strings[refFun->s_name], &GetOutput->strings[getFun->s_name]);
+        break;
+      }
       caseDirBrig(DirectiveSignature);
       default:
         printf("Offset to invalid directive");
         exit(1);
+
     }
   }
 }
