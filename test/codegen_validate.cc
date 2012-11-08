@@ -35,7 +35,7 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
         caseOperBrig(OperandRegV4);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandLabelRef);
-        caseBrigEOperandFunctionList:
+        case BrigEOperandFunctionList:
         caseOperBrig(OperandArgumentList);
         caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandArgumentRef);
