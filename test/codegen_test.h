@@ -115,7 +115,7 @@ public:
         caseOperBrig(OperandLabelRef);
         caseOperBrig(OperandIndirect);
         caseOperBrig(OperandCompound);
-        case(BrigEOperandFunctionList):
+        case(BrigEOperandFunctionList): break;
         caseOperBrig(OperandArgumentList);
         caseOperBrig(OperandArgumentRef);
         caseOperBrig(OperandWaveSz);
