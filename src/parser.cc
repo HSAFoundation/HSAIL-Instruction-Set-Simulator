@@ -576,18 +576,17 @@ int CallTargets(Context* context) {
     if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
       funcName = context->token_value.string_val;
 
-      if (!context->arg_map.count(funcName)) {
-        BrigOperandArgumentRef opArgRef = {
-          sizeof(BrigOperandArgumentRef),
-          BrigEOperandArgumentRef,
-          0
-        };
-        // TODO(Chuang): judge whether the identifier has been defined.
-        // and which Map will the offset of directive about signature func be saved into?
-        opArgRef.arg = context->func_map[funcName];
-        context->arg_map[funcName] = context->get_operand_offset();
-        context->append_operand(&opArgRef);
-      }
+      BrigOperandArgumentRef opArgRef = {
+        sizeof(BrigOperandArgumentRef),
+        BrigEOperandArgumentRef,
+        0
+      };
+      // TODO(Chuang): judge whether the identifier has been defined.
+      // and which Map will the offset of directive about signature func be saved into?
+      opArgRef.arg = context->func_map[funcName];
+      context->arg_map[funcName] = context->get_operand_offset();
+      context->append_operand(&opArgRef);
+
       BrigOperandArgumentList funcList = {
         sizeof(BrigOperandArgumentList),
         BrigEOperandFunctionList,
@@ -714,17 +713,17 @@ int CallArgs(Context* context) {
       break;
     } else if (saved_token == TOKEN_GLOBAL_IDENTIFIER ||
                saved_token == TOKEN_LOCAL_IDENTIFIER) {
-      if (!context->arg_map.count(arg_name)) {
-        BrigOperandArgumentRef opArgRef = {
-          sizeof(BrigOperandArgumentRef),
-          BrigEOperandArgumentRef,
-          0
-        };
-        // TODO(Chuang): judge whether the identifier has been defined.
-        opArgRef.arg = context->symbol_map[arg_name];
-        context->arg_map[arg_name] = context->get_operand_offset();
-        context->append_operand(&opArgRef);
-      }
+
+      BrigOperandArgumentRef opArgRef = {
+        sizeof(BrigOperandArgumentRef),
+        BrigEOperandArgumentRef,
+        0
+      };
+      // TODO(Chuang): judge whether the identifier has been defined.
+      opArgRef.arg = context->symbol_map[arg_name];
+      context->arg_map[arg_name] = context->get_operand_offset();
+      context->append_operand(&opArgRef);
+
       arg_offset[n_elements] = context->arg_map[arg_name];
       n_elements++;
       context->token_to_scan = yylex();
