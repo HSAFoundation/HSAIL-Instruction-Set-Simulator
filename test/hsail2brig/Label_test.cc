@@ -179,7 +179,7 @@ TEST(CodegenTest, Label_CodeGen) {
   instCbr.packing = BrigNoPacking;
   instCbr.o_operands[0] = instBrn.o_operands[1] + sizeof(lab2Oper);
   instCbr.o_operands[1] = sizeof(width1) + sizeof(lab1Oper) + sizeof(width2);
-  instCbr.o_operands[2] = sizeof(reg) + instCbr.o_operands[1];
+  instCbr.o_operands[2] = sizeof(width1);
   instCbr.o_operands[3] = 0;
   instCbr.o_operands[4] = 0;
  
@@ -225,14 +225,14 @@ TEST(CodegenTest, Label_CodeGen) {
   lab1Dir.size = sizeof(lab1Dir);
   lab1Dir.kind = BrigEDirectiveLabel;
   lab1Dir.c_code = sizeof(instBrn);
-  lab1Dir.s_name = funName.size();
+  lab1Dir.s_name = funName.size() + 1;
 
   dir->append(&lab1Dir);
 
   lab2Dir.size = sizeof(lab2Dir);
   lab2Dir.kind = BrigEDirectiveLabel;
   lab2Dir.c_code = sizeof(instBrn) + sizeof(instCbr);
-  lab2Dir.s_name = funName.size() + regName.size() + lab1Name.size() + 2;
+  lab2Dir.s_name = funName.size() + regName.size() + lab1Name.size() + 3;
   
   dir->append(&lab2Dir);
 
