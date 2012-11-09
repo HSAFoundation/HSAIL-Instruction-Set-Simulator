@@ -1868,12 +1868,6 @@ TEST(ParserTest, Mov) {
   EXPECT_NE(0, Mov(context));
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
-  input.assign("mov_b32 , $q3, $q1;\n");  // redundant ','
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, Mov(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
-
   delete lexer;
 }
 
