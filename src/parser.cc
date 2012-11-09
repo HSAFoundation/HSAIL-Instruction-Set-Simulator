@@ -816,7 +816,6 @@ int Instruction2OpcodeDT(Context* context) {
   inst.opcode = context->token_value.opcode;
 
   context->token_to_scan = yylex();
-  // TODO(Chuang): whether support for rounding
   if (!RoundingMode(context)) {
     aluModifier = context->get_alu_modifier();
   }
@@ -829,61 +828,53 @@ int Instruction2OpcodeDT(Context* context) {
     }
     context->token_to_scan = yylex();
   }
-  // inst.packing == BrigNoPacking
-  // TODO(Chuang): whether can use packed operation without packing.
-  if (context->token_type == DATA_TYPE_ID) {
-
-    context->set_type(context->token_value.data_type);
-    inst.type = context->token_value.data_type;
-    context->token_to_scan = yylex();
-    if (context->token_type == REGISTER) {
-      if (Operand(context, &inst.o_operands[0])) {
-        return 1;
-      }
-      if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        // TODO(Chuang): judge whether operands is suitable.
-
-        if (!Operand(context, &inst.o_operands[1])) {
-          if (context->token_to_scan == ';') {
-            int* aluValue = reinterpret_cast<int*>(&aluModifier);
-            if (*aluValue != 0) {
-              BrigInstMod mod = {
-                sizeof(BrigInstMod),  // size
-                BrigEInstMod,         // kind
-                inst.opcode,              // opcode
-                inst.type,         // type
-                inst.packing,        // packing
-                {0, 0, 0, 0, 0},      // o_operands[5]
-                {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-              };
-              for (int i = 0 ; i < 5 ; ++i) {
-                mod.o_operands[i] = inst.o_operands[i];
-              }
-              mod.aluModifier = aluModifier;
-              context->append_code(&mod);
-            } else {
-              context->append_code(&inst);
-            }
-            context->token_to_scan = yylex();
-            return 0;
-          } else {  // ';'
-            context->set_error(MISSING_SEMICOLON);
-          }
-        } else {  // Second Operand
-          context->set_error(MISSING_OPERAND);
-        }
-      } else {  // ','
-        context->set_error(MISSING_COMMA);
-      }
-    } else {  // First Operand
-      context->set_error(INVALID_FIRST_OPERAND);
-    }
-  } else {  // Data Type
+  if (context->token_type != DATA_TYPE_ID) {
     context->set_error(INVALID_DATA_TYPE);
+    return 1;
   }
-
-  return 1;
+  context->set_type(context->token_value.data_type);
+  inst.type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  if (context->token_type != REGISTER) {
+    context->set_error(INVALID_FIRST_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &inst.o_operands[0])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (Operand(context, &inst.o_operands[1])) {
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  int* aluValue = reinterpret_cast<int*>(&aluModifier);
+  if (*aluValue != 0) {
+    BrigInstMod mod = {
+      sizeof(BrigInstMod),  // size
+      BrigEInstMod,         // kind
+      inst.opcode,              // opcode
+      inst.type,         // type
+      inst.packing,        // packing
+      {0, 0, 0, 0, 0},      // o_operands[5]
+      {0, 0, 0, 0, 0, 0, 0}  // aluModifier
+    };
+    for (int i = 0 ; i < 5 ; ++i) {
+      mod.o_operands[i] = inst.o_operands[i];
+    }
+    mod.aluModifier = aluModifier;
+    context->append_code(&mod);
+  } else {
+    context->append_code(&inst);
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Instruction2OpcodeNoDT(Context* context) {
@@ -4434,9 +4425,7 @@ int Atom(Context* context) {
 }
 
 int Mov(Context* context) {
-  // Chuang
-  // first token is MOV "mov"
-
+  
   BrigInstBase movInst = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
@@ -4448,38 +4437,35 @@ int Mov(Context* context) {
 
   context->token_to_scan = yylex();
   // TODO(Chuang): When type is b128 or b64 etc, check whether the operands is correct.
-  if (context->token_to_scan == _B1 ||
-      context->token_to_scan == _B32 ||
-      context->token_to_scan == _B64 ||
-      context->token_to_scan == _B128) {
-
-    context->set_type(context->token_value.data_type);  
-    movInst.type = context->token_value.data_type;
-    context->token_to_scan = yylex();
-    if (!ArrayOperand(context, &movInst.o_operands[0])) {
-      if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        if (!ArrayOperand(context, &movInst.o_operands[1])) {
-          if (context->token_to_scan == ';') {
-            context->append_code(&movInst);
-            context->token_to_scan = yylex();
-            return 0;
-          } else {  // ';'
-            context->set_error(MISSING_SEMICOLON);
-          }
-        } else {  // Operand or ArrayOperandList
-          context->set_error(INVALID_SECOND_OPERAND);
-        }
-      } else {  // ','
-        context->set_error(MISSING_COMMA);
-      }
-    } else {  // Operand or ArrayOperandList
-      context->set_error(INVALID_FIRST_OPERAND);
-    }
-  } else {  // datatypeId
+  if (context->token_to_scan != _B1 &&
+      context->token_to_scan != _B32 &&
+      context->token_to_scan != _B64 &&
+      context->token_to_scan != _B128) {
     context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }    
+
+  context->set_type(context->token_value.data_type);  
+  movInst.type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  if (ArrayOperand(context, &movInst.o_operands[0])) {
+    return 1;
   }
-  return 1;
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (ArrayOperand(context, &movInst.o_operands[1])) {
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->append_code(&movInst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int GlobalGroupDecl(Context* context) {
