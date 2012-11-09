@@ -796,8 +796,8 @@ int RoundingMode(Context* context) {
   if(mod.ftz){
     context->set_alu_modifier(mod);
     return 0;
-  } else
-    return 1;
+  }
+  return 1;
 }
 
 int Instruction2OpcodeDT(Context* context) {
@@ -3122,13 +3122,10 @@ int Instruction4Mad(Context* context) {
   };
 
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
-
   context->token_to_scan = yylex();
   if (!RoundingMode(context)) {
     aluModifier = context->get_alu_modifier();
   }
-  // TODO(Chuang):Type f Length: 16 (in some implementations), 32, 64
-  // Or Type u, s Length 32, 64
   if (context->token_to_scan == _F32 ||
       context->token_to_scan == _F64 ||
       context->token_to_scan == _U32 ||
@@ -3140,110 +3137,92 @@ int Instruction4Mad(Context* context) {
     madInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
-    // Note: dest: Destination register.
-
     if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
-
-    if (!Operand(context, &madInst.o_operands[0])) {
-      if (context->token_to_scan != ',') {
-        context->set_error(MISSING_COMMA);
-        return 1;
-      }
-      context->token_to_scan = yylex();
-      // Sources. Can be a register or immediate value.
-      if (context->token_type != REGISTER &&
-          context->token_type != CONSTANT) {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-
-      if (!Operand(context, &madInst.o_operands[1])) {
-        if (context->token_to_scan != ',') {
-          context->set_error(MISSING_COMMA);
-          return 1;
-        }
-        context->token_to_scan = yylex();
-        if (context->token_type != REGISTER &&
-            context->token_type != CONSTANT) {
-          context->set_error(INVALID_OPERAND);
-          return 1;
-        }
-        if (!Operand(context, &madInst.o_operands[2])) {
-          if (context->token_to_scan != ',') {
-              context->set_error(MISSING_COMMA);
-              return 1;
-          }
-          context->token_to_scan = yylex();
-
-          if (context->token_type != REGISTER &&
-              context->token_type != CONSTANT) {
-            context->set_error(INVALID_OPERAND);
-            return 1;
-          }
-
-          if (!Operand(context, &madInst.o_operands[3])) {
-
-            if (context->token_to_scan == ';') {
-              int* pCmp = reinterpret_cast<int*>(&aluModifier);
-              if (*pCmp != 0) {
-                // Note: mad_u/s without _ftz/rounding
-                if (madInst.type != Brigf32 && madInst.type != Brigf64) {
-                  context->set_error(INVALID_ROUNDING_MODE);
-                  return 1;
-                }
-                BrigInstMod madMod = {
-                  sizeof(BrigInstMod),  // size
-                  BrigEInstMod,         // kind
-                  BrigMad,              // opcode
-                  madInst.type,         // type
-                  BrigNoPacking,        // packing
-                  {0, 0, 0, 0, 0},      // o_operands[5]
-                  {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-                };
-                for (int i = 0 ; i < 5 ; ++i) {
-                  madMod.o_operands[i] = madInst.o_operands[i];
-                }
-                madMod.aluModifier = aluModifier;
-                context->append_code(&madMod);
-              }
-              else {
-                context->append_code(&madInst);
-              }
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-              return 1;
-            }  // ';'
-          } else {  // 4 operand
-              context->set_error(INVALID_FOURTH_OPERAND);
-              return 1;
-          }
-        } else {  // 3 operand
-          context->set_error(INVALID_THIRD_OPERAND);
-          return 1;
-        }
-      } else {  // 2 operand
-        context->set_error(INVALID_SECOND_OPERAND);
-        return 1;
-      }
-    } else {  // 1 operand
-      context->set_error(INVALID_FIRST_OPERAND);
+    if (Operand(context, &madInst.o_operands[0])) {
       return 1;
     }
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+      // Sources. Can be a register or immediate value.
+    if (context->token_type != REGISTER &&
+        context->token_type != CONSTANT) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    if (Operand(context, &madInst.o_operands[1])) {
+      return 1;
+    }
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (context->token_type != REGISTER &&
+        context->token_type != CONSTANT) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    if (Operand(context, &madInst.o_operands[2])) {
+      return 1;
+    }
+    if (context->token_to_scan != ',') {
+        context->set_error(MISSING_COMMA);
+        return 1;
+    }
+    context->token_to_scan = yylex();
+    if (context->token_type != REGISTER &&
+        context->token_type != CONSTANT) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    if (Operand(context, &madInst.o_operands[3])) {
+      return 1;
+    }
+    if (context->token_to_scan != ';') {
+      context->set_error(MISSING_SEMICOLON);
+      return 1;
+    }
+    int* pCmp = reinterpret_cast<int*>(&aluModifier);
+    if (*pCmp != 0) {      
+      if (madInst.type != Brigf32 && madInst.type != Brigf64) {
+        context->set_error(INVALID_ROUNDING_MODE);
+        return 1;
+      }
+      BrigInstMod madMod = {
+        sizeof(BrigInstMod),  // size
+        BrigEInstMod,         // kind
+        BrigMad,              // opcode
+        madInst.type,         // type
+        BrigNoPacking,        // packing
+        {0, 0, 0, 0, 0},      // o_operands[5]
+        {0, 0, 0, 0, 0, 0, 0}  // aluModifier
+      };
+      for (int i = 0 ; i < 5 ; ++i) {
+        madMod.o_operands[i] = madInst.o_operands[i];
+      }
+      madMod.aluModifier = aluModifier;
+      context->append_code(&madMod);
+    }
+    else {
+      context->append_code(&madInst);
+    }
+    context->token_to_scan = yylex();
+    return 0;
+  
   } else {  // DATA_TYPE_ID
     context->set_error(MISSING_DATA_TYPE);
     return 1;
-  }
-  return 1;
+  }  
 }
 
 int Instruction4BitOperation(Context* context) {
   const unsigned int first_token = context->token_to_scan;
-
   BrigInstBase bsoInst = {
     sizeof(BrigInstBase),   // size
     BrigEInstBase,         // kind
@@ -3278,68 +3257,48 @@ int Instruction4BitOperation(Context* context) {
     bsoInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
-    // Note: dest: Destination register.
-
     if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
-
-    if (!Operand(context, &bsoInst.o_operands[0])) {
-      if (context->token_to_scan != ',') {
-        context->set_error(MISSING_COMMA);
-        return 1;
-      }
-      context->token_to_scan = yylex();
-
-      if (!Operand(context, &bsoInst.o_operands[1])) {
-        if (context->token_to_scan != ',') {
-          context->set_error(MISSING_COMMA);
-          return 1;
-        }
-        context->token_to_scan = yylex();
-
-        // TODO(Chuang): src1, src2: type follow as the kind of opcode.
-        // different opcode will have different rule of types.
-
-        if (!Operand(context, &bsoInst.o_operands[2])) {
-
-          if (context->token_to_scan != ',') {
-              context->set_error(MISSING_COMMA);
-              return 1;
-          }
-          context->token_to_scan = yylex();
-
-          if (!Operand(context, &bsoInst.o_operands[3])) {
-            if (context->token_to_scan == ';') {
-              context->append_code(&bsoInst);
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-              return 1;
-            }  // ';'
-          } else {  // 4 operand
-              context->set_error(INVALID_FOURTH_OPERAND);
-              return 1;
-          }
-        } else {  // 3 operand
-          context->set_error(INVALID_THIRD_OPERAND);
-          return 1;
-        }
-      } else {  // 2 operand
-        context->set_error(INVALID_SECOND_OPERAND);
-        return 1;
-      }
-    } else {  // 1 operand
-      context->set_error(INVALID_FIRST_OPERAND);
+    if (Operand(context, &bsoInst.o_operands[0])) {
       return 1;
     }
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (Operand(context, &bsoInst.o_operands[1])) {
+      return 1;
+    }
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (Operand(context, &bsoInst.o_operands[2])) {
+      return 1;
+    }
+    if (context->token_to_scan != ',') {
+        context->set_error(MISSING_COMMA);
+        return 1;
+    }
+    context->token_to_scan = yylex();
+    if (Operand(context, &bsoInst.o_operands[3])) {
+      return 1;
+    }
+    if (context->token_to_scan != ';') {
+      context->set_error(MISSING_SEMICOLON);
+      return 1;
+    }
+    context->append_code(&bsoInst);
+    context->token_to_scan = yylex();
+    return 0;
   } else {  // DATA_TYPE_ID
     context->set_error(MISSING_DATA_TYPE);
     return 1;
-  }
-  return 1;
+  } 
 }
 
 int Instruction4Cmov(Context* context) {
@@ -3431,8 +3390,6 @@ int Instruction4Shuffle(Context* context) {
   };
 
   context->token_to_scan = yylex();
-  // Type: s, u, f.
-  // Length: 8x4, 8x8, 16x2, 16x4, 32x2
 
   if (context->token_to_scan == _U8X4 ||
       context->token_to_scan == _S8X4 ||
@@ -3454,83 +3411,62 @@ int Instruction4Shuffle(Context* context) {
 
     // Note: dest: Destination register.
     std::string opName;
-
     if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
-
-    if (!Operand(context, &shuffleInst.o_operands[0])) {
-      if (context->token_to_scan != ',') {
-        context->set_error(MISSING_COMMA);
-        return 1;
-      }
-      context->token_to_scan = yylex();
-
-      if (context->token_type != REGISTER &&
-          context->token_type != CONSTANT) {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-
-      if (!Operand(context, &shuffleInst.o_operands[1])) {
-
-        if (context->token_to_scan != ',') {
-          context->set_error(MISSING_COMMA);
-          return 1;
-        }
-        context->token_to_scan = yylex();
-        if (context->token_type != REGISTER &&
-            context->token_type != CONSTANT) {
-          context->set_error(INVALID_OPERAND);
-          return 1;
-        }
-
-        if (!Operand(context, &shuffleInst.o_operands[2])) {
-
-          if (context->token_to_scan != ',') {
-              context->set_error(MISSING_COMMA);
-              return 1;
-          }
-          context->token_to_scan = yylex();
-
-          // src2: Source. Must be a literal value used to select elements
-          if (context->token_type != CONSTANT) {
-            context->set_error(INVALID_OPERAND);
-            return 1;
-          }
-
-          if (!Operand(context, &shuffleInst.o_operands[3])) {
-            if (context->token_to_scan == ';') {
-              context->append_code(&shuffleInst);
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-              return 1;
-            }  // ';'
-          } else {  // 4 operand
-              context->set_error(INVALID_FOURTH_OPERAND);
-              return 1;
-          }
-        } else {  // 3 operand
-          context->set_error(INVALID_THIRD_OPERAND);
-          return 1;
-        }
-      } else {  // 2 operand
-        context->set_error(INVALID_SECOND_OPERAND);
-        return 1;
-      }
-    } else {  // 1 operand
-      context->set_error(INVALID_FIRST_OPERAND);
+    if (Operand(context, &shuffleInst.o_operands[0])) {
       return 1;
     }
-  } else {  // DATA_TYPE_ID
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (context->token_type != REGISTER &&
+        context->token_type != CONSTANT) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    if (Operand(context, &shuffleInst.o_operands[1])) {
+      return 1;
+    }
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (context->token_type != REGISTER &&
+        context->token_type != CONSTANT) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    if (Operand(context, &shuffleInst.o_operands[2])) {
+      return 1;
+    }
+    if (context->token_to_scan != ',') {
+        context->set_error(MISSING_COMMA);
+        return 1;
+    }
+    context->token_to_scan = yylex();
+    if (context->token_type != CONSTANT) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+    if (Operand(context, &shuffleInst.o_operands[3])) {
+      return 1;
+    }
+    if (context->token_to_scan != ';') {
+      context->set_error(MISSING_SEMICOLON);
+      return 1;
+    }
+    context->append_code(&shuffleInst);
+    context->token_to_scan = yylex();
+    return 0;
+  } else{
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  return 1;
-
 }
 
 int KernelArgumentDecl(Context *context) {
