@@ -3354,104 +3354,70 @@ int Instruction4Cmov(Context* context) {
 
   context->token_to_scan = yylex();
 
-  // TODO(Chuang):Type: For the regular operation: b.
-  // For the packed operation: s, u, f.
-  // Length: For rhe regular operation, Length can be 1, 32, 64.
-  // Applies to src1, and src2. For the packed
-  // operation, Length can be any packed type.
-
-  if (context->token_type == DATA_TYPE_ID) {
-    context->set_type(context->token_value.data_type);
-    
-    cmovInst.type = context->token_value.data_type;
-    cmovInst.packing = cmovInst.type >= Brigu8x4 ? BrigPackPP : cmovInst.packing;
-    context->token_to_scan = yylex();
-
-    
-  
-    // Note: dest: Destination register.
-    std::string opName;
-
-    if (context->token_type != REGISTER) {
-      context->set_error(INVALID_FIRST_OPERAND);
-      return 1;
-    }
-
-    if (!Operand(context, &cmovInst.o_operands[0])) {
-      if (context->token_to_scan != ',') {
-        context->set_error(MISSING_COMMA);
-        return 1;
-      }
-      context->token_to_scan = yylex();
-
-      // TODO(Chuang): src0, src1, src2: Sources. For the regular operation,
-      // src0 must be a control (c) register or an immediate value.
-      // For the packed operation, if the Length is 32-bit,
-      // then src0 must be an s register or literal value; if
-      // the Length is 64-bit, then src0 must be a d register or literal value.
-
-      if (context->token_type != REGISTER &&
-          context->token_type != CONSTANT) {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-
-      if (!Operand(context ,&cmovInst.o_operands[1])) {
-        if (context->token_to_scan != ',') {
-          context->set_error(MISSING_COMMA);
-          return 1;
-        }
-        context->token_to_scan = yylex();
-        if (context->token_type != REGISTER &&
-            context->token_type != CONSTANT) {
-          context->set_error(INVALID_OPERAND);
-          return 1;
-        }
-
-        if (!Operand(context, &cmovInst.o_operands[2])) {
-          if (context->token_to_scan != ',') {
-              context->set_error(MISSING_COMMA);
-              return 1;
-          }
-          context->token_to_scan = yylex();
-
-          if (context->token_type != REGISTER &&
-              context->token_type != CONSTANT) {
-            context->set_error(INVALID_OPERAND);
-            return 1;
-          }
-
-          if (!Operand(context, &cmovInst.o_operands[3])) {
-            if (context->token_to_scan == ';') {
-              context->append_code(&cmovInst);
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-              return 1;
-            }  // ';'
-          } else {  // 4 operand
-              context->set_error(INVALID_FOURTH_OPERAND);
-              return 1;
-          }
-        } else {  // 3 operand
-          context->set_error(INVALID_THIRD_OPERAND);
-          return 1;
-        }
-      } else {  // 2 operand
-        context->set_error(INVALID_SECOND_OPERAND);
-        return 1;
-      }
-    } else {  // 1 operand
-      context->set_error(INVALID_FIRST_OPERAND);
-      return 1;
-    }
-  } else {  // DATA_TYPE_ID
+  if (context->token_type != DATA_TYPE_ID) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  return 1;
+  context->set_type(context->token_value.data_type);  
+  cmovInst.type = context->token_value.data_type;
+  cmovInst.packing = cmovInst.type >= Brigu8x4 ? BrigPackPP : cmovInst.packing;
+  context->token_to_scan = yylex();
 
+  std::string opName;
+  if (context->token_type != REGISTER) {
+    context->set_error(INVALID_FIRST_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &cmovInst.o_operands[0])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_type != REGISTER &&
+          context->token_type != CONSTANT) {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+  }
+  if (Operand(context ,&cmovInst.o_operands[1])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_type != REGISTER &&
+      context->token_type != CONSTANT) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &cmovInst.o_operands[2])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+  }
+  context->token_to_scan = yylex();
+
+  if (context->token_type != REGISTER &&
+      context->token_type != CONSTANT) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &cmovInst.o_operands[3])) {
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->append_code(&cmovInst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Instruction4Shuffle(Context* context) {
