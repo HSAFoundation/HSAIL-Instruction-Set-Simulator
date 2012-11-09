@@ -2139,7 +2139,6 @@ bool BrigModule::validateMov(const inst_iterator inst) const {
                  isa<BrigOperandImmed>(src), 
                  "Src of Mov should be reg, regv2, regv4 or immediate");
 
-
   if(isa<BrigOperandReg>(dest))
     valid &= check(isCompatibleSrc(type, dest), 
                    "Incompatible destination operand");
@@ -2147,13 +2146,11 @@ bool BrigModule::validateMov(const inst_iterator inst) const {
   if(isa<BrigOperandReg>(src))
     valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
 
-
   if(isa<BrigOperandRegV2>(dest)) 
     valid &= check(isa<BrigOperandReg>(src) && 
                    *getType(src) == Brigb64 && 
                    *getType(dest) == Brigb32,
                    "Src should point to d reg and type of dest should be b32");
-
 
   if(isa<BrigOperandRegV2>(src))
     valid &= check(isa<BrigOperandReg>(dest) && 
@@ -2225,7 +2222,6 @@ bool BrigModule::validateShuffle(const inst_iterator inst) const {
                  "Shuffle should accept vector types");
   valid &= check(inst->packing == BrigNoPacking, 
                  "The packing should be set to BrigNoPacking");
-
   return valid;
 }
 
@@ -2275,7 +2271,6 @@ bool BrigModule::validateCmov(const inst_iterator inst) const {
     valid &= check(inst->packing == BrigNoPacking, 
                    "Packing should be nopacking");
   }
-
   return valid;
 }
 
