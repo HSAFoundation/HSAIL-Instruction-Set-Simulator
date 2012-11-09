@@ -66,6 +66,7 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/Block_test.cc
     test/hsail2brig/Call_test.cc
     test/hsail2brig/Comment_test.cc
+    test/hsail2brig/Control_test.cc
     test/hsail2brig/Cmp_test.cc
     test/hsail2brig/Cvt_test.cc
     test/hsail2brig/Extension_test.cc
@@ -86,6 +87,7 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/Instruction5_test.cc
     test/hsail2brig/Kernel_test.cc
     test/hsail2brig/Ld_test.cc
+    test/hsail2brig/Label_test.cc
     test/hsail2brig/Location_test.cc
     test/hsail2brig/Mov_test.cc
     test/hsail2brig/Mul_test.cc
@@ -113,6 +115,7 @@ else (ENABLE_TEST_CASE)
     test/hsail2brig/Block_test.cc
     test/hsail2brig/Call_test.cc
     test/hsail2brig/Comment_test.cc
+    test/hsail2brig/Control_test.cc
     test/hsail2brig/Cmp_test.cc
     test/hsail2brig/Cvt_test.cc
     test/hsail2brig/Extension_test.cc
@@ -133,6 +136,7 @@ else (ENABLE_TEST_CASE)
     test/hsail2brig/Instruction5_test.cc
     test/hsail2brig/Kernel_test.cc
     test/hsail2brig/Ld_test.cc
+    test/hsail2brig/Label_test.cc
     test/hsail2brig/Location_test.cc
     test/hsail2brig/Mov_test.cc
     test/hsail2brig/Mul_test.cc

@@ -8,9 +8,9 @@ namespace brig {
 class Label_Test: public BrigCodeGenTest {
 
 private:
-  Buffer* RefCode;
-  Buffer* RefOper;
   Buffer* RefDir;
+  Buffer* RefOper;
+  Buffer* RefCode; 
 
 public:
   Label_Test(std::string& in, StringBuffer* sbuf, Buffer* dir,
@@ -46,7 +46,7 @@ TEST(CodegenTest, Label_CodeGen) {
 
   BrigInstBase instCbr, instBrn;
 
-  BrigOperandLabelRef lab1Oper, lab2Oper, lab3Oper, lab4Oper;
+  BrigOperandLabelRef lab1Oper, lab2Oper, lab3Oper;
   BrigOperandImmed width1, width2;
   BrigOperandReg reg;
 
