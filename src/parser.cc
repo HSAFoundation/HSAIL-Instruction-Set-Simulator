@@ -902,58 +902,49 @@ int Instruction2OpcodeNoDT(Context* context) {
   inst.opcode = context->token_value.opcode;
 
   context->token_to_scan = yylex();
-  // TODO(Chuang): whether support for rounding
   if (!RoundingMode(context)) {
     aluModifier = context->get_alu_modifier();
   }
-
-
-  // TODO(Chuang): judge whether operands is suitable.
-  if (context->token_type == REGISTER) {
-    if (Operand(context, &inst.o_operands[0])) {
-      return 1;
-    }
-    if (context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-      // TODO(Chuang): judge whether operands is suitable.
-
-      if (!Operand(context, &inst.o_operands[1])) {
-        if (context->token_to_scan == ';') {
-          int* aluValue = reinterpret_cast<int*>(&aluModifier);
-          if (*aluValue != 0) {
-            BrigInstMod mod = {
-              sizeof(BrigInstMod),  // size
-              BrigEInstMod,         // kind
-              inst.opcode,              // opcode
-              inst.type,         // type
-              inst.packing,        // packing
-              {0, 0, 0, 0, 0},      // o_operands[5]
-              {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-            };
-            for (int i = 0 ; i < 5 ; ++i) {
-              mod.o_operands[i] = inst.o_operands[i];
-            }
-            mod.aluModifier = aluModifier;
-            context->append_code(&mod);
-          } else {
-            context->append_code(&inst);
-          }
-          context->token_to_scan = yylex();
-          return 0;
-        } else {  // ';'
-          context->set_error(MISSING_SEMICOLON);
-        }
-      } else {  // Second Operand
-        context->set_error(MISSING_OPERAND);
-      }
-    } else {  // ','
-      context->set_error(MISSING_COMMA);
-    }
-  } else {  // First Operand
+  if (context->token_type != REGISTER) {
     context->set_error(INVALID_FIRST_OPERAND);
+    return 1;
   }
-
-  return 1;
+  if (Operand(context, &inst.o_operands[0])) {
+      return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (Operand(context, &inst.o_operands[1])) {
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  int* aluValue = reinterpret_cast<int*>(&aluModifier);
+  if (*aluValue != 0) {
+    BrigInstMod mod = {
+      sizeof(BrigInstMod),  // size
+      BrigEInstMod,         // kind
+      inst.opcode,              // opcode
+      inst.type,         // type
+      inst.packing,        // packing
+      {0, 0, 0, 0, 0},      // o_operands[5]
+      {0, 0, 0, 0, 0, 0, 0}  // aluModifier
+    };
+    for (int i = 0 ; i < 5 ; ++i) {
+      mod.o_operands[i] = inst.o_operands[i];
+    }
+    mod.aluModifier = aluModifier;
+    context->append_code(&mod);
+  } else {
+    context->append_code(&inst);
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Instruction2OpcodeFtz(Context* context) {
