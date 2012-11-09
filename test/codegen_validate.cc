@@ -827,12 +827,34 @@ void validate(const BrigDirectiveLabel* ref, const BrigDirectiveLabel* get,
 
 void validate(const BrigDirectiveLabelList* ref, const BrigDirectiveLabelList* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
-    
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  if (get->c_code != 0) {
+    validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
+  }
+  EXPECT_EQ(ref->elementCount, get->elementCount);
+  if (get->label != 0) {
+    validate_DIR_OFFSET(ref->label, get->label, RefOutput, GetOutput);
+  }
+  int no_init_bytes = ref->size - sizeof(BrigDirectiveInit) + sizeof(uint64_t);
+  for(int i = 0 ; i < no_init_bytes; i++) {
+    EXPECT_EQ(ref->d_labels[i], get->d_labels[i]);
+  } 
 }
 
 void validate(const BrigDirectiveLabelInit* ref, const BrigDirectiveLabelInit* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
-    
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  if (get->c_code != 0) {
+    validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
+  }
+  EXPECT_EQ(ref->elementCount, get->elementCount);
+  EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
+  int no_init_bytes = ref->size - sizeof(BrigDirectiveInit) + sizeof(uint64_t);
+  for(int i = 0 ; i < no_init_bytes; i++) {
+    EXPECT_EQ(ref->d_labels[i], get->d_labels[i]);
+  } 
 }
 
 void validate(const BrigDirectiveKernel* ref, const BrigDirectiveKernel* get,
