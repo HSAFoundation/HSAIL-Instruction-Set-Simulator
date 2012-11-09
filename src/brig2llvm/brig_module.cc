@@ -1610,6 +1610,44 @@ bool BrigModule::validateMovsInst(const inst_iterator inst) const {
   return valid;
 }
 
+bool BrigModule::validateUnpackInst(const inst_iterator inst) const {  //1031
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
+    return false;
+
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(inst->type== Brigu16x2 || inst->type== Brigs16x2 || 
+                 inst->type==  Brigf16x2 || inst->type== Brigu16x4 || 
+                 inst->type== Brigs16x4 || inst->type== Brigf16x4 || 
+                 inst->type==  Brigu32x2 ||  inst->type== Brigs32x2 || 
+                 inst->type== Brigf32x2 || inst->type== Brigu8x8 || 
+                 inst->type== Brigs8x8 || inst->type== Brigu8x4 || 
+                 inst->type== Brigs8x4, 
+                 "Length of Unpack should be 8x4, 8x8, 16x2, 16x4 or 32x2"); 
+
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
+  oper_iterator src0(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(src0) ||
+                 isa<BrigOperandImmed>(src0), "Src should be reg or immed");
+  oper_iterator src1(S_.operands + inst->o_operands[2]);
+  valid &= check(isa<BrigOperandReg>(src1) ||
+                 isa<BrigOperandImmed>(src1), "Src should be reg or immed");
+
+  for(int i = 0; i < 3; i++) {
+    oper_iterator reg(S_.operands + inst->o_operands[i]);
+    valid &= check(isCompatibleSrc(type, reg), "Incompatible source operand");
+  }
+
+  valid &= check(BrigInstHelper::isVectorTy(type), 
+                 "Unpack should accept vector types");
+  valid &= check(inst->packing == BrigNoPacking, 
+                 "The packing should be set to BrigNoPacking");
+
+  return valid;
+}
+
+
 bool BrigModule::validateAbs(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
@@ -2192,19 +2230,84 @@ bool BrigModule::validateShuffle(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateUnpackHi(const inst_iterator inst) const {
-  return true;
+  return validateUnpackInst(inst);
 }
 
 bool BrigModule::validateUnpackLo(const inst_iterator inst) const {
-  return true;
+  return validateUnpackInst(inst);
 }
 
 bool BrigModule::validateCmov(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
+    return false;
+
+  BrigDataType type = BrigDataType(inst->type);
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
+
+  oper_iterator src0(S_.operands + inst->o_operands[1]);
+
+  oper_iterator src1(S_.operands + inst->o_operands[2]);
+  valid &= check(isCompatibleSrc(type, src1), "Incompatible src1 operand");
+
+  oper_iterator src2(S_.operands + inst->o_operands[3]);
+  valid &= check(isCompatibleSrc(type, src2), "Incompatible src2 operand");
+
+  for(int i = 1; i < 4; i++) {
+    oper_iterator src(S_.operands + inst->o_operands[i]);
+    valid &= check(isa<BrigOperandReg>(src) ||
+                   isa<BrigOperandImmed>(src), 
+                   "Source should be reg or immdiate");
+  }
+    
+  if(BrigInstHelper::isVectorTy(type)) {
+    valid &= check(BrigInstHelper::isSignedTy(type)   ||
+                   BrigInstHelper::isUnsignedTy(type) ||
+                   BrigInstHelper::isFloatTy(type),
+                   "Invalid type");   
+    valid &= check(isCompatibleSrc(type, src0), "Incompatible src0 operand");
+    valid &= check(inst->packing == BrigPackPP, "Packing should be pp");
+  } else {
+    valid &= check(inst->type == Brigb1 || inst->type == Brigb32 || 
+                   inst->type == Brigb64, "Type should be b1, b32 and b64");
+    valid &= check(*getType(src0) == Brigb1, "Type of Src0 should be b1");
+    valid &= check(inst->packing == BrigNoPacking, 
+                   "Packing should be nopacking");
+  }
+
+  return valid;
 }
 
-bool BrigModule::validateClass(const inst_iterator inst) const {
-  return true;
+bool BrigModule::validateClass(const inst_iterator inst) const {  
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
+    return false;
+  valid &= check(inst->type == Brigf32 || inst->type == Brigf64, 
+                 "Type of Class should be f32 or f64");
+
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), 
+                 "Destination should be a register");
+  valid &= check(*getType(dest) == Brigb1, "Destination should be a c reg");
+
+  for(int i = 1; i < 3; i++) {
+    oper_iterator src(S_.operands + inst->o_operands[i]);
+    valid &= check(isa<BrigOperandReg>(src) || 
+                   isa<BrigOperandImmed>(dest), 
+                   "Source should be register or immediate");
+  }
+
+  BrigDataType type = BrigDataType(inst->type);
+  oper_iterator src0(S_.operands + inst->o_operands[1]);
+  valid &= check(isCompatibleSrc(type, src0), "Incompatible src0 operand");
+
+  oper_iterator src1(S_.operands + inst->o_operands[2]);
+  valid &= check(*getType(src1) == Brigb32, "Type of src1 should be Brigb32");
+
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "Class can not accept the vector");
+  return valid;
 }
 
 bool BrigModule::validateFcos(const inst_iterator inst) const {
@@ -2264,51 +2367,91 @@ bool BrigModule::validateFsin(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateBitAlign(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of BitAlign should be b32");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "BitAlign can not accept vector types");
+  valid &= validateArithmeticInst(inst, 3);
+  return valid;
 }
 
 bool BrigModule::validateByteAlign(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of ByteAlign should be b32");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "ByteAlign can not accept vector types");
+  valid &= validateArithmeticInst(inst, 3);
+  return valid;
 }
 
 bool BrigModule::validateF2u4(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigu32, "Type of F2u4 should be u32");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "F2u4 can not accept vector types");
+  valid &= validateArithmeticInst(inst, 4);
+  return valid;
 }
 
 bool BrigModule::validateLerp(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of Lerp should be b32");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "Lerp can not accept vector types");
+  valid &= validateArithmeticInst(inst, 3);
+  return valid;
 }
 
 bool BrigModule::validateSad(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of Sad should be b32");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "Sad can not accept vector types");
+  valid &= validateArithmeticInst(inst, 3);
+  return valid;
 }
 
 bool BrigModule::validateSad2(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of Sad2 should be b32");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "Sad2 can not accept vector types");
+  valid &= validateArithmeticInst(inst, 3);
+  return valid;
 }
 
 bool BrigModule::validateSad4(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of Sad4 should be b32");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "Sad4 can not accept vector types");
+  valid &= validateArithmeticInst(inst, 3);
+  return valid;
 }
 
 bool BrigModule::validateSad4Hi(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of Sad4Hi should be b32");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)), 
+                 "Sad4Hi can not accept vector types");
+  valid &= validateArithmeticInst(inst, 3);
+  return valid;
 }
 
 bool BrigModule::validateUnpack0(const inst_iterator inst) const {
-  return true;
+  return validateArithmeticInst(inst, 1);
 }
 
 bool BrigModule::validateUnpack1(const inst_iterator inst) const {
-  return true;
+  return validateArithmeticInst(inst, 1);
 }
 
 bool BrigModule::validateUnpack2(const inst_iterator inst) const {
-  return true;
+  return validateArithmeticInst(inst, 1);
 }
 
 bool BrigModule::validateUnpack3(const inst_iterator inst) const {
-  return true;
+  return validateArithmeticInst(inst, 1);
 }
 
 bool BrigModule::validateSegmentp(const inst_iterator inst) const {
