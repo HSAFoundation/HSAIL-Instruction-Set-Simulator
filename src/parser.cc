@@ -796,8 +796,8 @@ int RoundingMode(Context* context) {
   if(mod.ftz){
     context->set_alu_modifier(mod);
     return 0;
-  }
-  return 1;
+  } else
+    return 1;
 }
 
 int Instruction2OpcodeDT(Context* context) {
@@ -816,6 +816,7 @@ int Instruction2OpcodeDT(Context* context) {
   inst.opcode = context->token_value.opcode;
 
   context->token_to_scan = yylex();
+  // TODO(Chuang): whether support for rounding
   if (!RoundingMode(context)) {
     aluModifier = context->get_alu_modifier();
   }
@@ -828,53 +829,61 @@ int Instruction2OpcodeDT(Context* context) {
     }
     context->token_to_scan = yylex();
   }
-  if (context->token_type != DATA_TYPE_ID) {
-    context->set_error(INVALID_DATA_TYPE);
-    return 1;
-  }
-  context->set_type(context->token_value.data_type);
-  inst.type = context->token_value.data_type;
-  context->token_to_scan = yylex();
-  if (context->token_type != REGISTER) {
-    context->set_error(INVALID_FIRST_OPERAND);
-    return 1;
-  }
-  if (Operand(context, &inst.o_operands[0])) {
-    return 1;
-  }
-  if (context->token_to_scan != ',') {
-    context->set_error(MISSING_COMMA);
-    return 1;
-  }
-  context->token_to_scan = yylex();
-  if (Operand(context, &inst.o_operands[1])) {
-    return 1;
-  }
-  if (context->token_to_scan != ';') {
-    context->set_error(MISSING_SEMICOLON);
-    return 1;
-  }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
-    BrigInstMod mod = {
-      sizeof(BrigInstMod),  // size
-      BrigEInstMod,         // kind
-      inst.opcode,              // opcode
-      inst.type,         // type
-      inst.packing,        // packing
-      {0, 0, 0, 0, 0},      // o_operands[5]
-      {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-    };
-    for (int i = 0 ; i < 5 ; ++i) {
-      mod.o_operands[i] = inst.o_operands[i];
+  // inst.packing == BrigNoPacking
+  // TODO(Chuang): whether can use packed operation without packing.
+  if (context->token_type == DATA_TYPE_ID) {
+
+    context->set_type(context->token_value.data_type);
+    inst.type = context->token_value.data_type;
+    context->token_to_scan = yylex();
+    if (context->token_type == REGISTER) {
+      if (Operand(context, &inst.o_operands[0])) {
+        return 1;
+      }
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        // TODO(Chuang): judge whether operands is suitable.
+
+        if (!Operand(context, &inst.o_operands[1])) {
+          if (context->token_to_scan == ';') {
+            int* aluValue = reinterpret_cast<int*>(&aluModifier);
+            if (*aluValue != 0) {
+              BrigInstMod mod = {
+                sizeof(BrigInstMod),  // size
+                BrigEInstMod,         // kind
+                inst.opcode,              // opcode
+                inst.type,         // type
+                inst.packing,        // packing
+                {0, 0, 0, 0, 0},      // o_operands[5]
+                {0, 0, 0, 0, 0, 0, 0}  // aluModifier
+              };
+              for (int i = 0 ; i < 5 ; ++i) {
+                mod.o_operands[i] = inst.o_operands[i];
+              }
+              mod.aluModifier = aluModifier;
+              context->append_code(&mod);
+            } else {
+              context->append_code(&inst);
+            }
+            context->token_to_scan = yylex();
+            return 0;
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+          }
+        } else {  // Second Operand
+          context->set_error(MISSING_OPERAND);
+        }
+      } else {  // ','
+        context->set_error(MISSING_COMMA);
+      }
+    } else {  // First Operand
+      context->set_error(INVALID_FIRST_OPERAND);
     }
-    mod.aluModifier = aluModifier;
-    context->append_code(&mod);
-  } else {
-    context->append_code(&inst);
+  } else {  // Data Type
+    context->set_error(INVALID_DATA_TYPE);
   }
-  context->token_to_scan = yylex();
-  return 0;
+
+  return 1;
 }
 
 int Instruction2OpcodeNoDT(Context* context) {
@@ -893,49 +902,58 @@ int Instruction2OpcodeNoDT(Context* context) {
   inst.opcode = context->token_value.opcode;
 
   context->token_to_scan = yylex();
+  // TODO(Chuang): whether support for rounding
   if (!RoundingMode(context)) {
     aluModifier = context->get_alu_modifier();
   }
-  if (context->token_type != REGISTER) {
-    context->set_error(INVALID_FIRST_OPERAND);
-    return 1;
-  }
-  if (Operand(context, &inst.o_operands[0])) {
+
+
+  // TODO(Chuang): judge whether operands is suitable.
+  if (context->token_type == REGISTER) {
+    if (Operand(context, &inst.o_operands[0])) {
       return 1;
-  }
-  if (context->token_to_scan != ',') {
-    context->set_error(MISSING_COMMA);
-    return 1;
-  }
-  context->token_to_scan = yylex();
-  if (Operand(context, &inst.o_operands[1])) {
-    return 1;
-  }
-  if (context->token_to_scan != ';') {
-    context->set_error(MISSING_SEMICOLON);
-    return 1;
-  }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
-    BrigInstMod mod = {
-      sizeof(BrigInstMod),  // size
-      BrigEInstMod,         // kind
-      inst.opcode,              // opcode
-      inst.type,         // type
-      inst.packing,        // packing
-      {0, 0, 0, 0, 0},      // o_operands[5]
-      {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-    };
-    for (int i = 0 ; i < 5 ; ++i) {
-      mod.o_operands[i] = inst.o_operands[i];
     }
-    mod.aluModifier = aluModifier;
-    context->append_code(&mod);
-  } else {
-    context->append_code(&inst);
+    if (context->token_to_scan == ',') {
+      context->token_to_scan = yylex();
+      // TODO(Chuang): judge whether operands is suitable.
+
+      if (!Operand(context, &inst.o_operands[1])) {
+        if (context->token_to_scan == ';') {
+          int* aluValue = reinterpret_cast<int*>(&aluModifier);
+          if (*aluValue != 0) {
+            BrigInstMod mod = {
+              sizeof(BrigInstMod),  // size
+              BrigEInstMod,         // kind
+              inst.opcode,              // opcode
+              inst.type,         // type
+              inst.packing,        // packing
+              {0, 0, 0, 0, 0},      // o_operands[5]
+              {0, 0, 0, 0, 0, 0, 0}  // aluModifier
+            };
+            for (int i = 0 ; i < 5 ; ++i) {
+              mod.o_operands[i] = inst.o_operands[i];
+            }
+            mod.aluModifier = aluModifier;
+            context->append_code(&mod);
+          } else {
+            context->append_code(&inst);
+          }
+          context->token_to_scan = yylex();
+          return 0;
+        } else {  // ';'
+          context->set_error(MISSING_SEMICOLON);
+        }
+      } else {  // Second Operand
+        context->set_error(MISSING_OPERAND);
+      }
+    } else {  // ','
+      context->set_error(MISSING_COMMA);
+    }
+  } else {  // First Operand
+    context->set_error(INVALID_FIRST_OPERAND);
   }
-  context->token_to_scan = yylex();
-  return 0;
+
+  return 1;
 }
 
 int Instruction2OpcodeFtz(Context* context) {
@@ -3104,10 +3122,13 @@ int Instruction4Mad(Context* context) {
   };
 
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
+
   context->token_to_scan = yylex();
   if (!RoundingMode(context)) {
     aluModifier = context->get_alu_modifier();
   }
+  // TODO(Chuang):Type f Length: 16 (in some implementations), 32, 64
+  // Or Type u, s Length 32, 64
   if (context->token_to_scan == _F32 ||
       context->token_to_scan == _F64 ||
       context->token_to_scan == _U32 ||
@@ -3119,92 +3140,110 @@ int Instruction4Mad(Context* context) {
     madInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
+    // Note: dest: Destination register.
+
     if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
-    if (Operand(context, &madInst.o_operands[0])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
-      context->set_error(MISSING_COMMA);
-      return 1;
-    }
-    context->token_to_scan = yylex();
-      // Sources. Can be a register or immediate value.
-    if (context->token_type != REGISTER &&
-        context->token_type != CONSTANT) {
-      context->set_error(INVALID_OPERAND);
-      return 1;
-    }
-    if (Operand(context, &madInst.o_operands[1])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
-      context->set_error(MISSING_COMMA);
-      return 1;
-    }
-    context->token_to_scan = yylex();
-    if (context->token_type != REGISTER &&
-        context->token_type != CONSTANT) {
-      context->set_error(INVALID_OPERAND);
-      return 1;
-    }
-    if (Operand(context, &madInst.o_operands[2])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
+
+    if (!Operand(context, &madInst.o_operands[0])) {
+      if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
-    }
-    context->token_to_scan = yylex();
-    if (context->token_type != REGISTER &&
-        context->token_type != CONSTANT) {
-      context->set_error(INVALID_OPERAND);
-      return 1;
-    }
-    if (Operand(context, &madInst.o_operands[3])) {
-      return 1;
-    }
-    if (context->token_to_scan != ';') {
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
-    int* pCmp = reinterpret_cast<int*>(&aluModifier);
-    if (*pCmp != 0) {      
-      if (madInst.type != Brigf32 && madInst.type != Brigf64) {
-        context->set_error(INVALID_ROUNDING_MODE);
+      }
+      context->token_to_scan = yylex();
+      // Sources. Can be a register or immediate value.
+      if (context->token_type != REGISTER &&
+          context->token_type != CONSTANT) {
+        context->set_error(INVALID_OPERAND);
         return 1;
       }
-      BrigInstMod madMod = {
-        sizeof(BrigInstMod),  // size
-        BrigEInstMod,         // kind
-        BrigMad,              // opcode
-        madInst.type,         // type
-        BrigNoPacking,        // packing
-        {0, 0, 0, 0, 0},      // o_operands[5]
-        {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-      };
-      for (int i = 0 ; i < 5 ; ++i) {
-        madMod.o_operands[i] = madInst.o_operands[i];
+
+      if (!Operand(context, &madInst.o_operands[1])) {
+        if (context->token_to_scan != ',') {
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+        if (context->token_type != REGISTER &&
+            context->token_type != CONSTANT) {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+        if (!Operand(context, &madInst.o_operands[2])) {
+          if (context->token_to_scan != ',') {
+              context->set_error(MISSING_COMMA);
+              return 1;
+          }
+          context->token_to_scan = yylex();
+
+          if (context->token_type != REGISTER &&
+              context->token_type != CONSTANT) {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
+
+          if (!Operand(context, &madInst.o_operands[3])) {
+
+            if (context->token_to_scan == ';') {
+              int* pCmp = reinterpret_cast<int*>(&aluModifier);
+              if (*pCmp != 0) {
+                // Note: mad_u/s without _ftz/rounding
+                if (madInst.type != Brigf32 && madInst.type != Brigf64) {
+                  context->set_error(INVALID_ROUNDING_MODE);
+                  return 1;
+                }
+                BrigInstMod madMod = {
+                  sizeof(BrigInstMod),  // size
+                  BrigEInstMod,         // kind
+                  BrigMad,              // opcode
+                  madInst.type,         // type
+                  BrigNoPacking,        // packing
+                  {0, 0, 0, 0, 0},      // o_operands[5]
+                  {0, 0, 0, 0, 0, 0, 0}  // aluModifier
+                };
+                for (int i = 0 ; i < 5 ; ++i) {
+                  madMod.o_operands[i] = madInst.o_operands[i];
+                }
+                madMod.aluModifier = aluModifier;
+                context->append_code(&madMod);
+              }
+              else {
+                context->append_code(&madInst);
+              }
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }  // ';'
+          } else {  // 4 operand
+              context->set_error(INVALID_FOURTH_OPERAND);
+              return 1;
+          }
+        } else {  // 3 operand
+          context->set_error(INVALID_THIRD_OPERAND);
+          return 1;
+        }
+      } else {  // 2 operand
+        context->set_error(INVALID_SECOND_OPERAND);
+        return 1;
       }
-      madMod.aluModifier = aluModifier;
-      context->append_code(&madMod);
+    } else {  // 1 operand
+      context->set_error(INVALID_FIRST_OPERAND);
+      return 1;
     }
-    else {
-      context->append_code(&madInst);
-    }
-    context->token_to_scan = yylex();
-    return 0;
-  
   } else {  // DATA_TYPE_ID
     context->set_error(MISSING_DATA_TYPE);
     return 1;
-  }  
+  }
+  return 1;
 }
 
 int Instruction4BitOperation(Context* context) {
   const unsigned int first_token = context->token_to_scan;
+
   BrigInstBase bsoInst = {
     sizeof(BrigInstBase),   // size
     BrigEInstBase,         // kind
@@ -3239,48 +3278,68 @@ int Instruction4BitOperation(Context* context) {
     bsoInst.type = context->token_value.data_type;
     context->token_to_scan = yylex();
 
+    // Note: dest: Destination register.
+
     if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
-    if (Operand(context, &bsoInst.o_operands[0])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
-      context->set_error(MISSING_COMMA);
-      return 1;
-    }
-    context->token_to_scan = yylex();
-    if (Operand(context, &bsoInst.o_operands[1])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
-      context->set_error(MISSING_COMMA);
-      return 1;
-    }
-    context->token_to_scan = yylex();
-    if (Operand(context, &bsoInst.o_operands[2])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
+
+    if (!Operand(context, &bsoInst.o_operands[0])) {
+      if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
-    }
-    context->token_to_scan = yylex();
-    if (Operand(context, &bsoInst.o_operands[3])) {
+      }
+      context->token_to_scan = yylex();
+
+      if (!Operand(context, &bsoInst.o_operands[1])) {
+        if (context->token_to_scan != ',') {
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+
+        // TODO(Chuang): src1, src2: type follow as the kind of opcode.
+        // different opcode will have different rule of types.
+
+        if (!Operand(context, &bsoInst.o_operands[2])) {
+
+          if (context->token_to_scan != ',') {
+              context->set_error(MISSING_COMMA);
+              return 1;
+          }
+          context->token_to_scan = yylex();
+
+          if (!Operand(context, &bsoInst.o_operands[3])) {
+            if (context->token_to_scan == ';') {
+              context->append_code(&bsoInst);
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }  // ';'
+          } else {  // 4 operand
+              context->set_error(INVALID_FOURTH_OPERAND);
+              return 1;
+          }
+        } else {  // 3 operand
+          context->set_error(INVALID_THIRD_OPERAND);
+          return 1;
+        }
+      } else {  // 2 operand
+        context->set_error(INVALID_SECOND_OPERAND);
+        return 1;
+      }
+    } else {  // 1 operand
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
-    if (context->token_to_scan != ';') {
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
-    context->append_code(&bsoInst);
-    context->token_to_scan = yylex();
-    return 0;
   } else {  // DATA_TYPE_ID
     context->set_error(MISSING_DATA_TYPE);
     return 1;
-  } 
+  }
+  return 1;
 }
 
 int Instruction4Cmov(Context* context) {
@@ -3295,70 +3354,104 @@ int Instruction4Cmov(Context* context) {
 
   context->token_to_scan = yylex();
 
-  if (context->token_type != DATA_TYPE_ID) {
-    context->set_error(MISSING_DATA_TYPE);
-    return 1;
-  }
-  context->set_type(context->token_value.data_type);  
-  cmovInst.type = context->token_value.data_type;
-  cmovInst.packing = cmovInst.type >= Brigu8x4 ? BrigPackPP : cmovInst.packing;
-  context->token_to_scan = yylex();
+  // TODO(Chuang):Type: For the regular operation: b.
+  // For the packed operation: s, u, f.
+  // Length: For rhe regular operation, Length can be 1, 32, 64.
+  // Applies to src1, and src2. For the packed
+  // operation, Length can be any packed type.
 
-  std::string opName;
-  if (context->token_type != REGISTER) {
-    context->set_error(INVALID_FIRST_OPERAND);
-    return 1;
-  }
-  if (Operand(context, &cmovInst.o_operands[0])) {
-    return 1;
-  }
-  if (context->token_to_scan != ',') {
-    context->set_error(MISSING_COMMA);
-    return 1;
-  }
-  context->token_to_scan = yylex();
-  if (context->token_type != REGISTER &&
+  if (context->token_type == DATA_TYPE_ID) {
+    context->set_type(context->token_value.data_type);
+    
+    cmovInst.type = context->token_value.data_type;
+    cmovInst.packing = cmovInst.type >= Brigu8x4 ? BrigPackPP : cmovInst.packing;
+    context->token_to_scan = yylex();
+
+    
+  
+    // Note: dest: Destination register.
+    std::string opName;
+
+    if (context->token_type != REGISTER) {
+      context->set_error(INVALID_FIRST_OPERAND);
+      return 1;
+    }
+
+    if (!Operand(context, &cmovInst.o_operands[0])) {
+      if (context->token_to_scan != ',') {
+        context->set_error(MISSING_COMMA);
+        return 1;
+      }
+      context->token_to_scan = yylex();
+
+      // TODO(Chuang): src0, src1, src2: Sources. For the regular operation,
+      // src0 must be a control (c) register or an immediate value.
+      // For the packed operation, if the Length is 32-bit,
+      // then src0 must be an s register or literal value; if
+      // the Length is 64-bit, then src0 must be a d register or literal value.
+
+      if (context->token_type != REGISTER &&
           context->token_type != CONSTANT) {
         context->set_error(INVALID_OPERAND);
         return 1;
-  }
-  if (Operand(context ,&cmovInst.o_operands[1])) {
-    return 1;
-  }
-  if (context->token_to_scan != ',') {
-    context->set_error(MISSING_COMMA);
-    return 1;
-  }
-  context->token_to_scan = yylex();
-  if (context->token_type != REGISTER &&
-      context->token_type != CONSTANT) {
-    context->set_error(INVALID_OPERAND);
-    return 1;
-  }
-  if (Operand(context, &cmovInst.o_operands[2])) {
-    return 1;
-  }
-  if (context->token_to_scan != ',') {
-      context->set_error(MISSING_COMMA);
-      return 1;
-  }
-  context->token_to_scan = yylex();
+      }
 
-  if (context->token_type != REGISTER &&
-      context->token_type != CONSTANT) {
-    context->set_error(INVALID_OPERAND);
+      if (!Operand(context ,&cmovInst.o_operands[1])) {
+        if (context->token_to_scan != ',') {
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+        if (context->token_type != REGISTER &&
+            context->token_type != CONSTANT) {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+
+        if (!Operand(context, &cmovInst.o_operands[2])) {
+          if (context->token_to_scan != ',') {
+              context->set_error(MISSING_COMMA);
+              return 1;
+          }
+          context->token_to_scan = yylex();
+
+          if (context->token_type != REGISTER &&
+              context->token_type != CONSTANT) {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
+
+          if (!Operand(context, &cmovInst.o_operands[3])) {
+            if (context->token_to_scan == ';') {
+              context->append_code(&cmovInst);
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }  // ';'
+          } else {  // 4 operand
+              context->set_error(INVALID_FOURTH_OPERAND);
+              return 1;
+          }
+        } else {  // 3 operand
+          context->set_error(INVALID_THIRD_OPERAND);
+          return 1;
+        }
+      } else {  // 2 operand
+        context->set_error(INVALID_SECOND_OPERAND);
+        return 1;
+      }
+    } else {  // 1 operand
+      context->set_error(INVALID_FIRST_OPERAND);
+      return 1;
+    }
+  } else {  // DATA_TYPE_ID
+    context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  if (Operand(context, &cmovInst.o_operands[3])) {
-    return 1;
-  }
-  if (context->token_to_scan != ';') {
-    context->set_error(MISSING_SEMICOLON);
-    return 1;
-  }
-  context->append_code(&cmovInst);
-  context->token_to_scan = yylex();
-  return 0;
+  return 1;
+
 }
 
 int Instruction4Shuffle(Context* context) {
@@ -3372,6 +3465,8 @@ int Instruction4Shuffle(Context* context) {
   };
 
   context->token_to_scan = yylex();
+  // Type: s, u, f.
+  // Length: 8x4, 8x8, 16x2, 16x4, 32x2
 
   if (context->token_to_scan == _U8X4 ||
       context->token_to_scan == _S8X4 ||
@@ -3393,62 +3488,83 @@ int Instruction4Shuffle(Context* context) {
 
     // Note: dest: Destination register.
     std::string opName;
+
     if (context->token_type != REGISTER) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
-    if (Operand(context, &shuffleInst.o_operands[0])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
-      context->set_error(MISSING_COMMA);
-      return 1;
-    }
-    context->token_to_scan = yylex();
-    if (context->token_type != REGISTER &&
-        context->token_type != CONSTANT) {
-      context->set_error(INVALID_OPERAND);
-      return 1;
-    }
-    if (Operand(context, &shuffleInst.o_operands[1])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
-      context->set_error(MISSING_COMMA);
-      return 1;
-    }
-    context->token_to_scan = yylex();
-    if (context->token_type != REGISTER &&
-        context->token_type != CONSTANT) {
-      context->set_error(INVALID_OPERAND);
-      return 1;
-    }
-    if (Operand(context, &shuffleInst.o_operands[2])) {
-      return 1;
-    }
-    if (context->token_to_scan != ',') {
+
+    if (!Operand(context, &shuffleInst.o_operands[0])) {
+      if (context->token_to_scan != ',') {
         context->set_error(MISSING_COMMA);
         return 1;
-    }
-    context->token_to_scan = yylex();
-    if (context->token_type != CONSTANT) {
-      context->set_error(INVALID_OPERAND);
+      }
+      context->token_to_scan = yylex();
+
+      if (context->token_type != REGISTER &&
+          context->token_type != CONSTANT) {
+        context->set_error(INVALID_OPERAND);
+        return 1;
+      }
+
+      if (!Operand(context, &shuffleInst.o_operands[1])) {
+
+        if (context->token_to_scan != ',') {
+          context->set_error(MISSING_COMMA);
+          return 1;
+        }
+        context->token_to_scan = yylex();
+        if (context->token_type != REGISTER &&
+            context->token_type != CONSTANT) {
+          context->set_error(INVALID_OPERAND);
+          return 1;
+        }
+
+        if (!Operand(context, &shuffleInst.o_operands[2])) {
+
+          if (context->token_to_scan != ',') {
+              context->set_error(MISSING_COMMA);
+              return 1;
+          }
+          context->token_to_scan = yylex();
+
+          // src2: Source. Must be a literal value used to select elements
+          if (context->token_type != CONSTANT) {
+            context->set_error(INVALID_OPERAND);
+            return 1;
+          }
+
+          if (!Operand(context, &shuffleInst.o_operands[3])) {
+            if (context->token_to_scan == ';') {
+              context->append_code(&shuffleInst);
+              context->token_to_scan = yylex();
+              return 0;
+            } else {
+              context->set_error(MISSING_SEMICOLON);
+              return 1;
+            }  // ';'
+          } else {  // 4 operand
+              context->set_error(INVALID_FOURTH_OPERAND);
+              return 1;
+          }
+        } else {  // 3 operand
+          context->set_error(INVALID_THIRD_OPERAND);
+          return 1;
+        }
+      } else {  // 2 operand
+        context->set_error(INVALID_SECOND_OPERAND);
+        return 1;
+      }
+    } else {  // 1 operand
+      context->set_error(INVALID_FIRST_OPERAND);
       return 1;
     }
-    if (Operand(context, &shuffleInst.o_operands[3])) {
-      return 1;
-    }
-    if (context->token_to_scan != ';') {
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
-    context->append_code(&shuffleInst);
-    context->token_to_scan = yylex();
-    return 0;
-  } else{
+  } else {  // DATA_TYPE_ID
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
+  return 1;
+
 }
 
 int KernelArgumentDecl(Context *context) {
@@ -4425,7 +4541,9 @@ int Atom(Context* context) {
 }
 
 int Mov(Context* context) {
-  
+  // Chuang
+  // first token is MOV "mov"
+
   BrigInstBase movInst = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
@@ -4437,35 +4555,38 @@ int Mov(Context* context) {
 
   context->token_to_scan = yylex();
   // TODO(Chuang): When type is b128 or b64 etc, check whether the operands is correct.
-  if (context->token_to_scan != _B1 &&
-      context->token_to_scan != _B32 &&
-      context->token_to_scan != _B64 &&
-      context->token_to_scan != _B128) {
-    context->set_error(MISSING_DATA_TYPE);
-    return 1;
-  }    
+  if (context->token_to_scan == _B1 ||
+      context->token_to_scan == _B32 ||
+      context->token_to_scan == _B64 ||
+      context->token_to_scan == _B128) {
 
-  context->set_type(context->token_value.data_type);  
-  movInst.type = context->token_value.data_type;
-  context->token_to_scan = yylex();
-  if (ArrayOperand(context, &movInst.o_operands[0])) {
-    return 1;
+    context->set_type(context->token_value.data_type);  
+    movInst.type = context->token_value.data_type;
+    context->token_to_scan = yylex();
+    if (!ArrayOperand(context, &movInst.o_operands[0])) {
+      if (context->token_to_scan == ',') {
+        context->token_to_scan = yylex();
+        if (!ArrayOperand(context, &movInst.o_operands[1])) {
+          if (context->token_to_scan == ';') {
+            context->append_code(&movInst);
+            context->token_to_scan = yylex();
+            return 0;
+          } else {  // ';'
+            context->set_error(MISSING_SEMICOLON);
+          }
+        } else {  // Operand or ArrayOperandList
+          context->set_error(INVALID_SECOND_OPERAND);
+        }
+      } else {  // ','
+        context->set_error(MISSING_COMMA);
+      }
+    } else {  // Operand or ArrayOperandList
+      context->set_error(INVALID_FIRST_OPERAND);
+    }
+  } else {  // datatypeId
+    context->set_error(MISSING_DATA_TYPE);
   }
-  if (context->token_to_scan != ',') {
-    context->set_error(MISSING_COMMA);
-    return 1;
-  }
-  context->token_to_scan = yylex();
-  if (ArrayOperand(context, &movInst.o_operands[1])) {
-    return 1;
-  }
-  if (context->token_to_scan != ';') {
-    context->set_error(MISSING_SEMICOLON);
-    return 1;
-  }
-  context->append_code(&movInst);
-  context->token_to_scan = yylex();
-  return 0;
+  return 1;
 }
 
 int GlobalGroupDecl(Context* context) {
@@ -5278,18 +5399,12 @@ int ImageRet(Context* context) {
 
 int ImageNoRet(Context* context) {
   // first token is ATOMICNORET_IMAGE
-  BrigInstAtomicImage imgNoRet = {
-    sizeof(BrigInstAtomicImage),// size
-    BrigEInstAtomicImage,   // kind
-    BrigAtomicNoRetImage,   // opcode
-    Brigb32,                // type
-    BrigNoPacking,          // packing
-    {0, 0, 0, 0, 0},        // o_operands[5]
-    0,                      // atomicOperation
-    BrigGlobalSpace,          // storageClass
-    BrigRegular,            // memorySemantic
-    0                       // geom
-  };
+  BrigDataType16_t type = Brigb32;
+  BrigoOffset32_t OpOffset[4] = {0, 0, 0, 0};
+  BrigAtomicOperation32_t atomicOperation = 0;
+  BrigMemorySemantic32_t memorySemantic = BrigRegular;
+  BrigGeom32_t geom = 0;
+
 
   unsigned int second_token;
   context->token_to_scan = yylex();
@@ -5297,48 +5412,48 @@ int ImageNoRet(Context* context) {
   second_token = context->token_to_scan;
 
   if (context->token_to_scan == _CAS) {
-    imgNoRet.atomicOperation = BrigAtomicCas;
+    atomicOperation = BrigAtomicCas;
     context->token_to_scan = yylex();
   } else if (context->token_type == ATOMIC_OP) {
     switch (context->token_to_scan) {  // without _CAS_ , _EXCh_
       case _AND_:
-        imgNoRet.atomicOperation = BrigAtomicAnd;
-        imgNoRet.type = Brigb32;
+        atomicOperation = BrigAtomicAnd;
+        type = Brigb32;
         break;
       case _OR_:
-        imgNoRet.atomicOperation = BrigAtomicOr;
-        imgNoRet.type = Brigb32;
+        atomicOperation = BrigAtomicOr;
+        type = Brigb32;
         break;
       case _XOR_:
-        imgNoRet.atomicOperation = BrigAtomicXor;
-        imgNoRet.type = Brigb32;
+        atomicOperation = BrigAtomicXor;
+        type = Brigb32;
         break;
     //   case _EXCH_:
     //    imgNoRet.atomicOperation = BrigAtomicExch;
     //   break;
       case _ADD_:
-        imgNoRet.atomicOperation = BrigAtomicAdd;
-        imgNoRet.type = Brigu64;
+        atomicOperation = BrigAtomicAdd;
+        type = Brigu64;
         break;
       case _INC_:
-        imgNoRet.atomicOperation = BrigAtomicInc;
-        imgNoRet.type = Brigs32;
+        atomicOperation = BrigAtomicInc;
+        type = Brigs32;
         break;
       case _DEC_:
-        imgNoRet.atomicOperation = BrigAtomicDec;
-        imgNoRet.type = Brigb32;
+        atomicOperation = BrigAtomicDec;
+        type = Brigb32;
         break;
       case _MIN_:
-        imgNoRet.atomicOperation = BrigAtomicMin;
-        imgNoRet.type = Brigu32;
+        atomicOperation = BrigAtomicMin;
+        type = Brigu32;
         break;
       case _MAX_:
-        imgNoRet.atomicOperation = BrigAtomicMax;
-        imgNoRet.type = Brigu32;
+        atomicOperation = BrigAtomicMax;
+        type = Brigu32;
         break;
       case _SUB_:
-        imgNoRet.atomicOperation = BrigAtomicSub;
-        imgNoRet.type = Brigu64;
+        atomicOperation = BrigAtomicSub;
+        type = Brigu64;
         break;
       default:
         context->set_error(MISSING_DECLPREFIX);
@@ -5349,39 +5464,42 @@ int ImageNoRet(Context* context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  if (!Optacqreg(context, &imgNoRet.memorySemantic)) {
+  if (!Optacqreg(context, &memorySemantic)) {
   }
 
-  if (context->token_type == GEOMETRY_ID) {
-    switch (context->token_to_scan) {
-      case _1D:
-        imgNoRet.geom = Briggeom_1d;
-        break;
-      case _2D:
-        imgNoRet.geom = Briggeom_2d;
-        break;
-      case _3D:
-        imgNoRet.geom = Briggeom_3d;
-        break;
-      case _1DB:
-        imgNoRet.geom = Briggeom_1db;
-        break;
-      case _1DA:
-        imgNoRet.geom = Briggeom_1da;
-        break;
-      case _2DA:
-        imgNoRet.geom = Briggeom_2da;
-        break;
-      default:
-        context->set_error(MISSING_DECLPREFIX);
-        return 1;
-    }
-    context->token_to_scan = yylex();
-    // TypeLength: u32, s32, b32, u64, depending on the type of operation.
-    // The add operation applies to u32, u64, and s32 types;
-    // min and max apply to u32 and s32 types; inc and dec apply to s32 types;
-    // and and, or, xor, and cas apply to b32 types.
-    /*
+  if (context->token_type != GEOMETRY_ID) {
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  switch (context->token_to_scan) {
+    case _1D:
+      geom = Briggeom_1d;
+      break;
+    case _2D:
+      geom = Briggeom_2d;
+      break;
+    case _3D:
+      geom = Briggeom_3d;
+      break;
+    case _1DB:
+      geom = Briggeom_1db;
+      break;
+    case _1DA:
+      geom = Briggeom_1da;
+      break;
+    case _2DA:
+      geom = Briggeom_2da;
+      break;
+    default:
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+  }
+  context->token_to_scan = yylex();
+  // TypeLength: u32, s32, b32, u64, depending on the type of operation.
+  // The add operation applies to u32, u64, and s32 types;
+  // min and max apply to u32 and s32 types; inc and dec apply to s32 types;
+  // and and, or, xor, and cas apply to b32 types.
+  /*
     BrigDataType16_t type = context->token_value.data_type;
     if (type == imgNoRet.type ||
         ((imgNoRet.atomicOperation == BrigAtomicSub ||
@@ -5396,168 +5514,168 @@ int ImageNoRet(Context* context) {
       return 1;
     }*/
 
-    if (context->token_type == DATA_TYPE_ID) {
-
-      std::string op_name;
-      imgNoRet.type = context->token_value.data_type;
-      context->set_type(context->token_value.data_type);
-
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == '[') {
-        context->token_to_scan = yylex();
-        if (!AddressableOperand(context, &imgNoRet.o_operands[0], true)) {
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if (!ArrayOperand(context, &imgNoRet.o_operands[1])) {
-              if (context->token_to_scan == ',') {
-                context->token_to_scan = yylex();
-                unsigned int opCount = 2;
-
-                if (!Operand(context, &imgNoRet.o_operands[opCount++])) {
-                  if (second_token == _CAS) {
-                    if (context->token_to_scan == ',') {
-                      context->token_to_scan = yylex();
-                      if (context->valid_string) {
-                        op_name = context->token_value.string_val;
-                      }
-                      if (!Operand(context, &imgNoRet.o_operands[opCount++])) {
-                      } else {  // Operand
-                        context->set_error(MISSING_OPERAND);
-                        return 1;
-                      }
-                    } else {  // ','
-                      context->set_error(MISSING_COMMA);
-                      return 1;
-                    }
-                  }
-                  if (context->token_to_scan == ';') {
-                    context->append_code(&imgNoRet);
-
-                    context->token_to_scan = yylex();
-                    return 0;
-                  } else {  // ';'
-                    context->set_error(MISSING_SEMICOLON);
-                    return 1;
-                  }
-                } else {  // Operand
-                  context->set_error(MISSING_OPERAND);
-                  return 1;
-                }
-              } else {  // ','
-                context->set_error(MISSING_COMMA);
-                return 1;
-              }
-            } else {  // Array Operand
-              context->set_error(MISSING_OPERAND);
-              return 1;
-            }
-          } else {  // ','
-            context->set_error(MISSING_COMMA);
-            return 1;
-          }
-        } else {  // Addressable Operand
-          context->set_error(INVALID_OPERAND);
-          return 1;
-        }
-      } else {
-        context->set_error(MISSING_OPERAND);
-      }
-    } else {  // Data Type
-      context->set_error(MISSING_DATA_TYPE);
-      return 1;
-    }
-  } else {  // Geometry Id
-    context->set_error(MISSING_DECLPREFIX);
+  if (context->token_type != DATA_TYPE_ID) {
+    context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
 
-  return 1;
+  type = context->token_value.data_type;
+  context->set_type(context->token_value.data_type);
+
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != '[') {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (AddressableOperand(context, &OpOffset[0], true)) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (ArrayOperand(context, &OpOffset[1])) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  unsigned int opCount = 2;
+
+  if (Operand(context, &OpOffset[opCount++])) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (second_token == _CAS) {
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (Operand(context, &OpOffset[opCount++])) {
+      context->set_error(MISSING_OPERAND);
+      return 1;
+    }
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  BrigInstAtomicImage imgNoRet = {
+    0,
+    BrigEInstAtomicImage,   // kind
+    BrigAtomicNoRetImage,   // opcode
+    type,                   // type
+    BrigNoPacking,          // packing
+    {0, 0, 0, 0, 0},        // o_operands[5]
+    atomicOperation,        // atomicOperation
+    BrigGlobalSpace,        // storageClass
+    memorySemantic,         // memorySemantic
+    geom                    // geom
+  };
+  imgNoRet.size = sizeof(imgNoRet);
+  for (int i = 0 ; i < 4 ; ++i) {
+    imgNoRet.o_operands[i] = OpOffset[i];
+  }
+  context->append_code(&imgNoRet);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Cvt(Context* context) {
   // first token is CVT "cvt"
   // TODO(Chuang): Extensions for Conversions
-
-  BrigInstCvt cvtInst = {
-    sizeof(BrigInstCvt),   // size
-    BrigEInstCvt,          // kind
-    BrigCvt,               // opcode
-    0,                     // type
-    BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0},       // o_operands[5]
-    {0, 0, 0, 0, 0, 0, 0}, // aluModifier
-    0,                     // stype
-    0                      // reserved
-  };
+  BrigAluModifier getAluMod = {0, 0, 0, 0, 0, 0, 0};
+  BrigDataType16_t type = Brigb32;
+  BrigDataType16_t stype = Brigb32;
+  BrigoOffset32_t OpOffset[2] = {0, 0};
   context->token_to_scan = yylex();
 
   if (!RoundingMode(context)) {
-    BrigAluModifier getAluMod = context->get_alu_modifier();
-    memcpy(&cvtInst.aluModifier, &getAluMod, sizeof(cvtInst.aluModifier));
+    getAluMod = context->get_alu_modifier();
   }
 
   // destType: b, u, s, f. (For b, only b1 is supported.)
   // destLength: 1, 8, 16, 32, 64. (For 1, only b1 is supported.)
 
-  if (context->token_to_scan == _B1 ||
-      context->token_to_scan == _S8 ||
-      context->token_to_scan == _S16 ||
-      context->token_to_scan == _S32 ||
-      context->token_to_scan == _S64 ||
-      context->token_to_scan == _U8 ||
-      context->token_to_scan == _U16 ||
-      context->token_to_scan == _U32 ||
-      context->token_to_scan == _U64 ||
-      context->token_to_scan == _F16 ||
-      context->token_to_scan == _F32 ||
-      context->token_to_scan == _F64) {
-
-    context->set_type(context->token_value.data_type);  
-    cvtInst.type = context->token_value.data_type;
-    context->token_to_scan = yylex();
-
-    if (context->token_type == DATA_TYPE_ID) {
-      cvtInst.stype = context->token_value.data_type;
-      context->token_to_scan = yylex();
-      // Note: dest: Destination register.
-      if (context->token_type != REGISTER) {
-        context->set_error(INVALID_OPERAND);
-        return 1;
-      }
-      if (!Operand(context, &cvtInst.o_operands[0])) {
-        if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-
-          if (!Operand(context, &cvtInst.o_operands[1])) {
-
-            if (context->token_to_scan == ';') {
-              context->append_code(&cvtInst);
-
-              context->token_to_scan = yylex();
-              return 0;
-            } else {
-              context->set_error(MISSING_SEMICOLON);
-            }
-          } else {
-            context->set_error(MISSING_OPERAND);
-          }
-        } else {
-          context->set_error(MISSING_COMMA);
-        }
-      } else {
-        context->set_error(INVALID_OPERAND);
-      }
-    } else {
-      context->set_error(MISSING_DATA_TYPE);
-    }
-  } else {
+  if (context->token_to_scan != _B1 &&
+      context->token_to_scan != _S8 &&
+      context->token_to_scan != _S16 &&
+      context->token_to_scan != _S32 &&
+      context->token_to_scan != _S64 &&
+      context->token_to_scan != _U8 &&
+      context->token_to_scan != _U16 &&
+      context->token_to_scan != _U32 &&
+      context->token_to_scan != _U64 &&
+      context->token_to_scan != _F16 &&
+      context->token_to_scan != _F32 &&
+      context->token_to_scan != _F64) {
     context->set_error(MISSING_DATA_TYPE);
+    return 1;
   }
-  return 1;
+
+  context->set_type(context->token_value.data_type);  
+  type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+
+  if (context->token_type != DATA_TYPE_ID) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  stype = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  // Note: dest: Destination register.
+  if (context->token_type != REGISTER) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &OpOffset[0])) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (Operand(context, &OpOffset[1])) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  BrigInstCvt cvtInst = {
+    0,                     // size
+    BrigEInstCvt,          // kind
+    BrigCvt,               // opcode
+    type,                  // type
+    BrigNoPacking,         // packing
+    {OpOffset[0], OpOffset[1], 0, 0, 0},       // o_operands[5]
+    getAluMod,             // aluModifier
+    stype,                 // stype
+    0                      // reserved
+  };
+  cvtInst.size = sizeof(cvtInst);
+  context->append_code(&cvtInst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Instruction0(Context* context) {
   // first token is NOP "nop"
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
   BrigInstBase inst0 = {
     sizeof(BrigInstBase),  // size
     BrigEInstBase,         // kind
@@ -5566,123 +5684,104 @@ int Instruction0(Context* context) {
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0}        // o_operands[5]
   };
+  context->append_code(&inst0);
   context->token_to_scan = yylex();
-  if (context->token_to_scan == ';') {
-    context->append_code(&inst0);
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
-    context->set_error(MISSING_SEMICOLON);
-  }
-  return 1;
+  return 0;
 }
 
 int Instruction1OpcodeDT(Context* context) {
-  BrigInstBase inst1_op = {
-    sizeof(inst1_op),
-    BrigEInstBase,
-    0,
-    Brigb32,
-    BrigNoPacking,
-    {0, 0, 0, 0, 0}
-  };
+  BrigoOffset32_t OpOffset[2] = {0, 0};
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
+  BrigOpcode32_t opcode = 0;
+  BrigDataType16_t type = Brigb32;
 
-  inst1_op.opcode = context->token_value.opcode;
+  opcode = context->token_value.opcode;
   // TODO(Chuang): fbar_wait_segment_b64
   // fbar_init_segment_b64
   // fbar_release_segment_b64
   // and whether there should be rounding in instruction1opcode.
   context->token_to_scan = yylex();
 
-  if (inst1_op.opcode != BrigFbarInit &&
-      inst1_op.opcode != BrigFbarRelease) {
+  if (opcode != BrigFbarInit &&
+      opcode != BrigFbarRelease) {
     // TODO(Chuang): whether support for rounding
     if (!RoundingMode(context)) {
       aluModifier = context->get_alu_modifier();
     }
   }
   // TODO(Chuang): What can the type of BrigFbarInit be?
-  if ((context->token_to_scan == _B64 &&
-       inst1_op.opcode != BrigCountUp) ||
-      ((inst1_op.opcode == BrigCountUp ||
-        inst1_op.opcode == BrigFbarInit) &&
-       context->token_to_scan == _U32)) {
-
-    inst1_op.type = context->token_value.data_type;
-    context->set_type(context->token_value.data_type);
-    
-    context->token_to_scan = yylex();
-    if ((context->token_to_scan == TOKEN_DREGISTER &&
-         inst1_op.opcode != BrigCountUp) ||
-        (context->token_to_scan == TOKEN_SREGISTER &&
-         (inst1_op.opcode == BrigCountUp ||
-          inst1_op.opcode == BrigFbarInit))) {
-      if (Operand(context, &inst1_op.o_operands[0])) {
-        return 1;
-      }
-      // Note: Fbar_Release and Fbar_Init may be a instruction2.
-      if (inst1_op.opcode == BrigFbarInit ||
-          inst1_op.opcode == BrigFbarRelease) {
-        if (context->token_to_scan == ',')  {
-          context->token_to_scan = yylex();
-          if (context->token_to_scan == TOKEN_DREGISTER) {
-            if (Operand(context, &inst1_op.o_operands[1])) {
-              return 1;
-            }
-          } else {  // Second Operand
-            context->set_error(MISSING_OPERAND);
-            return 1;
-          }
-        }
-      }
-      if (context->token_to_scan == ';') {
-        int* aluValue = reinterpret_cast<int *>(&aluModifier);
-        if (*aluValue != 0) {
-          BrigInstMod mod = {
-            sizeof(BrigInstMod),  // size
-            BrigEInstMod,         // kind
-            inst1_op.opcode,              // opcode
-            inst1_op.type,         // type
-            inst1_op.packing,        // packing
-            {0, 0, 0, 0, 0},      // o_operands[5]
-            {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-          };
-          for (int i = 0 ; i < 5 ; ++i) {
-            mod.o_operands[i] = inst1_op.o_operands[i];
-          }
-          mod.aluModifier = aluModifier;
-          context->append_code(&mod);
-        } else {
-          context->append_code(&inst1_op);
-        }
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
-    } else {  // First Operand
-      context->set_error(MISSING_OPERAND);
-    }
-  } else {
+  if (context->token_to_scan != _B64 &&
+      context->token_to_scan != _U32) {
     context->set_error(INVALID_DATA_TYPE);
+    return 1;
   }
 
-  return 1;
+  type = context->token_value.data_type;
+  context->set_type(context->token_value.data_type);
+    
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_DREGISTER &&
+      context->token_to_scan != TOKEN_SREGISTER) { 
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &OpOffset[0])) {
+    return 1;
+  }
+  // Note: Fbar_Release and Fbar_Init may be a instruction2.
+  if (opcode == BrigFbarInit ||
+      opcode == BrigFbarRelease) {
+    if (context->token_to_scan == ',')  {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == TOKEN_DREGISTER) {
+        context->set_error(MISSING_OPERAND);
+        return 1;
+      }
+      if (Operand(context, &OpOffset[1])) {
+        return 1;
+      }
+    }
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  int* aluValue = reinterpret_cast<int *>(&aluModifier);
+  if (*aluValue != 0) {
+    BrigInstMod mod = {
+      0,
+      BrigEInstMod,         // kind
+      opcode,               // opcode
+      type,                 // type
+      BrigNoPacking,        // packing
+      {OpOffset[0], OpOffset[1], 0, 0, 0},      // o_operands[5]
+      aluModifier
+    };
+    mod.size = sizeof(mod);
+    context->append_code(&mod);
+  } else {
+    BrigInstBase inst1_op = {
+      0,
+      BrigEInstBase,
+      opcode,
+      type,
+      BrigNoPacking,
+      {OpOffset[0], OpOffset[1], 0, 0, 0}
+    };
+    inst1_op.size = sizeof(inst1_op);
+    context->append_code(&inst1_op);
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Instruction1OpcodeNoDT(Context* context) {
-  BrigInstBase inst1_op = {
-    sizeof(inst1_op),
-    BrigEInstBase,
-    0,
-    Brigb32,
-    BrigNoPacking,
-    {0, 0, 0, 0, 0}
-  };
+  BrigoOffset32_t OpOffset[1] = {0};
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
+  BrigOpcode32_t opcode = 0;
+
   context->set_type(Brigb32);
-  inst1_op.opcode = context->token_value.opcode;
+  opcode = context->token_value.opcode;
   
   context->token_to_scan = yylex();
   // TODO(Chuang): whether support for rounding
@@ -5690,70 +5789,74 @@ int Instruction1OpcodeNoDT(Context* context) {
     aluModifier = context->get_alu_modifier();
   }
 
-  if ((context->token_to_scan == TOKEN_SREGISTER &&
-       inst1_op.opcode != BrigDebugTrap) ||
-      (inst1_op.opcode == BrigDebugTrap &&
-       context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-    if (Operand(context, &inst1_op.o_operands[0])) {
-      return 1;
-    }
-    if (context->token_to_scan == ';') {
-      int* aluValue = reinterpret_cast<int*>(&aluModifier);
-      if (*aluValue != 0) {
-        BrigInstMod mod = {
-          sizeof(BrigInstMod),  // size
-          BrigEInstMod,         // kind
-          inst1_op.opcode,              // opcode
-          inst1_op.type,         // type
-          BrigNoPacking,        // packing
-          {0, 0, 0, 0, 0},      // o_operands[5]
-          {0, 0, 0, 0, 0, 0, 0}  // aluModifier
-        };
-        for (int i = 0 ; i < 5 ; ++i) {
-          mod.o_operands[i] = inst1_op.o_operands[i];
-        }
-        mod.aluModifier = aluModifier;
-        context->append_code(&mod);
-      } else {
-        context->append_code(&inst1_op);
-      }
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_SEMICOLON);
-    }
-  } else {
+  if (context->token_to_scan != TOKEN_SREGISTER &&
+      context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
     context->set_error(MISSING_OPERAND);
+    return 1;
   }
+  if (Operand(context, &OpOffset[0])) {
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  int* aluValue = reinterpret_cast<int*>(&aluModifier);
+  if (*aluValue != 0) {
+    BrigInstMod mod = {
+      0,                    // size
+      BrigEInstMod,         // kind
+      opcode,      // opcode
+      Brigb32,        // type
+      BrigNoPacking,        // packing
+      {OpOffset[0], 0, 0, 0, 0},      // o_operands[5]
+      aluModifier           // aluModifier
+    };
+    mod.size = sizeof(mod);
+    context->append_code(&mod);
+  } else {
+    BrigInstBase inst1_op = {
+      0,
+      BrigEInstBase,
+      opcode,
+      Brigb32,
+      BrigNoPacking,
+      {OpOffset[0], 0, 0, 0, 0}
+    };
+    inst1_op.size = sizeof(inst1_op);
+    context->append_code(&inst1_op);
+  }
+  context->token_to_scan = yylex();
   return 0;
 }
 
 int Instruction1Clock(Context* context) {
+  BrigoOffset32_t OpOffset[1] = {0};
+  context->set_type(Brigb64);
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_DREGISTER) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &OpOffset[0])) {
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
   BrigInstBase inst1_op = {
-    sizeof(inst1_op),
+    0,
     BrigEInstBase,
     BrigClock,
     Brigb64,
     BrigNoPacking,
-    {0, 0, 0, 0, 0}
+    {OpOffset[0], 0, 0, 0, 0}
   };
-  context->set_type(Brigb64);
+  inst1_op.size = sizeof(inst1_op);
+  context->append_code(&inst1_op);
   context->token_to_scan = yylex();
-  if (context->token_to_scan == TOKEN_DREGISTER) {
-    if (Operand(context, &inst1_op.o_operands[0])) {
-      return 1;
-    }
-    if (context->token_to_scan == ';') {
-      context->append_code(&inst1_op);
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_SEMICOLON);
-    }
-  } else {
-    context->set_error(MISSING_OPERAND);
-  }
-  return 1;
+  return 0;
 }
 
 int Instruction1(Context* context) {
@@ -5773,157 +5876,144 @@ int Instruction1(Context* context) {
   return 1;
 }
 
+
 int Segp(Context* context) {
   if (context->token_to_scan == SEGMENTP) { //segmentp
-    context->token_to_scan = yylex();
-
-    BrigInstMem segmentp_op = {
-      sizeof(BrigInstMem),   // size
-      BrigEInstMem,          // kind
-      BrigSegmentp,          // opcode
-      Brigb32,               // type
-      BrigNoPacking,         // packing
-      {0, 0, 0, 0, 0},       // o_operands[5]
-      BrigFlatSpace          // storageClass
-    };
-
-    if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-      segmentp_op.storageClass = context->token_value.storage_class;
-
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == _B1) { //datatypeId must be b1
-        context->set_type(context->token_value.data_type);
-        segmentp_op.type = context->token_value.data_type;
-        context->token_to_scan = yylex();
-        //dest must be c register
-        if (context->token_to_scan == TOKEN_CREGISTER) {
-          if (Operand(context, &segmentp_op.o_operands[0])) {
-            return 1;
-          }
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if(context->token_type == REGISTER ) {
-              if (Operand(context, &segmentp_op.o_operands[1])) {
-                return 1;
-              }
-              if (context->token_to_scan == ';') {
-                context->append_code(&segmentp_op);
-
-                context->token_to_scan = yylex();
-                return 0;
-              } else {
-                context->set_error(MISSING_SEMICOLON);
-              }
-            } else if (context->token_type == CONSTANT ||
-                       context->token_to_scan == TOKEN_WAVESIZE) {
-              if (Operand(context, &segmentp_op.o_operands[1])) {
-                return 1;
-              }
-              if (context->token_to_scan == ';') {
-                context->append_code(&segmentp_op);
-                context->token_to_scan = yylex();
-                return 0;
-              } else {
-                context->set_error(MISSING_SEMICOLON);
-              }
-            } else {
-              context->set_error(MISSING_OPERAND);
-            }
-          } else {
-            context->set_error(MISSING_COMMA);
-          }
-        } else {
-          context->set_error(MISSING_OPERAND);
-        }
-      } else {
-        context->set_error(MISSING_DATA_TYPE);
-      }
-    } else {
-      // should be missing ADDRESS_SPACE_IDENTIFIER
-      context->set_error(MISSING_IDENTIFIER);
+    if (!SegpPart1Segmentp(context)) {
+      return 0;
     }
   } else if (context->token_to_scan == STOF || // stof or ftos
              context->token_to_scan == FTOS) {
-
-    BrigInstMem sf_op = {
-      sizeof(BrigInstMem),   // size
-      BrigEInstMem,          // kind
-      BrigStoF,              // opcode
-      Brigb32,               // type
-      BrigNoPacking,         // packing
-      {0, 0, 0, 0, 0},       // o_operands[5]
-      BrigFlatSpace          // storageClass
-    };
-
-    switch (context->token_to_scan) {
-      case STOF:
-        sf_op.opcode = BrigStoF;
-        break;
-      case FTOS:
-        sf_op.opcode = BrigFtoS;
-        break;
-    }
-    context->token_to_scan = yylex();
-    if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-      sf_op.storageClass = context->token_value.storage_class;
-
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == _U32 ||
-          context->token_to_scan == _U64) { //datatypeId must be u32 or u64
-        context->set_type(context->token_value.data_type);
-        sf_op.type = context->token_value.data_type;
-        context->token_to_scan = yylex();
-        //dest must be d register
-        if (context->token_to_scan == TOKEN_DREGISTER) {
-          if (Operand(context, &sf_op.o_operands[0])) {
-            return 1;
-          }
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if(context->token_type == REGISTER ) {
-              if (Operand(context, &sf_op.o_operands[1])) {
-                return 1;
-              }
-              if (context->token_to_scan == ';') {
-                context->append_code(&sf_op);
-                context->token_to_scan = yylex();
-                return 0;
-              } else {
-                context->set_error(MISSING_SEMICOLON);
-              }
-            } else if (context->token_type == CONSTANT ||
-                       context->token_to_scan == TOKEN_WAVESIZE) {
-              if (Operand(context, &sf_op.o_operands[1])) {
-                return 1;
-              }
-              if (context->token_to_scan == ';') {
-                context->append_code(&sf_op);
-
-                context->token_to_scan = yylex();
-                return 0;
-              } else {
-                context->set_error(MISSING_SEMICOLON);
-              }
-            } else {
-              context->set_error(MISSING_OPERAND);
-            }
-          } else {
-            context->set_error(MISSING_COMMA);
-          }
-        } else {
-          context->set_error(MISSING_OPERAND);
-        }
-      } else {
-        context->set_error(MISSING_DATA_TYPE);
-      }
-    } else {
-      // should be missing ADDRESS_SPACE_IDENTIFIER
-      context->set_error(MISSING_IDENTIFIER);
+    if (!SegpPart2StoFAndFtoS(context)) {
+      return 0;
     }
   }
   return 1;
 }
 
+int SegpPart1Segmentp(Context* context) {
+  context->token_to_scan = yylex();
+  BrigDataType16_t type = Brigb32;
+  BrigoOffset32_t OpOffset[2] = {0, 0};
+  BrigStorageClass32_t storageClass =  0;
+
+  if (context->token_type != ADDRESS_SPACE_IDENTIFIER) {
+    // should be missing ADDRESS_SPACE_IDENTIFIER
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  storageClass = context->token_value.storage_class;
+
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != _B1) { // datatypeId must be b1
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_type(context->token_value.data_type);
+  type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  // dest must be c register
+  if (context->token_to_scan != TOKEN_CREGISTER) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &OpOffset[0])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (Operand(context, &OpOffset[1])) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  BrigInstMem segmentp_op = {
+    0,                     // size
+    BrigEInstMem,          // kind
+    BrigSegmentp,          // opcode
+    type,                  // type
+    BrigNoPacking,         // packing
+    {OpOffset[0], OpOffset[1], 0, 0, 0},       // o_operands[5]
+    storageClass           // storageClass
+  };
+  segmentp_op.size = sizeof(segmentp_op);
+  context->append_code(&segmentp_op);
+  context->token_to_scan = yylex();
+  return 0;
+}
+
+int SegpPart2StoFAndFtoS(Context* context) {
+
+  BrigDataType16_t type = Brigb32;
+  BrigoOffset32_t OpOffset[2] = {0, 0};
+  BrigOpcode32_t opcode;
+  BrigStorageClass32_t storageClass;
+
+  switch (context->token_to_scan) {
+    case STOF:
+      opcode = BrigStoF;
+      break;
+    case FTOS:
+      opcode = BrigFtoS;
+      break;
+  }
+  context->token_to_scan = yylex();
+  if (context->token_type != ADDRESS_SPACE_IDENTIFIER) {
+    // should be missing ADDRESS_SPACE_IDENTIFIER
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  storageClass = context->token_value.storage_class;
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != _U32 && 
+      context->token_to_scan != _U64) { //datatypeId must be u32 or u64
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_type(context->token_value.data_type);
+  type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  // dest must be d register
+  if (context->token_to_scan != TOKEN_DREGISTER) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (Operand(context, &OpOffset[0])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (Operand(context, &OpOffset[1])) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  BrigInstMem sf_op = {
+    0,                     // size
+    BrigEInstMem,          // kind
+    opcode,                // opcode
+    type,                  // type
+    BrigNoPacking,         // packing
+    {OpOffset[0], OpOffset[1], 0, 0, 0},       // o_operands[5]
+    storageClass           // storageClass
+  };
+  sf_op.size = sizeof(sf_op);
+  context->append_code(&sf_op);
+  context->token_to_scan = yylex();
+  return 0;
+}
 int Operation(Context* context) {
   if (context->token_type == INSTRUCTION1_OPCODE_NODT ||
       context->token_to_scan == CLOCK ||
@@ -6077,19 +6167,17 @@ int BodyStatementNested(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
-    if (!Label(context)) {
-      if(context->token_to_scan == LABELTARGETS) {
-        return LabelTargetsPart2(context);
-      }
-      return 0;
-    } else {
+    if (Label(context)) {
       return 1;
     }
+    if(context->token_to_scan == LABELTARGETS) {
+      return LabelTargetsPart2(context);
+    }
+    return 0;
   } else if (!Operation(context)) {
     context->update_bdf_operation_count();
     return 0;
   }
-
   return 1;
 }
 
@@ -6116,28 +6204,27 @@ int ArgStatement(Context* context) {
 }
 
 int ArgStatements(Context* context) {
-  if (!ArgStatement(context)) {
-    while (!ArgStatement(context)) {
-      ;
-    }
-    return 0;
+  if (ArgStatement(context)) {
+    return 1;
   }
-  return 1;
+  while (!ArgStatement(context)) {
+    ;
+  }
+  return 0;
 }
 
-int Comment(Context* context){
-
-    if(context->token_to_scan == TOKEN_COMMENT){
-    std::string comment(context->token_value.string_val);
-    int comment_offset = context->add_symbol(comment);
-    BrigDirectiveComment dir_com = { sizeof(BrigDirectiveComment), BrigEDirectiveComment, context->get_code_offset(), comment_offset};
-    context->append_directive(&dir_com);
-    context->token_to_scan = yylex();
-    return 0;
-    } else {
-        context->set_error(INVALID_COMMENT);
-        return 1;
-    }
+int Comment(Context* context) {
+  if(context->token_to_scan != TOKEN_COMMENT) {
+    context->set_error(INVALID_COMMENT);
+    return 1;
+  }
+  std::string comment(context->token_value.string_val);
+  int comment_offset = context->add_symbol(comment);
+  BrigDirectiveComment dir_com = { sizeof(BrigDirectiveComment), BrigEDirectiveComment,
+                                   context->get_code_offset(), comment_offset};
+  context->append_directive(&dir_com);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int BodyStatement(Context* context) {
@@ -6174,288 +6261,274 @@ int BodyStatement(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
-      if (!Label(context)) {
-		if(context->token_to_scan == LABELTARGETS)
-			return LabelTargetsPart2(context);
-		return 0;
-	  }else
-		return 1;
+    if (Label(context)) {
+      return 1;
+    }
+    if (context->token_to_scan == LABELTARGETS)
+      return LabelTargetsPart2(context);
+    return 0;
   } else if (!Operation(context)) {
     context->update_bdf_operation_count();
     return 0;
   }
-
   return 1;
 }
 
 int BodyStatements(Context* context) {
-  if (!BodyStatement(context)) {
-    while (context->token_to_scan && (context->token_to_scan != '}')){
-      if(BodyStatement(context))
-		break;
-	  //context->token_to_scan = yylex();
-	}
-	if((!context->token_to_scan) || (context->token_to_scan == '}'))
-		return 0;
-	else
-		return 1;
-  } else{
-    context->set_error(INVALID_CODEBLOCK); //Codeblock should have atleast one bodyStatement
+  if (BodyStatement(context)) {
+    context->set_error(INVALID_CODEBLOCK);
+    // Codeblock should have atleast one bodyStatement
     return 1;
   }
- }
+  while (context->token_to_scan && (context->token_to_scan != '}')) {
+    if(BodyStatement(context))
+      break;
+    // context->token_to_scan = yylex();
+  }
+  if((!context->token_to_scan) || (context->token_to_scan == '}'))
+    return 0;
+  return 1;
+}
 
 int ImageLoad(Context* context) {
   // first token is LD_IMAGE
-  BrigInstImage imgLdInst = {
-    sizeof(BrigInstImage), // size
-    BrigEInstImage,        // kind
-    BrigLdImage,           // opcode
-    0,                 // type
-    0,                 // stype
-    BrigNoPacking,         // packing
-    0,                      // reserved
-    {0, 0, 0, 0, 0},   // o_operands[5]
-    0                 // geom
-  };
+  BrigDataType16_t type = Brigb32;
+  BrigDataType16_t stype = Brigb32;
+  BrigoOffset32_t OpOffset[3] = {0, 0, 0};
+  BrigGeom32_t geom = 0;
   context->token_to_scan = yylex();
-  if (context->token_to_scan == _V4) {
-    context->token_to_scan = yylex();
-    if (context->token_type == GEOMETRY_ID) {
-      switch (context->token_to_scan) {
-        case _1D:
-          imgLdInst.geom = Briggeom_1d;
-          break;
-        case _2D:
-          imgLdInst.geom = Briggeom_2d;
-          break;
-        case _3D:
-          imgLdInst.geom = Briggeom_3d;
-          break;
-        case _1DB:
-          imgLdInst.geom = Briggeom_1db;
-          break;
-        case _1DA:
-          imgLdInst.geom = Briggeom_1da;
-          break;
-        case _2DA:
-          imgLdInst.geom = Briggeom_2da;
-          break;
-        default:
-          context->set_error(MISSING_DECLPREFIX);
-          return 1;
-      }
-      context->token_to_scan = yylex();
-      // Note: destLength: Destination length: 32 (f32, u32, or s32)
-      if (context->token_to_scan == _F32 ||
-          context->token_to_scan == _U32 ||
-          context->token_to_scan == _S32) {
-        
-        imgLdInst.type = context->token_value.data_type;
-        context->token_to_scan = yylex();
-        // Note: srcLength: Source length: 32 srcType: u32.
-        if (context->token_to_scan == _U32) {
-          context->set_type(context->token_value.data_type);
-          imgLdInst.stype = context->token_value.data_type;
-          context->token_to_scan = yylex();
-          if (!ArrayOperand(context, &imgLdInst.o_operands[0])) {
-            // Note: dest: Destination. Must be a vector of four s registers.
-            uint16_t kind;
-            context->get_operand(imgLdInst.o_operands[0] + sizeof(uint16_t), &kind);
-            if (kind != BrigEOperandRegV4) {
-              context->set_error(INVALID_OPERAND);
-              return 1;
-            }
-
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-              // TODO(Chuang): [image]: The image. Must be a read-write or read-only image.
-              if (context->token_to_scan == '[') {
-                context->token_to_scan = yylex();
-                if (!AddressableOperand(context, &imgLdInst.o_operands[1], true)) {
-                  if (context->token_to_scan == ',') {
-                    context->token_to_scan = yylex();
-                    // TODO(Chuang): src: Register source for the coordinates.
-                    // A scalar for 1D images; a 2-element vector for 2D images;
-                    // a 4-element vector for 3D images, where the fourth element is ignored.
-                    // Each coordinate must be in an s register
-
-                    if (!ArrayOperand(context, &imgLdInst.o_operands[2])) {
-                      if (context->token_to_scan == ';') {
-                        context->append_code(&imgLdInst);
-                        context->token_to_scan = yylex();
-                        return 0;
-                      } else {  // ';'
-                        context->set_error(MISSING_SEMICOLON);
-                        return 1;
-                      }
-                    } else {  // ArrayOperand
-                      context->set_error(INVALID_OPERAND);
-                      return 1;
-                    }
-                  } else {  // ','
-                    context->set_error(MISSING_COMMA);
-                    return 1;
-                  }
-                } else {  // Addressable Operand
-                  context->set_error(INVALID_OPERAND);
-                  return 1;
-                }
-              } else {
-                context->set_error(MISSING_OPERAND);
-                return 1;
-              }
-            } else {  // ','
-              context->set_error(MISSING_COMMA);
-              return 1;
-            }
-          } else {  // ArrayOperand
-            context->set_error(INVALID_OPERAND);
-            return 1;
-          }
-        } else {  // Data Type
-          context->set_error(MISSING_DATA_TYPE);
-          return 1;
-        }
-      } else {  // Data Type
-        context->set_error(MISSING_DATA_TYPE);
-        return 1;
-      }
-    } else {  // Geometry ID
-      context->set_error(MISSING_DECLPREFIX);
-      return 1;
-    }
-  } else {  // _V4
+  if (context->token_to_scan != _V4) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  return 1;
+  context->token_to_scan = yylex();
+  if (context->token_type != GEOMETRY_ID) {
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  switch (context->token_to_scan) {
+    case _1D:
+      geom = Briggeom_1d;
+      break;
+    case _2D:
+      geom = Briggeom_2d;
+      break;
+    case _3D:
+      geom = Briggeom_3d;
+      break;
+    case _1DB:
+      geom = Briggeom_1db;
+      break;
+    case _1DA:
+      geom = Briggeom_1da;
+      break;
+    case _2DA:
+      geom = Briggeom_2da;
+      break;
+    default:
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+  }
+  context->token_to_scan = yylex();
+  // Note: destLength: Destination length: 32 (f32, u32, or s32)
+  if (context->token_to_scan != _F32 &&
+      context->token_to_scan != _U32 &&
+      context->token_to_scan != _S32) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  // Note: srcLength: Source length: 32 srcType: u32.
+  if (context->token_to_scan != _U32) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_type(context->token_value.data_type);
+  stype = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  if (ArrayOperand(context, &OpOffset[0])) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  // Note: dest: Destination. Must be a vector of four s registers.
+  uint16_t kind;
+  context->get_operand(OpOffset[0] + sizeof(uint16_t), &kind);
+  if (kind != BrigEOperandRegV4) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  // TODO(Chuang): [image]: The image. Must be a read-write or read-only image.
+  if (context->token_to_scan != '[') {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (AddressableOperand(context, &OpOffset[1], true)) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  // TODO(Chuang): src: Register source for the coordinates.
+  // A scalar for 1D images; a 2-element vector for 2D images;
+  // a 4-element vector for 3D images, where the fourth element is ignored.
+  // Each coordinate must be in an s register
+  if (ArrayOperand(context, &OpOffset[2])) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+     context->set_error(MISSING_SEMICOLON);
+     return 1;
+  }
+  BrigInstImage imgLdInst = {
+    0,                // size
+    BrigEInstImage,   // kind
+    BrigLdImage,      // opcode
+    type,             // type
+    stype,            // stype
+    BrigNoPacking,    // packing
+    0,                // reserved
+    {0, 0, 0, 0, 0},  // o_operands[5]
+    geom              // geom
+  };
+  imgLdInst.size = sizeof(imgLdInst);
+  for (int i = 0 ; i < 3 ; ++i) {
+    imgLdInst.o_operands[i] = OpOffset[i];
+  }
+  context->append_code(&imgLdInst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int ImageStore(Context* context) {
   // first token is St_image
-  BrigInstImage imgStInst = {
-    sizeof(BrigInstImage), // size
-    BrigEInstImage,        // kind
-    BrigStImage,           // opcode
-    0,                 // type
-    0,                 // stype
-    BrigNoPacking,         // packing
-    0,                      // reserved
-    {0, 0, 0, 0, 0},   // o_operands[5]
-    0                 // geom
-  };
+  BrigDataType16_t type = Brigb32;
+  BrigDataType16_t stype = Brigb32;
+  BrigoOffset32_t OpOffset[3] = {0, 0, 0};
+  BrigGeom32_t geom = 0;
   context->token_to_scan = yylex();
-  if (context->token_to_scan == _V4) {
-    context->token_to_scan = yylex();
-    if (context->token_type == GEOMETRY_ID) {
-      switch (context->token_to_scan) {
-        case _1D:
-          imgStInst.geom = Briggeom_1d;
-          break;
-        case _2D:
-          imgStInst.geom = Briggeom_2d;
-          break;
-        case _3D:
-          imgStInst.geom = Briggeom_3d;
-          break;
-        case _1DB:
-          imgStInst.geom = Briggeom_1db;
-          break;
-        case _1DA:
-          imgStInst.geom = Briggeom_1da;
-          break;
-        case _2DA:
-          imgStInst.geom = Briggeom_2da;
-          break;
-        default:
-          context->set_error(MISSING_DECLPREFIX);
-          return 1;
-      }
-      context->token_to_scan = yylex();
-      // Note: destLength: Destination length: 32 (f32, u32, or s32)
-      if (context->token_to_scan == _F32 ||
-          context->token_to_scan == _U32 ||
-          context->token_to_scan == _S32) {
-
-        imgStInst.type = context->token_value.data_type;
-        context->token_to_scan = yylex();
-        // Note: srcLength: Source length: 32 srcType: u32.
-        if (context->token_to_scan == _U32) {
-          context->set_type(context->token_value.data_type);
-          imgStInst.stype = context->token_value.data_type;
-          context->token_to_scan = yylex();
-          if (!ArrayOperand(context, &imgStInst.o_operands[0])) {
-            // Note: dest: Destination. Must be a vector of four s registers.
-            uint16_t kind;
-            context->get_operand(imgStInst.o_operands[0] + sizeof(uint16_t), &kind);
-            if (kind != BrigEOperandRegV4) {
-              context->set_error(INVALID_OPERAND);
-              return 1;
-            }
-
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-              // TODO(Chuang): [image]: Destination image. A read-write image.
-              if (context->token_to_scan == '[') {
-                context->token_to_scan = yylex();
-                if (!AddressableOperand(context, &imgStInst.o_operands[1], true)) {
-                  if (context->token_to_scan == ',') {
-                    context->token_to_scan = yylex();
-                    // TODO(Chuang): src: Register source for the coordinates.
-                    // A scalar for 1D images; a 2-element vector for 2D images;
-                    // a 4-element vector for 3D images, where the fourth element is ignored.
-                    // Each coordinate must be in an s register
-                    if (!ArrayOperand(context, &imgStInst.o_operands[2])) {
-                      if (context->token_to_scan == ';') {
-                        context->append_code(&imgStInst);
-                        context->token_to_scan = yylex();
-                        return 0;
-                      } else {  // ';'
-                        context->set_error(MISSING_SEMICOLON);
-                        return 1;
-                      }
-                    } else {  // ArrayOperand
-                      context->set_error(INVALID_OPERAND);
-                      return 1;
-                    }
-                  } else {  // ','
-                    context->set_error(MISSING_COMMA);
-                    return 1;
-                  }
-                } else {  // Addressable Operand
-                  context->set_error(INVALID_OPERAND);
-                  return 1;
-                }
-              } else {
-                context->set_error(MISSING_OPERAND);
-                return 1;
-              }
-            } else {  // ','
-              context->set_error(MISSING_COMMA);
-              return 1;
-            }
-          } else {  // ArrayOperand
-            context->set_error(INVALID_OPERAND);
-            return 1;
-          }
-        } else {  // Data Type
-          context->set_error(MISSING_DATA_TYPE);
-          return 1;
-        }
-      } else {  // Data Type
-        context->set_error(MISSING_DATA_TYPE);
-        return 1;
-      }
-    } else {  // Geometry ID
-      context->set_error(MISSING_DECLPREFIX);
-      return 1;
-    }
-  } else {  // _V4
+  if (context->token_to_scan != _V4) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  return 1;
+  context->token_to_scan = yylex();
+  if (context->token_type != GEOMETRY_ID) {
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  switch (context->token_to_scan) {
+    case _1D:
+      geom = Briggeom_1d;
+      break;
+    case _2D:
+      geom = Briggeom_2d;
+      break;
+    case _3D:
+      geom = Briggeom_3d;
+      break;
+    case _1DB:
+      geom = Briggeom_1db;
+      break;
+    case _1DA:
+      geom = Briggeom_1da;
+      break;
+    case _2DA:
+      geom = Briggeom_2da;
+      break;
+    default:
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+  }
+  context->token_to_scan = yylex();
+  // Note: destLength: Destination length: 32 (f32, u32, or s32)
+  if (context->token_to_scan != _F32 && 
+      context->token_to_scan != _U32 &&
+      context->token_to_scan != _S32) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+
+  type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  // Note: srcLength: Source length: 32 srcType: u32.
+  if (context->token_to_scan != _U32) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_type(context->token_value.data_type);
+  stype = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  if (ArrayOperand(context, &OpOffset[0])) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  // Note: dest: Destination. Must be a vector of four s registers.
+  uint16_t kind;
+  context->get_operand(OpOffset[0] + sizeof(uint16_t), &kind);
+  if (kind != BrigEOperandRegV4) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  // TODO(Chuang): [image]: Destination image. A read-write image.
+  if (context->token_to_scan != '[') {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (AddressableOperand(context, &OpOffset[1], true)) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  // TODO(Chuang): src: Register source for the coordinates.
+  // A scalar for 1D images; a 2-element vector for 2D images;
+  // a 4-element vector for 3D images, where the fourth element is ignored.
+  // Each coordinate must be in an s register
+  if (ArrayOperand(context, &OpOffset[2])) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  BrigInstImage imgStInst = {
+    0,                  // size
+    BrigEInstImage,     // kind
+    BrigStImage,        // opcode
+    type,               // type
+    stype,              // stype
+    BrigNoPacking,      // packing
+    0,                  // reserved
+    {0, 0, 0, 0, 0},    // o_operands[5]
+    geom                // geom
+  };
+  imgStInst.size = sizeof(imgStInst);
+  for (int i = 0 ; i < 3 ; ++i ) {
+    imgStInst.o_operands[i] = OpOffset[i];
+  }
+  context->append_code(&imgStInst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
@@ -6547,16 +6620,14 @@ int SingleListSingle(Context * context, std::vector<float>* single_list) {
     single_list->push_back(context->token_value.float_val);
 
     context->token_to_scan = yylex();
-    if (context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_SINGLE_CONSTANT) {
-        continue;
-      } else {
-        context->set_error(MISSING_SINGLE_CONSTANT);
-        return 1;
-      }
-    } else 
+    if (context->token_to_scan != ',') {
       break;
+    }
+    context->token_to_scan = yylex();
+    if (context->token_to_scan != TOKEN_SINGLE_CONSTANT) {
+      context->set_error(MISSING_SINGLE_CONSTANT);
+      return 1;
+    }
   }
   return 0;      
 }
@@ -6566,60 +6637,56 @@ int ImageInit(Context *context) {
   uint32_t first_token ;
 
   if (FORMAT == context->token_to_scan
-    || ORDER == context->token_to_scan) {
+    || ORDER == context->token_to_scan) { 
     first_token = context->token_to_scan;
     context->token_to_scan = yylex();
 
-     if ('=' == context->token_to_scan) {
-       context->token_to_scan = yylex();
-
-       if (TOKEN_PROPERTY == context->token_to_scan) {
-         context->get_directive(&bdi);
-         switch(first_token){
-           case FORMAT:
-             bdi.format = context->token_value.format;
-             break;
-           case ORDER:
-             bdi.order  = context->token_value.order;
-             break;
-         }
-       } else {
-         context->set_error(MISSING_PROPERTY);
-         return 1;
-       }
-     } else {
+     if ('=' != context->token_to_scan) {
        context->set_error(INVALID_IMAGE_INIT);
        return 1;
      }
+     context->token_to_scan = yylex();
+
+     if (TOKEN_PROPERTY != context->token_to_scan) {
+       context->set_error(MISSING_PROPERTY);
+       return 1;
+     }
+     context->get_directive(&bdi);
+     switch(first_token){
+       case FORMAT:
+         bdi.format = context->token_value.format;
+         break;
+       case ORDER:
+         bdi.order  = context->token_value.order;
+         break;
+     }
   } else if (WIDTH == context->token_to_scan
-       || HEIGHT == context->token_to_scan
-       || DEPTH == context->token_to_scan) {
+          || HEIGHT == context->token_to_scan
+          || DEPTH == context->token_to_scan) {
     first_token = context->token_to_scan ;
 
     context->token_to_scan = yylex();
-    if ('=' == context->token_to_scan) {
-      context->token_to_scan = yylex();
-
-      if (TOKEN_INTEGER_CONSTANT == context->token_to_scan) {
-        context->get_directive(&bdi);
-        switch(first_token){
-          case WIDTH:
-            bdi.width  = context->token_value.int_val;
-            break ;
-          case HEIGHT:
-            bdi.height = context->token_value.int_val;
-            break ;
-          case DEPTH:
-            bdi.depth  = context->token_value.int_val;
-            break ;
-        }
-      } else {
-        context->set_error(MISSING_PROPERTY);
-        return 1;
-      }
-    } else {
+    if ('=' != context->token_to_scan) {
       context->set_error(INVALID_IMAGE_INIT);
       return 1;
+    }
+    context->token_to_scan = yylex();
+
+    if (TOKEN_INTEGER_CONSTANT != context->token_to_scan) {
+      context->set_error(MISSING_PROPERTY);
+      return 1;
+    }
+    context->get_directive(&bdi);
+    switch(first_token){
+      case WIDTH:
+        bdi.width  = context->token_value.int_val;
+        break ;
+      case HEIGHT:
+        bdi.height = context->token_value.int_val;
+        break ;
+      case DEPTH:
+        bdi.depth  = context->token_value.int_val;
+        break ;
     }
   }
   unsigned char *bdi_charp =
@@ -6632,12 +6699,11 @@ int ImageInit(Context *context) {
 }
 
 int GlobalImageDecl(Context *context) {
-  if(context->token_to_scan == GLOBAL){
-    context->token_to_scan = yylex();
-    return (GlobalImageDeclPart2(context));
-  }else{
+  if(context->token_to_scan != GLOBAL) {
     return 1;
   }
+  context->token_to_scan = yylex();
+  return (GlobalImageDeclPart2(context));
 }
 
 int GlobalImageDeclPart2(Context *context){
@@ -6703,77 +6769,70 @@ int GlobalImageDeclPart2(Context *context){
 }
 
 int GlobalReadOnlyImageDecl(Context *context) {
-  if(GLOBAL == context->token_to_scan){
-    context->token_to_scan = yylex();
-
-    return GlobalReadOnlyImageDeclPart2(context);
-  }else{
+  if(GLOBAL != context->token_to_scan) {
     return 1;
   }
+  context->token_to_scan = yylex();
+  return GlobalReadOnlyImageDeclPart2(context);
 }
 
 int GlobalReadOnlyImageDeclPart2(Context *context){
   //First token has been scanned and verified as global. Scan next token.
+  if (_ROIMG != context->token_to_scan) {
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan) {
+    context->set_error(MISSING_IDENTIFIER);
+  }
+  std::string var_name(context->token_value.string_val);
+  int var_name_offset = context->add_symbol(var_name);
 
- if (_ROIMG == context->token_to_scan) {
-    context->token_to_scan = yylex();
-    if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
-      std::string var_name(context->token_value.string_val);
-      int var_name_offset = context->add_symbol(var_name);
+  context->token_to_scan = yylex();
+  // set default value(scalar)
+  context->set_dim(0);
+  //context->set_symbol_modifier(BrigArray);
+  if ('[' == context->token_to_scan) {
+    if (ArrayDimensionSet(context)) {
+      return 1;
+    }
+  }
+  BrigDirectiveImage bdi = {
+    sizeof(BrigDirectiveImage), //size
+    BrigEDirectiveImage,       //kind
+    {
+      context->get_code_offset(),      // c_code
+      BrigGlobalSpace,                 // storag class
+      context->get_attribute(),        // attribut
+      0,                               // reserved
+      context->get_symbol_modifier(),  // symbolModifier
+      context->get_dim(),              // dim
+      var_name_offset,                 // s_name
+      BrigROImg,                       // type
+      context->get_alignment()         // align
+    },
+    0,                      //width
+    0,                      //height
+    0,                      //depth
+    1,                      //array
+    BrigImageOrderUnknown,  //order
+    BrigImageFormatUnknown  //format
+  };
+  context->append_directive(&bdi);
 
-      context->token_to_scan = yylex();
-      // set default value(scalar)
-      context->set_dim(0);
-      //context->set_symbol_modifier(BrigArray);
-      if ('[' == context->token_to_scan) {
-        if (!ArrayDimensionSet(context)) {
-        } else {
-          return 1;
-        }
-      }
-      BrigDirectiveImage bdi = {
-        sizeof(BrigDirectiveImage), //size
-        BrigEDirectiveImage,       //kind
-        {
-          context->get_code_offset(),      // c_code
-          BrigGlobalSpace,                 // storag class
-          context->get_attribute(),        // attribut
-          0,                               // reserved
-          context->get_symbol_modifier(),  // symbolModifier
-          context->get_dim(),              // dim
-          var_name_offset,                 // s_name
-          BrigROImg,                       // type
-          context->get_alignment()         // align
-        },
-        0,                      //width
-        0,                      //height
-        0,                      //depth
-        1,                      //array
-        BrigImageOrderUnknown,  //order
-        BrigImageFormatUnknown  //format
-      };
-      context->append_directive(&bdi);
-
-      if ('=' == context->token_to_scan) {
-        if (!ImageInitializer(context)) {
-        } else {
-          context->set_error(INVALID_IMAGE_INIT);
-          return 1;
-        }
-      }
-
-      if (';' == context->token_to_scan) {
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
-    } else {
-      context->set_error(INVALID_INITIALIZER);
+  if ('=' == context->token_to_scan) {
+    if (ImageInitializer(context)) {
+      context->set_error(INVALID_IMAGE_INIT);
+      return 1;
     }
   }
 
-  return 1;
+  if (';' != context->token_to_scan) {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int ImageInitializer(Context *context) {
@@ -6782,31 +6841,26 @@ int ImageInitializer(Context *context) {
     return 1;
 
   context->token_to_scan = yylex();
-  if ('{' == context->token_to_scan) {
-    while (1) {
-      context->token_to_scan = yylex();
-      if (!ImageInit(context)) {
-        if (',' == context->token_to_scan) {
-          continue;
-        } else {
-          break;
-        }
-      } else {
-        context->set_error(MISSING_IDENTIFIER);
-        return 1;
-      }
-    }  // end for while
-
-    if ('}' == context->token_to_scan) {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_CLOSING_BRACKET);
-    }
-  } else {
+  if ('{' != context->token_to_scan) {
     context->set_error(MISSING_OPENNING_BRACKET);
   }
-  return 1;
+  while (1) {
+    context->token_to_scan = yylex();
+    if (ImageInit(context)) {
+      context->set_error(MISSING_IDENTIFIER);
+      return 1;
+    }
+    if (',' != context->token_to_scan) {
+      break;
+    }
+  }  // end for while
+
+  if ('}' != context->token_to_scan) {
+    context->set_error(MISSING_CLOSING_BRACKET); 
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Ret(Context* context) {
@@ -6818,176 +6872,168 @@ int Ret(Context* context) {
   BrigOpcode32_t opcode = context->token_value.opcode ;
 
   context->token_to_scan = yylex();
-  if (context->token_to_scan == ';') {
-     BrigInstBase op_ret = {
-      sizeof(BrigInstBase),
-      BrigEInstBase,
-      opcode,
-      Brigb32,
-      BrigNoPacking,
-      {0, 0, 0, 0, 0}
-    };
-    // write to .code section
-    context->append_code(&op_ret);
-
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
+  if (context->token_to_scan != ';') {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
+  BrigInstBase op_ret = {
+    sizeof(BrigInstBase),
+    BrigEInstBase,
+    opcode,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0}
+  };
+  // write to .code section
+  context->append_code(&op_ret);
 
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int ImageRead(Context *context) {
   // first token is RD_IMAGE
-  BrigInstRead imgRdInst = {
-    sizeof(BrigInstRead),  // size
-    BrigEInstRead,         // kind
-    BrigRdImage,           // opcode
-    0,                     // type
-    0,                     // stype
-    BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0},       // o_operands[5]
-    0,                     // geom
-    0                      // reserved
-  };
+  BrigDataType16_t type = Brigb32;
+  BrigDataType16_t stype = Brigb32;
+  BrigoOffset32_t OpOffset[4] = {0, 0, 0, 0};
+  BrigGeom32_t geom = 0;
+
   context->token_to_scan = yylex();
-  if (context->token_to_scan == _V4) {
-    context->token_to_scan = yylex();
-    // Note: 1db is not supported
-    if (context->token_type == GEOMETRY_ID) {
-      switch (context->token_to_scan) {
-        case _1D:
-          imgRdInst.geom = Briggeom_1d;
-          break;
-        case _2D:
-          imgRdInst.geom = Briggeom_2d;
-          break;
-        case _3D:
-          imgRdInst.geom = Briggeom_3d;
-          break;
-        case _1DA:
-          imgRdInst.geom = Briggeom_1da;
-          break;
-        case _2DA:
-          imgRdInst.geom = Briggeom_2da;
-          break;
-        default:
-          context->set_error(MISSING_DECLPREFIX);
-          return 1;
-      }
-
-      context->token_to_scan = yylex();
-      // Note: destLength: Destination length: 32 (f32, u32, or s32)
-      if (context->token_to_scan == _F32 ||
-          context->token_to_scan == _U32 ||
-          context->token_to_scan == _S32) {
-
-        imgRdInst.type = context->token_value.data_type;
-        context->token_to_scan = yylex();
-        // Note: srcLength: Source length: 32 srcType: f32 or u32.
-        if (context->token_to_scan == _F32 ||
-            context->token_to_scan == _U32) {
-          context->set_type(context->token_value.data_type);
-          imgRdInst.stype = context->token_value.data_type;
-          context->token_to_scan = yylex();
-
-          if (!ArrayOperand(context, &imgRdInst.o_operands[0])) {
-            // Note: dest: Destination. Must be a vector of four s registers.
-            uint16_t kind;
-            context->get_operand(imgRdInst.o_operands[0] + sizeof(uint16_t), &kind);
-            if (kind != BrigEOperandRegV4) {
-              context->set_error(INVALID_OPERAND);
-              return 1;
-            }
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-              // TODO(Chuang): Whether the sampler("[Samp]") can be omitted.
-              // rd_image used with integer coordinates has restrictions on the sampler:
-              // coord must be unnormalized.
-              // filter must be nearest.
-              // The boundary mode must be clamp or border.
-
-              if (context->token_to_scan == '[') {
-                context->token_to_scan = yylex();
-                if (!AddressableOperand(context, &imgRdInst.o_operands[1], true)) {
-                  if (context->token_to_scan == ',') {
-                    unsigned int opCount = 2;
-                    context->token_to_scan = yylex();
-                    if (context->token_to_scan == '[') {
-                      context->token_to_scan = yylex();
-                      if (!AddressableOperand(context, &imgRdInst.o_operands[opCount++], true)) {
-                        if (context->token_to_scan == ',') {
-                          context->token_to_scan = yylex();
-                        } else {  // ','
-                          context->set_error(MISSING_COMMA);
-                          return 1;
-                        }
-                      } else {  // Addressable Operand
-                        context->set_error(INVALID_OPERAND);
-                        return 1;
-                      }
-                    } else {  // '['
-                      context->set_error(MISSING_OPERAND);
-                      return 1;
-                    }
-                    // TODO(Chuang): src: Register source for the coordinates.
-                    // A scalar for 1D images; a 2-element vector for 2D images;
-                    // a 4-element vector for 3D images, where the fourth element is ignored.
-                    // Each coordinate must be in an s register
-
-                    if (!ArrayOperand(context, &imgRdInst.o_operands[opCount])) {
-
-                      if (context->token_to_scan == ';') {
-                        context->append_code(&imgRdInst);
-                        context->token_to_scan = yylex();
-                        return 0;
-                      } else {  // ';'
-                        context->set_error(MISSING_SEMICOLON);
-                        return 1;
-                      }
-                    } else {  // Array Operand
-                      context->set_error(INVALID_OPERAND);
-                      return 1;
-                    }
-                  } else {  // ','
-                    context->set_error(MISSING_COMMA);
-                    return 1;
-                  }
-                } else {  // Addressable Operand
-                  context->set_error(INVALID_OPERAND);
-                  return 1;
-                }
-              } else {  // '['
-                context->set_error(MISSING_OPERAND);
-                return 1;
-              }
-            } else {  // ','
-              context->set_error(MISSING_COMMA);
-              return 1;
-            }
-          } else {  // Array Operand
-            context->set_error(MISSING_OPERAND);
-            return 1;
-          }
-        } else {  // Data Type
-          context->set_error(MISSING_DATA_TYPE);
-          return 1;
-        }
-      } else {  // Data Type
-        context->set_error(MISSING_DATA_TYPE);
-        return 1;
-      }
-    } else {  // Geometry ID
-      context->set_error(MISSING_DECLPREFIX);
-      return 1;
-    }
-  } else {  // _V4
+  if (context->token_to_scan != _V4) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  return 1;
+  context->token_to_scan = yylex();
+  // Note: 1db is not supported
+  if (context->token_type != GEOMETRY_ID) {
+    context->set_error(MISSING_DECLPREFIX);
+    return 1;
+  }
+  switch (context->token_to_scan) {
+    case _1D:
+      geom = Briggeom_1d;
+      break;
+    case _2D:
+      geom = Briggeom_2d;
+      break;
+    case _3D:
+      geom = Briggeom_3d;
+      break;
+    case _1DA:
+      geom = Briggeom_1da;
+      break;
+    case _2DA:
+      geom = Briggeom_2da;
+      break;
+    default:
+      context->set_error(MISSING_DECLPREFIX);
+      return 1;
+  }
+
+  context->token_to_scan = yylex();
+  // Note: destLength: Destination length: 32 (f32, u32, or s32)
+  if (context->token_to_scan != _F32 &&
+      context->token_to_scan != _U32 &&
+      context->token_to_scan != _S32) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+
+  type = context->token_value.data_type;
+  context->token_to_scan = yylex();
+  // Note: srcLength: Source length: 32 srcType: f32 or u32.
+  if (context->token_to_scan != _F32 && 
+      context->token_to_scan != _U32) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_type(context->token_value.data_type);
+  stype = context->token_value.data_type;
+  context->token_to_scan = yylex();
+
+  if (ArrayOperand(context, &OpOffset[0])) {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  // Note: dest: Destination. Must be a vector of four s registers.
+  uint16_t kind;
+  context->get_operand(OpOffset[0] + sizeof(uint16_t), &kind);
+  if (kind != BrigEOperandRegV4) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  // TODO(Chuang): Whether the sampler("[Samp]") can be omitted.
+  // rd_image used with integer coordinates has restrictions on the sampler:
+  // coord must be unnormalized.
+  // filter must be nearest.
+  // The boundary mode must be clamp or border.
+
+  if (context->token_to_scan != '[') {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (AddressableOperand(context, &OpOffset[1], true)) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  unsigned int opCount = 2;
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != '[') {
+    context->set_error(MISSING_OPERAND);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  if (AddressableOperand(context, &OpOffset[opCount++], true)) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ',') {
+    context->set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  // TODO(Chuang): src: Register source for the coordinates.
+  // A scalar for 1D images; a 2-element vector for 2D images;
+  // a 4-element vector for 3D images, where the fourth element is ignored.
+  // Each coordinate must be in an s register
+
+  if (ArrayOperand(context, &OpOffset[opCount++])) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+
+  BrigInstRead imgRdInst = {
+    0,                     // size
+    BrigEInstRead,         // kind
+    BrigRdImage,           // opcode
+    type,                  // type
+    stype,                 // stype
+    BrigNoPacking,         // packing
+    {0, 0, 0, 0, 0},       // o_operands[5]
+    geom,                  // geom
+    0                      // reserved
+  };
+  imgRdInst.size = sizeof(imgRdInst);
+  for (int i = 0 ; i < 4 ; ++i) {
+    imgRdInst.o_operands[i] = OpOffset[i];
+  }
+  context->append_code(&imgRdInst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Sync(Context* context) {
@@ -7057,30 +7103,29 @@ int Bar(Context* context) {
     context->append_operand(&op_width);
   }
 
-    if (context->token_to_scan == _GLOBAL) {
-      syncFlags = BrigGlobalLevel;
-      context->token_to_scan = yylex();
-    } else if (context->token_to_scan == _GROUP) {
-      syncFlags = BrigGroupLevel;
-      context->token_to_scan = yylex();
-    }
-    if (context->token_to_scan == ';') {
-      BrigInstBar op_bar = {
-        sizeof(BrigInstBar),
-        BrigEInstBar,
-        opcode ,
-        Brigb32 ,
-        BrigNoPacking,
-        {offset,0,0,0,0},
-        syncFlags
-      };
-      context->append_code(&op_bar);
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
+  if (context->token_to_scan == _GLOBAL) {
+    syncFlags = BrigGlobalLevel;
+    context->token_to_scan = yylex();
+  } else if (context->token_to_scan == _GROUP) {
+    syncFlags = BrigGroupLevel;
+    context->token_to_scan = yylex();
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  BrigInstBar op_bar = {
+    sizeof(BrigInstBar),
+    BrigEInstBar,
+    opcode ,
+    Brigb32 ,
+    BrigNoPacking,
+    {offset,0,0,0,0},
+    syncFlags
+  };
+  context->append_code(&op_bar);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int AtomModifiers(Context* context, BrigMemorySemantic32_t *pMemorySemantic) {
@@ -7107,9 +7152,9 @@ int AtomicNoRet(Context* context) {
   // first token is ATOMICNORET or ATOMICNORET_CAS
 
   BrigMemorySemantic32_t MemorySemantic = BrigRegular;
-  BrigAtomicOperation32_t atomicOperation;
+  BrigAtomicOperation32_t atomicOperation = 0;
   BrigStorageClass32_t StorageClass = BrigFlatSpace;
-  BrigDataType16_t DataType;
+  BrigDataType16_t DataType = Brigb32;
   BrigoOffset32_t OpOffset[3] = {0,0,0};
 
   const unsigned int first_token = context->token_to_scan;
@@ -7232,46 +7277,39 @@ int Location(Context* context) {
     return 1;
 
   context->token_to_scan = yylex();
-  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-    uint32_t sourceFile = context->token_value.int_val;
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      uint32_t sourceLine = context->token_value.int_val;
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        uint32_t sourceColumn = context->token_value.int_val;
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == ';') {
-
-          BrigDirectiveLoc bdl = {
-            sizeof(BrigDirectiveLoc),   //size
-            BrigEDirectiveLoc,          //kind
-            context->get_code_offset(), //c_code
-            sourceFile,                 //sourceFile
-            sourceLine,                 //sourceLine
-            sourceColumn                //sourceColumn
-          };
-          context->append_directive(&bdl);
-
-          context->token_to_scan = yylex();
-          return 0;
-        } else {  // ';'
-          context->set_error(MISSING_SEMICOLON);
-          return 1;
-        }
-      } else {  // Integer Constant
-        context->set_error(MISSING_INTEGER_CONSTANT);
-        return 1;
-      }
-    } else {  // Integer Constant
-      context->set_error(MISSING_INTEGER_CONSTANT);
-      return 1;
-    }
-  } else {  // Integer Constant
+  if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
     context->set_error(MISSING_INTEGER_CONSTANT);
     return 1;
   }
-  return 1;
+  uint32_t sourceFile = context->token_value.int_val;
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+    context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+  uint32_t sourceLine = context->token_value.int_val;
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+    context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+  uint32_t sourceColumn = context->token_value.int_val;
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  BrigDirectiveLoc bdl = {
+    sizeof(BrigDirectiveLoc),   //size
+    BrigEDirectiveLoc,          //kind
+    context->get_code_offset(), //c_code
+    sourceFile,                 //sourceFile
+    sourceLine,                 //sourceLine
+    sourceColumn                //sourceColumn
+  };
+  context->append_directive(&bdl);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Control(Context* context) {
@@ -7288,100 +7326,89 @@ int Control(Context* context) {
   } else if (context->token_to_scan == WORKGROUPS_PER_CU) {
     controlType = BrigEMaxGperC;
     context->token_to_scan = yylex();
-    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      values[0] = context->token_value.int_val; //TODO
-    } else {  // Integer Constant
+    if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
       context->set_error(MISSING_INTEGER_CONSTANT);
       return 1;
     }
+    values[0] = context->token_value.int_val; 
   } else if (context->token_to_scan == ITEMS_PER_WORKGROUP) {
     controlType = BrigEMaxWIperG;
     context->token_to_scan = yylex();
-    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      values[0] = context->token_value.int_val;
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-          values[1] = context->token_value.int_val;
-          context->token_to_scan = yylex();
-          if (context->token_to_scan == ',') {
-            context->token_to_scan = yylex();
-            if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-              values[2] = context->token_value.int_val;
-            } else {  // Integer Constant
-              context->set_error(MISSING_INTEGER_CONSTANT);
-              return 1;
-            }
-          } else {  // ','
-             context->set_error(MISSING_COMMA);
-             return 1;
-          }
-        } else {  // Integer Constant
-          context->set_error(MISSING_INTEGER_CONSTANT);
-          return 1;
-        }
-      } else {  // ','
-        context->set_error(MISSING_COMMA);
-        return 1;
-      }
-    } else {  // Integer Constant
+    if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
       context->set_error(MISSING_INTEGER_CONSTANT);
       return 1;
     }
+    values[0] = context->token_value.int_val;
+    context->token_to_scan = yylex();
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+      context->set_error(MISSING_INTEGER_CONSTANT);
+      return 1;
+    }
+    values[1] = context->token_value.int_val;
+    context->token_to_scan = yylex();
+    if (context->token_to_scan != ',') {
+      context->set_error(MISSING_COMMA);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+    if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+      context->set_error(MISSING_INTEGER_CONSTANT);
+      return 1;
+    }
+    values[2] = context->token_value.int_val;
   } else {
+    context->set_error(INVALID_CONTROL_TYPE);
     return 1;
   }
   context->token_to_scan = yylex();
-  if (context->token_to_scan == ';') {
-    // codegen
-    BrigDirectiveControl bdc = {
-      sizeof(BrigDirectiveControl),   // size
-      BrigEDirectiveControl,          // kind
-      context->get_code_offset(),     // c_code
-      controlType,                    // controlType
-      {values[0],values[1],values[2]} //values
-    };
-    context->append_directive(&bdc);
-
-    context->token_to_scan = yylex();
-    return 0;
-  } else {
+  if (context->token_to_scan != ';') {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
+  // codegen
+  BrigDirectiveControl bdc = {
+    sizeof(BrigDirectiveControl),   // size
+    BrigEDirectiveControl,          // kind
+    context->get_code_offset(),     // c_code
+    controlType,                    // controlType
+    {values[0],values[1],values[2]} //values
+  };
+  context->append_directive(&bdc);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Pragma(Context* context) {
   // first token is PRAGMA
   if(PRAGMA != context->token_to_scan)
     return 1;
-
   context->token_to_scan = yylex();
-  if (context->token_to_scan == TOKEN_STRING) {
-    std::string s_name = context->token_value.string_val;
-    s_name.assign(s_name, 1, s_name.size() - 2); 
-
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ';') {
-      BrigDirectivePragma bdp = {
-        sizeof(BrigDirectivePragma), // size
-        BrigEDirectivePragma,        // kind
-        context->get_code_offset(),  // c_code
-        context->add_symbol(s_name)  // s_name
-      };
-      context->append_directive(&bdp);
-
-      context->token_to_scan = yylex();
-      return 0;
-    } else {  // ';'
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
-  } else {  // String
+  if (context->token_to_scan != TOKEN_STRING) {
     context->set_error(MISSING_STRING);
     return 1;
   }
+  std::string s_name = context->token_value.string_val;
+  s_name.assign(s_name, 1, s_name.size() - 2); 
+
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  BrigDirectivePragma bdp = {
+    sizeof(BrigDirectivePragma), // size
+    BrigEDirectivePragma,        // kind
+    context->get_code_offset(),  // c_code
+    context->add_symbol(s_name)  // s_name
+  };
+  context->append_directive(&bdp);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int LabelList(Context* context, BrigdOffset32_t bds_offset) {
@@ -7553,16 +7580,14 @@ int FloatListSingle(Context* context, std::vector <double>* float_list) {
   while (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
     float_list->push_back(context->token_value.double_val);
     context->token_to_scan = yylex();
-
-    if (context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-      if(context->token_to_scan != TOKEN_DOUBLE_CONSTANT){
-        context->set_error(MISSING_DOUBLE_CONSTANT);
-        return 1;
-      } else
-        continue;
-    } else 
+    if (context->token_to_scan != ',') {
       break;
+    }
+    context->token_to_scan = yylex();
+    if(context->token_to_scan != TOKEN_DOUBLE_CONSTANT) {
+      context->set_error(MISSING_DOUBLE_CONSTANT);
+      return 1;
+    }
   }
   return 0;  
 }
@@ -7707,9 +7732,8 @@ int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
 }
 
 int DecimalListSingle(Context* context, std::vector<int32_t>* decimal_list) {
-  
   uint32_t elementCount = 0;
-   while (1) {
+  while (1) {
     if (context->token_to_scan == '-') {
       context->token_to_scan = yylex();
       if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
@@ -7724,11 +7748,10 @@ int DecimalListSingle(Context* context, std::vector<int32_t>* decimal_list) {
       decimal_list->push_back(context->token_value.int_val);
     }
     context->token_to_scan = yylex();
-    if (context->token_to_scan == ',') {
-        context->token_to_scan = yylex();
-        continue;
-    } else 
+    if (context->token_to_scan != ',') {
       break;
+    }
+    context->token_to_scan = yylex();
   }
   return 0;
 }
@@ -7739,93 +7762,85 @@ int Block(Context* context) {
     return 1;
 
   context->token_to_scan = yylex();
-  if (context->token_to_scan == TOKEN_STRING) {
-    std::string name = context->token_value.string_val;
-    // block start
-    BrigBlockStart bbs = {
-      sizeof(BrigBlockStart),     // size
-      BrigEDirectiveBlockStart,   // kind
-      context->get_code_offset(), // c_code
-      context->add_symbol(name)   // s_name
-    };
-    context->append_directive(&bbs);
-
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ENDBLOCK) {
-      context->set_error(MISSING_SECTION_ITEM);
-      return 1;
-    }
-    while (context->token_to_scan != ENDBLOCK) {
-      if (context->token_to_scan == BLOCKSTRING) {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == TOKEN_STRING) {
-          std::string str = context->token_value.string_val;
-          // block string
-          BrigBlockString bbs = {
-            sizeof(BrigBlockString),
-            BrigEDirectiveBlockString,
-            context->add_symbol(str)
-          };
-          context->append_directive(&bbs);
-
-          context->token_to_scan = yylex();
-        } else {  // String
-          context->set_error(INVALID_SECTION_ITEM);
-          return 1;
-        }
-      } else if (context->token_to_scan == BLOCKNUMERIC) {
-        
-        context->token_to_scan = yylex();
-        if (context->token_type == DATA_TYPE_ID) {
-          context->set_type(context->token_value.data_type);
-
-          context->token_to_scan = yylex();
-          if (context->token_to_scan == TOKEN_LABEL) {
-            context->token_to_scan = yylex();
-          } else if (context->token_to_scan == '-' ||
-                     context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-            if (DecimalListSingleBlock(context)) {
-              return 1;
-            }
-          } else {
-            context->set_error(INVALID_SECTION_ITEM);
-            return 1;
-          }
-        } else {  // Data Type
-          context->set_error(MISSING_DATA_TYPE);
-          return 1;
-        }
-      } else {  // Block Numeric or Block String
-        context->set_error(MISSING_BLOCK_TYPE);
-        return 1;
-      }
-      if (context->token_to_scan == ';') {
-        context->token_to_scan = yylex();
-        continue;
-      } else {  // ';'
-        context->set_error(MISSING_SEMICOLON);
-        return 1;
-      }
-    }  // While
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ';') {
-      // block end
-      BrigBlockEnd bbe = {
-        sizeof(BrigBlockEnd),
-        BrigEDirectiveBlockEnd
-      };
-      context->append_directive(&bbe);
-
-      context->token_to_scan = yylex();
-      return 0;
-    } else {  // ';'
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
-  } else {  // String
+  if (context->token_to_scan != TOKEN_STRING) {
     context->set_error(MISSING_STRING);
     return 1;
   }
+  std::string name = context->token_value.string_val;
+  // block start
+  BrigBlockStart bbs = {
+    sizeof(BrigBlockStart),     // size
+    BrigEDirectiveBlockStart,   // kind
+    context->get_code_offset(), // c_code
+    context->add_symbol(name)   // s_name
+  };
+  context->append_directive(&bbs);
+
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == ENDBLOCK) {
+    context->set_error(MISSING_SECTION_ITEM);
+    return 1;
+  }
+  while (context->token_to_scan != ENDBLOCK) {
+    if (context->token_to_scan == BLOCKSTRING) {
+      context->token_to_scan = yylex();
+      if (context->token_to_scan != TOKEN_STRING) {
+        context->set_error(INVALID_SECTION_ITEM);
+        return 1;
+      }
+      std::string str = context->token_value.string_val;
+      // block string
+      BrigBlockString bbs = {
+        sizeof(BrigBlockString),
+        BrigEDirectiveBlockString,
+        context->add_symbol(str)
+      };
+      context->append_directive(&bbs);
+      context->token_to_scan = yylex();
+    } else if (context->token_to_scan == BLOCKNUMERIC) {
+      context->token_to_scan = yylex();
+      if (context->token_type != DATA_TYPE_ID) {
+        context->set_error(MISSING_DATA_TYPE);
+        return 1;
+      }
+      context->set_type(context->token_value.data_type);
+
+      context->token_to_scan = yylex();
+      if (context->token_to_scan == TOKEN_LABEL) {
+        context->token_to_scan = yylex();
+      } else if (context->token_to_scan == '-' ||
+                 context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+        if (DecimalListSingleBlock(context)) {
+          return 1;
+        }
+      } else {
+        context->set_error(INVALID_SECTION_ITEM);
+        return 1;
+      }
+    } else {  // Block Numeric or Block String
+      context->set_error(MISSING_BLOCK_TYPE);
+      return 1;
+    }
+    if (context->token_to_scan != ';') {
+      context->set_error(MISSING_SEMICOLON);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+  }  // While
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+      // block end
+  BrigBlockEnd bbe = {
+    sizeof(BrigBlockEnd),
+    BrigEDirectiveBlockEnd
+  };
+  context->append_directive(&bbe);
+
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int GlobalSymbolDeclpart2(Context* context) {
@@ -7833,15 +7848,14 @@ int GlobalSymbolDeclpart2(Context* context) {
     return (GlobalGroupDecl(context));
   else if (context->token_to_scan == PRIVATE)
     return (GlobalPrivateDecl(context));
-
   return 1;
 }
 
 int GlobalSymbolDecl(Context* context) {
-  if (!DeclPrefix(context)) {
-    return GlobalSymbolDeclpart2(context);
+  if (DeclPrefix(context)) {
+    return 1;
   }
-  return 1;
+  return GlobalSymbolDeclpart2(context);
 }
 
 int Directive(Context* context) {
@@ -7931,29 +7945,29 @@ int SobInit(Context *context){
    
 }
 
-int SobInitializer(Context *context){
+int SobInitializer(Context *context) {
   //first must be '='
-  if('=' != context->token_to_scan){
+  if ('=' != context->token_to_scan) {
      return 1;
   }
 
   context->token_to_scan = yylex();
-  if('{' != context->token_to_scan){
+  if ('{' != context->token_to_scan) {
     context->set_error(MISSING_OPENNING_BRACKET);
     return 1;
   }
   
-  while(1){
-      context->token_to_scan = yylex();
-      if(SobInit(context)){
-        context->set_error(INVALID_INITIALIZER);
-        return 1;
-      }
-      if(',' != context->token_to_scan)
-        break ;      
+  while(1) {
+    context->token_to_scan = yylex();
+    if(SobInit(context)){
+      context->set_error(INVALID_INITIALIZER);
+      return 1;
+    }
+    if (',' != context->token_to_scan)
+      break ;      
   }
 
-  if('}' != context->token_to_scan){
+  if ('}' != context->token_to_scan) {
     context->set_error(MISSING_CLOSING_BRACKET);
     return 1;
   }
@@ -7962,13 +7976,12 @@ int SobInitializer(Context *context){
   
 }
 
-int GlobalSamplerDecl(Context *context){
-  if(GLOBAL == context->token_to_scan){
-    context->token_to_scan = yylex();
-    return (GlobalSamplerDeclPart2(context));
-  }else{
+int GlobalSamplerDecl(Context *context) {
+  if (GLOBAL != context->token_to_scan) {
     return 1;
   }
+  context->token_to_scan = yylex();
+  return (GlobalSamplerDeclPart2(context));
 }
 
 int GlobalSamplerDeclPart2(Context *context){
@@ -7995,26 +8008,26 @@ int GlobalSamplerDeclPart2(Context *context){
   }
 
   BrigDirectiveSampler bds = {
-        sizeof(BrigDirectiveSampler),      //size
-        BrigEDirectiveSampler,             //kind
-        {
-          context->get_code_offset(),      // c_code
-          BrigGlobalSpace,                 // storag class
-          context->get_attribute(),        // attribut
-          0,                               // reserved
-          context->get_symbol_modifier(),  // symbolModifier
-          context->get_dim(),              // dim
-          var_name_offset,                 // s_name
-          BrigSamp,                        // type
-          context->get_alignment()         // align
-        },
-        0,                      //valid
-        0,                      //normalized
-        0,                      //filter
-        0,                      //boundaryU
-        0,                      //boundaryV
-        0,                      //boundaryW
-        0                       //reserved1
+    sizeof(BrigDirectiveSampler),      //size
+    BrigEDirectiveSampler,             //kind
+    {
+      context->get_code_offset(),      // c_code
+      BrigGlobalSpace,                 // storag class
+      context->get_attribute(),        // attribut
+      0,                               // reserved
+      context->get_symbol_modifier(),  // symbolModifier
+      context->get_dim(),              // dim
+      var_name_offset,                 // s_name
+      BrigSamp,                        // type
+      context->get_alignment()         // align
+    },
+    0,                      //valid
+    0,                      //normalized
+    0,                      //filter
+    0,                      //boundaryU
+    0,                      //boundaryV
+    0,                      //boundaryW
+    0                       //reserved1
   };
   context->append_directive(&bds);
 
@@ -8033,27 +8046,25 @@ int GlobalSamplerDeclPart2(Context *context){
   return 0;  
 }
 
-int GlobalInitializablePart2(Context* context){
-
-  if (GLOBAL == context->token_to_scan){
+int GlobalInitializablePart2(Context* context) {
+  if (GLOBAL == context->token_to_scan) {
     BrigStorageClass32_t storage_class = context->token_value.storage_class;
     context->token_to_scan = yylex();
-    switch(context->token_to_scan){
+    switch(context->token_to_scan) {
       case _RWIMG:
         return(GlobalImageDeclPart2(context));
       case _ROIMG:
         return(GlobalReadOnlyImageDeclPart2(context));
-      case _SAMP :
+      case _SAMP:
         return(GlobalSamplerDeclPart2(context));
       default:
-        if (context->token_type==DATA_TYPE_ID)
-          return (InitializableDecl(context, storage_class));
-        else {
+        if (context->token_type != DATA_TYPE_ID) {
           context->set_error(MISSING_IDENTIFIER);
           return 1;
         }
+        return (InitializableDecl(context, storage_class));
     }
-  } else if (READONLY == context->token_to_scan){
+  } else if (READONLY == context->token_to_scan) {
     return InitializableDecl(context);
   } else {
     return 1;
@@ -8062,47 +8073,43 @@ int GlobalInitializablePart2(Context* context){
 }
 
 int GlobalInitializable(Context* context){
-  if (!DeclPrefix(context)){
-    return GlobalInitializablePart2(context);
-  } else{
+  if (DeclPrefix(context)) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
+  return GlobalInitializablePart2(context);
 }
 
 int GlobalDeclpart2(Context *context){
   // the header is declPrefix
-  if(FUNCTION == context->token_to_scan){
-    if(!FunctionDefinitionPart2(context)){
-       if(';'== context->token_to_scan)
-          return 0;
-        else return 1;
+  if (FUNCTION == context->token_to_scan) {
+    if (FunctionDefinitionPart2(context)) {
+      return 1;
     }
-    else return 1;
-  } else if (!GlobalInitializablePart2(context)){
+    if (';' == context->token_to_scan) {
+      return 0;
+    }
+  } else if (!GlobalInitializablePart2(context)) {
     return 0;
-  } else if (!GlobalSymbolDeclpart2(context)){
+  } else if (!GlobalSymbolDeclpart2(context)) {
     return 0;
   }
   return 1;
 }
 
 int GlobalDecl(Context *context){
-
-  if (SIGNATURE == context->token_to_scan){ // functionSignature
+  if (SIGNATURE == context->token_to_scan) {
+    // functionSignature
     return FunctionSignature(context);
-  } else if (!DeclPrefix(context)){
-      return GlobalDeclpart2(context);
+  } else if (!DeclPrefix(context)) {
+    return GlobalDeclpart2(context);
   }
-
   return 1;
 }
 
-int SequenceOfPrograms(Context *context){
-  while(VERSION == context->token_to_scan){
-    if(!Program(context)){
-      continue ;
-    }else{
+int SequenceOfPrograms(Context *context) {
+  while(VERSION == context->token_to_scan) {
+    if(Program(context)) {
       context->set_error(INVALID_PROGRAM);
       return 1;
     }
@@ -8112,70 +8119,56 @@ int SequenceOfPrograms(Context *context){
 
 int PairAddressableOperand(Context* context) {
   // this judge(first token == '[') is necessary in here
-  if (context->token_to_scan == '[') {
-    int CurrentoOffset = 0;
-    context->token_to_scan = yylex();
-    CurrentoOffset = context->get_operand_offset();
-    // AddressableOperand
-    if ((context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) ||
-        (context->token_to_scan == TOKEN_LOCAL_IDENTIFIER)) {
-      std::string name(context->token_value.string_val);
-
-      context->token_to_scan = yylex();
-
-      if (context->token_to_scan == ']') {
-        BrigOperandAddress boa = {
-          sizeof(boa),            // size
-          BrigEOperandAddress,    // kind
-          Brigb32,                // type
-          0,                      // reserved
-          0                       // directive
-        };
-
-        boa.directive = context->symbol_map[name];
-
-        if (context->get_machine() == BrigELarge) {
-          boa.type = Brigb64;
-        }
-        context->append_operand(&boa);
-        context->token_to_scan = yylex();
-        if (context->token_to_scan == '[') {
-          BrigoOffset32_t retOpOffset;
-          context->token_to_scan = yylex();
-          if (!OffsetAddressableOperandPart2(context, CurrentoOffset, &retOpOffset)) {
-            // Global/Local Identifier with offsetAddressOperand.
-            return 0;
-          } else {
-            return 1;
-          }
-        } else {  // '['
-          context->set_error(MISSING_OPENNING_BRACKET);
-          return 1;
-        }
-      } else {
-        context->set_error(MISSING_CLOSING_BRACKET);
-        return 1;
-      }
-    } else {  // Global/Local Identifier
-      context->set_error(MISSING_IDENTIFIER);
-      return 1;
-    }
-  } else {  // '['
+  if (context->token_to_scan != '[') { 
     context->set_error(MISSING_OPENNING_BRACKET);
     return 1;
   }
-  return 1;
-}
+  int CurrentoOffset = 0;
+  context->token_to_scan = yylex();
+  CurrentoOffset = context->get_operand_offset();
+  // AddressableOperand
+  if ((context->token_to_scan != TOKEN_GLOBAL_IDENTIFIER) && 
+      (context->token_to_scan != TOKEN_LOCAL_IDENTIFIER)) {
+    context->set_error(MISSING_IDENTIFIER);
+    return 1;
+  }
+  std::string name(context->token_value.string_val);
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != ']') {
+    context->set_error(MISSING_CLOSING_BRACKET);
+    return 1;
+  }
 
-int LdaMod(Context* context) {
-  if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
-    return 0;
+  BrigOperandAddress boa = {
+    sizeof(boa),            // size
+    BrigEOperandAddress,    // kind
+    Brigb32,                // type
+    0,                      // reserved
+    0                       // directive
+  };
+
+  boa.directive = context->symbol_map[name];
+
+  if (context->get_machine() == BrigELarge) {
+    boa.type = Brigb64;
+  }
+  context->append_operand(&boa);
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != '[') {
+    context->set_error(MISSING_OPENNING_BRACKET);
+    return 1;
+  }
+  BrigoOffset32_t retOpOffset;
+  context->token_to_scan = yylex();
+  if (OffsetAddressableOperandPart2(context, 
+    CurrentoOffset, &retOpOffset)) {
+    // Global/Local Identifier with offsetAddressOperand.
+    return 1;
   }
   return 0;
 }
 
 int TopLevelStatement(Context *context){
-
   if(TOKEN_COMMENT==context->token_to_scan){
     return Comment(context);
   }
@@ -8193,20 +8186,19 @@ int TopLevelStatement(Context *context){
         return 1;
     }
   }
-
-  if(FUNCTION == context->token_to_scan){
-    if(!FunctionDefinition(context)){
-        if(';' == context->token_to_scan){
-            context->token_to_scan = yylex();
-            return 0;
-        }
-        else {
-            if(!Codeblock(context)){
-                return 0;
-            } else
-                return 1;
-        }
-    } else return 1;
+  if(FUNCTION == context->token_to_scan) {
+    if(FunctionDefinition(context)) {
+      return 1;
+    }
+    if(';' == context->token_to_scan) {
+      context->token_to_scan = yylex();
+      return 0;
+    } else {
+      if(Codeblock(context)){
+        return 1;
+      }
+      return 0;
+    }
   } else if (!GlobalInitializablePart2(context)){
     return 0;
   } else if (!GlobalSymbolDeclpart2(context)){
@@ -8216,11 +8208,10 @@ int TopLevelStatement(Context *context){
 }
 
 int TopLevelStatements(Context *context){
- while (context->token_to_scan && (context->token_to_scan != VERSION)){
+  while (context->token_to_scan && (context->token_to_scan != VERSION)) {
     if (TopLevelStatement(context)){
-        return 1;
+      return 1;
     }
-    else continue;
   }
   return 0;
 }
@@ -8228,23 +8219,17 @@ int TopLevelStatements(Context *context){
 int ArrayOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   std::string op_name;
   if (context->token_to_scan == '(') {
-    if (!ArrayOperandList(context ,pRetOpOffset)) {
-      return 0;
-    } else {
+    if (ArrayOperandList(context ,pRetOpOffset)) {
       context->set_error(MISSING_CLOSING_PARENTHESIS);
       return 1;
     }
   } else {
-
-    if (!Operand(context, pRetOpOffset)) {
-      return 0;
-
-    } else {
+    if (Operand(context, pRetOpOffset)) {
       context->set_error(MISSING_OPERAND);
       return 1;
     }
   }
-  return 1;
+  return 0;
 }
 
 int ArrayOperand(Context* context) {

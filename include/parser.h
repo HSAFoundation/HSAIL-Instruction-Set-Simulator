@@ -76,6 +76,8 @@ int Instruction0(Context* context);
 int Instruction1(Context* context);
 int Operation(Context* context);
 int Segp(Context* context);
+int SegpPart1Segmentp(Context* context);
+int SegpPart2StoFAndFtoS(Context* context);
 
 int BodyStatementNested(Context* context);
 int ArgStatement(Context* context);
@@ -136,7 +138,6 @@ int GlobalInitializable(Context* context);
 
 int SequenceOfPrograms(Context *context);
 int PairAddressableOperand(Context *context);
-int LdaMod(Context *context);
 int OffsetAddressableOperand(Context* context);
 int LdModifier(Context* context);
 

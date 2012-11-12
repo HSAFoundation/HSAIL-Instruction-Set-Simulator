@@ -63,6 +63,7 @@ enum error_code_t {
   INVALID_CALL_ARGS,
   INVALID_ARRAY_DIMENSIONS,
   INVALID_CALL_TARGETS,
+  INVALID_CONTROL_TYPE,
   // missing part
   MISSING_VERSION_STATEMENT,
   MISSING_WIDTH_INFO,
@@ -200,6 +201,8 @@ class ErrorReporterInterface {
           return std::string("Invalid Call Targets.");
         case INVALID_ARRAY_DIMENSIONS:
           return std::string("Invalid Array Dimensions");
+        case INVALID_CONTROL_TYPE:
+          return std::string("Invalid Control type.");
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");
         case MISSING_WIDTH_INFO:
