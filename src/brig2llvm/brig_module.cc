@@ -2209,8 +2209,77 @@ bool BrigModule::validateCbr(const inst_iterator inst) const {
   return true;
 }
 
+bool isPowerOf2(const uint32_t immed) {
+  if(0 == immed || 1 == immed)
+    return true;
+  unsigned t = 2;
+  for (unsigned i = 0; i < 10; ++i) {
+    if(t == immed) return true;
+    t *= t;
+  }
+  return false;
+}
+
 bool BrigModule::validateBrn(const inst_iterator inst) const {
-  return true;
+
+  bool valid = true;
+
+  if(!check(isa<BrigInstBase>(inst) || isa<BrigInstMod>(inst),
+            "Incorrect instruction kind"))
+    return false;
+
+  const unsigned numoperands = getNumOperands(inst);
+
+  if(!check(numoperands == 2 || numoperands == 3, "Incorrect number of operands"))
+    return false;
+
+  if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
+    if(mod->aluModifier.valid) {
+      valid &= check(!mod->aluModifier.floatOrInt,
+                     "Incompatible ALU modifier");
+      valid &= check(!mod->aluModifier.rounding,
+                     "Incompatible ALU modifier");
+      valid &= check(!mod->aluModifier.ftz,
+                     "Incompatible ALU modifier");
+      valid &= check(!mod->aluModifier.approx,
+                     "Incompatible ALU modifier");
+    }
+  }
+
+  oper_iterator number(S_.operands + inst->o_operands[0]);
+  const BrigOperandImmed *widthMod = dyn_cast<BrigOperandImmed>(number);
+  if(!check(widthMod, "o_operands[0] must be a BrigOperandImmed"))
+    return false;
+  valid &= check(BrigInstHelper::isBitTy(BrigDataType(widthMod->type)),
+                   "Invalid type");
+  valid &= check(32 == BrigInstHelper::getTypeSize(BrigDataType(widthMod->type)),
+                   "Invalid type size");
+  valid &= check(isPowerOf2(widthMod->bits.u), "Width must be a power of 2");
+  
+  if(numoperands == 2){
+  oper_iterator label_or_register (S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandLabelRef>(label_or_register)   ||
+                   isa<BrigOperandReg>(label_or_register),
+                   "Destination must be a LabelRef or Reg");
+  if(isa<BrigOperandReg>(label_or_register))
+      valid &= check(32 == BrigInstHelper::getTypeSize(*getType(label_or_register)),
+                   "Invalid type size");
+    
+  }
+
+  if(numoperands == 3){
+  oper_iterator dest(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(dest),
+                   "Destination must be a Reg");
+    valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)),
+                   "Invalid type size");
+    
+  oper_iterator label_or_address(S_.operands + inst->o_operands[2]);
+  valid &= check(isa<BrigOperandLabelRef>(label_or_address)   ||
+                   isa<BrigOperandAddress>(label_or_address),
+                   "Destination must be a LabelRef or Address");
+  }
+   return valid;
 }
 
 bool BrigModule::validateBarrier(const inst_iterator inst) const {
