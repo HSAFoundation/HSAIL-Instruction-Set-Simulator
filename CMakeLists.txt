@@ -26,14 +26,13 @@ COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
 endif(DOXYGEN_FOUND)
 
-set(LLVM_TARGETS_TO_BUILD "X86")
-#set(LLVM_BUILD_TOOLS off)
-set(LLVM_INCLUDE_TOOLS off)
-set(LLVM_INCLUDE_EXAMPLES off)
-set(LLVM_INCLUDE_TESTS on)
-
-# obtain specific information about llvm setup
-SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
+set(LLVM_TARGETS_TO_BUILD "X86" CACHE STRING "")
+set(LLVM_BUILD_TOOLS off CACHE STRING "")
+set(LLVM_INCLUDE_TOOLS off CACHE STRING "")
+set(LLVM_INCLUDE_EXAMPLES off CACHE STRING "")
+set(LLVM_INCLUDE_TESTS off CACHE STRING "")
+set(LLVM_INCLUDE_RUNTIME off CACHE STRING "")
+set(LLVM_BINARY_DIR "${PROJECT_BINARY_DIR}/src/brig2llvm/compiler")
 
 SET(LLVM_REQUIRES_EH "true")
 
@@ -58,6 +57,12 @@ add_subdirectory(src/brig2llvm/compiler)
 
 include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
 include(HandleLLVMOptions)
+
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-Werror -Wunknown-warning -Wno-return-type-c-linkage" SUPPORTS_NO_RET_C_LINK)
+if (SUPPORTS_NO_RET_C_LINK)
+  add_llvm_definitions(-Wno-return-type-c-linkage)
+endif (SUPPORTS_NO_RET_C_LINK)
 
 add_subdirectory(src)
 add_subdirectory(src/brig2llvm)

@@ -348,17 +348,48 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
 }
 
 void BrigEngine::launch(llvm::Function *EntryFn,
-                        llvm::ArrayRef<void *> args) {
-  void **argsArray = new void*[args.size()];
-  for(unsigned i = 0; i < args.size(); ++i)
-    argsArray[i] = args[i];
+                        llvm::ArrayRef<void *> args,
+                        uint32_t blockNum,
+                        uint32_t threadNum) {
 
-  std::vector<llvm::GenericValue> GVArgs;
-  GVArgs.push_back(llvm::GenericValue(0));
-  GVArgs.push_back(llvm::GenericValue(argsArray));
-  EE_->runFunction(EntryFn, GVArgs);
+  assert(blockNum && threadNum && "Thread count too low");
 
-  delete[] argsArray;
+  typedef void *(*EntryFunPtrTy)(void*);
+  EntryFunPtrTy EntryFunPtr =
+    (EntryFunPtrTy)(intptr_t) EE_->getPointerToFunction(EntryFn);
+
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+
+  ThreadInfo **threads = new ThreadInfo *[blockNum * threadNum];
+
+  uint32_t NDRangeSize = blockNum * threadNum;
+  uint32_t workdim = 1;
+  uint32_t workGroupSize[] = { threadNum, 1, 1 };
+
+  for(uint32_t i = 0; i < blockNum; ++i) {
+    for(uint32_t j = 0; j < threadNum; ++j) {
+
+      uint32_t tid = i * threadNum + j;
+      uint32_t workItemAID[] = { tid, 0, 0 };
+      threads[tid] = new ThreadInfo(NDRangeSize, workdim,
+                                    workGroupSize, workItemAID,
+                                    args.data(), args.size());
+      pthread_create(&threads[tid]->tid, &attr, EntryFunPtr,
+                     threads[tid]->argsArray);
+    }
+  }
+
+  for(uint32_t i = 0; i < blockNum * threadNum; ++i) {
+    void *retVal;
+    pthread_join(threads[i]->tid, &retVal);
+    delete threads[i];
+
+  }
+
+  pthread_attr_destroy(&attr);
+
+  delete[] threads;
 }
 
 BrigEngine::~BrigEngine() {

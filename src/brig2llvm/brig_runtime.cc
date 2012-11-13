@@ -12,6 +12,10 @@ namespace brig {
 
 ForceBrigRuntimeLinkage::ForceBrigRuntimeLinkage() {}
 
+static __thread ThreadInfo *__brigThreadInfo;
+
+extern "C" void __setThreadInfo(ThreadInfo *info) { __brigThreadInfo = info; }
+
 extern "C" void enableFtzMode(void) {
   _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
   _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
@@ -800,7 +804,9 @@ template<class T> static T AtomicSub(T *x, T y) {
 }
 AtomicInst(define, Sub, Binary)
 
-extern "C" u32 WorkItemAId_b32(u32 x) { return 0U; }
+extern "C" u32 WorkItemAId_b32(u32 x) {
+  return __brigThreadInfo->workItemAID[x];
+}
 
 } // namespace brig
 } // namespace hsa

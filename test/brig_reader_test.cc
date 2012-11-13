@@ -1340,8 +1340,8 @@ TEST(BrigKernelTest,  zeller) {
   int temp[4] = {1,0,2,4};
 
   for(int i = 0; i < 4; i++) {
-  hsa::brig::BrigEngine BE(BP);
-  void *args[] = { &r_arg, m_arg+i, d_arg+i,y_arg+i };
+    hsa::brig::BrigEngine BE(BP);
+    void *args[] = { &r_arg, m_arg+i, d_arg+i,y_arg+i };
     llvm::Function *fun = BP->getFunction("zeller");
     BE.launch(fun, args);
     EXPECT_EQ(*r_arg,temp[i]);
@@ -1350,5 +1350,35 @@ TEST(BrigKernelTest,  zeller) {
   delete[] d_arg;
   delete[] y_arg;
   delete r_arg;
+}
 
+TEST(BrigKernelTest, ThreadTest) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &threadTest(kernarg_s32 %r)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s0, [%r];\n"
+    "  workitemaid    $s1, 0;\n"
+    "	 shl_u32	      $s2, $s1, 2;\n"
+    "  add_u32        $s0, $s0, $s2;\n"
+    "  st_global_s32  $s1, [$s0];\n"
+    "  ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  const unsigned threads = 16;
+  unsigned *tids = new unsigned[threads];
+  for(unsigned i = 0; i < threads; ++i) {
+    tids[i] = ~0;
+  }
+
+  hsa::brig::BrigEngine BE(BP);
+  void *args[] = { &tids };
+  llvm::Function *fun = BP->getFunction("threadTest");
+  BE.launch(fun, args, 1, threads);
+
+  for(unsigned i = 0; i < threads; ++i) {
+    EXPECT_EQ(i, tids[i]);
+  }
+  delete[] tids;
 }
