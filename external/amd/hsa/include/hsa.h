@@ -333,11 +333,10 @@ typedef struct LaunchAttributes {
 
     void *callBackArguments;    /*!< arguments of the callback function */
 
-    uint32_t debugMode;         /*!< debug mode to indicate whether
-                                 the kernel is executed in debug mode and
-                                 which type of debug mode. 0 means regular
-                                 execution. Users each have their own different
-                                 debug modes. */
+    uint32_t dispatchMode;      /*!< kernel dispatch mode is to indicate which 
+                                 mode that the kernel is executed. 0 means regular
+                                 execution, which is the default value. Users each 
+                                 also have their own modes. */
 
     bool timestampEnabled;      /*!< default is false*/
 /************************* @endcond *******************************************/
@@ -359,7 +358,7 @@ typedef struct LaunchAttributes {
         groupMemorySize = 0;
 
 /************************** @cond HSA_EXPERIMENTAL ****************************/
-        debugMode = 0;
+        dispatchMode = 0;
         trapHandler = NULL;
         functionPtr = NULL;
         callBackArguments = NULL;
