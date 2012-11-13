@@ -80,12 +80,9 @@ int Query(Context* context) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
-  std::string opName = context->token_value.string_val;
-  if (Identifier(context)) {
+  if (Operand(context, &OpOffset[0])) {
     return 1;
   }
-  OpOffset[0] = context->operand_map[opName];
-  context->token_to_scan = yylex();
   if (context->token_to_scan != ',') {
     context->set_error(MISSING_COMMA);
     return 1;
@@ -3458,7 +3455,6 @@ int Instruction4Shuffle(Context* context) {
   context->token_to_scan = yylex();
 
   // Note: dest: Destination register.
-  std::string opName;
 
   if (context->token_type != REGISTER) {
     context->set_error(INVALID_OPERAND);
@@ -3817,7 +3813,7 @@ int Cmp(Context* context) {
   BrigOpcode32_t opcode = BrigCmp;
   BrigDataType16_t type = Brigb32;
   BrigDataType16_t stype = Brigb32;
-  BrigCompareOperation32_t comparisonOperator;
+  BrigCompareOperation32_t comparisonOperator = 0;
   BrigoOffset32_t OpOffset[3] = {0, 0, 0};
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
   context->token_to_scan = yylex();
@@ -3847,7 +3843,6 @@ int Cmp(Context* context) {
     opcode = BrigPackedCmp;
     stype = type;
   }
-  std::string opName;
   // Note: Dest must be a register.
   if (context->token_type != REGISTER) {
     context->set_error(INVALID_FIRST_OPERAND);
