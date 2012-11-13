@@ -2,6 +2,7 @@
 #define BRIG_RUNTIME_H
 
 #include <stdint.h>
+#include <pthread.h>
 
 namespace hsa {
 namespace brig {
@@ -111,5 +112,32 @@ typedef u32x4 b128;
 
 #undef declareVector
 #undef vector
+
+struct ThreadInfo {
+  void **argsArray;
+  const uint32_t NDRangeSize; // number of work items
+  const uint32_t workdim;     // number of work group dimensions
+  uint32_t workGroupSize[3];  // work group dimensions
+  uint32_t workItemAID[3];    // absolute identifier
+  pthread_t tid;
+
+  ThreadInfo(uint32_t NDRangeSize, uint32_t workdim,
+             uint32_t workGroupSize[3], uint32_t workItemAID[3],
+             void *const *args, size_t size) :
+    argsArray(new void*[size + 1]),
+    NDRangeSize(NDRangeSize), workdim(workdim) {
+
+    for(unsigned i = 0; i < 3; ++i) {
+      this->workGroupSize[i] = workGroupSize[i];
+      this->workItemAID[i] = workItemAID[i];
+    }
+
+    argsArray[0] = this;
+    for(unsigned i = 0; i < size; ++i)
+      argsArray[i + 1] = args[i];
+  }
+
+  ~ThreadInfo() { delete[] argsArray; }
+};
 
 #endif // BRIG_RUNTIME_H

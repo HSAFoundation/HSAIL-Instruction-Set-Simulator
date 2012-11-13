@@ -59,7 +59,7 @@ include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfi
 include(HandleLLVMOptions)
 
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-Werror -Wno-return-type-c-linkage" SUPPORTS_NO_RET_C_LINK)
+CHECK_CXX_COMPILER_FLAG("-Werror -Wunknown-warning -Wno-return-type-c-linkage" SUPPORTS_NO_RET_C_LINK)
 if (SUPPORTS_NO_RET_C_LINK)
   add_llvm_definitions(-Wno-return-type-c-linkage)
 endif (SUPPORTS_NO_RET_C_LINK)
