@@ -76,7 +76,6 @@ void Context::clear_context(void) {
     valid_string = false;
   }
   set_default_values();
-  types.clear();
   last_directive_offset = 0;
   current_bdf_offset = 0;
   aluModifier.floatOrInt = 0;
