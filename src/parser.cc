@@ -2452,46 +2452,46 @@ int ArgUninitializableDecl(Context* context) {
 }
 
 int FileDecl(Context* context) {
+  uint32_t fileid = 0;
+  BrigsOffset32_t path_offset = 0;
+
   // first token is _FILE "file"
   if (_FILE != context->token_to_scan)
     return 1;
 
   context->token_to_scan = yylex();
-
-  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-    int fileid = context->token_value.int_val;
-    context->token_to_scan = yylex();
-
-    if (context->token_to_scan == TOKEN_STRING) {
-      std::string path(context->token_value.string_val);
-      path.assign(path, 1, path.size() - 2);
-      BrigsOffset32_t path_offset = context->add_symbol(path);
-      context->token_to_scan = yylex();
-
-      if (context->token_to_scan == ';') {
-
-        BrigDirectiveFile bdfile = {
-           sizeof(BrigDirectiveFile),   //size
-           BrigEDirectiveFile,          //kind
-           context->get_code_offset(),  //c_code??
-           fileid,                      //fileid
-           path_offset                  //s_filename
-        };
-        context->append_directive(&bdfile);
-
-        context->token_to_scan = yylex();
-        return 0;
-      } else {
-        context->set_error(MISSING_SEMICOLON);
-      }
-    } else {
-      context->set_error(MISSING_STRING);
-    }
-  } else {
+  if (TOKEN_INTEGER_CONSTANT != context->token_to_scan) {
     context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+  fileid = context->token_value.int_val;
+
+  context->token_to_scan = yylex();
+  if (TOKEN_STRING != context->token_to_scan) {
+    context->set_error(MISSING_STRING);
+    return 1;
+  }
+  std::string path(context->token_value.string_val);
+  path.assign(path, 1, path.size() - 2);
+  path_offset = context->add_symbol(path);
+
+  context->token_to_scan = yylex();
+  if (';' != context->token_to_scan) {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
   }
 
-  return 1;
+  BrigDirectiveFile bdfile = {
+    sizeof(BrigDirectiveFile),   //size
+    BrigEDirectiveFile,          //kind
+    context->get_code_offset(),  //c_code
+    fileid,                      //fileid
+    path_offset                  //s_filename
+  };
+  context->append_directive(&bdfile);
+
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int SignatureType(Context *context) {
