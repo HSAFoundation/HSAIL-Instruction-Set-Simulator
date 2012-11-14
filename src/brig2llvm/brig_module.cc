@@ -2524,15 +2524,169 @@ bool BrigModule::validateStoF(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateCmp(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
+    return false;
+  valid &= check(BrigInstHelper::getAluModifier(inst),  
+                 "Cmp may not have an aluModifier");
+  const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst); 
+  if(!validate(cmp)) return false;
+  BrigDataType type = BrigDataType(cmp->type);
+  valid &= check(type == Brigb1  || type == Brigb32 || type == Brigu32 || 
+                 type == Brigs32 || type == Brigf32 || type == Brigf16 ||
+                 type == Brigs16 || type == Brigu16 || type == Brigb16, 
+                 "Invalid destination type");
+  BrigDataType srcTy = BrigDataType(cmp->sourceType);
+  valid &= check(srcTy == Brigb1  || srcTy == Brigb32 || srcTy == Brigu32 || 
+                 srcTy == Brigs32 || srcTy == Brigf32 || srcTy == Brigb64 ||
+                 srcTy == Brigu64 || srcTy == Brigs64 || srcTy == Brigf64 ||
+                 srcTy == Brigf16 || srcTy == Brigs16 || srcTy == Brigu16 ||
+                 srcTy == Brigb16, "Invalid source type");
+  oper_iterator dest(S_.operands + cmp->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
+  valid &= check(isCompatibleSrc(type, dest), 
+                 "Incompatible destination operand");
+  for(int i = 1; i < 3; i++) {
+    oper_iterator src(S_.operands + cmp->o_operands[i]);
+    if(BrigInstHelper::isFloatTy(type)) {
+      valid &= check(isa<BrigOperandReg>(src) ||
+                     isa<BrigOperandImmed>(src), 
+                     "Source should be reg or immediate");
+    } else {
+      valid &= check(isa<BrigOperandReg>(src)   ||
+                     isa<BrigOperandImmed>(src) ||
+                     isa<BrigOperandWaveSz>(src), 
+                     "Source should be reg, immediate or waveSz");
+    }
+    
+    valid &= check(isCompatibleSrc(srcTy, src), "Incompatible source operand"); 
+  }
+  if(BrigInstHelper::isUnsignedTy(srcTy) || BrigInstHelper::isSignedTy(srcTy)) 
+    valid &= check(cmp->comparisonOperator <= 5, "Invalid comparisonOperator"); 
+
+  if(BrigInstHelper::isFloatTy(srcTy)) 
+    valid &= check(cmp->comparisonOperator <= 27, "Invalid comparisonOperator"); 
+
+  valid &= check(!BrigInstHelper::isVectorTy(type), 
+                 "Cmp can not accept vector types");
+  return valid;
 }
 
 bool BrigModule::validatePackedCmp(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
+    return false;
+  valid &= check(BrigInstHelper::getAluModifier(inst),  
+                 "PackedCmp may not have an aluModifier");
+  const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst);
+  if(!validate(cmp)) return false;
+  BrigDataType type = BrigDataType(cmp->type);
+  valid &= check(type == Brigu8x4  || type == Brigs8x4  || type == Brigs16x2 || 
+                 type == Brigu16x2 || type == Brigf16x2 || type == Brigu8x8  || 
+                 type == Brigs8x8  || type == Brigs16x4 || type == Brigu16x4 || 
+                 type == Brigf16x4 || type == Brigu32x2 || type == Brigu32x2 || 
+                 type == Brigu32x2, "Invalid type");
+  oper_iterator dest(S_.operands + cmp->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
+  valid &= check(isCompatibleSrc(type, dest), 
+		  "Incompatible destination oper;and");
+  for(int i = 1; i < 3; i++) {
+    oper_iterator src(S_.operands + cmp->o_operands[i]);
+    valid &= check(isa<BrigOperandReg>(src) ||
+                   isa<BrigOperandImmed> (src), 
+                   "Source should be reg or immediate");
+    valid &= check(isCompatibleSrc(type, src), "Incompatible source operand"); 
+  }
+
+  if(BrigInstHelper::isUnsignedTy(type) || BrigInstHelper::isSignedTy(type)) 
+    valid &= check(cmp->comparisonOperator <= 5, "Invalid comparisonOperator"); 
+
+  if(BrigInstHelper::isFloatTy(type)) 
+    valid &= check(cmp->comparisonOperator <= 27, "Invalid comparisonOperator"); 
+  
+  if(BrigInstHelper::isVectorTy(type)) {
+    valid &= check(cmp->packing == BrigPackPP, "Packing should be pp"); 
+  } else {
+    valid &= check(cmp->packing == BrigNoPacking, 
+                   "Packing should be noPacking");
+  }
+  return valid;
 }
 
 bool BrigModule::validateCvt(const inst_iterator inst) const {
-  return true;
+   bool valid = true;
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  valid &= check(BrigInstHelper::getAluModifier(inst),  
+                 "Cvt may not have an aluModifier");
+  const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst);
+  if(!validate(cvt)) return false;
+
+  BrigDataType type = BrigDataType(cvt->type);
+  valid &= check(BrigInstHelper::isBitTy(type)      || 
+                 BrigInstHelper::isUnsignedTy(type) || 
+                 BrigInstHelper::isSignedTy(type)   || 
+                 BrigInstHelper::isFloatTy(type), 
+                 "Type should be unsigned, signed, float or bit");
+
+  if(BrigInstHelper::isBitTy(type)) {
+    valid &= check(BrigInstHelper::getTypeSize(type) == 1, 
+                   "Illegal data length");
+  } else {
+    valid &= check(BrigInstHelper::getTypeSize(type) <= 64, 
+                   "Illegal data length");
+  }
+
+  BrigDataType srcTy = BrigDataType(cvt->stype);
+  valid &= check(BrigInstHelper::isBitTy(srcTy) ||
+                 BrigInstHelper::isUnsignedTy(srcTy) ||
+                 BrigInstHelper::isSignedTy(srcTy) ||
+                 BrigInstHelper::isFloatTy(srcTy),
+                 "Type should be unsigned, signed float or bit");
+  if(BrigInstHelper::isBitTy(srcTy)) {
+    valid &= check(BrigInstHelper::getTypeSize(srcTy) == 1,
+                   "Illegal data length");
+  } else {
+    valid &= check(BrigInstHelper::getTypeSize(srcTy) <= 64, 
+                   "Illegal data length");
+  }
+
+  oper_iterator dest(S_.operands + cvt->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
+
+  if(BrigInstHelper::getTypeSize(type) == 8 || 
+     BrigInstHelper::getTypeSize(type) == 16) {
+    valid &= check(*getType(dest) == Brigb32, 
+                   "Destination should be s register"); 
+  } else {
+    valid &= check(isCompatibleSrc(type, dest), 
+                   "Incompatible destination operand");
+  }
+
+  oper_iterator src(S_.operands + cvt->o_operands[1]);
+  if(BrigInstHelper::isFloatTy(type)) {
+    valid &= check(isa<BrigOperandReg>(src) ||
+                   isa<BrigOperandImmed>(src), 
+                   "Source should be reg or immediate");
+  } else {
+    valid &= check(isa<BrigOperandReg>(src) ||
+                   isa<BrigOperandImmed>(src) ||
+                   isa<BrigOperandWaveSz>(src), 
+                   "Source should be reg, immediate or waveSz");
+  }
+
+  if(BrigInstHelper::getTypeSize(srcTy) == 8 ||
+     BrigInstHelper::getTypeSize(srcTy) == 16) {
+    valid &= check(*getType(src) == Brigb32, 
+                   "Source should be s register");
+  } else {
+    valid &= check(isCompatibleSrc(srcTy, src), "Incompatible source operand");
+  }
+
+  valid &= check(!BrigInstHelper::isVectorTy(type), 
+                 "Cvt can not accept vector types");
+
+  return valid;
 }
 
 bool BrigModule::validateLd(const inst_iterator inst) const {
