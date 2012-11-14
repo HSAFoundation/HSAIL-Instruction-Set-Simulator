@@ -2732,45 +2732,55 @@ int FunctionSignature(Context *context) {
 }
 
 int Label(Context* context) {
-  if (context->token_to_scan == TOKEN_LABEL) {
-    BrigDirectiveLabel label_directive = {
-      sizeof(BrigDirectiveLabel),    // size
-      BrigEDirectiveLabel,    // kind
-      0,                      // c_code
-      0                       // s_name
-    };
-    std::string s_name = context->token_value.string_val;
-    if (yylex() == ':') {
-      if (!context->symbol_map.count(s_name)) {
-        label_directive.c_code = context->get_code_offset();
-        int str_offset = context->lookup_symbol(s_name);
-        if (str_offset == -1) {
-          str_offset = context->get_string_offset();
-          context->add_symbol(s_name);
-        }
-        label_directive.s_name = str_offset;
-        if (context->label_o_map.count(s_name)) {
-          BrigoOffset32_t ope_offset = context->label_o_map[s_name];
-          BrigdOffset32_t lab_dir_offset = context->get_directive_offset();
-          unsigned char* lab_d_Offset = reinterpret_cast<unsigned char*>(&lab_dir_offset);
-          // sizeof(uint16_t) << 1:
-          // leaped over BrigOperandLabelRef.size and .kind
-          // make the offset to point the address of labeldirecitive in BrigOperandLabelRef
-          context->update_operand_bytes(lab_d_Offset,
-                                        ope_offset + sizeof(uint16_t) * 2,
-                                        sizeof(BrigdOffset32_t));
-        }
-        context->symbol_map[s_name] = context->get_directive_offset();
-        context->append_directive(&label_directive);
-      }
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_COLON);
-      return 1;
-    }
+  // first must be "label"
+  BrigcOffset32_t c_code = 0;
+  BrigsOffset32_t s_name = 0;
+
+  if (TOKEN_LABEL != context->token_to_scan)
+    return 1;
+
+  std::string name = context->token_value.string_val;
+
+  context->token_to_scan = yylex();
+  if (':' != context->token_to_scan) {
+    context->set_error(MISSING_COLON);
+    return 1;
   }
-  return 1;
+
+  if (context->symbol_map.count(name)) {
+   // TODO if count isnot zeor,
+   // it's wrong program,emit error report
+   // context->set_error(INVALID_LABEL);
+   // return 1;
+    context->token_to_scan = yylex();
+    return 0;
+  }
+  c_code = context->get_code_offset();
+
+  // dont need to check if name exist in symbol buffer 
+  s_name = context->get_string_offset();
+  context->add_symbol(name);
+
+  if (context->label_o_map.count(name)) {
+    BrigoOffset32_t ope_offset = context->label_o_map[name];
+    BrigdOffset32_t lab_dir_offset = context->get_directive_offset();
+    unsigned char* lab_d_Offset = reinterpret_cast<unsigned char*>(&lab_dir_offset);
+    context->update_operand_bytes(lab_d_Offset,
+                         ope_offset + sizeof(uint16_t) * 2,
+                         sizeof(BrigdOffset32_t));
+  }
+  BrigDirectiveLabel label_directive = {
+    sizeof(BrigDirectiveLabel),    // size
+    BrigEDirectiveLabel,           // kind
+    c_code,                        // c_code
+    s_name                         // s_name
+  };
+
+  context->symbol_map[name] = context->get_directive_offset();
+  context->append_directive(&label_directive);
+
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int LabelTargets(Context* context) {
