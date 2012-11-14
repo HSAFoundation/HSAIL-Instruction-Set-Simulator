@@ -1884,7 +1884,7 @@ int BranchBrn(Context* context) {
   }
   // check for optional _fbar modifier
   if (context->token_to_scan == __FBAR) {
-      mod.valid = 1;
+    mod.valid = 1;
     mod.fbar = 1;
     context->set_alu_modifier(mod);
     context->token_to_scan = yylex();
@@ -2012,13 +2012,9 @@ int Branch(Context* context) {
   context->token_to_scan = yylex();
 
   if (op == CBR) {
-    if (!BranchCbr(context)) {
-      return 0;
-    }
+    return BranchCbr(context);
   } else if (op == BRN) {
-    if (!BranchBrn(context)) {
-      return 0;
-    }
+    return BranchBrn(context);
   }
   return 1;
 }
