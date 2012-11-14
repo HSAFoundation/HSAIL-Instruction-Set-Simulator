@@ -2531,95 +2531,106 @@ int SignatureType(Context *context) {
 }
 
 int SysCall(Context* context) {
-  // first token is _SYSCALL "syscall"
+  BrigoOffset32_t  o_operands[5] = {0};
 
-  BrigInstBase syscallInst = {
-    sizeof(BrigInstBase),  // size
-    BrigEInstBase,         // kind
-    BrigSysCall,         // opcode
-    Brigb32,               // type
-    BrigNoPacking,         // packing
-    {0, 0, 0, 0, 0}        // o_operands[5]
-  };
-  std::string opName;
+  // first token must be SYSCALL 
+  if (SYSCALL != context->token_to_scan) 
+    return 1;
+  
   context->token_to_scan = yylex();
   context->set_type(Brigb32);
+
   // Note: dest: Destination. Must be a 32-bit register.
-  if (context->token_to_scan == TOKEN_SREGISTER) {
-    if (Operand(context, &syscallInst.o_operands[0])) {
-      return 1;
-    }
-    if (context->token_to_scan == ',') {
-      context->token_to_scan = yylex();
-      // n: An integer literal. Valid values fit into a u32 data type.
-      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        if (Operand(context, &syscallInst.o_operands[1])) {
-          return 1;
-        }
-        if (context->token_to_scan == ',') {
-          context->token_to_scan = yylex();
-
-          if (((context->token_to_scan == TOKEN_SREGISTER) ||
-               (context->token_to_scan == TOKEN_WAVESIZE) ||
-               (context->token_to_scan == TOKEN_INTEGER_CONSTANT))) {
-
-            if (Operand(context, &syscallInst.o_operands[2])) {
-              return 1;
-            }
-            if (context->token_to_scan == ',') {
-              context->token_to_scan = yylex();
-
-              if ((context->token_to_scan == TOKEN_SREGISTER) ||
-                  (context->token_to_scan == TOKEN_WAVESIZE) ||
-                  (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-                if (Operand(context, &syscallInst.o_operands[3])) {
-                  return 1;
-                }
-                if (context->token_to_scan == ',') {
-                  context->token_to_scan = yylex();
-
-                  if ((context->token_to_scan == TOKEN_SREGISTER) ||
-                      (context->token_to_scan == TOKEN_WAVESIZE) ||
-                      (context->token_to_scan == TOKEN_INTEGER_CONSTANT)) {
-                    if (Operand(context, &syscallInst.o_operands[4])) {
-                      return 1;
-                    }
-
-                    if (context->token_to_scan == ';') {
-                      context->append_code(&syscallInst);
-                      context->token_to_scan = yylex();
-                      return 0;
-                    } else {  // ';'
-                      context->set_error(MISSING_SEMICOLON);
-                    }
-                  } else {  // 5 operand
-                    context->set_error(INVALID_FIFTH_OPERAND);
-                  }
-                } else {
-                  context->set_error(MISSING_COMMA);
-                }
-              } else {  // 4 operand
-                context->set_error(INVALID_FOURTH_OPERAND);
-              }
-            } else {
-              context->set_error(MISSING_COMMA);
-            }
-          } else {  // 3 operand
-            context->set_error(INVALID_THIRD_OPERAND);
-          }
-        } else {
-          context->set_error(MISSING_COMMA);
-        }
-      } else {  // 2 base operand
-        context->set_error(INVALID_SECOND_OPERAND);
-      }
-    } else {
-      context-> set_error(MISSING_COMMA);
-    }
-  } else {  // 1 operand
+  // operand 1
+  if (context->token_to_scan != TOKEN_SREGISTER) {
     context->set_error(INVALID_FIRST_OPERAND);
+    return 1;
   }
-  return 1;
+  if (Operand(context,&o_operands[0])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') { 
+    context-> set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+
+  //operand 2
+  if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+    context->set_error(INVALID_SECOND_OPERAND);
+    return 1;
+  } 
+  if (Operand(context, &o_operands[1])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') { 
+    context-> set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+
+  // operand 3
+  if (((context->token_to_scan != TOKEN_SREGISTER) &&
+       (context->token_to_scan != TOKEN_WAVESIZE) &&
+       (context->token_to_scan != TOKEN_INTEGER_CONSTANT))) {
+    context->set_error(INVALID_THIRD_OPERAND);
+    return 1;
+  } 
+  if (Operand(context, &o_operands[2])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') { 
+    context-> set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+
+  // operand 4
+  if (((context->token_to_scan != TOKEN_SREGISTER) &&
+       (context->token_to_scan != TOKEN_WAVESIZE) &&
+       (context->token_to_scan != TOKEN_INTEGER_CONSTANT))) {
+    context->set_error(INVALID_FOURTH_OPERAND);
+    return 1;
+  } 
+  if (Operand(context, &o_operands[3])) {
+    return 1;
+  }
+  if (context->token_to_scan != ',') { 
+    context-> set_error(MISSING_COMMA);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+
+  // operand 5
+  if (((context->token_to_scan != TOKEN_SREGISTER) &&
+       (context->token_to_scan != TOKEN_WAVESIZE) &&
+       (context->token_to_scan != TOKEN_INTEGER_CONSTANT))) {
+    context->set_error(INVALID_FOURTH_OPERAND);
+    return 1;
+  } 
+  if (Operand(context, &o_operands[4])) {
+    return 1;
+  }
+
+  if (context->token_to_scan != ';') { 
+    context-> set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+
+  BrigInstBase syscallInst = {
+    sizeof(BrigInstBase),         // size
+    BrigEInstBase,                // kind
+    BrigSysCall,                  // opcode
+    Brigb32,                      // type
+    BrigNoPacking,                // packing
+    {o_operands[0], o_operands[1],  // o_operands[5]
+     o_operands[2], o_operands[3], 
+     o_operands[4]}        
+  };
+
+  context->append_code(&syscallInst);
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int SignatureArgumentList(Context *context, std::vector<BrigDirectiveSignature::BrigProtoType> *types) {
