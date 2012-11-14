@@ -15,14 +15,24 @@ set(CMAKE_CXX_FLAGS "-msse3 ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DBIN_PATH=${PROJECT_BINARY_DIR}/test ${CMAKE_CXX_FLAGS}")
 
-set(LLVM_TARGETS_TO_BUILD "X86")
-#set(LLVM_BUILD_TOOLS off)
-set(LLVM_INCLUDE_TOOLS off)
-set(LLVM_INCLUDE_EXAMPLES off)
-set(LLVM_INCLUDE_TESTS on)
+# add a target to generate API documentation with Doxygen
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+add_custom_target(doc
+${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+COMMENT "Generating API documentation with Doxygen" VERBATIM
+)
+endif(DOXYGEN_FOUND)
 
-# obtain specific information about llvm setup
-SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
+set(LLVM_TARGETS_TO_BUILD "X86" CACHE STRING "")
+set(LLVM_BUILD_TOOLS off CACHE STRING "")
+set(LLVM_INCLUDE_TOOLS off CACHE STRING "")
+set(LLVM_INCLUDE_EXAMPLES off CACHE STRING "")
+set(LLVM_INCLUDE_TESTS off CACHE STRING "")
+set(LLVM_INCLUDE_RUNTIME off CACHE STRING "")
+set(LLVM_BINARY_DIR "${PROJECT_BINARY_DIR}/src/brig2llvm/compiler")
 
 SET(LLVM_REQUIRES_EH "true")
 
@@ -30,6 +40,7 @@ SET(LLVM_REQUIRES_EH "true")
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
+include (EnsureAtomicOps)
 include (EnsureLLVMisPresent)
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
 
@@ -37,8 +48,6 @@ SET(PROJ_SEARCH_PATH
 "${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
-"${PROJECT_BINARY_DIR}/src"
-"${PROJECT_SOURCE_DIR}/src"
 "${PROJECT_BINARY_DIR}/src")
 include_directories( ${PROJ_SEARCH_PATH} )
 
@@ -48,6 +57,12 @@ add_subdirectory(src/brig2llvm/compiler)
 
 include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
 include(HandleLLVMOptions)
+
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-Werror -Wunknown-warning -Wno-return-type-c-linkage" SUPPORTS_NO_RET_C_LINK)
+if (SUPPORTS_NO_RET_C_LINK)
+  add_llvm_definitions(-Wno-return-type-c-linkage)
+endif (SUPPORTS_NO_RET_C_LINK)
 
 add_subdirectory(src)
 add_subdirectory(src/brig2llvm)

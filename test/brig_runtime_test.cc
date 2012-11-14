@@ -1072,57 +1072,57 @@ MakeCvtF2FdTest(down, a >= result)
 MakeCvtF2FdTest(zero, std::abs(a) >= std::abs(result))
 MakeCvtF2FdTest(near, (f32) a == result)
 
-template<class T> static void AtomicAndLogic(T result, T *a, T b) {
-  EXPECT_EQ(*a, T(result & b));
+template<class T> static void AtomicAndLogic(T result, T a, T b) {
+  EXPECT_EQ(T(a & b), result);
 }
 TestAll(AtomicInst, And, Binary)
 
-template<class T> static void AtomicOrLogic(T result, T *a, T b) {
-  EXPECT_EQ(*a, T(result | b));
+template<class T> static void AtomicOrLogic(T result, T a, T b) {
+  EXPECT_EQ(T(a | b), result);
 }
 TestAll(AtomicInst, Or, Binary)
 
-template<class T> static void AtomicXorLogic(T result, T* a, T b) {
-  EXPECT_EQ((result | b) & ~(result & b), *a);
+template<class T> static void AtomicXorLogic(T result, T a, T b) {
+  EXPECT_EQ(T(a ^ b), result);
 }
 TestAll(AtomicInst, Xor, Binary)
 
-template<class T> static void AtomicExchLogic(T result, T* a, T b) {
-  EXPECT_EQ(b, *a);
+template<class T> static void AtomicExchLogic(T result, T a, T b) {
+  EXPECT_EQ(b, result);
 }
 TestAll(AtomicInst, Exch, Binary)
 
-template<class T> static void AtomicAddLogic(T result, T* a, T b) {
-  if(isNan(result) || isNan(b)) {
-    EXPECT_PRED1(isNan<T>, *a);
-  } else if((isPosInf(*a) && isNegInf(b))) {
-    EXPECT_PRED1(isNan<T>, *a);
-  } else if((isNegInf(result) && isPosInf(b))) {
-    EXPECT_PRED1(isNan<T>, *a);
+template<class T> static void AtomicAddLogic(T result, T a, T b) {
+  if(isNan(a) || isNan(b)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(isPosInf(a) && isNegInf(b)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(isNegInf(a) && isPosInf(b)) {
+    EXPECT_PRED1(isNan<T>, result);
   } else {
-    EXPECT_EQ(T(result + b), *a);
+    EXPECT_EQ(T(a + b), result);
   }
 }
 TestAll(AtomicInst, Add, Binary)
 
-template<class T> static void AtomicSubLogic(T result, T* a, T b) {
-  if(isNan(result) || isNan(b)) {
-    EXPECT_PRED1(isNan<T>, *a);
-  } else if((isPosInf(*a) && isNegInf(b))) {
-    EXPECT_PRED1(isNan<T>, *a);
-  } else if((isNegInf(result) && isPosInf(b))) {
-    EXPECT_PRED1(isNan<T>, *a);
+template<class T> static void AtomicSubLogic(T result, T a, T b) {
+  if(isNan(a) || isNan(b)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(isPosInf(a) && isPosInf(b)) {
+    EXPECT_PRED1(isNan<T>, result);
+  } else if(isNegInf(a) && isNegInf(b)) {
+    EXPECT_PRED1(isNan<T>, result);
   } else {
-    EXPECT_EQ(T(result - b), *a);
+    EXPECT_EQ(T(a - b), result);
   }
 }
 TestAll(AtomicInst, Sub, Binary)
 
-template<class T> static void AtomicCasLogic(T result, T* a, T b, T c) {
-  if(result == b) {
-    EXPECT_EQ(c, *a);
+template<class T> static void AtomicCasLogic(T result, T a, T b, T c) {
+  if(a == b) {
+    EXPECT_EQ(c, result);
   } else {
-    EXPECT_EQ(result, *a);
+    EXPECT_EQ(a, result);
   }
 }
 TestAll(AtomicInst, Cas, Ternary)

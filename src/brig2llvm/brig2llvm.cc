@@ -39,7 +39,7 @@ static llvm::StructType *createSOAType(llvm::LLVMContext &C,
   return soa_type;
 }
 
-static void gen_GPU_states(llvm::LLVMContext &C) {
+static void insertGPUStateTy(llvm::LLVMContext &C) {
   llvm::StructType *c_reg_type =
     createSOAType(C, llvm::Type::getInt1Ty(C), "c_regs", 8);
   llvm::StructType *s_reg_type =
@@ -56,6 +56,14 @@ static void gen_GPU_states(llvm::LLVMContext &C) {
                         q_reg_type,
                         pc_reg_type };
   llvm::StructType::create(C, tv1, std::string("struct.regs"), false);
+}
+
+static void insertSetThreadInfo(llvm::LLVMContext &C, llvm::Module *M) {
+  llvm::Type *voidTy = llvm::Type::getVoidTy(C);
+  llvm::Type *args[] = { llvm::Type::getInt8PtrTy(C) };
+  llvm::FunctionType *setThreadInfoTy =
+    llvm::FunctionType::get(voidTy, args, false);
+  M->getOrInsertFunction("__setThreadInfo", setThreadInfoTy);
 }
 
 static llvm::Type *getElementTy(llvm::LLVMContext &C, BrigDataType type) {
@@ -648,18 +656,30 @@ static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
   }
 }
 
-// Work around limitations of MCJIT. MCJIT can call a function if the function's
-// type is similar to main. We create a trampoline with the function signature:
-// void fun(int argc, char **argv)
+static llvm::Value *getParameter(llvm::BasicBlock *bb,
+                                 llvm::Value *argArray,
+                                 llvm::Type *paramTy,
+                                 unsigned paramNo) {
+  llvm::LLVMContext &C = bb->getContext();
+  llvm::Value *offset =
+    llvm::ConstantInt::get(llvm::Type::getInt32Ty(C), paramNo);
+  llvm::Value *gep = llvm::GetElementPtrInst::Create(argArray, offset, "", bb);
+
+  llvm::Value *load = new llvm::LoadInst(gep, "", bb);
+  return new llvm::BitCastInst(load, paramTy, "", bb);
+}
+
+
+// We create a trampoline with the function signature:
+// void fun(char **argv)
 // The real function arguments are encoded in the argv array.
-// The argc parameter is ignored.
 static void makeKernelTrampoline(llvm::Function *fun, const char *name) {
 
   llvm::LLVMContext &C = fun->getContext();
+  llvm::Module *M = fun->getParent();
 
   llvm::Type *voidTy = llvm::Type::getVoidTy(C);
   llvm::Type *trampArgs[] = {
-    llvm::Type::getInt32Ty(C),
     llvm::Type::getInt8Ty(C)->getPointerTo()->getPointerTo()
   };
   llvm::FunctionType *trampFunTy =
@@ -670,21 +690,17 @@ static void makeKernelTrampoline(llvm::Function *fun, const char *name) {
     llvm::Function::Create(trampFunTy, linkage, name, fun->getParent());
   llvm::BasicBlock *bb = llvm::BasicBlock::Create(C, "", trampFun);
 
-  llvm::Value *argArray = ++trampFun->arg_begin();
+  llvm::Value *argArray = trampFun->arg_begin();
+  llvm::Type *int8PtrTy = llvm::Type::getInt8PtrTy(C);
+  llvm::Value *args[] = { getParameter(bb, argArray, int8PtrTy, 0) };
+  llvm::Value *setThreadInfoFun = M->getFunction("__setThreadInfo");
+  llvm::CallInst::Create(setThreadInfoFun, args, "", bb);
+
   llvm::FunctionType *funTy = fun->getFunctionType();
   std::vector<llvm::Value *> trampParams;
   for(unsigned i = 0; i < fun->arg_size(); ++i) {
-
-    llvm::Value *offset =
-      llvm::ConstantInt::get(llvm::Type::getInt32Ty(C), i);
-    llvm::Value *gep =
-      llvm::GetElementPtrInst::Create(argArray, offset, "", bb);
-
-    llvm::Value *load = new llvm::LoadInst(gep, "", bb);
-
     llvm::Type *paramTy = funTy->getParamType(i);
-    llvm::Value *bitcast = new llvm::BitCastInst(load, paramTy, "", bb);
-    trampParams.push_back(bitcast);
+    trampParams.push_back(getParameter(bb, argArray, paramTy, i + 1));
   }
 
   llvm::CallInst::Create(fun, trampParams, "", bb);
@@ -793,7 +809,8 @@ BrigProgram GenLLVM::getLLVMModule(const BrigModule &M) {
   llvm::LLVMContext *C = new llvm::LLVMContext();
   llvm::Module *mod = new llvm::Module("BRIG", *C);
 
-  gen_GPU_states(*C);
+  insertGPUStateTy(*C);
+  insertSetThreadInfo(*C, mod);
 
   SymbolMap symbolMap;
   for(BrigSymbol symbol = M.global_begin(),
