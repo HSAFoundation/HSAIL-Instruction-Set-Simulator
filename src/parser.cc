@@ -993,24 +993,13 @@ int Instruction2OpcodeFtz(Context* context) {
 }
 
 int Instruction2(Context* context) {
-
-  // First token must be an Instruction2Opcode
   switch (context->token_type) {
     case INSTRUCTION2_OPCODE:
-      if (!Instruction2OpcodeDT(context)) {
-        return 0;
-      }
-      break;
+      return Instruction2OpcodeDT(context);
     case INSTRUCTION2_OPCODE_NODT:
-      if (!Instruction2OpcodeNoDT(context)) {
-        return 0;
-      }
-      break;
+      return Instruction2OpcodeNoDT(context);
     case INSTRUCTION2_OPCODE_FTZ:
-      if (!Instruction2OpcodeFtz(context)) {
-        return 0;
-      }
-      break;
+      return Instruction2OpcodeFtz(context);
     default:
       return 1;
   }
