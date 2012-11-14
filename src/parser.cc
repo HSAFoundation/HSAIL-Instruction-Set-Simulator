@@ -2494,7 +2494,7 @@ int FileDecl(Context* context) {
   return 0;
 }
 
-int SignatureType(Context *context) {
+int SignatureType(Context *context, std::vector<BrigDirectiveSignature::BrigProtoType> *types) {
   // alignment optional
   if (ALIGN == context->token_to_scan) {
     if (Alignment(context)) 
@@ -2528,9 +2528,14 @@ int SignatureType(Context *context) {
     (context->get_dim() != 0),   // hasDim
     context->get_dim()           // dim
   };
-  context->types.push_back(bpt);
+  types->push_back(bpt);
 
   return 0;
+}
+
+int SignatureType(Context *context) {
+  std::vector<BrigDirectiveSignature::BrigProtoType> types;
+  return SignatureType(context,&types);
 }
 
 int SysCall(Context* context) {
@@ -2625,25 +2630,30 @@ int SysCall(Context* context) {
   return 1;
 }
 
-int SignatureArgumentList(Context *context) {
+int SignatureArgumentList(Context *context, std::vector<BrigDirectiveSignature::BrigProtoType> *types) {
   while (1) {
-    if (ARG == context->token_to_scan
-        || ALIGN == context->token_to_scan ) {
-      if (!SignatureType(context)) {
-        if (',' == context->token_to_scan) {
-          context->token_to_scan = yylex();
-          continue;
-        } else {
-          break;
-        }
-      }
-    } else {
-      context->set_error(MISSING_ARGUMENT);
+    if(')' == context->token_to_scan)
+      return 0;
+
+    if (SignatureType(context,types)) 
       return 1;
-    }
+
+    if (',' == context->token_to_scan)
+      context->token_to_scan = yylex();
   }
   return 0;
 }
+
+int SignatureArgumentList(Context *context) {
+  std::vector<BrigDirectiveSignature::BrigProtoType> types;
+  if ('(' == context->token_to_scan) {
+    context->token_to_scan = yylex();
+    return SignatureArgumentList(context,&types);
+  } else {
+    return 1;
+  }
+}
+
 
 int FunctionSignature(Context *context) {
   // first token is SIGNATURE
