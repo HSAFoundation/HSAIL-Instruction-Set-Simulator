@@ -1545,32 +1545,34 @@ int FunctionDecl(Context *context){
 int ArgBlock(Context* context) {
   // first token should be {
   // add BrigDirectiveScope
+  if ('{' != context->token_to_scan) {
+    return 1;
+  }
   BrigDirectiveScope argblock_start = {
     sizeof(BrigDirectiveScope),
     BrigEDirectiveArgStart,
     context->get_code_offset()
   };
   context->append_directive(&argblock_start);
+
   context->token_to_scan = yylex();
-  if (!ArgStatements(context)) {
-    BrigDirectiveScope argblock_end = {
-      sizeof(BrigDirectiveScope),
-      BrigEDirectiveArgEnd,
-      context->get_code_offset()
-    };
-    context->append_directive(&argblock_end);
-    if (context->token_to_scan == '}') {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_CLOSING_BRACKET);
-      return 1;
-    }
-  } else {
+  if (ArgStatements(context)) {
     context->set_error(INVALID_ARG_BLOCK);
     return 1;
   }
-  return 1;
+  BrigDirectiveScope argblock_end = {
+    sizeof(BrigDirectiveScope),
+    BrigEDirectiveArgEnd,
+    context->get_code_offset()
+  };
+  context->append_directive(&argblock_end);
+
+  if ('}' != context->token_to_scan) {
+    context->set_error(MISSING_CLOSING_BRACKET);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int CodeBlockEnd(Context* context) {
