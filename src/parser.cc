@@ -2654,80 +2654,81 @@ int SignatureArgumentList(Context *context) {
   }
 }
 
-
 int FunctionSignature(Context *context) {
+  BrigsOffset32_t s_name = 0 ;
+  uint32_t inCount = 0;
+  uint32_t outCount = 0;
+  std::vector<BrigDirectiveSignature::BrigProtoType> types;
+
   // first token is SIGNATURE
+  if (SIGNATURE != context->token_to_scan) 
+    return 1;
+
   context->token_to_scan = yylex();
-
-  size_t inCount = 0;
-  size_t outCount = 0;
-  if (TOKEN_GLOBAL_IDENTIFIER == context->token_to_scan) {
-    std::string name = context->token_value.string_val;
-    BrigsOffset32_t name_offset = context->add_symbol(name);
-    context->token_to_scan = yylex();
-    // check return argument list
-    if ('(' == context->token_to_scan) {
-      context->token_to_scan = yylex();
-      if (')' == context->token_to_scan) {  // empty signature Argument List
-        context->token_to_scan = yylex();
-      } else if (!SignatureArgumentList(context)) {
-        outCount = context->types.size();
-        if (context->token_to_scan == ')')
-          context->token_to_scan = yylex();
-        else
-          context->set_error(MISSING_CLOSING_PARENTHESIS);
-      }
-    } else {
-      context->set_error(MISSING_OPENNING_BRACKET);
-      return 1;
-    }
-
-    // for input argument
-    if ('(' == context->token_to_scan) {
-      context->token_to_scan = yylex();
-      if (')' == context->token_to_scan) {  // empty
-        context->token_to_scan = yylex();
-      } else if (!SignatureArgumentList(context)) {
-        inCount = context->types.size() - outCount ;
-        if (context->token_to_scan == ')')
-          context->token_to_scan = yylex();
-        else
-          context->set_error(MISSING_CLOSING_PARENTHESIS);
-      }
-    } else {
-      context->set_error(MISSING_OPENNING_BRACKET);
-      return 1;
-    }
-
-    if (';' == context->token_to_scan) {  // end with ;
-
-      size_t arraySize = sizeof(BrigDirectiveSignature) +
-             (context->types.size() - 1) * sizeof(BrigDirectiveSignature::BrigProtoType);
-      uint8_t *array  = new uint8_t[arraySize];
-      BrigDirectiveSignature *bds =
-          reinterpret_cast<BrigDirectiveSignature*>(array);
-
-      bds->size = arraySize;
-      bds->kind = BrigEDirectiveSignature;
-      bds->c_code = context->get_code_offset();
-      bds->s_name = name_offset;
-      bds->outCount = outCount;
-      bds->inCount = inCount;
-      for(uint32_t i = 0;i < context->types.size();i++)
-        memmove(&bds->types[i],&context->types[i],sizeof(BrigDirectiveSignature::BrigProtoType));
-      context->append_directive(bds);
-
-      delete[] reinterpret_cast<char *>(bds);
-      context->types.clear();
-
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
+  if (TOKEN_GLOBAL_IDENTIFIER != context->token_to_scan) {
+    context->set_error(MISSING_GLOBAL_IDENTIFIER);
+    return 1;
   }
-  return 1;
+  std::string name(context->token_value.string_val);
+  s_name = context->add_symbol(name);
+
+  // optional output
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == '(') {
+    context->token_to_scan = yylex();
+    if(SignatureArgumentList(context, &types)){
+      context->set_error(INVALID_ARGUMENT_LIST);
+      return 1;
+    } 
+   if (context->token_to_scan != ')') {
+      context->set_error(MISSING_CLOSING_PARENTHESIS);
+      return 1;
+    }
+    outCount = types.size();
+    context->token_to_scan = yylex();
+  }
+
+  // optional input
+  if (context->token_to_scan == '(') {
+    context->token_to_scan = yylex();
+    if (SignatureArgumentList(context, &types)){
+      context->set_error(INVALID_ARGUMENT_LIST);
+      return 1;
+    } 
+    if (context->token_to_scan != ')') {
+      context->set_error(MISSING_CLOSING_PARENTHESIS);
+      return 1;
+    }
+    inCount = types.size() - outCount;
+    context->token_to_scan = yylex();
+  }
+
+  if (';' != context->token_to_scan) {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+
+  size_t arraySize = sizeof(BrigDirectiveSignature) +
+         (types.size() - 1) * sizeof(BrigDirectiveSignature::BrigProtoType);
+  uint8_t *array  = new uint8_t[arraySize];
+  BrigDirectiveSignature *bds =
+      reinterpret_cast<BrigDirectiveSignature*>(array);
+
+  bds->size = arraySize;
+  bds->kind = BrigEDirectiveSignature;
+  bds->c_code = context->get_code_offset();
+  bds->s_name = s_name;
+  bds->outCount = outCount;
+  bds->inCount = inCount;
+  for (uint32_t i = 0, size = types.size(); i < size; i++)
+    memmove(&bds->types[i],&types[i],sizeof(BrigDirectiveSignature::BrigProtoType));
+  context->append_directive(bds);
+
+  delete[] reinterpret_cast<char *>(bds);
+  types.clear();
+
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Label(Context* context) {
