@@ -333,125 +333,104 @@ int AddressableOperand(Context* context) {
 }
 
 int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler){
-  // context->token_to_scan must be non register
+  bool isIntConst = false; // check if match [name<int>]
+  bool isBracket = false;  // check if include <..> in the [name ..]
+
+  BrigdOffset32_t directive = 0;
+  BrigoOffset32_t reg = 0;
+  int32_t offset = 0;
+
+  // first token must be non register
   if ((context->token_to_scan != TOKEN_GLOBAL_IDENTIFIER) &&
       (context->token_to_scan != TOKEN_LOCAL_IDENTIFIER)) {
     return 1;    
   }
   std::string name(context->token_value.string_val);
+  /*if (!context->symbol_map.count(name)) {
+      context->set_error(MISSING_OPERAND);
+       return 1;
+    }*/
+  directive = context->symbol_map[name];
   context->token_to_scan = yylex();
 
-  if (context->token_to_scan == ']') {
-    if (!IsImageOrSampler) {
-      BrigOperandAddress boa = {
-        sizeof(boa),            // size
-        BrigEOperandAddress,    // kind
-        Brigb32,                // type
-        0,                      // reserved
-        0
-      };
-      /*if (!context->symbol_map.count(name)) {
-        context->set_error(MISSING_OPERAND);
-        return 1;
-      }*/
-      boa.directive = context->symbol_map[name];
+  // check <..>
+  if (context->token_to_scan == '<') {
+    isBracket = true;
 
-      if (context->get_machine() == BrigELarge) {
-        boa.type = Brigb64;
-      }
-      *pRetOpOffset = context->get_operand_offset();
-      context->append_operand(&boa);
-    } else {
-      BrigOperandOpaque boo = {
-        sizeof(BrigOperandOpaque),
-        BrigEOperandOpaque,
-        0,                      // name
-        0,                      // reg
-        0                       // offset
-      };
-      /*if (!context->symbol_map.count(name)) {
-        context->set_error(MISSING_OPERAND);
-        return 1;
-      }*/
-      boo.directive = context->symbol_map[name];
-      *pRetOpOffset = context->get_operand_offset();
-      context->append_operand(&boo);
-    }   
-  } else  if (context->token_to_scan == '<') {
-    if (!IsImageOrSampler) {
-      context->set_error(INVALID_OPERATION);
-      return 1;
-    }
-    BrigOperandOpaque boo = {
-      sizeof(BrigOperandOpaque),
-      BrigEOperandOpaque,
-      context->symbol_map[name], // name
-      0,                         // reg
-      0                          // offset
-    };
     context->token_to_scan = yylex();
     if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      boo.offset = context->token_value.int_val;
-      context->token_to_scan = yylex();
-      if (context->token_to_scan != '>') {
-        context->set_error(MISSING_CLOSING_BRACKET);
-        return 1;
-      }
-      context->token_to_scan = yylex();
-      if (context->token_to_scan != ']') {
-        context->set_error(MISSING_CLOSING_BRACKET);
-        return 1;
-      }
-      *pRetOpOffset = context->get_operand_offset();
-      context->append_operand(&boo);          
+      isIntConst = true ;
+      offset = context->token_value.int_val;
     } else if (context->token_to_scan == TOKEN_SREGISTER) {
-      name = context->token_value.string_val;
+      std::string regName = context->token_value.string_val;
       if (Identifier(context)) {
           return 1;
       }
-      boo.reg = context->operand_map[name];
-      context->token_to_scan = yylex();
-      if (context->token_to_scan == '>') {
-        context->token_to_scan = yylex();
-        if (context->token_to_scan != ']') {
-          context->set_error(MISSING_CLOSING_BRACKET);
-          return 1;
-        }
-        *pRetOpOffset = context->get_operand_offset();
-        context->append_operand(&boo);        
-      } else if ((context->token_to_scan == '+') ||
-                   (context->token_to_scan == '-')) {
-        int sign = 1;
-        if (context->token_to_scan == '-') {
-          sign = -1;
-        }
-        context->token_to_scan = yylex();
-        if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
-          context->set_error(MISSING_INTEGER_CONSTANT);
-          return 1;   
-        }
-        boo.offset = context->token_value.int_val * sign;
-        context->token_to_scan = yylex();
-        if (context->token_to_scan != '>') {
-          context->set_error(MISSING_CLOSING_BRACKET);
-          return 1;
-        }
-        context->token_to_scan = yylex();
-        if (context->token_to_scan != ']') {
-          context->set_error(MISSING_CLOSING_BRACKET);
-          return 1;
-        }
-        *pRetOpOffset = context->get_operand_offset();
-        context->append_operand(&boo);        
-      } 
-    }else {
-        context->set_error(MISSING_OPERAND);
-        return 1;
+      reg = context->operand_map[regName];
+    } else {
+      context->set_error(MISSING_OPERAND);
+      return 1;
     }
-  } else{
-    context->set_error(MISSING_OPERAND);
+    context->token_to_scan = yylex();
+
+    if ((!isIntConst) && ((context->token_to_scan == '+') ||
+                          (context->token_to_scan == '-'))) {
+      int sign = 1;
+      if (context->token_to_scan == '-') {
+        sign = -1;
+      }
+
+      context->token_to_scan = yylex();
+      if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+        context->set_error(MISSING_INTEGER_CONSTANT);
+        return 1;   
+      }
+      offset = context->token_value.int_val * sign;  
+      
+      context->token_to_scan = yylex();   
+    }
+
+    if (context->token_to_scan != '>') {
+      context->set_error(MISSING_CLOSING_BRACKET);
+      return 1;
+    }
+    context->token_to_scan = yylex();
+  } 
+  // end with ]
+  if (context->token_to_scan != ']') {
+    context->set_error(INVALID_OPERAND);
     return 1;
   }
+  if (!IsImageOrSampler && !isBracket) {
+    BrigOperandAddress boa = {
+      sizeof(boa),               // size
+      BrigEOperandAddress,       // kind
+      Brigb32,                   // type
+      0,                         // reserved
+      directive                  // directive
+    };
+
+    if (context->get_machine() == BrigELarge) {
+      boa.type = Brigb64;
+    }
+    *pRetOpOffset = context->get_operand_offset();
+    context->append_operand(&boa);
+  } else if (IsImageOrSampler) {
+    BrigOperandOpaque boo = {
+      sizeof(BrigOperandOpaque), // size
+      BrigEOperandOpaque,        // kind
+      directive,                 // directive
+      reg,                       // reg
+      offset                     // offset
+    };
+
+    *pRetOpOffset = context->get_operand_offset();
+    context->append_operand(&boo);
+  } else {
+    context->set_error(INVALID_OPERATION);
+    return 1;
+  }
+
   context->token_to_scan = yylex();
   return 0;
 }
