@@ -2496,54 +2496,32 @@ int FileDecl(Context* context) {
 
 int SignatureType(Context *context) {
   // alignment optional
-  if (ALIGN == context->token_to_scan){
-    if (Alignment(context))
+  if (ALIGN == context->token_to_scan) {
+    if (Alignment(context)) 
       return 1;
-    if (ARG == context->token_to_scan){
-      context->token_to_scan = yylex();
-      if (DATA_TYPE_ID == context->token_type){
-        context->set_type(context->token_value.data_type);
-        context->token_to_scan = yylex();
-        // set default value(scalar)
-        context->set_dim(0);
-        //context->set_symbol_modifier(BrigArray);
-        if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
-          context->token_to_scan = yylex();
-          if ('[' == context->token_to_scan ){
-            if (!ArrayDimensionSet(context)){
-            } else {
-              return 1;
-        }
-      }
-    }
-      }
-    }
-  } else if (ARG == context->token_to_scan){
-    context->token_to_scan = yylex();
-    if (DATA_TYPE_ID == context->token_type) {
-      context->set_type(context->token_value.data_type);
-      context->token_to_scan = yylex();
-      // set default value(scalar)
-      context->set_dim(0);
-     // context->set_symbol_modifier(BrigArray);
-      if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan){
-      // ignore the local identifier
-        context->token_to_scan = yylex();
-        if ('[' == context->token_to_scan){
-          if (ArrayDimensionSet(context)) {
-            return 1;
-          }
-        }
-      }
-    } else if (_ROIMG == context->token_to_scan
-             || _RWIMG == context->token_to_scan
-             || _SAMP == context->token_to_scan ) {
-      context->set_type(context->token_value.data_type);
-      context->token_to_scan = yylex();
-    }
-  } else {
+  }
+
+  if (ARG != context->token_to_scan) {
     return 1;
   }
+
+  context->token_to_scan = yylex();
+  if (DATA_TYPE_ID != context->token_type) {
+    context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  context->set_type(context->token_value.data_type);
+
+  context->token_to_scan = yylex();
+  if (TOKEN_LOCAL_IDENTIFIER == context->token_to_scan) {
+    context->token_to_scan = yylex();
+  }
+
+  context->set_dim(0);
+  if ('[' == context->token_to_scan )
+    if (ArrayDimensionSet(context))
+      return 1;
+
   BrigDirectiveSignature::BrigProtoType bpt = {
     context->get_type(),
     context->get_alignment(),
