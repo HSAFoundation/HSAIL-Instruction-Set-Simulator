@@ -1297,35 +1297,38 @@ int DeclPrefix(Context* context){
 }
 
 int ArrayDimensionSet(Context* context) {
-  // first token must be '['
   uint32_t dim = 1;
   bool have_size = false;
   context->set_isArray(true);
+
+  // first token must be '['
+  if ('[' != context->token_to_scan) {
+    return 1;
+  }
   context->token_to_scan = yylex();
 
   while (1) {
-    if (context->token_to_scan == ']') {
-      context->token_to_scan = yylex();  // check if there is more item
-      if (context->token_to_scan == '[') {  // more item
-        context->token_to_scan = yylex();
-      } else {  // no more item
-        break;
-      }
-    } else if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
+    if (TOKEN_INTEGER_CONSTANT == context->token_to_scan ) {
       have_size = true;
       dim *= context->token_value.int_val;
-      context->token_to_scan = yylex();  // scan next
-    } else {
+      context->token_to_scan = yylex(); 
+    }
+    if (']' != context->token_to_scan) {
       context->set_error(MISSING_CLOSING_BRACKET);
       return 1;
     }
+    context->token_to_scan = yylex();
+    if ('[' == context->token_to_scan)
+      context->token_to_scan = yylex();
+    else 
+      break;
   }
+  
   if (!have_size){
-    context->set_dim(0);// flexiable array
-    //context->set_symbol_modifier(BrigArray);
+    context->set_dim(0);
     context->set_symbol_modifier(BrigFlex);
   } else {
-    context->set_dim(dim); // vector(size in dim)
+    context->set_dim(dim);
     context->set_symbol_modifier(BrigArray);
   }
   return 0;
