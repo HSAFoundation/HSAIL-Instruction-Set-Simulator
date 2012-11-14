@@ -1221,59 +1221,79 @@ int Alignment(Context* context) {
 }
 
 int DeclPrefix(Context* context){
+  context->set_attribute(BrigNone);
+  context->init_symbol_modifier();
 
-    context->set_attribute(BrigNone);
-    context->init_symbol_modifier();
-    if((context->token_to_scan == ALIGN) || (context->token_to_scan == EXTERN) || (context->token_to_scan == STATIC) || (context->token_to_scan==CONST)){
-        switch(context->token_to_scan){
-            case ALIGN: if(Alignment(context)) return 1;
-                        break;
-            case CONST:
-                        context->set_symbol_modifier(BrigConst);
-                        context->token_to_scan = yylex();
-                        break;
-            default: if(context->token_to_scan==EXTERN)
-                        context->set_attribute(BrigExtern);
-                     else if(context->token_to_scan == STATIC)
-                            context->set_attribute(BrigStatic);
-                     context->token_to_scan = yylex();
-                     break;
-        }
-    }else return 0;
-
-    if((context->token_to_scan == ALIGN) || (context->token_to_scan == EXTERN) || (context->token_to_scan == STATIC) || (context->token_to_scan==CONST)){
-        switch(context->token_to_scan){
-            case ALIGN: if(Alignment(context)) return 1;
-                        break;
-            case CONST:
-                        context->set_symbol_modifier(BrigConst);
-                        context->token_to_scan = yylex();
-                        break;
-            default: if(context->token_to_scan==EXTERN)
-                        context->set_attribute(BrigExtern);
-                     else if(context->token_to_scan == STATIC)
-                            context->set_attribute(BrigStatic);
-                     context->token_to_scan = yylex();
-                     break;
-        }
-    } else return 0;
-    if((context->token_to_scan == ALIGN) || (context->token_to_scan == EXTERN) || (context->token_to_scan == STATIC) || (context->token_to_scan==CONST)){
-        switch(context->token_to_scan){
-            case ALIGN: if(Alignment(context)) return 1;
-                        break;
-            case CONST:
-                        context->set_symbol_modifier(BrigConst);
-                        context->token_to_scan = yylex();
-                        break;
-            default: if(context->token_to_scan==EXTERN)
-                        context->set_attribute(BrigExtern);
-                     else if(context->token_to_scan == STATIC)
-                            context->set_attribute(BrigStatic);
-                     context->token_to_scan = yylex();
-                     break;
-        }
+  if ((context->token_to_scan == ALIGN)  ||
+     (context->token_to_scan == EXTERN) || 
+     (context->token_to_scan == STATIC) || 
+     (context->token_to_scan == CONST)) {
+    switch (context->token_to_scan){
+      case ALIGN:
+        if (Alignment(context))
+          return 1;
+        break;
+      case CONST:
+        context->set_symbol_modifier(BrigConst);
+        context->token_to_scan = yylex();
+        break;
+      default:
+        if (context->token_to_scan==EXTERN)
+          context->set_attribute(BrigExtern);
+        else if (context->token_to_scan == STATIC)
+          context->set_attribute(BrigStatic);
+        context->token_to_scan = yylex();
+        break;
     }
+  } else 
     return 0;
+
+  if ((context->token_to_scan == ALIGN) ||
+     (context->token_to_scan == EXTERN) ||
+     (context->token_to_scan == STATIC) ||
+     (context->token_to_scan==CONST)) {
+    switch (context->token_to_scan) {
+      case ALIGN:
+        if (Alignment(context))
+          return 1;
+        break;
+      case CONST:
+        context->set_symbol_modifier(BrigConst);
+        context->token_to_scan = yylex();
+        break;
+      default:
+        if (context->token_to_scan == EXTERN)
+          context->set_attribute(BrigExtern);
+        else if (context->token_to_scan == STATIC)
+          context->set_attribute(BrigStatic);
+        context->token_to_scan = yylex();
+        break;
+    }
+  } else
+    return 0;
+  if ((context->token_to_scan == ALIGN) ||
+     (context->token_to_scan == EXTERN) ||
+     (context->token_to_scan == STATIC) ||
+     (context->token_to_scan==CONST)) {
+    switch (context->token_to_scan){
+      case ALIGN:
+        if (Alignment(context))
+          return 1;
+        break;
+      case CONST:
+        context->set_symbol_modifier(BrigConst);
+        context->token_to_scan = yylex();
+        break;
+      default:
+        if (context->token_to_scan==EXTERN)
+          context->set_attribute(BrigExtern);
+        else if (context->token_to_scan == STATIC)
+          context->set_attribute(BrigStatic);
+      context->token_to_scan = yylex();
+      break;
+    }
+  }
+  return 0;
 }
 
 int ArrayDimensionSet(Context* context) {
