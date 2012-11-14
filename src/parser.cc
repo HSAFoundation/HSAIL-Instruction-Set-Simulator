@@ -1115,7 +1115,6 @@ int Instruction3(Context* context) {
 }
 
 int Version(Context* context) {
-  // first token must be version keyword
   BrigDirectiveVersion bdv;
   bdv.kind = BrigEDirectiveVersion;
   bdv.size = sizeof(BrigDirectiveVersion);
@@ -1125,81 +1124,84 @@ int Version(Context* context) {
   bdv.machine = BrigELarge;
   bdv.profile = BrigEFull;
   bdv.ftz = BrigENosftz;
+
+  // first token must be version
+  if (VERSION != context->token_to_scan) {
+    return 1;
+  }
   context->token_to_scan = yylex();
-  if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-    bdv.major = context->token_value.int_val;
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ':') {
-      context->token_to_scan = yylex();
-      // check for minor
-      if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-        bdv.minor = context->token_value.int_val;
-        context->token_to_scan = yylex();
 
-        if (context->token_to_scan == ';') {
-        } else if (context->token_to_scan == ':') {
-          // check for target
-          context->token_to_scan = yylex();
-          while (context->token_to_scan != ';') {
-            if (context->token_type == TARGET) {
-              switch (context->token_to_scan) {
-                case _SMALL:
-                  bdv.machine = BrigESmall;
-                  break;
-                case _LARGE:
-                  bdv.machine = BrigELarge;
-                  break;
-                case _FULL:
-                  bdv.profile = BrigEFull;
-                  break;
-                case _REDUCED:
-                  bdv.profile = BrigEReduced;
-                  break;
-                case _SFTZ:
-                  bdv.ftz = BrigESftz;
-                  break;
-                case _NOSFTZ:
-                  bdv.ftz = BrigENosftz;
-                  break;
-              }
-
-              // update context
-              context->set_machine(bdv.machine);
-              context->set_profile(bdv.profile);
-              
-              context->token_to_scan = yylex();
-              if (context->token_to_scan == ',') {
-                context->token_to_scan = yylex();      // next target
-              } else {
-                if (context->token_to_scan != ';') {
-                  context->set_error(MISSING_SEMICOLON);
-                  return 1;
-                }
-              }
-            } else {
-              context->set_error(INVALID_TARGET);
-              return 1;
-            }
-          }
-        } else {
-          context->set_error(MISSING_SEMICOLON);
-          return 1;
-        }
-        context->append_directive(&bdv);
-        context->token_to_scan = yylex();
-        context->set_error(OK);
-        return 0;
-      } else {
-      context->set_error(MISSING_INTEGER_CONSTANT);
-      }
-    } else {
-    context->set_error(MISSING_COLON);
-    }
-  } else {
+  if (TOKEN_INTEGER_CONSTANT != context->token_to_scan) {
     context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+  bdv.major = context->token_value.int_val;
+  context->token_to_scan = yylex();
+
+  if (':' != context->token_to_scan) {
+    context->set_error(MISSING_COLON);
+    return 1;
+  }
+  context->token_to_scan = yylex(); 
+
+  if (TOKEN_INTEGER_CONSTANT != context->token_to_scan) {
+    context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }  
+  bdv.minor = context->token_value.int_val;
+  context->token_to_scan = yylex();
+
+  if (':' == context->token_to_scan) {
+    context->token_to_scan = yylex();
+    while ( ';' != context->token_to_scan) {
+      if (TARGET != context->token_type) {
+        context->set_error(INVALID_TARGET);
+        return 1;
+      }
+      switch (context->token_to_scan) {
+        case _SMALL:
+          bdv.machine = BrigESmall;
+          break;
+        case _LARGE:
+          bdv.machine = BrigELarge;
+          break;
+        case _FULL:
+          bdv.profile = BrigEFull;
+          break;
+        case _REDUCED:
+          bdv.profile = BrigEReduced;
+          break;
+        case _SFTZ:
+          bdv.ftz = BrigESftz;
+          break;
+        case _NOSFTZ:
+          bdv.ftz = BrigENosftz;
+          break;
+      }
+      context->set_machine(bdv.machine);
+      context->set_profile(bdv.profile);
+
+      context->token_to_scan = yylex();
+      if ((',' != context->token_to_scan) &&
+          (';' != context->token_to_scan)) {
+        context->set_error(MISSING_SEMICOLON);
+        return 1;
+      }
+      
+      if (',' == context->token_to_scan) {
+        context->token_to_scan = yylex();
+      }
+    }
+  }
+  if (';' != context->token_to_scan) {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
   }
 
-  return 1;
+  context->append_directive(&bdv);
+  context->token_to_scan = yylex();
+  context->set_error(OK);
+  return 0;   
 }
 
 int Alignment(Context* context) {
