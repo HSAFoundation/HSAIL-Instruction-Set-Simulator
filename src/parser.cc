@@ -1576,16 +1576,16 @@ int ArgBlock(Context* context) {
 }
 
 int CodeBlockEnd(Context* context) {
-  if (context->token_to_scan == '}') {
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ';') {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
-  }else return 1;
+  if ('}' != context->token_to_scan)
+    return 1;
+
+  context->token_to_scan = yylex();
+  if (';' != context->token_to_scan) {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Codeblock(Context* context) {
