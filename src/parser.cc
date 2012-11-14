@@ -2523,10 +2523,10 @@ int SignatureType(Context *context) {
       return 1;
 
   BrigDirectiveSignature::BrigProtoType bpt = {
-    context->get_type(),
-    context->get_alignment(),
-    (context->get_dim() != 0),
-    context->get_dim()
+    context->get_type(),         // type
+    context->get_alignment(),    // align
+    (context->get_dim() != 0),   // hasDim
+    context->get_dim()           // dim
   };
   context->types.push_back(bpt);
 
