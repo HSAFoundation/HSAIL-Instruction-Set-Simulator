@@ -441,11 +441,14 @@ int ArrayOperandList(Context* context) {
 }
 
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
-  // assumed first_token is '('
   unsigned int count_op = 0;
-  BrigoOffset32_t offsets[4] = {0};
-  
+  BrigoOffset32_t offsets[4] = {0};	
   std::string iden_name;
+
+  // first token must be '('
+  if ('(' != context->token_to_scan) 
+    return 1;
+
   while (1) {
     context->token_to_scan = yylex();
     if (count_op > 3){
