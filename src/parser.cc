@@ -1590,38 +1590,35 @@ int CodeBlockEnd(Context* context) {
 
 int Codeblock(Context* context) {
   // first token should be '{'
+  if ('{' != context->token_to_scan)
+    return 1;
+
   context->token_to_scan = yylex();
-  if(!BodyStatements(context)){
-
-      BrigDirectiveFunction bdf;
-      context->get_directive(context->get_bdf_offset(), &bdf);
-	  if(bdf.kind == BrigEDirectiveFunction){
-
-		bdf.d_nextDirective = context->get_directive_offset();
-		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
-		context->update_directive_bytes(bdf_charp,
-                                 context->get_bdf_offset(),
-                                 sizeof(BrigDirectiveFunction));
-	  } else if(bdf.kind == BrigEDirectiveKernel){
-		BrigDirectiveKernel* bdk = reinterpret_cast<BrigDirectiveKernel*> (&bdf); //Since they are the same size
-		bdk->d_nextDirective = context->get_directive_offset();
-		unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(bdk);
-		context->update_directive_bytes(bdf_charp,
-                                 context->get_bdf_offset(),
-                                 sizeof(BrigDirectiveKernel));
-
-	  } else {
-			context->set_error(INVALID_CODEBLOCK);
-			return 1;
-		}
-   }
-	if (context->token_to_scan == '}')
-      return CodeBlockEnd(context);
-	else if(!context->token_to_scan){
-		context->set_error(MISSING_CLOSING_BRACKET);
-		return 1;
-	} else
-		return 1;
+  if (BodyStatements(context)) {
+    context->set_error(INVALID_CODEBLOCK);
+    return 1;
+  }
+  BrigDirectiveFunction bdf;
+  context->get_directive(context->get_bdf_offset(), &bdf);
+  if (bdf.kind == BrigEDirectiveFunction) {
+    bdf.d_nextDirective = context->get_directive_offset();
+    unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(&bdf);
+    context->update_directive_bytes(bdf_charp,
+                             context->get_bdf_offset(),
+                             sizeof(BrigDirectiveFunction));
+  } else if (bdf.kind == BrigEDirectiveKernel) {
+    BrigDirectiveKernel* bdk = reinterpret_cast<BrigDirectiveKernel*> (&bdf); 
+    bdk->d_nextDirective = context->get_directive_offset();
+    unsigned char * bdf_charp = reinterpret_cast<unsigned char*>(bdk);
+    context->update_directive_bytes(bdf_charp,
+                               context->get_bdf_offset(),
+                               sizeof(BrigDirectiveKernel));
+  }
+  if ('}' != context->token_to_scan) {
+    context->set_error(MISSING_CLOSING_BRACKET);
+    return 1;
+  }
+  return CodeBlockEnd(context);
 }
 
 int Functionpart2(Context *context){
