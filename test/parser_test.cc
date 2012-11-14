@@ -1455,17 +1455,17 @@ TEST(ParserTest, SignatureArgumentList) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("arg_u32,arg_b32\n");
+  std::string input("(arg_u32,arg_b32)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
 
-  input.assign("arg_u32,arg_b32 %arg\n");
+  input.assign("(arg_u32,arg_b32 %arg)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
 
-  input.assign("arg_u32 %arg,arg_b32\n");
+  input.assign("(arg_u32 %arg,arg_b32)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
