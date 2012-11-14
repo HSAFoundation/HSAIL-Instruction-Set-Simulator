@@ -1638,13 +1638,13 @@ int Function(Context* context) {
 }
 
 int Program(Context* context) {
-  if (context->token_to_scan == VERSION) {
-    if (!Version(context)) {
-      // parse topLevelStatement
-      return TopLevelStatements(context);
-    }   // if (!Version)
-  } else {
+  // first token must be VERSION
+  if (VERSION != context->token_to_scan) {
     context->set_error(MISSING_VERSION_STATEMENT);
+    return 1;
+  }
+  if (!Version(context)) {
+    return TopLevelStatements(context);
   }
   return 1;
 }
@@ -1667,25 +1667,25 @@ int OptionalWidth(Context* context) {
     width_param = context->token_value.int_val;
   } else if (context->token_to_scan == ALL){
     width_param = 0;
-  } else{
-      context->set_error(INVALID_WIDTH_NUMBER);
-      return 1;
+  } else {
+    context->set_error(INVALID_WIDTH_NUMBER);
+    return 1;
   }
   context->token_to_scan = yylex();
 
-	if(context->token_to_scan != ')'){
+  if (context->token_to_scan != ')') {
     context->set_error(MISSING_CLOSING_PARENTHESIS);
     return 1;
   }
-	BrigOperandImmed op_width = {
-      sizeof(BrigOperandImmed),
-      BrigEOperandImmed,
-      Brigb32,
-      0,
-      { 0 }
-  } ;
+  BrigOperandImmed op_width = {
+    sizeof(BrigOperandImmed),
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    { 0 }
+  };
   op_width.size = sizeof(op_width);
-  if((width_param<= 1024) && ((width_param&0x01) == 0))
+  if ((width_param <= 1024) && ((width_param & 0x01) == 0))
     op_width.bits.u  = width_param ;
   context->append_operand(&op_width);
   context->token_to_scan = yylex();
