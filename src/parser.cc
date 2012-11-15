@@ -1016,7 +1016,7 @@ int Instruction3(Context* context) {
   bool has_modifier = false;
   BrigDataType16_t type = Brigb32;
   BrigOpcode32_t opcode = context->token_value.opcode;
-  BrigPacking16_t packing = BrigNoPacking;
+  BrigPacking packing = BrigNoPacking;
   BrigoOffset32_t OpOffset0 = 0, OpOffset1 = 0, OpOffset2 = 0;
 
   /* Checking for Instruction3 statement  - no error set here*/
@@ -1032,7 +1032,7 @@ int Instruction3(Context* context) {
 
   /*Packing optional*/
   if (context->token_type == PACKING) {
-    packing = context->token_value.packing;
+    packing = ((BrigPacking) context->token_value.packing);
     context->token_to_scan = yylex();
   }
 
@@ -1040,12 +1040,12 @@ int Instruction3(Context* context) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
-  type = context->token_value.data_type;
+  type = (context->token_value.data_type);
   type = (opcode == BrigClass) ? (int)Brigb1 : type;
   context->set_type(type);
   context->token_to_scan = yylex();
   if((opcode==BrigShr) || (opcode==BrigShl))
-    packing = (type >= Brigu8x4) ? BrigPackPS : packing;
+    packing = type >= Brigu8x4 ? BrigPackPS : packing;
     
   if (Operand(context, &OpOffset0)) {
     context->set_error(MISSING_OPERAND);
@@ -3300,7 +3300,8 @@ int Instruction4Cmov(Context* context) {
   }
   context->set_type(context->token_value.data_type);  
   cmovInst.type = context->token_value.data_type;
-  cmovInst.packing = cmovInst.type >= Brigu8x4 ? BrigPackPP : cmovInst.packing;
+  BrigPacking packing = cmovInst.type >= Brigu8x4 ? BrigPackPP : BrigNoPacking;
+  cmovInst.packing = packing;
   context->token_to_scan = yylex();
 
   std::string opName;
