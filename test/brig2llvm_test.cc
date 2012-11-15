@@ -4799,6 +4799,8 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("$s1"));
+    strings.append(std::string("$s2"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
 
@@ -4821,17 +4823,35 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       sizeof(bic),              //size
       BrigEInstCmp,             //kind
       BrigCmp,                  //opcode
-      0,                        //type
+      Brigu32,                  //type
       0,                        //packing
-      {0, 0, 0, 0, 0},          //o_operands[5]
+      {8, 8, 20, 0, 0},         //o_operands[5]
       {0, 0, 0, 0, 0, 0, 0},    //aluModifier
       0,                        //comparisonOperator
-      0,                        //sourceType
+      Brigu32,                  //sourceType
       0                         //reserved
     };
     code.append(&bic);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      8
+    };
+    operands.append(&bor1);
+
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      12
+    };
+    operands.append(&bor2);
 
     hsa::brig::Buffer debug;
 
@@ -5483,6 +5503,8 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("$s1"));
+    strings.append(std::string("$s2"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
 
@@ -5507,7 +5529,7 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       BrigCvt,                  //opcode
       0,                        //type
       0,                        //packing
-      {0, 0, 0, 0, 0},          //o_operands[5]
+      {8, 20, 0, 0, 0},         //o_operands[5]
       {0, 0, 0, 0, 0, 0, 0},    //aluModifier
       0,                        //stype
       0                         //reserved
@@ -5515,6 +5537,24 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
     code.append(&bic);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      8
+    };
+    operands.append(&bor1);
+
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      12
+    };
+    operands.append(&bor2);
 
     hsa::brig::Buffer debug;
 
