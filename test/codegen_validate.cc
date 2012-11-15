@@ -35,7 +35,7 @@ void validate(const BrigInstBase* ref, const BrigInstBase* get,
         caseOperBrig(OperandRegV4);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandLabelRef);
-        // caseOperBrig(OperandFunctionList);
+        case BrigEOperandFunctionList: break;
         caseOperBrig(OperandArgumentList);
         caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandArgumentRef);
@@ -71,6 +71,7 @@ void validate(const BrigInstMod* ref, const BrigInstMod* get,
         caseOperBrig(OperandWaveSz);
         caseOperBrig(OperandAddress);
         caseOperBrig(OperandLabelRef);
+        case BrigEOperandFunctionList: break;
         caseOperBrig(OperandArgumentList);
         caseOperBrig(OperandFunctionRef);
         caseOperBrig(OperandArgumentRef);
@@ -204,16 +205,15 @@ void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
       ASSERT_EQ(refoper->kind, getoper->kind);
       switch(getoper->kind){
         caseOperBrig(OperandReg);
-        caseOperBrig(OperandAddress);
-        caseOperBrig(OperandIndirect);
-        caseOperBrig(OperandCompound);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandCompound);
         caseOperBrig(OperandLabelRef);
         caseOperBrig(OperandFunctionRef);
-        caseOperBrig(OperandRegV4);
         caseOperBrig(OperandRegV2);
-
+        caseOperBrig(OperandRegV4);
         default:
           printf("Offset to invalid operand");
           exit(1);
@@ -605,15 +605,22 @@ void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* g
     dir_iterator refdir(RefOutput->directives + ref->fn);
     dir_iterator getdir(GetOutput->directives + get->fn);
     switch(getdir->kind){
-      caseDirBrig(DirectiveFunction);
+      case BrigEDirectiveFunction: {
+        const BrigDirectiveFunction* refFun = cast<BrigDirectiveFunction>(refdir);
+        const BrigDirectiveFunction* getFun = cast<BrigDirectiveFunction>(getdir);
+        EXPECT_EQ(refFun->size, getFun->size);
+        EXPECT_EQ(refFun->kind, getFun->kind);
+        EXPECT_STREQ(&RefOutput->strings[refFun->s_name], &GetOutput->strings[getFun->s_name]);
+        break;
+      }
       caseDirBrig(DirectiveSignature);
       default:
         printf("Offset to invalid directive");
         exit(1);
+
     }
   }
 }
-
 void validate(const BrigOperandOpaque* ref, const BrigOperandOpaque* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
 
@@ -651,17 +658,21 @@ void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, 
   bool validOffset = (getoffset>=CODEBUFFER_OFFSET) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
   if(refinst!=NULL && getinst!=NULL && validOffset){
     switch(getinst->kind){
-      caseInstBrig(InstBase);
-      caseInstBrig(InstMod) ;
-      caseInstBrig(InstCvt) ;
-      caseInstBrig(InstRead);
-      caseInstBrig(InstBar) ;
-      caseInstBrig(InstLdSt);
-      caseInstBrig(InstCmp);
-      caseInstBrig(InstMem);
-      caseInstBrig(InstAtomic);
-      caseInstBrig(InstAtomicImage);
-      caseInstBrig(InstImage);
+      case BrigEInstBase: 
+      case BrigEInstMod:
+      case BrigEInstCvt:
+      case BrigEInstRead:
+      case BrigEInstBar:
+      case BrigEInstLdSt:
+      case BrigEInstCmp:
+      case BrigEInstMem:
+      case BrigEInstAtomic:
+      case BrigEInstAtomicImage:
+      case BrigEInstImage:
+        EXPECT_EQ(refinst->size, getinst->size);
+        EXPECT_EQ(refinst->kind, getinst->kind);
+        EXPECT_EQ(refinst->opcode, getinst->opcode);
+        break;
       default:
           printf("Invalid instruction\n");
           exit(1);
@@ -808,17 +819,42 @@ void validate(const BrigDirectiveInit* ref, const BrigDirectiveInit* get,
 
 void validate(const BrigDirectiveLabel* ref, const BrigDirectiveLabel* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
-
+  EXPECT_EQ(ref->size, ref->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
+  EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
 }
 
 void validate(const BrigDirectiveLabelList* ref, const BrigDirectiveLabelList* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
-
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  if (get->c_code != 0) {
+    validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
+  }
+  EXPECT_EQ(ref->elementCount, get->elementCount);
+  if (get->label != 0) {
+    validate_DIR_OFFSET(ref->label, get->label, RefOutput, GetOutput);
+  }
+  int no_init_bytes = ref->size - sizeof(BrigDirectiveInit) + sizeof(uint64_t);
+  for(int i = 0 ; i < no_init_bytes; i++) {
+    EXPECT_EQ(ref->d_labels[i], get->d_labels[i]);
+  } 
 }
 
 void validate(const BrigDirectiveLabelInit* ref, const BrigDirectiveLabelInit* get,
     BrigSections* RefOutput, BrigSections* GetOutput){
-
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  if (get->c_code != 0) {
+    validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
+  }
+  EXPECT_EQ(ref->elementCount, get->elementCount);
+  EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
+  int no_init_bytes = ref->size - sizeof(BrigDirectiveInit) + sizeof(uint64_t);
+  for(int i = 0 ; i < no_init_bytes; i++) {
+    EXPECT_EQ(ref->d_labels[i], get->d_labels[i]);
+  } 
 }
 
 void validate(const BrigDirectiveKernel* ref, const BrigDirectiveKernel* get,

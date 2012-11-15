@@ -73,16 +73,23 @@ if (ENABLE_TEST_CASE)
 set(hsail2brig_test_SOURCES
     test/lexer_test.cc
     test/parser_test.cc
-    test/codegen_test.cc
     test/codegen_validate.cc
     test/hsail2brig/Atom_test.cc
     test/hsail2brig/AtomicImage_test.cc
-    test/hsail2brig/Block_test.cc
     test/hsail2brig/Branch_test.cc
-    #test/hsail2brig/Call_test.cc
+    test/hsail2brig/Block_test.cc
+    test/hsail2brig/Call_test.cc
+    test/hsail2brig/Comment_test.cc
+    test/hsail2brig/Control_test.cc
     test/hsail2brig/Cmp_test.cc
     test/hsail2brig/Cvt_test.cc
     test/hsail2brig/Extension_test.cc
+    test/hsail2brig/Example1_test.cc
+    test/hsail2brig/Example2_test.cc
+    test/hsail2brig/Example3_test.cc
+    test/hsail2brig/Example4_test.cc
+    test/hsail2brig/Example5_test.cc
+    test/hsail2brig/Example6_test.cc
     test/hsail2brig/FileDecl_test.cc
     test/hsail2brig/GlobalDecl_test.cc
     test/hsail2brig/ImageInstruction_test.cc
@@ -92,7 +99,9 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/Instruction3_test.cc
     test/hsail2brig/Instruction4_test.cc
     test/hsail2brig/Instruction5_test.cc
+    test/hsail2brig/Kernel_test.cc
     test/hsail2brig/Ld_test.cc
+    test/hsail2brig/Label_test.cc
     test/hsail2brig/Location_test.cc
     test/hsail2brig/Mov_test.cc
     test/hsail2brig/Mul_test.cc
@@ -101,7 +110,6 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/St_test.cc
     test/hsail2brig/Syscall_test.cc
     test/hsail2brig/Version_test.cc
-    #test/hsail2brig/Control_test.cc
     testcase/globaldecl_test.cc
     testcase/version_test.cc
     testcase/operation_test.cc
@@ -113,16 +121,23 @@ else (ENABLE_TEST_CASE)
   set(hsail2brig_test_SOURCES
     test/lexer_test.cc
     test/parser_test.cc
-    test/codegen_test.cc
     test/codegen_validate.cc
     test/hsail2brig/Atom_test.cc
     test/hsail2brig/AtomicImage_test.cc
     test/hsail2brig/Branch_test.cc
     test/hsail2brig/Block_test.cc
-    #test/hsail2brig/Call_test.cc
+    test/hsail2brig/Call_test.cc
+    test/hsail2brig/Comment_test.cc
+    test/hsail2brig/Control_test.cc
     test/hsail2brig/Cmp_test.cc
     test/hsail2brig/Cvt_test.cc
     test/hsail2brig/Extension_test.cc
+    test/hsail2brig/Example1_test.cc
+    test/hsail2brig/Example2_test.cc
+    test/hsail2brig/Example3_test.cc
+    test/hsail2brig/Example4_test.cc
+    test/hsail2brig/Example5_test.cc
+    test/hsail2brig/Example6_test.cc
     test/hsail2brig/FileDecl_test.cc
     test/hsail2brig/GlobalDecl_test.cc
     test/hsail2brig/ImageInstruction_test.cc
@@ -132,7 +147,9 @@ else (ENABLE_TEST_CASE)
     test/hsail2brig/Instruction3_test.cc
     test/hsail2brig/Instruction4_test.cc
     test/hsail2brig/Instruction5_test.cc
+    test/hsail2brig/Kernel_test.cc
     test/hsail2brig/Ld_test.cc
+    test/hsail2brig/Label_test.cc
     test/hsail2brig/Location_test.cc
     test/hsail2brig/Mov_test.cc
     test/hsail2brig/Mul_test.cc
@@ -141,7 +158,6 @@ else (ENABLE_TEST_CASE)
     test/hsail2brig/St_test.cc
     test/hsail2brig/Syscall_test.cc
     test/hsail2brig/Version_test.cc
-    #test/hsail2brig/Control_test.cc
     gmock/gmock_main.cc
     gmock/gmock-gtest-all.cc
     )

@@ -261,8 +261,7 @@ class Context {
     BrigDataType16_t get_type() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
-    bool get_isBlockNumeric() const;
-
+    
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
     void set_symbol_modifier(BrigSymbolModifier modifier);
@@ -274,7 +273,6 @@ class Context {
     void set_type(BrigDataType16_t type);
     void set_dim(uint32_t dim);
     void set_isArray(bool is_array);
-    void set_isBlockNumeric(bool is_blockNumeric);
     void set_bdf_offset(BrigdOffset32_t offset) { this->current_bdf_offset = offset;};
     BrigdOffset32_t get_bdf_offset(){ return this->current_bdf_offset;};
     
@@ -290,11 +288,7 @@ class Context {
     Buffer *get_operands(void) const {return obuf;}
     StringBuffer *get_strings(void) const {return sbuf;}
 
-    bool is_arg_output(void) const {return arg_output;}
-    void set_arg_output(bool output) { this->arg_output = output; }
-    
     BrigoOffset32_t current_argList_offset;
-    BrigdOffset32_t current_argdecl_offset;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in an instruction
     std::map<std::string, BrigoOffset32_t> arg_map;
@@ -355,11 +349,8 @@ class Context {
     uint32_t dim;
     BrigdOffset32_t last_directive_offset;
     BrigdOffset32_t current_bdf_offset;
-    
-    bool arg_output;
     bool is_array;
-    bool is_blockNumeric;
-    
+      
 };
 
 }  // namespace brig

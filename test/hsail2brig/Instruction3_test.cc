@@ -573,7 +573,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
     BrigEInstBase,
     BrigShr,
     Brigu8x4,
-    BrigNoPacking,
+    BrigPackPS,
     {0, sizeof(reg1),
      sizeof(reg1) + sizeof(reg2), 0, 0}
   };

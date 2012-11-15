@@ -46,11 +46,11 @@ TEST(ParserTest, OperandTest) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
 
-  input.assign("_u32(12, 13 ,14) \n");  // decimalListSingle
+  /*input.assign("_u32(12, 13 ,14) \n");  // decimalListSingle
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operand(context));
-
+*/
   delete lexer;
 }
 
@@ -456,9 +456,7 @@ TEST(ParserTest, ArgumentListBody) {
   input.append("static arg_f16 %local_id[], align 8 arg_u64 %test )\n");
   lexer->set_source_string(input);
   context->clear_context();
-  // initialize fake values
-  // which should be set in real case when parser parses a function def
-  context->set_arg_output(false);
+ 
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
       40,                       // size
@@ -533,8 +531,7 @@ TEST(ParserTest, Codeblock) {
 // initialize fake values
   // which should be set in real case when parser parses a function def
   context->set_bdf_offset(context->get_directive_offset());
-  context->set_arg_output(false);
-  // append a fake BDF to directive buffer
+ 
   BrigDirectiveFunction fake = {
       40,                       // size
       BrigEDirectiveFunction,   // kind
@@ -632,9 +629,6 @@ TEST(ParserTest, BranchOperation) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  // initialize fake values
-  // which should be set in real case when parser parses a function def
-  context->set_arg_output(false);
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
       40,                       // size
@@ -1874,12 +1868,6 @@ TEST(ParserTest, Mov) {
   EXPECT_NE(0, Mov(context));
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
-  input.assign("mov_b32 , $q3, $q1;\n");  // redundant ','
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, Mov(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
-
   delete lexer;
 }
 
@@ -2509,9 +2497,7 @@ TEST(ParserTest, KernelArgumentListBody) {
 
   lexer->set_source_string(input);
   context->clear_context();
-  // initialize fake values
-  // which should be set in real case when parser parses a function def
-  context->set_arg_output(false);
+  
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
       40,                       // size
@@ -2540,7 +2526,6 @@ TEST(ParserTest, KernelArgumentListBody) {
   context->clear_context();
   // initialize fake values
   // which should be set in real case when parser parses a function def
-  context->set_arg_output(false);
   context->append_directive(&fake);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0 , KernelArgumentListBody(context));
@@ -3571,16 +3556,18 @@ TEST(ParserTest, SingleListSingleTest) {
   std::string input("0.5e3f \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SingleListSingle(context));
+  std::vector<float> list;
+  EXPECT_EQ(0, SingleListSingle(context, &list));
 
-/*  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
+  input.assign("0.7e12f, 0.5e3f, 0.2e1f \n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SingleListSingle(context));
-*/
+  std::vector<float> list2;
+  EXPECT_EQ(0, SingleListSingle(context, &list2));
 
   delete lexer;
 }
+
 
 TEST(ParserTest, GlobalImageDecl) {
   Lexer* lexer = new Lexer();

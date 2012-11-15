@@ -8,9 +8,9 @@ namespace brig {
 class Example4_Test: public BrigCodeGenTest {
 
 private:
-  Buffer* RefCode;
-  Buffer* RefOper;
   Buffer* RefDir;
+  Buffer* RefOper;
+  Buffer* RefCode;
 
 public:
   Example4_Test(std::string& in, StringBuffer* sbuf, Buffer* dir,
@@ -266,7 +266,7 @@ TEST(CodegenTest, Example4_CodeGen) {
   dirLab1Ref.size = sizeof(dirLab1Ref);
   dirLab1Ref.kind = BrigEDirectiveLabel;
   dirLab1Ref.c_code = sizeof(instCbr) + sizeof(instAbs) + sizeof(instBrn);
-  dirLab1Ref.s_name = funName.size() + symName.size() + reg1Name.size(),
+  dirLab1Ref.s_name = funName.size() + symName.size() + reg1Name.size() +
                       reg2Name.size() + reg3Name.size() + 5;
 
   dir->append(&dirLab1Ref);
@@ -274,9 +274,9 @@ TEST(CodegenTest, Example4_CodeGen) {
   dirLab2Ref.size = sizeof(dirLab2Ref);
   dirLab2Ref.kind = BrigEDirectiveLabel;
   dirLab2Ref.c_code = sizeof(instCbr) + sizeof(instAbs) + sizeof(instBrn) + sizeof(instAdd),
-  dirLab2Ref.s_name = funName.size() + symName.size() + reg1Name.size(),
+  dirLab2Ref.s_name = funName.size() + symName.size() + reg1Name.size() + lab1Name.size() +
                       reg2Name.size() + reg3Name.size() + reg4Name.size() + 
-                      reg5Name.size() + 7;
+                      reg5Name.size() + 8;
 
   dir->append(&dirLab2Ref);
 

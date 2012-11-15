@@ -47,7 +47,7 @@ int Branch(Context* context);
 int CallTargets(Context* context);
 int CallArgs(Context* context);
 int Call(Context* context);
-int Initializer(Context* context);
+int Initializer(Context* context, BrigdOffset32_t sym_offset);
 int InitializableDecl(Context* context);
 int InitializableDeclPart2(Context* context, BrigStorageClass32_t storage_class);
 int UninitializableDecl(Context* context);
@@ -98,8 +98,6 @@ int ImageNoRet(Context* context);
 int Cvt(Context* context);
 int ImageLoad(Context* context);
 int ImageStore(Context* context);
-
-int SingleListSingle(Context *context);
 int GlobalImageDecl(Context *context);
 int GlobalImageDeclPart2(Context *context);
 int ImageInitializer(Context *context);
@@ -116,12 +114,18 @@ int Location(Context* context);
 int Control(Context* context);
 int Pragma(Context* context);
 int Block(Context* context);
-int DecimalListSingle(Context* context);
-int FloatListSingle(Context* context);
+
+int DecimalListSingleBLock(Context* context);
+int DecimalInitializer(Context* context, BrigdOffset32_t sym_offset);
+int DecimalListSingle(Context* context, std::vector<int32_t>* decimal_list);
+int FloatInitializer(Context* context, BrigdOffset32_t sym_offset);
+int FloatListSingle(Context* context, std::vector<double>* float_list);
+int SingleInitializer(Context *context, BrigdOffset32_t sym_offset);
+int SingleListSingle(Context* context, std::vector<float>* single_list);
+int LabelList(Context* context, BrigdOffset32_t sym_offset);
+
 int GlobalSymbolDecl(Context* context);
 int Directive(Context* context);
-int LabelList(Context* context);
-
 int SobInit(Context *context);
 int SobInitializer(Context *context);
 int GlobalSamplerDecl(Context *context);
@@ -185,8 +189,7 @@ int Instruction2OpcodeFtz(Context* context);
 int BranchCbr(Context* context);
 int BranchBrn(Context* context);
 
-int DecimalListSingleBLock(Context* context, const std::vector<int32_t> &decimal_list,
-                                const uint32_t elementCount);
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

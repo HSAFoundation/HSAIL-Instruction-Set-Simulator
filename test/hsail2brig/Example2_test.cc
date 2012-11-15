@@ -8,10 +8,10 @@ namespace brig {
 class Example2_Test: public BrigCodeGenTest {
 
 private:
-  Buffer* RefCode;
-  Buffer* RefOper;
   Buffer* RefDir;
-
+  Buffer* RefOper;
+  Buffer* RefCode;
+  
 public:
   Example2_Test(std::string& in, StringBuffer* sbuf, Buffer* dir,
                 Buffer* code, Buffer* oper):
