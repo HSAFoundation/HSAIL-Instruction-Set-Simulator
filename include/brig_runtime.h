@@ -55,8 +55,7 @@ class Vector {
   typedef void (*QForEachFn)(Base, Base, Base, Base);
   typedef void (*SForEachFn)(Base, Base, unsigned);
 
-  Vector() {}
-  Vector(Base b) {
+  Vector(Base b = 0) {
     for(unsigned i = 0; i < Len; ++i)
       t_[i] = b;
   }
