@@ -2138,7 +2138,7 @@ bool BrigModule::validateCvt(const inst_iterator inst) const {
 }
 
 static bool isPowerOf2(const uint32_t immed) {
-  return immed & 0xFFFFF800 ? !(immed & (immed - 1)) : false;
+  return immed & 0xFFFFF800 ? false : !(immed & (immed - 1));
 }
 
 bool BrigModule::validateLd(const inst_iterator inst) const {
