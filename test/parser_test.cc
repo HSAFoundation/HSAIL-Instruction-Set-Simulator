@@ -1404,21 +1404,6 @@ TEST(ParserTest, SignatureType) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureType(context));
 
-  input.assign("arg_ROImg\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SignatureType(context));
-
-  input.assign("arg_RWImg\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SignatureType(context));
-
-  input.assign("arg_Samp\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SignatureType(context));
-
   input.clear();
   delete lexer;
 }
@@ -1470,17 +1455,17 @@ TEST(ParserTest, SignatureArgumentList) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("arg_u32,arg_ROImg\n");
+  std::string input("(arg_u32,arg_b32)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
 
-  input.assign("arg_u32,arg_RWImg\n");
+  input.assign("(arg_u32,arg_b32 %arg)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
 
-  input.assign("arg_u32,arg_Samp\n");
+  input.assign("(arg_u32 %arg,arg_b32)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
