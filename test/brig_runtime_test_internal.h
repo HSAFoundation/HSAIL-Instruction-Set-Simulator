@@ -333,7 +333,7 @@ template<> void initTestVector(std::vector<double> &testVector) {
   testVector.push_back(INFINITY);
   testVector.push_back(NAN);
 
-  union { b64 b; f64 f; } SNAN = { 0x7FF8000000000000UL };
+  union { b64 b; f64 f; } SNAN = { 0x7FF8000000000000ULL };
   testVector.push_back(SNAN.f);
 
   for(double d = 1.0; d != INFINITY; d *= 2)
@@ -475,26 +475,30 @@ static void TestVectorInst(R (*Impl)(T, T, unsigned),
 }
 
 template<class R, class A, class B>
-static void TestAtomicBinary(R (*Impl)(A*, B), void (*Logic)(R, A*, B)) {
+static void TestAtomicBinary(R (*Impl)(A*, B), void (*Logic)(R, A, B)) {
   for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
-    A a = getTestVector<A>()[i];
+    const A a = getTestVector<A>()[i];
     for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      A tempA = a;
       B b = getTestVector<B>()[j];
-      Logic(Impl(&a, b), &a, b);
+      Impl(&tempA, b);
+      Logic(tempA, a, b);
     }
   }
 }
 
 template<class R, class A, class B, class C>
 static void TestAtomicTernary(R (*Impl)(A*, B, C),
-                              void (*Logic)(R, A*, B, C)) {
+                              void (*Logic)(R, A, B, C)) {
   for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
-    A a = getTestVector<A>()[i];
+    const A a = getTestVector<A>()[i];
     for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
       B b = getTestVector<B>()[j];
       for(unsigned k = 0; k < getTestVector<C>().size(); ++k) {
+        A tempA = a;
         C c = getTestVector<C>()[k];
-        Logic(Impl(&a, b, c), &a, b, c);
+        Impl(&tempA, b, c);
+        Logic(tempA, a, b, c);
       }
     }
   }
@@ -502,30 +506,30 @@ static void TestAtomicTernary(R (*Impl)(A*, B, C),
 
 template<class A, class B>
 static void TestAtomicBinary(void (*Impl)(A*, B),
-                             void (*Logic)(A, A*, B)) {
+                             void (*Logic)(A, A, B)) {
   for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
-    A a = getTestVector<A>()[i];
+    const A a = getTestVector<A>()[i];
     for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
+      A tempA = a;
       B b = getTestVector<B>()[j];
-      A olda = a;
-      Impl(&a, b);
-      Logic(olda, &a, b);
+      Impl(&tempA, b);
+      Logic(tempA, a, b);
     }
   }
 }
 
 template<class A, class B, class C>
 static void TestAtomicTernary(void (*Impl)(A*, B, C),
-                              void (*Logic)(A, A*, B, C)) {
+                              void (*Logic)(A, A, B, C)) {
   for(unsigned i = 0; i < getTestVector<A>().size(); ++i) {
-    A a = getTestVector<A>()[i];
+    const A a = getTestVector<A>()[i];
     for(unsigned j = 0; j < getTestVector<B>().size(); ++j) {
       B b = getTestVector<B>()[j];
       for(unsigned k = 0; k < getTestVector<C>().size(); ++k) {
+        A tempA = a;
         C c = getTestVector<C>()[k];
-        A olda = a;
-        Impl(&a, b, c);
-        Logic(olda, &a, b, c);
+        Impl(&tempA, b, c);
+        Logic(tempA, a, b, c);
       }
     }
   }

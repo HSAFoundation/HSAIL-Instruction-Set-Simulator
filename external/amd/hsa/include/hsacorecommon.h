@@ -66,10 +66,10 @@ public:
 // TODO: Replace out_of_range with an HSART exception
 using namespace hsacommon;
 
-using hsacommon::vector;
-using hsacommon::string;
+//using hsacommon::vector;
+//using hsacommon::string;
 
-typedef hsa::KernelArg KernelArg;
+//typedef hsa::KernelArg KernelArg;
 
 /* @}*/
 

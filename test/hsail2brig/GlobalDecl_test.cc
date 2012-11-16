@@ -36,7 +36,7 @@ public:
     RefArgsList(arglist),
     RefInit(NULL) { }
 
-  void Run_Test(int (*Rule)(Context*)){  
+  void Run_Test(int (*Rule)(Context*)){
     Buffer* dir = new Buffer();
 
     dir->append(RefDir);
@@ -44,14 +44,14 @@ public:
       dir->append(RefArgsList);
     if (RefInit)
       dir->append(RefInit);
-    
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
-      reinterpret_cast<const char *>(&dir->get()[0]), NULL, NULL, NULL, 
-      RefStr->size(), dir->size(), (size_t)0, (size_t)0, (size_t)0);    
-    
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
+      reinterpret_cast<const char *>(&dir->get()[0]), NULL, NULL, NULL,
+      RefStr->size(), dir->size(), (size_t)0, (size_t)0, (size_t)0);
+
     Parse_Validate(Rule, &RefOutput);
     delete dir;
-  } 
+  }
 };
 
 TEST(CodegenTest, GlobalSymbolDecl_Codegen){
@@ -870,12 +870,12 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
 
   std::string in, name;
   StringBuffer *sbuf = new StringBuffer();
-  
+
   /************************Test Case 1****************************/
   in.assign("global_RWImg &demo[9]");
   in.append("={format = signed_int32 ,order = r,width = 2,height = 3,depth = 4 };\n");
   name.assign("&demo"); sbuf->append(name);
-  
+
   BrigDirectiveImage out1 = {
     0,                      //size
     BrigEDirectiveImage,    //kind
@@ -903,11 +903,11 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
   TestCase1.Run_Test(&GlobalImageDecl);
   sbuf->clear();
 
-  
+
   /************************Test Case 2****************************/
   in.assign("global_RWImg &demo[9][9]={order = a};");
   name.assign("&demo"); sbuf->append(name);
-  
+
   BrigDirectiveImage out2 = {
     0,                      //size
     BrigEDirectiveImage,    //kind
@@ -939,7 +939,7 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
   in.assign("global_RWImg &demo");
   in.append("={format = signed_int32 ,order = r,width = 2,height = 3,depth = 4 };\n");
   name.assign("&demo"); sbuf->append(name);
-  
+
   BrigDirectiveImage out3 = {
     0,                      //size
     BrigEDirectiveImage,    //kind
@@ -975,12 +975,12 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
 
   std::string in, name;
   StringBuffer *sbuf = new StringBuffer();
-  
+
   /************************Test Case 1****************************/
   in.assign("global_ROImg &demo[9]");
   in.append("={format = unsigned_int32 ,order = r,width = 4 ,height = 5,depth = 6 };\n");
   name.assign("&demo"); sbuf->append(name);
-  
+
   BrigDirectiveImage out1 = {
     0,                      //size
     BrigEDirectiveImage,    //kind
@@ -1008,11 +1008,11 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
   TestCase1.Run_Test(&GlobalReadOnlyImageDecl);
   sbuf->clear();
 
-  
+
   /************************Test Case 2****************************/
   in.assign("global_ROImg &demo[9][9]={format = unorm_short_101010, order = rgbx, width = 4 ,height = 5,depth = 6};");
   name.assign("&demo"); sbuf->append(name);
-  
+
   BrigDirectiveImage out2 = {
     0,                      //size
     BrigEDirectiveImage,    //kind
@@ -1044,7 +1044,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
   in.assign("global_ROImg &demo");
   in.append("={format = unsigned_int32 ,order = r,width = 4 ,height = 5,depth = 6 };\n");
   name.assign("&demo"); sbuf->append(name);
-  
+
   BrigDirectiveImage out3 = {
     0,                      //size
     BrigEDirectiveImage,    //kind
@@ -1080,13 +1080,13 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
 
   std::string in, name;
   StringBuffer *sbuf = new StringBuffer();
-  
+
   /************************Test Case 1****************************/
   in.assign("global_Samp &demo[9]={coord = normalized, filter = linear,");
   in.append("boundaryU = clamp, boundaryV = wrap, boundaryW = mirror } ;\n");
 
   name.assign("&demo"); sbuf->append(name);
-  
+
    BrigDirectiveSampler out1 = {
     0,                           //size
     BrigEDirectiveSampler,       //kind
@@ -1115,13 +1115,13 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
   TestCase1.Run_Test(&GlobalSamplerDecl);
   sbuf->clear();
 
-  
+
   /************************Test Case 2****************************/
   in.assign("global_Samp &demo[9]={coord = unnormalized, filter = nearest,");
   in.append("boundaryU = mirroronce, boundaryV = border, boundaryW = clamp } ;\n");
 
   name.assign("&demo"); sbuf->append(name);
-  
+
    BrigDirectiveSampler out2 = {
     0,                           //size
     BrigEDirectiveSampler,       //kind
@@ -1155,7 +1155,7 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
   in.append("boundaryU = mirroronce, boundaryV = border, boundaryW = clamp } ;\n");
 
   name.assign("&demo"); sbuf->append(name);
-  
+
    BrigDirectiveSampler out3 = {
     0,                           //size
     BrigEDirectiveSampler,       //kind

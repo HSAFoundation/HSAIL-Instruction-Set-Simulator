@@ -26,7 +26,9 @@ class BrigEngine {
              char optLevel = ' ');
 
   void launch(llvm::Function *EntryFn,
-              llvm::ArrayRef<void *> args);
+              llvm::ArrayRef<void *> args,
+              uint32_t blockNum = 1,
+              uint32_t threadNum = 1);
 
 
   ~BrigEngine();
