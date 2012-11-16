@@ -5,107 +5,28 @@
 namespace hsa {
 namespace brig {
 
-struct BrigBlockNode {
-  BrigBlockNode* next;
-  BrigBlockNumeric* num;
-  BrigBlockString* str;
-  BrigBlockNode() {
-    next = NULL;
-    str = NULL;
-    num = NULL;
-  }
-  ~BrigBlockNode() {
-    if (str != NULL) {
-      delete str;
-      str = NULL;
-    }
-    if (num != NULL) {
-      delete num;
-      num = NULL;
-    }
-  }
-};
-
-struct BrigBlockList {
-  uint32_t size;
-  BrigBlockNode* head;
-  BrigBlockList() {
-    size = 0;
-    head = NULL;
-  }
-  void empty() {
-    if (head != NULL) {
-      BrigBlockNode* step = head->next;
-      BrigBlockNode* tmp;
-      while (step != NULL) {
-        tmp = step; 
-        step = step->next;
-        delete tmp;
-      }
-      head->next = NULL;
-    }
-    size = 0; 
-  }
-  ~BrigBlockList() {
-    if (head != NULL) {
-      BrigBlockNode* step = head->next;
-      BrigBlockNode* tmp;
-      while (step != NULL) {
-        tmp = step; 
-        step = step->next;
-        delete tmp;
-      }
-      delete head;
-      head = NULL; 
-    }
-    size = 0;
-  }
-};
-
-
 class Block_Test: public BrigCodeGenTest {
 
 private:
-  const BrigBlockStart* blockStart;
-  const BrigBlockList* blockList;
-  const BrigBlockEnd* blockEnd;
-
+  Buffer* RefDir;
 public:
-  Block_Test(std::string& in, StringBuffer* sbuf, BrigBlockStart* blockStart, 
-             BrigBlockList* blockList, BrigBlockEnd* blockEnd):
+  Block_Test(std::string& in, StringBuffer* sbuf, Buffer* dir):
     BrigCodeGenTest(in, sbuf),
-    blockStart(blockStart),
-    blockList(blockList),
-    blockEnd(blockEnd) { }
+    RefDir(dir) {}
 
   void Run_Test(int (*Rule)(Context*)){  
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
-    Buffer* dir = new Buffer();
 
-    dir->append(blockStart);
-
-    BrigBlockNode* ref = blockList->head->next;
-
-    for (uint32_t i = 0 ; i < blockList->size ; ++i) {
-      if (ref->num != NULL) {
-        dir->append(ref->num);
-      } else if (ref->str != NULL) {
-        dir->append(ref->str);
-      }
-      ref = ref->next;
-    }
-    dir->append(blockEnd);
     struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
-      reinterpret_cast<const char *>(&dir->get()[0]),
+      reinterpret_cast<const char *>(&RefDir->get()[0]),
       reinterpret_cast<const char *>(&code->get()[0]), 
       reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-      RefStr->size(), dir->size(), 0, 0, 0);
+      RefStr->size(), RefDir->size(), 0, 0, 0);
     
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
-    delete dir;
   }
 };
 
@@ -122,16 +43,11 @@ TEST(CodegenTest, Block_CodeGen) {
   BrigBlockStart start;
   BrigBlockEnd end;
   BrigBlockString str;
-  BrigBlockList blockList;
-  BrigBlockNode *push;
-  size_t arraySize;
-
-  blockList.head = new BrigBlockNode();
-  // Note: first node is empty;
-
+  BrigBlockNumeric* num = NULL;
+  size_t arraySize = 0;
 
   symbols = new StringBuffer();
-
+  Buffer* dir = new Buffer();
   /************************************* Test Case 1 ************************************/
   in.assign("block \"debug\"\n");
   in.append("blocknumeric_b32 1255, 0x323, 10, 23;\n");
@@ -153,94 +69,85 @@ TEST(CodegenTest, Block_CodeGen) {
   start.kind = BrigEDirectiveBlockStart;
   start.c_code = 0;
   start.s_name = 0;
-
-  push = blockList.head;
+  
+  dir->append(&start);
 
   // frist numeric block
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
 
   arraySize = sizeof(BrigBlockNumeric) + sizeof(uint64_t);
-  push->num = reinterpret_cast<BrigBlockNumeric*>(new int8_t[arraySize]);
+  num = reinterpret_cast<BrigBlockNumeric*>(new int8_t[arraySize]);
 
-  push->num->size = arraySize;
-  push->num->kind =  BrigEDirectiveBlockNumeric;
-  push->num->type = Brigb32;
-  push->num->elementCount = 4;
-  push->num->u32[0] = 1255;
-  push->num->u32[1] = 0x323;
-  push->num->u32[2] = 10;
-  push->num->u32[3] = 23;
+  num->size = arraySize;
+  num->kind =  BrigEDirectiveBlockNumeric;
+  num->type = Brigb32;
+  num->elementCount = 4;
+  num->u32[0] = 1255;
+  num->u32[1] = 0x323;
+  num->u32[2] = 10;
+  num->u32[3] = 23;
 
-  // second numeric block
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
+  dir->append(num);
+  delete[] num;
+  num = NULL;
 
   arraySize = sizeof(BrigBlockNumeric) + 3 * sizeof(uint64_t);
-  push->num = reinterpret_cast<BrigBlockNumeric*>(new int8_t[arraySize]);
+  num = reinterpret_cast<BrigBlockNumeric*>(new int8_t[arraySize]);
 
-  push->num->size = arraySize;
-  push->num->kind = BrigEDirectiveBlockNumeric;
-  push->num->type = Brigb64;
-  push->num->elementCount = 4;
-  push->num->u64[0] = 0x12345678;
-  push->num->u64[1] = 0x323;
-  push->num->u64[2] = 10;
-  push->num->u64[3] = 23;
+  num->size = arraySize;
+  num->kind = BrigEDirectiveBlockNumeric;
+  num->type = Brigb64;
+  num->elementCount = 4;
+  num->u64[0] = 0x12345678;
+  num->u64[1] = 0x323;
+  num->u64[2] = 10;
+  num->u64[3] = 23;
   
-  // third string block
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
+  dir->append(num);
+  delete[] num;
+  num = NULL;
 
-  push->str = new BrigBlockString();
-  push->str->size = sizeof(str);
-  push->str->kind = BrigEDirectiveBlockString;
-  push->str->s_name = blockName.size() + 1;
+  str.size = sizeof(str);
+  str.kind = BrigEDirectiveBlockString;
+  str.s_name = blockName.size() + 1;
 
-  // forth numeric block
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
+  dir->append(&str);
 
   arraySize = sizeof(BrigBlockNumeric);
-  push->num = new BrigBlockNumeric();
+  num = new BrigBlockNumeric();
 
-  push->num->size = arraySize;
-  push->num->kind =  BrigEDirectiveBlockNumeric;
-  push->num->type = Brigb8;
-  push->num->elementCount = 5;
-  push->num->u8[0] = 1;
-  push->num->u8[1] = 255;
-  push->num->u8[2] = 0;
-  push->num->u8[3] = 127;
-  push->num->u8[4] = 128;
-  push->num->u8[5] = 0;
-  push->num->u8[6] = 0;
-  push->num->u8[7] = 0;
+  num->size = arraySize;
+  num->kind =  BrigEDirectiveBlockNumeric;
+  num->type = Brigb8;
+  num->elementCount = 5;
+  num->u8[0] = 1;
+  num->u8[1] = 255;
+  num->u8[2] = 0;
+  num->u8[3] = 127;
+  num->u8[4] = 128;
+  num->u8[5] = 0;
+  num->u8[6] = 0;
+  num->u8[7] = 0;
 
-  // fifth string block
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
+  dir->append(num);
+  delete num;
+  num = NULL;
 
-  push->str = new BrigBlockString();
-  push->str->size = sizeof(str);
-  push->str->kind = BrigEDirectiveBlockString;
-  push->str->s_name = blockName.size() + strBlock1.size() + 2;
+  str.size = sizeof(str);
+  str.kind = BrigEDirectiveBlockString;
+  str.s_name = blockName.size() + strBlock1.size() + 2;
+   
+  dir->append(&str);
 
   end.size = sizeof(end);
   end.kind = BrigEDirectiveBlockEnd;
+ 
+  dir->append(&end);
   
-  Block_Test TestCase1(in, symbols, &start, &blockList, &end);
+  Block_Test TestCase1(in, symbols, dir);
   TestCase1.Run_Test(&Block);
 
-  blockList.empty();
-  push = NULL;
   symbols->clear();
-
+  dir->clear();
   /************************************* Test Case 2 ************************************/
   in.assign("block \"string\"\n");
   in.append("blockstring \"this is a string1\";\n");
@@ -266,58 +173,42 @@ TEST(CodegenTest, Block_CodeGen) {
   start.c_code = 0;
   start.s_name = 0;
 
-  push = blockList.head;
+  dir->append(&start);
 
-  // first block string
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
+  str.size = sizeof(str);
+  str.kind = BrigEDirectiveBlockString;
+  str.s_name = blockName.size() + 1;
 
-  push->str = new BrigBlockString();
-  push->str->size = sizeof(str);
-  push->str->kind = BrigEDirectiveBlockString;
-  push->str->s_name = blockName.size() + 1;
+  dir->append(&str);
 
-  // second block string
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
+  str.size = sizeof(str);
+  str.kind = BrigEDirectiveBlockString;
+  str.s_name = blockName.size() + strBlock1.size() + 2;
 
-  push->str = new BrigBlockString();
-  push->str->size = sizeof(str);
-  push->str->kind = BrigEDirectiveBlockString;
-  push->str->s_name = blockName.size() + strBlock1.size() + 2;
+  dir->append(&str);
 
-  // third block string
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
+  str.size = sizeof(str);
+  str.kind = BrigEDirectiveBlockString;
+  str.s_name = blockName.size() + strBlock1.size() + strBlock2.size() + 3;
 
-  push->str = new BrigBlockString();
-  push->str->size = sizeof(str);
-  push->str->kind = BrigEDirectiveBlockString;
-  push->str->s_name = blockName.size() + strBlock1.size() + strBlock2.size() + 3;
+  dir->append(&str);
 
-  // forth block string
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
-
-  push->str = new BrigBlockString();
-  push->str->size = sizeof(str);
-  push->str->kind = BrigEDirectiveBlockString;
-  push->str->s_name = blockName.size() + strBlock1.size() + 
+  str.size = sizeof(str);
+  str.kind = BrigEDirectiveBlockString;
+  str.s_name = blockName.size() + strBlock1.size() + 
                       strBlock2.size() + strBlock4.size() + 4;
+  dir->append(&str);
 
   end.size = sizeof(end);
   end.kind = BrigEDirectiveBlockEnd;
   
-  Block_Test TestCase2(in, symbols, &start, &blockList, &end);
+  dir->append(&end);
+ 
+  Block_Test TestCase2(in, symbols, dir);
   TestCase2.Run_Test(&Block);
 
-  blockList.empty();
-  push = NULL;
   symbols->clear();
+  dir->clear();
 
   /************************************* Test Case 3 ************************************/
   in.assign("block \"numeric\"\n");
@@ -332,36 +223,36 @@ TEST(CodegenTest, Block_CodeGen) {
   start.c_code = 0;
   start.s_name = 0;
 
-  push = blockList.head;
-
-  blockList.size++;
-  push->next = new BrigBlockNode();
-  push = push->next;
+  dir->append(&start);
 
   arraySize = sizeof(BrigBlockNumeric) + sizeof(uint64_t);
-  push->num = reinterpret_cast<BrigBlockNumeric*>(new int8_t[arraySize]);
+  num = reinterpret_cast<BrigBlockNumeric*>(new int8_t[arraySize]);
 
-  push->num->size = arraySize;
-  push->num->kind =  BrigEDirectiveBlockNumeric;
-  push->num->type = Brigb32;
-  push->num->elementCount = 4;
-  push->num->u32[0] = 11;
-  push->num->u32[1] = 23;
-  push->num->u32[2] = 10;
-  push->num->u32[3] = 22;
+  num->size = arraySize;
+  num->kind =  BrigEDirectiveBlockNumeric;
+  num->type = Brigb32;
+  num->elementCount = 4;
+  num->u32[0] = 11;
+  num->u32[1] = 23;
+  num->u32[2] = 10;
+  num->u32[3] = 22;
+
+  dir->append(num);
+  delete[] num;
+  num = NULL;
 
   end.size = sizeof(end);
   end.kind = BrigEDirectiveBlockEnd;
   
-  Block_Test TestCase3(in, symbols, &start, &blockList, &end);
+  dir->append(&end);
+
+  Block_Test TestCase3(in, symbols, dir);
   TestCase3.Run_Test(&Block);
 
-  blockList.empty();
-  push = NULL;
   symbols->clear();
-
+  dir->clear();
   delete symbols;
-
+  delete dir;
 }
 } // namespace hsa
 } // namespace brig
