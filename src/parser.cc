@@ -2758,8 +2758,7 @@ int Label(Context* context) {
   c_code = context->get_code_offset();
 
   // dont need to check if name exist in symbol buffer 
-  s_name = context->get_string_offset();
-  context->add_symbol(name);
+  s_name = context->add_symbol(name);
 
   if (context->label_o_map.count(name)) {
     BrigoOffset32_t ope_offset = context->label_o_map[name];
