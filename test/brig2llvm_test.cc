@@ -519,7 +519,7 @@ TEST(Brig2LLVMTest, Example4) {
 
     BrigInstBar brn = {
       sizeof(brn),         // size
-      BrigEInstBar,        // kind
+      BrigEInstBase,       // kind
       BrigBrn,             // opcode
       Brigb32,             // type
       BrigNoPacking,       // type
