@@ -130,14 +130,17 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset) {
 
   if (!Identifier(context)) {
     *pRetOpOffset = (current_offset == context->get_operand_offset()) ? context->operand_map[opName] : current_offset;
+    context->token_to_scan = yylex();
+    return 0;
   } else if(!BaseOperand(context)){
     *pRetOpOffset = (current_offset == context->get_operand_offset()) ? context->operand_map[opName] : current_offset;
+    context->token_to_scan = yylex();
+    return 0;
   }else{
     context->set_error(INVALID_OPERAND);
     return 1;
   }
-  context->token_to_scan = yylex();
-  return 0;
+  
 }
 
 int Operand(Context* context) {
