@@ -5245,7 +5245,8 @@ int ImageRet(Context* context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  if (!Optacqreg(context, &memorySemantic)) {
+  if (Optacqreg(context, &memorySemantic)) {
+    return 1;
   }
 
   if (context->token_type != GEOMETRY_ID) {
