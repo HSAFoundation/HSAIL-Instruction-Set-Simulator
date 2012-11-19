@@ -269,6 +269,60 @@ TEST(CodegenTest, Syscall_CodeGen) {
                TestCase4(in, symbols, &out, &dest, &imm1, &reg2, &imm3, &wav4);
   TestCase4.Run_Test(&SysCall);
   symbols->clear();
+  /************************************* Test Case 5 ************************************/
+  in.assign("syscall $s14, -12, -13, -14, -15;\n");
+  destName.assign("$s14");   
+  symbols->append(destName); 
+
+  out.size = sizeof(out);
+  out.kind = BrigEInstBase;
+  out.opcode = BrigSysCall;
+  out.type = Brigb32;
+  out.packing = BrigNoPacking;
+  out.o_operands[0] = 0;
+  out.o_operands[1] = sizeof(dest);
+  out.o_operands[2] = sizeof(imm1) + sizeof(dest);
+  out.o_operands[3] = out.o_operands[2] + sizeof(imm2);
+  out.o_operands[4] = out.o_operands[3] + sizeof(imm3);
+
+  dest.size = sizeof(dest);
+  dest.kind = BrigEOperandReg;
+  dest.type = Brigb32;
+  dest.reserved = 0;
+  dest.s_name = 0;
+
+  imm1.size = sizeof(imm1);
+  imm1.kind = BrigEOperandImmed;
+  imm1.type = Brigb32;
+  imm1.reserved = 0;
+  memset(&imm1.bits, 0, sizeof(imm1.bits));
+  imm1.bits.u = -12;
+
+  imm2.size = sizeof(imm2);
+  imm2.kind = BrigEOperandImmed;
+  imm2.type = Brigb32;
+  imm2.reserved = 0;
+  memset(&imm2.bits, 0, sizeof(imm2.bits));
+  imm2.bits.u = -13;
+
+  imm3.size = sizeof(imm3);
+  imm3.kind = BrigEOperandImmed;
+  imm3.type = Brigb32;
+  imm3.reserved = 0;
+  memset(&imm3.bits, 0, sizeof(imm3.bits));
+  imm3.bits.u = -14;
+
+  imm4.size = sizeof(imm4);
+  imm4.kind = BrigEOperandImmed;
+  imm4.type = Brigb32;
+  imm4.reserved = 0;
+  memset(&imm4.bits, 0, sizeof(imm4.bits));
+  imm4.bits.u = -15;
+
+  Syscall_Test<BrigOperandImmed, BrigOperandImmed, BrigOperandImmed>
+               TestCase5(in, symbols, &out, &dest, &imm1, &imm2, &imm3, &imm4);
+  TestCase5.Run_Test(&SysCall);
+  symbols->clear();
 
   delete symbols;
 }
