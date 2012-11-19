@@ -121,7 +121,7 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset) {
 
   if ((context->token_type == REGISTER) || (context->token_to_scan == TOKEN_WAVESIZE)) {
     opName = context->token_value.string_val;
-  } else if (context->token_type == CONSTANT) {
+  } else if (context->token_type == CONSTANT || context->token_to_scan == '-') {
     current_offset += current_offset & 0x7;
   }
 
@@ -2556,7 +2556,8 @@ int SysCall(Context* context) {
   context->token_to_scan = yylex();
 
   //operand 2
-  if (context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
+  if (context->token_to_scan != TOKEN_INTEGER_CONSTANT &&
+      context->token_to_scan != '-') {
     context->set_error(INVALID_SECOND_OPERAND);
     return 1;
   } 
@@ -2572,7 +2573,8 @@ int SysCall(Context* context) {
   // operand 3
   if (((context->token_to_scan != TOKEN_SREGISTER) &&
        (context->token_to_scan != TOKEN_WAVESIZE) &&
-       (context->token_to_scan != TOKEN_INTEGER_CONSTANT))) {
+       (context->token_to_scan != TOKEN_INTEGER_CONSTANT) &&
+       (context->token_to_scan != '-'))) {
     context->set_error(INVALID_THIRD_OPERAND);
     return 1;
   } 
@@ -2588,7 +2590,8 @@ int SysCall(Context* context) {
   // operand 4
   if (((context->token_to_scan != TOKEN_SREGISTER) &&
        (context->token_to_scan != TOKEN_WAVESIZE) &&
-       (context->token_to_scan != TOKEN_INTEGER_CONSTANT))) {
+       (context->token_to_scan != TOKEN_INTEGER_CONSTANT) && 
+       (context->token_to_scan != '-'))) {
     context->set_error(INVALID_FOURTH_OPERAND);
     return 1;
   } 
@@ -2604,7 +2607,8 @@ int SysCall(Context* context) {
   // operand 5
   if (((context->token_to_scan != TOKEN_SREGISTER) &&
        (context->token_to_scan != TOKEN_WAVESIZE) &&
-       (context->token_to_scan != TOKEN_INTEGER_CONSTANT))) {
+       (context->token_to_scan != TOKEN_INTEGER_CONSTANT) && 
+       (context->token_to_scan != '-'))) {
     context->set_error(INVALID_FOURTH_OPERAND);
     return 1;
   } 
