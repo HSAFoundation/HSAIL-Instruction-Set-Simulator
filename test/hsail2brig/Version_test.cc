@@ -1,7 +1,7 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "mock_error_reporter.h"
+#include "../mock_error_reporter.h"
 
 using ::testing::AtLeast;
 using ::testing::_;
