@@ -5351,6 +5351,9 @@ int ImageRet(Context* context) {
     memorySemantic,         // memorySemantic
     geom                    // geom
   };
+  for (int i = 0 ; i < 4 ; ++i ) {
+    img_inst.o_operands[i] = OpOffset[i];
+  }
   img_inst.size = sizeof(img_inst);
   context->append_code(&img_inst);
   context->token_to_scan = yylex();
