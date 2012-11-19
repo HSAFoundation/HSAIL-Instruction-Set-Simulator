@@ -3903,7 +3903,6 @@ int GlobalPrivateDecl(Context* context) {
   // first token is PRIVATE
   BrigsOffset32_t str_offset;
   context->set_dim(0);
-  context->init_symbol_modifier();
 
   if (PRIVATE != context->token_to_scan)
     return 1;
@@ -3956,6 +3955,7 @@ int GlobalPrivateDecl(Context* context) {
   };
   context->append_directive(&bds);
 
+  context->init_symbol_modifier();
   context->token_to_scan = yylex();
   return 0;
 } 
@@ -4556,7 +4556,6 @@ int GlobalGroupDecl(Context* context) {
 
   BrigsOffset32_t str_offset;
   context->set_dim(0);
-  context->init_symbol_modifier();
   // first token is Group
   if (GROUP != context->token_to_scan)
     return 1;
@@ -4577,7 +4576,6 @@ int GlobalGroupDecl(Context* context) {
   
   str_offset = context->add_symbol(context->token_value.string_val);
   context->set_dim(0);
-  context->init_symbol_modifier();
 
   context->token_to_scan = yylex();
   if ('[' == context->token_to_scan) {
@@ -4610,6 +4608,7 @@ int GlobalGroupDecl(Context* context) {
   };
   context->append_directive(&bds);
 
+  context->init_symbol_modifier();
   context->token_to_scan = yylex();
   return 0;
 } 
