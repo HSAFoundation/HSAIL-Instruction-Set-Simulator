@@ -248,8 +248,9 @@ class Context {
     void clear_string_buffer(void);
     void clear_all_buffers(void);
     void clear_context(void);
-    void set_default_values(void);
-
+    void initialize_all_fields(void);
+    void initialize_bodystatement_fields(void);
+    
     /* Temporary Context Manipulators */
     // check context
     uint16_t get_alignment() const;
@@ -338,14 +339,16 @@ class Context {
     /* Global context variables */
     BrigMachine16_t machine;
     BrigProfile16_t profile;
+    BrigdOffset32_t last_directive_offset;
+    BrigdOffset32_t current_bdf_offset;
+    
+    /* Body Statement specific variables */
     uint16_t alignment;
     uint32_t symModifier;
     BrigAttribute16_t attribute;
     BrigDataType16_t type;
     BrigAluModifier aluModifier;
     uint32_t dim;
-    BrigdOffset32_t last_directive_offset;
-    BrigdOffset32_t current_bdf_offset;
     bool is_array;
       
 };
