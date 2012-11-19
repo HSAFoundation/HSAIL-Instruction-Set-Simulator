@@ -5194,7 +5194,7 @@ int ImageRet(Context* context) {
   // first token is ATOMIC_IMAGE
   unsigned int second_token;
   BrigDataType16_t type = Brigb32;
-  BrigoOffset32_t OpOffset[4] = {0, 0, 0, 0};
+  BrigoOffset32_t OpOffset[5] = {0, 0, 0, 0, 0};
   BrigAtomicOperation32_t atomicOperation = 0;
   BrigMemorySemantic32_t memorySemantic = BrigRegular;
   BrigGeom32_t geom = 0;
@@ -5345,7 +5345,7 @@ int ImageRet(Context* context) {
     BrigAtomicImage,        // opcode
     type,                   // type
     BrigNoPacking,          // packing
-    {0, 0, 0, 0, 0},        // o_operands[5]
+    {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], OpOffset[4]},        // o_operands[5]
     atomicOperation,        // atomicOperation
     BrigGlobalSpace,        // storageClass
     memorySemantic,         // memorySemantic
