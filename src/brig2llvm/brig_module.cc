@@ -1610,7 +1610,7 @@ bool BrigModule::validateMovsInst(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateUnpackInst(const inst_iterator inst) const {  //1031
+bool BrigModule::validateUnpackInst(const inst_iterator inst) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
     return false;
@@ -1662,7 +1662,8 @@ bool BrigModule::validateLdStImageInst(const inst_iterator inst) const {
   valid &= check(srcType == Brigu32, "Type of source should be u32");
   oper_iterator dest(S_.operands + image->o_operands[0]);
   valid &= check(isa<BrigOperandRegV4>(dest), "Destination should be regV4");
-  valid &= check(*getType(dest) == Brigb32, "Destination should be s register");
+  valid &= check(*getType(dest) == Brigb32,
+		 "Destination should be s register");
   oper_iterator src0(S_.operands + image->o_operands[1]);
   valid &= check(isa<BrigOperandOpaque>(src0), "Source should be opaque");
   const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src0);
@@ -1701,14 +1702,14 @@ bool BrigModule::validateImageQueryInst(const inst_iterator inst) const {
                  "Source should be BrigOperandOpaque");
   const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src);
   if(!validate(opaque)) return false;
-  dir_iterator directive(S_.directives + opaque->directive);
-  if(const BrigDirectiveImage *dir = dyn_cast<BrigDirectiveImage>(directive)) 
+  dir_iterator direc(S_.directives + opaque->directive);
+  if(const BrigDirectiveImage *dir = dyn_cast<BrigDirectiveImage>(direc))
     valid &= check(dir->s.type == BrigROImg ||
                    dir->s.type == BrigRWImg ||
                    dir->s.type == BrigSamp,
                    "Type should be image object or sampler object");
 
-  if(const BrigDirectiveSampler *dir = dyn_cast<BrigDirectiveSampler>(directive)) 
+  if(const BrigDirectiveSampler *dir = dyn_cast<BrigDirectiveSampler>(direc))
     valid &= check(dir->s.type == BrigROImg ||
                    dir->s.type == BrigRWImg ||
                    dir->s.type == BrigSamp,
@@ -1718,7 +1719,8 @@ bool BrigModule::validateImageQueryInst(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateParaSynInst(const inst_iterator inst, unsigned nary) const {
+bool BrigModule::validateParaSynInst(const inst_iterator inst,
+				     unsigned nary) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 1 + nary, "Incorrect number of operands"))
     return false;
@@ -2565,6 +2567,7 @@ bool BrigModule::validateSegmentp(const inst_iterator inst) const {
                  isa<BrigOperandImmed>(src) ||
                  isa<BrigOperandWaveSz>(src),
                  "Source should be reg, immediate or waveSz");
+  valid &= check(inst->type == Brigb32, "Type should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(type),
                  "Segmentp can not accept vector types");
   return valid;
@@ -2817,7 +2820,7 @@ bool BrigModule::validateLdImage(const inst_iterator inst) const {
 bool BrigModule::validateStImage(const inst_iterator inst) const {
   bool valid = true;
   const BrigInstImage *image = dyn_cast<BrigInstImage>(inst);
-  if(!validate(image)) return false;  
+  if(!validate(image)) return false;
   oper_iterator src0(S_.operands + image->o_operands[1]);
   const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src0);
   if(!validate(opaque)) return false;
@@ -2891,7 +2894,7 @@ bool BrigModule::validateQueryOrder(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateQueryWidth(const inst_iterator inst) const { 
+bool BrigModule::validateQueryWidth(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigu32, "Type of QueryWidth should be u32");
   valid &= validateImageQueryInst(inst);
@@ -2974,12 +2977,13 @@ bool BrigModule::validateBarrier(const inst_iterator inst) const {
   if(!validate(bib)) return false;
   BrigDataType type = BrigDataType(bib->type);
   oper_iterator dest(S_.operands + bib->o_operands[0]);
-  valid &= check(isa<BrigOperandImmed>(dest), 
+  valid &= check(isa<BrigOperandImmed>(dest),
                  "Destination should be immediate");
   valid &= check(type == Brigb32, "Type of dest should be b32");
   valid &= check(*getType(dest) == Brigb32, "Type of immediate should be b32");
-  valid &= check(bib->syncFlags <= 4, "SyncFlags should be global, group, or both");
-  valid &= check(!BrigInstHelper::isVectorTy(type), 
+  valid &= check(bib->syncFlags <= 4,
+		 "SyncFlags should be global, group, or both");
+  valid &= check(!BrigInstHelper::isVectorTy(type),
                  "Barrier can not accept vector types");
   return valid;
 }
