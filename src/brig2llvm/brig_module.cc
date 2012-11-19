@@ -1647,6 +1647,102 @@ bool BrigModule::validateUnpackInst(const inst_iterator inst) const {  //1031
   return valid;
 }
 
+bool BrigModule::validateLdStImageInst(const inst_iterator inst) const {
+  bool valid = true;
+  const BrigInstImage *image = dyn_cast<BrigInstImage>(inst);
+  if(!validate(image)) return false;
+  if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
+    return false;
+  BrigDataType destType = BrigDataType(image->type);
+  valid &= check(destType == Brigu32 ||
+                 destType == Brigf32 ||
+                 destType == Brigs32,
+                 "Type of destination should be u32, f32 or s32");
+  BrigDataType srcType = BrigDataType(image->stype);
+  valid &= check(srcType == Brigu32, "Type of source should be u32");
+  oper_iterator dest(S_.operands + image->o_operands[0]);
+  valid &= check(isa<BrigOperandRegV4>(dest), "Destination should be regV4");
+  valid &= check(*getType(dest) == Brigb32, "Destination should be s register");
+  oper_iterator src0(S_.operands + image->o_operands[1]);
+  valid &= check(isa<BrigOperandOpaque>(src0), "Source should be opaque");
+  const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src0);
+  if(!validate(opaque)) return false;
+  dir_iterator direc(S_.directives + opaque->directive);
+  if(const BrigDirectiveImage *dir = dyn_cast<BrigDirectiveImage>(direc))
+    valid &= check(dir->s.type == BrigROImg || dir->s.type == BrigRWImg,
+                   "Type should be read-write or read-only image");
+  if(const BrigDirectiveSampler *dir = dyn_cast<BrigDirectiveSampler>(direc))
+    valid &= check(dir->s.type == BrigROImg || dir->s.type == BrigRWImg,
+                   "Type should be read-write or read-only image");
+  oper_iterator src1(S_.operands + image->o_operands[2]);
+  valid &= check(isa<BrigOperandReg>(src1) ||
+                 isa<BrigOperandRegV2>(src1) ||
+                 isa<BrigOperandRegV4>(src1),
+                 "Source should be reg, regV2 or regV4");
+  valid &= check(*getType(src1) == Brigb32, "Source should be s register");
+  valid &= check(!BrigInstHelper::isVectorTy(destType),
+                 "LdSt can not accept vector types");
+  return valid;
+}
+
+bool BrigModule::validateImageQueryInst(const inst_iterator inst) const {
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(type == Brigb32 || type == Brigu32,
+                 "Type should be b32 or u32");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
+  valid &= check(isCompatibleSrc(type, dest),
+                 "Incompatible destination operand");
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandOpaque>(src),
+                 "Source should be BrigOperandOpaque");
+  const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src);
+  if(!validate(opaque)) return false;
+  dir_iterator directive(S_.directives + opaque->directive);
+  if(const BrigDirectiveImage *dir = dyn_cast<BrigDirectiveImage>(directive)) 
+    valid &= check(dir->s.type == BrigROImg ||
+                   dir->s.type == BrigRWImg ||
+                   dir->s.type == BrigSamp,
+                   "Type should be image object or sampler object");
+
+  if(const BrigDirectiveSampler *dir = dyn_cast<BrigDirectiveSampler>(directive)) 
+    valid &= check(dir->s.type == BrigROImg ||
+                   dir->s.type == BrigRWImg ||
+                   dir->s.type == BrigSamp,
+                   "Type should be image object or sampler object");
+  valid &= check(!BrigInstHelper::isVectorTy(type),
+                 "Image can not accept vector types");
+  return valid;
+}
+
+bool BrigModule::validateParaSynInst(const inst_iterator inst, unsigned nary) const {
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 1 + nary, "Incorrect number of operands"))
+    return false;
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(type == Brigb64 ||
+                 type == Brigu32 ||
+                 type == Brigb32,
+                 "Type should be b64, u32 or b32");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
+  valid &= check(isCompatibleSrc(type, dest),
+                 "Incompatible destination operand");
+  for(unsigned i = 0; i < nary; ++i) {
+    oper_iterator src(S_.operands + inst->o_operands[i + 1]);
+    valid &= check(isa<BrigOperandReg>(src) ||
+                   isa<BrigOperandImmed>(src) ||
+                   isa<BrigOperandWaveSz>(src),
+                   "Source shoule be register, immediate or waveSz");
+    valid &= check(isCompatibleSrc(type, src), "Incompatible Source operand");
+  }
+  valid &= check(BrigInstHelper::isVectorTy(type),
+                 "ParaSynInst can not accept vector types");
+  return valid;
+}
 
 bool BrigModule::validateAbs(const inst_iterator inst) const {
   bool valid = true;
@@ -2715,11 +2811,25 @@ bool BrigModule::validateRdImage(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateLdImage(const inst_iterator inst) const {
-  return true;
+  return validateLdStImageInst(inst);
 }
 
 bool BrigModule::validateStImage(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  const BrigInstImage *image = dyn_cast<BrigInstImage>(inst);
+  if(!validate(image)) return false;  
+  oper_iterator src0(S_.operands + image->o_operands[1]);
+  const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src0);
+  if(!validate(opaque)) return false;
+  dir_iterator direc(S_.directives + opaque->directive);
+  if(const BrigDirectiveImage *dir = dyn_cast<BrigDirectiveImage>(direc))
+    valid &= check(dir->s.type == BrigRWImg,
+                   "Type should be read-write image");
+  if(const BrigDirectiveSampler *dir = dyn_cast<BrigDirectiveSampler>(direc))
+    valid &= check(dir->s.type == BrigRWImg,
+                   "Type should be read-write image");
+  valid &= validateLdStImageInst(inst);
+  return valid;
 }
 
 bool BrigModule::validateAtomicImage(const inst_iterator inst) const {
@@ -2731,35 +2841,61 @@ bool BrigModule::validateAtomicNoRetImage(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateQueryArray(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of QueryArray should be b32");
+  valid &= validateImageQueryInst(inst);
+  return valid;
 }
 
 bool BrigModule::validateQueryData(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of QueryData should be b32");
+  valid &= validateImageQueryInst(inst);
+  return valid;
 }
 
 bool BrigModule::validateQueryDepth(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigu32, "Type of QueryDepth should be u32");
+  valid &= validateImageQueryInst(inst);
+  return valid;
 }
 
 bool BrigModule::validateQueryFiltering(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32,
+                 "Type of QueryFiltering should be b32");
+  valid &= validateImageQueryInst(inst);
+  return valid;
 }
 
 bool BrigModule::validateQueryHeight(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigu32, "Type of QueryHeight should be u32");
+  valid &= validateImageQueryInst(inst);
+  return valid;
 }
 
 bool BrigModule::validateQueryNormalized(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32,
+                 "Type of QueryNormalized should be b32");
+  valid &= validateImageQueryInst(inst);
+  return valid;
 }
 
 bool BrigModule::validateQueryOrder(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type of QueryOrder should be b32");
+  valid &= validateImageQueryInst(inst);
+  return valid;
 }
 
-bool BrigModule::validateQueryWidth(const inst_iterator inst) const {
-  return true;
+bool BrigModule::validateQueryWidth(const inst_iterator inst) const { 
+  bool valid = true;
+  valid &= check(inst->type == Brigu32, "Type of QueryWidth should be u32");
+  valid &= validateImageQueryInst(inst);
+  return valid;
 }
 
 bool BrigModule::validateCbr(const inst_iterator inst) const {
@@ -2831,51 +2967,125 @@ bool BrigModule::validateBrn(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateBarrier(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
+    return false;
+  const BrigInstBar *bib = dyn_cast<BrigInstBar>(inst);
+  if(!validate(bib)) return false;
+  BrigDataType type = BrigDataType(bib->type);
+  oper_iterator dest(S_.operands + bib->o_operands[0]);
+  valid &= check(isa<BrigOperandImmed>(dest), 
+                 "Destination should be immediate");
+  valid &= check(type == Brigb32, "Type of dest should be b32");
+  valid &= check(*getType(dest) == Brigb32, "Type of immediate should be b32");
+  valid &= check(bib->syncFlags <= 4, "SyncFlags should be global, group, or both");
+  valid &= check(!BrigInstHelper::isVectorTy(type), 
+                 "Barrier can not accept vector types");
+  return valid;
 }
 
 bool BrigModule::validateFbarArrive(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb64, "Type should be b64");
+  valid &= validateParaSynInst(inst, 0);
+  return valid;
 }
 
 bool BrigModule::validateFbarInit(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb64, "Type should be b64");
+  valid &= validateParaSynInst(inst, 1);
+  return valid;
 }
 
 bool BrigModule::validateFbarRelease(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb64, "Type should be b64");
+  valid &= validateParaSynInst(inst, 0);
+  return valid;
 }
 
 bool BrigModule::validateFbarSkip(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb64, "Type should be b64");
+  valid &= validateParaSynInst(inst, 0);
+  return valid;
 }
 
 bool BrigModule::validateFbarWait(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb64, "Type should be b64");
+  valid &= validateParaSynInst(inst, 0);
+  return valid;
 }
 
 bool BrigModule::validateSync(const inst_iterator inst) const {
+  if(!check(getNumOperands(inst) == 0, "Incorrect number of operands"))
+    return false;
   return true;
 }
 
 bool BrigModule::validateCount(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operand"))
+    return false;
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(type == Brigu32, "Type should be u32");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(src) ||
+                 isa<BrigOperandImmed>(src) ||
+                 isa<BrigOperandWaveSz>(src),
+                 "Source should be register, immediate or waveSz");
+  valid &= check(*getType(src) == Brigb1 || *getType(src) == Brigb32,
+                 "Source should be c or s register");
+  valid &= check(BrigInstHelper::isVectorTy(type),
+                 "Count can not accept vector types");
+  return valid;
 }
 
 bool BrigModule::validateCountUp(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigu32, "Type should be u32");
+  valid &= validateParaSynInst(inst, 0);
+  return valid;
 }
 
 bool BrigModule::validateMask(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operand"))
+    return false;
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(type == Brigb64, "Type should be b64");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
+  valid &= check(isCompatibleSrc(type, dest),
+                 "Incompatible destination operand");
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(src) ||
+                 isa<BrigOperandImmed>(src) ||
+                 isa<BrigOperandWaveSz>(src),
+                 "Source should be register, immediate or waveSz");
+  valid &= check(*getType(src) == Brigb1 || *getType(src) == Brigb32,
+                 "Source should be c or s register");
+  valid &= check(BrigInstHelper::isVectorTy(type),
+                 "Mask can not accept vector types");
+  return valid;
 }
 
 bool BrigModule::validateSend(const inst_iterator inst) const {
-  return true;
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type should be b32");
+  valid &= validateParaSynInst(inst, 2);
+  return valid;
 }
 
-bool BrigModule::validateReceive(const inst_iterator inst) const {
-  return true;
+bool BrigModule::validateReceive(const inst_iterator inst) const { 
+  bool valid = true;
+  valid &= check(inst->type == Brigb32, "Type should be b32");
+  valid &= validateParaSynInst(inst, 2);
+  return valid;
 }
 
 bool BrigModule::validateCall(const inst_iterator inst) const {
