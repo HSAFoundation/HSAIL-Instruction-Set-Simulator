@@ -1214,8 +1214,7 @@ int Alignment(Context* context) {
 
 int DeclPrefix(Context* context){
   context->set_attribute(BrigNone);
-  context->init_symbol_modifier();
-
+  
   if ((context->token_to_scan == ALIGN)  ||
      (context->token_to_scan == EXTERN) || 
      (context->token_to_scan == STATIC) || 
@@ -1333,7 +1332,6 @@ int ArgumentDecl(Context* context) {
     return 1;
   }
   context->set_dim(0);
-  context->init_symbol_modifier();
   BrigStorageClass32_t storage_class = context->token_value.storage_class;
   
   if(context->token_to_scan != ARG){
@@ -2244,7 +2242,6 @@ int InitializableDecl(Context* context) {
 
 int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){  
   int var_name_offset;
-  context->init_symbol_modifier();
   context->set_isArray(false);
   //First token already verified as GLOBAL/READONLY
   if (context->token_type != DATA_TYPE_ID) {
@@ -2335,8 +2332,7 @@ int UninitializableDecl(Context* context) {
 
   context->token_to_scan = yylex();
   context->set_dim(0);
-  context->init_symbol_modifier();
-
+  
   if ('[' == context->token_to_scan) {
     if (ArrayDimensionSet(context))
       return 1;
@@ -2397,8 +2393,7 @@ int ArgUninitializableDecl(Context* context) {
 
   context->token_to_scan = yylex();
   context->set_dim(0);
-  context->init_symbol_modifier();
-
+  
   if ('[' == context->token_to_scan) {
     if (ArrayDimensionSet(context))
       return 1;
@@ -3545,7 +3540,6 @@ int KernelArgumentDecl(Context *context) {
     return 1;
 
   context->set_dim(0);
-  context->init_symbol_modifier();
   BrigStorageClass32_t storage_class = context->token_value.storage_class;
 
   if (KERNARG != context->token_to_scan)
@@ -3959,7 +3953,6 @@ int GlobalPrivateDecl(Context* context) {
   };
   context->append_directive(&bds);
 
-  context->init_symbol_modifier();
   context->token_to_scan = yylex();
   return 0;
 } 
@@ -4612,7 +4605,6 @@ int GlobalGroupDecl(Context* context) {
   };
   context->append_directive(&bds);
 
-  context->init_symbol_modifier();
   context->token_to_scan = yylex();
   return 0;
 } 
@@ -6143,6 +6135,8 @@ int BodyStatementNested(Context* context) {
 }
 
 int ArgStatement(Context* context) {
+  
+  context->initialize_statement_fields();
   if (context->token_to_scan == CALL) {
     if (!Call(context)) {
       context->update_bdf_operation_count();
@@ -6189,7 +6183,8 @@ int Comment(Context* context) {
 }
 
 int BodyStatement(Context* context) {
-
+  
+  context->initialize_statement_fields();
   if (context->token_to_scan == TOKEN_COMMENT) {
     return Comment(context);
   } else if (context->token_to_scan == PRAGMA) {
@@ -8130,6 +8125,8 @@ int PairAddressableOperand(Context* context) {
 }
 
 int TopLevelStatement(Context *context){
+
+  context->initialize_statement_fields();
   if(TOKEN_COMMENT==context->token_to_scan){
     return Comment(context);
   } else if(!Directive(context)) {

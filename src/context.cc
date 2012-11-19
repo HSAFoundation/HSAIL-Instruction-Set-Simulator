@@ -83,7 +83,13 @@ void Context::initialize_all_fields(void) {
   attribute = BrigNone;
   alignment = 1;
   symModifier = 0;
-  aluModifier = {0,0,0,0,0,0,0};
+  aluModifier.floatOrInt = 0;
+  aluModifier.rounding = 0;
+  aluModifier.valid = 0;
+  aluModifier.ftz = 0;
+  aluModifier.approx = 0;
+  aluModifier.fbar = 0;
+  aluModifier.reserved = 0;
   dim = 0;
   type = Brigb32;
   is_array = false;
@@ -265,12 +271,18 @@ void Context::clear_all_buffers(void) {
   for(unsigned i = 0; i < 8; ++i) sbuf->append_char(0);
 }
 
-void Context::initialize_bodystatement_fields(void){
+void Context::initialize_statement_fields(void){
   attribute = BrigNone;
   alignment = 1;
   symModifier = 0;
   type = Brigb32;
-  aluModifier = {0,0,0,0,0,0,0};
+  aluModifier.floatOrInt = 0;
+  aluModifier.rounding = 0;
+  aluModifier.valid = 0;
+  aluModifier.ftz = 0;
+  aluModifier.approx = 0;
+  aluModifier.fbar = 0;
+  aluModifier.reserved = 0;
   dim = 0;
   is_array = false;
 }
@@ -321,9 +333,6 @@ void Context::set_symbol_modifier(BrigSymbolModifier modifier) {
   this->symModifier |= ((uint32_t)(modifier));
 }
 
-void Context::init_symbol_modifier(){
-	this->symModifier = 0;
-}
 void Context::set_attribute(BrigAttribute16_t attrib) {
   this->attribute = attrib;
 }

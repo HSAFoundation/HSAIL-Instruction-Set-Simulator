@@ -249,7 +249,7 @@ class Context {
     void clear_all_buffers(void);
     void clear_context(void);
     void initialize_all_fields(void);
-    void initialize_bodystatement_fields(void);
+    void initialize_statement_fields(void);
     
     /* Temporary Context Manipulators */
     // check context
@@ -266,7 +266,6 @@ class Context {
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
     void set_symbol_modifier(BrigSymbolModifier modifier);
-    void init_symbol_modifier();
     void set_attribute(BrigAttribute16_t attrib);
     void set_alignment(uint16_t align);
     void set_machine(BrigMachine16_t machine);
