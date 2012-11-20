@@ -1,15 +1,10 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
+#include "../mock_error_reporter.h"
+
+using ::testing::AtLeast;
+using ::testing::_;
 
 namespace hsa{
 namespace brig{
@@ -1710,6 +1705,42 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
 
   /***************************************  End of tests *************************************/
   delete symbols;
+}
+
+TEST(ErrorReportTest, Instruction4) {  
+  Context* context = Context::get_instance();
+  context->clear_context();
+
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
+  mer.DelegateToFake();
+  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
+
+  std::string input = "extract_b32 $s1, $s0, $s3,$s2 \n";
+  Lexer* lexer = new Lexer();
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Instruction4(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  
+  input.assign( "shuffle $s1, $s0, $s3, 0; \n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Instruction4(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
+  
+  input.assign( "cmov_u16x4 $d1, $d3, $d2; \n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Instruction4(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+  
+  context->set_error_reporter(ErrorReporter::get_instance());
+  delete lexer;
 }
 
 }
