@@ -5292,14 +5292,23 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
       sizeof(bib),
       BrigEInstBar,
       BrigBarrier,
-      Brigu32,
+      Brigb32,
       0,
-      {0, 0, 0, 0, 0},
+      {8, 0, 0, 0, 0},
       1
     };
     code.append(&bib);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandImmed boi = {
+      sizeof(boi),
+      BrigEOperandImmed,
+      Brigb32,
+      0,
+      { 0 }
+    };
+    operands.append(&boi);
 
     hsa::brig::Buffer debug;
 
