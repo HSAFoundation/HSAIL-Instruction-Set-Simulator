@@ -286,8 +286,10 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
     return val;
   }
 
-  if(const BrigOperandLabelRef *label = dyn_cast<BrigOperandLabelRef>(op))
-    return state.cbMap.find(label->labeldirective)->second;
+  if(const BrigOperandLabelRef *label = dyn_cast<BrigOperandLabelRef>(op)) {
+    llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
+    return llvm::ConstantInt::get(int32Ty, label->labeldirective);
+  }
 
   if(const BrigOperandFunctionRef *func = dyn_cast<BrigOperandFunctionRef>(op))
     return state.funMap.find(func->fn)->second;
@@ -566,8 +568,9 @@ static void runOnBranchInst(llvm::BasicBlock &B,
   unsigned targetOpNum = inst->opcode == BrigBrn ? 1 : 2;
 
   const BrigOperandBase *target = helper.getOperand(inst, targetOpNum);
-  llvm::BasicBlock *targetBB =
-    llvm::cast<llvm::BasicBlock>(getOperand(B, target, helper, state));
+  llvm::ConstantInt *cbNum =
+    llvm::cast<llvm::ConstantInt>(getOperand(B, target, helper, state));
+  llvm::BasicBlock *targetBB = state.cbMap.find(cbNum->getZExtValue())->second;
 
   if(inst->opcode == BrigCbr) {
     const BrigOperandBase *pred = helper.getOperand(inst, 1);
