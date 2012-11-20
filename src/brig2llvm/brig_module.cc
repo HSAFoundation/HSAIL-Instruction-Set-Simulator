@@ -2907,24 +2907,24 @@ bool BrigModule::validateBranchInst(const inst_iterator inst, unsigned nary) con
 
   if(!check(isa<BrigInstBase>(inst) || isa<BrigInstMod>(inst),
             "Incorrect instruction kind"))
-    return false;
+  return false;
 
   const unsigned numOperands = getNumOperands(inst);
 
   if(!check(numOperands == nary || numOperands == nary + 1, 
             "Incorrect number of operands"))
-    return false;
+  return false;
 
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
     if(mod->aluModifier.valid) {
       valid &= check(!mod->aluModifier.floatOrInt,
-                     "Incompatible ALU modifier");
+                       "Incompatible ALU modifier");
       valid &= check(!mod->aluModifier.rounding,
-                     "Incompatible ALU modifier");
+                       "Incompatible ALU modifier");
       valid &= check(!mod->aluModifier.ftz,
-                     "Incompatible ALU modifier");
+                       "Incompatible ALU modifier");
       valid &= check(!mod->aluModifier.approx,
-                     "Incompatible ALU modifier");
+                       "Incompatible ALU modifier");
     }
   }
 
@@ -2943,7 +2943,7 @@ bool BrigModule::validateBranchInst(const inst_iterator inst, unsigned nary) con
   valid &= check(isa<BrigOperandReg>(dest),
                    "Destination must be a Reg");
     valid &= check(1 == BrigInstHelper::getTypeSize(*getType(dest)),
-                   "Invalid type size");
+                     "Invalid type size");
   }
 
   if(numOperands == nary) {
@@ -2956,20 +2956,19 @@ bool BrigModule::validateBranchInst(const inst_iterator inst, unsigned nary) con
   if(numOperands == nary + 1){
     oper_iterator dest(S_.operands + inst->o_operands[nary - 1]);
     valid &= check(isa<BrigOperandReg>(dest),
-                   "Destination must be a Reg");
+                     "Destination must be a Reg");
     valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)),
-                   "Invalid type size");
+                     "Invalid type size");
     oper_iterator labelOrAddr(S_.operands + inst->o_operands[nary]);
     valid &= check(isa<BrigOperandLabelRef>(labelOrAddr)   ||
-                   isa<BrigOperandAddress>(labelOrAddr),
-                   "Destination must be a LabelRef or Address");
+                     isa<BrigOperandAddress>(labelOrAddr),
+                     "Destination must be a LabelRef or Address");
   }
   return valid;
 }
 
 bool BrigModule::validateCbr(const inst_iterator inst) const {
   bool valid = true;
-
   valid &= validateBranchInst(inst, 3);
   return valid;
 }
@@ -2978,7 +2977,6 @@ bool BrigModule::validateCbr(const inst_iterator inst) const {
 
 bool BrigModule::validateBrn(const inst_iterator inst) const {
   bool valid = true;
-
   valid &= validateBranchInst(inst, 2);
   return valid;
 }
