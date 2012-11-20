@@ -1369,5 +1369,35 @@ TEST(ErrorReportTest, Lda) {
   delete lexer;
 }
 
+TEST(ErrorReportTest, Ldc) {  
+  Context* context = Context::get_instance();
+  context->clear_context();
+
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
+  mer.DelegateToFake();
+  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
+
+  std::string input = "ldc_b32 $s2, @lab\n";
+  Lexer* lexer = new Lexer();
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Ldc(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  
+  input.assign( "ldc_b32 $s4;\n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Ldc(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+
+  context->set_error_reporter(ErrorReporter::get_instance());
+  delete lexer;
+}
+
+
 }
 }
