@@ -2973,13 +2973,12 @@ bool BrigModule::validateCbr(const inst_iterator inst) const {
   return valid;
 }
 
-
-
 bool BrigModule::validateBrn(const inst_iterator inst) const {
   bool valid = true;
   valid &= validateBranchInst(inst, 2);
   return valid;
 }
+
 bool BrigModule::validateBarrier(const inst_iterator inst) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
