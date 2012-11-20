@@ -5010,7 +5010,7 @@ int Ld(Context* context) {
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
   if (ArrayOperand(context, &OpOffset[1])) {
-    context->set_error(INVALID_SECOND_OPERAND);
+    context->set_error(INVALID_FIRST_OPERAND);
     return 1;
   }
   if (context->token_to_scan != ',') {
@@ -5020,7 +5020,7 @@ int Ld(Context* context) {
   context->token_to_scan = yylex();
 
   if (MemoryOperand(context, &OpOffset[2])) {
-    context->set_error(INVALID_FIRST_OPERAND);
+    context->set_error(INVALID_SECOND_OPERAND);
     return 1;
   }
   if (context->token_to_scan != ';') {
