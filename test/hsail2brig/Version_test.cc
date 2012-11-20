@@ -107,7 +107,7 @@ TEST(CodegenTest, Version_CodeGen) {
 
 }
 
-TEST(ErrorReportTest, Version_CodeGen) {  
+TEST(ErrorReportTest, Version) {  
   Context* context = Context::get_instance();
   context->clear_context();
 
@@ -124,8 +124,22 @@ TEST(ErrorReportTest, Version_CodeGen) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_FALSE(!Version(context));
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
-  context->set_error_reporter(ErrorReporter::get_instance());
   
+  input.assign("version 2;1:$nosftz, $small, $full;\n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Version(context));
+  EXPECT_EQ(MISSING_COLON, mer.get_last_error());
+  
+  input.assign("version 2:1 $nosftz, $full;\n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Version(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  
+  context->set_error_reporter(ErrorReporter::get_instance());
   delete lexer;
 }
 
