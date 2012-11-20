@@ -1,15 +1,10 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
+#include "../mock_error_reporter.h"
+
+using ::testing::AtLeast;
+using ::testing::_;
 
 namespace hsa{
 namespace brig{
@@ -604,6 +599,42 @@ TEST(CodegenTest, St_Codegen){
 
 /************************************ End of tests*******************************************/
   delete sbuf;
+}
+
+TEST(ErrorReportTest, St) {  
+  Context* context = Context::get_instance();
+  context->clear_context();
+
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
+  mer.DelegateToFake();
+  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
+
+  std::string input = "st_arg 3.1415l, [$s2-4];\n";
+  Lexer* lexer = new Lexer();
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!St(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
+  
+  input.assign("st_arg_f64 3.1415l;\n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!St(context));
+  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+  
+  input.assign( "st_arg_f32 $s0, [%output]\n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!St(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+
+  context->set_error_reporter(ErrorReporter::get_instance());
+  delete lexer;
 }
 
 }
