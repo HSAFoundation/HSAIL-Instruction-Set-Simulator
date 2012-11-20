@@ -144,6 +144,7 @@ class BrigModule {
   bool validateMovdInst(const inst_iterator inst) const;
   bool validateMovsInst(const inst_iterator inst) const;
   bool validateUnpackInst(const inst_iterator inst) const;
+  bool validateBranchInst(const inst_iterator inst, unsigned nary) const;
 
   bool validateAbs(const inst_iterator inst) const;
   bool validateAdd(const inst_iterator inst) const;
