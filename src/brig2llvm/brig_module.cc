@@ -2907,13 +2907,13 @@ bool BrigModule::validateBranchInst(const inst_iterator inst, unsigned nary) con
 
   if(!check(isa<BrigInstBase>(inst) || isa<BrigInstMod>(inst),
             "Incorrect instruction kind"))
-  return false;
+    return false;
 
   const unsigned numOperands = getNumOperands(inst);
 
   if(!check(numOperands == nary || numOperands == nary + 1, 
             "Incorrect number of operands"))
-  return false;
+    return false;
 
   if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst)) {
     if(mod->aluModifier.valid) {
@@ -2939,9 +2939,9 @@ bool BrigModule::validateBranchInst(const inst_iterator inst, unsigned nary) con
   valid &= check(isPowerOf2(widthMod->bits.u), "Width must be a power of 2");
 
   if(nary == 3){
-  oper_iterator dest(S_.operands + inst->o_operands[1]);
-  valid &= check(isa<BrigOperandReg>(dest),
-                   "Destination must be a Reg");
+    oper_iterator dest(S_.operands + inst->o_operands[1]);
+    valid &= check(isa<BrigOperandReg>(dest),
+                     "Destination must be a Reg");
     valid &= check(1 == BrigInstHelper::getTypeSize(*getType(dest)),
                      "Invalid type size");
   }
