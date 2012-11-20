@@ -1,6 +1,10 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
+#include "../mock_error_reporter.h"
+
+using ::testing::AtLeast;
+using ::testing::_;
 
 namespace hsa {
 namespace brig {
@@ -1292,6 +1296,43 @@ TEST(CodegenTest, Ldc_Codegen){
 
   delete sbuf;
 }
+
+TEST(ErrorReportTest, Ld) {  
+  Context* context = Context::get_instance();
+  context->clear_context();
+
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
+  mer.DelegateToFake();
+  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
+
+  std::string input = "ld_readonly_s32 $s1, [%tbl][12]\n";
+  Lexer* lexer = new Lexer();
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Ld(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  
+  input.assign( "ld_arg_f32 [%input];\n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Ld(context));
+  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
+  
+  input.assign( "ld_group $d5, [100];\n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Ld(context));
+  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
+  
+  context->set_error_reporter(ErrorReporter::get_instance());
+  delete lexer;
+}
+
 
 }
 }
