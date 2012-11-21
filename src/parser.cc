@@ -1675,8 +1675,13 @@ int OptionalWidth(Context* context) {
     { 0 }
   };
   op_width.size = sizeof(op_width);
-  if ((width_param <= 1024) && ((width_param & 0x01) == 0))
-    op_width.bits.u  = width_param ;
+  if ((width_param <= 1024) && 
+      ((width_param & (width_param - 1)) == 0)) {
+    op_width.bits.u  = width_param;
+  } else {
+    context->set_error(INVALID_WIDTH_NUMBER);
+    return 1;
+  }
   context->append_operand(&op_width);
   context->token_to_scan = yylex();
   return 0;
