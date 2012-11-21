@@ -821,6 +821,34 @@ TEST(ErrorReportTest, Instruction1) {
   delete lexer;
 }
 
+TEST(ErrorReportTest, Barrier) {  
+  Context* context = Context::get_instance();
+  context->clear_context();
+
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
+  mer.DelegateToFake();
+  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
+
+  std::string input = "barrier\n";
+  Lexer* lexer = new Lexer();
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Bar(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  
+  input.assign( "barrier_width(62)_group;\n");
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Bar(context));
+  EXPECT_EQ(INVALID_WIDTH_NUMBER, mer.get_last_error());
+
+  context->set_error_reporter(ErrorReporter::get_instance());
+  delete lexer;
+}
 
 }
 }
