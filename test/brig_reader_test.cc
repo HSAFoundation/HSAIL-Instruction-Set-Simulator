@@ -1456,7 +1456,7 @@ TEST(BrigKernelTest, IndirectBranches) {
   }
 }
 
-TEST(BrigKernelTest, IndirectCall) {
+TEST(BrigKernelTest, DISABLED_IndirectCall) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
     "function &foo (arg_u32 %r) (arg_u32 %n)\n"
