@@ -1705,7 +1705,50 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, symbols, &out5, &reg1, &imm3);
   TestCase5.Run_Test(&Instruction2);
   symbols->clear();
+/*********************************************** Test case ****************************************/
+  in.assign( "neg_ftz_f32 $s1, 99.0;\n");
+  op1.assign("$s1");
+  symbols->append(op1);
+  bam.valid = 1;
+  bam.rounding = 0;
+  bam.ftz = 1;
+  bam.floatOrInt = 1;
+  bam.valid = 1;
+  bam.approx = 0;
+  bam.fbar = 0;
+  bam.reserved = 0;
 
+  BrigInstMod out6 = {
+    0,
+    BrigEInstMod,
+    BrigNeg,
+    Brigf32,
+    BrigNoPacking,
+    {0, sizeof(reg1), 0, 0, 0},
+    bam
+  };
+  out6.size = sizeof(out6);
+
+  reg1.size = sizeof(reg1);
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb32;
+  reg1.reserved = 0;
+  reg1.s_name = 0;
+
+  BrigOperandImmed imm4 = {
+    0,
+    BrigEOperandImmed,
+    Brigb64,
+    0,
+    {0}
+  };
+  imm4.bits.d = 99.0;
+  imm4.size = sizeof(imm4);
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase6(in, symbols, &out6, &reg1, &imm4);
+  TestCase6.Run_Test(&Instruction2);
+  symbols->clear();
+
+  
   /******************************  End of tests *****************************************/
   delete symbols;
 }

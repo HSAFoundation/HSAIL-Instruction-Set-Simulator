@@ -235,7 +235,6 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
-    boi.type = type;
     boi.bits.l[0] = boi.bits.l[1] = 0;
     boi.bits.d = context->token_value.double_val;
     context->append_operand(&boi);
