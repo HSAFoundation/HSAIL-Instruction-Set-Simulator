@@ -269,6 +269,26 @@ class BrigInstHelper {
     return opcode == BrigBrn || opcode == BrigCbr;
   }
 
+  const BrigOperandBase *getBranchTarget(const inst_iterator inst) const {
+    BrigOpcode opcode = BrigOpcode(inst->opcode);
+    if(opcode == BrigBrn)
+      return getOperand(inst, 1);
+    if(opcode == BrigCbr)
+      return getOperand(inst, 2);
+
+    assert(false && "Not a branch instruction");
+  }
+
+  bool isDirectBranchInst(const inst_iterator inst) const {
+    if(!isBranchInst(inst)) return false;
+    return isa<BrigOperandLabelRef>(getBranchTarget(inst));
+  }
+
+  bool isIndirectBranchInst(const inst_iterator inst) const {
+    if(!isBranchInst(inst)) return false;
+    return isa<BrigOperandReg>(getBranchTarget(inst));
+  }
+
  private:
   const BrigSections &S_;
 };

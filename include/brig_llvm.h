@@ -29,6 +29,7 @@ struct BrigProgram {
   bool operator!() { return !M; }
   llvm::Module *operator->() { return M.get(); }
 
+ private:
   static void delModule(llvm::Module *M);
 };
 

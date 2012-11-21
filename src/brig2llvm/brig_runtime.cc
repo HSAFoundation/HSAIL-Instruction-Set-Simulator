@@ -413,6 +413,9 @@ extern "C" b64 Movd_hi_b64(b64 x, b32 y) {
 template<class T> static T Lda(T x) { return x; }
 UnsignedInst(define, Lda, Unary)
 
+template<class T> static T Ldc(T x) { return x; }
+BitInst(define, Ldc, Unary)
+
 template<class T> static T ShuffleVector(T x, T y, b32 z) {
 
   unsigned len   = T::Len;

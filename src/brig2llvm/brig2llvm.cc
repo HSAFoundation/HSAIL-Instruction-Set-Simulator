@@ -555,19 +555,16 @@ static void runOnComplexInst(llvm::BasicBlock &B,
   if(ftz) insertDisableFtz(B);
 }
 
-static void runOnBranchInst(llvm::BasicBlock &B,
-                            const inst_iterator inst,
-                            const BrigInstHelper &helper,
-                            const FunState &state) {
+static void runOnDirectBranchInst(llvm::BasicBlock &B,
+                                  const inst_iterator inst,
+                                  const BrigInstHelper &helper,
+                                  const FunState &state) {
 
   // The width of the branch is not necessary for a functional simulator.
   // Similarly, we can ignore the list of possible branch targets for an
   // indirect branch. In debug mode, we should check for and log branchs outside
   // the target width and branch divergence beyond the limit given by width.
-
-  unsigned targetOpNum = inst->opcode == BrigBrn ? 1 : 2;
-
-  const BrigOperandBase *target = helper.getOperand(inst, targetOpNum);
+  const BrigOperandBase *target = helper.getBranchTarget(inst);
   llvm::ConstantInt *cbNum =
     llvm::cast<llvm::ConstantInt>(getOperand(B, target, helper, state));
   llvm::BasicBlock *targetBB = state.cbMap.find(cbNum->getZExtValue())->second;
@@ -585,6 +582,37 @@ static void runOnBranchInst(llvm::BasicBlock &B,
   }
 
   assert(false && "Unknown branch opcode");
+}
+
+static void runOnIndirectBranchInst(llvm::BasicBlock &B,
+                                    const inst_iterator inst,
+                                    const BrigInstHelper &helper,
+                                    const FunState &state) {
+
+  llvm::LLVMContext &C = B.getContext();
+  llvm::Function *F = B.getParent();
+  const BrigOperandBase *target = helper.getBranchTarget(inst);
+  llvm::Value *targetBB = getOperand(B, target, helper, state);
+
+  llvm::BasicBlock *launchBB = &B;
+  if(inst->opcode == BrigCbr) {
+    launchBB = llvm::BasicBlock::Create(C, B.getName() + ".launch", F);
+    const BrigOperandBase *pred = helper.getOperand(inst, 1);
+    llvm::Value *predVal = getOperand(B, pred, helper, state);
+    llvm::BranchInst::Create(launchBB, NULL, predVal, &B);
+  }
+
+  llvm::IntegerType *int32Ty = llvm::Type::getInt32Ty(C);
+  const FunState::CBMap &cbMap = state.cbMap;
+  llvm::SwitchInst *launchInst =
+    llvm::SwitchInst::Create(targetBB, &B, cbMap.size(), launchBB);
+  for(FunState::CBIt cb = cbMap.begin(), E = cbMap.end(); cb != E; ++cb) {
+    llvm::BasicBlock *dest = cb->second;
+    llvm::ConstantInt *label = llvm::ConstantInt::get(int32Ty, cb->first);
+    if(dest != &F->getEntryBlock())
+      launchInst->addCase(label, dest);
+  }
+  launchInst->setDefaultDest(launchInst->getSuccessor(1));
 }
 
 static void runOnCallInst(llvm::BasicBlock &B,
@@ -621,8 +649,10 @@ static void runOnInstruction(llvm::BasicBlock &B,
 
   if(inst->opcode == BrigRet) {
     llvm::ReturnInst::Create(C, &B);
-  } else if(helper.isBranchInst(inst)) {
-    runOnBranchInst(B, inst, helper, state);
+  } else if(helper.isDirectBranchInst(inst)) {
+    runOnDirectBranchInst(B, inst, helper, state);
+  } else if(helper.isIndirectBranchInst(inst)) {
+    runOnIndirectBranchInst(B, inst, helper, state);
   } else if(inst->opcode == BrigCall) {
     runOnCallInst(B, inst, helper, state);
   } else {
