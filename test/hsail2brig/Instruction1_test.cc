@@ -850,5 +850,27 @@ TEST(ErrorReportTest, Barrier) {
   delete lexer;
 }
 
+TEST(ErrorReportTest, Sync) {  
+  Context* context = Context::get_instance();
+  context->clear_context();
+
+  MockErrorReporter mer;
+  context->set_error_reporter(&mer);
+  mer.DelegateToFake();
+  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
+  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
+
+  std::string input = "sync_global\n";
+  Lexer* lexer = new Lexer();
+  lexer->set_source_string(input);
+
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_FALSE(!Sync(context));
+  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+
+  context->set_error_reporter(ErrorReporter::get_instance());
+  delete lexer;
+}
+
 }
 }
