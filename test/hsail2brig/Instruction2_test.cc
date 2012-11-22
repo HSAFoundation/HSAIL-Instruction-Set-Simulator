@@ -1,15 +1,13 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa {
 namespace brig {
 
-template <typename TInst, typename T1, typename T2>
+template <typename TInst=BrigInstBase, 
+          typename T1=BrigOperandReg, 
+          typename T2=BrigOperandReg>
 class Instruction2_Test: public BrigCodeGenTest {
 
 private:
@@ -19,6 +17,9 @@ private:
   const T2* RefSrc;
 
 public:
+  Instruction2_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Instruction2_Test(std::string& in, StringBuffer* sbuf, TInst* ref,
            T1* Dest, T2* Src):
     BrigCodeGenTest(in, sbuf),
@@ -43,6 +44,9 @@ public:
     delete code;
     delete oper;
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 
@@ -1818,39 +1822,17 @@ TEST(CodegenTest, MemorySegmentOps){
 }
 
 TEST(ErrorReportTest, Instruction2) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "unpack3 $s1, $s2\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction2(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Instruction2_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Instruction2, MISSING_SEMICOLON);
   
   input.assign( "firstbit $s0, $s0;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction2(context));
-  EXPECT_EQ(INVALID_DATA_TYPE, mer.get_last_error());
+  Instruction2_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Instruction2, INVALID_DATA_TYPE);
   
   input.assign( "frcp_f32 $s0;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction2(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
-  
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Instruction2_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Instruction2, MISSING_COMMA);
 }
 
 } //namespace brig
