@@ -1,15 +1,13 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa {
 namespace brig {
 
-template <typename TInst, typename T1, typename T2, typename T3 = BrigOperandReg>
+template <typename TInst=BrigInstBase, 
+          typename T1=BrigOperandReg, typename T2=BrigOperandReg, 
+          typename T3=BrigOperandReg>
 class Mul_Test: public BrigCodeGenTest {
 
 private:
@@ -21,6 +19,9 @@ private:
   const T3* RefSrc3;
 
 public:
+  Mul_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+  
   Mul_Test(std::string& in, StringBuffer* sbuf, TInst* ref,
            BrigOperandReg* Dest, T1* Src1, T2* Src2, T3* Src3 = NULL):
     BrigCodeGenTest(in, sbuf),
@@ -52,6 +53,10 @@ public:
     delete oper;
     delete dir;
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
+
 };
 
 
@@ -626,32 +631,13 @@ TEST(CodegenTest, Mul_AluModifier_CodeGen) {
 }
 
 TEST(ErrorReportTest, Mul) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "mul_ftz_up $s1 ,$s2, $s3;\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Mul(context));
-  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
+  Mul_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Mul, MISSING_DATA_TYPE);
   
   input.assign("mul_u32 $s1 $s2, $s3;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Mul(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
-  
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Mul_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Mul, MISSING_COMMA);
 }
 
 } // namespace hsa
