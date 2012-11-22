@@ -1,15 +1,12 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa{
 namespace brig{
 
-template <typename TInst, typename T> class Instruction1_Test : public BrigCodeGenTest{
+template <typename TInst=BrigInstBase, typename T=BrigOperandReg>
+class Instruction1_Test : public BrigCodeGenTest{
 private:
 
   //Instruction in .code buffer - Pointers to brig structures
@@ -18,6 +15,8 @@ private:
   const T* RefDest;
 
 public:
+  Instruction1_Test(std::string& in):
+    BrigCodeGenTest(in) {}
 
   Instruction1_Test(std::string& in, StringBuffer *sbuf, TInst* ref, T* Dest) :
     BrigCodeGenTest(in, sbuf),
@@ -46,6 +45,9 @@ public:
     delete dir;
     RefInst = NULL;
     RefDest = NULL;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -786,90 +788,33 @@ TEST(CodegenTest, Barrier_Codegen){
 }
 
 TEST(ErrorReportTest, Instruction1) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input =  "clock $d6\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction1(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Instruction1_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Instruction1, MISSING_SEMICOLON);
   
   input.assign( "fbar_release $d1;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction1(context));
-  EXPECT_EQ(INVALID_DATA_TYPE, mer.get_last_error());
+  Instruction1_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Instruction1, INVALID_DATA_TYPE);
 
   input.assign( "countup_u32;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction1(context));
-  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
-
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Instruction1_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Instruction1, MISSING_OPERAND);
 }
 
 TEST(ErrorReportTest, Barrier) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "barrier\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Bar(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Instruction1_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Bar, MISSING_SEMICOLON);
   
   input.assign( "barrier_width(62)_group;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Bar(context));
-  EXPECT_EQ(INVALID_WIDTH_NUMBER, mer.get_last_error());
-
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Instruction1_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Bar, INVALID_WIDTH_NUMBER);
 }
 
 TEST(ErrorReportTest, Sync) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "sync_global\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Sync(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
-
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Instruction1_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Sync, MISSING_SEMICOLON);
 }
 
 }
