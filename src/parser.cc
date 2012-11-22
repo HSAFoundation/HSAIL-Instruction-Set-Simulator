@@ -4519,7 +4519,8 @@ int Mov(Context* context) {
   context->set_type(context->token_value.data_type);  
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
-  if (ArrayOperand(context, &OpOffset[0])) {
+  if ((context->token_to_scan != '(' && context->token_type != REGISTER) || 
+      ArrayOperand(context, &OpOffset[0])) {
     context->set_error(INVALID_FIRST_OPERAND);
     return 1;
   }
