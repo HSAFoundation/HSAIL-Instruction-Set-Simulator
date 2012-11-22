@@ -1,15 +1,13 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa {
 namespace brig {
 
-template <typename T1, typename T2, typename T3>
+template <typename T1=BrigOperandReg, 
+          typename T2=BrigOperandReg, 
+          typename T3=BrigOperandReg>
 class Syscall_Test: public BrigCodeGenTest {
 
 private:
@@ -22,6 +20,9 @@ private:
   const T3* RefSrc4;
 
 public:
+  Syscall_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Syscall_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref,
                BrigOperandReg* Dest, BrigOperandImmed* Src1, T1* Src2, T2* Src3, T3* Src4):
     BrigCodeGenTest(in, sbuf),
@@ -63,6 +64,11 @@ public:
     delete oper;
     delete dir;
   }
+
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
+
 };
 
 
@@ -332,46 +338,21 @@ TEST(CodegenTest, Syscall_CodeGen) {
 }
 
 TEST(ErrorReportTest, SysCall) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "syscall $s1, 0x7 0x8, 0x9, 0xa;\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!SysCall(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+  Syscall_Test<> TestCase1(input);
+  TestCase1.Run_Test(&SysCall, MISSING_COMMA);
   
   input.assign("syscall $s1, 0x7, 0x8, 0x9, 0xa\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!SysCall(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Syscall_Test<> TestCase2(input);
+  TestCase2.Run_Test(&SysCall, MISSING_SEMICOLON);
   
   input.assign("syscall $s1, 0x2, $d3, $s4, $s5;\n");
-  lexer->set_source_string(input);
+  Syscall_Test<> TestCase3(input);
+  TestCase3.Run_Test(&SysCall, INVALID_THIRD_OPERAND);
 
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!SysCall(context));
-  EXPECT_EQ(INVALID_THIRD_OPERAND, mer.get_last_error());
-  
   input.assign("syscall $s1, $s2, $s3, $s4, $s5;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!SysCall(context));
-  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
-
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Syscall_Test<> TestCase4(input);
+  TestCase4.Run_Test(&SysCall, INVALID_SECOND_OPERAND);
 }
 
 } // namespace hsa
