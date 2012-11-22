@@ -1,15 +1,11 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa {
 namespace brig {
 
-template <typename Tinst, typename T>
+template <typename Tinst=BrigInstBase, typename T=BrigOperandReg>
 class Ld_Test: public BrigCodeGenTest {
 
 private:
@@ -30,6 +26,8 @@ private:
   BrigOperandReg RefSrc_RegList[4];
   
 public:
+  Ld_Test(std::string& in):
+    BrigCodeGenTest(in) {}
 
   //TestCase outputs a BrigOperandAddress only
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
@@ -181,8 +179,10 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
-
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 /*********************** Ld Test ***************************/
 TEST(CodegenTest, Ld_Codegen){
@@ -1298,104 +1298,42 @@ TEST(CodegenTest, Ldc_Codegen){
 }
 
 TEST(ErrorReportTest, Ld) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "ld_readonly_s32 $s1, [%tbl][12]\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Ld(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Ld_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Ld, MISSING_SEMICOLON);
   
   input.assign( "ld_arg_f32 [%input];\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Ld(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
+  Ld_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Ld, INVALID_FIRST_OPERAND);
   
   input.assign( "ld_group $d5, [100];\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Ld(context));
-  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
-  
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Ld_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Ld, MISSING_DATA_TYPE);
 }
 
 
 TEST(ErrorReportTest, Lda) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "lda_u32 $s1, [%loc]\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Lda(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Ld_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Lda, MISSING_SEMICOLON);
   
   input.assign( "lda_u64 $d4, $d5;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Lda(context));
-  EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
+  Ld_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Lda, MISSING_OPERAND);
 
   input.assign( "lda_u64 $d4 [%loc];\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Lda(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Ld_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Lda, MISSING_COMMA);
 }
 
 TEST(ErrorReportTest, Ldc) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "ldc_b32 $s2, @lab\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Ldc(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Ld_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Ldc, MISSING_SEMICOLON);
   
   input.assign( "ldc_b32 $s4;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Ldc(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
-
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Ld_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Ldc, MISSING_COMMA);
 }
 
 
