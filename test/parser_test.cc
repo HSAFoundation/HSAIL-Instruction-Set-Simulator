@@ -1982,6 +1982,12 @@ TEST(ParserTest, Segp) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Segp(context));
 
+  input.assign("ftos_global_u32 $s1,$s2; \n");  // lack of ';'
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Segp(context));
+
+  
   delete lexer;
 }
 

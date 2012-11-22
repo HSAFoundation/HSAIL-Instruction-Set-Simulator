@@ -5934,8 +5934,12 @@ int SegpPart2StoFAndFtoS(Context* context) {
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
   // dest must be d register
-  if (context->token_to_scan != TOKEN_DREGISTER) {
-    context->set_error(MISSING_OPERAND);
+  bool valid_addr = false;
+  valid_addr = ((type==Brigu32) && (context->token_to_scan == TOKEN_SREGISTER)) ? true : valid_addr;
+  valid_addr = ((type==Brigu64) && (context->token_to_scan == TOKEN_DREGISTER)) ? true : valid_addr;
+  
+  if (!valid_addr) {
+    context->set_error(INVALID_OPERAND);
     return 1;
   }
   if (Operand(context, &OpOffset[0])) {
