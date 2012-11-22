@@ -1,10 +1,6 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa{
 namespace brig{
@@ -20,6 +16,9 @@ private:
   const BrigOperandReg* RefOpaqueReg;
 
 public:
+  Query_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Query_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref, BrigOperandReg* Dest, BrigOperandOpaque* Src1, BrigOperandReg* Src2 = NULL) :
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
@@ -45,6 +44,11 @@ public:
     delete code;
     delete oper;
   }  
+
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
+
 };
 
 TEST(CodegenTest, Query_CodeGen){
@@ -498,39 +502,17 @@ TEST(CodegenTest, Query_CodeGen){
 }
 
 TEST(ErrorReportTest, Query) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "query_order $s1, [%RWImg3<$s0 + 10>];\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Query(context));
-  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
+  Query_Test TestCase1(input);
+  TestCase1.Run_Test(&Query, MISSING_DATA_TYPE);
   
   input.assign( "query_width_u32 $s1 [%RWImg3]; \n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Query(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+  Query_Test TestCase2(input);
+  TestCase2.Run_Test(&Query, MISSING_COMMA);
 
   input.assign( "query_width_u32 $s1, $s3; \n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Query(context));
-  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
-  
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Query_Test TestCase3(input);
+  TestCase3.Run_Test(&Query, INVALID_OPERAND);
 }
 
 } // namespace hsa
