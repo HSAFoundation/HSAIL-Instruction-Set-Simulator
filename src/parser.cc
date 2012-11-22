@@ -182,8 +182,9 @@ int Identifier(Context* context) {
 
 int BaseOperand(Context* context) {
   
-  BrigDataType16_t type = context->get_type();
-  switch(type){
+  BrigDataType16_t context_type = context->get_type();
+  BrigDataType16_t type;
+  switch(context_type){
     case Brigb1: type = Brigb1; break; 
     case Brigs8:
     case Brigu8:
@@ -235,7 +236,6 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
-    boi.type = type;
     boi.bits.l[0] = boi.bits.l[1] = 0;
     boi.bits.d = context->token_value.double_val;
     context->append_operand(&boi);
@@ -5834,7 +5834,6 @@ int Instruction1(Context* context) {
   return 1;
 }
 
-
 int Segp(Context* context) {
   if (context->token_to_scan == SEGMENTP) { //segmentp
     if (!SegpPart1Segmentp(context)) {
@@ -5972,6 +5971,7 @@ int SegpPart2StoFAndFtoS(Context* context) {
   context->token_to_scan = yylex();
   return 0;
 }
+
 int Operation(Context* context) {
   if (context->token_type == INSTRUCTION1_OPCODE_NODT ||
       context->token_to_scan == CLOCK ||
@@ -7069,6 +7069,9 @@ int Bar(Context* context) {
     context->token_to_scan = yylex();
   } else if (context->token_to_scan == _GROUP) {
     syncFlags = BrigGroupLevel;
+    context->token_to_scan = yylex();
+  } else if(context->token_to_scan == _PARTIAL){
+     syncFlags = BrigPartialLevel;
     context->token_to_scan = yylex();
   }
   if (context->token_to_scan != ';') {
