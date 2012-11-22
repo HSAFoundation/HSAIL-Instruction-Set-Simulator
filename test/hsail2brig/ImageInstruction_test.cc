@@ -1060,6 +1060,23 @@ TEST(ErrorReportTest, ImageStore) {
   ImageInst_Test<> TestCase3(input);
   TestCase3.Run_Test(&ImageStore, MISSING_DATA_TYPE);
 }
+TEST(ErrorReportTest, ImageLoad) {  
+  std::string input = "ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),\
+                       [%RWImg3], ($s4,$s5,$s2,$s3)\n";
+  ImageInst_Test<> TestCase1(input);
+  TestCase1.Run_Test(&ImageLoad, MISSING_SEMICOLON);
+
+  input.assign("ld_image_v4_1da_f32 ($s1,$s2,$s3,$s4),\
+                [%RWImg3], ($s4,$s5);\n");
+  ImageInst_Test<> TestCase2(input);
+  TestCase2.Run_Test(&ImageLoad, MISSING_DATA_TYPE);
+
+  input.assign("ld_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), \
+                [%RWImg3<$s4>] ($s5);\n");
+  ImageInst_Test<> TestCase3(input);
+  TestCase3.Run_Test(&ImageLoad, MISSING_COMMA);
+ 
+}
 
 }
 }
