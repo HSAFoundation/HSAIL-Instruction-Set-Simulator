@@ -227,6 +227,11 @@ int BaseOperand(Context* context) {
     case Brigu64x2:
     case Brigf64x2: type = Brigb128; break;    
   }
+  int sign = 1;
+  if ((context->token_to_scan == '-') || (context->token_to_scan == '+')) {
+    sign = (context->token_to_scan == '-') ? -1 : 1;
+    context->token_to_scan = yylex();
+  }  
   
   if (context->token_to_scan == TOKEN_DOUBLE_CONSTANT) {
     BrigOperandImmed boi = {
@@ -237,7 +242,7 @@ int BaseOperand(Context* context) {
       { 0 }
     };
     boi.bits.l[0] = boi.bits.l[1] = 0;
-    boi.bits.d = context->token_value.double_val;
+    boi.bits.d = sign*context->token_value.double_val;
     context->append_operand(&boi);
     return 0;
   } 
@@ -252,7 +257,7 @@ int BaseOperand(Context* context) {
     };
     boi.type = type;
     boi.bits.l[0] = boi.bits.l[1] = 0;
-    boi.bits.f = context->token_value.float_val;
+    boi.bits.f = sign*context->token_value.float_val;
     context->append_operand(&boi);
     return 0;
   } 
@@ -268,7 +273,7 @@ int BaseOperand(Context* context) {
     
     boi.type = type;
     boi.bits.l[0] = boi.bits.l[1] = 0;
-    boi.bits.u = context->token_value.int_val;
+    boi.bits.u = sign*context->token_value.int_val;
     context->append_operand(&boi);
 
     return 0;
@@ -284,26 +289,6 @@ int BaseOperand(Context* context) {
       context->append_operand(&waveOp);
     }
     return 0;  
-  }
-
-  if (context->token_to_scan == '-') {
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == TOKEN_INTEGER_CONSTANT) {
-      BrigOperandImmed boi = {
-      sizeof(boi),        // size
-      BrigEOperandImmed,  // kind
-      Brigb32,            // type
-      0,                  // reserved
-      { 0 }
-      };
-    
-      boi.type = type;
-      boi.bits.l[0] = boi.bits.l[1] = 0;
-      boi.bits.u = -context->token_value.int_val;
-      context->append_operand(&boi);
-
-     return 0;
-    }
   }
   
 //TODO: Deepthi - This part needs to be tested - is there any instruction which uses datatypeid list as an operand  
