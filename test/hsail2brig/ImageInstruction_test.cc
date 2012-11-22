@@ -1075,7 +1075,22 @@ TEST(ErrorReportTest, ImageLoad) {
                 [%RWImg3<$s4>] ($s5);\n");
   ImageInst_Test<> TestCase3(input);
   TestCase3.Run_Test(&ImageLoad, MISSING_COMMA);
- 
+}
+TEST(ErrorReportTest, ImageRead) {  
+  std::string input = "rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4),\
+                       [%RWImg3],[%Samp3],($s5, $s6, $s4, $s3)\n";
+  ImageInst_Test<> TestCase1(input);
+  TestCase1.Run_Test(&ImageRead, MISSING_SEMICOLON);
+
+  input.assign("rd_image_v4_1d_f32_u32 ($s0,$s1,$s3,$s4),\
+                [%RWImg3],[%Samp3],(100)\n");
+  ImageInst_Test<> TestCase2(input);
+  TestCase2.Run_Test(&ImageRead, INVALID_OPERAND);
+  
+  input.assign("rd_image_v4_1d_s32 ($s0,$s1,$s5,$s3),[%RWImg3],\
+                [%Samp3], ($s6);\n");
+  ImageInst_Test<> TestCase3(input);
+  TestCase3.Run_Test(&ImageRead, MISSING_DATA_TYPE);
 }
 
 }
