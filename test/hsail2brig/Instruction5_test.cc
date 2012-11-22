@@ -1,15 +1,17 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa{
 namespace brig{
 
-template <typename T, typename T1, typename T2, typename T3, typename T4, typename T5> class Instruction5Opcode_Test : public BrigCodeGenTest{
+template <typename T=BrigInstBase, 
+          typename T1=BrigOperandReg, 
+          typename T2=BrigOperandReg, 
+          typename T3=BrigOperandReg, 
+          typename T4=BrigOperandReg, 
+          typename T5=BrigOperandReg>
+class Instruction5Opcode_Test : public BrigCodeGenTest{
 private:
 
   //Instruction in .code buffer
@@ -22,6 +24,9 @@ private:
   const T5* RefSrc4;
 
 public:
+  Instruction5Opcode_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Instruction5Opcode_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1, T3* Src2, T4* Src3, T5 *Src4) :
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
@@ -50,6 +55,9 @@ public:
     delete code;
     delete oper;
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
  };
 
 TEST(CodegenTest,Instruction5Op_CodeGen){
@@ -408,40 +416,17 @@ delete symbols;
 }
 
 TEST(ErrorReportTest, Instruction5) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "f2u4 $s1, $s0, 123, 0, 3;\n";
-  
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction5(context));
-  EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
+  Instruction5Opcode_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Instruction5, MISSING_DATA_TYPE);
   
   input.assign("f2u4_u32 $s1, $s0, 123, 0, 3\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction5(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Instruction5Opcode_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Instruction5, MISSING_SEMICOLON);
 
   input.assign("f2u4_u32 $s1, $s0, 123, 3;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Instruction5(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
-
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Instruction5Opcode_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Instruction5, MISSING_COMMA);
 }
 
 }
