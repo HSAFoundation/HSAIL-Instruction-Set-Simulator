@@ -734,7 +734,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     BrigNone ,                 // attribute
     0,                         // reserved
     0,                         // symbolModifier
-    1,                         // dim
+    0,                         // dim
     0,                         // s_name
     Brigu32,                   // type
     1                          // align
