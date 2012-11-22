@@ -1,15 +1,14 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa{
 namespace brig{
 
-template <typename T, typename T1, typename T2> class Mov_Test : public BrigCodeGenTest{
+template <typename T=BrigInstBase, 
+          typename T1=BrigOperandReg, 
+          typename T2=BrigOperandReg> 
+class Mov_Test : public BrigCodeGenTest {
 private:
 
   //Instruction in .code buffer
@@ -20,7 +19,10 @@ private:
   const BrigOperandReg *RefReg1, *RefReg2, *RefReg3, *RefReg4;
 
 public:
-    Mov_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1,
+  Mov_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
+  Mov_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1,
      BrigOperandReg *Reg1 = NULL,
      BrigOperandReg *Reg2 = NULL,
      BrigOperandReg *Reg3 = NULL,
@@ -75,6 +77,9 @@ public:
     delete code;
     delete oper;
   } 
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 
  };
 
@@ -421,39 +426,17 @@ TEST(CodegenTest,Mov_CodeGen){
 }
 
 TEST(ErrorReportTest, Mov) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "mov_b64 ($s0, $s3), $d1\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Mov(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Mov_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Mov, MISSING_SEMICOLON);
   
   input.assign("mov_b64 $d1 $d0;\n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Mov(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+  Mov_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Mov, MISSING_COMMA);
   
   input.assign( "mov_b128 ($s3, $s1, $s2), $q1; \n");
-  lexer->set_source_string(input);
-
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Mov(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
-  
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Mov_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Mov, INVALID_FIRST_OPERAND);
 }
 
 }
