@@ -1,10 +1,6 @@
 #include "parser.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
-#include "../mock_error_reporter.h"
-
-using ::testing::AtLeast;
-using ::testing::_;
 
 namespace hsa {
 namespace brig {
@@ -16,6 +12,9 @@ private:
   // Operands in .operands buffer
 
 public:
+  Version_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Version_Test(std::string& in, BrigDirectiveVersion* ref):
     BrigCodeGenTest(in),
     RefVer(ref) { }
@@ -31,6 +30,11 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete dir;
   } 
+  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
+
 };
 
 
@@ -108,39 +112,20 @@ TEST(CodegenTest, Version_CodeGen) {
 }
 
 TEST(ErrorReportTest, Version) {  
-  Context* context = Context::get_instance();
-  context->clear_context();
-
-  MockErrorReporter mer;
-  context->set_error_reporter(&mer);
-  mer.DelegateToFake();
-  EXPECT_CALL(mer, report_error(_, _, _)).Times(AtLeast(1));
-  EXPECT_CALL(mer, get_last_error()).Times(AtLeast(1));
-
   std::string input = "version 2:1\n";
-  Lexer* lexer = new Lexer();
-  lexer->set_source_string(input);
 
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Version(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+  Version_Test TestCase1(input);
+  TestCase1.Run_Test(&Version, MISSING_SEMICOLON);
   
   input.assign("version 2;1:$nosftz, $small, $full;\n");
-  lexer->set_source_string(input);
 
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Version(context));
-  EXPECT_EQ(MISSING_COLON, mer.get_last_error());
+  Version_Test TestCase2(input);
+  TestCase2.Run_Test(&Version, MISSING_COLON);
   
   input.assign("version 2:1 $nosftz, $full;\n");
-  lexer->set_source_string(input);
 
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_FALSE(!Version(context));
-  EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
-  
-  context->set_error_reporter(ErrorReporter::get_instance());
-  delete lexer;
+  Version_Test TestCase3(input);
+  TestCase3.Run_Test(&Version, MISSING_SEMICOLON);
 }
 
 } // namespace hsa
