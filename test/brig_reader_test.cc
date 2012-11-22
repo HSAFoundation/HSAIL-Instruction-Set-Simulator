@@ -1522,3 +1522,22 @@ TEST(BrigKernelTest, DISABLED_IndirectCall) {
   delete r;
 }
 
+TEST(BrigWriterTest, GlobalInitialization) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "\n"
+  "global_u32 &n = 9;\n"
+  "kernel &__OpenCL_Global_Initializer_kernel(\n"
+  "        kernarg_u32 %r)\n"
+  "{\n"
+  "@__OpenCL_Global_Initializer_kernel_entry:\n"
+  "        ld_kernarg_u32 $s2, [%r];\n"
+  "        ld_kernarg_u32 $s1, [&n];\n"
+  "        st_global_u32  $s1, [$s2];\n"
+  "        ret;\n"
+  "};\n"
+    );
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+}
