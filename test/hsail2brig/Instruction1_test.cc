@@ -813,8 +813,8 @@ TEST(ErrorReportTest, Barrier) {
 
 TEST(ErrorReportTest, Sync) {  
   std::string input = "sync_global\n";
-  Instruction1_Test<> TestCase3(input);
-  TestCase3.Run_Test(&Sync, MISSING_SEMICOLON);
+  Instruction1_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Sync, MISSING_SEMICOLON);
 }
 
 }
