@@ -443,7 +443,6 @@ int ArrayOperandList(Context* context) {
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
   unsigned int count_op = 0;
   BrigoOffset32_t offsets[4] = {0};	
-  std::string iden_name;
 
   // first token must be '('
   if ('(' != context->token_to_scan) 
@@ -455,14 +454,11 @@ int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
         context->set_error(INVALID_OPERAND);
         return 1;
     }
-    iden_name = context->token_value.string_val;
-    if (Identifier(context)) {
-      context->set_error(MISSING_IDENTIFIER);
+    if (context->token_type != REGISTER || Operand(context, &offsets[count_op])) {
+      context->set_error(INVALID_OPERAND);
       return 1;
     }    
-    offsets[count_op] = context->operand_map[iden_name];
     ++count_op;
-    context->token_to_scan = yylex();
     if (context->token_to_scan == ')') {
       break;
     } else if (context->token_to_scan == ',') {
@@ -521,8 +517,8 @@ int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
       context->get_operand_bytes((char *)(&elements[1]), offsets[1], sizeof(BrigOperandReg));
       context->get_operand_bytes((char *)(&elements[2]), offsets[2], sizeof(BrigOperandReg));
       context->get_operand_bytes((char *)(&elements[3]), offsets[3], sizeof(BrigOperandReg));
-      if((elements[0].type != elements[1].type) && (elements[3].type!=elements[4].type) 
-        && (elements[0].type != elements[3].type)){
+      if((elements[0].type != elements[1].type) || (elements[0].type != elements[2].type) || 
+         (elements[0].type != elements[3].type)){
         context->set_error(INVALID_OPERAND);
         return 1;
       }  
