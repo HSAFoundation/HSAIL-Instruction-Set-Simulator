@@ -6501,17 +6501,24 @@ int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
   uint32_t n = 0;
   BrigDirectiveSymbol bds ;
   context->get_directive(sym_offset,&bds);
+  
+  n = bds.s.dim;
   if (0 == context->get_dim()) {
     if (context->get_isArray()) {
+      // If array is empty [],  Update dim.
       bds.s.symbolModifier = BrigArray;
       context->set_symbol_modifier(BrigArray);
+      bds.s.dim = elementCount;
+      n = elementCount;
+    } else {
+      bds.s.dim = 0;
+      n = 1;
     }
-    bds.s.dim = elementCount;
   } else if (elementCount > bds.s.dim) {
     context->set_error(INVALID_INITIALIZER);
     return 1;
   }
-  n = bds.s.dim;
+  elementCount = n;
   context->set_dim(bds.s.dim);
   
   switch (context->get_type()) {
@@ -6527,7 +6534,7 @@ int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
   uint8_t *array = new uint8_t[arraySize];
   memset(array, 0 , sizeof(uint8_t) * arraySize);
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-  bdi->elementCount = bds.s.dim;
+  bdi->elementCount = elementCount; 
   bdi->size = arraySize;
   bdi->kind = BrigEDirectiveInit;
   bdi->c_code = 0;
@@ -7467,19 +7474,25 @@ int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
 
   BrigDirectiveSymbol bds ;
   context->get_directive(symbol_offset, &bds);
-
+ 
+  n = bds.s.dim;
   if (0 == context->get_dim()) {
     if (context->get_isArray()) {
       // If array is empty [],  Update dim.
       bds.s.symbolModifier = BrigArray;
       context->set_symbol_modifier(BrigArray);
+      bds.s.dim = elementCount;
+      n = elementCount;
+    } else {
+      bds.s.dim = 0;
+      n = 1;
     }
-    bds.s.dim = elementCount;
   } else if (elementCount > bds.s.dim) {
     context->set_error(INVALID_INITIALIZER);
     return 1;
   }
-  n = bds.s.dim;
+  elementCount = n;
+
   context->set_dim(bds.s.dim);
   switch (context->get_type()) {
     case Brigb1:
@@ -7495,7 +7508,7 @@ int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
   memset(array, 0, sizeof(uint8_t) * arraySize);
 
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-  bdi->elementCount = bds.s.dim;
+  bdi->elementCount = elementCount; 
 
   bdi->size = arraySize;
   bdi->kind = BrigEDirectiveInit;
@@ -7621,18 +7634,23 @@ int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
   BrigDirectiveSymbol bds ;
   context->get_directive(symbol_offset,&bds);
 
+  n = bds.s.dim;
   if (0 == context->get_dim()) {
     if (context->get_isArray()) {
       // If array is empty [],  Update dim.
       bds.s.symbolModifier = BrigArray;
       context->set_symbol_modifier(BrigArray);
+      bds.s.dim = elementCount;
+      n = elementCount;
+    } else {
+      bds.s.dim = 0;
+      n = 1;
     }
-    bds.s.dim = elementCount;
   } else if (elementCount > bds.s.dim) {
     context->set_error(INVALID_INITIALIZER);
     return 1;
   }
-  n = bds.s.dim;
+  elementCount = n;
   context->set_dim(bds.s.dim);
 
   switch (context->get_type()) {
@@ -7649,7 +7667,7 @@ int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
   memset(array, 0, sizeof(uint8_t) * arraySize);
 
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit*>(array);
-  bdi->elementCount = bds.s.dim;
+  bdi->elementCount = elementCount;
 
   bdi->size = arraySize;
   bdi->kind = BrigEDirectiveInit;
