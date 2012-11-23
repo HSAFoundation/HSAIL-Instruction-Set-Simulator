@@ -12,6 +12,9 @@ private:
   // Operands in .operands buffer
 
 public:
+  FileDecl_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   FileDecl_Test(std::string& in, StringBuffer* sbuf, BrigDirectiveFile* ref):
     BrigCodeGenTest(in, sbuf),
     RefFile(ref) { }
@@ -28,6 +31,9 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete dir;
   } 
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 
@@ -55,6 +61,21 @@ TEST(CodegenTest, FileDecl_CodeGen) {
   
   delete buf;
 }
+
+TEST(ErrorReportTest, FileDecl) {  
+  std::string input = "file 1 \"math.c\"\n";
+  FileDecl_Test TestCase1(input);
+  TestCase1.Run_Test(&FileDecl, MISSING_SEMICOLON);
+  
+  input.assign("file \"math.c\";\n");
+  FileDecl_Test TestCase2(input);
+  TestCase2.Run_Test(&FileDecl, MISSING_INTEGER_CONSTANT);
+
+  input.assign("file 1;\n");
+  FileDecl_Test TestCase3(input);
+  TestCase3.Run_Test(&FileDecl, MISSING_STRING);
+}
+
 } // namespace hsa
 } // namespace brig
 
