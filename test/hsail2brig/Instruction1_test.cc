@@ -5,7 +5,8 @@
 namespace hsa{
 namespace brig{
 
-template <typename TInst, typename T> class Instruction1_Test : public BrigCodeGenTest{
+template <typename TInst=BrigInstBase, typename T=BrigOperandReg>
+class Instruction1_Test : public BrigCodeGenTest{
 private:
 
   //Instruction in .code buffer - Pointers to brig structures
@@ -14,6 +15,8 @@ private:
   const T* RefDest;
 
 public:
+  Instruction1_Test(std::string& in):
+    BrigCodeGenTest(in) {}
 
   Instruction1_Test(std::string& in, StringBuffer *sbuf, TInst* ref, T* Dest) :
     BrigCodeGenTest(in, sbuf),
@@ -42,6 +45,9 @@ public:
     delete dir;
     RefInst = NULL;
     RefDest = NULL;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -754,8 +760,61 @@ TEST(CodegenTest, Barrier_Codegen){
   Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase4(in, sbuf, &out4, &width4);
   TestCase4.Run_Test(&Bar);
 
+  in.assign( "barrier_partial;\n");
+  BrigOperandImmed width5 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}
+  };
+  width5.size = sizeof(width5);
+  BrigInstBar out5 = {
+    0,
+    BrigEInstBar,
+    BrigBarrier,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0},
+    BrigPartialLevel
+  };
+  out5.size = sizeof(out5);
+
+  Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase5(in, sbuf, &out5, &width5);
+  TestCase5.Run_Test(&Bar);
+  
 /******************************  End of tests *****************************************/
   delete sbuf;
+}
+
+TEST(ErrorReportTest, Instruction1) {  
+  std::string input =  "clock $d6\n";
+  Instruction1_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Instruction1, MISSING_SEMICOLON);
+  
+  input.assign( "fbar_release $d1;\n");
+  Instruction1_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Instruction1, INVALID_DATA_TYPE);
+
+  input.assign( "countup_u32;\n");
+  Instruction1_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Instruction1, MISSING_OPERAND);
+}
+
+TEST(ErrorReportTest, Barrier) {  
+  std::string input = "barrier\n";
+  Instruction1_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Bar, MISSING_SEMICOLON);
+  
+  input.assign( "barrier_width(62)_group;\n");
+  Instruction1_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Bar, INVALID_WIDTH_NUMBER);
+}
+
+TEST(ErrorReportTest, Sync) {  
+  std::string input = "sync_global\n";
+  Instruction1_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Sync, MISSING_SEMICOLON);
 }
 
 }

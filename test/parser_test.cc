@@ -1404,21 +1404,6 @@ TEST(ParserTest, SignatureType) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureType(context));
 
-  input.assign("arg_ROImg\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SignatureType(context));
-
-  input.assign("arg_RWImg\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SignatureType(context));
-
-  input.assign("arg_Samp\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, SignatureType(context));
-
   input.clear();
   delete lexer;
 }
@@ -1470,17 +1455,17 @@ TEST(ParserTest, SignatureArgumentList) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
-  std::string input("arg_u32,arg_ROImg\n");
+  std::string input("(arg_u32,arg_b32)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
 
-  input.assign("arg_u32,arg_RWImg\n");
+  input.assign("(arg_u32,arg_b32 %arg)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
 
-  input.assign("arg_u32,arg_Samp\n");
+  input.assign("(arg_u32 %arg,arg_b32)\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, SignatureArgumentList(context));
@@ -1831,12 +1816,12 @@ TEST(ParserTest, Mov) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
-
+/*
   input.assign("mov_b32 $s4, (&global_id, %local_id);\n");  // Arrayoperandlist
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
-
+*/
   // wrong cases
   input.assign("mov $q1, $q2;\n");  // lack of modifier
   lexer->set_source_string(input);
@@ -1963,12 +1948,12 @@ TEST(ParserTest, Segp) {
   input.assign("ftos_arg_u32 $d3, $d4;\n");  // ftos
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Segp(context));
+  EXPECT_NE(0, Segp(context));
 
   input.assign("stof_spill_u32 $d2, 235;\n");  // stof
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Segp(context));
+  EXPECT_NE(0, Segp(context));
 
   input.assign("stof_private_u64 $d2, $d1;\n");  // stof
   lexer->set_source_string(input);
@@ -1997,6 +1982,12 @@ TEST(ParserTest, Segp) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Segp(context));
 
+  input.assign("ftos_global_u32 $s1,$s2; \n");  // lack of ';'
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Segp(context));
+
+  
   delete lexer;
 }
 
@@ -2085,7 +2076,7 @@ TEST(ParserTest, Operation) {
   input.assign("ftos_arg_u32 $d3, $d4;\n"); // segp
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Operation(context));
+  EXPECT_NE(0, Operation(context));
 
   input.assign("lda_u32 $s1, [%g];\n"); // lda
   lexer->set_source_string(input);
@@ -4401,24 +4392,6 @@ TEST(ParserTest, PairAddressableOperandTest) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, PairAddressableOperand(context));
 
-  delete lexer;
-}
-
-TEST(ParserTest, LdaModTest) {
-  // Create a lexer
-  Lexer* lexer = new Lexer();
-
-  // register error reporter with context
-  context->set_error_reporter(main_reporter);
-  std::string input(" ");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, LdaMod(context));
-
-  input.assign("_spill\n");
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, LdaMod(context));
   delete lexer;
 }
 

@@ -1,20 +1,14 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
 
-template <typename T, typename T1, typename T2> class Mov_Test : public BrigCodeGenTest{
+template <typename T=BrigInstBase, 
+          typename T1=BrigOperandReg, 
+          typename T2=BrigOperandReg> 
+class Mov_Test : public BrigCodeGenTest {
 private:
 
   //Instruction in .code buffer
@@ -25,7 +19,10 @@ private:
   const BrigOperandReg *RefReg1, *RefReg2, *RefReg3, *RefReg4;
 
 public:
-    Mov_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1,
+  Mov_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
+  Mov_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1,
      BrigOperandReg *Reg1 = NULL,
      BrigOperandReg *Reg2 = NULL,
      BrigOperandReg *Reg3 = NULL,
@@ -80,6 +77,9 @@ public:
     delete code;
     delete oper;
   } 
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 
  };
 
@@ -423,6 +423,24 @@ TEST(CodegenTest,Mov_CodeGen){
 /***********************************************************/
 
   delete symbols;
+}
+
+TEST(ErrorReportTest, Mov) {  
+  std::string input = "mov_b64 ($s0, $s3), $d1\n";
+  Mov_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Mov, MISSING_SEMICOLON);
+  
+  input.assign("mov_b64 $d1 $d0;\n");
+  Mov_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Mov, MISSING_COMMA);
+  
+  input.assign( "mov_b128 ($s3, $s1, $s2), $q1; \n");
+  Mov_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Mov, INVALID_FIRST_OPERAND);
+
+  input.assign( "mov_b1 100, $c1; \n");
+  Mov_Test<> TestCase4(input);
+  TestCase4.Run_Test(&Mov, INVALID_FIRST_OPERAND);
 }
 
 }

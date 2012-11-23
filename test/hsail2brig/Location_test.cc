@@ -2,7 +2,6 @@
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
-
 namespace hsa {
 namespace brig {
 
@@ -13,6 +12,9 @@ private:
   // Operands in .operands buffer
 
 public:
+  Location_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Location_Test(std::string& in, BrigDirectiveLoc* ref):
     BrigCodeGenTest(in),
     RefLoc(ref) { }
@@ -28,6 +30,10 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete dir;
   } 
+
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 
 };
 
@@ -53,6 +59,18 @@ TEST(CodegenTest, Location_CodeGen) {
   TestCase1.Run_Test(&Location);
   
 }
+
+
+TEST(ErrorReportTest, Location) {  
+  std::string input = "loc 1 10 5\n";
+  Location_Test TestCase1(input);
+  TestCase1.Run_Test(&Location, MISSING_SEMICOLON);
+  
+  input.assign("loc 10 5;\n");
+  Location_Test TestCase2(input);
+  TestCase2.Run_Test(&Location, MISSING_INTEGER_CONSTANT);
+}
+
 } // namespace hsa
 } // namespace brig
 

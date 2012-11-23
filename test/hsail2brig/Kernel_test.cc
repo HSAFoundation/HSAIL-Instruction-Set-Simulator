@@ -278,7 +278,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
   oper->append(&regs3);
   code->append(&inst3);
 
-/************************instruction 3****************************/
+/************************instruction 4****************************/
   o_operand = oper->size();
   s_name += (op8.size() + op9.size() + op10.size() + 3);
 

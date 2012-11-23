@@ -12,6 +12,9 @@ private:
   // Operands in .operands buffer
 
 public:
+  Pragma_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Pragma_Test(std::string& in, StringBuffer* sbuf, BrigDirectivePragma* ref):
     BrigCodeGenTest(in, sbuf),
     RefPrag(ref) { }
@@ -28,6 +31,9 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete dir;
   } 
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 
 };
 
@@ -55,6 +61,19 @@ TEST(CodegenTest, Pragma_CodeGen) {
   
   delete buf;
 }
+
+TEST(ErrorReportTest, Pragma) {  
+
+  std::string input = "pragma \"once\"\n";
+
+  Pragma_Test TestCase1(input);
+  TestCase1.Run_Test(&Pragma, MISSING_SEMICOLON);
+  
+  input.assign("pragma ;\n");
+  Pragma_Test TestCase2(input);
+  TestCase2.Run_Test(&Pragma, MISSING_STRING);
+}
+
 } // namespace hsa
 } // namespace brig
 

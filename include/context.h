@@ -248,8 +248,9 @@ class Context {
     void clear_string_buffer(void);
     void clear_all_buffers(void);
     void clear_context(void);
-    void set_default_values(void);
-
+    void initialize_all_fields(void);
+    void initialize_statement_fields(void);
+    
     /* Temporary Context Manipulators */
     // check context
     uint16_t get_alignment() const;
@@ -265,7 +266,6 @@ class Context {
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
     void set_symbol_modifier(BrigSymbolModifier modifier);
-    void init_symbol_modifier();
     void set_attribute(BrigAttribute16_t attrib);
     void set_alignment(uint16_t align);
     void set_machine(BrigMachine16_t machine);
@@ -298,9 +298,6 @@ class Context {
     std::map<std::string, BrigoOffset32_t> label_o_map;
     std::multimap<std::string, BrigcOffset32_t> label_c_map;
     std::map<std::string, BrigdOffset32_t> symbol_map;
-
-    // contains the type info of functionSignature
-    std::vector<BrigDirectiveSignature::BrigProtoType> types;
 
     unsigned int token_to_scan;
     int               yycolno;
@@ -341,14 +338,16 @@ class Context {
     /* Global context variables */
     BrigMachine16_t machine;
     BrigProfile16_t profile;
+    BrigdOffset32_t last_directive_offset;
+    BrigdOffset32_t current_bdf_offset;
+    
+    /* Body Statement specific variables */
     uint16_t alignment;
     uint32_t symModifier;
     BrigAttribute16_t attribute;
     BrigDataType16_t type;
     BrigAluModifier aluModifier;
     uint32_t dim;
-    BrigdOffset32_t last_directive_offset;
-    BrigdOffset32_t current_bdf_offset;
     bool is_array;
       
 };

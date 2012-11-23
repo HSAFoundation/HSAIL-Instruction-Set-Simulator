@@ -1,13 +1,4 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
@@ -20,6 +11,9 @@ private:
   const BrigInstBase* RefInst;
 
 public:
+  Instruction0_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Instruction0_Test(std::string& in, BrigInstBase* ref):
     BrigCodeGenTest(in),
     RefInst(ref) {}
@@ -34,8 +28,10 @@ public:
     
     Parse_Validate(Rule, &RefOutput);
     delete code;
-    
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 /****************** Nop Test ************************/
@@ -80,6 +76,17 @@ TEST(CodegenTest, Ret_Codegen){
     
   Instruction0_Test TestCase1(in, &out1);
   TestCase1.Run_Test(&Ret);  
+}
+
+TEST(ErrorReportTest, Instruction0) {  
+  std::string input = "nop\n";
+  Instruction0_Test TestCase1(input);
+  TestCase1.Run_Test(&Instruction0, MISSING_SEMICOLON);
+}
+TEST(ErrorReportTest, Ret) {  
+  std::string input = "ret\n";
+  Instruction0_Test TestCase1(input);
+  TestCase1.Run_Test(&Ret, MISSING_SEMICOLON);
 }
 
 }

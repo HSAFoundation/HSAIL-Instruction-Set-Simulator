@@ -1,13 +1,4 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
@@ -15,7 +6,7 @@ namespace hsa{
 namespace brig{
 
 /*Template describes the type of the destination, reg/regv2/regv4 or immediate value*/
-template <typename T> class St_Test : public BrigCodeGenTest{
+template <typename T=BrigOperandReg> class St_Test : public BrigCodeGenTest{
 private:
 
   const BrigInstLdSt* RefInst;
@@ -30,6 +21,9 @@ private:
   const BrigOperandReg *RefReg1, *RefReg2, *RefReg3, *RefReg4;
 
 public:
+  St_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+  
   //TestCase outputs a BrigOperandAddress only
   St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref,
       T* src, BrigOperandAddress* addr,
@@ -119,6 +113,10 @@ public:
     delete code;
     delete oper;
   } 
+
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 TEST(CodegenTest, St_Codegen){
@@ -604,6 +602,20 @@ TEST(CodegenTest, St_Codegen){
 
 /************************************ End of tests*******************************************/
   delete sbuf;
+}
+
+TEST(ErrorReportTest, St) {  
+  std::string input = "st_arg 3.1415l, [$s2-4];\n";
+  St_Test<> TestCase1(input);
+  TestCase1.Run_Test(&St, MISSING_DATA_TYPE);
+  
+  input.assign("st_arg_f64 3.1415l;\n");
+  St_Test<> TestCase2(input);
+  TestCase2.Run_Test(&St, MISSING_COMMA);
+  
+  input.assign( "st_arg_f32 $s0, [%output]\n");
+  St_Test<> TestCase3(input);
+  TestCase3.Run_Test(&St, MISSING_SEMICOLON);
 }
 
 }

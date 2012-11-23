@@ -1,13 +1,4 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
@@ -25,6 +16,9 @@ private:
   const BrigOperandReg* RefOpaqueReg;
 
 public:
+  Query_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Query_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref, BrigOperandReg* Dest, BrigOperandOpaque* Src1, BrigOperandReg* Src2 = NULL) :
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
@@ -50,6 +44,11 @@ public:
     delete code;
     delete oper;
   }  
+
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
+
 };
 
 TEST(CodegenTest, Query_CodeGen){
@@ -501,5 +500,20 @@ TEST(CodegenTest, Query_CodeGen){
   /*************************************************************************/
   delete symbols;
 }
+
+TEST(ErrorReportTest, Query) {  
+  std::string input = "query_order $s1, [%RWImg3<$s0 + 10>];\n";
+  Query_Test TestCase1(input);
+  TestCase1.Run_Test(&Query, MISSING_DATA_TYPE);
+  
+  input.assign( "query_width_u32 $s1 [%RWImg3]; \n");
+  Query_Test TestCase2(input);
+  TestCase2.Run_Test(&Query, MISSING_COMMA);
+
+  input.assign( "query_width_u32 $s1, $s3; \n");
+  Query_Test TestCase3(input);
+  TestCase3.Run_Test(&Query, INVALID_OPERAND);
 }
-}
+
+} // namespace hsa
+} // namespace brig

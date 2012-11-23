@@ -5,7 +5,7 @@
 namespace hsa {
 namespace brig {
 
-template <typename Tinst, typename T>
+template <typename Tinst=BrigInstBase, typename T=BrigOperandReg>
 class Ld_Test: public BrigCodeGenTest {
 
 private:
@@ -26,6 +26,8 @@ private:
   BrigOperandReg RefSrc_RegList[4];
   
 public:
+  Ld_Test(std::string& in):
+    BrigCodeGenTest(in) {}
 
   //TestCase outputs a BrigOperandAddress only
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
@@ -177,8 +179,10 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
-
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 /*********************** Ld Test ***************************/
 TEST(CodegenTest, Ld_Codegen){
@@ -1292,6 +1296,46 @@ TEST(CodegenTest, Ldc_Codegen){
 
   delete sbuf;
 }
+
+TEST(ErrorReportTest, Ld) {  
+  std::string input = "ld_readonly_s32 $s1, [%tbl][12]\n";
+  Ld_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Ld, MISSING_SEMICOLON);
+  
+  input.assign( "ld_arg_f32 [%input];\n");
+  Ld_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Ld, INVALID_FIRST_OPERAND);
+  
+  input.assign( "ld_group $d5, [100];\n");
+  Ld_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Ld, MISSING_DATA_TYPE);
+}
+
+
+TEST(ErrorReportTest, Lda) {  
+  std::string input = "lda_u32 $s1, [%loc]\n";
+  Ld_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Lda, MISSING_SEMICOLON);
+  
+  input.assign( "lda_u64 $d4, $d5;\n");
+  Ld_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Lda, MISSING_OPERAND);
+
+  input.assign( "lda_u64 $d4 [%loc];\n");
+  Ld_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Lda, MISSING_COMMA);
+}
+
+TEST(ErrorReportTest, Ldc) {  
+  std::string input = "ldc_b32 $s2, @lab\n";
+  Ld_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Ldc, MISSING_SEMICOLON);
+  
+  input.assign( "ldc_b32 $s4;\n");
+  Ld_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Ldc, MISSING_COMMA);
+}
+
 
 }
 }
