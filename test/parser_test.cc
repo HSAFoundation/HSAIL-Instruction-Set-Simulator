@@ -1948,12 +1948,12 @@ TEST(ParserTest, Segp) {
   input.assign("ftos_arg_u32 $d3, $d4;\n");  // ftos
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Segp(context));
+  EXPECT_NE(0, Segp(context));
 
   input.assign("stof_spill_u32 $d2, 235;\n");  // stof
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Segp(context));
+  EXPECT_NE(0, Segp(context));
 
   input.assign("stof_private_u64 $d2, $d1;\n");  // stof
   lexer->set_source_string(input);
@@ -1985,7 +1985,7 @@ TEST(ParserTest, Segp) {
   input.assign("ftos_global_u32 $s1,$s2; \n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Segp(context));
+  EXPECT_NE(0, Segp(context));
 
   
   delete lexer;
@@ -2076,7 +2076,7 @@ TEST(ParserTest, Operation) {
   input.assign("ftos_arg_u32 $d3, $d4;\n"); // segp
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Operation(context));
+  EXPECT_NE(0, Operation(context));
 
   input.assign("lda_u32 $s1, [%g];\n"); // lda
   lexer->set_source_string(input);
