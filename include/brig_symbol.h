@@ -54,15 +54,14 @@ class BrigSymbol {
   };
 
   template<class T> const T *getInit() const {
-    assert(isArray() && "Must be an array");
     const BrigDirectiveSymbol *symbol = cast<BrigDirectiveSymbol>(it_);
+    if(!symbol->d_init) return NULL;
+
     const BrigDirectiveInit *init =
       dyn_cast<BrigDirectiveInit>(dir_iterator(S_.directives + symbol->d_init));
+    if(!init) return NULL;
 
-    if(init)
-      return reinterpret_cast<const T *>(&init->initializationData);
-
-    assert(false && "Unimplemented");
+    return reinterpret_cast<const T *>(&init->initializationData);
   }
 
   const void *getAddr() const { return it_; }
