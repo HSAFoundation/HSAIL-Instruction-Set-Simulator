@@ -1971,11 +1971,6 @@ _ar               { free_string(context);
                     context->yycolno+=yyleng;
                     return _AR;}
 
-_region           { free_string(context);
-                    context->token_type = ATOM_MODIFIER;
-                    context->yycolno+=yyleng;
-                    return _REGION;}
-
 _cas              { free_string(context);
                     context->token_type = ATOM_MODIFIER;
                     context->yycolno+=yyleng;
@@ -2041,6 +2036,17 @@ _rel              { free_string(context);
                     context->yycolno+=yyleng;
                     return _REL;}
 
+_part_acq              { free_string(context);
+                    context->token_type = COMMON_KEYWORD;
+                    context->yycolno+=yyleng;
+                    return _PART_ACQ;}
+
+_part_rel              { free_string(context);
+                    context->token_type = COMMON_KEYWORD;
+                    context->yycolno+=yyleng;
+                    return _PART_REL;}
+                    
+                    
 ld                { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;

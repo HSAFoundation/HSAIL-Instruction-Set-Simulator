@@ -80,6 +80,7 @@ enum error_code_t {
   MISSING_ADDRESS,
   MISSING_OPERATION,
   MISSING_FUNCTION_DIRECTIVE,
+  MISSING_SEGMENT,
 
   UNKNOWN_ERROR
 };
@@ -234,6 +235,8 @@ class ErrorReporterInterface {
           return std::string("Missing operation");
         case MISSING_FUNCTION_DIRECTIVE:
           return std::string("Invalid argument space. No function/kernel specified");
+        case MISSING_SEGMENT:
+          return std::string("Missing segment information for segment operation.");
         case UNKNOWN_ERROR:
         default:
           return std::string("Unknown error.");

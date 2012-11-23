@@ -2088,11 +2088,6 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("atomic_exch_ar_region_u32 $s4, [&a], 1;\n"); // atom
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Operation(context));
-
   input.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3), [%RWImg3],");
   input.append(" [%Samp3], ($s6);");
   //imageread
@@ -3427,13 +3422,7 @@ TEST(ParserTest, Atom) {
   EXPECT_CALL(mer, get_last_error())
       .Times(AtLeast(1));
 
-  // correct cases
-  std::string input("atomic_exch_ar_region_u32 $s4, [&a], 1;\n");
-  // atomic with AtomModifiers
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Atom(context));
-
+  std::string input;
   input.assign("atomic_and_u32 $s4, [&b], 1;\n");
   // atomic without AtomModifiers
   lexer->set_source_string(input);
@@ -3460,14 +3449,6 @@ TEST(ParserTest, Atom) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Atom(context));
   EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
-
-  input.assign("atomic_exch_ar_region_u32 [&a], 1;\n");
-
-  // lack of Operand
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_NE(0, Atom(context));
-  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
   delete lexer;
 }

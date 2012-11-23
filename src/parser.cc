@@ -136,8 +136,7 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   }else{
     context->set_error(INVALID_OPERAND);
     return 1;
-  }
-  
+  }  
 }
 
 int Operand(Context* context) {
@@ -4888,29 +4887,19 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
       continue;
     }
 
-    if (context->token_to_scan == _REL) {
-      pLdSt_op->memorySemantic = BrigRelease;
-      context->token_to_scan = yylex();
+    BrigMemorySemantic32_t pmemSem;
+   
+    if(!Acq(context, &pmemSem)){
+      pLdSt_op->memorySemantic = pmemSem;
       continue;
     }
-    if (context->token_to_scan == _ACQ) {
-      pLdSt_op->memorySemantic = BrigAcquire;
-      context->token_to_scan = yylex();
-      continue;
-    }
+    
     if (context->token_to_scan == _DEP) {
       pLdSt_op->memorySemantic = BrigDep;
       context->token_to_scan = yylex();
       continue;
     }
-
-    if (context->token_to_scan == _REGION) {
-      // TODO(Chuang) need to check "_region" out again.
-      pLdSt_op->memorySemantic = BrigRegular;
-      context->token_to_scan = yylex();
-      continue;
-    }
-
+    
     if (context->token_to_scan == _EQUIV) {
       context->token_to_scan = yylex();
 
@@ -5150,23 +5139,50 @@ int Lda(Context* context) {
   return 0;
 }
 
-int Optacqreg(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
-  if (context->token_to_scan == _REL) {
-    *pMemSemantic = BrigRelease;
-    context->token_to_scan = yylex();
-  } else if (context->token_to_scan == _ACQ) {
-    *pMemSemantic = BrigAcquire;
-    context->token_to_scan = yylex();
-  } else if (context->token_to_scan == _AR) {
-    *pMemSemantic = BrigAcquireRelease;
-    context->token_to_scan = yylex();
+int Acq(Context* context, BrigMemorySemantic32_t* pMemSem){
+  switch(context->token_to_scan){
+    case _ACQ:
+      *pMemSem = BrigAcquire;
+      context->token_to_scan = yylex();
+      break;
+    case _PART_ACQ:
+      *pMemSem = BrigParAcquire;
+      context->token_to_scan = yylex();
+      break;
+    case _REL:
+      *pMemSem = BrigRelease;
+      context->token_to_scan = yylex();
+      break;
+    case _PART_REL:          
+      *pMemSem = BrigParRelease;
+      context->token_to_scan = yylex();
+      break;
+    default: 
+      return 1;
+  }
+  return 0;
+}  
+
+int AcqRel(Context* context, BrigMemorySemantic32_t* pMemSem ){
+  switch(context->token_to_scan){
+    case _AR:
+      *pMemSem = BrigAcquireRelease;
+      context->token_to_scan = yylex();
+      break;
+    case _PART_AR:
+      *pMemSem = BrigParAcquireRelease;
+      context->token_to_scan = yylex();
+      break;
+    default: 
+      return 1;
   }
   return 0;
 }
 
-int Optacqreg(Context* context) {
-  BrigMemorySemantic32_t temp;
-  return Optacqreg(context, &temp);
+int Optacqreg(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
+  int ret = Acq(context, pMemSemantic) && AcqRel(context, pMemSemantic);
+  
+  return 0;
 }
 
 int ImageRet(Context* context) {
@@ -5817,15 +5833,12 @@ int Instruction1(Context* context) {
 }
 
 int Segp(Context* context) {
-  if (context->token_to_scan == SEGMENTP) { //segmentp
-    if (!SegpPart1Segmentp(context)) {
-      return 0;
-    }
-  } else if (context->token_to_scan == STOF || // stof or ftos
-             context->token_to_scan == FTOS) {
-    if (!SegpPart2StoFAndFtoS(context)) {
-      return 0;
-    }
+  switch (context->token_to_scan){
+    case SEGMENTP:  
+      return SegpPart1Segmentp(context);
+    case STOF:
+    case FTOS:  
+      return SegpPart2StoFAndFtoS(context);
   }
   return 1;
 }
@@ -5900,19 +5913,18 @@ int SegpPart2StoFAndFtoS(Context* context) {
       break;
     case FTOS:
       opcode = BrigFtoS;
-      break;
+      break;    
   }
   context->token_to_scan = yylex();
   if (context->token_type != ADDRESS_SPACE_IDENTIFIER) {
-    // should be missing ADDRESS_SPACE_IDENTIFIER
-    context->set_error(MISSING_IDENTIFIER);
+    context->set_error(MISSING_SEGMENT);
     return 1;
   }
   storageClass = context->token_value.storage_class;
   context->token_to_scan = yylex();
   if (context->token_to_scan != _U32 && 
       context->token_to_scan != _U64) { //datatypeId must be u32 or u64
-    context->set_error(MISSING_DATA_TYPE);
+    context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
   context->set_type(context->token_value.data_type);
@@ -5940,7 +5952,6 @@ int SegpPart2StoFAndFtoS(Context* context) {
   }
   context->token_to_scan = yylex();
   if (Operand(context, &OpOffset[1])) {
-    context->set_error(MISSING_OPERAND);
     return 1;
   }
   if (context->token_to_scan != ';') {

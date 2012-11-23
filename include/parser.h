@@ -146,8 +146,6 @@ int LdModifier(Context* context);
 int TopLevelStatement(Context *context);
 int TopLevelStatements(Context *context);
 
-int Optacqreg(Context* context);
-
 int ArrayOperand(Context* context);
 
 int CodeBlockEnd(Context* context);
@@ -163,6 +161,8 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int AtomModifiers(Context* context, BrigMemorySemantic32_t* pMemorySemantic);
 int Optacqreg(Context* context, BrigMemorySemantic32_t* memSemantic);
+int AcqRel(Context* context, BrigMemorySemantic32_t* memSemantic);
+int Acq(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperand(Context* context, BrigoOffset32_t* pOperand);
