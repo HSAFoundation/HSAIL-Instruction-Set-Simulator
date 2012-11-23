@@ -11,6 +11,7 @@
 #include "brig_util.h"
 #include "brig_buffer.h"
 #include "codegen_validate.h"
+#include "mock_error_reporter.h"
 
 namespace hsa{
 namespace brig{
@@ -150,6 +151,28 @@ public:
       validate(RefOutput, &GetOutput);
 
     }
+    context->clear_context();
+    delete lexer;
+  }
+  
+  void False_Validate(int (*Rule)(Context*), error_code_t refError) {
+    Context* context = Context::get_instance();
+    context->clear_context();
+
+    MockErrorReporter mer;
+    context->set_error_reporter(&mer);
+    mer.DelegateToFake();
+    EXPECT_CALL(mer, report_error(_, _, _)).Times(testing::AtLeast(1));
+    EXPECT_CALL(mer, get_last_error()).Times(testing::AtLeast(1));
+
+    Lexer* lexer = new Lexer();
+    lexer->set_source_string(Input);
+
+    context->token_to_scan = lexer->get_next_token();
+    EXPECT_FALSE(!(*Rule)(context));
+    EXPECT_EQ(refError, mer.get_last_error());
+
+    context->set_error_reporter(ErrorReporter::get_instance());
     context->clear_context();
     delete lexer;
   }

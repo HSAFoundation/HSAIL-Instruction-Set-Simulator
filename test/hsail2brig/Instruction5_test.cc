@@ -1,20 +1,17 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
 
-template <typename T, typename T1, typename T2, typename T3, typename T4, typename T5> class Instruction5Opcode_Test : public BrigCodeGenTest{
+template <typename T=BrigInstBase, 
+          typename T1=BrigOperandReg, 
+          typename T2=BrigOperandReg, 
+          typename T3=BrigOperandReg, 
+          typename T4=BrigOperandReg, 
+          typename T5=BrigOperandReg>
+class Instruction5Opcode_Test : public BrigCodeGenTest{
 private:
 
   //Instruction in .code buffer
@@ -27,6 +24,9 @@ private:
   const T5* RefSrc4;
 
 public:
+  Instruction5Opcode_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Instruction5Opcode_Test(std::string& in, StringBuffer* sbuf, T* ref, T1* Dest, T2* Src1, T3* Src2, T4* Src3, T5 *Src4) :
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
@@ -55,6 +55,9 @@ public:
     delete code;
     delete oper;
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
  };
 
 TEST(CodegenTest,Instruction5Op_CodeGen){
@@ -410,6 +413,20 @@ TEST(CodegenTest,Instruction5Op_CodeGen){
 
 /*******************************************************************/
 delete symbols;
+}
+
+TEST(ErrorReportTest, Instruction5) {  
+  std::string input = "f2u4 $s1, $s0, 123, 0, 3;\n";
+  Instruction5Opcode_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Instruction5, MISSING_DATA_TYPE);
+  
+  input.assign("f2u4_u32 $s1, $s0, 123, 0, 3\n");
+  Instruction5Opcode_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Instruction5, MISSING_SEMICOLON);
+
+  input.assign("f2u4_u32 $s1, $s0, 123, 3;\n");
+  Instruction5Opcode_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Instruction5, MISSING_COMMA);
 }
 
 }

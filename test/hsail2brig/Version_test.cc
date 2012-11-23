@@ -12,6 +12,9 @@ private:
   // Operands in .operands buffer
 
 public:
+  Version_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Version_Test(std::string& in, BrigDirectiveVersion* ref):
     BrigCodeGenTest(in),
     RefVer(ref) { }
@@ -27,6 +30,11 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete dir;
   } 
+  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
+
 };
 
 
@@ -102,6 +110,24 @@ TEST(CodegenTest, Version_CodeGen) {
   TestCase4.Run_Test(&Version);
 
 }
+
+TEST(ErrorReportTest, Version) {  
+  std::string input = "version 2:1\n";
+
+  Version_Test TestCase1(input);
+  TestCase1.Run_Test(&Version, MISSING_SEMICOLON);
+  
+  input.assign("version 2;1:$nosftz, $small, $full;\n");
+
+  Version_Test TestCase2(input);
+  TestCase2.Run_Test(&Version, MISSING_COLON);
+  
+  input.assign("version 2:1 $nosftz, $full;\n");
+
+  Version_Test TestCase3(input);
+  TestCase3.Run_Test(&Version, MISSING_SEMICOLON);
+}
+
 } // namespace hsa
 } // namespace brig
 

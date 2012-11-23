@@ -27,6 +27,7 @@ int Instruction3(Context* context);
 int Version(Context* context);
 int Alignment(Context* context);
 int SignatureArgumentList(Context *context);
+int SignatureArgumentList(Context *context, std::vector<BrigDirectiveSignature::BrigProtoType> *types);
 int Label(Context* context);
 int LabelTargets(Context* context);
 int Instruction4(Context* context);
@@ -54,6 +55,7 @@ int UninitializableDecl(Context* context);
 int ArgUninitializableDecl(Context* context);
 int VectorToken(Context *context);
 int SignatureType(Context *context);
+int SignatureType(Context *context, std::vector<BrigDirectiveSignature::BrigProtoType> *types);
 int FileDecl(Context* context);
 int SysCall(Context* context);
 int ArgBlock(Context* context);
@@ -76,6 +78,8 @@ int Instruction0(Context* context);
 int Instruction1(Context* context);
 int Operation(Context* context);
 int Segp(Context* context);
+int SegpPart1Segmentp(Context* context);
+int SegpPart2StoFAndFtoS(Context* context);
 
 int BodyStatementNested(Context* context);
 int ArgStatement(Context* context);
@@ -136,7 +140,6 @@ int GlobalInitializable(Context* context);
 
 int SequenceOfPrograms(Context *context);
 int PairAddressableOperand(Context *context);
-int LdaMod(Context *context);
 int OffsetAddressableOperand(Context* context);
 int LdModifier(Context* context);
 

@@ -6,7 +6,8 @@
 namespace hsa{
 namespace brig{
 
-template <typename TInst, typename TSrc> 
+template <typename TInst=BrigInstImage, 
+          typename TSrc=BrigOperandReg> 
 class ImageInst_Test : public BrigCodeGenTest{
 private:
 
@@ -23,6 +24,9 @@ private:
   const BrigOperandReg* SmpReg;
 
 public:
+  ImageInst_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   ImageInst_Test(std::string& input, StringBuffer* sbuf, TInst* ref,
                  BrigOperandRegV4* dest, BrigOperandReg* destList, 
                  BrigOperandOpaque* image, BrigOperandOpaque* sample, 
@@ -95,6 +99,9 @@ public:
     delete code;
     delete oper;
     delete dir;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -1036,6 +1043,54 @@ TEST(CodegenTest, ImageRead_Codegen) {
 
   /***********************  End of tests *************************/
   delete sbuf;
+}
+TEST(ErrorReportTest, ImageStore) {  
+  std::string input = "st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),\
+                       [%RWImg3], ($s2,$s3,$s4,$s5)\n";
+  ImageInst_Test<> TestCase1(input);
+  TestCase1.Run_Test(&ImageStore, MISSING_SEMICOLON);
+
+  input.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4) [%RWImg3],\
+               ($s4,$s5);\n");
+  ImageInst_Test<> TestCase2(input);
+  TestCase2.Run_Test(&ImageStore, MISSING_COMMA);
+
+  input.assign("st_image_v4_1db_f32 ($s1,$s2,$s3,$s4),\
+                [%RWImg3<$s4 - 0x4>], ($s5);\n");
+  ImageInst_Test<> TestCase3(input);
+  TestCase3.Run_Test(&ImageStore, MISSING_DATA_TYPE);
+}
+TEST(ErrorReportTest, ImageLoad) {  
+  std::string input = "ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),\
+                       [%RWImg3], ($s4,$s5,$s2,$s3)\n";
+  ImageInst_Test<> TestCase1(input);
+  TestCase1.Run_Test(&ImageLoad, MISSING_SEMICOLON);
+
+  input.assign("ld_image_v4_1da_f32 ($s1,$s2,$s3,$s4),\
+                [%RWImg3], ($s4,$s5);\n");
+  ImageInst_Test<> TestCase2(input);
+  TestCase2.Run_Test(&ImageLoad, MISSING_DATA_TYPE);
+
+  input.assign("ld_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), \
+                [%RWImg3<$s4>] ($s5);\n");
+  ImageInst_Test<> TestCase3(input);
+  TestCase3.Run_Test(&ImageLoad, MISSING_COMMA);
+}
+TEST(ErrorReportTest, ImageRead) {  
+  std::string input = "rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4),\
+                       [%RWImg3],[%Samp3],($s5, $s6, $s4, $s3)\n";
+  ImageInst_Test<> TestCase1(input);
+  TestCase1.Run_Test(&ImageRead, MISSING_SEMICOLON);
+
+  input.assign("rd_image_v4_1d_f32_u32 ($s0,$s1,$s3,$s4),\
+                [%RWImg3],[%Samp3],(100)\n");
+  ImageInst_Test<> TestCase2(input);
+  TestCase2.Run_Test(&ImageRead, INVALID_OPERAND);
+  
+  input.assign("rd_image_v4_1d_s32 ($s0,$s1,$s5,$s3),[%RWImg3],\
+                [%Samp3], ($s6);\n");
+  ImageInst_Test<> TestCase3(input);
+  TestCase3.Run_Test(&ImageRead, MISSING_DATA_TYPE);
 }
 
 }

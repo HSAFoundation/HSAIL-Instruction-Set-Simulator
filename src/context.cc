@@ -32,20 +32,8 @@ Context::Context(void) {
   obuf = new Buffer();
   sbuf = new StringBuffer();
   err_reporter = NULL;
-  yycolno = 0;
-  yylineno = 1;
-  dim = 0;
-  last_directive_offset = 0;
-  type = Brigb32;
-  current_bdf_offset = 0;
-  aluModifier.floatOrInt = 0;
-  aluModifier.rounding = 0;
-  aluModifier.valid = 0;
-  aluModifier.ftz = 0;
-  aluModifier.approx = 0;
-  aluModifier.fbar = 0;
-  aluModifier.reserved = 0;
-  set_default_values();
+    
+  initialize_all_fields();
   for(unsigned i = 0; i < 8; ++i) cbuf->append_char(0);
   for(unsigned i = 0; i < 8; ++i) dbuf->append_char(0);
   for(unsigned i = 0; i < 8; ++i) obuf->append_char(0);
@@ -75,10 +63,26 @@ void Context::clear_context(void) {
     free(token_value.string_val);
     valid_string = false;
   }
-  set_default_values();
-  types.clear();
+  initialize_all_fields();  
+}
+
+void Context::initialize_all_fields(void) {
+  /* Lexer Values */
+  token_type = UNKNOWN;
+  token_to_scan = 0;
+  token_value.int_val = 0;
+  valid_string = false;
+  yycolno = 0;
+  yylineno = 1;
+  
+  machine = BrigELarge;
+  profile = BrigEFull;
   last_directive_offset = 0;
   current_bdf_offset = 0;
+    
+  attribute = BrigNone;
+  alignment = 1;
+  symModifier = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
   aluModifier.valid = 0;
@@ -86,22 +90,9 @@ void Context::clear_context(void) {
   aluModifier.approx = 0;
   aluModifier.fbar = 0;
   aluModifier.reserved = 0;
-  /*Error Reported not cleared - clear_context typically used between unit tests*/
-  
-}
-
-void Context::set_default_values(void) {
-  machine = BrigELarge;
-  profile = BrigEFull;
-  attribute = BrigNone;
-  alignment = 1;
-  token_type = UNKNOWN;
-  token_to_scan = 0;
-  token_value.int_val = 0;
-  valid_string = false;
-  yycolno = 0;
-  yylineno = 1;
-  symModifier = 0;
+  dim = 0;
+  type = Brigb32;
+  is_array = false;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
@@ -280,6 +271,22 @@ void Context::clear_all_buffers(void) {
   for(unsigned i = 0; i < 8; ++i) sbuf->append_char(0);
 }
 
+void Context::initialize_statement_fields(void){
+  attribute = BrigNone;
+  alignment = 1;
+  symModifier = 0;
+  type = Brigb32;
+  aluModifier.floatOrInt = 0;
+  aluModifier.rounding = 0;
+  aluModifier.valid = 0;
+  aluModifier.ftz = 0;
+  aluModifier.approx = 0;
+  aluModifier.fbar = 0;
+  aluModifier.reserved = 0;
+  dim = 0;
+  is_array = false;
+}
+
 // check context
 uint16_t Context::get_alignment() const {
   return alignment;
@@ -326,9 +333,6 @@ void Context::set_symbol_modifier(BrigSymbolModifier modifier) {
   this->symModifier |= ((uint32_t)(modifier));
 }
 
-void Context::init_symbol_modifier(){
-	this->symModifier = 0;
-}
 void Context::set_attribute(BrigAttribute16_t attrib) {
   this->attribute = attrib;
 }

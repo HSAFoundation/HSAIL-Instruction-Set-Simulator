@@ -128,6 +128,26 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase3(in, sbuf, &ref);
   TestCase3.Run_Test(&GlobalDecl);
   sbuf->clear();
+  
+  in.assign("const align 8 extern group_u32 &x3;\n");
+  name.assign("&x3"); sbuf->append(name);
+
+  ref.size = sizeof(ref);
+  ref.kind = BrigEDirectiveSymbol;
+  ref.s.c_code = 0;
+  ref.s.storageClass = BrigGroupSpace;
+  ref.s.attribute = BrigExtern;
+  ref.s.reserved = 0;
+  ref.s.symbolModifier = BrigConst;
+  ref.s.dim = 0;
+  ref.s.s_name = 0;
+  ref.s.type = Brigu32;
+  ref.s.align = 8;
+  ref.d_init = 0;
+  ref.reserved = 0;
+  GlobalDecl_Test<BrigDirectiveSymbol> TestCase4(in, sbuf, &ref);
+  TestCase4.Run_Test(&GlobalDecl);
+  sbuf->clear();
 
   /********************************* Case 4 Group ********************************/
   in.assign("group_b8 &x4[];\n");
@@ -146,8 +166,8 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   ref.s.align = 1;
   ref.d_init = 0;
   ref.reserved = 0;
-  GlobalDecl_Test<BrigDirectiveSymbol> TestCase4(in, sbuf, &ref);
-  TestCase4.Run_Test(&GlobalDecl);
+  GlobalDecl_Test<BrigDirectiveSymbol> TestCase5(in, sbuf, &ref);
+  TestCase5.Run_Test(&GlobalDecl);
   sbuf->clear();
 
   /********************************* Case 5 Private ********************************/
@@ -167,8 +187,8 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   ref.s.align = 1;
   ref.d_init = 0;
   ref.reserved = 0;
-  GlobalDecl_Test<BrigDirectiveSymbol> TestCase5(in, sbuf, &ref);
-  TestCase5.Run_Test(&GlobalDecl);
+  GlobalDecl_Test<BrigDirectiveSymbol> TestCase6(in, sbuf, &ref);
+  TestCase6.Run_Test(&GlobalDecl);
   sbuf->clear();
 
   /********************************* Case 6 Private ********************************/
@@ -188,10 +208,30 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   ref.s.align = 1;
   ref.d_init = 0;
   ref.reserved = 0;
-  GlobalDecl_Test<BrigDirectiveSymbol> TestCase6(in, sbuf, &ref);
-  TestCase6.Run_Test(&GlobalDecl);
+  GlobalDecl_Test<BrigDirectiveSymbol> TestCase7(in, sbuf, &ref);
+  TestCase7.Run_Test(&GlobalDecl);
   sbuf->clear();
 
+  in.assign("const private_b64 &y5[8][256];\n");
+  name.assign("&y5"); sbuf->append(name);
+
+  ref.size = sizeof(ref);
+  ref.kind = BrigEDirectiveSymbol;
+  ref.s.c_code = 0;
+  ref.s.storageClass = BrigPrivateSpace;
+  ref.s.attribute = BrigNone;
+  ref.s.reserved = 0;
+  ref.s.symbolModifier = BrigArray | BrigConst;
+  ref.s.dim = 2048;
+  ref.s.s_name = 0;
+  ref.s.type = Brigb64;
+  ref.s.align = 1;
+  ref.d_init = 0;
+  ref.reserved = 0;
+  GlobalDecl_Test<BrigDirectiveSymbol> TestCase8(in, sbuf, &ref);
+  TestCase8.Run_Test(&GlobalDecl);
+  sbuf->clear();
+  
 
   /******************************************** End of tests ********************************/
   delete sbuf;
@@ -694,7 +734,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     BrigNone ,                 // attribute
     0,                         // reserved
     0,                         // symbolModifier
-    1,                         // dim
+    0,                         // dim
     0,                         // s_name
     Brigu32,                   // type
     1                          // align

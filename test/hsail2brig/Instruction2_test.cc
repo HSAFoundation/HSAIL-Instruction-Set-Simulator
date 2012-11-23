@@ -1,20 +1,13 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
 namespace hsa {
 namespace brig {
 
-template <typename TInst, typename T1, typename T2>
+template <typename TInst=BrigInstBase, 
+          typename T1=BrigOperandReg, 
+          typename T2=BrigOperandReg>
 class Instruction2_Test: public BrigCodeGenTest {
 
 private:
@@ -24,6 +17,9 @@ private:
   const T2* RefSrc;
 
 public:
+  Instruction2_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Instruction2_Test(std::string& in, StringBuffer* sbuf, TInst* ref,
            T1* Dest, T2* Src):
     BrigCodeGenTest(in, sbuf),
@@ -48,6 +44,9 @@ public:
     delete code;
     delete oper;
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 
@@ -1705,7 +1704,50 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase5(in, symbols, &out5, &reg1, &imm3);
   TestCase5.Run_Test(&Instruction2);
   symbols->clear();
+/*********************************************** Test case ****************************************/
+  in.assign( "neg_ftz_f32 $s1, 99.0;\n");
+  op1.assign("$s1");
+  symbols->append(op1);
+  bam.valid = 1;
+  bam.rounding = 0;
+  bam.ftz = 1;
+  bam.floatOrInt = 1;
+  bam.valid = 1;
+  bam.approx = 0;
+  bam.fbar = 0;
+  bam.reserved = 0;
 
+  BrigInstMod out6 = {
+    0,
+    BrigEInstMod,
+    BrigNeg,
+    Brigf32,
+    BrigNoPacking,
+    {0, sizeof(reg1), 0, 0, 0},
+    bam
+  };
+  out6.size = sizeof(out6);
+
+  reg1.size = sizeof(reg1);
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb32;
+  reg1.reserved = 0;
+  reg1.s_name = 0;
+
+  BrigOperandImmed imm4 = {
+    0,
+    BrigEOperandImmed,
+    Brigb64,
+    0,
+    {0}
+  };
+  imm4.bits.d = 99.0;
+  imm4.size = sizeof(imm4);
+  Instruction2_Test<BrigInstMod, BrigOperandReg, BrigOperandImmed> TestCase6(in, symbols, &out6, &reg1, &imm4);
+  TestCase6.Run_Test(&Instruction2);
+  symbols->clear();
+
+  
   /******************************  End of tests *****************************************/
   delete symbols;
 }
@@ -1820,6 +1862,20 @@ TEST(CodegenTest, MemorySegmentOps){
 
   delete sbuf;
 
+}
+
+TEST(ErrorReportTest, Instruction2) {  
+  std::string input = "unpack3 $s1, $s2\n";
+  Instruction2_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Instruction2, MISSING_SEMICOLON);
+  
+  input.assign( "firstbit $s0, $s0;\n");
+  Instruction2_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Instruction2, INVALID_DATA_TYPE);
+  
+  input.assign( "frcp_f32 $s0;\n");
+  Instruction2_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Instruction2, MISSING_COMMA);
 }
 
 } //namespace brig
