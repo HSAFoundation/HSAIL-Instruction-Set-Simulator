@@ -5180,9 +5180,26 @@ int AcqRel(Context* context, BrigMemorySemantic32_t* pMemSem ){
 }
 
 int Optacqreg(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
-  int ret = Acq(context, pMemSemantic) && AcqRel(context, pMemSemantic);
   
-  return 0;
+  int ret = (Acq(context, pMemSemantic)) &&  (AcqRel(context, pMemSemantic));
+  return ret;
+}
+
+int AddressSpaceIdentifier(Context* context){
+
+  switch(context->token_to_scan){
+    case _READONLY:
+    case _KERNARG:
+    case _GLOBAL:
+    case _PRIVATE:
+    case _ARG:
+    case _GROUP:
+    case _SPILL: 
+      context->token_to_scan = yylex();
+      return 0;
+    default: 
+      return 1;
+  }
 }
 
 int ImageRet(Context* context) {
@@ -5240,9 +5257,7 @@ int ImageRet(Context* context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  if (Optacqreg(context, &memorySemantic)) {
-    return 1;
-  }
+  int ret = Optacqreg(context, &memorySemantic);    
 
   if (context->token_type != GEOMETRY_ID) {
     context->set_error(MISSING_DECLPREFIX);
@@ -5420,9 +5435,9 @@ int ImageNoRet(Context* context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  if (!Optacqreg(context, &memorySemantic)) {
-  }
-
+  
+  int ret = Optacqreg(context, &memorySemantic);
+  
   if (context->token_type != GEOMETRY_ID) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;

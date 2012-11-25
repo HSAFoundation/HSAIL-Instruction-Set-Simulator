@@ -1966,10 +1966,6 @@ f2u4              { free_string(context);
                     return F2U4;}
 
   /*-- Atom Modifiers --*/
-_ar               { free_string(context);
-                    context->token_type = ATOM_MODIFIER;
-                    context->yycolno+=yyleng;
-                    return _AR;}
 
 _cas              { free_string(context);
                     context->token_type = ATOM_MODIFIER;
@@ -2011,38 +2007,43 @@ cvt               { free_string(context);
                     context->yycolno+=yyleng;
                     return CVT;}
 
-_dep              { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
-                    context->yycolno+=yyleng;
-                    return _DEP;}
-
 _equiv            { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
                     return _EQUIV;}
 
+_ar               { free_string(context);
+                    context->token_type = MEMORY_SEMANTIC;
+                    context->yycolno+=yyleng;
+                    return _AR;}
+                   
+_dep              { free_string(context);
+                    context->token_type = MEMORY_SEMANTIC;
+                    context->yycolno+=yyleng;
+                    return _DEP;}
+
 _acq              { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
+                    context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _ACQ;}
 
 _part_ar          { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
+                    context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _PART_AR;}
 
 _rel              { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
+                    context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _REL;}
 
 _part_acq              { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
+                    context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _PART_ACQ;}
 
 _part_rel              { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
+                    context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _PART_REL;}
                     
