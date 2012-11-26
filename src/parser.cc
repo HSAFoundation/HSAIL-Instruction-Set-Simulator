@@ -4412,13 +4412,12 @@ int Atom(Context* context) {
     return 1;
   }
 
-  if(context->token_type==ADDRESS_SPACE_IDENTIFIER){
+  if(!AddressSpaceIdentifier(context)){
     StorageClass = context->token_value.storage_class;
     context->token_to_scan = yylex();
   }
 
-  if (AtomModifiers(context, &MemorySemantic)) {
-    context->set_error(UNKNOWN_ERROR);
+  if (Optacqreg(context, &MemorySemantic)) {
     return 1;
   }
 
@@ -5181,7 +5180,12 @@ int AcqRel(Context* context, BrigMemorySemantic32_t* pMemSem ){
 
 int Optacqreg(Context* context, BrigMemorySemantic32_t* pMemSemantic) {
   
-  int ret = (Acq(context, pMemSemantic)) &&  (AcqRel(context, pMemSemantic));
+  /* Either acq or acqrel is allowed - not both*/
+  int ret = (Acq(context, pMemSemantic));
+  int ret2 = (AcqRel(context, pMemSemantic));
+  int ret3 = (Acq(context, pMemSemantic)); 
+  
+  ret = ((ret | ret2)==0) || ((ret2 | ret3)==0) ? 1 : 0; 
   return ret;
 }
 
@@ -5195,7 +5199,6 @@ int AddressSpaceIdentifier(Context* context){
     case _ARG:
     case _GROUP:
     case _SPILL: 
-      context->token_to_scan = yylex();
       return 0;
     default: 
       return 1;
@@ -5257,7 +5260,8 @@ int ImageRet(Context* context) {
     context->set_error(MISSING_DECLPREFIX);
     return 1;
   }
-  int ret = Optacqreg(context, &memorySemantic);    
+  if(Optacqreg(context, &memorySemantic))
+    return 1;    
 
   if (context->token_type != GEOMETRY_ID) {
     context->set_error(MISSING_DECLPREFIX);
@@ -5436,7 +5440,8 @@ int ImageNoRet(Context* context) {
     return 1;
   }
   
-  int ret = Optacqreg(context, &memorySemantic);
+  if(Optacqreg(context, &memorySemantic))
+    return 1;
   
   if (context->token_type != GEOMETRY_ID) {
     context->set_error(MISSING_DECLPREFIX);
@@ -7115,26 +7120,6 @@ int Bar(Context* context) {
   return 0;
 }
 
-int AtomModifiers(Context* context, BrigMemorySemantic32_t *pMemorySemantic) {
-
-  if (context->token_to_scan == _AR) {
-    *pMemorySemantic = BrigAcquireRelease;
-    context->token_to_scan = yylex();
-  } else if (context->token_to_scan == _ACQ) {
-    *pMemorySemantic = BrigAcquire;
-    context->token_to_scan = yylex();
-  } else if (context->token_to_scan == _PART_AR) {
-    *pMemorySemantic = BrigParAcquireRelease;
-    context->token_to_scan = yylex();
-  }
-
-  if(context->token_to_scan == _REGION){
-    //TODO: What parameter needs to be set if the token is _REGION?
-     context->token_to_scan = yylex();
-  }
-  return 0;
-}
-
 int AtomicNoRet(Context* context) {
   // first token is ATOMICNORET or ATOMICNORET_CAS
 
@@ -7193,12 +7178,12 @@ int AtomicNoRet(Context* context) {
     return 1;
   }
 
-  if(context->token_type == ADDRESS_SPACE_IDENTIFIER){
+  if(!AddressSpaceIdentifier(context)){
     StorageClass = context->token_value.storage_class;
     context->token_to_scan = yylex();
   }
 
-  if (AtomModifiers(context, &MemorySemantic)) {
+  if (Optacqreg(context, &MemorySemantic)) {
     context->set_error(UNKNOWN_ERROR);
     return 1;
   }

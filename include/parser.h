@@ -159,7 +159,7 @@ int GlobalSamplerDeclPart2(Context *context);
 int InitializableDecl(Context* context, BrigStorageClass32_t storage_class);
 int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset, BrigoOffset32_t* pRetOpOffset);
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
-int AtomModifiers(Context* context, BrigMemorySemantic32_t* pMemorySemantic);
+int AddressSpaceIdentifier(Context* context);
 int Optacqreg(Context* context, BrigMemorySemantic32_t* memSemantic);
 int AcqRel(Context* context, BrigMemorySemantic32_t* memSemantic);
 int Acq(Context* context, BrigMemorySemantic32_t* memSemantic);
