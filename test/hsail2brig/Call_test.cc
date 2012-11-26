@@ -256,14 +256,14 @@ TEST(CodegenTest, Call_CodeGen) {
   funList.elementCount = 1;
   funList.o_args[0] = outMod.o_operands[3] + sizeof(inputArgs);
 
-  BrigOperandArgumentRef* funcList2 = new BrigOperandArgumentRef[pFunList->elementCount * sizeof(func)];
+  BrigOperandFunctionRef* funcList2 = new BrigOperandFunctionRef[pFunList->elementCount * sizeof(func)];
   for (uint32_t i = 0 ; i < pFunList->elementCount ; ++i) {
     funcList2[i].size = sizeof(funcList2[i]);
-    funcList2[i].kind = BrigEOperandArgumentRef;
-    funcList2[i].arg = 0;
+    funcList2[i].kind = BrigEOperandFunctionRef;
+    funcList2[i].fn = 0;
   }
 
-  Call_Test<BrigInstMod, BrigOperandReg, BrigOperandArgumentRef>
+  Call_Test<BrigInstMod, BrigOperandReg, BrigOperandFunctionRef>
   TestCase2(in, symbols, &outMod, &width, &outputArgs, &reg, &inputArgs, &funList, outputArgsList2, inputArgsList2, funcList2);
   TestCase2.Run_Test(&Call);
 
