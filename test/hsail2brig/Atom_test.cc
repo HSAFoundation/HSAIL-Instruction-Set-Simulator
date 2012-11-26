@@ -1321,9 +1321,20 @@ TEST(ErrorReportTest, Atom) {
   TestCase3.Run_Test(&Atom, MISSING_DATA_TYPE);
 }
 
+TEST(ErrorReportTest, AtomicNoRet) {  
+  std::string input = "atomicNoRet_sub_u32 [0x100], $s2\n";
+  Atom_Test<> TestCase1(input);
+  TestCase1.Run_Test(&AtomicNoRet, MISSING_SEMICOLON);
+
+  input.assign("atomicNoRet_dec_group [&y], $s1;\n");
+  Atom_Test<> TestCase2(input);
+  TestCase2.Run_Test(&AtomicNoRet, MISSING_DATA_TYPE);
+
+  input.assign("atomicNoRet_or_group_u64 [%x][$s2 - 0x4];\n");
+  Atom_Test<> TestCase3(input);
+  TestCase3.Run_Test(&AtomicNoRet, MISSING_COMMA);
+}
+
 } // namespace hsa
 } // namespace brig
-
-
-
 
