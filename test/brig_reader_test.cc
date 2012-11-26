@@ -1541,3 +1541,125 @@ TEST(BrigWriterTest, GlobalInitialization) {
   EXPECT_TRUE(BP);
   if(!BP) return;
 }
+
+static const char GlobalInitializerInst[] = 
+  "version 1:0:$small;\n"
+  "\n"
+  "global_%s &n = %s;\n"
+  "kernel &__OpenCL_Global_Initializer_kernel(\n"
+  "        kernarg_%s %%r)\n"
+  "{\n"
+  "@__OpenCL_Global_Initializer_kernel_entry:\n"
+  "        ld_kernarg_u%u $%c2, [%%r];\n"
+  "        ld_global_u%u $%c1, [&n];\n"
+  "        st_global_u%u  $%c1, [$%c2];\n"
+  "        ret;\n"
+  "};\n";
+
+template<class T>
+static void testGlobalInitializer(const char *type,
+				   const T &result,
+				   const char *value,
+				   unsigned bits) {
+  char reg = 0;
+  if(bits == 8 || bits == 16 || bits == 32)
+    reg = 's';
+  if(bits == 64)
+    reg = 'd';
+  size_t size =
+    snprintf(NULL,
+	     0,
+	     GlobalInitializerInst,
+	     type,
+	     value,
+	     type,
+	     bits,
+	     reg,
+	     bits,
+	     reg,
+	     bits,
+	     reg,
+	     reg);
+  char *buffer = new char[size];
+  snprintf(buffer,
+	   size,
+	   GlobalInitializerInst,
+	     type,
+	     value,
+	     type,
+	     bits,
+	     reg,
+	     bits,
+	     reg,
+	     bits,
+	     reg,
+	     reg);
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete buffer;
+  
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  
+  T *arg_val0 = new T;
+  *arg_val0 = 0;
+  
+  void *args[] = { &arg_val0 };
+  llvm::Function *fun = BP->getFunction("__OpenCL_Global_Initializer_kernel");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+
+  EXPECT_EQ(result, *arg_val0);
+  
+  delete arg_val0;
+}
+  
+TEST(BrigGlobalTest, GlobalInitializer) {
+  {
+    const uint8_t result = uint8_t(0x0);
+    const char *value = "0x0";
+    unsigned bits = 8;
+    testGlobalInitializer("b8", result, value, bits);
+  }
+  {
+    const uint8_t result = uint8_t(0xff);
+    const char *value = "0xff";
+    unsigned bits = 8;
+    testGlobalInitializer("b8", result, value, bits);
+  }
+  {
+    const uint16_t result = uint16_t(0x0);
+    const char *value = "0x0";
+    unsigned bits = 16;
+    testGlobalInitializer("b16", result, value, bits);
+  }
+  {
+    const uint16_t result = uint16_t(0xffff);
+    const char *value = "0xffff";
+    unsigned bits = 16;
+    testGlobalInitializer("b16", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x0);
+    const char *value = "0x0";
+    unsigned bits = 32;
+    testGlobalInitializer("b32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0xffffffff);
+    const char *value = "0xffffffff";
+    unsigned bits = 32;
+    testGlobalInitializer("b32", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x0);
+    const char *value = "0x0";
+    unsigned bits = 64;
+    testGlobalInitializer("b64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xffffffffffffffff);
+    const char *value = "0xffffffffffffffff";
+    unsigned bits = 64;
+    testGlobalInitializer("b64", result, value, bits);
+  }
+}
