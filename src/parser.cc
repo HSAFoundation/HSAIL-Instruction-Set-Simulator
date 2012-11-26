@@ -7136,9 +7136,6 @@ int AtomicNoRet(Context* context) {
       case _XOR_:
         atomicOperation = BrigAtomicXor;
         break;
-      case _EXCH_:
-        atomicOperation = BrigAtomicExch;
-        break;
       case _ADD_:
         atomicOperation = BrigAtomicAdd;
         break;
