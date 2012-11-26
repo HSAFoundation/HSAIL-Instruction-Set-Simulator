@@ -5,7 +5,8 @@
 namespace hsa {
 namespace brig {
 
-template <typename T1, typename T2 = BrigOperandReg>
+template <typename T1 = BrigOperandReg, 
+          typename T2 = BrigOperandReg>
 class Atom_Test: public BrigCodeGenTest {
 
 private:
@@ -21,6 +22,9 @@ private:
   const T2* RefSrc2;
 
 public:
+  Atom_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Atom_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomic* ref,
             BrigOperandReg* Dest, BrigOperandCompound* Compound, BrigOperandAddress* Addr,
             BrigOperandReg* Reg, T1* Src1, T2* Src2 = NULL):
@@ -97,6 +101,9 @@ public:
     delete oper;
     delete dir;
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 TEST(CodegenTest, Atom_CodeGen) {
@@ -1300,7 +1307,19 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
 }
 
+TEST(ErrorReportTest, Atom) {  
+  std::string input = "atomic_and_global_ar_u32 $s1, [&x2], 24\n";
+  Atom_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Atom, MISSING_SEMICOLON);
 
+  input.assign("atomic_cas_global_ar_b64 $d1, [&x1], 12;\n");
+  Atom_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Atom, MISSING_COMMA);
+
+  input.assign("atomic_sub $s1, [0x100], $s2;\n");
+  Atom_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Atom, MISSING_DATA_TYPE);
+}
 
 } // namespace hsa
 } // namespace brig
