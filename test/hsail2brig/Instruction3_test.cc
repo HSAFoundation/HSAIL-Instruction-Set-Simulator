@@ -1665,6 +1665,45 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   TestCase41.Run_Test(&Instruction3);
   symbols->clear();
 
+  /**********************************************************************************************/
+  in.assign("sub_f32 $s1, $s2, $s3;\n");
+  op1.assign("$s1"); op2.assign("$s2"); op3.assign("$s3");
+  symbols->append(op1); symbols->append(op2); symbols->append(op3);
+
+  BrigInstBase out42 = {
+    0,
+    BrigEInstBase,
+    BrigSub,
+    Brigf32,
+    BrigNoPacking,
+    {0, sizeof(reg1), sizeof(reg1) + sizeof(reg2), 0, 0}   
+  };
+  out42.size = sizeof(out42);
+
+  reg1.size = sizeof(reg1);
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb32;
+  reg1.reserved = 0;
+  reg1.s_name = 0;
+
+  reg2.size = sizeof(reg2);
+  reg2.kind = BrigEOperandReg;
+  reg2.type = Brigb32;
+  reg2.reserved = 0;
+  reg2.s_name = op1.size()+1;
+
+  reg3.size = sizeof(reg3);
+  reg3.kind = BrigEOperandReg;
+  reg3.type = Brigb32;
+  reg3.reserved = 0;
+  reg3.s_name = op1.size()+op2.size()+2;
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg>
+            TestCase42(in, symbols, &out42, &reg1, &reg2, &reg3);
+  TestCase42.Run_Test(&Instruction3);
+  symbols->clear();
+
+  
   /***************************************  End of tests *************************************/
   delete symbols;
 }
