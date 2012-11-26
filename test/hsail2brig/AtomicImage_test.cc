@@ -1393,6 +1393,19 @@ TEST(ErrorReportTest, ImageRet) {
   TestCase3.Run_Test(&ImageRet, MISSING_DATA_TYPE);
 }
 
+TEST(ErrorReportTest, ImageNoRet) {  
+  std::string input = "atomicNoRet_image_cas_1d_b32 [&namedRWImg], $s1, $s3, $s4\n";
+  AtomicImage_Test<> TestCase1(input);
+  TestCase1.Run_Test(&ImageNoRet, MISSING_SEMICOLON);
+  input.assign("atomicNoRet_image_max_ar_2da [&name], ($s2,$s3,$s4,$s5), $s6;\n");
+  AtomicImage_Test<> TestCase2(input);
+  TestCase2.Run_Test(&ImageNoRet, MISSING_DATA_TYPE);
+
+  input.assign("atomicNoRet_image_add_ar_2d_u32 [&name<$s5 + 10>], ($s0,$s3);\n");
+  AtomicImage_Test<> TestCase3(input);
+  TestCase3.Run_Test(&ImageNoRet, MISSING_COMMA);
+}
+
 } // namespace hsa
 } // namespace brig
 
