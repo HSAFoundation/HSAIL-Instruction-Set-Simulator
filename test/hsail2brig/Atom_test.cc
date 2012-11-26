@@ -417,14 +417,14 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 7 ************************************/
-  in.assign("atomic_max_group_f32 $s1, [0x77], $s14;\n");
+  in.assign("atomic_max_group_b32 $s1, [0x77], $s14;\n");
   destName.assign("$s1");  op1Name.assign("$s14");
   symbols->append(destName);  symbols->append(op1Name);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
   out.opcode = BrigAtomic;
-  out.type = Brigf32;
+  out.type = Brigb32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
   out.o_operands[1] = sizeof(dest);
@@ -552,7 +552,6 @@ TEST(CodegenTest, Atom_CodeGen) {
   addr.reserved = 0;
   addr.directive = 0;
 
-  // TODO(Chuang): the type of immed should be b64.
   imm1.size = sizeof(imm1);
 
   imm1.kind = BrigEOperandImmed;
@@ -762,7 +761,6 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   addr.reserved = 0;
   addr.directive = 0;
 
-  // TODO(Chuang): the type of immed should be b64.
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
   imm1.type = Brigb64;
@@ -783,12 +781,12 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 2 ************************************/
-  in.assign("atomicNoRet_max_global_ar_f64 [&x], 23.0;\n");
+  in.assign("atomicNoRet_max_global_ar_b64 [&x], 23.0;\n");
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
   out.opcode = BrigAtomicNoRet;
-  out.type = Brigf64;
+  out.type = Brigb64;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
   out.o_operands[1] = sizeof(addr);
@@ -805,7 +803,6 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   addr.reserved = 0;
   addr.directive = 0;
 
-  // TODO(Chuang): the type of immed should be b64.
   imm1.size = sizeof(imm1);
   imm1.kind = BrigEOperandImmed;
   imm1.type = Brigb64;
@@ -1040,13 +1037,13 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 8 ************************************/
-  in.assign("atomicNoRet_max_group_f32 [0x77], $s14;\n");
+  in.assign("atomicNoRet_max_group_b32 [0x77], $s14;\n");
   op1Name.assign("$s14");   symbols->append(op1Name);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
   out.opcode = BrigAtomicNoRet;
-  out.type = Brigf32;
+  out.type = Brigb32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
   out.o_operands[1] = sizeof(indi);
@@ -1075,7 +1072,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 9 ************************************/
-  in.assign("atomicNoRet_exch_s64 [%loc][0x7777], $d3;\n");
+  in.assign("atomicNoRet_inc_s64 [%loc][0x7777], $d3;\n");
   op1Name.assign("$d3");  symbols->append(op1Name);
 
   out.size = sizeof(out);
@@ -1088,7 +1085,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   out.o_operands[2] = 0;
   out.o_operands[3] = 0;
   out.o_operands[4] = 0;
-  out.atomicOperation = BrigAtomicExch;
+  out.atomicOperation = BrigAtomicInc;
   out.storageClass = BrigFlatSpace;
   out.memorySemantic = BrigRegular;
 
@@ -1154,7 +1151,6 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   addr.reserved = 0;
   addr.directive = 0;
 
-  // TODO(Chuang): the type of immed should be b64.
   imm1.size = sizeof(imm1);
 
   imm1.kind = BrigEOperandImmed;
