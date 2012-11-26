@@ -783,6 +783,29 @@ TEST(CodegenTest, Barrier_Codegen){
   Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase5(in, sbuf, &out5, &width5);
   TestCase5.Run_Test(&Bar);
   
+  in.assign( "barrier_width(64)_partial;\n");
+  BrigOperandImmed width6 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {64}
+  };
+  width6.size = sizeof(width6);
+  BrigInstBar out6 = {
+    0,
+    BrigEInstBar,
+    BrigBarrier,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0},
+    BrigPartialLevel
+  };
+  out6.size = sizeof(out6);
+
+  Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase6(in, sbuf, &out6, &width6);
+  TestCase6.Run_Test(&Bar);
+  
 /******************************  End of tests *****************************************/
   delete sbuf;
 }
