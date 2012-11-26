@@ -538,16 +538,17 @@ int CallTargets(Context* context) {
     if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
       funcName = context->token_value.string_val;
 
-      BrigOperandArgumentRef opArgRef = {
-        sizeof(BrigOperandArgumentRef),
-        BrigEOperandArgumentRef,
+      BrigOperandFunctionRef opFunRef = {
+        0, 
+        BrigEOperandFunctionRef,
         0
       };
       // TODO(Chuang): judge whether the identifier has been defined.
       // and which Map will the offset of directive about signature func be saved into?
-      opArgRef.arg = context->func_map[funcName];
+      opFunRef.size = sizeof(opFunRef);
+      opFunRef.fn = context->func_map[funcName];
       context->arg_map[funcName] = context->get_operand_offset();
-      context->append_operand(&opArgRef);
+      context->append_operand(&opFunRef);
 
       BrigOperandArgumentList funcList = {
         sizeof(BrigOperandArgumentList),
@@ -2709,6 +2710,7 @@ int FunctionSignature(Context *context) {
   bds->inCount = inCount;
   for (uint32_t i = 0, size = types.size(); i < size; i++)
     memmove(&bds->types[i],&types[i],sizeof(BrigDirectiveSignature::BrigProtoType));
+  context->func_map[name] = context->get_directive_offset(); 
   context->append_directive(bds);
 
   delete[] reinterpret_cast<char *>(bds);
@@ -7144,9 +7146,6 @@ int AtomicNoRet(Context* context) {
         break;
       case _XOR_:
         atomicOperation = BrigAtomicXor;
-        break;
-      case _EXCH_:
-        atomicOperation = BrigAtomicExch;
         break;
       case _ADD_:
         atomicOperation = BrigAtomicAdd;

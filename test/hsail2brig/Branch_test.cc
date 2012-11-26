@@ -5,7 +5,10 @@
 namespace hsa {
 namespace brig {
  
-template <typename Tinst, typename T1, typename T2 = BrigOperandReg, typename T3 = BrigOperandReg>
+template <typename Tinst = BrigInstBase, 
+          typename T1 = BrigOperandReg, 
+          typename T2 = BrigOperandReg, 
+          typename T3 = BrigOperandReg>
 class Branch_Test : public BrigCodeGenTest{
 private:
   
@@ -19,6 +22,8 @@ private:
   const T3* RefSrc3;
 
 public:
+  Branch_Test(std::string& in):
+    BrigCodeGenTest(in) {}
   
   Branch_Test(std::string& in, StringBuffer* sbuf, Tinst* ref, 
               BrigOperandImmed* width, T1* src1, T2* src2 = NULL, T3* src3 = NULL) : 
@@ -53,7 +58,9 @@ public:
     delete oper;
     delete dir;
   }  
-    
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 TEST(CodegenTest, Brn_Codegen){
@@ -467,6 +474,15 @@ TEST(CodegenTest, Cbr_Codegen){
   /***************************  End of tests ***********************/
   delete sbuf;
 }
+TEST(ErrorReportTest, Branch) {  
+  std::string input = "brn_width(all)_fbar @label\n";
+  Branch_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Branch, MISSING_SEMICOLON);
+
+  input.assign("cbr $c1;\n");
+  Branch_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Branch, MISSING_COMMA);
+}  
  
 }  // namespace hsa 
 }  // namespace brig 

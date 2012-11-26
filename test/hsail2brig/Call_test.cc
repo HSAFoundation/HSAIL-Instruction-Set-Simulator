@@ -5,7 +5,9 @@
 namespace hsa {
 namespace brig {
 
-template <typename TInst, typename TSrc2, typename TFuncList = BrigOperandFunctionRef>
+template <typename TInst = BrigInstBase,
+          typename TSrc2 = BrigOperandReg, 
+          typename TFuncList = BrigOperandFunctionRef>
 class Call_Test: public BrigCodeGenTest {
 
 private:
@@ -29,6 +31,9 @@ private:
 
 
 public:
+  Call_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Call_Test(std::string& in, StringBuffer* sbuf, TInst* ref, BrigOperandImmed *width,
             BrigOperandArgumentList* Src1, TSrc2* Src2, BrigOperandArgumentList* Src3,
             BrigOperandArgumentList* Src4,  BrigOperandArgumentRef* outList = NULL,
@@ -88,6 +93,9 @@ public:
     delete code;
     delete oper;
     delete dir;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -248,14 +256,14 @@ TEST(CodegenTest, Call_CodeGen) {
   funList.elementCount = 1;
   funList.o_args[0] = outMod.o_operands[3] + sizeof(inputArgs);
 
-  BrigOperandArgumentRef* funcList2 = new BrigOperandArgumentRef[pFunList->elementCount * sizeof(func)];
+  BrigOperandFunctionRef* funcList2 = new BrigOperandFunctionRef[pFunList->elementCount * sizeof(func)];
   for (uint32_t i = 0 ; i < pFunList->elementCount ; ++i) {
     funcList2[i].size = sizeof(funcList2[i]);
-    funcList2[i].kind = BrigEOperandArgumentRef;
-    funcList2[i].arg = 0;
+    funcList2[i].kind = BrigEOperandFunctionRef;
+    funcList2[i].fn = 0;
   }
 
-  Call_Test<BrigInstMod, BrigOperandReg, BrigOperandArgumentRef>
+  Call_Test<BrigInstMod, BrigOperandReg, BrigOperandFunctionRef>
   TestCase2(in, symbols, &outMod, &width, &outputArgs, &reg, &inputArgs, &funList, outputArgsList2, inputArgsList2, funcList2);
   TestCase2.Run_Test(&Call);
 
@@ -409,6 +417,19 @@ TEST(CodegenTest, Call_CodeGen) {
   symbols->clear();
 
   delete symbols;
+}
+TEST(ErrorReportTest, Call) {  
+  std::string input = "call &bar(%in)\n";
+  Call_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Call, MISSING_SEMICOLON);
+
+  input.assign("call_width(64) (%in) [&foo, &bar];\n");
+  Call_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Call, MISSING_OPERAND);
+
+  input.assign("call &foo(%out)(%in1,%in2;\n");
+  Call_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Call, INVALID_CALL_ARGS);
 }
 } // namespace hsa
 } // namespace brig

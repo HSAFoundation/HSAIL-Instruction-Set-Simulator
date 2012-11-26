@@ -12,6 +12,9 @@ private:
   // Operands in .operands buffer
 
 public:
+  Extension_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Extension_Test(std::string& in, StringBuffer* sbuf, BrigDirectiveExtension* ref):
     BrigCodeGenTest(in, sbuf),
     RefExt(ref) { }
@@ -28,6 +31,9 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete dir;
   } 
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 
@@ -53,6 +59,16 @@ TEST(CodegenTest, Extension_CodeGen) {
   TestCase1.Run_Test(&Extension);
   
   delete buf;
+}
+TEST(ErrorReportTest, Extension) {  
+  std::string input = "extension \"\\device\\amd.hsa\"\n";
+  Extension_Test TestCase1(input);
+  TestCase1.Run_Test(&Extension, MISSING_SEMICOLON);
+  
+  input.assign("extension ;\n");
+  Extension_Test TestCase2(input);
+  TestCase2.Run_Test(&Extension, MISSING_STRING);
+  
 }
 } // namespace hsa
 } // namespace brig

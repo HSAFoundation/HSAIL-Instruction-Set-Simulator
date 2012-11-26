@@ -1,13 +1,4 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
@@ -16,7 +7,8 @@ namespace brig{
 
 //T = BrigDirectivefunction/BrigDirectiveSymbol/BrigDirectiveSignature
 
-template <typename T> class GlobalDecl_Test: public BrigCodeGenTest{
+template <typename T=BrigDirectiveSymbol>
+class GlobalDecl_Test: public BrigCodeGenTest{
 private:
   T* RefDir;
 
@@ -24,6 +16,9 @@ private:
   BrigDirectiveInit* RefInit;
 
 public:
+  GlobalDecl_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, BrigDirectiveInit* d_init=NULL) :
     BrigCodeGenTest(in, sbuf),
     RefDir(out),
@@ -51,6 +46,9 @@ public:
 
     Parse_Validate(Rule, &RefOutput);
     delete dir;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -1226,6 +1224,20 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
 
   /********************************/
   delete sbuf;
+}
+
+TEST(ErrorReportTest, GlobalDecl) {  
+  std::string input = "group_u32 &x3\n";
+  GlobalDecl_Test<> TestCase1(input);
+  TestCase1.Run_Test(&GlobalDecl, MISSING_SEMICOLON);
+
+  input.assign("private &y5[8];\n");
+  GlobalDecl_Test<> TestCase2(input);
+  TestCase2.Run_Test(&GlobalDecl, MISSING_DATA_TYPE);
+
+  input.assign("global_b16 &x2[17] = {0xF7, 3 0xF1, -3, 31};\n");
+  GlobalDecl_Test<> TestCase3(input);
+  TestCase3.Run_Test(&GlobalDecl, MISSING_CLOSING_BRACKET);
 }
 
 }

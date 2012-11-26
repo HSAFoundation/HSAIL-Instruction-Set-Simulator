@@ -5,7 +5,8 @@
 namespace hsa {
 namespace brig {
 
-template <typename T1, typename T2>
+template <typename T1 = BrigOperandReg, 
+          typename T2 = BrigOperandReg>
 class Cmp_Test: public BrigCodeGenTest {
 
 private:
@@ -16,6 +17,9 @@ private:
   const T2* RefSrc2;
 
 public:
+  Cmp_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+  
   Cmp_Test(std::string& in, StringBuffer* sbuf, BrigInstCmp* ref,
                BrigOperandReg* Dest, T1* Src1, T2* Src2):
     BrigCodeGenTest(in, sbuf),
@@ -48,7 +52,9 @@ public:
     delete oper;
     delete dir;
   }  
-
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
 };
 
 
@@ -410,6 +416,20 @@ TEST(CodegenTest, Cmp_CodeGen) {
 
   delete symbols;
 }
+TEST(ErrorReportTest, Cmp) {  
+  std::string input = "packedcmp_eq_u8x4 $s1, $s2, $s3\n";
+  Cmp_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Cmp, MISSING_SEMICOLON);
+
+  input.assign("cmp_sltu_f64 $c1, $d1, $d2;\n");
+  Cmp_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Cmp, MISSING_DATA_TYPE);
+
+  input.assign("cmp_ne_f32_b1 $s1, $c2;\n");
+  Cmp_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Cmp, MISSING_COMMA);
+}
+  
 } // namespace hsa
 } // namespace brig
 

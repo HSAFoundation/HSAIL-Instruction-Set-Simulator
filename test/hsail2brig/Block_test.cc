@@ -10,6 +10,9 @@ class Block_Test: public BrigCodeGenTest {
 private:
   Buffer* RefDir;
 public:
+  Block_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Block_Test(std::string& in, StringBuffer* sbuf, Buffer* dir):
     BrigCodeGenTest(in, sbuf),
     RefDir(dir) {}
@@ -27,6 +30,9 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -253,6 +259,19 @@ TEST(CodegenTest, Block_CodeGen) {
   dir->clear();
   delete symbols;
   delete dir;
+}
+TEST(ErrorReportTest, Block) {  
+  std::string input;  
+  input.assign("block \"numeric\"\n");
+  input.append("blocknumeric_b32 11, 23, 10, 22\n");
+  input.append("endblock;\n");
+  Block_Test TestCase1(input);
+  TestCase1.Run_Test(&Block, MISSING_SEMICOLON);
+
+  input.assign("block \"numeric\"\n");
+  input.append("blocknumeric_b32 11, 23, 10, 22;\n");
+  Block_Test TestCase2(input);
+  TestCase2.Run_Test(&Block, MISSING_BLOCK_TYPE);
 }
 } // namespace hsa
 } // namespace brig
