@@ -1542,6 +1542,26 @@ TEST(BrigWriterTest, GlobalInitialization) {
   if(!BP) return;
 }
 
+TEST(BrigWriterTest, GlobalInitialization_b64) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "\n"
+  "global_b64 &n = 0;\n"
+  "kernel &__OpenCL_Global_Initializer_kernel(\n"
+  "        kernarg_b64 %r)\n"
+  "{\n"
+  "@__OpenCL_Global_Initializer_kernel_entry:\n"
+  "        ld_kernarg_u64 $d2, [%r];\n"
+  "        ld_kernarg_u64 $d1, [&n];\n"
+  "        st_global_u64  $d1, [$d2];\n"
+  "        ret;\n"
+  "};\n"
+    );
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+}
+
 static const char GlobalInitializerInst[] = 
   "version 1:0:$small;\n"
   "\n"
