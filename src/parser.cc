@@ -3116,12 +3116,6 @@ int Instruction4Mad(Context* context) {
     return 1;
   }
   context->token_to_scan = yylex();
-  // Sources. Can be a register or immediate value.
-  if (context->token_type != REGISTER &&
-      context->token_type != CONSTANT) {
-    context->set_error(INVALID_OPERAND);
-    return 1;
-  }
 
   if (Operand(context, &OpOffset[1])) {
     context->set_error(INVALID_SECOND_OPERAND);
