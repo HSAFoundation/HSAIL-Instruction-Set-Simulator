@@ -1859,7 +1859,70 @@ TEST(CodegenTest, MemorySegmentOps){
   Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase3(in, sbuf, &ref3, &dest, &src);
   TestCase3.Run_Test(&Segp);
   sbuf->clear();
+  /**************************************** Case 4 ******************************************/
+  in.assign("ftos_global_u32 $s1,$s2;\n");
+  op1.assign("$s1"); op2.assign("$s2");
+  sbuf->append(op1); sbuf->append(op2);
 
+  BrigInstMem ref4 = {
+    0,                    // size
+    BrigEInstMem,         // kind
+    BrigFtoS,         // opcode
+    Brigu32,               // type
+    BrigNoPacking,        // packing
+    {0, 0, 0, 0, 0},      // o_operands[5]
+    BrigGlobalSpace        // storageClass
+  };
+  ref4.size = sizeof(ref4);
+  ref4.o_operands[1] = sizeof(dest);
+
+  dest.size = sizeof(dest);
+  dest.kind = BrigEOperandReg;
+  dest.type = Brigb32;
+  dest.reserved = 0;
+  dest.s_name = 0;
+
+  src.size = sizeof(src);
+  src.kind = BrigEOperandReg;
+  src.type = Brigb32;
+  src.reserved = 0;
+  src.s_name = op1.size() + 1;
+
+  Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase4(in, sbuf, &ref4, &dest, &src);
+  TestCase4.Run_Test(&Segp);
+  sbuf->clear();
+  /**************************************** Case 5 ******************************************/
+  in.assign("stof_global_u32 $s1,$s2;\n");
+  op1.assign("$s1"); op2.assign("$s2");
+  sbuf->append(op1); sbuf->append(op2);
+
+  BrigInstMem ref5 = {
+    0,                    // size
+    BrigEInstMem,         // kind
+    BrigStoF,         // opcode
+    Brigu32,               // type
+    BrigNoPacking,        // packing
+    {0, 0, 0, 0, 0},      // o_operands[5]
+    BrigGlobalSpace        // storageClass
+  };
+  ref5.size = sizeof(ref5);
+  ref5.o_operands[1] = sizeof(dest);
+
+  dest.size = sizeof(dest);
+  dest.kind = BrigEOperandReg;
+  dest.type = Brigb32;
+  dest.reserved = 0;
+  dest.s_name = 0;
+
+  src.size = sizeof(src);
+  src.kind = BrigEOperandReg;
+  src.type = Brigb32;
+  src.reserved = 0;
+  src.s_name = op1.size() + 1;
+
+  Instruction2_Test<BrigInstMem, BrigOperandReg, BrigOperandReg> TestCase5(in, sbuf, &ref5, &dest, &src);
+  TestCase5.Run_Test(&Segp);
+  sbuf->clear();
   delete sbuf;
 
 }
