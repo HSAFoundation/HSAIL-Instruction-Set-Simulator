@@ -3349,9 +3349,15 @@ int Instruction4Cmov(Context* context) {
     return 1;
   }
 
+  if (packing == BrigNoPacking) {
+    context->set_type(Brigb1);
+  }
   if (Operand(context ,&OpOffset[1])) {
     context->set_error(INVALID_SECOND_OPERAND);
     return 1;
+  }
+  if (packing == BrigNoPacking) {
+    context->set_type(type);
   }
   if (context->token_to_scan != ',') {
     context->set_error(MISSING_COMMA);
