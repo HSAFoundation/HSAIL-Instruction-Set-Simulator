@@ -5953,19 +5953,20 @@ int SegpPart2StoFAndFtoS(Context* context) {
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
   // dest must be d register
-  bool valid_addr = false;
-  BrigMachine16_t mach = context->get_machine();
-  switch (mach){
-    case BrigESmall: 
-      valid_addr = ((type==Brigu32) && (context->token_to_scan == TOKEN_SREGISTER)) ? true : valid_addr; break;
-    case BrigELarge:
-      valid_addr = ((type==Brigu64) && (context->token_to_scan == TOKEN_DREGISTER)) ? true : valid_addr; break;
-  }
-  if (!valid_addr) {
-    context->set_error(INVALID_SEGMENT_OPERATION);
-    return 1;
-  }
+  // bool valid_addr = false;
+  // BrigMachine16_t mach = context->get_machine();
+  // switch (mach){
+  //   case BrigESmall: 
+  //     valid_addr = ((type==Brigu32) && (context->token_to_scan == TOKEN_SREGISTER)) ? true : valid_addr; break;
+  //   case BrigELarge:
+  //     valid_addr = ((type==Brigu64) && (context->token_to_scan == TOKEN_DREGISTER)) ? true : valid_addr; break;
+  // }
+  // if (!valid_addr) {
+  //   context->set_error(INVALID_SEGMENT_OPERATION);
+  //   return 1;
+  // }
   if (Operand(context, &OpOffset[0])) {
+    context->set_error(MISSING_OPERAND);
     return 1;
   }
   if (context->token_to_scan != ',') {
