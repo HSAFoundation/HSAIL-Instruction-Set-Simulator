@@ -114,6 +114,53 @@ int Query(Context* context) {
   return 0;
 }
 
+int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
+            BrigDataType16_t expectedType) {
+  BrigoOffset32_t current_offset;
+  std::string opName;
+  BrigDataType16_t type;
+  current_offset = context->get_operand_offset();
+  if (context->token_type == REGISTER) {
+    switch (context->token_to_scan) {
+      case TOKEN_CREGISTER:
+        type = Brigb1;
+        break;
+      case TOKEN_DREGISTER:
+        type = Brigb64;
+        break;
+      case TOKEN_SREGISTER:
+        type = Brigb32;
+        break;
+      case TOKEN_QREGISTER:
+        type = Brigb128;
+        break;
+    }
+    if (expectedType != type) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+  }
+
+  if ((context->token_type == REGISTER) || (context->token_to_scan == TOKEN_WAVESIZE)) {
+    opName = context->token_value.string_val;
+  } else if (context->token_type == CONSTANT || context->token_to_scan == '-') {
+    current_offset += current_offset & 0x7;
+  }
+
+  if (!Identifier(context)) {
+    *pRetOpOffset = (current_offset == context->get_operand_offset()) ? context->operand_map[opName] : current_offset;
+    context->token_to_scan = yylex();
+    return 0;
+  } else if(!BaseOperand(context)) {
+    *pRetOpOffset = (current_offset == context->get_operand_offset()) ? context->operand_map[opName] : current_offset;
+    context->token_to_scan = yylex();
+    return 0;
+  } else {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }  
+}
+
 int Operand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   BrigoOffset32_t current_offset;
   std::string opName;
@@ -180,52 +227,9 @@ int Identifier(Context* context) {
 }
 
 int BaseOperand(Context* context) {
-  
-  BrigDataType16_t context_type = context->get_type();
+
   BrigDataType16_t type;
-  switch(context_type){
-    case Brigb1: type = Brigb1; break; 
-    case Brigs8:
-    case Brigu8:
-    case Brigb8: type = Brigb8; break;
-    case Brigs16:
-    case Brigu16:
-    case Brigf16:
-    case Brigb16: type = Brigb16; break;
-    case Brigs32:
-    case Brigu32:
-    case Brigf32:
-    case Brigb32: 
-    case Brigu8x4:
-    case Brigs8x4:
-    case Brigu16x2:
-    case Brigs16x2:
-    case Brigf16x2: type = Brigb32; break;
-    case Brigs64:
-    case Brigu64:
-    case Brigf64:
-    case Brigb64: 
-    case Brigu8x8:
-    case Brigs8x8:
-    case Brigu16x4:
-    case Brigs16x4:
-    case Brigf16x4:
-    case Brigu32x2:
-    case Brigs32x2:
-    case Brigf32x2: type = Brigb64; break;
-    case Brigb128:
-    case Brigs8x16:
-    case Brigu8x16:
-    case Brigs16x8:
-    case Brigu16x8:
-    case Brigf16x8:
-    case Brigs32x4:
-    case Brigu32x4:
-    case Brigf32x4:
-    case Brigs64x2:
-    case Brigu64x2:
-    case Brigf64x2: type = Brigb128; break;    
-  }
+  type = ConvertType(context->get_type());
   int sign = 1;
   if ((context->token_to_scan == '-') || (context->token_to_scan == '+')) {
     sign = (context->token_to_scan == '-') ? -1 : 1;
@@ -8219,6 +8223,53 @@ int ArrayOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
 int ArrayOperand(Context* context) {
   BrigoOffset32_t opOffset = 0;
   return ArrayOperand(context, &opOffset);
+}
+
+BrigDataType16_t ConvertType(BrigDataType16_t type) {
+  switch(type) {
+    case Brigb1: return Brigb1;  
+    case Brigs8:
+    case Brigu8:
+    case Brigb8: return Brigb8; 
+    case Brigs16:
+    case Brigu16:
+    case Brigf16:
+    case Brigb16: return Brigb16; 
+    case Brigs32:
+    case Brigu32:
+    case Brigf32:
+    case Brigb32: 
+    case Brigu8x4:
+    case Brigs8x4:
+    case Brigu16x2:
+    case Brigs16x2:
+    case Brigf16x2: return Brigb32; 
+    case Brigs64:
+    case Brigu64:
+    case Brigf64:
+    case Brigb64: 
+    case Brigu8x8:
+    case Brigs8x8:
+    case Brigu16x4:
+    case Brigs16x4:
+    case Brigf16x4:
+    case Brigu32x2:
+    case Brigs32x2:
+    case Brigf32x2: return Brigb64; 
+    case Brigb128:
+    case Brigs8x16:
+    case Brigu8x16:
+    case Brigs16x8:
+    case Brigu16x8:
+    case Brigf16x8:
+    case Brigs32x4:
+    case Brigu32x4:
+    case Brigf32x4:
+    case Brigs64x2:
+    case Brigu64x2:
+    case Brigf64x2: return Brigb128;     
+  }
+  return Brigb32;
 }
 
 }  // namespace brig

@@ -15,6 +15,8 @@ int QueryOp(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpco
 
 int Operand(Context* context);
 int Operand(Context* context, BrigoOffset32_t* pRetOpOffset);
+int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
+            BrigDataType16_t expectedType);
 
 int Identifier(Context* context);
 int BaseOperand(Context* context);
@@ -192,6 +194,7 @@ int Instruction2OpcodeFtz(Context* context);
 int BranchCbr(Context* context);
 int BranchBrn(Context* context);
 
+BrigDataType16_t ConvertType(BrigDataType16_t type);
 
 }  // namespace brig
 }  // namespace hsa
