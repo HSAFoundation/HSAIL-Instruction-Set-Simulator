@@ -984,8 +984,55 @@ TEST(CodegenTest, Ld_Codegen){
   Ld_Test<BrigInstLdSt, BrigOperandRegV4> TestCase12(in, sbuf, &out12, &width12, &dest12, &comp12, &addr12, NULL, regList);
   TestCase12.Run_Test(&Ld);
   sbuf->clear();
+  /**********************************************************************************/
+  in.assign("ld_equiv(1)_s8 $s1, [%g];\n");
+  op1.assign("$s1"); sbuf->append(op1);
 
-/******************************  End of tests *****************************************/
+  BrigOperandReg dest13 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    0
+  };
+  dest13.size = sizeof(dest13);
+
+  BrigOperandImmed width13 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}
+  };
+  width13.size = sizeof(width13);
+
+  BrigOperandAddress addr13 = {
+    0,
+    BrigEOperandAddress,
+    Brigb64,
+    0,
+    0
+  };
+  addr13.size = sizeof(addr13);
+
+  BrigInstLdSt out13 = {
+    0,
+    BrigEInstLdSt,
+    BrigLd,
+    Brigs8,
+    BrigNoPacking,
+    {0, sizeof(width13), sizeof(width13) + sizeof(dest13), 0, 0},
+    BrigFlatSpace,
+    BrigRegular,
+    1
+  };
+  out13.size = sizeof(out13);
+
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase13(in, sbuf, &out13, &width13, &dest13, &addr13);
+  TestCase13.Run_Test(&Ld);
+  sbuf->clear();
+
+  /******************************  End of tests *****************************************/
   delete sbuf;
 }
 
