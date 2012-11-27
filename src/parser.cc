@@ -4913,7 +4913,7 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
         context->set_error(MISSING_INTEGER_CONSTANT);
         return 1;
       }
-      pLdSt_op->equivClass = context->token_to_scan;
+      pLdSt_op->equivClass = context->token_value.int_val;
       context->token_to_scan = yylex();
       if (context->token_to_scan != ')') {
         context->set_error(MISSING_CLOSING_PARENTHESIS);
