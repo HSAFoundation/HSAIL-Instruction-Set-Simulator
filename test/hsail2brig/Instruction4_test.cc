@@ -1494,7 +1494,7 @@ TEST(CodegenTest,Instruction4Op_CodeGen){
   memset(&imm2, 0, sizeof(imm2));
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
-  imm2.type = Brigb32;
+  imm2.type = Brigb1;
   imm2.reserved = 0;
   imm2.bits.u = 1;
 
