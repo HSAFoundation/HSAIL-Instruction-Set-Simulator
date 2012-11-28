@@ -1544,7 +1544,7 @@ TEST(BrigWriterTest, GlobalInitialization) {
 
 TEST(BrigWriterTest, GlobalInitialization_b64) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$small;\n"
+  "version 1:0:$large;\n"
   "\n"
   "global_b64 &n = 0;\n"
   "kernel &__OpenCL_Global_Initializer_kernel(\n"
@@ -1563,7 +1563,7 @@ TEST(BrigWriterTest, GlobalInitialization_b64) {
 }
 
 static const char GlobalInitializerInst[] = 
-  "version 1:0:$small;\n"
+  "version 1:0:$%s;\n"
   "\n"
   "global_%s &n = %s;\n"
   "kernel &__OpenCL_Global_Initializer_kernel(\n"
@@ -1580,7 +1580,8 @@ template<class T>
 static void testGlobalInitializer(const char *type,
 				   const T &result,
 				   const char *value,
-				   unsigned bits) {
+				   unsigned bits,
+				   const char *model) {
   char reg = 0;
   if(bits == 8 || bits == 16 || bits == 32)
     reg = 's';
@@ -1590,6 +1591,7 @@ static void testGlobalInitializer(const char *type,
     snprintf(NULL,
 	     0,
 	     GlobalInitializerInst,
+	     model,
 	     type,
 	     value,
 	     type,
@@ -1604,16 +1606,17 @@ static void testGlobalInitializer(const char *type,
   snprintf(buffer,
 	   size,
 	   GlobalInitializerInst,
-	     type,
-	     value,
-	     type,
-	     bits,
-	     reg,
-	     bits,
-	     reg,
-	     bits,
-	     reg,
-	     reg);
+	   model,
+	   type,
+	   value,
+	   type,
+	   bits,
+	   reg,
+	   bits,
+	   reg,
+	   bits,
+	   reg,
+	   reg);
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete buffer;
   
@@ -1637,49 +1640,57 @@ TEST(BrigGlobalTest, GlobalInitializer) {
   {
     const uint8_t result = uint8_t(0x0);
     const char *value = "0x0";
-    unsigned bits = 8;
-    testGlobalInitializer("b8", result, value, bits);
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("b8", result, value, bits, model);
   }
   {
     const uint8_t result = uint8_t(0xff);
     const char *value = "0xff";
-    unsigned bits = 8;
-    testGlobalInitializer("b8", result, value, bits);
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("b8", result, value, bits, model);
   }
   {
     const uint16_t result = uint16_t(0x0);
     const char *value = "0x0";
-    unsigned bits = 16;
-    testGlobalInitializer("b16", result, value, bits);
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("b16", result, value, bits, model);
   }
   {
     const uint16_t result = uint16_t(0xffff);
     const char *value = "0xffff";
-    unsigned bits = 16;
-    testGlobalInitializer("b16", result, value, bits);
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("b16", result, value, bits, model);
   }
   {
     const uint32_t result = uint32_t(0x0);
     const char *value = "0x0";
+    const char *model = "small";
     unsigned bits = 32;
-    testGlobalInitializer("b32", result, value, bits);
+    testGlobalInitializer("b32", result, value, bits, model);
   }
   {
     const uint32_t result = uint32_t(0xffffffff);
     const char *value = "0xffffffff";
+    const char *model = "small";
     unsigned bits = 32;
-    testGlobalInitializer("b32", result, value, bits);
+    testGlobalInitializer("b32", result, value, bits, model);
   }
   {
     const uint64_t result = uint64_t(0x0);
     const char *value = "0x0";
+    const char *model = "large";
     unsigned bits = 64;
-    testGlobalInitializer("b64", result, value, bits);
+    testGlobalInitializer("b64", result, value, bits, model);
   }
   {
     const uint64_t result = uint64_t(0xffffffffffffffff);
     const char *value = "0xffffffffffffffff";
+    const char *model = "large";
     unsigned bits = 64;
-    testGlobalInitializer("b64", result, value, bits);
+    testGlobalInitializer("b64", result, value, bits, model);
   }
 }
