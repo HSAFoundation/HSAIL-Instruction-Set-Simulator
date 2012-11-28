@@ -1540,4 +1540,672 @@ TEST(BrigWriterTest, GlobalInitialization) {
 
   EXPECT_TRUE(BP);
   if(!BP) return;
+} 
+
+static const char InstTestCvt[] =
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__Cvt_rounding_mode_test_kernel(\n"
+  "        kernarg_u32 %%result, \n"
+  "        kernarg%s %%input)\n"
+  "{\n"
+  "        ld_kernarg_u32 $s3, [%%result] ;\n"
+  "        ld_kernarg%s $%c1, [%%input] ;\n"
+  "        %s%s%s %s;\n"
+  "@return:\n"
+  "        st_global%s $%c0, [$s3];\n"
+  "        ret;\n"
+  "};\n";
+
+static const char *cvtOperands[] = { "$s0, $s1",
+                                     "$s0, $d1",
+                                     "$d0, $s1",
+                                     "$d0, $d1"};
+
+static hsa::brig::BrigProgram makeTestCvt(const char *inst,
+                                          const char *destTypeLength,
+                                          const char *srcTypeLength,
+                                          unsigned destBits,
+                                          unsigned srcBits) {
+  char dc = destBits > 32 ? 'd' : 's';
+  char sc = srcBits > 32 ? 'd' : 's';
+  if(destBits < 32) destBits = 32;
+  if(srcBits < 32) srcBits = 32;
+  unsigned args = ((destBits >> 5) & 0x2) | (srcBits >> 6);
+  size_t size =
+    snprintf(NULL, 0, InstTestCvt,
+             srcTypeLength,             
+             srcTypeLength, sc,
+             inst, destTypeLength, srcTypeLength, cvtOperands[args],
+             destTypeLength, dc);
+  char *buffer = new char[size];
+  snprintf(buffer, size, InstTestCvt,
+           srcTypeLength,             
+           srcTypeLength, sc,
+           inst, destTypeLength, srcTypeLength, cvtOperands[args],
+           destTypeLength, dc);
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete[] buffer;
+  return BP;
+}
+
+template<class R, class T>
+static void testInstCvt(const char *inst, const char *destTypeLength,
+                     const char *srcTypeLength, const R result, const T input) {
+  hsa::brig::BrigProgram BP = makeTestCvt(inst, destTypeLength, srcTypeLength,
+                                          sizeof(R) * 8, sizeof(T) * 8);
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  T *src = new T(input); 
+  R *dest = new R;
+  void *args[] = {&dest, src};
+  llvm::Function *fun = BP->getFunction("__Cvt_rounding_mode_test_kernel");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+  EXPECT_EQ(result, *dest);
+
+  delete dest;
+  delete src;
+}
+
+TEST(BrigInstTest, CvtRoundingMode) {
+  union { uint64_t u64; double f64; int64_t s64;
+          uint32_t u32; float f32; int32_t s32;
+          uint16_t u16; int16_t s16;
+          uint8_t u8; int8_t s8; } result;
+  union { uint64_t u64; double f64; int64_t s64;
+          uint32_t u32; float f32; int32_t s32;
+          uint16_t u16; int16_t s16;
+          uint8_t u8; int8_t s8; } input;
+  {
+    result.u8 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0xFF;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_upi", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u16 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_u16", "_f32", result.u16, input.f32 );
+  }
+  {
+    result.u16 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0xFFFF;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_upi", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u32 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_u32", "_f32", result.u32, input.f32 );
+  }
+  {
+    result.u32 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_upi", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u64 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_u64", "_f32", result.u64 , input.f32 );
+  }
+  {
+    result.u64 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFF;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_upi", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u8 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0xFF;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_upi", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u16 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0xFFFF;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_upi", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u32 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_u32", "_f64", result.u32, input.f64 );
+  }
+  {
+    result.u32 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_upi", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u64 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_u64", "_f64", result.u64, input.f64 );
+  }
+  {
+    result.u64 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFF;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_upi", "_s64", "_f64", result.s64, input.f64 );
+  }
+  //down i
+  {
+    result.u8 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0xFE;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_downi", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u16 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_u16", "_f32", result.u16, input.f32 );
+  }
+  {
+    result.u16 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0xFFFe;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_downi", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u32 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_u32", "_f32", result.u32, input.f32 );
+  }
+  {
+    result.u32 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFFFFFE;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_downi", "_s32", "_f32", result.s32, input.f32 );
+  }
+    {
+    result.u64 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_u64", "_f32", result.u64 , input.f32 );
+  }
+  {
+    result.u64 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFE;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_downi", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u8 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_downi", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_downi", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0xFE;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_downi", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u16 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_downi", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_downi", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0xFFFE;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_downi", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u32 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_downi", "_u32", "_f64", result.u32, input.f64 );
+  }
+  {
+    result.u32 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_downi", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0xFFFFFFFE;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_downi", "_s32", "_f64", result.s32, input.f64 );
+  }
+  // near i
+  {
+    result.u8 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0xFE;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_neari", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u16 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_u16", "_f32", result.u16, input.f32 );
+  }
+  {
+    result.u16 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0xFFFE;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_neari", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u32 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_u32", "_f32", result.u32, input.f32 );
+  }
+  {
+    result.u32 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFFFFFE;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_neari", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u64 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_u64", "_f32", result.u64 , input.f32 );
+  }
+  {
+    result.u64 = 0x2;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFE;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_neari", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u8 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0xFE;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_neari", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u16 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0xFFFE;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_neari", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u32 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_u32", "_f64", result.u32, input.f64 );
+  }
+  {
+    result.u32 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0xFFFFFFFE;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_neari", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u64 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_u64", "_f64", result.u64, input.f64 );
+  }
+  {
+    result.u64 = 0x2;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFE;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_neari", "_s64", "_f64", result.s64, input.f64 );
+  }
+  //zeroi
+  {
+    result.u8 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0xFF;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_zeroi", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u16 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_u16", "_f32", result.u16, input.f32 );
+  }
+  {
+    result.u16 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0xFFFF;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_zeroi", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u32 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_u32", "_f32", result.u32, input.f32 );
+  }
+  {
+    result.u32 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_zeroi", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u64 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_u64", "_f32", result.u64 , input.f32 );
+  }
+  {
+    result.u64 = 0x1;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFF;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_zeroi", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u8 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0xFF;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_zeroi", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u16 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0xFFFF;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_zeroi", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u32 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_u32", "_f64", result.u32, input.f64 );
+  }
+  {
+    result.u32 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_zeroi", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u64 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_u64", "_f64", result.u64, input.f64 );
+  }
+  {
+    result.u64 = 0x1;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFF;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_zeroi", "_s64", "_f64", result.s64, input.f64 );
+  }  
+  //f32 to f32
+  {
+    result.u32 = 0x40000000;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_upi", "_f32", "_f32", result.f32, input.f32 );
+  }
+  {
+    result.u32 = 0xBF800000;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_upi", "_f32", "_f32", result.f32, input.f32 );
+  }
+  {
+    result.u32 = 0x3F800000;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_downi", "_f32", "_f32", result.f32, input.f32 );
+  }
+  {
+    result.u32 = 0xC0000000;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_downi", "_f32", "_f32", result.f32, input.f32 );
+  }
+  {
+    result.u32 = 0x3F800000;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_zeroi", "_f32", "_f32", result.f32, input.f32 );
+  }
+  {
+    result.u32 = 0xBF800000;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_zeroi", "_f32", "_f32", result.f32, input.f32 );
+  }
+  {
+    result.u32 = 0x40000000;
+    input.u32 = 0x3FCCCCCD;
+    testInstCvt("cvt_neari", "_f32", "_f32", result.f32, input.f32 );
+  }
+  {
+    result.u32 = 0xC0000000;
+    input.u32 = 0xBFCCCCCD;
+    testInstCvt("cvt_neari", "_f32", "_f32", result.f32, input.f32 );
+  }
+  // f64 to f64
+  {
+    result.u64 = 0x4000000000000000;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_upi", "_f64", "_f64", result.f64, input.f64 );
+  }
+  {
+    result.u64 = 0xBFF0000000000000;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_upi", "_f64", "_f64", result.f64, input.f64 );
+  }
+  {
+    result.u64 = 0x3FF0000000000000;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_downi", "_f64", "_f64", result.f64, input.f64 );
+  }
+  {
+    result.u64 = 0xC000000000000000;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_downi", "_f64", "_f64", result.f64, input.f64 );
+  }
+  {
+    result.u64 = 0x3FF0000000000000;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zeroi", "_f64", "_f64", result.f64, input.f64 );
+  }
+  {
+    result.u64 = 0xBFF0000000000000;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_zeroi", "_f64", "_f64", result.f64, input.f64 );
+  }
+  {
+    result.u64 = 0x4000000000000000;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_neari", "_f64", "_f64", result.f64, input.f64 );
+  }
+  {
+    result.u64 = 0xC000000000000000;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_neari", "_f64", "_f64", result.f64, input.f64 );
+  }  
+  //f64 to f32
+  {
+    result.u32 = 0x3FCCCCCD;
+    input.u64 = 0x3FF999999999999A;//1.6d
+    testInstCvt("cvt_up", "_f32", "_f64", result.f32, input.f64 );
+  }
+  {
+    result.u32 = 0xBFCCCCCC;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_up", "_f32", "_f64", result.f32, input.f64 );
+  }
+  {
+    result.u32 = 0x3FCCCCCC;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_down", "_f32", "_f64", result.f32, input.f64 );
+  }
+  {
+    result.u32 = 0xBFCCCCCD;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_down", "_f32", "_f64", result.f32, input.f64 );
+  }
+  {
+    result.u32 = 0x3FCCCCCD;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_near", "_f32", "_f64", result.f32, input.f64 );
+  }
+  {
+    result.u32 = 0xBFCCCCCD;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_near", "_f32", "_f64", result.f32, input.f64 );
+  }
+  {
+    result.u32 = 0x3FCCCCCC;
+    input.u64 = 0x3FF999999999999A;
+    testInstCvt("cvt_zero", "_f32", "_f64", result.f32, input.f64 );
+  }
+  {
+    result.u32 = 0xBFCCCCCC;
+    input.u64 = 0xBFF999999999999A;
+    testInstCvt("cvt_zero", "_f32", "_f64", result.f32, input.f64 );
+  }
 }
