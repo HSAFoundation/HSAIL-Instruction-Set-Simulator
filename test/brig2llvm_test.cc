@@ -4469,8 +4469,8 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       BrigRdImage,
       0,
       0,
-      0,
       {0, 0, 0, 0, 0},
+      0,
       0,
       0
     };
@@ -4509,11 +4509,11 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       sizeof(bir),
       BrigEInstRead,
       BrigRdImage + 1,
+      Brigf64x2 + 1,
+      BrigPackPsat + 1,
+      {20, 0, 0, 0, 0},
       Briggeom_2da + 1,
       Brigf64x2 + 1,
-      Brigf64x2 + 1,
-      {20, 0, 0, 0, 0},
-      BrigPackPsat + 1,
       1
     };
     code.append(&bir);
@@ -5139,11 +5139,11 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       sizeof(bii),              //size
       BrigEInstImage,           //kind
       BrigRdImage,              //opcode
-      0,                        //geom
       0,                        //type
-      0,                        //stype
       0,                        //packing
       {0, 0, 0, 0, 0},          //o_operands[5]
+      0,                        //geom
+      0,                        //stype
       0                         //reserved
     };
     code.append(&bii);
@@ -5182,11 +5182,11 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       BrigEInstImage,           //kind
       BrigRdImage + 1,          //opcode
       Brigf64x2 + 1,            //type
-      Brigf64x2 + 1,            //stype
       BrigPackPsat + 1,         //packing
-      1,                        //reserved
       {20, 0, 0, 0, 0},         //o_operands[5]
-      Briggeom_2da + 1          //geom
+      Briggeom_2da + 1,         //geom
+      Brigf64x2 + 1,            //stype
+      1                         //reserved
     };
     code.append(&bii);
 
@@ -5238,16 +5238,15 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
 
     BrigInstImage bii = {
-      sizeof(bii) - 1,              //size
+      sizeof(bii) - 1,          //size
       BrigEInstImage,           //kind
       BrigRdImage,              //opcode
       0,                        //type
-      0,                        //stype
       0,                        //packing
-      0,                        //reserved
       {0, 0, 0, 0, 0},          //o_operands[5]
-      0                         //geom
-
+      0,                        //geom
+      0,                        //stype
+      0                         //reserved
     };
     code.append(&bii);
 
