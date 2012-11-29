@@ -3828,6 +3828,11 @@ int Cmp(Context* context) {
       return 1;
     }
     stype = context->token_value.data_type;
+    if (stype == Brigb1 && (comparisonOperator != BrigEq &&
+                            comparisonOperator != BrigNe)) {
+      context->set_error(INVALID_DATA_TYPE);
+      return 1;
+    }
     context->token_to_scan = yylex();
   } else {  // CMP
     opcode = BrigPackedCmp;
