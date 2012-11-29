@@ -1567,7 +1567,7 @@ static const char GlobalInitializerInst[] =
   "\n"
   "global_%s &n = %s;\n"
   "kernel &__OpenCL_Global_Initializer_kernel(\n"
-  "        kernarg_%s %%r)\n"
+  "        kernarg_u%u %%r)\n"
   "{\n"
   "@__OpenCL_Global_Initializer_kernel_entry:\n"
   "        ld_kernarg_u%u $%c2, [%%r];\n"
@@ -1595,7 +1595,7 @@ static void testGlobalInitializer(const char *type,
              model,
 	     type,
 	     value,
-	     type,
+	     equalWithModel,
 	     equalWithModel,
 	     reg,
 	     bits,
@@ -1610,7 +1610,7 @@ static void testGlobalInitializer(const char *type,
            model,
 	   type,
 	   value,
-	   type,
+	   equalWithModel,
 	   equalWithModel,
 	   reg,
 	   bits,
