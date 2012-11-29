@@ -8212,7 +8212,7 @@ int ArrayOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
       return 1;
     }
   } else {
-    if (Operand(context, pRetOpOffset)) {
+    if (Operand(context, pRetOpOffset, ConvertType(context->get_type()))) {
       context->set_error(MISSING_OPERAND);
       return 1;
     }
