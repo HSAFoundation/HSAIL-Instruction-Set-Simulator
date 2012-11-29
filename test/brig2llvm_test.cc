@@ -6854,7 +6854,7 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid reg, should be point BrigDirectiveSymbol")));
+    "Argument should be a symbol, image, or sampler")));
   }
 }
 TEST(Brig2LLVMTest, validateBrigOperandReg) {
