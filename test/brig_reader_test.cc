@@ -1571,17 +1571,18 @@ static const char GlobalInitializerInst[] =
   "{\n"
   "@__OpenCL_Global_Initializer_kernel_entry:\n"
   "        ld_kernarg_u%u $%c2, [%%r];\n"
-  "        ld_global_u%u $%c1, [&n];\n"
+  "        ld_global_u%u  $%c1, [&n];\n"
   "        st_global_u%u  $%c1, [$%c2];\n"
   "        ret;\n"
   "};\n";
 
 template<class T>
 static void testGlobalInitializer(const char *type,
-				   const T &result,
-				   const char *value,
-				   unsigned bits,
-				   const char *model) {
+				  const T &result,
+				  const char *value,
+				  unsigned bits,
+                                  const char *model) {
+  unsigned equalWithModel = bits<= 32 ? 32 :64;
   char reg = 0;
   if(bits == 8 || bits == 16 || bits == 32)
     reg = 's';
@@ -1591,11 +1592,11 @@ static void testGlobalInitializer(const char *type,
     snprintf(NULL,
 	     0,
 	     GlobalInitializerInst,
-	     model,
+             model,
 	     type,
 	     value,
 	     type,
-	     bits,
+	     equalWithModel,
 	     reg,
 	     bits,
 	     reg,
@@ -1606,11 +1607,11 @@ static void testGlobalInitializer(const char *type,
   snprintf(buffer,
 	   size,
 	   GlobalInitializerInst,
-	   model,
+           model,
 	   type,
 	   value,
 	   type,
-	   bits,
+	   equalWithModel,
 	   reg,
 	   bits,
 	   reg,
@@ -1641,28 +1642,28 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     const uint8_t result = uint8_t(0x0);
     const char *value = "0x0";
     const char *model = "small";
-    unsigned bits = 32;
+    unsigned bits = 8;
     testGlobalInitializer("b8", result, value, bits, model);
   }
   {
     const uint8_t result = uint8_t(0xff);
     const char *value = "0xff";
     const char *model = "small";
-    unsigned bits = 32;
+    unsigned bits = 8; 
     testGlobalInitializer("b8", result, value, bits, model);
   }
   {
     const uint16_t result = uint16_t(0x0);
     const char *value = "0x0";
     const char *model = "small";
-    unsigned bits = 32;
+    unsigned bits = 16;
     testGlobalInitializer("b16", result, value, bits, model);
   }
   {
     const uint16_t result = uint16_t(0xffff);
     const char *value = "0xffff";
     const char *model = "small";
-    unsigned bits = 32;
+    unsigned bits = 16;
     testGlobalInitializer("b16", result, value, bits, model);
   }
   {
@@ -1687,10 +1688,262 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("b64", result, value, bits, model);
   }
   {
+    const uint64_t result = uint64_t(0xfffffffff);
+    const char *value = "0xfffffffff";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("b64", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0x7f);
+    const char *value = "0x7f";
+    const char *model = "small";
+    unsigned bits = 8;
+    testGlobalInitializer("s8", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0x7e);
+    const char *value = "0x7e";
+    const char *model = "small";
+    unsigned bits = 8;
+    testGlobalInitializer("s8", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0x40);
+    const char *value = "0x40";
+    const char *model = "small";
+    unsigned bits = 8;
+    testGlobalInitializer("s8", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0x41);
+    const char *value = "0x41";
+    const char *model = "small";
+    unsigned bits = 8;
+    testGlobalInitializer("s8", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0x0);
+    const char *value = "0x0";
+    const char *model = "small";
+    unsigned bits = 8;
+    testGlobalInitializer("s8", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0x7fff);
+    const char *value = "0x7fff";
+    const char *model = "small";
+    unsigned bits = 16;
+    testGlobalInitializer("s16", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0x7ffe);
+    const char *value = "0x7ffe";
+    const char *model = "small";
+    unsigned bits = 16;
+    testGlobalInitializer("s16", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0x4000);
+    const char *value = "0x4000";
+    const char *model = "small";
+    unsigned bits = 16;
+    testGlobalInitializer("s16", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0x4001);
+    const char *value = "0x4001";
+    const char *model = "small";
+    unsigned bits = 16;
+    testGlobalInitializer("s16", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0x0);
+    const char *value = "0x0";
+    const char *model = "small";
+    unsigned bits = 16;
+    testGlobalInitializer("s16", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0x7fffffff);
+    const char *value = "0x7fffffff";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("s32", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0x7ffffffe);
+    const char *value = "0x7ffffffe";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("s32", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0x40000000);
+    const char *value = "0x40000000";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("s32", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0x40000001);
+    const char *value = "0x40000001";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("s32", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0x0);
+    const char *value = "0x0";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("s32", result, value, bits, model);
+  }
+  {
+    const uint64_t result = uint64_t(0x7fffffffffffffff);
+    const char *value = "0x7fffffffffffffff";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("s64", result, value, bits, model);
+  }
+  {
+    const uint64_t result = uint64_t(0x7ffffffffffffffe);
+    const char *value = "0x7ffffffffffffffe";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("s64", result, value, bits, model);
+  }
+  {
+    const uint64_t result = uint64_t(0x4000000000000000);
+    const char *value = "0x4000000000000000";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("s64", result, value, bits, model);
+  }
+  {
+    const uint64_t result = uint64_t(0x4000000000000001);
+    const char *value = "0x4000000000000001";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("s64", result, value, bits, model);
+  }
+  {
+    const uint64_t result = uint64_t(0x0);
+    const char *value = "0x0";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("s64", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0xff);
+    const char *value = "0xff";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u8", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0xfe);
+    const char *value = "0xfe";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u8", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0x0);
+    const char *value = "0x0";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u8", result, value, bits, model);
+  }
+  {
+    const uint8_t result = uint8_t(0x01);
+    const char *value = "0x01";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u8", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0xffff);
+    const char *value = "0xffff";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u16", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0xfffe);
+    const char *value = "0xfffe";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u16", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0x0);
+    const char *value = "0x0";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u16", result, value, bits, model);
+  }
+  {
+    const uint16_t result = uint16_t(0x0001);
+    const char *value = "0x0001";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u16", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0xffffffff);
+    const char *value = "0xffffffff";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u32", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0xfffffffe);
+    const char *value = "0xfffffffe";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u32", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0x0);
+    const char *value = "0x0";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u32", result, value, bits, model);
+  }
+  {
+    const uint32_t result = uint32_t(0x00000001);
+    const char *value = "0x00000001";
+    const char *model = "small";
+    unsigned bits = 32;
+    testGlobalInitializer("u32", result, value, bits, model);
+  }
+  {
     const uint64_t result = uint64_t(0xffffffffffffffff);
     const char *value = "0xffffffffffffffff";
     const char *model = "large";
     unsigned bits = 64;
-    testGlobalInitializer("b64", result, value, bits, model);
+    testGlobalInitializer("u64", result, value, bits, model);
+  }
+  {
+    const uint64_t result = uint64_t(0xfffffffffffffffe);
+    const char *value = "0xfffffffffffffffe";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("u64", result, value, bits, model);
+  }
+  {
+    const uint64_t result = uint64_t(0x0);
+    const char *value = "0x0";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("u64", result, value, bits, model);
+  }
+  {
+    const uint64_t result = uint64_t(0x0000000000000001);
+    const char *value = "0x0000000000000001";
+    const char *model = "large";
+    unsigned bits = 64;
+    testGlobalInitializer("u64", result, value, bits, model);
   }
 }
