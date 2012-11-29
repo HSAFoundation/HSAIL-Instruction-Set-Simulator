@@ -857,7 +857,50 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   TestCase6.Run_Test(&GlobalDecl);
   free(bdi6);  bdi6 = NULL;
   sbuf->clear();
+  /************************************************ Case 7 ***************************************/
+  in.assign("global_b64 &x2[5] = {0x1, 0x0, 0x123456789ABCDEF0, 0xFEDCBA01234, 0xFFFFFFFFFFFFFFFF};\n");
+  name.assign("&x2"); sbuf->append(name);
 
+  BrigDirectiveSymbol ref7 = {
+  0,                           // size
+  BrigEDirectiveSymbol ,       // kind
+  {
+    0,                         // c_code
+    BrigGlobalSpace,           // storage class
+    BrigNone ,                 // attribute
+    0,                         // reserved
+    BrigArray,                 // symbolModifier
+    5,                         // dim
+    0,                         // s_name
+    Brigb64,                   // type
+    1                          // align
+  },
+  0,                           // d_init
+  0                            // reserved
+  };
+
+  ref7.size = sizeof(ref7);
+  ref7.d_init = sizeof(ref7);
+
+  BrigDirectiveInit* bdi7 = (BrigDirectiveInit*) (malloc(sizeof(BrigDirectiveInit) + sizeof(uint64_t) * 4));
+
+  bdi7->size = sizeof(BrigDirectiveInit) + sizeof(uint64_t) * 4;   // size
+  bdi7->kind = BrigEDirectiveInit;                                 // kind
+  bdi7->c_code = 0;                                                // c_code
+  bdi7->elementCount = 5;                                         // elementCount
+  bdi7->type = Brigb64;                                            // type
+  bdi7->reserved = 0;                                              // reserved
+
+  bdi7->initializationData.u64[0] = 0x1;                     // initializationData
+  bdi7->initializationData.u64[1] = 0x0;
+  bdi7->initializationData.u64[2] = 0x123456789ABCDEF0;
+  bdi7->initializationData.u64[3] = 0xFEDCBA01234; 
+  bdi7->initializationData.u64[4] = 0xFFFFFFFFFFFFFFFF;
+
+  GlobalDecl_Test<BrigDirectiveSymbol> TestCase7(in, sbuf, &ref7, bdi7);
+  TestCase7.Run_Test(&GlobalDecl);
+  free(bdi7);  bdi7 = NULL;
+  sbuf->clear();
   /************************************************ Case 7 ***************************************/
   /*
   in.assign("global_f64 &x[3] = {@a, @b, @c}; ");
