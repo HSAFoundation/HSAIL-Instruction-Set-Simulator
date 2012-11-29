@@ -7581,7 +7581,7 @@ int FloatListSingle(Context* context, std::vector <double>* float_list) {
 
 int DecimalListSingleBlock(Context* context) {
   
-  std::vector<int32_t> decimal_list;
+  std::vector<int64_t> decimal_list;
   if(DecimalListSingle(context, &decimal_list))
     return 1;
   uint32_t elementCount = decimal_list.size();  
@@ -7613,13 +7613,13 @@ int DecimalListSingleBlock(Context* context) {
       break;
     case Brigb32:
       for (uint32_t i = 0; i < decimal_list.size(); i++ ){
-        *(int32_t*)&blockNumeric->u32[i] = decimal_list[i];
+        *(int32_t*)&blockNumeric->u32[i] = (int32_t)decimal_list[i];
       }
       break;
     case Brigb64:
       // TODO(Chuang): Loss of precision
       for (uint32_t i = 0; i < decimal_list.size(); i++ ) {
-        *(int32_t*)&blockNumeric->u64[i] = decimal_list[i];
+        *(int64_t*)&blockNumeric->u64[i] = decimal_list[i];
       }
       break;
   }
@@ -7638,7 +7638,7 @@ int DecimalListSingleBlock(Context* context) {
 
 int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
 
-  std::vector<int32_t> decimal_list;
+  std::vector<int64_t> decimal_list;
   if(DecimalListSingle(context, &decimal_list))
     return 1;
   uint32_t n = 0;
@@ -7700,13 +7700,13 @@ int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
       break;
     case Brigb32:
       for (uint32_t i = 0; i < decimal_list.size(); i++ ){
-        *(int32_t*)&bdi->initializationData.u32[i] = decimal_list[i];
+        *(int32_t*)&bdi->initializationData.u32[i] = (int32_t)decimal_list[i];
       }
       break;
     case Brigb64:
       // TODO(Chuang): Loss of precision
       for (uint32_t i = 0; i < decimal_list.size(); i++ ) {
-        *(int32_t*)&bdi->initializationData.u64[i] = decimal_list[i];
+        *(int64_t*)&bdi->initializationData.u64[i] = decimal_list[i];
       }
       break;
   }
@@ -7723,7 +7723,7 @@ int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
 
 }
 
-int DecimalListSingle(Context* context, std::vector<int32_t>* decimal_list) {
+int DecimalListSingle(Context* context, std::vector<int64_t>* decimal_list) {
   uint32_t elementCount = 0;
   while (1) {
     if (context->token_to_scan == '-') {

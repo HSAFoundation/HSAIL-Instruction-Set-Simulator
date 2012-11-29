@@ -123,7 +123,7 @@ int Block(Context* context);
 
 int DecimalListSingleBLock(Context* context);
 int DecimalInitializer(Context* context, BrigdOffset32_t sym_offset);
-int DecimalListSingle(Context* context, std::vector<int32_t>* decimal_list);
+int DecimalListSingle(Context* context, std::vector<int64_t>* decimal_list);
 int FloatInitializer(Context* context, BrigdOffset32_t sym_offset);
 int FloatListSingle(Context* context, std::vector<double>* float_list);
 int SingleInitializer(Context *context, BrigdOffset32_t sym_offset);
