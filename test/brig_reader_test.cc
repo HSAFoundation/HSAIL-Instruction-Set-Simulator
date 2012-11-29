@@ -1607,7 +1607,6 @@ static void testInstCvt(const char *inst, const char *destTypeLength,
   delete dest;
   delete src;
 }
-
 TEST(BrigInstTest, CvtRoundingMode) {
   union { uint64_t u64; double f64; int64_t s64;
           uint32_t u32; float f32; int32_t s32;
@@ -1619,62 +1618,62 @@ TEST(BrigInstTest, CvtRoundingMode) {
           uint8_t u8; int8_t s8; } input;
   {
     result.u8 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_u8", "_f32", result.u8, input.f32 );
   }
   {
     result.u8 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_s8", "_f32", result.s8, input.f32 );
   }
   {
     result.u8 = 0xFF;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_upi", "_s8", "_f32", result.s8, input.f32 );
   }
   {
     result.u16 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_u16", "_f32", result.u16, input.f32 );
   }
   {
     result.u16 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u16 = 0xFFFF;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_upi", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u32 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_u32", "_f32", result.u32, input.f32 );
   }
   {
     result.u32 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_s32", "_f32", result.s32, input.f32 );
   }
   {
     result.u32 = 0xFFFFFFFF;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_upi", "_s32", "_f32", result.s32, input.f32 );
   }
   {
     result.u64 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_u64", "_f32", result.u64 , input.f32 );
   }
   {
     result.u64 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFF;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_upi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
@@ -1740,62 +1739,62 @@ TEST(BrigInstTest, CvtRoundingMode) {
   //down i
   {
     result.u8 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_u8", "_f32", result.u8, input.f32 );
   }
   {
     result.u8 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_s8", "_f32", result.s8, input.f32 );
   }
   {
     result.u8 = 0xFE;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_downi", "_s8", "_f32", result.s8, input.f32 );
   }
   {
     result.u16 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_u16", "_f32", result.u16, input.f32 );
   }
   {
     result.u16 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u16 = 0xFFFe;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_downi", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u32 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_u32", "_f32", result.u32, input.f32 );
   }
   {
     result.u32 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_s32", "_f32", result.s32, input.f32 );
   }
   {
     result.u32 = 0xFFFFFFFE;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_downi", "_s32", "_f32", result.s32, input.f32 );
   }
     {
     result.u64 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_u64", "_f32", result.u64 , input.f32 );
   }
   {
     result.u64 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFE;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_downi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
@@ -1846,62 +1845,62 @@ TEST(BrigInstTest, CvtRoundingMode) {
   // near i
   {
     result.u8 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_u8", "_f32", result.u8, input.f32 );
   }
   {
     result.u8 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_s8", "_f32", result.s8, input.f32 );
   }
   {
     result.u8 = 0xFE;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_neari", "_s8", "_f32", result.s8, input.f32 );
   }
   {
     result.u16 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_u16", "_f32", result.u16, input.f32 );
   }
   {
     result.u16 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u16 = 0xFFFE;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_neari", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u32 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_u32", "_f32", result.u32, input.f32 );
   }
   {
     result.u32 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_s32", "_f32", result.s32, input.f32 );
   }
   {
     result.u32 = 0xFFFFFFFE;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_neari", "_s32", "_f32", result.s32, input.f32 );
   }
   {
     result.u64 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_u64", "_f32", result.u64 , input.f32 );
   }
   {
     result.u64 = 0x2;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFE;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_neari", "_s64", "_f32", result.s64, input.f32 );
   }
   {
@@ -1967,245 +1966,372 @@ TEST(BrigInstTest, CvtRoundingMode) {
   //zeroi
   {
     result.u8 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_u8", "_f32", result.u8, input.f32 );
   }
   {
     result.u8 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_s8", "_f32", result.s8, input.f32 );
   }
   {
     result.u8 = 0xFF;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_zeroi", "_s8", "_f32", result.s8, input.f32 );
   }
   {
     result.u16 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_u16", "_f32", result.u16, input.f32 );
   }
   {
     result.u16 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u16 = 0xFFFF;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_zeroi", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u32 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_u32", "_f32", result.u32, input.f32 );
   }
   {
     result.u32 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_s32", "_f32", result.s32, input.f32 );
   }
   {
     result.u32 = 0xFFFFFFFF;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_zeroi", "_s32", "_f32", result.s32, input.f32 );
   }
   {
     result.u64 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_u64", "_f32", result.u64 , input.f32 );
   }
   {
     result.u64 = 0x1;
-    input.u32 = 0x3FCCCCCD;
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFF;
-    input.u32 = 0xBFCCCCCD;
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u8 = 0x1;
-    input.u64 = 0x3FF999999999999A;
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_u8", "_f64", result.u8, input.f64 );
   }
   {
     result.u8 = 0x1;
-    input.u64 = 0x3FF999999999999A;
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u8 = 0xFF;
-    input.u64 = 0xBFF999999999999A;
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_zeroi", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u16 = 0x1;
-    input.u64 = 0x3FF999999999999A;
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_u16", "_f64", result.u16, input.f64 );
   }
   {
     result.u16 = 0x1;
-    input.u64 = 0x3FF999999999999A;
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u16 = 0xFFFF;
-    input.u64 = 0xBFF999999999999A;
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_zeroi", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u32 = 0x1;
-    input.u64 = 0x3FF999999999999A;
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_u32", "_f64", result.u32, input.f64 );
   }
   {
     result.u32 = 0x1;
-    input.u64 = 0x3FF999999999999A;
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_s32", "_f64", result.s32, input.f64 );
   }
   {
     result.u32 = 0xFFFFFFFF;
-    input.u64 = 0xBFF999999999999A;
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_zeroi", "_s32", "_f64", result.s32, input.f64 );
   }
   {
     result.u64 = 0x1;
-    input.u64 = 0x3FF999999999999A;
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_u64", "_f64", result.u64, input.f64 );
   }
   {
     result.u64 = 0x1;
-    input.u64 = 0x3FF999999999999A;
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f64", result.s64, input.f64 );
   }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFF;
-    input.u64 = 0xBFF999999999999A;
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f64", result.s64, input.f64 );
   }  
   //f32 to f32
   {
-    result.u32 = 0x40000000;
-    input.u32 = 0x3FCCCCCD;
+    result.u32 = 0x40000000; //2.0f
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_upi", "_f32", "_f32", result.f32, input.f32 );
   }
   {
-    result.u32 = 0xBF800000;
-    input.u32 = 0xBFCCCCCD;
+    result.u32 = 0xBF800000; //-1.0f
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_upi", "_f32", "_f32", result.f32, input.f32 );
   }
   {
-    result.u32 = 0x3F800000;
-    input.u32 = 0x3FCCCCCD;
+    result.u32 = 0x3F800000; //1.0f
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_f32", "_f32", result.f32, input.f32 );
   }
   {
-    result.u32 = 0xC0000000;
-    input.u32 = 0xBFCCCCCD;
+    result.u32 = 0xC0000000; //-2.0f
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_downi", "_f32", "_f32", result.f32, input.f32 );
   }
   {
-    result.u32 = 0x3F800000;
-    input.u32 = 0x3FCCCCCD;
+    result.u32 = 0x3F800000; //1.0f
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_f32", "_f32", result.f32, input.f32 );
   }
   {
-    result.u32 = 0xBF800000;
-    input.u32 = 0xBFCCCCCD;
+    result.u32 = 0xBF800000; //-1.0f
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_zeroi", "_f32", "_f32", result.f32, input.f32 );
   }
   {
-    result.u32 = 0x40000000;
-    input.u32 = 0x3FCCCCCD;
+    result.u32 = 0x40000000; //2.0f
+    input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_f32", "_f32", result.f32, input.f32 );
   }
   {
-    result.u32 = 0xC0000000;
-    input.u32 = 0xBFCCCCCD;
+    result.u32 = 0xC0000000; //-2.0f
+    input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_neari", "_f32", "_f32", result.f32, input.f32 );
   }
   // f64 to f64
   {
-    result.u64 = 0x4000000000000000;
-    input.u64 = 0x3FF999999999999A;
+    result.u64 = 0x4000000000000000; //2.0f
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_upi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0xBFF0000000000000;
-    input.u64 = 0xBFF999999999999A;
+    result.u64 = 0xBFF0000000000000; //-1.0f
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_upi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0x3FF0000000000000;
-    input.u64 = 0x3FF999999999999A;
+    result.u64 = 0x3FF0000000000000; //1.0f
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_downi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0xC000000000000000;
-    input.u64 = 0xBFF999999999999A;
+    result.u64 = 0xC000000000000000; //-2.0f
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_downi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0x3FF0000000000000;
-    input.u64 = 0x3FF999999999999A;
+    result.u64 = 0x3FF0000000000000; //1.0f
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zeroi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0xBFF0000000000000;
-    input.u64 = 0xBFF999999999999A;
+    result.u64 = 0xBFF0000000000000; //-1.0f
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_zeroi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0x4000000000000000;
-    input.u64 = 0x3FF999999999999A;
+    result.u64 = 0x4000000000000000; //2,0f
+    input.u64 = 0x3FF999999999999A; //1.6.f
     testInstCvt("cvt_neari", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0xC000000000000000;
-    input.u64 = 0xBFF999999999999A;
+    result.u64 = 0xC000000000000000; //-2.0f
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_neari", "_f64", "_f64", result.f64, input.f64 );
   }  
   //f64 to f32
   {
-    result.u32 = 0x3FCCCCCD;
-    input.u64 = 0x3FF999999999999A;//1.6d
+    result.u32 = 0x3FCCCCCD; //1.6f
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_up", "_f32", "_f64", result.f32, input.f64 );
   }
   {
-    result.u32 = 0xBFCCCCCC;
-    input.u64 = 0xBFF999999999999A;
+    result.u32 = 0xBFCCCCCC; //-1.6f
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_up", "_f32", "_f64", result.f32, input.f64 );
   }
   {
-    result.u32 = 0x3FCCCCCC;
-    input.u64 = 0x3FF999999999999A;
+    result.u32 = 0x3FCCCCCC; //1.6f
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_down", "_f32", "_f64", result.f32, input.f64 );
   }
   {
-    result.u32 = 0xBFCCCCCD;
-    input.u64 = 0xBFF999999999999A;
+    result.u32 = 0xBFCCCCCD; //-1.6f
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_down", "_f32", "_f64", result.f32, input.f64 );
   }
   {
-    result.u32 = 0x3FCCCCCD;
-    input.u64 = 0x3FF999999999999A;
+    result.u32 = 0x3FCCCCCD; //1.6f
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_near", "_f32", "_f64", result.f32, input.f64 );
   }
   {
-    result.u32 = 0xBFCCCCCD;
-    input.u64 = 0xBFF999999999999A;
+    result.u32 = 0xBFCCCCCD; //-1.6f
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_near", "_f32", "_f64", result.f32, input.f64 );
   }
   {
-    result.u32 = 0x3FCCCCCC;
-    input.u64 = 0x3FF999999999999A;
+    result.u32 = 0x3FCCCCCC; //1.6f
+    input.u64 = 0x3FF999999999999A; //1.6f
     testInstCvt("cvt_zero", "_f32", "_f64", result.f32, input.f64 );
   }
   {
-    result.u32 = 0xBFCCCCCC;
-    input.u64 = 0xBFF999999999999A;
+    result.u32 = 0xBFCCCCCC; //-1.6f
+    input.u64 = 0xBFF999999999999A; //-1.6f
     testInstCvt("cvt_zero", "_f32", "_f64", result.f32, input.f64 );
+  }
+  //integer to floating point
+  //up
+  const unsigned X = 3 + (1 << 25);
+  const uint64_t Y = (uint64_t)3 +((uint64_t)1 << 54);
+  {
+    input.u32 = X;
+    result.f32 = X + 1;
+    testInstCvt("cvt_up", "_f32", "_u32", result.f32, input.u32 );
+  }
+  {
+    input.u32 = X;
+    result.f32 = X + 1;
+    testInstCvt("cvt_up", "_f32", "_s32", result.f32, input.s32 );
+  }
+  {
+    input.s32 = -1 * X;
+    result.f32 = input.s32 + 3;
+    testInstCvt("cvt_up", "_f32", "_s32", result.f32, input.s32 );
+  }
+  {
+    input.u64 = Y;
+    result.f64 = Y + 1;
+    testInstCvt("cvt_up", "_f64", "_u64", result.f64, input.u64 );
+  }
+  {
+    input.s64 = Y;
+    result.f64 = Y + 1;
+    testInstCvt("cvt_up", "_f64", "_s64", result.f64, input.s64 );
+  }
+  {
+    input.s64 = -1 * Y;
+    result.f64 = input.s64 + 3;
+    testInstCvt("cvt_up", "_f64", "_s64", result.f64, input.s64 );
+  }
+  //down
+  {
+    input.u32 = X;
+    result.f32 = X - 3;
+    testInstCvt("cvt_down", "_f32", "_u32", result.f32, input.u32 );
+  }
+  {
+    input.u32 = X;
+    result.f32 = X - 3;
+    testInstCvt("cvt_down", "_f32", "_s32", result.f32, input.s32 );
+  }
+  {
+    input.s32 = -1 * X;
+    result.f32 = input.s32 - 1;
+    testInstCvt("cvt_down", "_f32", "_s32", result.f32, input.s32 );
+  }
+  {
+    input.u64 = Y;
+    result.f64 = Y - 3;
+    testInstCvt("cvt_down", "_f64", "_u64", result.f64, input.u64 );
+  }
+  {
+    input.s64 = Y;
+    result.f64 = Y - 3;
+    testInstCvt("cvt_down", "_f64", "_s64", result.f64, input.s64 );
+  }
+  {
+    input.s64 = -1 * Y;
+    result.f64 = input.s64 - 1;
+    testInstCvt("cvt_down", "_f64", "_s64", result.f64, input.s64 );
+  }
+  //near
+  {
+    input.u32 = X;
+    result.f32 = X + 1;
+    testInstCvt("cvt_near", "_f32", "_u32", result.f32, input.u32 );
+  }
+  {
+    input.u32 = X;
+    result.f32 = X + 1;
+    testInstCvt("cvt_near", "_f32", "_s32", result.f32, input.s32 );
+  }
+  {
+    input.s32 = -1 * X;
+    result.f32 = input.s32 - 1;
+    testInstCvt("cvt_near", "_f32", "_s32", result.f32, input.s32 );
+  }
+  {
+    input.u64 = Y;
+    result.f64 = Y + 1;
+    testInstCvt("cvt_near", "_f64", "_u64", result.f64, input.u64 );
+  }
+  {
+    input.s64 = Y;
+    result.f64 = Y + 1;
+    testInstCvt("cvt_near", "_f64", "_s64", result.f64, input.s64 );
+  }
+  {
+    input.s64 = -1 * Y;
+    result.f64 = input.s64 - 1;
+    testInstCvt("cvt_near", "_f64", "_s64", result.f64, input.s64 );
+  }
+  //zero
+  {
+    input.u32 = X;
+    result.f32 = X - 3;
+    testInstCvt("cvt_zero", "_f32", "_u32", result.f32, input.u32 );
+  }
+  {
+    input.u32 = X;
+    result.f32 = X - 3;
+    testInstCvt("cvt_zero", "_f32", "_s32", result.f32, input.s32 );
+  }
+  {
+    input.s32 = -1 * X;
+    result.f32 = input.s32 + 3;
+    testInstCvt("cvt_zero", "_f32", "_s32", result.f32, input.s32 );
+  }
+  {
+    input.u64 = Y;
+    result.f64 = Y - 3;
+    testInstCvt("cvt_zero", "_f64", "_u64", result.f64, input.u64 );
+  }
+  {
+    input.s64 = Y;
+    result.f64 = Y - 3;
+    testInstCvt("cvt_zero", "_f64", "_s64", result.f64, input.s64 );
+  }
+  {
+    input.s64 = -1 * Y;
+    result.f64 = input.s64 + 3;
+    testInstCvt("cvt_zero", "_f64", "_s64", result.f64, input.s64 );
   }
 }
