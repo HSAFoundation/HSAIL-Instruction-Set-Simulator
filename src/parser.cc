@@ -8212,7 +8212,24 @@ int ArrayOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
       return 1;
     }
   } else {
-    if (Operand(context, pRetOpOffset, ConvertType(context->get_type()))) {
+    if (Operand(context, pRetOpOffset)) {
+      context->set_error(MISSING_OPERAND);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int ArrayOperand(Context* context, BrigoOffset32_t* pRetOpOffset,
+                 BrigDataType16_t expectedType) {
+  std::string op_name;
+  if (context->token_to_scan == '(') {
+    if (ArrayOperandList(context, pRetOpOffset)) {
+      context->set_error(MISSING_CLOSING_PARENTHESIS);
+      return 1;
+    }
+  } else {
+    if (Operand(context, pRetOpOffset, ConvertType(expectedType))) {
       context->set_error(MISSING_OPERAND);
       return 1;
     }

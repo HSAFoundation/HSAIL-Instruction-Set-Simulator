@@ -168,6 +168,7 @@ int Acq(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperand(Context* context, BrigoOffset32_t* pOperand);
+int ArrayOperand(Context* context, BrigoOffset32_t* pOperand, BrigDataType16_t expectedType);
 
 int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
 int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
