@@ -428,6 +428,10 @@ TEST(ErrorReportTest, Cmp) {
   input.assign("cmp_ne_f32_b1 $s1, $c2;\n");
   Cmp_Test<> TestCase3(input);
   TestCase3.Run_Test(&Cmp, MISSING_COMMA);
+  
+  input.assign("cmp_lt_b32_b1 $s1, $c2, $c3;");
+  Cmp_Test<> TestCase4(input);
+  TestCase4.Run_Test(&Cmp, INVALID_DATA_TYPE);
 }
   
 } // namespace hsa
