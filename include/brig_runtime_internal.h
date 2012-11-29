@@ -172,6 +172,8 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## ShuffleVector(INST, f32x2)
 
 #define AtomicInst(D,INST,NARY)                 \
+  D ## Atomic ## NARY(INST, b32)                \
+  D ## Atomic ## NARY(INST, b64)                \
   D ## Atomic ## NARY(INST, s32)                \
   D ## Atomic ## NARY(INST, s64)                \
   D ## Atomic ## NARY(INST, u32)                \
