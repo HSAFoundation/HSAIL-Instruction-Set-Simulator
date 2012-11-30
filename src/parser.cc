@@ -334,11 +334,11 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
     return 1;    
   }
   std::string name(context->token_value.string_val);
-  /*if (!context->symbol_map.count(name)) {
-      context->set_error(MISSING_OPERAND);
-       return 1;
-    }*/
-  directive = context->symbol_map[name];
+  if (context->symbol_map.count(name)) {
+    directive = context->symbol_map[name];
+  } else {
+    directive = 0;
+  }
   context->token_to_scan = yylex();
 
   // check <..>
@@ -4136,9 +4136,24 @@ int MemoryOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   BrigoOffset32_t currentToOffset = 0;
   context->token_to_scan = yylex();
   // AddressableOperand
+  if (context->token_type == REGISTER) {
+    if ((context->get_machine() == BrigELarge && context->token_to_scan != TOKEN_DREGISTER) || 
+        (context->get_machine() == BrigESmall && context->token_to_scan != TOKEN_SREGISTER)) {
+      context->set_error(INVALID_MEMORY_OPERAND);
+      return 1;
+    }
+  }
+
   if (!AddressableOperand(context, &currentToOffset, false)) {
     if (context->token_to_scan == '[') {
       context->token_to_scan = yylex();
+      if (context->token_type == REGISTER) {
+        if ((context->get_machine() == BrigELarge && context->token_to_scan != TOKEN_DREGISTER) || 
+            (context->get_machine() == BrigESmall && context->token_to_scan != TOKEN_SREGISTER)) {
+          context->set_error(INVALID_MEMORY_OPERAND);
+          return 1;
+        }
+      }
       if (!OffsetAddressableOperandPart2(context, currentToOffset, pRetOpOffset)) {
         // Global/Local Identifier with offsetAddressOperand.
         return 0;
