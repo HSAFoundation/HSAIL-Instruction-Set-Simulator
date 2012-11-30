@@ -2053,7 +2053,8 @@ int Call(Context* context) {
     }
     OpOffset[2] = context->func_o_map[opName];
     context->token_to_scan = yylex();
-  } else if (firstOpToken == TOKEN_SREGISTER) {
+  } else if (firstOpToken == TOKEN_SREGISTER ||
+             firstOpToken == TOKEN_DREGISTER) {
     if (Operand(context, &OpOffset[2])) {
       context->set_error(INVALID_OPERAND);
       return 1;
@@ -2098,7 +2099,8 @@ int Call(Context* context) {
   OpOffset[3] = secondOpOffset;
 
   // if there is CallTarget, the first operand token must be a s register.
-  if (firstOpToken == TOKEN_SREGISTER) {
+  if (firstOpToken == TOKEN_SREGISTER ||
+      firstOpToken == TOKEN_DREGISTER) {
     if (CallTargets(context)) {
       context->set_error(INVALID_CALL_TARGETS);
       return 1;
