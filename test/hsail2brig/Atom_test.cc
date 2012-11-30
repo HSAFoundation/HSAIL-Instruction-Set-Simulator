@@ -215,9 +215,9 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 3 ************************************/
-  in.assign("atomic_min_u64 $d1, [$s7], 23;\n");
+  in.assign("atomic_min_u64 $d1, [$d7], 23;\n");
   destName.assign("$d1");  symbols->append(destName);
-  regName.assign("$s7");  symbols->append(regName);
+  regName.assign("$d7");  symbols->append(regName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -248,7 +248,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -264,9 +264,9 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 4 ************************************/
-  in.assign("atomic_or_group_u64 $d1, [%x][$s2 - 0x4], $d1;\n");
+  in.assign("atomic_or_group_u64 $d1, [%x][$d2 - 0x4], $d1;\n");
   destName.assign("$d1");  symbols->append(destName);
-  regName.assign("$s2");  symbols->append(regName);
+  regName.assign("$d2");  symbols->append(regName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -298,7 +298,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -313,8 +313,8 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 5 ************************************/
-  in.assign("atomic_cas_global_b32 $s1, [&map][$s1 + 0x7], WAVESIZE, WAVESIZE;\n");
-  destName.assign("$s1");
+  in.assign("atomic_cas_global_b32 $d1, [&map][$d1 + 0x7], WAVESIZE, WAVESIZE;\n");
+  destName.assign("$d1");
   symbols->append(destName);
 
   out.size = sizeof(out);
@@ -333,7 +333,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandReg;
-  dest.type = Brigb32;
+  dest.type = Brigb64;
   dest.reserved = 0;
   dest.s_name = 0;
 
@@ -361,8 +361,8 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 6 ************************************/
-  in.assign("atomic_cas_b32 $s1, [$s14 + 0x32], $s4, $s6;\n");
-  destName.assign("$s1");  regName.assign("$s14");
+  in.assign("atomic_cas_b32 $s1, [$d7 + 0x32], $s4, $s6;\n");
+  destName.assign("$s1");  regName.assign("$d7");
   op1Name.assign("$s4");  op2Name.assign("$s6");
   symbols->append(destName);  symbols->append(regName);
   symbols->append(op1Name);  symbols->append(op2Name);
@@ -396,7 +396,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -508,8 +508,8 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 9 ************************************/
-  in.assign("atomic_xor_global_u64 $d2, [&glo][$s2], 0x74;\n");
-  destName.assign("$d2");  regName.assign("$s2");
+  in.assign("atomic_xor_global_u64 $d2, [&glo][$d3], 0x74;\n");
+  destName.assign("$d2");  regName.assign("$d3");
   symbols->append(destName);  symbols->append(regName);
 
   out.size = sizeof(out);
@@ -542,7 +542,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -637,13 +637,13 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 12 ************************************/
-  in.assign("atomic_inc_group_u32 $s1, [$s1], $s1;\n");
-  destName.assign("$s1");  symbols->append(destName);
+  in.assign("atomic_inc_group_u64 $d1, [$d1], $d1;\n");
+  destName.assign("$d1");  symbols->append(destName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
   out.opcode = BrigAtomic;
-  out.type = Brigu32;
+  out.type = Brigu64;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
   out.o_operands[1] = sizeof(dest);
@@ -656,7 +656,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandReg;
-  dest.type = Brigb32;
+  dest.type = Brigb64;
   dest.reserved = 0;
   dest.s_name = 0;
 
@@ -714,9 +714,9 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 14 ************************************/
-  in.assign("atomic_inc_group_part_ar_u32 $s1, [$s2], $s3;\n");
+  in.assign("atomic_inc_group_part_ar_u32 $s1, [$d2], $s3;\n");
   destName.assign("$s1");  symbols->append(destName);
-  regName.assign("$s2");  symbols->append(regName);
+  regName.assign("$d2");  symbols->append(regName);
   op1Name.assign("$s3");  symbols->append(op1Name);
 
   out.size = sizeof(out);
@@ -748,7 +748,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -939,8 +939,8 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 4 ************************************/
-  in.assign("atomicNoRet_min_u64 [$s7], $d7;\n");
-  regName.assign("$s7");  symbols->append(regName);
+  in.assign("atomicNoRet_min_u64 [$d6], $d7;\n");
+  regName.assign("$d6");  symbols->append(regName);
   op2Name.assign("$d7");  symbols->append(op2Name);
 
   out.size = sizeof(out);
@@ -966,7 +966,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -982,9 +982,9 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 5 ************************************/
-  in.assign("atomicNoRet_or_group_u64 [%x][$s2 - 0x4], $d1;\n");
+  in.assign("atomicNoRet_or_group_u64 [%x][$d2 - 0x4], $d1;\n");
   destName.assign("$d1");  symbols->append(destName);
-  regName.assign("$s2");  symbols->append(regName);
+  regName.assign("$d2");  symbols->append(regName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -1010,7 +1010,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -1031,8 +1031,8 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 6 ************************************/
-  in.assign("atomicNoRet_cas_global_b32 [&map][$s1 + 0x7], WAVESIZE, WAVESIZE;\n");
-  destName.assign("$s1");
+  in.assign("atomicNoRet_cas_global_b32 [&map][$d1 + 0x7], WAVESIZE, WAVESIZE;\n");
+  destName.assign("$d1");
   symbols->append(destName);
 
   out.size = sizeof(out);
@@ -1060,7 +1060,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -1078,8 +1078,8 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 7 ************************************/
-  in.assign("atomicNoRet_cas_b32 [$s14 + 0x32], $s4, $s6;\n");
-  regName.assign("$s14");    op1Name.assign("$s4");     op2Name.assign("$s6");
+  in.assign("atomicNoRet_cas_b32 [$d4 + 0x32], $s4, $s6;\n");
+  regName.assign("$d4");    op1Name.assign("$s4");     op2Name.assign("$s6");
   symbols->append(regName);  symbols->append(op1Name);  symbols->append(op2Name);
 
   out.size = sizeof(out);
@@ -1105,7 +1105,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -1203,8 +1203,8 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 10 ************************************/
-  in.assign("atomicNoRet_xor_global_u64 [&glo][$s2], 0x74;\n");
-  regName.assign("$s2");  symbols->append(regName);
+  in.assign("atomicNoRet_xor_global_u64 [&glo][$d2], 0x74;\n");
+  regName.assign("$d2");  symbols->append(regName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -1230,7 +1230,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -1319,13 +1319,13 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 13 ************************************/
-  in.assign("atomicNoRet_inc_group_u32 [$s1], $s1;\n");
-  destName.assign("$s1");  symbols->append(destName);
+  in.assign("atomicNoRet_inc_group_u64 [$d1], $d1;\n");
+  destName.assign("$d1");  symbols->append(destName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
   out.opcode = BrigAtomicNoRet;
-  out.type = Brigu32;
+  out.type = Brigu64;
   out.packing = BrigNoPacking;
   out.o_operands[0] = sizeof(reg);
   out.o_operands[1] = 0;
@@ -1345,7 +1345,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -1484,7 +1484,7 @@ TEST(ErrorReportTest, AtomicNoRet) {
   Atom_Test<> TestCase2(input);
   TestCase2.Run_Test(&AtomicNoRet, MISSING_DATA_TYPE);
 
-  input.assign("atomicNoRet_or_group_u64 [%x][$s2 - 0x4];\n");
+  input.assign("atomicNoRet_or_group_u64 [%x][$d2 - 0x4];\n");
   Atom_Test<> TestCase3(input);
   TestCase3.Run_Test(&AtomicNoRet, MISSING_COMMA);
 }

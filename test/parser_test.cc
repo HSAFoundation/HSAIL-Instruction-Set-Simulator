@@ -2100,6 +2100,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
+  context->set_machine(BrigESmall);
   input.assign("st_f32 $s1, [$s3+4];"); // st
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2868,6 +2869,7 @@ TEST(ParserTest, MemoryOperand) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, MemoryOperand(context));
 
+  context->set_machine(BrigESmall);
   input.assign("[$s2-0xf7]");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -3012,7 +3014,8 @@ TEST(ParserTest, Ld) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld(context));
-
+  
+  context->set_machine(BrigESmall);
   input.assign("ld_acq_equiv(2)_f32 $s1, [$s3+4];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -3183,6 +3186,7 @@ TEST(ParserTest, Lda) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Lda(context));
 
+  context->set_machine(BrigELarge);
   input.assign("lda_u64 $d1, [$d0+10];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();

@@ -127,8 +127,8 @@ TEST(CodegenTest, St_Codegen){
 
   /*********************************** Test Case 1************************************************************/
 
-  in.assign( "st_arg_f32 $s0, [%output][$s2-4];\n");
-  op1.assign("$s0"); op2.assign("%output"); op3.assign("$s2");
+  in.assign( "st_arg_f32 $s0, [%output][$d2-4];\n");
+  op1.assign("$s0"); op2.assign("%output"); op3.assign("$d2");
   sbuf->append(op1); sbuf->append(op2); sbuf->append(op3);
 
   //Reference to $s0
@@ -155,7 +155,7 @@ TEST(CodegenTest, St_Codegen){
   BrigOperandReg dest2 = {
   0,
   BrigEOperandReg,
-  Brigb32,
+  Brigb64,
   0,
   op1.size() + op2.size() +2,
   };
@@ -191,8 +191,8 @@ TEST(CodegenTest, St_Codegen){
 
   /*********************************** Test Case 2************************************************************/
 
-  in.assign( "st_arg_f32 $s0, [$s2-4];\n");
-  op1.assign("$s0");  op2.assign("$s2");
+  in.assign( "st_arg_f32 $s0, [$d2-4];\n");
+  op1.assign("$s0");  op2.assign("$d2");
   sbuf->append(op1); sbuf->append(op2);
 
   //Reference to $s0
@@ -202,10 +202,10 @@ TEST(CodegenTest, St_Codegen){
   src.reserved = 0;
   src.s_name = 0;
 
-  //Ref to $s2
+  //Ref to $d2
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
-  dest2.type = Brigb32;
+  dest2.type = Brigb64;
   dest2.reserved = 0;
   dest2.s_name = op1.size() + 1;
 
@@ -319,8 +319,8 @@ TEST(CodegenTest, St_Codegen){
 
   /*********************************** Test Case 5************************************************************/
 
-  in.assign( "st_arg_f64 3.1415l, [$s2-4];\n");
-  op1.assign("$s2");
+  in.assign( "st_arg_f64 3.1415l, [$d2-4];\n");
+  op1.assign("$d2");
   sbuf->append(op1);
 
   //Reference to immed
@@ -330,10 +330,10 @@ TEST(CodegenTest, St_Codegen){
   src1.reserved = 0;
   src1.bits.d = 3.1415l;
 
-  //Ref to $s2
+  //Ref to $d2
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
-  dest2.type = Brigb32;
+  dest2.type = Brigb64;
   dest2.reserved = 0;
   dest2.s_name = 0;
 
@@ -363,8 +363,8 @@ TEST(CodegenTest, St_Codegen){
 
  /*********************************** Test Case 6************************************************************/
 
-  in.assign( "st_arg_f64 3.1415l, [%output][$s2-4];\n");
-  op1.assign("%output");  op2.assign("$s2");
+  in.assign( "st_arg_f64 3.1415l, [%output][$d2-4];\n");
+  op1.assign("%output");  op2.assign("$d2");
   sbuf->append(op1);  sbuf->append(op2);
 
   //Reference to immed
@@ -381,10 +381,10 @@ TEST(CodegenTest, St_Codegen){
   dest1.reserved = 0;
   dest1.directive = 0;//Offset to .directives, However, no directive in .directives. Ambiguous testing.
 
-  //Ref to $s2
+  //Ref to $d2
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
-  dest2.type = Brigb32;
+  dest2.type = Brigb64;
   dest2.reserved = 0;
   dest2.s_name = op1.size() + 1;
 
@@ -417,9 +417,9 @@ TEST(CodegenTest, St_Codegen){
 
  /*********************************** Test Case 7************************************************************/
 
-  in.assign( "st_v2_f32 ($s0,$s1), [%output][$s2-4];\n");
+  in.assign( "st_v2_f32 ($s0,$s1), [%output][$d2-4];\n");
   op1.assign("$s0");  op2.assign("$s1");
-  op3.assign("%output");  op4.assign("$s2");
+  op3.assign("%output");  op4.assign("$d2");
   sbuf->append(op1);  sbuf->append(op2);
   sbuf->append(op3);  sbuf->append(op4);
 
@@ -460,10 +460,10 @@ TEST(CodegenTest, St_Codegen){
   dest1.reserved = 0;
   dest1.directive = 0;//Offset to .directives, However, no directive in .directives. Ambiguous testing.
 
-  //Ref to $s2
+  //Ref to $d2
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
-  dest2.type = Brigb32;
+  dest2.type = Brigb64;
   dest2.reserved = 0;
   dest2.s_name = op1.size()  + op2.size() + op3.size() + 3;
 
@@ -499,10 +499,10 @@ TEST(CodegenTest, St_Codegen){
 
  /*********************************** Test Case8************************************************************/
 
-  in.assign( "st_v4_f32 ($s0,$s1,$s2,$s3), [%output][$s4-4];\n");
+  in.assign( "st_v4_f32 ($s0,$s1,$s2,$s3), [%output][$d4-4];\n");
   op1.assign("$s0");  op2.assign("$s1");
   op3.assign("$s2");  op4.assign("$s3");
-  op5.assign("%output");  op6.assign("$s4");
+  op5.assign("%output");  op6.assign("$d4");
   sbuf->append(op1);  sbuf->append(op2);
   sbuf->append(op3);  sbuf->append(op4);
   sbuf->append(op5);  sbuf->append(op6);
@@ -559,10 +559,10 @@ TEST(CodegenTest, St_Codegen){
   dest1.reserved = 0;
   dest1.directive = 0;//Offset to .directives, However, no directive in .directives. Ambiguous testing.
 
-  //Ref to $s4
+  //Ref to $d4
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
-  dest2.type = Brigb32;
+  dest2.type = Brigb64;
   dest2.reserved = 0;
   dest2.s_name = op1.size()  + op2.size() +
            op3.size() + op4.size() + op5.size()+ 5;
