@@ -1813,49 +1813,49 @@ TEST(BrigGlobalTest, GlobalInitializer) {
   {
     const uint8_t result = uint8_t(0xff);
     const char *value = "0xff";
-    unsigned bits = 32;
+    unsigned bits = 8;
     testGlobalInitializer("u8", result, value, bits);
   }
   {
     const uint8_t result = uint8_t(0xfe);
     const char *value = "0xfe";
-    unsigned bits = 32;
+    unsigned bits = 8;
     testGlobalInitializer("u8", result, value, bits);
   }
   {
     const uint8_t result = uint8_t(0x0);
     const char *value = "0x0";
-    unsigned bits = 32;
+    unsigned bits = 8;
     testGlobalInitializer("u8", result, value, bits);
   }
   {
     const uint8_t result = uint8_t(0x01);
     const char *value = "0x01";
-    unsigned bits = 32;
+    unsigned bits = 8;
     testGlobalInitializer("u8", result, value, bits);
   }
   {
     const uint16_t result = uint16_t(0xffff);
     const char *value = "0xffff";
-    unsigned bits = 32;
+    unsigned bits = 16;
     testGlobalInitializer("u16", result, value, bits);
   }
   {
     const uint16_t result = uint16_t(0xfffe);
     const char *value = "0xfffe";
-    unsigned bits = 32;
+    unsigned bits = 16;
     testGlobalInitializer("u16", result, value, bits);
   }
   {
     const uint16_t result = uint16_t(0x0);
     const char *value = "0x0";
-    unsigned bits = 32;
+    unsigned bits = 16;
     testGlobalInitializer("u16", result, value, bits);
   }
   {
     const uint16_t result = uint16_t(0x0001);
     const char *value = "0x0001";
-    unsigned bits = 32;
+    unsigned bits = 16;
     testGlobalInitializer("u16", result, value, bits);
   }
   {
@@ -1905,5 +1905,23 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     const char *value = "0x0000000000000001";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x7f7fffff);
+    const char *value = "3.4028234663852e+38f";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x1);
+    const char *value = "0f";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0xff7fffff);
+    const char *value = "-3.402834663852e+38f";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
   }
 }
