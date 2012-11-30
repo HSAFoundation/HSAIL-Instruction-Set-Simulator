@@ -256,8 +256,8 @@ TEST(CodegenTest, Call_CodeGen) {
   funList.elementCount = 1;
   funList.o_args[0] = outMod.o_operands[3] + sizeof(inputArgs);
 
-  BrigOperandFunctionRef* funcList2 = new BrigOperandFunctionRef[pFunList->elementCount * sizeof(func)];
-  for (uint32_t i = 0 ; i < pFunList->elementCount ; ++i) {
+  BrigOperandFunctionRef* funcList2 = new BrigOperandFunctionRef[funList.elementCount * sizeof(func)];
+  for (uint32_t i = 0 ; i < funList.elementCount ; ++i) {
     funcList2[i].size = sizeof(funcList2[i]);
     funcList2[i].kind = BrigEOperandFunctionRef;
     funcList2[i].fn = 0;
@@ -414,6 +414,70 @@ TEST(CodegenTest, Call_CodeGen) {
   TestCase5(in, symbols, &outBase, &width, &emptyArgs, &func, &emptyArgs, NULL);
   TestCase5.Run_Test(&Call);
 
+  symbols->clear();
+  /************************************* Test Case 6 ************************************/
+  in.assign("call $d1 (%in) [&foo, &bar];\n");
+  regName.assign("$d1");
+  symbols->append(regName);
+
+  outBase.size = sizeof(outBase);
+  outBase.kind = BrigEInstBase;
+  outBase.opcode = BrigCall;
+  outBase.type = Brigb32;
+  outBase.packing = BrigNoPacking;
+  outBase.o_operands[0] = 0;
+  outBase.o_operands[1] = sizeof(width) + sizeof(reg) + sizeof(inputArgs) + sizeof(argRef);
+  outBase.o_operands[2] = sizeof(width);
+  outBase.o_operands[3] = sizeof(width) + sizeof(reg) + sizeof(argRef);
+  outBase.o_operands[4] = outBase.o_operands[1] + sizeof(func) * 2 + sizeof(emptyArgs);
+
+  width.size = sizeof(width);
+  width.kind = BrigEOperandImmed;
+  width.type = Brigb32;
+  width.reserved = 0;
+  memset(&width.bits, 0, sizeof(width.bits));
+
+  inputArgs.size = sizeof(inputArgs);
+  inputArgs.kind = BrigEOperandArgumentList;
+  inputArgs.elementCount = 1;
+  inputArgs.o_args[0] = sizeof(width) + sizeof(reg);
+
+  BrigOperandArgumentRef* inputArgsList6 = new BrigOperandArgumentRef[inputArgs.elementCount * sizeof(argRef)];
+  for (uint32_t i = 0 ; i < inputArgs.elementCount ; ++i) {
+    inputArgsList6[i].size = sizeof(inputArgsList6[i]);
+    inputArgsList6[i].kind = BrigEOperandArgumentRef;
+    inputArgsList6[i].arg = 0;
+  }
+
+
+  reg.size = sizeof(reg);
+  reg.kind = BrigEOperandReg;
+  reg.type = Brigb64;
+  reg.reserved = 0;
+  reg.s_name = 0;
+
+  unsigned char mem6[sizeof(funList) + sizeof(BrigoOffset32_t)];
+  pFunList = reinterpret_cast<BrigOperandArgumentList*>(mem6);
+  pFunList->size = sizeof(funList) + sizeof(BrigoOffset32_t);
+  pFunList->kind = BrigEOperandFunctionList;
+  pFunList->elementCount = 2;
+  pFunList->o_args[0] = outBase.o_operands[1] + sizeof(emptyArgs);
+  pFunList->o_args[1] = outBase.o_operands[1] + sizeof(emptyArgs) + sizeof(func);
+
+  BrigOperandFunctionRef* funcList6 = new BrigOperandFunctionRef[pFunList->elementCount * sizeof(func)];
+  for (uint32_t i = 0 ; i < pFunList->elementCount ; ++i) {
+    funcList6[i].size = sizeof(funcList6[i]);
+    funcList6[i].kind = BrigEOperandFunctionRef;
+    funcList6[i].fn = 0;
+  }
+
+  Call_Test<BrigInstBase, BrigOperandReg, BrigOperandFunctionRef>
+  TestCase6(in, symbols, &outBase, &width, &emptyArgs, &reg, &inputArgs, pFunList, NULL, inputArgsList6, funcList6);
+
+  TestCase6.Run_Test(&Call);
+
+  delete []inputArgsList1;  inputArgsList1 = NULL;
+  delete []funcList1;  funcList1 = NULL;
   symbols->clear();
 
   delete symbols;
