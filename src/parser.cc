@@ -6573,16 +6573,12 @@ int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
   }
   elementCount = n;
   context->set_dim(bds.s.dim);
-
-  switch (context->get_type()) {
-    case Brigb1:
-      context->set_error(INVALID_INITIALIZER);
-      return 1;
-    case Brigb8:    n = (n + 7) >> 3; break;
-    case Brigb16:   n = (n + 3) >> 2; break;
-    case Brigb32:   n = (n + 1) >> 1; break;
-    case Brigb64:   break;
+  if (context->get_type() != Brigb32) {
+    context->set_error(INVALID_INITIALIZER);
+    return 1;
   }
+
+  n = (n + 1) >> 1;
   size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t);
   uint8_t *array = new uint8_t[arraySize];
   memset(array, 0 , sizeof(uint8_t) * arraySize);
@@ -6593,28 +6589,8 @@ int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
   bdi->c_code = 0;
   bdi->type = context->get_type();
   bdi->reserved = 0;
-  switch (context->get_type()) {
-    case Brigb8:
-      for (uint32_t i = 0; i < single_list.size(); i++ ) {
-        *(float*)&bdi->initializationData.u8[i] = single_list[i];
-      }
-      break;
-    case Brigb16:
-      for (uint32_t i = 0; i < single_list.size(); i++ ) {
-        *(float*)&bdi->initializationData.u16[i] = single_list[i];
-      }
-      break;
-    case Brigb32:
-      for (uint32_t i = 0; i < single_list.size(); i++ ) {
-        *(float*)&bdi->initializationData.u32[i] = single_list[i];
-      }
-      break;
-    case Brigb64:
-      // TODO(Chuang): Loss of precision
-      for (uint32_t i = 0; i < single_list.size(); i++ ) {
-        *(double*)&bdi->initializationData.u64[i] = (double)single_list[i];
-      }
-      break;
+  for (uint32_t i = 0; i < single_list.size(); i++ ) {
+    *(float*)&bdi->initializationData.u32[i] = single_list[i];
   }
   bds.d_init = context->get_directive_offset();
   bds.d_init += bds.d_init & 0x7;
@@ -7524,14 +7500,9 @@ int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
   elementCount = n;
 
   context->set_dim(bds.s.dim);
-  switch (context->get_type()) {
-    case Brigb1:
-      context->set_error(INVALID_INITIALIZER);
-      return 1;
-    case Brigb8:    n = (n + 7) >> 3; break;
-    case Brigb16:   n = (n + 3) >> 2; break;
-    case Brigb32:   n = (n + 1) >> 1; break;
-    case Brigb64:   break;
+  if (context->get_type() != Brigb64) {
+    context->set_error(INVALID_INITIALIZER);
+    return 1;
   }
   size_t arraySize = sizeof(BrigDirectiveInit) + (n - 1) * sizeof(uint64_t);
   uint8_t *array = new uint8_t[arraySize];
@@ -7545,28 +7516,8 @@ int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
   bdi->c_code = 0;
   bdi->type = context->get_type();
   bdi->reserved = 0;
-  switch(context->get_type()) {
-    case Brigb8:
-      for (uint32_t i = 0; i < float_list.size(); i++ ) {
-        *(double*)&bdi->initializationData.u8[i] = float_list[i];
-      }
-      break;
-    case Brigb16:
-      for (uint32_t i = 0; i < float_list.size(); i++ ) {
-        *(double*)&bdi->initializationData.u16[i] = float_list[i];
-      }
-      break;
-    case Brigb32:
-      for (uint32_t i = 0; i < float_list.size(); i++ ) {
-        *(double*)&bdi->initializationData.u32[i] = float_list[i];
-      }
-      break;
-    case Brigb64:
-      // TODO(Chuang): Loss of precision
-      for (uint32_t i = 0; i < float_list.size(); i++ ) {
-        *(double*)&bdi->initializationData.u64[i] = float_list[i];
-      }
-      break;
+  for (uint32_t i = 0; i < float_list.size(); i++ ) {
+    *(double*)&bdi->initializationData.u64[i] = float_list[i];
   }
   bds.d_init = context->get_directive_offset();
   bds.d_init += bds.d_init & 0x7;
