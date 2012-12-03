@@ -980,11 +980,11 @@ struct BrigInstImage {
   uint16_t kind;
   BrigOpcode32_t opcode;
   BrigDataType16_t type;
-  BrigDataType16_t stype;
   BrigPacking16_t packing;
-  uint16_t reserved;
   BrigoOffset32_t o_operands[5];
   BrigGeom32_t geom;
+  BrigDataType16_t stype;
+  uint16_t reserved;
 };
 
 // BrigInstMem
@@ -1009,10 +1009,10 @@ struct BrigInstRead {
   uint16_t kind;
   BrigOpcode32_t opcode;
   BrigDataType16_t type;
-  BrigDataType16_t stype;
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
   BrigGeom32_t geom;
+  BrigDataType16_t stype;
   uint16_t reserved;
 };
 

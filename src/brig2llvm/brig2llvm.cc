@@ -794,11 +794,22 @@ static llvm::Type *getType(llvm::LLVMContext &C,
 
 template<class T>
 static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
+                                        llvm::Type *type,
                                         const BrigSymbol &S) {
   const T *array = S.getInit<T>();
   uint32_t size = std::max(1U, S.getArrayDim());
-  llvm::ArrayRef<T> arrayRef(array, size);
-  return llvm::ConstantDataArray::get(C, arrayRef);
+  if(S.isArray()) {
+    llvm::ArrayRef<T> arrayRef(array, size);
+    return llvm::ConstantDataArray::get(C, arrayRef);
+  }
+
+  if(llvm::isa<llvm::IntegerType>(type))
+    return llvm::ConstantInt::get(type, *array);
+
+  if(type->isHalfTy() || type->isFloatTy() || type->isDoubleTy())
+    return llvm::ConstantFP::get(type, *array);
+
+  assert(false && "Unknown type");
 }
 
 static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
@@ -811,19 +822,20 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
 
   llvm::Constant *init = NULL;
   if(S.hasInitializer()) {
-    llvm::Type *elementTy = type->getArrayElementType();
+    llvm::Type *elementTy = llvm::isa<llvm::SequentialType>(type) ?
+      type->getArrayElementType() : type;
     if(elementTy->isIntegerTy(1) || elementTy->isIntegerTy(8)) {
-      init = runOnInitializer<uint8_t>(C, S);
+      init = runOnInitializer<uint8_t>(C, elementTy, S);
     } else if(elementTy->isIntegerTy(16)) {
-      init = runOnInitializer<uint16_t>(C, S);
+      init = runOnInitializer<uint16_t>(C, elementTy, S);
     } else if(elementTy->isIntegerTy(32)) {
-      init = runOnInitializer<uint32_t>(C, S);
+      init = runOnInitializer<uint32_t>(C, elementTy, S);
     } else if(elementTy->isIntegerTy(64)) {
-      init = runOnInitializer<uint64_t>(C, S);
+      init = runOnInitializer<uint64_t>(C, elementTy, S);
     } else if(elementTy->isFloatTy()) {
-      init = runOnInitializer<float>(C, S);
+      init = runOnInitializer<float>(C, elementTy, S);
     } else if(elementTy->isDoubleTy()) {
-      init = runOnInitializer<double>(C, S);
+      init = runOnInitializer<double>(C, elementTy, S);
     } else {
       assert(false && "Unimplemented");
     }

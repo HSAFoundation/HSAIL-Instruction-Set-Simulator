@@ -1119,7 +1119,7 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
   unsigned funRefCount = 0;
-  unsigned argRefCount = 0;
+  unsigned sigRefCount = 0;
 
   if(operand->elementCount) {
     valid &= check(sizeof(BrigOperandArgumentList) +
@@ -1134,27 +1134,19 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
        dyn_cast<BrigOperandFunctionRef>(arg)) {
       dir_iterator fun(S_.directives + funRef->fn);
       if(!validate(fun)) return false;
-      valid &= check(isa<BrigDirectiveFunction>(fun),
-                     "should point to BrigOperandFunctionRef, "
-                     "refer to BrigDirectiveFunction");
-      ++funRefCount;
-    }
-    if(const BrigOperandArgumentRef *argRef =
-        dyn_cast<BrigOperandArgumentRef>(arg)) {
-      dir_iterator funSig(S_.directives + argRef->arg);
-      if(!validate(funSig)) return false;
-      //conflict with BrigOperandArgumentRef refer to BrigDirectiveSymbol
-      valid &= check(isa<BrigDirectiveSignature>(funSig),
-                     "should point to BrigOperandArgumentRef, "
-                     "refer to BrigDirectiveSignature");
-      ++argRefCount;
+
+      if(isa<BrigDirectiveFunction>(fun)) {
+        ++funRefCount;
+      } else {
+        ++sigRefCount;
+      }
     }
   }
   valid &= check(funRefCount == operand->elementCount ||
-                 argRefCount == operand->elementCount,
-                 "element of o_args should be BrigOperandFunctionRef "
-                 "or BrigOperandArgumentRef");
-  valid &= check(argRefCount < 2, "Invalid argRefCount, should be 1 or 0");
+                 sigRefCount == operand->elementCount,
+                 "element of o_args should be all functions or "
+                 "all signatures");
+  valid &= check(sigRefCount < 2, "Too many function signatures");
 
   return valid;
 }
@@ -1164,8 +1156,10 @@ bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
   if(!validateSize(operand)) return false;
   dir_iterator argDir(S_.directives + operand->arg);
   if(!validate(argDir)) return false;
-  valid &= check(isa<BrigDirectiveSymbol>(argDir),
-                 "Invalid reg, should be point BrigDirectiveSymbol");
+  valid &= check(isa<BrigDirectiveSymbol>(argDir) ||
+                 isa<BrigDirectiveImage>(argDir) ||
+                 isa<BrigDirectiveSampler>(argDir),
+                 "Argument should be a symbol, image, or sampler");
   return valid;
 }
 
@@ -2911,7 +2905,7 @@ bool BrigModule::validateBranchInst(const inst_iterator inst, unsigned nary) con
 
   const unsigned numOperands = getNumOperands(inst);
 
-  if(!check(numOperands == nary || numOperands == nary + 1, 
+  if(!check(numOperands == nary || numOperands == nary + 1,
             "Incorrect number of operands"))
     return false;
 
@@ -3095,7 +3089,7 @@ bool BrigModule::validateSend(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateReceive(const inst_iterator inst) const { 
+bool BrigModule::validateReceive(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigb32, "Type should be b32");
   valid &= validateParaSynInst(inst, 2);
