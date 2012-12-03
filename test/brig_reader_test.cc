@@ -1542,18 +1542,22 @@ TEST(BrigKernelTest, IndirectBranches) {
       "  ldc_b32 $s1, @odd;\n"
       "@ldc_end:"
       
-      "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
-      "  global_u32 %tab[] =  {@even, @odd};\n"
-      "  cbr $c0, $s1, [%tab];\n"              //in the case of $s0 >= $s2
-                                               //if %n is even goto @even esle goto @odd
-      "  mov_b32 $s2, 0xD;\n"                  //or: set 13 to $s2
-      "  brn $s1, [%tab];\n"                   //if %n is even goto @even esle goto @odd
+       "  brn @cmp;\n"
       "@odd:"
       "  add_u32 $s2, $s2, 2;\n"
       "  brn @return;\n"
       "@even:"
       "  add_u32 $s2, $s2, 1;\n"
       "  brn @return;\n"
+      "@cmp:"
+      
+      "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
+      "  global_u32 %tab[] =  {@even, @odd};\n"
+      "  cbr $c0, $s1, [%tab];\n"              //in the case of $s0 >= $s2
+                                               //if %n is even goto @even esle goto @odd
+      "  mov_b32 $s2, 0xD;\n"                  //or: set 13 to $s2
+      "  brn $s1, [%tab];\n"                   //if %n is even goto @even esle goto @odd
+
       "@return:" 
       "  ld_kernarg_u32 $s1, [%r];\n"
       "  st_global_u32 $s2, [$s1];\n"
