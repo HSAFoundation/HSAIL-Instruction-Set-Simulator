@@ -2807,3 +2807,97 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("f32", result, value, bits);
   }
 }
+
+static const char GlobalArrayInst[] = 
+  "version 1:0:$%s;\n"
+  "\n"
+  "global_%s &array[5] = { %s };\n"
+  "kernel &__OpenCL_Global_Array_kernel(\n"
+  "        kernarg_%s %%r)\n"
+  "{\n"
+  "@__OpenCL_Global_Array_kernel_entry:\n"
+  "        ld_kernarg_%s $%c2, [%%r];\n"
+  "        ld_global_u%u  $%c1, [&array];\n"
+  "        st_global_u%u  $%c1, [$%c2];\n"
+  "        ret;\n"
+  "};\n";
+
+template<class T>
+static void testGlobalArray(const char *type,
+                            const T *result,
+                            const char *value,
+                            unsigned bits) {
+for(unsigned i =0; i < 2; ++i) {
+  char reg = 0;
+  if(bits == 8 || bits == 16 || bits == 32)
+    reg = 's';
+  if(bits == 64)
+    reg = 'd';
+  size_t size =
+    snprintf(NULL,
+             0,
+             GlobalArrayInst,
+             model[i],
+             type,
+             value,
+             mType[i],
+             mType[i],
+             mReg[i],
+             bits,
+             reg,
+             bits,
+             reg,
+             mReg[i]);
+  char *buffer = new char[size];
+  snprintf(buffer,
+           size,
+           GlobalArrayInst,
+           model[i],
+           type,
+           value,
+           mType[i],
+           mType[i],
+           mReg[i],
+           bits,
+           reg,
+           bits,
+           reg,
+           mReg[i]);
+
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete buffer;
+  
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+  
+  T *arg_val0 = new T[5];
+  arg_val0[0] = 0;
+  arg_val0[1] = 0;
+  arg_val0[2] = 0;
+  arg_val0[3] = 0;
+  arg_val0[4] = 0;
+    
+  void *args[] = { arg_val0 };
+  llvm::Function *fun = BP->getFunction("__OpenCL_Global_Array_kernel");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+
+
+  std::cout<<arg_val0[0]<<std::endl;
+  
+  for (unsigned i = 0; i < 5; i++) {
+    EXPECT_EQ(result[i], arg_val0[i]);  
+  }
+
+  delete[] arg_val0;
+ }
+}
+
+TEST(BrigGlobalTest, GlobalArray) {
+  {
+    uint32_t result[5] = { 1, 2, 3, 4, 5 };
+    const char *value = "1, 2, 3, 4, 5";
+    unsigned bits = 8;
+    testGlobalArray("u8", result, value, bits);
+  }
+}
