@@ -7411,77 +7411,65 @@ int Pragma(Context* context) {
 
 int LabelList(Context* context, BrigdOffset32_t bds_offset) {
   uint32_t elementCount = 0;
-  std::vector<BrigDirectiveLabel> label_list;
+  std::vector<BrigdOffset32_t> label_list;
 
   while (context->token_to_scan == TOKEN_LABEL) {
     std::string label_name = context->token_value.string_val;
-    BrigsOffset32_t label_name_offset = context->add_symbol(label_name);
 
-    BrigDirectiveLabel bdl = {
-      sizeof(BrigDirectiveLabel),  //size
-      BrigEDirectiveLabel,         //kind
-      0,                           //c_code
-      label_name_offset            //s_name
-    };
-
-    label_list.push_back(bdl);
-    elementCount ++;
+    label_list.push_back(context->symbol_map[label_name]);
+    elementCount++;
     context->token_to_scan = yylex();
     if (context->token_to_scan == ',') {
       context->token_to_scan = yylex();
       continue;
     } else {
-      // create
-      size_t arraySize = sizeof(BrigDirectiveLabelInit) +
-                         (elementCount - 1) * sizeof(BrigdOffset32_t);
-      uint8_t *array = new uint8_t[arraySize];
-      BrigDirectiveLabelInit *bdli = reinterpret_cast<BrigDirectiveLabelInit*>(array);
-
       // update the BrigDirectiveSymbol.d_init and dim
       BrigDirectiveSymbol bds ;
       context->get_directive(bds_offset,&bds);
-      bds.d_init = context->get_directive_offset();
-      bds.d_init += bds.d_init & 0x7;
-      // TODO(Chuang):  handle to an empty list.
+
       if (bds.s.dim != 0) {
         if (elementCount > bds.s.dim) {
           context->set_error(INVALID_INITIALIZER);
           return 1;
         }
+        elementCount = bds.s.dim;
       } else {
-        bds.s.dim = elementCount;
+        if (context->get_isArray()) {
+          bds.s.dim = elementCount;
+        }
       }
+      size_t arraySize = sizeof(BrigDirectiveLabelInit) +
+        (elementCount - 1) * sizeof(BrigdOffset32_t);
+      uint8_t *array = new uint8_t[arraySize];
+      memset(array, 0, sizeof(uint8_t) * arraySize);
+      BrigDirectiveLabelInit *bdli = reinterpret_cast<BrigDirectiveLabelInit*>(array);
+
       context->set_dim(bds.s.dim);
-      if (0 == context->get_dim() && context->get_isArray())
+      if (0 != context->get_dim() && context->get_isArray()) {
         bds.s.symbolModifier = BrigArray;
-
-      unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-      context->update_directive_bytes(bds_charp,
-                                      bds_offset,
-                                      sizeof(BrigDirectiveSymbol));
-
+      }
 
       // fill the data of BrigDirectiveLabelInit
       bdli->size = arraySize;
       bdli->kind = BrigEDirectiveLabelInit;
-      bdli->c_code = 0;
+      bdli->c_code = context->get_code_offset();
       bdli->elementCount = elementCount;
-      context->append_directive(bdli);
+      bdli->s_name = bds.s.s_name;
 
-      for (unsigned i = 0 ; i < elementCount ; i ++){
-        bdli->d_labels[i] = context->get_directive_offset();
-        // put into the symbo_map,not need to check,
-        // will be first time to put ?
-        std::string label_name = context->get_string(label_list[i].s_name);
-        context->symbol_map[label_name] = context->get_directive_offset();
-
-        context->append_directive(&label_list[i]);
+      for (unsigned i = 0 ; i < label_list.size() ; i ++){
+        bdli->d_labels[i] = label_list[i];
       }
 
-      unsigned char *bdli_charp = reinterpret_cast<unsigned char*>(bdli);
-      context->update_directive_bytes(bdli_charp,
-                                      bds.d_init,
-                                      arraySize);
+      bds.d_init = context->get_directive_offset();
+      bds.d_init += bds.d_init & 0x7;
+      context->append_directive(bdli);
+
+      unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+      context->update_directive_bytes(
+          bds_charp,
+          bds_offset,
+          sizeof(BrigDirectiveSymbol));
+
       delete[] reinterpret_cast<char *>(bdli);
 
       return 0;
