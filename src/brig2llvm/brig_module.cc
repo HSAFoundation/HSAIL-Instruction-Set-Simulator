@@ -2788,7 +2788,6 @@ static bool isPowerOf2(const uint32_t immed) {
   return !(immed & (immed - 1));
 }
 
-
 bool BrigModule::validateLd(const inst_iterator inst) const {
   bool valid = true;
   if(!check(isa<BrigInstLdSt>(inst),"Incorrect instruction kind"))
