@@ -8,19 +8,20 @@ namespace brig{
 
 //T = BrigDirectivefunction/BrigDirectiveSymbol/BrigDirectiveSignature
 
-template <typename T=BrigDirectiveSymbol>
+template <typename T=BrigDirectiveSymbol,
+	  typename TInit=BrigDirectiveInit>
 class GlobalDecl_Test: public BrigCodeGenTest{
 private:
   T* RefDir;
 
   BrigDirectiveSymbol* RefArgsList;
-  BrigDirectiveInit* RefInit;
+  TInit* RefInit;
 
 public:
   GlobalDecl_Test(std::string& in):
     BrigCodeGenTest(in) {}
 
-  GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, BrigDirectiveInit* d_init=NULL) :
+  GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, TInit* d_init=NULL) :
     BrigCodeGenTest(in, sbuf),
     RefDir(out),
     RefArgsList(NULL),
@@ -986,47 +987,127 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   free(bdi9);  bdi9 = NULL;
   sbuf->clear();
 
-  /************************************************ Case 7 ***************************************/
-  /*
-     in.assign("global_f64 &x[3] = {@a, @b, @c}; ");
-     name.assign("&x"); sbuf->append(name);
+  /************************************************ Case 10 ***************************************/
 
-     BrigDirectiveSymbol ref7 = {
-     0,                        // size
-     BrigEDirectiveSymbol,     // kind
-     {
-     0,                      // c_code
-     BrigGlobalSpace,        // storage class
-     BrigNone,               // attribute
-     0,                      // reserved
-     BrigArray,              // symbolModifier
-     3,                      // dim
-     0,                      // s_name
-     Brigf64,                // type
-     1,                      // align
-     },
-     0,                        // d_init
-     0                         // reserved
-     };
-     ref7.size = sizeof(ref7);
-     ref7.d_init = sizeof(ref7);
+  in.assign("global_u32 %tab[] = {@even, @odd};\n");
+  name.assign("%tab"); sbuf->append(name);
 
-     size_t arraySize = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t) * 2;
-     BrigDirectiveLabelInit* bdli7 = (BrigDirectiveLabelInit*) (malloc(arraySize));
+  BrigDirectiveSymbol ref10 = {
+    0,                        // size
+    BrigEDirectiveSymbol,     // kind
+    {
+      0,                      // c_code
+      BrigGlobalSpace,        // storage class
+      BrigNone,               // attribute
+      0,                      // reserved
+      BrigArray,              // symbolModifier
+      2,                      // dim
+      0,                      // s_name
+      Brigu32,                // type
+      1,                      // align
+    },
+    0,                        // d_init
+    0                         // reserved
+  };
+  ref10.size = sizeof(ref10);
+  ref10.d_init = sizeof(ref10);
 
-     bdli7->size = arraySize;                              // size
-     bdli7->kind = BrigEDirectiveLabelInit;                // kind
-     bdli7->c_code = 0;                                    // c_code
-     bdli7->elementCount = 3;                              // elementCount
-     bdli7->d_labels[0] = sizeof(ref7) + arraySize;        // d_labels
-     bdli7->d_labels[1] = bdli7->d_labels[0] + sizeof(BrigDirectiveLabel);
-     bdli7->d_labels[2] = bdli7->d_labels[1] + sizeof(BrigDirectiveLabel);
+  size_t arraySize = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t);
+  BrigDirectiveLabelInit* bdli10 = (BrigDirectiveLabelInit*) (malloc(arraySize));
 
-  // GlobalDecl_Test<BrigDirectiveSymbol> TestCase4(in, sbuf, &ref7, bdli7);
-  // TestCase7.Run_Test(&GlobalDecl);
-  // free(bdli7);  bdli7 = NULL;
+  bdli10->size = arraySize;                              // size
+  bdli10->kind = BrigEDirectiveLabelInit;                // kind
+  bdli10->c_code = 0;                                    // c_code
+  bdli10->elementCount = 2;                              // elementCount
+  bdli10->s_name = 0;
+  bdli10->d_labels[0] = 0;        // d_labels
+  bdli10->d_labels[1] = 0;
+
+  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> TestCase10(in, sbuf, &ref10, bdli10);
+  TestCase10.Run_Test(&GlobalDecl);
+  free(bdli10);  bdli10 = NULL;
   sbuf->clear();
-   */
+  /************************************************ Case 11 ***************************************/
+
+  in.assign("global_u32 %tab[3] = {@odd};\n");
+  name.assign("%tab"); sbuf->append(name);
+
+  BrigDirectiveSymbol ref11 = {
+    0,                        // size
+    BrigEDirectiveSymbol,     // kind
+    {
+      0,                      // c_code
+      BrigGlobalSpace,        // storage class
+      BrigNone,               // attribute
+      0,                      // reserved
+      BrigArray,              // symbolModifier
+      3,                      // dim
+      0,                      // s_name
+      Brigu32,                // type
+      1,                      // align
+    },
+    0,                        // d_init
+    0                         // reserved
+  };
+  ref11.size = sizeof(ref11);
+  ref11.d_init = sizeof(ref11);
+
+  arraySize = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t) * 2;
+  BrigDirectiveLabelInit* bdli11 = (BrigDirectiveLabelInit*) (malloc(arraySize));
+
+  bdli11->size = arraySize;                              // size
+  bdli11->kind = BrigEDirectiveLabelInit;                // kind
+  bdli11->c_code = 0;                                    // c_code
+  bdli11->elementCount = 3;                              // elementCount
+  bdli11->s_name = 0;
+  bdli11->d_labels[0] = 0;
+  bdli11->d_labels[1] = 0;
+  bdli11->d_labels[2] = 0;
+
+  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> TestCase11(in, sbuf, &ref11, bdli11);
+  TestCase11.Run_Test(&GlobalDecl);
+  free(bdli11);  bdli11 = NULL;
+  sbuf->clear();
+  /************************************************ Case 12 ***************************************/
+
+  in.assign("global_u32 %tab = {@odd};\n");
+  name.assign("%tab"); sbuf->append(name);
+
+  BrigDirectiveSymbol ref12 = {
+    0,                        // size
+    BrigEDirectiveSymbol,     // kind
+    {
+      0,                      // c_code
+      BrigGlobalSpace,        // storage class
+      BrigNone,               // attribute
+      0,                      // reserved
+      0,              // symbolModifier
+      0,                      // dim
+      0,                      // s_name
+      Brigu32,                // type
+      1,                      // align
+    },
+    0,                        // d_init
+    0                         // reserved
+  };
+  ref12.size = sizeof(ref12);
+  ref12.d_init = sizeof(ref12);
+
+  arraySize = sizeof(BrigDirectiveLabelInit);  
+  BrigDirectiveLabelInit* bdli12 = (BrigDirectiveLabelInit*) (malloc(arraySize));
+
+  bdli12->size = arraySize;                              // size
+  bdli12->kind = BrigEDirectiveLabelInit;                // kind
+  bdli12->c_code = 0;                                    // c_code
+  bdli12->elementCount = 1;                              // elementCount
+  bdli12->s_name = 0;
+  bdli12->d_labels[0] = 0;
+
+  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> TestCase12(in, sbuf, &ref12, bdli12);
+  TestCase12.Run_Test(&GlobalDecl);
+  free(bdli12);  bdli12 = NULL;
+  sbuf->clear();
+
   /*******************************************************End of tests ***********************************************/
   delete sbuf;
 
