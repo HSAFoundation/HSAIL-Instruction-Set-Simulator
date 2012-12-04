@@ -1456,9 +1456,9 @@ TEST(BrigKernelTest, IndirectBranches) {
   }
 }
 
-TEST(BrigKernelTest, DISABLED_IndirectCall) {
+TEST(BrigKernelTest, IndirectCall) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 1:0:$large;\n"
     "function &foo (arg_u32 %r) (arg_u32 %n)\n"
     "{\n"
     "  ld_arg_u32 $s1, [%n];\n"     //add 1 to %n and set result to %r
@@ -1482,27 +1482,27 @@ TEST(BrigKernelTest, DISABLED_IndirectCall) {
     "{\n"
     "  ld_kernarg_u32 $s0, [%n_ptr];\n"
 
-    "  ldc_b32 $s3, &foo;\n"
+    "  ldc_b64 $d3, &foo;\n"
     "  {\n"
     "    arg_u32 %r;\n"
     "    arg_u32 %n;\n"
     "    st_arg_u32 $s0, [%n];\n"
-    "    call $s3 (%r)(%n) [&foo, &bar];\n"
+    "    call $d3 (%r)(%n) [&foo, &bar];\n"
     "    ld_arg_u32 $s0, [%r];\n"
     "  }\n"
 
-    "  ldc_b32 $s3, &bar;\n"
+    "  ldc_b64 $d3, &bar;\n"
     "  {\n"
     "    arg_u32 %r;\n"
     "    arg_u32 %n;\n"
     "    st_arg_u32 $s0, [%n];\n"
-    "    call $s3 (%r)(%n) &barone_t;\n"
+    "    call $d3 (%r)(%n) &barone_t;\n"
     "    ld_arg_u32 $s0, [%r];\n"
     "  }\n"
 
     "@return:"
-    "  ld_kernarg_u32 $s1, [%r_ptr];\n"
-    "  st_global_u32 $s0, [$s1];\n"
+    "  ld_kernarg_u64 $d1, [%r_ptr];\n"
+    "  st_global_u32 $s0, [$d1];\n"
     "  ret;\n"
     "};"
     );

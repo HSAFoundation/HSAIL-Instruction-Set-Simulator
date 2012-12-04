@@ -615,6 +615,27 @@ static void runOnIndirectBranchInst(llvm::BasicBlock &B,
   launchInst->setDefaultDest(launchInst->getSuccessor(1));
 }
 
+static llvm::Value *decodeFunPacking(llvm::BasicBlock &B,
+                                     llvm::Value *rawFun,
+                                     const std::vector<llvm::Value *> &args) {
+
+  if(llvm::isa<llvm::Function>(rawFun)) return rawFun;
+
+  llvm::LLVMContext &C = B.getContext();
+  llvm::Type *result = llvm::Type::getVoidTy(C);
+  std::vector<llvm::Type *> params;
+  for(unsigned i = 0; i < args.size(); ++i) {
+    params.push_back(args[i]->getType());
+  }
+
+  llvm::Type *funTy = llvm::FunctionType::get(result, params, false);
+  llvm::Type *funPtrTy = funTy->getPointerTo(0);
+  llvm::Instruction::CastOps castOp =
+    llvm::CastInst::getCastOpcode(rawFun, false, funPtrTy, false);
+
+  return llvm::CastInst::Create(castOp, rawFun, funPtrTy, "", &B);
+}
+
 static void runOnCallInst(llvm::BasicBlock &B,
                           const inst_iterator inst,
                           const BrigInstHelper &helper,
@@ -637,8 +658,9 @@ static void runOnCallInst(llvm::BasicBlock &B,
   }
 
   const BrigOperandBase *brigFun = helper.getOperand(inst, 2);
-  llvm::Value *func = getOperand(B, brigFun, helper, state);
-  llvm::CallInst::Create(func, args, "", &B);
+  llvm::Value *rawFun = getOperand(B, brigFun, helper, state);
+  llvm::Value *fun = decodeFunPacking(B, rawFun, args);
+  llvm::CallInst::Create(fun, args, "", &B);
 }
 
 static void runOnInstruction(llvm::BasicBlock &B,
