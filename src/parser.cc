@@ -3132,11 +3132,7 @@ int Instruction4Mad(Context* context) {
     return 1;
   }
   context->token_to_scan = yylex();
-  if (context->token_type != REGISTER &&
-      context->token_type != CONSTANT) {
-    context->set_error(INVALID_OPERAND);
-    return 1;
-  }
+
   if (Operand(context, &OpOffset[2])) {
     context->set_error(INVALID_THIRD_OPERAND);
     return 1;
