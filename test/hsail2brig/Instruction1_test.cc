@@ -300,7 +300,8 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   TestCase9.Run_Test(&Instruction1);
   sbuf->clear();
 
-/******************************  End of tests *****************************************/
+
+  /******************************  End of tests *****************************************/
   delete sbuf;
 }
 
@@ -583,7 +584,33 @@ TEST(CodegenTest, Instruction1Opcode_Codegen){
   Instruction1_Test <BrigInstBase, BrigOperandReg> TestCase5(in, sbuf, &out5, &dest5);
   TestCase5.Run_Test(&Instruction1);
   sbuf->clear();
+  /**********************************************************************************/
+  in.assign( "nullptr_global_u64 $d1;\n");
+  op1.assign("$d1"); sbuf->append(op1);
 
+  BrigOperandReg dest10 = {
+    0,
+    BrigEOperandReg,
+    Brigb64,
+    0,
+    0
+  };
+  dest10.size = sizeof(dest10);
+
+  BrigInstMem out10 = {
+    0,
+    BrigEInstMem,
+    BrigNullPtr,
+    Brigu64,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0},
+    BrigGlobalSpace
+  };
+  out10.size = sizeof(out10);
+
+  Instruction1_Test <BrigInstMem, BrigOperandReg> TestCase10(in, sbuf, &out10, &dest10);
+  TestCase10.Run_Test(&Instruction1);
+  sbuf->clear();
 /******************************  End of tests *****************************************/
   delete sbuf;
 }
