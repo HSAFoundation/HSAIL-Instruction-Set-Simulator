@@ -122,12 +122,17 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
   }
 }
 
-static llvm::Type *runOnType(llvm::LLVMContext &C, const BrigSymbol &S) {
-
-  if(S.isArray()) assert(false && "Array types unimplemented");
-  if(S.isFlexArray()) assert(false && "Flex array types unimplemented");
-
-  return runOnType(C, S.getType());
+static llvm::Type *runOnType(llvm::LLVMContext &C,
+                             const BrigSymbol &S) {
+  BrigDataType brigType = S.getType();
+  llvm::Type *llvmType = runOnType(C, brigType);
+  if(!S.isArray()) {
+    return llvmType;
+  } else if(S.isFlexArray()) {
+    return llvmType->getPointerTo(0);
+  } else {
+    return llvm::ArrayType::get(llvmType, S.getArrayDim());
+  }
 }
 
 static llvm::GlobalValue::LinkageTypes runOnLinkage(BrigAttribute link) {
@@ -803,17 +808,6 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
     makeKernelTrampoline(fun, F.getName());
 }
 
-static llvm::Type *getType(llvm::LLVMContext &C,
-                           const BrigSymbol &S) {
-  BrigDataType brigType = S.getType();
-  llvm::Type *llvmType = runOnType(C, brigType);
-  if(!S.isArray()) {
-    return llvmType;
-  } else {
-    return llvm::ArrayType::get(llvmType, S.getArrayDim());
-  }
-}
-
 template<class T>
 static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
                                         llvm::Type *type,
@@ -837,7 +831,7 @@ static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
 static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
                         SymbolMap &symbolMap) {
   llvm::LLVMContext &C = M.getContext();
-  llvm::Type *type = getType(C, S);
+  llvm::Type *type = runOnType(C, S);
   bool isConst = S.isConst();
   llvm::GlobalValue::LinkageTypes linkage = runOnLinkage(S.getLinkage());
   llvm::Twine name(S.getName());
