@@ -2467,7 +2467,7 @@ TEST(BrigWriterTest, GlobalInitialization_b64) {
   if(!BP) return;
 }
 
-static const char GlobalInitializerInst[] = 
+static const char GlobalInitializerInst[] =
   "version 1:0:$%s;\n"
   "\n"
   "global_%s &n = %s;\n"
@@ -2527,25 +2527,25 @@ for(unsigned i =0; i < 2; ++i) {
            mReg[i]);
 
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
-  delete buffer;
-  
+  delete[] buffer;
+
   EXPECT_TRUE(BP);
   if(!BP) return;
-  
+
   T *arg_val0 = new T;
   *arg_val0 = 0;
-  
+
   void *args[] = { &arg_val0 };
   llvm::Function *fun = BP->getFunction("__OpenCL_Global_Initializer_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
   EXPECT_EQ(result, *arg_val0);
-  
+
   delete arg_val0;
  }
 }
-  
+
 TEST(BrigGlobalTest, GlobalInitializer) {
   {
     const uint8_t result = uint8_t(0x0);
@@ -2556,7 +2556,7 @@ TEST(BrigGlobalTest, GlobalInitializer) {
   {
     const uint8_t result = uint8_t(0xff);
     const char *value = "0xff";
-    unsigned bits = 8; 
+    unsigned bits = 8;
     testGlobalInitializer("b8", result, value, bits);
   }
   {
@@ -2890,11 +2890,11 @@ static void testGlobalArray(const char *type,
              reg);
 
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
-  delete buffer;
-  
+  delete[] buffer;
+
   EXPECT_TRUE(BP);
   if(!BP) return;
-  
+
   T *arg_val0 = new T[arraySz];
   for (unsigned i = 0; i < arraySz; i++) {
     arg_val0[i] = 0;
@@ -2906,7 +2906,7 @@ static void testGlobalArray(const char *type,
   llvm::Function *fun = BP->getFunction("__OpenCL_Global_Array_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
-  
+
   for (unsigned i = 0; i < arraySz; i++) {
     EXPECT_EQ(result[i], arg_val0[i]);
   }
