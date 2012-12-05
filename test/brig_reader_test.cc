@@ -2831,58 +2831,97 @@ TEST(BrigGlobalTest, GlobalInitializer) {
   }
 }
 
-TEST(BrigGlobalTest, GlobalArrayInitializer) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-      "version 1:0:$small;\n"
-      "\n"
-      "global_f32 &array[] = { 1.1f, 2.2f };\n"
-      "\n"
-      "kernel &__OpenCL_global_array_kernel(\n"
-      "        kernarg_u32 %arg_val0, kernarg_u32 %n, kernarg_u32 %bits)\n"
-      "{\n"
-      "        ld_kernarg_u32 $s3, [%n];\n"
-      "        ld_kernarg_u32 $s5, [%bits];\n"
-      "        div_u32 $s5, $s5, 8;"
-      "        xor_b32 $s2, $s2, $s2;\n"
-      "        mov_b32 $s9, 0;\n"
-      "        ld_kernarg_u32 $s0, [%arg_val0] ;\n"
-      "@store:"
-      "        ld_global_u32 $s4, [&array][$s9];\n"
-      "        st_global_u32 $s4, [$s0];\n"
-      "        add_u32 $s9, $s9, $s5;\n"
-      "        add_u32 $s0, $s0, $s5;\n"
-      "@loop_check:"
-      "        add_u32 $s2, $s2, 1;\n"
-      "        cmp_lt_b1_u32 $c1, $s2, $s3;\n"
-      "        cbr $c1, @store;\n"
-      "        ret ;\n"
-      "} ;\n"
-      );
+static const char GlobalArrayInst[] =
+  "version 1:0:$small;\n"
+  "\n"
+  "global_%s &array[] = { %s };\n"
+  "\n"
+  "kernel &__OpenCL_Global_Array_kernel(\n"
+  "        kernarg_u32 %%arg_val0, kernarg_u32 %%n, kernarg_u32 %%bitsLen)\n"
+  "{\n"
+  "        ld_kernarg_u32 $s3, [%%n];\n"
+  "        ld_kernarg_u32 $s5, [%%bitsLen];\n"
+  "        div_u32 $s5, $s5, 8;\n"
+  "        xor_b32 $s2, $s2, $s2;\n"
+  "        mov_b32 $s9, 0;\n"
+  "        ld_kernarg_u32 $s0, [%%arg_val0];\n"
+  "@store:\n"
+  "        ld_global_u%u $%c4, [&array][$s9];\n"
+  "        st_global_u%u $%c4, [$s0];\n"
+  "        add_u32 $s9, $s9, $s5;\n"
+  "        add_u32 $s0, $s0, $s5;\n"
+  "@loop_check:\n"
+  "        add_u32 $s2, $s2, 1;\n"
+  "        cmp_lt_b1_u32 $c1, $s2, $s3;\n"
+  "        cbr $c1, @store;\n"
+  "        ret ;\n"
+  "} ;\n";
 
+template<class T>
+static void testGlobalArray(const char *type,
+                            const T *result,
+                            const char *value,
+                            unsigned bits,
+                            unsigned arraySz) {
+  char reg = 0;
+  if(bits == 8 || bits == 16 || bits == 32)
+    reg = 's';
+  if(bits == 64)
+    reg = 'd';
+  size_t size =
+    snprintf(NULL,
+             0,
+             GlobalArrayInst,
+             type,
+             value,
+             bits,
+             reg,
+             bits,
+             reg);
+  char *buffer = new char[size];
+  snprintf(buffer,
+           size,
+             GlobalArrayInst,
+             type,
+             value,
+             bits,
+             reg,
+             bits,
+             reg);
+
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete buffer;
+  
   EXPECT_TRUE(BP);
   if(!BP) return;
-
-  const unsigned arrayLen = 2;
-  const unsigned bitLen = 32;
-  float *arg_val0 = new float[2];
-  for (unsigned i = 0; i < 2; i++) {
+  
+  T *arg_val0 = new T[arraySz];
+  for (unsigned i = 0; i < arraySz; i++) {
     arg_val0[i] = 0;
   }
-  unsigned *n = new unsigned(arrayLen);
-  unsigned *bits= new unsigned(bitLen);
+  unsigned *n = new unsigned(arraySz);
+  unsigned *bitsLen = new unsigned(bits);
 
-  float result[arrayLen] = { 1.1f, 2.2f };
-
-  llvm::Function *fun = BP->getFunction("__OpenCL_global_array_kernel");
-  void *args[] = { &arg_val0, n, bits };
+  void *args[] = { &arg_val0, n, bitsLen };
+  llvm::Function *fun = BP->getFunction("__OpenCL_Global_Array_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
-
-  for (unsigned i = 0; i < 2; i++) {
-    EXPECT_FLOAT_EQ(result[i], arg_val0[i]);
+  
+  for (unsigned i = 0; i < arraySz; i++) {
+    EXPECT_EQ(result[i], arg_val0[i]);
   }
 
   delete[] arg_val0;
+  delete bitsLen;
   delete n;
-  delete bits;
+}
+
+TEST(BrigGlobalTest, GlobalArray) {
+  {
+    float result[5] = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f };
+    const char *value = "1.1f, 2.2f, 3.3f, 4.4f, 5.5f";
+    const unsigned bits = 32;
+    const unsigned arraySz = 5;
+    testGlobalArray("f32", result, value, bits, arraySz);
+  }
 }
