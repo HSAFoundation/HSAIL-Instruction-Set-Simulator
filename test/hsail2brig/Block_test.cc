@@ -63,9 +63,9 @@ TEST(CodegenTest, Block_CodeGen) {
   in.append("blockstring \"this is a string2\";\n");
   in.append("endblock;\n");
 
-  blockName.assign("\"debug\"");  
-  strBlock1.assign("\"this is a string1\""); 
-  strBlock2.assign("\"this is a string2\"");
+  blockName.assign("debug");  
+  strBlock1.assign("this is a string1"); 
+  strBlock2.assign("this is a string2");
 
   symbols->append(blockName);
   symbols->append(strBlock1);
@@ -162,11 +162,11 @@ TEST(CodegenTest, Block_CodeGen) {
   in.append("blockstring \"this is a string4\";\n");
   in.append("endblock;\n");
 
-  blockName.assign("\"string\"");  
-  strBlock1.assign("\"this is a string1\""); 
-  strBlock2.assign("\"this is a string2\"");
-  strBlock3.assign("\"this is a string3\""); 
-  strBlock4.assign("\"this is a string4\"");
+  blockName.assign("string");  
+  strBlock1.assign("this is a string1"); 
+  strBlock2.assign("this is a string2");
+  strBlock3.assign("this is a string3"); 
+  strBlock4.assign("this is a string4");
 
   symbols->append(blockName);
   symbols->append(strBlock1);
@@ -221,7 +221,7 @@ TEST(CodegenTest, Block_CodeGen) {
   in.append("blocknumeric_b32 11, 23, 10, 22;\n");
   in.append("endblock;\n");
 
-  blockName.assign("\"numeric\"");  
+  blockName.assign("numeric");  
   symbols->append(blockName);
 
   start.size = sizeof(start);
