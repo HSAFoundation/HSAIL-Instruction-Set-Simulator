@@ -2423,3 +2423,26 @@ TEST(BrigInstTest, CvtRoundingMode) {
     }
   }
 }
+
+TEST(BrigWriterTest, FlexArray) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "function &maxofN(arg_f32 %r)(arg_u32 %n, align 8 arg_u8 %last[])\n"
+    "{\n"
+    "ld_arg_u32 $s0, [%n];\n"
+    "mov_b32 $s1, 0;\n"
+    "mov_b32 $s3, 0;\n"
+    "@loop:\n"
+    "cmp_eq_b1_u32 $c1, $s0, 0;\n"
+    "cbr $c1, @done;\n"
+    "ld_arg_f32 $s4, [%last][$s3]; \n"
+    "add_f32 $s1, $s1, $s4;\n"
+    "add_u32 $s3, $s3, 4;\n"
+    "sub_u32 $s0, $s0, 1;\n"
+    "brn @loop;\n"
+    "@done:\n"
+    "st_arg_f32 $s1, [%r];\n"
+    "ret;\n"
+    "};\n"
+   );
+}
