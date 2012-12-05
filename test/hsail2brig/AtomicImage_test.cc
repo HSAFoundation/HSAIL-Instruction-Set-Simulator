@@ -6,7 +6,9 @@
 namespace hsa {
 namespace brig {
 
-template <typename T2, typename T3, typename T4 = BrigOperandReg>
+template <typename T2 = BrigOperandReg, 
+          typename T3 = BrigOperandReg, 
+          typename T4 = BrigOperandReg>
 class AtomicImage_Test: public BrigCodeGenTest {
 
 private:
@@ -21,6 +23,9 @@ private:
   const BrigOperandReg* ImageReg;
 
 public:
+  AtomicImage_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   AtomicImage_Test(std::string& in, StringBuffer* sbuf, BrigInstAtomicImage* ref,
            BrigOperandReg* Dest, BrigOperandOpaque* Src1, T2* Src2, T3* Src3,
            T4* Src4 = NULL, BrigOperandReg* regList = NULL, BrigOperandReg *imageReg = NULL):
@@ -73,6 +78,9 @@ public:
 
     delete code;
     delete oper;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -1372,6 +1380,31 @@ TEST(CodegenTest, ImageNoRet_CodeGen) {
 
 }
 
+TEST(ErrorReportTest, ImageRet) {  
+  std::string input = "atomic_image_cas_1d_b32 $s10, [&namedRWImg2], $s1, $s3, $s4\n";
+  AtomicImage_Test<> TestCase1(input);
+  TestCase1.Run_Test(&ImageRet, MISSING_SEMICOLON);
+  input.assign("atomic_image_cas_1d_b32 $s10, [&namedRWImg2], $s1, $s3;\n");
+  AtomicImage_Test<> TestCase2(input);
+  TestCase2.Run_Test(&ImageRet, MISSING_COMMA);
+
+  input.assign("atomic_image_add_ar_2d $s1, [&name<$s5 + 4>], ($s0,$s3), $s2;\n");
+  AtomicImage_Test<> TestCase3(input);
+  TestCase3.Run_Test(&ImageRet, MISSING_DATA_TYPE);
+}
+
+TEST(ErrorReportTest, ImageNoRet) {  
+  std::string input = "atomicNoRet_image_cas_1d_b32 [&namedRWImg], $s1, $s3, $s4\n";
+  AtomicImage_Test<> TestCase1(input);
+  TestCase1.Run_Test(&ImageNoRet, MISSING_SEMICOLON);
+  input.assign("atomicNoRet_image_max_ar_2da [&name], ($s2,$s3,$s4,$s5), $s6;\n");
+  AtomicImage_Test<> TestCase2(input);
+  TestCase2.Run_Test(&ImageNoRet, MISSING_DATA_TYPE);
+
+  input.assign("atomicNoRet_image_add_ar_2d_u32 [&name<$s5 + 10>], ($s0,$s3);\n");
+  AtomicImage_Test<> TestCase3(input);
+  TestCase3.Run_Test(&ImageNoRet, MISSING_COMMA);
+}
 
 } // namespace hsa
 } // namespace brig

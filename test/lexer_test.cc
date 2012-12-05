@@ -1408,10 +1408,6 @@ TEST(LexTest, Bug51_AtomModifier) {              // keywords for Atom Modifiers
 
   EXPECT_EQ(_AR, lexer->get_next_token());
 
-  input.assign("_region");
-  lexer->set_source_string(input);
-  EXPECT_EQ(_REGION, lexer->get_next_token());
-
   input.assign("atomic_cas");
   lexer->set_source_string(input);
   EXPECT_EQ(ATOMIC_CAS, lexer->get_next_token());

@@ -1,13 +1,4 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
@@ -21,6 +12,9 @@ private:
   const BrigDirectiveControl* RefDir;
 
 public:
+  Control_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Control_Test(std::string& in, StringBuffer* sbuf, BrigDirectiveControl* ref) :
     BrigCodeGenTest(in, sbuf),
     RefDir(ref)  { }
@@ -36,7 +30,9 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete dir;
   }  
-
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
  };
 
 TEST(CodegenTest,Control_CodeGen){
@@ -115,6 +111,19 @@ TEST(CodegenTest,Control_CodeGen){
 
   /*************************************end*********************************/
   delete symbols;
+}
+TEST(ErrorReportTest, Control) {  
+  std::string input =  "memopt_off \n";
+  Control_Test TestCase1(input);
+  TestCase1.Run_Test(&Control, MISSING_SEMICOLON);
+  
+  input.assign( "workgroupspercu; \n");
+  Control_Test TestCase2(input);
+  TestCase2.Run_Test(&Control, MISSING_INTEGER_CONSTANT);
+
+  input.assign( "itemsperworkgroup 2,4; \n");
+  Control_Test TestCase3(input);
+  TestCase3.Run_Test(&Control, MISSING_COMMA);
 }
 
 }

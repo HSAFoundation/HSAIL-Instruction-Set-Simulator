@@ -4191,6 +4191,7 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("$s1"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
     BrigDirectiveVersion bdv = {
@@ -4205,16 +4206,33 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
       0
     };
     directives.append(&bdv);
-
+    BrigDirectiveSymbol bdsy1 = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        8,                               // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bdsy1);
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     BrigInstAtomic bca = {
       sizeof(bca),
       BrigEInstAtomic,
       BrigAtomic,
-      Brigb32,
+      Brigu32,
       BrigNoPacking,
-      {0, 0, 0, 0, 0},
+      {8, 20, 32, 0, 0},
       BrigAtomicSub,
       BrigGlobalSpace,
       BrigAcquire
@@ -4222,7 +4240,31 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
     code.append(&bca);
 
     hsa::brig::Buffer operands;
-
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),                    // size
+      BrigEOperandReg,                 // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      8                               // name
+    };
+    operands.append(&bor1);
+    BrigOperandAddress boa1 = {
+      sizeof(boa1),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      28                                // directive
+    };
+    operands.append(&boa1);
+    BrigOperandReg bor2 = {
+      sizeof(bor1),                    // size
+      BrigEOperandReg,                 // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      8                               // name
+    };
+    operands.append(&bor2);
     hsa::brig::Buffer debug;
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
@@ -4339,7 +4381,8 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
-
+    strings.append(std::string("$s1"));
+    strings.append(std::string("$s2"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
     BrigDirectiveVersion bdv = {
@@ -4354,16 +4397,37 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
       0
     };
     directives.append(&bdv);
-
+    BrigDirectiveImage bdi = {
+      sizeof(bdi),
+      BrigEDirectiveImage,
+      {
+        8,             // c_code
+        BrigArgSpace,  // storageClass
+        BrigNone,      // attribute
+        0,             // reserved
+        0,             // symbolModifier
+        0,             // dim
+        8,            // s_name
+        BrigRWImg,       // type
+        1,            // align
+      },
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    };
+    directives.append(&bdi);
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     BrigInstAtomicImage biai = {
       sizeof(biai),
       BrigEInstAtomicImage,
       BrigAtomicImage,
-      Brigb32,
+      Brigu32,
       0,
-      {0, 0, 0, 0, 0},
+      {8, 32, 20, 20, 0},
       BrigAtomicSub,
       BrigGlobalSpace,
       BrigAcquire,
@@ -4372,7 +4436,33 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
     code.append(&biai);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      8
+    };
+    operands.append(&bor1);
 
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      12
+    };
+    operands.append(&bor2);
+
+    BrigOperandOpaque boo = {
+      sizeof(boo),
+      BrigEOperandOpaque,
+      28,
+      8,
+      0
+    };
+    operands.append(&boo);
     hsa::brig::Buffer debug;
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
@@ -4447,7 +4537,8 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
-
+    strings.append(std::string("$s1"));
+    strings.append(std::string("$s2"));
     BrigDirectiveVersion bdv = {
       sizeof(bdv),
       BrigEDirectiveVersion,
@@ -4460,24 +4551,80 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       0
     };
     directives.append(&bdv);
-
+    BrigDirectiveImage bdi = {
+      sizeof(bdi),
+      BrigEDirectiveImage,
+      {
+        8,             // c_code
+        BrigArgSpace,  // storageClass
+        BrigNone,      // attribute
+        0,             // reserved
+        0,             // symbolModifier
+        0,             // dim
+        8,            // s_name
+        BrigRWImg,       // type
+        1,            // align
+      },
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    };
+    directives.append(&bdi);
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
     BrigInstRead bir = {
       sizeof(bir),
       BrigEInstRead,
       BrigRdImage,
+      Brigu32,
+      BrigNoPacking,
+      {32, 56, 56, 20, 0},
       0,
-      0,
-      {0, 0, 0, 0, 0},
-      0,
-      0,
+      Brigu32,
       0
     };
     code.append(&bir);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      8
+    };
+    operands.append(&bor1);
 
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      12
+    };
+    operands.append(&bor2);
+
+    BrigOperandRegV4 borv = {
+      sizeof(borv),
+      BrigEOperandRegV4,
+      Brigb32,
+      0,
+      {8,8,20,20}
+    };
+    operands.append(&borv);
+
+    BrigOperandOpaque boo = {
+      sizeof(boo),
+      BrigEOperandOpaque,
+      28,
+      8,
+      0
+    };
+    operands.append(&boo);
     hsa::brig::Buffer debug;
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
@@ -5116,6 +5263,8 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("$s1"));
+    strings.append(std::string("$s2"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
 
@@ -5131,25 +5280,81 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       0
     };
     directives.append(&bdv);
-
+    BrigDirectiveImage bdi = {
+      sizeof(bdi),
+      BrigEDirectiveImage,
+      {
+        8,             // c_code
+        BrigArgSpace,  // storageClass
+        BrigNone,      // attribute
+        0,             // reserved
+        0,             // symbolModifier
+        0,             // dim
+        8,            // s_name
+        BrigRWImg,       // type
+        1,            // align
+      },
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    };
+    directives.append(&bdi);
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
 
     BrigInstImage bii = {
       sizeof(bii),              //size
       BrigEInstImage,           //kind
-      BrigRdImage,              //opcode
-      0,                        //type
-      0,                        //packing
-      {0, 0, 0, 0, 0},          //o_operands[5]
+      BrigLdImage,              //opcode
+      Brigu32,
+      BrigNoPacking,
+      {32, 56, 8, 0, 0},        //o_operands[5]
       0,                        //geom
-      0,                        //stype
+      Brigu32,                  //stype
       0                         //reserved
     };
     code.append(&bii);
 
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      8
+    };
+    operands.append(&bor1);
 
+    BrigOperandReg bor2 = {
+      sizeof(bor2),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      12
+    };
+    operands.append(&bor2);
+
+    BrigOperandRegV4 borv = {
+      sizeof(borv),
+      BrigEOperandRegV4,
+      Brigb32,
+      0,
+      {8,8,20,20}
+    };
+    operands.append(&borv);
+
+    BrigOperandOpaque boo = {
+      sizeof(boo),
+      BrigEOperandOpaque,
+      28,
+      8,
+      0
+    };
+    operands.append(&boo);
     hsa::brig::Buffer debug;
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
@@ -5180,7 +5385,7 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
     BrigInstImage bii = {
       sizeof(bii),              //size
       BrigEInstImage,           //kind
-      BrigRdImage + 1,          //opcode
+      BrigStImage + 1,          //opcode
       Brigf64x2 + 1,            //type
       BrigPackPsat + 1,         //packing
       {20, 0, 0, 0, 0},         //o_operands[5]
@@ -5419,6 +5624,7 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("$s1"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
     BrigDirectiveVersion bdv = {
@@ -5427,7 +5633,7 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
       0,
       1,
       0,
-      BrigELarge,
+      BrigESmall,
       BrigEFull,
       BrigENosftz,
       0
@@ -5439,16 +5645,24 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
     BrigInstMem bcm = {
       sizeof(bcm),
       BrigEInstMem,
-      BrigRet,
-      Brigb32,
+      BrigNullPtr,
+      Brigu32,
       BrigNoPacking,
-      {0, 0, 0, 0, 0},
+      {8, 0, 0, 0, 0},
       BrigGlobalSpace
     };
     code.append(&bcm);
 
     hsa::brig::Buffer operands;
-
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),
+      BrigEOperandReg,
+      Brigb32,
+      0,
+      8
+    };
+    operands.append(&bor1);
     hsa::brig::Buffer debug;
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,
@@ -5773,6 +5987,8 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
   {
     hsa::brig::StringBuffer strings;
     for(unsigned i = 0; i < 8; ++i) strings.append_char(0);
+    strings.append(std::string("$s0"));
+    strings.append(std::string("%output"));
     hsa::brig::Buffer directives;
     for(unsigned i = 0; i < 8; ++i) directives.append_char(0);
     BrigDirectiveVersion bdv = {
@@ -5787,24 +6003,58 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
       0
     };
     directives.append(&bdv);
-
+    BrigDirectiveSymbol bds = {
+      40,                              // size
+      BrigEDirectiveSymbol,            // kind
+      {
+        0,                               // c_code
+        BrigArgSpace,                    // storageClass
+        BrigNone,                        // attribute
+        0,                               // reserved
+        0,                               // symbolModifier
+        0,                               // dim
+        11,                              // s_name
+        Brigf32,                         // type
+        1                                // align
+      },
+      0,                               // d_init
+      0                                // reserved
+    };
+    directives.append(&bds);
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstAtomic bils = {
-      sizeof(bils),
-      BrigEInstLdSt,
-      BrigLd,
-      Brigb32,
-      BrigNoPacking,
-      {0, 0, 0, 0, 0},
-      BrigGlobalSpace,
-      BrigAcquire,
-      0
+    BrigInstLdSt st1 = {
+      sizeof(st1),                     // size
+      BrigEInstLdSt,                   // kind
+      BrigSt,                          // opcode
+      Brigf32,                         // type
+      BrigNoPacking,                   // packing
+      { 8, 20, 0, 0, 0 },              // o_operand
+      BrigArgSpace,                    // storageClass
+      BrigRegular,                     // memorySemantic
+      0                                // equivClass
     };
-    code.append(&bils);
-
+    code.append(&st1);
+    
     hsa::brig::Buffer operands;
+    for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
+    BrigOperandReg bor1 = {
+      sizeof(bor1),                    // size
+      BrigEOperandReg,                 // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      8                               // name
+    };
+    operands.append(&bor1);
 
+    BrigOperandAddress boa1 = {
+      sizeof(boa1),                    // size
+      BrigEOperandAddress,             // kind
+      Brigb32,                         // type
+      0,                               // reserved
+      28,                             // directive
+    };
+    operands.append(&boa1);
     hsa::brig::Buffer debug;
 
     hsa::brig::BrigModule mod(strings, directives, code, operands, debug,

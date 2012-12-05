@@ -122,12 +122,17 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
   }
 }
 
-static llvm::Type *runOnType(llvm::LLVMContext &C, const BrigSymbol &S) {
-
-  if(S.isArray()) assert(false && "Array types unimplemented");
-  if(S.isFlexArray()) assert(false && "Flex array types unimplemented");
-
-  return runOnType(C, S.getType());
+static llvm::Type *runOnType(llvm::LLVMContext &C,
+                             const BrigSymbol &S) {
+  BrigDataType brigType = S.getType();
+  llvm::Type *llvmType = runOnType(C, brigType);
+  if(!S.isArray()) {
+    return llvmType;
+  } else if(S.isFlexArray()) {
+    return llvmType->getPointerTo(0);
+  } else {
+    return llvm::ArrayType::get(llvmType, S.getArrayDim());
+  }
 }
 
 static llvm::GlobalValue::LinkageTypes runOnLinkage(BrigAttribute link) {
@@ -615,6 +620,27 @@ static void runOnIndirectBranchInst(llvm::BasicBlock &B,
   launchInst->setDefaultDest(launchInst->getSuccessor(1));
 }
 
+static llvm::Value *decodeFunPacking(llvm::BasicBlock &B,
+                                     llvm::Value *rawFun,
+                                     const std::vector<llvm::Value *> &args) {
+
+  if(llvm::isa<llvm::Function>(rawFun)) return rawFun;
+
+  llvm::LLVMContext &C = B.getContext();
+  llvm::Type *result = llvm::Type::getVoidTy(C);
+  std::vector<llvm::Type *> params;
+  for(unsigned i = 0; i < args.size(); ++i) {
+    params.push_back(args[i]->getType());
+  }
+
+  llvm::Type *funTy = llvm::FunctionType::get(result, params, false);
+  llvm::Type *funPtrTy = funTy->getPointerTo(0);
+  llvm::Instruction::CastOps castOp =
+    llvm::CastInst::getCastOpcode(rawFun, false, funPtrTy, false);
+
+  return llvm::CastInst::Create(castOp, rawFun, funPtrTy, "", &B);
+}
+
 static void runOnCallInst(llvm::BasicBlock &B,
                           const inst_iterator inst,
                           const BrigInstHelper &helper,
@@ -637,8 +663,9 @@ static void runOnCallInst(llvm::BasicBlock &B,
   }
 
   const BrigOperandBase *brigFun = helper.getOperand(inst, 2);
-  llvm::Value *func = getOperand(B, brigFun, helper, state);
-  llvm::CallInst::Create(func, args, "", &B);
+  llvm::Value *rawFun = getOperand(B, brigFun, helper, state);
+  llvm::Value *fun = decodeFunPacking(B, rawFun, args);
+  llvm::CallInst::Create(fun, args, "", &B);
 }
 
 static void runOnInstruction(llvm::BasicBlock &B,
@@ -781,17 +808,6 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
     makeKernelTrampoline(fun, F.getName());
 }
 
-static llvm::Type *getType(llvm::LLVMContext &C,
-                           const BrigSymbol &S) {
-  BrigDataType brigType = S.getType();
-  llvm::Type *llvmType = runOnType(C, brigType);
-  if(!S.isArray()) {
-    return llvmType;
-  } else {
-    return llvm::ArrayType::get(llvmType, S.getArrayDim());
-  }
-}
-
 template<class T>
 static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
                                         llvm::Type *type,
@@ -815,7 +831,7 @@ static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
 static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
                         SymbolMap &symbolMap) {
   llvm::LLVMContext &C = M.getContext();
-  llvm::Type *type = getType(C, S);
+  llvm::Type *type = runOnType(C, S);
   bool isConst = S.isConst();
   llvm::GlobalValue::LinkageTypes linkage = runOnLinkage(S.getLinkage());
   llvm::Twine name(S.getName());

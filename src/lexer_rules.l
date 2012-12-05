@@ -100,11 +100,11 @@ OCT_INT     (0[0-7]+)
 DEC_INT     (0|([1-9]+[0-9]*))
 HEX_INT     (0(x|X)[0-9a-fA-F]+)
 
-DEC_DOUBLE  ([0-9]*((("."[0-9]*)(l|L)?)|([0-9]+(l|L))|(("."[0-9]*)?((e|E)[+|-]?[0-9]+)(l|L)?)))
+DEC_DOUBLE  ([-]?[0-9]*((("."[0-9]*)(l|L)?)|([0-9]+(l|L))|(("."[0-9]*)?((e|E)[+|-]?[0-9]+)(l|L)?)))
 HEX_DOUBLE  (0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(l|L)?)
 IEEE_DOUBLE (0(d|D)[0-9a-fA-F]{16})
 
-DEC_SINGLE  ([0-9]*(("."[0-9]*)|([0-9]+)|(("."[0-9]*)?((e|E)[+|-]?[0-9]+)))(f|F))
+DEC_SINGLE  ([-]?[0-9]*(("."[0-9]*)|([0-9]+)|(("."[0-9]*)?((e|E)[+|-]?[0-9]+)))(f|F))
 HEX_SINGLE  (0(x|X)[0-9a-fA-F]+(("."[0-9a-fA-F]*)((p|P)[+|-]?[0-9]*)?)(f|F))
 IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 
@@ -1966,15 +1966,6 @@ f2u4              { free_string(context);
                     return F2U4;}
 
   /*-- Atom Modifiers --*/
-_ar               { free_string(context);
-                    context->token_type = ATOM_MODIFIER;
-                    context->yycolno+=yyleng;
-                    return _AR;}
-
-_region           { free_string(context);
-                    context->token_type = ATOM_MODIFIER;
-                    context->yycolno+=yyleng;
-                    return _REGION;}
 
 _cas              { free_string(context);
                     context->token_type = ATOM_MODIFIER;
@@ -2016,31 +2007,47 @@ cvt               { free_string(context);
                     context->yycolno+=yyleng;
                     return CVT;}
 
-_dep              { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
-                    context->yycolno+=yyleng;
-                    return _DEP;}
-
 _equiv            { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;
                     return _EQUIV;}
 
+_ar               { free_string(context);
+                    context->token_type = MEMORY_SEMANTIC;
+                    context->yycolno+=yyleng;
+                    return _AR;}
+                   
+_dep              { free_string(context);
+                    context->token_type = MEMORY_SEMANTIC;
+                    context->yycolno+=yyleng;
+                    return _DEP;}
+
 _acq              { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
+                    context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _ACQ;}
 
 _part_ar          { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
+                    context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _PART_AR;}
 
 _rel              { free_string(context);
-                    context->token_type = COMMON_KEYWORD;
+                    context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _REL;}
 
+_part_acq              { free_string(context);
+                    context->token_type = MEMORY_SEMANTIC;
+                    context->yycolno+=yyleng;
+                    return _PART_ACQ;}
+
+_part_rel              { free_string(context);
+                    context->token_type = MEMORY_SEMANTIC;
+                    context->yycolno+=yyleng;
+                    return _PART_REL;}
+                    
+                    
 ld                { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;

@@ -1,20 +1,12 @@
-#include <iostream>
-#include <string>
-
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
 #include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
 #include "parser_wrapper.h"
 #include "../codegen_test.h"
 
 namespace hsa{
 namespace brig{
 
-template <typename T> class Cvt_Test : public BrigCodeGenTest{
+template <typename T = BrigOperandReg> 
+class Cvt_Test : public BrigCodeGenTest{
 private:
   
   //Instruction in .code buffer
@@ -24,6 +16,9 @@ private:
   const T* RefSrc1;
      
 public:
+  Cvt_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Cvt_Test(std::string& in, StringBuffer* sbuf, BrigInstCvt* ref, BrigOperandReg* Dest, T* Src1) : 
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),
@@ -46,6 +41,9 @@ public:
     delete code;
     delete oper;
   }  
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
+  }
  }; 
 
 TEST(CodegenTest, Cvt_CodeGen){  
@@ -312,6 +310,19 @@ delete symbols;
 
 }
 
+TEST(ErrorReportTest, Cvt) {  
+  std::string input =  "cvt_upi_f32_s32 $s1, 35\n";
+  Cvt_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Cvt, MISSING_SEMICOLON);
+
+  input.assign( "cvt_up_f32 $s1, 3.14f ;\n");
+  Cvt_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Cvt, MISSING_DATA_TYPE);
+
+  input.assign( "cvt_f32_f64 $d1;\n");
+  Cvt_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Cvt, MISSING_COMMA);
+}
 
 }
 }

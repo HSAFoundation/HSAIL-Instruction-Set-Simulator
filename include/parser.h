@@ -15,6 +15,8 @@ int QueryOp(Context* context, BrigDataType16_t* pDataType, BrigOpcode32_t* pOpco
 
 int Operand(Context* context);
 int Operand(Context* context, BrigoOffset32_t* pRetOpOffset);
+int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
+            BrigDataType16_t expectedType);
 
 int Identifier(Context* context);
 int BaseOperand(Context* context);
@@ -121,7 +123,7 @@ int Block(Context* context);
 
 int DecimalListSingleBLock(Context* context);
 int DecimalInitializer(Context* context, BrigdOffset32_t sym_offset);
-int DecimalListSingle(Context* context, std::vector<int32_t>* decimal_list);
+int DecimalListSingle(Context* context, std::vector<int64_t>* decimal_list);
 int FloatInitializer(Context* context, BrigdOffset32_t sym_offset);
 int FloatListSingle(Context* context, std::vector<double>* float_list);
 int SingleInitializer(Context *context, BrigdOffset32_t sym_offset);
@@ -146,8 +148,6 @@ int LdModifier(Context* context);
 int TopLevelStatement(Context *context);
 int TopLevelStatements(Context *context);
 
-int Optacqreg(Context* context);
-
 int ArrayOperand(Context* context);
 
 int CodeBlockEnd(Context* context);
@@ -161,11 +161,14 @@ int GlobalSamplerDeclPart2(Context *context);
 int InitializableDecl(Context* context, BrigStorageClass32_t storage_class);
 int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset, BrigoOffset32_t* pRetOpOffset);
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
-int AtomModifiers(Context* context, BrigMemorySemantic32_t* pMemorySemantic);
+int AddressSpaceIdentifier(Context* context);
 int Optacqreg(Context* context, BrigMemorySemantic32_t* memSemantic);
+int AcqRel(Context* context, BrigMemorySemantic32_t* memSemantic);
+int Acq(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperand(Context* context, BrigoOffset32_t* pOperand);
+int ArrayOperand(Context* context, BrigoOffset32_t* pOperand, BrigDataType16_t expectedType);
 
 int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
 int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
@@ -192,6 +195,7 @@ int Instruction2OpcodeFtz(Context* context);
 int BranchCbr(Context* context);
 int BranchBrn(Context* context);
 
+BrigDataType16_t ConvertType(BrigDataType16_t type);
 
 }  // namespace brig
 }  // namespace hsa

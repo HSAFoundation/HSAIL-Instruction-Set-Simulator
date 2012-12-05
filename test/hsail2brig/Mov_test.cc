@@ -441,6 +441,10 @@ TEST(ErrorReportTest, Mov) {
   input.assign( "mov_b1 100, $c1; \n");
   Mov_Test<> TestCase4(input);
   TestCase4.Run_Test(&Mov, INVALID_FIRST_OPERAND);
+   
+  input.assign("mov_b128 $c1, ($s2, $s3, $s4, $s5);\n");
+  Mov_Test<> TestCase5(input);
+  TestCase5.Run_Test(&Mov, INVALID_FIRST_OPERAND);
 }
 
 }

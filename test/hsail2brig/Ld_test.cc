@@ -504,8 +504,8 @@ TEST(CodegenTest, Ld_Codegen){
   sbuf->clear();
 
 /**********************************************************************************/
-  in.assign( "ld_global_u32 $s3, [%g][$s2];\n");
-  op1.assign("$s3"); op2.assign("$s2");
+  in.assign( "ld_global_u32 $s3, [%g][$d2];\n");
+  op1.assign("$s3"); op2.assign("$d2");
   sbuf->append(op1); sbuf->append(op2);
 
   BrigOperandReg dest7 = {
@@ -538,7 +538,7 @@ TEST(CodegenTest, Ld_Codegen){
   BrigOperandReg reg7 = {
     0,
     BrigEOperandReg,
-    Brigb32,
+    Brigb64,
     0,
     op1.size() + 1
   };
@@ -574,8 +574,8 @@ TEST(CodegenTest, Ld_Codegen){
   sbuf->clear();
 
 /**********************************************************************************/
-  in.assign( "ld_global_u32 $s4, [%g][$s2+4];\n");
-  op1.assign("$s4"); op2.assign("$s2");
+  in.assign( "ld_global_u32 $s4, [%g][$d2+4];\n");
+  op1.assign("$s4"); op2.assign("$d2");
   sbuf->append(op1); sbuf->append(op2);
 
   BrigOperandReg dest8 = {
@@ -608,7 +608,7 @@ TEST(CodegenTest, Ld_Codegen){
   BrigOperandReg reg8 = {
     0,
     BrigEOperandReg,
-    Brigb32,
+    Brigb64,
     0,
     op1.size() + 1
   };
@@ -702,10 +702,10 @@ TEST(CodegenTest, Ld_Codegen){
   sbuf->clear();
 
 /**********************************************************************************/
-  in.assign( "ld_v2_f32 ($s9,$s2), [$s1+3];\n");
+  in.assign( "ld_v2_f32 ($s9,$s2), [$d1+3];\n");
   op1.assign("$s9"); sbuf->append(op1);
   op1.assign("$s2"); sbuf->append(op1);
-  op2.assign("$s1"); sbuf->append(op2);
+  op2.assign("$d1"); sbuf->append(op2);
 
   BrigOperandImmed width10 = {
     0,
@@ -751,7 +751,7 @@ TEST(CodegenTest, Ld_Codegen){
   BrigOperandReg reg10 = {
     0,
     BrigEOperandReg,
-    Brigb32,
+    Brigb64,
     0,
     2 * (op1.size() + 1)
   };
@@ -984,8 +984,55 @@ TEST(CodegenTest, Ld_Codegen){
   Ld_Test<BrigInstLdSt, BrigOperandRegV4> TestCase12(in, sbuf, &out12, &width12, &dest12, &comp12, &addr12, NULL, regList);
   TestCase12.Run_Test(&Ld);
   sbuf->clear();
+  /**********************************************************************************/
+  in.assign("ld_equiv(1)_s8 $s1, [%g];\n");
+  op1.assign("$s1"); sbuf->append(op1);
 
-/******************************  End of tests *****************************************/
+  BrigOperandReg dest13 = {
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    0
+  };
+  dest13.size = sizeof(dest13);
+
+  BrigOperandImmed width13 = {
+    0,
+    BrigEOperandImmed,
+    Brigb32,
+    0,
+    {0}
+  };
+  width13.size = sizeof(width13);
+
+  BrigOperandAddress addr13 = {
+    0,
+    BrigEOperandAddress,
+    Brigb64,
+    0,
+    0
+  };
+  addr13.size = sizeof(addr13);
+
+  BrigInstLdSt out13 = {
+    0,
+    BrigEInstLdSt,
+    BrigLd,
+    Brigs8,
+    BrigNoPacking,
+    {0, sizeof(width13), sizeof(width13) + sizeof(dest13), 0, 0},
+    BrigFlatSpace,
+    BrigRegular,
+    1
+  };
+  out13.size = sizeof(out13);
+
+  Ld_Test<BrigInstLdSt, BrigOperandReg> TestCase13(in, sbuf, &out13, &width13, &dest13, &addr13);
+  TestCase13.Run_Test(&Ld);
+  sbuf->clear();
+
+  /******************************  End of tests *****************************************/
   delete sbuf;
 }
 
@@ -1071,8 +1118,8 @@ TEST(CodegenTest, Lda_Codegen){
   sbuf->clear();
 
 /**********************************************************************************/
-  in.assign( "lda_u32 $s2, [$s1];\n");
-  op1.assign("$s2"); op2.assign("$s1");
+  in.assign( "lda_u32 $s2, [$d1];\n");
+  op1.assign("$s2"); op2.assign("$d1");
   sbuf->append(op1); sbuf->append(op2);
 
   BrigOperandReg dest3 = {
@@ -1087,7 +1134,7 @@ TEST(CodegenTest, Lda_Codegen){
   BrigOperandReg reg3 = {
     0,
     BrigEOperandReg,
-    Brigb32,
+    Brigb64,
     0,
     op1.size() + 1
   };

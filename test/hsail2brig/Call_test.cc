@@ -5,7 +5,9 @@
 namespace hsa {
 namespace brig {
 
-template <typename TInst, typename TSrc2, typename TFuncList = BrigOperandFunctionRef>
+template <typename TInst = BrigInstBase,
+          typename TSrc2 = BrigOperandReg, 
+          typename TFuncList = BrigOperandFunctionRef>
 class Call_Test: public BrigCodeGenTest {
 
 private:
@@ -29,6 +31,9 @@ private:
 
 
 public:
+  Call_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Call_Test(std::string& in, StringBuffer* sbuf, TInst* ref, BrigOperandImmed *width,
             BrigOperandArgumentList* Src1, TSrc2* Src2, BrigOperandArgumentList* Src3,
             BrigOperandArgumentList* Src4,  BrigOperandArgumentRef* outList = NULL,
@@ -88,6 +93,9 @@ public:
     delete code;
     delete oper;
     delete dir;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -248,14 +256,14 @@ TEST(CodegenTest, Call_CodeGen) {
   funList.elementCount = 1;
   funList.o_args[0] = outMod.o_operands[3] + sizeof(inputArgs);
 
-  BrigOperandArgumentRef* funcList2 = new BrigOperandArgumentRef[pFunList->elementCount * sizeof(func)];
-  for (uint32_t i = 0 ; i < pFunList->elementCount ; ++i) {
+  BrigOperandFunctionRef* funcList2 = new BrigOperandFunctionRef[funList.elementCount * sizeof(func)];
+  for (uint32_t i = 0 ; i < funList.elementCount ; ++i) {
     funcList2[i].size = sizeof(funcList2[i]);
-    funcList2[i].kind = BrigEOperandArgumentRef;
-    funcList2[i].arg = 0;
+    funcList2[i].kind = BrigEOperandFunctionRef;
+    funcList2[i].fn = 0;
   }
 
-  Call_Test<BrigInstMod, BrigOperandReg, BrigOperandArgumentRef>
+  Call_Test<BrigInstMod, BrigOperandReg, BrigOperandFunctionRef>
   TestCase2(in, symbols, &outMod, &width, &outputArgs, &reg, &inputArgs, &funList, outputArgsList2, inputArgsList2, funcList2);
   TestCase2.Run_Test(&Call);
 
@@ -407,8 +415,85 @@ TEST(CodegenTest, Call_CodeGen) {
   TestCase5.Run_Test(&Call);
 
   symbols->clear();
+  /************************************* Test Case 6 ************************************/
+  in.assign("call $d1 (%in) [&foo, &bar];\n");
+  regName.assign("$d1");
+  symbols->append(regName);
+
+  outBase.size = sizeof(outBase);
+  outBase.kind = BrigEInstBase;
+  outBase.opcode = BrigCall;
+  outBase.type = Brigb32;
+  outBase.packing = BrigNoPacking;
+  outBase.o_operands[0] = 0;
+  outBase.o_operands[1] = sizeof(width) + sizeof(reg) + sizeof(inputArgs) + sizeof(argRef);
+  outBase.o_operands[2] = sizeof(width);
+  outBase.o_operands[3] = sizeof(width) + sizeof(reg) + sizeof(argRef);
+  outBase.o_operands[4] = outBase.o_operands[1] + sizeof(func) * 2 + sizeof(emptyArgs);
+
+  width.size = sizeof(width);
+  width.kind = BrigEOperandImmed;
+  width.type = Brigb32;
+  width.reserved = 0;
+  memset(&width.bits, 0, sizeof(width.bits));
+
+  inputArgs.size = sizeof(inputArgs);
+  inputArgs.kind = BrigEOperandArgumentList;
+  inputArgs.elementCount = 1;
+  inputArgs.o_args[0] = sizeof(width) + sizeof(reg);
+
+  BrigOperandArgumentRef* inputArgsList6 = new BrigOperandArgumentRef[inputArgs.elementCount * sizeof(argRef)];
+  for (uint32_t i = 0 ; i < inputArgs.elementCount ; ++i) {
+    inputArgsList6[i].size = sizeof(inputArgsList6[i]);
+    inputArgsList6[i].kind = BrigEOperandArgumentRef;
+    inputArgsList6[i].arg = 0;
+  }
+
+
+  reg.size = sizeof(reg);
+  reg.kind = BrigEOperandReg;
+  reg.type = Brigb64;
+  reg.reserved = 0;
+  reg.s_name = 0;
+
+  unsigned char mem6[sizeof(funList) + sizeof(BrigoOffset32_t)];
+  pFunList = reinterpret_cast<BrigOperandArgumentList*>(mem6);
+  pFunList->size = sizeof(funList) + sizeof(BrigoOffset32_t);
+  pFunList->kind = BrigEOperandFunctionList;
+  pFunList->elementCount = 2;
+  pFunList->o_args[0] = outBase.o_operands[1] + sizeof(emptyArgs);
+  pFunList->o_args[1] = outBase.o_operands[1] + sizeof(emptyArgs) + sizeof(func);
+
+  BrigOperandFunctionRef* funcList6 = new BrigOperandFunctionRef[pFunList->elementCount * sizeof(func)];
+  for (uint32_t i = 0 ; i < pFunList->elementCount ; ++i) {
+    funcList6[i].size = sizeof(funcList6[i]);
+    funcList6[i].kind = BrigEOperandFunctionRef;
+    funcList6[i].fn = 0;
+  }
+
+  Call_Test<BrigInstBase, BrigOperandReg, BrigOperandFunctionRef>
+  TestCase6(in, symbols, &outBase, &width, &emptyArgs, &reg, &inputArgs, pFunList, NULL, inputArgsList6, funcList6);
+
+  TestCase6.Run_Test(&Call);
+
+  delete []inputArgsList1;  inputArgsList1 = NULL;
+  delete []funcList1;  funcList1 = NULL;
+  symbols->clear();
 
   delete symbols;
+}
+TEST(ErrorReportTest, Call) {  
+  std::string input = "call &bar(%in)\n";
+  Call_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Call, MISSING_SEMICOLON);
+
+  input.assign("call_width(64) (%in) [&foo, &bar];\n");
+  Call_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Call, MISSING_OPERAND);
+
+  input.assign("call &foo(%out)(%in1,%in2;\n");
+  Call_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Call, INVALID_CALL_ARGS);
 }
 } // namespace hsa
 } // namespace brig

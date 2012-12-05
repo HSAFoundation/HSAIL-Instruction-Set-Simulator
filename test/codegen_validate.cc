@@ -836,9 +836,8 @@ void validate(const BrigDirectiveLabelList* ref, const BrigDirectiveLabelList* g
   if (get->label != 0) {
     validate_DIR_OFFSET(ref->label, get->label, RefOutput, GetOutput);
   }
-  int no_init_bytes = ref->size - sizeof(BrigDirectiveInit) + sizeof(uint64_t);
-  for(int i = 0 ; i < no_init_bytes; i++) {
-    EXPECT_EQ(ref->d_labels[i], get->d_labels[i]);
+  for(uint32_t i = 0 ; i < get->elementCount; i++) {
+    validate_DIR_OFFSET(ref->d_labels[i], get->d_labels[i], RefOutput, GetOutput);
   } 
 }
 
@@ -851,9 +850,8 @@ void validate(const BrigDirectiveLabelInit* ref, const BrigDirectiveLabelInit* g
   }
   EXPECT_EQ(ref->elementCount, get->elementCount);
   EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
-  int no_init_bytes = ref->size - sizeof(BrigDirectiveInit) + sizeof(uint64_t);
-  for(int i = 0 ; i < no_init_bytes; i++) {
-    EXPECT_EQ(ref->d_labels[i], get->d_labels[i]);
+  for(uint32_t i = 0 ; i < get->elementCount; i++) {
+    validate_DIR_OFFSET(ref->d_labels[i], get->d_labels[i], RefOutput, GetOutput);
   } 
 }
 

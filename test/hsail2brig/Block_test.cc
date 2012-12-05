@@ -10,6 +10,9 @@ class Block_Test: public BrigCodeGenTest {
 private:
   Buffer* RefDir;
 public:
+  Block_Test(std::string& in):
+    BrigCodeGenTest(in) {}
+
   Block_Test(std::string& in, StringBuffer* sbuf, Buffer* dir):
     BrigCodeGenTest(in, sbuf),
     RefDir(dir) {}
@@ -27,6 +30,9 @@ public:
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
+  }
+  void Run_Test(int (*Rule)(Context*), error_code_t refError){
+    False_Validate(Rule, refError);
   }
 };
 
@@ -57,9 +63,9 @@ TEST(CodegenTest, Block_CodeGen) {
   in.append("blockstring \"this is a string2\";\n");
   in.append("endblock;\n");
 
-  blockName.assign("\"debug\"");  
-  strBlock1.assign("\"this is a string1\""); 
-  strBlock2.assign("\"this is a string2\"");
+  blockName.assign("debug");  
+  strBlock1.assign("this is a string1"); 
+  strBlock2.assign("this is a string2");
 
   symbols->append(blockName);
   symbols->append(strBlock1);
@@ -156,11 +162,11 @@ TEST(CodegenTest, Block_CodeGen) {
   in.append("blockstring \"this is a string4\";\n");
   in.append("endblock;\n");
 
-  blockName.assign("\"string\"");  
-  strBlock1.assign("\"this is a string1\""); 
-  strBlock2.assign("\"this is a string2\"");
-  strBlock3.assign("\"this is a string3\""); 
-  strBlock4.assign("\"this is a string4\"");
+  blockName.assign("string");  
+  strBlock1.assign("this is a string1"); 
+  strBlock2.assign("this is a string2");
+  strBlock3.assign("this is a string3"); 
+  strBlock4.assign("this is a string4");
 
   symbols->append(blockName);
   symbols->append(strBlock1);
@@ -215,7 +221,7 @@ TEST(CodegenTest, Block_CodeGen) {
   in.append("blocknumeric_b32 11, 23, 10, 22;\n");
   in.append("endblock;\n");
 
-  blockName.assign("\"numeric\"");  
+  blockName.assign("numeric");  
   symbols->append(blockName);
 
   start.size = sizeof(start);
@@ -253,6 +259,19 @@ TEST(CodegenTest, Block_CodeGen) {
   dir->clear();
   delete symbols;
   delete dir;
+}
+TEST(ErrorReportTest, Block) {  
+  std::string input;  
+  input.assign("block \"numeric\"\n");
+  input.append("blocknumeric_b32 11, 23, 10, 22\n");
+  input.append("endblock;\n");
+  Block_Test TestCase1(input);
+  TestCase1.Run_Test(&Block, MISSING_SEMICOLON);
+
+  input.assign("block \"numeric\"\n");
+  input.append("blocknumeric_b32 11, 23, 10, 22;\n");
+  Block_Test TestCase2(input);
+  TestCase2.Run_Test(&Block, MISSING_BLOCK_TYPE);
 }
 } // namespace hsa
 } // namespace brig
