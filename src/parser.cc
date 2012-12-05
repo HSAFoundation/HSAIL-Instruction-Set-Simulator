@@ -5696,6 +5696,7 @@ int Instruction0(Context* context) {
 int Instruction1OpcodeDT(Context* context) {
   BrigoOffset32_t OpOffset[2] = {0, 0};
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
+  BrigStorageClass32_t storageClass = BrigFlatSpace;
   BrigOpcode32_t opcode = 0;
   BrigDataType16_t type = Brigb32;
 
@@ -5705,6 +5706,13 @@ int Instruction1OpcodeDT(Context* context) {
   // fbar_release_segment_b64
   // and whether there should be rounding in instruction1opcode.
   context->token_to_scan = yylex();
+  
+  if (opcode == BrigNullPtr) {
+    if (context->token_type == ADDRESS_SPACE_IDENTIFIER) {
+      storageClass = context->token_value.storage_class;
+      context->token_to_scan = yylex();
+    }
+  }
 
   if (opcode != BrigFbarInit &&
       opcode != BrigFbarRelease) {
@@ -5715,7 +5723,8 @@ int Instruction1OpcodeDT(Context* context) {
   }
   // TODO(Chuang): What can the type of BrigFbarInit be?
   if (context->token_to_scan != _B64 &&
-      context->token_to_scan != _U32) {
+      context->token_to_scan != _U32 && 
+      context->token_to_scan != _U64) {
     context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
@@ -5749,6 +5758,20 @@ int Instruction1OpcodeDT(Context* context) {
   if (context->token_to_scan != ';') {
     context->set_error(MISSING_SEMICOLON);
     return 1;
+  }
+  if (opcode == BrigNullPtr) {
+    BrigInstMem mem = {
+      0,
+      BrigEInstMem,
+      opcode,
+      type,
+      BrigNoPacking,
+      {OpOffset[0], 0, 0, 0, 0},
+      storageClass
+    };
+    mem.size = sizeof(mem);
+    context->append_code(&mem);
+    return 0;
   }
   int* aluValue = reinterpret_cast<int *>(&aluModifier);
   if (*aluValue != 0) {

@@ -830,6 +830,12 @@ countup             { free_string(context);
                       context->token_value.opcode = BrigCountUp;
                       return COUNTUP; }
 
+nullptr             { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigNullPtr;
+                      return NULLPTR; }
+
 laneid              { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
