@@ -7764,6 +7764,7 @@ int Block(Context* context) {
     return 1;
   }
   std::string name = context->token_value.string_val;
+  name.assign(name, 1, name.size() - 2);
   // block start
   BrigBlockStart bbs = {
     sizeof(BrigBlockStart),     // size
@@ -7786,11 +7787,12 @@ int Block(Context* context) {
         return 1;
       }
       std::string str = context->token_value.string_val;
+      str.assign(str, 1, str.size() - 2);
       // block string
       BrigBlockString bbs = {
-        sizeof(BrigBlockString),
-        BrigEDirectiveBlockString,
-        context->add_symbol(str)
+	sizeof(BrigBlockString),
+	BrigEDirectiveBlockString,
+	context->add_symbol(str)
       };
       context->append_directive(&bbs);
       context->token_to_scan = yylex();
