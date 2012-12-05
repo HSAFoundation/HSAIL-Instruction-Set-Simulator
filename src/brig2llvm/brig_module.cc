@@ -2795,7 +2795,8 @@ bool BrigModule::validateLd(const inst_iterator inst) const {
   if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
     return false;
   oper_iterator number(S_.operands + inst->o_operands[0]);
-  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)), "Invalid type");
+  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)),
+                 "Invalid type");
   const BrigOperandImmed *widthMod = dyn_cast<BrigOperandImmed>(number);
   if(!check(widthMod, "width modifier must be a BrigOperandImmed"))
     return false;
@@ -2870,7 +2871,8 @@ bool BrigModule::validateSt(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateAtomicInst(const inst_iterator inst, bool isRet) const {
+bool BrigModule::validateAtomicInst(const inst_iterator inst,
+                                    bool isRet) const {
   bool valid = true;
   unsigned ret = isRet ? 1 : 0;
   const BrigInstAtomic *atomicInst = dyn_cast<BrigInstAtomic>(inst);
@@ -2878,7 +2880,8 @@ bool BrigModule::validateAtomicInst(const inst_iterator inst, bool isRet) const 
     return false;
   const unsigned numOperands = getNumOperands(inst);
   if(!check((2 + ret) == numOperands  ||
-            ((3 + ret) == numOperands && BrigAtomicCas == (atomicInst->atomicOperation)),
+            ((3 + ret) == numOperands &&
+             BrigAtomicCas == (atomicInst->atomicOperation)),
            "Incorrect number of operands"))
     return false;
   BrigDataType type = BrigDataType(inst->type);
@@ -2889,7 +2892,8 @@ bool BrigModule::validateAtomicInst(const inst_iterator inst, bool isRet) const 
                    BrigInstHelper::isUnsignedTy(type) ||
                    BrigInstHelper::isBitTy(type),
                    "Invalid type");
-    valid &= check(BrigInstHelper::getTypeSize(type) <= 64, "Illegal data type");
+    valid &= check(BrigInstHelper::getTypeSize(type) <= 64,
+                   "Illegal data type");
     valid &= check(BrigInstHelper::getTypeSize(type) <=
                    BrigInstHelper::getTypeSize(*getType(dest)),
                    "Destination register is too small");
@@ -2931,8 +2935,10 @@ bool BrigModule::validateRdImage(const inst_iterator inst) const {
   if(!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
     return false;
   oper_iterator dest(S_.operands + instRead->o_operands[0]);
-  valid &= check(isa<BrigOperandRegV4>(dest), "Destination must be register v4");
-  valid &= check(BrigInstHelper::getTypeSize(*getType(dest)) == 32, "Illegal data type");
+  valid &= check(isa<BrigOperandRegV4>(dest),
+                 "Destination must be register v4");
+  valid &= check(BrigInstHelper::getTypeSize(*getType(dest)) == 32,
+                 "Illegal data type");
   for(unsigned i = 1; i < 3; ++i){
       oper_iterator image(S_.operands + instRead->o_operands[i]);
       valid &= check(isa<BrigOperandOpaque>(image), "Image must be a opaque");
@@ -2942,7 +2948,8 @@ bool BrigModule::validateRdImage(const inst_iterator inst) const {
                  isa<BrigOperandRegV2>(src) ||
                  isa<BrigOperandRegV4>(src),
                  "Src must be a register,register v2 or register v4");
-  valid &= check(BrigInstHelper::getTypeSize(*getType(src)) == 32, "Illegal data type");
+  valid &= check(BrigInstHelper::getTypeSize(*getType(src)) == 32,
+                 "Illegal data type");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(instRead->type)),
                  "Image cannot accept vector types");
   BrigDataType type = BrigDataType(instRead->type);
@@ -2983,7 +2990,8 @@ bool BrigModule::validateStImage(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateAtomicImageInst(const inst_iterator inst, bool isRet) const {
+bool BrigModule::validateAtomicImageInst(const inst_iterator inst,
+                                         bool isRet) const {
   bool valid = true;
   const BrigInstAtomicImage *atoIm = dyn_cast<BrigInstAtomicImage>(inst);
   if(!check(atoIm, "Incorrect instruction kind"))
@@ -3135,7 +3143,8 @@ bool BrigModule::validateQueryWidth(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateBranchInst(const inst_iterator inst, unsigned nary) const {
+bool BrigModule::validateBranchInst(const inst_iterator inst,
+                                    unsigned nary) const {
 
   bool valid = true;
 
@@ -3168,8 +3177,9 @@ bool BrigModule::validateBranchInst(const inst_iterator inst, unsigned nary) con
     return false;
   valid &= check(BrigInstHelper::isBitTy(BrigDataType(widthMod->type)),
                    "Invalid type");
-  valid &= check(32 == BrigInstHelper::getTypeSize(BrigDataType(widthMod->type)),
-                   "Invalid type size");
+  valid &=
+    check(32 == BrigInstHelper::getTypeSize(BrigDataType(widthMod->type)),
+          "Invalid type size");
   valid &= check(isPowerOf2(widthMod->bits.u), "Width must be a power of 2");
 
   if(nary == 3){
@@ -3356,14 +3366,16 @@ bool BrigModule::validateCall(const inst_iterator inst) const {
     }
   }
   oper_iterator number(S_.operands + inst->o_operands[0]);
-  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)), "Invalid type");
+  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)),
+                 "Invalid type");
   const BrigOperandImmed *widthMod = dyn_cast<BrigOperandImmed>(number);
   if(!check(widthMod, "width modifier must be a BrigOperandImmed"))
     return false;
   valid &= check(isPowerOf2(widthMod->bits.u), "Width must be a power of 2");
   for(unsigned i = 1; i < 4; i += 2){
     oper_iterator args(S_.operands + inst->o_operands[i]);
-    valid &= check(isa<BrigOperandArgumentList>(args), "args must be an argumentList");
+    valid &= check(isa<BrigOperandArgumentList>(args),
+                   "args must be an argumentList");
   }
   oper_iterator func(S_.operands + inst->o_operands[2]);
   valid &= check(isa<BrigOperandFunctionRef>(func) ||
@@ -3371,7 +3383,8 @@ bool BrigModule::validateCall(const inst_iterator inst) const {
                  "functionRef must be a register or function reference");
   if(5 == numOperands){
     oper_iterator funcs(S_.operands + inst->o_operands[4]);
-    valid &= check(isa<BrigOperandFunctionList>(funcs), "funcs must be a functionList");
+    valid &= check(isa<BrigOperandFunctionList>(funcs),
+                   "funcs must be a functionList");
   }
   return valid;
 }
@@ -3401,7 +3414,8 @@ bool BrigModule::validateSysCall(const inst_iterator inst) const {
   for(unsigned i = 2; i < 5; ++i) {
     oper_iterator src(S_.operands + inst->o_operands[i]);
     if(!isa<BrigOperandWaveSz>(src))
-      valid &= check(BrigInstHelper::getTypeSize(*getType(src)) == 32, "Illegal data type");
+      valid &= check(BrigInstHelper::getTypeSize(*getType(src)) == 32,
+                     "Illegal data type");
     valid &= check(isa<BrigOperandReg>(src)   ||
                    isa<BrigOperandImmed>(src) ||
                    isa<BrigOperandWaveSz>(src),
@@ -3423,7 +3437,8 @@ bool BrigModule::validateAlloca(const inst_iterator inst) const {
 
   oper_iterator src(S_.operands + inst->o_operands[1]);
   if(!isa<BrigOperandWaveSz>(src))
-    valid &= check(BrigInstHelper::getTypeSize(*getType(src)) == 32, "Illegal data type");
+    valid &= check(BrigInstHelper::getTypeSize(*getType(src)) == 32,
+                   "Illegal data type");
   valid &= check(isa<BrigOperandReg>(src)   ||
                  isa<BrigOperandImmed>(src) ||
                  isa<BrigOperandWaveSz>(src),
@@ -3445,7 +3460,8 @@ bool BrigModule::validateSpecialInst(const inst_iterator inst,
                  "Destination register type must be b32");
   if(1 == nary){
     oper_iterator number(S_.operands + inst->o_operands[1]);
-    valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)), "Invalid type");
+    valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)),
+                   "Invalid type");
     const BrigOperandImmed *dimension = dyn_cast<BrigOperandImmed>(number);
     if(!check(dimension, "number must be a BrigOperandImmed"))
       return false;
