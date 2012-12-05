@@ -2424,6 +2424,29 @@ TEST(BrigInstTest, CvtRoundingMode) {
   }
 }
 
+TEST(BrigWriterTest, FlexArray) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "function &maxofN(arg_f32 %r)(arg_u32 %n, align 8 arg_u8 %last[])\n"
+    "{\n"
+    "ld_arg_u32 $s0, [%n];\n"
+    "mov_b32 $s1, 0;\n"
+    "mov_b32 $s3, 0;\n"
+    "@loop:\n"
+    "cmp_eq_b1_u32 $c1, $s0, 0;\n"
+    "cbr $c1, @done;\n"
+    "ld_arg_f32 $s4, [%last][$s3]; \n"
+    "add_f32 $s1, $s1, $s4;\n"
+    "add_u32 $s3, $s3, 4;\n"
+    "sub_u32 $s0, $s0, 1;\n"
+    "brn @loop;\n"
+    "@done:\n"
+    "st_arg_f32 $s1, [%r];\n"
+    "ret;\n"
+    "};\n"
+   );
+}
+
 TEST(BrigWriterTest, GlobalInitialization_b64) {
   hsa::brig::BrigProgram BP = TestHSAIL(
   "version 1:0:$large;\n"
@@ -2795,109 +2818,71 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("f32", result, value, bits);
   }
   {
-    const uint32_t result = uint32_t(0x1);
+    const uint32_t result = uint32_t(0x0);
     const char *value = "0f";
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
   {
     const uint32_t result = uint32_t(0xff7fffff);
-    const char *value = "-3.402834663852e+38f";
+    const char *value = "-3.4028234663852e+38f";
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
 }
 
-static const char GlobalArrayInst[] = 
-  "version 1:0:$%s;\n"
-  "\n"
-  "global_%s &array[5] = { %s };\n"
-  "kernel &__OpenCL_Global_Array_kernel(\n"
-  "        kernarg_%s %%r)\n"
-  "{\n"
-  "@__OpenCL_Global_Array_kernel_entry:\n"
-  "        ld_kernarg_%s $%c2, [%%r];\n"
-  "        ld_global_u%u  $%c1, [&array];\n"
-  "        st_global_u%u  $%c1, [$%c2];\n"
-  "        ret;\n"
-  "};\n";
+TEST(BrigGlobalTest, GlobalArrayInitializer) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 1:0:$small;\n"
+      "\n"
+      "global_f32 &array[] = { 1.1f, 2.2f };\n"
+      "\n"
+      "kernel &__OpenCL_global_array_kernel(\n"
+      "        kernarg_u32 %arg_val0, kernarg_u32 %n, kernarg_u32 %bits)\n"
+      "{\n"
+      "        ld_kernarg_u32 $s3, [%n];\n"
+      "        ld_kernarg_u32 $s5, [%bits];\n"
+      "        div_u32 $s5, $s5, 8;"
+      "        xor_b32 $s2, $s2, $s2;\n"
+      "        mov_b32 $s9, 0;\n"
+      "        ld_kernarg_u32 $s0, [%arg_val0] ;\n"
+      "@store:"
+      "        ld_global_u32 $s4, [&array][$s9];\n"
+      "        st_global_u32 $s4, [$s0];\n"
+      "        add_u32 $s9, $s9, $s5;\n"
+      "        add_u32 $s0, $s0, $s5;\n"
+      "@loop_check:"
+      "        add_u32 $s2, $s2, 1;\n"
+      "        cmp_lt_b1_u32 $c1, $s2, $s3;\n"
+      "        cbr $c1, @store;\n"
+      "        ret ;\n"
+      "} ;\n"
+      );
 
-template<class T>
-static void testGlobalArray(const char *type,
-                            const T *result,
-                            const char *value,
-                            unsigned bits) {
-for(unsigned i =0; i < 2; ++i) {
-  char reg = 0;
-  if(bits == 8 || bits == 16 || bits == 32)
-    reg = 's';
-  if(bits == 64)
-    reg = 'd';
-  size_t size =
-    snprintf(NULL,
-             0,
-             GlobalArrayInst,
-             model[i],
-             type,
-             value,
-             mType[i],
-             mType[i],
-             mReg[i],
-             bits,
-             reg,
-             bits,
-             reg,
-             mReg[i]);
-  char *buffer = new char[size];
-  snprintf(buffer,
-           size,
-           GlobalArrayInst,
-           model[i],
-           type,
-           value,
-           mType[i],
-           mType[i],
-           mReg[i],
-           bits,
-           reg,
-           bits,
-           reg,
-           mReg[i]);
-
-  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
-  delete buffer;
-  
   EXPECT_TRUE(BP);
   if(!BP) return;
-  
-  T *arg_val0 = new T[5];
-  arg_val0[0] = 0;
-  arg_val0[1] = 0;
-  arg_val0[2] = 0;
-  arg_val0[3] = 0;
-  arg_val0[4] = 0;
-    
-  void *args[] = { arg_val0 };
-  llvm::Function *fun = BP->getFunction("__OpenCL_Global_Array_kernel");
+
+  const unsigned arrayLen = 2;
+  const unsigned bitLen = 32;
+  float *arg_val0 = new float[2];
+  for (unsigned i = 0; i < 2; i++) {
+    arg_val0[i] = 0;
+  }
+  unsigned *n = new unsigned(arrayLen);
+  unsigned *bits= new unsigned(bitLen);
+
+  float result[arrayLen] = { 1.1f, 2.2f };
+
+  llvm::Function *fun = BP->getFunction("__OpenCL_global_array_kernel");
+  void *args[] = { &arg_val0, n, bits };
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
-
-  std::cout<<arg_val0[0]<<std::endl;
-  
-  for (unsigned i = 0; i < 5; i++) {
-    EXPECT_EQ(result[i], arg_val0[i]);  
+  for (unsigned i = 0; i < 2; i++) {
+    EXPECT_FLOAT_EQ(result[i], arg_val0[i]);
   }
 
   delete[] arg_val0;
- }
-}
-
-TEST(BrigGlobalTest, GlobalArray) {
-  {
-    uint32_t result[5] = { 1, 2, 3, 4, 5 };
-    const char *value = "1, 2, 3, 4, 5";
-    unsigned bits = 8;
-    testGlobalArray("u8", result, value, bits);
-  }
+  delete n;
+  delete bits;
 }
