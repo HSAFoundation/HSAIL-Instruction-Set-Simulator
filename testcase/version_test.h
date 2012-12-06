@@ -2,56 +2,26 @@
 
 #ifndef VERSION_TEST_H_
 #define VERSION_TEST_H_
+#include "test.h"
 
 namespace hsa {
 namespace brig {
 
-class CodegenTestVersion: public ::testing::TestWithParam<int>
-{
+class TestVersion: public ::testing::TestWithParam<int>{
 
 };
 
-std::string inputarray_version[] = {
-  "version 1:0; ",
-  "version 2:0:$large;",
-  "version 2:0:$small;",
-  "version 2:0:$reduced;",
-  "version 2:0:$full;",
-  "version 2:0:$sftz;",
-  "version 2:0:$nosftz;",
-  "version 2:0:$reduced, $small;",
-  "version 2:0:$reduced, $large;",
-  "version 2:0:$full, $small;",
-  "version 2:0:$full, $large;",
-  "version 2:0:$sftz, $reduced;",
-  "version 2:0:$nosftz, $reduced;",
-  "version 2:0:$sftz, $full;",
-  "version 2:0:$nosftz, $full;",
-  "version 2:0:$large, $sftz;",
-  "version 2:0:$large, $nosftz;",
-  "version 2:0:$small, $sftz;",
-  "version 2:0:$small, $nosftz;",
-  "version 2:0:$large, $reduced, $sftz;",
-  "version 2:0:$large, $reduced, $nosftz;",
-  "version 2:0:$large, $full, $sftz;",
-  "version 2:0:$large, $full, $nosftz;",
-  "version 2:0:$small, $reduced, $sftz;",
-  "version 2:0:$small, $reduced, $nosftz;",
-  "version 2:0:$small, $full, $sftz;",
-  "version 3:2:$small, $full, $nosftz;",
-  "version 2:0:$large, $small;",
-  "version 2:0:$full, $reduced, $sftz;",
-  "version 3:2:$small, $full, $nosftz;",
-  "version 3:2:$small, $full, $nosftz, $sftz;",
-  "version 3:2:$small, $full, $nosftz, $sftz, $large;",
-  "version 3:2:$small, $full, $nosftz, $sftz, $large, $reduced;",
-  "version 3:2:$small, $full, $nosftz, $sftz, $large, $reduced, $small;"
+struct VersionTest{
+  const char * str;
+  BrigDirectiveVersion ref;
 };
 
-BrigDirectiveVersion outputarray_version[] = {
-//"version 1:0; "
+struct VersionTest version_pair[34] = {
+//version_pair[0]
   {
-    20,                     //size
+    "version 1:0; ",
+    {
+    brig_directive_version_size,   //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     1,                      // major
@@ -60,10 +30,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,              // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$large;"
+//version_pair[1]
   {
-    20,                     //size
+  "version 2:0:$large;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -72,10 +45,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,              // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$small;"
-  {
-    20,                     //size
+//version_pair[2]
+  { 
+    "version 2:0:$small;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -84,10 +60,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,              // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$reduced"
+//version_pair[3]
   {
-    20,                     //size
+    "version 2:0:$reduced;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -96,10 +75,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEReduced,              // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$full;"
+//version_pair[4]
   {
-    20,                     //size
+    "version 2:0:$full;",
+     {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -108,10 +90,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,              // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$sftz;"
+//version_pair[5]
   {
-    20,                     //size
+    "version 2:0:$sftz;",
+     {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -120,10 +105,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,              // profile
     BrigESftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$nosftz;"
+//version_pair[6]
   {
-    20,                     //size
+    "version 2:0:$nosftz;",
+     {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -132,10 +120,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,              // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$reduced, $small;"
- {
-    20,                     //size
+//version_pair[7]
+  {
+    "version 2:0:$reduced, $small;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -144,10 +135,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEReduced,           // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-// "version 2:0:$reduced, $large;"
+//version_pair[8]
   {
-    20,                     //size
+    "version 2:0:$reduced, $large;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -156,10 +150,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEReduced,           // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-// "version 2:0:$full, $small;"
+//version_pair[9]
   {
-    20,                     //size
+    "version 2:0:$full, $small;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -168,10 +165,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,           // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$full, $large;"
+//version_pair[10]
   {
-    20,                     //size
+    "version 2:0:$full, $large;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -180,10 +180,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,           // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$sftz, $reduced;"
+//version_pair[11]
   {
-    20,                     //size
+    "version 2:0:$sftz, $reduced;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -192,10 +195,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEReduced,           // profile
     BrigESftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$nosftz, $reduced;"
+//version_pair[12]
   {
-    20,                     //size
+    "version 2:0:$nosftz, $reduced;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -204,10 +210,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEReduced,           // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$sftz, $full;"
+//version_pair[13]
   {
-    20,                     //size
+    "version 2:0:$sftz, $full;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -216,10 +225,13 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,              // profile
     BrigESftz,              // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$nosftz, $full;"
+//version_pair[14]
   {
-    20,                     //size
+    "version 2:0:$nosftz, $full;",
+    {
+    brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
     0,                      // c_code
     2,                      // major
@@ -228,243 +240,300 @@ BrigDirectiveVersion outputarray_version[] = {
     BrigEFull,              // profile
     BrigENosftz,            // ftz
     0                       // reserved
+    }
   },
-//"version 2:0:$large, $stfz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigELarge,             // machine
-    BrigEFull,              // profile
-    BrigESftz,            // ftz
-    0                       // reserved
-  },
-//"version 2:0:$large, $nostfz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigELarge,             // machine
-    BrigEFull,              // profile
-    BrigENosftz,            // ftz
-    0                       // reserved
-  },
-//"version 2:0:$small, $stfz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigESmall,             // machine
-    BrigEFull,              // profile
-    BrigESftz,            // ftz
-    0                       // reserved
-  },
-//"version 2:0:$small, $nostfz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigESmall,             // machine
-    BrigEFull,              // profile
-    BrigENosftz,            // ftz
-    0                       // reserved
-  },
-//"version 2:0:$large, $reduced, $sftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigELarge,             // machine
-    BrigEReduced,           // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-//"version 2:0:$large, $reduced, $nosftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigELarge,             // machine
-    BrigEReduced,           // profile
-    BrigENosftz,              // ftz
-    0                       // reserved
-  },
-//"version 2:0:$large, $full, $sftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigELarge,             // machine
-    BrigEFull,              // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-//"version 2:0:$large, $full, $nosftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigELarge,             // machine
-    BrigEFull,              // profile
-    BrigENosftz,              // ftz
-    0                       // reserved
-  },
-//"version 2:0:$small, $reduced, $sftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigESmall,             // machine
-    BrigEReduced,              // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-//"version 2:0:$small, $reduced, $nosftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigESmall,             // machine
-    BrigEReduced,              // profile
-    BrigENosftz,              // ftz
-    0                       // reserved
-  },
-//"version 2:0:$small, $full, $sftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigESmall,             // machine
-    BrigEFull,              // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-//"version 3:2:$small, $full, $nosftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    3,                      // major
-    2,                      // minor
-    BrigESmall,             // machine
-    BrigEFull,              // profile
-    BrigENosftz,            // ftz
-    0                       // reserved
-  },
-//"version 2:0:$large, $small;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigESmall,             // machine
-    BrigEFull,              // profile
-    BrigENosftz,            // ftz
-    0                       // reserved
-  },
-//"version 2:0:$full, $reduced, $sftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    2,                      // major
-    0,                      // minor
-    BrigELarge,             // machine
-    BrigEReduced,           // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-//"version 3:2:$small, $full, $nosftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    3,                      // major
-    2,                      // minor
-    BrigESmall,             // machine
-    BrigEFull,           // profile
-    BrigENosftz,              // ftz
-    0                       // reserved
-  },
-//"version 3:2:$small, $full, $nosftz, $sftz;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    3,                      // major
-    2,                      // minor
-    BrigESmall,             // machine
-    BrigEFull,           // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-//"version 3:2:$small, $full, $nosftz, $sftz, $large;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    3,                      // major
-    2,                      // minor
-    BrigELarge,             // machine
-    BrigEFull,           // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-//"version 3:2:$small, $full, $nosftz, $sftz, $large, $reduced;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    3,                      // major
-    2,                      // minor
-    BrigELarge,             // machine
-    BrigEReduced,           // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-//"version 3:2:$small, $full, $nosftz, $sftz, $large, $reduced, $small;"
-  {
-    20,                     //size
-    BrigEDirectiveVersion,  //kind
-    0,                      // c_code
-    3,                      // major
-    2,                      // minor
-    BrigESmall,             // machine
-    BrigEReduced,           // profile
-    BrigESftz,              // ftz
-    0                       // reserved
-  },
-};
-
-class TestVersionFalseInput: public ::testing::TestWithParam<int>
+//version_pair[15]
 {
+    "version 2:0:$large, $sftz;",
+    {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigELarge,             // machine
+    BrigEFull,              // profile
+    BrigESftz,            // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[16]
+{
+    "version 2:0:$large, $nosftz;",
+    {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigELarge,             // machine
+    BrigEFull,              // profile
+    BrigENosftz,            // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[17]
+  {
+    "version 2:0:$small, $sftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigESmall,             // machine
+    BrigEFull,              // profile
+    BrigESftz,            // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[18]
+  {
+    "version 2:0:$small, $nosftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigESmall,             // machine
+    BrigEFull,              // profile
+    BrigENosftz,            // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[19]
+  {
+    "version 2:0:$large, $reduced, $sftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigELarge,             // machine
+    BrigEReduced,           // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[20]
+  {
+    "version 2:0:$large, $reduced, $nosftz;",
+    {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigELarge,             // machine
+    BrigEReduced,           // profile
+    BrigENosftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[21]
+  {
+    "version 2:0:$large, $full, $sftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigELarge,             // machine
+    BrigEFull,              // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[22]
+  {
+    "version 2:0:$large, $full, $nosftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigELarge,             // machine
+    BrigEFull,              // profile
+    BrigENosftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[23]
+  {
+    "version 2:0:$small, $reduced, $sftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigESmall,             // machine
+    BrigEReduced,              // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[24]
+  {
+    "version 2:0:$small, $reduced, $nosftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigESmall,             // machine
+    BrigEReduced,              // profile
+    BrigENosftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[25]
+  {
+    "version 2:0:$small, $full, $sftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigESmall,             // machine
+    BrigEFull,              // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[26]
+  {
+    "version 3:2:$small, $full, $nosftz;",
+    {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    3,                      // major
+    2,                      // minor
+    BrigESmall,             // machine
+    BrigEFull,              // profile
+    BrigENosftz,            // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[27]
+  {
+    "version 2:0:$large, $small;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigESmall,             // machine
+    BrigEFull,              // profile
+    BrigENosftz,            // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[28]
+  {
+    "version 2:0:$full, $reduced, $sftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    2,                      // major
+    0,                      // minor
+    BrigELarge,             // machine
+    BrigEReduced,           // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[29]
+  {
+    "version 3:2:$small, $full, $nosftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    3,                      // major
+    2,                      // minor
+    BrigESmall,             // machine
+    BrigEFull,           // profile
+    BrigENosftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[30]
+  {
+    "version 3:2:$small, $full, $nosftz, $sftz;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    3,                      // major
+    2,                      // minor
+    BrigESmall,             // machine
+    BrigEFull,           // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[31]
+  {
+    "version 3:2:$small, $full, $nosftz, $sftz, $large;",
+    {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    3,                      // major
+    2,                      // minor
+    BrigELarge,             // machine
+    BrigEFull,           // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[32]
+  {
+    "version 3:2:$small, $full, $nosftz, $sftz, $large, $reduced;",
+    {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    3,                      // major
+    2,                      // minor
+    BrigELarge,             // machine
+    BrigEReduced,           // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  },
+//version_pair[33]
+  {
+    "version 3:2:$small, $full, $nosftz, $sftz, $large, $reduced, $small;",
+     {
+    brig_directive_version_size, //size
+    BrigEDirectiveVersion,  //kind
+    0,                      // c_code
+    3,                      // major
+    2,                      // minor
+    BrigESmall,             // machine
+    BrigEReduced,           // profile
+    BrigESftz,              // ftz
+    0                       // reserved
+    }
+  }
+};
+
+class TestVersionInvalid: public ::testing::TestWithParam<int>{
 
 };
 
-std::string inputarray_version_false[] = {
+std::string inputarray_version_invalid[] = {
   "version ;",
   "version 1; ",
   "version 1:; ",

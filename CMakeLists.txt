@@ -68,8 +68,6 @@ add_subdirectory(src)
 add_subdirectory(src/brig2llvm)
 add_subdirectory(src/hsa_runtime)
 
-option(ENABLE_TEST_CASE "Run test cases" OFF)
-if (ENABLE_TEST_CASE)
 set(hsail2brig_test_SOURCES
     test/lexer_test.cc
     test/parser_test.cc
@@ -110,58 +108,36 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/St_test.cc
     test/hsail2brig/Syscall_test.cc
     test/hsail2brig/Version_test.cc
-    testcase/globaldecl_test.cc
-    testcase/version_test.cc
-    testcase/operation_test.cc
+    testcase/atom_test.cc
+    testcase/bar_test.cc
+    testcase/branch_test.cc
+    testcase/cmp_test.cc
+    testcase/cvt_test.cc
+    testcase/declare_test.cc
+    testcase/directive_test.cc
+    testcase/image_test.cc
+    testcase/instruction0_test.cc
+    testcase/instruction1_test.cc
+    testcase/instruction2_test.cc
+    testcase/instruction3_test.cc
+    testcase/instruction4_test.cc
+    testcase/instruction5_test.cc
+    testcase/label_test.cc
+    testcase/ld_test.cc
+    testcase/location_test.cc
+    testcase/mov_test.cc
+    testcase/mul_test.cc
     testcase/operand_test.cc
+    testcase/query_test.cc
+    testcase/ret_test.cc
+    testcase/segp_test.cc
+    testcase/st_test.cc
+    testcase/sync_test.cc
+    testcase/syscall_test.cc
+    testcase/version_test.cc
     gmock/gmock_main.cc
     gmock/gmock-gtest-all.cc
     )
-else (ENABLE_TEST_CASE)
-  set(hsail2brig_test_SOURCES
-    test/lexer_test.cc
-    test/parser_test.cc
-    test/codegen_validate.cc
-    test/hsail2brig/Atom_test.cc
-    test/hsail2brig/AtomicImage_test.cc
-    test/hsail2brig/Branch_test.cc
-    test/hsail2brig/Block_test.cc
-    test/hsail2brig/Call_test.cc
-    test/hsail2brig/Comment_test.cc
-    test/hsail2brig/Control_test.cc
-    test/hsail2brig/Cmp_test.cc
-    test/hsail2brig/Cvt_test.cc
-    test/hsail2brig/Extension_test.cc
-    test/hsail2brig/Example1_test.cc
-    test/hsail2brig/Example2_test.cc
-    test/hsail2brig/Example3_test.cc
-    test/hsail2brig/Example4_test.cc
-    test/hsail2brig/Example5_test.cc
-    test/hsail2brig/Example6_test.cc
-    test/hsail2brig/FileDecl_test.cc
-    test/hsail2brig/GlobalDecl_test.cc
-    test/hsail2brig/ImageInstruction_test.cc
-    test/hsail2brig/Instruction0_test.cc
-    test/hsail2brig/Instruction1_test.cc
-    test/hsail2brig/Instruction2_test.cc
-    test/hsail2brig/Instruction3_test.cc
-    test/hsail2brig/Instruction4_test.cc
-    test/hsail2brig/Instruction5_test.cc
-    test/hsail2brig/Kernel_test.cc
-    test/hsail2brig/Ld_test.cc
-    test/hsail2brig/Label_test.cc
-    test/hsail2brig/Location_test.cc
-    test/hsail2brig/Mov_test.cc
-    test/hsail2brig/Mul_test.cc
-    test/hsail2brig/Pragma_test.cc
-    test/hsail2brig/Query_test.cc
-    test/hsail2brig/St_test.cc
-    test/hsail2brig/Syscall_test.cc
-    test/hsail2brig/Version_test.cc
-    gmock/gmock_main.cc
-    gmock/gmock-gtest-all.cc
-    )
-endif (ENABLE_TEST_CASE)
 
 add_executable(hsail2brig_test ${hsail2brig_test_SOURCES})
 target_link_libraries(hsail2brig_test hsa2brig)

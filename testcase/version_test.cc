@@ -1,14 +1,5 @@
 // Copyright 2012 MulticoreWare Inc.
 
-#include <iostream>
-#include "gtest/gtest.h"
-#include "tokens.h"
-#include "lexer.h"
-#include "parser.h"
-#include "brig.h"
-#include "error_reporter.h"
-#include "context.h"
-#include "parser_wrapper.h"
 #include "version_test.h"
 
 namespace hsa {
@@ -17,23 +8,21 @@ namespace brig {
 extern ErrorReporter* main_reporter;
 extern Context* context;
 
-TEST_P(CodegenTestVersion, Version) {
+TEST_P(TestVersion, Version) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   int n = GetParam();
-  std::string input(inputarray_version[n]);
+  std::string input(version_pair[n].str);
 
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Version(context));
 
-  uint32_t curr_d_offset = context->get_directive_offset();
-
-  BrigDirectiveVersion ref = outputarray_version[n];
+  BrigDirectiveVersion ref = version_pair[n].ref;
 
   BrigDirectiveVersion get;
-  context->get_directive(curr_d_offset-sizeof(get), &get);
+  context->get_directive(directive_offset, &get);
 
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.major, get.major);
@@ -45,14 +34,14 @@ TEST_P(CodegenTestVersion, Version) {
   delete lexer;
 }
 
-INSTANTIATE_TEST_CASE_P(TestVersion,CodegenTestVersion,testing::Range(0,34));
+INSTANTIATE_TEST_CASE_P(CodegenTest, TestVersion, testing::Range(0,34));
 
-TEST_P(TestVersionFalseInput, VersionFalseInput) {
+TEST_P(TestVersionInvalid, VersionInvalid) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   int n = GetParam();
-  std::string input(inputarray_version_false[n]);
+  std::string input(inputarray_version_invalid[n]);
 
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
@@ -61,9 +50,7 @@ TEST_P(TestVersionFalseInput, VersionFalseInput) {
   delete lexer;
 }
 
-INSTANTIATE_TEST_CASE_P(TestVersionFalse,
-                        TestVersionFalseInput,
-                        testing::Range(0,7));
+INSTANTIATE_TEST_CASE_P(InvalidTest, TestVersionInvalid, testing::Range(0,7));
 
 }  // namespace brig
 }  // namespace hsa
