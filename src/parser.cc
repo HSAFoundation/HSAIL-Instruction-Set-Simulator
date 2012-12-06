@@ -144,7 +144,7 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
   if ((context->token_type == REGISTER) || (context->token_to_scan == TOKEN_WAVESIZE)) {
     opName = context->token_value.string_val;
   } else if (context->token_type == CONSTANT || context->token_to_scan == '-') {
-    current_offset += current_offset & 0x7;
+    current_offset += 0x8 - (current_offset & 0x7);
   }
 
   if (!Identifier(context)) {
@@ -169,7 +169,7 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   if ((context->token_type == REGISTER) || (context->token_to_scan == TOKEN_WAVESIZE)) {
     opName = context->token_value.string_val;
   } else if (context->token_type == CONSTANT || context->token_to_scan == '-') {
-    current_offset += current_offset & 0x7;
+    current_offset += 0x8 - (current_offset & 0x7);
   }
 
   if (!Identifier(context)) {
@@ -1678,7 +1678,7 @@ int BranchCbr(Context* context) {
   BrigoOffset32_t OpOffset[4] = {0,0,0,0};
 
   BrigoOffset32_t widthOffset = context->get_operand_offset();
-  widthOffset += widthOffset & 0x7;
+  widthOffset += 0x8 - (widthOffset & 0x7);
 
   // check for optionalWidth
   if (context->token_to_scan == _WIDTH) {
@@ -1842,7 +1842,7 @@ int BranchBrn(Context* context) {
   BrigoOffset32_t OpOffset[3] = {0,0,0};
 
   BrigoOffset32_t widthOffset = context->get_operand_offset();
-  widthOffset += widthOffset & 0x7;
+  widthOffset += 0x8 - (widthOffset & 0x7);
 
   OpOffset[0] = widthOffset;
 
@@ -2011,7 +2011,7 @@ int Call(Context* context) {
   // optional width
   BrigoOffset32_t widthOffset = context->get_operand_offset();
   bool has_width = false;
-  widthOffset += widthOffset & 0x7;
+  widthOffset += 0x8 - (widthOffset & 0x7);
   OpOffset[0] = widthOffset;
 
   if (context->token_to_scan == _WIDTH) {
@@ -4974,7 +4974,7 @@ int Ld(Context* context) {
   BrigoOffset32_t OpOffset[3] = {0, 0, 0};
   context->token_to_scan = yylex();
   BrigoOffset32_t widthOffset = context->get_operand_offset();
-  widthOffset += widthOffset & 0x7;
+  widthOffset += 0x8 - (widthOffset & 0x7);
   OpOffset[0] = widthOffset;
 
   if (context->token_to_scan == _WIDTH) {
@@ -6612,7 +6612,7 @@ int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
     *(float*)&bdi->initializationData.u32[i] = single_list[i];
   }
   bds.d_init = context->get_directive_offset();
-  bds.d_init += bds.d_init & 0x7;
+  bds.d_init += 0x8 - (bds.d_init & 0x7);
   unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
   context->update_directive_bytes(bds_charp, sym_offset,
                                   sizeof(BrigDirectiveSymbol));
@@ -7098,7 +7098,7 @@ int Bar(Context* context) {
 
   context->token_to_scan = yylex();
   BrigoOffset32_t offset = context->get_operand_offset();
-  offset += offset & 0x7;
+  offset += 0x8 - (offset & 0x7);
 
   if (context->token_to_scan == _WIDTH) {
     if (OptionalWidth(context)) {
@@ -7526,7 +7526,7 @@ int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
     *(double*)&bdi->initializationData.u64[i] = float_list[i];
   }
   bds.d_init = context->get_directive_offset();
-  bds.d_init += bds.d_init & 0x7;
+  bds.d_init += 0x8 - (bds.d_init & 0x7);
   unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
   context->update_directive_bytes(bds_charp, symbol_offset,
                                   sizeof(BrigDirectiveSymbol));
@@ -7685,7 +7685,7 @@ int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
       break;
   }
   bds.d_init = context->get_directive_offset();
-  bds.d_init += bds.d_init & 0x7;
+  bds.d_init += 0x8 - (bds.d_init & 0x7);
   unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
   context->update_directive_bytes(bds_charp, symbol_offset,
                                   sizeof(BrigDirectiveSymbol));
