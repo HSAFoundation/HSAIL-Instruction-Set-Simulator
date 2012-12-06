@@ -280,7 +280,11 @@ int BaseOperand(Context* context) {
 
     boi.type = type;
     boi.bits.l[0] = boi.bits.l[1] = 0;
-    boi.bits.u = sign*context->token_value.int_val;
+    if (boi.type == Brigb64) {
+      boi.bits.l[0] = sign*context->token_value.int_val;
+    } else {
+      boi.bits.u = sign*context->token_value.int_val;
+    }
     context->append_operand(&boi);
 
     return 0;
@@ -816,6 +820,9 @@ int Instruction2OpcodeDT(Context* context) {
   if (context->token_to_scan != ',') {
     context->set_error(MISSING_COMMA);
     return 1;
+  }
+  if (inst.opcode == BrigMovsLo || inst.opcode == BrigMovsHi) {
+    context->set_type(Brigb64);
   }
   context->token_to_scan = yylex();
   if (Operand(context, &inst.o_operands[1])) {
