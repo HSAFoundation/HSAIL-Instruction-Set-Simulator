@@ -3273,6 +3273,14 @@ int Instruction4BitOperation(Context* context) {
   // TODO(Chuang): src1, src2: type follow as the kind of opcode.
   // different opcode will have different rule of types.
 
+  if (opcode == BrigExtract) {
+    if (context->token_type == REGISTER) {
+      if (context->token_to_scan != TOKEN_SREGISTER) {
+	context->set_error(INVALID_THIRD_OPERAND);
+	return 1;
+      }
+    }
+  }
   if (Operand(context, &OpOffset[2])) {
     context->set_error(INVALID_THIRD_OPERAND);
     return 1;
@@ -3283,6 +3291,14 @@ int Instruction4BitOperation(Context* context) {
   }
   context->token_to_scan = yylex();
 
+  if (opcode == BrigExtract) {
+    if (context->token_type == REGISTER) {
+      if (context->token_to_scan != TOKEN_SREGISTER) {
+	context->set_error(INVALID_FOURTH_OPERAND);
+	return 1;
+      }
+    }
+  }
   if (Operand(context, &OpOffset[3])) {
     context->set_error(INVALID_FOURTH_OPERAND);
     return 1;
