@@ -270,6 +270,7 @@ static bool hasAddr(const BrigOperandBase *op) {
   case BrigEOperandImmed:
   case BrigEOperandIndirect:
   case BrigEOperandLabelRef:
+  case BrigEOperandWaveSz:
     return false;
   case BrigEOperandReg:
     return true;
@@ -355,6 +356,15 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
                                    base, offset, "", &B);
     return llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
                                         adderInt, index, "", &B);
+  }
+
+  if(isa<BrigOperandWaveSz>(op)) {
+    llvm::Module *M = B.getParent()->getParent();
+    llvm::FunctionType *getWavefrontSizeTy =
+      llvm::FunctionType::get(llvm::Type::getInt32Ty(C), false);
+    llvm::Constant *wavefrontSizeFn =
+      M->getOrInsertFunction("getWavefrontSize", getWavefrontSizeTy);
+    return llvm::CallInst::Create(wavefrontSizeFn, "", &B);
   }
 
   assert(false && "Unimplemented");

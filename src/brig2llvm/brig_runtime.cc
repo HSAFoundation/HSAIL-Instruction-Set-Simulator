@@ -42,6 +42,8 @@ extern "C" void setRoundingMode_down(void) {
   fesetround(FE_DOWNWARD);
 }
 
+extern "C" unsigned getWavefrontSize(void) { return 1; }
+
 template<class T> static T Abs(T t) { return std::abs(t); }
 template<class T> static T AbsVector(T t) { return map(Abs, t); }
 SignedInst(define, Abs, Unary)

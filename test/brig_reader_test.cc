@@ -2973,3 +2973,27 @@ TEST(BrigGlobalTest, GlobalArray) {
     testGlobalArray("f32", result, value, bits, arraySz);
   }
 }
+
+TEST(BrigInstTest, WaveSize) {
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 1:0:$large;\n"
+      "kernel &waveTest(kernarg_u64 %r)\n"
+      "{\n"
+      "  ld_kernarg_u64 $d0, [%r];\n"
+      "  add_u32    $s1, WAVESIZE, 0;\n"
+      "  st_global_u32  $s1, [$d0];\n"
+      "  ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if(!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("waveTest");
+    unsigned *waveSize = new unsigned(0);
+    void *args[] = { &waveSize };
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *waveSize);
+    delete waveSize;
+  }
+}
