@@ -3122,6 +3122,11 @@ int Instruction4Mad(Context* context) {
     context->set_error(INVALID_OPERAND);
     return 1;
   }
+  if ((ConvertType(type) == Brigb32 && context->token_to_scan != TOKEN_SREGISTER) ||
+      (ConvertType(type) == Brigb64 && context->token_to_scan != TOKEN_DREGISTER)) {
+    context->set_error(INVALID_OPERAND);
+    return 1;
+  }
 
   if (Operand(context, &OpOffset[0])) {
     context->set_error(INVALID_FIRST_OPERAND);
@@ -3153,11 +3158,6 @@ int Instruction4Mad(Context* context) {
   }
   context->token_to_scan = yylex();
 
-  if (context->token_type != REGISTER &&
-      context->token_type != CONSTANT) {
-    context->set_error(INVALID_OPERAND);
-    return 1;
-  }
 
   if (Operand(context, &OpOffset[3])) {
     context->set_error(INVALID_FOURTH_OPERAND);
