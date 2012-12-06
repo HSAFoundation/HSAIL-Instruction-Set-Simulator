@@ -788,11 +788,11 @@ TEST_P(Instruction4MadTest, BrigMad) {
       EXPECT_EQ(wavesz_size, getWave1.size);
       EXPECT_EQ(BrigEOperandWaveSz, getWave1.kind);
 
-      context->get_operand(ref.o_operands[2], &getReg4);
+      context->get_operand(ref.o_operands[3], &getReg4);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg4.size);
       EXPECT_EQ(BrigEOperandReg, getReg4.kind);
-      EXPECT_EQ(Brigb64, getReg4.type);
+      EXPECT_EQ(Brigb32, getReg4.type);
       EXPECT_EQ(0, getReg4.reserved);
       EXPECT_EQ(12, getReg4.s_name);
       break;
@@ -811,7 +811,7 @@ TEST_P(Instruction4MadTest, BrigMad) {
       EXPECT_EQ(wavesz_size, getWave1.size);
       EXPECT_EQ(BrigEOperandWaveSz, getWave1.kind);
 
-      context->get_operand(ref.o_operands[2], &getImm3);
+      context->get_operand(ref.o_operands[3], &getImm3);
       // BrigOperandImmed
       EXPECT_EQ(immed_size, getImm3.size);
       EXPECT_EQ(BrigEOperandImmed, getImm3.kind);

@@ -374,7 +374,7 @@ struct Instruction4Test instruction4mad_pair[27] ={
       operand_offset, 
       operand_offset + reg_size, 
       operand_offset + reg_size + wavesz_size, 
-      operand_offset + reg_size * 2 + wavesz_size, 
+      RoundUp8(operand_offset + reg_size * 2 + wavesz_size), 
       0
       }
     }
