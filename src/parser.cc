@@ -7456,7 +7456,6 @@ int LabelList(Context* context, BrigdOffset32_t bds_offset) {
       }
 
       bds.d_init = context->get_directive_offset();
-      bds.d_init += bds.d_init & 0x7;
       context->append_directive(bdli);
 
       unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
