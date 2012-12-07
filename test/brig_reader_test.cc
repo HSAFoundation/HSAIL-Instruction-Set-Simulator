@@ -3185,6 +3185,30 @@ TEST(BrigGlobalTest, GlobalArray) {
     const unsigned arraySz = 5;
     testGlobalArray("f32", result, value, bits, arraySz);
   }
+  {
+    float result[4] = { 12.345, 12.345, 12.345, 12.345 };
+    union { float f32; uint32_t u32; } inputData = { 12.345 };
+    static const char input[] = "%ff, %ef, 0f%lx, %aff";
+    size_t size = snprintf(NULL, 0, input, inputData.f32, inputData.f32, inputData.u32, inputData.f32);
+    char *buffer = new char[size];
+    snprintf(buffer, size, input, inputData.f32, inputData.f32, inputData.u32, inputData.f32);
+    const char *value = buffer;
+    const unsigned bits = 32;
+    const unsigned arraySz = 4;
+    testGlobalArray("f32", result, value, bits, arraySz);
+  }
+  {
+    float result[4] = { 12.345, 12.345, 12.345, 12.345 };
+    union { double f64; uint64_t u64; } inputData = { 12.345 };
+    static const char input[] = "%fl, %el, 0d%llx, %all";
+    size_t size = snprintf(NULL, 0, input, inputData.f64, inputData.f64, inputData.u64, inputData.f64);
+    char *buffer = new char[size];
+    snprintf(buffer, size, input, inputData.f64, inputData.f64, inputData.u64, inputData.f64);
+    const char *value = buffer;
+    const unsigned bits = 64;
+    const unsigned arraySz = 4;
+    testGlobalArray("f64", result, value, bits, arraySz);
+  }
 }
 
 TEST(BrigInstTest, WaveSize) {
