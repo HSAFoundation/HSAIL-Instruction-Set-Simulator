@@ -3169,7 +3169,10 @@ static void testGlobalArray(const char *type,
   BE.launch(fun, args);
 
   for (unsigned i = 0; i < arraySz; i++) {
-    EXPECT_EQ(result[i], arg_val0[i]);
+    if (!strcmp(type, "f32"))
+      EXPECT_FLOAT_EQ(result[i], arg_val0[i]);
+    if (!strcmp(type, "f64"))
+      EXPECT_DOUBLE_EQ(result[i], arg_val0[i]); 
   }
 
   delete[] arg_val0;
@@ -3188,7 +3191,7 @@ TEST(BrigGlobalTest, GlobalArray) {
   {
     float result[4] = { 12.345, 12.345, 12.345, 12.345 };
     union { float f32; uint32_t u32; } inputData = { 12.345 };
-    static const char input[] = "%ff, %ef, 0f%lx, %aff";
+    const char input[] = "%ff, %ef, 0f%lx, %aff";
     size_t size = snprintf(NULL, 0, input, inputData.f32, inputData.f32, inputData.u32, inputData.f32);
     char *buffer = new char[size];
     snprintf(buffer, size, input, inputData.f32, inputData.f32, inputData.u32, inputData.f32);
@@ -3196,11 +3199,12 @@ TEST(BrigGlobalTest, GlobalArray) {
     const unsigned bits = 32;
     const unsigned arraySz = 4;
     testGlobalArray("f32", result, value, bits, arraySz);
+    delete[] buffer;
   }
   {
-    float result[4] = { 12.345, 12.345, 12.345, 12.345 };
+    double result[4] = { 12.345, 12.345, 12.345, 12.345 };
     union { double f64; uint64_t u64; } inputData = { 12.345 };
-    static const char input[] = "%fl, %el, 0d%llx, %all";
+    const char input[] = "%fl, %el, 0d%llx, %all";
     size_t size = snprintf(NULL, 0, input, inputData.f64, inputData.f64, inputData.u64, inputData.f64);
     char *buffer = new char[size];
     snprintf(buffer, size, input, inputData.f64, inputData.f64, inputData.u64, inputData.f64);
@@ -3208,6 +3212,7 @@ TEST(BrigGlobalTest, GlobalArray) {
     const unsigned bits = 64;
     const unsigned arraySz = 4;
     testGlobalArray("f64", result, value, bits, arraySz);
+    delete[] buffer;
   }
 }
 
