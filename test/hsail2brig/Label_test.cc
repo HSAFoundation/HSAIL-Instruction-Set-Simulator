@@ -252,15 +252,341 @@ TEST(CodegenTest, Label_CodeGen) {
   
   dir->append(&lab4Dir);
 
-  Label_Test TestCase(in, symbols, dir, code, oper);
-  TestCase.Run_Test(&Program);
+  Label_Test TestCase1(in, symbols, dir, code, oper);
+  TestCase1.Run_Test(&Program);
   symbols->clear();
+  dir->clear();
+  code->clear();
+  oper->clear();
 
+  in.assign("version 1:0:$small;\n");
+  in.append("kernel &LabelTest()\n");
+  in.append("{\n");
+  in.append("  @t1:  add_u32 $s2, $s2, 2;\n");
+  in.append("  @t2:  add_u32 $s2, $s2, 1;\n");
+  in.append("  global_u32 %tab1[] =  {@t1, @t2};\n");
+  in.append("  @t3:  add_u32 $s2, $s2, 3;\n");
+  in.append("  global_u32 %tab2[3] =  {@t3, @t4, @t5};\n");
+  in.append("  @t4:  add_u32 $s2, $s2, 4;\n");
+  in.append("  @t5:  add_u32 $s2, $s2, 5;\n");
+  in.append("  ret;\n");
+  in.append("};\n");
+
+  std::string t1Name, t2Name, t3Name, t4Name, t5Name;
+  std::string tab1Name, tab2Name, kerName;
+  BrigInstBase instAdd, instRet;
+  BrigOperandImmed imm;
+
+  kerName.assign("&LabelTest");
+  t1Name.assign("@t1");
+  regName.assign("$s2");
+  t2Name.assign("@t2");
+  tab1Name.assign("%tab1");
+  t3Name.assign("@t3");
+  tab2Name.assign("%tab2");
+  t4Name.assign("@t4");
+  t5Name.assign("@t5");  
+  
+  symbols->append(kerName);
+  symbols->append(t1Name);
+  symbols->append(regName);
+  symbols->append(t2Name);
+  symbols->append(tab1Name);
+  symbols->append(t3Name);
+  symbols->append(tab2Name);
+  symbols->append(t4Name);
+  symbols->append(t5Name);
+
+  instAdd.size = sizeof(instAdd);
+  instAdd.kind = BrigEInstBase;
+  instAdd.opcode = BrigAdd;
+  instAdd.type = Brigu32;
+  instAdd.packing = BrigNoPacking;
+  instAdd.o_operands[0] = 0;
+  instAdd.o_operands[1] = 0;
+  instAdd.o_operands[2] = sizeof(reg);
+  instAdd.o_operands[3] = 0;
+  instAdd.o_operands[4] = 0;
+
+  code->append(&instAdd);
+
+  instAdd.size = sizeof(instAdd);
+  instAdd.kind = BrigEInstBase;
+  instAdd.opcode = BrigAdd;
+  instAdd.type = Brigu32;
+  instAdd.packing = BrigNoPacking;
+  instAdd.o_operands[0] = 0;
+  instAdd.o_operands[1] = 0;
+  instAdd.o_operands[2] = sizeof(reg) + sizeof(imm);
+  instAdd.o_operands[3] = 0;
+  instAdd.o_operands[4] = 0;
+
+  code->append(&instAdd);
+
+  instAdd.size = sizeof(instAdd);
+  instAdd.kind = BrigEInstBase;
+  instAdd.opcode = BrigAdd;
+  instAdd.type = Brigu32;
+  instAdd.packing = BrigNoPacking;
+  instAdd.o_operands[0] = 0;
+  instAdd.o_operands[1] = 0;
+  instAdd.o_operands[2] = sizeof(reg) + sizeof(imm) * 2;
+  instAdd.o_operands[3] = 0;
+  instAdd.o_operands[4] = 0;
+
+  code->append(&instAdd);
+
+  instAdd.size = sizeof(instAdd);
+  instAdd.kind = BrigEInstBase;
+  instAdd.opcode = BrigAdd;
+  instAdd.type = Brigu32;
+  instAdd.packing = BrigNoPacking;
+  instAdd.o_operands[0] = 0;
+  instAdd.o_operands[1] = 0;
+  instAdd.o_operands[2] = sizeof(reg) + sizeof(imm) * 3;
+  instAdd.o_operands[3] = 0;
+  instAdd.o_operands[4] = 0;
+
+  code->append(&instAdd);
+
+  instAdd.size = sizeof(instAdd);
+  instAdd.kind = BrigEInstBase;
+  instAdd.opcode = BrigAdd;
+  instAdd.type = Brigu32;
+  instAdd.packing = BrigNoPacking;
+  instAdd.o_operands[0] = 0;
+  instAdd.o_operands[1] = 0;
+  instAdd.o_operands[2] = sizeof(reg) + sizeof(imm) * 4;
+  instAdd.o_operands[3] = 0;
+  instAdd.o_operands[4] = 0;
+
+  code->append(&instAdd);
+
+  instRet.size = sizeof(instRet);
+  instRet.kind = BrigEInstBase;
+  instRet.opcode = BrigRet;
+  instRet.type = Brigb32;
+  instRet.packing = BrigNoPacking;
+  instRet.o_operands[0] = 0;
+  instRet.o_operands[1] = 0;
+  instRet.o_operands[2] = 0;
+  instRet.o_operands[3] = 0;
+  instRet.o_operands[4] = 0;
+
+  code->append(&instRet);
+
+  reg.size = sizeof(reg);
+  reg.kind = BrigEOperandReg;
+  reg.type = Brigb32;
+  reg.reserved = 0;
+  reg.s_name = kerName.size() + t1Name.size() + 2;
+
+  oper->append(&reg);
+
+  imm.size = sizeof(imm);
+  imm.kind = BrigEOperandImmed;
+  imm.type = Brigb32;
+  imm.reserved = 0;
+  memset(&imm.bits, 0, sizeof(imm.bits));
+  imm.bits.u = 2;
+
+  oper->append(&imm);
+
+  imm.size = sizeof(imm);
+  imm.kind = BrigEOperandImmed;
+  imm.type = Brigb32;
+  imm.reserved = 0;
+  memset(&imm.bits, 0, sizeof(imm.bits));
+  imm.bits.u = 1;
+
+  oper->append(&imm);
+
+  imm.size = sizeof(imm);
+  imm.kind = BrigEOperandImmed;
+  imm.type = Brigb32;
+  imm.reserved = 0;
+  memset(&imm.bits, 0, sizeof(imm.bits));
+  imm.bits.u = 3;
+
+  oper->append(&imm);
+
+  imm.size = sizeof(imm);
+  imm.kind = BrigEOperandImmed;
+  imm.type = Brigb32;
+  imm.reserved = 0;
+  memset(&imm.bits, 0, sizeof(imm.bits));
+  imm.bits.u = 4;
+
+  oper->append(&imm);
+
+  imm.size = sizeof(imm);
+  imm.kind = BrigEOperandImmed;
+  imm.type = Brigb32;
+  imm.reserved = 0;
+  memset(&imm.bits, 0, sizeof(imm.bits));
+  imm.bits.u = 5;
+
+  oper->append(&imm);
+
+  BrigDirectiveKernel kerRef;
+  BrigDirectiveLabel t1, t2, t3, t4, t5;
+  BrigDirectiveSymbol tab1, tab2;
+  BrigDirectiveLabelInit* tab1Init, *tab2Init;
+  tab1Init = (BrigDirectiveLabelInit*)malloc(sizeof(BrigDirectiveLabelInit) +
+                                             sizeof(BrigdOffset32_t));
+
+  tab2Init = (BrigDirectiveLabelInit*)malloc(sizeof(BrigDirectiveLabelInit) +
+                                             sizeof(BrigdOffset32_t) * 2);
+  verRef.size = sizeof(verRef);
+  verRef.kind = BrigEDirectiveVersion;
+  verRef.c_code = 0;
+  verRef.major = 1;
+  verRef.minor = 0;
+  verRef.machine = BrigESmall;
+  verRef.profile = BrigEFull;
+  verRef.ftz = BrigENosftz;
+  verRef.reserved = 0;
+
+  dir->append(&verRef);
+
+  kerRef.size = sizeof(kerRef);
+  kerRef.kind = BrigEDirectiveKernel;
+  kerRef.c_code = 0;
+  kerRef.s_name = 0;
+  kerRef.inParamCount = 0;
+  kerRef.d_firstScopedDirective = sizeof(verRef) + sizeof(kerRef);  
+  kerRef.operationCount = 6;
+  kerRef.d_nextDirective = kerRef.d_firstScopedDirective + sizeof(t1) + 
+                           sizeof(t2) + sizeof(t3) + sizeof(t4) + sizeof(t5) +
+			   sizeof(tab1) + sizeof(tab2) + 
+			   sizeof(BrigdOffset32_t) * 3 +
+			   sizeof(BrigDirectiveLabelInit) * 2;
+
+  kerRef.attribute = BrigNone;
+  kerRef.reserved = 0;
+  kerRef.outParamCount = 0;
+  kerRef.d_firstInParam = 0;
+
+  dir->append(&kerRef);
+
+  t1.size = sizeof(t1);
+  t1.kind = BrigEDirectiveLabel;
+  t1.c_code = 0;
+  t1.s_name = kerName.size() + 1;
+
+  dir->append(&t1);
+
+  t2.size = sizeof(t2);
+  t2.kind = BrigEDirectiveLabel;
+  t2.c_code = sizeof(instAdd);
+  t2.s_name = kerName.size() + t1Name.size() + regName.size() + 3;
+
+  dir->append(&t2);
+  
+  tab1.size = sizeof(tab1);
+  tab1.kind = BrigEDirectiveSymbol;
+  tab1.s.c_code = sizeof(instAdd) * 2;
+  tab1.s.storageClass = BrigGlobalSpace;
+  tab1.s.attribute = BrigNone;
+  tab1.s.reserved = 0;
+  tab1.s.symbolModifier = BrigArray;
+  tab1.s.dim = 2;
+  tab1.s.s_name = t1Name.size() + regName.size() + t2Name.size() + kerName.size() + 4;
+  tab1.s.type = Brigu32;
+  tab1.s.align = 1;
+  tab1.d_init = sizeof(verRef) + sizeof(kerRef) + sizeof(t1) + 
+                sizeof(tab1) + sizeof(t2);
+  tab1.reserved = 0;
+
+  dir->append(&tab1);
+
+  tab1Init->size = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t);
+  tab1Init->kind = BrigEDirectiveLabelInit;
+  tab1Init->c_code = sizeof(instAdd) * 2;
+  tab1Init->elementCount = 2;
+  tab1Init->s_name = tab1.s.s_name;
+  tab1Init->d_labels[0] = sizeof(verRef) + sizeof(kerRef);
+  tab1Init->d_labels[1] = sizeof(verRef) + sizeof(kerRef) + sizeof(t1);
+
+  dir->append(tab1Init);
+
+  t3.size = sizeof(t3);
+  t3.kind = BrigEDirectiveLabel;
+  t3.c_code = sizeof(instAdd) * 2;
+  t3.s_name = kerName.size() + regName.size() + t1Name.size() + 
+              t2Name.size() + tab1Name.size() + 5;
+
+  dir->append(&t3);
+
+  tab2.size = sizeof(tab2);
+  tab2.kind = BrigEDirectiveSymbol;
+  tab2.s.c_code = sizeof(instAdd) * 3;
+  tab2.s.storageClass = BrigGlobalSpace;
+  tab2.s.attribute = BrigNone;
+  tab2.s.reserved = 0;
+  tab2.s.symbolModifier = BrigArray;
+  tab2.s.dim = 3;
+  tab2.s.s_name = t1Name.size() + t2Name.size() + kerName.size() + 
+                  tab1Name.size() + t3Name.size() + regName.size() + 6;
+  tab2.s.type = Brigu32;
+  tab2.s.align = 1;
+  tab2.d_init = sizeof(verRef) + sizeof(kerRef) + sizeof(t1) + 
+                sizeof(tab1) + sizeof(BrigDirectiveLabelInit) + 
+		sizeof(BrigdOffset32_t) + sizeof(t2) + sizeof(t3) + sizeof(tab2) +
+		sizeof(t4) + sizeof(t5);
+  tab2.reserved = 0;
+
+  dir->append(&tab2);
+
+
+
+  t4.size = sizeof(t4);
+  t4.kind = BrigEDirectiveLabel;
+  t4.c_code = sizeof(instAdd) * 3;
+  t4.s_name = kerName.size() + t1Name.size() + t2Name.size() + regName.size() +
+              t3Name.size() + tab1Name.size() + tab2Name.size() + 7;
+
+  dir->append(&t4);
+
+  t5.size = sizeof(t5);
+  t5.kind = BrigEDirectiveLabel;
+  t5.c_code = sizeof(instAdd) * 4;
+  t5.s_name = kerName.size() + t1Name.size() + t2Name.size() + regName.size() +
+              tab1Name.size() + t3Name.size() + t4Name.size() +
+	      tab2Name.size() + 8;
+
+  dir->append(&t5);
+
+  tab2Init->size = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t) * 2;
+  tab2Init->kind = BrigEDirectiveLabelInit;
+  tab2Init->c_code = sizeof(instAdd) * 3;
+  tab2Init->elementCount = 3;
+  tab2Init->s_name = tab2.s.s_name;
+  tab2Init->d_labels[0] = tab1.d_init + sizeof(BrigDirectiveLabelInit) + 
+                          sizeof(BrigdOffset32_t);
+  tab2Init->d_labels[1] = tab2Init->d_labels[0] + sizeof(tab2) + sizeof(t3);
+                         
+  tab2Init->d_labels[2] = tab2Init->d_labels[1] + sizeof(t4);
+
+  dir->append(tab2Init);
+
+  Label_Test TestCase2(in, symbols, dir, code, oper);
+  TestCase2.Run_Test(&Program);
+  symbols->clear();
+  dir->clear();
+  code->clear();
+  oper->clear();
+
+  free(tab1Init);
+  free(tab2Init);
   delete dir;
   delete code;
   delete oper;
   delete symbols;
 }
+
+  
+
 } // namespace hsa
 } // namespace brig
 
