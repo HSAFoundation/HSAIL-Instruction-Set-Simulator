@@ -1477,10 +1477,10 @@ TEST(BrigKernelTest, IndirectBranches) {
 
       "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
       "@tab: labeltargets @even, @odd;\n"
-      "  cbr $c0, $s1, [@tab];\n"         //in the case of $s0 >= $s2
-                                          //if %n is even goto @even esle goto @odd
-      "  mov_b32 $s2, 0xD;\n"             //or: set 13 to $s2
-      "  brn $s1, [@tab];\n"              //if %n is even goto @even esle goto @odd
+      "  cbr $c0, $s1, [@tab];\n" //in the case of $s0 >= $s2
+                                  //if %n is even goto @even else goto @odd
+      "  mov_b32 $s2, 0xD;\n"     //or: set 13 to $s2
+      "  brn $s1, [@tab];\n"      //if %n is even goto @even else goto @odd
       "@odd:"
       "  add_u32 $s2, $s2, 2;\n"
       "  brn @return;\n"
@@ -1557,10 +1557,10 @@ TEST(BrigKernelTest, IndirectBranches) {
 
       "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
       "  global_u32 %tab[] =  {@even, @odd};\n"
-      "  cbr $c0, $s1, [%tab];\n"              //in the case of $s0 >= $s2
-                                               //if %n is even goto @even esle goto @odd
-      "  mov_b32 $s2, 0xD;\n"                  //or: set 13 to $s2
-      "  brn $s1, [%tab];\n"                   //if %n is even goto @even esle goto @odd
+      "  cbr $c0, $s1, [%tab];\n" //in the case of $s0 >= $s2
+                                  //if %n is even goto @even else goto @odd
+      "  mov_b32 $s2, 0xD;\n"     //or: set 13 to $s2
+      "  brn $s1, [%tab];\n"      //if %n is even goto @even else goto @odd
 
       "@return:"
       "  ld_kernarg_u32 $s1, [%r];\n"
