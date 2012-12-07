@@ -1743,8 +1743,8 @@ int BranchCbr(Context* context) {
         0
       };
       context->label_o_map[label_name] = context->get_operand_offset();
-      if (context->symbol_map.count(label_name)) {
-        opLabelRef.labeldirective = context->symbol_map[label_name];
+      if (context->label_d_map.count(label_name)) {
+        opLabelRef.labeldirective = context->label_d_map[label_name];
       }
       context->append_operand(&opLabelRef);
     }
@@ -1772,8 +1772,8 @@ int BranchCbr(Context* context) {
             0
           };
           context->label_o_map[label_name] = context->get_operand_offset();
-          if (context->symbol_map.count(label_name)) {
-            opLabelRef.labeldirective = context->symbol_map[label_name];
+          if (context->label_d_map.count(label_name)) {
+            opLabelRef.labeldirective = context->label_d_map[label_name];
           }
           context->append_operand(&opLabelRef);
         }
@@ -1895,8 +1895,8 @@ int BranchBrn(Context* context) {
         0
       };
       context->label_o_map[label_name] = context->get_operand_offset();
-      if (context->symbol_map.count(label_name)) {
-        opLabelRef.labeldirective = context->symbol_map[label_name];
+      if (context->label_d_map.count(label_name)) {
+        opLabelRef.labeldirective = context->label_d_map[label_name];
       }
       context->append_operand(&opLabelRef);
     }
@@ -1928,8 +1928,8 @@ int BranchBrn(Context* context) {
             0
           };
           context->label_o_map[label_name] = context->get_operand_offset();
-          if (context->symbol_map.count(label_name)) {
-            opLabelRef.labeldirective = context->symbol_map[label_name];
+          if (context->label_d_map.count(label_name)) {
+            opLabelRef.labeldirective = context->label_d_map[label_name];
           }
           context->append_operand(&opLabelRef);
         }
@@ -2758,37 +2758,40 @@ int Label(Context* context) {
     context->set_error(MISSING_COLON);
     return 1;
   }
-
-  if (context->symbol_map.count(name)) {
-   // TODO if count isnot zeor,
-   // it's wrong program,emit error report
-   // context->set_error(INVALID_LABEL);
-   // return 1;
-    context->token_to_scan = yylex();
-    return 0;
-  }
+  s_name = context->add_symbol(name);
   c_code = context->get_code_offset();
 
-  // dont need to check if name exist in symbol buffer
-  s_name = context->add_symbol(name);
+  if (!context->label_d_map.count(name)) {
+    // dont need to check if name exist in symbol buffer
+
+    BrigDirectiveLabel label_directive = {
+      sizeof(BrigDirectiveLabel),    // size
+      BrigEDirectiveLabel,           // kind
+      c_code,                        // c_code
+      s_name                         // s_name
+    };
+
+    context->label_d_map[name] = context->get_directive_offset();
+    context->append_directive(&label_directive);
+  } else {
+    BrigdOffset32_t lab_d_offset = context->label_d_map[name];
+    BrigDirectiveLabel lab;
+    context->get_directive(lab_d_offset, &lab);
+    lab.c_code = c_code;
+    lab.s_name = s_name;
+    context->update_directive_bytes(
+      reinterpret_cast<unsigned char*>(&lab), 
+      lab_d_offset, sizeof(lab));
+  }
 
   if (context->label_o_map.count(name)) {
     BrigoOffset32_t ope_offset = context->label_o_map[name];
-    BrigdOffset32_t lab_dir_offset = context->get_directive_offset();
+    BrigdOffset32_t lab_dir_offset = context->label_d_map[name]; 
     unsigned char* lab_d_Offset = reinterpret_cast<unsigned char*>(&lab_dir_offset);
     context->update_operand_bytes(lab_d_Offset,
                          ope_offset + sizeof(uint16_t) * 2,
                          sizeof(BrigdOffset32_t));
   }
-  BrigDirectiveLabel label_directive = {
-    sizeof(BrigDirectiveLabel),    // size
-    BrigEDirectiveLabel,           // kind
-    c_code,                        // c_code
-    s_name                         // s_name
-  };
-
-  context->symbol_map[name] = context->get_directive_offset();
-  context->append_directive(&label_directive);
 
   context->token_to_scan = yylex();
   return 0;
@@ -4362,8 +4365,8 @@ int Ldc(Context* context) {
       };
       labRef.size = sizeof(labRef);
 
-      if (context->symbol_map.count(oper_name)) {
-        labRef.labeldirective = context->symbol_map[oper_name];
+      if (context->label_d_map.count(oper_name)) {
+        labRef.labeldirective = context->label_d_map[oper_name];
       }
       OpOffset[1] = context->get_operand_offset();
       context->label_o_map[oper_name] = context->get_operand_offset();
@@ -7449,8 +7452,18 @@ int LabelList(Context* context, BrigdOffset32_t bds_offset) {
 
   while (context->token_to_scan == TOKEN_LABEL) {
     std::string label_name = context->token_value.string_val;
-
-    label_list.push_back(context->symbol_map[label_name]);
+    if (context->label_d_map.count(label_name) == 0) {
+      BrigDirectiveLabel lab = {
+	0,
+	BrigEDirectiveLabel,
+        0,
+        0
+      };
+      lab.size = sizeof(lab);
+      context->label_d_map[label_name] = context->get_directive_offset();
+      context->append_directive(&lab);
+    }
+    label_list.push_back(context->label_d_map[label_name]);
     elementCount++;
     context->token_to_scan = yylex();
     if (context->token_to_scan == ',') {

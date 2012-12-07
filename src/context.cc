@@ -56,7 +56,7 @@ void Context::clear_context(void) {
   func_o_map.clear();
   operand_map.clear();
   label_o_map.clear();
-  label_c_map.clear();
+  label_d_map.clear();
   symbol_map.clear();
   arg_map.clear();
   if (valid_string) {
