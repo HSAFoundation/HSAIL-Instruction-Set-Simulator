@@ -2218,7 +2218,7 @@ int Initializer(Context* context, BrigdOffset32_t sym_offset) {
       }
       break;
     case TOKEN_LABEL:
-      if (LabelList(context, sym_offset)) {
+      if (LabelList(context, sym_offset, false)) {
         return 1;
       }
       break;
@@ -2798,37 +2798,38 @@ int Label(Context* context) {
 }
 
 int LabelTargets(Context* context) {
+  std::string labelName;
+  if (context->token_to_scan == TOKEN_LABEL) {
+    labelName = context->token_value.string_val;
+  }
   if (Label(context)) {
     context->set_error(MISSING_LABEL);
     return 1;
   }
   if (context->token_to_scan == LABELTARGETS) {
-    return LabelTargetsPart2(context);
+    return LabelTargetsPart2(context, context->label_d_map[labelName]);
   } else {
     context->set_error(INVALID_LABEL_TARGETS);
     return 1;
   }
+  return 1;
 }
 
-int LabelTargetsPart2(Context* context){
-  while (1) {
-    context->token_to_scan = yylex();
-    if (context->token_to_scan != TOKEN_LABEL) {
-      context->set_error(MISSING_LABEL);
-      return 1;
-    }
-
-    context->token_to_scan = yylex();
-    if (context->token_to_scan == ',') {
-      continue;
-    } else if (context->token_to_scan == ';') {
-      context->token_to_scan = yylex();
-      return 0;
-    } else {
-      context->set_error(MISSING_SEMICOLON);
-      return 1;
-    }
+int LabelTargetsPart2(Context* context, BrigdOffset32_t dOffset) {
+  context->token_to_scan = yylex();
+  if (context->token_to_scan != TOKEN_LABEL) {
+    context->set_error(MISSING_LABEL);
+    return 1;
   }
+  if (LabelList(context, dOffset, true)) {
+    return 1;
+  }
+  if (context->token_to_scan != ';') {
+    context->set_error(MISSING_SEMICOLON);
+    return 1;
+  }
+  context->token_to_scan = yylex();
+  return 0;
 }
 
 int Instruction4(Context* context) {
@@ -6232,11 +6233,12 @@ int BodyStatementNested(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
+    std::string labelName = context->token_value.string_val;
     if (Label(context)) {
       return 1;
     }
     if(context->token_to_scan == LABELTARGETS) {
-      return LabelTargetsPart2(context);
+      return LabelTargetsPart2(context, context->label_d_map[labelName]);
     }
     return 0;
   } else if (!Operation(context)) {
@@ -6329,11 +6331,12 @@ int BodyStatement(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
+    std::string labelName = context->token_value.string_val;
     if (Label(context)) {
       return 1;
     }
     if (context->token_to_scan == LABELTARGETS)
-      return LabelTargetsPart2(context);
+      return LabelTargetsPart2(context, context->label_d_map[labelName]);
     return 0;
   } else if (!Operation(context)) {
     context->update_bdf_operation_count();
@@ -7446,7 +7449,7 @@ int Pragma(Context* context) {
   return 0;
 }
 
-int LabelList(Context* context, BrigdOffset32_t bds_offset) {
+int LabelList(Context* context, BrigdOffset32_t dOffset, bool IsTargets) {
   uint32_t elementCount = 0;
   std::vector<BrigdOffset32_t> label_list;
 
@@ -7470,58 +7473,79 @@ int LabelList(Context* context, BrigdOffset32_t bds_offset) {
       context->token_to_scan = yylex();
       continue;
     } else {
-      // update the BrigDirectiveSymbol.d_init and dim
-      BrigDirectiveSymbol bds ;
-      context->get_directive(bds_offset,&bds);
+      if (!IsTargets) {
+	// update the BrigDirectiveSymbol.d_init and dim
+	BrigDirectiveSymbol bds ;
+	context->get_directive(dOffset, &bds);
 
-      if (bds.s.dim != 0) {
-        if (elementCount > bds.s.dim) {
-          context->set_error(INVALID_INITIALIZER);
-          return 1;
-        }
-        elementCount = bds.s.dim;
+	if (bds.s.dim != 0) {
+	  if (elementCount > bds.s.dim) {
+	    context->set_error(INVALID_INITIALIZER);
+	    return 1;
+	  }
+	  elementCount = bds.s.dim;
+	} else {
+	  if (context->get_isArray()) {
+	    bds.s.dim = elementCount;
+	  }
+	}
+	size_t arraySize = sizeof(BrigDirectiveLabelInit) +
+	  (elementCount - 1) * sizeof(BrigdOffset32_t);
+	uint8_t *array = new uint8_t[arraySize];
+	memset(array, 0, sizeof(uint8_t) * arraySize);
+	BrigDirectiveLabelInit *bdli = 
+	  reinterpret_cast<BrigDirectiveLabelInit*>(array);
+
+	context->set_dim(bds.s.dim);
+	if (0 != context->get_dim() && context->get_isArray()) {
+	  bds.s.symbolModifier = BrigArray;
+	}
+
+	// fill the data of BrigDirectiveLabelInit
+	bdli->size = arraySize;
+	bdli->kind = BrigEDirectiveLabelInit;
+	bdli->c_code = context->get_code_offset();
+	bdli->elementCount = elementCount;
+	bdli->s_name = bds.s.s_name;
+
+	for (unsigned i = 0 ; i < label_list.size() ; i ++){
+	  bdli->d_labels[i] = label_list[i];
+	}
+
+	bds.d_init = context->get_directive_offset();
+	context->append_directive(bdli);
+
+	unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+	context->update_directive_bytes(
+	    bds_charp,
+	    dOffset,
+	    sizeof(BrigDirectiveSymbol)
+	);
+
+	delete[] reinterpret_cast<char *>(bdli);
       } else {
-        if (context->get_isArray()) {
-          bds.s.dim = elementCount;
-        }
+	BrigDirectiveLabelList* labelList;
+
+	size_t arraySize = sizeof(BrigDirectiveLabelList) +
+	                   (elementCount - 1) * sizeof(BrigdOffset32_t);
+	uint8_t *array = new uint8_t[arraySize];
+	memset(array, 0, sizeof(uint8_t) * arraySize);
+	labelList = reinterpret_cast<BrigDirectiveLabelList*>(array);
+        labelList->size = arraySize;
+	labelList->kind = BrigEDirectiveLabelList;
+	labelList->c_code = context->get_code_offset();
+        labelList->label = dOffset;
+	labelList->elementCount = elementCount;
+	for (uint32_t i = 0 ; i < elementCount ; ++i) {
+	  labelList->d_labels[i] = label_list[i];
+	}
+	context->append_directive(labelList);
+	delete []array;
       }
-      size_t arraySize = sizeof(BrigDirectiveLabelInit) +
-        (elementCount - 1) * sizeof(BrigdOffset32_t);
-      uint8_t *array = new uint8_t[arraySize];
-      memset(array, 0, sizeof(uint8_t) * arraySize);
-      BrigDirectiveLabelInit *bdli = reinterpret_cast<BrigDirectiveLabelInit*>(array);
-
-      context->set_dim(bds.s.dim);
-      if (0 != context->get_dim() && context->get_isArray()) {
-        bds.s.symbolModifier = BrigArray;
-      }
-
-      // fill the data of BrigDirectiveLabelInit
-      bdli->size = arraySize;
-      bdli->kind = BrigEDirectiveLabelInit;
-      bdli->c_code = context->get_code_offset();
-      bdli->elementCount = elementCount;
-      bdli->s_name = bds.s.s_name;
-
-      for (unsigned i = 0 ; i < label_list.size() ; i ++){
-        bdli->d_labels[i] = label_list[i];
-      }
-
-      bds.d_init = context->get_directive_offset();
-      context->append_directive(bdli);
-
-      unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-      context->update_directive_bytes(
-          bds_charp,
-          bds_offset,
-          sizeof(BrigDirectiveSymbol));
-
-      delete[] reinterpret_cast<char *>(bdli);
-
       return 0;
     }
   }  // While
-
+  context->set_error(MISSING_LABEL);
   return 1;
 }
 

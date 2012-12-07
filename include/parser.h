@@ -128,7 +128,7 @@ int FloatInitializer(Context* context, BrigdOffset32_t sym_offset);
 int FloatListSingle(Context* context, std::vector<double>* float_list);
 int SingleInitializer(Context *context, BrigdOffset32_t sym_offset);
 int SingleListSingle(Context* context, std::vector<float>* single_list);
-int LabelList(Context* context, BrigdOffset32_t sym_offset);
+int LabelList(Context* context, BrigdOffset32_t dOffset, bool IsTargets);
 
 int GlobalSymbolDecl(Context* context);
 int Directive(Context* context);
@@ -182,7 +182,7 @@ int Instruction4Shuffle(Context* context);
 int FunctionDefinitionPart2(Context* context);
 int MemoryOperand(Context* context, BrigoOffset32_t* pRetOpOffset);
 
-int LabelTargetsPart2(Context* context);
+int LabelTargetsPart2(Context* context, BrigdOffset32_t dOffset);
 
 int Instruction1OpcodeDT(Context* context);
 int Instruction1OpcodeNoDT(Context* context);
