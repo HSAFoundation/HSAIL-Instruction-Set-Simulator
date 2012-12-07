@@ -3024,6 +3024,72 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
+  {
+    const uint64_t result = uint64_t(0x7fefffffffffffff);
+    const char *value = "0d7fefffffffffffff";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x0);
+    const char *value = "0d0000000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xffefffffffffffff);
+    const char *value = "0dffefffffffffffff";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7feffffffffffffe);
+    const char *value = "0d7feffffffffffffe";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x8000000000000001);
+    const char *value = "0d8000000000000001";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x0000000000000001);
+    const char *value = "0d0000000000000001";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xffeffffffffffffe);
+    const char *value = "0dffeffffffffffffe";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7ff0000000000000);
+    const char *value = "0d7ff0000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xfff0000000000000);
+    const char *value = "0dfff0000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7fff800000000000);
+    const char *value = "0d7fff800000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xfff8000000000000);
+    const char *value = "0dfff8000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
 }
 
 static const char GlobalArrayInst[] =
