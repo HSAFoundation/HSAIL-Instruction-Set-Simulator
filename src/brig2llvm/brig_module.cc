@@ -26,6 +26,7 @@ bool BrigModule::validate(void) const {
   valid &= validateOperands();
   valid &= validateStrings();
   valid &= validateDebug();
+  if(valid) valid &= validateCCode();
   if(valid) valid &= validateInstructions();
   return valid;
 }
@@ -391,6 +392,62 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
   }
 
   return valid;
+}
+
+template<unsigned> struct hasCCode { typedef bool Bool; };
+
+template<class T>
+static typename hasCCode<sizeof(T::c_code)>::Bool
+updateCCode(BrigcOffset32_t &c_code, const T *dir) {
+  if(c_code > dir->c_code) return false;
+  c_code = dir->c_code;
+  return true;
+}
+
+static bool updateCCode(BrigcOffset32_t &c_code, ...) { return true; }
+
+bool BrigModule::validateCCode(void) const {
+  BrigcOffset32_t c_code = 0;
+  dir_iterator it = S_.begin();
+  const dir_iterator E = S_.end();
+
+#define caseBrig(X)                                     \
+  case BrigE ## X:                                      \
+    if(!check(updateCCode(c_code, cast<Brig ## X>(it)), \
+              "c_code out of order")) return false;     \
+    break
+
+  for(; it != E; ++it) {
+    switch(it->kind) {
+      caseBrig(DirectiveFunction);
+      caseBrig(DirectiveKernel);
+      caseBrig(DirectiveSymbol);
+      caseBrig(DirectiveImage);
+      caseBrig(DirectiveSampler);
+      caseBrig(DirectiveLabel);
+      caseBrig(DirectiveLabelList);
+      caseBrig(DirectiveVersion);
+      caseBrig(DirectiveSignature);
+      caseBrig(DirectiveFile);
+      caseBrig(DirectiveComment);
+      caseBrig(DirectiveLoc);
+      caseBrig(DirectiveInit);
+      caseBrig(DirectiveLabelInit);
+      caseBrig(DirectiveControl);
+      caseBrig(DirectivePragma);
+      caseBrig(DirectiveExtension);
+      caseBrig(DirectiveArgStart);
+      caseBrig(DirectiveArgEnd);
+      caseBrig(DirectiveBlockStart);
+      caseBrig(DirectiveBlockNumeric);
+      caseBrig(DirectiveBlockString);
+      caseBrig(DirectiveBlockEnd);
+      caseBrig(DirectivePad);
+    }
+  }
+#undef caseBrig
+
+  return true;
 }
 
 bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {

@@ -78,6 +78,7 @@ class BrigModule {
   bool validateOperands(void) const;
   bool validateStrings(void) const;
   bool validateDebug(void) const;
+  bool validateCCode(void) const;
   bool validateInstructions(void) const;
 
   bool validate(const BrigDirectiveMethod *dir) const;
@@ -148,7 +149,7 @@ class BrigModule {
   bool validateImageQueryInst(const inst_iterator inst) const;
   bool validateParaSynInst(const inst_iterator inst, unsigned nary) const;
   bool validateLdStImageInst(const inst_iterator) const;
-  
+
   bool validateSpecialInst(const inst_iterator inst, unsigned nary) const;
   bool validateAtomicInst(const inst_iterator inst, bool isRet) const;
   bool validateAtomicImageInst(const inst_iterator inst, bool isRet) const;
