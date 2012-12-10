@@ -3005,6 +3005,18 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("f32", result, value, bits);
   }
   {
+    const uint32_t result = uint32_t(0x007fffff);
+    const char *value = "0f007fffff";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x807fffff);
+    const char *value = "0f807fffff";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
     const uint64_t result = uint64_t(0x7fefffffffffffff);
     const char *value = "0d7fefffffffffffff";
     unsigned bits = 64;
@@ -3067,6 +3079,18 @@ TEST(BrigGlobalTest, GlobalInitializer) {
   {
     const uint64_t result = uint64_t(0xfff8000000000000);
     const char *value = "0dfff8000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x000fffffffffffff);
+    const char *value = "0d000fffffffffffff";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x800fffffffffffff);
+    const char *value = "0d800fffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
