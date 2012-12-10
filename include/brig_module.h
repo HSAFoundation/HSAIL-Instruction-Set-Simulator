@@ -205,6 +205,7 @@ class BrigModule {
   bool validateFexp2(const inst_iterator inst) const;
   bool validateFlog2(const inst_iterator inst) const;
   bool validateFrcp(const inst_iterator inst) const;
+  bool validateFsqrt(const inst_iterator inst) const;
   bool validateFrsqrt(const inst_iterator inst) const;
   bool validateFsin(const inst_iterator inst) const;
   bool validateBitAlign(const inst_iterator inst) const;
@@ -262,6 +263,7 @@ class BrigModule {
   bool validateAlloca(const inst_iterator inst) const;
   bool validateClock(const inst_iterator inst) const;
   bool validateCU(const inst_iterator inst) const;
+  bool validateCurrentWorkGroupSize(const inst_iterator inst) const;
   bool validateDebugTrap(const inst_iterator inst) const;
   bool validateDispatchId(const inst_iterator inst) const;
   bool validateDynWaveId(const inst_iterator inst) const;

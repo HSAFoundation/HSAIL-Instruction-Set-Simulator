@@ -228,6 +228,7 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(Fexp2);
       caseInst(Flog2);
       caseInst(Frcp);
+      caseInst(Fsqrt);
       caseInst(Frsqrt);
       caseInst(Fsin);
       caseInst(BitAlign);
@@ -285,6 +286,7 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(Alloca);
       caseInst(Clock);
       caseInst(CU);
+      caseInst(CurrentWorkGroupSize);
       caseInst(DebugTrap);
       caseInst(DispatchId);
       caseInst(DynWaveId);
@@ -2529,6 +2531,16 @@ bool BrigModule::validateFrcp(const inst_iterator inst) const {
   return valid;
 }
 
+bool BrigModule::validateFsqrt(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(inst->type == Brigf32 || inst->type == Brigf64,
+                 "Type should be f32 or f64");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Fsqrt can not accept vector types");
+  valid &= validateArithmeticInst(inst, 1);
+  return valid;
+}
+
 bool BrigModule::validateFrsqrt(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigf32 || inst->type == Brigf64,
@@ -3599,6 +3611,12 @@ bool BrigModule::validateClock(const inst_iterator inst) const {
 bool BrigModule::validateCU(const inst_iterator inst) const {
   bool valid = true;
   valid &= validateSpecialInst(inst, 0);
+  return valid;
+}
+
+bool BrigModule::validateCurrentWorkGroupSize(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= validateSpecialInst(inst, 1);
   return valid;
 }
 
