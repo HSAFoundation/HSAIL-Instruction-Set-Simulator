@@ -397,7 +397,7 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
 template<unsigned> struct hasCCode { typedef bool Bool; };
 
 template<class T>
-static typename hasCCode<sizeof(T::c_code)>::Bool
+static typename hasCCode<sizeof(((T *) 0)->c_code)>::Bool
 updateCCode(BrigcOffset32_t &c_code, const T *dir) {
   if(c_code > dir->c_code) return false;
   c_code = dir->c_code;
