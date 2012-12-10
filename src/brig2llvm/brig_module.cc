@@ -1574,6 +1574,7 @@ bool BrigModule::validateArithmeticInst(const inst_iterator inst,
 
 bool BrigModule::validateShiftInst(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
     return false;
   BrigDataType type = BrigDataType(inst->type);
@@ -1624,6 +1625,7 @@ bool BrigModule::validateShiftInst(const inst_iterator inst) const {
 
 bool BrigModule::validateMovdInst(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
     return false;
   valid &= check(inst->type == Brigb64, "Type of Movd should be Brigb64");
@@ -1646,6 +1648,7 @@ bool BrigModule::validateMovdInst(const inst_iterator inst) const {
 
 bool BrigModule::validateMovsInst(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Movs should be Brigb32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Movs cannot accept vector types");
@@ -1664,6 +1667,7 @@ bool BrigModule::validateMovsInst(const inst_iterator inst) const {
 
 bool BrigModule::validateUnpackInst(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
     return false;
 
@@ -1798,6 +1802,29 @@ bool BrigModule::validateParaSynInst(const inst_iterator inst,
   return valid;
 }
 
+bool BrigModule::validateFirstLastbitInst(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(type == Brigb32 || type == Brigb64,
+                 "Type should be b32 or b64");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "Type of destination should be b32");
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(src) ||
+                 isa<BrigOperandImmed>(src) ||
+                 isa<BrigOperandWaveSz>(src),
+                 "Source should be register, immediate or wave size");
+  valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
+  valid &= check(!BrigInstHelper::isVectorTy(type),
+                 "First and Last cannot accept vector types");
+  return valid;
+}
+
 bool BrigModule::validateAbs(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
@@ -1822,6 +1849,7 @@ bool BrigModule::validateAdd(const inst_iterator inst) const {
 
 bool BrigModule::validateBorrow(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
                  BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
                  "Borrow is only valid for signed and unsigned types");
@@ -1833,6 +1861,7 @@ bool BrigModule::validateBorrow(const inst_iterator inst) const {
 
 bool BrigModule::validateCarry(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
                  BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
                  "Carry is only valid for signed and unsigned types");
@@ -1867,7 +1896,7 @@ bool BrigModule::validateDiv(const inst_iterator inst) const {
   valid &= check(!BrigInstHelper::isSaturated(BrigPacking(inst->packing)),
                  "Div cannot saturate");
   valid &= validateArithmeticInst(inst, 2);
-  return valid;;
+  return valid;
 }
 
 bool BrigModule::validateFma(const inst_iterator inst) const {
@@ -1942,6 +1971,7 @@ bool BrigModule::validateMul(const inst_iterator inst) const {
 
 bool BrigModule::validateMulHi(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
                  BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
                  "MulHi is only valid for signed and unsigned types");
@@ -2002,6 +2032,7 @@ bool BrigModule::validateSub(const inst_iterator inst) const {
 
 bool BrigModule::validateMad24(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
                  BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
                  "Mad24 is only valid for signed and unsigned types");
@@ -2024,6 +2055,7 @@ bool BrigModule::validateMad24Hi(const inst_iterator inst) const {
 
 bool BrigModule::validateMul24(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
                  BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
                  "Mul24 is only valid for signed and unsigned types");
@@ -2035,6 +2067,7 @@ bool BrigModule::validateMul24(const inst_iterator inst) const {
 
 bool BrigModule::validateMul24Hi(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(BrigInstHelper::isSignedTy(BrigDataType(inst->type)) ||
                  BrigInstHelper::isUnsignedTy(BrigDataType(inst->type)),
                  "Mul24Hi is only valid for signed and unsigned types");
@@ -2054,6 +2087,7 @@ bool BrigModule::validateShr(const inst_iterator inst) const {
 
 bool BrigModule::validateAnd(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
                  inst->type == Brigb64,
                  "Type of And should be b1, b32 or b64");
@@ -2065,6 +2099,7 @@ bool BrigModule::validateAnd(const inst_iterator inst) const {
 
 bool BrigModule::validateNot(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
                  inst->type == Brigb64,
                  "Type of Not should be b1, b32 or b64");
@@ -2076,6 +2111,7 @@ bool BrigModule::validateNot(const inst_iterator inst) const {
 
 bool BrigModule::validateOr(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
                  inst->type == Brigb64,
                  "Type of Or should be b1, b32 or b64");
@@ -2087,6 +2123,7 @@ bool BrigModule::validateOr(const inst_iterator inst) const {
 
 bool BrigModule::validatePopCount(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   BrigDataType type = BrigDataType(inst->type);
   valid &= check(inst->type == Brigb32 || inst->type ==Brigb64,
                  "Type of PopCount shoud be b32 or b64");
@@ -2114,6 +2151,7 @@ bool BrigModule::validatePopCount(const inst_iterator inst) const {
 
 bool BrigModule::validateXor(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
                  inst->type == Brigb64,
                  "Type of Xor should be b1, b32 or b64");
@@ -2125,6 +2163,7 @@ bool BrigModule::validateXor(const inst_iterator inst) const {
 
 bool BrigModule::validateBitRev(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
                  "Type of BitRev should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
@@ -2135,6 +2174,7 @@ bool BrigModule::validateBitRev(const inst_iterator inst) const {
 
 bool BrigModule::validateBitSelect(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
                  "Type of BitSelect should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
@@ -2145,6 +2185,7 @@ bool BrigModule::validateBitSelect(const inst_iterator inst) const {
 
 bool BrigModule::validateExtract(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
                  "Type of Extract should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
@@ -2183,17 +2224,12 @@ bool BrigModule::validateExtract(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateFirstBit(const inst_iterator inst) const {
-  bool valid = true;
-  valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of FirstBit should be b32 or b64");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "FirstBit cannot accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
-  return valid;
+  return validateFirstLastbitInst(inst);
 }
 
 bool BrigModule::validateInsert(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
                  "Type of Insert should be b32 or b64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
@@ -2203,17 +2239,12 @@ bool BrigModule::validateInsert(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateLastBit(const inst_iterator inst) const {
-  bool valid = true;
-  valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of LastBit should be b32 or b64");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "LastBit cannot accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
-  return valid;
+  return validateFirstLastbitInst(inst);
 }
 
 bool BrigModule::validateLda(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
   valid &= check(inst->type ==Brigu32 || inst->type == Brigu64,
@@ -2237,6 +2268,7 @@ bool BrigModule::validateLda(const inst_iterator inst) const {
 
 bool BrigModule::validateLdc(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
   valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
@@ -2269,6 +2301,7 @@ bool BrigModule::validateLdc(const inst_iterator inst) const {
 
 bool BrigModule::validateMov(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
   valid &= check(inst->type == Brigb1 || inst->type == Brigb32 ||
@@ -2324,23 +2357,24 @@ bool BrigModule::validateMov(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateMovdHi(const inst_iterator inst) const {
-  return validateMovdInst(inst);;
+  return validateMovdInst(inst);
 }
 
 bool BrigModule::validateMovdLo(const inst_iterator inst) const {
-  return validateMovdInst(inst);;
+  return validateMovdInst(inst);
 }
 
 bool BrigModule::validateMovsHi(const inst_iterator inst) const {
-  return validateMovsInst(inst);;
+  return validateMovsInst(inst);
 }
 
 bool BrigModule::validateMovsLo(const inst_iterator inst) const {
-  return validateMovsInst(inst);;
+  return validateMovsInst(inst);
 }
 
 bool BrigModule::validateShuffle(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
     return false;
   BrigDataType type = BrigDataType(inst->type);
@@ -2386,6 +2420,7 @@ bool BrigModule::validateUnpackLo(const inst_iterator inst) const {
 
 bool BrigModule::validateCmov(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
     return false;
 
@@ -2427,6 +2462,7 @@ bool BrigModule::validateCmov(const inst_iterator inst) const {
 
 bool BrigModule::validateClass(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
     return false;
   valid &= check(inst->type == Brigf32 || inst->type == Brigf64,
@@ -2514,6 +2550,7 @@ bool BrigModule::validateFsin(const inst_iterator inst) const {
 
 bool BrigModule::validateBitAlign(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of BitAlign should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "BitAlign can not accept vector types");
@@ -2523,6 +2560,7 @@ bool BrigModule::validateBitAlign(const inst_iterator inst) const {
 
 bool BrigModule::validateByteAlign(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of ByteAlign should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "ByteAlign can not accept vector types");
@@ -2532,6 +2570,7 @@ bool BrigModule::validateByteAlign(const inst_iterator inst) const {
 
 bool BrigModule::validateF2u4(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigu32, "Type of F2u4 should be u32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "F2u4 can not accept vector types");
@@ -2541,6 +2580,7 @@ bool BrigModule::validateF2u4(const inst_iterator inst) const {
 
 bool BrigModule::validateLerp(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Lerp should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Lerp can not accept vector types");
@@ -2550,6 +2590,7 @@ bool BrigModule::validateLerp(const inst_iterator inst) const {
 
 bool BrigModule::validateSad(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Sad should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Sad can not accept vector types");
@@ -2559,6 +2600,7 @@ bool BrigModule::validateSad(const inst_iterator inst) const {
 
 bool BrigModule::validateSad2(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Sad2 should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Sad2 can not accept vector types");
@@ -2568,6 +2610,7 @@ bool BrigModule::validateSad2(const inst_iterator inst) const {
 
 bool BrigModule::validateSad4(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Sad4 should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Sad4 can not accept vector types");
@@ -2577,6 +2620,7 @@ bool BrigModule::validateSad4(const inst_iterator inst) const {
 
 bool BrigModule::validateSad4Hi(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Sad4Hi should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Sad4Hi can not accept vector types");
@@ -2585,19 +2629,31 @@ bool BrigModule::validateSad4Hi(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateUnpack0(const inst_iterator inst) const {
-  return validateArithmeticInst(inst, 1);
+  bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
+  valid &= validateArithmeticInst(inst, 1);
+  return valid;
 }
 
 bool BrigModule::validateUnpack1(const inst_iterator inst) const {
-  return validateArithmeticInst(inst, 1);
+  bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
+  valid &= validateArithmeticInst(inst, 1);
+  return valid;
 }
 
 bool BrigModule::validateUnpack2(const inst_iterator inst) const {
-  return validateArithmeticInst(inst, 1);
+  bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
+  valid &= validateArithmeticInst(inst, 1);
+  return valid;
 }
 
 bool BrigModule::validateUnpack3(const inst_iterator inst) const {
-  return validateArithmeticInst(inst, 1);
+  bool valid = true;
+  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
+  valid &= validateArithmeticInst(inst, 1);
+  return valid;
 }
 
 bool BrigModule::validateSegmentp(const inst_iterator inst) const {

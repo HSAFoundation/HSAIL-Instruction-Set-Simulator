@@ -149,6 +149,7 @@ class BrigModule {
   bool validateImageQueryInst(const inst_iterator inst) const;
   bool validateParaSynInst(const inst_iterator inst, unsigned nary) const;
   bool validateLdStImageInst(const inst_iterator) const;
+  bool validateFirstLastbitInst(const inst_iterator) const;
 
   bool validateSpecialInst(const inst_iterator inst, unsigned nary) const;
   bool validateAtomicInst(const inst_iterator inst, bool isRet) const;
