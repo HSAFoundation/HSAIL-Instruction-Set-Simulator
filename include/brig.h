@@ -217,8 +217,6 @@ enum BrigStorageClass {
   BrigSpillSpace = 5,
   BrigArgSpace = 6,
   BrigFlatSpace = 7,
-  BrigExtSpace0 = 8,
-  BrigExtSpace1 = 9,
   BrigInvalidSpace
 };
 // 8-16 reserved for extensions
