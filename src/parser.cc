@@ -1743,8 +1743,8 @@ int BranchCbr(Context* context) {
         0
       };
       context->label_o_map[label_name] = context->get_operand_offset();
-      if (context->label_d_map.count(label_name)) {
-        opLabelRef.labeldirective = context->label_d_map[label_name];
+      if (context->symbol_map.count(label_name)) {
+        opLabelRef.labeldirective = context->symbol_map[label_name];
       }
       context->append_operand(&opLabelRef);
     }
@@ -1772,8 +1772,8 @@ int BranchCbr(Context* context) {
             0
           };
           context->label_o_map[label_name] = context->get_operand_offset();
-          if (context->label_d_map.count(label_name)) {
-            opLabelRef.labeldirective = context->label_d_map[label_name];
+          if (context->symbol_map.count(label_name)) {
+            opLabelRef.labeldirective = context->symbol_map[label_name];
           }
           context->append_operand(&opLabelRef);
         }
@@ -1895,8 +1895,8 @@ int BranchBrn(Context* context) {
         0
       };
       context->label_o_map[label_name] = context->get_operand_offset();
-      if (context->label_d_map.count(label_name)) {
-        opLabelRef.labeldirective = context->label_d_map[label_name];
+      if (context->symbol_map.count(label_name)) {
+        opLabelRef.labeldirective = context->symbol_map[label_name];
       }
       context->append_operand(&opLabelRef);
     }
@@ -1928,8 +1928,8 @@ int BranchBrn(Context* context) {
             0
           };
           context->label_o_map[label_name] = context->get_operand_offset();
-          if (context->label_d_map.count(label_name)) {
-            opLabelRef.labeldirective = context->label_d_map[label_name];
+          if (context->symbol_map.count(label_name)) {
+            opLabelRef.labeldirective = context->symbol_map[label_name];
           }
           context->append_operand(&opLabelRef);
         }
@@ -2760,37 +2760,38 @@ int Label(Context* context) {
   }
   s_name = context->add_symbol(name);
   c_code = context->get_code_offset();
+  BrigDirectiveLabel labelDir = {
+    sizeof(BrigDirectiveLabel),    // size
+    BrigEDirectiveLabel,           // kind
+    c_code,                        // c_code
+    s_name                         // s_name
+  };
+  context->symbol_map[name] = context->get_directive_offset();
+  context->append_directive(&labelDir);
 
-  if (!context->label_d_map.count(name)) {
-    // dont need to check if name exist in symbol buffer
+  if (context->label_d_map.count(name)) {
+    BrigdOffset32_t dOffset = context->symbol_map[name];
+    typedef std::multimap<std::string, BrigdOffset32_t>::const_iterator MapIter_t;
+    std::pair<MapIter_t, MapIter_t> labRange;
+    labRange = context->label_d_map.equal_range(name);
 
-    BrigDirectiveLabel label_directive = {
-      sizeof(BrigDirectiveLabel),    // size
-      BrigEDirectiveLabel,           // kind
-      c_code,                        // c_code
-      s_name                         // s_name
-    };
-
-    context->label_d_map[name] = context->get_directive_offset();
-    context->append_directive(&label_directive);
-  } else {
-    BrigdOffset32_t lab_d_offset = context->label_d_map[name];
-    BrigDirectiveLabel lab;
-    context->get_directive(lab_d_offset, &lab);
-    lab.c_code = c_code;
-    lab.s_name = s_name;
-    context->update_directive_bytes(
-      reinterpret_cast<unsigned char*>(&lab),
-      lab_d_offset, sizeof(lab));
+    for (MapIter_t i = labRange.first; i != labRange.second; ++i) {
+      context->update_directive_bytes(
+        reinterpret_cast<unsigned char*>(&dOffset),
+        i->second, sizeof(BrigdOffset32_t)
+      );
+    }
   }
 
   if (context->label_o_map.count(name)) {
-    BrigoOffset32_t ope_offset = context->label_o_map[name];
-    BrigdOffset32_t lab_dir_offset = context->label_d_map[name];
-    unsigned char* lab_d_Offset = reinterpret_cast<unsigned char*>(&lab_dir_offset);
-    context->update_operand_bytes(lab_d_Offset,
-                         ope_offset + sizeof(uint16_t) * 2,
-                         sizeof(BrigdOffset32_t));
+    BrigoOffset32_t labOpOffset = context->label_o_map[name];
+    BrigOperandLabelRef labOp;
+    context->get_operand(labOpOffset, &labOp);
+    labOp.labeldirective = context->symbol_map[name];
+    context->update_operand_bytes(
+      reinterpret_cast<unsigned char*>(&labOp),
+      labOpOffset, sizeof(labOp)
+    );
   }
 
   context->token_to_scan = yylex();
@@ -2807,7 +2808,7 @@ int LabelTargets(Context* context) {
     return 1;
   }
   if (context->token_to_scan == LABELTARGETS) {
-    return LabelTargetsPart2(context, context->label_d_map[labelName]);
+    return LabelTargetsPart2(context, context->symbol_map[labelName]);
   } else {
     context->set_error(INVALID_LABEL_TARGETS);
     return 1;
@@ -4367,7 +4368,7 @@ int Ldc(Context* context) {
       labRef.size = sizeof(labRef);
 
       if (context->label_d_map.count(oper_name)) {
-        labRef.labeldirective = context->label_d_map[oper_name];
+        labRef.labeldirective = context->symbol_map[oper_name];
       }
       OpOffset[1] = context->get_operand_offset();
       context->label_o_map[oper_name] = context->get_operand_offset();
@@ -6238,7 +6239,7 @@ int BodyStatementNested(Context* context) {
       return 1;
     }
     if(context->token_to_scan == LABELTARGETS) {
-      return LabelTargetsPart2(context, context->label_d_map[labelName]);
+      return LabelTargetsPart2(context, context->symbol_map[labelName]);
     }
     return 0;
   } else if (!Operation(context)) {
@@ -6336,7 +6337,7 @@ int BodyStatement(Context* context) {
       return 1;
     }
     if (context->token_to_scan == LABELTARGETS)
-      return LabelTargetsPart2(context, context->label_d_map[labelName]);
+      return LabelTargetsPart2(context, context->symbol_map[labelName]);
     return 0;
   } else if (!Operation(context)) {
     context->update_bdf_operation_count();
@@ -7451,22 +7452,15 @@ int Pragma(Context* context) {
 
 int LabelList(Context* context, BrigdOffset32_t dOffset, bool IsTargets) {
   uint32_t elementCount = 0;
-  std::vector<BrigdOffset32_t> label_list;
+  std::vector<BrigdOffset32_t> labDirOffset_list;
+  std::vector<std::string> labName_list;
 
   while (context->token_to_scan == TOKEN_LABEL) {
     std::string label_name = context->token_value.string_val;
-    if (context->label_d_map.count(label_name) == 0) {
-      BrigDirectiveLabel lab = {
-	0,
-	BrigEDirectiveLabel,
-        0,
-        0
-      };
-      lab.size = sizeof(lab);
-      context->label_d_map[label_name] = context->get_directive_offset();
-      context->append_directive(&lab);
-    }
-    label_list.push_back(context->label_d_map[label_name]);
+
+    labDirOffset_list.push_back(context->symbol_map[label_name]);
+    labName_list.push_back(label_name);
+
     elementCount++;
     context->token_to_scan = yylex();
     if (context->token_to_scan == ',') {
@@ -7474,73 +7468,90 @@ int LabelList(Context* context, BrigdOffset32_t dOffset, bool IsTargets) {
       continue;
     } else {
       if (!IsTargets) {
-	// update the BrigDirectiveSymbol.d_init and dim
-	BrigDirectiveSymbol bds ;
-	context->get_directive(dOffset, &bds);
+        // update the BrigDirectiveSymbol.d_init and dim
+        BrigDirectiveSymbol bds;
+        context->get_directive(dOffset, &bds);
 
-	if (bds.s.dim != 0) {
-	  if (elementCount > bds.s.dim) {
-	    context->set_error(INVALID_INITIALIZER);
-	    return 1;
-	  }
-	  elementCount = bds.s.dim;
-	} else {
-	  if (context->get_isArray()) {
-	    bds.s.dim = elementCount;
-	  }
-	}
-	size_t arraySize = sizeof(BrigDirectiveLabelInit) +
-	  (elementCount - 1) * sizeof(BrigdOffset32_t);
-	uint8_t *array = new uint8_t[arraySize];
-	memset(array, 0, sizeof(uint8_t) * arraySize);
-	BrigDirectiveLabelInit *bdli = 
-	  reinterpret_cast<BrigDirectiveLabelInit*>(array);
+        if (bds.s.dim != 0) {
+          if (elementCount > bds.s.dim) {
+            context->set_error(INVALID_INITIALIZER);
+            return 1;
+          }
+          elementCount = bds.s.dim;
+        } else {
+          if (context->get_isArray()) {
+            bds.s.dim = elementCount;
+          }
+        }
+        size_t arraySize = sizeof(BrigDirectiveLabelInit) +
+          (elementCount - 1) * sizeof(BrigdOffset32_t);
+        uint8_t *array = new uint8_t[arraySize];
+        memset(array, 0, sizeof(uint8_t) * arraySize);
+        BrigDirectiveLabelInit *bdli = 
+          reinterpret_cast<BrigDirectiveLabelInit*>(array);
 
-	context->set_dim(bds.s.dim);
-	if (0 != context->get_dim() && context->get_isArray()) {
-	  bds.s.symbolModifier = BrigArray;
-	}
+        context->set_dim(bds.s.dim);
+        if (0 != context->get_dim() && context->get_isArray()) {
+          bds.s.symbolModifier = BrigArray;
+        }
 
-	// fill the data of BrigDirectiveLabelInit
-	bdli->size = arraySize;
-	bdli->kind = BrigEDirectiveLabelInit;
-	bdli->c_code = context->get_code_offset();
-	bdli->elementCount = elementCount;
-	bdli->s_name = bds.s.s_name;
+        // fill the data of BrigDirectiveLabelInit
+        bdli->size = arraySize;
+        bdli->kind = BrigEDirectiveLabelInit;
+        bdli->c_code = context->get_code_offset();
+        bdli->elementCount = elementCount;
+        bdli->s_name = bds.s.s_name;
 
-	for (unsigned i = 0 ; i < label_list.size() ; i ++){
-	  bdli->d_labels[i] = label_list[i];
-	}
+        bds.d_init = context->get_directive_offset();
 
-	bds.d_init = context->get_directive_offset();
-	context->append_directive(bdli);
+        for (unsigned i = 0 ; i < labDirOffset_list.size() ; i ++){
+          bdli->d_labels[i] = labDirOffset_list[i];
+          // Save the address of d_label in directive section.
+          if (bdli->d_labels[i] == 0) {
+            context->label_d_map.insert(std::pair<std::string, BrigdOffset32_t>(
+              labName_list[i], bds.d_init + arraySize - sizeof(BrigdOffset32_t) * 
+              (elementCount - i))
+            );
+          }
+        }
 
-	unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-	context->update_directive_bytes(
-	    bds_charp,
-	    dOffset,
-	    sizeof(BrigDirectiveSymbol)
-	);
+        context->append_directive(bdli);
 
-	delete[] reinterpret_cast<char *>(bdli);
+        unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
+        context->update_directive_bytes(
+            bds_charp,
+            dOffset,
+            sizeof(BrigDirectiveSymbol)
+        );
+
+        delete[] reinterpret_cast<char *>(bdli);
       } else {
-	BrigDirectiveLabelList* labelList;
+        BrigDirectiveLabelList* labelList;
 
-	size_t arraySize = sizeof(BrigDirectiveLabelList) +
-	                   (elementCount - 1) * sizeof(BrigdOffset32_t);
-	uint8_t *array = new uint8_t[arraySize];
-	memset(array, 0, sizeof(uint8_t) * arraySize);
-	labelList = reinterpret_cast<BrigDirectiveLabelList*>(array);
+        size_t arraySize = sizeof(BrigDirectiveLabelList) +
+          (elementCount - 1) * sizeof(BrigdOffset32_t);
+        uint8_t *array = new uint8_t[arraySize];
+        memset(array, 0, sizeof(uint8_t) * arraySize);
+        labelList = reinterpret_cast<BrigDirectiveLabelList*>(array);
         labelList->size = arraySize;
-	labelList->kind = BrigEDirectiveLabelList;
-	labelList->c_code = context->get_code_offset();
+        labelList->kind = BrigEDirectiveLabelList;
+        labelList->c_code = context->get_code_offset();
         labelList->label = dOffset;
-	labelList->elementCount = elementCount;
-	for (uint32_t i = 0 ; i < elementCount ; ++i) {
-	  labelList->d_labels[i] = label_list[i];
-	}
-	context->append_directive(labelList);
-	delete []array;
+        labelList->elementCount = elementCount;
+
+        for (unsigned i = 0 ; i < labDirOffset_list.size() ; ++i){
+          labelList->d_labels[i] = labDirOffset_list[i];
+          // Save the address of d_label in directive section.
+          if (labelList->d_labels[i] == 0) {
+            context->label_d_map.insert(std::pair<std::string, BrigdOffset32_t>(
+              labName_list[i], 
+              context->get_directive_offset() + arraySize - 
+              sizeof(BrigdOffset32_t) * (elementCount - i))
+            );
+          }
+        }
+        context->append_directive(labelList);
+        delete []array;
       }
       return 0;
     }
@@ -7606,8 +7617,10 @@ int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
     bds.d_init += 8 - bds.d_init % 8;
   }
   unsigned char *bds_charp = reinterpret_cast<unsigned char*>(&bds);
-  context->update_directive_bytes(bds_charp, symbol_offset,
-                                  sizeof(BrigDirectiveSymbol));
+  context->update_directive_bytes(
+    bds_charp, symbol_offset,
+    sizeof(BrigDirectiveSymbol)
+  );
   context->append_directive(bdi);
   delete[] reinterpret_cast<uint8_t *>(bdi);
   bdi = NULL;

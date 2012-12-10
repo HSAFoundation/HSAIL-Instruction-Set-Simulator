@@ -290,13 +290,13 @@ class Context {
 
     BrigoOffset32_t current_argList_offset;
     // label_o_map contains the info for OperandLabelRef,
-    // label_d_map contains the label that needed in an instruction
+    // label_d_map contains the label that needed in LabelList
     std::map<std::string, BrigoOffset32_t> arg_map;
     std::map<std::string, BrigdOffset32_t> func_map;
     std::map<std::string, BrigoOffset32_t> func_o_map;
     std::map<std::string, BrigoOffset32_t> operand_map;
     std::map<std::string, BrigoOffset32_t> label_o_map;
-    std::map<std::string, BrigdOffset32_t> label_d_map;
+    std::multimap<std::string, BrigdOffset32_t> label_d_map;
     std::map<std::string, BrigdOffset32_t> symbol_map;
 
     unsigned int token_to_scan;
