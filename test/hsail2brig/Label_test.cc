@@ -535,23 +535,6 @@ TEST(CodegenTest, Label_CodeGen) {
 
   dir->append(&tar);
 
-  t4.size = sizeof(t4);
-  t4.kind = BrigEDirectiveLabel;
-  t4.c_code = sizeof(instAdd) * 3;
-  t4.s_name = kerName.size() + t1Name.size() + t2Name.size() + regName.size() +
-              t3Name.size() + tab1Name.size() + tab2Name.size() + tarName.size() + 8;
-
-  dir->append(&t4);
-
-  t6.size = sizeof(t6);
-  t6.kind = BrigEDirectiveLabel;
-  t6.c_code = sizeof(instAdd) * 5;
-  t6.s_name = kerName.size() + t1Name.size() + t2Name.size() + regName.size() +
-              t3Name.size() + t4Name.size() + t5Name.size() + 
-	          tab1Name.size() + tab2Name.size() + tarName.size() + 10;
-
-  dir->append(&t6);
-
   tabList->size = sizeof(BrigDirectiveLabelList) + sizeof(BrigdOffset32_t) * 3;
   tabList->kind = BrigEDirectiveLabelList;
   tabList->c_code = sizeof(instAdd) * 3;
@@ -562,8 +545,8 @@ TEST(CodegenTest, Label_CodeGen) {
   tabList->d_labels[0] = sizeof(verRef) + sizeof(kerRef) + sizeof(t1);
   tabList->d_labels[1] = sizeof(verRef) + sizeof(kerRef) + sizeof(t1) + sizeof(t2) + 
                          sizeof(tab1) + sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t); 
-  tabList->d_labels[2] = tabList->label + sizeof(tar);
-  tabList->d_labels[3] = tabList->d_labels[2] + sizeof(t4);
+  tabList->d_labels[2] = kerRef.d_nextDirective - sizeof(t5) - sizeof(t6) - sizeof(t4);
+  tabList->d_labels[3] = kerRef.d_nextDirective - sizeof(t6);
 
   dir->append(tabList);
 
@@ -579,11 +562,31 @@ TEST(CodegenTest, Label_CodeGen) {
                   tab1Name.size() + t3Name.size() + regName.size() + 7;
   tab2.s.type = Brigu32;
   tab2.s.align = 1;
-  tab2.d_init =  tabList->d_labels[3] + sizeof(t6) + sizeof(BrigDirectiveLabelList) +
-                 sizeof(BrigdOffset32_t) * 3 + sizeof(tab2) + sizeof(t5);
+  tab2.d_init =  tabList->label + sizeof(tar) + sizeof(BrigDirectiveLabelList) + 
+                 sizeof(BrigdOffset32_t) * 3 + sizeof(tab2);
   tab2.reserved = 0;
 
   dir->append(&tab2);
+
+  tab2Init->size = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t) * 2;
+  tab2Init->kind = BrigEDirectiveLabelInit;
+  tab2Init->c_code = sizeof(instAdd) * 3;
+  tab2Init->elementCount = 3;
+  tab2Init->s_name = tab2.s.s_name;
+  tab2Init->d_labels[0] = tab1.d_init + sizeof(BrigDirectiveLabelInit) + 
+                          sizeof(BrigdOffset32_t);
+  tab2Init->d_labels[1] = tabList->d_labels[2];
+  tab2Init->d_labels[2] = tabList->d_labels[3] - sizeof(t5);
+
+  dir->append(tab2Init);
+
+  t4.size = sizeof(t4);
+  t4.kind = BrigEDirectiveLabel;
+  t4.c_code = sizeof(instAdd) * 3;
+  t4.s_name = kerName.size() + t1Name.size() + t2Name.size() + regName.size() +
+              t3Name.size() + tab1Name.size() + tab2Name.size() + tarName.size() + 8;
+
+  dir->append(&t4);
 
   t5.size = sizeof(t5);
   t5.kind = BrigEDirectiveLabel;
@@ -593,17 +596,14 @@ TEST(CodegenTest, Label_CodeGen) {
 
   dir->append(&t5);
 
-  tab2Init->size = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t) * 2;
-  tab2Init->kind = BrigEDirectiveLabelInit;
-  tab2Init->c_code = sizeof(instAdd) * 3;
-  tab2Init->elementCount = 3;
-  tab2Init->s_name = tab2.s.s_name;
-  tab2Init->d_labels[0] = tab1.d_init + sizeof(BrigDirectiveLabelInit) + 
-                          sizeof(BrigdOffset32_t);
-  tab2Init->d_labels[1] = tabList->label + sizeof(tar);
-  tab2Init->d_labels[2] = tab2.d_init - sizeof(t5);
+  t6.size = sizeof(t6);
+  t6.kind = BrigEDirectiveLabel;
+  t6.c_code = sizeof(instAdd) * 5;
+  t6.s_name = kerName.size() + t1Name.size() + t2Name.size() + regName.size() +
+              t3Name.size() + t4Name.size() + t5Name.size() + 
+	          tab1Name.size() + tab2Name.size() + tarName.size() + 10;
 
-  dir->append(tab2Init);
+  dir->append(&t6);
 
   Label_Test TestCase2(in, symbols, dir, code, oper);
   TestCase2.Run_Test(&Program);

@@ -15,29 +15,22 @@ private:
   T* RefDir;
 
   BrigDirectiveSymbol* RefArgsList;
-  BrigDirectiveLabel* RefLabList;
-  uint32_t labListSize;
   TInit* RefInit;
 
 public:
   GlobalDecl_Test(std::string& in):
     BrigCodeGenTest(in) {}
 
-  GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, TInit* d_init=NULL, 
-                  BrigDirectiveLabel* labList=NULL, uint32_t size=0):
+  GlobalDecl_Test(std::string& in, StringBuffer* sbuf,  T* out, TInit* d_init=NULL):
     BrigCodeGenTest(in, sbuf),
     RefDir(out),
     RefArgsList(NULL),
-    RefLabList(labList),
-    labListSize(size),
     RefInit(d_init)   { }
 
   GlobalDecl_Test(std::string& in, StringBuffer* sbuf, T* out, BrigDirectiveSymbol* arglist) :
     BrigCodeGenTest(in, sbuf),
     RefDir(out),
     RefArgsList(arglist),
-    RefLabList(NULL),
-    labListSize(0),
     RefInit(NULL) { }
 
   void Run_Test(int (*Rule)(Context*)){
@@ -46,11 +39,6 @@ public:
     dir->append(RefDir);
     if (RefArgsList)
       dir->append(RefArgsList);
-    if (RefLabList != NULL) {
-      for (uint32_t i = 0 ; i < labListSize ; ++i ) {
-	dir->append(&RefLabList[i]);
-      }
-    }
     if (RefInit)
       dir->append(RefInit);
 
@@ -1000,8 +988,6 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   sbuf->clear();
 
   /************************************************ Case 10 ***************************************/
-
-  BrigDirectiveLabel labList10[2];
   in.assign("global_u32 %tab[] = {@even, @odd};\n");
   name.assign("%tab"); sbuf->append(name);
 
@@ -1023,7 +1009,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     0                         // reserved
   };
   ref10.size = sizeof(ref10);
-  ref10.d_init = sizeof(ref10) + sizeof(labList10[0]) + sizeof(labList10[1]);
+  ref10.d_init = sizeof(ref10);
 
   size_t arraySize = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t);
   BrigDirectiveLabelInit* bdli10 = (BrigDirectiveLabelInit*) (malloc(arraySize));
@@ -1033,25 +1019,15 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdli10->c_code = 0;                                    // c_code
   bdli10->elementCount = 2;                              // elementCount
   bdli10->s_name = 0;
-  bdli10->d_labels[0] = sizeof(ref10);        // d_labels
-  bdli10->d_labels[1] = sizeof(ref10) + sizeof(BrigDirectiveLabel);
-  labList10[0].size = sizeof(labList10[0]);
-  labList10[0].kind = BrigEDirectiveLabel;
-  labList10[0].c_code = 0;
-  labList10[0].s_name = 0;
-  labList10[1].size = sizeof(labList10[1]);
-  labList10[1].kind = BrigEDirectiveLabel;
-  labList10[1].c_code = 0;
-  labList10[1].s_name = 0;
+  bdli10->d_labels[0] = 0;
+  bdli10->d_labels[1] = 0;
 
   GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> 
-    TestCase10(in, sbuf, &ref10, bdli10, labList10, 2);
+    TestCase10(in, sbuf, &ref10, bdli10);
   TestCase10.Run_Test(&GlobalDecl);
   free(bdli10);  bdli10 = NULL;
   sbuf->clear();
   /************************************************ Case 11 ***************************************/
-
-  BrigDirectiveLabel labList11;
   in.assign("global_u32 %tab[3] = {@odd};\n");
   name.assign("%tab"); sbuf->append(name);
 
@@ -1073,7 +1049,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     0                         // reserved
   };
   ref11.size = sizeof(ref11);
-  ref11.d_init = sizeof(labList11) + sizeof(ref11);
+  ref11.d_init = sizeof(ref11);
 
   arraySize = sizeof(BrigDirectiveLabelInit) + sizeof(BrigdOffset32_t) * 2;
   BrigDirectiveLabelInit* bdli11 = (BrigDirectiveLabelInit*) (malloc(arraySize));
@@ -1083,23 +1059,16 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdli11->c_code = 0;                                    // c_code
   bdli11->elementCount = 3;                              // elementCount
   bdli11->s_name = 0;
-  bdli11->d_labels[0] = sizeof(ref11);
+  bdli11->d_labels[0] = 0;
   bdli11->d_labels[1] = 0;
   bdli11->d_labels[2] = 0;
 
-  labList11.size = sizeof(labList11);
-  labList11.kind = BrigEDirectiveLabel;
-  labList11.c_code = 0;
-  labList11.s_name = 0;
-
   GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> 
-    TestCase11(in, sbuf, &ref11, bdli11, &labList11, 1);
+    TestCase11(in, sbuf, &ref11, bdli11);
   TestCase11.Run_Test(&GlobalDecl);
   free(bdli11);  bdli11 = NULL;
   sbuf->clear();
   /************************************************ Case 12 ***************************************/
-
-  BrigDirectiveLabel labList12;
   in.assign("global_u32 %tab = {@odd};\n");
   name.assign("%tab"); sbuf->append(name);
 
@@ -1121,7 +1090,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     0                         // reserved
   };
   ref12.size = sizeof(ref12);
-  ref12.d_init = sizeof(labList12) + sizeof(ref12);
+  ref12.d_init = sizeof(ref12);
 
   arraySize = sizeof(BrigDirectiveLabelInit);  
   BrigDirectiveLabelInit* bdli12 = (BrigDirectiveLabelInit*) (malloc(arraySize));
@@ -1131,15 +1100,10 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdli12->c_code = 0;                                    // c_code
   bdli12->elementCount = 1;                              // elementCount
   bdli12->s_name = 0;
-  bdli12->d_labels[0] = sizeof(ref12);
-
-  labList12.size = sizeof(labList12);
-  labList12.kind = BrigEDirectiveLabel;
-  labList12.c_code = 0;
-  labList12.s_name = 0;
+  bdli12->d_labels[0] = 0;
 
   GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> 
-    TestCase12(in, sbuf, &ref12, bdli12, &labList12, 1);
+    TestCase12(in, sbuf, &ref12, bdli12);
   TestCase12.Run_Test(&GlobalDecl);
   free(bdli12);  bdli12 = NULL;
   sbuf->clear();
