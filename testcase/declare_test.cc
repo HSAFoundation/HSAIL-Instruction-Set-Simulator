@@ -7,15 +7,15 @@ namespace brig {
 
 extern ErrorReporter* main_reporter;
 extern Context* context;
- 
+
 TEST_P(TestGlobalSamplerDecl,GlobalSamplerDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(globalsamplerdecl_pair[n].str);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -45,7 +45,7 @@ TEST_P(TestGlobalSamplerDecl,GlobalSamplerDecl)
   EXPECT_EQ(ref.boundaryV, get.boundaryV);
   EXPECT_EQ(ref.boundaryW, get.boundaryW);
   EXPECT_EQ(ref.reserved, get.reserved);
- 
+
   delete lexer;
 }
 
@@ -57,10 +57,10 @@ TEST_P(TestGlobalImageDecl,GlobalImageDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(globalimagedecl_pair[n].str);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -88,7 +88,7 @@ TEST_P(TestGlobalImageDecl,GlobalImageDecl)
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.s.align, get.s.align);
- 
+
   delete lexer;
 }
 
@@ -98,10 +98,10 @@ TEST_P(TestGlobalReadOnlyImageDecl,GlobalReadOnlyImageDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(globalreadonlyimagedecl_pair[n].str);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -129,7 +129,7 @@ TEST_P(TestGlobalReadOnlyImageDecl,GlobalReadOnlyImageDecl)
   EXPECT_EQ(ref.s.s_name, get.s.s_name);
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.s.align, get.s.align);
- 
+
   delete lexer;
 }
 
@@ -141,10 +141,10 @@ TEST_P(TestGlobalPrivateDecl,GlobalPrivateDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(globalprivatedecl_pair[n].str);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -170,7 +170,7 @@ TEST_P(TestGlobalPrivateDecl,GlobalPrivateDecl)
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
- 
+
   delete lexer;
 }
 
@@ -182,10 +182,10 @@ TEST_P(TestGlobalGroupDecl,GlobalGroupDecl)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(globalgroupdecl_pair[n].str);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -211,7 +211,7 @@ TEST_P(TestGlobalGroupDecl,GlobalGroupDecl)
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
- 
+
   delete lexer;
 }
 
@@ -233,7 +233,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_s32) {
   BrigEDirectiveSymbol ,    // kind
      {
     code_offset,       // c_code
-    BrigReadonlySpace,      // storag class 
+    BrigReadonlySpace,      // storag class
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
@@ -246,14 +246,14 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_s32) {
   0,                        // reserved
    };
 
-  size_t arraySize = sizeof(BrigDirectiveInit) + 2 * sizeof(int32_t); 
+  size_t arraySize = sizeof(BrigDirectiveInit) + 2 * sizeof(int32_t);
   int8_t *array = new int8_t[arraySize];
-     
+
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
   bdi->size = arraySize;           //size
   bdi->kind = BrigEDirectiveInit;  //kind
-  bdi->c_code = 0;                 //c_code
+  bdi->c_code = 8;                 //c_code
   bdi->elementCount = 4;           //elementCount
   bdi->type = Brigb32;             //type
   bdi->reserved = 0;               //reserved
@@ -288,7 +288,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_s32) {
 
   Buffer *dbuf = context->get_directive();
   int init_offset = directive_offset + brig_directive_symbol_size;
-  BrigDirectiveInit *get2 = 
+  BrigDirectiveInit *get2 =
     reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[init_offset]);
 
   EXPECT_EQ(bdi->size, get2->size);
@@ -320,7 +320,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_u32) {
   BrigEDirectiveSymbol ,    // kind
      {
     code_offset,       // c_code
-    BrigGlobalSpace,        // storag class 
+    BrigGlobalSpace,        // storag class
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
@@ -333,14 +333,14 @@ TEST(CodegenTest, initializableDeclCodeGen_global_u32) {
   0,                         // reserved
    };
 
-  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint32_t); 
+  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint32_t);
   uint8_t *array = new uint8_t[arraySize];
 
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
   bdi->size = arraySize;           //size
   bdi->kind = BrigEDirectiveInit;  //kind
-  bdi->c_code = 0;                 //c_code
+  bdi->c_code = 8;                 //c_code
   bdi->elementCount = 3;           //elementCount
   bdi->type = Brigb32;             //type
   bdi->reserved = 0;               //reserved
@@ -375,7 +375,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_u32) {
 
   Buffer *dbuf = context->get_directive();
   int init_offset = directive_offset + brig_directive_symbol_size;
-  BrigDirectiveInit *get2 = 
+  BrigDirectiveInit *get2 =
     reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[init_offset]);
   EXPECT_EQ(bdi->size, get2->size);
   EXPECT_EQ(bdi->kind, get2->kind);
@@ -406,7 +406,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f32) {
   BrigEDirectiveSymbol ,    // kind
      {
     code_offset,        // c_code
-    BrigReadonlySpace,       // storag class 
+    BrigReadonlySpace,       // storag class
     BrigNone ,               // attribut
     0,                       // reserved
     BrigArray,               // symbolModifier
@@ -419,14 +419,14 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f32) {
   0,                         // reserved
    };
 
-  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint32_t); 
+  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint32_t);
   uint8_t *array = new uint8_t[arraySize];
 
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
   bdi->size = arraySize;           //size
   bdi->kind = BrigEDirectiveInit;  //kind
-  bdi->c_code = 0;                 //c_code
+  bdi->c_code = 8;                 //c_code
   bdi->elementCount = 3;           //elementCount
   bdi->type = Brigb32;             //type
   bdi->reserved = 0;               //reserved
@@ -461,7 +461,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f32) {
 
   Buffer *dbuf = context->get_directive();
   int init_offset = directive_offset + brig_directive_symbol_size;
-  BrigDirectiveInit *get2 = 
+  BrigDirectiveInit *get2 =
     reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[init_offset]);
   EXPECT_EQ(bdi->size, get2->size);
   EXPECT_EQ(bdi->kind, get2->kind);
@@ -492,7 +492,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f32) {
   BrigEDirectiveSymbol ,    // kind
      {
     code_offset,       // c_code
-    BrigGlobalSpace,        // storag class 
+    BrigGlobalSpace,        // storag class
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
@@ -505,14 +505,14 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f32) {
   0,                        // reserved
    };
 
-  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint32_t); 
+  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint32_t);
   uint8_t *array = new uint8_t[arraySize];
 
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
   bdi->size = arraySize;           //size
   bdi->kind = BrigEDirectiveInit;  //kind
-  bdi->c_code = 0;                 //c_code
+  bdi->c_code = 8;                 //c_code
   bdi->elementCount = 3;           //elementCount
   bdi->type = Brigb32;             //type
   bdi->reserved = 0;               //reserved
@@ -548,7 +548,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f32) {
 
   Buffer *dbuf = context->get_directive();
   int init_offset = directive_offset + brig_directive_symbol_size;
-  BrigDirectiveInit *get2 = 
+  BrigDirectiveInit *get2 =
     reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[init_offset]);
   EXPECT_EQ(bdi->size, get2->size);
   EXPECT_EQ(bdi->kind, get2->kind);
@@ -579,7 +579,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f64) {
   BrigEDirectiveSymbol ,    // kind
      {
     code_offset,       // c_code
-    BrigReadonlySpace,      // storag class 
+    BrigReadonlySpace,      // storag class
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
@@ -592,14 +592,14 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f64) {
   0,                        // reserved
    };
 
-  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint64_t); 
+  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint64_t);
   uint8_t *array = new uint8_t[arraySize];
 
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
   bdi->size = arraySize;           //size
   bdi->kind = BrigEDirectiveInit;  //kind
-  bdi->c_code = 0;                 //c_code
+  bdi->c_code = 8;                 //c_code
   bdi->elementCount = 3;           //elementCount
   bdi->type = Brigb64;             //type
   bdi->reserved = 0;               //reserved
@@ -632,7 +632,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f64) {
 
   Buffer *dbuf = context->get_directive();
  int init_offset = directive_offset + brig_directive_symbol_size;
-  BrigDirectiveInit *get2 = 
+  BrigDirectiveInit *get2 =
     reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[init_offset]);
   EXPECT_EQ(bdi->size, get2->size);
   EXPECT_EQ(bdi->kind, get2->kind);
@@ -662,7 +662,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f64) {
   BrigEDirectiveSymbol ,    // kind
      {
     code_offset,       // c_code
-    BrigGlobalSpace,        // storag class 
+    BrigGlobalSpace,        // storag class
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
@@ -675,14 +675,14 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f64) {
   0,                        // reserved
    };
 
-  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint64_t); 
+  size_t arraySize = sizeof(BrigDirectiveInit) + 2*sizeof(uint64_t);
   uint8_t *array = new uint8_t[arraySize];
 
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
   bdi->size = arraySize;           //size
   bdi->kind = BrigEDirectiveInit;  //kind
-  bdi->c_code = 0;                 //c_code
+  bdi->c_code = 8;                 //c_code
   bdi->elementCount = 3;           //elementCount
   bdi->type = Brigb64;             //type
   bdi->reserved = 0;               //reserved
@@ -716,7 +716,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f64) {
 
   Buffer *dbuf = context->get_directive();
   int init_offset = directive_offset + brig_directive_symbol_size;
-  BrigDirectiveInit *get2 = 
+  BrigDirectiveInit *get2 =
     reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[init_offset]);
   EXPECT_EQ(bdi->size, get2->size);
   EXPECT_EQ(bdi->kind, get2->kind);
@@ -747,7 +747,7 @@ TEST(CodegenTest, InitializableDeclCodeGen_global_b8) {
   BrigEDirectiveSymbol ,    // kind
   {
     code_offset,       // c_code
-    BrigGlobalSpace,        // storag class 
+    BrigGlobalSpace,        // storag class
     BrigNone ,              // attribut
     0,                      // reserved
     BrigArray,              // symbolModifier
@@ -760,14 +760,14 @@ TEST(CodegenTest, InitializableDeclCodeGen_global_b8) {
   0,                        // reserved
   };
 
-  size_t arraySize = sizeof(BrigDirectiveInit); 
+  size_t arraySize = sizeof(BrigDirectiveInit);
   uint8_t *array = new uint8_t[arraySize];
 
   BrigDirectiveInit *bdi = reinterpret_cast<BrigDirectiveInit *>(array);
 
   bdi->size = arraySize;           //size
   bdi->kind = BrigEDirectiveInit;  //kind
-  bdi->c_code = 0;                 //c_code
+  bdi->c_code = 8;                 //c_code
   bdi->elementCount = 7;           //elementCount
   bdi->type = Brigb8;              //type
   bdi->reserved = 0;               //reserved
@@ -802,7 +802,7 @@ TEST(CodegenTest, InitializableDeclCodeGen_global_b8) {
 
   Buffer *dbuf = context->get_directive();
   int init_offset = directive_offset + brig_directive_symbol_size;
-  BrigDirectiveInit *get2 = 
+  BrigDirectiveInit *get2 =
     reinterpret_cast<BrigDirectiveInit*>(&dbuf->get()[init_offset]);
   EXPECT_EQ(bdi->size, get2->size);
   EXPECT_EQ(bdi->kind, get2->kind);
@@ -825,12 +825,12 @@ TEST(CodegenTest, InitializableDeclCodeGen_global_b8) {
 
 TEST_P(TestGlobalSymbolDecl,GlobalSymbolDecl)
 {
-  context->set_error_reporter(main_reporter); 
+  context->set_error_reporter(main_reporter);
   context->clear_context();
- 
+
   int n = GetParam();
   std::string input(globalsymboldecl_pair[n].str);
- 
+
   Lexer* lexer = new Lexer(input);
 
   lexer->set_source_string(input);
@@ -856,7 +856,7 @@ TEST_P(TestGlobalSymbolDecl,GlobalSymbolDecl)
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
- 
+
   delete lexer;
 }
 
@@ -894,7 +894,7 @@ TEST_P(TestunInitializableDecl, InitializableDecl) {
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
-     
+
   delete lexer;
 }
 
@@ -932,7 +932,7 @@ TEST_P(TestKernelArgumentDecl, KernelArgumentDecl) {
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
-     
+
   delete lexer;
 }
 
@@ -970,7 +970,7 @@ TEST_P(TestArgUninitializableDecl, ArgUninitializableDecl) {
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
-     
+
   delete lexer;
 }
 
@@ -1008,7 +1008,7 @@ TEST_P(TestArgumentDecl, ArgumentDecl) {
   EXPECT_EQ(ref.s.type, get.s.type);
   EXPECT_EQ(ref.d_init, get.d_init);
   EXPECT_EQ(ref.reserved, get.reserved);
-     
+
   delete lexer;
 }
 

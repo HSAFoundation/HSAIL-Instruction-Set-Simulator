@@ -14,6 +14,8 @@
 #include "llvm/Support/system_error.h"
 #include "gtest/gtest.h"
 
+#include <cstdarg>
+
 #define STR(X) #X
 #define XSTR(X) STR(X)
 
@@ -408,27 +410,31 @@ static const char *nary64[] = { "$d2",
                                 "$d2, $d2, $d3",
                                 "$d2, $d2, $d3, $d4" };
 
+static char *asnprintf(const char *format, ...) {
+  va_list ap;
+  va_start(ap, format);
+  size_t size = vsnprintf(NULL, 0, format, ap) + 1;
+  va_end(ap);
+  char *buffer = new char[size];
+  va_start(ap, format);
+  vsnprintf(buffer, size, format, ap);
+  va_end(ap);
+  return buffer;
+}
+
 static hsa::brig::BrigProgram makeTest(unsigned args, const char *inst,
                                        unsigned bits) {
   unsigned logBytes = bits == 32 ? 2 : 3;
   char c = bits == 32 ? 's' : 'd';
   const char **nary = bits == 32 ? nary32 : nary64;
-  size_t size =
-    snprintf(NULL, 0, InstTest,
-             logBytes,
-             bits, c,
-             bits, c,
-             bits, c,
-             inst, nary[args],
-             bits, c);
-  char *buffer = new char[size];
-  snprintf(buffer, size, InstTest,
-           logBytes,
-           bits, c,
-           bits, c,
-           bits, c,
-           inst, nary[args],
-           bits, c);
+  char *buffer =
+    asnprintf(InstTest,
+              logBytes,
+              bits, c,
+              bits, c,
+              bits, c,
+              inst, nary[args],
+              bits, c);
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
   return BP;
@@ -712,9 +718,7 @@ static const char SubwordsInst[] =
 
 template<class T>
 static void testSubwords(const char *type, const T &result, const char *value) {
-  size_t size = snprintf(NULL, 0, SubwordsInst, type, value);
-  char *buffer = new char[size];
-  snprintf(buffer, size, SubwordsInst, type, value);
+  char *buffer = asnprintf(SubwordsInst, type, value);
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
 
@@ -1473,10 +1477,10 @@ TEST(BrigKernelTest, IndirectBranches) {
 
       "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
       "@tab: labeltargets @even, @odd;\n"
-      "  cbr $c0, $s1, [@tab];\n"         //in the case of $s0 >= $s2
-                                          //if %n is even goto @even esle goto @odd
-      "  mov_b32 $s2, 0xD;\n"             //or: set 13 to $s2
-      "  brn $s1, [@tab];\n"              //if %n is even goto @even esle goto @odd
+      "  cbr $c0, $s1, [@tab];\n" //in the case of $s0 >= $s2
+                                  //if %n is even goto @even else goto @odd
+      "  mov_b32 $s2, 0xD;\n"     //or: set 13 to $s2
+      "  brn $s1, [@tab];\n"      //if %n is even goto @even else goto @odd
       "@odd:"
       "  add_u32 $s2, $s2, 2;\n"
       "  brn @return;\n"
@@ -1553,10 +1557,10 @@ TEST(BrigKernelTest, IndirectBranches) {
 
       "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
       "  global_u32 %tab[] =  {@even, @odd};\n"
-      "  cbr $c0, $s1, [%tab];\n"              //in the case of $s0 >= $s2
-                                               //if %n is even goto @even esle goto @odd
-      "  mov_b32 $s2, 0xD;\n"                  //or: set 13 to $s2
-      "  brn $s1, [%tab];\n"                   //if %n is even goto @even esle goto @odd
+      "  cbr $c0, $s1, [%tab];\n" //in the case of $s0 >= $s2
+                                  //if %n is even goto @even else goto @odd
+      "  mov_b32 $s2, 0xD;\n"     //or: set 13 to $s2
+      "  brn $s1, [%tab];\n"      //if %n is even goto @even else goto @odd
 
       "@return:"
       "  ld_kernarg_u32 $s1, [%r];\n"
@@ -1719,18 +1723,12 @@ static hsa::brig::BrigProgram makeTestCvt(const char *inst,
   if(destBits < 32) destBits = 32;
   if(srcBits < 32) srcBits = 32;
   unsigned args = ((destBits >> 5) & 0x2) | (srcBits >> 6);
-  size_t size =
-    snprintf(NULL, 0, InstTestCvt,
-             srcTypeLength,
-             srcTypeLength, sc,
-             inst, destTypeLength, srcTypeLength, cvtOperands[args],
-             destTypeLength, dc);
-  char *buffer = new char[size];
-  snprintf(buffer, size, InstTestCvt,
-           srcTypeLength,
-           srcTypeLength, sc,
-           inst, destTypeLength, srcTypeLength, cvtOperands[args],
-           destTypeLength, dc);
+  char *buffer =
+    asnprintf(InstTestCvt,
+              srcTypeLength,
+              srcTypeLength, sc,
+              inst, destTypeLength, srcTypeLength, cvtOperands[args],
+              destTypeLength, dc);
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
   return BP;
@@ -2642,37 +2640,19 @@ for(unsigned i =0; i < 2; ++i) {
     reg = 's';
   if(bits == 64)
     reg = 'd';
-  size_t size =
-    snprintf(NULL,
-             0,
-             GlobalInitializerInst,
-             model[i],
-             type,
-             value,
-             mType[i],
-             mType[i],
-             mReg[i],
-             bits,
-             reg,
-             bits,
-             reg,
-             mReg[i]);
-  char *buffer = new char[size];
-  snprintf(buffer,
-           size,
-           GlobalInitializerInst,
-           model[i],
-           type,
-           value,
-           mType[i],
-           mType[i],
-           mReg[i],
-           bits,
-           reg,
-           bits,
-           reg,
-           mReg[i]);
-
+  char *buffer =
+    asnprintf(GlobalInitializerInst,
+              model[i],
+              type,
+              value,
+              mType[i],
+              mType[i],
+              mReg[i],
+              bits,
+              reg,
+              bits,
+              reg,
+              mReg[i]);
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
 
@@ -3024,6 +3004,96 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
+  {
+    const uint32_t result = uint32_t(0x007fffff);
+    const char *value = "0f007fffff";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x807fffff);
+    const char *value = "0f807fffff";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7fefffffffffffff);
+    const char *value = "0d7fefffffffffffff";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x0);
+    const char *value = "0d0000000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xffefffffffffffff);
+    const char *value = "0dffefffffffffffff";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7feffffffffffffe);
+    const char *value = "0d7feffffffffffffe";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x8000000000000001);
+    const char *value = "0d8000000000000001";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x0000000000000001);
+    const char *value = "0d0000000000000001";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xffeffffffffffffe);
+    const char *value = "0dffeffffffffffffe";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7ff0000000000000);
+    const char *value = "0d7ff0000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xfff0000000000000);
+    const char *value = "0dfff0000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7fff800000000000);
+    const char *value = "0d7fff800000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xfff8000000000000);
+    const char *value = "0dfff8000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x000fffffffffffff);
+    const char *value = "0d000fffffffffffff";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x800fffffffffffff);
+    const char *value = "0d800fffffffffffff";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
 }
 
 static const char GlobalArrayInst[] =
@@ -3063,27 +3133,14 @@ static void testGlobalArray(const char *type,
     reg = 's';
   if(bits == 64)
     reg = 'd';
-  size_t size =
-    snprintf(NULL,
-             0,
-             GlobalArrayInst,
-             type,
-             value,
-             bits,
-             reg,
-             bits,
-             reg);
-  char *buffer = new char[size];
-  snprintf(buffer,
-           size,
-             GlobalArrayInst,
-             type,
-             value,
-             bits,
-             reg,
-             bits,
-             reg);
-
+  char *buffer =
+    asnprintf(GlobalArrayInst,
+              type,
+              value,
+              bits,
+              reg,
+              bits,
+              reg);
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
 
@@ -3103,7 +3160,10 @@ static void testGlobalArray(const char *type,
   BE.launch(fun, args);
 
   for (unsigned i = 0; i < arraySz; i++) {
-    EXPECT_EQ(result[i], arg_val0[i]);
+    if (!strcmp(type, "f32"))
+      EXPECT_FLOAT_EQ(result[i], arg_val0[i]);
+    if (!strcmp(type, "f64"))
+      EXPECT_DOUBLE_EQ(result[i], arg_val0[i]);
   }
 
   delete[] arg_val0;
@@ -3118,6 +3178,34 @@ TEST(BrigGlobalTest, GlobalArray) {
     const unsigned bits = 32;
     const unsigned arraySz = 5;
     testGlobalArray("f32", result, value, bits, arraySz);
+  }
+  {
+    float result[4] = { 12.345, 12.345, 12.345, 12.345 };
+    union { float f32; uint32_t u32; } inputData = { 12.345 };
+    const char input[] = "%ff, %ef, 0f%lx, %af";
+    char *buffer =
+      asnprintf(input,
+                inputData.f32, inputData.f32,
+                inputData.u32, inputData.f32);
+    const char *value = buffer;
+    const unsigned bits = 32;
+    const unsigned arraySz = 4;
+    testGlobalArray("f32", result, value, bits, arraySz);
+    delete[] buffer;
+  }
+  {
+    double result[4] = { 12.345, 12.345, 12.345, 12.345 };
+    union { double f64; uint64_t u64; } inputData = { 12.345 };
+    const char input[] = "%fl, %el, 0d%llx, %al";
+    char *buffer =
+      asnprintf(input,
+                inputData.f64, inputData.f64,
+                inputData.u64, inputData.f64);
+    const char *value = buffer;
+    const unsigned bits = 64;
+    const unsigned arraySz = 4;
+    testGlobalArray("f64", result, value, bits, arraySz);
+    delete[] buffer;
   }
 }
 
