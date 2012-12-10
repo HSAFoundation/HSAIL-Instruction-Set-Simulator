@@ -384,8 +384,8 @@ enum BrigOpcode {
   BrigWorkDim = 116,
   BrigWorkGroupId = 117,
   BrigWorkGroupSize = 118,
-  BrigWorkItemAId = 119,
-  BrigWorkItemAIdFlat = 120,
+  BrigWorkItemAbsId = 119,
+  BrigWorkItemAbsIdFlat = 120,
   BrigWorkItemId = 121,
   BrigWorkItemIdFlat = 122,
   BrigInvalidOpcode

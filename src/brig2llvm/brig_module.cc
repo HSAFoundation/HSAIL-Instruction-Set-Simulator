@@ -297,8 +297,8 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(WorkDim);
       caseInst(WorkGroupId);
       caseInst(WorkGroupSize);
-      caseInst(WorkItemAId);
-      caseInst(WorkItemAIdFlat);
+      caseInst(WorkItemAbsId);
+      caseInst(WorkItemAbsIdFlat);
       caseInst(WorkItemId);
       caseInst(WorkItemIdFlat);
     default:
@@ -3701,11 +3701,11 @@ bool BrigModule::validateWorkGroupSize(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateWorkItemAId(const inst_iterator inst) const {
+bool BrigModule::validateWorkItemAbsId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkItemAIdFlat(const inst_iterator inst) const {
+bool BrigModule::validateWorkItemAbsIdFlat(const inst_iterator inst) const {
   bool valid = true;
   valid &= validateSpecialInst(inst, 0);
   return valid;

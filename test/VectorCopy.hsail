@@ -7,7 +7,7 @@ kernel &__OpenCL_vec_copy_kernel(
 {
 @__OpenCL_vec_copy_kernel_entry:
         ld_kernarg_u32  $s0, [%arg_val2] ;
-        workitemaid     $s1, 0 ;
+        workitemabsid    $s1, 0 ;
         cmp_ge_b1_u32    $c0, $s1, $s0 ;
         ld_kernarg_u32  $s0, [%arg_val1] ;
         ld_kernarg_u32  $s2, [%arg_val0] ;

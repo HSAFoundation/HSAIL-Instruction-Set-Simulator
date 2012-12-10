@@ -274,8 +274,8 @@ class BrigModule {
   bool validateWorkDim(const inst_iterator inst) const;
   bool validateWorkGroupId(const inst_iterator inst) const;
   bool validateWorkGroupSize(const inst_iterator inst) const;
-  bool validateWorkItemAId(const inst_iterator inst) const;
-  bool validateWorkItemAIdFlat(const inst_iterator inst) const;
+  bool validateWorkItemAbsId(const inst_iterator inst) const;
+  bool validateWorkItemAbsIdFlat(const inst_iterator inst) const;
   bool validateWorkItemId(const inst_iterator inst) const;
   bool validateWorkItemIdFlat(const inst_iterator inst) const;
 

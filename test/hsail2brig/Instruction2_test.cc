@@ -5,8 +5,8 @@
 namespace hsa {
 namespace brig {
 
-template <typename TInst=BrigInstBase, 
-          typename T1=BrigOperandReg, 
+template <typename TInst=BrigInstBase,
+          typename T1=BrigOperandReg,
           typename T2=BrigOperandReg>
 class Instruction2_Test: public BrigCodeGenTest {
 
@@ -26,24 +26,24 @@ public:
     RefInst(ref),
     RefDest(Dest),
     RefSrc(Src) {}
-  
-  void Run_Test(int (*Rule)(Context*)){  
+
+  void Run_Test(int (*Rule)(Context*)){
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
     code->append(RefInst);
     oper->append(RefDest);
     oper->append(RefSrc);
 
-    
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
-      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
-      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);    
-    
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
+      NULL, reinterpret_cast<const char *>(&code->get()[0]),
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);
+
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
-  }  
+  }
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
     False_Validate(Rule, refError);
   }
@@ -62,7 +62,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   BrigOperandReg reg1, reg2;
   /*****************************************************************/
- 
+
   in.assign("abs_s32 $s1, $s2;\n");
   destName.assign("$s1");   srcName.assign("$s2");
   symbols->append(destName);  symbols->append(srcName);
@@ -194,8 +194,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "abs_p_f32x2 $d1, $d1;\n");
-  destName.assign("$d1");   
-  symbols->append(destName);  
+  destName.assign("$d1");
+  symbols->append(destName);
 
   BrigInstBase out6 = {
     0,
@@ -351,8 +351,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "neg_s32 $s1, 99;\n");
-  destName.assign("$s1");   
-  symbols->append(destName);  
+  destName.assign("$s1");
+  symbols->append(destName);
 
   BrigInstBase out12 = {
     0,
@@ -412,8 +412,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "neg_f32 $s3,1.0f;\n");
-  destName.assign("$s3");   
-  symbols->append(destName);  
+  destName.assign("$s3");
+  symbols->append(destName);
    BrigInstBase out14 = {
     0,
     BrigEInstBase,
@@ -446,8 +446,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "neg_f64 $d3,1.0;\n");
-  destName.assign("$d3");   
-  symbols->append(destName);  
+  destName.assign("$d3");
+  symbols->append(destName);
 
   BrigInstBase out15 = {
     0,
@@ -713,11 +713,11 @@ TEST(CodegenTest, Instruction2_CodeGen){
   Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandReg> TestCase24(in, symbols, &out24, &reg1, &reg2);
   TestCase24.Run_Test(&Instruction2);
   symbols->clear();
- 
+
   /**********************************************************************************/
   in.assign( "bitrev_b64 $d1, 0x234;\n");
-  destName.assign("$d1");   
-  symbols->append(destName); 
+  destName.assign("$d1");
+  symbols->append(destName);
 
    BrigInstBase out25 = {
     0,
@@ -751,8 +751,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "firstbit_b32 $s0, $s0;\n");
-  destName.assign("$s0");   
-  symbols->append(destName);  
+  destName.assign("$s0");
+  symbols->append(destName);
 
   BrigInstBase out26 = {
     0,
@@ -805,8 +805,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "lastbit_b32 $s0, $s0;\n");
-  destName.assign("$s0");   
-  symbols->append(destName);  
+  destName.assign("$s0");
+  symbols->append(destName);
 
   BrigInstBase out28 = {
     0,
@@ -915,8 +915,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "fract_f32 $s0, 3.2f;\n");
-  destName.assign("$s0");   
-  symbols->append(destName);  
+  destName.assign("$s0");
+  symbols->append(destName);
 
   BrigInstBase out32 = {
     0,
@@ -1108,8 +1108,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "sqrt_f64 $d1, 1.21;\n");
-  destName.assign("$d1");   
-  symbols->append(destName);  
+  destName.assign("$d1");
+  symbols->append(destName);
 
   BrigInstBase out39 = {
     0,
@@ -1351,8 +1351,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "alloca $s1, 24;");
-  destName.assign("$s1");   
-  symbols->append(destName);  
+  destName.assign("$s1");
+  symbols->append(destName);
 
   BrigInstBase out48 = {
     0,
@@ -1408,14 +1408,14 @@ TEST(CodegenTest, Instruction2_CodeGen){
   symbols->clear();
 
   /**********************************************************************************/
-  in.assign( "workitemaid $s1, 0;");
-  destName.assign("$s1");   
-  symbols->append(destName);  
+  in.assign( "workitemabsid $s1, 0;");
+  destName.assign("$s1");
+  symbols->append(destName);
 
   BrigInstBase out50 = {
     0,
     BrigEInstBase,
-    BrigWorkItemAId,
+    BrigWorkItemAbsId,
     Brigb32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0}
@@ -1441,8 +1441,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign( "workgroupid $s1, 0;");
-  destName.assign("$s1");   
-  symbols->append(destName);  
+  destName.assign("$s1");
+  symbols->append(destName);
 
   BrigInstBase out51 = {
     0,
@@ -1473,8 +1473,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign("workgroupsize $s1, 0;");
-  destName.assign("$s1");   
-  symbols->append(destName);  
+  destName.assign("$s1");
+  symbols->append(destName);
 
   BrigInstBase out52 = {
     0,
@@ -1505,8 +1505,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign("NDRangesize $s2, 2;");
-  destName.assign("$s2");  
-  symbols->append(destName);  
+  destName.assign("$s2");
+  symbols->append(destName);
 
   BrigInstBase out53 = {
     0,
@@ -1537,8 +1537,8 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign("NDRangegroups $s2, 2;");
-  destName.assign("$s2");   
-  symbols->append(destName);  
+  destName.assign("$s2");
+  symbols->append(destName);
 
   BrigInstBase out54 = {
     0,
@@ -1747,7 +1747,7 @@ TEST(CodegenTest, Instruction2_With_Modifier_CodeGen) {
   TestCase6.Run_Test(&Instruction2);
   symbols->clear();
 
-  
+
   /******************************  End of tests *****************************************/
   delete symbols;
 }
@@ -1927,15 +1927,15 @@ TEST(CodegenTest, MemorySegmentOps){
 
 }
 
-TEST(ErrorReportTest, Instruction2) {  
+TEST(ErrorReportTest, Instruction2) {
   std::string input = "unpack3 $s1, $s2\n";
   Instruction2_Test<> TestCase1(input);
   TestCase1.Run_Test(&Instruction2, MISSING_SEMICOLON);
-  
+
   input.assign( "firstbit $s0, $s0;\n");
   Instruction2_Test<> TestCase2(input);
   TestCase2.Run_Test(&Instruction2, INVALID_DATA_TYPE);
-  
+
   input.assign( "frcp_f32 $s0;\n");
   Instruction2_Test<> TestCase3(input);
   TestCase3.Run_Test(&Instruction2, MISSING_COMMA);

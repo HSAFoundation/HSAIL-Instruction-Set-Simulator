@@ -117,18 +117,18 @@ struct ThreadInfo {
   const uint32_t NDRangeSize; // number of work items
   const uint32_t workdim;     // number of work group dimensions
   uint32_t workGroupSize[3];  // work group dimensions
-  uint32_t workItemAID[3];    // absolute identifier
+  uint32_t workItemAbsId[3];    // absolute identifier
   pthread_t tid;
 
   ThreadInfo(uint32_t NDRangeSize, uint32_t workdim,
-             uint32_t workGroupSize[3], uint32_t workItemAID[3],
+             uint32_t workGroupSize[3], uint32_t workItemAbsId[3],
              void *const *args, size_t size) :
     argsArray(new void*[size + 1]),
     NDRangeSize(NDRangeSize), workdim(workdim) {
 
     for(unsigned i = 0; i < 3; ++i) {
       this->workGroupSize[i] = workGroupSize[i];
-      this->workItemAID[i] = workItemAID[i];
+      this->workItemAbsId[i] = workItemAbsId[i];
     }
 
     argsArray[0] = this;

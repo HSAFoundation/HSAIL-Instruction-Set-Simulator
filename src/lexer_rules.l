@@ -817,11 +817,11 @@ workitemid_flat     { free_string(context);
                       context->token_value.opcode = BrigWorkItemIdFlat;
                       return WORKITEMID_FLAT; }
 
-workitemaid_flat    { free_string(context);
+workitemabsid_flat  { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigWorkItemAIdFlat;
-                      return WORKITEMAID_FLAT; }
+                      context->token_value.opcode = BrigWorkItemAbsIdFlat;
+                      return WORKITEMABSID_FLAT; }
 
 debugtrap           { free_string(context);
                       context->token_type = INSTRUCTION1_OPCODE_NODT;
@@ -992,11 +992,11 @@ workitemid          { free_string(context);
                       context->token_value.opcode = BrigWorkItemId;
                       return WORKITEMID; }
 
-workitemaid         { free_string(context);
+workitemabsid       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigWorkItemAId;
-                      return  WORKITEMAID;}
+                      context->token_value.opcode = BrigWorkItemAbsId;
+                      return  WORKITEMABSID;}
 
 workgroupsize       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;

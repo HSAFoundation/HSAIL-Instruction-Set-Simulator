@@ -809,8 +809,8 @@ template<class T> static T AtomicSub(T *x, T y) {
 }
 AtomicInst(define, Sub, Binary)
 
-extern "C" u32 WorkItemAId_b32(u32 x) {
-  return __brigThreadInfo->workItemAID[x];
+extern "C" u32 WorkItemAbsId_b32(u32 x) {
+  return __brigThreadInfo->workItemAbsId[x];
 }
 
 } // namespace brig

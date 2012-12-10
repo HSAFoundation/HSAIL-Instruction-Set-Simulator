@@ -1428,7 +1428,7 @@ kernel &AllUp()
   atomicNoRet_sub_b32 [$s0], $s0;
   atomic_sub_b64 $d0, [$s0], $d0;
   atomicNoRet_sub_b64 [$s0], $d0;
-  workitemaid $s0, 0;
+  workitemabsid $s0, 0;
 
 //instruction2
   abs_s32 $s1, $s2;
@@ -2026,7 +2026,7 @@ kernel &AllUp()
   barrier_width(all)_group;
   barrier_width(all)_partial;
 
-//cmp 
+//cmp
   cmp_eq_b1_b1 $c1, $c2, $c3;
   cmp_eq_b1_b32 $c1, $s2, 0;
   cmp_eq_b1_b64 $c1, $d2, WAVESIZE;

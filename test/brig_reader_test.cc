@@ -183,8 +183,8 @@ TEST(BrigKernelTest, Cosine) {
     "\n"
     "kernel &__Get_fcos(kernarg_u32 %arg_val0, kernarg_u32 %arg_val1)\n"
     "{\n"
-    "	// Use workitemaid to get the buffer offset\n"
-    "	workitemaid $s1, 0;\n"
+    "	// Use workitemabsid to get the buffer offset\n"
+    "	workitemabsid $s1, 0;\n"
     "	shl_u32	 $s1, $s1, 2;  // Get offset by Multiplying by 4 because \n"
     "                        // that is the size of each value in the buffer\n"
     "	\n"
@@ -314,8 +314,8 @@ TEST(BrigKernelTest, VectorCopy) {
     "{\n"
     "@__OpenCL_vec_copy_kernel_entry:\n"
     "        ld_kernarg_u32  $s0, [%arg_val2] ;\n"
-    "        workitemaid     $s1, 0 ;\n"
-    "        cmp_ge_b1_u32    $c0, $s1, $s0 ;\n"
+    "        workitemabsid   $s1, 0 ;\n"
+    "        cmp_ge_b1_u32   $c0, $s1, $s0 ;\n"
     "        ld_kernarg_u32  $s0, [%arg_val1] ;\n"
     "        ld_kernarg_u32  $s2, [%arg_val0] ;\n"
     "        cbr     $c0, @BB0_2 ;\n"
@@ -376,7 +376,7 @@ static const char InstTest[] =
   "{\n"
   "@__OpenCL_vec_add_kernel_entry:\n"
   "        ld_kernarg_u32 $s0, [%%array_size] ;\n"
-  "        workitemaid $s1, 0 ;\n"
+  "        workitemabsid $s1, 0 ;\n"
   "        cmp_lt_b1_u32 $c0, $s1, $s0 ;\n"
   "        ld_kernarg_u32 $s0, [%%result] ;\n"
   "        ld_kernarg_u32 $s2, [%%arg_val0] ;\n"
@@ -865,7 +865,7 @@ TEST(BrigKernelTest, VectorAddArray) {
     "@__OpenCL_vec_add_kernel_entry:\n"
     "// BB#0:                                // %entry\n"
     "      ld_kernarg_u32    $s0, [%arg_val3];\n"
-    "      workitemaid    $s1, 0;\n"
+    "      workitemabsid     $s1, 0;\n"
     "      cmp_lt_b1_u32     $c0, $s1, $s0;\n"
     "      ld_kernarg_u32    $s0, [%arg_val2];\n"
     "      ld_kernarg_u32    $s2, [%arg_val1];\n"
@@ -1362,7 +1362,7 @@ TEST(BrigKernelTest, ThreadTest) {
     "kernel &threadTest(kernarg_s32 %r)\n"
     "{\n"
     "  ld_kernarg_u32 $s0, [%r];\n"
-    "  workitemaid    $s1, 0;\n"
+    "  workitemabsid  $s1, 0;\n"
     "	 shl_u32	      $s2, $s1, 2;\n"
     "  add_u32        $s0, $s0, $s2;\n"
     "  st_global_s32  $s1, [$s0];\n"
@@ -3039,7 +3039,7 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     const char *value = "0x0";
     unsigned bits = 8;
     testGlobalInitializer("u8", result, value, bits);
-  } 
+  }
   {
     const uint8_t result = uint8_t(00);
     const char *value = "00";

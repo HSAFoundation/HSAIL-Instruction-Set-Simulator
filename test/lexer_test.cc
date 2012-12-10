@@ -490,17 +490,17 @@ TEST(LexTest, Bug26_DecDoubleConstant) {
   EXPECT_EQ(2.33, context->token_value.double_val);
   EXPECT_EQ(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(0.33, context->token_value.double_val);
-  
+
   /*input.assign("4294967296LL");
   lexer->set_source_string(input);
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(4294967296LL, context->token_value.int_val);*/
-  
+
   input.assign("0xFFFFFFFF");
   lexer->set_source_string(input);
   EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
   EXPECT_EQ(0xffffffff, context->token_value.int_val);
-    
+
   input.assign("L");
   lexer->set_source_string(input);
   EXPECT_NE(TOKEN_DOUBLE_CONSTANT, lexer->get_next_token());
@@ -721,9 +721,9 @@ TEST(LexTest, Bug37_Opcodes) {              // opcodes
   lexer->set_source_string(input);
   EXPECT_EQ(WORKITEMID_FLAT, lexer->get_next_token());
 
-  input.assign("workitemaid_flat");
+  input.assign("workitemabsid_flat");
   lexer->set_source_string(input);
-  EXPECT_EQ(WORKITEMAID_FLAT, lexer->get_next_token());
+  EXPECT_EQ(WORKITEMABSID_FLAT, lexer->get_next_token());
 
   input.assign("debugtrap");
   lexer->set_source_string(input);
@@ -857,9 +857,9 @@ TEST(LexTest, Bug40_Instruction2OpcodeNoDT) {
   lexer->set_source_string(input);
   EXPECT_EQ(WORKITEMID, lexer->get_next_token());
 
-  input.assign("workitemaid");
+  input.assign("workitemabsid");
   lexer->set_source_string(input);
-  EXPECT_EQ(WORKITEMAID, lexer->get_next_token());
+  EXPECT_EQ(WORKITEMABSID, lexer->get_next_token());
 
   input.assign("workgroupsize");
   lexer->set_source_string(input);
