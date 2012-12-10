@@ -534,9 +534,9 @@ kernel &AllUp()
   bitselect_b32 $s0, $s0, $s0, $s0;
   bitselect_b64 $d0, $d0, $d0, $d0;
   firstbit_b32 $s0, $s0;
-  firstbit_b64 $d0, $d0;
+  firstbit_b64 $s0, $d0;
   lastbit_b32 $s0, $s0;
-  lastbit_b64 $d0, $d0;
+  lastbit_b64 $s0, $d0;
   movs_lo_b32 $s0, $d0;
   movs_hi_b32 $s0, $d0;
   movd_lo_b64 $d0, $d0, $s0;
