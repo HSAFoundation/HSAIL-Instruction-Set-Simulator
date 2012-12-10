@@ -296,7 +296,7 @@ class Context {
     std::map<std::string, BrigoOffset32_t> func_o_map;
     std::map<std::string, BrigoOffset32_t> operand_map;
     std::map<std::string, BrigoOffset32_t> label_o_map;
-    std::multimap<std::string, BrigcOffset32_t> label_c_map;
+    std::map<std::string, BrigdOffset32_t> label_d_map;
     std::map<std::string, BrigdOffset32_t> symbol_map;
 
     unsigned int token_to_scan;

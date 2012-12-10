@@ -3530,7 +3530,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
       reinterpret_cast<BrigDirectiveLabelInit *>(array);
     bdli->size = arraySize;
     bdli->kind = BrigEDirectiveLabelInit;
-    bdli->c_code = 0;
+    bdli->c_code = 8;
     bdli->elementCount = 3;
     bdli->s_name = 32;
     bdli->d_labels[0] = directives.size() + arraySize;
@@ -3541,21 +3541,21 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
     BrigDirectiveLabel bdl1 = {
       sizeof(bdl1), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
-      0,
+      8,
       8,
     };
     directives.append(&bdl1);
     BrigDirectiveLabel bdl2 = {
       sizeof(bdl2), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
-      0,
+      8,
       16,
     };
     directives.append(&bdl2);
     BrigDirectiveLabel bdl3 = {
       sizeof(bdl3), //uint16_t size;
       BrigEDirectiveLabel, //uint16_t kind;
-      0,
+      8,
       24,
     };
     directives.append(&bdl3);
@@ -6035,7 +6035,7 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
       0                                // equivClass
     };
     code.append(&st1);
-    
+
     hsa::brig::Buffer operands;
     for(unsigned i = 0; i < 8; ++i) operands.append_char(0);
     BrigOperandReg bor1 = {

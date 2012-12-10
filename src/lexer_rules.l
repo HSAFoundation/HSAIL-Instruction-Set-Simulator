@@ -12,76 +12,15 @@
 hsa::brig::Context* context = hsa::brig::Context::get_instance();
 
 /* helper function for IEEE to Single */
-float ieee754tof(char* text) {
-  float floatval;
-  unsigned int mem_single=0;
-  unsigned int first;
-  char first2[3];
-
-  first2[0] = text[2];
-  first2[1] = text[3];
-  first2[2] = '\0';
-  first = strtoull(first2, NULL, 16);
-  mem_single = strtoull(text+4, NULL, 16);
-  first = first << 24;
-  mem_single += first;
-  memcpy(&floatval, &mem_single, sizeof(float));
-
-  return floatval;
+float ieee754tof(char *text) {
+  union { uint32_t u32; float f32; } result = { strtoull(text + 2, NULL, 16) };
+  return result.f32;
 }
 
 
 double ieee754tod(char* text) {
-  double return_val = 0.0;  // return context->token_value
-  unsigned int* int_ptr = 0;
-  char first4[5];    // first 2 bytes(4 chars after 0d)
-  char temp_str[5];  // temporary string to hold part of yytext
-  unsigned int i;
-  unsigned int first_int;    // convert the double as 2 integers
-  unsigned int second_int;
-  unsigned int temp = 0;
-
-  // convert the first 2 bytes
-  for (i=0; i<4; i++)
-    first4[i] = text[i+2];
-
-  first4[4] = '\0';
-  first_int = strtoull(first4, NULL, 16);
-
-  // get the next 2 bytes;
-  for (i=0;i<4;i++)
-    temp_str[i] = text[i+6];
-  temp_str[4] = '\0';
-  temp = strtoull(temp_str,NULL,16);
-  first_int <<= 16;
-
-  temp += first_int;
-
-  int_ptr = (unsigned int*)&return_val;
-
-  memcpy(int_ptr+1,&temp, sizeof(float));
-  // printf("Return context->token_value after update first 4 bytes: %2.16f\n",return_val);
-
-
-  // for the last 4bytes, do the same thing, to avoid treating the first bit as the SIGN.
-  for (i=0;i<4;i++)
-    first4[i] = text[i+10];
-
-  first4[4] = '\0';
-  second_int = strtoull(first4, NULL, 16);
-
-  // get the last 2 bytes;
-  for (i=0;i<4;i++)
-    temp_str[i] = text[i+14];
-  temp_str[4] = '\0';
-  temp = strtoull(temp_str,NULL,16);
-  second_int <<= 16;
-  temp += second_int;
-
-  memcpy(int_ptr,&temp, sizeof(int));
-
-  //printf("Final return context->token_value: %2.14f\n",return_val);
-  return return_val;
+  union { uint64_t u64; double f64; } result = { strtoull(text + 2, NULL, 16) };
+  return result.f64;
 }
 
 void free_string(hsa::brig::Context* context) {
@@ -2022,7 +1961,7 @@ _ar               { free_string(context);
                     context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _AR;}
-                   
+
 _dep              { free_string(context);
                     context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
@@ -2052,8 +1991,8 @@ _part_rel              { free_string(context);
                     context->token_type = MEMORY_SEMANTIC;
                     context->yycolno+=yyleng;
                     return _PART_REL;}
-                    
-                    
+
+
 ld                { free_string(context);
                     context->token_type = COMMON_KEYWORD;
                     context->yycolno+=yyleng;

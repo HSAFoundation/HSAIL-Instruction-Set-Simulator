@@ -270,6 +270,7 @@ static bool hasAddr(const BrigOperandBase *op) {
   case BrigEOperandImmed:
   case BrigEOperandIndirect:
   case BrigEOperandLabelRef:
+  case BrigEOperandWaveSz:
     return false;
   case BrigEOperandReg:
     return true;
@@ -355,6 +356,15 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
                                    base, offset, "", &B);
     return llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
                                         adderInt, index, "", &B);
+  }
+
+  if(isa<BrigOperandWaveSz>(op)) {
+    llvm::Module *M = B.getParent()->getParent();
+    llvm::FunctionType *getWavefrontSizeTy =
+      llvm::FunctionType::get(llvm::Type::getInt32Ty(C), false);
+    llvm::Constant *wavefrontSizeFn =
+      M->getOrInsertFunction("getWavefrontSize", getWavefrontSizeTy);
+    return llvm::CallInst::Create(wavefrontSizeFn, "", &B);
   }
 
   assert(false && "Unimplemented");
@@ -811,6 +821,27 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
 template<class T>
 static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
                                         llvm::Type *type,
+                                        const T *array) {
+  return llvm::ConstantInt::get(type, *array);
+}
+
+template<>
+llvm::Constant *runOnInitializer<float>(llvm::LLVMContext &C,
+                                        llvm::Type *type,
+                                        const float *array) {
+  return llvm::ConstantFP::get(C, llvm::APFloat(*array));
+}
+
+template<>
+llvm::Constant *runOnInitializer<double>(llvm::LLVMContext &C,
+                                         llvm::Type *type,
+                                         const double *array) {
+  return llvm::ConstantFP::get(C, llvm::APFloat(*array));
+}
+
+template<class T>
+static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
+                                        llvm::Type *type,
                                         const BrigSymbol &S) {
   const T *array = S.getInit<T>();
   uint32_t size = std::max(1U, S.getArrayDim());
@@ -819,13 +850,7 @@ static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
     return llvm::ConstantDataArray::get(C, arrayRef);
   }
 
-  if(llvm::isa<llvm::IntegerType>(type))
-    return llvm::ConstantInt::get(type, *array);
-
-  if(type->isHalfTy() || type->isFloatTy() || type->isDoubleTy())
-    return llvm::ConstantFP::get(type, *array);
-
-  assert(false && "Unknown type");
+  return runOnInitializer(C, type, array);
 }
 
 static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,

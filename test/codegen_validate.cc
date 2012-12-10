@@ -822,7 +822,9 @@ void validate(const BrigDirectiveLabel* ref, const BrigDirectiveLabel* get,
   EXPECT_EQ(ref->size, ref->size);
   EXPECT_EQ(ref->kind, get->kind);
   validate_CODE_OFFSET(ref->c_code, get->c_code, RefOutput, GetOutput);
-  EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
+  if (get->s_name != 0) {
+    EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
+  }
 }
 
 void validate(const BrigDirectiveLabelList* ref, const BrigDirectiveLabelList* get,
