@@ -941,7 +941,7 @@ fexp2               { free_string(context);
 fsqrt               { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_FTZ;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigSqrt;
+                      context->token_value.opcode = BrigFsqrt;
                       return FSQRT; }
 
 frsqrt              { free_string(context);
