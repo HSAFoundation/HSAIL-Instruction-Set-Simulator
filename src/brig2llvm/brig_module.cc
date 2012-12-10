@@ -1798,6 +1798,28 @@ bool BrigModule::validateParaSynInst(const inst_iterator inst,
   return valid;
 }
 
+bool BrigModule::validateFirstLastbitInst(const inst_iterator inst) const {
+  bool valid = true;
+  if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigDataType type = BrigDataType(inst->type);
+  valid &= check(type == Brigb32 || type == Brigb64,
+                 "Type should be b32 or b64");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "Type of destination should be b32");
+  oper_iterator src(S_.operands + inst->o_operands[1]);
+  valid &= check(isa<BrigOperandReg>(src) ||
+                 isa<BrigOperandImmed>(src) ||
+                 isa<BrigOperandWaveSz>(src),
+                 "Source should be register, immediate or wave size");
+  valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
+  valid &= check(!BrigInstHelper::isVectorTy(type),
+                 "First and Last cannot accept vector types");
+  return valid;
+}
+
 bool BrigModule::validateAbs(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!BrigInstHelper::isBitTy(BrigDataType(inst->type)),
@@ -1867,7 +1889,7 @@ bool BrigModule::validateDiv(const inst_iterator inst) const {
   valid &= check(!BrigInstHelper::isSaturated(BrigPacking(inst->packing)),
                  "Div cannot saturate");
   valid &= validateArithmeticInst(inst, 2);
-  return valid;;
+  return valid;
 }
 
 bool BrigModule::validateFma(const inst_iterator inst) const {
@@ -2183,13 +2205,7 @@ bool BrigModule::validateExtract(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateFirstBit(const inst_iterator inst) const {
-  bool valid = true;
-  valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of FirstBit should be b32 or b64");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "FirstBit cannot accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
-  return valid;
+  return validateFirstLastbitInst(inst);
 }
 
 bool BrigModule::validateInsert(const inst_iterator inst) const {
@@ -2203,13 +2219,7 @@ bool BrigModule::validateInsert(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateLastBit(const inst_iterator inst) const {
-  bool valid = true;
-  valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
-                 "Type of LastBit should be b32 or b64");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
-                 "LastBit cannot accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
-  return valid;
+  return validateFirstLastbitInst(inst);
 }
 
 bool BrigModule::validateLda(const inst_iterator inst) const {
@@ -2324,19 +2334,19 @@ bool BrigModule::validateMov(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateMovdHi(const inst_iterator inst) const {
-  return validateMovdInst(inst);;
+  return validateMovdInst(inst);
 }
 
 bool BrigModule::validateMovdLo(const inst_iterator inst) const {
-  return validateMovdInst(inst);;
+  return validateMovdInst(inst);
 }
 
 bool BrigModule::validateMovsHi(const inst_iterator inst) const {
-  return validateMovsInst(inst);;
+  return validateMovsInst(inst);
 }
 
 bool BrigModule::validateMovsLo(const inst_iterator inst) const {
-  return validateMovsInst(inst);;
+  return validateMovsInst(inst);
 }
 
 bool BrigModule::validateShuffle(const inst_iterator inst) const {
