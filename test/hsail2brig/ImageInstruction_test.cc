@@ -6,8 +6,8 @@
 namespace hsa{
 namespace brig{
 
-template <typename TInst=BrigInstImage, 
-          typename TSrc=BrigOperandReg> 
+template <typename TInst=BrigInstImage,
+          typename TSrc=BrigOperandReg>
 class ImageInst_Test : public BrigCodeGenTest{
 private:
 
@@ -28,9 +28,9 @@ public:
     BrigCodeGenTest(in) {}
 
   ImageInst_Test(std::string& input, StringBuffer* sbuf, TInst* ref,
-                 BrigOperandRegV4* dest, BrigOperandReg* destList, 
-                 BrigOperandOpaque* image, BrigOperandOpaque* sample, 
-                 TSrc* src, BrigOperandReg* srcList = NULL, 
+                 BrigOperandRegV4* dest, BrigOperandReg* destList,
+                 BrigOperandOpaque* image, BrigOperandOpaque* sample,
+                 TSrc* src, BrigOperandReg* srcList = NULL,
                  BrigOperandReg* imgReg = NULL, BrigOperandReg* smpReg = NULL):
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),
@@ -43,7 +43,7 @@ public:
     ImgReg(imgReg),
     SmpReg(smpReg) { }
 
-  void Run_Test(int (*Rule)(Context*)){  
+  void Run_Test(int (*Rule)(Context*)){
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
     Buffer* dir = new Buffer();
@@ -55,7 +55,7 @@ public:
     }
 
     oper->append(RefDest);
-   
+
     if (ImgReg != NULL) {
       oper->append(ImgReg);
     }
@@ -89,12 +89,12 @@ public:
 
     oper->append(RefSrc);
 
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
       reinterpret_cast<const char *>(&dir->get()[0]),
-      reinterpret_cast<const char *>(&code->get()[0]), 
-      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-      RefStr->size(), 0, code->size(), oper->size(), 0);    
-    
+      reinterpret_cast<const char *>(&code->get()[0]),
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+      RefStr->size(), 0, code->size(), oper->size(), 0);
+
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
@@ -119,7 +119,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
   BrigOperandRegV2 srcRegV2;
   BrigOperandReg destList[4], srcList[4];
   BrigOperandOpaque image1;
-  
+
 
   /**************************** Case 1 ***************************/
   in.assign("st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s2,$s3,$s4,$s5);\n");
@@ -134,7 +134,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
   out.kind = BrigEInstImage;
   out.opcode = BrigStImage;
   out.type = Brigf32;
-  out.stype = Brigu32;
+  out.sourceType = Brigu32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -167,7 +167,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
   // If the structure is empty in srcList, the reg will be generated in other places.
   memset(&srcList[1], 0, sizeof(srcList[1]));
@@ -191,13 +191,13 @@ TEST(CodegenTest, ImageStore_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
   image1.reg = 0;
   image1.offset = 0;
-  
+
   srcRegV4.size = sizeof(srcRegV4);
   srcRegV4.kind = BrigEOperandRegV4;
   srcRegV4.type = Brigb32;
@@ -205,8 +205,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
   srcRegV4.regs[0] = sizeof(reg1);
   srcRegV4.regs[1] = sizeof(reg1) + sizeof(reg2);
   srcRegV4.regs[2] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  srcRegV4.regs[3] = sizeof(reg1) + sizeof(reg2) + 
-                      sizeof(reg3) + sizeof(reg4) + 
+  srcRegV4.regs[3] = sizeof(reg1) + sizeof(reg2) +
+                      sizeof(reg3) + sizeof(reg4) +
                       sizeof(dest) + sizeof(image1);
 
   reg4.size = sizeof(reg4);
@@ -218,10 +218,10 @@ TEST(CodegenTest, ImageStore_Codegen) {
 
   srcList[3] = reg4;
 
-  ImageInst_Test<BrigInstImage, BrigOperandRegV4> 
+  ImageInst_Test<BrigInstImage, BrigOperandRegV4>
   TestCase1(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV4, srcList);
   TestCase1.Run_Test(&ImageStore);
-  
+
   sbuf->clear();
 
   /**************************** Case 2 ***************************/
@@ -237,7 +237,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
   out.kind = BrigEInstImage;
   out.opcode = BrigStImage;
   out.type = Brigf32;
-  out.stype = Brigu32;
+  out.sourceType = Brigu32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -268,7 +268,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
 
   reg4.size = sizeof(reg4);
@@ -290,20 +290,20 @@ TEST(CodegenTest, ImageStore_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
   image1.reg = 0;
   image1.offset = 0;
-  
+
   srcRegV2.size = sizeof(srcRegV2);
   srcRegV2.kind = BrigEOperandRegV2;
   srcRegV2.type = Brigb32;
   srcRegV2.reserved = 0;
   srcRegV2.regs[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  srcRegV2.regs[1] = sizeof(reg1) + sizeof(reg2) + 
-                      sizeof(reg3) + sizeof(reg4) + 
+  srcRegV2.regs[1] = sizeof(reg1) + sizeof(reg2) +
+                      sizeof(reg3) + sizeof(reg4) +
                       sizeof(dest) + sizeof(image1);
 
   reg4.size = sizeof(reg4);
@@ -315,10 +315,10 @@ TEST(CodegenTest, ImageStore_Codegen) {
 
   srcList[1] = reg4;
 
-  ImageInst_Test<BrigInstImage, BrigOperandRegV2> 
+  ImageInst_Test<BrigInstImage, BrigOperandRegV2>
   TestCase2(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV2, srcList);
   TestCase2.Run_Test(&ImageStore);
-  
+
   sbuf->clear();
 
   /**************************** Case 3 ***************************/
@@ -334,7 +334,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
   out.kind = BrigEInstImage;
   out.opcode = BrigStImage;
   out.type = Brigf32;
-  out.stype = Brigu32;
+  out.sourceType = Brigu32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -365,7 +365,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
 
   reg4.size = sizeof(reg4);
@@ -385,13 +385,13 @@ TEST(CodegenTest, ImageStore_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
   image1.reg = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
   image1.offset = -4;
-  
+
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
@@ -399,10 +399,10 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg2.s_name = reg1Name.size() + reg2Name.size() +
                 reg3Name.size() + reg4Name.size() + 4;
 
-  ImageInst_Test<BrigInstImage, BrigOperandReg> 
+  ImageInst_Test<BrigInstImage, BrigOperandReg>
   TestCase3(in, sbuf, &out, &dest, destList, &image1, NULL, &reg2);
   TestCase3.Run_Test(&ImageStore);
-  
+
   sbuf->clear();
   /***********************  End of tests *************************/
   delete sbuf;
@@ -423,7 +423,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   BrigOperandRegV2 srcRegV2;
   BrigOperandReg destList[4], srcList[4];
   BrigOperandOpaque image1;
-  
+
 
   /**************************** Case 1 ***************************/
   in.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5,$s2,$s3);\n");
@@ -438,7 +438,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   out.kind = BrigEInstImage;
   out.opcode = BrigLdImage;
   out.type = Brigf32;
-  out.stype = Brigu32;
+  out.sourceType = Brigu32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -470,7 +470,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
   memset(&srcList[3], 0, sizeof(srcList[3]));
 
@@ -492,20 +492,20 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
   image1.reg = 0;
   image1.offset = 0;
-  
+
   srcRegV4.size = sizeof(srcRegV4);
   srcRegV4.kind = BrigEOperandRegV4;
   srcRegV4.type = Brigb32;
   srcRegV4.reserved = 0;
   srcRegV4.regs[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  srcRegV4.regs[1] = sizeof(reg1) + sizeof(reg2) + 
-                      sizeof(reg3) + sizeof(reg4) + 
+  srcRegV4.regs[1] = sizeof(reg1) + sizeof(reg2) +
+                      sizeof(reg3) + sizeof(reg4) +
                       sizeof(dest) + sizeof(image1);
   srcRegV4.regs[2] = sizeof(reg1);
   srcRegV4.regs[3] = sizeof(reg1) + sizeof(reg2);
@@ -520,10 +520,10 @@ TEST(CodegenTest, ImageLoad_Codegen) {
 
   srcList[1] = reg4;
 
-  ImageInst_Test<BrigInstImage, BrigOperandRegV4> 
+  ImageInst_Test<BrigInstImage, BrigOperandRegV4>
   TestCase1(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV4, srcList);
   TestCase1.Run_Test(&ImageLoad);
-  
+
   sbuf->clear();
 
   /**************************** Case 2 ***************************/
@@ -539,7 +539,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   out.kind = BrigEInstImage;
   out.opcode = BrigLdImage;
   out.type = Brigf32;
-  out.stype = Brigu32;
+  out.sourceType = Brigu32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -570,7 +570,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
 
   reg4.size = sizeof(reg4);
@@ -591,20 +591,20 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
   image1.reg = 0;
   image1.offset = 0;
-  
+
   srcRegV2.size = sizeof(srcRegV2);
   srcRegV2.kind = BrigEOperandRegV2;
   srcRegV2.type = Brigb32;
   srcRegV2.reserved = 0;
   srcRegV2.regs[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  srcRegV2.regs[1] = sizeof(reg1) + sizeof(reg2) + 
-                      sizeof(reg3) + sizeof(reg4) + 
+  srcRegV2.regs[1] = sizeof(reg1) + sizeof(reg2) +
+                      sizeof(reg3) + sizeof(reg4) +
                       sizeof(dest) + sizeof(image1);
 
   reg4.size = sizeof(reg4);
@@ -616,10 +616,10 @@ TEST(CodegenTest, ImageLoad_Codegen) {
 
   srcList[1] = reg4;
 
-  ImageInst_Test<BrigInstImage, BrigOperandRegV2> 
+  ImageInst_Test<BrigInstImage, BrigOperandRegV2>
   TestCase2(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV2, srcList);
   TestCase2.Run_Test(&ImageLoad);
-  
+
   sbuf->clear();
 
   /**************************** Case 3 ***************************/
@@ -635,7 +635,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   out.kind = BrigEInstImage;
   out.opcode = BrigLdImage;
   out.type = Brigf32;
-  out.stype = Brigu32;
+  out.sourceType = Brigu32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -666,7 +666,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
 
   reg4.size = sizeof(reg4);
@@ -686,13 +686,13 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
   image1.reg = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
   image1.offset = 0;
-  
+
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
@@ -700,10 +700,10 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   reg2.s_name = reg1Name.size() + reg2Name.size() +
                 reg3Name.size() + reg4Name.size() + 4;
 
-  ImageInst_Test<BrigInstImage, BrigOperandReg> 
+  ImageInst_Test<BrigInstImage, BrigOperandReg>
   TestCase3(in, sbuf, &out, &dest, destList, &image1, NULL, &reg2);
   TestCase3.Run_Test(&ImageLoad);
-  
+
   sbuf->clear();
 
   /***********************  End of tests *************************/
@@ -718,13 +718,13 @@ TEST(CodegenTest, ImageRead_Codegen) {
   std::string reg1Name, reg2Name, reg3Name, reg4Name, reg5Name, reg6Name;
   StringBuffer* sbuf = new StringBuffer();
 
-  BrigInstRead out;
+  BrigInstImage out;
   BrigOperandReg reg1, reg2, reg3, reg4, reg5, reg6;
   BrigOperandRegV4 dest, srcRegV4;
   BrigOperandRegV2 srcRegV2;
   BrigOperandReg destList[4], srcList[4];
   BrigOperandOpaque image1, samp2;
-  
+
 
   /**************************** Case 1 ***************************/
   in.assign("rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],[%Samp3],($s5, $s6, $s4, $s3);\n");
@@ -736,10 +736,10 @@ TEST(CodegenTest, ImageRead_Codegen) {
   sbuf->append(reg5Name);  sbuf->append(reg6Name);
 
   out.size = sizeof(out);
-  out.kind = BrigEInstRead;
+  out.kind = BrigEInstImage;
   out.opcode = BrigRdImage;
   out.type = Brigs32;
-  out.stype = Brigf32;
+  out.sourceType = Brigf32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -770,7 +770,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
   memset(&srcList[3], 0, sizeof(srcList[3]));
 
@@ -792,7 +792,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
@@ -804,7 +804,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   samp2.directive = 0;
   samp2.reg = 0;
   samp2.offset = 0;
-  
+
   srcRegV4.size = sizeof(srcRegV4);
   srcRegV4.kind = BrigEOperandRegV4;
   srcRegV4.type = Brigb32;
@@ -829,14 +829,14 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg2.type = Brigb32;
   reg2.reserved = 0;
   reg2.s_name = reg1Name.size() + reg2Name.size() +
-                reg3Name.size() + reg4Name.size() + 
+                reg3Name.size() + reg4Name.size() +
                 reg5Name.size() + 5;
   srcList[1] = reg2;
 
-  ImageInst_Test<BrigInstRead, BrigOperandRegV4> 
+  ImageInst_Test<BrigInstImage, BrigOperandRegV4>
   TestCase1(in, sbuf, &out, &dest, destList, &image1, &samp2, &srcRegV4, srcList);
   TestCase1.Run_Test(&ImageRead);
-  
+
   sbuf->clear();
 
   /**************************** Case 2 ***************************/
@@ -849,10 +849,10 @@ TEST(CodegenTest, ImageRead_Codegen) {
   sbuf->append(reg5Name);  sbuf->append(reg6Name);
 
   out.size = sizeof(out);
-  out.kind = BrigEInstRead;
+  out.kind = BrigEInstImage;
   out.opcode = BrigRdImage;
   out.type = Brigs32;
-  out.stype = Brigf32;
+  out.sourceType = Brigf32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -885,7 +885,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
 
   reg4.size = sizeof(reg4);
@@ -909,7 +909,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg6.type = Brigb32;
   reg6.reserved = 0;
   reg6.s_name = reg1Name.size() + reg2Name.size() +
-                reg3Name.size() + reg4Name.size() + 
+                reg3Name.size() + reg4Name.size() +
                 reg5Name.size() + 5;
 
 
@@ -921,12 +921,12 @@ TEST(CodegenTest, ImageRead_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
   image1.reg = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) +
-               sizeof(reg4) + sizeof(dest); 
+               sizeof(reg4) + sizeof(dest);
   image1.offset = 3;
 
   samp2.size = sizeof(samp2);
@@ -936,8 +936,8 @@ TEST(CodegenTest, ImageRead_Codegen) {
                sizeof(reg4) + sizeof(dest) + sizeof(image1) +
                sizeof(reg5);
   samp2.offset = 0;
-  
-  
+
+
   srcRegV2.size = sizeof(srcRegV2);
   srcRegV2.kind = BrigEOperandRegV2;
   srcRegV2.type = Brigb32;
@@ -945,10 +945,10 @@ TEST(CodegenTest, ImageRead_Codegen) {
   srcRegV2.regs[0] = 0;
   srcRegV2.regs[1] = sizeof(reg1);
 
-  ImageInst_Test<BrigInstRead, BrigOperandRegV2> 
+  ImageInst_Test<BrigInstImage, BrigOperandRegV2>
   TestCase2(in, sbuf, &out, &dest, destList, &image1, &samp2, &srcRegV2, srcList, &reg5, &reg6);
   TestCase2.Run_Test(&ImageRead);
-  
+
   sbuf->clear();
 
   /**************************** Case 3 ***************************/
@@ -961,10 +961,10 @@ TEST(CodegenTest, ImageRead_Codegen) {
   sbuf->append(reg5Name);
 
   out.size = sizeof(out);
-  out.kind = BrigEInstRead;
+  out.kind = BrigEInstImage;
   out.opcode = BrigRdImage;
   out.type = Brigs32;
-  out.stype = Brigf32;
+  out.sourceType = Brigf32;
   out.packing = BrigNoPacking;
   out.reserved = 0;
   out.o_operands[0] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(reg4);
@@ -995,7 +995,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg3.type = Brigb32;
   reg3.reserved = 0;
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
-  
+
   destList[2] = reg3;
 
   reg4.size = sizeof(reg4);
@@ -1015,7 +1015,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   dest.regs[1] = sizeof(reg1);
   dest.regs[2] = sizeof(reg1) + sizeof(reg2);
   dest.regs[3] = sizeof(reg1) + sizeof(reg2) + sizeof(reg3);
-  
+
   image1.size = sizeof(image1);
   image1.kind = BrigEOperandOpaque;
   image1.directive = 0;
@@ -1027,7 +1027,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
   samp2.directive = 0;
   samp2.reg = 0;
   samp2.offset = 0;
-  
+
   reg3.size = sizeof(reg3);
   reg3.kind = BrigEOperandReg;
   reg3.type = Brigb32;
@@ -1035,16 +1035,16 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg3.s_name = reg1Name.size() + reg2Name.size() +
                 reg3Name.size() + reg4Name.size() + 4;
 
-  ImageInst_Test<BrigInstRead, BrigOperandReg> 
+  ImageInst_Test<BrigInstImage, BrigOperandReg>
   TestCase3(in, sbuf, &out, &dest, destList, &image1, &samp2, &reg3);
   TestCase3.Run_Test(&ImageRead);
-  
+
   sbuf->clear();
 
   /***********************  End of tests *************************/
   delete sbuf;
 }
-TEST(ErrorReportTest, ImageStore) {  
+TEST(ErrorReportTest, ImageStore) {
   std::string input = "st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),\
                        [%RWImg3], ($s2,$s3,$s4,$s5)\n";
   ImageInst_Test<> TestCase1(input);
@@ -1060,7 +1060,7 @@ TEST(ErrorReportTest, ImageStore) {
   ImageInst_Test<> TestCase3(input);
   TestCase3.Run_Test(&ImageStore, MISSING_DATA_TYPE);
 }
-TEST(ErrorReportTest, ImageLoad) {  
+TEST(ErrorReportTest, ImageLoad) {
   std::string input = "ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),\
                        [%RWImg3], ($s4,$s5,$s2,$s3)\n";
   ImageInst_Test<> TestCase1(input);
@@ -1076,7 +1076,7 @@ TEST(ErrorReportTest, ImageLoad) {
   ImageInst_Test<> TestCase3(input);
   TestCase3.Run_Test(&ImageLoad, MISSING_COMMA);
 }
-TEST(ErrorReportTest, ImageRead) {  
+TEST(ErrorReportTest, ImageRead) {
   std::string input = "rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4),\
                        [%RWImg3],[%Samp3],($s5, $s6, $s4, $s3)\n";
   ImageInst_Test<> TestCase1(input);
@@ -1086,7 +1086,7 @@ TEST(ErrorReportTest, ImageRead) {
                 [%RWImg3],[%Samp3],(100)\n");
   ImageInst_Test<> TestCase2(input);
   TestCase2.Run_Test(&ImageRead, INVALID_OPERAND);
-  
+
   input.assign("rd_image_v4_1d_s32 ($s0,$s1,$s5,$s3),[%RWImg3],\
                 [%Samp3], ($s6);\n");
   ImageInst_Test<> TestCase3(input);

@@ -32,10 +32,10 @@ TEST_P(TestLdImage, LdImage) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.stype, get.stype);
+  EXPECT_EQ(ref.sourceType, get.sourceType);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.reserved, get.reserved);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -63,7 +63,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getReg);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg.size);
@@ -92,7 +92,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getReg);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg.size);
@@ -121,7 +121,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV2);
       // BrigOperandRegV2
       EXPECT_EQ(regv2_size, getRegV2.size);
@@ -151,7 +151,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV2);
       // BrigOperandRegV2
       EXPECT_EQ(regv2_size, getRegV2.size);
@@ -181,7 +181,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV4);
       // BrigOperandRegV4
       EXPECT_EQ(regv4_size, getRegV4.size);
@@ -213,7 +213,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV4);
       // BrigOperandRegV4
       EXPECT_EQ(regv4_size, getRegV4.size);
@@ -245,7 +245,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV2);
       // BrigOperandRegV2
       EXPECT_EQ(regv2_size, getRegV2.size);
@@ -275,7 +275,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV2);
       // BrigOperandRegV2
       EXPECT_EQ(regv2_size, getRegV2.size);
@@ -305,7 +305,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV4);
       // BrigOperandRegV4
       EXPECT_EQ(regv4_size, getRegV4.size);
@@ -337,7 +337,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV4);
       // BrigOperandRegV4
       EXPECT_EQ(regv4_size, getRegV4.size);
@@ -369,7 +369,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getReg);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg.size);
@@ -398,7 +398,7 @@ TEST_P(TestLdImage, LdImage) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getReg);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg.size);
@@ -450,7 +450,7 @@ TEST_P(TestImageNoRetAdd, ImageNoRetAdd) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -483,7 +483,7 @@ TEST_P(TestImageNoRetSub, ImageNoRetSub) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -516,7 +516,7 @@ TEST_P(TestImageNoRetOr, ImageNoRetOr) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -549,7 +549,7 @@ TEST_P(TestImageNoRetAnd, ImageNoRetAnd) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -582,7 +582,7 @@ TEST_P(TestImageNoRetXor, ImageNoRetXor) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -615,7 +615,7 @@ TEST_P(TestImageNoRetInc, ImageNoRetInc) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -648,7 +648,7 @@ TEST_P(TestImageNoRetDec, ImageNoRetDec) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -681,7 +681,7 @@ TEST_P(TestImageNoRetMax, ImageNoRetMax) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -714,7 +714,7 @@ TEST_P(TestImageNoRetMin, ImageNoRetMin) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -747,7 +747,7 @@ TEST_P(TestImageNoRetCas, ImageNoRetCas) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -768,13 +768,13 @@ TEST_P(TestRdImage1d, RdImage1d) {
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
   context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1; 
+  context->symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
-  BrigInstRead ref = imageread_1d_pair[n].ref;
+  BrigInstImage ref = imageread_1d_pair[n].ref;
 
-  BrigInstRead get;
-  BrigOperandReg getReg1, getReg2, getReg3, getReg4, getReg5; 
+  BrigInstImage get;
+  BrigOperandReg getReg1, getReg2, getReg3, getReg4, getReg5;
   BrigOperandOpaque getImage1, getImage2;
   BrigOperandRegV4 getRegV4;
 
@@ -783,10 +783,10 @@ TEST_P(TestRdImage1d, RdImage1d) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.stype, get.stype);
+  EXPECT_EQ(ref.sourceType, get.sourceType);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.reserved, get.reserved);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -821,7 +821,7 @@ TEST_P(TestRdImage1d, RdImage1d) {
   context->get_operand(operand_offset + reg_size * 3, &getReg4);
   // BrigOperandReg
   EXPECT_EQ(reg_size, getReg4.size);
-  EXPECT_EQ(BrigEOperandReg, getReg4.kind); 
+  EXPECT_EQ(BrigEOperandReg, getReg4.kind);
   EXPECT_EQ(Brigb32, getReg4.type);
   EXPECT_EQ(0, getReg4.reserved);
   EXPECT_EQ(string_offset + 4 * 3, getReg4.s_name);
@@ -887,13 +887,13 @@ TEST_P(TestRdImage2d, RdImage2d) {
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
   context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1; 
+  context->symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
-  BrigInstRead ref = imageread_2d_pair[n].ref;
+  BrigInstImage ref = imageread_2d_pair[n].ref;
 
-  BrigInstRead get;
-  BrigOperandReg getReg1, getReg2, getReg3, getReg4, getReg5, getReg6; 
+  BrigInstImage get;
+  BrigOperandReg getReg1, getReg2, getReg3, getReg4, getReg5, getReg6;
   BrigOperandRegV2 getRegV2;
   BrigOperandRegV4 getRegV4;
   BrigOperandOpaque getImage1, getImage2;
@@ -903,10 +903,10 @@ TEST_P(TestRdImage2d, RdImage2d) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.stype, get.stype);
+  EXPECT_EQ(ref.sourceType, get.sourceType);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.reserved, get.reserved);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1024,13 +1024,13 @@ TEST_P(TestRdImage3d, RdImage3d) {
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
   context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1; 
+  context->symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
-  BrigInstRead ref = imageread_3d_pair[n].ref;
+  BrigInstImage ref = imageread_3d_pair[n].ref;
 
-  BrigInstRead get;
-  BrigOperandReg getReg1, getReg2, getReg3, getReg4; 
+  BrigInstImage get;
+  BrigOperandReg getReg1, getReg2, getReg3, getReg4;
   BrigOperandReg getReg5, getReg6, getReg7, getReg8;
   BrigOperandRegV4 getRegV4_1, getRegV4_2;
   BrigOperandOpaque getImage1, getImage2;
@@ -1040,10 +1040,10 @@ TEST_P(TestRdImage3d, RdImage3d) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.stype, get.stype);
+  EXPECT_EQ(ref.sourceType, get.sourceType);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.reserved, get.reserved);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1180,13 +1180,13 @@ TEST_P(TestRdImage1da, RdImage1da) {
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
   context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1; 
+  context->symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
-  BrigInstRead ref = imageread_1da_pair[n].ref;
+  BrigInstImage ref = imageread_1da_pair[n].ref;
 
-  BrigInstRead get;
-  BrigOperandReg getReg1, getReg2, getReg3, getReg4; 
+  BrigInstImage get;
+  BrigOperandReg getReg1, getReg2, getReg3, getReg4;
   BrigOperandReg getReg5, getReg6;
   BrigOperandRegV2 getRegV2;
   BrigOperandRegV4 getRegV4;
@@ -1197,10 +1197,10 @@ TEST_P(TestRdImage1da, RdImage1da) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.stype, get.stype);
+  EXPECT_EQ(ref.sourceType, get.sourceType);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.reserved, get.reserved);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1318,13 +1318,13 @@ TEST_P(TestRdImage2da, RdImage2da) {
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
   context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1; 
+  context->symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
-  BrigInstRead ref = imageread_2da_pair[n].ref;
+  BrigInstImage ref = imageread_2da_pair[n].ref;
 
-  BrigInstRead get;
-  BrigOperandReg getReg1, getReg2, getReg3, getReg4; 
+  BrigInstImage get;
+  BrigOperandReg getReg1, getReg2, getReg3, getReg4;
   BrigOperandReg getReg5, getReg6, getReg7, getReg8;
   BrigOperandRegV4 getRegV4_1, getRegV4_2;
   BrigOperandOpaque getImage1, getImage2;
@@ -1334,10 +1334,10 @@ TEST_P(TestRdImage2da, RdImage2da) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.stype, get.stype);
+  EXPECT_EQ(ref.sourceType, get.sourceType);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.reserved, get.reserved);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1485,7 +1485,7 @@ TEST_P(TestImageRetAdd, ImageRetAdd) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1518,7 +1518,7 @@ TEST_P(TestImageRetSub, ImageRetSub) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1551,7 +1551,7 @@ TEST_P(TestImageRetOr, ImageRetOr) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1584,7 +1584,7 @@ TEST_P(TestImageRetAnd, ImageRetAnd) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1617,7 +1617,7 @@ TEST_P(TestImageRetXor, ImageRetXor) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1650,7 +1650,7 @@ TEST_P(TestImageRetInc, ImageRetInc) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1683,7 +1683,7 @@ TEST_P(TestImageRetDec, ImageRetDec) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1716,7 +1716,7 @@ TEST_P(TestImageRetMax, ImageRetMax) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1749,7 +1749,7 @@ TEST_P(TestImageRetMin, ImageRetMin) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1782,7 +1782,7 @@ TEST_P(TestImageRetCas, ImageRetCas) {
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.atomicOperation, get.atomicOperation);
   EXPECT_EQ(ref.storageClass, get.storageClass);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1818,10 +1818,10 @@ TEST_P(TestImageStore, ImageStore) {
   EXPECT_EQ(ref.kind, get.kind);
   EXPECT_EQ(ref.opcode, get.opcode);
   EXPECT_EQ(ref.type, get.type);
-  EXPECT_EQ(ref.stype, get.stype);
+  EXPECT_EQ(ref.sourceType, get.sourceType);
   EXPECT_EQ(ref.packing, get.packing);
   EXPECT_EQ(ref.reserved, get.reserved);
-  EXPECT_EQ(ref.geom, get.geom); 
+  EXPECT_EQ(ref.geom, get.geom);
 
   EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
   EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
@@ -1849,7 +1849,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getReg);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg.size);
@@ -1878,7 +1878,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getReg);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg.size);
@@ -1907,7 +1907,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV2);
       // BrigOperandRegV2
       EXPECT_EQ(regv2_size, getRegV2.size);
@@ -1937,7 +1937,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV2);
       // BrigOperandRegV2
       EXPECT_EQ(regv2_size, getRegV2.size);
@@ -1967,7 +1967,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV4);
       // BrigOperandRegV4
       EXPECT_EQ(regv4_size, getRegV4.size);
@@ -1999,7 +1999,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV4);
       // BrigOperandRegV4
       EXPECT_EQ(regv4_size, getRegV4.size);
@@ -2031,7 +2031,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV2);
       // BrigOperandRegV2
       EXPECT_EQ(regv2_size, getRegV2.size);
@@ -2061,7 +2061,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV2);
       // BrigOperandRegV2
       EXPECT_EQ(regv2_size, getRegV2.size);
@@ -2091,7 +2091,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV4);
       // BrigOperandRegV4
       EXPECT_EQ(regv4_size, getRegV4.size);
@@ -2123,7 +2123,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getRegV4);
       // BrigOperandRegV4
       EXPECT_EQ(regv4_size, getRegV4.size);
@@ -2155,7 +2155,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getReg);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg.size);
@@ -2184,7 +2184,7 @@ TEST_P(TestImageStore, ImageStore) {
       EXPECT_EQ(30, getImage.directive);
       EXPECT_EQ(0, getImage.reg);
       EXPECT_EQ(0, getImage.offset);
- 
+
       context->get_operand(ref.o_operands[2], &getReg);
       // BrigOperandReg
       EXPECT_EQ(reg_size, getReg.size);

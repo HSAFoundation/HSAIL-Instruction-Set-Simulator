@@ -184,14 +184,14 @@ enum BrigInstKinds {
   BrigEInstBase = 0,
   BrigEInstMod = 1,
   BrigEInstCvt = 2,
-  BrigEInstRead = 3,
+  BrigEInstImage = 3,
   BrigEInstBar = 4,
   BrigEInstLdSt = 5,
   BrigEInstCmp = 6,
   BrigEInstMem = 7,
   BrigEInstAtomic = 8,
   BrigEInstAtomicImage = 9,
-  BrigEInstImage = 10
+  BrigEInstSegp = 10
 };
 
 // 19.5.14
@@ -218,7 +218,8 @@ enum BrigStorageClass {
   BrigArgSpace = 6,
   BrigFlatSpace = 7,
   BrigExtSpace0 = 8,
-  BrigExtSpace1 = 9
+  BrigExtSpace1 = 9,
+  BrigInvalidSpace
 };
 // 8-16 reserved for extensions
 
@@ -985,7 +986,7 @@ struct BrigInstImage {
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
   BrigGeom32_t geom;
-  BrigDataType16_t stype;
+  BrigDataType16_t sourceType;
   uint16_t reserved;
 };
 
@@ -1002,22 +1003,18 @@ struct BrigInstMem {
   BrigStorageClass32_t storageClass;
 };
 
-// BrigInstRead
-// The BrigInstRead format is a special format used for the read image
-// operation.
-struct BrigInstRead {
-  enum { InstKind = BrigEInstRead };
+struct BrigInstSegp {
+  enum { InstKind = BrigEInstSegp };
   uint16_t size;
   uint16_t kind;
   BrigOpcode32_t opcode;
   BrigDataType16_t type;
   BrigPacking16_t packing;
   BrigoOffset32_t o_operands[5];
-  BrigGeom32_t geom;
-  BrigDataType16_t stype;
+  BrigStorageClass32_t storageClass;
+  BrigDataType16_t sourceType;
   uint16_t reserved;
 };
-
 
 struct BrigOperandBase {
   enum { OperKind = BrigEOperandBase };
@@ -1027,7 +1024,7 @@ struct BrigOperandBase {
 
 // Operand structures
 // BrigOperandReg
-// BrigOperandReg is used for a register (c, s, or d).
+// BrigOperandReg is used for a register (c, s, d, or q).
 struct BrigOperandReg {
   enum { OperKind = BrigEOperandReg };
   uint16_t size;

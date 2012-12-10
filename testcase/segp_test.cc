@@ -24,7 +24,7 @@ TEST_P(SegpSegmentpb1, BrigSegmentp){
   BrigOperandWaveSz getWaveSz;
   context->get_code(code_offset, &getMem);
 
-  BrigInstMem ref = segpsegmentpb1_pair[n].ref;
+  BrigInstSegp ref = segpsegmentpb1_pair[n].ref;
 
   EXPECT_EQ(ref.size, getMem.size);
   EXPECT_EQ(ref.kind, getMem.kind);
@@ -124,7 +124,7 @@ TEST_P(SegpFtos, BrigFtoS)
   BrigOperandWaveSz getWaveSz;
   context->get_code(code_offset, &getMem);
 
-  BrigInstMem ref = segpftos_pair[n].ref;
+  BrigInstSegp ref = segpftos_pair[n].ref;
 
   EXPECT_EQ(ref.size, getMem.size);
   EXPECT_EQ(ref.kind, getMem.kind);
@@ -253,7 +253,7 @@ TEST_P(SegpStof, BrigStoF){
   BrigOperandWaveSz getWaveSz;
   context->get_code(code_offset, &getMem);
 
-  BrigInstMem ref = segpstof_pair[n].ref;
+  BrigInstSegp ref = segpstof_pair[n].ref;
 
   EXPECT_EQ(ref.size, getMem.size);
   EXPECT_EQ(ref.kind, getMem.kind);

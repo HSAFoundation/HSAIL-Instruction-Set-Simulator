@@ -44,7 +44,6 @@ public:
         caseInstBrig(InstBase);
         caseInstBrig(InstMod) ;
         caseInstBrig(InstCvt) ;
-        caseInstBrig(InstRead);
         caseInstBrig(InstBar) ;
         caseInstBrig(InstLdSt);
         caseInstBrig(InstCmp);
@@ -52,6 +51,7 @@ public:
         caseInstBrig(InstAtomic);
         caseInstBrig(InstAtomicImage);
         caseInstBrig(InstImage);
+        caseInstBrig(InstSegp);
         default:
             printf("Invalid instruction\n");
             exit(1);
@@ -154,7 +154,7 @@ public:
     context->clear_context();
     delete lexer;
   }
-  
+
   void False_Validate(int (*Rule)(Context*), error_code_t refError) {
     Context* context = Context::get_instance();
     context->clear_context();

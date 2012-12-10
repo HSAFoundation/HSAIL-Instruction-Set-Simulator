@@ -119,40 +119,6 @@ void validate(const BrigInstCvt* ref, const BrigInstCvt* get,
   EXPECT_EQ(ref->reserved, get->reserved);
 }
 
-void validate(const BrigInstRead* ref, const BrigInstRead*get,
-      BrigSections* RefOutput, BrigSections* GetOutput){
-  EXPECT_EQ(ref->size, get->size);
-  EXPECT_EQ(ref->kind, get->kind);
-  EXPECT_EQ(ref->opcode, get->opcode);
-  EXPECT_EQ(ref->type, get->type);
-  EXPECT_EQ(ref->stype, get->stype);
-  EXPECT_EQ(ref->packing, get->packing);
-  for(int i=0; i<5; i++){
-     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
-      && get->o_operands[i]<GetOutput->operandsSize
-      && ref->o_operands[i]<RefOutput->operandsSize;
-    if(validOffset){
-      oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
-      oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
-      ASSERT_EQ(refoper->size, getoper->size);
-      ASSERT_EQ(refoper->kind, getoper->kind);
-      switch(getoper->kind){
-        caseOperBrig(OperandReg);
-        caseOperBrig(OperandRegV2);
-        caseOperBrig(OperandRegV4);
-        caseOperBrig(OperandOpaque);
-        caseOperBrig(OperandImmed);
-        caseOperBrig(OperandWaveSz);
-        default:
-          printf("Offset to invalid operand");
-          exit(1);
-      }
-    }
-  }
-  EXPECT_EQ(ref->geom, get->geom);
-  EXPECT_EQ(ref->reserved, get->reserved);
-}
-
 void validate(const BrigInstBar* ref, const BrigInstBar* get,
       BrigSections* RefOutput, BrigSections* GetOutput){
   EXPECT_EQ(ref->size, get->size);
@@ -366,7 +332,7 @@ void validate(const BrigInstImage* ref, const BrigInstImage* get,
   EXPECT_EQ(ref->kind, get->kind);
   EXPECT_EQ(ref->opcode, get->opcode);
   EXPECT_EQ(ref->type, get->type);
-  EXPECT_EQ(ref->stype, get->stype);
+  EXPECT_EQ(ref->sourceType, get->sourceType);
   EXPECT_EQ(ref->packing, get->packing);
   EXPECT_EQ(ref->reserved, get->reserved);
   for(int i=0; i<5; i++){
@@ -392,6 +358,38 @@ void validate(const BrigInstImage* ref, const BrigInstImage* get,
     }
   }
   EXPECT_EQ(ref->geom, get->geom);
+}
+
+void validate(const BrigInstSegp* ref, const BrigInstSegp* get,
+      BrigSections* RefOutput, BrigSections* GetOutput) {
+  EXPECT_EQ(ref->size, get->size);
+  EXPECT_EQ(ref->kind, get->kind);
+  EXPECT_EQ(ref->opcode, get->opcode);
+  EXPECT_EQ(ref->type, get->type);
+  EXPECT_EQ(ref->packing, get->packing);
+  EXPECT_EQ(ref->sourceType, get->sourceType);
+  EXPECT_EQ(ref->storageClass, get->storageClass);
+  EXPECT_EQ(ref->reserved, get->reserved);
+
+  for(int i=0; i<5; i++){
+     bool validOffset = (get->o_operands[i] >= OPERANDSBUFFER_OFFSET)
+      && get->o_operands[i]<GetOutput->operandsSize
+      && ref->o_operands[i]<RefOutput->operandsSize;
+    if(validOffset){
+      oper_iterator refoper(RefOutput->operands + ref->o_operands[i]);
+      oper_iterator getoper(GetOutput->operands + get->o_operands[i]);
+      ASSERT_EQ(refoper->size, getoper->size);
+      ASSERT_EQ(refoper->kind, getoper->kind);
+      switch(getoper->kind){
+        caseOperBrig(OperandReg);
+        caseOperBrig(OperandImmed);
+        caseOperBrig(OperandWaveSz);
+        default:
+          printf("Offset to invalid operand");
+          exit(1);
+      }
+    }
+  }
 }
 
 /********************************************* Operands ***********************************************************/
@@ -658,10 +656,9 @@ void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, 
   bool validOffset = (getoffset>=CODEBUFFER_OFFSET) && refoffset<RefOutput->directivesSize && getoffset<GetOutput->directivesSize;
   if(refinst!=NULL && getinst!=NULL && validOffset){
     switch(getinst->kind){
-      case BrigEInstBase: 
+      case BrigEInstBase:
       case BrigEInstMod:
       case BrigEInstCvt:
-      case BrigEInstRead:
       case BrigEInstBar:
       case BrigEInstLdSt:
       case BrigEInstCmp:
@@ -669,6 +666,7 @@ void validate_CODE_OFFSET(BrigcOffset32_t refoffset, BrigcOffset32_t getoffset, 
       case BrigEInstAtomic:
       case BrigEInstAtomicImage:
       case BrigEInstImage:
+      case BrigEInstSegp:
         EXPECT_EQ(refinst->size, getinst->size);
         EXPECT_EQ(refinst->kind, getinst->kind);
         EXPECT_EQ(refinst->opcode, getinst->opcode);
@@ -840,7 +838,7 @@ void validate(const BrigDirectiveLabelList* ref, const BrigDirectiveLabelList* g
   }
   for(uint32_t i = 0 ; i < get->elementCount; i++) {
     validate_DIR_OFFSET(ref->d_labels[i], get->d_labels[i], RefOutput, GetOutput);
-  } 
+  }
 }
 
 void validate(const BrigDirectiveLabelInit* ref, const BrigDirectiveLabelInit* get,
@@ -854,7 +852,7 @@ void validate(const BrigDirectiveLabelInit* ref, const BrigDirectiveLabelInit* g
   EXPECT_STREQ(&(RefOutput->strings[ref->s_name]), &(GetOutput->strings[get->s_name]));
   for(uint32_t i = 0 ; i < get->elementCount; i++) {
     validate_DIR_OFFSET(ref->d_labels[i], get->d_labels[i], RefOutput, GetOutput);
-  } 
+  }
 }
 
 void validate(const BrigDirectiveKernel* ref, const BrigDirectiveKernel* get,

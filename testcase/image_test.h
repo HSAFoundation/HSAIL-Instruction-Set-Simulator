@@ -21,10 +21,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_1d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -32,9 +32,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1d,
-      Brigu32, 
+      Brigu32,
        0
     }
   },
@@ -42,10 +42,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_1d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -53,9 +53,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1d,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -63,10 +63,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_2d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -74,9 +74,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 6*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_2d,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -84,10 +84,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_2d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -95,9 +95,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 6*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_2d,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -105,10 +105,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_3d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -116,9 +116,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 8*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_3d,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -126,10 +126,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_3d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -137,9 +137,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 8*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_3d,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -147,10 +147,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_1da_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -158,9 +158,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 6*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1da,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -168,10 +168,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_1da_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -179,9 +179,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 6*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1da,
-      Brigu32, 
+      Brigu32,
        0
     }
   },
@@ -189,10 +189,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_2da_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -200,9 +200,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 8*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_2da,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -210,10 +210,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_2da_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -221,9 +221,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 8*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_2da,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -231,10 +231,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_1db_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -242,9 +242,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1db,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -252,10 +252,10 @@ struct LdImageTest imageload_pair[12] = {
   {
     "ld_image_v4_1db_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigLdImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigLdImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -263,9 +263,9 @@ struct LdImageTest imageload_pair[12] = {
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1db,
-      Brigu32, 
+      Brigu32,
       0
     }
   }
@@ -1810,7 +1810,7 @@ class TestRdImage1d : public ::testing::TestWithParam<int>
 };
 struct RdImageTest{
   const char *str;
-  BrigInstRead ref;
+  BrigInstImage ref;
 };
 
 struct RdImageTest imageread_1d_pair[6] = {
@@ -1819,7 +1819,7 @@ struct RdImageTest imageread_1d_pair[6] = {
     "rd_image_v4_1d_u32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5);",
     {
       brig_inst_read_size, // size
-      BrigEInstRead, // kind
+      BrigEInstImage, // kind
       BrigRdImage, // opcode
       Brigu32, // type
       BrigNoPacking, //packing
@@ -1831,7 +1831,7 @@ struct RdImageTest imageread_1d_pair[6] = {
         0
       }, // o_operands[5]
       Briggeom_1d, // geom
-      Brigu32, // stype
+      Brigu32, // sourceType
       0 // reserved
     }
   },
@@ -1839,19 +1839,19 @@ struct RdImageTest imageread_1d_pair[6] = {
   {
     "rd_image_v4_1d_u32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigu32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigu32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 4*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1d, 
+      },
+      Briggeom_1d,
       Brigf32,
       0
     }
@@ -1860,20 +1860,20 @@ struct RdImageTest imageread_1d_pair[6] = {
   {
     "rd_image_v4_1d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 4*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1d, 
-      Brigu32, 
+      },
+      Briggeom_1d,
+      Brigu32,
       0
     }
   },
@@ -1881,20 +1881,20 @@ struct RdImageTest imageread_1d_pair[6] = {
   {
     "rd_image_v4_1d_s32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 4*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1d, 
-      Brigf32, 
+      },
+      Briggeom_1d,
+      Brigf32,
       0
     }
   },
@@ -1902,20 +1902,20 @@ struct RdImageTest imageread_1d_pair[6] = {
   {
     "rd_image_v4_1d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 4*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1d, 
-      Brigu32, 
+      },
+      Briggeom_1d,
+      Brigu32,
       0
     }
   },
@@ -1923,20 +1923,20 @@ struct RdImageTest imageread_1d_pair[6] = {
   {
     "rd_image_v4_1d_f32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 4*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1d, 
-      Brigf32, 
+      },
+      Briggeom_1d,
+      Brigf32,
       0
     }
   }
@@ -2003,7 +2003,7 @@ struct RdImageTest imageread_2d_pair[6] = {
     "rd_image_v4_2d_u32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
       brig_inst_read_size, // size
-      BrigEInstRead, // kind
+      BrigEInstImage, // kind
       BrigRdImage, // opcode
       Brigu32, // type
       BrigNoPacking, //packing
@@ -2015,7 +2015,7 @@ struct RdImageTest imageread_2d_pair[6] = {
         0
       }, // o_operands[5]
       Briggeom_2d, // geom
-      Brigu32, // stype
+      Brigu32, // sourceType
       0 // reserved
     }
   },
@@ -2023,20 +2023,20 @@ struct RdImageTest imageread_2d_pair[6] = {
   {
     "rd_image_v4_2d_u32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigu32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigu32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2d, 
-      Brigf32, 
+      },
+      Briggeom_2d,
+      Brigf32,
       0
     }
   },
@@ -2044,20 +2044,20 @@ struct RdImageTest imageread_2d_pair[6] = {
   {
     "rd_image_v4_2d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2d, 
-      Brigu32, 
+      },
+      Briggeom_2d,
+      Brigu32,
       0
     }
   },
@@ -2065,20 +2065,20 @@ struct RdImageTest imageread_2d_pair[6] = {
   {
     "rd_image_v4_2d_s32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2d, 
-      Brigf32, 
+      },
+      Briggeom_2d,
+      Brigf32,
       0
     }
   },
@@ -2086,20 +2086,20 @@ struct RdImageTest imageread_2d_pair[6] = {
   {
     "rd_image_v4_2d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2d, 
-      Brigu32, 
+      },
+      Briggeom_2d,
+      Brigu32,
       0
     }
   },
@@ -2107,20 +2107,20 @@ struct RdImageTest imageread_2d_pair[6] = {
   {
     "rd_image_v4_2d_f32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2d, 
-      Brigf32, 
+      },
+      Briggeom_2d,
+      Brigf32,
       0
     }
   }
@@ -2187,7 +2187,7 @@ struct RdImageTest imageread_3d_pair[6] = {
     "rd_image_v4_3d_u32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
       brig_inst_read_size, // size
-      BrigEInstRead, // kind
+      BrigEInstImage, // kind
       BrigRdImage, // opcode
       Brigu32, // type
       BrigNoPacking, //packing
@@ -2199,7 +2199,7 @@ struct RdImageTest imageread_3d_pair[6] = {
         0
       }, // o_operands[5]
       Briggeom_3d, // geom
-      Brigu32, // stype
+      Brigu32, // sourceType
       0 // reserved
     }
   },
@@ -2207,20 +2207,20 @@ struct RdImageTest imageread_3d_pair[6] = {
   {
     "rd_image_v4_3d_u32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigu32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigu32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_3d, 
-      Brigf32, 
+      },
+      Briggeom_3d,
+      Brigf32,
       0
     }
   },
@@ -2228,19 +2228,19 @@ struct RdImageTest imageread_3d_pair[6] = {
   {
     "rd_image_v4_3d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32,  
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_3d, 
+      },
+      Briggeom_3d,
       Brigu32,
       0
     }
@@ -2249,20 +2249,20 @@ struct RdImageTest imageread_3d_pair[6] = {
   {
     "rd_image_v4_3d_s32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_3d, 
-      Brigf32, 
+      },
+      Briggeom_3d,
+      Brigf32,
       0
     }
   },
@@ -2270,20 +2270,20 @@ struct RdImageTest imageread_3d_pair[6] = {
   {
     "rd_image_v4_3d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_3d, 
-      Brigu32, 
+      },
+      Briggeom_3d,
+      Brigu32,
       0
     }
   },
@@ -2291,20 +2291,20 @@ struct RdImageTest imageread_3d_pair[6] = {
   {
     "rd_image_v4_3d_f32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_3d, 
-      Brigf32, 
+      },
+      Briggeom_3d,
+      Brigf32,
       0
     }
   }
@@ -2371,7 +2371,7 @@ struct RdImageTest imageread_1da_pair[6] = {
     "rd_image_v4_1da_u32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
       brig_inst_read_size, // size
-      BrigEInstRead, // kind
+      BrigEInstImage, // kind
       BrigRdImage, // opcode
       Brigu32, // type
       BrigNoPacking, //packing
@@ -2383,7 +2383,7 @@ struct RdImageTest imageread_1da_pair[6] = {
         0
       }, // o_operands[5]
       Briggeom_1da, // geom
-      Brigu32, // stype
+      Brigu32, // sourceType
       0 // reserved
     }
   },
@@ -2391,20 +2391,20 @@ struct RdImageTest imageread_1da_pair[6] = {
   {
     "rd_image_v4_1da_u32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigu32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigu32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1da, 
-      Brigf32, 
+      },
+      Briggeom_1da,
+      Brigf32,
       0
     }
   },
@@ -2412,20 +2412,20 @@ struct RdImageTest imageread_1da_pair[6] = {
   {
     "rd_image_v4_1da_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1da, 
-      Brigu32, 
+      },
+      Briggeom_1da,
+      Brigu32,
       0
     }
   },
@@ -2433,20 +2433,20 @@ struct RdImageTest imageread_1da_pair[6] = {
   {
     "rd_image_v4_1da_s32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1da, 
-      Brigf32, 
+      },
+      Briggeom_1da,
+      Brigf32,
       0
     }
   },
@@ -2454,20 +2454,20 @@ struct RdImageTest imageread_1da_pair[6] = {
   {
     "rd_image_v4_1da_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1da, 
-      Brigu32, 
+      },
+      Briggeom_1da,
+      Brigu32,
       0
     }
   },
@@ -2475,20 +2475,20 @@ struct RdImageTest imageread_1da_pair[6] = {
   {
     "rd_image_v4_1da_f32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 6*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_1da, 
-      Brigf32, 
+      },
+      Briggeom_1da,
+      Brigf32,
       0
     }
   }
@@ -2555,7 +2555,7 @@ struct RdImageTest imageread_2da_pair[6] = {
     "rd_image_v4_2da_u32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
       brig_inst_read_size, // size
-      BrigEInstRead, // kind
+      BrigEInstImage, // kind
       BrigRdImage, // opcode
       Brigu32, // type
       BrigNoPacking, //packing
@@ -2567,7 +2567,7 @@ struct RdImageTest imageread_2da_pair[6] = {
         0
       }, // o_operands[5]
       Briggeom_2da, // geom
-      Brigu32, // stype
+      Brigu32, // sourceType
       0 // reserved
     }
   },
@@ -2575,20 +2575,20 @@ struct RdImageTest imageread_2da_pair[6] = {
   {
     "rd_image_v4_2da_u32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigu32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigu32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2da, 
-      Brigf32, 
+      },
+      Briggeom_2da,
+      Brigf32,
       0
     }
   },
@@ -2596,20 +2596,20 @@ struct RdImageTest imageread_2da_pair[6] = {
   {
     "rd_image_v4_2da_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2da, 
-      Brigu32, 
+      },
+      Briggeom_2da,
+      Brigu32,
       0
     }
   },
@@ -2617,20 +2617,20 @@ struct RdImageTest imageread_2da_pair[6] = {
   {
     "rd_image_v4_2da_s32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigs32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigs32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2da, 
-      Brigf32, 
+      },
+      Briggeom_2da,
+      Brigf32,
       0
     }
   },
@@ -2638,20 +2638,20 @@ struct RdImageTest imageread_2da_pair[6] = {
   {
     "rd_image_v4_2da_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2da, 
-      Brigu32, 
+      },
+      Briggeom_2da,
+      Brigu32,
       0
     }
   },
@@ -2659,20 +2659,20 @@ struct RdImageTest imageread_2da_pair[6] = {
   {
     "rd_image_v4_2da_f32_f32 ($s1, $s2, $s3, $s4), [%RWImg3], [%Samp3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_read_size, 
-      BrigEInstRead, 
-      BrigRdImage, 
-      Brigf32, 
-      BrigNoPacking, 
+      brig_inst_read_size,
+      BrigEInstImage,
+      BrigRdImage,
+      Brigf32,
+      BrigNoPacking,
       {
         operand_offset + 4*reg_size,
         operand_offset + 4*reg_size + regv4_size,
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         operand_offset + 8*reg_size + regv4_size + 2*opaque_size,
         0
-      }, 
-      Briggeom_2da, 
-      Brigf32, 
+      },
+      Briggeom_2da,
+      Brigf32,
       0
     }
   }
@@ -4147,10 +4147,10 @@ struct ImageStoreTest imagestore_pair[12] = {
 {
     "st_image_v4_1d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4158,9 +4158,9 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1d,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -4168,10 +4168,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_1d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4179,7 +4179,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1d,
       Brigu32,
       0
@@ -4189,10 +4189,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_2d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4200,7 +4200,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 6*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_2d,
       Brigu32,
        0
@@ -4210,10 +4210,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_2d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4221,7 +4221,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 6*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_2d,
       Brigu32,
       0
@@ -4231,10 +4231,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_3d_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4242,7 +4242,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 8*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_3d,
       Brigu32,
       0
@@ -4252,10 +4252,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_3d_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4263,9 +4263,9 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 8*reg_size + regv4_size + opaque_size,
         0,
         0
-      },  
+      },
       Briggeom_3d,
-      Brigu32, 
+      Brigu32,
       0
     }
   },
@@ -4273,10 +4273,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_1da_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4284,7 +4284,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 6*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1da,
       Brigu32,
       0
@@ -4294,10 +4294,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_1da_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4305,7 +4305,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 6*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1da,
       Brigu32,
       0
@@ -4315,10 +4315,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_2da_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4326,7 +4326,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 8*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_2da,
       Brigu32,
       0
@@ -4336,10 +4336,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_2da_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5, $s6, $s7, $s8);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4347,7 +4347,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 8*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_2da,
       Brigu32,
       0
@@ -4357,10 +4357,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_1db_f32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigf32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigf32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4368,7 +4368,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1db,
       Brigu32,
       0
@@ -4378,10 +4378,10 @@ struct ImageStoreTest imagestore_pair[12] = {
   {
     "st_image_v4_1db_s32_u32 ($s1, $s2, $s3, $s4), [%RWImg3], ($s5);",
     {
-      brig_inst_image_size, 
-      BrigEInstImage, 
-      BrigStImage, 
-      Brigs32, 
+      brig_inst_image_size,
+      BrigEInstImage,
+      BrigStImage,
+      Brigs32,
       BrigNoPacking,
       {
         operand_offset + 4*reg_size,
@@ -4389,7 +4389,7 @@ struct ImageStoreTest imagestore_pair[12] = {
         operand_offset + 4*reg_size + regv4_size + opaque_size,
         0,
         0
-      }, 
+      },
       Briggeom_1db,
       Brigu32,
       0
