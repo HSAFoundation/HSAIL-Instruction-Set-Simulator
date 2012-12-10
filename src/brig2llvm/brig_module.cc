@@ -1812,8 +1812,8 @@ bool BrigModule::validateFirstLastbitInst(const inst_iterator inst) const {
                  "Type should be b32 or b64");
   oper_iterator dest(S_.operands + inst->o_operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
-  valid &= check(*getType(dest) == Brigb32,
-                 "Type of destination should be b32");
+  valid &= check(*getType(dest) == Brigb32 || *getType(dest) == Brigb64,
+                 "Type of destination should be b32 or b64");
   oper_iterator src(S_.operands + inst->o_operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
                  isa<BrigOperandImmed>(src) ||
