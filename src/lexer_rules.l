@@ -998,6 +998,12 @@ workitemabsid       { free_string(context);
                       context->token_value.opcode = BrigWorkItemAbsId;
                       return  WORKITEMABSID;}
 
+currentworkgroupsize  { free_string(context);
+                        context->token_type = INSTRUCTION2_OPCODE_NODT;
+                        context->yycolno+=yyleng;
+                        context->token_value.opcode = BrigCurrentWorkGroupSize;
+                        return CURRENTWORKGROUPSIZE;}
+
 workgroupsize       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
