@@ -289,6 +289,8 @@ class BrigModule {
   bool validateSName(BrigsOffset32_t s_name) const;
   bool validateAlignment(const void *dir, uint8_t alignment) const;
   template<typename T> bool validateSize(const T *brig) const;
+  
+  const BrigDirectiveVersion* getFirstVersionDirective() const;
 
   const BrigSections S_;
   llvm::raw_ostream *out_;
