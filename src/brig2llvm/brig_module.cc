@@ -2599,6 +2599,10 @@ bool BrigModule::validateBitAlign(const inst_iterator inst) const {
   valid &= check(inst->type == Brigb32, "Type of BitAlign should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "BitAlign can not accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   valid &= validateArithmeticInst(inst, 3);
   return valid;
 }
@@ -2609,6 +2613,10 @@ bool BrigModule::validateByteAlign(const inst_iterator inst) const {
   valid &= check(inst->type == Brigb32, "Type of ByteAlign should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "ByteAlign can not accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   valid &= validateArithmeticInst(inst, 3);
   return valid;
 }
@@ -2619,6 +2627,10 @@ bool BrigModule::validateF2u4(const inst_iterator inst) const {
   valid &= check(inst->type == Brigu32, "Type of F2u4 should be u32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "F2u4 can not accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   valid &= validateArithmeticInst(inst, 4);
   return valid;
 }
@@ -2629,6 +2641,10 @@ bool BrigModule::validateLerp(const inst_iterator inst) const {
   valid &= check(inst->type == Brigb32, "Type of Lerp should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Lerp can not accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   valid &= validateArithmeticInst(inst, 3);
   return valid;
 }
@@ -2639,6 +2655,10 @@ bool BrigModule::validateSad(const inst_iterator inst) const {
   valid &= check(inst->type == Brigb32, "Type of Sad should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Sad can not accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   valid &= validateArithmeticInst(inst, 3);
   return valid;
 }
@@ -2649,6 +2669,10 @@ bool BrigModule::validateSad2(const inst_iterator inst) const {
   valid &= check(inst->type == Brigb32, "Type of Sad2 should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Sad2 can not accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   valid &= validateArithmeticInst(inst, 3);
   return valid;
 }
@@ -2660,6 +2684,10 @@ bool BrigModule::validateSad4(const inst_iterator inst) const {
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Sad4 can not accept vector types");
   valid &= validateArithmeticInst(inst, 3);
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   return valid;
 }
 
@@ -2669,6 +2697,10 @@ bool BrigModule::validateSad4Hi(const inst_iterator inst) const {
   valid &= check(inst->type == Brigb32, "Type of Sad4Hi should be b32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Sad4Hi can not accept vector types");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   valid &= validateArithmeticInst(inst, 3);
   return valid;
 }
@@ -2678,6 +2710,10 @@ bool BrigModule::validateUnpack0(const inst_iterator inst) const {
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Unpack0 should be b32");
   valid &= validateArithmeticInst(inst, 1);
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   return valid;
 }
 
@@ -2686,6 +2722,10 @@ bool BrigModule::validateUnpack1(const inst_iterator inst) const {
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Unpack1 should be b32");
   valid &= validateArithmeticInst(inst, 1);
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   return valid;
 }
 
@@ -2694,6 +2734,10 @@ bool BrigModule::validateUnpack2(const inst_iterator inst) const {
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Unpack2 should be b32");
   valid &= validateArithmeticInst(inst, 1);
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   return valid;
 }
 
@@ -2701,6 +2745,10 @@ bool BrigModule::validateUnpack3(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(inst->type == Brigb32, "Type of Unpack3 should be b32");
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "dest should be a s register");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
