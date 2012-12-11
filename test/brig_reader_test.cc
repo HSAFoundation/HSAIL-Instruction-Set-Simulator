@@ -3524,3 +3524,29 @@ TEST(BrigKernelTest, MultipleVersionStatements) {
   EXPECT_TRUE(BP);
   if(!BP) return;
 }
+
+TEST(BrigInstTest, RegV2) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "kernel &regV2(kernarg_u32 %r, kernarg_u32 %n)\n"
+  "{\n"
+  "  ld_kernarg_u32 $s5, [%r];\n"
+  "  ld_kernarg_u32 $s0, [%n];\n"
+  "  ld_kernarg_u32 $s1, [%n];\n"
+  "  mov_b64 $d1, ($s0, $s1);\n"
+  "  st_kernarg_u64 $d1, [$s5];\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("regV2");
+  unsigned *input = new unsigned(0xffffffff);
+  unsigned *output = new unsigned(0);
+  void *args[] = { &output, &input };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xffffffffffffffff, *output);
+
+  delete input;
+  delete output;
+}
