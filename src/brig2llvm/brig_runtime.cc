@@ -575,18 +575,7 @@ extern "C" f32 Unpack0(b32 w) {
 }
 
 extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
-  switch(y) {
-  case 0:
-    return w;
-  case 8:
-  case 16:
-  case 24:
-    return (w << y) | (x >> (32 - y));
-  case 32:
-    return x;
-  default :
-    return 0;
-  }
+  return (b64(w) << y) | (b64(x) >> (32 - y));
 }
 
 extern "C" b32 Bytealign_b32(b32 w, b32 x, b32 y) {
