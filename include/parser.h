@@ -195,7 +195,10 @@ int Instruction2OpcodeFtz(Context* context);
 int BranchCbr(Context* context);
 int BranchBrn(Context* context);
 
-BrigDataType16_t ConvertType(BrigDataType16_t type);
+BrigDataType16_t ConvertTypeToB(BrigDataType16_t type);
+bool CheckDataType(BrigMachine16_t model, BrigStorageClass32_t addressType, 
+    BrigDataType16_t type);
+bool CheckRegister(unsigned int token, BrigDataType16_t type); 
 
 }  // namespace brig
 }  // namespace hsa
