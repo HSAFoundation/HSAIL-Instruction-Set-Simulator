@@ -117,7 +117,8 @@ class BrigModule {
   bool validate(const BrigInstLdSt *code) const;
   bool validate(const BrigInstMem *code) const;
   bool validate(const BrigInstMod *code) const;
-  bool validate(const BrigInstRead *code) const;
+  bool validate(const BrigInstSegp *code) const;
+
   bool validate(const BrigAluModifier *c) const;
 
   bool validate(const BrigOperandAddress *operand) const;
@@ -205,6 +206,7 @@ class BrigModule {
   bool validateFexp2(const inst_iterator inst) const;
   bool validateFlog2(const inst_iterator inst) const;
   bool validateFrcp(const inst_iterator inst) const;
+  bool validateFsqrt(const inst_iterator inst) const;
   bool validateFrsqrt(const inst_iterator inst) const;
   bool validateFsin(const inst_iterator inst) const;
   bool validateBitAlign(const inst_iterator inst) const;
@@ -262,6 +264,7 @@ class BrigModule {
   bool validateAlloca(const inst_iterator inst) const;
   bool validateClock(const inst_iterator inst) const;
   bool validateCU(const inst_iterator inst) const;
+  bool validateCurrentWorkGroupSize(const inst_iterator inst) const;
   bool validateDebugTrap(const inst_iterator inst) const;
   bool validateDispatchId(const inst_iterator inst) const;
   bool validateDynWaveId(const inst_iterator inst) const;
@@ -274,8 +277,8 @@ class BrigModule {
   bool validateWorkDim(const inst_iterator inst) const;
   bool validateWorkGroupId(const inst_iterator inst) const;
   bool validateWorkGroupSize(const inst_iterator inst) const;
-  bool validateWorkItemAId(const inst_iterator inst) const;
-  bool validateWorkItemAIdFlat(const inst_iterator inst) const;
+  bool validateWorkItemAbsId(const inst_iterator inst) const;
+  bool validateWorkItemAbsIdFlat(const inst_iterator inst) const;
   bool validateWorkItemId(const inst_iterator inst) const;
   bool validateWorkItemIdFlat(const inst_iterator inst) const;
 

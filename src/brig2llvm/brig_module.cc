@@ -114,7 +114,7 @@ bool BrigModule::validateCode(void) const {
       caseBrig(InstLdSt);
       caseBrig(InstMem);
       caseBrig(InstMod);
-      caseBrig(InstRead);
+      caseBrig(InstSegp);
       default:
         check(false, "Unrecognized code");
         return false;
@@ -228,6 +228,7 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(Fexp2);
       caseInst(Flog2);
       caseInst(Frcp);
+      caseInst(Fsqrt);
       caseInst(Frsqrt);
       caseInst(Fsin);
       caseInst(BitAlign);
@@ -285,6 +286,7 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(Alloca);
       caseInst(Clock);
       caseInst(CU);
+      caseInst(CurrentWorkGroupSize);
       caseInst(DebugTrap);
       caseInst(DispatchId);
       caseInst(DynWaveId);
@@ -297,8 +299,8 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(WorkDim);
       caseInst(WorkGroupId);
       caseInst(WorkGroupSize);
-      caseInst(WorkItemAId);
-      caseInst(WorkItemAIdFlat);
+      caseInst(WorkItemAbsId);
+      caseInst(WorkItemAbsIdFlat);
       caseInst(WorkItemId);
       caseInst(WorkItemIdFlat);
     default:
@@ -359,6 +361,7 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
     if(!validate(argIt)) return false;
     const BrigDirectiveSymbol *bds = dyn_cast<BrigDirectiveSymbol>(argIt);
     if(!check(bds, "Too few argument symbols")) return false;
+    if(!validate(bds)) return false;
     if(dir->kind == BrigEDirectiveFunction)
       valid &= check(bds->s.storageClass == BrigArgSpace,
                      "Argument not in arg space");
@@ -472,6 +475,9 @@ bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
       dyn_cast<BrigDirectiveLabelInit>(init);
     if(!check(bdi || bdli, "Missing initializer")) return false;
 
+    if(bdi && !validate(bdi)) return false;
+    if(bdli && !validate(bdli)) return false;
+
     uint32_t elementCount = bdi ? bdi->elementCount : bdli->elementCount;
     if(dir->s.dim)
       valid &= check(elementCount == dir->s.dim,
@@ -529,14 +535,14 @@ bool BrigModule::validate(const BrigDirectiveLabelList *dir) const {
   valid &= validateCCode(dir->c_code);
   const dir_iterator label(S_.directives + dir->label);
   if(!validate(label)) return false;
-  if(!check(dyn_cast<BrigDirectiveLabel>(label),
+  if(!check(isa<BrigDirectiveLabel>(label),
             "label of a label list is not a label"))
     return false;
   for (unsigned i = 0; i < dir->elementCount; i++) {
     const dir_iterator init(S_.directives + dir->d_labels[i]);
     if(!validate(init)) return false;
-    const BrigDirectiveLabel *bcl = dyn_cast<BrigDirectiveLabel>(init);
-    if(!check(bcl, "d_labels offset is wrong, not a BrigDirectiveLabel"))
+    if(!check(isa<BrigDirectiveLabel>(init),
+              "d_labels offset is wrong, not a BrigDirectiveLabel"))
       return false;
   }
   return valid;
@@ -635,8 +641,8 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
   for (unsigned i = 0; i < dir->elementCount; i++) {
     const dir_iterator init(S_.directives + dir->d_labels[i]);
     if(!validate(init)) return false;
-    const BrigDirectiveLabel *bcl = dyn_cast<BrigDirectiveLabel>(init);
-    if(!check(bcl, "d_labels offset is wrong, not a BrigDirectiveLabel"))
+    if(!check(isa<BrigDirectiveLabel>(init),
+              "d_labels offset is wrong, not a BrigDirectiveLabel"))
       return false;
   }
   return valid;
@@ -977,7 +983,8 @@ bool BrigModule::validate(const BrigInstImage *code) const {
   bool valid = true;
   if(!validateSize(code)) return false;
   valid &= check(code->opcode == BrigLdImage ||
-                 code->opcode == BrigStImage,
+                 code->opcode == BrigStImage ||
+                 code->opcode == BrigRdImage,
                  "Invalid opcode");
   for (unsigned i = 0; i < 5; i++) {
     if(code->o_operands[i]) {
@@ -989,7 +996,7 @@ bool BrigModule::validate(const BrigInstImage *code) const {
                  "Invalid type of image geometry");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
-  valid &= check(code->stype <= Brigf64x2,
+  valid &= check(code->sourceType <= Brigf64x2,
                  "Invalid stype");
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
@@ -1077,6 +1084,7 @@ bool BrigModule::validate(const BrigInstMem *code) const {
                  "private, kernarg, readonly, spill, arg, or flat");
     return valid;
 }
+
 bool BrigModule::validate(const BrigInstMod *code) const {
   bool valid = true;
   if(!validateSize(code)) return false;
@@ -1095,25 +1103,30 @@ bool BrigModule::validate(const BrigInstMod *code) const {
   valid &= validate(&code->aluModifier);
   return valid;
 }
-bool BrigModule::validate(const BrigInstRead *code) const {
+
+bool BrigModule::validate(const BrigInstSegp *code) const {
   bool valid = true;
   if(!validateSize(code)) return false;
-  valid &= check(code->opcode == BrigRdImage,
+  valid &= check(code->opcode == BrigSegmentp ||
+                 code->opcode == BrigFtoS ||
+                 code->opcode == BrigStoF,
                  "Invalid opcode");
+  valid &= check(code->type <= Brigf64x2,
+                 "Invalid type");
+  valid &= check(code->packing <= BrigPackPsat,
+                 "Invalid packing control");
   for (unsigned i = 0; i < 5; i++) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
     }
   }
-  valid &= check(code->geom <= Briggeom_2da,
-                 "Invalid type of image geometry");
-  valid &= check(code->stype <= Brigf64x2,
-                 "Invalide type");
-  valid &= check(code->type <= Brigf64x2,
+  valid &= check(code->storageClass < BrigInvalidSpace,
+                 "Invalid storage class");
+  valid &= check(code->storageClass != BrigFlatSpace,
+                 "Invalid storage class");
+  valid &= check(code->sourceType <= Brigf64x2,
                  "Invalid type");
-  valid &= check(code->packing <= BrigPackPsat,
-                 "Invalid packing control");
   valid &= check(code->reserved == 0,
                  "reserved must be zero");
   return valid;
@@ -1190,6 +1203,7 @@ bool BrigModule::validate(const BrigOperandFunctionList *operand) const {
     if(!validate(arg)) return false;
     if(const BrigOperandFunctionRef *funRef =
        dyn_cast<BrigOperandFunctionRef>(arg)) {
+      if(!validate(funRef)) return false;
       dir_iterator fun(S_.directives + funRef->fn);
       if(!validate(fun)) return false;
 
@@ -1246,6 +1260,7 @@ bool BrigModule::validate(const BrigOperandCompound *operand) const {
     const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
     if(!check(bor, "reg offset is wrong, not a BrigOperandReg"))
       return false;
+    if(!validate(bor)) return false;
     valid &= check(bor->type == Brigb32 ||
                    bor->type == Brigb64, "Invalid register, the register "
                    "must be an s or d register");
@@ -1324,6 +1339,7 @@ bool BrigModule::validate(const BrigOperandOpaque *operand) const {
   if(!validate(oper)) return false;
   const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
   if(!check(bor, "reg offset is wrong, not a BrigOperandReg")) return false;
+  if(!validate(bor)) return false;
   valid &= check(bor->type == Brigb32,
                  "Register type should be Brigb32");
   return valid;
@@ -1396,6 +1412,7 @@ bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
     if(!validate(oper)) return false;
     const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
     valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
+    if(!validate(bor)) return false;
     valid &= check(bor->type == operand->type,
                    "should be the same type with BrigOperandReg");
   }
@@ -1415,6 +1432,7 @@ bool BrigModule::validate(const BrigOperandRegV4 *operand) const {
     if(!validate(oper)) return false;
     const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
     valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
+    if(!validate(bor)) return false;
     valid &= check(bor->type == operand->type,
                    "should be the same type with BrigOperandReg");
   }
@@ -1706,7 +1724,7 @@ bool BrigModule::validateUnpackInst(const inst_iterator inst) const {
 bool BrigModule::validateLdStImageInst(const inst_iterator inst) const {
   bool valid = true;
   const BrigInstImage *image = dyn_cast<BrigInstImage>(inst);
-  if(!validate(image)) return false;
+  if(!check(image, "Invalid instruction kind")) return false;
   if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
     return false;
   BrigDataType destType = BrigDataType(image->type);
@@ -1714,23 +1732,32 @@ bool BrigModule::validateLdStImageInst(const inst_iterator inst) const {
                  destType == Brigf32 ||
                  destType == Brigs32,
                  "Type of destination should be u32, f32 or s32");
-  BrigDataType srcType = BrigDataType(image->stype);
+
+  BrigDataType srcType = BrigDataType(image->sourceType);
   valid &= check(srcType == Brigu32, "Type of source should be u32");
+
   oper_iterator dest(S_.operands + image->o_operands[0]);
   valid &= check(isa<BrigOperandRegV4>(dest), "Destination should be regV4");
   valid &= check(*getType(dest) == Brigb32,
 		 "Destination should be s register");
+
   oper_iterator src0(S_.operands + image->o_operands[1]);
   valid &= check(isa<BrigOperandOpaque>(src0), "Source should be opaque");
+
   const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src0);
-  if(!validate(opaque)) return false;
+  if(!check(opaque, "Invalid operand format")) return false;
+
   dir_iterator direc(S_.directives + opaque->directive);
+  valid &= check(isa<BrigDirectiveImage>(direc) || isa<BrigDirectiveSampler>(direc),
+                 "The first operand should be an image or a sample");
+
   if(const BrigDirectiveImage *dir = dyn_cast<BrigDirectiveImage>(direc))
     valid &= check(dir->s.type == BrigROImg || dir->s.type == BrigRWImg,
                    "Type should be read-write or read-only image");
   if(const BrigDirectiveSampler *dir = dyn_cast<BrigDirectiveSampler>(direc))
     valid &= check(dir->s.type == BrigROImg || dir->s.type == BrigRWImg,
                    "Type should be read-write or read-only image");
+
   oper_iterator src1(S_.operands + image->o_operands[2]);
   valid &= check(isa<BrigOperandReg>(src1) ||
                  isa<BrigOperandRegV2>(src1) ||
@@ -1746,19 +1773,27 @@ bool BrigModule::validateImageQueryInst(const inst_iterator inst) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
+
   BrigDataType type = BrigDataType(inst->type);
   valid &= check(type == Brigb32 || type == Brigu32,
                  "Type should be b32 or u32");
+
   oper_iterator dest(S_.operands + inst->o_operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
   valid &= check(isCompatibleSrc(type, dest),
                  "Incompatible destination operand");
+
   oper_iterator src(S_.operands + inst->o_operands[1]);
   valid &= check(isa<BrigOperandOpaque>(src),
                  "Source should be BrigOperandOpaque");
+
   const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src);
-  if(!validate(opaque)) return false;
+  if(!check(opaque, "Invalid operand format")) return false;
+
   dir_iterator direc(S_.directives + opaque->directive);
+  valid &= check(isa<BrigDirectiveImage>(direc) || isa<BrigDirectiveSampler>(direc),
+                 "The first operand should be an image or a sample");
+
   if(const BrigDirectiveImage *dir = dyn_cast<BrigDirectiveImage>(direc))
     valid &= check(dir->s.type == BrigROImg ||
                    dir->s.type == BrigRWImg ||
@@ -1812,8 +1847,8 @@ bool BrigModule::validateFirstLastbitInst(const inst_iterator inst) const {
                  "Type should be b32 or b64");
   oper_iterator dest(S_.operands + inst->o_operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
-  valid &= check(*getType(dest) == Brigb32,
-                 "Type of destination should be b32");
+  valid &= check(*getType(dest) == Brigb32 || *getType(dest) == Brigb64,
+                 "Type of destination should be b32 or b64");
   oper_iterator src(S_.operands + inst->o_operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
                  isa<BrigOperandImmed>(src) ||
@@ -2288,7 +2323,7 @@ bool BrigModule::validateLdc(const inst_iterator inst) const {
   if(isa<BrigOperandFunctionRef>(src)) {
     const dir_iterator version(S_.directives + 8);
     const BrigDirectiveVersion *bdv = dyn_cast<BrigDirectiveVersion>(version);
-    if(!validate(bdv)) return false;
+    if(!check(bdv, "Missing version?")) return false;
     if(bdv->machine == BrigELarge)
       valid &= check(*getType(dest) == Brigb64,
                      "Type of dest should be b64 if machine model is large");
@@ -2529,6 +2564,16 @@ bool BrigModule::validateFrcp(const inst_iterator inst) const {
   return valid;
 }
 
+bool BrigModule::validateFsqrt(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(inst->type == Brigf32 || inst->type == Brigf64,
+                 "Type should be f32 or f64");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+                 "Fsqrt can not accept vector types");
+  valid &= validateArithmeticInst(inst, 1);
+  return valid;
+}
+
 bool BrigModule::validateFrsqrt(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == Brigf32 || inst->type == Brigf64,
@@ -2631,6 +2676,7 @@ bool BrigModule::validateSad4Hi(const inst_iterator inst) const {
 bool BrigModule::validateUnpack0(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
+  valid &= check(inst->type == Brigb32, "Type of Unpack0 should be b32");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2638,6 +2684,7 @@ bool BrigModule::validateUnpack0(const inst_iterator inst) const {
 bool BrigModule::validateUnpack1(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
+  valid &= check(inst->type == Brigb32, "Type of Unpack1 should be b32");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2645,6 +2692,7 @@ bool BrigModule::validateUnpack1(const inst_iterator inst) const {
 bool BrigModule::validateUnpack2(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
+  valid &= check(inst->type == Brigb32, "Type of Unpack2 should be b32");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2652,6 +2700,7 @@ bool BrigModule::validateUnpack2(const inst_iterator inst) const {
 bool BrigModule::validateUnpack3(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
+  valid &= check(inst->type == Brigb32, "Type of Unpack3 should be b32");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -2660,8 +2709,8 @@ bool BrigModule::validateSegmentp(const inst_iterator inst) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
-  const BrigInstMem *mem = dyn_cast<BrigInstMem>(inst);
-  if(!validate(mem)) return false;
+  const BrigInstSegp *mem = dyn_cast<BrigInstSegp>(inst);
+  if(!check(mem, "Invalid instruction kind")) return false;
   BrigDataType type = BrigDataType(mem->type);
   valid &= check(type == Brigb1, "Type of Segmentp should be b1");
   valid &= check(mem->storageClass <= 6, "StorageClass should be global, "
@@ -2685,8 +2734,8 @@ bool BrigModule::validateFtoS(const inst_iterator inst) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
-  const BrigInstMem *mem = dyn_cast<BrigInstMem>(inst);
-  if(!validate(mem)) return false;
+  const BrigInstSegp *mem = dyn_cast<BrigInstSegp>(inst);
+  if(!check(mem, "Invalid instruction kind")) return false;
   valid &= check(mem->type == Brigu32 || mem->type == Brigu64,
                  "Type of FtoS should be u32 or u64");
   BrigDataType type = BrigDataType(mem->type);
@@ -2709,8 +2758,8 @@ bool BrigModule::validateStoF(const inst_iterator inst) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
-  const BrigInstMem *mem = dyn_cast<BrigInstMem>(inst);
-  if(!validate(mem)) return false;
+  const BrigInstSegp *mem = dyn_cast<BrigInstSegp>(inst);
+  if(!check(mem, "Invalid instruction kind")) return false;
   valid &= check(mem->type == Brigu32 || mem->type == Brigu64,
                  "Type of StoF should be u32 or u64");
   BrigDataType type = BrigDataType(mem->type);
@@ -2737,7 +2786,7 @@ bool BrigModule::validateCmp(const inst_iterator inst) const {
   valid &= check(BrigInstHelper::getAluModifier(inst),
                  "Cmp may not have an aluModifier");
   const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst);
-  if(!validate(cmp)) return false;
+  if(!check(cmp, "Invalid instruction kind")) return false;
   BrigDataType type = BrigDataType(cmp->type);
   valid &= check(type == Brigb1  || type == Brigb32 || type == Brigu32 ||
                  type == Brigs32 || type == Brigf32 || type == Brigf16 ||
@@ -2786,7 +2835,7 @@ bool BrigModule::validatePackedCmp(const inst_iterator inst) const {
   valid &= check(BrigInstHelper::getAluModifier(inst),
                  "PackedCmp may not have an aluModifier");
   const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst);
-  if(!validate(cmp)) return false;
+  if(!check(cmp, "Invalid instruction kind")) return false;
   BrigDataType type = BrigDataType(cmp->type);
   valid &= check(type == Brigu8x4  || type == Brigs8x4  ||
                  type == Brigu8x8  || type == Brigs8x8  ||
@@ -2828,7 +2877,7 @@ bool BrigModule::validateCvt(const inst_iterator inst) const {
   valid &= check(BrigInstHelper::getAluModifier(inst),
                  "Cvt may not have an aluModifier");
   const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst);
-  if(!validate(cvt)) return false;
+  if(!check(cvt, "Invalid instruction kind")) return false;
 
   BrigDataType type = BrigDataType(cvt->type);
   valid &= check(BrigInstHelper::isBitTy(type)      ||
@@ -2989,7 +3038,7 @@ bool BrigModule::validateAtomicInst(const inst_iterator inst,
   bool valid = true;
   unsigned ret = isRet ? 1 : 0;
   const BrigInstAtomic *atomicInst = dyn_cast<BrigInstAtomic>(inst);
-  if(!check(atomicInst,"Incorrect instruction kind"))
+  if(!check(atomicInst, "Incorrect instruction kind"))
     return false;
   const unsigned numOperands = getNumOperands(inst);
   if(!check((2 + ret) == numOperands  ||
@@ -3042,8 +3091,8 @@ bool BrigModule::validateAtomicNoRet(const inst_iterator inst) const {
 
 bool BrigModule::validateRdImage(const inst_iterator inst) const {
   bool valid = true;
-  const BrigInstRead *instRead = dyn_cast<BrigInstRead>(inst);
-  if(!check(instRead,"Incorrect instruction kind"))
+  const BrigInstImage *instRead = dyn_cast<BrigInstImage>(inst);
+  if(!check(instRead, "Incorrect instruction kind"))
     return false;
   if(!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
     return false;
@@ -3066,7 +3115,7 @@ bool BrigModule::validateRdImage(const inst_iterator inst) const {
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(instRead->type)),
                  "Image cannot accept vector types");
   BrigDataType type = BrigDataType(instRead->type);
-  BrigDataType stype = BrigDataType(instRead->stype);
+  BrigDataType stype = BrigDataType(instRead->sourceType);
   valid &= check(BrigInstHelper::getTypeSize(type) == 32, "Illegal data type");
   valid &= check(BrigInstHelper::getTypeSize(stype) == 32, "Illegal data type");
   valid &= check(BrigInstHelper::isSignedTy(type)   ||
@@ -3088,11 +3137,14 @@ bool BrigModule::validateLdImage(const inst_iterator inst) const {
 bool BrigModule::validateStImage(const inst_iterator inst) const {
   bool valid = true;
   const BrigInstImage *image = dyn_cast<BrigInstImage>(inst);
-  if(!validate(image)) return false;
+  if(!check(image, "Invalid instruction kind")) return false;
   oper_iterator src0(S_.operands + image->o_operands[1]);
   const BrigOperandOpaque *opaque = dyn_cast<BrigOperandOpaque>(src0);
-  if(!validate(opaque)) return false;
+  if(!check(opaque, "Invalid operand format")) return false;
   dir_iterator direc(S_.directives + opaque->directive);
+
+  valid &= check(isa<BrigDirectiveImage>(direc) || isa<BrigDirectiveSampler>(direc),
+                 "The first operand should be an image or a sample");
   if(const BrigDirectiveImage *dir = dyn_cast<BrigDirectiveImage>(direc))
     valid &= check(dir->s.type == BrigRWImg,
                    "Type should be read-write image");
@@ -3341,7 +3393,7 @@ bool BrigModule::validateBarrier(const inst_iterator inst) const {
   if(!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
     return false;
   const BrigInstBar *bib = dyn_cast<BrigInstBar>(inst);
-  if(!validate(bib)) return false;
+  if(!check(bib, "Invalid instruction kind")) return false;
   BrigDataType type = BrigDataType(bib->type);
   oper_iterator dest(S_.operands + bib->o_operands[0]);
   valid &= check(isa<BrigOperandImmed>(dest),
@@ -3602,6 +3654,12 @@ bool BrigModule::validateCU(const inst_iterator inst) const {
   return valid;
 }
 
+bool BrigModule::validateCurrentWorkGroupSize(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= validateSpecialInst(inst, 1);
+  return valid;
+}
+
 bool BrigModule::validateDebugTrap(const inst_iterator inst) const {
   bool valid = true;
   if(!check(isa<BrigInstBase>(inst),"Incorrect instruction kind"))
@@ -3701,11 +3759,11 @@ bool BrigModule::validateWorkGroupSize(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateWorkItemAId(const inst_iterator inst) const {
+bool BrigModule::validateWorkItemAbsId(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateWorkItemAIdFlat(const inst_iterator inst) const {
+bool BrigModule::validateWorkItemAbsIdFlat(const inst_iterator inst) const {
   bool valid = true;
   valid &= validateSpecialInst(inst, 0);
   return valid;

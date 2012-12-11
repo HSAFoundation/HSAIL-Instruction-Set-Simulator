@@ -28,15 +28,15 @@ public:
     RefOper(oper),
     RefCode(code) { }
 
-  void Run_Test(int (*Rule)(Context*)){ 
-    
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
-      reinterpret_cast<const char *>(&RefDir->get()[0]), reinterpret_cast<const char *>(&RefCode->get()[0]), 
-      reinterpret_cast<const char *>(&RefOper->get()[0]), NULL, 
-      RefStr->size(), RefDir->size(), RefCode->size(), RefOper->size(), (size_t)0);    
-    
+  void Run_Test(int (*Rule)(Context*)){
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
+      reinterpret_cast<const char *>(&RefDir->get()[0]), reinterpret_cast<const char *>(&RefCode->get()[0]),
+      reinterpret_cast<const char *>(&RefOper->get()[0]), NULL,
+      RefStr->size(), RefDir->size(), RefCode->size(), RefOper->size(), (size_t)0);
+
     Parse_Validate(Rule, &RefOutput);
-  } 
+  }
 };
 
 TEST(CodegenTest, Kernel_SimpleTest_Codegen){
@@ -60,7 +60,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
   in.append("{ \n");
   in.append("@begin: \n");
   in.append("  private_s32 %arg2;\n");
-  in.append("  workitemaid $s0, 0; \n");
+  in.append("  workitemabsid $s0, 0; \n");
   in.append("  ld_kernarg_u32 $s2, [%arg0]; \n");
   in.append("  mad_u32 $s5, $s4, $s2, $s3; \n");
   in.append("  ret; \n");
@@ -73,7 +73,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
   sbuf->append(op1); sbuf->append(op2); sbuf->append(op3); sbuf->append(op4); sbuf->append(op5);
   sbuf->append(op6); sbuf->append(op7); sbuf->append(op8); sbuf->append(op9); sbuf->append(op10);
 
-/*******************************directive****************************************/  
+/*******************************directive****************************************/
   s_name = 0 ;
   BrigDirectiveKernel bdk = {
     sizeof(BrigDirectiveKernel),   // size
@@ -126,7 +126,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
     },
     0,                        // d_init
     0                         // reserved
-  };  
+  };
 
   s_name += (op3.size() + 1);
   BrigDirectiveLabel labRef = {
@@ -180,7 +180,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
   BrigInstBase inst1 = {
     0,
     BrigEInstBase,
-    BrigWorkItemAId,
+    BrigWorkItemAbsId,
     Brigb32,
     BrigNoPacking,
     {o_operand, o_operand + sizeof(regs0), 0, 0, 0}
@@ -200,7 +200,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
   regs2.type = Brigb32;
   regs2.reserved = 0;
   regs2.s_name = s_name;
- 
+
   BrigOperandImmed width = {
     0,
     BrigEOperandImmed,
@@ -231,7 +231,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
     0
   };
   inst2.size = sizeof(inst2);
-  
+
   oper->append(&width);
   s2_operand = oper->size();
   oper->append(&regs2);
@@ -266,9 +266,9 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
     BrigMad,
     Brigu32,
     BrigNoPacking,
-    {o_operand,                
-     o_operand + sizeof(regs5), 
-     s2_operand, 
+    {o_operand,
+     o_operand + sizeof(regs5),
+     s2_operand,
      o_operand + sizeof(regs5) + sizeof(regs4), 0}
   };
   inst3.size = sizeof(inst3);
@@ -283,12 +283,12 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
   s_name += (op8.size() + op9.size() + op10.size() + 3);
 
   BrigInstBase inst4 = {
-    0,                     
-    BrigEInstBase,         
-    BrigRet,                     
-    Brigb32,               
-    BrigNoPacking,         
-    {0, 0, 0, 0, 0},                     
+    0,
+    BrigEInstBase,
+    BrigRet,
+    Brigb32,
+    BrigNoPacking,
+    {0, 0, 0, 0, 0},
   };
   inst4.size = sizeof(inst4);
   code->append(&inst4);

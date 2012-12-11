@@ -456,7 +456,7 @@ TEST(ParserTest, ArgumentListBody) {
   input.append("static arg_f16 %local_id[], align 8 arg_u64 %test )\n");
   lexer->set_source_string(input);
   context->clear_context();
- 
+
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
       40,                       // size
@@ -531,7 +531,7 @@ TEST(ParserTest, Codeblock) {
 // initialize fake values
   // which should be set in real case when parser parses a function def
   context->set_bdf_offset(context->get_directive_offset());
- 
+
   BrigDirectiveFunction fake = {
       40,                       // size
       BrigEDirectiveFunction,   // kind
@@ -1987,7 +1987,7 @@ TEST(ParserTest, Segp) {
   // context->token_to_scan = lexer->get_next_token();
   // EXPECT_NE(0, Segp(context));
 
-  
+
   delete lexer;
 }
 
@@ -2484,7 +2484,7 @@ TEST(ParserTest, KernelArgumentListBody) {
 
   lexer->set_source_string(input);
   context->clear_context();
-  
+
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
       40,                       // size
@@ -3014,7 +3014,7 @@ TEST(ParserTest, Ld) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld(context));
-  
+
   context->set_machine(BrigESmall);
   input.assign("ld_acq_equiv(2)_f32 $s1, [$s3+4];");
   lexer->set_source_string(input);
@@ -4481,7 +4481,7 @@ TEST(ParserTest, Program_VectorCopy) {
   input.append("{\n");
   input.append("@__OpenCL_vec_copy_kernel_entry:\n");
   input.append("        ld_kernarg_u32  $s0, [%arg_val2] ;\n");
-  input.append("        workitemaid     $s1, 0 ;\n");
+  input.append("        workitemabsid   $s1, 0 ;\n");
   input.append("        cmp_ge_b1_u32    $c0, $s1, $s0 ;\n");
   input.append("        ld_kernarg_u32  $s0, [%arg_val1] ;\n");
   input.append("        ld_kernarg_u32  $s2, [%arg_val0] ;\n");

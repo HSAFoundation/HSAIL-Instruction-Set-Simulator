@@ -46,7 +46,7 @@ struct Instruction1NullptrTest instruction1_nullptr_pair[9] = {
       {operand_offset, 0, 0, 0, 0},
       BrigFlatSpace
     }
-  }, 
+  },
   //instruction1_nullptr_pair[2]
   {
     "nullptr_readonly_u32 $d1;",
@@ -59,7 +59,7 @@ struct Instruction1NullptrTest instruction1_nullptr_pair[9] = {
       {operand_offset, 0, 0, 0, 0},
       BrigReadonlySpace
     }
-  }, 
+  },
   //instruction1_nullptr_pair[3]
   {
     "nullptr_kernarg_u64 $d2;",
@@ -72,7 +72,7 @@ struct Instruction1NullptrTest instruction1_nullptr_pair[9] = {
       {operand_offset, 0, 0, 0, 0},
       BrigKernargSpace
     }
-  }, 
+  },
   //instruction1_nullptr_pair[4]
   {
     "nullptr_global_u32 $d1;",
@@ -85,7 +85,7 @@ struct Instruction1NullptrTest instruction1_nullptr_pair[9] = {
       {operand_offset, 0, 0, 0, 0},
       BrigGlobalSpace
     }
-  }, 
+  },
   //instruction1_nullptr_pair[5]
   {
     "nullptr_private_u64 $d2;",
@@ -98,7 +98,7 @@ struct Instruction1NullptrTest instruction1_nullptr_pair[9] = {
       {operand_offset, 0, 0, 0, 0},
       BrigPrivateSpace
     }
-  }, 
+  },
   //instruction1_nullptr_pair[6]
   {
     "nullptr_arg_u32 $d1;",
@@ -111,7 +111,7 @@ struct Instruction1NullptrTest instruction1_nullptr_pair[9] = {
       {operand_offset, 0, 0, 0, 0},
       BrigArgSpace
     }
-  }, 
+  },
   //instruction1_nullptr_pair[7]
   {
     "nullptr_group_u64 $d2;",
@@ -124,7 +124,7 @@ struct Instruction1NullptrTest instruction1_nullptr_pair[9] = {
       {operand_offset, 0, 0, 0, 0},
       BrigGroupSpace
     }
-  }, 
+  },
   //instruction1_nullptr_pair[8]
   {
     "nullptr_spill_u64 $d2;",
@@ -242,16 +242,16 @@ struct Instruction1Test instruction1_workitemidflat_pair[1] = {
   }
 };
 
-class TestInstruction1WorkitemAidFlat: public ::testing::TestWithParam<int>{
+class TestInstruction1WorkitemAbsidFlat: public ::testing::TestWithParam<int>{
 };
 
-struct Instruction1Test instruction1_workitemaidflat_pair[1] = {
+struct Instruction1Test instruction1_workitemabsidflat_pair[1] = {
   {
-  "workitemaid_flat $s1;",
+  "workitemabsid_flat $s1;",
     {
     brig_inst_base_size,
     BrigEInstBase,
-    BrigWorkItemAIdFlat,
+    BrigWorkItemAbsIdFlat,
     Brigb32,
     BrigNoPacking,
     {operand_offset, 0, 0, 0, 0}

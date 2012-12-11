@@ -12,7 +12,7 @@ version 1:0:$small;
 kernel &__Get_fcos(kernarg_u32 %arg_val0, kernarg_u32 %arg_val1)
 {
 	// Use workitemaid to get the buffer offset
-	workitemaid $s1, 0;
+	workitemabsid $s1, 0;
 	shl_u32	 $s1, $s1, 2;  // Get offset by Multiplying by 4 because
                                // that is the size of each value in the buffer
 

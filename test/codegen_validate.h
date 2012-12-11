@@ -20,32 +20,32 @@ namespace brig{
 
 namespace validate_brig{
 
-void validate(const BrigInstBase* ref, const BrigInstBase* get, 
+void validate(const BrigInstBase* ref, const BrigInstBase* get,
       BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigInstMod* ref, const BrigInstMod* get, 
-      BrigSections* RefOutput, BrigSections* GetOutput);      
-void validate(const BrigInstCvt* ref, const BrigInstCvt* get, 
+void validate(const BrigInstMod* ref, const BrigInstMod* get,
       BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigInstRead* ref, const BrigInstRead* get, 
+void validate(const BrigInstCvt* ref, const BrigInstCvt* get,
       BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigInstBar* ref, const BrigInstBar* get, 
+void validate(const BrigInstBar* ref, const BrigInstBar* get,
       BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get, 
+void validate(const BrigInstLdSt* ref, const BrigInstLdSt* get,
       BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigInstCmp* ref, const BrigInstCmp* get, 
+void validate(const BrigInstCmp* ref, const BrigInstCmp* get,
       BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigInstMem* ref, const BrigInstMem* get, 
+void validate(const BrigInstMem* ref, const BrigInstMem* get,
       BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigInstAtomic* ref, const BrigInstAtomic* get, 
+void validate(const BrigInstAtomic* ref, const BrigInstAtomic* get,
       BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigInstAtomicImage* ref, const BrigInstAtomicImage* get, 
-      BrigSections* RefOutput, BrigSections* GetOutput);      
-void validate(const BrigInstImage* ref, const BrigInstImage* get, 
-      BrigSections* RefOutput, BrigSections* GetOutput);      
+void validate(const BrigInstAtomicImage* ref, const BrigInstAtomicImage* get,
+      BrigSections* RefOutput, BrigSections* GetOutput);
+void validate(const BrigInstImage* ref, const BrigInstImage* get,
+      BrigSections* RefOutput, BrigSections* GetOutput);
+void validate(const BrigInstSegp* ref, const BrigInstSegp* get,
+      BrigSections* RefOutput, BrigSections* GetOutput);
 
-void validate(const BrigOperandBase* ref, const BrigOperandBase* get, 
+void validate(const BrigOperandBase* ref, const BrigOperandBase* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigOperandReg* ref, const BrigOperandReg* get, 
+void validate(const BrigOperandReg* ref, const BrigOperandReg* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigOperandImmed* ref, const BrigOperandImmed* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
@@ -65,7 +65,7 @@ void validate(const BrigOperandArgumentList* ref, const BrigOperandArgumentList*
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigOperandArgumentRef* ref, const BrigOperandArgumentRef* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigOperandWaveSz* ref, const BrigOperandWaveSz* get, 
+void validate(const BrigOperandWaveSz* ref, const BrigOperandWaveSz* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigOperandFunctionRef* ref, const BrigOperandFunctionRef* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
@@ -77,13 +77,13 @@ void validate(const BrigDirectiveComment* ref, const BrigDirectiveComment* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigDirectiveControl* ref, const BrigDirectiveControl* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigDirectiveExtension* ref, const BrigDirectiveExtension* get, 
+void validate(const BrigDirectiveExtension* ref, const BrigDirectiveExtension* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigDirectiveFile* ref, const BrigDirectiveFile* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigDirectiveFunction* ref, const BrigDirectiveFunction* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigDirectiveImage* ref, const BrigDirectiveImage* get, 
+void validate(const BrigDirectiveImage* ref, const BrigDirectiveImage* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigDirectiveInit* ref, const BrigDirectiveInit* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
@@ -98,9 +98,9 @@ void validate(const BrigDirectiveKernel* ref, const BrigDirectiveKernel* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigDirectiveLoc* ref, const BrigDirectiveLoc* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const  BrigDirectivePad* ref, const BrigDirectivePad* get, 
+void validate(const  BrigDirectivePad* ref, const BrigDirectivePad* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
-void validate(const BrigDirectivePragma* ref, const BrigDirectivePragma* get, 
+void validate(const BrigDirectivePragma* ref, const BrigDirectivePragma* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigDirectiveSignature* ref, const BrigDirectiveSignature* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
@@ -120,26 +120,26 @@ void validate(const BrigBlockNumeric* ref, const BrigBlockNumeric* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
 void validate(const BrigBlockEnd* ref, const BrigBlockEnd* get,
     BrigSections* RefOutput, BrigSections* GetOutput);
-      
+
 #define caseOperBrig(X)                                   \
   case BrigE ## X:                                    \
     validate_brig::validate((cast<Brig ## X>(refoper)), (cast<Brig ## X>(getoper)),  \
       RefOutput, GetOutput);   \
-    break 
+    break
 
 
 #define caseDirBrig(X)                                   \
   case BrigE ## X:                                    \
     validate_brig::validate((cast<Brig ## X>(refdir)), (cast<Brig ## X>(getdir)),  \
       RefOutput, GetOutput);   \
-    break  
+    break
 
 #define caseInstBrig(X)                                   \
   case BrigE ## X:                                    \
     validate_brig::validate((cast<Brig ## X>(refinst)), (cast<Brig ## X>(getinst)),  \
       RefOutput, GetOutput);   \
-    break  
-    
+    break
+
 
 }
 }

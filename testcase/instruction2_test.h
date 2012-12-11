@@ -636,72 +636,72 @@ class TestInstruction2Firstbit : public ::testing::TestWithParam<int>
 struct Instruction2Test instruction2firstbit_pair[6] = {
 //instruction2firstbit_pair[0]
   {
-    "firstbit_s32 $s1, $s2;",
+    "firstbit_b32 $s1, $s2;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigFirstBit,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[1]
   {
-    "firstbit_s64 $s1, $d2;",
+    "firstbit_b64 $s1, $d2;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigFirstBit,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[2]
   {
-    "firstbit_s32 $s1, 0x01;",
+    "firstbit_b32 $s1, 0x01;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigFirstBit,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[3]
   {
-    "firstbit_s64 $s1, 0x01;",
+    "firstbit_b64 $s1, 0x01;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigFirstBit,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[4]
   {
-    "firstbit_s32 $s1, WAVESIZE;",
+    "firstbit_b32 $s1, WAVESIZE;",
     {
     brig_inst_base_size,
     BrigEInstBase,
     BrigFirstBit,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[5]
   {
-    "firstbit_s64 $s1, WAVESIZE;",
+    "firstbit_b64 $s1, WAVESIZE;",
     {
     brig_inst_base_size,
     BrigEInstBase,
     BrigFirstBit,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
@@ -717,72 +717,72 @@ class TestInstruction2Lastbit : public ::testing::TestWithParam<int>
 struct Instruction2Test instruction2lastbit_pair[6] = {
 //instruction2firstbit_pair[0]
   {
-    "lastbit_s32 $s1, $s2;",
+    "lastbit_b32 $s1, $s2;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLastBit,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[1]
   {
-    "lastbit_s64 $s1, $d2;",
+    "lastbit_b64 $s1, $d2;",
     {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLastBit,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[2]
   {
-    "lastbit_s32 $s1, 0x01;",
+    "lastbit_b32 $s1, 0x01;",
     {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLastBit,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[3]
   {
-    "lastbit_s64 $s1, 0x01;",
+    "lastbit_b64 $s1, 0x01;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLastBit,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[4]
   {
-    "lastbit_s32 $s1, WAVESIZE;",
+    "lastbit_b32 $s1, WAVESIZE;",
     {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLastBit,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2firstbit_pair[5]
   {
-    "lastbit_s64 $s1, WAVESIZE;",
+    "lastbit_b64 $s1, WAVESIZE;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLastBit,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
@@ -798,72 +798,72 @@ class TestInstruction2Bitrev : public ::testing::TestWithParam<int>
 struct Instruction2Test instruction2bitrev_pair[6] = {
 //instruction2bitrev_pair[0]
   {
-    "bitrev_s32 $s1, $s2;",
+    "bitrev_b32 $s1, $s2;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigBitRev,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2bitrev_pair[1]
   {
-    "bitrev_s64 $d1, $d2;",
+    "bitrev_b64 $d1, $d2;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigBitRev,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2bitrev_pair[2]
   {
-    "bitrev_s32 $s1, 0x01;",
+    "bitrev_b32 $s1, 0x01;",
       {
     brig_inst_base_size,
     BrigEInstBase,
     BrigBitRev,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
     }
   },
 //instruction2bitrev_pair[3]
   {
-    "bitrev_s64 $d1, 0x01;",
+    "bitrev_b64 $d1, 0x01;",
       {
     brig_inst_base_size,
     BrigEInstBase,
     BrigBitRev,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
     }
   },
 //instruction2bitrev_pair[4]
   {
-    "bitrev_s32 $s1, WAVESIZE;",
+    "bitrev_b32 $s1, WAVESIZE;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigBitRev,
-    Brigs32,
+    Brigb32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //instruction2bitrev_pair[5]
   {
-    "bitrev_s64 $d1, WAVESIZE;",
+    "bitrev_b64 $d1, WAVESIZE;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigBitRev,
-    Brigs64,
+    Brigb64,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }

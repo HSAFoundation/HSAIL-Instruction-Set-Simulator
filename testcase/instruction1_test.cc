@@ -287,12 +287,12 @@ INSTANTIATE_TEST_CASE_P(CodegenTest,
                         TestInstruction1WorkitemIdFlat,
                         testing::Range(0,1));
 
-TEST_P(TestInstruction1WorkitemAidFlat, WorkitemAidFlat){
+TEST_P(TestInstruction1WorkitemAbsidFlat, WorkitemAbsidFlat){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
   int n = GetParam();
-  Lexer* lexer = new Lexer(instruction1_workitemaidflat_pair[n].str);
+  Lexer* lexer = new Lexer(instruction1_workitemabsidflat_pair[n].str);
   context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0, Instruction1(context));
@@ -301,7 +301,7 @@ TEST_P(TestInstruction1WorkitemAidFlat, WorkitemAidFlat){
   BrigOperandReg getReg;
   context->get_code(code_offset, &getBase);
   context->get_operand(operand_offset, &getReg);
-  BrigInstBase ref = instruction1_workitemaidflat_pair[n].ref;
+  BrigInstBase ref = instruction1_workitemabsidflat_pair[n].ref;
 
   EXPECT_EQ(ref.size, getBase.size);
   EXPECT_EQ(ref.kind, getBase.kind);
@@ -325,7 +325,7 @@ TEST_P(TestInstruction1WorkitemAidFlat, WorkitemAidFlat){
 }
 
 INSTANTIATE_TEST_CASE_P(CodegenTest,
-                        TestInstruction1WorkitemAidFlat,
+                        TestInstruction1WorkitemAbsidFlat,
                         testing::Range(0,1));
 
 TEST_P(TestInstruction1Clock, Clock){

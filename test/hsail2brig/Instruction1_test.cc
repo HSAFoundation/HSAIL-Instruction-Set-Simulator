@@ -23,7 +23,7 @@ public:
     RefInst(ref),
     RefDest(Dest)  { }
 
-  void Run_Test(int (*Rule)(Context*)){  
+  void Run_Test(int (*Rule)(Context*)){
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
     Buffer* dir = new Buffer();
@@ -31,14 +31,14 @@ public:
     code->append(RefInst);
     if (RefDest != NULL) {
       oper->append(RefDest);
-    } 
+    }
 
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
       reinterpret_cast<const char *>(&dir->get()[0]),
-      reinterpret_cast<const char *>(&code->get()[0]), 
-      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-      RefStr->size(), 0, code->size(), oper->size(), 0);    
-    
+      reinterpret_cast<const char *>(&code->get()[0]),
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+      RefStr->size(), 0, code->size(), oper->size(), 0);
+
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
@@ -248,7 +248,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   sbuf->clear();
 
 /**********************************************************************************/
-  in.assign( "workitemaid_flat  $s6;\n");
+  in.assign( "workitemabsid_flat  $s6;\n");
   op1.assign("$s6"); sbuf->append(op1);
 
   BrigOperandReg dest8 = {
@@ -263,7 +263,7 @@ TEST(CodegenTest, Instruction1OpcodeNoDT_Codegen){
   BrigInstBase out8 = {
     0,
     BrigEInstBase,
-    BrigWorkItemAIdFlat,
+    BrigWorkItemAbsIdFlat,
     Brigb32,
     BrigNoPacking,
     {0, 0, 0, 0, 0}
@@ -809,7 +809,7 @@ TEST(CodegenTest, Barrier_Codegen){
 
   Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase5(in, sbuf, &out5, &width5);
   TestCase5.Run_Test(&Bar);
-  
+
   in.assign( "barrier_width(64)_partial;\n");
   BrigOperandImmed width6 = {
     0,
@@ -832,16 +832,16 @@ TEST(CodegenTest, Barrier_Codegen){
 
   Instruction1_Test <BrigInstBar, BrigOperandImmed> TestCase6(in, sbuf, &out6, &width6);
   TestCase6.Run_Test(&Bar);
-  
+
 /******************************  End of tests *****************************************/
   delete sbuf;
 }
 
-TEST(ErrorReportTest, Instruction1) {  
+TEST(ErrorReportTest, Instruction1) {
   std::string input =  "clock $d6\n";
   Instruction1_Test<> TestCase1(input);
   TestCase1.Run_Test(&Instruction1, MISSING_SEMICOLON);
-  
+
   input.assign( "fbar_release $d1;\n");
   Instruction1_Test<> TestCase2(input);
   TestCase2.Run_Test(&Instruction1, INVALID_DATA_TYPE);
@@ -851,17 +851,17 @@ TEST(ErrorReportTest, Instruction1) {
   TestCase3.Run_Test(&Instruction1, MISSING_OPERAND);
 }
 
-TEST(ErrorReportTest, Barrier) {  
+TEST(ErrorReportTest, Barrier) {
   std::string input = "barrier\n";
   Instruction1_Test<> TestCase1(input);
   TestCase1.Run_Test(&Bar, MISSING_SEMICOLON);
-  
+
   input.assign( "barrier_width(62)_group;\n");
   Instruction1_Test<> TestCase2(input);
   TestCase2.Run_Test(&Bar, INVALID_WIDTH_NUMBER);
 }
 
-TEST(ErrorReportTest, Sync) {  
+TEST(ErrorReportTest, Sync) {
   std::string input = "sync_global\n";
   Instruction1_Test<> TestCase1(input);
   TestCase1.Run_Test(&Sync, MISSING_SEMICOLON);

@@ -339,7 +339,8 @@ defineUnary(BitRev, b64)
 template<class T> static T Extract(T x, b32 y, b32 z) {
   unsigned offset = Int<T>::ShiftMask & y;
   unsigned width  = Int<T>::ShiftMask & z;
-  return (x << offset) >> (Int<T>::Bits - width);
+  if(!width) return 0;
+  return (x << (Int<T>::Bits - width - offset)) >> (Int<T>::Bits - width);
 }
 defineTernary(Extract, b32)
 defineTernary(Extract, b64)
@@ -575,18 +576,7 @@ extern "C" f32 Unpack0(b32 w) {
 }
 
 extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
-  switch(y) {
-  case 0:
-    return w;
-  case 8:
-  case 16:
-  case 24:
-    return (w << y) | (x >> (32 - y));
-  case 32:
-    return x;
-  default :
-    return 0;
-  }
+  return (b64(w) << y) | (b64(x) >> (32 - y));
 }
 
 extern "C" b32 Bytealign_b32(b32 w, b32 x, b32 y) {
@@ -809,8 +799,8 @@ template<class T> static T AtomicSub(T *x, T y) {
 }
 AtomicInst(define, Sub, Binary)
 
-extern "C" u32 WorkItemAId_b32(u32 x) {
-  return __brigThreadInfo->workItemAID[x];
+extern "C" u32 WorkItemAbsId_b32(u32 x) {
+  return __brigThreadInfo->workItemAbsId[x];
 }
 
 } // namespace brig

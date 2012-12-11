@@ -5992,14 +5992,16 @@ int SegpPart1Segmentp(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  BrigInstMem segmentp_op = {
+  BrigInstSegp segmentp_op = {
     0,                     // size
-    BrigEInstMem,          // kind
+    BrigEInstSegp,          // kind
     BrigSegmentp,          // opcode
     type,                  // type
     BrigNoPacking,         // packing
     {OpOffset[0], OpOffset[1], 0, 0, 0},       // o_operands[5]
-    storageClass           // storageClass
+    storageClass,          // storageClass
+    Brigb32,
+    0
   };
   segmentp_op.size = sizeof(segmentp_op);
   context->append_code(&segmentp_op);
@@ -6066,14 +6068,16 @@ int SegpPart2StoFAndFtoS(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  BrigInstMem sf_op = {
+  BrigInstSegp sf_op = {
     0,                     // size
-    BrigEInstMem,          // kind
+    BrigEInstSegp,         // kind
     opcode,                // opcode
     type,                  // type
     BrigNoPacking,         // packing
     {OpOffset[0], OpOffset[1], 0, 0, 0},       // o_operands[5]
-    storageClass           // storageClass
+    storageClass,           // storageClass
+    Brigb32,
+    0
   };
   sf_op.size = sizeof(sf_op);
   context->append_code(&sf_op);
@@ -7073,9 +7077,9 @@ int ImageRead(Context *context) {
     return 1;
   }
 
-  BrigInstRead imgRdInst = {
+  BrigInstImage imgRdInst = {
     0,                     // size
-    BrigEInstRead,         // kind
+    BrigEInstImage,        // kind
     BrigRdImage,           // opcode
     type,                  // type
     BrigNoPacking,         // packing

@@ -371,9 +371,9 @@ void BrigEngine::launch(llvm::Function *EntryFn,
     for(uint32_t j = 0; j < threadNum; ++j) {
 
       uint32_t tid = i * threadNum + j;
-      uint32_t workItemAID[] = { tid, 0, 0 };
+      uint32_t workItemAbsId[] = { tid, 0, 0 };
       threads[tid] = new ThreadInfo(NDRangeSize, workdim,
-                                    workGroupSize, workItemAID,
+                                    workGroupSize, workItemAbsId,
                                     args.data(), args.size());
       pthread_create(&threads[tid]->tid, &attr, EntryFunPtr,
                      threads[tid]->argsArray);

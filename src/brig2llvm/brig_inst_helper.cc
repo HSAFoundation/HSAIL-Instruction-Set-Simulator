@@ -152,8 +152,8 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(WorkDim);
     caseOper(WorkGroupId);
     caseOper(WorkGroupSize);
-    caseOper(WorkItemAId);
-    caseOper(WorkItemAIdFlat);
+    caseOper(WorkItemAbsId);
+    caseOper(WorkItemAbsIdFlat);
     caseOper(WorkItemId);
     caseOper(WorkItemIdFlat);
   default:

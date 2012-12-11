@@ -4575,9 +4575,9 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
     directives.append(&bdi);
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstRead bir = {
+    BrigInstImage bir = {
       sizeof(bir),
-      BrigEInstRead,
+      BrigEInstImage,
       BrigRdImage,
       Brigu32,
       BrigNoPacking,
@@ -4652,10 +4652,10 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
 
     hsa::brig::Buffer code;
     for(unsigned i = 0; i < 8; ++i) code.append_char(0);
-    BrigInstRead bir = {
+    BrigInstImage bir = {
       sizeof(bir),
-      BrigEInstRead,
-      BrigRdImage + 1,
+      BrigEInstImage,
+      BrigInvalidOpcode,
       Brigf64x2 + 1,
       BrigPackPsat + 1,
       {20, 0, 0, 0, 0},
