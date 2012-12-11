@@ -3496,3 +3496,31 @@ TEST(BrigInstTest, WaveSize) {
     delete waveSize;
   }
 }
+
+TEST(BrigKernelTest, MultipleVersionStatements) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__Kernel_in_First_Scope(\n"
+  "        kernarg_u32 %r)\n"
+  "{\n"
+  "        ret;\n"
+  "};\n"
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__Kernel_in_Second_Scope(\n"
+  "        kernarg_u32 %r)\n"
+  "{\n"
+  "        ret;\n"
+  "};\n"
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__Kernel_in_Third_Scope(\n"
+  "        kernarg_u32 %r)\n"
+  "{\n"
+  "        ret;\n"
+  "};\n");
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+}

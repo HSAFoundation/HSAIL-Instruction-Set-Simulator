@@ -565,7 +565,14 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
                  dir->ftz == BrigENosftz,
                  "Invalid flush to zero");
   valid &= check(!dir->reserved, "Reserved not zero");
-
+  const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
+  if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;  
+  valid &= check(dir->machine == bdfv->machine,
+                 "version statement must have the same machine operands");
+  valid &= check(dir->profile == bdfv->profile,
+                 "version statement must have the same profile operands");
+  valid &= check(dir->ftz == bdfv->ftz,
+                 "version statement must have the same flush to zero operands");
   return valid;
 }
 
@@ -1157,9 +1164,11 @@ bool BrigModule::validate(const inst_iterator inst) const {
 bool BrigModule::validate(const BrigOperandAddress *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  valid &= check(operand->type == Brigb32 ||
-                 operand->type == Brigb64, "Invald datatype, should be "
-                 "Brigb32 and Brigb64");
+  const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
+  if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;  
+  valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
+                 (operand->type == Brigb64 && bdfv->machine == BrigELarge),
+                 "Invald datatype, should be suit to memory model");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   dir_iterator dir(S_.directives + operand->directive);
@@ -1244,9 +1253,11 @@ bool BrigModule::validate(const BrigOperandBase *operand) const {
 bool BrigModule::validate(const BrigOperandCompound *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  valid &= check(operand->type == Brigb32 ||
-                 operand->type == Brigb64, "Invald datatype, should be "
-                 "Brigb32 and Brigb64");
+  const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
+  if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;  
+  valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
+                 (operand->type == Brigb64 && bdfv->machine == BrigELarge),
+                 "Invald datatype, should be suit to memory model");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   oper_iterator nameOper(S_.operands + operand->name);
@@ -1306,9 +1317,11 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
     if(!validate(regOper)) return false;
     valid &= check(isa<BrigOperandReg>(regOper),
                    "Invalid reg, should be point BrigOprandReg");
-    valid &= check(operand->type == Brigb32 ||
-                   operand->type == Brigb64, "Invald datatype, should be "
-                   "Brigb32 and Brigb64");
+    const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
+    if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;  
+    valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
+                   (operand->type == Brigb64 && bdfv->machine == BrigELarge),
+                   "Invald datatype, should be suit to memory model");
   }
 
   valid &= check(operand->reserved == 0,
@@ -3779,6 +3792,11 @@ bool BrigModule::validateWorkItemIdFlat(const inst_iterator inst) const {
   bool valid = true;
   valid &= validateSpecialInst(inst, 0);
   return valid;
+}
+
+const BrigDirectiveVersion* BrigModule::getFirstVersionDirective() const {
+  return isa<BrigDirectiveVersion>(S_.begin()) ?
+    dyn_cast<BrigDirectiveVersion>(S_.begin()) : NULL;   
 }
 
 } // namespace brig

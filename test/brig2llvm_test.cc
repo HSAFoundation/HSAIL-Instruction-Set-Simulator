@@ -4252,7 +4252,7 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
     BrigOperandAddress boa1 = {
       sizeof(boa1),                    // size
       BrigEOperandAddress,             // kind
-      Brigb32,                         // type
+      Brigb64,                         // type
       0,                               // reserved
       28                                // directive
     };
@@ -6050,7 +6050,7 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
     BrigOperandAddress boa1 = {
       sizeof(boa1),                    // size
       BrigEOperandAddress,             // kind
-      Brigb32,                         // type
+      Brigb64,                         // type
       0,                               // reserved
       28,                             // directive
     };
@@ -6169,7 +6169,7 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
     BrigOperandAddress boa = {
       sizeof(boa),
       BrigEOperandAddress,
-      Brigb32,
+      Brigb64,
       0,
       28
     };
@@ -6246,7 +6246,7 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invald datatype, should be Brigb32 and Brigb64")));
+    "Invald datatype, should be suit to memory mode")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6380,7 +6380,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     BrigOperandAddress boa = {
       16,
       BrigEOperandAddress,
-      Brigb32,
+      Brigb64,
       0,
       28
     };
@@ -6389,7 +6389,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     BrigOperandCompound boc = {
       sizeof(boc),
       BrigEOperandCompound,
-      Brigb32,
+      Brigb64,
       0,
       20,
       8,
@@ -6490,7 +6490,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invald datatype, should be Brigb32 and Brigb64")));
+    "Invald datatype, should be suit to memory model")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
@@ -6645,7 +6645,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     BrigOperandAddress boa = {
       16,
       BrigEOperandAddress,
-      Brigb32,
+      Brigb64,
       0,
       28
     };
@@ -6654,7 +6654,7 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
     BrigOperandCompound boc = {
       sizeof(boc),
       BrigEOperandCompound,
-      Brigb32,
+      Brigb64,
       0,
       20,
       60,
@@ -6913,7 +6913,7 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
       sizeof(boi),
       BrigEOperandIndirect,
       8,
-      Brigb32,
+      Brigb64,
       0,
       0
     };
@@ -6990,7 +6990,7 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "Invalid reg, should be point BrigOprandReg")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invald datatype, should be Brigb32 and Brigb64")));
+    "Invald datatype, should be suit to memory model")));
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
     "reserved must be zero")));
   }
