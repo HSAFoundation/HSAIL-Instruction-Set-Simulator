@@ -1004,6 +1004,12 @@ workgroupsize       { free_string(context);
                       context->token_value.opcode = BrigWorkGroupSize;
                       return WORKGROUPSIZE;}
 
+currentworkgroupsize  { free_string(context);
+                        context->token_type = INSTRUCTION2_OPCODE_NODT;
+                        context->yycolno+=yyleng;
+                        context->token_value.opcode = BrigCurrentWorkGroupSize;
+                        return WORKGROUPSIZE;}
+
 workgroupid       { free_string(context);
                     context->token_type = INSTRUCTION2_OPCODE_NODT;
                     context->yycolno+=yyleng;
