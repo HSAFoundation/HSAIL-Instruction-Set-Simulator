@@ -1567,6 +1567,37 @@ TEST(CodegenTest, Instruction2_CodeGen){
   TestCase54.Run_Test(&Instruction2);
   symbols->clear();
 
+  /**********************************************************************************/
+  in.assign("currentworkgroupsize $s2, 077;");
+  destName.assign("$s2"); symbols->append(destName);  
+
+  BrigInstBase out55 = {
+    0,
+    BrigEInstBase,
+    BrigCurrentWorkGroupSize,
+    Brigb32,
+    BrigNoPacking,
+    {0, sizeof(reg1), 0, 0, 0}
+  };
+  out55.size = sizeof(out55);
+
+  reg1.size = sizeof(reg1);
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb32;
+  reg1.reserved = 0;
+  reg1.s_name = 0;
+
+  imm2.size = sizeof(imm2);
+  imm2.kind = BrigEOperandImmed;
+  imm2.type = Brigb32;
+  imm2.reserved = 0;
+  memset(&imm2.bits, 0, sizeof(imm2.bits));
+  imm2.bits.u = 077;
+
+  Instruction2_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase55(in, symbols, &out55, &reg1, &imm2);
+  TestCase55.Run_Test(&Instruction2);
+  symbols->clear();
+
   delete symbols;
 }
 
