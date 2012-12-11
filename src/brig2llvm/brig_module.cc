@@ -843,6 +843,36 @@ template<typename T> bool BrigModule::validateSize(const T *brig) const{
 }
 
 // validating the code section
+template<class BrigInst>
+bool BrigModule::isCompatibleAddr(const BrigInst inst) const {
+  bool valid = true;
+  BrigStorageClass sClass = (BrigStorageClass)inst->storageClass;
+  for(unsigned i = 0; i < 5; ++i) {
+    if(!inst->o_operands[i])
+      return valid;
+    oper_iterator oper(S_.operands + inst->o_operands[i]);
+    switch(sClass){
+    case BrigGroupSpace:
+    case BrigPrivateSpace:
+    case BrigSpillSpace:
+    case BrigArgSpace:
+      if(const BrigOperandAddress *address = dyn_cast<BrigOperandAddress>(oper))
+        valid &= check(32 == BrigInstHelper::getTypeSize(BrigDataType(address->type)),
+                       "Invalid type");
+      if(const BrigOperandCompound *compound = dyn_cast<BrigOperandCompound>(oper))
+        valid &= check(32 == BrigInstHelper::getTypeSize(BrigDataType(compound->type)),
+                       "Invalid type");
+      if(const BrigOperandIndirect *indirect = dyn_cast<BrigOperandIndirect>(oper))
+        valid &= check(32 == BrigInstHelper::getTypeSize(BrigDataType(indirect->type)),
+                       "Invalid type");
+      break;
+    default:
+      break;
+    }
+  }
+  return valid;
+}
+
 bool BrigModule::validate(const BrigAluModifier *c) const {
   bool valid = true;
   if(!c->valid)
@@ -891,6 +921,7 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
                  code->memorySemantic == BrigParAcquireRelease,
                  "Invalid memorySemantic, can be regular, acquire, "
                  "acquire release, or partial acquire release");
+  valid &= isCompatibleAddr(code);
   return valid;
 }
 
@@ -1062,6 +1093,7 @@ bool BrigModule::validate(const BrigInstLdSt *code) const {
                  "or partial release");
   valid &= check(code->equivClass < 64,
                  "Invalid equivClass, must less than 64");
+  valid &= isCompatibleAddr(code);
   return valid;
 }
 bool BrigModule::validate(const BrigInstMem *code) const {
@@ -1089,7 +1121,8 @@ bool BrigModule::validate(const BrigInstMem *code) const {
                  code->storageClass == BrigFlatSpace,
                  "Invalid storage class, can be global, group, "
                  "private, kernarg, readonly, spill, arg, or flat");
-    return valid;
+  valid &= isCompatibleAddr(code);
+  return valid;
 }
 
 bool BrigModule::validate(const BrigInstMod *code) const {
@@ -1164,11 +1197,9 @@ bool BrigModule::validate(const inst_iterator inst) const {
 bool BrigModule::validate(const BrigOperandAddress *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
-  if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;
-  valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
-                 (operand->type == Brigb64 && bdfv->machine == BrigELarge),
-                 "Invald datatype, should be suit to memory model");
+  valid &= check(operand->type == Brigb32 ||
+                 operand->type == Brigb64, "Invald datatype, should be "
+                 "Brigb32 and Brigb64");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   dir_iterator dir(S_.directives + operand->directive);
@@ -1253,11 +1284,9 @@ bool BrigModule::validate(const BrigOperandBase *operand) const {
 bool BrigModule::validate(const BrigOperandCompound *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
-  if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;
-  valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
-                 (operand->type == Brigb64 && bdfv->machine == BrigELarge),
-                 "Invald datatype, should be suit to memory model");
+  valid &= check(operand->type == Brigb32 ||
+                 operand->type == Brigb64, "Invald datatype, should be "
+                 "Brigb32 and Brigb64");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   oper_iterator nameOper(S_.operands + operand->name);
@@ -1317,11 +1346,9 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
     if(!validate(regOper)) return false;
     valid &= check(isa<BrigOperandReg>(regOper),
                    "Invalid reg, should be point BrigOprandReg");
-    const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
-    if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;
-    valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
-                   (operand->type == Brigb64 && bdfv->machine == BrigELarge),
-                   "Invald datatype, should be suit to memory model");
+    valid &= check(operand->type == Brigb32 ||
+                   operand->type == Brigb64, "Invald datatype, should be "
+                   "Brigb32 and Brigb64");
   }
 
   valid &= check(operand->reserved == 0,
@@ -2311,6 +2338,7 @@ bool BrigModule::validateLda(const inst_iterator inst) const {
                  isa<BrigOperandCompound>(src),
                  "Src should be BrigOperandAddress, BrigOperandIndirect "
                  "and BrigOPerandCompound");
+  valid &= isCompatibleSrc(*getType(src), dest);
   return valid;
 }
 
