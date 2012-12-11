@@ -455,7 +455,7 @@ template<class T> static void ExtractLogic(T result, T a, T b, T c) {
 
   if(width && offset + width <= Int<T>::Bits) {
     T mask = ~(~T(0) << width);
-    T noSign = (a >> (Int<T>::Bits - width - offset)) & mask;
+    T noSign = (a >> offset) & mask;
     T signEx = noSign << (Int<T>::Bits - width) >> (Int<T>::Bits - width);
     EXPECT_EQ(signEx, result);
   }

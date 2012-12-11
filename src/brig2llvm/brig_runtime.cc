@@ -339,7 +339,8 @@ defineUnary(BitRev, b64)
 template<class T> static T Extract(T x, b32 y, b32 z) {
   unsigned offset = Int<T>::ShiftMask & y;
   unsigned width  = Int<T>::ShiftMask & z;
-  return (x << offset) >> (Int<T>::Bits - width);
+  if(!width) return 0;
+  return (x << (Int<T>::Bits - width - offset)) >> (Int<T>::Bits - width);
 }
 defineTernary(Extract, b32)
 defineTernary(Extract, b64)
