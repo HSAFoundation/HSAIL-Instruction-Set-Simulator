@@ -1928,38 +1928,39 @@ TEST(ParserTest, Segp) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
   // correct cases
-  std::string input("segmentp_private_b1 $c1, 1;\n");
+  std::string input("segmentp_private_b1_u32 $c1, 1;\n");
   // segmentp
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
 
-  input.assign("segmentp_group_b1 $c1, 24.87L;\n");
+  input.assign("segmentp_group_b1_u32 $c1, 24;\n");
   // segmentp
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
 
-  input.assign("ftos_group_u64 $d1, WAVESIZE;\n");  // ftos
+  input.assign("ftos_global_u64_u64 $d1, $d2;\n");  // ftos
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
 
-  // input.assign("ftos_arg_u32 $d3, $d4;\n");  // ftos
-  // lexer->set_source_string(input);
-  // context->token_to_scan = lexer->get_next_token();
-  // EXPECT_NE(0, Segp(context));
-
-  // input.assign("stof_spill_u32 $d2, 235;\n");  // stof
-  // lexer->set_source_string(input);
-  // context->token_to_scan = lexer->get_next_token();
-  // EXPECT_NE(0, Segp(context));
-
-  input.assign("stof_private_u64 $d2, $d1;\n");  // stof
+  input.assign("stof_kernarg_u64_u64 $d2, $d1;\n");  // stof
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Segp(context));
+
   // wrong cases
+  input.assign("ftos_arg_u32 $d3, $d4;\n");  // ftos
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Segp(context));
+
+  input.assign("stof_spill_u32 $d2, 235;\n");  // stof
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Segp(context));
+
   input.assign("stof_u64 $d2, $d1;\n");
   // lack of addressSpaceIdentifier
   lexer->set_source_string(input);
