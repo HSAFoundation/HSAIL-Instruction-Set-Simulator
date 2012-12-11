@@ -3550,3 +3550,34 @@ TEST(BrigInstTest, RegV2) {
   delete input;
   delete output;
 }
+
+TEST(BrigInstTest, RegV4) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "kernel &regV4(kernarg_u32 %r, kernarg_u32 %input1, kernarg_u32 %input2)\n"
+  "{\n"
+  "  ld_kernarg_u32 $s0, [%r];\n"
+  "  ld_kernarg_u32 $s1, [%input1];\n"
+  "  ld_kernarg_u32 $s2, [%input1];\n"
+  "  ld_kernarg_u32 $s3, [%input2];\n"
+  "  ld_kernarg_u32 $s4, [%input2];\n"
+  "  mov_b128 $q0, ($s1, $s2, $s3, $s4);\n"
+  "  st_kernarg_b128 $q2, [$s0];\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("regV4");
+  unsigned *input1 = new unsigned(0xffffffff);
+  unsigned *input2 = new unsigned(0xeeeeeeee);
+  unsigned *output = new unsigned(0);
+  void *args[] = { &output, &input1, &input2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xffffffffffffffff, output[0]);
+  EXPECT_EQ(0xeeeeeeeeeeeeeeee, output[1]);
+  
+  delete input1;
+  delete input2;
+  delete output;
+}
