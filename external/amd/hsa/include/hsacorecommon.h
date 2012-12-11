@@ -156,7 +156,13 @@ class DLL_PUBLIC HsailKernel
           */
           virtual int getScratchBufferWaveOffsetSGPRIndex() = 0;
 
-          /* @brief - Returns a pointer to the DWARF info (BRIG to ISA)
+          /* @brief - Returns the index of the registers that 
+          * contains work group ID, and the number of registers
+          * that are actually used to hold the info
+          */
+          virtual int getWorkGroupSGPRIndex(bool en[3]) = 0;
+
+		  /* @brief - Returns a pointer to the DWARF info (BRIG to ISA)
           * return - Returns the index of type uint32_t
           */
           virtual void* getDebugISASourceInfo() = 0;
