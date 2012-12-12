@@ -558,7 +558,7 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
                  dir->machine == BrigESmall,
                  "Invalid machine");
   valid &= check(dir->profile == BrigEFull ||
-                 dir->profile == BrigEReduced,
+                 dir->profile == BrigEMobile,
                  "Invalid profile");
 
   valid &= check(dir->ftz == BrigESftz ||
@@ -842,7 +842,6 @@ template<typename T> bool BrigModule::validateSize(const T *brig) const{
   return check(brig->size >= sizeof(T),"Brig structure is too small");
 }
 
-// validating the code section
 bool BrigModule::validate(const BrigAluModifier *c) const {
   bool valid = true;
   if(!c->valid)
@@ -867,7 +866,7 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
                  "BrigAtomicNoRet");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
@@ -903,7 +902,7 @@ bool BrigModule::validate(const BrigInstAtomicImage *code) const {
                  "BrigAtomicNoRetImage");
   valid &= check(code->type <= Brigf64x2,
                  "Invalid type");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                      "o_operands past the operands section");
@@ -931,7 +930,7 @@ bool BrigModule::validate(const BrigInstBar *code) const {
                  "Invalid opcode, should be either BrigBarrier, BrigSync or "
                  "BrigBrn");
   valid &= check(code->type <= Brigf64x2, "Invalid type");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                      "o_operands past the operands section");
@@ -953,7 +952,7 @@ bool BrigModule::validate(const BrigInstBase *code) const {
                  "Invalid type");
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                      "o_operands past the operands section");
@@ -971,7 +970,7 @@ bool BrigModule::validate(const BrigInstCmp *code) const {
                  "Invalid type");
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
@@ -993,7 +992,7 @@ bool BrigModule::validate(const BrigInstImage *code) const {
                  code->opcode == BrigStImage ||
                  code->opcode == BrigRdImage,
                  "Invalid opcode");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
@@ -1020,7 +1019,7 @@ bool BrigModule::validate(const BrigInstCvt *code) const {
                  "Invalid type");
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
@@ -1042,7 +1041,7 @@ bool BrigModule::validate(const BrigInstLdSt *code) const {
                  "Invalid type");
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
@@ -1073,7 +1072,7 @@ bool BrigModule::validate(const BrigInstMem *code) const {
                  "Invalid type");
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
@@ -1089,7 +1088,7 @@ bool BrigModule::validate(const BrigInstMem *code) const {
                  code->storageClass == BrigFlatSpace,
                  "Invalid storage class, can be global, group, "
                  "private, kernarg, readonly, spill, arg, or flat");
-    return valid;
+  return valid;
 }
 
 bool BrigModule::validate(const BrigInstMod *code) const {
@@ -1101,7 +1100,7 @@ bool BrigModule::validate(const BrigInstMod *code) const {
                  "Invalid type");
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
@@ -1122,7 +1121,7 @@ bool BrigModule::validate(const BrigInstSegp *code) const {
                  "Invalid type");
   valid &= check(code->packing <= BrigPackPsat,
                  "Invalid packing control");
-  for (unsigned i = 0; i < 5; i++) {
+  for (unsigned i = 0; i < 5; ++i) {
     if(code->o_operands[i]) {
       valid &= check(code->o_operands[i] < S_.operandsSize,
                    "o_operands past the operands section");
@@ -1164,11 +1163,9 @@ bool BrigModule::validate(const inst_iterator inst) const {
 bool BrigModule::validate(const BrigOperandAddress *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
-  if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;
-  valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
-                 (operand->type == Brigb64 && bdfv->machine == BrigELarge),
-                 "Invald datatype, should be suit to memory model");
+  valid &= check(operand->type == Brigb32 ||
+                 operand->type == Brigb64, "Invalid datatype, should be "
+                 "Brigb32 and Brigb64");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   dir_iterator dir(S_.directives + operand->directive);
@@ -1253,11 +1250,9 @@ bool BrigModule::validate(const BrigOperandBase *operand) const {
 bool BrigModule::validate(const BrigOperandCompound *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
-  if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;
-  valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
-                 (operand->type == Brigb64 && bdfv->machine == BrigELarge),
-                 "Invald datatype, should be suit to memory model");
+  valid &= check(operand->type == Brigb32 ||
+                 operand->type == Brigb64, "Invalid datatype, should be "
+                 "Brigb32 and Brigb64");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   oper_iterator nameOper(S_.operands + operand->name);
@@ -1317,11 +1312,9 @@ bool BrigModule::validate(const BrigOperandIndirect *operand) const {
     if(!validate(regOper)) return false;
     valid &= check(isa<BrigOperandReg>(regOper),
                    "Invalid reg, should be point BrigOprandReg");
-    const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
-    if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;
-    valid &= check((operand->type == Brigb32 && bdfv->machine == BrigESmall) ||
-                   (operand->type == Brigb64 && bdfv->machine == BrigELarge),
-                   "Invald datatype, should be suit to memory model");
+    valid &= check(operand->type == Brigb32 ||
+                   operand->type == Brigb64, "Invalid datatype, should be "
+                   "Brigb32 and Brigb64");
   }
 
   valid &= check(operand->reserved == 0,
@@ -1420,7 +1413,7 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
 bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  for(int i = 0; i < 2; i++) {
+  for(int i = 0; i < 2; ++i) {
     const oper_iterator oper(S_.operands + operand->regs[i]);
     if(!validate(oper)) return false;
     const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
@@ -1440,7 +1433,7 @@ bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
 bool BrigModule::validate(const BrigOperandRegV4 *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  for(int i = 0; i < 4; i++) {
+  for(int i = 0; i < 4; ++i) {
     const oper_iterator oper(S_.operands + operand->regs[i]);
     if(!validate(oper)) return false;
     const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
@@ -1721,7 +1714,7 @@ bool BrigModule::validateUnpackInst(const inst_iterator inst) const {
   valid &= check(isa<BrigOperandReg>(src1) ||
                  isa<BrigOperandImmed>(src1), "Src should be reg or immed");
 
-  for(int i = 0; i < 3; i++) {
+  for(int i = 0; i < 3; ++i) {
     oper_iterator reg(S_.operands + inst->o_operands[i]);
     valid &= check(isCompatibleSrc(type, reg), "Incompatible source operand");
   }
@@ -2247,7 +2240,7 @@ bool BrigModule::validateExtract(const inst_iterator inst) const {
   valid &= check(isCompatibleSrc(type, dest),
                  "Incompatible destination operand");
 
-  for(int i = 1; i < 4; i++) {
+  for(int i = 1; i < 4; ++i) {
     oper_iterator src(S_.operands + inst->o_operands[i]);
     valid &= check(isa<BrigOperandReg>(src) ||
                    isa<BrigOperandImmed>(src) ||
@@ -2311,6 +2304,7 @@ bool BrigModule::validateLda(const inst_iterator inst) const {
                  isa<BrigOperandCompound>(src),
                  "Src should be BrigOperandAddress, BrigOperandIndirect "
                  "and BrigOPerandCompound");
+  valid &= isCompatibleSrc(*getType(src), dest);
   return valid;
 }
 
@@ -2445,7 +2439,7 @@ bool BrigModule::validateShuffle(const inst_iterator inst) const {
   oper_iterator src2(S_.operands + inst->o_operands[3]);
   valid &= check(isa<BrigOperandImmed>(src2), "Src2 should be immed");
 
-  for(int i = 0; i < 4; i++) {
+  for(int i = 0; i < 4; ++i) {
     oper_iterator reg(S_.operands + inst->o_operands[i]);
     valid &= check(isCompatibleSrc(type, reg), "Incompatible operand");
   }
@@ -2483,7 +2477,7 @@ bool BrigModule::validateCmov(const inst_iterator inst) const {
   oper_iterator src2(S_.operands + inst->o_operands[3]);
   valid &= check(isCompatibleSrc(type, src2), "Incompatible src2 operand");
 
-  for(int i = 1; i < 4; i++) {
+  for(int i = 1; i < 4; ++i) {
     oper_iterator src(S_.operands + inst->o_operands[i]);
     valid &= check(isa<BrigOperandReg>(src) ||
                    isa<BrigOperandImmed>(src),
@@ -2520,7 +2514,7 @@ bool BrigModule::validateClass(const inst_iterator inst) const {
                  "Destination should be a register");
   valid &= check(*getType(dest) == Brigb1, "Destination should be a c reg");
 
-  for(int i = 1; i < 3; i++) {
+  for(int i = 1; i < 3; ++i) {
     oper_iterator src(S_.operands + inst->o_operands[i]);
     valid &= check(isa<BrigOperandReg>(src) ||
                    isa<BrigOperandImmed>(dest),
@@ -2776,7 +2770,7 @@ bool BrigModule::validateUnpack3(const inst_iterator inst) const {
   oper_iterator dest(S_.operands + inst->o_operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "dest should be register");
   valid &= check(*getType(dest) == Brigb32,
-                 "dest should be a s register"); 
+                 "dest should be a s register");
   return valid;
 }
 
@@ -2877,7 +2871,7 @@ bool BrigModule::validateCmp(const inst_iterator inst) const {
   valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
   valid &= check(isCompatibleSrc(type, dest),
                  "Incompatible destination operand");
-  for(int i = 1; i < 3; i++) {
+  for(int i = 1; i < 3; ++i) {
     oper_iterator src(S_.operands + cmp->o_operands[i]);
     if(BrigInstHelper::isFloatTy(type)) {
       valid &= check(isa<BrigOperandReg>(src) ||
@@ -2922,7 +2916,7 @@ bool BrigModule::validatePackedCmp(const inst_iterator inst) const {
   valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
   valid &= check(isCompatibleSrc(type, dest),
 		  "Incompatible destination oper;and");
-  for(int i = 1; i < 3; i++) {
+  for(int i = 1; i < 3; ++i) {
     oper_iterator src(S_.operands + cmp->o_operands[i]);
     valid &= check(isa<BrigOperandReg>(src) ||
                    isa<BrigOperandImmed> (src),

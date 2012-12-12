@@ -1158,8 +1158,8 @@ int Version(Context* context) {
         case _FULL:
           bdv.profile = BrigEFull;
           break;
-        case _REDUCED:
-          bdv.profile = BrigEReduced;
+        case _MOBILE:
+          bdv.profile = BrigEMobile;
           break;
         case _SFTZ:
           bdv.ftz = BrigESftz;
@@ -7555,7 +7555,7 @@ int LabelList(Context* context, BrigdOffset32_t dOffset, bool IsTargets) {
           (elementCount - 1) * sizeof(BrigdOffset32_t);
         uint8_t *array = new uint8_t[arraySize];
         memset(array, 0, sizeof(uint8_t) * arraySize);
-        BrigDirectiveLabelInit *bdli = 
+        BrigDirectiveLabelInit *bdli =
           reinterpret_cast<BrigDirectiveLabelInit*>(array);
 
         context->set_dim(bds.s.dim);
@@ -7577,7 +7577,7 @@ int LabelList(Context* context, BrigdOffset32_t dOffset, bool IsTargets) {
           // Save the address of d_label in directive section.
           if (bdli->d_labels[i] == 0) {
             context->label_d_map.insert(std::pair<std::string, BrigdOffset32_t>(
-              labName_list[i], bds.d_init + arraySize - sizeof(BrigdOffset32_t) * 
+              labName_list[i], bds.d_init + arraySize - sizeof(BrigdOffset32_t) *
               (elementCount - i))
             );
           }
@@ -7612,8 +7612,8 @@ int LabelList(Context* context, BrigdOffset32_t dOffset, bool IsTargets) {
           // Save the address of d_label in directive section.
           if (labelList->d_labels[i] == 0) {
             context->label_d_map.insert(std::pair<std::string, BrigdOffset32_t>(
-              labName_list[i], 
-              context->get_directive_offset() + arraySize - 
+              labName_list[i],
+              context->get_directive_offset() + arraySize -
               sizeof(BrigdOffset32_t) * (elementCount - i))
             );
           }
