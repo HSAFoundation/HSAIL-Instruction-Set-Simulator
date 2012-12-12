@@ -3543,7 +3543,7 @@ TEST(BrigInstTest, RegV2) {
   llvm::Function *fun = BP->getFunction("regV2");
   unsigned *input = new unsigned(0xffffffff);
   unsigned *output = new unsigned(0);
-  void *args[] = { &output, &input };
+  void *args[] = { &output, input };
   BE.launch(fun, args);
   EXPECT_EQ(0xffffffffffffffff, *output);
 
@@ -3573,7 +3573,7 @@ TEST(BrigInstTest, RegV4) {
   unsigned *input2 = new unsigned(0xeeeeeeee);
   uint64_t *output = new uint64_t[2];
   memset(output, 0, sizeof(uint64_t) * 2);
-  void *args[] = { &output, &input1, &input2 };
+  void *args[] = { &output, input1, input2 };
   BE.launch(fun, args);
   EXPECT_EQ(0xeeeeeeeeeeeeeeee, output[0]);
   EXPECT_EQ(0xffffffffffffffff, output[1]);
@@ -3595,4 +3595,75 @@ TEST(BrigInstTest, Testb128) {
   "};\n");
   EXPECT_TRUE(BP);
   if(!BP) return;
+}
+
+static const char Packed[] =
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &packed_kernel(\n"
+  "        kernarg_u32 %%r, kernarg_u%u %%input)\n"
+  "{\n"
+  "  ld_kernarg_u32 $s4, [%%r];\n"
+  "  ld_kernarg_u%u $%c0, [%%input];\n"
+  "  ld_kernarg_u%u $%c1, [%%input];\n"
+  "  shuffle_%s $%c2, $%c0, $%c1, 0x11;\n"
+  "  st_kernarg_u32 $%c2, [$s4];\n"
+  "  ret;\n"
+  "};\n";
+  
+template<class T>
+static void testPacked(const char *type,
+                       const T &result,
+                       uint32_t *input,
+                       unsigned bits) {
+  char reg = 0;
+  if(bits == 32)
+    reg = 's';
+  if(bits == 64)
+    reg = 'd';
+  char *buffer =
+    asnprintf(Packed,
+              bits,
+              bits,
+              reg,
+              bits,
+              reg,
+              type,
+              reg,
+              reg,
+              reg,
+              reg);
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  T *arg_val0 = new T;
+  *arg_val0 = 0;
+
+  void *args[] = { &arg_val0, input };
+  llvm::Function *fun = BP->getFunction("packed_kernel");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+
+  EXPECT_EQ(result, *arg_val0);
+  delete arg_val0;
+}
+
+TEST(BrigPacked, testPacked) {
+  {
+    const uint32_t result = uint32_t(0x1000100);
+    uint32_t *input = new uint32_t(0x1);
+    unsigned bits = 32;
+    testPacked("u8x4", result, input, bits);
+    delete input;
+  }
+  {
+    const uint32_t result = uint32_t(0x1000100);
+    uint32_t *input = new uint32_t(0x1);
+    unsigned bits = 32;
+    testPacked("s8x4", result, input, bits);
+    delete input;
+  }
 }
