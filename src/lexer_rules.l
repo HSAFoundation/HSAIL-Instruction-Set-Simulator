@@ -1578,10 +1578,10 @@ _p_sat              { free_string(context);
                       context->yycolno+=yyleng;
                       return  _FULL;}
 
-\$reduced           { free_string(context);
+\$mobile            { free_string(context);
                       context->token_type = TARGET;
                       context->yycolno+=yyleng;
-                      return  _REDUCED;}
+                      return  _MOBILE;}
 
 \$sftz              { free_string(context);
                       context->token_type = TARGET;

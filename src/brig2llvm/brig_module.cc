@@ -558,7 +558,7 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
                  dir->machine == BrigESmall,
                  "Invalid machine");
   valid &= check(dir->profile == BrigEFull ||
-                 dir->profile == BrigEReduced,
+                 dir->profile == BrigEMobile,
                  "Invalid profile");
 
   valid &= check(dir->ftz == BrigESftz ||

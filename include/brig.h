@@ -167,7 +167,7 @@ enum BrigMachine {
 // BrigProfile is used to specify the kind of profile.
 enum BrigProfile {
   BrigEFull = 0,
-  BrigEReduced = 1
+  BrigEMobile = 1
 };
 
 // PRM 19.5.19
@@ -382,13 +382,14 @@ enum BrigOpcode {
   BrigNDRangeSize = 115,
   BrigNop = 116,
   BrigNullPtr = 117,
-  BrigWorkDim = 118,
-  BrigWorkGroupId = 119,
-  BrigWorkGroupSize = 120,
-  BrigWorkItemAbsId = 121,
-  BrigWorkItemAbsIdFlat = 122,
-  BrigWorkItemId = 123,
-  BrigWorkItemIdFlat = 124,
+  BrigQid = 118,
+  BrigWorkDim = 119,
+  BrigWorkGroupId = 120,
+  BrigWorkGroupSize = 121,
+  BrigWorkItemAbsId = 122,
+  BrigWorkItemAbsIdFlat = 123,
+  BrigWorkItemId = 124,
+  BrigWorkItemIdFlat = 125,
   BrigInvalidOpcode
 };
 
