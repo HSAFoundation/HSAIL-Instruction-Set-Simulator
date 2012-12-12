@@ -18,19 +18,19 @@ public:
   Version_Test(std::string& in, BrigDirectiveVersion* ref):
     BrigCodeGenTest(in),
     RefVer(ref) { }
- 
-  void Run_Test(int (*Rule)(Context*)){  
+
+  void Run_Test(int (*Rule)(Context*)){
     Buffer* dir = new Buffer();
 
     dir->append(RefVer);
-    
-    struct BrigSections RefOutput(NULL, reinterpret_cast<const char *>(&dir->get()[0]), 
-                                  NULL, NULL, NULL, 0, dir->size(), 0, 0, 0);    
-    
+
+    struct BrigSections RefOutput(NULL, reinterpret_cast<const char *>(&dir->get()[0]),
+                                  NULL, NULL, NULL, 0, dir->size(), 0, 0, 0);
+
     Parse_Validate(Rule, &RefOutput);
     delete dir;
-  } 
-  
+  }
+
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
     False_Validate(Rule, refError);
   }
@@ -38,13 +38,13 @@ public:
 };
 
 
-TEST(CodegenTest, Version_CodeGen) {  
-  
+TEST(CodegenTest, Version_CodeGen) {
+
   /********************************** Common variables used by all tests******************************/
-    
+
   std::string in;
   BrigDirectiveVersion out;
-   
+
   /************************************* Test Case 1 ************************************/
   in.assign("version 1:0;\n");
 
@@ -78,7 +78,7 @@ TEST(CodegenTest, Version_CodeGen) {
   TestCase2.Run_Test(&Version);
 
   /************************************* Test Case 3 ************************************/
-  in.assign("version 2:0:$large, $reduced, $sftz;\n");
+  in.assign("version 2:0:$large, $mobile, $sftz;\n");
 
   out.size = sizeof(out);
   out.kind = BrigEDirectiveVersion;
@@ -86,7 +86,7 @@ TEST(CodegenTest, Version_CodeGen) {
   out.major = 2;
   out.minor = 0;
   out.machine = BrigELarge;
-  out.profile = BrigEReduced;
+  out.profile = BrigEMobile;
   out.ftz = BrigESftz;
   out.reserved = 0;
 
@@ -111,17 +111,17 @@ TEST(CodegenTest, Version_CodeGen) {
 
 }
 
-TEST(ErrorReportTest, Version) {  
+TEST(ErrorReportTest, Version) {
   std::string input = "version 2:1\n";
 
   Version_Test TestCase1(input);
   TestCase1.Run_Test(&Version, MISSING_SEMICOLON);
-  
+
   input.assign("version 2;1:$nosftz, $small, $full;\n");
 
   Version_Test TestCase2(input);
   TestCase2.Run_Test(&Version, MISSING_COLON);
-  
+
   input.assign("version 2:1 $nosftz, $full;\n");
 
   Version_Test TestCase3(input);
