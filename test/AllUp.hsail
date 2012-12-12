@@ -2529,7 +2529,6 @@ kernel &AllUp()
   lda_u32 $s1, [$s2 + 10];
   lda_u32 $s1, [$s2 - 5];
   lda_u32 $s1, [$s2];
-  lda_u64 $d1, [$s2];
 
   ret;
 };

@@ -35,21 +35,20 @@ using hsacommon::Status;
  */
 typedef enum _EVENTID
 {
-    USER_GEN_DEVICE_INTERRUPT  = 0, ///< user-mode generated interrupt
+    SIGNAL_EVENT               = 0, ///< user-mode generated GPU signal
     NODE_CHANGE_EVENT          = 1, ///< "H-NUMA" node change
     DEVICE_STATE_CHANGE_EVENT  = 2, ///< device state change ( start/stop )
     HW_EXCEPTION_EVENT         = 3, ///< GPU shader exception event
     SYSTEM_EVENT               = 4, ///< GPU SYSCALL with parameter info
     DEBUG_EVENT                = 5, ///< debugger event
     PROFILE_EVENT              = 6, ///< GPU signal for profiling
-    /*
-     * Specifies type as Gpu Memory Write event.
-     */
-    HSA_MEM_WRITE_EVENT = 7,
+    QUEUE_EVENT                = 7, ///< GPU signal queue idle state (EOP pm4)
+
+    ///< Linux specific event for EOP. Remove this when LINUX support interrupt.
+    HSA_MEM_WRITE_EVENT        = 8, 
     //...
     MAX_EVENTS
 } EVENTID;
-
 
 
 class Device;

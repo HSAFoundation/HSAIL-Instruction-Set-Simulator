@@ -291,6 +291,7 @@ class BrigModule {
   template<typename T> bool validateSize(const T *brig) const;
   
   const BrigDirectiveVersion* getFirstVersionDirective() const;
+  template<class BrigInst> bool isCompatibleAddr(const BrigInst inst) const;
 
   const BrigSections S_;
   llvm::raw_ostream *out_;
