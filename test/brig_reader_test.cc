@@ -3571,12 +3571,13 @@ TEST(BrigInstTest, RegV4) {
   llvm::Function *fun = BP->getFunction("regV4");
   unsigned *input1 = new unsigned(0xffffffff);
   unsigned *input2 = new unsigned(0xeeeeeeee);
-  unsigned *output = new unsigned(0);
+  uint64_t *output = new uint64_t[2];
+  memset(output, 0, sizeof(uint64_t) * 2);
   void *args[] = { &output, &input1, &input2 };
   BE.launch(fun, args);
-  EXPECT_EQ(0xffffffffffffffff, output[0]);
-  EXPECT_EQ(0xeeeeeeeeeeeeeeee, output[1]);
-  
+  EXPECT_EQ(0xeeeeeeeeeeeeeeee, output[0]);
+  EXPECT_EQ(0xffffffffffffffff, output[1]);
+
   delete input1;
   delete input2;
   delete output;
