@@ -3562,7 +3562,7 @@ TEST(BrigInstTest, RegV4) {
   "  ld_kernarg_u32 $s3, [%input2];\n"
   "  ld_kernarg_u32 $s4, [%input2];\n"
   "  mov_b128 $q0, ($s1, $s2, $s3, $s4);\n"
-  "  st_kernarg_b128 $q2, [$s0];\n"
+  "  st_kernarg_b128 $q0, [$s0];\n"
   "};\n");
   EXPECT_TRUE(BP);
   if(!BP) return;
@@ -3581,4 +3581,18 @@ TEST(BrigInstTest, RegV4) {
   delete input1;
   delete input2;
   delete output;
+}
+
+TEST(BrigInstTest, Testb128) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "kernel &MovB128(kernarg_u32 %r)\n"
+  "{\n"
+  "  ld_kernarg_u32 $s0, [%r];\n"
+  "  mov_b128 $q1, _u32x4(1, 2, 3, 4);\n"
+  "  st_kernarg_b128 $q1, [$s0];\n"
+  "  ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
 }
