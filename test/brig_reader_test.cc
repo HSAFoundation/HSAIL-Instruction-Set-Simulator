@@ -3595,6 +3595,17 @@ TEST(BrigInstTest, Testb128) {
   "};\n");
   EXPECT_TRUE(BP);
   if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("MovB128");
+  uint64_t *output = new uint64_t[2];
+  memset(output, 0, sizeof(uint64_t) * 2);
+  void *args[] = { &output };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x0000000100000010, output[1]);
+  EXPECT_EQ(0x0000001100000100, output[0]);
+
+  delete output;
 }
 
 static const char Packed[] =
@@ -3614,7 +3625,7 @@ static const char Packed[] =
 template<class T>
 static void testPacked(const char *type,
                        const T &result,
-                       uint32_t *input,
+                       T *input,
                        unsigned bits) {
   char reg = 0;
   if(bits == 32)
@@ -3664,6 +3675,41 @@ TEST(BrigPacked, testPacked) {
     uint32_t *input = new uint32_t(0x1);
     unsigned bits = 32;
     testPacked("s8x4", result, input, bits);
+    delete input;
+  }
+  {
+    const uint32_t result = uint32_t(0x10000);
+    uint32_t *input = new uint32_t(0x1);
+    unsigned bits = 32;
+    testPacked("s16x2", result, input, bits);
+    delete input;
+  }
+  {
+    const uint32_t result = uint32_t(0x10000);
+    uint32_t *input = new uint32_t(0x1);
+    unsigned bits = 32;
+    testPacked("u16x2", result, input, bits);
+    delete input;
+  }
+  {
+    const uint64_t result = uint64_t(0x101010101010000);
+    uint64_t *input = new uint64_t(0x1);
+    unsigned bits = 64;
+    testPacked("s8x8", result, input, bits);
+    delete input;
+  }
+  {
+    const uint64_t result = uint64_t(0x100000000);
+    uint64_t *input = new uint64_t(0x1);
+    unsigned bits = 64;
+    testPacked("f32x2", result, input, bits);
+    delete input;
+  }
+  {
+    const uint64_t result = uint64_t(0x101010101010000);
+    uint64_t *input = new uint64_t(0x1);
+    unsigned bits = 64;
+    testPacked("u8x8", result, input, bits);
     delete input;
   }
 }
