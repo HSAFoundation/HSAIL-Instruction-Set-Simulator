@@ -1097,6 +1097,12 @@ int Instruction3(Context* context) {
   if((opcode==BrigShr) || (opcode==BrigShl))
     packing = type >= Brigu8x4 ? BrigPackPS : packing;
 
+  if (opcode == BrigMovdHi || opcode == BrigMovdLo) {
+    if (context->token_to_scan != TOKEN_DREGISTER) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+  }
   if (Operand(context, &OpOffset0)) {
     context->set_error(MISSING_OPERAND);
     return 1;
@@ -1107,6 +1113,12 @@ int Instruction3(Context* context) {
   }
   context->token_to_scan = yylex();
 
+  if (opcode == BrigMovdHi || opcode == BrigMovdLo) {
+    if (context->token_to_scan != TOKEN_DREGISTER) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+  }
   if (Operand(context, &OpOffset1)) {
     context->set_error(MISSING_OPERAND);
     return 1;
@@ -1117,6 +1129,12 @@ int Instruction3(Context* context) {
   }
   context->token_to_scan = yylex();
 
+  if (opcode == BrigMovdHi || opcode == BrigMovdLo) {
+    if (context->token_to_scan != TOKEN_SREGISTER) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+  }
   if (Operand(context, &OpOffset2)) {
     context->set_error(MISSING_OPERAND);
     return 1;
