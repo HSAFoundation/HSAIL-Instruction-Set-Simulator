@@ -2285,7 +2285,7 @@ bool BrigModule::validateLastBit(const inst_iterator inst) const {
 
 bool BrigModule::validateLda(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
+  valid &= check(isa<BrigInstMem>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
   valid &= check(inst->type ==Brigu32 || inst->type == Brigu64,
