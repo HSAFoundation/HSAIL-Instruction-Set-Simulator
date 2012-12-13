@@ -3602,8 +3602,8 @@ TEST(BrigInstTest, Testb128) {
   memset(output, 0, sizeof(uint64_t) * 2);
   void *args[] = { &output };
   BE.launch(fun, args);
-  EXPECT_EQ(0x0000000100000010, output[1]);
-  EXPECT_EQ(0x0000001100000100, output[0]);
+  EXPECT_EQ(0x0000001000000001, output[1]);
+  EXPECT_EQ(0x0000010000000011, output[0]);
 
   delete output;
 }
