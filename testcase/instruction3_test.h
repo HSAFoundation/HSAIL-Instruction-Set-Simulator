@@ -4355,7 +4355,7 @@ struct Instruction3Test instruction3op_unpackhi_pair[22] = {
 class Instruction3OpMovdlob64: public ::testing::TestWithParam<int>{
 };
 
-struct Instruction3Test instruction3op_movdlo_pair[4] = {
+struct Instruction3Test instruction3op_movdlo_pair[1] = {
 //instruction3op_movdlo_pair[0]
   {
     "movd_lo_b64 $d1, $d2, $s3;",
@@ -4373,67 +4373,28 @@ struct Instruction3Test instruction3op_movdlo_pair[4] = {
       0
       }
     }
-  },
-//instruction3op_movdlo_pair[1]
-  {
-    "movd_lo_b64 $d1, $d2, 0x1703a;",
-     {
-    brig_inst_base_size,                              
-    BrigEInstBase,
-    BrigMovdLo,
-    Brigb64,
-    BrigNoPacking,
-     {
-      operand_offset, 
-      operand_offset + reg_size, 
-      RoundUp8(operand_offset + reg_size * 2),  
-      0, 
-      0
-      }
-    }
-  },
-//instruction3op_movdlo_pair[2]
-  {
-    "movd_lo_b64 $d1, 0x38002a, $s3;",
-     {
-    brig_inst_base_size,                              
-    BrigEInstBase,
-    BrigMovdLo,
-    Brigb64,
-    BrigNoPacking,
-    {
-      operand_offset, 
-      RoundUp8(operand_offset + reg_size), 
-      RoundUp8(operand_offset + reg_size) + immed_size,  
-      0, 
-      0
-      }
-    }
-  },
-//instruction3op_movdlo_pair[3]
-  {
-    "movd_lo_b64 $d1, 0x38002a, 0x1703a;",
-     {
-    brig_inst_base_size,                              
-    BrigEInstBase,
-    BrigMovdLo,
-    Brigb64,
-    BrigNoPacking,
-   {
-      operand_offset, 
-      RoundUp8(operand_offset + reg_size), 
-      RoundUp8(RoundUp8(operand_offset + reg_size) + immed_size),  
-      0, 
-      0
-      }
-    }
-  },
+  }
+};
+
+class TestInstruction3MovdLoInvalid : public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string input_instruction3_movdlo_invalid[6] = {
+  "movd_lo_b64 $d1, $d2, 0x1703a;",
+  "movd_lo_b64 $d1, 0x38002a, $s3;",
+  "movd_lo_b64 $d1, 0x38002a, 0x1703a;",
+  "movd_lo_b64 $d1, $d2, WAVESIZE;",
+  "movd_lo_b64 $d1, WAVESIZE, $s3;",
+  //dest must be a d register
+  "movd_lo_b64 $s1, $d2, $s2;",
 };
 
 class Instruction3OpMovdhib64: public ::testing::TestWithParam<int>{
 };
 
-struct Instruction3Test instruction3op__movdhi_pair[4] = {
+struct Instruction3Test instruction3op__movdhi_pair[1] = {
 //instruction3op__movdhi_pair[0]
   {
     "movd_hi_b64 $d1, $d2, $s3;",
@@ -4451,61 +4412,22 @@ struct Instruction3Test instruction3op__movdhi_pair[4] = {
       0
       }
     }
-  },
-//instruction3op__movdhi_pair[1]
-  {
-    "movd_hi_b64 $d1, $d2, 0x1703a;",
-     {
-    brig_inst_base_size,                                
-    BrigEInstBase,
-    BrigMovdHi,
-    Brigb64,
-    BrigNoPacking,
-   {
-      operand_offset, 
-      operand_offset + reg_size, 
-      RoundUp8(operand_offset + reg_size * 2),  
-      0, 
-      0
-      }
-    }
-  },
-//instruction3op__movdhi_pair[2]
-  {
-    "movd_hi_b64 $d1, 0x38002a, $s3;",
-     {
-    brig_inst_base_size,                              
-    BrigEInstBase,
-    BrigMovdHi,
-    Brigb64,
-    BrigNoPacking,
-    {
-      operand_offset, 
-      RoundUp8(operand_offset + reg_size), 
-      RoundUp8(operand_offset + reg_size) + immed_size, 
-      0, 
-      0
-      }
-    }
-  },
-//instruction3op__movdhi_pair[3]
-  {
-    "movd_hi_b64 $d1, 0x38002a, 0x1703a;",
-     {
-    brig_inst_base_size,                              
-    BrigEInstBase,
-    BrigMovdHi,
-    Brigb64,
-    BrigNoPacking,
-    {
-      operand_offset, 
-      RoundUp8(operand_offset + reg_size), 
-      RoundUp8(RoundUp8(operand_offset + reg_size) + immed_size), 
-      0, 
-      0
-      }
-    }
-  },
+  }
+};
+
+class TestInstruction3MovdHiInvalid : public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string input_instruction3_movdhi_invalid[6] = {
+  "movd_hi_b64 $d1, $d2, 0x1703a;",
+  "movd_hi_b64 $d1, 0x38002a, $s3;",
+  "movd_hi_b64 $d1, 0x38002a, 0x1703a;",
+  "movd_lo_b64 $d1, $d2, WAVESIZE;",
+  "movd_lo_b64 $d1, WAVESIZE, $s3;",
+  //dest must be a d register
+  "movd_hi_b64 $s1, $d2, $s2;",
 };
 
 class Instruction3OpCopySignFloat: public ::testing::TestWithParam<int>{
