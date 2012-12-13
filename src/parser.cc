@@ -871,10 +871,14 @@ int Instruction2OpcodeDT(Context* context) {
     context->set_error(MISSING_COMMA);
     return 1;
   }
+  context->token_to_scan = yylex();
   if (inst.opcode == BrigMovsLo || inst.opcode == BrigMovsHi) {
     context->set_type(Brigb64);
+    if (context->token_to_scan != TOKEN_DREGISTER) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
   }
-  context->token_to_scan = yylex();
   if (Operand(context, &inst.o_operands[1])) {
     return 1;
   }
