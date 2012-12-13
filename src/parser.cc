@@ -864,6 +864,13 @@ int Instruction2OpcodeDT(Context* context) {
     context->set_error(INVALID_FIRST_OPERAND);
     return 1;
   }
+  if (inst.opcode == BrigMovsLo || inst.opcode == BrigMovsHi) {
+    context->set_type(Brigb32);
+    if (context->token_to_scan != TOKEN_SREGISTER) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+  }
   if (Operand(context, &inst.o_operands[0])) {
     return 1;
   }

@@ -1014,7 +1014,6 @@ TEST_P(TestInstruction2Movhi, Movhi) {
 
   BrigInstBase get;
   BrigOperandReg getReg1, getReg2;
-  BrigOperandImmed getImmed1;
   context->get_code(code_offset, &get);
   BrigInstBase ref = instruction2movshi_pair[n].ref;
 
