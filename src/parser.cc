@@ -363,8 +363,8 @@ int BaseOperand(Context* context) {
     boi.bits.l[0] = boi.bits.l[1] = 0;
     int8_t* step = reinterpret_cast<int8_t*>(&boi.bits);
     for (uint32_t i = 0 ; i < size ; ++i) {
-      step += i * typeSize;
       memcpy(step, &decList[i], typeSize);
+      step += typeSize;
     }
     boi.type = type;
     context->append_operand(&boi);
