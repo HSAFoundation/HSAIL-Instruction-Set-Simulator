@@ -953,7 +953,6 @@ TEST_P(TestInstruction2MovLo, Movlo) {
 
   BrigInstBase get;
   BrigOperandReg getReg1, getReg2;
-  BrigOperandImmed getImmed1;
   context->get_code(code_offset, &get);
   BrigInstBase ref = instruction2movslo_pair[n].ref;
 
@@ -982,25 +981,27 @@ TEST_P(TestInstruction2MovLo, Movlo) {
     EXPECT_EQ(Brigb64, getReg2.type);
     EXPECT_EQ(0, getReg2.reserved);
     EXPECT_EQ(string_offset + 4, getReg2.s_name);
-  } else {
-    context->get_operand(operand_offset, &getReg1);
-    EXPECT_EQ(reg_size, getReg1.size);
-    EXPECT_EQ(BrigEOperandReg, getReg1.kind);
-    EXPECT_EQ(Brigb32, getReg1.type);
-    EXPECT_EQ(0, getReg1.reserved);
-    EXPECT_EQ(string_offset, getReg1.s_name);
-
-    context->get_operand(ref.o_operands[1], &getImmed1);
-    EXPECT_EQ(immed_size, getImmed1.size);
-    EXPECT_EQ(BrigEOperandImmed, getImmed1.kind);
-    EXPECT_EQ(Brigb64, getImmed1.type);
-    EXPECT_EQ(0, getImmed1.reserved);
-    EXPECT_EQ(4295032833, getImmed1.bits.l[0]);
-  }
+  } 
   delete lexer;
 }
 
-INSTANTIATE_TEST_CASE_P(CodegenTest, TestInstruction2MovLo, testing::Range(0, 2));
+INSTANTIATE_TEST_CASE_P(CodegenTest, TestInstruction2MovLo, testing::Range(0, 1));
+
+TEST_P(TestInstruction2MovsLoInvalid, MovsLo) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(input_instruction2_movslo_invalid[n]);
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Instruction2(context));
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest,
+                           TestInstruction2MovsLoInvalid,
+                           testing::Range(0,5));
 
 TEST_P(TestInstruction2Movhi, Movhi) {
   context->set_error_reporter(main_reporter);
@@ -1042,25 +1043,28 @@ TEST_P(TestInstruction2Movhi, Movhi) {
     EXPECT_EQ(Brigb64, getReg2.type);
     EXPECT_EQ(0, getReg2.reserved);
     EXPECT_EQ(string_offset + 4, getReg2.s_name);
-  } else {
-    context->get_operand(operand_offset, &getReg1);
-    EXPECT_EQ(reg_size, getReg1.size);
-    EXPECT_EQ(BrigEOperandReg, getReg1.kind);
-    EXPECT_EQ(Brigb32, getReg1.type);
-    EXPECT_EQ(0, getReg1.reserved);
-    EXPECT_EQ(string_offset, getReg1.s_name);
-
-    context->get_operand(ref.o_operands[1], &getImmed1);
-    EXPECT_EQ(immed_size, getImmed1.size);
-    EXPECT_EQ(BrigEOperandImmed, getImmed1.kind);
-    EXPECT_EQ(Brigb64, getImmed1.type);
-    EXPECT_EQ(0, getImmed1.reserved);
-    EXPECT_EQ(4295032833, getImmed1.bits.l[0]);
-  }
+  } 
   delete lexer;
 }
 
-INSTANTIATE_TEST_CASE_P(CodegenTest, TestInstruction2Movhi, testing::Range(0, 2));
+INSTANTIATE_TEST_CASE_P(CodegenTest, TestInstruction2Movhi, testing::Range(0, 1));
+
+TEST_P(TestInstruction2MovsHiInvalid, MovsHi) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(input_instruction2_movshi_invalid[n]);
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Instruction2(context));
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest,
+                           TestInstruction2MovsHiInvalid,
+                           testing::Range(0,5));
+
 
 TEST_P(TestInstruction2Count, Count) {
   context->set_error_reporter(main_reporter);
