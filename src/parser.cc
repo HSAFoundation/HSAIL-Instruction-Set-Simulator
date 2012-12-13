@@ -5149,6 +5149,12 @@ int Lda(Context* context) {
   context->token_to_scan = yylex();
   BrigDataType16_t type = Brigb32;
   BrigoOffset32_t OpOffset[2] = {0, 0};
+  BrigStorageClass32_t storageClass = BrigFlatSpace;
+
+  if (!AddressSpaceIdentifier(context)) {
+    storageClass = context->token_value.storage_class;
+    context->token_to_scan = yylex();
+  }
 
   // Note: lda_uLength I think 'b' is also allowed.
   // Length: 1, 32, 64
@@ -5190,13 +5196,14 @@ int Lda(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  BrigInstBase lda_op = {
-    0,                      // size
-    BrigEInstBase,          // kind
-    BrigLda,                // opcode
-    type,                   // type
+  BrigInstMem lda_op = {
+    0,                     // size
+    BrigEInstMem,          // kind
+    BrigLda,               // opcode
+    type,                  // type
     BrigNoPacking,         // packing
-    {OpOffset[0], OpOffset[1], 0, 0, 0}       // o_operands[5]
+    {OpOffset[0], OpOffset[1], 0, 0, 0},
+    storageClass
   };
   lda_op.size = sizeof(lda_op);
   context->append_code(&lda_op);
