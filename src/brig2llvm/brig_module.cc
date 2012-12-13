@@ -1293,8 +1293,8 @@ bool BrigModule::validate(const BrigOperandImmed *operand) const {
   if(!validateSize(operand)) return false;
   valid &= check(Brigb1 == operand->type  || Brigb8 == operand->type  ||
                  Brigb16 == operand->type || Brigb32 == operand->type ||
-                 Brigb64 == operand->type,
-                 "Invalid type, must be b1, b8, b16, b32 or b64");
+                 Brigb64 == operand->type || Brigb128 == operand->type,
+                 "Invalid type, must be b1, b8, b16, b32, b64 or b128");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   BrigDataType type = BrigDataType(operand->type);
