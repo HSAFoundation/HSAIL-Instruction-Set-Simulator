@@ -5080,7 +5080,7 @@ class OperationLda : public ::testing::TestWithParam<int>{
 
 struct LdaTest{
   const char* str;
-  BrigInstBase ref;
+  BrigInstMem ref;
 };
 
 struct LdaTest lda_pair[22] = {
@@ -5088,108 +5088,117 @@ struct LdaTest lda_pair[22] = {
   {
     "lda_u32 $s1, [&x];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[1]
   {
     "lda_u32 $s1, [%g];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[2]
   {
     "lda_u32 $s1, [$s2];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[3]
   {
     "lda_u32 $s1, [$s2 + 10];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[4]
   {
     "lda_u32 $s1, [$s2 - 5];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[5]
   {
     "lda_u32 $s1, [%g][$s2];",
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[6]
   {
     "lda_u32 $s1, [%g][$s2 + 10];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[7]
   {
     "lda_u32 $s1, [%g][$s2 - 5];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[8]
   {
     "lda_u32 $s1, [0x6e];",
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 
@@ -5197,156 +5206,169 @@ struct LdaTest lda_pair[22] = {
   {
     "lda_u32 $s1, [%g][4];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size + address_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size + address_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[10]
   {
     "lda_u32 $s1, [&array][4];",
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size + address_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size + address_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[11]
   {
     "lda_u64 $d1, [&x];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-   {operand_offset, operand_offset + reg_size, 0, 0, 0}
+   {operand_offset, operand_offset + reg_size, 0, 0, 0},
+   BrigFlatSpace
     }
   },
 //lda_pair[12]
   {
     "lda_u64 $d1, [%g];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[13]
   {
     "lda_u64 $d1, [$d2];",
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[14]
   {
     "lda_u64 $d1, [0x6e];", 
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-   {operand_offset, operand_offset + reg_size, 0, 0, 0}
+   {operand_offset, operand_offset + reg_size, 0, 0, 0},
+   BrigFlatSpace
     }
   },
 //lda_pair[15]
   {
     "lda_u64 $d1, [$d2 + 10];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[16]
   {
     "lda_u64 $d1, [$d2 - 5];",
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-   {operand_offset, operand_offset + reg_size * 2, 0, 0, 0}
+   {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
+   BrigFlatSpace
     }
   },
 //lda_pair[17]
   {
     "lda_u64 $d1, [%g][4];",
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size + address_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size + address_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[18]
   {
     "lda_u64 $d1, [&array][4];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-   {operand_offset, operand_offset + reg_size + address_size, 0, 0, 0}
+   {operand_offset, operand_offset + reg_size + address_size, 0, 0, 0},
+   BrigFlatSpace
     }
   },
 //lda_pair[19]
   {
     "lda_u64 $d1, [%g][$d2];",
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-   {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0}
+   {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
+   BrigFlatSpace
     }
   },
 //lda_pair[20]
   {
     "lda_u64 $d1, [%g][$d2 + 10];",
     {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-    {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0}
+    {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
+    BrigFlatSpace
     }
   },
 //lda_pair[21]
   {
     "lda_u64 $d1, [%g][$d2 - 5];",
      {
-    brig_inst_base_size,
-    BrigEInstBase,
+    brig_inst_mem_size,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-   {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0}
+   {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
+   BrigFlatSpace
     }
   }
 };
