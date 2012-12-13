@@ -296,6 +296,7 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(NDRangeSize);
       caseInst(Nop);
       caseInst(NullPtr);
+      caseInst(Qid);
       caseInst(WorkDim);
       caseInst(WorkGroupId);
       caseInst(WorkGroupSize);
@@ -3807,6 +3808,20 @@ bool BrigModule::validateNullPtr(const inst_iterator inst) const {
   if(BrigESmall == bdv->machine)
     valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)),
                    "Destination must be  a s register for the small model");
+  return valid;
+}
+
+bool BrigModule::validateQid(const inst_iterator inst) const {
+  bool valid = true;
+  //maybe BrigInstBase, or other.
+  if(!check(isa<BrigInstBase>(inst), "Incorrect instruction kind"))
+    return false;
+  if(!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
+    return false;
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "Type of destination should be s register");
   return valid;
 }
 
