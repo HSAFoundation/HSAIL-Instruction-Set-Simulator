@@ -3525,6 +3525,35 @@ TEST(BrigKernelTest, MultipleVersionStatements) {
   if(!BP) return;
 }
 
+TEST(BrigKernelTest, Sftz) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small, $sftz;\n"
+    "kernel &ftzTest(kernarg_f32 %out)\n"
+    "{\n"
+    " add_f32 $s1, 0x007FFFFF, 0;\n"
+    " st_kernarg_f32 $s1, [%out];\n"
+    " ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("ftzTest");
+  float *arg1 = new float(7.0f);
+  void *args[] = { arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0.0f, *arg1);
+  delete arg1;
+}
+
+TEST(BrigGlobalTest, Align16) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "align 16 readonly_s32 &x[] = {12, 13, 14, -13};"
+    );
+  EXPECT_TRUE(BP);
+}
+
 TEST(BrigInstTest, RegV2) {
   hsa::brig::BrigProgram BP = TestHSAIL(
   "version 1:0:$small;\n"
@@ -3602,8 +3631,8 @@ TEST(BrigInstTest, Testb128) {
   memset(output, 0, sizeof(uint64_t) * 2);
   void *args[] = { &output };
   BE.launch(fun, args);
-  EXPECT_EQ(0x0000001000000001, output[1]);
-  EXPECT_EQ(0x0000010000000011, output[0]);
+  EXPECT_EQ(0x0000000100000010, output[0]);
+  EXPECT_EQ(0x0000001100000100, output[1]);
 
   delete output;
 }
