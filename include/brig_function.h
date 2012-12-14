@@ -18,6 +18,8 @@ class BrigFunction {
     return S_.strings + getMethod()->s_name + 1;
   }
 
+  bool isSftz() const { return ver_->ftz == BrigESftz; }
+
   uint32_t getNumArgs() const {
     const BrigDirectiveMethod *method = getMethod();
     return method->inParamCount + method->outParamCount;

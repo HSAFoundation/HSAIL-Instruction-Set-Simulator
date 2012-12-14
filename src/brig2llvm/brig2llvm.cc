@@ -169,9 +169,10 @@ struct FunState {
   typedef std::map<uint32_t, llvm::BasicBlock *> CBMap ;
   typedef CBMap::const_iterator CBIt;
 
+  CBMap cbMap;
   const FunMap &funMap;
   llvm::Value *regs;
-  CBMap cbMap;
+  const bool isSftz;
 
   static const FunState Create(const FunMap &funMap,
                                SymbolMap &symbolMap,
@@ -198,6 +199,7 @@ struct FunState {
   FunState(const FunMap &funMap, SymbolMap &symbolMap,
            const BrigFunction &brigFun, llvm::Function *llvmFun) :
     funMap(funMap),
+    isSftz(brigFun.isSftz()),
     symbolMap(symbolMap) {
 
     llvm::LLVMContext &C = llvmFun->getContext();
@@ -526,7 +528,8 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 
   unsigned operand = 0;
 
-  bool ftz = BrigInstHelper::isFtz(inst);
+  bool ftz =
+    BrigInstHelper::isFtz(inst) || (inst->type == Brigf32 && state.isSftz);
   if(ftz) insertEnableFtz(B);
 
   bool rounding = BrigInstHelper::hasRoundingMode(inst);
