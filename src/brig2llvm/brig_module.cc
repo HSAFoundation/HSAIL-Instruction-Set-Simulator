@@ -767,7 +767,8 @@ bool BrigModule::validate(const BrigSymbolCommon *s) const {
   valid &= check(s->type <= Brigf64x2,
                  "Invalid type");
   valid &= check(s->align == 1 || s->align == 2 ||
-                 s->align == 4 || s->align == 8,
+                 s->align == 4 || s->align == 8 ||
+                 s->align == 16,
                  "Invalid alignment");
 
   return valid;
@@ -3092,7 +3093,7 @@ bool BrigModule::validateLd(const inst_iterator inst) const {
   if(!check(ldSt, "Invalid instruction kind")) return false;
   valid &= check(isCompatibleAddrSize(ldSt->storageClass, *getType(addr)),
                  "Incompatible address size");
-  
+
   return valid;
 }
 

@@ -3525,7 +3525,7 @@ TEST(BrigKernelTest, MultipleVersionStatements) {
   if(!BP) return;
 }
 
-TEST(ftzTest, ftzTest) {
+TEST(BrigKernelTest, Sftz) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small, $sftz;\n"
     "kernel &ftzTest(kernarg_f32 %out)\n"
@@ -3544,4 +3544,12 @@ TEST(ftzTest, ftzTest) {
   BE.launch(fun, args);
   EXPECT_EQ(0.0f, *arg1);
   delete arg1;
+}
+
+TEST(BrigGlobalTest, Align16) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "align 16 readonly_s32 &x[] = {12, 13, 14, -13};"
+    );
+  EXPECT_TRUE(BP);
 }
