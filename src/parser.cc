@@ -143,7 +143,10 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
 
   if ((context->token_type == REGISTER) || (context->token_to_scan == TOKEN_WAVESIZE)) {
     opName = context->token_value.string_val;
-  } else if (context->token_type == CONSTANT || context->token_to_scan == '-') {
+  } else if (context->token_type == CONSTANT || 
+             context->token_to_scan == '-' ||
+             context->token_to_scan == '+' ||
+             context->token_type == DATA_TYPE_ID) {
     if (current_offset % 8) {
       current_offset += 8 - current_offset % 8;
     }
@@ -338,8 +341,20 @@ int BaseOperand(Context* context) {
         context->set_error(MISSING_DOUBLE_CONSTANT); 
         return 1;
       }
-      for (uint32_t i = 0; i < douList.size(); ++i) {
-        decList.push_back(*reinterpret_cast<int64_t*>(&douList[i]));
+      switch (subType) {
+        case Brigb32: {
+          float temp;
+          for (uint32_t i = 0; i < douList.size(); ++i) {
+            temp = (float)douList[i];
+            decList.push_back((uint64_t)(*reinterpret_cast<int32_t*>(&temp)));
+          }
+          break;
+        }
+        case Brigb64:
+          for (uint32_t i = 0; i < douList.size(); ++i) {
+            decList.push_back(*reinterpret_cast<int64_t*>(&douList[i]));
+          }
+          break;
       }
     }
     if (context->token_to_scan != ')') {
@@ -353,18 +368,65 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
-    uint32_t typeSize = 0;
+    uint32_t size1 = 0, size2 = 0;
+    //TODO(Chuang): f16 and b1 constant implement should be implemented
+    size1 = size2 = size;
+    if (type == Brigb128) {
+      //Note: 128bit constant is not exist except packed constant. 
+      //      If data type is Brigb128. Size will never be only 1.
+      size1 >>= 1;
+    }
+    uint64_t shift = 0x0;
+    //Note: If the subType is Zero, it won't be a packed constant.
+    //      the type of Zero is Brigs8.
     switch (subType) {
-      case Brigb8:   typeSize = sizeof(int8_t);  break;
-      case Brigb16:  typeSize = sizeof(int16_t); break;
-      case Brigb32:  typeSize = sizeof(int32_t); break;
-      case Brigb64:  typeSize = sizeof(int64_t); break;
+      case Brigb8:  shift = 8;  break;
+      case Brigb16: shift = 16; break;
+      case Brigb32: shift = 32; break;
     }
     boi.bits.l[0] = boi.bits.l[1] = 0;
-    int8_t* step = reinterpret_cast<int8_t*>(&boi.bits);
-    for (uint32_t i = 0 ; i < size ; ++i) {
-      memcpy(step, &decList[i], typeSize);
-      step += typeSize;
+    // Not endian sensitive
+    uint32_t i;
+    switch (subType) {
+      case Brigb8:
+        for (i = 0 ; i < size1; ++i) {
+          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] += (uint8_t)decList[i];
+        }
+        for (; i < size2; ++i) {
+          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] += (uint8_t)decList[i];
+        }
+        break;
+      
+      case Brigb16:
+        for (i = 0 ; i < size1; ++i) {
+          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] += (uint16_t)decList[i];
+        }
+        for (; i < size2; ++i) {
+          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] += (uint16_t)decList[i];
+        }
+        break;
+      case Brigb32:
+        for (i = 0 ; i < size1; ++i) {
+          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] += (uint32_t)decList[i];
+        }
+        for (; i < size2; ++i) {
+          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] += (uint32_t)decList[i];
+        }
+        break;
+      case Brigb64:
+        for (i = 0 ; i < size1; ++i) {
+          boi.bits.l[0] = (uint64_t)decList[i];
+        }
+        for (; i < size2; ++i) {
+          boi.bits.l[1] = (uint64_t)decList[i];
+        }
+        break;
     }
     boi.type = type;
     context->append_operand(&boi);
@@ -8482,23 +8544,23 @@ BrigDataType16_t ConvertTypeToB(BrigDataType16_t type,
   uint32_t size = 0;
   
   switch(type) {
-    case Brigb1: bType = Brigb1; break;
+    case Brigb1:      bType = Brigb1; subType = 0; size = 1; break;
     case Brigs8:
     case Brigu8:
-    case Brigb8: bType = Brigb8; break;
+    case Brigb8:      bType = Brigb8; subType = 0; size = 1; break;
     case Brigs16:
     case Brigu16:
     case Brigf16:
-    case Brigb16: bType = Brigb16; break;
+    case Brigb16:     bType = Brigb16; subType = 0; size = 1; break;
     case Brigs32:
     case Brigu32:
     case Brigf32:
-    case Brigb32: bType =  Brigb32; break;
+    case Brigb32:     bType = Brigb32; subType = 0; size = 1; break;
     case Brigs64:
     case Brigu64:
     case Brigf64:
-    case Brigb64:  bType = Brigb64; break;
-    case Brigb128: bType = Brigb128; break;
+    case Brigb64:     bType = Brigb64; subType = 0; size = 1; break;
+    case Brigb128:    bType = Brigb128; subType = 0; size = 1; break;
     case Brigu8x4:    bType = Brigb32;  subType = Brigb8;  size = 4;  break;
     case Brigs8x4:    bType = Brigb32;  subType = Brigb8;  size = 4;  break;
     case Brigu16x2:   bType = Brigb32;  subType = Brigb16; size = 2;  break;
