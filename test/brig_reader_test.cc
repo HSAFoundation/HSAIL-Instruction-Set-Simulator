@@ -3673,6 +3673,7 @@ TEST(BrigPacked, testPackedConstants) {
   {
     unsigned bits = 64;
     uint32_t result = uint32_t(0x400000003f800000);
-    testPackedConstants(bits, "_f32x2(2.0l, 1.0l)", result, "f32x2");
+    testPackedConstants(bits, "_f32x2(0d4000000000000000, 0d3ff0000000000000)",
+			 result, "f32x2");
   }
 }
