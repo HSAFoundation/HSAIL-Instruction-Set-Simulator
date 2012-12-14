@@ -1243,7 +1243,6 @@ TEST_P(Instruction3OpMovdlob64, BrigMovdlo){
 
   BrigInstBase getBase;
   BrigOperandReg getReg;
-  BrigOperandImmed getImm;
   context->get_code(code_offset, &getBase);
   BrigInstBase ref = instruction3op_movdlo_pair[n].ref;
 
@@ -1283,84 +1282,29 @@ TEST_P(Instruction3OpMovdlob64, BrigMovdlo){
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset + 4 * 2, getReg.s_name);  
   }
-  if(n == 1){
-    context->get_operand(ref.o_operands[0], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset, getReg.s_name);  
-
-    context->get_operand(ref.o_operands[1], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset + 4, getReg.s_name);  
-
-    context->get_operand(ref.o_operands[2], &getImm);
-    // BrigOperandImmed
-    EXPECT_EQ(immed_size, getImm.size);
-    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x1703a, getImm.bits.u);
-  }
-  if(n == 2){
-    context->get_operand(ref.o_operands[0], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset, getReg.s_name);  
-
-    context->get_operand(ref.o_operands[1], &getImm);
-    // BrigOperandImmed
-    EXPECT_EQ(immed_size, getImm.size);
-    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x38002a, getImm.bits.u);
-
-    context->get_operand(ref.o_operands[2], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset + 4, getReg.s_name);
-  }
-  if(n == 3){
-    context->get_operand(ref.o_operands[0], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset, getReg.s_name);  
-
-    context->get_operand(ref.o_operands[1], &getImm);
-    // BrigOperandImmed
-    EXPECT_EQ(immed_size, getImm.size);
-    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x38002a, getImm.bits.u);
-
-    context->get_operand(ref.o_operands[2], &getImm);
-    // BrigOperandImmed
-    EXPECT_EQ(immed_size, getImm.size);
-    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x1703a, getImm.bits.u);
-  }
-
+  
   delete lexer;
 }
 
 INSTANTIATE_TEST_CASE_P(CodegenTest, 
                         Instruction3OpMovdlob64, 
-                        testing::Range(0,4));
+                        testing::Range(0,1));
+
+TEST_P(TestInstruction3MovdLoInvalid, MovsLo) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(input_instruction3_movdlo_invalid[n]);
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Instruction3(context));
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest,
+                           TestInstruction3MovdLoInvalid,
+                           testing::Range(0,6));
 
 TEST_P(Instruction3OpMovdhib64, BrigMovdhi){
   context->set_error_reporter(main_reporter);
@@ -1374,7 +1318,6 @@ TEST_P(Instruction3OpMovdhib64, BrigMovdhi){
 
   BrigInstBase getBase;
   BrigOperandReg getReg;
-  BrigOperandImmed getImm;
   context->get_code(code_offset, &getBase);
   BrigInstBase ref = instruction3op__movdhi_pair[n].ref;
 
@@ -1414,84 +1357,30 @@ TEST_P(Instruction3OpMovdhib64, BrigMovdhi){
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset + 4 * 2, getReg.s_name);  
   }
-  if(n == 1){
-    context->get_operand(ref.o_operands[0], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset, getReg.s_name);  
-
-    context->get_operand(ref.o_operands[1], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset + 4, getReg.s_name);  
-
-    context->get_operand(ref.o_operands[2], &getImm);
-    // BrigOperandImmed
-    EXPECT_EQ(immed_size, getImm.size);
-    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x1703a, getImm.bits.u);
-  }
-  if(n == 2){
-    context->get_operand(ref.o_operands[0], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset, getReg.s_name);  
-
-    context->get_operand(ref.o_operands[1], &getImm);
-    // BrigOperandImmed
-    EXPECT_EQ(immed_size, getImm.size);
-    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x38002a, getImm.bits.u);
-
-    context->get_operand(ref.o_operands[2], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset + 4, getReg.s_name);
-  }
-  if(n == 3){
-    context->get_operand(ref.o_operands[0], &getReg);
-    // BrigOperandReg
-    EXPECT_EQ(reg_size, getReg.size);
-    EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
-    EXPECT_EQ(0, getReg.reserved);
-    EXPECT_EQ(string_offset, getReg.s_name);  
-
-    context->get_operand(ref.o_operands[1], &getImm);
-    // BrigOperandImmed
-    EXPECT_EQ(immed_size, getImm.size);
-    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x38002a, getImm.bits.u);
-
-    context->get_operand(ref.o_operands[2], &getImm);
-    // BrigOperandImmed
-    EXPECT_EQ(immed_size, getImm.size);
-    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x1703a, getImm.bits.u);
-  }
-
+ 
   delete lexer;
 }
 
 INSTANTIATE_TEST_CASE_P(CodegenTest, 
                         Instruction3OpMovdhib64, 
-                        testing::Range(0,4));
+                        testing::Range(0,1));
+
+TEST_P(TestInstruction3MovdHiInvalid, MovsHi) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(input_instruction3_movdhi_invalid[n]);
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Instruction3(context));
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest,
+                           TestInstruction3MovdHiInvalid,
+                           testing::Range(0,6));
+
 
 TEST_P(Instruction3OpCopySignFloat, BrigCopysign){
   context->set_error_reporter(main_reporter);

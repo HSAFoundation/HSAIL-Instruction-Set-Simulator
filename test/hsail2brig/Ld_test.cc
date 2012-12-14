@@ -1067,17 +1067,19 @@ TEST(CodegenTest, Lda_Codegen){
   };
   addr1.size = sizeof(addr1);
 
-  BrigInstBase out1 = {
+  BrigInstMem out1 = {
     0,
-    BrigEInstBase,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {0, sizeof(dest1), 0, 0, 0}
+    {0, sizeof(dest1), 0, 0, 0},
+    BrigFlatSpace
   };
   out1.size = sizeof(out1);
 
-  Ld_Test<BrigInstBase, BrigOperandReg> TestCase1(in, sbuf, &out1, NULL, &dest1, &addr1);
+  Ld_Test<BrigInstMem, BrigOperandReg> 
+    TestCase1(in, sbuf, &out1, NULL, &dest1, &addr1);
   TestCase1.Run_Test(&Lda);
   sbuf->clear();
 
@@ -1103,17 +1105,19 @@ TEST(CodegenTest, Lda_Codegen){
   };
   addr2.size = sizeof(addr2);
 
-  BrigInstBase out2 = {
+  BrigInstMem out2 = {
     0,
-    BrigEInstBase,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
-    {0, sizeof(dest2), 0, 0, 0}
+    {0, sizeof(dest2), 0, 0, 0},
+    BrigFlatSpace
   };
   out2.size = sizeof(out2);
 
-  Ld_Test<BrigInstBase, BrigOperandReg> TestCase2(in, sbuf, &out2, NULL, &dest2, &addr2);
+  Ld_Test<BrigInstMem, BrigOperandReg> 
+    TestCase2(in, sbuf, &out2, NULL, &dest2, &addr2);
   TestCase2.Run_Test(&Lda);
   sbuf->clear();
 
@@ -1150,17 +1154,18 @@ TEST(CodegenTest, Lda_Codegen){
   };
   indir3.size = sizeof(indir3);
 
-  BrigInstBase out3 = {
+  BrigInstMem out3 = {
     0,
-    BrigEInstBase,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
     {0, sizeof(dest3) + sizeof(reg3), 0, 0, 0},
+    BrigFlatSpace
   };
   out3.size = sizeof(out3);
 
-  Ld_Test<BrigInstBase, BrigOperandReg> TestCase3(in, sbuf, &out3, NULL, &dest3, &indir3, &reg3);
+  Ld_Test<BrigInstMem, BrigOperandReg> TestCase3(in, sbuf, &out3, NULL, &dest3, &indir3, &reg3);
   TestCase3.Run_Test(&Lda);
   sbuf->clear();
 
@@ -1197,17 +1202,18 @@ TEST(CodegenTest, Lda_Codegen){
   };
   indir4.size = sizeof(indir4);
 
-  BrigInstBase out4 = {
+  BrigInstMem out4 = {
     0,
-    BrigEInstBase,
+    BrigEInstMem,
     BrigLda,
     Brigu64,
     BrigNoPacking,
     {0, sizeof(dest4) + sizeof(reg4), 0, 0, 0},
+    BrigFlatSpace
   };
   out4.size = sizeof(out4);
 
-  Ld_Test<BrigInstBase, BrigOperandReg> TestCase4(in, sbuf, &out4, NULL, &dest4, &indir4, &reg4);
+  Ld_Test<BrigInstMem, BrigOperandReg> TestCase4(in, sbuf, &out4, NULL, &dest4, &indir4, &reg4);
   TestCase4.Run_Test(&Lda);
   sbuf->clear();
 
@@ -1244,17 +1250,19 @@ TEST(CodegenTest, Lda_Codegen){
   };
   comp5.size = sizeof(comp5);
 
-  BrigInstBase out5 = {
+  BrigInstMem out5 = {
     0,
-    BrigEInstBase,
+    BrigEInstMem,
     BrigLda,
     Brigu32,
     BrigNoPacking,
     {0, sizeof(dest5) + sizeof(addr5), 0, 0, 0},
+    BrigFlatSpace
   };
   out5.size = sizeof(out5);
 
-  Ld_Test<BrigInstBase, BrigOperandReg> TestCase5(in, sbuf, &out5, NULL, &dest5, &comp5, &addr5, NULL);
+  Ld_Test<BrigInstMem, BrigOperandReg> 
+    TestCase5(in, sbuf, &out5, NULL, &dest5, &comp5, &addr5, NULL);
   TestCase5.Run_Test(&Lda);
   sbuf->clear();
 

@@ -1787,8 +1787,8 @@ TEST(CodegenTest, MemorySegmentOps){
 
   std::string in, op1, op2;
   StringBuffer* sbuf = new StringBuffer();
-  in.assign("stof_private_u64 $d2, $d1;\n");
-  op1.assign("$d2"); op2.assign("$d1");
+  in.assign("stof_private_u64_u32 $d2, $s1;\n");
+  op1.assign("$d2"); op2.assign("$s1");
   sbuf->append(op1); sbuf->append(op2);
 
   BrigInstSegp ref1 = {
@@ -1799,37 +1799,38 @@ TEST(CodegenTest, MemorySegmentOps){
     BrigNoPacking,         // packing
     {0, 0, 0, 0, 0},      // o_operands[5]
     BrigPrivateSpace,      // storageClass
-    Brigb32,
+    Brigu32,
     0
   };
   ref1.size = sizeof(ref1);
 
   BrigOperandReg dest = {
-  0,
-  BrigEOperandReg,
-  Brigb64,
-  0,
-  0
+    0,
+    BrigEOperandReg,
+    Brigb64,
+    0,
+    0
   };
   dest.size = sizeof(dest);
   ref1.o_operands[1] = sizeof(dest);
 
   BrigOperandReg src = {
-  0,
-  BrigEOperandReg,
-  Brigb64,
-  0,
-  op1.size()+1
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    op1.size() + 1
   };
   src.size = sizeof(src);
 
-  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> TestCase1(in, sbuf, &ref1, &dest, &src);
+  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> 
+    TestCase1(in, sbuf, &ref1, &dest, &src);
   TestCase1.Run_Test(&Segp);
   sbuf->clear();
 
   /**************************************** Case 2 ******************************************/
-  in.assign("segmentp_group_b1 $c1, $d0;\n");
-  op1.assign("$c1"); op2.assign("$d0");
+  in.assign("segmentp_arg_b1_u32 $c1, $s0;\n");
+  op1.assign("$c1"); op2.assign("$s0");
   sbuf->append(op1); sbuf->append(op2);
 
   BrigInstSegp ref2 = {
@@ -1839,8 +1840,8 @@ TEST(CodegenTest, MemorySegmentOps){
     Brigb1,               // type
     BrigNoPacking,        // packing
     {0, 0, 0, 0, 0},      // o_operands[5]
-    BrigGroupSpace,       // storageClass
-    Brigb32,
+    BrigArgSpace,       // storageClass
+    Brigu32,
     0
   };
   ref2.size = sizeof(ref2);
@@ -1854,7 +1855,7 @@ TEST(CodegenTest, MemorySegmentOps){
 
   src.size = sizeof(src);
   src.kind = BrigEOperandReg;
-  src.type = Brigb64;
+  src.type = Brigb32;
   src.reserved = 0;
   src.s_name = op1.size() + 1;
 
@@ -1863,23 +1864,58 @@ TEST(CodegenTest, MemorySegmentOps){
   sbuf->clear();
 
   /**************************************** Case 3 ******************************************/
-  in.assign("ftos_group_u64 $d1, $d2;\n");
-  op1.assign("$d1"); op2.assign("$d2");
+  in.assign("ftos_group_u32_u64 $s1, $d2;\n");
+  op1.assign("$s1"); op2.assign("$d2");
   sbuf->append(op1); sbuf->append(op2);
 
   BrigInstSegp ref3 = {
     0,                    // size
     BrigEInstSegp,         // kind
     BrigFtoS,             // opcode
-    Brigu64,              // type
+    Brigu32,              // type
     BrigNoPacking,        // packing
     {0, 0, 0, 0, 0},      // o_operands[5]
     BrigGroupSpace,        // storageClass
-    Brigb32,
+    Brigu64,
     0
   };
   ref3.size = sizeof(ref3);
   ref3.o_operands[1] = sizeof(dest);
+
+  dest.size = sizeof(dest);
+  dest.kind = BrigEOperandReg;
+  dest.type = Brigb32;
+  dest.reserved = 0;
+  dest.s_name = 0;
+
+  src.size = sizeof(src);
+  src.kind = BrigEOperandReg;
+  src.type = Brigb64;
+  src.reserved = 0;
+  src.s_name = op1.size() + 1;
+
+  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> 
+    TestCase3(in, sbuf, &ref3, &dest, &src);
+  TestCase3.Run_Test(&Segp);
+  sbuf->clear();
+  /**************************************** Case 4 ******************************************/
+  in.assign("ftos_global_u64_u64 $d1, $d2;\n");
+  op1.assign("$d1"); op2.assign("$d2");
+  sbuf->append(op1); sbuf->append(op2);
+
+  BrigInstSegp ref4 = {
+    0,                    // size
+    BrigEInstSegp,         // kind
+    BrigFtoS,         // opcode
+    Brigu64,               // type
+    BrigNoPacking,        // packing
+    {0, 0, 0, 0, 0},      // o_operands[5]
+    BrigGlobalSpace,        // storageClass
+    Brigu64,
+    0
+  };
+  ref4.size = sizeof(ref4);
+  ref4.o_operands[1] = sizeof(dest);
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandReg;
@@ -1893,57 +1929,24 @@ TEST(CodegenTest, MemorySegmentOps){
   src.reserved = 0;
   src.s_name = op1.size() + 1;
 
-  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> TestCase3(in, sbuf, &ref3, &dest, &src);
-  TestCase3.Run_Test(&Segp);
-  sbuf->clear();
-  /**************************************** Case 4 ******************************************/
-  in.assign("ftos_global_u32 $s1,$s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
-  sbuf->append(op1); sbuf->append(op2);
-
-  BrigInstSegp ref4 = {
-    0,                    // size
-    BrigEInstSegp,         // kind
-    BrigFtoS,         // opcode
-    Brigu32,               // type
-    BrigNoPacking,        // packing
-    {0, 0, 0, 0, 0},      // o_operands[5]
-    BrigGlobalSpace,        // storageClass
-    Brigb32,
-    0
-  };
-  ref4.size = sizeof(ref4);
-  ref4.o_operands[1] = sizeof(dest);
-
-  dest.size = sizeof(dest);
-  dest.kind = BrigEOperandReg;
-  dest.type = Brigb32;
-  dest.reserved = 0;
-  dest.s_name = 0;
-
-  src.size = sizeof(src);
-  src.kind = BrigEOperandReg;
-  src.type = Brigb32;
-  src.reserved = 0;
-  src.s_name = op1.size() + 1;
-
-  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> TestCase4(in, sbuf, &ref4, &dest, &src);
+  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> 
+    TestCase4(in, sbuf, &ref4, &dest, &src);
   TestCase4.Run_Test(&Segp);
   sbuf->clear();
   /**************************************** Case 5 ******************************************/
-  in.assign("stof_global_u32 $s1,$s2;\n");
-  op1.assign("$s1"); op2.assign("$s2");
+  in.assign("stof_spill_u64_u32 $d1, $s2;\n");
+  op1.assign("$d1"); op2.assign("$s2");
   sbuf->append(op1); sbuf->append(op2);
 
   BrigInstSegp ref5 = {
     0,                    // size
     BrigEInstSegp,         // kind
     BrigStoF,         // opcode
-    Brigu32,               // type
+    Brigu64,               // type
     BrigNoPacking,        // packing
     {0, 0, 0, 0, 0},      // o_operands[5]
-    BrigGlobalSpace,        // storageClass
-    Brigb32,
+    BrigSpillSpace,        // storageClass
+    Brigu32,
     0
   };
   ref5.size = sizeof(ref5);
@@ -1951,7 +1954,7 @@ TEST(CodegenTest, MemorySegmentOps){
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandReg;
-  dest.type = Brigb32;
+  dest.type = Brigb64;
   dest.reserved = 0;
   dest.s_name = 0;
 
@@ -1961,11 +1964,11 @@ TEST(CodegenTest, MemorySegmentOps){
   src.reserved = 0;
   src.s_name = op1.size() + 1;
 
-  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> TestCase5(in, sbuf, &ref5, &dest, &src);
+  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> 
+    TestCase5(in, sbuf, &ref5, &dest, &src);
   TestCase5.Run_Test(&Segp);
   sbuf->clear();
   delete sbuf;
-
 }
 
 TEST(ErrorReportTest, Instruction2) {
@@ -1980,6 +1983,32 @@ TEST(ErrorReportTest, Instruction2) {
   input.assign( "frcp_f32 $s0;\n");
   Instruction2_Test<> TestCase3(input);
   TestCase3.Run_Test(&Instruction2, MISSING_COMMA);
+}
+
+TEST(ErrorReportTest, Segp) {
+  std::string input = "stof_global_u64_u64 $d1, $d2\n";
+  Instruction2_Test<> TestCase1(input);
+  TestCase1.Run_Test(&Segp, MISSING_SEMICOLON);
+
+  input.assign( "stof_global_f32_u64 $s1, $d2;\n");
+  Instruction2_Test<> TestCase2(input);
+  TestCase2.Run_Test(&Segp, INVALID_DATA_TYPE);
+
+  input.assign( "ftos_u32_u64 $s1, $d2;\n");
+  Instruction2_Test<> TestCase3(input);
+  TestCase3.Run_Test(&Segp, MISSING_ADDRESSSPACE_IDENTIFIER);
+
+  input.assign("segmentp_group_b32_u64 $s1, $d0;\n");
+  Instruction2_Test<> TestCase4(input);
+  TestCase4.Run_Test(&Segp, INVALID_DATA_TYPE);
+
+  input.assign("segmentp_readonly_b1_u64 $s1, $d0;\n");
+  Instruction2_Test<> TestCase5(input);
+  TestCase5.Run_Test(&Segp, INVALID_OPERAND);
+
+  input.assign( "ftos_arg_u32_u64 $s1;\n");
+  Instruction2_Test<> TestCase6(input);
+  TestCase6.Run_Test(&Segp, MISSING_COMMA);
 }
 
 } //namespace brig

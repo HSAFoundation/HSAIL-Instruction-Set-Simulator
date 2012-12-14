@@ -79,6 +79,7 @@ enum error_code_t {
   MISSING_SECTION_ITEM,
   MISSING_BLOCK_TYPE,
   MISSING_ADDRESS,
+  MISSING_ADDRESSSPACE_IDENTIFIER,
   MISSING_OPERATION,
   MISSING_FUNCTION_DIRECTIVE,
   MISSING_SEGMENT,
@@ -234,6 +235,8 @@ class ErrorReporterInterface {
           return std::string("Missing block type.");
         case MISSING_ADDRESS:
           return std::string("Missing Address.");
+        case MISSING_ADDRESSSPACE_IDENTIFIER:
+          return std::string("Missing Address Space identifier.");
         case MISSING_OPERATION:
           return std::string("Missing operation");
         case MISSING_FUNCTION_DIRECTIVE:

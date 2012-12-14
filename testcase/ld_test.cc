@@ -568,24 +568,25 @@ TEST_P(OperationLda, BrigLda)
 
   EXPECT_EQ(0, Lda(context));
 
-  BrigInstBase getBase;
+  BrigInstMem getMem;
   BrigOperandReg getReg;
   BrigOperandAddress getAdd;
   BrigOperandIndirect getIndir;
   BrigOperandCompound getComp;
-  context->get_code(code_offset, &getBase);
-  BrigInstBase ref = lda_pair[n].ref;
+  context->get_code(code_offset, &getMem);
+  BrigInstMem ref = lda_pair[n].ref;
 
-  EXPECT_EQ(ref.size, getBase.size);
-  EXPECT_EQ(ref.kind, getBase.kind);
-  EXPECT_EQ(ref.opcode, getBase.opcode);
-  EXPECT_EQ(ref.packing, getBase.packing);
-  EXPECT_EQ(ref.type, getBase.type);
-  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
-  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
-  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
-  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
-  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+  EXPECT_EQ(ref.size, getMem.size);
+  EXPECT_EQ(ref.kind, getMem.kind);
+  EXPECT_EQ(ref.opcode, getMem.opcode);
+  EXPECT_EQ(ref.packing, getMem.packing);
+  EXPECT_EQ(ref.type, getMem.type);
+  EXPECT_EQ(ref.o_operands[0], getMem.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getMem.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getMem.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getMem.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getMem.o_operands[4]);
+  EXPECT_EQ(ref.storageClass, getMem.storageClass);
 
   if(n == 0){
     context->get_operand(ref.o_operands[0], &getReg);

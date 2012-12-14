@@ -876,7 +876,7 @@ class TestInstruction2MovLo : public ::testing::TestWithParam<int>
 
 };
 
-struct Instruction2Test instruction2movslo_pair[2] = {
+struct Instruction2Test instruction2movslo_pair[1] = {
 //instruction2movs_pair[0]
   {
     "movs_lo_b32 $s1, $d1;",
@@ -888,19 +888,21 @@ struct Instruction2Test instruction2movslo_pair[2] = {
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
-  },
-//instruction2movs_pair[1]
-  {
-    "movs_lo_b32 $s1, 0x000100010001;",
-     {
-    brig_inst_base_size,
-    BrigEInstBase,
-    BrigMovsLo,
-    Brigb32,
-    BrigNoPacking,
-    {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
-    }
   }
+};
+
+class TestInstruction2MovsLoInvalid : public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string input_instruction2_movslo_invalid[5] = {
+  "movs_lo_b32 $s1, 0x000100010001;",
+  "movs_lo_b32 0x000100010001, 0x000100010001;",
+  "movs_lo_b32 0x000100010001, $d1;",
+  "movs_lo_b32 $s1, WAVESIZE;",
+  //dest must be a s register
+  "movs_lo_b32 $d1, $d1;"
 };
 
 // BrigMovsHi
@@ -909,7 +911,7 @@ class TestInstruction2Movhi : public ::testing::TestWithParam<int>
 
 };
 
-struct Instruction2Test instruction2movshi_pair[2] = {
+struct Instruction2Test instruction2movshi_pair[1] = {
 //instruction2movshi_pair[0]
   {
     "movs_hi_b32 $s1, $d1;",
@@ -921,21 +923,22 @@ struct Instruction2Test instruction2movshi_pair[2] = {
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
-  },
-//instruction2movshi_pair[1]
-  {
-    "movs_hi_b32 $s1, 0x000100010001;",
-     {
-    brig_inst_base_size,
-    BrigEInstBase,
-    BrigMovsHi,
-    Brigb32,
-    BrigNoPacking,
-    {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
-    }
   }
 };
 
+class TestInstruction2MovsHiInvalid : public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string input_instruction2_movshi_invalid[5] = {
+  "movs_hi_b32 $s1, 0x000100010001;",
+  "movs_hi_b32 0x000100010001, 0x000100010001;",
+  "movs_hi_b32 0x000100010001, $d1;",
+  "movs_hi_b32 $s1, WAVESIZE;",
+  //dest must be a s register
+  "movs_hi_b32 $d1, $d1;"
+};
 // BrigCount
 class TestInstruction2Count : public ::testing::TestWithParam<int>
 {

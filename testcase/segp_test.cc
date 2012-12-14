@@ -21,7 +21,6 @@ TEST_P(SegpSegmentpb1, BrigSegmentp){
   BrigInstMem getMem;
   BrigOperandReg getReg;
   BrigOperandImmed getImm;
-  BrigOperandWaveSz getWaveSz;
   context->get_code(code_offset, &getMem);
 
   BrigInstSegp ref = segpsegmentpb1_pair[n].ref;
@@ -50,7 +49,7 @@ TEST_P(SegpSegmentpb1, BrigSegmentp){
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(12, getReg.s_name);
   }
@@ -84,8 +83,8 @@ TEST_P(SegpSegmentpb1, BrigSegmentp){
     // BrigOperandImmed
     EXPECT_EQ(immed_size, getImm.size);
     EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb1, getImm.type);
-    EXPECT_EQ(1, getImm.bits.u);
+    EXPECT_EQ(Brigb64, getImm.type);
+    EXPECT_EQ(1, getImm.bits.l[0]);
   }
   if(n == 3){
     context->get_operand(ref.o_operands[0], &getReg);
@@ -96,10 +95,12 @@ TEST_P(SegpSegmentpb1, BrigSegmentp){
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
-    context->get_operand(ref.o_operands[1], &getWaveSz);
-    //BrigOperandWaveSz
-    EXPECT_EQ(wavesz_size, getWaveSz.size);
-    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+    context->get_operand(ref.o_operands[1], &getImm);
+    // BrigOperandImmed
+    EXPECT_EQ(immed_size, getImm.size);
+    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+    EXPECT_EQ(Brigb64, getImm.type);
+    EXPECT_EQ(0x1234567890abcdef, getImm.bits.l[0]);
   }
 
   delete lexer;
@@ -121,7 +122,6 @@ TEST_P(SegpFtos, BrigFtoS)
   BrigInstMem getMem;
   BrigOperandReg getReg;
   BrigOperandImmed getImm;
-  BrigOperandWaveSz getWaveSz;
   context->get_code(code_offset, &getMem);
 
   BrigInstSegp ref = segpftos_pair[n].ref;
@@ -142,7 +142,7 @@ TEST_P(SegpFtos, BrigFtoS)
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
@@ -150,7 +150,7 @@ TEST_P(SegpFtos, BrigFtoS)
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(12, getReg.s_name);
   }
@@ -159,7 +159,7 @@ TEST_P(SegpFtos, BrigFtoS)
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
@@ -167,22 +167,24 @@ TEST_P(SegpFtos, BrigFtoS)
     // BrigOperandImmed
     EXPECT_EQ(immed_size, getImm.size);
     EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb32, getImm.type);
-    EXPECT_EQ(61, getImm.bits.u);
+    EXPECT_EQ(Brigb64, getImm.type);
+    EXPECT_EQ(61, getImm.bits.l[0]);
   }
   if(n == 2){
     context->get_operand(ref.o_operands[0], &getReg);
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
-    context->get_operand(ref.o_operands[1], &getWaveSz);
-    //BrigOperandWaveSz
-    EXPECT_EQ(wavesz_size, getWaveSz.size);
-    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+    context->get_operand(ref.o_operands[1], &getImm);
+    // BrigOperandImmed
+    EXPECT_EQ(immed_size, getImm.size);
+    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+    EXPECT_EQ(Brigb64, getImm.type);
+    EXPECT_EQ(0xf7, getImm.bits.l[0]);
   }
   if(n == 21){
     context->get_operand(ref.o_operands[0], &getReg);
@@ -226,10 +228,13 @@ TEST_P(SegpFtos, BrigFtoS)
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
-    context->get_operand(ref.o_operands[1], &getWaveSz);
-    //BrigOperandWaveSz
-    EXPECT_EQ(wavesz_size, getWaveSz.size);
-    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+    context->get_operand(ref.o_operands[1], &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(reg_size, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(12, getReg.s_name);
   }
 
   delete lexer;
@@ -250,7 +255,6 @@ TEST_P(SegpStof, BrigStoF){
   BrigInstMem getMem;
   BrigOperandReg getReg;
   BrigOperandImmed getImm;
-  BrigOperandWaveSz getWaveSz;
   context->get_code(code_offset, &getMem);
 
   BrigInstSegp ref = segpstof_pair[n].ref;
@@ -271,7 +275,7 @@ TEST_P(SegpStof, BrigStoF){
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
@@ -279,7 +283,7 @@ TEST_P(SegpStof, BrigStoF){
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(12, getReg.s_name);
   }
@@ -288,7 +292,7 @@ TEST_P(SegpStof, BrigStoF){
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
@@ -296,7 +300,7 @@ TEST_P(SegpStof, BrigStoF){
     // BrigOperandImmed
     EXPECT_EQ(immed_size, getImm.size);
     EXPECT_EQ(BrigEOperandImmed, getImm.kind);
-    EXPECT_EQ(Brigb32, getImm.type);
+    EXPECT_EQ(Brigb64, getImm.type);
     EXPECT_EQ(61, getImm.bits.u);
   }
   if(n == 2){
@@ -304,14 +308,18 @@ TEST_P(SegpStof, BrigStoF){
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb32, getReg.type);
+    EXPECT_EQ(Brigb64, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
-    context->get_operand(ref.o_operands[1], &getWaveSz);
-    //BrigOperandWaveSz
-    EXPECT_EQ(wavesz_size, getWaveSz.size);
-    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+    context->get_operand(ref.o_operands[1], &getReg);
+    // BrigOperandReg
+    EXPECT_EQ(reg_size, getReg.size);
+    EXPECT_EQ(BrigEOperandReg, getReg.kind);
+    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(0, getReg.reserved);
+    EXPECT_EQ(12, getReg.s_name);
+
   }
   if(n == 21){
     context->get_operand(ref.o_operands[0], &getReg);
@@ -355,10 +363,12 @@ TEST_P(SegpStof, BrigStoF){
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset, getReg.s_name);
 
-    context->get_operand(ref.o_operands[1], &getWaveSz);
-    //BrigOperandWaveSz
-    EXPECT_EQ(wavesz_size, getWaveSz.size);
-    EXPECT_EQ(BrigEOperandWaveSz, getWaveSz.kind);
+    context->get_operand(ref.o_operands[1], &getImm);
+    // BrigOperandImmed
+    EXPECT_EQ(immed_size, getImm.size);
+    EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+    EXPECT_EQ(Brigb32, getImm.type);
+    EXPECT_EQ(0xabcdef, getImm.bits.u);
   }
 
   delete lexer;

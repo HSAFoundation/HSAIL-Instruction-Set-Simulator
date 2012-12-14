@@ -274,6 +274,7 @@ class BrigModule {
   bool validateNDRangeSize(const inst_iterator inst) const;
   bool validateNop(const inst_iterator inst) const;
   bool validateNullPtr(const inst_iterator inst) const;
+  bool validateQid(const inst_iterator inst) const;
   bool validateWorkDim(const inst_iterator inst) const;
   bool validateWorkGroupId(const inst_iterator inst) const;
   bool validateWorkGroupSize(const inst_iterator inst) const;
@@ -291,7 +292,8 @@ class BrigModule {
   template<typename T> bool validateSize(const T *brig) const;
 
   const BrigDirectiveVersion* getFirstVersionDirective() const;
-
+  bool isCompatibleAddrSize(const BrigStorageClass32_t sClass,
+                            const BrigDataType type) const;
   const BrigSections S_;
   llvm::raw_ostream *out_;
   const bool valid_;

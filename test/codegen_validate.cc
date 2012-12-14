@@ -246,6 +246,13 @@ void validate(const BrigInstMem* ref, const BrigInstMem* get,
         caseOperBrig(OperandReg);
         caseOperBrig(OperandImmed);
         caseOperBrig(OperandWaveSz);
+        caseOperBrig(OperandOpaque);
+        caseOperBrig(OperandRegV2);
+        caseOperBrig(OperandRegV4);
+        caseOperBrig(OperandAddress);
+        caseOperBrig(OperandLabelRef);        
+        caseOperBrig(OperandIndirect);
+        caseOperBrig(OperandCompound);
         default:
           printf("Offset to invalid operand");
           exit(1);

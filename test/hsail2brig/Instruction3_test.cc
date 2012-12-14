@@ -791,10 +791,10 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   TestCase19.Run_Test(&Instruction3);
   symbols->clear();
 
-  /********************************* case 20 reg , reg , immed *******/
-  in.assign( "movd_lo_b64 $d2, $d1, 23;");
-  op1.assign("$d2"); op2.assign("$d1");
-  symbols->append(op1); symbols->append(op2);
+  /********************************* case 20 reg , reg , reg *******/
+  in.assign( "movd_lo_b64 $d2, $d1, $s1;");
+  op1.assign("$d2"); op2.assign("$d1"); op3.assign("$s1");
+  symbols->append(op1); symbols->append(op2); symbols->append(op3);
   BrigInstBase out20 = {
     0,
     BrigEInstBase,
@@ -818,15 +818,14 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   reg2.reserved = 0;
   reg2.s_name = op1.size() + 1;
 
-  memset(&imm3, 0, sizeof(imm3));
-  imm3.size = sizeof(imm3);
-  imm3.kind = BrigEOperandImmed;
-  imm3.type = Brigb64;
-  imm3.reserved = 0;
-  imm3.bits.u = 23;
+  reg3.size = sizeof(reg3);
+  reg3.kind = BrigEOperandReg;
+  reg3.type = Brigb32;
+  reg3.reserved = 0;
+  reg3.s_name = op1.size() + op2.size() + 2;
 
-  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandImmed>
-            TestCase20(in, symbols, &out20, &reg1, &reg2, &imm3);
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandReg>
+            TestCase20(in, symbols, &out20, &reg1, &reg2, &reg3);
   TestCase20.Run_Test(&Instruction3);
   symbols->clear();
 
@@ -1703,6 +1702,46 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   TestCase42.Run_Test(&Instruction3);
   symbols->clear();
 
+  /**********************************************************************************************/
+  in.assign( "add_pp_s16x4 $d1, $d2, _s16x4(0x1234,0x5678,0x9abc,0xdef0);\n");
+
+  op1.assign("$d1"); op2.assign("$d2"); 
+  symbols->append(op1); symbols->append(op2); 
+
+  Out.size = sizeof(Out);
+  Out.kind = BrigEInstBase;
+  Out.opcode = BrigAdd;
+  Out.type = Brigs16x4;
+  Out.packing = BrigPackPP;
+  Out.o_operands[0] = 0; 
+  Out.o_operands[1] = sizeof(reg1);
+  Out.o_operands[2] = sizeof(reg1) + sizeof(reg2); 
+  Out.o_operands[3] = 0; 
+  Out.o_operands[4] = 0;
+
+  reg1.size = sizeof(reg1);
+  reg1.kind = BrigEOperandReg;
+  reg1.type = Brigb64;
+  reg1.reserved = 0;
+  reg1.s_name = 0;
+
+  reg2.size = sizeof(reg2);
+  reg2.kind = BrigEOperandReg;
+  reg2.type = Brigb64;
+  reg2.reserved = 0;
+  reg2.s_name = op2.size() + 1;
+
+  memset(&imm3, 0, sizeof(imm3));
+  imm3.size = sizeof(imm3);
+  imm3.kind = BrigEOperandImmed;
+  imm3.type = Brigb64;
+  imm3.reserved = 0;
+  imm3.bits.l[0] = 0xdef09abc56781234;
+
+  Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandImmed>
+            TestCase43(in, symbols, &Out, &reg1, &reg2, &imm3);
+  TestCase43.Run_Test(&Instruction3);
+  symbols->clear();
   
   /***************************************  End of tests *************************************/
   delete symbols;
