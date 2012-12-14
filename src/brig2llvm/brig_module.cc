@@ -1528,6 +1528,29 @@ static bool isCompatibleSrc(BrigDataType type, const oper_iterator oper) {
   return instSize == srcSize;
 }
 
+bool BrigModule::isCompatibleAddrSize(const BrigStorageClass32_t sClass,
+                                      const BrigDataType type) const {
+  bool valid = true;
+  switch(sClass){
+  case BrigGroupSpace:
+  case BrigPrivateSpace:
+  case BrigSpillSpace:
+  case BrigArgSpace:
+    valid &= check(32 == BrigInstHelper::getTypeSize(type), "Invalid type");
+    break;
+  default:
+    const BrigDirectiveVersion *bdv = getFirstVersionDirective();
+    if(!check(bdv, "Missing version?")) return false;
+    valid &= check((32 == BrigInstHelper::getTypeSize(type) &&
+                    bdv->machine == BrigESmall) ||
+                   (64 == BrigInstHelper::getTypeSize(type) &&
+                    bdv->machine == BrigELarge),
+                   "Invalid type");
+    break;
+  }
+  return valid;
+}
+
 bool BrigModule::validateArithmeticInst(const inst_iterator inst,
                                         unsigned nary) const {
 
@@ -2288,10 +2311,14 @@ bool BrigModule::validateLda(const inst_iterator inst) const {
   valid &= check(isa<BrigInstMem>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
-  valid &= check(inst->type ==Brigu32 || inst->type == Brigu64,
-                 "Length should be 32 or 64");
   BrigDataType type = BrigDataType(inst->type);
-  valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
+  valid &= check(type == Brigu32 || type == Brigu64,
+                 "Length should be 32 or 64");
+  const BrigInstMem *mem = dyn_cast<BrigInstMem>(inst);
+  if(!check(mem, "Invalid instruction kind")) return false;
+  valid &= check(isCompatibleAddrSize(mem->storageClass, type),
+                 "Incompatible address size");
+  valid &= check(!BrigInstHelper::isVectorTy(type),
                  "Lda cannot accept vector types");
   oper_iterator dest(S_.operands + inst->o_operands[0]);
   valid &= check(isa<BrigOperandReg>(dest),
@@ -2304,7 +2331,8 @@ bool BrigModule::validateLda(const inst_iterator inst) const {
                  isa<BrigOperandCompound>(src),
                  "Src should be BrigOperandAddress, BrigOperandIndirect "
                  "and BrigOPerandCompound");
-  valid &= isCompatibleSrc(*getType(src), dest);
+  valid &= check(isCompatibleAddrSize(mem->storageClass, *getType(src)),
+                 "Incompatible address size");
   return valid;
 }
 
@@ -2790,12 +2818,10 @@ bool BrigModule::validateSegmentp(const inst_iterator inst) const {
                  "Incompatible destination operand");
   oper_iterator src(S_.operands + mem->o_operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
-                 isa<BrigOperandImmed>(src) ||
-                 isa<BrigOperandWaveSz>(src),
-                 "Source should be reg, immediate or waveSz");
-  valid &= check(inst->type == Brigb32, "Type should be b32");
-  valid &= check(!BrigInstHelper::isVectorTy(type),
-                 "Segmentp can not accept vector types");
+                 isa<BrigOperandImmed>(src),
+                 "Source should be reg, immediate");
+  valid &= check(isCompatibleAddrSize(mem->storageClass, *getType(src)),
+                 "Incompatible address size");
   return valid;
 }
 
@@ -2810,14 +2836,14 @@ bool BrigModule::validateFtoS(const inst_iterator inst) const {
   BrigDataType type = BrigDataType(mem->type);
   oper_iterator dest(S_.operands + mem->o_operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
-  valid &= check(isCompatibleSrc(type, dest),
-                 "Incompatible destination operand");
+  valid &= check(isCompatibleAddrSize(mem->storageClass, *getType(dest)),
+                 "Incompatible address size");
   oper_iterator src(S_.operands + mem->o_operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
-                 isa<BrigOperandImmed>(src) ||
-                 isa<BrigOperandWaveSz>(src),
-                 "Source should be reg, immediate or waveSz");
-  valid &= check(isCompatibleSrc(type, src), "Incompatible Source operand");
+                 isa<BrigOperandImmed>(src),
+                 "Source should be reg, immediate");
+  valid &= check(isCompatibleAddrSize(BrigStorageClass32_t(BrigFlatSpace), *getType(src)),
+                 "Incompatible address size");
   valid &= check(!BrigInstHelper::isVectorTy(type),
                  "FtoS can not accept vector types");
   return valid;
@@ -2829,20 +2855,21 @@ bool BrigModule::validateStoF(const inst_iterator inst) const {
     return false;
   const BrigInstSegp *mem = dyn_cast<BrigInstSegp>(inst);
   if(!check(mem, "Invalid instruction kind")) return false;
-  valid &= check(mem->type == Brigu32 || mem->type == Brigu64,
-                 "Type of StoF should be u32 or u64");
   BrigDataType type = BrigDataType(mem->type);
+  valid &= check(type == Brigu32 || type == Brigu64,
+                 "Type of StoF should be u32 or u64");
+  valid &= check(isCompatibleAddrSize(BrigStorageClass32_t(BrigFlatSpace), type),
+                 "Incompatible address size");
   oper_iterator dest(S_.operands + mem->o_operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
   valid &= check(isCompatibleSrc(type, dest),
                  "Incompatible destination operand");
   oper_iterator src(S_.operands + mem->o_operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
-                 isa<BrigOperandImmed>(src) ||
-                 isa<BrigOperandWaveSz>(src),
+                 isa<BrigOperandImmed>(src),
                  "Source should be reg, immediate or waveSz");
-
-  valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
+  valid &= check(isCompatibleAddrSize(mem->storageClass, *getType(dest)),
+                 "Incompatible address size");
   valid &= check(!BrigInstHelper::isVectorTy(type),
                  "StoF can not accept vector types");
   return valid;
@@ -3060,6 +3087,11 @@ bool BrigModule::validateLd(const inst_iterator inst) const {
                  isa<BrigOperandCompound>(addr),
                  "address must be a BrigOperandAddress, BrigOperandIndirect,"
                  " or BrigOperandCompound");
+  const BrigInstLdSt *ldSt = dyn_cast<BrigInstLdSt>(inst);
+  if(!check(ldSt, "Invalid instruction kind")) return false;
+  valid &= check(isCompatibleAddrSize(ldSt->storageClass, *getType(addr)),
+                 "Incompatible address size");
+  
   return valid;
 }
 
@@ -3099,6 +3131,10 @@ bool BrigModule::validateSt(const inst_iterator inst) const {
                  isa<BrigOperandCompound>(addr),
                  "address must be a BrigOperandAddress, BrigOperandIndirect,"
                  " or BrigOperandCompound");
+  const BrigInstLdSt *ldSt = dyn_cast<BrigInstLdSt>(inst);
+  if(!check(ldSt, "Invalid instruction kind")) return false;
+  valid &= check(isCompatibleAddrSize(ldSt->storageClass, *getType(addr)),
+                 "Incompatible address size");
   return valid;
 }
 
@@ -3135,6 +3171,8 @@ bool BrigModule::validateAtomicInst(const inst_iterator inst,
                  isa<BrigOperandCompound>(addr),
                  "address must be a BrigOperandAddress, BrigOperandIndirect,"
                  " or BrigOperandCompound");
+  valid &= check(isCompatibleAddrSize(atomicInst->storageClass, *getType(addr)),
+                 "Incompatible address size");
   for(unsigned i = ret + 1; i < numOperands; ++i) {
     oper_iterator src(S_.operands + inst->o_operands[i]);
     valid &= check(isa<BrigOperandReg>(src)   ||
@@ -3799,14 +3837,10 @@ bool BrigModule::validateNullPtr(const inst_iterator inst) const {
                  64 == BrigInstHelper::getTypeSize(type), "Illegal data type");
   oper_iterator dest(S_.operands + inst->o_operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
-  const BrigDirectiveVersion *bdv = getFirstVersionDirective();
-  if(!check(bdv, "Missing BrigDirectiveVersion")) return false;
-  if(BrigELarge == bdv->machine)
-    valid &= check(64 == BrigInstHelper::getTypeSize(*getType(dest)),
-                   "Destination must be  a d register for the large model");
-  if(BrigESmall == bdv->machine)
-    valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)),
-                   "Destination must be  a s register for the small model");
+  const BrigInstMem *mem = dyn_cast<BrigInstMem>(inst);
+  if(!check(mem, "Invalid instruction kind")) return false;
+  valid &= check(isCompatibleAddrSize(mem->storageClass, *getType(dest)),
+                 "Incompatible address size");
   return valid;
 }
 
