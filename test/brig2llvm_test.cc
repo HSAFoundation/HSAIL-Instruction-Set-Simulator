@@ -8393,7 +8393,7 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
     BrigOperandImmed boi = {
       sizeof(boi),
       BrigEOperandImmed,
-      Brigb128,
+      Brigu32,
       0,
       { 0 }
     };
@@ -8408,7 +8408,7 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
     EXPECT_FALSE(mod.isValid());
     errMsgOut.flush();
     EXPECT_NE(std::string::npos, errorMsg.find(std::string(
-    "Invalid type, must be b1, b8, b16, b32 or b64")));
+    "Invalid type, must be b1, b8, b16, b32, b64 or b128")));
   }
   {
     hsa::brig::StringBuffer strings;

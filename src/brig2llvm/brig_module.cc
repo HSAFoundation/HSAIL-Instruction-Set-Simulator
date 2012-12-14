@@ -296,6 +296,7 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(NDRangeSize);
       caseInst(Nop);
       caseInst(NullPtr);
+      caseInst(Qid);
       caseInst(WorkDim);
       caseInst(WorkGroupId);
       caseInst(WorkGroupSize);
@@ -1292,8 +1293,8 @@ bool BrigModule::validate(const BrigOperandImmed *operand) const {
   if(!validateSize(operand)) return false;
   valid &= check(Brigb1 == operand->type  || Brigb8 == operand->type  ||
                  Brigb16 == operand->type || Brigb32 == operand->type ||
-                 Brigb64 == operand->type,
-                 "Invalid type, must be b1, b8, b16, b32 or b64");
+                 Brigb64 == operand->type || Brigb128 == operand->type,
+                 "Invalid type, must be b1, b8, b16, b32, b64 or b128");
   valid &= check(operand->reserved == 0,
                  "reserved must be zero");
   BrigDataType type = BrigDataType(operand->type);
@@ -3841,6 +3842,20 @@ bool BrigModule::validateNullPtr(const inst_iterator inst) const {
   if(!check(mem, "Invalid instruction kind")) return false;
   valid &= check(isCompatibleAddrSize(mem->storageClass, *getType(dest)),
                  "Incompatible address size");
+  return valid;
+}
+
+bool BrigModule::validateQid(const inst_iterator inst) const {
+  bool valid = true;
+  //maybe BrigInstBase, or other.
+  if(!check(isa<BrigInstBase>(inst), "Incorrect instruction kind"))
+    return false;
+  if(!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
+    return false;
+  oper_iterator dest(S_.operands + inst->o_operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
+  valid &= check(*getType(dest) == Brigb32,
+                 "Type of destination should be s register");
   return valid;
 }
 
