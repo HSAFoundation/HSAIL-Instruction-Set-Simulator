@@ -3366,7 +3366,7 @@ static const char GlobalArrayInst[] =
   "global_%s &array[] = { %s };\n"
   "\n"
   "kernel &__OpenCL_Global_Array_kernel(\n"
-  "w        kernarg_u32 %%arg_val0, kernarg_u32 %%n, kernarg_u32 %%bitsLen)\n"
+  "        kernarg_u32 %%arg_val0, kernarg_u32 %%n, kernarg_u32 %%bitsLen)\n"
   "{\n"
   "        ld_kernarg_u32 $s3, [%%n];\n"
   "        ld_kernarg_u32 $s5, [%%bitsLen];\n"
