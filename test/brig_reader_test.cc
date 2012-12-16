@@ -3553,3 +3553,25 @@ TEST(BrigGlobalTest, Align16) {
     );
   EXPECT_TRUE(BP);
 }
+
+TEST(BrigKernelTest, Example6) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;"
+    "function &callee(arg_f32 %output)(arg_f32 %input) {"
+    "  ld_arg_f32 $s0, [%input];"
+    "  st_arg_f32 $s0, [%output];"
+    "  ret;"
+    "};"
+    ""
+    "function &caller()() {"
+    "  {"
+    "    arg_f32 %an_input;"
+    "    st_arg_f32 $s1, [%an_input ];"
+    "    arg_f32 %an_output;"
+    "    call &callee (%an_output)(%an_input);"
+    "    ld_arg_f32 $s0, [%an_output];"
+    "  }"
+    "};"
+    );
+  EXPECT_TRUE(BP);
+}
