@@ -398,17 +398,33 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
   return valid;
 }
 
-template<unsigned> struct hasCCode { typedef bool Bool; };
-
-template<class T>
-static typename hasCCode<sizeof(((T *) 0)->c_code)>::Bool
-updateCCode(BrigcOffset32_t &c_code, const T *dir) {
+template<class T> 
+static bool updateCCode(BrigcOffset32_t &c_code, const T *dir) {
   if(c_code > dir->c_code) return false;
   c_code = dir->c_code;
   return true;
 }
 
-static bool updateCCode(BrigcOffset32_t &c_code, ...) { return true; }
+template<> bool updateCCode(BrigcOffset32_t &, 
+			    const BrigDirectiveSymbol *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &, 
+			    const BrigDirectiveImage *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &, 
+			    const BrigDirectiveSampler *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &, 
+			    const BrigDirectivePad *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &, 
+			    const BrigBlockNumeric *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &, 
+			    const BrigBlockString *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &, 
+			    const BrigBlockEnd *) { return true; }
 
 bool BrigModule::validateCCode(void) const {
   BrigcOffset32_t c_code = 0;

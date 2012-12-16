@@ -100,7 +100,7 @@ TEST_P(SegpSegmentpb1, BrigSegmentp){
     EXPECT_EQ(immed_size, getImm.size);
     EXPECT_EQ(BrigEOperandImmed, getImm.kind);
     EXPECT_EQ(Brigb64, getImm.type);
-    EXPECT_EQ(0x1234567890abcdef, getImm.bits.l[0]);
+    EXPECT_EQ(0x1234567890abcdefLL, getImm.bits.l[0]);
   }
 
   delete lexer;
