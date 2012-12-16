@@ -2518,6 +2518,41 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   }
 };
 
+class TestGlobalSymbolDeclInvalid: public ::testing::TestWithParam<int>{
+
+};
+
+std::string inputarray_globalsymboldecl_invalid[6] = {
+/*If an alignment is specified, 
+it must be equal to or greater than the variable's natural alignment.*/
+  "align 4 private_u8x8 &tmp;",
+  "align 2 group_s8x4 &tmp;",
+  "align 8 static group_f16x8 &tmp;",
+  "align 1 private_b32 &tmp[2];\n",
+//Valid values of n are 1, 2, 4, 8, and 16
+  "align 10 group_s8x4 &tmp;",
+  "align 9 group_s8x4 &tmp;"
+};
+
+class TestGlobalInitializableInvalid: public ::testing::TestWithParam<int>{
+
+};
+
+std::string inputarray_globalinitializable_invalid[6] = {
+/*If an alignment is specified, 
+it must be equal to or greater than the variable's natural alignment.
+Opaque image and sampler objects always have a size of 32 bytes and a
+natural alignment of 16 bytes*/
+  "align 8 global_Samp &demo ;",
+  "align 8 global_RWImg &demo={format = unorm_int8} ;",
+  "align 8 global_ROImg &demo[10]={format = unorm_int8} ;",
+  "align 2 readonly_s32 &x[4]= {12, 13,14, -13};",
+//Valid values of n are 1, 2, 4, 8, and 16
+  "align 5 readonly_s32 &x[4]= {12, 13,14, -13};",
+  "align 6 readonly_s32 &x[4]= {12, 13,14, -13};"
+};
+
+
 class TestunInitializableDecl: public ::testing::TestWithParam<int>{
 
 };

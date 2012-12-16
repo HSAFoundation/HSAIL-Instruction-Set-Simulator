@@ -864,6 +864,42 @@ INSTANTIATE_TEST_CASE_P(CodegenTest,
                         TestGlobalSymbolDecl,
                         testing::Range(0,54));
 
+TEST_P(TestGlobalSymbolDeclInvalid, GlobalSymbolDeclInvalid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(inputarray_globalsymboldecl_invalid[n]);
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalSymbolDecl(context));
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest, 
+                        TestGlobalSymbolDeclInvalid, 
+                        testing::Range(0,6));
+
+TEST_P(TestGlobalInitializableInvalid, GlobalInitializableInvalid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(inputarray_globalinitializable_invalid[n]);
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalInitializable(context));
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest, 
+                        TestGlobalInitializableInvalid, 
+                        testing::Range(0,6));
+
 TEST_P(TestunInitializableDecl, InitializableDecl) {
   context->set_error_reporter(main_reporter);
   context->clear_context();

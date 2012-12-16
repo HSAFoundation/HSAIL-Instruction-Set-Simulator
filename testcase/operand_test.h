@@ -148,7 +148,6 @@ class SRegisterValidInput : public ::testing::TestWithParam<int>
 };
 
 std::string input_sregister[] = {
-// $16-$31 are acceptable inputs in the new version PRM
   "$s0",
   "$s1",
   "$s2",
@@ -164,7 +163,7 @@ std::string input_sregister[] = {
   "$s12",
   "$s13",
   "$s14",
-  "$s15"
+  "$s127"
 };
 
 class DRegisterValidInput : public ::testing::TestWithParam<int>
@@ -173,7 +172,6 @@ class DRegisterValidInput : public ::testing::TestWithParam<int>
 };
 
 std::string input_dregister[] = {
-// $8-$31 are acceptable inputs in the new version PRM
   "$d0",
   "$d1",
   "$d2",
@@ -181,7 +179,7 @@ std::string input_dregister[] = {
   "$d4",
   "$d5",
   "$d6",
-  "$d7"
+  "$d63"
 };
 
 class QRegisterValidInput : public ::testing::TestWithParam<int>
@@ -197,7 +195,7 @@ std::string input_qregister[] = {
   "$q4",
   "$q5",
   "$q6",
-  "$q7"
+  "$q31"
 };
 
 class LabelValidInput : public ::testing::TestWithParam<int>
