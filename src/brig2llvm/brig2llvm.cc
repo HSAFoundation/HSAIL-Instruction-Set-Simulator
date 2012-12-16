@@ -637,8 +637,6 @@ static llvm::Value *decodeFunPacking(llvm::BasicBlock &B,
                                      llvm::Value *rawFun,
                                      const std::vector<llvm::Value *> &args) {
 
-  if(llvm::isa<llvm::Function>(rawFun)) return rawFun;
-
   llvm::LLVMContext &C = B.getContext();
   llvm::Type *result = llvm::Type::getVoidTy(C);
   std::vector<llvm::Type *> params;
@@ -648,6 +646,8 @@ static llvm::Value *decodeFunPacking(llvm::BasicBlock &B,
 
   llvm::Type *funTy = llvm::FunctionType::get(result, params, false);
   llvm::Type *funPtrTy = funTy->getPointerTo(0);
+  if(funPtrTy == rawFun->getType()) return rawFun;
+
   llvm::Instruction::CastOps castOp =
     llvm::CastInst::getCastOpcode(rawFun, false, funPtrTy, false);
 
