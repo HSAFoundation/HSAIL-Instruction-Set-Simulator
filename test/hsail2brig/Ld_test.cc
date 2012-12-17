@@ -213,6 +213,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width1.size = sizeof(width1);
+  width1.bits.u = 1;
 
   BrigOperandAddress addr1 = {
     0,
@@ -261,6 +262,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width2.size = sizeof(width2);
+  width2.bits.u = 1;
 
   BrigOperandIndirect indir2 = {
     0,
@@ -311,6 +313,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width3.size = sizeof(width3);
+  width3.bits.u = 1;
 
   BrigOperandIndirect indir3 = {
     0,
@@ -369,6 +372,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width4.size = sizeof(width4);
+  width4.bits.u = 1;
 
   BrigOperandAddress addr4 = {
     0,
@@ -465,6 +469,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width6.size = sizeof(width6);
+  width6.bits.u = 1;
 
   BrigOperandAddress addr6 = {
     0,
@@ -525,6 +530,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width7.size = sizeof(width7);
+  width7.bits.u = 1;
 
   BrigOperandAddress addr7 = {
     0,
@@ -595,6 +601,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width8.size = sizeof(width8);
+  width8.bits.u = 1;
 
   BrigOperandAddress addr8 = {
     0,
@@ -663,6 +670,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width9.size = sizeof(width9);
+  width9.bits.u = 1;
 
   BrigOperandAddress addr9 = {
     0,
@@ -715,6 +723,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width10.size = sizeof(width10);
+  width10.bits.u = 1;
 
   BrigOperandReg reg_v1 = {
     0,
@@ -800,6 +809,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width11.size = sizeof(width11);
+  width11.bits.u = 1;
 
   BrigOperandReg regv1_11 = {
     0,
@@ -1005,6 +1015,7 @@ TEST(CodegenTest, Ld_Codegen){
     {0}
   };
   width13.size = sizeof(width13);
+  width13.bits.u = 1;
 
   BrigOperandAddress addr13 = {
     0,

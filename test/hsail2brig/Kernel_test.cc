@@ -208,7 +208,9 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
     0,
     {0}
   };
+
   width.size = sizeof(width);
+  width.bits.u = 1;
 
   BrigOperandAddress addr = {
     0,
