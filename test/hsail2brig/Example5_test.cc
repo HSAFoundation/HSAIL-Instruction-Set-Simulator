@@ -108,6 +108,7 @@ TEST(CodegenTest, Example5_CodeGen) {
     {0}
   };
   width.size = sizeof(width);
+  width.bits.u = 1;
 
   BrigInstBase instCall = {
     0,  // size

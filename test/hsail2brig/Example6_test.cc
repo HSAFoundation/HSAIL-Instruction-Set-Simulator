@@ -155,7 +155,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   width.type = Brigb32;
   width.reserved = 0;
   memset(&width.bits, 0, sizeof(width.bits));
-  width.bits.u = 0;
+  width.bits.u = 1;
   
   oper->append(&width);
 
