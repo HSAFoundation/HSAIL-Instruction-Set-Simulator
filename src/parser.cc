@@ -2201,7 +2201,7 @@ int Call(Context* context) {
       0,
       { 0 }
     };
-    op_width.bits.u = 0;
+    op_width.bits.u = 1;
     context->append_operand(&op_width);
   }
 
