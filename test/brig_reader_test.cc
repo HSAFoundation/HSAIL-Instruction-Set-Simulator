@@ -3575,3 +3575,98 @@ TEST(BrigKernelTest, Example6) {
     );
   EXPECT_TRUE(BP);
 }
+
+static const char packedConstants[] =
+  "version 1:0:$small;\n"
+  "kernel &packedConstants(kernarg_u32 %%r)\n"
+  "{\n"
+  "  ld_kernarg_u32 $s0, [%r];\n"
+  "  mov_b%u $%c2, 0;\n"
+  "  add_pp_%s $%c3, $%c2, %s;\n"
+  "  st_kernarg_u%u $%c3, [$s0];\n"
+  "  ret;\n"
+  "};\n";
+template<class T>
+static void testPackedConstants(unsigned bits,
+                                const char *value1,
+                                const T &result,
+                                const char *type) {
+  char reg = 0;
+  if(bits == 32)
+    reg = 's';
+  if(bits == 64)
+    reg = 'd';
+  char *buffer =
+    asnprintf(packedConstants,
+              bits,
+              reg,
+              type,
+              reg,
+              reg,
+              value1,
+              bits,
+              reg);
+
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("packedConstants");
+  T *output = new T;
+  *output = 0;
+  void *args[] = { &output };
+  BE.launch(fun, args);
+  std::cout << std::hex << result << std::endl;
+  std::cout << std::hex << *output << std::endl;
+  EXPECT_EQ(result, *output);
+
+  delete output;
+}
+
+TEST(BrigPacked, testPackedConstants) {
+  {
+    unsigned bits = 32;
+    uint32_t result = uint32_t(0xffe90038);
+    testPackedConstants(bits, "_s16x2(-23, 56)", result, "s16x2");
+  }
+  {
+    unsigned bits = 32;
+    uint32_t result = uint32_t(0x170038);
+    testPackedConstants(bits, "_u16x2(23, 56)", result, "u16x2");
+  }
+  {
+    unsigned bits = 64;
+    uint64_t result = uint64_t(0x1700380022000a);
+    testPackedConstants(bits, "_s16x4(23, 56, 34,10)", result, "s16x4");
+  }
+  {
+    unsigned bits = 64;
+    uint64_t result = uint64_t(0x1000000010000);
+    testPackedConstants(bits, "_u16x4(1, 0, 1, 0)", result, "u16x4");
+  }
+  {
+    unsigned bits = 32;
+    uint32_t result = uint32_t(0x1738220a);
+    testPackedConstants(bits, "_s8x4(23, 56, 34, 10)", result, "s8x4");
+  }
+  {
+    unsigned bits = 32;
+    uint32_t result = uint32_t(0x1000100);
+    testPackedConstants(bits, "_u8x4(1, 0, 1, 0)", result, "u8x4");
+  }
+  {
+    unsigned bits = 64;
+    uint64_t result = uint64_t(0x1738220a00000000);
+    testPackedConstants(bits, "_s8x8(23, 56, 34, 10, 0, 0, 0, 0)",
+                        result, "s8x8");
+  }
+  {
+    unsigned bits = 64;
+    uint32_t result = uint32_t(0x400000003f800000);
+    testPackedConstants(bits, "_f32x2(0d4000000000000000, 0d3ff0000000000000)",
+			 result, "f32x2");
+  }
+}
