@@ -5197,7 +5197,7 @@ int Ld(Context* context) {
       0,
       { 0 }
     };
-    op_width.bits.u = 0;
+    op_width.bits.u = 1;
     context->append_operand(&op_width);
   }
 
@@ -5210,6 +5210,21 @@ int Ld(Context* context) {
 
   if (context->token_type != DATA_TYPE_ID) {
     context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  if (context->token_to_scan != _B128 &&
+      context->token_to_scan != _U8 &&
+      context->token_to_scan != _U16 &&
+      context->token_to_scan != _U32 &&
+      context->token_to_scan != _U64 &&
+      context->token_to_scan != _S8 &&
+      context->token_to_scan != _S16 &&
+      context->token_to_scan != _S32 &&
+      context->token_to_scan != _S64 &&
+      context->token_to_scan != _F16 &&
+      context->token_to_scan != _F32 &&
+      context->token_to_scan != _F64) {
+    context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
   // Get Type value in here
