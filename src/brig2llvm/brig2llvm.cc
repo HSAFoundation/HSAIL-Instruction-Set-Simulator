@@ -43,11 +43,11 @@ static void insertGPUStateTy(llvm::LLVMContext &C) {
   llvm::StructType *c_reg_type =
     createSOAType(C, llvm::Type::getInt1Ty(C), "c_regs", 8);
   llvm::StructType *s_reg_type =
-    createSOAType(C, llvm::Type::getInt32Ty(C), "s_regs", 32);
+    createSOAType(C, llvm::Type::getInt32Ty(C), "s_regs", 128);
   llvm::StructType *d_reg_type =
-    createSOAType(C, llvm::Type::getInt64Ty(C), "d_regs", 32);
+    createSOAType(C, llvm::Type::getInt64Ty(C), "d_regs", 64);
   llvm::StructType *q_reg_type =
-    createSOAType(C, llvm::Type::getIntNTy(C, 128), "q_regs", 8);
+    createSOAType(C, llvm::Type::getIntNTy(C, 128), "q_regs", 32);
   llvm::StructType *pc_reg_type =
     createSOAType(C, llvm::Type::getIntNTy(C, 32), "pc_regs", 3);
   llvm::Type *tv1[] = { c_reg_type,
@@ -637,8 +637,6 @@ static llvm::Value *decodeFunPacking(llvm::BasicBlock &B,
                                      llvm::Value *rawFun,
                                      const std::vector<llvm::Value *> &args) {
 
-  if(llvm::isa<llvm::Function>(rawFun)) return rawFun;
-
   llvm::LLVMContext &C = B.getContext();
   llvm::Type *result = llvm::Type::getVoidTy(C);
   std::vector<llvm::Type *> params;
@@ -648,6 +646,8 @@ static llvm::Value *decodeFunPacking(llvm::BasicBlock &B,
 
   llvm::Type *funTy = llvm::FunctionType::get(result, params, false);
   llvm::Type *funPtrTy = funTy->getPointerTo(0);
+  if(funPtrTy == rawFun->getType()) return rawFun;
+
   llvm::Instruction::CastOps castOp =
     llvm::CastInst::getCastOpcode(rawFun, false, funPtrTy, false);
 

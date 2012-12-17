@@ -1819,68 +1819,68 @@ TEST(BrigInstTest, CvtRoundingMode) {
     testInstCvt("cvt_upi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
-    result.u64 = 0xFFFFFFFFFFFFFFFF;
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;
     input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_upi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u8 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_u8", "_f64", result.u8, input.f64 );
   }
   {
     result.u8 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u8 = 0xFF;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_upi", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u16 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_u16", "_f64", result.u16, input.f64 );
   }
   {
     result.u16 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u16 = 0xFFFF;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_upi", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u32 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_u32", "_f64", result.u32, input.f64 );
   }
   {
     result.u32 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_s32", "_f64", result.s32, input.f64 );
   }
   {
     result.u32 = 0xFFFFFFFF;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_upi", "_s32", "_f64", result.s32, input.f64 );
   }
   {
-    result.u64 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x2LL;
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_u64", "_f64", result.u64, input.f64 );
   }
   {
-    result.u64 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x2LL;
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_s64", "_f64", result.s64, input.f64 );
   }
   {
-    result.u64 = 0xFFFFFFFFFFFFFFFF;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_upi", "_s64", "_f64", result.s64, input.f64 );
   }
   //down i
@@ -1930,63 +1930,63 @@ TEST(BrigInstTest, CvtRoundingMode) {
     testInstCvt("cvt_downi", "_s32", "_f32", result.s32, input.f32 );
   }
     {
-    result.u64 = 0x1;
+    result.u64 = 0x1LL;
     input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_u64", "_f32", result.u64 , input.f32 );
   }
   {
-    result.u64 = 0x1;
+    result.u64 = 0x1LL;
     input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_downi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
-    result.u64 = 0xFFFFFFFFFFFFFFFE;
+    result.u64 = 0xFFFFFFFFFFFFFFFELL;
     input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_downi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u8 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_downi", "_u8", "_f64", result.u8, input.f64 );
   }
   {
     result.u8 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_downi", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u8 = 0xFE;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_downi", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u16 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_downi", "_u16", "_f64", result.u16, input.f64 );
   }
   {
     result.u16 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_downi", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u16 = 0xFFFE;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_downi", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u32 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_downi", "_u32", "_f64", result.u32, input.f64 );
   }
   {
     result.u32 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_downi", "_s32", "_f64", result.s32, input.f64 );
   }
   {
     result.u32 = 0xFFFFFFFE;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_downi", "_s32", "_f64", result.s32, input.f64 );
   }
   // near i
@@ -2036,78 +2036,78 @@ TEST(BrigInstTest, CvtRoundingMode) {
     testInstCvt("cvt_neari", "_s32", "_f32", result.s32, input.f32 );
   }
   {
-    result.u64 = 0x2;
+    result.u64 = 0x2LL;
     input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_u64", "_f32", result.u64 , input.f32 );
   }
   {
-    result.u64 = 0x2;
+    result.u64 = 0x2LL;
     input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_neari", "_s64", "_f32", result.s64, input.f32 );
   }
   {
-    result.u64 = 0xFFFFFFFFFFFFFFFE;
+    result.u64 = 0xFFFFFFFFFFFFFFFELL;
     input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_neari", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u8 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_neari", "_u8", "_f64", result.u8, input.f64 );
   }
   {
     result.u8 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_neari", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u8 = 0xFE;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_neari", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u16 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_neari", "_u16", "_f64", result.u16, input.f64 );
   }
   {
     result.u16 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_neari", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u16 = 0xFFFE;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_neari", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u32 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_neari", "_u32", "_f64", result.u32, input.f64 );
   }
   {
     result.u32 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_neari", "_s32", "_f64", result.s32, input.f64 );
   }
   {
     result.u32 = 0xFFFFFFFE;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_neari", "_s32", "_f64", result.s32, input.f64 );
   }
   {
-    result.u64 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x2LL;
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_neari", "_u64", "_f64", result.u64, input.f64 );
   }
   {
-    result.u64 = 0x2;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x2LL;
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_neari", "_s64", "_f64", result.s64, input.f64 );
   }
   {
-    result.u64 = 0xFFFFFFFFFFFFFFFE;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    result.u64 = 0xFFFFFFFFFFFFFFFELL;
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_neari", "_s64", "_f64", result.s64, input.f64 );
   }
   //zeroi
@@ -2157,78 +2157,78 @@ TEST(BrigInstTest, CvtRoundingMode) {
     testInstCvt("cvt_zeroi", "_s32", "_f32", result.s32, input.f32 );
   }
   {
-    result.u64 = 0x1;
+    result.u64 = 0x1LL;
     input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_u64", "_f32", result.u64 , input.f32 );
   }
   {
-    result.u64 = 0x1;
+    result.u64 = 0x1LL;
     input.u32 = 0x3FCCCCCD; //1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
-    result.u64 = 0xFFFFFFFFFFFFFFFF;
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;
     input.u32 = 0xBFCCCCCD; //-1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f32", result.s64, input.f32 );
   }
   {
     result.u8 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_u8", "_f64", result.u8, input.f64 );
   }
   {
     result.u8 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u8 = 0xFF;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_zeroi", "_s8", "_f64", result.s8, input.f64 );
   }
   {
     result.u16 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_u16", "_f64", result.u16, input.f64 );
   }
   {
     result.u16 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u16 = 0xFFFF;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_zeroi", "_s16", "_f64", result.s16, input.f64 );
   }
   {
     result.u32 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_u32", "_f64", result.u32, input.f64 );
   }
   {
     result.u32 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_s32", "_f64", result.s32, input.f64 );
   }
   {
     result.u32 = 0xFFFFFFFF;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_zeroi", "_s32", "_f64", result.s32, input.f64 );
   }
   {
-    result.u64 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x1LL;
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_u64", "_f64", result.u64, input.f64 );
   }
   {
-    result.u64 = 0x1;
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x1LL;
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f64", result.s64, input.f64 );
   }
   {
-    result.u64 = 0xFFFFFFFFFFFFFFFF;
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f64", result.s64, input.f64 );
   }
   //f32 to f32
@@ -2274,84 +2274,84 @@ TEST(BrigInstTest, CvtRoundingMode) {
   }
   // f64 to f64
   {
-    result.u64 = 0x4000000000000000; //2.0f
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x4000000000000000LL; //2.0f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_upi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0xBFF0000000000000; //-1.0f
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    result.u64 = 0xBFF0000000000000LL; //-1.0f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_upi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0x3FF0000000000000; //1.0f
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x3FF0000000000000LL; //1.0f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_downi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0xC000000000000000; //-2.0f
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    result.u64 = 0xC000000000000000LL; //-2.0f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_downi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0x3FF0000000000000; //1.0f
-    input.u64 = 0x3FF999999999999A; //1.6f
+    result.u64 = 0x3FF0000000000000LL; //1.0f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zeroi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0xBFF0000000000000; //-1.0f
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    result.u64 = 0xBFF0000000000000LL; //-1.0f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_zeroi", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0x4000000000000000; //2,0f
-    input.u64 = 0x3FF999999999999A; //1.6.f
+    result.u64 = 0x4000000000000000LL; //2,0f
+    input.u64 = 0x3FF999999999999ALL; //1.6.f
     testInstCvt("cvt_neari", "_f64", "_f64", result.f64, input.f64 );
   }
   {
-    result.u64 = 0xC000000000000000; //-2.0f
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    result.u64 = 0xC000000000000000LL; //-2.0f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_neari", "_f64", "_f64", result.f64, input.f64 );
   }
   //f64 to f32
   {
     result.u32 = 0x3FCCCCCD; //1.6f
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_up", "_f32", "_f64", result.f32, input.f64 );
   }
   {
     result.u32 = 0xBFCCCCCC; //-1.6f
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_up", "_f32", "_f64", result.f32, input.f64 );
   }
   {
     result.u32 = 0x3FCCCCCC; //1.6f
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_down", "_f32", "_f64", result.f32, input.f64 );
   }
   {
     result.u32 = 0xBFCCCCCD; //-1.6f
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_down", "_f32", "_f64", result.f32, input.f64 );
   }
   {
     result.u32 = 0x3FCCCCCD; //1.6f
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_near", "_f32", "_f64", result.f32, input.f64 );
   }
   {
     result.u32 = 0xBFCCCCCD; //-1.6f
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_near", "_f32", "_f64", result.f32, input.f64 );
   }
   {
     result.u32 = 0x3FCCCCCC; //1.6f
-    input.u64 = 0x3FF999999999999A; //1.6f
+    input.u64 = 0x3FF999999999999ALL; //1.6f
     testInstCvt("cvt_zero", "_f32", "_f64", result.f32, input.f64 );
   }
   {
     result.u32 = 0xBFCCCCCC; //-1.6f
-    input.u64 = 0xBFF999999999999A; //-1.6f
+    input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_zero", "_f32", "_f64", result.f32, input.f64 );
   }
   //integer to floating point
@@ -2759,13 +2759,13 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("b64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xffffffffffffffff);
+    const uint64_t result = uint64_t(0xffffffffffffffffLL);
     const char *value = "0xffffffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("b64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(01777777777777777777777);
+    const uint64_t result = uint64_t(01777777777777777777777LL);
     const char *value = "01777777777777777777777";
     unsigned bits = 64;
     testGlobalInitializer("b64", result, value, bits);
@@ -2951,61 +2951,61 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("s32", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x7fffffffffffffff);
+    const uint64_t result = uint64_t(0x7fffffffffffffffLL);
     const char *value = "0x7fffffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(01777777777777777777777);
+    const uint64_t result = uint64_t(01777777777777777777777LL);
     const char *value = "01777777777777777777777";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x7ffffffffffffffe);
+    const uint64_t result = uint64_t(0x7ffffffffffffffeLL);
     const char *value = "0x7ffffffffffffffe";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(01777777777777777777776);
+    const uint64_t result = uint64_t(01777777777777777777776LL);
     const char *value = "01777777777777777777776";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x8000000000000000);
+    const uint64_t result = uint64_t(0x8000000000000000LL);
     const char *value = "0x8000000000000000";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(01000000000000000000000);
+    const uint64_t result = uint64_t(01000000000000000000000LL);
     const char *value = "01000000000000000000000";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x8000000000000001);
+    const uint64_t result = uint64_t(0x8000000000000001LL);
     const char *value = "0x8000000000000001";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(01000000000000000000001);
+    const uint64_t result = uint64_t(01000000000000000000001LL);
     const char *value = "01000000000000000000001";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x0);
+    const uint64_t result = uint64_t(0x0LL);
     const char *value = "0x0";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(00);
+    const uint64_t result = uint64_t(00LL);
     const char *value = "00";
     unsigned bits = 64;
     testGlobalInitializer("s64", result, value, bits);
@@ -3155,49 +3155,49 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("u32", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xffffffffffffffff);
+    const uint64_t result = uint64_t(0xffffffffffffffffLL);
     const char *value = "0xffffffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(01777777777777777777777);
+    const uint64_t result = uint64_t(01777777777777777777777LL);
     const char *value = "01777777777777777777777";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xfffffffffffffffe);
+    const uint64_t result = uint64_t(0xfffffffffffffffeLL);
     const char *value = "0xfffffffffffffffe";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(01777777777777777777776);
+    const uint64_t result = uint64_t(01777777777777777777776LL);
     const char *value = "01777777777777777777776";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x0);
+    const uint64_t result = uint64_t(0x0LL);
     const char *value = "0x0";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(00);
+    const uint64_t result = uint64_t(00LL);
     const char *value = "00";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x0000000000000001);
+    const uint64_t result = uint64_t(0x0000000000000001LL);
     const char *value = "0x0000000000000001";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(00000000000000000000001);
+    const uint64_t result = uint64_t(00000000000000000000001LL);
     const char *value = "0000000000000000000001";
     unsigned bits = 64;
     testGlobalInitializer("u64", result, value, bits);
@@ -3281,79 +3281,79 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("f32", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x7fefffffffffffff);
+    const uint64_t result = uint64_t(0x7fefffffffffffffLL);
     const char *value = "0d7fefffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x0);
+    const uint64_t result = uint64_t(0x0LL);
     const char *value = "0d0000000000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xffefffffffffffff);
+    const uint64_t result = uint64_t(0xffefffffffffffffLL);
     const char *value = "0dffefffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x7feffffffffffffe);
+    const uint64_t result = uint64_t(0x7feffffffffffffeLL);
     const char *value = "0d7feffffffffffffe";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x8000000000000001);
+    const uint64_t result = uint64_t(0x8000000000000001LL);
     const char *value = "0d8000000000000001";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x0000000000000001);
+    const uint64_t result = uint64_t(0x0000000000000001LL);
     const char *value = "0d0000000000000001";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xffeffffffffffffe);
+    const uint64_t result = uint64_t(0xffeffffffffffffeLL);
     const char *value = "0dffeffffffffffffe";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x7ff0000000000000);
+    const uint64_t result = uint64_t(0x7ff0000000000000LL);
     const char *value = "0d7ff0000000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xfff0000000000000);
+    const uint64_t result = uint64_t(0xfff0000000000000LL);
     const char *value = "0dfff0000000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x7fff800000000000);
+    const uint64_t result = uint64_t(0x7fff800000000000LL);
     const char *value = "0d7fff800000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xfff8000000000000);
+    const uint64_t result = uint64_t(0xfff8000000000000LL);
     const char *value = "0dfff8000000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x000fffffffffffff);
+    const uint64_t result = uint64_t(0x000fffffffffffffLL);
     const char *value = "0d000fffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x800fffffffffffff);
+    const uint64_t result = uint64_t(0x800fffffffffffffLL);
     const char *value = "0d800fffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
@@ -3554,126 +3554,24 @@ TEST(BrigGlobalTest, Align16) {
   EXPECT_TRUE(BP);
 }
 
-TEST(BrigPacked, PackdConstants) {
+TEST(BrigKernelTest, Example6) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$small;\n"
-  "kernel &packedConstants(kernarg_u32 %r1, kernarg_u32 %r2)\n"
-  "{\n"
-  "  ld_kernarg_u32 $s0, [%r1];\n"
-  "  ld_kernarg_u32 $s1, [%r2];\n"
-  "  mov_b32 $s2, 0;\n"
-  "  add_pp_s16x2 $s3, $s2, _s16x2(-23,56);\n"
-  "  add_pp_s16x2 $s4, $s2, 0xffe90038;\n"
-  "  st_kernarg_u32 $s3, [$s0];\n"
-  "  st_kernarg_u32 $s4, [$s1];\n"
-  "  ret;\n"
-  "};\n"
-  );
-
+    "version 1:0:$small;"
+    "function &callee(arg_f32 %output)(arg_f32 %input) {"
+    "  ld_arg_f32 $s0, [%input];"
+    "  st_arg_f32 $s0, [%output];"
+    "  ret;"
+    "};"
+    ""
+    "function &caller()() {"
+    "  {"
+    "    arg_f32 %an_input;"
+    "    st_arg_f32 $s1, [%an_input ];"
+    "    arg_f32 %an_output;"
+    "    call &callee (%an_output)(%an_input);"
+    "    ld_arg_f32 $s0, [%an_output];"
+    "  }"
+    "};"
+    );
   EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("packedConstants");
-  uint32_t *output1 = new uint32_t(0);
-  uint32_t *output2 = new uint32_t(0);
-  void *args[] = { &output1, &output2 };
-  BE.launch(fun, args);
-  EXPECT_EQ(*output1, *output2);
-
-  delete output1;
-  delete output2;
-}
-
-static const char packedConstants[] =
-  "version 1:0:$small;\n"
-  "kernel &packedConstants(kernarg_u32 %%r)\n"
-  "{\n"
-  "  ld_kernarg_u32 $s0, [%r];\n"
-  "  mov_b%u $%c2, 0;\n"
-  "  add_pp_%s $%c3, $%c2, %s;\n"
-  "  st_kernarg_u%u $%c3, [$s0];\n"
-  "  ret;\n"
-  "};\n";
-template<class T>
-static void testPackedConstants(unsigned bits,
-                                const char *value1,
-                                const T &result,
-                                const char *type) {
-  char reg = 0;
-  if(bits == 32)
-    reg = 's';
-  if(bits == 64)
-    reg = 'd';
-  char *buffer =
-    asnprintf(packedConstants,
-              bits,
-              reg,
-              type,
-              reg,
-              reg,
-              value1,
-              bits,
-              reg);
-
-  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
-  delete[] buffer;
-
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("packedConstants");
-  T *output = new T;
-  *output = 0;
-  void *args[] = { &output };
-  BE.launch(fun, args);
-  EXPECT_EQ(result, *output);
-
-  delete output;
-}
-
-TEST(BrigPacked, testPackedConstants) {
-  {
-    unsigned bits = 32;
-    uint32_t result = uint32_t(0xffe90038);
-    testPackedConstants(bits, "_s16x2(-23, 56)", result, "s16x2");
-  }
-  {
-    unsigned bits = 32;
-    uint32_t result = uint32_t(0x170038);
-    testPackedConstants(bits, "_u16x2(23, 56)", result, "u16x2");
-  }
-  {
-    unsigned bits = 64;
-    uint64_t result = uint64_t(0x1700380022000a);
-    testPackedConstants(bits, "_s16x4(23, 56, 34,10)", result, "s16x4");
-  }
-  {
-    unsigned bits = 64;
-    uint64_t result = uint64_t(0x1000000010000);
-    testPackedConstants(bits, "_u16x4(1, 0, 1, 0)", result, "u16x4");
-  }
-  {
-    unsigned bits = 32;
-    uint32_t result = uint32_t(0x1738220a);
-    testPackedConstants(bits, "_s8x4(23, 56, 34, 10)", result, "s8x4");
-  }
-  {
-    unsigned bits = 32;
-    uint32_t result = uint32_t(0x1000100);
-    testPackedConstants(bits, "_u8x4(1, 0, 1, 0)", result, "u8x4");
-  }
-  {
-    unsigned bits = 64;
-    uint64_t result = uint64_t(0x1738220a00000000);
-    testPackedConstants(bits, "_s8x8(23, 56, 34, 10, 0, 0, 0, 0)",
-                        result, "s8x8");
-  }
-  {
-    unsigned bits = 64;
-    uint32_t result = uint32_t(0x400000003f800000);
-    testPackedConstants(bits, "_f32x2(0d4000000000000000, 0d3ff0000000000000)",
-			 result, "f32x2");
-  }
 }
