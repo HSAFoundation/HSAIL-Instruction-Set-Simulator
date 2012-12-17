@@ -1218,6 +1218,9 @@ int Instruction3(Context* context) {
       return 1;
     }
   }
+  if (opcode == BrigShl || opcode ==BrigShr) {
+    context->set_type(Brigb32);
+  }
   if (Operand(context, &OpOffset2)) {
     context->set_error(MISSING_OPERAND);
     return 1;
