@@ -3984,6 +3984,12 @@ int Cmp(Context* context) {
   BrigoOffset32_t OpOffset[3] = {0, 0, 0};
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
   context->token_to_scan = yylex();
+  if (context->token_to_scan == _FTZ) {
+    aluModifier.valid = 1;
+    aluModifier.ftz = 1;
+    aluModifier.floatOrInt = 1;
+    context->token_to_scan = yylex();
+  }
   if (ComparisonId(context, &comparisonOperator)) {
     context->set_error(MISSING_COMPARISON_TYPE);
     return 1;
