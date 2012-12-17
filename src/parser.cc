@@ -829,7 +829,7 @@ int CallArgs(Context* context) {
 int RoundingMode(Context* context) {
   unsigned int first_token = context->token_to_scan;
   // get current alu modifier from context
-  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};//context->get_alu_modifier();
+  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
 
   if (first_token == _FTZ) {
     mod.valid = 1;
@@ -839,9 +839,15 @@ int RoundingMode(Context* context) {
   }
 
   if (context->token_type == FLOAT_ROUNDING) {
-      // next is floatRounding
-    mod.valid = 1;
-    mod.floatOrInt = 1;
+    if (mod.valid) {
+      if (!mod.floatOrInt) {
+        context->set_error(INVALID_MODIFIER);
+        return 1;
+      }
+    } else {
+      mod.valid = 1;
+      mod.floatOrInt = 1;
+    }
     switch (context->token_to_scan) {
       case _UP:
         mod.rounding = 2;
@@ -856,12 +862,17 @@ int RoundingMode(Context* context) {
         mod.rounding = 0;
         break;
     }
-    context->token_to_scan = yylex();  // set context for following functions
-    context->set_alu_modifier(mod);
-    return 0;
+    context->token_to_scan = yylex();
   } else if (context->token_type == INT_ROUNDING) {
-    mod.valid = 1;
-    mod.floatOrInt = 0;
+    if (mod.valid) {
+      if (mod.floatOrInt) {
+        context->set_error(INVALID_MODIFIER);
+        return 1;
+      }
+    } else {
+      mod.valid = 1;
+      mod.floatOrInt = 0;
+    }
     switch (first_token) {
       case _UPI:
         mod.rounding = 2;
@@ -876,15 +887,11 @@ int RoundingMode(Context* context) {
         mod.rounding = 0;
         break;
     }
-    context->token_to_scan = yylex();  // set context for following functions
-    context->set_alu_modifier(mod);
-    return 0;
+    context->token_to_scan = yylex();
   }
-  if(mod.ftz){
-    context->set_alu_modifier(mod);
-    return 0;
-  }
-  return 1;
+
+  context->set_alu_modifier(mod);
+  return 0;
 }
 
 int Instruction2OpcodeDT(Context* context) {
@@ -903,9 +910,11 @@ int Instruction2OpcodeDT(Context* context) {
   inst.opcode = context->token_value.opcode;
 
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
   if (context->token_type == PACKING) {
     // there is packing
     inst.packing = context->token_value.packing;
@@ -955,8 +964,7 @@ int Instruction2OpcodeDT(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       sizeof(BrigInstMod),  // size
       BrigEInstMod,         // kind
@@ -994,9 +1002,11 @@ int Instruction2OpcodeNoDT(Context* context) {
   inst.opcode = context->token_value.opcode;
 
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
   if (context->token_type != REGISTER) {
     context->set_error(INVALID_FIRST_OPERAND);
     return 1;
@@ -1016,8 +1026,7 @@ int Instruction2OpcodeNoDT(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       sizeof(BrigInstMod),  // size
       BrigEInstMod,         // kind
@@ -1050,9 +1059,11 @@ int Instruction2OpcodeFtz(Context* context) {
 
   /* Check for rounding mode*/
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-      aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
 
   if (context->token_type != DATA_TYPE_ID) {
     context->set_error(INVALID_DATA_TYPE);
@@ -1084,8 +1095,7 @@ int Instruction2OpcodeFtz(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       0,  // size
       BrigEInstMod,         // kind
@@ -1132,11 +1142,11 @@ int Instruction3(Context* context) {
   // First token must be an Instruction3Opcode
 
   /* Variables for storing Brig struct information */
-  bool has_modifier = false;
   BrigDataType16_t type = Brigb32;
   BrigOpcode32_t opcode = context->token_value.opcode;
   BrigPacking packing = BrigNoPacking;
   BrigoOffset32_t OpOffset0 = 0, OpOffset1 = 0, OpOffset2 = 0;
+  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
 
   /* Checking for Instruction3 statement  - no error set here*/
   if ((context->token_type != INSTRUCTION3_OPCODE)
@@ -1147,7 +1157,11 @@ int Instruction3(Context* context) {
   context->token_to_scan= yylex();
 
   /* Rounding Optional*/
-  has_modifier = (!RoundingMode(context));
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
+  }
+  mod = context->get_alu_modifier();
 
   /*Packing optional*/
   if (context->token_type == PACKING) {
@@ -1213,8 +1227,7 @@ int Instruction3(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  if (has_modifier){
-    BrigAluModifier mod = context->get_alu_modifier();
+  if (mod.valid){
     BrigInstMod bim = {
       0,
       BrigEInstMod,
@@ -2190,6 +2203,7 @@ int Call(Context* context) {
   }
 
   if (context->token_to_scan == __FBAR) {
+    aluModifier.valid = 1;
     aluModifier.fbar = 1;
     context->token_to_scan = yylex();
   }
@@ -2270,7 +2284,7 @@ int Call(Context* context) {
     return 1;
   }
 
-  if (*paluModifier!=0) {
+  if (aluModifier.valid) {
     BrigInstMod callMod = {
       0,
       BrigEInstMod,
@@ -3132,9 +3146,11 @@ int Instruction4Fma(Context* context) {
   BrigoOffset32_t OpOffset[4] = {0, 0, 0, 0};
 
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
   // TODO(Chuang):Type Length: 16 (in some implementations), 32, 64
   if (context->token_to_scan != _F32 &&
       context->token_to_scan != _F64) {
@@ -3208,8 +3224,7 @@ int Instruction4Fma(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }  // ';'
-  int* pCmp = reinterpret_cast<int*>(&aluModifier);
-  if (*pCmp != 0) {
+  if (aluModifier.valid) {
     BrigInstMod fmaMod = {
       sizeof(BrigInstMod),  // size
       BrigEInstMod,         // kind
@@ -3250,9 +3265,11 @@ int Instruction4Mad(Context* context) {
   BrigDataType16_t type = Brigb32;
 
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
   // TODO(Chuang):Type f Length: 16 (in some implementations), 32, 64
   // Or Type u, s Length 32, 64
   if (context->token_to_scan != _F32 &&
@@ -3321,8 +3338,7 @@ int Instruction4Mad(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }  // ';'
-  int* pCmp = reinterpret_cast<int*>(&aluModifier);
-  if (*pCmp != 0) {
+  if (aluModifier.valid) {
     // Note: mad_u/s without _ftz/rounding
     if (type != Brigf32 && type != Brigf64) {
       context->set_error(INVALID_ROUNDING_MODE);
@@ -4819,10 +4835,12 @@ int MulInst(Context* context) {
   context->token_to_scan = yylex();
 
   if (opcode == BrigMul) {
-    if (!RoundingMode(context)) {
-      aluModifier = context->get_alu_modifier();
+    if (RoundingMode(context)) {
+      context->set_error(INVALID_MODIFIER);
+      return 1;
     }
   }
+  aluModifier = context->get_alu_modifier();
 
   if (context->token_type == PACKING) {
     packing = context->token_value.packing;
@@ -4875,7 +4893,7 @@ int MulInst(Context* context) {
     return 1;
   }
 
-  if (*(reinterpret_cast<int*>(&aluModifier)) == 0) {
+  if (!aluModifier.valid) {
     BrigInstBase mulInst = {
       0,                     // size
       BrigEInstBase,         // kind
@@ -5791,9 +5809,11 @@ int Cvt(Context* context) {
   BrigoOffset32_t OpOffset[2] = {0, 0};
   context->token_to_scan = yylex();
 
-  if (!RoundingMode(context)) {
-    getAluMod = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  getAluMod = context->get_alu_modifier();
 
   // destType: b, u, s, f. (For b, only b1 is supported.)
   // destLength: 1, 8, 16, 32, 64. (For 1, only b1 is supported.)
@@ -5907,9 +5927,11 @@ int Instruction1OpcodeDT(Context* context) {
   if (opcode != BrigFbarInit &&
       opcode != BrigFbarRelease) {
     // TODO(Chuang): whether support for rounding
-    if (!RoundingMode(context)) {
-      aluModifier = context->get_alu_modifier();
+    if (RoundingMode(context)) {
+      context->set_error(INVALID_MODIFIER);
+      return 1;
     }
+    aluModifier = context->get_alu_modifier();
   }
   // TODO(Chuang): What can the type of BrigFbarInit be?
   if (context->token_to_scan != _B64 &&
@@ -5963,8 +5985,7 @@ int Instruction1OpcodeDT(Context* context) {
     context->append_code(&mem);
     return 0;
   }
-  int* aluValue = reinterpret_cast<int *>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       0,
       BrigEInstMod,         // kind
@@ -6002,9 +6023,11 @@ int Instruction1OpcodeNoDT(Context* context) {
 
   context->token_to_scan = yylex();
   // TODO(Chuang): whether support for rounding
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
 
   if (context->token_to_scan != TOKEN_SREGISTER &&
       context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
@@ -6018,8 +6041,7 @@ int Instruction1OpcodeNoDT(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       0,                    // size
       BrigEInstMod,         // kind
