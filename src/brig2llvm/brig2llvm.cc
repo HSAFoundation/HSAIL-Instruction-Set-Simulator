@@ -14,7 +14,6 @@
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
 #include "llvm/Analysis/Verifier.h"
-#include "llvm/Target/TargetData.h"
 #include "llvm/Support/raw_ostream.h"
 
 namespace hsa{
@@ -223,11 +222,11 @@ struct FunState {
     // Use memset to remove a source of non-deterministic behavior. The HSA PRM
     // does not require that registers are initialized to zero.
     llvm::IRBuilder<> builder(&entry);
-    llvm::TargetData TD(M);
+    llvm::DataLayout DL(M);
     llvm::Value *zero = llvm::ConstantInt::get(C, llvm::APInt(8, 0));
     builder.CreateMemSet(regs, zero,
-                         TD.getTypeAllocSize(regsType),
-                         TD.getPrefTypeAlignment(regsType));
+                         DL.getTypeAllocSize(regsType),
+                         DL.getPrefTypeAlignment(regsType));
 
     for(BrigSymbol local = brigFun.local_begin(),
           E = brigFun.local_end(); local != E; ++local) {
@@ -468,9 +467,12 @@ static llvm::Function *getInstFun(const inst_iterator inst,
     llvm::cast<llvm::Function>(M->getOrInsertFunction(name, instFunTy));
 
   if(sret) {
-    instFun->addAttribute(1, llvm::Attribute::StructRet);
-    instFun->addAttribute(1, llvm::Attribute::NoAlias);
-    instFun->addAttribute(1, llvm::Attribute::NoCapture);
+    llvm::AttrBuilder AB;
+    AB.addAttribute(llvm::Attributes::StructRet);
+    AB.addAttribute(llvm::Attributes::NoAlias);
+    AB.addAttribute(llvm::Attributes::NoCapture);
+    llvm::Attributes attrs = llvm::Attributes::get(C, AB);
+    instFun->addAttribute(1, attrs);
   }
 
   return instFun;

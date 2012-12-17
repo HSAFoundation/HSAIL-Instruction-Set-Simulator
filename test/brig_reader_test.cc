@@ -3361,24 +3361,24 @@ TEST(BrigGlobalTest, GlobalInitializer) {
 }
 
 static const char GlobalArrayInst[] =
-  "version 1:0:$small;\n"
+  "version 1:0:$large;\n"
   "\n"
   "global_%s &array[] = { %s };\n"
   "\n"
   "kernel &__OpenCL_Global_Array_kernel(\n"
-  "        kernarg_u32 %%arg_val0, kernarg_u32 %%n, kernarg_u32 %%bitsLen)\n"
+  "        kernarg_u32 %%arg_val0, kernarg_u32 %%n, kernarg_u64 %%bitsLen)\n"
   "{\n"
   "        ld_kernarg_u32 $s3, [%%n];\n"
-  "        ld_kernarg_u32 $s5, [%%bitsLen];\n"
-  "        div_u32 $s5, $s5, 8;\n"
+  "        ld_kernarg_u64 $d5, [%%bitsLen];\n"
+  "        div_u64 $d5, $d5, 8;\n"
   "        xor_b32 $s2, $s2, $s2;\n"
-  "        mov_b32 $s9, 0;\n"
-  "        ld_kernarg_u32 $s0, [%%arg_val0];\n"
+  "        mov_b64 $d7, 0;\n"
+  "        ld_kernarg_u64 $d0, [%%arg_val0];\n"
   "@store:\n"
-  "        ld_global_u%u $%c4, [&array][$s9];\n"
-  "        st_global_u%u $%c4, [$s0];\n"
-  "        add_u32 $s9, $s9, $s5;\n"
-  "        add_u32 $s0, $s0, $s5;\n"
+  "        ld_global_u%u $%c4, [&array][$d7];\n"
+  "        st_global_u%u $%c4, [$d0];\n"
+  "        add_u64 $d7, $d7, $d5;\n"
+  "        add_u64 $d0, $d0, $d5;\n"
   "@loop_check:\n"
   "        add_u32 $s2, $s2, 1;\n"
   "        cmp_lt_b1_u32 $c1, $s2, $s3;\n"
@@ -3416,7 +3416,7 @@ static void testGlobalArray(const char *type,
     arg_val0[i] = 0;
   }
   unsigned *n = new unsigned(arraySz);
-  unsigned *bitsLen = new unsigned(bits);
+  uint64_t *bitsLen = new uint64_t(bits);
 
   void *args[] = { &arg_val0, n, bitsLen };
   llvm::Function *fun = BP->getFunction("__OpenCL_Global_Array_kernel");
