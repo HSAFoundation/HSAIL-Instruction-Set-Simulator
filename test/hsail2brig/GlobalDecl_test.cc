@@ -894,10 +894,10 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdi7->reserved = 0;                                              // reserved
 
   bdi7->initializationData.u64[0] = 0x1;                     // initializationData
-  bdi7->initializationData.u64[1] = 0x0;
-  bdi7->initializationData.u64[2] = 0x123456789ABCDEF0;
-  bdi7->initializationData.u64[3] = 0xFEDCBA01234; 
-  bdi7->initializationData.u64[4] = 0xFFFFFFFFFFFFFFFF;
+  bdi7->initializationData.u64[1] = 0x0LL;
+  bdi7->initializationData.u64[2] = 0x123456789ABCDEF0LL;
+  bdi7->initializationData.u64[3] = 0xFEDCBA01234LL; 
+  bdi7->initializationData.u64[4] = 0xFFFFFFFFFFFFFFFFLL;
 
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase7(in, sbuf, &ref7, bdi7);
   TestCase7.Run_Test(&GlobalDecl);

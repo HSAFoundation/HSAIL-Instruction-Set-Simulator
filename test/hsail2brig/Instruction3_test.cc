@@ -1736,7 +1736,7 @@ TEST(CodegenTest, Instruction3Op_CodeGen){
   imm3.kind = BrigEOperandImmed;
   imm3.type = Brigb64;
   imm3.reserved = 0;
-  imm3.bits.l[0] = 0x123456789abcdef0;
+  imm3.bits.l[0] = 0xdef09abc56781234LL;
 
   Instruction3Opcode_Test<BrigInstBase, BrigOperandReg, BrigOperandReg, BrigOperandImmed>
             TestCase43(in, symbols, &Out, &reg1, &reg2, &imm3);

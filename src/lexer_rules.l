@@ -12,9 +12,11 @@
 hsa::brig::Context* context = hsa::brig::Context::get_instance();
 
 /* helper function for IEEE to Single */
-float ieee754tof(char *text) {
+void ieee754tof(float *f, char *text) {
   union { uint32_t u32; float f32; } result = { strtoull(text + 2, NULL, 16) };
-  return result.f32;
+  // x86-32's fld instruction will not preserve 32-bit SNAN constants,
+  // so don't return the result!
+  *f = result.f32;
 }
 
 
@@ -104,7 +106,7 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 {IEEE_SINGLE} { context->token_type = CONSTANT;
                 free_string(context);
                 context->yycolno+=yyleng;
-                context->token_value.float_val = ieee754tof(yytext);
+                ieee754tof(&context->token_value.float_val, yytext);
                 return TOKEN_SINGLE_CONSTANT; }
 
 {DEC_DOUBLE}  { context->token_type = CONSTANT;
