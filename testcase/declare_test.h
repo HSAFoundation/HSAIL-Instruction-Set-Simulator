@@ -34,7 +34,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       1000,                 // dim
       string_offset,   // s_name
       BrigSamp,             // type
-      1,                    // align
+      16,                    // align
     },
     1,                      //valid
     1,                      //normalized
@@ -61,7 +61,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       1000,                  // dim
       string_offset,    // s_name
       BrigSamp,              // type
-      1,                     // align
+      16,                     // align
     },
     1,                       //valid
     0,                       //normalized
@@ -88,7 +88,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       1000,                  // dim
       string_offset,   // s_name
       BrigSamp,              // type
-      1,                     // align
+      16,                     // align
     },
     1,                       //valid
     0,                       //normalized
@@ -115,7 +115,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       1000,                   // dim
       string_offset,     // s_name
       BrigSamp,               // type
-      1,                      // align
+      16,                      // align
     },
     1,                        //valid
     0,                        //normalized
@@ -142,7 +142,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       1000,                   // dim
       string_offset,     // s_name
       BrigSamp,               // type
-      1,                      // align
+      16,                      // align
     },
     1,                        //valid
     0,                        //normalized
@@ -168,7 +168,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       0,                      // dim
       string_offset,     // s_name
       BrigSamp,               // type
-      1,                      // align
+      16,                      // align
     },
     0,                        //valid
     0,                        //normalized
@@ -194,7 +194,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       10,                     // dim
       string_offset,     // s_name
       BrigSamp,               // type
-      1,                      // align
+      16,                      // align
     },
     1,                        //valid
     0,                        //normalized
@@ -220,7 +220,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       100,                    // dim
       string_offset,     // s_name
       BrigSamp,               // type
-      1,                      // align
+      16,                      // align
     },
     1,                        //valid
     0,                        //normalized
@@ -247,7 +247,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       1000,                   // dim
       string_offset,     // s_name
       BrigSamp,               // type
-      1,                      // align
+      16,                      // align
     },
     1,                        //valid
     0,                        //normalized
@@ -274,7 +274,7 @@ struct GlobalSamplerDeclTest globalsamplerdecl_pair[10]={
       1000,                   // dim
       string_offset,     // s_name
       BrigSamp,               // type
-      1,                      // align
+      16,                      // align
     },
     1,                        //valid
     0,                        //normalized
@@ -314,7 +314,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                     // dim  
       string_offset,    // s_name
       BrigRWImg,             // type
-      1,                     // align
+      16,                     // align
            },
     2,                       //width
     3,                       //height
@@ -340,7 +340,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                     // dim  
       string_offset,    // s_name
       BrigRWImg,             // type
-      1,                     // align 
+      16,                     // align 
            },
     2,                       //width
     3,                       //height
@@ -365,7 +365,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,   // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -390,7 +390,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,    // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -415,7 +415,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,   // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     2,                      //width
     0,                      //height
@@ -441,7 +441,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,  // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     2,                      //width
     3,                      //height
@@ -466,7 +466,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,  // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -491,7 +491,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,    // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -516,7 +516,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset, // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -541,7 +541,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,   // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -566,7 +566,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,   // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -591,7 +591,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,  // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -616,7 +616,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,  // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -641,7 +641,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,    // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -666,7 +666,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,   // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -691,7 +691,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,   // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -716,7 +716,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       0,                    // dim  
       string_offset,    // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -741,7 +741,7 @@ struct GlobalImageDeclTest globalimagedecl_pair[18]={
       10,                   // dim  
       string_offset,   // s_name
       BrigRWImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -780,7 +780,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset , // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     2,                      //width
     3,                      //height
@@ -806,7 +806,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,  // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     2,                      //width
     3,                      //height
@@ -831,7 +831,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       10,                    // dim  
       string_offset,    // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -856,7 +856,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,    // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -881,7 +881,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,   // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     2,                      //width
     0,                      //height
@@ -907,7 +907,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,   // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     2,                      //width
     3,                      //height
@@ -932,7 +932,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,   // s_name 
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -957,7 +957,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,  // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -982,7 +982,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,  // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1007,7 +1007,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,   // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1032,7 +1032,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,   // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1057,7 +1057,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,  // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1082,7 +1082,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,   // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1107,7 +1107,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,   // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1132,7 +1132,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,  // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1157,7 +1157,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,   // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1182,7 +1182,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       0,                    // dim  
       string_offset,  // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1207,7 +1207,7 @@ struct GlobalReadOnlyImageDeclTest globalreadonlyimagedecl_pair[18] = {
       10,                    // dim  
       string_offset,    // s_name
       BrigROImg,            // type
-      1,                    // align
+      16,                    // align
            },
     0,                      //width
     0,                      //height
@@ -1245,7 +1245,7 @@ struct GlobalPrivateDeclTest globalprivatedecl_pair[3] = {
     4,                      // dim
     string_offset,     // s_name
     Brigu32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1266,7 +1266,7 @@ struct GlobalPrivateDeclTest globalprivatedecl_pair[3] = {
     0,                      // dim
     string_offset,   // s_name
     Brigs32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1287,7 +1287,7 @@ struct GlobalPrivateDeclTest globalprivatedecl_pair[3] = {
     2,                      // dim
     string_offset,     // s_name
     Brigb32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1321,7 +1321,7 @@ struct GlobalGroupDeclTest globalgroupdecl_pair[3] = {
     4,                      // dim
     string_offset,     // s_name
     Brigu32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1342,7 +1342,7 @@ struct GlobalGroupDeclTest globalgroupdecl_pair[3] = {
     0,                      // dim
     string_offset,     // s_name
     Brigs32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1363,7 +1363,7 @@ struct GlobalGroupDeclTest globalgroupdecl_pair[3] = {
     2,                      // dim
     string_offset,     // s_name
     Brigb32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1733,7 +1733,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigb128,                // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1754,7 +1754,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigu8x4,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1775,7 +1775,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigu8x16,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1796,7 +1796,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigs8x16,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1817,7 +1817,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigu16x8,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1838,7 +1838,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigs16x8,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1859,7 +1859,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigf16x8,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1964,7 +1964,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,    // s_name
     Brigu16x2,              // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -1985,7 +1985,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     2,                      // dim
     string_offset,     // s_name
     Brigf16x2,              // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2132,7 +2132,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigu32x4,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2153,7 +2153,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigs32x4,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2174,7 +2174,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     2,                      // dim
     string_offset,     // s_name
     Brigf32x4,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2195,7 +2195,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigu32x4,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2216,7 +2216,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,    // s_name
     Brigs32x4,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2237,7 +2237,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     2,                      // dim
     string_offset,     // s_name
     Brigf32x4,              // type
-    1,                      // align
+    16,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2405,7 +2405,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     4,                      // dim
     string_offset,     // s_name
     Brigu32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2426,7 +2426,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigs32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2447,7 +2447,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     2,                      // dim
     string_offset,     // s_name
     Brigb32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2468,7 +2468,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     4,                      // dim
     string_offset,     // s_name
     Brigu32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2489,7 +2489,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     0,                      // dim
     string_offset,     // s_name
     Brigs32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2510,7 +2510,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     2,                      // dim
     string_offset,     // s_name
     Brigb32,                // type
-    1,                      // align
+    4,                      // align
      },
   0,                        // d_init
   0,                        // reserved
@@ -2578,7 +2578,7 @@ struct unInitializableDeclTest uninitializabledecl_pair[3] = {
         0,
         string_offset,
         Brigu32,
-        1
+        4
       },
       0,
       0
@@ -2599,7 +2599,7 @@ struct unInitializableDeclTest uninitializabledecl_pair[3] = {
         8,
         string_offset,
         Brigu32,
-        1
+        4
       },
       0,
       0
@@ -2620,7 +2620,7 @@ struct unInitializableDeclTest uninitializabledecl_pair[3] = {
         8,
         string_offset,
         Brigs32,
-        1
+        4
       },
       0,
       0
@@ -2653,7 +2653,7 @@ struct KernelArgumentDeclTest kernelargumentdecl_pair[4] = {
         0,
         string_offset,
         Brigu32,
-        1
+        4
       },
       0,
       0
@@ -2674,7 +2674,7 @@ struct KernelArgumentDeclTest kernelargumentdecl_pair[4] = {
         8,
         string_offset,
         BrigROImg,
-        1
+        16
       },
       0,
       0
@@ -2695,7 +2695,7 @@ struct KernelArgumentDeclTest kernelargumentdecl_pair[4] = {
         2,
         string_offset,
         Brigu32,
-        1
+        4
       },
       0,
       0
@@ -2703,7 +2703,7 @@ struct KernelArgumentDeclTest kernelargumentdecl_pair[4] = {
   },
 //argumentdecl_pair[3]
   {
-    "const align 8 extern kernarg_ROImg %x;",
+    "const align 16 extern kernarg_ROImg %x;",
     {
       brig_directive_symbol_size,
       BrigEDirectiveSymbol,
@@ -2716,7 +2716,7 @@ struct KernelArgumentDeclTest kernelargumentdecl_pair[4] = {
         0,
         string_offset,
         BrigROImg,
-        8
+        16
       },
       0,
       0
@@ -2749,7 +2749,7 @@ struct ArgUninitializableDeclTest arguninitializabledecl_pair[2] = {
         0,
         string_offset,
         Brigu32,
-        1
+        4
       },
       0,
       0
@@ -2770,7 +2770,7 @@ struct ArgUninitializableDeclTest arguninitializabledecl_pair[2] = {
         8,
         string_offset,
         Brigu32,
-        1
+        4
       },
       0,
       0
@@ -2803,7 +2803,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
         0,
         string_offset,
         Brigu32,
-        1
+        4
       },
       0,
       0
@@ -2824,7 +2824,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
         8,
         string_offset,
         BrigROImg,
-        1
+        16
       },
       0,
       0
@@ -2845,7 +2845,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
         2,
         string_offset,
         Brigu32,
-        1
+        4
       },
       0,
       0
@@ -2853,7 +2853,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
   },
 //argumentdecl_pair[3]
   {
-    "const align 8 extern arg_ROImg %x",
+    "const align 16 extern arg_ROImg %x",
     {
       brig_directive_symbol_size,
       BrigEDirectiveSymbol,
@@ -2866,7 +2866,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
         0,
         string_offset,
         BrigROImg,
-        8
+        16
       },
       0,
       0

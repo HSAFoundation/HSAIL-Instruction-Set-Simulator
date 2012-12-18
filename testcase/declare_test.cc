@@ -240,7 +240,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_s32) {
     4,                      // dim
     string_offset,     // s_name
     Brigs32,                // type
-    1,                      // align
+    4,                      // align
       },
   directive_offset + brig_directive_symbol_size, // d_init
   0,                        // reserved
@@ -327,7 +327,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_u32) {
     3,                      // dim
     string_offset,     // s_name
     Brigu32,                // type
-    1,                      // align
+    4,                      // align
       },
   directive_offset + brig_directive_symbol_size, // d_init
   0,                         // reserved
@@ -413,7 +413,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f32) {
     3,                       // dim
     string_offset,      // s_name
     Brigf32,                 // type
-    1,                       // align
+    4,                       // align
       },
   directive_offset + brig_directive_symbol_size, // d_init
   0,                         // reserved
@@ -499,7 +499,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f32) {
     3,                      // dim
     string_offset,    // s_name
     Brigf32,                // type
-    1,                      // align
+    4,                      // align
       },
   directive_offset + brig_directive_symbol_size,  // d_init
   0,                        // reserved
@@ -586,7 +586,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f64) {
     3,                      // dim
     string_offset,     // s_name
     Brigf64,                // type
-    1,                      // align
+    8,                      // align
       },
   directive_offset + brig_directive_symbol_size,   // d_init
   0,                        // reserved
@@ -669,7 +669,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f64) {
     3,                      // dim
     string_offset,     // s_name
     Brigf64,                // type
-    1,                      // align
+    8,                      // align
       },
   directive_offset + brig_directive_symbol_size,   // d_init
   0,                        // reserved
