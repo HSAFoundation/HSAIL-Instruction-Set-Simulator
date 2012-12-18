@@ -66,6 +66,7 @@ enum error_code_t {
   INVALID_CONTROL_TYPE,
   INVALID_SEGMENT_OPERATION,
   INVALID_MEMORY_OPERAND,
+  INVALID_MODIFIER,
   // missing part
   MISSING_VERSION_STATEMENT,
   MISSING_WIDTH_INFO,
@@ -209,6 +210,8 @@ class ErrorReporterInterface {
           return std::string("Invalid Control type.");
         case INVALID_SEGMENT_OPERATION:
           return std::string("Invalid Segment Operation: The instruction type and operand registers must match the machine model.");
+        case INVALID_MODIFIER:
+          return std::string("Invalid modifier.");
         case INVALID_MEMORY_OPERAND:
           return std::string("Invalid Memory Operand.");
         case MISSING_VERSION_STATEMENT:

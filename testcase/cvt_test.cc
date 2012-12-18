@@ -42,5 +42,22 @@ TEST_P(TestCvt,Cvt)
 
 INSTANTIATE_TEST_CASE_P(CodegenTestCvt, TestCvt, testing::Range(0, 62));
 
+TEST_P(TestCvtInvalid, CvtInvalid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(inputarray_cvt_invalid[n]);
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Cvt(context));
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest, TestCvtInvalid, testing::Range(0,4));
+
+
 }  // namespace brig
 }  // namespace hsa

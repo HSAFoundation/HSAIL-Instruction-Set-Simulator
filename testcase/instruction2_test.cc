@@ -8,6 +8,148 @@ namespace brig {
 extern ErrorReporter* main_reporter;
 extern Context* context;
 
+TEST_P(TestInstruction2Ndrangegroups, Ndrangegroups) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(instruction2ndrangegroups_pair[n].str);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  BrigOperandReg getReg1;
+  BrigOperandImmed getImmed1;
+  context->get_code(code_offset, &get);
+  BrigInstBase ref = instruction2ndrangegroups_pair[n].ref;
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  if(n == 0) {
+    context->get_operand(operand_offset, &getReg1);
+    EXPECT_EQ(reg_size, getReg1.size);
+    EXPECT_EQ(BrigEOperandReg, getReg1.kind);
+    EXPECT_EQ(Brigb32, getReg1.type);
+    EXPECT_EQ(0, getReg1.reserved);
+    EXPECT_EQ(string_offset, getReg1.s_name);
+
+    context->get_operand(ref.o_operands[1], &getImmed1);
+    EXPECT_EQ(immed_size, getImmed1.size);
+    EXPECT_EQ(BrigEOperandImmed, getImmed1.kind);
+    EXPECT_EQ(Brigb32, getImmed1.type);
+    EXPECT_EQ(0, getImmed1.reserved);
+    EXPECT_EQ(2, getImmed1.bits.u);
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(CodegenTest, 
+                        TestInstruction2Ndrangegroups, 
+                        testing::Range(0, 1));
+
+TEST_P(TestInstruction2Ndrangesize, Ndrangesize) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(instruction2ndrangesize_pair[n].str);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  BrigOperandReg getReg1;
+  BrigOperandImmed getImmed1;
+  context->get_code(code_offset, &get);
+  BrigInstBase ref = instruction2ndrangesize_pair[n].ref;
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  if(n == 0) {
+    context->get_operand(operand_offset, &getReg1);
+    EXPECT_EQ(reg_size, getReg1.size);
+    EXPECT_EQ(BrigEOperandReg, getReg1.kind);
+    EXPECT_EQ(Brigb32, getReg1.type);
+    EXPECT_EQ(0, getReg1.reserved);
+    EXPECT_EQ(string_offset, getReg1.s_name);
+
+    context->get_operand(ref.o_operands[1], &getImmed1);
+    EXPECT_EQ(immed_size, getImmed1.size);
+    EXPECT_EQ(BrigEOperandImmed, getImmed1.kind);
+    EXPECT_EQ(Brigb32, getImmed1.type);
+    EXPECT_EQ(0, getImmed1.reserved);
+    EXPECT_EQ(0, getImmed1.bits.u);
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(CodegenTest, 
+                        TestInstruction2Ndrangesize, 
+                        testing::Range(0, 1));
+
+TEST_P(TestInstruction2Currentworkgroupsize, Currentworkgroupsize) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(instruction2currentworkgroupsize_pair[n].str);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Instruction2(context));
+
+  BrigInstBase get;
+  BrigOperandReg getReg1;
+  BrigOperandImmed getImmed1;
+  context->get_code(code_offset, &get);
+  BrigInstBase ref = instruction2currentworkgroupsize_pair[n].ref;
+
+  EXPECT_EQ(ref.size, get.size);
+  EXPECT_EQ(ref.kind, get.kind);
+  EXPECT_EQ(ref.opcode, get.opcode);
+  EXPECT_EQ(ref.packing, get.packing);
+  EXPECT_EQ(ref.type, get.type);
+  EXPECT_EQ(ref.o_operands[0], get.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], get.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], get.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], get.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], get.o_operands[4]);
+
+  if(n == 0) {
+    context->get_operand(operand_offset, &getReg1);
+    EXPECT_EQ(reg_size, getReg1.size);
+    EXPECT_EQ(BrigEOperandReg, getReg1.kind);
+    EXPECT_EQ(Brigb32, getReg1.type);
+    EXPECT_EQ(0, getReg1.reserved);
+    EXPECT_EQ(string_offset, getReg1.s_name);
+
+    context->get_operand(ref.o_operands[1], &getImmed1);
+    EXPECT_EQ(immed_size, getImmed1.size);
+    EXPECT_EQ(BrigEOperandImmed, getImmed1.kind);
+    EXPECT_EQ(Brigb32, getImmed1.type);
+    EXPECT_EQ(0, getImmed1.reserved);
+    EXPECT_EQ(1, getImmed1.bits.u);
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(CodegenTest, 
+                        TestInstruction2Currentworkgroupsize, 
+                        testing::Range(0, 1));
+
+
 TEST_P(TestInstruction2Abs, Abs) {
   context->set_error_reporter(main_reporter);
   context->clear_context();

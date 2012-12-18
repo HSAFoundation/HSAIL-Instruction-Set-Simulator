@@ -8,8 +8,8 @@ namespace hsa {
 namespace brig {
 
 BrigAluModifier cmp_bam[8] = {
+  {0, 0, 0, 0, 0, 0, 0},// no modifiers and all fields are all zeros
   {1, 1, 0, 1, 0, 0, 0},// ftz
-  {1, 1, 0, 0, 0, 0, 0},// near
   {1, 1, 1, 0, 0, 0, 0},// zero
   {1, 1, 2, 0, 0, 0, 0},// up
   {1, 1, 3, 0, 0, 0, 0},// down
@@ -29,8 +29,9 @@ struct CmpEqTest{
 
 struct CmpEqTest cmp_eq_pair[45] = {
 // cmp_pair[0]
+//supports eight control registers
   {
-    "cmp_eq_b1_b1 $c1, $c2, $c3;",
+    "cmp_eq_b1_b1 $c7, $c2, $c3;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -184,7 +185,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
   },
 // cmp_pair[7]
   {
-    "cmp_eq_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_eq_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -220,7 +221,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEq,
       Brigf64,
       0
@@ -382,7 +383,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
   },
 // cmp_pair[16]
   {
-    "cmp_eq_b32_f32 $s1, WAVESIZE, 0;",
+    "cmp_ftz_eq_b32_f32 $s1, WAVESIZE, 0;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -418,7 +419,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEq,
       Brigf64,
       0
@@ -594,7 +595,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEq,
       Brigf32,
       0
@@ -616,7 +617,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEq,
       Brigf64,
       0
@@ -778,7 +779,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
   },
 // cmp_pair[34]
   {
-    "cmp_eq_s32_f32 $s1, WAVESIZE, 0.0f;",
+    "cmp_ftz_eq_s32_f32 $s1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -800,7 +801,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
   },
 // cmp_pair[35]
   {
-    "cmp_eq_s32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_eq_s32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -976,7 +977,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
   },
 // cmp_pair[43]
   {
-    "cmp_eq_f32_f32 $s1, WAVESIZE, 0.0f;",
+    "cmp_ftz_eq_f32_f32 $s1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -998,7 +999,7 @@ struct CmpEqTest cmp_eq_pair[45] = {
   },
 // cmp_pair[44]
   {
-    "cmp_eq_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_eq_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -1127,7 +1128,7 @@ std::string input_array_cmp_eq_invalid[56] = {
 // false[49]
   "cmp_eq_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_eq_b32_s32 $s1, $s2, $s100;",
+  "cmp_eq_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_eq_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -1320,7 +1321,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf32,
       0
@@ -1328,7 +1329,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
   },
 // cmp_pair[8]
   {
-    "cmp_ne_b1_f64 $c1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_ne_b1_f64 $c1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -1518,7 +1519,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf32,
       0
@@ -1540,7 +1541,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf64,
       0
@@ -1716,7 +1717,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf32,
       0
@@ -1738,7 +1739,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf64,
       0
@@ -1914,7 +1915,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf32,
       0
@@ -1936,7 +1937,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf64,
       0
@@ -2098,7 +2099,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
   },
 // cmp_pair[43]
   {
-    "cmp_ne_f32_f32 $s1, WAVESIZE, 0.0f;",
+    "cmp_ftz_ne_f32_f32 $s1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -2134,7 +2135,7 @@ struct CmpNeTest cmp_ne_pair[45] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf64,
       0
@@ -2249,7 +2250,7 @@ std::string input_array_cmp_ne_invalid[56] = {
 // false[49]
   "cmp_ne_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_ne_b32_s32 $s1, $s2, $s100;",
+  "cmp_ne_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_ne_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -2406,7 +2407,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
   },
 // cmp_pair[6]
   {
-    "cmp_lt_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_lt_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -2442,7 +2443,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf64,
       0
@@ -2596,7 +2597,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf32,
       0
@@ -2618,7 +2619,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf64,
       0
@@ -2772,7 +2773,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf32,
       0
@@ -2794,7 +2795,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf64,
       0
@@ -2948,7 +2949,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf32,
       0
@@ -2970,7 +2971,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf64,
       0
@@ -3110,7 +3111,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
   },
 // cmp_pair[38]
   {
-    "cmp_lt_f32_f32 $s1, WAVESIZE, 0.0f;",
+    "cmp_ftz_lt_f32_f32 $s1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -3146,7 +3147,7 @@ struct CmpLtTest cmp_lt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf64,
       0
@@ -3261,7 +3262,7 @@ std::string input_array_cmp_lt_invalid[58] = {
 // false[49]
   "cmp_lt_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_lt_b32_s32 $s1, $s2, $s100;",
+  "cmp_lt_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_lt_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -3422,7 +3423,7 @@ struct CmpLeTest cmp_le_pair[40] = {
   },
 // cmp_pair[6]
   {
-    "cmp_le_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_le_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -3458,7 +3459,7 @@ struct CmpLeTest cmp_le_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigf64,
       0
@@ -3612,7 +3613,7 @@ struct CmpLeTest cmp_le_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigf32,
       0
@@ -3634,7 +3635,7 @@ struct CmpLeTest cmp_le_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigf64,
       0
@@ -3788,7 +3789,7 @@ struct CmpLeTest cmp_le_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigf32,
       0
@@ -3810,7 +3811,7 @@ struct CmpLeTest cmp_le_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigf64,
       0
@@ -3964,7 +3965,7 @@ struct CmpLeTest cmp_le_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigf32,
       0
@@ -3986,7 +3987,7 @@ struct CmpLeTest cmp_le_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigf64,
       0
@@ -4140,7 +4141,7 @@ struct CmpLeTest cmp_le_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigf32,
       0
@@ -4148,7 +4149,7 @@ struct CmpLeTest cmp_le_pair[40] = {
   },
 // cmp_pair[39]
   {
-    "cmp_le_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_le_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -4277,7 +4278,7 @@ std::string input_array_cmp_le_invalid[58] = {
 // false[49]
   "cmp_le_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_le_b32_s32 $s1, $s2, $s100;",
+  "cmp_le_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_le_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -4452,7 +4453,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGt,
       Brigf32,
       0
@@ -4460,7 +4461,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
   },
 // cmp_pair[7]
   {
-    "cmp_gt_b1_f64 $c1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_gt_b1_f64 $c1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -4628,7 +4629,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGt,
       Brigf32,
       0
@@ -4650,7 +4651,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGt,
       Brigf64,
       0
@@ -4804,7 +4805,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGt,
       Brigf32,
       0
@@ -4826,7 +4827,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGt,
       Brigf64,
       0
@@ -4980,7 +4981,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGt,
       Brigf32,
       0
@@ -5002,7 +5003,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGt,
       Brigf64,
       0
@@ -5142,7 +5143,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
   },
 // cmp_pair[38]
   {
-    "cmp_gt_f32_f32 $s1, WAVESIZE, 0.0f;",
+    "cmp_ftz_gt_f32_f32 $s1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -5178,7 +5179,7 @@ struct CmpGtTest cmp_gt_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGt,
       Brigf64,
       0
@@ -5293,7 +5294,7 @@ std::string input_array_cmp_gt_invalid[58] = {
 // false[49]
   "cmp_gt_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_gt_b32_s32 $s1, $s2, $s100;",
+  "cmp_gt_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_gt_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -5454,7 +5455,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
   },
 // cmp_pair[6]
   {
-    "cmp_ge_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_ge_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -5490,7 +5491,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf64,
       0
@@ -5644,7 +5645,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf32,
       0
@@ -5666,7 +5667,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf64,
       0
@@ -5820,7 +5821,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf32,
       0
@@ -5842,7 +5843,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf64,
       0
@@ -5996,7 +5997,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf32,
       0
@@ -6018,7 +6019,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf64,
       0
@@ -6158,7 +6159,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
   },
 // cmp_pair[38]
   {
-    "cmp_ge_f32_f32 $s1, WAVESIZE, 0.0f;",
+    "cmp_ftz_ge_f32_f32 $s1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -6194,7 +6195,7 @@ struct CmpGeTest cmp_ge_pair[40] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf64,
       0
@@ -6309,7 +6310,7 @@ std::string input_array_cmp_ge_invalid[58] = {
 // false[49]
   "cmp_ge_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_ge_b32_s32 $s1, $s2, $s100;",
+  "cmp_ge_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_ge_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -6338,7 +6339,7 @@ struct CmpEquTest{
 struct CmpEquTest cmp_equ_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_equ_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_equ_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -6374,7 +6375,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf64,
       0
@@ -6397,7 +6398,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf32,
       0
@@ -6419,7 +6420,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf64,
       0
@@ -6441,7 +6442,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf32,
       0
@@ -6463,7 +6464,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf64,
       0
@@ -6485,7 +6486,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf32,
       0
@@ -6507,7 +6508,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf64,
       0
@@ -6529,7 +6530,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigb32,
       0
@@ -6551,7 +6552,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigb64,
       0
@@ -6573,7 +6574,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigu32,
       0
@@ -6595,7 +6596,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigu64,
       0
@@ -6617,7 +6618,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigs32,
       0
@@ -6639,7 +6640,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigs64,
       0
@@ -6647,7 +6648,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
   },
 // cmp_pair[14]
   {
-    "cmp_equ_f32_f32 $s1, WAVESIZE, 0.0f;",
+    "cmp_ftz_equ_f32_f32 $s1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -6683,7 +6684,7 @@ struct CmpEquTest cmp_equ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf64,
       0
@@ -6813,7 +6814,7 @@ struct CmpNeuTest{
 struct CmpNeuTest cmp_neu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_neu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_neu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -6849,7 +6850,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigf64,
       0
@@ -6872,7 +6873,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigf32,
       0
@@ -6894,7 +6895,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigf64,
       0
@@ -6916,7 +6917,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigf32,
       0
@@ -6938,7 +6939,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigf64,
       0
@@ -6960,7 +6961,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigf32,
       0
@@ -6982,7 +6983,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigf64,
       0
@@ -7004,7 +7005,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigb32,
       0
@@ -7026,7 +7027,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigb64,
       0
@@ -7048,7 +7049,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigu32,
       0
@@ -7070,7 +7071,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigu64,
       0
@@ -7092,7 +7093,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigs32,
       0
@@ -7114,7 +7115,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigs64,
       0
@@ -7136,7 +7137,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigf32,
       0
@@ -7144,7 +7145,7 @@ struct CmpNeuTest cmp_neu_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_neu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_neu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -7288,7 +7289,7 @@ struct CmpLeuTest{
 struct CmpLeuTest cmp_leu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_leu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_leu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -7324,7 +7325,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf64,
       0
@@ -7347,7 +7348,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf32,
       0
@@ -7369,7 +7370,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf64,
       0
@@ -7391,7 +7392,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf32,
       0
@@ -7413,7 +7414,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf64,
       0
@@ -7435,7 +7436,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf32,
       0
@@ -7457,7 +7458,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf64,
       0
@@ -7479,7 +7480,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigb32,
       0
@@ -7501,7 +7502,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigb64,
       0
@@ -7523,7 +7524,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigu32,
       0
@@ -7545,7 +7546,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigu64,
       0
@@ -7567,7 +7568,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigs32,
       0
@@ -7589,7 +7590,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigs64,
       0
@@ -7611,7 +7612,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf32,
       0
@@ -7619,7 +7620,7 @@ struct CmpLeuTest cmp_leu_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_leu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_leu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -7763,7 +7764,7 @@ struct CmpLtuTest{
 struct CmpLtuTest cmp_ltu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_ltu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_ltu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -7799,7 +7800,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf64,
       0
@@ -7822,7 +7823,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf32,
       0
@@ -7844,7 +7845,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf64,
       0
@@ -7866,7 +7867,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf32,
       0
@@ -7888,7 +7889,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf64,
       0
@@ -7910,7 +7911,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf32,
       0
@@ -7932,7 +7933,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf64,
       0
@@ -7954,7 +7955,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigb32,
       0
@@ -7976,7 +7977,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigb64,
       0
@@ -7998,7 +7999,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigu32,
       0
@@ -8020,7 +8021,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigu64,
       0
@@ -8042,7 +8043,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigs32,
       0
@@ -8064,7 +8065,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigs64,
       0
@@ -8086,7 +8087,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf32,
       0
@@ -8094,7 +8095,7 @@ struct CmpLtuTest cmp_ltu_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_ltu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_ltu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -8238,7 +8239,7 @@ struct CmpGtuTest{
 struct CmpGtuTest cmp_gtu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_gtu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_gtu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -8274,7 +8275,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigf64,
       0
@@ -8297,7 +8298,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigf32,
       0
@@ -8319,7 +8320,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigf64,
       0
@@ -8341,7 +8342,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigf32,
       0
@@ -8363,7 +8364,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigf64,
       0
@@ -8385,7 +8386,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigf32,
       0
@@ -8407,7 +8408,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigf64,
       0
@@ -8429,7 +8430,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigb32,
       0
@@ -8451,7 +8452,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigb64,
       0
@@ -8473,7 +8474,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigu32,
       0
@@ -8495,7 +8496,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigu64,
       0
@@ -8517,7 +8518,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigs32,
       0
@@ -8539,7 +8540,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigs64,
       0
@@ -8561,7 +8562,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigf32,
       0
@@ -8569,7 +8570,7 @@ struct CmpGtuTest cmp_gtu_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_gtu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_gtu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -8713,7 +8714,7 @@ struct CmpGeuTest{
 struct CmpGeuTest cmp_geu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_geu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_geu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -8749,7 +8750,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf64,
       0
@@ -8772,7 +8773,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf32,
       0
@@ -8794,7 +8795,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf64,
       0
@@ -8816,7 +8817,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf32,
       0
@@ -8838,7 +8839,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf64,
       0
@@ -8860,7 +8861,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf32,
       0
@@ -8882,7 +8883,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf64,
       0
@@ -8904,7 +8905,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigb32,
       0
@@ -8926,7 +8927,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigb64,
       0
@@ -8948,7 +8949,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigu32,
       0
@@ -8970,7 +8971,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigu64,
       0
@@ -8992,7 +8993,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigs32,
       0
@@ -9014,7 +9015,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigs64,
       0
@@ -9036,7 +9037,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf32,
       0
@@ -9044,7 +9045,7 @@ struct CmpGeuTest cmp_geu_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_geu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_geu_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -9188,7 +9189,7 @@ struct CmpNumTest{
 struct CmpNumTest cmp_num_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_num_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_num_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -9224,7 +9225,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf64,
       0
@@ -9247,7 +9248,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf32,
       0
@@ -9269,7 +9270,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf64,
       0
@@ -9291,7 +9292,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf32,
       0
@@ -9313,7 +9314,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf64,
       0
@@ -9335,7 +9336,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf32,
       0
@@ -9357,7 +9358,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf64,
       0
@@ -9379,7 +9380,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigb32,
       0
@@ -9401,7 +9402,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigb64,
       0
@@ -9423,7 +9424,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigu32,
       0
@@ -9445,7 +9446,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigu64,
       0
@@ -9467,7 +9468,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigs32,
       0
@@ -9489,7 +9490,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigs64,
       0
@@ -9511,7 +9512,7 @@ struct CmpNumTest cmp_num_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf32,
       0
@@ -9519,7 +9520,7 @@ struct CmpNumTest cmp_num_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_num_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_num_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -9663,7 +9664,7 @@ struct CmpNanTest{
 struct CmpNanTest cmp_nan_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_nan_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_nan_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -9699,7 +9700,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigf64,
       0
@@ -9722,7 +9723,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigf32,
       0
@@ -9744,7 +9745,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigf64,
       0
@@ -9766,7 +9767,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigf32,
       0
@@ -9788,7 +9789,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigf64,
       0
@@ -9810,7 +9811,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigf32,
       0
@@ -9832,7 +9833,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigf64,
       0
@@ -9854,7 +9855,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigb32,
       0
@@ -9876,7 +9877,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigb64,
       0
@@ -9898,7 +9899,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigu32,
       0
@@ -9920,7 +9921,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigu64,
       0
@@ -9942,7 +9943,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigs32,
       0
@@ -9964,7 +9965,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigs64,
       0
@@ -9986,7 +9987,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigf32,
       0
@@ -9994,7 +9995,7 @@ struct CmpNanTest cmp_nan_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_nan_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_nan_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -10138,7 +10139,7 @@ struct CmpSeqTest{
 struct CmpSeqTest cmp_seq_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_seq_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_seq_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -10174,7 +10175,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf64,
       0
@@ -10197,7 +10198,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf32,
       0
@@ -10219,7 +10220,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf64,
       0
@@ -10241,7 +10242,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf32,
       0
@@ -10263,7 +10264,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf64,
       0
@@ -10285,7 +10286,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf32,
       0
@@ -10307,7 +10308,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf64,
       0
@@ -10329,7 +10330,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigb32,
       0
@@ -10351,7 +10352,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigb64,
       0
@@ -10373,7 +10374,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigu32,
       0
@@ -10395,7 +10396,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigs32,
       0
@@ -10417,7 +10418,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigs64,
       0
@@ -10439,7 +10440,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf32,
       0
@@ -10461,7 +10462,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf64,
       0
@@ -10469,7 +10470,7 @@ struct CmpSeqTest cmp_seq_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_seq_f32_u64 $s1, 1, 0;",
+    "cmp_ftz_seq_f32_u64 $s1, 1, 0;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -10613,7 +10614,7 @@ struct CmpSneTest{
 struct CmpSneTest cmp_sne_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sne_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sne_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -10649,7 +10650,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf64,
       0
@@ -10672,7 +10673,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf32,
       0
@@ -10694,7 +10695,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf64,
       0
@@ -10716,7 +10717,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf32,
       0
@@ -10738,7 +10739,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf64,
       0
@@ -10760,7 +10761,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf32,
       0
@@ -10782,7 +10783,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf64,
       0
@@ -10804,7 +10805,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigb32,
       0
@@ -10826,7 +10827,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigb64,
       0
@@ -10848,7 +10849,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigu32,
       0
@@ -10870,7 +10871,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigs32,
       0
@@ -10892,7 +10893,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigs64,
       0
@@ -10914,7 +10915,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf32,
       0
@@ -10936,7 +10937,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf64,
       0
@@ -10944,7 +10945,7 @@ struct CmpSneTest cmp_sne_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_sne_f32_u64 $s1, 1, 0;",
+    "cmp_ftz_sne_f32_u64 $s1, 1, 0;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -11088,7 +11089,7 @@ struct CmpSltTest{
 struct CmpSltTest cmp_slt_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_slt_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_slt_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -11124,7 +11125,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigf64,
       0
@@ -11147,7 +11148,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigf32,
       0
@@ -11169,7 +11170,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigf64,
       0
@@ -11191,7 +11192,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigf32,
       0
@@ -11213,7 +11214,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigf64,
       0
@@ -11235,7 +11236,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigf32,
       0
@@ -11257,7 +11258,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigf64,
       0
@@ -11279,7 +11280,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigb32,
       0
@@ -11301,7 +11302,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigb64,
       0
@@ -11323,7 +11324,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigu32,
       0
@@ -11345,7 +11346,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigs32,
       0
@@ -11367,7 +11368,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigs64,
       0
@@ -11389,7 +11390,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigf32,
       0
@@ -11397,7 +11398,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
   },
 // cmp_pair[14]
   {
-    "cmp_slt_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_slt_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -11433,7 +11434,7 @@ struct CmpSltTest cmp_slt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigu64,
       0
@@ -11563,7 +11564,7 @@ struct CmpSleTest{
 struct CmpSleTest cmp_sle_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sle_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sle_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -11599,7 +11600,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf64,
       0
@@ -11622,7 +11623,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf32,
       0
@@ -11644,7 +11645,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf64,
       0
@@ -11666,7 +11667,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf32,
       0
@@ -11688,7 +11689,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf64,
       0
@@ -11710,7 +11711,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf32,
       0
@@ -11732,7 +11733,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf64,
       0
@@ -11754,7 +11755,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigb32,
       0
@@ -11776,7 +11777,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigb64,
       0
@@ -11798,7 +11799,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigu32,
       0
@@ -11820,7 +11821,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigs32,
       0
@@ -11842,7 +11843,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigs64,
       0
@@ -11864,7 +11865,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf32,
       0
@@ -11886,7 +11887,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf64,
       0
@@ -11894,7 +11895,7 @@ struct CmpSleTest cmp_sle_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_sle_f32_u64 $s1, 1, 0;",
+    "cmp_ftz_sle_f32_u64 $s1, 1, 0;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -12038,7 +12039,7 @@ struct CmpSgtTest{
 struct CmpSgtTest cmp_sgt_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sgt_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sgt_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -12074,7 +12075,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf64,
       0
@@ -12097,7 +12098,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf32,
       0
@@ -12119,7 +12120,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf64,
       0
@@ -12141,7 +12142,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf32,
       0
@@ -12163,7 +12164,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf64,
       0
@@ -12185,7 +12186,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf32,
       0
@@ -12207,7 +12208,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf64,
       0
@@ -12229,7 +12230,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigb32,
       0
@@ -12251,7 +12252,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigb64,
       0
@@ -12273,7 +12274,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigu32,
       0
@@ -12295,7 +12296,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigs32,
       0
@@ -12317,7 +12318,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigs64,
       0
@@ -12339,7 +12340,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf32,
       0
@@ -12361,7 +12362,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf64,
       0
@@ -12369,7 +12370,7 @@ struct CmpSgtTest cmp_sgt_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_sgt_f32_u64 $s1, 1, 0;",
+    "cmp_ftz_sgt_f32_u64 $s1, 1, 0;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -12513,7 +12514,7 @@ struct CmpSgeTest{
 struct CmpSgeTest cmp_sge_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sge_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sge_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -12549,7 +12550,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf64,
       0
@@ -12572,7 +12573,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf32,
       0
@@ -12594,7 +12595,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf64,
       0
@@ -12616,7 +12617,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf32,
       0
@@ -12638,7 +12639,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf64,
       0
@@ -12660,7 +12661,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf32,
       0
@@ -12682,7 +12683,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf64,
       0
@@ -12704,7 +12705,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigb32,
       0
@@ -12726,7 +12727,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigb64,
       0
@@ -12748,7 +12749,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigu32,
       0
@@ -12770,7 +12771,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigs32,
       0
@@ -12792,7 +12793,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigs64,
       0
@@ -12814,7 +12815,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf32,
       0
@@ -12836,7 +12837,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigf64,
       0
@@ -12844,7 +12845,7 @@ struct CmpSgeTest cmp_sge_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_sge_f32_u64 $s1, 1, 0;",
+    "cmp_ftz_sge_f32_u64 $s1, 1, 0;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -12988,7 +12989,7 @@ struct CmpSequTest{
 struct CmpSequTest cmp_sequ_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sequ_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sequ_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -13024,7 +13025,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf64,
       0
@@ -13047,7 +13048,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf32,
       0
@@ -13069,7 +13070,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf64,
       0
@@ -13091,7 +13092,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf32,
       0
@@ -13113,7 +13114,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf64,
       0
@@ -13135,7 +13136,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf32,
       0
@@ -13157,7 +13158,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf64,
       0
@@ -13179,7 +13180,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigb32,
       0
@@ -13201,7 +13202,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigb64,
       0
@@ -13223,7 +13224,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigu32,
       0
@@ -13245,7 +13246,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigs32,
       0
@@ -13267,7 +13268,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigs64,
       0
@@ -13289,7 +13290,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf32,
       0
@@ -13297,7 +13298,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
   },
 // cmp_pair[14]
   {
-    "cmp_sequ_f32_f64 $s1, WAVESIZE, WAVESIZE;",
+    "cmp_ftz_sequ_f32_f64 $s1, WAVESIZE, WAVESIZE;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -13311,7 +13312,7 @@ struct CmpSequTest cmp_sequ_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf64,
       0
@@ -13463,7 +13464,7 @@ struct CmpSneuTest{
 struct CmpSneuTest cmp_sneu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sneu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sneu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -13499,7 +13500,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf64,
       0
@@ -13522,7 +13523,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf32,
       0
@@ -13544,7 +13545,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf64,
       0
@@ -13566,7 +13567,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf32,
       0
@@ -13588,7 +13589,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf64,
       0
@@ -13610,7 +13611,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf32,
       0
@@ -13632,7 +13633,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf64,
       0
@@ -13654,7 +13655,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigb32,
       0
@@ -13676,7 +13677,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigb64,
       0
@@ -13698,7 +13699,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigu32,
       0
@@ -13720,7 +13721,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigs32,
       0
@@ -13742,7 +13743,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigs64,
       0
@@ -13764,7 +13765,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf32,
       0
@@ -13786,7 +13787,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf64,
       0
@@ -13808,7 +13809,7 @@ struct CmpSneuTest cmp_sneu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigu64,
       0
@@ -13938,7 +13939,7 @@ struct CmpSleuTest{
 struct CmpSleuTest cmp_sleu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sleu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sleu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -13974,7 +13975,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf64,
       0
@@ -13997,7 +13998,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf32,
       0
@@ -14019,7 +14020,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf64,
       0
@@ -14041,7 +14042,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf32,
       0
@@ -14063,7 +14064,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf64,
       0
@@ -14085,7 +14086,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf32,
       0
@@ -14107,7 +14108,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf64,
       0
@@ -14129,7 +14130,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigb32,
       0
@@ -14151,7 +14152,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigb64,
       0
@@ -14173,7 +14174,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigu32,
       0
@@ -14195,7 +14196,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigs32,
       0
@@ -14217,7 +14218,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigs64,
       0
@@ -14239,7 +14240,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf32,
       0
@@ -14261,7 +14262,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigf64,
       0
@@ -14283,7 +14284,7 @@ struct CmpSleuTest cmp_sleu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigu64,
       0
@@ -14413,7 +14414,7 @@ struct CmpSltuTest{
 struct CmpSltuTest cmp_sltu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sltu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sltu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -14449,7 +14450,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf64,
       0
@@ -14472,7 +14473,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf32,
       0
@@ -14494,7 +14495,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf64,
       0
@@ -14516,7 +14517,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf32,
       0
@@ -14538,7 +14539,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf64,
       0
@@ -14560,7 +14561,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf32,
       0
@@ -14582,7 +14583,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf64,
       0
@@ -14604,7 +14605,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigb32,
       0
@@ -14626,7 +14627,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigb64,
       0
@@ -14648,7 +14649,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigu32,
       0
@@ -14670,7 +14671,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigs32,
       0
@@ -14692,7 +14693,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigs64,
       0
@@ -14714,7 +14715,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf32,
       0
@@ -14736,7 +14737,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf64,
       0
@@ -14744,7 +14745,7 @@ struct CmpSltuTest cmp_sltu_pair[16] = {
   },
 // cmp_pair[15]
   {
-    "cmp_sltu_f32_u64 $s1, 1, 0;",
+    "cmp_ftz_sltu_f32_u64 $s1, 1, 0;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -14888,7 +14889,7 @@ struct CmpSgtuTest{
 struct CmpSgtuTest cmp_sgtu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sgtu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sgtu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -14924,7 +14925,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf64,
       0
@@ -14947,7 +14948,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf32,
       0
@@ -14969,7 +14970,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf64,
       0
@@ -14991,7 +14992,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf32,
       0
@@ -15013,7 +15014,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf64,
       0
@@ -15035,7 +15036,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf32,
       0
@@ -15057,7 +15058,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf64,
       0
@@ -15079,7 +15080,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigb32,
       0
@@ -15101,7 +15102,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigb64,
       0
@@ -15123,7 +15124,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigu32,
       0
@@ -15145,7 +15146,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigs32,
       0
@@ -15167,7 +15168,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigs64,
       0
@@ -15189,7 +15190,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf32,
       0
@@ -15211,7 +15212,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf64,
       0
@@ -15233,7 +15234,7 @@ struct CmpSgtuTest cmp_sgtu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigu64,
       0
@@ -15363,7 +15364,7 @@ struct CmpSgeuTest{
 struct CmpSgeuTest cmp_sgeu_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_sgeu_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_sgeu_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -15399,7 +15400,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf64,
       0
@@ -15422,7 +15423,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf32,
       0
@@ -15444,7 +15445,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf64,
       0
@@ -15466,7 +15467,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf32,
       0
@@ -15488,7 +15489,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf64,
       0
@@ -15510,7 +15511,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf32,
       0
@@ -15532,7 +15533,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf64,
       0
@@ -15554,7 +15555,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigb32,
       0
@@ -15576,7 +15577,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigb64,
       0
@@ -15598,7 +15599,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigu32,
       0
@@ -15620,7 +15621,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigs32,
       0
@@ -15642,7 +15643,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigs64,
       0
@@ -15664,7 +15665,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf32,
       0
@@ -15686,7 +15687,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigf64,
       0
@@ -15708,7 +15709,7 @@ struct CmpSgeuTest cmp_sgeu_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigu64,
       0
@@ -15838,7 +15839,7 @@ struct CmpSnumTest{
 struct CmpSnumTest cmp_snum_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_snum_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_snum_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -15874,7 +15875,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf64,
       0
@@ -15897,7 +15898,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf32,
       0
@@ -15919,7 +15920,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf64,
       0
@@ -15941,7 +15942,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf32,
       0
@@ -15963,7 +15964,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf64,
       0
@@ -15985,7 +15986,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf32,
       0
@@ -16007,7 +16008,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf64,
       0
@@ -16029,7 +16030,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigb32,
       0
@@ -16051,7 +16052,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigb64,
       0
@@ -16073,7 +16074,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigu32,
       0
@@ -16095,7 +16096,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigs32,
       0
@@ -16117,7 +16118,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigs64,
       0
@@ -16139,7 +16140,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf32,
       0
@@ -16161,7 +16162,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf64,
       0
@@ -16183,7 +16184,7 @@ struct CmpSnumTest cmp_snum_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigu64,
       0
@@ -16313,7 +16314,7 @@ struct CmpSnanTest{
 struct CmpSnanTest cmp_snan_pair[16] = {
 // cmp_pair[0]
   {
-    "cmp_snan_b1_f32 $c1, WAVESIZE, 0.0f;",
+    "cmp_ftz_snan_b1_f32 $c1, WAVESIZE, 0.0f;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -16349,7 +16350,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf64,
       0
@@ -16372,7 +16373,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf32,
       0
@@ -16394,7 +16395,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf64,
       0
@@ -16416,7 +16417,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf32,
       0
@@ -16438,7 +16439,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf64,
       0
@@ -16460,7 +16461,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf32,
       0
@@ -16482,7 +16483,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf64,
       0
@@ -16504,7 +16505,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigb32,
       0
@@ -16526,7 +16527,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigb64,
       0
@@ -16548,7 +16549,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigu32,
       0
@@ -16570,7 +16571,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigs32,
       0
@@ -16592,7 +16593,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigs64,
       0
@@ -16614,7 +16615,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf32,
       0
@@ -16636,7 +16637,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf64,
       0
@@ -16658,7 +16659,7 @@ struct CmpSnanTest cmp_snan_pair[16] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigu64,
       0
@@ -16788,7 +16789,7 @@ struct CmpF16Test{
 struct CmpF16Test cmp_f16_pair[27] = {
 // cmp_pair[0]
   {
-    "cmp_eq_f16_b32 $s1, $s2, $s3;",
+    "cmp_ftz_eq_f16_b32 $s1, $s2, $s3;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -16824,7 +16825,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNe,
       Brigf16,
       0
@@ -16846,7 +16847,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLt,
       Brigf16,
       0
@@ -16868,7 +16869,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLe,
       Brigb32,
       0
@@ -16890,7 +16891,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGe,
       Brigf16,
       0
@@ -16912,7 +16913,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigEqu,
       Brigf16,
       0
@@ -16934,7 +16935,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNeu,
       Brigb32,
       0
@@ -16956,7 +16957,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLeu,
       Brigf16,
       0
@@ -16978,7 +16979,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigLtu,
       Brigf16,
       0
@@ -17000,7 +17001,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGtu,
       Brigb32,
       0
@@ -17022,7 +17023,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigGeu,
       Brigf16,
       0
@@ -17044,7 +17045,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNum,
       Brigf16,
       0
@@ -17066,7 +17067,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigNan,
       Brigb32,
       0
@@ -17088,7 +17089,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSeq,
       Brigf16,
       0
@@ -17110,7 +17111,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSne,
       Brigf16,
       0
@@ -17132,7 +17133,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSlt,
       Brigb32,
       0
@@ -17154,7 +17155,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSle,
       Brigf16,
       0
@@ -17176,7 +17177,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgt,
       Brigf16,
       0
@@ -17198,7 +17199,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSge,
       Brigb32,
       0
@@ -17220,7 +17221,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSequ,
       Brigf16,
       0
@@ -17242,7 +17243,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSneu,
       Brigf16,
       0
@@ -17264,7 +17265,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSleu,
       Brigb32,
       0
@@ -17286,7 +17287,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSltu,
       Brigf16,
       0
@@ -17308,7 +17309,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgtu,
       Brigf16,
       0
@@ -17330,7 +17331,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSgeu,
       Brigb32,
       0
@@ -17352,7 +17353,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnum,
       Brigf16,
       0
@@ -17374,7 +17375,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
         0,
         0
       },
-      cmp_bam[1],
+      cmp_bam[0],
       BrigSnan,
       Brigf16,
       0
@@ -17383,7 +17384,7 @@ struct CmpF16Test cmp_f16_pair[27] = {
 };
 
 BrigAluModifier packedcmp_bam[9] = {
-  {1, 0, 0, 0, 0, 0, 0},//integer
+  {0, 0, 0, 0, 0, 0, 0},//integer
   {1, 1, 0, 1, 0, 0, 0},// ftz
   {1, 1, 0, 0, 0, 0, 0},// near
   {1, 1, 1, 0, 0, 0, 0},// zero
@@ -17626,7 +17627,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
   },
 // packedcmp_pair[10]
   {
-    "packedcmp_eq_f16x2 $s1, $s2, $s3;",
+    "packedcmp_ftz_eq_f16x2 $s1, $s2, $s3;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -17662,7 +17663,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigEq,
       Brigf16x4,
       0
@@ -17684,7 +17685,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigEq,
       Brigf32x2,
       0
@@ -17926,7 +17927,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNe,
       Brigf16x2,
       0
@@ -17948,7 +17949,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNe,
       Brigf16x4,
       0
@@ -17970,7 +17971,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNe,
       Brigf32x2,
       0
@@ -18198,7 +18199,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
   },
 // packedcmp_pair[36]
   {
-    "packedcmp_lt_f16x2 $s1, $s2, $s3;",
+    "packedcmp_ftz_lt_f16x2 $s1, $s2, $s3;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -18234,7 +18235,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLt,
       Brigf16x4,
       0
@@ -18256,7 +18257,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLt,
       Brigf32x2,
       0
@@ -18484,7 +18485,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
   },
 // packedcmp_pair[49]
   {
-    "packedcmp_le_f16x2 $s1, $s2, $s3;",
+    "packedcmp_ftz_le_f16x2 $s1, $s2, $s3;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -18520,7 +18521,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLe,
       Brigf16x4,
       0
@@ -18542,7 +18543,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLe,
       Brigf32x2,
       0
@@ -18784,7 +18785,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGe,
       Brigf16x2,
       0
@@ -18806,7 +18807,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGe,
       Brigf16x4,
       0
@@ -18828,7 +18829,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGe,
       Brigf32x2,
       0
@@ -19070,7 +19071,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGt,
       Brigf16x2,
       0
@@ -19092,7 +19093,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGt,
       Brigf16x4,
       0
@@ -19114,7 +19115,7 @@ struct PackedCmpIntegerTest packedcmp_integer_pair[78] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGt,
       Brigf32x2,
       0
@@ -19262,7 +19263,7 @@ struct PackedCmpFloatsTest{
 struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
 // packedcmp_pair[0]
   {
-    "packedcmp_equ_f16x2 $s1, $s2, $s3;",
+    "packedcmp_ftz_equ_f16x2 $s1, $s2, $s3;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -19298,7 +19299,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigEqu,
       Brigf16x4,
       0
@@ -19320,7 +19321,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigEqu,
       Brigf32x2,
       0
@@ -19342,7 +19343,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNeu,
       Brigf16x2,
       0
@@ -19364,7 +19365,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNeu,
       Brigf16x4,
       0
@@ -19386,7 +19387,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNeu,
       Brigf32x2,
       0
@@ -19408,7 +19409,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLtu,
       Brigf16x2,
       0
@@ -19430,7 +19431,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLtu,
       Brigf16x4,
       0
@@ -19452,7 +19453,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLtu,
       Brigf32x2,
       0
@@ -19474,7 +19475,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLeu,
       Brigf16x2,
       0
@@ -19496,7 +19497,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLeu,
       Brigf16x4,
       0
@@ -19518,7 +19519,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigLeu,
       Brigf32x2,
       0
@@ -19540,7 +19541,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGtu,
       Brigf16x2,
       0
@@ -19562,7 +19563,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGtu,
       Brigf16x4,
       0
@@ -19584,7 +19585,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGtu,
       Brigf32x2,
       0
@@ -19606,7 +19607,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGeu,
       Brigf16x2,
       0
@@ -19628,7 +19629,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGeu,
       Brigf16x4,
       0
@@ -19650,7 +19651,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigGeu,
       Brigf32x2,
       0
@@ -19672,7 +19673,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNum,
       Brigf16x2,
       0
@@ -19694,7 +19695,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNum,
       Brigf16x4,
       0
@@ -19716,7 +19717,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNum,
       Brigf32x2,
       0
@@ -19738,7 +19739,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNan,
       Brigf16x2,
       0
@@ -19760,7 +19761,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNan,
       Brigf16x4,
       0
@@ -19782,7 +19783,7 @@ struct PackedCmpFloatsTest packedcmp_floats_pair[24] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigNan,
       Brigf32x2,
       0
@@ -19970,7 +19971,7 @@ struct PackedCmpSnanTest{
 struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
 // packedcmp_pair[0]
   {
-    "packedcmp_sequ_f16x2 $s1, $s2, $s3;",
+    "packedcmp_ftz_sequ_f16x2 $s1, $s2, $s3;",
     {
       brig_inst_cmp_size,
       BrigEInstCmp,
@@ -20006,7 +20007,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSequ,
       Brigf16x4,
       0
@@ -20028,7 +20029,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSequ,
       Brigf32x2,
       0
@@ -20050,7 +20051,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSneu,
       Brigf16x2,
       0
@@ -20072,7 +20073,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSneu,
       Brigf16x4,
       0
@@ -20094,7 +20095,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSneu,
       Brigf32x2,
       0
@@ -20116,7 +20117,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSltu,
       Brigf16x2,
       0
@@ -20138,7 +20139,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSltu,
       Brigf16x4,
       0
@@ -20160,7 +20161,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSltu,
       Brigf32x2,
       0
@@ -20182,7 +20183,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSleu,
       Brigf16x2,
       0
@@ -20204,7 +20205,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSleu,
       Brigf16x4,
       0
@@ -20226,7 +20227,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSleu,
       Brigf32x2,
       0
@@ -20248,7 +20249,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgtu,
       Brigf16x2,
       0
@@ -20270,7 +20271,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgtu,
       Brigf16x4,
       0
@@ -20292,7 +20293,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgtu,
       Brigf32x2,
       0
@@ -20314,7 +20315,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgeu,
       Brigf16x2,
       0
@@ -20336,7 +20337,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgeu,
       Brigf16x4,
       0
@@ -20358,7 +20359,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgeu,
       Brigf32x2,
       0
@@ -20380,7 +20381,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSnum,
       Brigf16x2,
       0
@@ -20402,7 +20403,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSnum,
       Brigf16x4,
       0
@@ -20424,7 +20425,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSnum,
       Brigf32x2,
       0
@@ -20446,7 +20447,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSnan,
       Brigf16x2,
       0
@@ -20468,7 +20469,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSnan,
       Brigf16x4,
       0
@@ -20490,7 +20491,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSnan,
       Brigf32x2,
       0
@@ -20512,7 +20513,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSeq,
       Brigf16x2,
       0
@@ -20534,7 +20535,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSeq,
       Brigf16x4,
       0
@@ -20556,7 +20557,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSeq,
       Brigf32x2,
       0
@@ -20578,7 +20579,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSne,
       Brigf16x2,
       0
@@ -20600,7 +20601,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSne,
       Brigf16x4,
       0
@@ -20622,7 +20623,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSne,
       Brigf32x2,
       0
@@ -20644,7 +20645,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSlt,
       Brigf16x2,
       0
@@ -20666,7 +20667,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSlt,
       Brigf16x4,
       0
@@ -20688,7 +20689,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSlt,
       Brigf32x2,
       0
@@ -20710,7 +20711,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSle,
       Brigf16x2,
       0
@@ -20732,7 +20733,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSle,
       Brigf16x4,
       0
@@ -20754,7 +20755,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSle,
       Brigf32x2,
       0
@@ -20776,7 +20777,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgt,
       Brigf16x2,
       0
@@ -20798,7 +20799,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgt,
       Brigf16x4,
       0
@@ -20820,7 +20821,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSgt,
       Brigf32x2,
       0
@@ -20842,7 +20843,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSge,
       Brigf16x2,
       0
@@ -20864,7 +20865,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSge,
       Brigf16x4,
       0
@@ -20886,7 +20887,7 @@ struct PackedCmpSnanTest packedcmp_snan_pair[42] = {
         0,
         0
       },
-      packedcmp_bam[1],
+      packedcmp_bam[0],
       BrigSge,
       Brigf32x2,
       0

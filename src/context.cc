@@ -81,7 +81,7 @@ void Context::initialize_all_fields(void) {
   current_bdf_offset = 0;
     
   attribute = BrigNone;
-  alignment = 1;
+  alignment = 0;
   symModifier = 0;
   aluModifier.floatOrInt = 0;
   aluModifier.rounding = 0;
@@ -273,7 +273,7 @@ void Context::clear_all_buffers(void) {
 
 void Context::initialize_statement_fields(void){
   attribute = BrigNone;
-  alignment = 1;
+  alignment = 0;
   symModifier = 0;
   type = Brigb32;
   aluModifier.floatOrInt = 0;

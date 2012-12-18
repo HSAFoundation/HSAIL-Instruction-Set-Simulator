@@ -123,6 +123,47 @@ INSTANTIATE_TEST_CASE_P(CodegenTest,
                         TestInstruction1DynWaveId,
                         testing::Range(0,1));
 
+TEST_P(TestInstruction1QId, QId){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(instruction1_qid_pair[n].str);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction1(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  context->get_code(code_offset, &getBase);
+  context->get_operand(operand_offset, &getReg);
+  BrigInstBase ref = instruction1_qid_pair[n].ref;
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  // BrigOperandReg
+  EXPECT_EQ(reg_size, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(string_offset, getReg.s_name);
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(CodegenTest,
+                        TestInstruction1QId,
+                        testing::Range(0,1));
+
 TEST_P(TestInstruction1DispatchId, DispatchId){
   context->set_error_reporter(main_reporter);
   context->clear_context();

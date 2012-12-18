@@ -33,6 +33,7 @@ namespace brig {
     context->clear_context();
 
     scan_symbols();
+    yylineno = 1;
 
     // restart lexer
     lexer->restart();

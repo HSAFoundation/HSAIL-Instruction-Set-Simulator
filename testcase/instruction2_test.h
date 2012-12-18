@@ -12,6 +12,66 @@ struct Instruction2Test{
   BrigInstBase ref;
 };
 
+class TestInstruction2Ndrangegroups : public ::testing::TestWithParam<int>
+{
+
+};
+
+struct Instruction2Test instruction2ndrangegroups_pair[1] = {
+//instruction2ndrangegroups_pair[0]
+  {
+    "ndrangegroups $s1, 2;",
+     {
+    brig_inst_base_size,
+    BrigEInstBase,
+    BrigNDRangeGroups,
+    Brigb32,
+    BrigNoPacking,
+    {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
+    }
+  }
+};
+
+class TestInstruction2Ndrangesize : public ::testing::TestWithParam<int>
+{
+
+};
+
+struct Instruction2Test instruction2ndrangesize_pair[1] = {
+//instruction2ndrangesize_pair[0]
+  {
+    "ndrangesize $s1, 0;",
+     {
+    brig_inst_base_size,
+    BrigEInstBase,
+    BrigNDRangeSize,
+    Brigb32,
+    BrigNoPacking,
+    {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
+    }
+  }
+};
+
+class TestInstruction2Currentworkgroupsize : public ::testing::TestWithParam<int>
+{
+
+};
+
+struct Instruction2Test instruction2currentworkgroupsize_pair[1] = {
+//instruction2currentworkgroupsize_pair[0]
+  {
+    "currentworkgroupsize $s1, 1;",
+     {
+    brig_inst_base_size,
+    BrigEInstBase,
+    BrigCurrentWorkGroupSize,
+    Brigb32,
+    BrigNoPacking,
+    {operand_offset, RoundUp8(operand_offset + reg_size), 0, 0, 0}
+    }
+  }
+};
+
 class TestInstruction2Abs : public ::testing::TestWithParam<int>
 {
 

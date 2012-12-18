@@ -956,6 +956,7 @@ TEST_P(Instruction3OpShl, BrigShl){
   EXPECT_EQ(0, Instruction3(context));
 
   BrigInstBase getBase;
+  BrigOperandImmed getImmed1;
   context->get_code(code_offset, &getBase);
   BrigInstBase ref = instruction3op_shl_pair[n].ref;
 
@@ -969,6 +970,15 @@ TEST_P(Instruction3OpShl, BrigShl){
   EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
   EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  if(n==3){
+      context->get_operand(ref.o_operands[2], &getImmed1);
+      EXPECT_EQ(immed_size, getImmed1.size);
+      EXPECT_EQ(BrigEOperandImmed, getImmed1.kind);
+      EXPECT_EQ(Brigb32, getImmed1.type);
+      EXPECT_EQ(0, getImmed1.reserved);
+      EXPECT_EQ(2, getImmed1.bits.u);
+  };
 
   delete lexer;
 }
@@ -988,6 +998,7 @@ TEST_P(Instruction3OpShlPacked, BrigShl){
   EXPECT_EQ(0, Instruction3(context));
 
   BrigInstBase getBase;
+  BrigOperandImmed getImmed1;
   context->get_code(code_offset, &getBase);
   BrigInstBase ref = instruction3op_shl_packed_pair[n].ref;
 
@@ -1001,6 +1012,15 @@ TEST_P(Instruction3OpShlPacked, BrigShl){
   EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
   EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
   EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  if(n==3){
+      context->get_operand(ref.o_operands[2], &getImmed1);
+      EXPECT_EQ(immed_size, getImmed1.size);
+      EXPECT_EQ(BrigEOperandImmed, getImmed1.kind);
+      EXPECT_EQ(Brigb32, getImmed1.type);
+      EXPECT_EQ(0, getImmed1.reserved);
+      EXPECT_EQ(2, getImmed1.bits.u);
+  };
 
   delete lexer;
 }

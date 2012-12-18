@@ -240,7 +240,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_s32) {
     4,                      // dim
     string_offset,     // s_name
     Brigs32,                // type
-    1,                      // align
+    4,                      // align
       },
   directive_offset + brig_directive_symbol_size, // d_init
   0,                        // reserved
@@ -327,7 +327,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_u32) {
     3,                      // dim
     string_offset,     // s_name
     Brigu32,                // type
-    1,                      // align
+    4,                      // align
       },
   directive_offset + brig_directive_symbol_size, // d_init
   0,                         // reserved
@@ -413,7 +413,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f32) {
     3,                       // dim
     string_offset,      // s_name
     Brigf32,                 // type
-    1,                       // align
+    4,                       // align
       },
   directive_offset + brig_directive_symbol_size, // d_init
   0,                         // reserved
@@ -499,7 +499,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f32) {
     3,                      // dim
     string_offset,    // s_name
     Brigf32,                // type
-    1,                      // align
+    4,                      // align
       },
   directive_offset + brig_directive_symbol_size,  // d_init
   0,                        // reserved
@@ -586,7 +586,7 @@ TEST(CodegenTest, initializableDeclCodeGen_readonly_f64) {
     3,                      // dim
     string_offset,     // s_name
     Brigf64,                // type
-    1,                      // align
+    8,                      // align
       },
   directive_offset + brig_directive_symbol_size,   // d_init
   0,                        // reserved
@@ -669,7 +669,7 @@ TEST(CodegenTest, initializableDeclCodeGen_global_f64) {
     3,                      // dim
     string_offset,     // s_name
     Brigf64,                // type
-    1,                      // align
+    8,                      // align
       },
   directive_offset + brig_directive_symbol_size,   // d_init
   0,                        // reserved
@@ -863,6 +863,42 @@ TEST_P(TestGlobalSymbolDecl,GlobalSymbolDecl)
 INSTANTIATE_TEST_CASE_P(CodegenTest,
                         TestGlobalSymbolDecl,
                         testing::Range(0,54));
+
+TEST_P(TestGlobalSymbolDeclInvalid, GlobalSymbolDeclInvalid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(inputarray_globalsymboldecl_invalid[n]);
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalSymbolDecl(context));
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest, 
+                        TestGlobalSymbolDeclInvalid, 
+                        testing::Range(0,6));
+
+TEST_P(TestGlobalInitializableInvalid, GlobalInitializableInvalid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(inputarray_globalinitializable_invalid[n]);
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, GlobalInitializable(context));
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest, 
+                        TestGlobalInitializableInvalid, 
+                        testing::Range(0,6));
 
 TEST_P(TestunInitializableDecl, InitializableDecl) {
   context->set_error_reporter(main_reporter);

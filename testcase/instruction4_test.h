@@ -1053,7 +1053,7 @@ std::string input_array_extract_invalid[23] = {
   "extract_b32 $s1, $s2, $s3,,$s4;",
   "extract_b32 $s1, $s2, $s3, $4;",
   "extract_b32 $s1, $s2, $s3, s4;",
-  "extract_b32 $s1, $s2, $s3, $s100;",
+  "extract_b32 $s1, $s2, $s3, $s130;",
   "extract_b32 $s1, $s2, $s3, $s4, $s5;",
   "extract_b32 $s1, $s2, $s3, $s4, 100;",
   "extract_b32 100, $s2, $s3, $s4;",
@@ -1064,7 +1064,7 @@ std::string input_array_extract_invalid[23] = {
   "extract_b64 $s1, $s2, $s3,,$s4;",
   "extract_b64 $s1, $s2, $s3, $4;",
   "extract_b64 $s1, $s2, $s3, s4;",
-  "extract_b64 $s1, $s2, $s3, $s100;",
+  "extract_b64 $s1, $s2, $s3, $s128;",
   "extract_b64 $s1, $s2, $s3, $s4, $s5;",
   "extract_b64 $s1, $s2, $s3, $s4, 100;",
   "extract_b64 100, $s2, $s3, $s4;",
@@ -1272,7 +1272,7 @@ std::string input_array_insert_invalid[22] = {
   "insert_b32 $s1, $s2, $s3,,$s4;",
   "insert_b32 $s1, $s2, $s3, $4;",
   "insert_b32 $s1, $s2, $s3, s4;",
-  "insert_b32 $s1, $s2, $s3, $s100;",
+  "insert_b32 $s1, $s2, $s3, $s128;",
   "insert_b32 $s1, $s2, $s3, $s4, $s5;",
   "insert_b32 $s1, $s2, $s3, $s4, 100;",
   "insert_b32 100, $s2, $s3, $s4;",
@@ -1283,7 +1283,7 @@ std::string input_array_insert_invalid[22] = {
   "insert_b64 $d1, $d2, $d3,,$d4;",
   "insert_b64 $d1, $d2, $d3, $4;",
   "insert_b64 $d1, $d2, $d3, d4;",
-  "insert_b64 $d1, $d2, $d3, $s100;",
+  "insert_b64 $d1, $d2, $d3, $s128;",
   "insert_b64 $d1, $d2, $d3, $d4, $s5;",
   "insert_b64 $d1, $d2, $d3, $d4, 100;",
   "insert_b64 100, $d2, $d3, $d4;",
@@ -1493,7 +1493,7 @@ std::string input_array_bitselect_invalid[22] = {
   "bitselect_b32 $s1, $s2, $s3,,$s4;",
   "bitselect_b32 $s1, $s2, $s3, $4;",
   "bitselect_b32 $s1, $s2, $s3, s4;",
-  "bitselect_b32 $s1, $s2, $s3, $s100;",
+  "bitselect_b32 $s1, $s2, $s3, $s130;",
   "bitselect_b32 $s1, $s2, $s3, $s4, $s5;",
   "bitselect_b32 $s1, $s2, $s3, $s4, 100;",
   "bitselect_b32 100, $s2, $s3, $s4;",
@@ -1504,7 +1504,7 @@ std::string input_array_bitselect_invalid[22] = {
   "bitselect_b64 $d1, $d2, $d3,,$d4;",
   "bitselect_b64 $d1, $d2, $d3, $4;",
   "bitselect_b64 $d1, $d2, $d3, d4;",
-  "bitselect_b64 $d1, $d2, $d3, $s100;",
+  "bitselect_b64 $d1, $d2, $d3, $s130;",
   "bitselect_b64 $d1, $d2, $d3, $d4, $s5;",
   "bitselect_b64 $d1, $d2, $d3, $d4, 100;",
   "bitselect_b64 100, $d2, $d3, $d4;",
@@ -1731,7 +1731,7 @@ std::string input_array_shuffle_invalid[18] = {
   "shuffle_u8x4 $s1, $s2, $s3, $4;",
   "shuffle_u8x4 $s1, $s2, $s3, $s4,;",
   "shuffle_s8x8 $s1, $s2, $s3, $s4, $5;",
-  "shuffle_s8x8 $s1, $s2, $s3, $s100;",
+  "shuffle_s8x8 $s1, $s2, $s3, $s130;",
   "shuffle_u8x8 $s1, $s2, $s3, $s4, $5;",
   "shuffle_s16x2 $s1, $s2, $s3, $s4;",
   "shuffle_s16x2 $s1, $s2, $s3, ;",
@@ -2146,7 +2146,7 @@ std::string input_array_cmov_invalid[18] = {
   "cmov_u8x4 $s1, $s2, $s3, $4;",
   "cmov_u8x4 $s1, $s2, $s3, $s4,;",
   "cmov_s8x8 $s1, $s2, $s3, $s4, $5;",
-  "cmov_s8x8 $s1, $s2, $s3, $s100;",
+  "cmov_s8x8 $s1, $s2, $s3, $s130;",
   "cmov_u8x8 $s1, $s2, $s3, $s4, $5;",
   "cmo_s16x2 $s1, $s2, $s3, $s4;,",
   "cmov_s16x2 $s1, $s2, $s3, ;",
@@ -2631,7 +2631,7 @@ class Instruction4BitAlignInvalid : public ::testing::TestWithParam<int>
 };
 std::string input_array_bitalign_invalid[9]={
   "bitalign_b32 $s1;",
-  "bitalign_b32 $s1, $s2, $s3, $s100;",
+  "bitalign_b32 $s1, $s2, $s3, $s130;",
   "bitalign_b32 $s1, $s2, $s3, $s4, 100;",
   "bitalignn_b32 $s1, $s2, $s3, $s4;",
   "bitalign_b64 $s1, $s2, $s3, $s4;",
@@ -2781,7 +2781,7 @@ class Instruction4ByteAlignInvalid : public ::testing::TestWithParam<int>
 };
 std::string input_array_bytealign_invalid[9]={
   "bytealign_b32 $s1;",
-  "bytealign_b32 $s1, $s2, $s3, $s100;",
+  "bytealign_b32 $s1, $s2, $s3, $s130;",
   "bytealign_b32 $s1, $s2, $s3, $s4, 100;",
   "bytealignn_b32 $s1, $s2, $s3, $s4;",
   "bytealign_b64 $s1, $s2, $s3, $s4;",
@@ -2931,7 +2931,7 @@ class Instruction4LerpInvalid : public ::testing::TestWithParam<int>
 };
 std::string input_array_lerp_invalid[9]={
   "lerp_b32 $s1;",
-  "lerp_b32 $s1, $s2, $s3, $s100;",
+  "lerp_b32 $s1, $s2, $s3, $s130;",
   "lerp_b32 $s1, $s2, $s3, $s4, 100;",
   "lerpn_b32 $s1, $s2, $s3, $s4;",
   "lerp_b64 $s1, $s2, $s3, $s4;",
@@ -3081,7 +3081,7 @@ class Instruction4SadInvalid : public ::testing::TestWithParam<int>
 };
 std::string input_array_sad_invalid[9]={
   "sad_b32 $s1;",
-  "sad_b32 $s1, $s2, $s3, $s100;",
+  "sad_b32 $s1, $s2, $s3, $s130;",
   "sad_b32 $s1, $s2, $s3, $s4, 100;",
   "sadn_b32 $s1, $s2, $s3, $s4;",
   "sad_b64 $s1, $s2, $s3, $s4;",
@@ -3231,7 +3231,7 @@ class Instruction4Sad2Invalid : public ::testing::TestWithParam<int>
 };
 std::string input_array_sad2_invalid[9]={
   "sad2_b32 $s1;",
-  "sad2_b32 $s1, $s2, $s3, $s100;",
+  "sad2_b32 $s1, $s2, $s3, $s130;",
   "sad2_b32 $s1, $s2, $s3, $s4, 100;",
   "sad2n_b32 $s1, $s2, $s3, $s4;",
   "sad2_b64 $s1, $s2, $s3, $s4;",
@@ -3381,7 +3381,7 @@ class Instruction4Sad4Invalid : public ::testing::TestWithParam<int>
 };
 std::string input_array_sad4_invalid[9]={
   "sad4_b32 $s1;",
-  "sad4_b32 $s1, $s2, $s3, $s100;",
+  "sad4_b32 $s1, $s2, $s3, $s130;",
   "sad4_b32 $s1, $s2, $s3, $s4, 100;",
   "sad4n_b32 $s1, $s2, $s3, $s4;",
   "sad4_b64 $s1, $s2, $s3, $s4;",
@@ -3531,7 +3531,7 @@ class Instruction4Sad4HiInvalid : public ::testing::TestWithParam<int>
 };
 std::string input_array_sad4hi_invalid[9]={
   "sad4hi_b32 $s1;",
-  "sad4hi_b32 $s1, $s2, $s3, $s100;",
+  "sad4hi_b32 $s1, $s2, $s3, $s130;",
   "sad4hi_b32 $s1, $s2, $s3, $s4, 100;",
   "sad4hin_b32 $s1, $s2, $s3, $s4;",
   "sad4hi_b64 $s1, $s2, $s3, $s4;",

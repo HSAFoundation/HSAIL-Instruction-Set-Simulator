@@ -502,7 +502,7 @@ TEST(CodegenTest, Label_CodeGen) {
   tab1.s.dim = 2;
   tab1.s.s_name = t1Name.size() + regName.size() + t2Name.size() + kerName.size() + 4;
   tab1.s.type = Brigu32;
-  tab1.s.align = 1;
+  tab1.s.align = 4;
   tab1.d_init = sizeof(verRef) + sizeof(kerRef) + sizeof(t1) + 
                 sizeof(tab1) + sizeof(t2);
   tab1.reserved = 0;
@@ -561,7 +561,7 @@ TEST(CodegenTest, Label_CodeGen) {
   tab2.s.s_name = t1Name.size() + t2Name.size() + kerName.size() + tarName.size() +  
                   tab1Name.size() + t3Name.size() + regName.size() + 7;
   tab2.s.type = Brigu32;
-  tab2.s.align = 1;
+  tab2.s.align = 4;
   tab2.d_init =  tabList->label + sizeof(tar) + sizeof(BrigDirectiveLabelList) + 
                  sizeof(BrigdOffset32_t) * 3 + sizeof(tab2);
   tab2.reserved = 0;
