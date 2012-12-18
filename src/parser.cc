@@ -454,11 +454,8 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
     return 1;
   }
   std::string name(context->token_value.string_val);
-  if (context->symbol_map.count(name)) {
-    directive = context->symbol_map[name];
-  } else {
-    directive = 0;
-  }
+
+  directive = context->symbol_map[name];
   context->token_to_scan = yylex();
 
   // check <..>
@@ -3910,6 +3907,7 @@ int KernelArgumentDecl(Context *context) {
     0                                 // reserved
   };
 
+  context->symbol_map[arg_name] = context->get_directive_offset();
   // append the DirectiveSymbol to .directive section.
   context->append_directive(&sym_decl);
   //Mapping symbol names to declarations in .dir
@@ -4245,8 +4243,8 @@ int GlobalPrivateDecl(Context* context) {
     context->set_error(MISSING_GLOBAL_IDENTIFIER);
     return 1;
   }
-
-  str_offset = context->add_symbol(context->token_value.string_val);
+  std::string symName = context->token_value.string_val;
+  str_offset = context->add_symbol(symName);
 
 
   context->token_to_scan = yylex();
@@ -4297,6 +4295,8 @@ int GlobalPrivateDecl(Context* context) {
     0,                             // d_init
     0,                             // reserved
   };
+  
+  context->symbol_map[symName] = context->get_directive_offset();
   context->append_directive(&bds);
   context->set_alignment(0);
 
@@ -4932,8 +4932,8 @@ int GlobalGroupDecl(Context* context) {
     context->set_error(MISSING_GLOBAL_IDENTIFIER);
     return 1;
   }
-
-  str_offset = context->add_symbol(context->token_value.string_val);
+  std::string symName = context->token_value.string_val;
+  str_offset = context->add_symbol(symName);
   context->set_dim(0);
 
   context->token_to_scan = yylex();
@@ -4984,6 +4984,7 @@ int GlobalGroupDecl(Context* context) {
     0,                             // d_init
     0,                             // reserved
   };
+  context->symbol_map[symName] = context->get_directive_offset();
   context->append_directive(&bds);
   context->set_alignment(0);
 
@@ -7255,6 +7256,7 @@ int GlobalImageDeclPart2(Context *context){
     BrigImageOrderUnknown,  //order
     BrigImageFormatUnknown  //format
   };
+  context->symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bdi);
   context->set_alignment(0);
 
@@ -7332,6 +7334,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
     BrigImageOrderUnknown,  //order
     BrigImageFormatUnknown  //format
   };
+  context->symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bdi);
   context->set_alignment(0);
 
@@ -8571,6 +8574,7 @@ int GlobalSamplerDeclPart2(Context *context){
     0,                      //boundaryW
     0                       //reserved1
   };
+  context->symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bds);
   context->set_alignment(0);
 
