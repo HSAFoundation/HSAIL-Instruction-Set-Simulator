@@ -865,11 +865,11 @@ TEST(LexTest, Bug40_Instruction2OpcodeNoDT) {
   lexer->set_source_string(input);
   EXPECT_EQ(WORKGROUPSIZE, lexer->get_next_token());
 
-  input.assign("NDRangesize");
+  input.assign("ndrangesize");
   lexer->set_source_string(input);
   EXPECT_EQ(NDRANGESIZE, lexer->get_next_token());
 
-  input.assign("NDRangegroups");
+  input.assign("ndrangegroups");
   lexer->set_source_string(input);
   EXPECT_EQ(NDRANGEGROUPS, lexer->get_next_token());
 
