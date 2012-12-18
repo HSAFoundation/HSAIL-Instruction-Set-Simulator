@@ -3619,8 +3619,6 @@ static void testPackedConstants(unsigned bits,
   *output = 0;
   void *args[] = { &output };
   BE.launch(fun, args);
-  std::cout << std::hex << result << std::endl;
-  std::cout << std::hex << *output << std::endl;
   EXPECT_EQ(result, *output);
 
   delete output;
