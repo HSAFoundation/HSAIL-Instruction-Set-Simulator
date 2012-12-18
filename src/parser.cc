@@ -1452,12 +1452,12 @@ int DeclPrefix(Context* context){
 int ArrayDimensionSet(Context* context) {
   uint32_t dim = 1;
   bool have_size = false;
-  context->set_isArray(true);
 
   // first token must be '['
   if ('[' != context->token_to_scan) {
     return 1;
   }
+  context->set_isArray(true);
   context->token_to_scan = yylex();
 
   while (1) {
@@ -7061,6 +7061,10 @@ int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
       bds.s.dim = elementCount;
       n = elementCount;
     } else {
+      if (elementCount != 1) {
+        context->set_error(INVALID_INITIALIZER);
+        return 1;
+      }
       bds.s.dim = 0;
       n = 1;
     }
@@ -8037,6 +8041,10 @@ int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
       bds.s.dim = elementCount;
       n = elementCount;
     } else {
+      if (elementCount != 1) {
+        context->set_error(INVALID_INITIALIZER);
+        return 1;
+      }
       bds.s.dim = 0;
       n = 1;
     }
@@ -8175,6 +8183,10 @@ int DecimalInitializer(Context* context, BrigdOffset32_t symbol_offset){
       bds.s.dim = elementCount;
       n = elementCount;
     } else {
+      if (elementCount != 1) {
+        context->set_error(INVALID_INITIALIZER);
+        return 1;
+      }
       bds.s.dim = 0;
       n = 1;
     }
