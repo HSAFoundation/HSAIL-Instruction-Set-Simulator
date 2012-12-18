@@ -6216,9 +6216,16 @@ int Instruction1OpcodeNoDT(Context* context) {
   }
   aluModifier = context->get_alu_modifier();
 
+  if (opcode == BrigQid) {
+    if (context->token_to_scan != TOKEN_SREGISTER) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
+  }
+
   if (context->token_to_scan != TOKEN_SREGISTER &&
       context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
-    context->set_error(MISSING_OPERAND);
+    context->set_error(INVALID_OPERAND);
     return 1;
   }
   if (Operand(context, &OpOffset[0])) {
