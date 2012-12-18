@@ -103,7 +103,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
       0,                         // dim
       s_name,                    // s_name
       Brigu32,                   // type
-      1,                         // align
+      4,                         // align
     },
     0,                          // d_init
     0                          // reserved
@@ -122,7 +122,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
       0,                        // dim
       s_name,                   // s_name
       Brigu32,                  // type
-      1,                        // align
+      4,                        // align
     },
     0,                        // d_init
     0                         // reserved
@@ -149,7 +149,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
       0,                        // dim
       s_name,                   // s_name
       Brigs32,                  // type
-      1,                        // align
+      4,                        // align
     },
     0,                          // d_init
     0                           // reserved

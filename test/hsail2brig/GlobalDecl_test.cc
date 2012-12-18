@@ -122,7 +122,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   ref.s.dim = 0;
   ref.s.s_name = 0;
   ref.s.type = Brigu32;
-  ref.s.align = 1;
+  ref.s.align = 4;
   ref.d_init = 0;
   ref.reserved = 0;
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase3(in, sbuf, &ref);
@@ -205,7 +205,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   ref.s.dim = 2048;
   ref.s.s_name = 0;
   ref.s.type = Brigb64;
-  ref.s.align = 1;
+  ref.s.align = 8;
   ref.d_init = 0;
   ref.reserved = 0;
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase7(in, sbuf, &ref);
@@ -225,7 +225,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   ref.s.dim = 2048;
   ref.s.s_name = 0;
   ref.s.type = Brigb64;
-  ref.s.align = 1;
+  ref.s.align = 8;
   ref.d_init = 0;
   ref.reserved = 0;
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase8(in, sbuf, &ref);
@@ -297,7 +297,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
       0,
       name.size()+1,
       Brigu32,
-      1,
+      4,
     },
     0,
     0
@@ -313,7 +313,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
       0,
       name.size()+arg1.size()+2,
       Brigu16,
-      1,
+      2,
     },
     0,
     0
@@ -398,7 +398,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
   args4[0].s.dim = 64;
   args4[0].s.s_name = name.size() + 1;
   args4[0].s.type = Brigu32;
-  args4[0].s.align = 1;
+  args4[0].s.align = 4;
   args4[0].d_init = 0;
   args4[0].reserved = 0;
 
@@ -412,7 +412,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
   args4[1].s.dim = 0;
   args4[1].s.s_name = name.size() + argsName[0].size() + 2;
   args4[1].s.type = Brigu32;
-  args4[1].s.align = 1;
+  args4[1].s.align = 4;
   args4[1].d_init = 0;
   args4[1].reserved = 0;
 
@@ -440,7 +440,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
   args4[3].s.dim = 64;
   args4[3].s.s_name = args4[2].s.s_name + argsName[2].size() + 1;
   args4[3].s.type = Brigb32;
-  args4[3].s.align = 1;
+  args4[3].s.align = 4;
   args4[3].d_init = 0;
   args4[3].reserved = 0;
 
@@ -634,7 +634,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     9,                      // dim
     0,                      // s_name
     Brigf32,                // type
-    1,                      // align
+    4,                      // align
   },
   0,                        // d_init
   0,                        // reserved
@@ -686,7 +686,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     9,                      // dim
     0,                      // s_name
     Brigf64,                // type
-    1,                      // align
+    8,                      // align
   },
   0,                        // d_init
   0,                        // reserved
@@ -737,7 +737,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     0,                         // dim
     0,                         // s_name
     Brigu32,                   // type
-    1                          // align
+    4                          // align
   },
   0,                           // d_init
   0                            // reserved
@@ -827,7 +827,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     17,                        // dim
     0,                         // s_name
     Brigb16,                   // type
-    1                          // align
+    2                          // align
   },
   0,                           // d_init
   0                            // reserved
@@ -875,7 +875,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
     5,                         // dim
     0,                         // s_name
     Brigb64,                   // type
-    1                          // align
+    8                          // align
   },
   0,                           // d_init
   0                            // reserved
@@ -920,7 +920,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
       0,                         // dim
       0,                         // s_name
       Brigf32,                   // type
-      1                          // align
+      4                          // align
     },
     0,                           // d_init
     0                            // reserved
@@ -962,7 +962,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
       0,                         // dim
       0,                         // s_name
       Brigf64,                   // type
-      1                          // align
+      8                          // align
     },
     0,                           // d_init
     0                            // reserved
@@ -1003,7 +1003,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
       2,                      // dim
       0,                      // s_name
       Brigu32,                // type
-      1,                      // align
+      4,                      // align
     },
     0,                        // d_init
     0                         // reserved
@@ -1043,7 +1043,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
       3,                      // dim
       0,                      // s_name
       Brigu32,                // type
-      1,                      // align
+      4,                      // align
     },
     0,                        // d_init
     0                         // reserved
@@ -1084,7 +1084,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
       0,                      // dim
       0,                      // s_name
       Brigu32,                // type
-      1,                      // align
+      4,                      // align
     },
     0,                        // d_init
     0                         // reserved
@@ -1135,7 +1135,7 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
       9,                        // dim
       0,                        // s_name
       BrigRWImg,                  // type
-      1,                        // align
+      16,                        // align
     },
     2,                      //width
     3,                      //height
@@ -1167,7 +1167,7 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
       81,                        // dim
       0,                        // s_name
       BrigRWImg,                  // type
-      1,                        // align
+      16,                        // align
     },
     0,                      //width
     0,                      //height
@@ -1199,7 +1199,7 @@ TEST(CodegenTest,GlobalImageDecl_Codegen){
       0,                        // dim
       0,                        // s_name
       BrigRWImg,                  // type
-      1,                        // align
+      16,                        // align
     },
     2,                      //width
     3,                      //height
@@ -1240,7 +1240,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
       9,                        // dim
       0,                        // s_name
       BrigROImg,                  // type
-      1,                        // align
+      16,                        // align
     },
     4,                      //width
     5,                      //height
@@ -1272,7 +1272,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
       81,                        // dim
       0,                        // s_name
       BrigROImg,                  // type
-      1,                        // align
+      16,                        // align
     },
     4,                      //width
     5,                      //height
@@ -1304,7 +1304,7 @@ TEST(CodegenTest,GlobalReadOnlyImageDecl_Codegen){
       0,                        // dim
       0,                        // s_name
       BrigROImg,                  // type
-      1,                        // align
+      16,                        // align
     },
     4,                      //width
     5,                      //height
@@ -1346,7 +1346,7 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
       9,                        // dim
       0,                        // s_name
       BrigSamp,                 // type
-      1,                        // align
+      16,                        // align
     },
     1,                      //valid
     1,                      //normalized
@@ -1381,7 +1381,7 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
       9,                        // dim
       0,                        // s_name
       BrigSamp,                 // type
-      1,                        // align
+      16,                        // align
     },
     1,                      //valid
     0,                      //normalized
@@ -1415,7 +1415,7 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
       0,                        // dim
       0,                        // s_name
       BrigSamp,                 // type
-      1,                        // align
+      16,                        // align
     },
     1,                      //valid
     0,                      //normalized

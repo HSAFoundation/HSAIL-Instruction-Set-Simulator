@@ -349,7 +349,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   symOutDir.s.dim = 0;
   symOutDir.s.s_name = fun1Name.size() + 1;
   symOutDir.s.type = Brigf32;
-  symOutDir.s.align = 1;
+  symOutDir.s.align = 4;
   symOutDir.d_init = 0;
   symOutDir.reserved = 0;
 
@@ -365,7 +365,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   symInDir.s.dim = 0;
   symInDir.s.s_name = fun1Name.size() + argOutName.size() + 2;
   symInDir.s.type = Brigf32;
-  symInDir.s.align = 1;
+  symInDir.s.align = 4;
   symInDir.d_init = 0;
   symInDir.reserved = 0;
 
@@ -405,7 +405,7 @@ TEST(CodegenTest, Example6_CodeGen) {
   sym1Dir.s.s_name = reg1Name.size() + argOutName.size() +
                      argInName.size() + fun1Name.size() + fun2Name.size() + 5;
   sym1Dir.s.type = Brigf32;
-  sym1Dir.s.align = 1;
+  sym1Dir.s.align = 4;
   sym1Dir.d_init = 0;
   sym1Dir.reserved = 0;
 
@@ -423,7 +423,7 @@ TEST(CodegenTest, Example6_CodeGen) {
                      reg2Name.size() + argInName.size() + fun1Name.size() +
                      sym1Name.size() + fun2Name.size() + 7;
   sym2Dir.s.type = Brigf32;
-  sym2Dir.s.align = 1;
+  sym2Dir.s.align = 4;
   sym2Dir.d_init = 0;
   sym2Dir.reserved = 0;
 
