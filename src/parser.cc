@@ -1351,12 +1351,21 @@ int Version(Context* context) {
 
 int Alignment(Context* context) {
   // first token must be "align" keyword
-  if ( ALIGN != context->token_to_scan)
+  if (ALIGN != context->token_to_scan) {
     return 1;
+  }
 
   context->token_to_scan = yylex();
   if (TOKEN_INTEGER_CONSTANT != context->token_to_scan){
     context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+  if (context->token_value.int_val != 1 &&
+      context->token_value.int_val != 2 &&
+      context->token_value.int_val != 4 &&
+      context->token_value.int_val != 8 &&
+      context->token_value.int_val != 16) {
+    context->set_error(INVALID_ALIGNMENT);
     return 1;
   }
 
@@ -1492,9 +1501,9 @@ int ArgumentDecl(Context* context) {
   }
   context->token_to_scan = yylex();
   if ((context->token_type != DATA_TYPE_ID)&&
-        (context->token_to_scan != _RWIMG) &&
-        (context->token_to_scan != _SAMP) &&
-        (context->token_to_scan != _ROIMG)) {
+      (context->token_to_scan != _RWIMG) &&
+      (context->token_to_scan != _SAMP) &&
+      (context->token_to_scan != _ROIMG)) {
 
     context->set_error(MISSING_DATA_TYPE);
     return 1;
@@ -1521,6 +1530,26 @@ int ArgumentDecl(Context* context) {
       return 1;
     }
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(type)) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
+
   BrigdOffset32_t dsize = context->get_directive_offset();
   BrigDirectiveSymbol sym_decl = {
     sizeof(BrigDirectiveSymbol),                 // size
@@ -1544,6 +1573,7 @@ int ArgumentDecl(Context* context) {
   context->append_directive(&sym_decl);
   //Mapping symbol names to declarations in .dir
   context->symbol_map[arg_name] = dsize;
+  context->set_alignment(0);
 
   return 0;
 }
@@ -2432,6 +2462,25 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
       return 1;
     }
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveSymbol sym_decl = {
     sizeof(sym_decl),                 // size
@@ -2450,6 +2499,7 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
     0,                                // d_init = 0 for arg
     0                                 // reserved
   };
+  context->set_alignment(0);
   context->symbol_map[var_name] = context->get_directive_offset();
   BrigdOffset32_t argdecl_offset = context->get_directive_offset();
   context->append_directive(&sym_decl);
@@ -2505,6 +2555,25 @@ int UninitializableDecl(Context* context) {
       return 1;
   }
 
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
   BrigDirectiveSymbol bds = {
     sizeof(BrigDirectiveSymbol),    // size
     BrigEDirectiveSymbol ,          // kind
@@ -2525,6 +2594,7 @@ int UninitializableDecl(Context* context) {
 
   context->symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bds);
+  context->set_alignment(0);
 
   if (';' != context->token_to_scan) {
     context->set_error(MISSING_SEMICOLON);
@@ -2565,6 +2635,25 @@ int ArgUninitializableDecl(Context* context) {
     if (ArrayDimensionSet(context))
       return 1;
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveSymbol bds = {
     sizeof(BrigDirectiveSymbol),    // size
@@ -2584,6 +2673,7 @@ int ArgUninitializableDecl(Context* context) {
     0,                             // reserved
   };
 
+  context->set_alignment(0);
   context->symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bds);
 /*
@@ -2676,6 +2766,25 @@ int SignatureType(Context *context, std::vector<BrigDirectiveSignature::BrigProt
     if (ArrayDimensionSet(context))
       return 1;
 
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
+
   BrigDirectiveSignature::BrigProtoType bpt = {
     context->get_type(),         // type
     context->get_alignment(),    // align
@@ -2683,6 +2792,7 @@ int SignatureType(Context *context, std::vector<BrigDirectiveSignature::BrigProt
     context->get_dim()           // dim
   };
   types->push_back(bpt);
+  context->set_alignment(0);
 
   return 0;
 }
@@ -3763,6 +3873,24 @@ int KernelArgumentDecl(Context *context) {
       return 1;
     }
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
   BrigdOffset32_t dsize = context->get_directive_offset();
   BrigDirectiveSymbol sym_decl = {
     sizeof(BrigDirectiveSymbol),                 // size
@@ -3786,6 +3914,7 @@ int KernelArgumentDecl(Context *context) {
   context->append_directive(&sym_decl);
   //Mapping symbol names to declarations in .dir
   context->symbol_map[arg_name] = dsize;
+  context->set_alignment(0);
 
   return 0;
 }
@@ -4131,6 +4260,25 @@ int GlobalPrivateDecl(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveSymbol bds = {
     sizeof(BrigDirectiveSymbol),    // size
@@ -4150,6 +4298,7 @@ int GlobalPrivateDecl(Context* context) {
     0,                             // reserved
   };
   context->append_directive(&bds);
+  context->set_alignment(0);
 
   context->token_to_scan = yylex();
   return 0;
@@ -4798,6 +4947,25 @@ int GlobalGroupDecl(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveSymbol bds = {
     sizeof(BrigDirectiveSymbol),    // size
@@ -4817,6 +4985,7 @@ int GlobalGroupDecl(Context* context) {
     0,                             // reserved
   };
   context->append_directive(&bds);
+  context->set_alignment(0);
 
   context->token_to_scan = yylex();
   return 0;
@@ -7045,6 +7214,14 @@ int GlobalImageDeclPart2(Context *context){
       return 1;
     }
   }
+  uint16_t naturalAlign = 16;
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveImage bdi = {
     sizeof(BrigDirectiveImage),//size
@@ -7068,6 +7245,7 @@ int GlobalImageDeclPart2(Context *context){
     BrigImageFormatUnknown  //format
   };
   context->append_directive(&bdi);
+  context->set_alignment(0);
 
   if ('=' == context->token_to_scan) {
     if (ImageInitializer(context)) {
@@ -7114,6 +7292,14 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
       return 1;
     }
   }
+  uint16_t naturalAlign = 16;
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
   BrigDirectiveImage bdi = {
     sizeof(BrigDirectiveImage), //size
     BrigEDirectiveImage,       //kind
@@ -7136,6 +7322,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
     BrigImageFormatUnknown  //format
   };
   context->append_directive(&bdi);
+  context->set_alignment(0);
 
   if ('=' == context->token_to_scan) {
     if (ImageInitializer(context)) {
@@ -8335,6 +8522,14 @@ int GlobalSamplerDeclPart2(Context *context){
     }
   }
 
+  uint16_t naturalAlign = 16;
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
   BrigDirectiveSampler bds = {
     sizeof(BrigDirectiveSampler),      //size
     BrigEDirectiveSampler,             //kind
@@ -8358,6 +8553,7 @@ int GlobalSamplerDeclPart2(Context *context){
     0                       //reserved1
   };
   context->append_directive(&bds);
+  context->set_alignment(0);
 
   if ('=' == context->token_to_scan) {
     if (SobInitializer(context)) {
@@ -8585,7 +8781,7 @@ int ArrayOperand(Context* context) {
 
 BrigDataType16_t ConvertTypeToB(BrigDataType16_t type, 
     BrigDataType16_t* pSubType, uint32_t* pSize) {
-  BrigDataType16_t bType = Brigb32;
+  BrigDataType16_t bType = type;
   BrigDataType16_t subType = Brigb32;
   uint32_t size = 0;
   
