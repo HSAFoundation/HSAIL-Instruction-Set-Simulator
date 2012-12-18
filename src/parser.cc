@@ -3907,7 +3907,6 @@ int KernelArgumentDecl(Context *context) {
     0                                 // reserved
   };
 
-  context->symbol_map[arg_name] = context->get_directive_offset();
   // append the DirectiveSymbol to .directive section.
   context->append_directive(&sym_decl);
   //Mapping symbol names to declarations in .dir
