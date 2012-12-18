@@ -5054,7 +5054,7 @@ struct LdTest ldv4_pair[80] = {
 //ldv4_pair[79]
 //supports 32 128-bit registers
   {
-    "ld_width(4)_v4_part_acq_equiv(2)_b128 ($q31,$q2,$q3,$q4), [&x][$s5 - 2];",
+    "ld_width(4)_v4_part_acq_equiv(2)_b128 ($q9,$q2,$q3,$q4), [&x][$s5 - 2];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,

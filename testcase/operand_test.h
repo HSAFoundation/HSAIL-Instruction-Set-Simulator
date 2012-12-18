@@ -627,9 +627,9 @@ std::string invalidinput_registercodegen[] = {
   "$c8",
   "$7",
   "$s",
-  "$d8",
+  "$d64",
   "$d",
-  "$q8"
+  "$q32"
 };
 
 class IntegerOperand : public ::testing::TestWithParam<int>

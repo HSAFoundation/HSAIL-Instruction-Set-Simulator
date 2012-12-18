@@ -13,8 +13,7 @@ TEST(LexTest, CRegisterInvalidInput) {
   std::string input("$c20");
   Lexer* lexer = new Lexer(input);
 
-  EXPECT_EQ(TOKEN_CREGISTER, lexer->get_next_token());
-  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0, lexer->get_next_token());
 
   input.assign("$c");
   lexer->set_source_string(input);
@@ -52,11 +51,10 @@ TEST(LexTest, CRegisterInvalidInput) {
 }
 
 TEST(LexTest, SRegisterInvalidInput) {
-  std::string input("$s17");
+  std::string input("$s170");
   Lexer* lexer = new Lexer(input);
 
-  EXPECT_EQ(TOKEN_SREGISTER, lexer->get_next_token());
-  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0, lexer->get_next_token());
 
   input.assign("$s");
   lexer->set_source_string(input);
@@ -90,10 +88,10 @@ TEST(LexTest, SRegisterInvalidInput) {
 }
 
 TEST(LexTest, DRegisterInvalidInput) {
-  std::string input("$d8");
+  std::string input("$d08");
   Lexer* lexer = new Lexer(input);
 
-  EXPECT_NE(TOKEN_DREGISTER, lexer->get_next_token());
+  EXPECT_EQ(0, lexer->get_next_token());
 
   input.assign("$d");
   lexer->set_source_string(input);
@@ -127,17 +125,16 @@ TEST(LexTest, DRegisterInvalidInput) {
 }
 
 TEST(LexTest, QRegisterInvalidInput) {
-  std::string input("$q20");
+  std::string input("$q020");
   Lexer* lexer = new Lexer(input);
 
-  EXPECT_EQ(TOKEN_QREGISTER, lexer->get_next_token());
-  EXPECT_EQ(TOKEN_INTEGER_CONSTANT, lexer->get_next_token());
+  EXPECT_EQ(0, lexer->get_next_token());
 
   input.assign("$q");
   lexer->set_source_string(input);
   EXPECT_NE(TOKEN_QREGISTER, lexer->get_next_token());
 
-  input.assign("$q8");
+  input.assign("$q32");
   lexer->set_source_string(input);
   EXPECT_NE(TOKEN_QREGISTER, lexer->get_next_token());
 

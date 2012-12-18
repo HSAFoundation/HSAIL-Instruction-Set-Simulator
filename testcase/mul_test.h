@@ -1180,7 +1180,7 @@ std::string input_array_mul_control_invalid[16] = {
 // false[8]
   "mul_sp_sat_s16x2 WAVESIZE, $s2, $s3;",
 // false[9]
-  "mul_ss_sat_u8x4 $s1, $s2, $s100;",
+  "mul_ss_sat_u8x4 $s1, $s2, $s130;",
 // false[10]
   "mul_ss_u8x4 $s1, $s2, $s3, 100;",
 // false[11]
@@ -1390,7 +1390,7 @@ std::string input_array_mul_hi_s32_base_invalid[13] = {
 // false[6]
   "mul_hi_s32 $s1, $s2, s3",
 // false[7]
-  "mul_hi_s32 $s1, $s2, $s100",
+  "mul_hi_s32 $s1, $s2, $s130",
 // false[8]
   "mul_hi_s32 $s1, $s2, $s3, $s4",
 // false[9]
@@ -1937,7 +1937,7 @@ std::string input_array_mul_hi_control_invalid[16] = {
 // false[8]
   "mul_hi_sp_sat_s16x2 WAVESIZE, $s2, $s3;",
 // false[9]
-  "mul_hi_ss_sat_u8x4 $s1, $s2, $s100;",
+  "mul_hi_ss_sat_u8x4 $s1, $s2, $s130;",
 // false[10]
   "mul_hi_ss_u8x4 $s1, $s2, $s3, 100;",
 // false[11]

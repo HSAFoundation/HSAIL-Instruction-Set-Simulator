@@ -1128,7 +1128,7 @@ std::string input_array_cmp_eq_invalid[56] = {
 // false[49]
   "cmp_eq_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_eq_b32_s32 $s1, $s2, $s100;",
+  "cmp_eq_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_eq_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -2250,7 +2250,7 @@ std::string input_array_cmp_ne_invalid[56] = {
 // false[49]
   "cmp_ne_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_ne_b32_s32 $s1, $s2, $s100;",
+  "cmp_ne_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_ne_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -3262,7 +3262,7 @@ std::string input_array_cmp_lt_invalid[58] = {
 // false[49]
   "cmp_lt_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_lt_b32_s32 $s1, $s2, $s100;",
+  "cmp_lt_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_lt_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -4278,7 +4278,7 @@ std::string input_array_cmp_le_invalid[58] = {
 // false[49]
   "cmp_le_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_le_b32_s32 $s1, $s2, $s100;",
+  "cmp_le_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_le_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -5294,7 +5294,7 @@ std::string input_array_cmp_gt_invalid[58] = {
 // false[49]
   "cmp_gt_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_gt_b32_s32 $s1, $s2, $s100;",
+  "cmp_gt_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_gt_b32_s64 $s1, $s2, $100;",
 // false[52]
@@ -6310,7 +6310,7 @@ std::string input_array_cmp_ge_invalid[58] = {
 // false[49]
   "cmp_ge_b32_u64 $s1, $s2, $s3, $s4;",
 // false[50]
-  "cmp_ge_b32_s32 $s1, $s2, $s100;",
+  "cmp_ge_b32_s32 $s1, $s2, $s130;",
 // false[51]
   "cmp_ge_b32_s64 $s1, $s2, $100;",
 // false[52]
