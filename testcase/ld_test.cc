@@ -21,6 +21,7 @@ TEST_P(OperationLd, BrigLd){
 
   BrigInstLdSt getLdSt;
   BrigOperandReg getReg;
+  BrigOperandImmed getImmed;
   BrigOperandAddress getAdd;
   BrigOperandIndirect getIndir;
   BrigOperandCompound getComp;
@@ -49,6 +50,13 @@ TEST_P(OperationLd, BrigLd){
   EXPECT_EQ(string_offset, getReg.s_name);
 
   if(n == 0){
+    context->get_operand(ref.o_operands[0], &getImmed);
+    EXPECT_EQ(immed_size, getImmed.size);
+    EXPECT_EQ(BrigEOperandImmed, getImmed.kind);
+    EXPECT_EQ(Brigb32, getImmed.type);
+    EXPECT_EQ(0, getImmed.reserved);
+    EXPECT_EQ(1, getImmed.bits.u);
+
     context->get_operand(ref.o_operands[2],&getAdd);
     // BrigOperandAddress
     EXPECT_EQ(address_size, getReg.size);
@@ -555,6 +563,23 @@ TEST_P(OperationLdV4, BrigLd){
 }
 
 INSTANTIATE_TEST_CASE_P(CodegenTest,OperationLdV4,testing::Range(0,80));
+
+TEST_P(TestLdInvalid, LdInvalid) {
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  std::string input(inputarray_ld_invalid[n]);
+
+  Lexer* lexer = new Lexer(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Ld(context));
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(InvalidTest, TestLdInvalid, testing::Range(0,12));
+
 
 TEST_P(OperationLda, BrigLda)
 {
@@ -1091,6 +1116,7 @@ TEST_P(OperationLdc, BrigLdc){
   int n = GetParam();
   Lexer* lexer = new Lexer(ldc_pair[n].str);
   context->token_to_scan = lexer->get_next_token();
+  if(n<2) context->set_machine(BrigESmall);
 
   EXPECT_EQ(0, Ldc(context));
 
@@ -1162,7 +1188,6 @@ TEST_P(OperationLdc, BrigLdc){
 }
 
 INSTANTIATE_TEST_CASE_P(OperationTest,OperationLdc,testing::Range(0,3));
-
 
 }  // namespace brig
 }  // namespace hsa

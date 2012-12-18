@@ -786,7 +786,7 @@ struct CvtTest cvt_pair[62] = {
   },                 
  //cvt_pair[51]
   {
-    "cvt_ftz_upi_f16_f16 $s1, $s2;",
+    "cvt_upi_f16_f16 $s1, $s2;",
    {
       brig_inst_cvt_size, //size
       BrigEInstCvt,       //kind
@@ -794,14 +794,14 @@ struct CvtTest cvt_pair[62] = {
       Brigf16,             //type
       BrigNoPacking,      //packing
     {operand_offset, operand_offset + reg_size, 0, 0, 0},
-      {1,1,2,1,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
+      {1,1,2,0,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
       Brigf16,            //sType
       0,                 //reserved
     }
   },              
  //cvt_pair[52]
   {
-    "cvt_ftz_downi_f32_f32 $s1, $s2;",
+    "cvt_downi_f32_f32 $s1, $s2;",
    {
       brig_inst_cvt_size, //size
       BrigEInstCvt,       //kind
@@ -809,14 +809,14 @@ struct CvtTest cvt_pair[62] = {
       Brigf32,             //type
       BrigNoPacking,      //packing
     {operand_offset, operand_offset + reg_size, 0, 0, 0},
-      {1,1,3,1,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
+      {1,1,3,0,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
       Brigf32,            //sType
       0,                 //reserved
     }
   },                
  //cvt_pair[53]
   {
-    "cvt_ftz_zeroi_f64_f64 $d1, $d2;",
+    "cvt_zeroi_f64_f64 $d1, $d2;",
    {
       brig_inst_cvt_size, //size
       BrigEInstCvt,       //kind
@@ -824,14 +824,14 @@ struct CvtTest cvt_pair[62] = {
       Brigf64,             //type
       BrigNoPacking,      //packing
     {operand_offset, operand_offset + reg_size, 0, 0, 0},
-       {1,1,1,1,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
+       {1,1,1,0,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
       Brigf64,            //sType
       0,                 //reserved
     }
   },           
  //cvt_pair[54]
   {
-    "cvt_ftz_neari_f32_f32 $s1, $s2;",
+    "cvt_neari_f32_f32 $s1, $s2;",
    {
       brig_inst_cvt_size, //size
       BrigEInstCvt,       //kind
@@ -839,14 +839,14 @@ struct CvtTest cvt_pair[62] = {
       Brigf32,             //type
       BrigNoPacking,      //packing
     {operand_offset, operand_offset + reg_size, 0, 0, 0},
-      {1,1,0,1,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
+      {1,1,0,0,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
       Brigf32,            //sType
       0,                 //reserved
     }
   },              
   //cvt_pair[55]
   {
-    "cvt_ftz_upi_u32_f32 $s1, $s2;",
+    "cvt_upi_u32_f32 $s1, $s2;",
    {
       brig_inst_cvt_size, //size
       BrigEInstCvt,       //kind
@@ -854,14 +854,14 @@ struct CvtTest cvt_pair[62] = {
       Brigu32,             //type
       BrigNoPacking,      //packing
     {operand_offset, operand_offset + reg_size, 0, 0, 0},
-       {1,1,2,1,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
+       {1,1,2,0,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
       Brigf32,            //sType
       0,                 //reserved
     }
   },             
   //cvt_pair[56]
   {
-    "cvt_ftz_downi_s32_f32 $s1, $s2;",
+    "cvt_downi_s32_f32 $s1, $s2;",
    {
       brig_inst_cvt_size, //size
       BrigEInstCvt,       //kind
@@ -869,7 +869,7 @@ struct CvtTest cvt_pair[62] = {
       Brigs32,             //type
       BrigNoPacking,      //packing
     {operand_offset, operand_offset + reg_size, 0, 0, 0},
-       {1,1,3,1,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
+       {1,1,3,0,0,0,0},//valid,float,near,noftz,approx,fbar,reserved
       Brigf32,            //sType
       0,                 //reserved
     }
@@ -951,6 +951,18 @@ struct CvtTest cvt_pair[62] = {
   }
 };
 
+class TestCvtInvalid: public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string inputarray_cvt_invalid[4] = {
+  //must reject ftz combined with integer rounding modes
+  "cvt_ftz_upi_f32_f32 $s1, $s2;",
+  "cvt_ftz_downi_f32_f32 $s1, $s2;",
+  "cvt_ftz_zeroi_f64_f64 $d1, $d2;",
+  "cvt_ftz_neari_f32_f32 $s1, $s2;"
+};
 }  // namespace brig
 }  // namespace hsa
 #endif //CVT_TEST_H_

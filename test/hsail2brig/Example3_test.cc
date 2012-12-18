@@ -163,7 +163,7 @@ TEST(CodegenTest, Example3_CodeGen) {
   symRef.s.dim = 0;
   symRef.s.s_name = funName.size() + 1;
   symRef.s.type = Brigu8x4;
-  symRef.s.align = 1;
+  symRef.s.align = 4;
   symRef.d_init = 0;
   symRef.reserved = 0;
 

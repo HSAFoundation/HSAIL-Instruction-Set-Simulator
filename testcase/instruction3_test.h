@@ -2216,7 +2216,7 @@ struct Instruction3Test instruction3op_shl_pair[8] = {
   },
 //instruction3op_shl_pair[3]
   {
-    "shl_s64 $d1, $d2, 0x3456a;",
+    "shl_s64 $d1, $d2, 2;",
      {
     brig_inst_base_size,                         
     BrigEInstBase,
@@ -2366,7 +2366,7 @@ struct Instruction3Test instruction3op_shl_packed_pair[16] = {
   },
 //instruction3op_shl_packed_pair[3]
   {
-    "shl_s8x8 $d1, $d2, 0x34567a;",
+    "shl_s8x8 $d1, $d2, 2;",
      {
     brig_inst_base_size,                       
     BrigEInstBase,
@@ -4424,8 +4424,8 @@ std::string input_instruction3_movdhi_invalid[6] = {
   "movd_hi_b64 $d1, $d2, 0x1703a;",
   "movd_hi_b64 $d1, 0x38002a, $s3;",
   "movd_hi_b64 $d1, 0x38002a, 0x1703a;",
-  "movd_lo_b64 $d1, $d2, WAVESIZE;",
-  "movd_lo_b64 $d1, WAVESIZE, $s3;",
+  "movd_hi_b64 $d1, $d2, WAVESIZE;",
+  "movd_hi_b64 $d1, WAVESIZE, $s3;",
   //dest must be a d register
   "movd_hi_b64 $s1, $d2, $s2;",
 };

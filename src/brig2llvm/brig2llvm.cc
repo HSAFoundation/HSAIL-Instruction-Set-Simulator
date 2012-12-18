@@ -14,7 +14,6 @@
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
 #include "llvm/Analysis/Verifier.h"
-#include "llvm/Target/TargetData.h"
 #include "llvm/Support/raw_ostream.h"
 
 namespace hsa{
@@ -43,11 +42,11 @@ static void insertGPUStateTy(llvm::LLVMContext &C) {
   llvm::StructType *c_reg_type =
     createSOAType(C, llvm::Type::getInt1Ty(C), "c_regs", 8);
   llvm::StructType *s_reg_type =
-    createSOAType(C, llvm::Type::getInt32Ty(C), "s_regs", 32);
+    createSOAType(C, llvm::Type::getInt32Ty(C), "s_regs", 128);
   llvm::StructType *d_reg_type =
-    createSOAType(C, llvm::Type::getInt64Ty(C), "d_regs", 32);
+    createSOAType(C, llvm::Type::getInt64Ty(C), "d_regs", 64);
   llvm::StructType *q_reg_type =
-    createSOAType(C, llvm::Type::getIntNTy(C, 128), "q_regs", 8);
+    createSOAType(C, llvm::Type::getIntNTy(C, 128), "q_regs", 32);
   llvm::StructType *pc_reg_type =
     createSOAType(C, llvm::Type::getIntNTy(C, 32), "pc_regs", 3);
   llvm::Type *tv1[] = { c_reg_type,
@@ -223,11 +222,11 @@ struct FunState {
     // Use memset to remove a source of non-deterministic behavior. The HSA PRM
     // does not require that registers are initialized to zero.
     llvm::IRBuilder<> builder(&entry);
-    llvm::TargetData TD(M);
+    llvm::DataLayout DL(M);
     llvm::Value *zero = llvm::ConstantInt::get(C, llvm::APInt(8, 0));
     builder.CreateMemSet(regs, zero,
-                         TD.getTypeAllocSize(regsType),
-                         TD.getPrefTypeAlignment(regsType));
+                         DL.getTypeAllocSize(regsType),
+                         DL.getPrefTypeAlignment(regsType));
 
     for(BrigSymbol local = brigFun.local_begin(),
           E = brigFun.local_end(); local != E; ++local) {
@@ -468,9 +467,12 @@ static llvm::Function *getInstFun(const inst_iterator inst,
     llvm::cast<llvm::Function>(M->getOrInsertFunction(name, instFunTy));
 
   if(sret) {
-    instFun->addAttribute(1, llvm::Attribute::StructRet);
-    instFun->addAttribute(1, llvm::Attribute::NoAlias);
-    instFun->addAttribute(1, llvm::Attribute::NoCapture);
+    llvm::AttrBuilder AB;
+    AB.addAttribute(llvm::Attributes::StructRet);
+    AB.addAttribute(llvm::Attributes::NoAlias);
+    AB.addAttribute(llvm::Attributes::NoCapture);
+    llvm::Attributes attrs = llvm::Attributes::get(C, AB);
+    instFun->addAttribute(1, attrs);
   }
 
   return instFun;
@@ -637,8 +639,6 @@ static llvm::Value *decodeFunPacking(llvm::BasicBlock &B,
                                      llvm::Value *rawFun,
                                      const std::vector<llvm::Value *> &args) {
 
-  if(llvm::isa<llvm::Function>(rawFun)) return rawFun;
-
   llvm::LLVMContext &C = B.getContext();
   llvm::Type *result = llvm::Type::getVoidTy(C);
   std::vector<llvm::Type *> params;
@@ -648,6 +648,8 @@ static llvm::Value *decodeFunPacking(llvm::BasicBlock &B,
 
   llvm::Type *funTy = llvm::FunctionType::get(result, params, false);
   llvm::Type *funPtrTy = funTy->getPointerTo(0);
+  if(funPtrTy == rawFun->getType()) return rawFun;
+
   llvm::Instruction::CastOps castOp =
     llvm::CastInst::getCastOpcode(rawFun, false, funPtrTy, false);
 

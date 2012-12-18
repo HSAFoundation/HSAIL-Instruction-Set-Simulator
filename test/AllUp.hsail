@@ -2504,3 +2504,37 @@ kernel &AllUp()
 
   ret;
 };
+
+function &maxofN(arg_f32 %r)(arg_u32 %n, align 8 arg_u8 %last[])
+{
+  ld_arg_u32 $s0, [%n];
+  mov_b32 $s1, 0;
+  mov_b32 $s3, 0;
+  @loop:
+  cmp_eq_b1_u32 $c1, $s0, 0;
+  cbr $c1, @done;
+  ld_arg_f32 $s4, [%last][$s3];
+  add_f32 $s1, $s1, $s4;
+  add_u32 $s3, $s3, 4;
+  sub_u32 $s0, $s0, 1;
+  brn @loop;
+  @done:
+  st_arg_f32 $s1, [%r];
+  ret;
+};
+
+kernel &adder()
+{
+  {
+    align 8 arg_u8 %n[16];
+    st_arg_f32 1.2f, [%n][0];
+    st_arg_f32 2.4f, [%n][4];
+    st_arg_f32 3.6f, [%n][8];
+    st_arg_f32 6.1f, [%n][12];
+    arg_u32 %count;
+    st_arg_u32 4, [%count];
+    arg_f32 %sum;
+    call &maxofN(%sum)(%count, %n);
+    ld_arg_f32 $s0, [%sum];
+  }
+};

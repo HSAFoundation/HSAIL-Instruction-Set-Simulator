@@ -5052,8 +5052,9 @@ struct LdTest ldv4_pair[80] = {
     }
   },
 //ldv4_pair[79]
+//supports 32 128-bit registers
   {
-    "ld_width(4)_v4_part_acq_equiv(2)_b128 ($q1,$q2,$q3,$q4), [&x][$s5 - 2];",
+    "ld_width(4)_v4_part_acq_equiv(2)_b128 ($q9,$q2,$q3,$q4), [&x][$s5 - 2];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -5073,6 +5074,27 @@ struct LdTest ldv4_pair[80] = {
     }
   }
 
+};
+
+class TestLdInvalid: public ::testing::TestWithParam<int>
+{
+
+};
+
+std::string inputarray_ld_invalid[12] = {
+//if type is b, length must be 128
+  "ld_b64 $d0, [$d1];",
+  "ld_b32 $s0, [$d1];",
+  "ld_b8 $s0, [$d1];",
+  "ld_b16 $s0, [$d1];",
+  "ld_v2_b64 ($d0,$d1), [$d2];",
+  "ld_v2_b32 ($s0,$s1), [$d1];",
+  "ld_v2_b8 ($s0,$s1), [$d1];",
+  "ld_v2_b16 ($s0,$s1), [$d1];",
+  "ld_v4_b64 ($d0,$d1,$d2,$d3), [$d5];",
+  "ld_v4_b32 ($s0,$s1,$s2,$s3), [$d1];",
+  "ld_v4_b8 ($s0,$s1,$s2,$s3), [$d1];",
+  "ld_v4_b16 ($s0,$s1,$s2,$s3), [$d1];"
 };
 
 class OperationLda : public ::testing::TestWithParam<int>{
@@ -5099,7 +5121,7 @@ struct LdaTest lda_pair[22] = {
   },
 //lda_pair[1]
   {
-    "lda_u32 $s1, [%g];",
+    "lda_global_u32 $s1, [%g];",
     {
     brig_inst_mem_size,
     BrigEInstMem,
@@ -5107,12 +5129,12 @@ struct LdaTest lda_pair[22] = {
     Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0},
-    BrigFlatSpace
+    BrigGlobalSpace
     }
   },
 //lda_pair[2]
   {
-    "lda_u32 $s1, [$s2];",
+    "lda_group_u32 $s1, [$s2];",
     {
     brig_inst_mem_size,
     BrigEInstMem,
@@ -5120,12 +5142,12 @@ struct LdaTest lda_pair[22] = {
     Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
-    BrigFlatSpace
+    BrigGroupSpace
     }
   },
 //lda_pair[3]
   {
-    "lda_u32 $s1, [$s2 + 10];",
+    "lda_private_u32 $s1, [$s2 + 10];",
     {
     brig_inst_mem_size,
     BrigEInstMem,
@@ -5133,12 +5155,12 @@ struct LdaTest lda_pair[22] = {
     Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
-    BrigFlatSpace
+    BrigPrivateSpace
     }
   },
 //lda_pair[4]
   {
-    "lda_u32 $s1, [$s2 - 5];",
+    "lda_kernarg_u32 $s1, [$s2 - 5];",
     {
     brig_inst_mem_size,
     BrigEInstMem,
@@ -5146,12 +5168,12 @@ struct LdaTest lda_pair[22] = {
     Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size * 2, 0, 0, 0},
-    BrigFlatSpace
+    BrigKernargSpace
     }
   },
 //lda_pair[5]
   {
-    "lda_u32 $s1, [%g][$s2];",
+    "lda_readonly_u32 $s1, [%g][$s2];",
      {
     brig_inst_mem_size,
     BrigEInstMem,
@@ -5159,12 +5181,12 @@ struct LdaTest lda_pair[22] = {
     Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
-    BrigFlatSpace
+    BrigReadonlySpace
     }
   },
 //lda_pair[6]
   {
-    "lda_u32 $s1, [%g][$s2 + 10];",
+    "lda_spill_u32 $s1, [%g][$s2 + 10];",
     {
     brig_inst_mem_size,
     BrigEInstMem,
@@ -5172,12 +5194,12 @@ struct LdaTest lda_pair[22] = {
     Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
-    BrigFlatSpace
+    BrigSpillSpace
     }
   },
 //lda_pair[7]
   {
-    "lda_u32 $s1, [%g][$s2 - 5];",
+    "lda_arg_u32 $s1, [%g][$s2 - 5];",
     {
     brig_inst_mem_size,
     BrigEInstMem,
@@ -5185,7 +5207,7 @@ struct LdaTest lda_pair[22] = {
     Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size * 2 + address_size, 0, 0, 0},
-    BrigFlatSpace
+    BrigArgSpace
     }
   },
 //lda_pair[8]
@@ -5419,6 +5441,7 @@ struct LdcTest ldc_pair[3] = {
     }
   }
 };
+
 }  // namespace brig
 }  // namespace hsa
 #endif //LD_TEST_H_

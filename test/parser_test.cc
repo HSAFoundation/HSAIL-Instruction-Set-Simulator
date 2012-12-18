@@ -384,6 +384,7 @@ TEST(ParserTest, ArrayDimensionSet) {
 
 TEST(ParserTest, ArgumentDecl) {
   // Create a lexer
+  context->clear_context();
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
@@ -4090,44 +4091,14 @@ TEST(ParserTest,GlobalInitializable){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalInitializable(context));
 
-  input.assign("const static align 4 global_Samp &demo[10]={boundaryU = linear} ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalInitializable(context));
-
-  input.assign("align 8 global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalInitializable(context));
-
     //for globalImageDecl
   input.assign("const extern global_RWImg &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalInitializable(context));
 
-  input.assign("static align 4 const global_RWImg &demo[10] ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalInitializable(context));
-
-  input.assign("align 4 global_RWImg &demo[10]={format = normalized} ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalInitializable(context));
-
   //for globalReadOlnyImageDecl
   input.assign("const  extern global_ROImg &demo ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalInitializable(context));
-
-  input.assign("static align 8 global_ROImg &demo[10] ;");
-  lexer->set_source_string(input);
-  context->token_to_scan = yylex();
-  EXPECT_EQ(0, GlobalInitializable(context));
-
-  input.assign("const extern align 8 global_ROImg &demo[10]={format = normalized } ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalInitializable(context));
@@ -4152,6 +4123,42 @@ TEST(ParserTest,GlobalInitializable){
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, GlobalInitializable(context));
   EXPECT_EQ(INVALID_INITIALIZER, mer.get_last_error());
+
+  input.assign("const static align 4 global_Samp &demo[10]={boundaryU = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalInitializable(context));
+  EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
+
+  input.assign("align 8 global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalInitializable(context));
+  EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
+
+  input.assign("static align 4 const global_RWImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalInitializable(context));
+  EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
+
+  input.assign("align 4 global_RWImg &demo[10]={format = normalized} ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalInitializable(context));
+  EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
+
+  input.assign("static align 8 global_ROImg &demo[10] ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalInitializable(context));
+  EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
+
+  input.assign("const extern align 8 global_ROImg &demo[10]={format = normalized } ;");
+  lexer->set_source_string(input);
+  context->token_to_scan = yylex();
+  EXPECT_NE(0, GlobalInitializable(context));
+  EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
 
   context->set_error_reporter(main_reporter);
 

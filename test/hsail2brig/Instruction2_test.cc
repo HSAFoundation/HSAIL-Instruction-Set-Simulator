@@ -1504,7 +1504,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   symbols->clear();
 
   /**********************************************************************************/
-  in.assign("NDRangesize $s2, 2;");
+  in.assign("ndrangesize $s2, 2;");
   destName.assign("$s2");
   symbols->append(destName);
 
@@ -1536,7 +1536,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
   symbols->clear();
 
   /**********************************************************************************/
-  in.assign("NDRangegroups $s2, 2;");
+  in.assign("ndrangegroups $s2, 2;");
   destName.assign("$s2");
   symbols->append(destName);
 

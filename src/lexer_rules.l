@@ -12,9 +12,11 @@
 hsa::brig::Context* context = hsa::brig::Context::get_instance();
 
 /* helper function for IEEE to Single */
-float ieee754tof(char *text) {
+void ieee754tof(float *f, char *text) {
   union { uint32_t u32; float f32; } result = { strtoull(text + 2, NULL, 16) };
-  return result.f32;
+  // x86-32's fld instruction will not preserve 32-bit SNAN constants,
+  // so don't return the result!
+  *f = result.f32;
 }
 
 
@@ -28,6 +30,18 @@ void free_string(hsa::brig::Context* context) {
     free(context->token_value.string_val);
     context->valid_string = false;
   }
+}
+
+bool CheckRegister(char *numberText, uint32_t limit) {
+  int len = strlen(numberText);
+  if (numberText[0] == '0' && len != 1) {
+    return false;
+  }
+  uint32_t num = strtoul(numberText, NULL, 10);
+  if (num >= limit) {
+    return false;
+  }
+  return true;
 }
 
 %}
@@ -104,7 +118,7 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 {IEEE_SINGLE} { context->token_type = CONSTANT;
                 free_string(context);
                 context->yycolno+=yyleng;
-                context->token_value.float_val = ieee754tof(yytext);
+                ieee754tof(&context->token_value.float_val, yytext);
                 return TOKEN_SINGLE_CONSTANT; }
 
 {DEC_DOUBLE}  { context->token_type = CONSTANT;
@@ -153,33 +167,69 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 <INLINE_COMMENT><<EOF>>       { printf("%d: Unterminated comment.\n", yylineno);
                                 return 0; }
 
-\$c(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng;
+\$c[0-9]+                                   { context->yycolno+=yyleng;
                                               free_string(context);
                                               context->token_value.string_val = strdup(yytext);
                                               context->valid_string = true;
                                               context->token_type = REGISTER;
-                                              return TOKEN_CREGISTER;}
+                                              if (CheckRegister(yytext + 2, 8)) {
+                                                return TOKEN_CREGISTER;
+                                              } else {
+                                                fprintf(stderr, "Invalid Register %s\n", yytext);
+                                                free_string(context);
+                                                context->token_to_scan = 0;
+                                                context->token_type = UNKNOWN;
+                                                return 0;
+                                              }
+                                            }
 
-\$d(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng;
+\$d[0-9]+                                   { context->yycolno+=yyleng;
                                               free_string(context);
                                               context->token_value.string_val = strdup(yytext);
                                               context->valid_string = true;
                                               context->token_type = REGISTER;
-                                              return TOKEN_DREGISTER;}
+                                              if (CheckRegister(yytext + 2, 64)) {
+                                                return TOKEN_DREGISTER;
+                                              } else {
+                                                fprintf(stderr, "Invalid Register %s\n", yytext);
+                                                free_string(context);
+                                                context->token_to_scan = 0;
+                                                context->token_type = UNKNOWN;
+                                                return 0;
+                                              }
+                                            }
 
-\$s(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15)  { context->yycolno+=yyleng;
+\$s[0-9]+                                   { context->yycolno+=yyleng;
                                               free_string(context);
                                               context->token_value.string_val = strdup(yytext);
                                               context->valid_string = true;
                                               context->token_type = REGISTER;
-                                              return TOKEN_SREGISTER;}
+                                              if (CheckRegister(yytext + 2, 128)) {
+                                                return TOKEN_SREGISTER;
+                                              } else {
+                                                fprintf(stderr, "Invalid Register %s\n", yytext);
+                                                free_string(context);
+                                                context->token_to_scan = 0;
+                                                context->token_type = UNKNOWN;
+                                                return 0;
+                                              }
+                                            }
 
-\$q(0|1|2|3|4|5|6|7)                        { context->yycolno+=yyleng;
+\$q[0-9]+                                   { context->yycolno+=yyleng;
                                               free_string(context);
                                               context->token_value.string_val = strdup(yytext);
                                               context->valid_string = true;
                                               context->token_type = REGISTER;
-                                              return TOKEN_QREGISTER;}
+                                              if (CheckRegister(yytext + 2, 32)) {
+                                                return TOKEN_QREGISTER;
+                                              } else {
+                                                fprintf(stderr, "Invalid Register %s\n", yytext);
+                                                free_string(context);
+                                                context->token_to_scan = 0;
+                                                context->token_type = UNKNOWN;
+                                                return 0;
+                                              }
+                                            }
 
 \%[_a-zA-Z]+[_a-zA-Z0-9]*       { context->token_type = IDENTIFIER;
                                   context->yycolno+=yyleng;
@@ -829,6 +879,12 @@ debugtrap           { free_string(context);
                       context->token_value.opcode = BrigDebugTrap;
                       return DEBUGTRAP; }
 
+qid                 { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE_NODT;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigQid;
+                      return QID; }
+
 abs                 { free_string(context);
                       context->token_value.opcode = BrigAbs;
                       context->token_type = INSTRUCTION2_OPCODE;
@@ -1016,13 +1072,13 @@ workgroupid       { free_string(context);
                     context->token_value.opcode = BrigWorkGroupId ;
                     return WORKGROUPID;}
 
-NDRangesize         { free_string(context);
+ndrangesize         { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
                       context->token_value.opcode = BrigNDRangeSize;
                       return NDRANGESIZE;}
 
-NDRangegroups       { free_string(context);
+ndrangegroups       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
                       context->token_value.opcode = BrigNDRangeGroups;

@@ -291,7 +291,7 @@ TEST(CodegenTest, Call_CodeGen) {
   width.type = Brigb32;
   width.reserved = 0;
   memset(&width.bits, 0, sizeof(width.bits));
-  width.bits.u = 0;
+  width.bits.u = 1;
 
   outputArgs.size = sizeof(outputArgs);
   outputArgs.kind = BrigEOperandArgumentList;
@@ -359,7 +359,7 @@ TEST(CodegenTest, Call_CodeGen) {
   width.type = Brigb32;
   width.reserved = 0;
   memset(&width.bits, 0, sizeof(width.bits));
-  width.bits.u = 0;
+  width.bits.u = 1;
 
   inputArgs.size = sizeof(inputArgs);
   inputArgs.kind = BrigEOperandArgumentList;
@@ -404,7 +404,7 @@ TEST(CodegenTest, Call_CodeGen) {
   width.type = Brigb32;
   width.reserved = 0;
   memset(&width.bits, 0, sizeof(width.bits));
-  width.bits.u = 0;
+  width.bits.u = 1;
 
   func.size = sizeof(func);
   func.kind = BrigEOperandFunctionRef;
@@ -436,6 +436,7 @@ TEST(CodegenTest, Call_CodeGen) {
   width.type = Brigb32;
   width.reserved = 0;
   memset(&width.bits, 0, sizeof(width.bits));
+  width.bits.u = 1;
 
   inputArgs.size = sizeof(inputArgs);
   inputArgs.kind = BrigEOperandArgumentList;

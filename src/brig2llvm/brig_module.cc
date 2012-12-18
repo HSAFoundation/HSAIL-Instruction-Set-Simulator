@@ -398,17 +398,33 @@ bool BrigModule::validate(const BrigDirectiveMethod *dir) const {
   return valid;
 }
 
-template<unsigned> struct hasCCode { typedef bool Bool; };
-
 template<class T>
-static typename hasCCode<sizeof(((T *) 0)->c_code)>::Bool
-updateCCode(BrigcOffset32_t &c_code, const T *dir) {
+static bool updateCCode(BrigcOffset32_t &c_code, const T *dir) {
   if(c_code > dir->c_code) return false;
   c_code = dir->c_code;
   return true;
 }
 
-static bool updateCCode(BrigcOffset32_t &c_code, ...) { return true; }
+template<> bool updateCCode(BrigcOffset32_t &,
+			    const BrigDirectiveSymbol *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &,
+			    const BrigDirectiveImage *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &,
+			    const BrigDirectiveSampler *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &,
+			    const BrigDirectivePad *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &,
+			    const BrigBlockNumeric *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &,
+			    const BrigBlockString *) { return true; }
+
+template<> bool updateCCode(BrigcOffset32_t &,
+			    const BrigBlockEnd *) { return true; }
 
 bool BrigModule::validateCCode(void) const {
   BrigcOffset32_t c_code = 0;
@@ -1401,9 +1417,13 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
   char *endptr;
   long int regOffset = strtol(name + 2, &endptr, 10);
   valid &= check(!*endptr, "Garbage after register offset");
-  if(type == Brigb1 || type == Brigb128)
+  if(type == Brigb1)
     check(0 <= regOffset && regOffset < 8, "Register offset out-of-bounds");
-  else if(type == Brigb32 || type == Brigb64)
+  else if(type == Brigb32)
+    check(0 <= regOffset && regOffset < 128, "Register offset out-of-bounds");
+  else if(type == Brigb64)
+    check(0 <= regOffset && regOffset < 64, "Register offset out-of-bounds");
+  else if(type == Brigb128)
     check(0 <= regOffset && regOffset < 32, "Register offset out-of-bounds");
 
   valid &= check(operand->type == type, "Register name does not match type");

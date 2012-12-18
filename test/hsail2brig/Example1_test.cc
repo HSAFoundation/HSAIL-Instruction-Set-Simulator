@@ -112,7 +112,7 @@ TEST(CodegenTest, Example1_CodeGen) {
   kerSymRef.s.dim = 0;
   kerSymRef.s.s_name = funName.size() + 1;
   kerSymRef.s.type = Brigf32;
-  kerSymRef.s.align = 1;
+  kerSymRef.s.align = 4;
   kerSymRef.d_init = 0;
   kerSymRef.reserved = 0;
 
@@ -128,7 +128,7 @@ TEST(CodegenTest, Example1_CodeGen) {
   priSymRef.s.dim = 0;
   priSymRef.s.s_name = funName.size() + kerSymName.size() + 2;
   priSymRef.s.type = Brigu32;
-  priSymRef.s.align = 1;
+  priSymRef.s.align = 4;
   priSymRef.d_init = 0;
   priSymRef.reserved = 0;
 

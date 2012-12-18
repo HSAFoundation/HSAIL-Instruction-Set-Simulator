@@ -108,6 +108,7 @@ set(hsail2brig_test_SOURCES
     test/hsail2brig/St_test.cc
     test/hsail2brig/Syscall_test.cc
     test/hsail2brig/Version_test.cc
+    test/hsail2brig/Operand_test.cc
     testcase/atom_test.cc
     testcase/bar_test.cc
     testcase/branch_test.cc

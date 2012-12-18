@@ -143,7 +143,10 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
 
   if ((context->token_type == REGISTER) || (context->token_to_scan == TOKEN_WAVESIZE)) {
     opName = context->token_value.string_val;
-  } else if (context->token_type == CONSTANT || context->token_to_scan == '-') {
+  } else if (context->token_type == CONSTANT || 
+             context->token_to_scan == '-' ||
+             context->token_to_scan == '+' ||
+             context->token_type == DATA_TYPE_ID) {
     if (current_offset % 8) {
       current_offset += 8 - current_offset % 8;
     }
@@ -338,8 +341,20 @@ int BaseOperand(Context* context) {
         context->set_error(MISSING_DOUBLE_CONSTANT); 
         return 1;
       }
-      for (uint32_t i = 0; i < douList.size(); ++i) {
-        decList.push_back(*reinterpret_cast<int64_t*>(&douList[i]));
+      switch (subType) {
+        case Brigb32: {
+          float temp;
+          for (uint32_t i = 0; i < douList.size(); ++i) {
+            temp = (float)douList[i];
+            decList.push_back((uint64_t)(*reinterpret_cast<int32_t*>(&temp)));
+          }
+          break;
+        }
+        case Brigb64:
+          for (uint32_t i = 0; i < douList.size(); ++i) {
+            decList.push_back(*reinterpret_cast<int64_t*>(&douList[i]));
+          }
+          break;
       }
     }
     if (context->token_to_scan != ')') {
@@ -353,18 +368,65 @@ int BaseOperand(Context* context) {
       0,                  // reserved
       { 0 }
     };
-    uint32_t typeSize = 0;
+    uint32_t size1 = 0, size2 = 0;
+    //TODO(Chuang): f16 and b1 constant implement should be implemented
+    size1 = size2 = size;
+    if (type == Brigb128) {
+      //Note: 128bit constant is not exist except packed constant. 
+      //      If data type is Brigb128. Size will never be only 1.
+      size1 >>= 1;
+    }
+    uint64_t shift = 0x0;
+    //Note: If the subType is Zero, it won't be a packed constant.
+    //      the type of Zero is Brigs8.
     switch (subType) {
-      case Brigb8:   typeSize = sizeof(int8_t);  break;
-      case Brigb16:  typeSize = sizeof(int16_t); break;
-      case Brigb32:  typeSize = sizeof(int32_t); break;
-      case Brigb64:  typeSize = sizeof(int64_t); break;
+      case Brigb8:  shift = 8;  break;
+      case Brigb16: shift = 16; break;
+      case Brigb32: shift = 32; break;
     }
     boi.bits.l[0] = boi.bits.l[1] = 0;
-    int8_t* step = reinterpret_cast<int8_t*>(&boi.bits);
-    for (uint32_t i = 0 ; i < size ; ++i) {
-      memcpy(step, &decList[i], typeSize);
-      step += typeSize;
+    // Not endian sensitive
+    uint32_t i;
+    switch (subType) {
+      case Brigb8:
+        for (i = 0 ; i < size1; ++i) {
+          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] += (uint8_t)decList[i];
+        }
+        for (; i < size2; ++i) {
+          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] += (uint8_t)decList[i];
+        }
+        break;
+      
+      case Brigb16:
+        for (i = 0 ; i < size1; ++i) {
+          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] += (uint16_t)decList[i];
+        }
+        for (; i < size2; ++i) {
+          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] += (uint16_t)decList[i];
+        }
+        break;
+      case Brigb32:
+        for (i = 0 ; i < size1; ++i) {
+          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] += (uint32_t)decList[i];
+        }
+        for (; i < size2; ++i) {
+          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] += (uint32_t)decList[i];
+        }
+        break;
+      case Brigb64:
+        for (i = 0 ; i < size1; ++i) {
+          boi.bits.l[0] = (uint64_t)decList[i];
+        }
+        for (; i < size2; ++i) {
+          boi.bits.l[1] = (uint64_t)decList[i];
+        }
+        break;
     }
     boi.type = type;
     context->append_operand(&boi);
@@ -767,7 +829,7 @@ int CallArgs(Context* context) {
 int RoundingMode(Context* context) {
   unsigned int first_token = context->token_to_scan;
   // get current alu modifier from context
-  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};//context->get_alu_modifier();
+  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
 
   if (first_token == _FTZ) {
     mod.valid = 1;
@@ -777,9 +839,15 @@ int RoundingMode(Context* context) {
   }
 
   if (context->token_type == FLOAT_ROUNDING) {
-      // next is floatRounding
-    mod.valid = 1;
-    mod.floatOrInt = 1;
+    if (mod.valid) {
+      if (!mod.floatOrInt) {
+        context->set_error(INVALID_MODIFIER);
+        return 1;
+      }
+    } else {
+      mod.valid = 1;
+      mod.floatOrInt = 1;
+    }
     switch (context->token_to_scan) {
       case _UP:
         mod.rounding = 2;
@@ -794,12 +862,17 @@ int RoundingMode(Context* context) {
         mod.rounding = 0;
         break;
     }
-    context->token_to_scan = yylex();  // set context for following functions
-    context->set_alu_modifier(mod);
-    return 0;
+    context->token_to_scan = yylex();
   } else if (context->token_type == INT_ROUNDING) {
-    mod.valid = 1;
-    mod.floatOrInt = 0;
+    if (mod.valid) {
+      if (mod.floatOrInt) {
+        context->set_error(INVALID_MODIFIER);
+        return 1;
+      }
+    } else {
+      mod.valid = 1;
+      mod.floatOrInt = 0;
+    }
     switch (first_token) {
       case _UPI:
         mod.rounding = 2;
@@ -814,15 +887,11 @@ int RoundingMode(Context* context) {
         mod.rounding = 0;
         break;
     }
-    context->token_to_scan = yylex();  // set context for following functions
-    context->set_alu_modifier(mod);
-    return 0;
+    context->token_to_scan = yylex();
   }
-  if(mod.ftz){
-    context->set_alu_modifier(mod);
-    return 0;
-  }
-  return 1;
+
+  context->set_alu_modifier(mod);
+  return 0;
 }
 
 int Instruction2OpcodeDT(Context* context) {
@@ -841,9 +910,11 @@ int Instruction2OpcodeDT(Context* context) {
   inst.opcode = context->token_value.opcode;
 
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
   if (context->token_type == PACKING) {
     // there is packing
     inst.packing = context->token_value.packing;
@@ -893,8 +964,7 @@ int Instruction2OpcodeDT(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       sizeof(BrigInstMod),  // size
       BrigEInstMod,         // kind
@@ -932,9 +1002,11 @@ int Instruction2OpcodeNoDT(Context* context) {
   inst.opcode = context->token_value.opcode;
 
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
   if (context->token_type != REGISTER) {
     context->set_error(INVALID_FIRST_OPERAND);
     return 1;
@@ -954,8 +1026,7 @@ int Instruction2OpcodeNoDT(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       sizeof(BrigInstMod),  // size
       BrigEInstMod,         // kind
@@ -988,9 +1059,11 @@ int Instruction2OpcodeFtz(Context* context) {
 
   /* Check for rounding mode*/
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-      aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
 
   if (context->token_type != DATA_TYPE_ID) {
     context->set_error(INVALID_DATA_TYPE);
@@ -1022,8 +1095,7 @@ int Instruction2OpcodeFtz(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       0,  // size
       BrigEInstMod,         // kind
@@ -1070,11 +1142,11 @@ int Instruction3(Context* context) {
   // First token must be an Instruction3Opcode
 
   /* Variables for storing Brig struct information */
-  bool has_modifier = false;
   BrigDataType16_t type = Brigb32;
   BrigOpcode32_t opcode = context->token_value.opcode;
   BrigPacking packing = BrigNoPacking;
   BrigoOffset32_t OpOffset0 = 0, OpOffset1 = 0, OpOffset2 = 0;
+  BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
 
   /* Checking for Instruction3 statement  - no error set here*/
   if ((context->token_type != INSTRUCTION3_OPCODE)
@@ -1085,7 +1157,11 @@ int Instruction3(Context* context) {
   context->token_to_scan= yylex();
 
   /* Rounding Optional*/
-  has_modifier = (!RoundingMode(context));
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
+  }
+  mod = context->get_alu_modifier();
 
   /*Packing optional*/
   if (context->token_type == PACKING) {
@@ -1142,6 +1218,9 @@ int Instruction3(Context* context) {
       return 1;
     }
   }
+  if (opcode == BrigShl || opcode ==BrigShr) {
+    context->set_type(Brigb32);
+  }
   if (Operand(context, &OpOffset2)) {
     context->set_error(MISSING_OPERAND);
     return 1;
@@ -1151,8 +1230,7 @@ int Instruction3(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  if (has_modifier){
-    BrigAluModifier mod = context->get_alu_modifier();
+  if (mod.valid){
     BrigInstMod bim = {
       0,
       BrigEInstMod,
@@ -1273,12 +1351,21 @@ int Version(Context* context) {
 
 int Alignment(Context* context) {
   // first token must be "align" keyword
-  if ( ALIGN != context->token_to_scan)
+  if (ALIGN != context->token_to_scan) {
     return 1;
+  }
 
   context->token_to_scan = yylex();
   if (TOKEN_INTEGER_CONSTANT != context->token_to_scan){
     context->set_error(MISSING_INTEGER_CONSTANT);
+    return 1;
+  }
+  if (context->token_value.int_val != 1 &&
+      context->token_value.int_val != 2 &&
+      context->token_value.int_val != 4 &&
+      context->token_value.int_val != 8 &&
+      context->token_value.int_val != 16) {
+    context->set_error(INVALID_ALIGNMENT);
     return 1;
   }
 
@@ -1414,9 +1501,9 @@ int ArgumentDecl(Context* context) {
   }
   context->token_to_scan = yylex();
   if ((context->token_type != DATA_TYPE_ID)&&
-        (context->token_to_scan != _RWIMG) &&
-        (context->token_to_scan != _SAMP) &&
-        (context->token_to_scan != _ROIMG)) {
+      (context->token_to_scan != _RWIMG) &&
+      (context->token_to_scan != _SAMP) &&
+      (context->token_to_scan != _ROIMG)) {
 
     context->set_error(MISSING_DATA_TYPE);
     return 1;
@@ -1443,6 +1530,26 @@ int ArgumentDecl(Context* context) {
       return 1;
     }
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(type)) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
+
   BrigdOffset32_t dsize = context->get_directive_offset();
   BrigDirectiveSymbol sym_decl = {
     sizeof(BrigDirectiveSymbol),                 // size
@@ -1466,6 +1573,7 @@ int ArgumentDecl(Context* context) {
   context->append_directive(&sym_decl);
   //Mapping symbol names to declarations in .dir
   context->symbol_map[arg_name] = dsize;
+  context->set_alignment(0);
 
   return 0;
 }
@@ -2123,11 +2231,12 @@ int Call(Context* context) {
       0,
       { 0 }
     };
-    op_width.bits.u = 0;
+    op_width.bits.u = 1;
     context->append_operand(&op_width);
   }
 
   if (context->token_to_scan == __FBAR) {
+    aluModifier.valid = 1;
     aluModifier.fbar = 1;
     context->token_to_scan = yylex();
   }
@@ -2208,7 +2317,7 @@ int Call(Context* context) {
     return 1;
   }
 
-  if (*paluModifier!=0) {
+  if (aluModifier.valid) {
     BrigInstMod callMod = {
       0,
       BrigEInstMod,
@@ -2353,6 +2462,25 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
       return 1;
     }
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveSymbol sym_decl = {
     sizeof(sym_decl),                 // size
@@ -2371,6 +2499,7 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
     0,                                // d_init = 0 for arg
     0                                 // reserved
   };
+  context->set_alignment(0);
   context->symbol_map[var_name] = context->get_directive_offset();
   BrigdOffset32_t argdecl_offset = context->get_directive_offset();
   context->append_directive(&sym_decl);
@@ -2426,6 +2555,25 @@ int UninitializableDecl(Context* context) {
       return 1;
   }
 
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
   BrigDirectiveSymbol bds = {
     sizeof(BrigDirectiveSymbol),    // size
     BrigEDirectiveSymbol ,          // kind
@@ -2446,6 +2594,7 @@ int UninitializableDecl(Context* context) {
 
   context->symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bds);
+  context->set_alignment(0);
 
   if (';' != context->token_to_scan) {
     context->set_error(MISSING_SEMICOLON);
@@ -2486,6 +2635,25 @@ int ArgUninitializableDecl(Context* context) {
     if (ArrayDimensionSet(context))
       return 1;
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveSymbol bds = {
     sizeof(BrigDirectiveSymbol),    // size
@@ -2505,6 +2673,7 @@ int ArgUninitializableDecl(Context* context) {
     0,                             // reserved
   };
 
+  context->set_alignment(0);
   context->symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bds);
 /*
@@ -2597,6 +2766,25 @@ int SignatureType(Context *context, std::vector<BrigDirectiveSignature::BrigProt
     if (ArrayDimensionSet(context))
       return 1;
 
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
+
   BrigDirectiveSignature::BrigProtoType bpt = {
     context->get_type(),         // type
     context->get_alignment(),    // align
@@ -2604,6 +2792,7 @@ int SignatureType(Context *context, std::vector<BrigDirectiveSignature::BrigProt
     context->get_dim()           // dim
   };
   types->push_back(bpt);
+  context->set_alignment(0);
 
   return 0;
 }
@@ -3070,9 +3259,11 @@ int Instruction4Fma(Context* context) {
   BrigoOffset32_t OpOffset[4] = {0, 0, 0, 0};
 
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
   // TODO(Chuang):Type Length: 16 (in some implementations), 32, 64
   if (context->token_to_scan != _F32 &&
       context->token_to_scan != _F64) {
@@ -3146,8 +3337,7 @@ int Instruction4Fma(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }  // ';'
-  int* pCmp = reinterpret_cast<int*>(&aluModifier);
-  if (*pCmp != 0) {
+  if (aluModifier.valid) {
     BrigInstMod fmaMod = {
       sizeof(BrigInstMod),  // size
       BrigEInstMod,         // kind
@@ -3188,9 +3378,11 @@ int Instruction4Mad(Context* context) {
   BrigDataType16_t type = Brigb32;
 
   context->token_to_scan = yylex();
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  aluModifier = context->get_alu_modifier();
   // TODO(Chuang):Type f Length: 16 (in some implementations), 32, 64
   // Or Type u, s Length 32, 64
   if (context->token_to_scan != _F32 &&
@@ -3259,8 +3451,7 @@ int Instruction4Mad(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }  // ';'
-  int* pCmp = reinterpret_cast<int*>(&aluModifier);
-  if (*pCmp != 0) {
+  if (aluModifier.valid) {
     // Note: mad_u/s without _ftz/rounding
     if (type != Brigf32 && type != Brigf64) {
       context->set_error(INVALID_ROUNDING_MODE);
@@ -3682,6 +3873,24 @@ int KernelArgumentDecl(Context *context) {
       return 1;
     }
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
   BrigdOffset32_t dsize = context->get_directive_offset();
   BrigDirectiveSymbol sym_decl = {
     sizeof(BrigDirectiveSymbol),                 // size
@@ -3705,6 +3914,7 @@ int KernelArgumentDecl(Context *context) {
   context->append_directive(&sym_decl);
   //Mapping symbol names to declarations in .dir
   context->symbol_map[arg_name] = dsize;
+  context->set_alignment(0);
 
   return 0;
 }
@@ -3922,6 +4132,12 @@ int Cmp(Context* context) {
   BrigoOffset32_t OpOffset[3] = {0, 0, 0};
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
   context->token_to_scan = yylex();
+  if (context->token_to_scan == _FTZ) {
+    aluModifier.valid = 1;
+    aluModifier.ftz = 1;
+    aluModifier.floatOrInt = 1;
+    context->token_to_scan = yylex();
+  }
   if (ComparisonId(context, &comparisonOperator)) {
     context->set_error(MISSING_COMPARISON_TYPE);
     return 1;
@@ -4044,6 +4260,25 @@ int GlobalPrivateDecl(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveSymbol bds = {
     sizeof(BrigDirectiveSymbol),    // size
@@ -4063,6 +4298,7 @@ int GlobalPrivateDecl(Context* context) {
     0,                             // reserved
   };
   context->append_directive(&bds);
+  context->set_alignment(0);
 
   context->token_to_scan = yylex();
   return 0;
@@ -4711,6 +4947,25 @@ int GlobalGroupDecl(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
+  uint16_t naturalAlign = 0;
+  switch (ConvertTypeToB(context->get_type())) {
+    case Brigb1: naturalAlign = 1; break;
+    case Brigb8: naturalAlign = 1; break;
+    case Brigb16: naturalAlign = 2; break;
+    case Brigb32: naturalAlign = 4; break;
+    case Brigb64: naturalAlign = 8; break;
+    case Brigb128: naturalAlign = 16; break;
+    case BrigRWImg: naturalAlign = 16; break;
+    case BrigROImg: naturalAlign = 16; break; 
+    case BrigSamp: naturalAlign = 16; break;
+  }
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveSymbol bds = {
     sizeof(BrigDirectiveSymbol),    // size
@@ -4730,6 +4985,7 @@ int GlobalGroupDecl(Context* context) {
     0,                             // reserved
   };
   context->append_directive(&bds);
+  context->set_alignment(0);
 
   context->token_to_scan = yylex();
   return 0;
@@ -4751,10 +5007,12 @@ int MulInst(Context* context) {
   context->token_to_scan = yylex();
 
   if (opcode == BrigMul) {
-    if (!RoundingMode(context)) {
-      aluModifier = context->get_alu_modifier();
+    if (RoundingMode(context)) {
+      context->set_error(INVALID_MODIFIER);
+      return 1;
     }
   }
+  aluModifier = context->get_alu_modifier();
 
   if (context->token_type == PACKING) {
     packing = context->token_value.packing;
@@ -4807,7 +5065,7 @@ int MulInst(Context* context) {
     return 1;
   }
 
-  if (*(reinterpret_cast<int*>(&aluModifier)) == 0) {
+  if (!aluModifier.valid) {
     BrigInstBase mulInst = {
       0,                     // size
       BrigEInstBase,         // kind
@@ -5108,7 +5366,7 @@ int Ld(Context* context) {
       0,
       { 0 }
     };
-    op_width.bits.u = 0;
+    op_width.bits.u = 1;
     context->append_operand(&op_width);
   }
 
@@ -5121,6 +5379,21 @@ int Ld(Context* context) {
 
   if (context->token_type != DATA_TYPE_ID) {
     context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  if (context->token_to_scan != _B128 &&
+      context->token_to_scan != _U8 &&
+      context->token_to_scan != _U16 &&
+      context->token_to_scan != _U32 &&
+      context->token_to_scan != _U64 &&
+      context->token_to_scan != _S8 &&
+      context->token_to_scan != _S16 &&
+      context->token_to_scan != _S32 &&
+      context->token_to_scan != _S64 &&
+      context->token_to_scan != _F16 &&
+      context->token_to_scan != _F32 &&
+      context->token_to_scan != _F64) {
+    context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
   // Get Type value in here
@@ -5723,9 +5996,11 @@ int Cvt(Context* context) {
   BrigoOffset32_t OpOffset[2] = {0, 0};
   context->token_to_scan = yylex();
 
-  if (!RoundingMode(context)) {
-    getAluMod = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
   }
+  getAluMod = context->get_alu_modifier();
 
   // destType: b, u, s, f. (For b, only b1 is supported.)
   // destLength: 1, 8, 16, 32, 64. (For 1, only b1 is supported.)
@@ -5839,9 +6114,11 @@ int Instruction1OpcodeDT(Context* context) {
   if (opcode != BrigFbarInit &&
       opcode != BrigFbarRelease) {
     // TODO(Chuang): whether support for rounding
-    if (!RoundingMode(context)) {
-      aluModifier = context->get_alu_modifier();
+    if (RoundingMode(context)) {
+      context->set_error(INVALID_MODIFIER);
+      return 1;
     }
+    aluModifier = context->get_alu_modifier();
   }
   // TODO(Chuang): What can the type of BrigFbarInit be?
   if (context->token_to_scan != _B64 &&
@@ -5895,8 +6172,7 @@ int Instruction1OpcodeDT(Context* context) {
     context->append_code(&mem);
     return 0;
   }
-  int* aluValue = reinterpret_cast<int *>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       0,
       BrigEInstMod,         // kind
@@ -5934,13 +6210,22 @@ int Instruction1OpcodeNoDT(Context* context) {
 
   context->token_to_scan = yylex();
   // TODO(Chuang): whether support for rounding
-  if (!RoundingMode(context)) {
-    aluModifier = context->get_alu_modifier();
+  if (RoundingMode(context)) {
+    context->set_error(INVALID_MODIFIER);
+    return 1;
+  }
+  aluModifier = context->get_alu_modifier();
+
+  if (opcode == BrigQid) {
+    if (context->token_to_scan != TOKEN_SREGISTER) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
   }
 
   if (context->token_to_scan != TOKEN_SREGISTER &&
       context->token_to_scan != TOKEN_INTEGER_CONSTANT) {
-    context->set_error(MISSING_OPERAND);
+    context->set_error(INVALID_OPERAND);
     return 1;
   }
   if (Operand(context, &OpOffset[0])) {
@@ -5950,8 +6235,7 @@ int Instruction1OpcodeNoDT(Context* context) {
     context->set_error(MISSING_SEMICOLON);
     return 1;
   }
-  int* aluValue = reinterpret_cast<int*>(&aluModifier);
-  if (*aluValue != 0) {
+  if (aluModifier.valid) {
     BrigInstMod mod = {
       0,                    // size
       BrigEInstMod,         // kind
@@ -6937,6 +7221,14 @@ int GlobalImageDeclPart2(Context *context){
       return 1;
     }
   }
+  uint16_t naturalAlign = 16;
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
 
   BrigDirectiveImage bdi = {
     sizeof(BrigDirectiveImage),//size
@@ -6960,6 +7252,7 @@ int GlobalImageDeclPart2(Context *context){
     BrigImageFormatUnknown  //format
   };
   context->append_directive(&bdi);
+  context->set_alignment(0);
 
   if ('=' == context->token_to_scan) {
     if (ImageInitializer(context)) {
@@ -7006,6 +7299,14 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
       return 1;
     }
   }
+  uint16_t naturalAlign = 16;
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
   BrigDirectiveImage bdi = {
     sizeof(BrigDirectiveImage), //size
     BrigEDirectiveImage,       //kind
@@ -7028,6 +7329,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
     BrigImageFormatUnknown  //format
   };
   context->append_directive(&bdi);
+  context->set_alignment(0);
 
   if ('=' == context->token_to_scan) {
     if (ImageInitializer(context)) {
@@ -8227,6 +8529,14 @@ int GlobalSamplerDeclPart2(Context *context){
     }
   }
 
+  uint16_t naturalAlign = 16;
+
+  if (context->get_alignment() == 0) {
+    context->set_alignment(naturalAlign);
+  } else if (context->get_alignment() < naturalAlign) {
+    context->set_error(INVALID_ALIGNMENT);
+    return 1;
+  }
   BrigDirectiveSampler bds = {
     sizeof(BrigDirectiveSampler),      //size
     BrigEDirectiveSampler,             //kind
@@ -8250,6 +8560,7 @@ int GlobalSamplerDeclPart2(Context *context){
     0                       //reserved1
   };
   context->append_directive(&bds);
+  context->set_alignment(0);
 
   if ('=' == context->token_to_scan) {
     if (SobInitializer(context)) {
@@ -8477,28 +8788,28 @@ int ArrayOperand(Context* context) {
 
 BrigDataType16_t ConvertTypeToB(BrigDataType16_t type, 
     BrigDataType16_t* pSubType, uint32_t* pSize) {
-  BrigDataType16_t bType = Brigb32;
+  BrigDataType16_t bType = type;
   BrigDataType16_t subType = Brigb32;
   uint32_t size = 0;
   
   switch(type) {
-    case Brigb1: bType = Brigb1; break;
+    case Brigb1:      bType = Brigb1; subType = 0; size = 1; break;
     case Brigs8:
     case Brigu8:
-    case Brigb8: bType = Brigb8; break;
+    case Brigb8:      bType = Brigb8; subType = 0; size = 1; break;
     case Brigs16:
     case Brigu16:
     case Brigf16:
-    case Brigb16: bType = Brigb16; break;
+    case Brigb16:     bType = Brigb16; subType = 0; size = 1; break;
     case Brigs32:
     case Brigu32:
     case Brigf32:
-    case Brigb32: bType =  Brigb32; break;
+    case Brigb32:     bType = Brigb32; subType = 0; size = 1; break;
     case Brigs64:
     case Brigu64:
     case Brigf64:
-    case Brigb64:  bType = Brigb64; break;
-    case Brigb128: bType = Brigb128; break;
+    case Brigb64:     bType = Brigb64; subType = 0; size = 1; break;
+    case Brigb128:    bType = Brigb128; subType = 0; size = 1; break;
     case Brigu8x4:    bType = Brigb32;  subType = Brigb8;  size = 4;  break;
     case Brigs8x4:    bType = Brigb32;  subType = Brigb8;  size = 4;  break;
     case Brigu16x2:   bType = Brigb32;  subType = Brigb16; size = 2;  break;

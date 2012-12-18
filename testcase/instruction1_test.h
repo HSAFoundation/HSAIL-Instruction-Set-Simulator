@@ -22,8 +22,9 @@ class TestInstruction1NullPtr: public ::testing::TestWithParam<int>{
 
 struct Instruction1NullptrTest instruction1_nullptr_pair[9] = {
 //instruction1_nullptr_pair[0]
+//supports 64 64-bit registers
   {
-    "nullptr_u64 $d1;",
+    "nullptr_u64 $d63;",
     {
       brig_inst_mem_size,
       BrigEInstMem,
@@ -144,8 +145,9 @@ class TestInstruction1LaneId: public ::testing::TestWithParam<int>{
 };
 
 struct Instruction1Test instruction1_laneid_pair[1] = {
+//supports 128 32-bit registers
   {
-  "laneid $s1;",
+  "laneid $s127;",
     {
     brig_inst_base_size,
     BrigEInstBase,
@@ -167,6 +169,23 @@ struct Instruction1Test instruction1_dynwaveid_pair[1] = {
     brig_inst_base_size,
     BrigEInstBase,
     BrigDynWaveId,
+    Brigb32,
+    BrigNoPacking,
+    {operand_offset, 0, 0, 0, 0}
+    }
+  }
+};
+
+class TestInstruction1QId: public ::testing::TestWithParam<int>{
+};
+
+struct Instruction1Test instruction1_qid_pair[1] = {
+  {
+  "qid $s1;",
+    {
+    brig_inst_base_size,
+    BrigEInstBase,
+    BrigQid,
     Brigb32,
     BrigNoPacking,
     {operand_offset, 0, 0, 0, 0}
