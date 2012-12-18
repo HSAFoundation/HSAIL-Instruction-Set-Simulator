@@ -879,6 +879,12 @@ debugtrap           { free_string(context);
                       context->token_value.opcode = BrigDebugTrap;
                       return DEBUGTRAP; }
 
+qid                 { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE_NODT;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigQid;
+                      return QID; }
+
 abs                 { free_string(context);
                       context->token_value.opcode = BrigAbs;
                       context->token_type = INSTRUCTION2_OPCODE;
@@ -1066,13 +1072,13 @@ workgroupid       { free_string(context);
                     context->token_value.opcode = BrigWorkGroupId ;
                     return WORKGROUPID;}
 
-NDRangesize         { free_string(context);
+ndrangesize         { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
                       context->token_value.opcode = BrigNDRangeSize;
                       return NDRANGESIZE;}
 
-NDRangegroups       { free_string(context);
+ndrangegroups       { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
                       context->token_value.opcode = BrigNDRangeGroups;
