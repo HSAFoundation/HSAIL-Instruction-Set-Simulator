@@ -4638,30 +4638,36 @@ int Ldc(Context* context) {
 
   BrigDataType16_t type;
   BrigoOffset32_t OpOffset[2] = {0,0};
+  BrigMachine16_t machine = context->get_machine();
 
-  if (context->token_to_scan != _B32 &&
-      (context->token_to_scan != _B64 ||
-       context->get_machine() != BrigELarge)) {
+  if (context->token_to_scan != _U32 &&
+      context->token_to_scan != _U64) {
     context->set_error(MISSING_DATA_TYPE);
+    return 1;
+  }
+  if (machine == BrigELarge && context->token_to_scan != _U64) {
+    context->set_error(INVALID_DATA_TYPE);
+    return 1;
+  }
+  if (machine == BrigESmall && context->token_to_scan != _U32) {
+    context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
 
   // If the source is a function, the destination size depends on
   // the machine model. For large, the destination must be 64 bits;
-  // for small, the destination must be 32 bits. For
-  // more information
+  // for small, the destination must be 32 bits. 
   context->set_type(context->token_value.data_type);
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
   // dest: must be BrigEOperandReg.
-  if (context->token_to_scan != TOKEN_SREGISTER &&
-      (context->token_to_scan != TOKEN_DREGISTER ||
-       type != Brigb64)) {
-    context->set_error(INVALID_FIRST_OPERAND);
+  if ((context->token_to_scan != TOKEN_SREGISTER && type == Brigu32) ||
+      (context->token_to_scan != TOKEN_DREGISTER && type == Brigu64)) {
+    context->set_error(INVALID_OPERAND);
     return 1;
   }
   if (Operand(context, &OpOffset[0])) {
-    context->set_error(INVALID_FIRST_OPERAND);
+    context->set_error(INVALID_OPERAND);
     return 1;
   }
   if (context->token_to_scan != ',') {
@@ -4671,7 +4677,7 @@ int Ldc(Context* context) {
   context->token_to_scan = yylex();
   // op[1] must be BrigEOperandLabelRef or BrigEOperandFunctionRef
 
-  if (context->token_to_scan == TOKEN_LABEL && type != Brigb64) {
+  if (context->token_to_scan == TOKEN_LABEL) {
     std::string oper_name = context->token_value.string_val;
     if (!context->label_o_map.count(oper_name)) {
       BrigOperandLabelRef labRef = {
@@ -4709,7 +4715,7 @@ int Ldc(Context* context) {
       OpOffset[1] = context->func_o_map[oper_name];
     }
   } else {
-    context->set_error(INVALID_SECOND_OPERAND);
+    context->set_error(INVALID_OPERAND);
     return 1;
   }
   context->token_to_scan = yylex();
@@ -5509,9 +5515,7 @@ int Lda(Context* context) {
   // Note: lda_uLength I think 'b' is also allowed.
   // Length: 1, 32, 64
   if (context->token_to_scan != _U32 &&
-      context->token_to_scan != _U64 &&
-      context->token_to_scan != _B32 &&
-      context->token_to_scan != _B64) {
+      context->token_to_scan != _U64) {
     context->set_error(MISSING_DATA_TYPE);
     return 1;
   }
@@ -5522,9 +5526,9 @@ int Lda(Context* context) {
 
   // dest: must be BrigEOperandReg.
   if ((context->token_to_scan == TOKEN_SREGISTER &&
-        (type == Brigu32 || type == Brigb32)) ||
+       type == Brigu32) ||
       (context->token_to_scan == TOKEN_DREGISTER &&
-       (type == Brigu64 || type == Brigb64))) {
+       type == Brigu64)) {
   } else {
     context->set_error(INVALID_OPERAND);
     return 1;
