@@ -515,8 +515,27 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsI
       directive                  // directive
     };
 
-    if (context->get_machine() == BrigELarge) {
-      boa.type = Brigb64;
+    //TODO(Chuang): This Comparison for uint test.
+    if (directive != 0) {
+      if (context->get_machine() == BrigELarge) {
+        BrigSymbolCommon symbol;
+        char* pSym = reinterpret_cast<char*>(&symbol);
+        context->get_directive_bytes(
+            pSym, directive + sizeof(uint16_t) * 2, sizeof(symbol));
+        switch (symbol.storageClass) {
+          case BrigFlatSpace:
+          case BrigGlobalSpace:
+          case BrigReadonlySpace:
+          case BrigKernargSpace:
+            boa.type = Brigb64; break;
+          default:
+            boa.type = Brigb32; 
+        }
+      }
+    } else {
+      if (context->get_machine() == BrigELarge) {
+        boa.type = Brigb64;
+      }
     }
     *pRetOpOffset = context->get_operand_offset();
     context->append_operand(&boa);
@@ -1976,9 +1995,27 @@ int BranchCbr(Context* context) {
         };
 
         boa.directive = context->symbol_map[idenName];
-
-        if (context->get_machine() == BrigELarge) {
-          boa.type = Brigb64;
+        //TODO(Chuang): This Comparison for uint test.
+        if (boa.directive != 0) {
+          if (context->get_machine() == BrigELarge) {
+            BrigSymbolCommon symbol;
+            char* pSym = reinterpret_cast<char*>(&symbol);
+            context->get_directive_bytes(
+                pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
+            switch (symbol.storageClass) {
+              case BrigFlatSpace:
+              case BrigGlobalSpace:
+              case BrigReadonlySpace:
+              case BrigKernargSpace:
+                boa.type = Brigb64; break;
+              default:
+                boa.type = Brigb32; 
+            }
+          }
+        } else {
+          if (context->get_machine() == BrigELarge) {
+            boa.type = Brigb64;
+          }
         }
         OpOffset[3] = context->get_operand_offset();
         context->append_operand(&boa);
@@ -2130,10 +2167,29 @@ int BranchBrn(Context* context) {
         };
 
         boa.directive = context->symbol_map[idenName];
-
-        if (context->get_machine() == BrigELarge) {
-          boa.type = Brigb64;
+        //TODO(Chuang): This Comparison for uint test.
+        if (boa.directive != 0) {
+          if (context->get_machine() == BrigELarge) {
+            BrigSymbolCommon symbol;
+            char* pSym = reinterpret_cast<char*>(&symbol);
+            context->get_directive_bytes(
+                pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
+            switch (symbol.storageClass) {
+              case BrigFlatSpace:
+              case BrigGlobalSpace:
+              case BrigReadonlySpace:
+              case BrigKernargSpace:
+                boa.type = Brigb64; break;
+              default:
+                boa.type = Brigb32; 
+            }
+          }
+        } else {
+          if (context->get_machine() == BrigELarge) {
+            boa.type = Brigb64;
+          }
         }
+
         OpOffset[2] = context->get_operand_offset();
         context->append_operand(&boa);
       } else {  // Identifier or Label
@@ -8698,10 +8754,29 @@ int PairAddressableOperand(Context* context) {
   };
 
   boa.directive = context->symbol_map[name];
-
-  if (context->get_machine() == BrigELarge) {
-    boa.type = Brigb64;
+  //TODO(Chuang): This Comparison for uint test.
+  if (boa.directive != 0) {
+    if (context->get_machine() == BrigELarge) {
+      BrigSymbolCommon symbol;
+      char* pSym = reinterpret_cast<char*>(&symbol);
+      context->get_directive_bytes(
+          pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
+      switch (symbol.storageClass) {
+        case BrigFlatSpace:
+        case BrigGlobalSpace:
+        case BrigReadonlySpace:
+        case BrigKernargSpace:
+          boa.type = Brigb64; break;
+        default:
+          boa.type = Brigb32; 
+      }
+    }
+  } else {
+    if (context->get_machine() == BrigELarge) {
+      boa.type = Brigb64;
+    }
   }
+
   context->append_operand(&boa);
   context->token_to_scan = yylex();
   if (context->token_to_scan != '[') {
