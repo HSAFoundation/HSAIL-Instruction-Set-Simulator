@@ -1467,10 +1467,10 @@ TEST(BrigKernelTest, IndirectBranches) {
       "  and_b32 $s3, $s0, 0x1;\n"        //$s3 is for odd or even
       "  mov_b32 $s2, 0xF;\n"             //set 15 to $s2
 
-      "  ldc_b32 $s1, @odd;\n"
+      "  ldc_u32 $s1, @odd;\n"
       "  cmp_eq_b1_u32 $c1, $s3, 0x1;\n"
       "  cbr $c1, @ldc_end;\n"
-      "  ldc_b32 $s1, @even;\n"
+      "  ldc_u32 $s1, @even;\n"
       "@ldc_end:"
 
       "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"
@@ -1538,10 +1538,10 @@ TEST(BrigKernelTest, IndirectBranches) {
       "  and_b32 $s3, $s0, 0x1;\n"             //$s3 is for odd or even
       "  mov_b32 $s2, 0xF;\n"                  //set 15 to $s2
 
-      "  ldc_b32 $s1, @odd;\n"
+      "  ldc_u32 $s1, @odd;\n"
       "  cmp_eq_b1_u32 $c1, $s3, 0x1;\n"
       "  cbr $c1, @ldc_end;\n"
-      "  ldc_b32 $s1, @even;\n"
+      "  ldc_u32 $s1, @even;\n"
       "@ldc_end:"
 
        "  brn @cmp;\n"
@@ -1631,7 +1631,7 @@ TEST(BrigKernelTest, DISABLED_IndirectCall) {
     "{\n"
     "  ld_kernarg_u32 $s0, [%n_ptr];\n"
 
-    "  ldc_b32 $s3, &foo;\n"
+    "  ldc_u32 $s3, &foo;\n"
     "  {\n"
     "    arg_u32 %r;\n"
     "    arg_u32 %n;\n"
@@ -1640,7 +1640,7 @@ TEST(BrigKernelTest, DISABLED_IndirectCall) {
     "    ld_arg_u32 $s0, [%r];\n"
     "  }\n"
 
-    "  ldc_b32 $s3, &bar;\n"
+    "  ldc_u32 $s3, &bar;\n"
     "  {\n"
     "    arg_u32 %r;\n"
     "    arg_u32 %n;\n"
