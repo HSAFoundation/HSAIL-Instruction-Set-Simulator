@@ -1282,7 +1282,6 @@ TEST(CodegenTest, Lda_Codegen){
 
 }
 
-/**********************************************************************************/
 /*********************** Ldc Test ***************************/
 TEST(CodegenTest, Ldc_Codegen){
 
@@ -1291,13 +1290,13 @@ TEST(CodegenTest, Ldc_Codegen){
   StringBuffer* sbuf = new StringBuffer();
 
   /*****************************************************************/
-  in.assign( "ldc_b32 $s2, @lab;\n");
-  op1.assign("$s2"); sbuf->append(op1);
+  in.assign( "ldc_u64 $d2, @lab;\n");
+  op1.assign("$d2"); sbuf->append(op1);
 
   BrigOperandReg dest1 = {
     0,
     BrigEOperandReg,
-    Brigb32,
+    Brigb64,
     0,
     0
   };
@@ -1314,7 +1313,7 @@ TEST(CodegenTest, Ldc_Codegen){
     0,
     BrigEInstBase,
     BrigLdc,
-    Brigb32,
+    Brigu64,
     BrigNoPacking,
     {0, sizeof(dest1), 0, 0, 0},
   };
@@ -1325,13 +1324,13 @@ TEST(CodegenTest, Ldc_Codegen){
   sbuf->clear();
 
 /**********************************************************************************/
-  in.assign( "ldc_b64 $s1, &some_function;\n");
-  op1.assign("$s1"); sbuf->append(op1);
+  in.assign( "ldc_u64 $d1, &some_function;\n");
+  op1.assign("$d1"); sbuf->append(op1);
 
   BrigOperandReg dest2 = {
     0,
     BrigEOperandReg,
-    Brigb32,
+    Brigb64,
     0,
     0
   };
@@ -1348,7 +1347,7 @@ TEST(CodegenTest, Ldc_Codegen){
     0,
     BrigEInstBase,
     BrigLdc,
-    Brigb64,
+    Brigu64,
     BrigNoPacking,
     {0, sizeof(dest2), 0, 0, 0},
   };
@@ -1393,11 +1392,11 @@ TEST(ErrorReportTest, Lda) {
 }
 
 TEST(ErrorReportTest, Ldc) {  
-  std::string input = "ldc_b32 $s2, @lab\n";
+  std::string input = "ldc_u64 $d2, @lab\n";
   Ld_Test<> TestCase1(input);
   TestCase1.Run_Test(&Ldc, MISSING_SEMICOLON);
   
-  input.assign( "ldc_b32 $s4;\n");
+  input.assign( "ldc_u64 $d4;\n");
   Ld_Test<> TestCase2(input);
   TestCase2.Run_Test(&Ldc, MISSING_COMMA);
 }

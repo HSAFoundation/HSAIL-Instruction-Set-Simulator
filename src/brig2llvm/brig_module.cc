@@ -2363,7 +2363,7 @@ bool BrigModule::validateLdc(const inst_iterator inst) const {
   valid &= check(isa<BrigInstBase>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
-  valid &= check(inst->type == Brigb32 || inst->type == Brigb64,
+  valid &= check(inst->type == Brigu32 || inst->type == Brigu64,
                  "Length should be 32 or 64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigDataType(inst->type)),
                  "Ldc cannot accept vector types");

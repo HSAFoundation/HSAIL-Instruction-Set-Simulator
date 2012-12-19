@@ -5406,36 +5406,36 @@ struct LdcTest{
 struct LdcTest ldc_pair[3] = {
 //ldc_pair[0]
   {
-    "ldc_b32 $s1, @lab;",
+    "ldc_u32 $s1, @lab;",
     {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLdc,
-    Brigb32,
+    Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //ldc_pair[1]
   {
-    "ldc_b32 $s1, &foo1;",
+    "ldc_u32 $s1, &foo1;",
      {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLdc,
-    Brigb32,
+    Brigu32,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }
   },
 //ldc_pair[2]
   {
-    "ldc_b64 $d1, &foo2;",
+    "ldc_u64 $d1, &foo2;",
     {
     brig_inst_base_size,
     BrigEInstBase,
     BrigLdc,
-    Brigb64,
+    Brigu64,
     BrigNoPacking,
     {operand_offset, operand_offset + reg_size, 0, 0, 0}
     }

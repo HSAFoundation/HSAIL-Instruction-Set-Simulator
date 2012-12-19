@@ -417,7 +417,7 @@ template<class T> static T Lda(T x) { return x; }
 UnsignedInst(define, Lda, Unary)
 
 template<class T> static T Ldc(T x) { return x; }
-BitInst(define, Ldc, Unary)
+UnsignedInst(define, Ldc, Unary)
 
 template<class T> static T ShuffleVector(T x, T y, b32 z) {
 
