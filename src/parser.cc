@@ -1672,6 +1672,10 @@ int FunctionDefinitionPart2(Context* context) {
     context->set_error(INVALID_ARGUMENT_LIST);
     return 1;
   }
+  if (paramCount > 1) {
+    context->set_error(INVALID_ARGUMENT_LIST);
+    return 1;
+  }
   if (context->token_to_scan != ')') {
     context->set_error(MISSING_CLOSING_PARENTHESIS);
     return 1;
@@ -2354,6 +2358,12 @@ int Call(Context* context) {
   }
 
   OpOffset[1] = firstOpOffset;
+  BrigOperandArgumentList outputList;
+  context->get_operand(firstOpOffset, &outputList);
+  if (outputList.elementCount > 1) {
+    context->set_error(INVALID_CALL_ARGS);
+    return 1;
+  }
   OpOffset[3] = secondOpOffset;
 
   // if there is CallTarget, the first operand token must be a s register.
@@ -3017,6 +3027,10 @@ int FunctionSignature(Context *context) {
       return 1;
     }
     outCount = types.size();
+    if (outCount > 1) {
+      context->set_error(INVALID_ARGUMENT_LIST);
+      return 1;
+    }
     context->token_to_scan = yylex();
   }
 
@@ -8801,7 +8815,7 @@ int TopLevelStatement(Context *context){
   } else if(!Directive(context)) {
     return 0 ;
   } else if(KERNEL == context->token_to_scan) {
-    return Kernel(context) ;
+    return Kernel(context);
   } else if(SIGNATURE == context->token_to_scan){
     return GlobalDecl(context) ;
   } else if ( (context->token_to_scan == ALIGN) ||

@@ -751,7 +751,7 @@ TEST(ParserTest, Call) {
   EXPECT_EQ(0, Call(context));
 
   input.assign("call_width(all) $s1 \n");
-  input.append("(%output1,&output2)(%input1, %input2) [&id1, &id2];\n");
+  input.append("(%output)(%input1, %input2) [&id1, &id2];\n");
 
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
