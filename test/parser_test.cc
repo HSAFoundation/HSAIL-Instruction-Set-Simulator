@@ -1476,11 +1476,11 @@ TEST(ParserTest, SignatureArgumentList) {
 
 TEST(ParserTest, Instruction4) {
   // Create a lexer
+  context->clear_context();
   Lexer* lexer = new Lexer();
   MockErrorReporter mer;
   // register error reporter with context
   context->set_error_reporter(&mer);
-  context->clear_context();
   // delegate some calls to FakeErrorReporter
   mer.DelegateToFake();
   // expected method calls
@@ -1564,7 +1564,7 @@ TEST(ParserTest, Instruction4) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Instruction4(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
   input.assign("sad4_b32 $s5, $s0 $s1, $s6;\n");  // lack of ','
   lexer->set_source_string(input);
@@ -1778,10 +1778,7 @@ TEST(ParserTest, Instruction5) {
   delete lexer;
 }
 
-// -----------------  Test for mov rule -------------------
-// format:
-// mov ::= "mov" dataTypeId arrayOperand ","
-//         arrayOperand ";"
+// -----------------  Test for mov rule ----------
 TEST(ParserTest, Mov) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -1803,15 +1800,6 @@ TEST(ParserTest, Mov) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
 /*
-  input.assign("mov_b128 $s5, $s6;\n");  // S register
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Mov(context));
-
-  input.assign("mov_b128 $c1, $c2;\n");  // C register
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Mov(context));
 */
   input.assign("mov_b128 $q3, $q5;\n");  // Q register
   lexer->set_source_string(input);
@@ -1822,12 +1810,7 @@ TEST(ParserTest, Mov) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Mov(context));
-/*
-  input.assign("mov_b32 $s4, (&global_id, %local_id);\n");  // Arrayoperandlist
-  lexer->set_source_string(input);
-  context->token_to_scan = lexer->get_next_token();
-  EXPECT_EQ(0, Mov(context));
-*/
+
   // wrong cases
   input.assign("mov $q1, $q2;\n");  // lack of modifier
   lexer->set_source_string(input);
@@ -1839,7 +1822,7 @@ TEST(ParserTest, Mov) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
   input.assign("mov_b32 $s2, $s1\n");  // lack of ';'
   lexer->set_source_string(input);
@@ -1851,13 +1834,28 @@ TEST(ParserTest, Mov) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
   input.assign("mov_b32 $s2, $s3, $s1;\n");  // redundant operand
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Mov(context));
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
+
+  input.assign("mov_b128 $s5, $s6;\n");  // S register
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+
+  input.assign("mov_b128 $c1, $c2;\n");  // C register
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
+
+  input.assign("mov_b32 $s4, (&global_id, %local_id);\n");  // Arrayoperandlist
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_NE(0, Mov(context));
 
   delete lexer;
 }
@@ -3300,9 +3298,6 @@ TEST(ParserTest, ImageNoRet) {
 }
 
 // -----------------  Test for cvt rule -------------------
-// format:
-// cvt ::= "cvt" optcvtModifier dataTypeId
-//         dataTypeId operand "," operand ";"
 TEST(ParserTest, Cvt) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -3325,7 +3320,7 @@ TEST(ParserTest, Cvt) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Cvt(context));
 
-  input.assign("cvt_near_f32_f32 $d1, $d2;\n");  // floatRounding modifier
+  input.assign("cvt_near_f64_f64 $d1, $d2;\n");  // floatRounding modifier
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();
@@ -3358,7 +3353,7 @@ TEST(ParserTest, Cvt) {
   EXPECT_NE(0, Cvt(context));
   EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
-  input.assign("cvt_f32_f64 $d1;\n");  // lack of operand
+  input.assign("cvt_f32_f64 $s1;\n");  // lack of operand
   lexer->set_source_string(input);
   context->clear_context();
   context->token_to_scan = lexer->get_next_token();

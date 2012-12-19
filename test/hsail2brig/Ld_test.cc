@@ -1384,7 +1384,7 @@ TEST(ErrorReportTest, Lda) {
   
   input.assign( "lda_u64 $d4, $d5;\n");
   Ld_Test<> TestCase2(input);
-  TestCase2.Run_Test(&Lda, MISSING_OPERAND);
+  TestCase2.Run_Test(&Lda, INVALID_OPERAND);
 
   input.assign( "lda_u64 $d4 [%loc];\n");
   Ld_Test<> TestCase3(input);
