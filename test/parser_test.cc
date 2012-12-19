@@ -1640,57 +1640,62 @@ TEST(ParserTest, Ldc) {
      .Times(AtLeast(1));
 
 
-  std::string input("ldc_b32 $s1, &bar;");  // identifier
+  context->set_machine(BrigESmall);
+  std::string input("ldc_u32 $s1, &bar;");  // identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ldc(context));
 
-  input.assign("ldc_b32 $s2, @lab;");  // label
+  input.assign("ldc_u32 $s2, @lab;");  // label
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ldc(context));
 
-  // input.assign("ldc_b64 $s2, %label;");  // identifier
-  // lexer->set_source_string(input);
-  // context->token_to_scan = lexer->get_next_token();
-  // EXPECT_EQ(0, Ldc(context));
+  context->set_machine(BrigELarge);
+  input.assign("ldc_u64 $d2, @label;");  // identifier
+  lexer->set_source_string(input);
+  context->token_to_scan = lexer->get_next_token();
+  EXPECT_EQ(0, Ldc(context));
 
   // wrong cases
-  input.assign("ldc_b32 $s1, &some_function");  // lack of ';'
+  context->set_machine(BrigESmall);
+  input.assign("ldc_u32 $s1, &some_function");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
   EXPECT_EQ(MISSING_SEMICOLON, mer.get_last_error());
 
-  input.assign("ldc_b32 $s1 &some_function;");  // lack of ','
+  input.assign("ldc_u32 $s1 &some_function;");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
   EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
 
-  input.assign("ldc_b32 $s1 &some_function;");  // lack of ','
+  context->set_machine(BrigELarge);
+  input.assign("ldc_u32 $s1, &some_function;");  // lack of ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
-  EXPECT_EQ(MISSING_COMMA, mer.get_last_error());
+  EXPECT_EQ(INVALID_DATA_TYPE, mer.get_last_error());
 
+  context->set_machine(BrigESmall);
   input.assign("ldc $s1, &function;");  // lack of dataTypeId
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
   EXPECT_EQ(MISSING_DATA_TYPE, mer.get_last_error());
 
-  input.assign("ldc_b32 , $s1, &function;");  // redundant ','
+  input.assign("ldc_u32 , $s1, &function;");  // redundant ','
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
-  EXPECT_EQ(INVALID_FIRST_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
-  input.assign("ldc_b32 $s1, e123;");  // unrecognized identifier
+  input.assign("ldc_u32 $s1, e123;");  // unrecognized identifier
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, Ldc(context));
-  EXPECT_EQ(INVALID_SECOND_OPERAND, mer.get_last_error());
+  EXPECT_EQ(INVALID_OPERAND, mer.get_last_error());
 
   delete lexer;
 }
@@ -1994,35 +1999,6 @@ TEST(ParserTest, Segp) {
 }
 
 // -----------------  Test for Operation rule -------------------
-// format:
-// Operation ::= Instruction1
-//               | Instruction0
-//               | Instruction2
-//               | Instruction3
-//               | Instruction4
-//               | cmp
-//               | mul
-//               | Instruction5
-//               | mov
-//               | segp
-//               | lda
-//               | ldc
-//               | atom
-//               | imageread
-//               | ld
-//               | st
-//               | cvt
-//               | atomicNoRet
-//               | imageNoRet
-//               | imageRet
-//               | sync
-//               | bar
-//               | syscall
-//               | ret
-//               | branch
-//               | query
-//               | imagestore
-//               | imageload
 TEST(ParserTest, Operation) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -2085,7 +2061,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("ldc_b32 $s1, &bar;"); // ldc
+  input.assign("ldc_u64 $d1, &bar;"); // ldc
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));

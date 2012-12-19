@@ -1398,10 +1398,8 @@ TEST(BrigKernelTest, IndirectBranches) {
       "  ld_kernarg_u32 $s0, [%n];\n"
       "  and_b32 $s1, $s0, 0x1;\n"         //$s1 is for odd or even
       "  mov_b32 $s2, 0xF;\n"              //set 15 to $s2
-
-      "  ldc_b32 $s4, @even;\n"
-      "  ldc_b32 $s5, @ge;\n"
-
+      "  ldc_u32 $s4, @even;\n"
+      "  ldc_u32 $s5, @ge;\n"
       "  cmp_ge_b1_u32 $c0, $s0, $s2;\n"   //if $s0 >= $s2 goto @ge
       "  cbr $c0, $s5;\n"
       "  mov_b32 $s2, 0xD;\n"              //else set 13 to $s2
