@@ -499,6 +499,7 @@ TEST(ParserTest, FunctionDefinition) {
 
 TEST(ParserTest, FunctionDecl) {
   // Create a lexer
+  context->clear_context();
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
@@ -574,6 +575,7 @@ TEST(ParserTest, Function) {
 }
 
 TEST(ParserTest, SimpleProg) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -852,6 +854,7 @@ TEST(ParserTest, InitializableDecl) {
 }
 
 TEST(ParserTest, ProgWithFunctionDefinition) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -868,6 +871,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
+  context->clear_context();
   // Example 2
   input.assign("version 1:0:$small;\n");
   input.append("function &return_true(arg_f32 %ret_val) () {\n");
@@ -878,6 +882,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
+  context->clear_context();
   // Example 4
   input.assign(" version 1:1:$small; \n");
   input.append("function &branch_ops (arg_u8x4 %x)() { \n");
@@ -892,6 +897,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
+  context->clear_context();
   // Example 5 - Call to simple function
   input.assign("version 1:0:$small; \n");
   input.append("function &callee()() { \n");
@@ -905,7 +911,8 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Program(context));
 
-  // Example 6a - Call to a complex function
+  context->clear_context();
+  // Example 6 - Call to a complex function
   input.assign("version 1:0:$small;\n");
   input.append("function &callee(arg_f32 %output)(arg_f32 %input) {\n");
   input.append("ret;\n");
@@ -925,6 +932,7 @@ TEST(ParserTest, ProgWithFunctionDefinition) {
 }
 
 TEST(ParserTest, ProgWithGlobalDecl) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -944,6 +952,7 @@ TEST(ParserTest, ProgWithGlobalDecl) {
 }
 
 TEST(ParserTest, ProgWithUninitializableDecl ) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -964,6 +973,7 @@ TEST(ParserTest, ProgWithUninitializableDecl ) {
 }
 
 TEST(ParserTest, UninitializableDecl) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -979,6 +989,7 @@ TEST(ParserTest, UninitializableDecl) {
 }
 
 TEST(ParserTest, ArgUninitializableDecl) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -994,6 +1005,7 @@ TEST(ParserTest, ArgUninitializableDecl) {
 }
 
 TEST(ParserTest, ProgWithArgUninitializableDecl ) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -1411,6 +1423,7 @@ TEST(ParserTest, SignatureType) {
 
 
 TEST(ParserTest, FunctionSignature) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -1420,31 +1433,37 @@ TEST(ParserTest, FunctionSignature) {
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
+  context->clear_context();
 
   input.assign("signature &test()(arg_u32) ;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
+  context->clear_context();
 
   input.assign("signature &test()(arg_u32,arg_u32) ;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
+  context->clear_context();
 
   input.assign("signature &test()(arg_u32);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
+  context->clear_context();
 
   input.assign("signature &test(arg_u32)(arg_u32,arg_u32) ;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
+  context->clear_context();
 
   input.assign("signature &test(arg_u32)(arg_u32);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
+  context->clear_context();
 
   delete lexer;
 }
@@ -3519,6 +3538,7 @@ TEST(ParserTest, SingleListSingleTest) {
 
 
 TEST(ParserTest, GlobalImageDecl) {
+  context->clear_context();
   Lexer* lexer = new Lexer();
   context->set_error_reporter(main_reporter);
 
@@ -3527,11 +3547,13 @@ TEST(ParserTest, GlobalImageDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalImageDecl(context));
 
+  context->clear_context();
   input.assign("global_RWImg &demo[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalImageDecl(context));
 
+  context->clear_context();
   input.assign("global_RWImg &demo[10]={format = normalized} ;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -3592,6 +3614,7 @@ TEST(ParserTest, ImageInit) {
 }
 
 TEST(ParserTest, GlobalReadOnlyImageDecl) {
+  context->clear_context();
   Lexer* lexer = new Lexer();
   context->set_error_reporter(main_reporter);
 
@@ -3600,11 +3623,13 @@ TEST(ParserTest, GlobalReadOnlyImageDecl) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
 
+  context->clear_context();
   input.assign("global_ROImg &demo[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalReadOnlyImageDecl(context));
 
+  context->clear_context();
   input.assign("global_ROImg &demo[10]={format = normalized} ;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -4028,6 +4053,7 @@ TEST(ParserTest ,SobInitializer){
 }
 
 TEST(ParserTest,GlobalSamplerDecl){
+  context->clear_context();
   Lexer* lexer = new Lexer();
   context->set_error_reporter(main_reporter);
 
@@ -4036,16 +4062,19 @@ TEST(ParserTest,GlobalSamplerDecl){
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalSamplerDecl(context));
 
+  context->clear_context();
   input.assign("global_Samp &demo[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalSamplerDecl(context));
 
+  context->clear_context();
   input.assign("global _Samp &demo = { boundaryU = linear, boundaryV = linear};");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalSamplerDecl(context));
 
+  context->clear_context();
   input.assign("global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
@@ -4054,6 +4083,7 @@ TEST(ParserTest,GlobalSamplerDecl){
 }
 
 TEST(ParserTest,GlobalInitializable){
+  context->clear_context();
   Lexer* lexer = new Lexer();
   context->set_error_reporter(main_reporter);
 
@@ -4063,17 +4093,20 @@ TEST(ParserTest,GlobalInitializable){
   EXPECT_EQ(0, GlobalInitializable(context));
 
     //for globalImageDecl
+  context->clear_context();
   input.assign("const extern global_RWImg &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalInitializable(context));
 
   //for globalReadOlnyImageDecl
+  context->clear_context();
   input.assign("const  extern global_ROImg &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalInitializable(context));
 
+  context->clear_context();
   input.assign("extern global_ROImg &demo[10]={format = normalized ,order = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
@@ -4095,37 +4128,37 @@ TEST(ParserTest,GlobalInitializable){
   EXPECT_NE(0, GlobalInitializable(context));
   EXPECT_EQ(INVALID_INITIALIZER, mer.get_last_error());
 
-  input.assign("const static align 4 global_Samp &demo[10]={boundaryU = linear} ;");
+  input.assign("const static align 4 global_Samp &demo1[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalInitializable(context));
   EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
 
-  input.assign("align 8 global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
+  input.assign("align 8 global_Samp &demo2[10]={boundaryU = linear , boundaryV = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalInitializable(context));
   EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
 
-  input.assign("static align 4 const global_RWImg &demo[10] ;");
+  input.assign("static align 4 const global_RWImg &demo3[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalInitializable(context));
   EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
 
-  input.assign("align 4 global_RWImg &demo[10]={format = normalized} ;");
+  input.assign("align 4 global_RWImg &demo4[10]={format = normalized} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalInitializable(context));
   EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
 
-  input.assign("static align 8 global_ROImg &demo[10] ;");
+  input.assign("static align 8 global_ROImg &demo5[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalInitializable(context));
   EXPECT_EQ(INVALID_ALIGNMENT, mer.get_last_error());
 
-  input.assign("const extern align 8 global_ROImg &demo[10]={format = normalized } ;");
+  input.assign("const extern align 8 global_ROImg &demo6[10]={format = normalized } ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_NE(0, GlobalInitializable(context));
@@ -4143,63 +4176,75 @@ TEST(ParserTest,GlobalInitializable){
 }
 
 TEST(ParserTest,GlobalDecl){
+  context->clear_context();
   Lexer* lexer = new Lexer();
   context->set_error_reporter(main_reporter);
 
   //for globalSamplerDecl
+  context->clear_context();
   std::string input("const extern global_Samp &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const extern global_Samp &demo[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for globalReadOlnyImageDecl
+  context->clear_context();
   input.assign("const  extern global_ROImg &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern global_ROImg &demo[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern global_ROImg &demo[10]={format = normalized } ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern global_ROImg &demo[10]={format = normalized ,order = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for globalImageDecl
+  context->clear_context();
   input.assign("const  extern global_RWImg &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern global_RWImg &demo[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const extern global_RWImg &demo[10]={format = normalized} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for functionDecl
+  context->clear_context();
   input.assign("const extern function &get_global_id(arg_u32 %ret_val)");
   input.append("(arg_u32 %arg_val0);\n");
   lexer->set_source_string(input);
@@ -4207,62 +4252,74 @@ TEST(ParserTest,GlobalDecl){
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for functionSignature
+  context->clear_context();
   input.assign("signature &test()();\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("signature &test()(arg_u32) ;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("signature &test()(arg_u32,arg_u32) ;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, FunctionSignature(context));
 
+  context->clear_context();
   input.assign("signature &test()(arg_u32);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("signature &test(arg_u32)(arg_u32,arg_u32) ;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("signature &test(arg_u32)(arg_u32);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for globalSymbolDecl
+  context->clear_context();
   input.assign("const  extern group_u32 &tmp[2][2];");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern group_s32 &tmp;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern group_b32 &tmp[2];");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern private_u32 &tmp[2][2];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern private_s32 &tmp;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
+  context->clear_context();
   input.assign("const  extern private_b32 &tmp[2];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -4272,6 +4329,7 @@ TEST(ParserTest,GlobalDecl){
 
 
 TEST(ParserTest, Program) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -4305,6 +4363,7 @@ TEST(ParserTest, Program) {
 
 
 TEST(ParserTest, SequenceOfPrograms) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -4373,6 +4432,7 @@ TEST(ParserTest, PairAddressableOperandTest) {
 }
 
 TEST(ParserTest, TopLevelStatement) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   context->set_error_reporter(main_reporter);
@@ -4407,6 +4467,7 @@ TEST(ParserTest, TopLevelStatement) {
 }
 
 TEST(ParserTest, TopLevelStatements) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
