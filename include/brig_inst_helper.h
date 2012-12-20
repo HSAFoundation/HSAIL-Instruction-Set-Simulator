@@ -40,6 +40,15 @@ class BrigInstHelper {
     return base;
   }
 
+  template<class T>
+  const BrigOperandBase *getReg(const T *t, unsigned i) const {
+    assert(i < sizeof(t->regs) / sizeof(*t->regs));
+    if(!t->regs[i]) return NULL;
+    oper_iterator base(S_.operands + t->regs[i]);
+    assert(isa<BrigOperandReg>(base));
+    return base;
+  }
+
   const BrigOperandBase *getOperand(const inst_iterator &inst,
                                     unsigned opNum) const {
     assert(opNum < 5 && "Instructions never have more than five operands");

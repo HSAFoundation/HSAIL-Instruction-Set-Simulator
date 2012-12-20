@@ -403,7 +403,7 @@ extern "C" b128 Mov_b128_b32(b32 w, b32 x, b32 y, b32 z) {
   result[3] = w;
   return result;
 }
-extern "C" b128 Mov_b128_b128(b128 x) { return x; }
+extern "C" b128 Mov_b128(b128 x) { return x; }
 
 extern "C" b32 Movs_lo_b32(b64 x) { return x; }
 extern "C" b32 Movs_hi_b32(b64 x) { return x >> 32; }
@@ -763,6 +763,7 @@ defineSt(s64)
 // defineSt(f16)
 defineSt(f32)
 defineSt(f64)
+defineSt(b128)
 
 template<class T> static T AtomicAnd(T *x, T y) {
   return __sync_fetch_and_and(x, y);

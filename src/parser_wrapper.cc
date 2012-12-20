@@ -47,8 +47,6 @@ namespace brig {
           return 1;
         }
       }
-
-      context->token_to_scan = lexer->get_next_token();
     }
     return 0;
   }

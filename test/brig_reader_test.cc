@@ -3574,149 +3574,191 @@ TEST(BrigKernelTest, Example6) {
   EXPECT_TRUE(BP);
 }
 
-static const char packedConstants[] =
+TEST(BrigInstTest, RegV2) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &regV2(kernarg_u32 %r, kernarg_u32 %n)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s5, [%r];\n"
+    "  ld_kernarg_u32 $s0, [%n];\n"
+    "  ld_kernarg_u32 $s1, [%n];\n"
+    "  mov_b64 $d1, ($s0, $s1);\n"
+    "  st_kernarg_u64 $d1, [$s5];\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("regV2");
+  unsigned *input = new unsigned(0xffffffff);
+  uint64_t *output = new uint64_t(0);
+  void *args[] = { &output, input };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xffffffffffffffff, *output);
+
+  delete input;
+  delete output;
+}
+
+TEST(BrigInstTest, RegV4) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &regV4(kernarg_u32 %r, kernarg_u32 %input1, kernarg_u32 %input2)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s0, [%r];\n"
+    "  ld_kernarg_u32 $s1, [%input1];\n"
+    "  ld_kernarg_u32 $s2, [%input1];\n"
+    "  ld_kernarg_u32 $s3, [%input2];\n"
+    "  ld_kernarg_u32 $s4, [%input2];\n"
+    "  mov_b128 $q0, ($s1, $s2, $s3, $s4);\n"
+    "  st_kernarg_b128 $q0, [$s0];\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("regV4");
+  unsigned *input1 = new unsigned(0xffffffff);
+  unsigned *input2 = new unsigned(0xeeeeeeee);
+  uint64_t *output = new uint64_t[2];
+  memset(output, 0, sizeof(uint64_t) * 2);
+  void *args[] = { &output, input1, input2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xeeeeeeeeeeeeeeee, output[0]);
+  EXPECT_EQ(0xffffffffffffffff, output[1]);
+
+  delete input1;
+  delete input2;
+  delete output;
+}
+
+TEST(BrigInstTest, Testb128) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &MovB128(kernarg_u32 %r)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s0, [%r];\n"
+    "  mov_b128 $q1, _u32x4(1, 2, 3, 4);\n"
+    "  st_kernarg_b128 $q1, [$s0];\n"
+    "  ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("MovB128");
+  uint64_t *output = new uint64_t[2];
+  memset(output, 0, sizeof(uint64_t) * 2);
+  void *args[] = { &output };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x0000000100000002, output[0]);
+  EXPECT_EQ(0x0000000300000004, output[1]);
+
+  delete output;
+}
+
+static const char Packed[] =
   "version 1:0:$small;\n"
-  "kernel &packedConstants(kernarg_u32 %%r)\n"
+  "\n"
+  "kernel &packed_kernel(\n"
+  "        kernarg_u32 %%r, kernarg_u%u %%input)\n"
   "{\n"
-  "  ld_kernarg_u32 $s0, [%r];\n"
-  "  mov_b%u $%c2, 0;\n"
-  "  add_pp_%s $%c3, $%c2, %s;\n"
-  "  st_kernarg_u%u $%c3, [$s0];\n"
+  "  ld_kernarg_u32 $s4, [%%r];\n"
+  "  ld_kernarg_u%u $%c0, [%%input];\n"
+  "  ld_kernarg_u%u $%c1, [%%input];\n"
+  "  shuffle_%s $%c2, $%c0, $%c1, 0x11;\n"
+  "  st_kernarg_u%u $%c2, [$s4];\n"
   "  ret;\n"
   "};\n";
+
 template<class T>
-static void testPackedConstants(unsigned bits,
-                                const char *value1,
-                                const T &result,
-                                const char *type) {
+static void testPacked(const char *type,
+                       const T &result,
+                       T *input,
+                       unsigned bits) {
   char reg = 0;
   if(bits == 32)
     reg = 's';
   if(bits == 64)
     reg = 'd';
   char *buffer =
-    asnprintf(packedConstants,
+    asnprintf(Packed,
+              bits,
+              bits,
+              reg,
               bits,
               reg,
               type,
               reg,
               reg,
-              value1,
+              reg,
               bits,
               reg);
-
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   delete[] buffer;
 
   EXPECT_TRUE(BP);
   if(!BP) return;
 
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("packedConstants");
-  T *output = new T;
-  *output = 0;
-  void *args[] = { &output };
-  BE.launch(fun, args);
-  EXPECT_EQ(result, *output);
+  T *arg_val0 = new T(0);
 
-  delete output;
+  void *args[] = { &arg_val0, input };
+  llvm::Function *fun = BP->getFunction("packed_kernel");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+
+  EXPECT_EQ(result, *arg_val0);
+  delete arg_val0;
 }
 
-TEST(BrigPacked, testPackedConstants) {
+TEST(BrigPacked, testPacked) {
   {
+    const uint32_t result = uint32_t(0x1000100);
+    uint32_t *input = new uint32_t(0x1);
     unsigned bits = 32;
-    uint32_t result = uint32_t(0xffe90038);
-    testPackedConstants(bits, "_s16x2(-23, 56)", result, "s16x2");
+    testPacked("u8x4", result, input, bits);
+    delete input;
   }
   {
+    const uint32_t result = uint32_t(0x1000100);
+    uint32_t *input = new uint32_t(0x1);
     unsigned bits = 32;
-    uint32_t result = uint32_t(0x170038);
-    testPackedConstants(bits, "_u16x2(23, 56)", result, "u16x2");
+    testPacked("s8x4", result, input, bits);
+    delete input;
   }
   {
-    unsigned bits = 64;
-    uint64_t result = uint64_t(0x1700380022000a);
-    testPackedConstants(bits, "_s16x4(23, 56, 34,10)", result, "s16x4");
-  }
-  {
-    unsigned bits = 64;
-    uint64_t result = uint64_t(0x1000000010000);
-    testPackedConstants(bits, "_u16x4(1, 0, 1, 0)", result, "u16x4");
-  }
-  {
+    const uint32_t result = uint32_t(0x10000);
+    uint32_t *input = new uint32_t(0x1);
     unsigned bits = 32;
-    uint32_t result = uint32_t(0x1738220a);
-    testPackedConstants(bits, "_s8x4(23, 56, 34, 10)", result, "s8x4");
+    testPacked("s16x2", result, input, bits);
+    delete input;
   }
   {
+    const uint32_t result = uint32_t(0x10000);
+    uint32_t *input = new uint32_t(0x1);
     unsigned bits = 32;
-    uint32_t result = uint32_t(0x1000100);
-    testPackedConstants(bits, "_u8x4(1, 0, 1, 0)", result, "u8x4");
+    testPacked("u16x2", result, input, bits);
+    delete input;
   }
   {
+    const uint64_t result = uint64_t(0x101010101010000);
+    uint64_t *input = new uint64_t(0x1);
     unsigned bits = 64;
-    uint64_t result = uint64_t(0x1738220a00000000);
-    testPackedConstants(bits, "_s8x8(23, 56, 34, 10, 0, 0, 0, 0)",
-                        result, "s8x8");
+    testPacked("s8x8", result, input, bits);
+    delete input;
   }
   {
+    const uint64_t result = uint64_t(0x100000000);
+    uint64_t *input = new uint64_t(0x1);
     unsigned bits = 64;
-    uint32_t result = uint32_t(0x400000003f800000);
-    testPackedConstants(bits, "_f32x2(0d4000000000000000, 0d3ff0000000000000)",
-                        result, "f32x2");
+    testPacked("f32x2", result, input, bits);
+    delete input;
   }
-}
-
-TEST(BrigKernelTest, VariadicFunction) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;"
-    "function &maxofN(arg_f32 %r)(arg_u32 %n, align 8 arg_u8 %last[])"
-    "{\n"
-      "ld_arg_u32 $s0, [%n];\n" // s0 holds the number to add
-      "mov_b32 $s1, 0;\n"       // s1 holds the sum
-      "mov_b32 $s3, 0;\n"       // s3 is the offset into last
-      "@loop:\n"
-      "cmp_eq_b1_u32 $c1, $s0, 0;\n"      // see if the count is zero
-      "cbr $c1, @done;\n"                // if it is, jump to done
-      "ld_arg_u32 $s4, [%last][$s3];\n" // load a value
-      "add_u32 $s1, $s1, $s4;\n"        // add the value
-      "add_u32 $s3, $s3, 4;\n"          // advance the offset to the next element
-      "sub_u32 $s0, $s0, 1;\n"          // decrement the count
-      "brn @loop;\n"
-      "@done:\n"
-      "st_arg_u32 $s1, [%r];\n"
-      "ret;\n"
-    "};\n"
-    
-    "kernel &adder(kernarg_u32 %r)\n"
-    "{\n"                             // here is an example caller passing in 4 32-bit floats
-    "  {\n"
-    "    ld_kernarg_u32 $s2, [%r];\n"
-    "    align 8 arg_u8 %n[16];\n"
-    "    st_arg_f32 1.2f, [%n][0];\n"
-    "    st_arg_f32 2.4f, [%n][4];\n"
-    "    st_arg_f32 3.6f, [%n][8];\n"
-    "    st_arg_f32 6.1f, [%n][12];\n"
-    "    arg_u32 %count;\n"
-    "    st_arg_u32 4, [%count];\n"
-    "    arg_f32 %sum;\n"
-    "    call &maxofN(%sum)(%count, %n);\n"
-    "    ld_arg_f32 $s0, [%sum];\n"
-    "    st_kernarg_u32 $s0, [$s2];\n"
-    " }\n"                              // ... %s0 holds the sum
-    "};\n"
-    );
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("adder");
-  float *output = new float;
-  *output = 0;
-
-  void *args[] = { &output };
-  BE.launch(fun, args);
-  EXPECT_EQ(1.2f + 2.4f + 3.6f +6.1f, *output);
-  
-  delete output;
+  {
+    const uint64_t result = uint64_t(0x101010101010000);
+    uint64_t *input = new uint64_t(0x1);
+    unsigned bits = 64;
+    testPacked("u8x8", result, input, bits);
+    delete input;
+  }
 }

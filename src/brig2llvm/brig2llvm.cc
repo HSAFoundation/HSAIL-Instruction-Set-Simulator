@@ -271,6 +271,8 @@ static bool hasAddr(const BrigOperandBase *op) {
   case BrigEOperandImmed:
   case BrigEOperandIndirect:
   case BrigEOperandLabelRef:
+  case BrigEOperandRegV2:
+  case BrigEOperandRegV4:
   case BrigEOperandWaveSz:
     return false;
   case BrigEOperandReg:
@@ -286,6 +288,7 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
                                const FunState &state) {
 
   llvm::LLVMContext &C = B.getContext();
+  llvm::Module *M = B.getParent()->getParent();
 
   if(hasAddr(op)) {
     llvm::Value *valAddr = getOperandAddr(B, op, helper, state);
@@ -303,7 +306,10 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
 
   if(const BrigOperandImmed *immedOp = dyn_cast<BrigOperandImmed>(op)) {
     llvm::Type *type = runOnType(C, BrigDataType(immedOp->type));
-    if(type->isIntegerTy(64)) {
+    if(type->isIntegerTy(128)) {
+      llvm::APInt bigInt(128, immedOp->bits.l);
+      return llvm::ConstantInt::get(type, bigInt);
+    } else if(type->isIntegerTy(64)) {
       return llvm::ConstantInt::get(type, immedOp->bits.l[0]);
     } else if(type->isIntegerTy(32)) {
       return llvm::ConstantInt::get(type, immedOp->bits.u);
@@ -359,8 +365,45 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
                                         adderInt, index, "", &B);
   }
 
+  if(const BrigOperandRegV2 *v2Op = dyn_cast<BrigOperandRegV2>(op)) {
+    llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
+    llvm::Type *argsTy[] = { int32Ty, int32Ty };
+    llvm::FunctionType *regV2FunTy =
+      llvm::FunctionType::get(llvm::Type::getInt64Ty(C), argsTy, false);
+    llvm::Constant *regV2Fun =
+      M->getOrInsertFunction("Mov_b64_b32", regV2FunTy);
+
+    const BrigOperandBase *regV1 = helper.getReg(v2Op, 0);
+    const BrigOperandBase *regV2 = helper.getReg(v2Op, 1);
+    llvm::Value *args[] =
+      { getOperand(B, regV1, helper, state),
+        getOperand(B, regV2, helper, state) };
+
+    return llvm::CallInst::Create(regV2Fun, args, "", &B);
+  }
+
+  if(const BrigOperandRegV4 *v4Op = dyn_cast<BrigOperandRegV4>(op)) {
+    llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
+    llvm::Type *argsTy[] = { int32Ty, int32Ty, int32Ty, int32Ty };
+    llvm::FunctionType *regV4FunTy =
+      llvm::FunctionType::get(llvm::Type::getIntNTy(C, 128), argsTy, false);
+    llvm::Constant *regV4Fun =
+      M->getOrInsertFunction("Mov_b128_b32", regV4FunTy);
+
+    const BrigOperandBase *regV1 = helper.getReg(v4Op, 0);
+    const BrigOperandBase *regV2 = helper.getReg(v4Op, 1);
+    const BrigOperandBase *regV3 = helper.getReg(v4Op, 2);
+    const BrigOperandBase *regV4 = helper.getReg(v4Op, 3);
+    llvm::Value *args[] =
+      { getOperand(B, regV1, helper, state),
+        getOperand(B, regV2, helper, state),
+        getOperand(B, regV3, helper, state),
+        getOperand(B, regV4, helper, state) };
+
+    return llvm::CallInst::Create(regV4Fun, args, "", &B);
+  }
+
   if(isa<BrigOperandWaveSz>(op)) {
-    llvm::Module *M = B.getParent()->getParent();
     llvm::FunctionType *getWavefrontSizeTy =
       llvm::FunctionType::get(llvm::Type::getInt32Ty(C), false);
     llvm::Constant *wavefrontSizeFn =
