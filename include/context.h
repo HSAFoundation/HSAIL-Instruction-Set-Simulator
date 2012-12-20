@@ -262,6 +262,7 @@ class Context {
     BrigDataType16_t get_type() const;
     uint32_t get_dim() const;
     bool get_isArray() const;
+    BrigStorageClass32_t get_storageClass() const;
     
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
@@ -274,6 +275,7 @@ class Context {
     void set_dim(uint32_t dim);
     void set_isArray(bool is_array);
     void set_bdf_offset(BrigdOffset32_t offset) { this->current_bdf_offset = offset;};
+    void set_storageClass(BrigStorageClass32_t storageClass);
     BrigdOffset32_t get_bdf_offset(){ return this->current_bdf_offset;};
     
     // get current offset
@@ -349,6 +351,7 @@ class Context {
     BrigAluModifier aluModifier;
     uint32_t dim;
     bool is_array;
+    BrigStorageClass32_t storageClass;
       
 };
 

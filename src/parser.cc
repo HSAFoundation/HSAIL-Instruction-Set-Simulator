@@ -4280,6 +4280,7 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
     BrigoOffset32_t* pRetOpOffset) {
 
   std::string operand_name;
+  BrigStorageClass32_t addrSpaceType = context->get_storageClass();
   // if the value of addrOpOffset is ZERO,
   // there won't be an NonRegister in the front of OffsetAddresssOperand rule.
   if (addrOpOffset) {
@@ -4293,8 +4294,17 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
       0                                // offset
     };
     if (context->get_machine() == BrigELarge) {
-      compound_op.type = Brigb64;
+      switch (addrSpaceType) {
+        case BrigFlatSpace:
+        case BrigGlobalSpace:
+        case BrigReadonlySpace:
+        case BrigKernargSpace:
+          compound_op.type = Brigb64; break;
+        default:
+          compound_op.type = Brigb32; 
+      }
     }
+
     compound_op.name = addrOpOffset;
     if (context->token_type == REGISTER) {
       // The register must be an s or d register (c registers are not allowed).
@@ -4374,7 +4384,15 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
       0                               // offset
     };
     if (context->get_machine() == BrigELarge) {
-      indirect_op.type = Brigb64;
+      switch (addrSpaceType) {
+        case BrigFlatSpace:
+        case BrigGlobalSpace:
+        case BrigReadonlySpace:
+        case BrigKernargSpace:
+          indirect_op.type = Brigb64; break;
+        default:
+          indirect_op.type = Brigb32; 
+      }
     }
     if (context->token_type == REGISTER) {
       // The register must be an s or d register (c registers are not allowed).
@@ -4751,6 +4769,7 @@ int Atom(Context* context) {
 
   if(!AddressSpaceIdentifier(context)){
     StorageClass = context->token_value.storage_class;
+    context->set_storageClass(StorageClass);
     context->token_to_scan = yylex();
   }
 
@@ -5341,6 +5360,7 @@ int Ld(Context* context) {
   if (LdModifierPart2(context, &tmp, &vector_size)) {
     return 1;
   }
+  context->set_storageClass(tmp.storageClass);
 
   if (context->token_type != DATA_TYPE_ID) {
     context->set_error(MISSING_DATA_TYPE);
@@ -5418,6 +5438,7 @@ int St(Context* context) {
   if (LdModifierPart2(context, &tmp, &vector_size)) {
     return 1;
   }
+  context->set_storageClass(tmp.storageClass);
 
   if (context->token_type != DATA_TYPE_ID) {
     context->set_error(MISSING_DATA_TYPE);
@@ -5470,6 +5491,7 @@ int Lda(Context* context) {
 
   if (!AddressSpaceIdentifier(context)) {
     storageClass = context->token_value.storage_class;
+    context->set_storageClass(storageClass);
     context->token_to_scan = yylex();
   }
 
@@ -7612,33 +7634,15 @@ int AtomicNoRet(Context* context) {
   context->token_to_scan = yylex();
   if ((first_token == ATOMICNORET) && (context->token_type == ATOMIC_OP)) {
     switch (context->token_to_scan) {  // without _CAS_
-      case _AND_:
-        atomicOperation = BrigAtomicAnd;
-        break;
-      case _OR_:
-        atomicOperation = BrigAtomicOr;
-        break;
-      case _XOR_:
-        atomicOperation = BrigAtomicXor;
-        break;
-      case _ADD_:
-        atomicOperation = BrigAtomicAdd;
-        break;
-      case _INC_:
-        atomicOperation = BrigAtomicInc;
-        break;
-      case _DEC_:
-        atomicOperation = BrigAtomicDec;
-        break;
-      case _MIN_:
-        atomicOperation = BrigAtomicMin;
-        break;
-      case _MAX_:
-        atomicOperation = BrigAtomicMax;
-        break;
-      case _SUB_:
-        atomicOperation = BrigAtomicSub;
-        break;
+      case _AND_: atomicOperation = BrigAtomicAnd; break;
+      case _OR_: atomicOperation = BrigAtomicOr; break;
+      case _XOR_: atomicOperation = BrigAtomicXor; break;
+      case _ADD_: atomicOperation = BrigAtomicAdd; break;
+      case _INC_: atomicOperation = BrigAtomicInc; break;
+      case _DEC_: atomicOperation = BrigAtomicDec; break;
+      case _MIN_: atomicOperation = BrigAtomicMin; break;
+      case _MAX_: atomicOperation = BrigAtomicMax; break;
+      case _SUB_: atomicOperation = BrigAtomicSub; break;
       default:
         context->set_error(MISSING_OPERATION);
         return 1;
@@ -7653,6 +7657,7 @@ int AtomicNoRet(Context* context) {
 
   if(!AddressSpaceIdentifier(context)){
     StorageClass = context->token_value.storage_class;
+    context->set_storageClass(StorageClass);
     context->token_to_scan = yylex();
   }
 
@@ -8671,8 +8676,7 @@ int PairAddressableOperand(Context* context) {
   }
   BrigoOffset32_t retOpOffset;
   context->token_to_scan = yylex();
-  if (OffsetAddressableOperandPart2(context,
-    CurrentoOffset, &retOpOffset)) {
+  if (OffsetAddressableOperandPart2(context, CurrentoOffset, &retOpOffset)) {
     // Global/Local Identifier with offsetAddressOperand.
     return 1;
   }
