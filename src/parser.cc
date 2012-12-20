@@ -1607,6 +1607,10 @@ int FunctionDefinitionPart2(Context* context) {
   std::string func_name = context->token_value.string_val;
   BrigsOffset32_t str_offset = context->add_symbol(func_name);
 
+  if (context->func_map.count(func_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   context->func_map[func_name] = bdf_offset;
   uint16_t size = sizeof(BrigDirectiveFunction);
   BrigDirectiveFunction bdf = {
@@ -2946,6 +2950,11 @@ int FunctionSignature(Context *context) {
   }
   std::string name(context->token_value.string_val);
   s_name = context->add_symbol(name);
+
+  if (context->func_map.count(name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
 
   // optional output
   context->token_to_scan = yylex();
@@ -7006,6 +7015,10 @@ int GlobalImageDeclPart2(Context *context){
   }
   std::string var_name(context->token_value.string_val);
   int var_name_offset = context->add_symbol(var_name);
+  if (context->symbol_map.count(var_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
 
   context->token_to_scan = yylex();
   context->set_dim(0);
@@ -7083,6 +7096,10 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
   }
   std::string var_name(context->token_value.string_val);
   int var_name_offset = context->add_symbol(var_name);
+  if (context->symbol_map.count(var_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
 
   context->token_to_scan = yylex();
   // set default value(scalar)
@@ -8285,6 +8302,12 @@ int GlobalSamplerDeclPart2(Context *context){
   }
   std::string var_name(context->token_value.string_val);
   int var_name_offset = context->add_symbol(var_name);
+
+  if (context->symbol_map.count(var_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
+
   context->token_to_scan = yylex();
 
   context->set_dim(0);
