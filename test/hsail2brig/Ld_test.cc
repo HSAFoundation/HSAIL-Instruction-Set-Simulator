@@ -268,7 +268,7 @@ TEST(CodegenTest, Ld_Codegen){
     0,
     BrigEOperandIndirect,
     0,
-    Brigb64,
+    Brigb32,
     0,
     100
   };

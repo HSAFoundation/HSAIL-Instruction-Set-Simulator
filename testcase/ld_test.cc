@@ -311,7 +311,7 @@ TEST_P(OperationLdV2, BrigLd){
     // BrigOperandCompound
     EXPECT_EQ(compound_size, getComp.size);
     EXPECT_EQ(BrigEOperandCompound, getComp.kind);
-    EXPECT_EQ(Brigb64, getComp.type);
+    EXPECT_EQ(Brigb32, getComp.type);
     EXPECT_EQ(0, getComp.reserved);
     EXPECT_EQ(ref.o_operands[2] - reg_size - address_size, getComp.name);
     EXPECT_EQ(ref.o_operands[2] - reg_size, getComp.reg);
