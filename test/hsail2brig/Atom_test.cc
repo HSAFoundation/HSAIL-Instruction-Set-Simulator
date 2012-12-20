@@ -290,7 +290,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   comp.size = sizeof(comp);
   comp.kind = BrigEOperandCompound;
-  comp.type = Brigb64;
+  comp.type = Brigb32;
   comp.reserved = 0;
   comp.name = sizeof(dest);
   comp.reg = sizeof(addr) + sizeof(dest);
@@ -444,7 +444,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
   indi.reg = sizeof(dest);
-  indi.type = Brigb64;
+  indi.type = Brigb32;
   indi.reserved = 0;
   indi.offset = 0x77;
 
@@ -663,7 +663,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
   indi.reg = 0;
-  indi.type = Brigb64;
+  indi.type = Brigb32;
   indi.reserved = 0;
   indi.offset = 0;
 
@@ -742,7 +742,7 @@ TEST(CodegenTest, Atom_CodeGen) {
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
   indi.reg = sizeof(dest);
-  indi.type = Brigb64;
+  indi.type = Brigb32;
   indi.reserved = 0;
   indi.offset = 0;
 
@@ -1002,7 +1002,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   comp.size = sizeof(comp);
   comp.kind = BrigEOperandCompound;
-  comp.type = Brigb64;
+  comp.type = Brigb32;
   comp.reserved = 0;
   comp.name = 0;
   comp.reg = sizeof(addr);
@@ -1146,7 +1146,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
   indi.reg = 0;
-  indi.type = Brigb64;
+  indi.type = Brigb32;
   indi.reserved = 0;
   indi.offset = 0x77;
 
@@ -1339,7 +1339,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   indi.size = sizeof(indi);
   indi.kind = BrigEOperandIndirect;
   indi.reg = 0;
-  indi.type = Brigb64;
+  indi.type = Brigb32;
   indi.reserved = 0;
   indi.offset = 0;
 

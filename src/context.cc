@@ -93,6 +93,7 @@ void Context::initialize_all_fields(void) {
   dim = 0;
   type = Brigb32;
   is_array = false;
+  storageClass = BrigFlatSpace;
 }
   /* Error reporter set/get */
 ErrorReporterInterface* Context::get_error_reporter(void) const {
@@ -285,6 +286,7 @@ void Context::initialize_statement_fields(void){
   aluModifier.reserved = 0;
   dim = 0;
   is_array = false;
+  storageClass = BrigFlatSpace;
 }
 
 // check context
@@ -324,6 +326,10 @@ bool Context::get_isArray() const {
   return is_array;
 }
 
+BrigStorageClass32_t Context::get_storageClass() const {
+  return storageClass;
+}
+
 // set context
 void Context::set_alu_modifier(BrigAluModifier modifier) {
   this->aluModifier = modifier;
@@ -360,6 +366,10 @@ void Context::set_dim(uint32_t dim) {
 
 void Context::set_isArray(bool is_array) {
   this->is_array = is_array;
+}
+
+void Context::set_storageClass(BrigStorageClass32_t storageClass) {
+  this->storageClass = storageClass;
 }
 
 // the operationCount of BrigDirectiveFunction add by 1

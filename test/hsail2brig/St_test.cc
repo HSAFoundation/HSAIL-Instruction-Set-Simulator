@@ -164,7 +164,7 @@ TEST(CodegenTest, St_Codegen){
   BrigOperandCompound comp = {
   0,
   BrigEOperandCompound,
-  Brigb64,
+  Brigb32,
   0,
   sizeof(src),//byte offset to operand addr
   sizeof(src) + sizeof(dest1), //to operand reg
@@ -213,7 +213,7 @@ TEST(CodegenTest, St_Codegen){
   0,
   BrigEOperandIndirect,
   sizeof(src), //to operand reg
-  Brigb64,
+  Brigb32,
   0,
   -4  //Offset in the included test case
   };
@@ -340,7 +340,7 @@ TEST(CodegenTest, St_Codegen){
   indirect.size = sizeof(indirect);
   indirect.kind = BrigEOperandIndirect;
   indirect.reg = sizeof(src1);
-  indirect.type = Brigb64;
+  indirect.type = Brigb32;
   indirect.reserved = 0;
   indirect.offset = -4 ;
 
@@ -391,7 +391,7 @@ TEST(CodegenTest, St_Codegen){
   // ref to comp
   comp.size = sizeof(comp);
   comp.kind = BrigEOperandCompound;
-  comp.type = Brigb64;
+  comp.type = Brigb32;
   comp.reserved = 0;
   comp.name = sizeof(src1);
   comp.reg = sizeof(src1) + sizeof(dest1);
