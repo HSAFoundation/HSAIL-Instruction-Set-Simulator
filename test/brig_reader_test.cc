@@ -3876,7 +3876,6 @@ TEST(BrigKernelTest, VariadicFunction) {
       "st_arg_u32 $s1, [%r];\n"
       "ret;\n"
     "};\n"
-    
     "kernel &adder(kernarg_u32 %r)\n"
     "{\n"                             // here is an example caller passing in 4 32-bit floats
     "  {\n"
@@ -3893,8 +3892,7 @@ TEST(BrigKernelTest, VariadicFunction) {
     "    ld_arg_f32 $s0, [%sum];\n"
     "    st_kernarg_u32 $s0, [$s2];\n"
     " }\n"                              // ... %s0 holds the sum
-    "};\n"
-    );
+    "};\n");
   EXPECT_TRUE(BP);
   if(!BP) return;
 
@@ -3906,6 +3904,6 @@ TEST(BrigKernelTest, VariadicFunction) {
   void *args[] = { &output };
   BE.launch(fun, args);
   EXPECT_EQ(1.2f + 2.4f + 3.6f +6.1f, *output);
-  
+
   delete output;
 }
