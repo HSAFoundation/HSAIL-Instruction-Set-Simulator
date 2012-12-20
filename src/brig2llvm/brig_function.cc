@@ -42,13 +42,9 @@ void BrigFunction::updateControl(const BrigDirectiveControl *control) {
     assert(false && "Invalid control type");
 }
 
-void BrigFunction::updatePragma(const BrigDirectivePragma *pragma) {
-  assert(false && "Unimplemented");
-}
+void BrigFunction::updatePragma(const BrigDirectivePragma *pragma) {}
 
-void BrigFunction::updateExtension(const BrigDirectiveExtension *ext) {
-  assert(false && "Unimplemented");
-}
+void BrigFunction::updateExtension(const BrigDirectiveExtension *ext) {}
 
 BrigFunction BrigModule::begin() const {
   return hsa::brig::fun_begin(S_);

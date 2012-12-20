@@ -157,7 +157,7 @@ static unsigned getRegOffset(const char *name) {
   char *endptr;
   unsigned offset = (unsigned) strtol(name + 2, &endptr, 10);
   assert(!*endptr && "Invalid field");
-  assert(offset < 16 && "Invalid offset");
+  assert(offset < 128 && "Invalid offset");
   return offset;
 }
 

@@ -319,7 +319,7 @@ TEST(ErrorReportTest, Cvt) {
   Cvt_Test<> TestCase2(input);
   TestCase2.Run_Test(&Cvt, MISSING_DATA_TYPE);
 
-  input.assign( "cvt_f32_f64 $d1;\n");
+  input.assign( "cvt_f64_f64 $d1;\n");
   Cvt_Test<> TestCase3(input);
   TestCase3.Run_Test(&Cvt, MISSING_COMMA);
 }
