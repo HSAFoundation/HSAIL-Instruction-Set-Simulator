@@ -440,7 +440,8 @@ int AddressableOperand(Context* context) {
   return AddressableOperand(context, &opOffset, true);
 }
 
-int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler){
+int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, 
+    bool IsImageOrSampler){
   bool isIntConst = false; // check if match [name<int>]
   bool isBracket = false;  // check if include <..> in the [name ..]
 
@@ -8725,8 +8726,8 @@ int TopLevelStatement(Context *context){
 
 int TopLevelStatements(Context *context){
   while (context->token_to_scan && (context->token_to_scan != VERSION)) {
-    if (TopLevelStatement(context)){
-      return 1;
+    if (TopLevelStatement(context)) {
+      return context->token_to_scan == VERSION ? 0 : 1;
     }
   }
   return 0;
