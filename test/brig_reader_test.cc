@@ -3594,7 +3594,7 @@ TEST(BrigInstTest, RegV2) {
   uint64_t *output = new uint64_t(0);
   void *args[] = { &output, input };
   BE.launch(fun, args);
-  EXPECT_EQ(0xffffffffffffffff, *output);
+  EXPECT_EQ(0xffffffffffffffffLL, *output);
 
   delete input;
   delete output;
@@ -3624,8 +3624,8 @@ TEST(BrigInstTest, RegV4) {
   memset(output, 0, sizeof(uint64_t) * 2);
   void *args[] = { &output, input1, input2 };
   BE.launch(fun, args);
-  EXPECT_EQ(0xeeeeeeeeeeeeeeee, output[0]);
-  EXPECT_EQ(0xffffffffffffffff, output[1]);
+  EXPECT_EQ(0xeeeeeeeeeeeeeeeeLL, output[0]);
+  EXPECT_EQ(0xffffffffffffffffLL, output[1]);
 
   delete input1;
   delete input2;
@@ -3651,8 +3651,8 @@ TEST(BrigInstTest, Testb128) {
   memset(output, 0, sizeof(uint64_t) * 2);
   void *args[] = { &output };
   BE.launch(fun, args);
-  EXPECT_EQ(0x0000000100000002, output[0]);
-  EXPECT_EQ(0x0000000300000004, output[1]);
+  EXPECT_EQ(0x0000000100000002LL, output[0]);
+  EXPECT_EQ(0x0000000300000004LL, output[1]);
 
   delete output;
 }
@@ -3741,21 +3741,21 @@ TEST(BrigPacked, testPacked) {
     delete input;
   }
   {
-    const uint64_t result = uint64_t(0x101010101010000);
+    const uint64_t result = uint64_t(0x101010101010000LL);
     uint64_t *input = new uint64_t(0x1);
     unsigned bits = 64;
     testPacked("s8x8", result, input, bits);
     delete input;
   }
   {
-    const uint64_t result = uint64_t(0x100000000);
+    const uint64_t result = uint64_t(0x100000000LL);
     uint64_t *input = new uint64_t(0x1);
     unsigned bits = 64;
     testPacked("f32x2", result, input, bits);
     delete input;
   }
   {
-    const uint64_t result = uint64_t(0x101010101010000);
+    const uint64_t result = uint64_t(0x101010101010000LL);
     uint64_t *input = new uint64_t(0x1);
     unsigned bits = 64;
     testPacked("u8x8", result, input, bits);
