@@ -3573,3 +3573,192 @@ TEST(BrigKernelTest, Example6) {
     );
   EXPECT_TRUE(BP);
 }
+
+TEST(BrigInstTest, RegV2) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &regV2(kernarg_u32 %r, kernarg_u32 %n)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s5, [%r];\n"
+    "  ld_kernarg_u32 $s0, [%n];\n"
+    "  ld_kernarg_u32 $s1, [%n];\n"
+    "  mov_b64 $d1, ($s0, $s1);\n"
+    "  st_kernarg_u64 $d1, [$s5];\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("regV2");
+  unsigned *input = new unsigned(0xffffffff);
+  uint64_t *output = new uint64_t(0);
+  void *args[] = { &output, input };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xffffffffffffffff, *output);
+
+  delete input;
+  delete output;
+}
+
+TEST(BrigInstTest, RegV4) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &regV4(kernarg_u32 %r, kernarg_u32 %input1, kernarg_u32 %input2)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s0, [%r];\n"
+    "  ld_kernarg_u32 $s1, [%input1];\n"
+    "  ld_kernarg_u32 $s2, [%input1];\n"
+    "  ld_kernarg_u32 $s3, [%input2];\n"
+    "  ld_kernarg_u32 $s4, [%input2];\n"
+    "  mov_b128 $q0, ($s1, $s2, $s3, $s4);\n"
+    "  st_kernarg_b128 $q0, [$s0];\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("regV4");
+  unsigned *input1 = new unsigned(0xffffffff);
+  unsigned *input2 = new unsigned(0xeeeeeeee);
+  uint64_t *output = new uint64_t[2];
+  memset(output, 0, sizeof(uint64_t) * 2);
+  void *args[] = { &output, input1, input2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xeeeeeeeeeeeeeeee, output[0]);
+  EXPECT_EQ(0xffffffffffffffff, output[1]);
+
+  delete input1;
+  delete input2;
+  delete output;
+}
+
+TEST(BrigInstTest, Testb128) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "kernel &MovB128(kernarg_u32 %r)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s0, [%r];\n"
+    "  mov_b128 $q1, _u32x4(1, 2, 3, 4);\n"
+    "  st_kernarg_b128 $q1, [$s0];\n"
+    "  ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("MovB128");
+  uint64_t *output = new uint64_t[2];
+  memset(output, 0, sizeof(uint64_t) * 2);
+  void *args[] = { &output };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x0000000100000002, output[0]);
+  EXPECT_EQ(0x0000000300000004, output[1]);
+
+  delete output;
+}
+
+static const char Packed[] =
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &packed_kernel(\n"
+  "        kernarg_u32 %%r, kernarg_u%u %%input)\n"
+  "{\n"
+  "  ld_kernarg_u32 $s4, [%%r];\n"
+  "  ld_kernarg_u%u $%c0, [%%input];\n"
+  "  ld_kernarg_u%u $%c1, [%%input];\n"
+  "  shuffle_%s $%c2, $%c0, $%c1, 0x11;\n"
+  "  st_kernarg_u%u $%c2, [$s4];\n"
+  "  ret;\n"
+  "};\n";
+
+template<class T>
+static void testPacked(const char *type,
+                       const T &result,
+                       T *input,
+                       unsigned bits) {
+  char reg = 0;
+  if(bits == 32)
+    reg = 's';
+  if(bits == 64)
+    reg = 'd';
+  char *buffer =
+    asnprintf(Packed,
+              bits,
+              bits,
+              reg,
+              bits,
+              reg,
+              type,
+              reg,
+              reg,
+              reg,
+              bits,
+              reg);
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  T *arg_val0 = new T(0);
+
+  void *args[] = { &arg_val0, input };
+  llvm::Function *fun = BP->getFunction("packed_kernel");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+
+  EXPECT_EQ(result, *arg_val0);
+  delete arg_val0;
+}
+
+TEST(BrigPacked, testPacked) {
+  {
+    const uint32_t result = uint32_t(0x1000100);
+    uint32_t *input = new uint32_t(0x1);
+    unsigned bits = 32;
+    testPacked("u8x4", result, input, bits);
+    delete input;
+  }
+  {
+    const uint32_t result = uint32_t(0x1000100);
+    uint32_t *input = new uint32_t(0x1);
+    unsigned bits = 32;
+    testPacked("s8x4", result, input, bits);
+    delete input;
+  }
+  {
+    const uint32_t result = uint32_t(0x10000);
+    uint32_t *input = new uint32_t(0x1);
+    unsigned bits = 32;
+    testPacked("s16x2", result, input, bits);
+    delete input;
+  }
+  {
+    const uint32_t result = uint32_t(0x10000);
+    uint32_t *input = new uint32_t(0x1);
+    unsigned bits = 32;
+    testPacked("u16x2", result, input, bits);
+    delete input;
+  }
+  {
+    const uint64_t result = uint64_t(0x101010101010000);
+    uint64_t *input = new uint64_t(0x1);
+    unsigned bits = 64;
+    testPacked("s8x8", result, input, bits);
+    delete input;
+  }
+  {
+    const uint64_t result = uint64_t(0x100000000);
+    uint64_t *input = new uint64_t(0x1);
+    unsigned bits = 64;
+    testPacked("f32x2", result, input, bits);
+    delete input;
+  }
+  {
+    const uint64_t result = uint64_t(0x101010101010000);
+    uint64_t *input = new uint64_t(0x1);
+    unsigned bits = 64;
+    testPacked("u8x8", result, input, bits);
+    delete input;
+  }
+}
