@@ -3762,3 +3762,150 @@ TEST(BrigPacked, testPacked) {
     delete input;
   }
 }
+
+static const char packedConstants[] =
+  "version 1:0:$small;\n"
+  "kernel &packedConstants(kernarg_u32 %%r)\n"
+  "{\n"
+  "  ld_kernarg_u32 $s0, [%r];\n"
+  "  mov_b%u $%c2, 0;\n"
+  "  add_pp_%s $%c3, $%c2, %s;\n"
+  "  st_kernarg_u%u $%c3, [$s0];\n"
+  "  ret;\n"
+  "};\n";
+template<class T>
+static void testPackedConstants(unsigned bits,
+                                const char *value1,
+                                const T &result,
+                                const char *type) {
+  char reg = 0;
+  if(bits == 32)
+    reg = 's';
+  if(bits == 64)
+    reg = 'd';
+  char *buffer =
+    asnprintf(packedConstants,
+              bits,
+              reg,
+              type,
+              reg,
+              reg,
+              value1,
+              bits,
+              reg);
+
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("packedConstants");
+  T *output = new T;
+  *output = 0;
+  void *args[] = { &output };
+  BE.launch(fun, args);
+  EXPECT_EQ(result, *output);
+
+  delete output;
+}
+
+TEST(BrigPacked, testPackedConstants) {
+  {
+    unsigned bits = 32;
+    uint32_t result = uint32_t(0xffe90038);
+    testPackedConstants(bits, "_s16x2(-23, 56)", result, "s16x2");
+  }
+  {
+    unsigned bits = 32;
+    uint32_t result = uint32_t(0x170038);
+    testPackedConstants(bits, "_u16x2(23, 56)", result, "u16x2");
+  }
+  {
+    unsigned bits = 64;
+    uint64_t result = uint64_t(0x1700380022000a);
+    testPackedConstants(bits, "_s16x4(23, 56, 34,10)", result, "s16x4");
+  }
+  {
+    unsigned bits = 64;
+    uint64_t result = uint64_t(0x1000000010000);
+    testPackedConstants(bits, "_u16x4(1, 0, 1, 0)", result, "u16x4");
+  }
+  {
+    unsigned bits = 32;
+    uint32_t result = uint32_t(0x1738220a);
+    testPackedConstants(bits, "_s8x4(23, 56, 34, 10)", result, "s8x4");
+  }
+  {
+    unsigned bits = 32;
+    uint32_t result = uint32_t(0x1000100);
+    testPackedConstants(bits, "_u8x4(1, 0, 1, 0)", result, "u8x4");
+  }
+  {
+    unsigned bits = 64;
+    uint64_t result = uint64_t(0x1738220a00000000);
+    testPackedConstants(bits, "_s8x8(23, 56, 34, 10, 0, 0, 0, 0)",
+                        result, "s8x8");
+  }
+  {
+    unsigned bits = 64;
+    uint32_t result = uint32_t(0x400000003f800000);
+    testPackedConstants(bits, "_f32x2(0d4000000000000000, 0d3ff0000000000000)",
+                        result, "f32x2");
+  }
+}
+
+TEST(BrigKernelTest, VariadicFunction) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;"
+    "function &maxofN(arg_f32 %r)(arg_u32 %n, align 8 arg_u8 %last[])"
+    "{\n"
+      "ld_arg_u32 $s0, [%n];\n" // s0 holds the number to add
+      "mov_b32 $s1, 0;\n"       // s1 holds the sum
+      "mov_b32 $s3, 0;\n"       // s3 is the offset into last
+      "@loop:\n"
+      "cmp_eq_b1_u32 $c1, $s0, 0;\n"      // see if the count is zero
+      "cbr $c1, @done;\n"                // if it is, jump to done
+      "ld_arg_u32 $s4, [%last][$s3];\n" // load a value
+      "add_u32 $s1, $s1, $s4;\n"        // add the value
+      "add_u32 $s3, $s3, 4;\n"          // advance the offset to the next element
+      "sub_u32 $s0, $s0, 1;\n"          // decrement the count
+      "brn @loop;\n"
+      "@done:\n"
+      "st_arg_u32 $s1, [%r];\n"
+      "ret;\n"
+    "};\n"
+    
+    "kernel &adder(kernarg_u32 %r)\n"
+    "{\n"                             // here is an example caller passing in 4 32-bit floats
+    "  {\n"
+    "    ld_kernarg_u32 $s2, [%r];\n"
+    "    align 8 arg_u8 %n[16];\n"
+    "    st_arg_f32 1.2f, [%n][0];\n"
+    "    st_arg_f32 2.4f, [%n][4];\n"
+    "    st_arg_f32 3.6f, [%n][8];\n"
+    "    st_arg_f32 6.1f, [%n][12];\n"
+    "    arg_u32 %count;\n"
+    "    st_arg_u32 4, [%count];\n"
+    "    arg_f32 %sum;\n"
+    "    call &maxofN(%sum)(%count, %n);\n"
+    "    ld_arg_f32 $s0, [%sum];\n"
+    "    st_kernarg_u32 $s0, [$s2];\n"
+    " }\n"                              // ... %s0 holds the sum
+    "};\n"
+    );
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("adder");
+  float *output = new float;
+  *output = 0;
+
+  void *args[] = { &output };
+  BE.launch(fun, args);
+  EXPECT_EQ(1.2f + 2.4f + 3.6f +6.1f, *output);
+  
+  delete output;
+}
