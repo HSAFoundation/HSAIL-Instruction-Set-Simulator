@@ -2,7 +2,8 @@ macro(ensure_llvm_is_present dest_dir name)
 
 if(EXISTS "${dest_dir}/${name}")
 MESSAGE("llvm is present")
-  execute_process( COMMAND ${Subversion_SVN_EXECUTABLE} up http://llvm.org/svn/llvm-project/llvm/release_32 ${dest_dir}/${name} )
+  execute_process( COMMAND ${Subversion_SVN_EXECUTABLE} switch http://llvm.org/svn/llvm-project/llvm/branches/release_32/ ${dest_dir}/${name} )
+  execute_process( COMMAND ${Subversion_SVN_EXECUTABLE} up ${dest_dir}/${name} )
 else(EXISTS "${dest_dir}/${name}")
 Find_Package(Subversion)
 
