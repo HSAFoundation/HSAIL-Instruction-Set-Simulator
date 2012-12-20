@@ -2107,9 +2107,9 @@ kernel &AllUp()
   mov_b1 $c1, $c2;
   mov_b32 $s1, $s2;
   mov_b32 $s1, 1.0f;
-  //mov_b64 $d1, ($s1, $s2);
+  mov_b64 $d1, ($s1, $s2);
   //mov_b64 ($s1, $s2), $d3;
-  //mov_b128 $q1, ($s1, $s2, $s3, $s4);
+  mov_b128 $q1, ($s1, $s2, $s3, $s4);
   //mov_b128 ($s1, $s2, $s3, $s4), $q1;
 
 //mul
