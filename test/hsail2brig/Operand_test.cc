@@ -16,27 +16,27 @@ public:
     BrigCodeGenTest(in, sbuf),
     Ref(ref) { }
 
-  void Run_Test(int (*Rule)(Context*)){  
+  void Run_Test(int (*Rule)(Context*)){
     Buffer* oper = new Buffer();
 
     oper->append(Ref);
-    
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
       NULL, NULL, reinterpret_cast<const char *>(&oper->get()[0]), NULL,
-      RefStr->size(), 0, 0, oper->size(), 0);    
-    
+      RefStr->size(), 0, 0, oper->size(), 0);
+
     Parse_Validate(Rule, &RefOutput);
     delete oper;
-  } 
+  }
 };
 
 
-TEST(CodegenTest, Operand_CodeGen) {  
+TEST(CodegenTest, Operand_CodeGen) {
   std::string in;
   BrigOperandImmed imm;
   StringBuffer* buf = new StringBuffer;
   buf->clear();
-   
+
   /********************* Test Case 1 ************************/
   in.assign("_u16x2(0x12345, 0x6789a)");
   memset(&imm, 0, sizeof(imm));
@@ -48,7 +48,7 @@ TEST(CodegenTest, Operand_CodeGen) {
 
   Operand_Test<BrigOperandImmed> TestCase1(in, buf, &imm);
   TestCase1.Run_Test(&Operand);
-  
+
   /********************* Test Case 2 ************************/
   in.assign("_s32x2(-1, 1)");
   memset(&imm, 0, sizeof(imm));
@@ -56,7 +56,7 @@ TEST(CodegenTest, Operand_CodeGen) {
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb64;
   imm.reserved = 0;
-  imm.bits.l[0] = 0xffffffff00000001;
+  imm.bits.l[0] = 0xffffffff00000001LL;
 
   Operand_Test<BrigOperandImmed> TestCase2(in, buf, &imm);
   TestCase2.Run_Test(&Operand);
@@ -68,8 +68,8 @@ TEST(CodegenTest, Operand_CodeGen) {
   imm.kind = BrigEOperandImmed;
   imm.type = Brigb128;
   imm.reserved = 0;
-  imm.bits.l[0] = 0xff000100fe003400;
-  imm.bits.l[1] = 0x560078009a00bcde;
+  imm.bits.l[0] = 0xff000100fe003400LL;
+  imm.bits.l[1] = 0x560078009a00bcdeLL;
 
   Operand_Test<BrigOperandImmed> TestCase3(in, buf, &imm);
   TestCase3.Run_Test(&Operand);
