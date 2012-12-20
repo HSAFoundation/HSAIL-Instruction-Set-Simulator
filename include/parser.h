@@ -201,6 +201,8 @@ bool CheckDataType(BrigMachine16_t model, BrigStorageClass32_t addressType,
     BrigDataType16_t type);
 bool CheckRegister(unsigned int token, BrigDataType16_t type); 
 
+bool CheckDestRegister(unsigned int token, BrigDataType16_t type, BrigOpcode32_t opcode); 
+
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_

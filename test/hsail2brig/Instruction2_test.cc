@@ -1978,7 +1978,7 @@ TEST(ErrorReportTest, Instruction2) {
 
   input.assign( "firstbit $s0, $s0;\n");
   Instruction2_Test<> TestCase2(input);
-  TestCase2.Run_Test(&Instruction2, INVALID_DATA_TYPE);
+  TestCase2.Run_Test(&Instruction2, MISSING_DATA_TYPE);
 
   input.assign( "frcp_f32 $s0;\n");
   Instruction2_Test<> TestCase3(input);

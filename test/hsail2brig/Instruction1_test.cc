@@ -848,7 +848,7 @@ TEST(ErrorReportTest, Instruction1) {
 
   input.assign( "countup_u32;\n");
   Instruction1_Test<> TestCase3(input);
-  TestCase3.Run_Test(&Instruction1, MISSING_OPERAND);
+  TestCase3.Run_Test(&Instruction1, INVALID_OPERAND);
 }
 
 TEST(ErrorReportTest, Barrier) {

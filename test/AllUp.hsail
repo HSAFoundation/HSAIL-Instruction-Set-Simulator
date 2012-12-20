@@ -2502,6 +2502,10 @@ kernel &AllUp()
   lda_u32 $s1, [$s2 - 5];
   lda_u32 $s1, [$s2];
 
+  ld_b128 $q31, [$s2];
+  abs_s32 $s127, $s0;
+  abs_s64 $d63, $d0;
+
   ret;
 };
 
