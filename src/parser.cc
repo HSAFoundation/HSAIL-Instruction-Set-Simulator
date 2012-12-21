@@ -663,9 +663,7 @@ int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
 
 int CallTargets(Context* context) {
   // assumed first_token is '['
-  // TODO(Chuang): the max size is 256
-  BrigoOffset32_t arg_offset[256] = {0};
-  int nElements = 0;
+  std::vector<BrigoOffset32_t> arg_offset;
   std::string funcName;
 
   if (context->token_to_scan != '[') {
@@ -709,7 +707,7 @@ int CallTargets(Context* context) {
     }
     if (!Identifier(context)) {
       if (context->func_o_map.count(funcName)) {
-        arg_offset[nElements++] = context->func_o_map[funcName];
+        arg_offset.push_back(context->func_o_map[funcName]);
       } else {
         BrigOperandFunctionRef opArgRef = {
           sizeof(BrigOperandFunctionRef),
@@ -720,14 +718,14 @@ int CallTargets(Context* context) {
         opArgRef.fn = context->func_map[funcName];
         context->func_o_map[funcName] = context->get_operand_offset();
         context->append_operand(&opArgRef);
-        arg_offset[nElements++] = context->func_o_map[funcName];
+        arg_offset.push_back(context->func_o_map[funcName]);
       }
       context->token_to_scan = yylex();
       if (context->token_to_scan == ']') {
       size_t list_size = sizeof(BrigOperandArgumentList);
-      if (nElements > 1) {
-        list_size += sizeof(BrigoOffset32_t) * (nElements - 1);
-      } else if (nElements == 0) {
+      if (arg_offset.size() > 1) {
+        list_size += sizeof(BrigoOffset32_t) * (arg_offset.size() - 1);
+      } else if (arg_offset.size() == 0) {
         // there is one identifier at least.
         context->set_error(MISSING_IDENTIFIER);
         return 1;
@@ -738,8 +736,8 @@ int CallTargets(Context* context) {
         *reinterpret_cast<BrigOperandArgumentList *>(array);
         funcList.size = list_size;
         funcList.kind = BrigEOperandFunctionList;
-        funcList.elementCount = nElements;
-        for (int32_t i = 0; i < nElements; ++i) {
+        funcList.elementCount = arg_offset.size();
+        for (uint32_t i = 0; i < arg_offset.size(); ++i) {
           funcList.o_args[i] = arg_offset[i];
         }
 
@@ -765,11 +763,7 @@ int CallTargets(Context* context) {
 
 int CallArgs(Context* context) {
   // assumed first_token is '('
-  int n_elements = 0;  // the size of the arglist.
-  BrigoOffset32_t arg_offset[256] = {0};
-
-  // [CAUTION] Assume the arg numbers cannot exceed 256
-  // Limited by the structure, we can only access one element.
+  std::vector<BrigoOffset32_t> arg_offset;
 
   context->token_to_scan = yylex();  // set context for Operand()
   unsigned int saved_token;
@@ -783,8 +777,8 @@ int CallArgs(Context* context) {
 
     if (context->token_to_scan == ')') {
       size_t list_size = sizeof(BrigOperandArgumentList);
-      if (n_elements > 1) {
-        list_size += sizeof(BrigoOffset32_t) * (n_elements - 1);
+      if (arg_offset.size() > 1) {
+        list_size += sizeof(BrigoOffset32_t) * (arg_offset.size() - 1);
       }
 
       char *array = new char[list_size];
@@ -792,11 +786,11 @@ int CallArgs(Context* context) {
         *reinterpret_cast<BrigOperandArgumentList *>(array);
       arg_list.size = list_size;
       arg_list.kind = BrigEOperandArgumentList;
-      arg_list.elementCount = n_elements;
-      for (int32_t i = 0; i < n_elements; ++i) {
+      arg_list.elementCount = arg_offset.size();
+      for (uint32_t i = 0; i < arg_offset.size(); ++i) {
         arg_list.o_args[i] = arg_offset[i];
       }
-      if (!n_elements) {
+      if (!arg_offset.size()) {
         // this is an empty Argument List.
         arg_list.o_args[0] = 0;
       }
@@ -820,8 +814,7 @@ int CallArgs(Context* context) {
       context->arg_map[arg_name] = context->get_operand_offset();
       context->append_operand(&opArgRef);
 
-      arg_offset[n_elements] = context->arg_map[arg_name];
-      n_elements++;
+      arg_offset.push_back(context->arg_map[arg_name]);
       context->token_to_scan = yylex();
       continue;
     } else if (context->token_to_scan == ',') {
