@@ -1467,6 +1467,7 @@ int ArgumentDecl(Context* context) {
   if (DeclPrefix(context)) {
     return 1;
   }
+
   context->set_dim(0);
   BrigStorageClass32_t storage_class = context->token_value.storage_class;
 
@@ -2547,6 +2548,11 @@ int UninitializableDecl(Context* context,
      &&(GROUP != context->token_to_scan)
      &&(SPILL != context->token_to_scan))
     return 1;
+ 
+  if (context->get_symbol_modifier() & BrigConst) {
+    context->set_error(INVALID_IDENTIFIER);
+    return 1;
+  }
 
   storage_class = context->token_value.storage_class;
   context->token_to_scan = yylex();
@@ -4154,6 +4160,10 @@ int GlobalPrivateDecl(Context* context) {
   if (PRIVATE != context->token_to_scan)
     return 1;
 
+  if (context->get_symbol_modifier() & BrigConst) {
+    context->set_error(INVALID_IDENTIFIER);
+    return 1;
+  }
   context->token_to_scan = yylex();
   if (DATA_TYPE_ID != context->token_type) {
     context->set_error(MISSING_DATA_TYPE);
@@ -4862,6 +4872,11 @@ int GlobalGroupDecl(Context* context) {
   // first token is Group
   if (GROUP != context->token_to_scan)
     return 1;
+
+  if (context->get_symbol_modifier() & BrigConst) {
+    context->set_error(INVALID_IDENTIFIER);
+    return 1;
+  }
 
   context->token_to_scan = yylex();
   if (DATA_TYPE_ID != context->token_type) {
