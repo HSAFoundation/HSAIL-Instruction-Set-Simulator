@@ -2216,10 +2216,8 @@ TEST(ParserTest, BodyStatementNested) {
 }
 
 // -----------------  Test for argStatement rule -------------------
-// argStatement := bodyStatementNested
-//                 | declprefix argUnitializableDecl
-//                 | call
 TEST(ParserTest, ArgStatement) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -2229,12 +2227,14 @@ TEST(ParserTest, ArgStatement) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgStatement(context));
 
+  context->clear_context();
   input.assign("extern const"); // declprefix argUnitializableDecl
   input.append("arg_f32 %f[3];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgStatement(context));
 
+  context->clear_context();
   input.assign("call &callee (%output)(%input);\n"); // call
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -4385,14 +4385,14 @@ TEST(ParserTest, SequenceOfPrograms) {
   input.append("private_u32 %x ; \n");
   input.append(" ret ;}; \n");
 
-  input.append("kernel &demo(kernarg_f32 %x) { \n");
+  input.append("kernel &demo1(kernarg_f32 %x) { \n");
   input.append("private_u32 %z; \n");
   input.append("ret; \n");
   input.append("};\n");
   input.append("\n");
 
   input.append("version 1:0:$large; \n");
-  input.append("kernel &demo(kernarg_f32 %x) { \n");
+  input.append("kernel &demo2(kernarg_f32 %x) { \n");
   input.append("private_u32 %z; \n");
   input.append("ret; \n");
   input.append("};\n");
@@ -4497,6 +4497,7 @@ TEST(ParserTest, TopLevelStatements) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, TopLevelStatements(context));
 
+  context->clear_context();
   input.assign("kernel &demo(kernarg_f32 %x) { \n");
   input.append("private_u32 %z; \n");
   input.append("ret; \n");
