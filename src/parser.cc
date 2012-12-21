@@ -2618,7 +2618,8 @@ int UninitializableDecl(Context* context,
     0                              // reserved
   };
 
-  context->global_symbol_map[var_name] = context->get_directive_offset();
+  symbol_map->insert(std::map<std::string, BrigdOffset32_t>::value_type(
+      var_name, context->get_directive_offset()));
   context->append_directive(&bds);
   context->set_alignment(0);
 
@@ -3933,6 +3934,10 @@ int Kernel(Context *context) {
 
   std::string kern_name = context->token_value.string_val;
   BrigsOffset32_t str_offset = context->add_symbol(kern_name);
+  if (context->func_map.count(kern_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   context->func_map[kern_name] = bdk_offset;
 
   size_t bdk_size = sizeof(BrigDirectiveKernel);
