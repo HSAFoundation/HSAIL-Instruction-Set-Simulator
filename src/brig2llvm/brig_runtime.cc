@@ -390,19 +390,6 @@ defineUnary(Lastbit, b64)
 
 template<class T> static T Mov(T x) { return x; }
 BitInst(define, Mov, Unary)
-
-extern "C" b64 Mov_b64_b32(b32 x, b32 y) { return (b64(x) << 32) | b64(y); }
-extern "C" b64 Mov_b64_b64(b64 x) { return x; }
-
-// Assumes little-endian
-extern "C" b128 Mov_b128_b32(b32 w, b32 x, b32 y, b32 z) {
-  b128 result;
-  result[0] = z;
-  result[1] = y;
-  result[2] = x;
-  result[3] = w;
-  return result;
-}
 extern "C" b128 Mov_b128(b128 x) { return x; }
 
 extern "C" b32 Movs_lo_b32(b64 x) { return x; }

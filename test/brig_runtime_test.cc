@@ -527,29 +527,6 @@ declareUnary(Lastbit, b64)
 MakeTest(Lastbit_b32, LastbitLogic)
 MakeTest(Lastbit_b64, LastbitLogic)
 
-static void Mov_b64_b32_Logic(b64 result, b32 a, b32 b) {
-  EXPECT_EQ(b, b32(result));
-  EXPECT_EQ(a, result >> 32);
-}
-extern "C" b64 Mov_b64_b32(b32, b32);
-MakeTest(Mov_b64_b32, Mov_b64_b32_Logic)
-
-static void Mov_b64_b64_Logic(b64 result, b64 a) {
-  EXPECT_EQ(a, result);
-}
-extern "C" b64 Mov_b64_b64(b64);
-MakeTest(Mov_b64_b64, Mov_b64_b64_Logic)
-
-// Assumes little-endian
-static void Mov_b128_b32_Logic(b128 result, b32 a, b32 b, b32 c, b32 d) {
-  EXPECT_EQ(d, result[0]);
-  EXPECT_EQ(c, result[1]);
-  EXPECT_EQ(b, result[2]);
-  EXPECT_EQ(a, result[3]);
-}
-extern "C" b128 Mov_b128_b32(b32, b32, b32, b32);
-MakeTest(Mov_b128_b32, Mov_b128_b32_Logic)
-
 static void Movs_lo_b32_Logic(b32 result, b64 a) {
   EXPECT_EQ(b32(a), result);
 }
