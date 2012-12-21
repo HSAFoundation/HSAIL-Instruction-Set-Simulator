@@ -1370,17 +1370,9 @@ TEST(LexTest, Bug49_Targets) {              // targets
   lexer->set_source_string(input);
   EXPECT_EQ(_FULL, lexer->get_next_token());
 
-  input.assign("$mobile");
+  input.assign("$base");
   lexer->set_source_string(input);
-  EXPECT_EQ(_MOBILE, lexer->get_next_token());
-
-  input.assign("$sftz");
-  lexer->set_source_string(input);
-  EXPECT_EQ(_SFTZ, lexer->get_next_token());
-
-  input.assign("$nosftz");
-  lexer->set_source_string(input);
-  EXPECT_EQ(_NOSFTZ, lexer->get_next_token());
+  EXPECT_EQ(_BASE, lexer->get_next_token());
 
   delete lexer;
 }

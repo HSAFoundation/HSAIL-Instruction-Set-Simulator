@@ -443,7 +443,7 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset,
   }
   std::string name(context->token_value.string_val);
 
-  directive = context->symbol_map[name];
+  directive = context->get_symbol(name);
   context->token_to_scan = yylex();
 
   // check <..>
@@ -663,9 +663,7 @@ int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
 
 int CallTargets(Context* context) {
   // assumed first_token is '['
-  // TODO(Chuang): the max size is 256
-  BrigoOffset32_t arg_offset[256] = {0};
-  int nElements = 0;
+  std::vector<BrigoOffset32_t> arg_offset;
   std::string funcName;
 
   if (context->token_to_scan != '[') {
@@ -709,7 +707,7 @@ int CallTargets(Context* context) {
     }
     if (!Identifier(context)) {
       if (context->func_o_map.count(funcName)) {
-        arg_offset[nElements++] = context->func_o_map[funcName];
+        arg_offset.push_back(context->func_o_map[funcName]);
       } else {
         BrigOperandFunctionRef opArgRef = {
           sizeof(BrigOperandFunctionRef),
@@ -720,14 +718,14 @@ int CallTargets(Context* context) {
         opArgRef.fn = context->func_map[funcName];
         context->func_o_map[funcName] = context->get_operand_offset();
         context->append_operand(&opArgRef);
-        arg_offset[nElements++] = context->func_o_map[funcName];
+        arg_offset.push_back(context->func_o_map[funcName]);
       }
       context->token_to_scan = yylex();
       if (context->token_to_scan == ']') {
       size_t list_size = sizeof(BrigOperandArgumentList);
-      if (nElements > 1) {
-        list_size += sizeof(BrigoOffset32_t) * (nElements - 1);
-      } else if (nElements == 0) {
+      if (arg_offset.size() > 1) {
+        list_size += sizeof(BrigoOffset32_t) * (arg_offset.size() - 1);
+      } else if (arg_offset.size() == 0) {
         // there is one identifier at least.
         context->set_error(MISSING_IDENTIFIER);
         return 1;
@@ -738,8 +736,8 @@ int CallTargets(Context* context) {
         *reinterpret_cast<BrigOperandArgumentList *>(array);
         funcList.size = list_size;
         funcList.kind = BrigEOperandFunctionList;
-        funcList.elementCount = nElements;
-        for (int32_t i = 0; i < nElements; ++i) {
+        funcList.elementCount = arg_offset.size();
+        for (uint32_t i = 0; i < arg_offset.size(); ++i) {
           funcList.o_args[i] = arg_offset[i];
         }
 
@@ -765,11 +763,7 @@ int CallTargets(Context* context) {
 
 int CallArgs(Context* context) {
   // assumed first_token is '('
-  int n_elements = 0;  // the size of the arglist.
-  BrigoOffset32_t arg_offset[256] = {0};
-
-  // [CAUTION] Assume the arg numbers cannot exceed 256
-  // Limited by the structure, we can only access one element.
+  std::vector<BrigoOffset32_t> arg_offset;
 
   context->token_to_scan = yylex();  // set context for Operand()
   unsigned int saved_token;
@@ -783,8 +777,8 @@ int CallArgs(Context* context) {
 
     if (context->token_to_scan == ')') {
       size_t list_size = sizeof(BrigOperandArgumentList);
-      if (n_elements > 1) {
-        list_size += sizeof(BrigoOffset32_t) * (n_elements - 1);
+      if (arg_offset.size() > 1) {
+        list_size += sizeof(BrigoOffset32_t) * (arg_offset.size() - 1);
       }
 
       char *array = new char[list_size];
@@ -792,11 +786,11 @@ int CallArgs(Context* context) {
         *reinterpret_cast<BrigOperandArgumentList *>(array);
       arg_list.size = list_size;
       arg_list.kind = BrigEOperandArgumentList;
-      arg_list.elementCount = n_elements;
-      for (int32_t i = 0; i < n_elements; ++i) {
+      arg_list.elementCount = arg_offset.size();
+      for (uint32_t i = 0; i < arg_offset.size(); ++i) {
         arg_list.o_args[i] = arg_offset[i];
       }
-      if (!n_elements) {
+      if (!arg_offset.size()) {
         // this is an empty Argument List.
         arg_list.o_args[0] = 0;
       }
@@ -816,12 +810,11 @@ int CallArgs(Context* context) {
         0
       };
       // TODO(Chuang): judge whether the identifier has been defined.
-      opArgRef.arg = context->symbol_map[arg_name];
+      opArgRef.arg = context->get_symbol(arg_name);
       context->arg_map[arg_name] = context->get_operand_offset();
       context->append_operand(&opArgRef);
 
-      arg_offset[n_elements] = context->arg_map[arg_name];
-      n_elements++;
+      arg_offset.push_back(context->arg_map[arg_name]);
       context->token_to_scan = yylex();
       continue;
     } else if (context->token_to_scan == ',') {
@@ -1261,7 +1254,6 @@ int Version(Context* context) {
   // set default values
   bdv.machine = BrigELarge;
   bdv.profile = BrigEFull;
-  bdv.ftz = BrigENosftz;
 
   // first token must be version
   if (VERSION != context->token_to_scan) {
@@ -1300,9 +1292,7 @@ int Version(Context* context) {
         case _SMALL: bdv.machine = BrigESmall; break;
         case _LARGE: bdv.machine = BrigELarge; break;
         case _FULL: bdv.profile = BrigEFull; break;
-        case _MOBILE: bdv.profile = BrigEMobile; break;
-        case _SFTZ: bdv.ftz = BrigESftz; break;
-        case _NOSFTZ: bdv.ftz = BrigENosftz; break;
+        case _BASE: bdv.profile = BrigEBase; break;
       }
       context->set_machine(bdv.machine);
       context->set_profile(bdv.profile);
@@ -1372,12 +1362,13 @@ int DeclPrefix(Context* context){
         context->token_to_scan = yylex();
         break;
       default:
-        if (context->token_to_scan==EXTERN)
+        if (context->token_to_scan == EXTERN) {
           context->set_attribute(BrigExtern);
-        else if (context->token_to_scan == STATIC)
+          context->token_to_scan = yylex();
+        } else if (context->token_to_scan == STATIC) {
           context->set_attribute(BrigStatic);
-        context->token_to_scan = yylex();
-        break;
+          context->token_to_scan = yylex();
+        }
     }
   } else
     return 0;
@@ -1385,7 +1376,7 @@ int DeclPrefix(Context* context){
   if ((context->token_to_scan == ALIGN) ||
      (context->token_to_scan == EXTERN) ||
      (context->token_to_scan == STATIC) ||
-     (context->token_to_scan==CONST)) {
+     (context->token_to_scan == CONST)) {
     switch (context->token_to_scan) {
       case ALIGN:
         if (Alignment(context))
@@ -1396,20 +1387,21 @@ int DeclPrefix(Context* context){
         context->token_to_scan = yylex();
         break;
       default:
-        if (context->token_to_scan == EXTERN)
+        if (context->token_to_scan == EXTERN) {
           context->set_attribute(BrigExtern);
-        else if (context->token_to_scan == STATIC)
+          context->token_to_scan = yylex();
+        } else if (context->token_to_scan == STATIC) {
           context->set_attribute(BrigStatic);
-        context->token_to_scan = yylex();
-        break;
+          context->token_to_scan = yylex();
+        }
     }
   } else
     return 0;
   if ((context->token_to_scan == ALIGN) ||
      (context->token_to_scan == EXTERN) ||
      (context->token_to_scan == STATIC) ||
-     (context->token_to_scan==CONST)) {
-    switch (context->token_to_scan){
+     (context->token_to_scan == CONST)) {
+    switch (context->token_to_scan) {
       case ALIGN:
         if (Alignment(context))
           return 1;
@@ -1419,12 +1411,13 @@ int DeclPrefix(Context* context){
         context->token_to_scan = yylex();
         break;
       default:
-        if (context->token_to_scan==EXTERN)
+        if (context->token_to_scan == EXTERN) {
           context->set_attribute(BrigExtern);
-        else if (context->token_to_scan == STATIC)
+          context->token_to_scan = yylex();
+        } else if (context->token_to_scan == STATIC) {
           context->set_attribute(BrigStatic);
-      context->token_to_scan = yylex();
-      break;
+          context->token_to_scan = yylex();
+        }
     }
   }
   return 0;
@@ -1474,6 +1467,7 @@ int ArgumentDecl(Context* context) {
   if (DeclPrefix(context)) {
     return 1;
   }
+
   context->set_dim(0);
   BrigStorageClass32_t storage_class = context->token_value.storage_class;
 
@@ -1500,6 +1494,10 @@ int ArgumentDecl(Context* context) {
   // and write the corresponding string into .string section.
 
   std::string arg_name = context->token_value.string_val;
+  if (context->local_symbol_map.count(arg_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   int arg_name_offset = context->add_symbol(arg_name);
 
   // scan for arrayDimensions
@@ -1553,7 +1551,7 @@ int ArgumentDecl(Context* context) {
   // append the DirectiveSymbol to .directive section.
   context->append_directive(&sym_decl);
   //Mapping symbol names to declarations in .dir
-  context->symbol_map[arg_name] = dsize;
+  context->local_symbol_map[arg_name] = dsize;
   context->set_alignment(0);
 
   return 0;
@@ -1734,6 +1732,7 @@ int ArgBlock(Context* context) {
     return 1;
   }
   context->token_to_scan = yylex();
+  context->arg_symbol_map.clear();
   return 0;
 }
 
@@ -1747,6 +1746,7 @@ int CodeBlockEnd(Context* context) {
     return 1;
   }
   context->token_to_scan = yylex();
+  context->local_symbol_map.clear();
   return 0;
 }
 
@@ -1919,9 +1919,8 @@ int BranchCbr(Context* context) {
         0
       };
       context->label_o_map[label_name] = context->get_operand_offset();
-      if (context->symbol_map.count(label_name)) {
-        opLabelRef.labeldirective = context->symbol_map[label_name];
-      }
+      opLabelRef.labeldirective = context->get_symbol(label_name);
+
       context->append_operand(&opLabelRef);
     }
     OpOffset[2] = context->label_o_map[label_name];
@@ -1948,9 +1947,8 @@ int BranchCbr(Context* context) {
             0
           };
           context->label_o_map[label_name] = context->get_operand_offset();
-          if (context->symbol_map.count(label_name)) {
-            opLabelRef.labeldirective = context->symbol_map[label_name];
-          }
+          opLabelRef.labeldirective = context->get_symbol(label_name);
+
           context->append_operand(&opLabelRef);
         }
 
@@ -1967,7 +1965,7 @@ int BranchCbr(Context* context) {
           0                       // directive
         };
 
-        boa.directive = context->symbol_map[idenName];
+        boa.directive = context->get_symbol(idenName);
         //TODO(Chuang): This Comparison for uint test.
         if (boa.directive != 0) {
           if (context->get_machine() == BrigELarge) {
@@ -2089,9 +2087,8 @@ int BranchBrn(Context* context) {
         0
       };
       context->label_o_map[label_name] = context->get_operand_offset();
-      if (context->symbol_map.count(label_name)) {
-        opLabelRef.labeldirective = context->symbol_map[label_name];
-      }
+      opLabelRef.labeldirective = context->get_symbol(label_name);
+
       context->append_operand(&opLabelRef);
     }
     OpOffset[1] = context->label_o_map[label_name];
@@ -2122,9 +2119,8 @@ int BranchBrn(Context* context) {
             0
           };
           context->label_o_map[label_name] = context->get_operand_offset();
-          if (context->symbol_map.count(label_name)) {
-            opLabelRef.labeldirective = context->symbol_map[label_name];
-          }
+          opLabelRef.labeldirective = context->get_symbol(label_name);
+          
           context->append_operand(&opLabelRef);
         }
         OpOffset[2] = context->label_o_map[label_name];
@@ -2139,7 +2135,7 @@ int BranchBrn(Context* context) {
           0                       // directive
         };
 
-        boa.directive = context->symbol_map[idenName];
+        boa.directive = context->get_symbol(idenName);
         //TODO(Chuang): This Comparison for uint test.
         if (boa.directive != 0) {
           if (context->get_machine() == BrigELarge) {
@@ -2433,21 +2429,27 @@ int Initializer(Context* context, BrigdOffset32_t sym_offset) {
 
 int InitializableDecl(Context* context) {
   // first token is GLOBAL or READONLY
-  if ((context->token_to_scan != GLOBAL)
-     && (context->token_to_scan != READONLY))
-    return 1;
 
-  BrigStorageClass32_t storage_class = context->token_value.storage_class;
-  context->token_to_scan = yylex();
-
-  return (InitializableDecl(context, storage_class));
-
+  return (InitializableDecl(context, &context->global_symbol_map));
 }
 
-int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
+int InitializableDecl(Context *context, 
+    std::map<std::string, BrigdOffset32_t> *symbol_map){
   int var_name_offset;
+  if (context->token_to_scan != GLOBAL && 
+      context->token_to_scan != READONLY) {
+    return 1;
+  }
+  BrigStorageClass32_t storageClass = context->token_value.storage_class;
+  context->token_to_scan = yylex();
+  if (context->token_to_scan == _RWIMG ||
+      context->token_to_scan == _ROIMG ||
+      context->token_to_scan == _SAMP) {
+    return 1;
+  }
+
   context->set_isArray(false);
-  //First token already verified as GLOBAL/READONLY
+  // First token already verified as GLOBAL/READONLY
   if (context->token_type != DATA_TYPE_ID) {
     return 1;
   }
@@ -2460,6 +2462,10 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
   }
   std::string var_name = context->token_value.string_val;
   var_name_offset = context->add_symbol(var_name);
+  if (symbol_map->count(var_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
 
   context->token_to_scan = yylex();
   // set default value(scalar)
@@ -2494,20 +2500,21 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
     BrigEDirectiveSymbol,             // kind
     {
       context->get_code_offset(),       // c_code
-      storage_class,                    // storageClass ??
+      storageClass,                     // storageClass 
       context->get_attribute(),         // attribute
       0,                                // reserved
       context->get_symbol_modifier(),   // symbol modifier
-      context->get_dim(),                                // dim
+      context->get_dim(),               // dim
       var_name_offset,                  // s_name
-      context->get_type(),                        // data type
+      context->get_type(),              // data type
       context->get_alignment(),         // alignment
     },
     0,                                // d_init = 0 for arg
     0                                 // reserved
   };
   context->set_alignment(0);
-  context->symbol_map[var_name] = context->get_directive_offset();
+  symbol_map->insert(std::map<std::string, BrigdOffset32_t>::value_type(
+      var_name, context->get_directive_offset()));
   BrigdOffset32_t argdecl_offset = context->get_directive_offset();
   context->append_directive(&sym_decl);
 
@@ -2527,6 +2534,12 @@ int InitializableDecl(Context *context, BrigStorageClass32_t storage_class){
 }
 
 int UninitializableDecl(Context* context) {
+  //TODO(Chuang): For test cases
+  return UninitializableDecl(context, &context->global_symbol_map);
+}
+
+int UninitializableDecl(Context* context, 
+    std::map<std::string, BrigdOffset32_t> *symbol_map) {
 
   BrigStorageClass32_t storage_class;
   BrigsOffset32_t str_offset;
@@ -2535,6 +2548,11 @@ int UninitializableDecl(Context* context) {
      &&(GROUP != context->token_to_scan)
      &&(SPILL != context->token_to_scan))
     return 1;
+ 
+  if (context->get_symbol_modifier() & BrigConst) {
+    context->set_error(INVALID_IDENTIFIER);
+    return 1;
+  }
 
   storage_class = context->token_value.storage_class;
   context->token_to_scan = yylex();
@@ -2552,6 +2570,10 @@ int UninitializableDecl(Context* context) {
   }
 
   std::string var_name = context->token_value.string_val;
+  if (symbol_map->count(var_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   str_offset = context->add_symbol(var_name);
 
   context->token_to_scan = yylex();
@@ -2596,10 +2618,11 @@ int UninitializableDecl(Context* context) {
       context->get_alignment(),          // align
     },
     0,                             // d_init
-    0,                             // reserved
+    0                              // reserved
   };
 
-  context->symbol_map[var_name] = context->get_directive_offset();
+  symbol_map->insert(std::map<std::string, BrigdOffset32_t>::value_type(
+      var_name, context->get_directive_offset()));
   context->append_directive(&bds);
   context->set_alignment(0);
 
@@ -2627,12 +2650,16 @@ int ArgUninitializableDecl(Context* context) {
   context->set_type(context->token_value.data_type);
   context->token_to_scan = yylex();
 
-  if (Identifier(context)) {
+  if (context->token_to_scan != TOKEN_LOCAL_IDENTIFIER) {
     context->set_error(MISSING_IDENTIFIER);
     return 1;
   }
 
   std::string var_name = context->token_value.string_val;
+  if (context->arg_symbol_map.count(var_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   BrigsOffset32_t str_offset = context->add_symbol(var_name);
 
   context->token_to_scan = yylex();
@@ -2681,7 +2708,7 @@ int ArgUninitializableDecl(Context* context) {
   };
 
   context->set_alignment(0);
-  context->symbol_map[var_name] = context->get_directive_offset();
+  context->arg_symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bds);
 
   if (';' != context->token_to_scan) {
@@ -3021,6 +3048,10 @@ int FunctionSignature(Context *context) {
 }
 
 int Label(Context* context) {
+  //TODO(Chuang): For test cases.
+  return Label(context, &context->global_symbol_map);
+}
+int Label(Context* context, std::map<std::string, BrigdOffset32_t> *symbol_map) {
   // first must be "label"
   BrigcOffset32_t c_code = 0;
   BrigsOffset32_t s_name = 0;
@@ -3043,11 +3074,12 @@ int Label(Context* context) {
     c_code,                        // c_code
     s_name                         // s_name
   };
-  context->symbol_map[name] = context->get_directive_offset();
+  symbol_map->insert(std::map<std::string, BrigdOffset32_t>::value_type(
+      name, context->get_directive_offset()));
   context->append_directive(&labelDir);
 
   if (context->label_d_map.count(name)) {
-    BrigdOffset32_t dOffset = context->symbol_map[name];
+    BrigdOffset32_t dOffset = context->get_symbol(name);
     typedef std::multimap<std::string, BrigdOffset32_t>::const_iterator MapIter_t;
     std::pair<MapIter_t, MapIter_t> labRange;
     labRange = context->label_d_map.equal_range(name);
@@ -3064,7 +3096,7 @@ int Label(Context* context) {
     BrigoOffset32_t labOpOffset = context->label_o_map[name];
     BrigOperandLabelRef labOp;
     context->get_operand(labOpOffset, &labOp);
-    labOp.labeldirective = context->symbol_map[name];
+    labOp.labeldirective = context->get_symbol(name);
     context->update_operand_bytes(
       reinterpret_cast<unsigned char*>(&labOp),
       labOpOffset, sizeof(labOp)
@@ -3080,12 +3112,12 @@ int LabelTargets(Context* context) {
   if (context->token_to_scan == TOKEN_LABEL) {
     labelName = context->token_value.string_val;
   }
-  if (Label(context)) {
+  if (Label(context, &context->global_symbol_map)) {
     context->set_error(MISSING_LABEL);
     return 1;
   }
   if (context->token_to_scan == LABELTARGETS) {
-    return LabelTargetsPart2(context, context->symbol_map[labelName]);
+    return LabelTargetsPart2(context, context->get_symbol(labelName));
   } else {
     context->set_error(INVALID_LABEL_TARGETS);
     return 1;
@@ -3807,6 +3839,10 @@ int KernelArgumentDecl(Context *context) {
   // and write the corresponding string into .string section.
 
   std::string arg_name = context->token_value.string_val;
+  if (context->local_symbol_map.count(arg_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   int arg_name_offset = context->add_symbol(arg_name);
 
   // scan for arrayDimensions
@@ -3858,7 +3894,7 @@ int KernelArgumentDecl(Context *context) {
   // append the DirectiveSymbol to .directive section.
   context->append_directive(&sym_decl);
   //Mapping symbol names to declarations in .dir
-  context->symbol_map[arg_name] = dsize;
+  context->local_symbol_map[arg_name] = dsize;
   context->set_alignment(0);
 
   return 0;
@@ -3901,6 +3937,10 @@ int Kernel(Context *context) {
 
   std::string kern_name = context->token_value.string_val;
   BrigsOffset32_t str_offset = context->add_symbol(kern_name);
+  if (context->func_map.count(kern_name)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   context->func_map[kern_name] = bdk_offset;
 
   size_t bdk_size = sizeof(BrigDirectiveKernel);
@@ -3950,7 +3990,6 @@ int Kernel(Context *context) {
   context->token_to_scan = yylex();
   if (Codeblock(context))
     return  1;
-
   return 0;
 }
 
@@ -4121,6 +4160,10 @@ int GlobalPrivateDecl(Context* context) {
   if (PRIVATE != context->token_to_scan)
     return 1;
 
+  if (context->get_symbol_modifier() & BrigConst) {
+    context->set_error(INVALID_IDENTIFIER);
+    return 1;
+  }
   context->token_to_scan = yylex();
   if (DATA_TYPE_ID != context->token_type) {
     context->set_error(MISSING_DATA_TYPE);
@@ -4135,6 +4178,10 @@ int GlobalPrivateDecl(Context* context) {
     return 1;
   }
   std::string symName = context->token_value.string_val;
+  if (context->global_symbol_map.count(symName)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   str_offset = context->add_symbol(symName);
 
 
@@ -4187,7 +4234,7 @@ int GlobalPrivateDecl(Context* context) {
     0,                             // reserved
   };
   
-  context->symbol_map[symName] = context->get_directive_offset();
+  context->global_symbol_map[symName] = context->get_directive_offset();
   context->append_directive(&bds);
   context->set_alignment(0);
 
@@ -4604,9 +4651,8 @@ int Ldc(Context* context) {
       };
       labRef.size = sizeof(labRef);
 
-      if (context->label_d_map.count(oper_name)) {
-        labRef.labeldirective = context->symbol_map[oper_name];
-      }
+      labRef.labeldirective = context->get_symbol(oper_name);
+      
       OpOffset[1] = context->get_operand_offset();
       context->label_o_map[oper_name] = context->get_operand_offset();
       context->append_operand(&labRef);
@@ -4827,6 +4873,11 @@ int GlobalGroupDecl(Context* context) {
   if (GROUP != context->token_to_scan)
     return 1;
 
+  if (context->get_symbol_modifier() & BrigConst) {
+    context->set_error(INVALID_IDENTIFIER);
+    return 1;
+  }
+
   context->token_to_scan = yylex();
   if (DATA_TYPE_ID != context->token_type) {
     context->set_error(MISSING_DATA_TYPE);
@@ -4841,6 +4892,10 @@ int GlobalGroupDecl(Context* context) {
     return 1;
   }
   std::string symName = context->token_value.string_val;
+  if (context->global_symbol_map.count(symName)) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
   str_offset = context->add_symbol(symName);
   context->set_dim(0);
 
@@ -4892,7 +4947,7 @@ int GlobalGroupDecl(Context* context) {
     0,                             // d_init
     0,                             // reserved
   };
-  context->symbol_map[symName] = context->get_directive_offset();
+  context->global_symbol_map[symName] = context->get_directive_offset();
   context->append_directive(&bds);
   context->set_alignment(0);
 
@@ -5174,12 +5229,8 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
   while (1) {
     if (context->token_type == VECTOR) {
       switch (context->token_to_scan) {
-        case _V2:
-          *pVec_size = 2;
-          break;
-        case _V4:
-          *pVec_size = 4;
-          break;
+        case _V2: *pVec_size = 2; break;
+        case _V4: *pVec_size = 4; break;
         default:
           *pVec_size = 0;
       }
@@ -5197,12 +5248,6 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
 
     if(!Acq(context, &pmemSem)){
       pLdSt_op->memorySemantic = pmemSem;
-      continue;
-    }
-
-    if (context->token_to_scan == _DEP) {
-      pLdSt_op->memorySemantic = BrigDep;
-      context->token_to_scan = yylex();
       continue;
     }
 
@@ -5279,7 +5324,7 @@ int Ld(Context* context) {
   }
 
   tmp.storageClass = BrigFlatSpace;
-  tmp.memorySemantic  = BrigRegular;
+  tmp.memorySemantic = BrigRegular;
   tmp.equivClass = 0;
   if (LdModifierPart2(context, &tmp, &vector_size)) {
     return 1;
@@ -6480,9 +6525,9 @@ int BodyStatementNested(Context* context) {
              context->token_type == UNINITIALIZABLE_ADDRESS ||
              context->token_type == INITIALIZABLE_ADDRESS) {
     if (!DeclPrefix(context)) {
-      if (!InitializableDecl(context)) {
+      if (!InitializableDecl(context, &context->arg_symbol_map)) {
         return 0;
-      } else if (!UninitializableDecl(context)) {
+      } else if (!UninitializableDecl(context, &context->arg_symbol_map)) {
         return 0;
       }
     }
@@ -6492,11 +6537,11 @@ int BodyStatementNested(Context* context) {
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
     std::string labelName = context->token_value.string_val;
-    if (Label(context)) {
+    if (Label(context, &context->arg_symbol_map)) {
       return 1;
     }
     if(context->token_to_scan == LABELTARGETS) {
-      return LabelTargetsPart2(context, context->symbol_map[labelName]);
+      return LabelTargetsPart2(context, context->get_symbol(labelName));
     }
     return 0;
   } else if (!Operation(context)) {
@@ -6575,9 +6620,9 @@ int BodyStatement(Context* context) {
              context->token_type == UNINITIALIZABLE_ADDRESS ||
              context->token_type == INITIALIZABLE_ADDRESS) {
     if (!DeclPrefix(context)) {
-      if (!InitializableDecl(context)) {
+      if (!InitializableDecl(context, &context->local_symbol_map)) {
         return 0;
-      } else if (!UninitializableDecl(context)) {
+      } else if (!UninitializableDecl(context, &context->local_symbol_map)) {
         return 0;
       }
     }
@@ -6591,11 +6636,11 @@ int BodyStatement(Context* context) {
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
     std::string labelName = context->token_value.string_val;
-    if (Label(context)) {
+    if (Label(context, &context->local_symbol_map)) {
       return 1;
     }
     if (context->token_to_scan == LABELTARGETS)
-      return LabelTargetsPart2(context, context->symbol_map[labelName]);
+      return LabelTargetsPart2(context, context->get_symbol(labelName));
     return 0;
   } else if (!Operation(context)) {
     context->update_bdf_operation_count();
@@ -6605,11 +6650,6 @@ int BodyStatement(Context* context) {
 }
 
 int BodyStatements(Context* context) {
-  if (BodyStatement(context)) {
-    context->set_error(INVALID_CODEBLOCK);
-    // Codeblock should have atleast one bodyStatement
-    return 1;
-  }
   while (context->token_to_scan && (context->token_to_scan != '}')) {
     if(BodyStatement(context))
       break;
@@ -7002,7 +7042,7 @@ int GlobalImageDecl(Context *context) {
 }
 
 int GlobalImageDeclPart2(Context *context){
- //First token has been scanned and verified as global. Read next token.
+  // First token has been scanned and verified as global. Read next token.
 
   if (_RWIMG != context->token_to_scan) {
     return 1;
@@ -7015,7 +7055,7 @@ int GlobalImageDeclPart2(Context *context){
   }
   std::string var_name(context->token_value.string_val);
   int var_name_offset = context->add_symbol(var_name);
-  if (context->symbol_map.count(var_name)) {
+  if (context->global_symbol_map.count(var_name)) {
     context->set_error(REPEATED_DECLARATION);
     return 1;
   }
@@ -7057,7 +7097,7 @@ int GlobalImageDeclPart2(Context *context){
     BrigImageOrderUnknown,  //order
     BrigImageFormatUnknown  //format
   };
-  context->symbol_map[var_name] = context->get_directive_offset();
+  context->global_symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bdi);
   context->set_alignment(0);
 
@@ -7096,7 +7136,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
   }
   std::string var_name(context->token_value.string_val);
   int var_name_offset = context->add_symbol(var_name);
-  if (context->symbol_map.count(var_name)) {
+  if (context->global_symbol_map.count(var_name)) {
     context->set_error(REPEATED_DECLARATION);
     return 1;
   }
@@ -7139,7 +7179,7 @@ int GlobalReadOnlyImageDeclPart2(Context *context){
     BrigImageOrderUnknown,  //order
     BrigImageFormatUnknown  //format
   };
-  context->symbol_map[var_name] = context->get_directive_offset();
+  context->global_symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bdi);
   context->set_alignment(0);
 
@@ -7698,7 +7738,7 @@ int LabelList(Context* context, BrigdOffset32_t dOffset, bool IsTargets) {
   while (context->token_to_scan == TOKEN_LABEL) {
     std::string label_name = context->token_value.string_val;
 
-    labDirOffset_list.push_back(context->symbol_map[label_name]);
+    labDirOffset_list.push_back(context->get_symbol(label_name));
     labName_list.push_back(label_name);
 
     elementCount++;
@@ -8303,7 +8343,7 @@ int GlobalSamplerDeclPart2(Context *context){
   std::string var_name(context->token_value.string_val);
   int var_name_offset = context->add_symbol(var_name);
 
-  if (context->symbol_map.count(var_name)) {
+  if (context->global_symbol_map.count(var_name)) {
     context->set_error(REPEATED_DECLARATION);
     return 1;
   }
@@ -8349,7 +8389,7 @@ int GlobalSamplerDeclPart2(Context *context){
     0,                      //boundaryW
     0                       //reserved1
   };
-  context->symbol_map[var_name] = context->get_directive_offset();
+  context->global_symbol_map[var_name] = context->get_directive_offset();
   context->append_directive(&bds);
   context->set_alignment(0);
 
@@ -8370,8 +8410,10 @@ int GlobalSamplerDeclPart2(Context *context){
 
 int GlobalInitializablePart2(Context* context) {
   if (GLOBAL == context->token_to_scan) {
-    BrigStorageClass32_t storage_class = context->token_value.storage_class;
-    context->token_to_scan = yylex();
+    if (!InitializableDecl(context, &context->global_symbol_map)) {
+      return 0;
+    }
+
     switch(context->token_to_scan) {
       case _RWIMG:
         return(GlobalImageDeclPart2(context));
@@ -8384,10 +8426,9 @@ int GlobalInitializablePart2(Context* context) {
           context->set_error(MISSING_IDENTIFIER);
           return 1;
         }
-        return (InitializableDecl(context, storage_class));
     }
   } else if (READONLY == context->token_to_scan) {
-    return InitializableDecl(context);
+    return InitializableDecl(context, &context->global_symbol_map);
   } else {
     return 1;
   }
@@ -8469,7 +8510,7 @@ int PairAddressableOperand(Context* context) {
     0                       // directive
   };
 
-  boa.directive = context->symbol_map[name];
+  boa.directive = context->get_symbol(name);
   //TODO(Chuang): This Comparison for uint test.
   if (boa.directive != 0) {
     if (context->get_machine() == BrigELarge) {
@@ -8533,6 +8574,7 @@ int TopLevelStatement(Context *context){
     }
     if (';' == context->token_to_scan) {
       context->token_to_scan = yylex();
+      context->local_symbol_map.clear();
       return 0;
     } else {
       if (Codeblock(context)){

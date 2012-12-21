@@ -43,7 +43,6 @@ TEST(Brig2LLVMTest, Example1) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -156,7 +155,6 @@ TEST(Brig2LLVMTest, Example2) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -273,7 +271,6 @@ TEST(Brig2LLVMTest, Example3) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -436,7 +433,6 @@ TEST(Brig2LLVMTest, Example4) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -671,7 +667,6 @@ TEST(Brig2LLVMTest, Example5) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -817,7 +812,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -859,7 +853,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -903,7 +896,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveComment) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -950,7 +942,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -990,7 +981,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1035,7 +1025,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveFile) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1081,7 +1070,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveLoc) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1122,7 +1110,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveLoc) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1170,7 +1157,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveControl) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1209,7 +1195,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveControl) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1333,7 +1318,6 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1400,7 +1384,6 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1487,7 +1470,6 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1523,7 +1505,6 @@ TEST(Brig2LLVMTest, BrigDirectiveExtension_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1570,7 +1551,6 @@ TEST(Brig2LLVMTest, BrigDirectiveArgStart_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1606,7 +1586,6 @@ TEST(Brig2LLVMTest, BrigDirectiveArgStart_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1650,7 +1629,6 @@ TEST(Brig2LLVMTest, BrigDirectiveArgEnd_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1686,7 +1664,6 @@ TEST(Brig2LLVMTest, BrigDirectiveArgEnd_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1726,7 +1703,6 @@ TEST(Brig2LLVMTest, BrigBlockMethodValidTest) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1791,7 +1767,6 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockStart_invalid) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1834,7 +1809,6 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1877,7 +1851,6 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockNumeric_invalid2) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1920,7 +1893,6 @@ TEST(Brig2LLVMTest, BrigDirectiveBlockString_invalid) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1960,7 +1932,6 @@ TEST(Brig2LLVMTest, validateBrigDirectivePad) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -1996,7 +1967,6 @@ TEST(Brig2LLVMTest, validateBrigDirectivePragma) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2035,7 +2005,6 @@ TEST(Brig2LLVMTest, validateBrigDirectivePragma) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2079,7 +2048,6 @@ TEST(Brig2LLVMTest, validateBrigDirectivePragma) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2129,7 +2097,6 @@ TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2179,7 +2146,6 @@ TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2235,7 +2201,6 @@ TEST(Brig2LLVMTest, BrigDirectiveImage_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2293,7 +2258,6 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2344,7 +2308,6 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2400,7 +2363,6 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2456,7 +2418,6 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2512,7 +2473,6 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2568,7 +2528,6 @@ TEST(Brig2LLVMTest, BrigDirectiveSampler_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2628,7 +2587,6 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2662,7 +2620,6 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2702,7 +2659,6 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2745,7 +2701,6 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2795,7 +2750,6 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2838,7 +2792,6 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2903,7 +2856,6 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelInit) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2959,7 +2911,6 @@ TEST(Brig2LLVMTest, UniqueString) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -2996,7 +2947,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3052,7 +3002,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3109,7 +3058,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3169,7 +3117,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveInit) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3233,7 +3180,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3276,7 +3222,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3326,7 +3271,6 @@ TEST(Brig2LLVMTest, validateBrigDirectiveProto) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3378,7 +3322,6 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3416,7 +3359,6 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3465,7 +3407,6 @@ TEST(Brig2LLVMTest, validateBrigInstBase) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3521,7 +3462,6 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3603,7 +3543,6 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3661,7 +3600,6 @@ TEST(Brig2LLVMTest, validateBrigInstAtomic) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3712,7 +3650,6 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3803,7 +3740,6 @@ TEST(Brig2LLVMTest, validateBrigInstAtomicImage) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3866,7 +3802,6 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -3964,7 +3899,6 @@ TEST(Brig2LLVMTest, validateBrigInstRead) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4029,7 +3963,6 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4087,7 +4020,6 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4138,7 +4070,6 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4183,7 +4114,6 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4228,7 +4158,6 @@ TEST(Brig2LLVMTest, validateBrigInstMod) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4278,7 +4207,6 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4339,7 +4267,6 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4398,7 +4325,6 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4446,7 +4372,6 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4494,7 +4419,6 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4542,7 +4466,6 @@ TEST(Brig2LLVMTest, validateBrigInstCmp) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4595,7 +4518,6 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4694,7 +4616,6 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4753,7 +4674,6 @@ TEST(Brig2LLVMTest, validateBrigInstImage) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4804,7 +4724,6 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4854,7 +4773,6 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4906,7 +4824,6 @@ TEST(Brig2LLVMTest, validateBrigInstBar) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -4954,7 +4871,6 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
       0,
       BrigESmall,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5001,7 +4917,6 @@ TEST(Brig2LLVMTest, validateBrigInstMem) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5057,7 +4972,6 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5117,7 +5031,6 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5173,7 +5086,6 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5220,7 +5132,6 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5267,7 +5178,6 @@ TEST(Brig2LLVMTest, validateBrigInstCvt) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5318,7 +5228,6 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5393,7 +5302,6 @@ TEST(Brig2LLVMTest, validateBrigInstLdSt) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5455,7 +5363,6 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5517,7 +5424,6 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5587,7 +5493,6 @@ TEST(Brig2LLVMTest, validateBrigOperandAddress) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5657,7 +5562,6 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5741,7 +5645,6 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5833,7 +5736,6 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -5922,7 +5824,6 @@ TEST(Brig2LLVMTest, validateBrigOperandCompound) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6011,7 +5912,6 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6070,7 +5970,6 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6140,7 +6039,6 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6208,7 +6106,6 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6263,7 +6160,6 @@ TEST(Brig2LLVMTest, validateBrigOperandIndirect) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6332,7 +6228,6 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6391,7 +6286,6 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentRef) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6442,7 +6336,6 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6490,7 +6383,6 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6535,7 +6427,6 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6580,7 +6471,6 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6625,7 +6515,6 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6671,7 +6560,6 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6724,7 +6612,6 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6771,7 +6658,6 @@ TEST(Brig2LLVMTest, validateBrigOperandReg) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6820,7 +6706,6 @@ TEST(Brig2LLVMTest, validateBrigOperandLabelRef) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6870,7 +6755,6 @@ TEST(Brig2LLVMTest, validateBrigOperandLabelRef) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6929,7 +6813,6 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV2) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -6987,7 +6870,6 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV2) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7058,7 +6940,6 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV4) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7134,7 +7015,6 @@ TEST(Brig2LLVMTest, validateBrigOperandRegV4) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7221,7 +7101,6 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7289,7 +7168,6 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7387,7 +7265,6 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7487,7 +7364,6 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7583,7 +7459,6 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7655,7 +7530,6 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7697,7 +7571,6 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);
@@ -7744,7 +7617,6 @@ TEST(Brig2LLVMTest, validateBrigOperandImmed) {
       0,
       BrigELarge,
       BrigEFull,
-      BrigENosftz,
       0
     };
     directives.append(&bdv);

@@ -29,8 +29,13 @@ int Instruction3(Context* context);
 int Version(Context* context);
 int Alignment(Context* context);
 int SignatureArgumentList(Context *context);
-int SignatureArgumentList(Context *context, std::vector<BrigDirectiveSignature::BrigProtoType> *types);
+int SignatureArgumentList(Context *context, 
+    std::vector<BrigDirectiveSignature::BrigProtoType> *types);
+
 int Label(Context* context);
+int Label(Context* context, 
+    std::map<std::string, BrigdOffset32_t> *symbol_map);
+
 int LabelTargets(Context* context);
 int Instruction4(Context* context);
 int DeclPrefix(Context* context);
@@ -52,12 +57,18 @@ int CallArgs(Context* context);
 int Call(Context* context);
 int Initializer(Context* context, BrigdOffset32_t sym_offset);
 int InitializableDecl(Context* context);
-int InitializableDeclPart2(Context* context, BrigStorageClass32_t storage_class);
+int InitializableDecl(Context* context, 
+    std::map<std::string, BrigdOffset32_t> *symbol_map);
+
 int UninitializableDecl(Context* context);
+int UninitializableDecl(Context* context, 
+    std::map<std::string, BrigdOffset32_t> *symbol_map);
+
 int ArgUninitializableDecl(Context* context);
 int VectorToken(Context *context);
 int SignatureType(Context *context);
-int SignatureType(Context *context, std::vector<BrigDirectiveSignature::BrigProtoType> *types);
+int SignatureType(Context *context, 
+    std::vector<BrigDirectiveSignature::BrigProtoType> *types);
 int FileDecl(Context* context);
 int SysCall(Context* context);
 int ArgBlock(Context* context);
@@ -158,8 +169,8 @@ int GlobalImageDeclPart2(Context *context);
 int GlobalReadOnlyImageDeclPart2(Context *context);
 int GlobalInitializablePart2(Context* context);
 int GlobalSamplerDeclPart2(Context *context);
-int InitializableDecl(Context* context, BrigStorageClass32_t storage_class);
-int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset, BrigoOffset32_t* pRetOpOffset);
+int OffsetAddressableOperandPart2(Context* context, 
+    BrigoOffset32_t addrOpOffset, BrigoOffset32_t* pRetOpOffset);
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int AddressSpaceIdentifier(Context* context);
 int Optacqreg(Context* context, BrigMemorySemantic32_t* memSemantic);
@@ -168,9 +179,11 @@ int Acq(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperand(Context* context, BrigoOffset32_t* pOperand);
-int ArrayOperand(Context* context, BrigoOffset32_t* pOperand, BrigDataType16_t expectedType);
+int ArrayOperand(Context* context, BrigoOffset32_t* pOperand, 
+    BrigDataType16_t expectedType);
 
-int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, bool IsImageOrSampler);
+int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, 
+    bool IsImageOrSampler);
 int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
 
 int Instruction4MultiMediaOperation(Context* context);
@@ -195,13 +208,14 @@ int Instruction2OpcodeFtz(Context* context);
 int BranchCbr(Context* context);
 int BranchBrn(Context* context);
 
-BrigDataType16_t ConvertTypeToB(BrigDataType16_t type, BrigDataType16_t* pSubType = NULL,
-                                uint32_t* pSize = NULL);
+BrigDataType16_t ConvertTypeToB(BrigDataType16_t type, 
+    BrigDataType16_t* pSubType = NULL, uint32_t* pSize = NULL);
 bool CheckDataType(BrigMachine16_t model, BrigStorageClass32_t addressType, 
     BrigDataType16_t type);
 bool CheckRegister(unsigned int token, BrigDataType16_t type); 
 
-bool CheckDestRegister(unsigned int token, BrigDataType16_t type, BrigOpcode32_t opcode); 
+bool CheckDestRegister(unsigned int token, BrigDataType16_t type, 
+    BrigOpcode32_t opcode); 
 
 }  // namespace brig
 }  // namespace hsa

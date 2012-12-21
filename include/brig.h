@@ -18,7 +18,6 @@ typedef uint32_t BrigdOffset32_t;
 typedef uint32_t BrigoOffset32_t;
 typedef uint16_t BrigMachine16_t;
 typedef uint16_t BrigProfile16_t;
-typedef uint16_t BrigSftz16_t;
 typedef uint32_t BrigControlType32_t;
 typedef uint16_t BrigAttribute16_t;
 typedef uint32_t BrigStorageClass32_t;
@@ -167,16 +166,7 @@ enum BrigMachine {
 // BrigProfile is used to specify the kind of profile.
 enum BrigProfile {
   BrigEFull = 0,
-  BrigEMobile = 1
-};
-
-// PRM 19.5.19
-// BrigSftz
-// BrigSftz is used to specify the use (or non-use) of single-precision
-// flush to zero.
-enum BrigSftz {
-  BrigESftz = 0,
-  BrigENosftz = 1
+  BrigEBase = 1
 };
 
 // PRM 19.5.12
@@ -376,20 +366,25 @@ enum BrigOpcode {
   BrigDebugTrap = 109,
   BrigDispatchId = 110,
   BrigDynWaveId = 111,
-  BrigLaneId = 112,
-  BrigMaxDynWaveId = 113,
-  BrigNDRangeGroups = 114,
-  BrigNDRangeSize = 115,
-  BrigNop = 116,
-  BrigNullPtr = 117,
-  BrigQid = 118,
-  BrigWorkDim = 119,
-  BrigWorkGroupId = 120,
-  BrigWorkGroupSize = 121,
-  BrigWorkItemAbsId = 122,
-  BrigWorkItemAbsIdFlat = 123,
-  BrigWorkItemId = 124,
-  BrigWorkItemIdFlat = 125,
+  BrigFeClearExcept = 112,
+  BrigFeGetExcept = 113,
+  BrigFeSetExcept = 114,
+  BrigGridGroups = 115,
+  BrigGridSize = 116,
+  BrigLaneId = 117,
+  BrigMaxDynWaveId = 118,
+  BrigNDRangeGroups = 119,
+  BrigNDRangeSize = 120,
+  BrigNop = 121,
+  BrigNullPtr = 122,
+  BrigQid = 123,
+  BrigWorkDim = 124,
+  BrigWorkGroupId = 125,
+  BrigWorkGroupSize = 126,
+  BrigWorkItemAbsId = 127,
+  BrigWorkItemAbsIdFlat = 128,
+  BrigWorkItemId = 129,
+  BrigWorkItemIdFlat = 130,
   BrigInvalidOpcode
 };
 
@@ -802,7 +797,6 @@ struct BrigDirectiveVersion {
     uint16_t minor;
     BrigMachine16_t machine;
     BrigProfile16_t profile;
-    BrigSftz16_t ftz;
     uint16_t reserved;
 };
 

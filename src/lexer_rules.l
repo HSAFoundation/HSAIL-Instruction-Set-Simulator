@@ -885,6 +885,26 @@ qid                 { free_string(context);
                       context->token_value.opcode = BrigQid;
                       return QID; }
 
+feclearexcept       { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE_NODT;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFeClearExcept;
+                      return FECLEAREXCEPT; }
+
+
+fegetexcept         { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE_NODT;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFeGetExcept;
+                      return FEGETEXCEPT; }
+
+
+fesetexcept         { free_string(context);
+                      context->token_type = INSTRUCTION1_OPCODE_NODT;
+                      context->yycolno+=yyleng;
+                      context->token_value.opcode = BrigFeSetExcept;
+                      return FESETEXCEPT; }
+
 abs                 { free_string(context);
                       context->token_value.opcode = BrigAbs;
                       context->token_type = INSTRUCTION2_OPCODE;
@@ -1634,20 +1654,10 @@ _p_sat              { free_string(context);
                       context->yycolno+=yyleng;
                       return  _FULL;}
 
-\$mobile            { free_string(context);
+\$base              { free_string(context);
                       context->token_type = TARGET;
                       context->yycolno+=yyleng;
-                      return  _MOBILE;}
-
-\$sftz              { free_string(context);
-                      context->token_type = TARGET;
-                      context->yycolno+=yyleng;
-                      return  _SFTZ;}
-
-\$nosftz            { free_string(context);
-                      context->token_type = TARGET;
-                      context->yycolno+=yyleng;
-                      return  _NOSFTZ;}
+                      return  _BASE;}
 
 width               { free_string(context);
                       context->token_type = COMMON_KEYWORD;

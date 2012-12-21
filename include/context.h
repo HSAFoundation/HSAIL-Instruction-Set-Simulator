@@ -290,6 +290,8 @@ class Context {
     Buffer *get_operands(void) const {return obuf;}
     StringBuffer *get_strings(void) const {return sbuf;}
 
+    BrigdOffset32_t get_symbol(std::string name);
+
     BrigoOffset32_t current_argList_offset;
     // label_o_map contains the info for OperandLabelRef,
     // label_d_map contains the label that needed in LabelList
@@ -299,7 +301,9 @@ class Context {
     std::map<std::string, BrigoOffset32_t> operand_map;
     std::map<std::string, BrigoOffset32_t> label_o_map;
     std::multimap<std::string, BrigdOffset32_t> label_d_map;
-    std::map<std::string, BrigdOffset32_t> symbol_map;
+    std::map<std::string, BrigdOffset32_t> global_symbol_map;
+    std::map<std::string, BrigdOffset32_t> local_symbol_map;
+    std::map<std::string, BrigdOffset32_t> arg_symbol_map;
 
     unsigned int token_to_scan;
     int               yycolno;
