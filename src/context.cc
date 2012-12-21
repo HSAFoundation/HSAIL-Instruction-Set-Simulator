@@ -57,7 +57,9 @@ void Context::clear_context(void) {
   operand_map.clear();
   label_o_map.clear();
   label_d_map.clear();
-  symbol_map.clear();
+  global_symbol_map.clear();
+  local_symbol_map.clear();
+  arg_symbol_map.clear();
   arg_map.clear();
   if (valid_string) {
     free(token_value.string_val);
@@ -328,6 +330,17 @@ bool Context::get_isArray() const {
 
 BrigStorageClass32_t Context::get_storageClass() const {
   return storageClass;
+}
+
+BrigdOffset32_t Context::get_symbol(std::string name) {
+  if (arg_symbol_map.count(name)) {
+    return arg_symbol_map[name];
+  } else if (local_symbol_map.count(name)) {
+    return local_symbol_map[name];
+  } else if (global_symbol_map.count(name)) {
+    return global_symbol_map[name];
+  }
+  return 0;
 }
 
 // set context
