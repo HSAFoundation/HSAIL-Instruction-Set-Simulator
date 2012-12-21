@@ -973,7 +973,6 @@ void validate(const BrigDirectiveVersion* ref, const BrigDirectiveVersion* get,
   EXPECT_EQ(ref->minor, get->minor);
   EXPECT_EQ(ref->machine, get->machine);
   EXPECT_EQ(ref->profile, get->profile);
-  EXPECT_EQ(ref->ftz, get->ftz);
   EXPECT_EQ(ref->reserved, get->reserved);
 }
 

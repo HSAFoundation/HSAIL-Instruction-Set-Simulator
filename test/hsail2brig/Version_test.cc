@@ -55,7 +55,6 @@ TEST(CodegenTest, Version_CodeGen) {
   out.minor = 0;
   out.machine = BrigELarge;
   out.profile = BrigEFull;
-  out.ftz = BrigENosftz;
   out.reserved = 0;
 
   Version_Test TestCase1(in, &out);
@@ -71,14 +70,13 @@ TEST(CodegenTest, Version_CodeGen) {
   out.minor = 0;
   out.machine = BrigELarge;
   out.profile = BrigEFull;
-  out.ftz = BrigENosftz;
   out.reserved = 0;
 
   Version_Test TestCase2(in, &out);
   TestCase2.Run_Test(&Version);
 
   /************************************* Test Case 3 ************************************/
-  in.assign("version 2:0:$large, $mobile, $sftz;\n");
+  in.assign("version 2:0:$large, $mobile;\n");
 
   out.size = sizeof(out);
   out.kind = BrigEDirectiveVersion;
@@ -87,14 +85,13 @@ TEST(CodegenTest, Version_CodeGen) {
   out.minor = 0;
   out.machine = BrigELarge;
   out.profile = BrigEMobile;
-  out.ftz = BrigESftz;
   out.reserved = 0;
 
   Version_Test TestCase3(in, &out);
   TestCase3.Run_Test(&Version);
 
   /************************************* Test Case 4 ************************************/
-  in.assign("version 2:1:$nosftz, $small, $full;\n");
+  in.assign("version 2:1: $small, $full;\n");
 
   out.size = sizeof(out);
   out.kind = BrigEDirectiveVersion;
@@ -103,7 +100,6 @@ TEST(CodegenTest, Version_CodeGen) {
   out.minor = 1;
   out.machine = BrigESmall;
   out.profile = BrigEFull;
-  out.ftz = BrigENosftz;
   out.reserved = 0;
 
   Version_Test TestCase4(in, &out);
@@ -117,12 +113,12 @@ TEST(ErrorReportTest, Version) {
   Version_Test TestCase1(input);
   TestCase1.Run_Test(&Version, MISSING_SEMICOLON);
 
-  input.assign("version 2;1:$nosftz, $small, $full;\n");
+  input.assign("version 2;1:$small, $full;\n");
 
   Version_Test TestCase2(input);
   TestCase2.Run_Test(&Version, MISSING_COLON);
 
-  input.assign("version 2:1 $nosftz, $full;\n");
+  input.assign("version 2:1:$full $small;\n");
 
   Version_Test TestCase3(input);
   TestCase3.Run_Test(&Version, MISSING_SEMICOLON);

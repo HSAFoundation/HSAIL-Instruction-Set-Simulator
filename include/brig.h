@@ -18,7 +18,6 @@ typedef uint32_t BrigdOffset32_t;
 typedef uint32_t BrigoOffset32_t;
 typedef uint16_t BrigMachine16_t;
 typedef uint16_t BrigProfile16_t;
-typedef uint16_t BrigSftz16_t;
 typedef uint32_t BrigControlType32_t;
 typedef uint16_t BrigAttribute16_t;
 typedef uint32_t BrigStorageClass32_t;
@@ -168,15 +167,6 @@ enum BrigMachine {
 enum BrigProfile {
   BrigEFull = 0,
   BrigEMobile = 1
-};
-
-// PRM 19.5.19
-// BrigSftz
-// BrigSftz is used to specify the use (or non-use) of single-precision
-// flush to zero.
-enum BrigSftz {
-  BrigESftz = 0,
-  BrigENosftz = 1
 };
 
 // PRM 19.5.12
@@ -802,7 +792,6 @@ struct BrigDirectiveVersion {
     uint16_t minor;
     BrigMachine16_t machine;
     BrigProfile16_t profile;
-    BrigSftz16_t ftz;
     uint16_t reserved;
 };
 

@@ -1254,7 +1254,6 @@ int Version(Context* context) {
   // set default values
   bdv.machine = BrigELarge;
   bdv.profile = BrigEFull;
-  bdv.ftz = BrigENosftz;
 
   // first token must be version
   if (VERSION != context->token_to_scan) {
@@ -1294,8 +1293,6 @@ int Version(Context* context) {
         case _LARGE: bdv.machine = BrigELarge; break;
         case _FULL: bdv.profile = BrigEFull; break;
         case _MOBILE: bdv.profile = BrigEMobile; break;
-        case _SFTZ: bdv.ftz = BrigESftz; break;
-        case _NOSFTZ: bdv.ftz = BrigENosftz; break;
       }
       context->set_machine(bdv.machine);
       context->set_profile(bdv.profile);
@@ -1379,7 +1376,7 @@ int DeclPrefix(Context* context){
   if ((context->token_to_scan == ALIGN) ||
      (context->token_to_scan == EXTERN) ||
      (context->token_to_scan == STATIC) ||
-     (context->token_to_scan==CONST)) {
+     (context->token_to_scan == CONST)) {
     switch (context->token_to_scan) {
       case ALIGN:
         if (Alignment(context))

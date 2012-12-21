@@ -60,7 +60,6 @@ TEST(BrigWriterTest, EmptyBRIG) {
     0,
     BrigELarge,
     BrigEFull,
-    BrigENosftz,
     0
   };
   dirBuf.append(&bdv);
@@ -3522,13 +3521,12 @@ TEST(BrigKernelTest, MultipleVersionStatements) {
   EXPECT_TRUE(BP);
   if(!BP) return;
 }
-
-TEST(BrigKernelTest, Sftz) {
+TEST(BrigKernelTest, Ftz2) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small, $sftz;\n"
+    "version 1:0:$small;\n"
     "kernel &ftzTest(kernarg_f32 %out)\n"
     "{\n"
-    " add_f32 $s1, 0x007FFFFF, 0;\n"
+    " add_ftz_f32 $s1, 0x007FFFFF, 0;\n"
     " st_kernarg_f32 $s1, [%out];\n"
     " ret;\n"
     "};\n");

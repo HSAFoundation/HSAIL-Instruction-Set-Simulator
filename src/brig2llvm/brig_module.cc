@@ -578,9 +578,6 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
                  dir->profile == BrigEMobile,
                  "Invalid profile");
 
-  valid &= check(dir->ftz == BrigESftz ||
-                 dir->ftz == BrigENosftz,
-                 "Invalid flush to zero");
   valid &= check(!dir->reserved, "Reserved not zero");
   const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
   if(!check(bdfv, "Missing BrigDirectiveVersion")) return false;
@@ -588,8 +585,6 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
                  "version statement must have the same machine operands");
   valid &= check(dir->profile == bdfv->profile,
                  "version statement must have the same profile operands");
-  valid &= check(dir->ftz == bdfv->ftz,
-                 "version statement must have the same flush to zero operands");
   return valid;
 }
 

@@ -318,7 +318,6 @@ TEST(CodegenTest, Example6_CodeGen) {
   verDir.minor = 0;
   verDir.machine = BrigESmall;
   verDir.profile = BrigEFull;
-  verDir.ftz = BrigENosftz;
   verDir.reserved = 0;
 
   dir->append(&verDir);

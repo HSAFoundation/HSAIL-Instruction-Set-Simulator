@@ -1639,16 +1639,6 @@ _p_sat              { free_string(context);
                       context->yycolno+=yyleng;
                       return  _MOBILE;}
 
-\$sftz              { free_string(context);
-                      context->token_type = TARGET;
-                      context->yycolno+=yyleng;
-                      return  _SFTZ;}
-
-\$nosftz            { free_string(context);
-                      context->token_type = TARGET;
-                      context->yycolno+=yyleng;
-                      return  _NOSFTZ;}
-
 width               { free_string(context);
                       context->token_type = COMMON_KEYWORD;
                       context->yycolno+=yyleng;

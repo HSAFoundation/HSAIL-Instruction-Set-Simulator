@@ -79,7 +79,6 @@ TEST(CodegenTest, Example1_CodeGen) {
   verRef.minor = 0;
   verRef.machine = BrigELarge;
   verRef.profile = BrigEFull;
-  verRef.ftz = BrigENosftz;
   verRef.reserved = 0;
 
   dir->append(&verRef);

@@ -29,7 +29,6 @@ TEST_P(TestVersion, Version) {
   EXPECT_EQ(ref.minor, get.minor);
   EXPECT_EQ(ref.machine, get.machine);
   EXPECT_EQ(ref.profile, get.profile);
-  EXPECT_EQ(ref.ftz, get.ftz);
      
   delete lexer;
 }
