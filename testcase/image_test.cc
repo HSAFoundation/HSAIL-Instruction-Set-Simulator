@@ -16,7 +16,7 @@ TEST_P(TestLdImage, LdImage) {
   std::string input(imageload_pair[n].str);
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  context->symbol_map["%RWImg3"] = 30;
+  context->global_symbol_map["%RWImg3"] = 30;
   EXPECT_EQ(0, ImageLoad(context));
 
   BrigInstImage ref = imageload_pair[n].ref;
@@ -767,8 +767,8 @@ TEST_P(TestRdImage1d, RdImage1d) {
   std::string input(imageread_1d_pair[n].str);
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1;
+  context->global_symbol_map["%RWImg3"] = 0xf7;
+  context->global_symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
   BrigInstImage ref = imageread_1d_pair[n].ref;
@@ -886,8 +886,8 @@ TEST_P(TestRdImage2d, RdImage2d) {
   std::string input(imageread_2d_pair[n].str);
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1;
+  context->global_symbol_map["%RWImg3"] = 0xf7;
+  context->global_symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
   BrigInstImage ref = imageread_2d_pair[n].ref;
@@ -1023,8 +1023,8 @@ TEST_P(TestRdImage3d, RdImage3d) {
   std::string input(imageread_3d_pair[n].str);
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1;
+  context->global_symbol_map["%RWImg3"] = 0xf7;
+  context->global_symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
   BrigInstImage ref = imageread_3d_pair[n].ref;
@@ -1179,8 +1179,8 @@ TEST_P(TestRdImage1da, RdImage1da) {
   std::string input(imageread_1da_pair[n].str);
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1;
+  context->global_symbol_map["%RWImg3"] = 0xf7;
+  context->global_symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
   BrigInstImage ref = imageread_1da_pair[n].ref;
@@ -1317,8 +1317,8 @@ TEST_P(TestRdImage2da, RdImage2da) {
   std::string input(imageread_2da_pair[n].str);
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  context->symbol_map["%RWImg3"] = 0xf7;
-  context->symbol_map["%Samp3"] = 0xf1;
+  context->global_symbol_map["%RWImg3"] = 0xf7;
+  context->global_symbol_map["%Samp3"] = 0xf1;
   EXPECT_EQ(0, ImageRead(context));
 
   BrigInstImage ref = imageread_2da_pair[n].ref;
@@ -1802,7 +1802,7 @@ TEST_P(TestImageStore, ImageStore) {
   std::string input(imagestore_pair[n].str);
   Lexer* lexer = new Lexer(input);
   context->token_to_scan = lexer->get_next_token();
-  context->symbol_map["%RWImg3"] = 30;
+  context->global_symbol_map["%RWImg3"] = 30;
   EXPECT_EQ(0, ImageStore(context));
 
   BrigInstImage ref = imagestore_pair[n].ref;

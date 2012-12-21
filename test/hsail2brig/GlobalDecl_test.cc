@@ -1446,7 +1446,7 @@ TEST(ErrorReportTest, GlobalDecl) {
 
   input.assign("global_b16 &x2[17] = {0xF7, 3 0xF1, -3, 31};\n");
   GlobalDecl_Test<> TestCase3(input);
-  TestCase3.Run_Test(&GlobalDecl, MISSING_CLOSING_BRACKET);
+  TestCase3.Run_Test(&GlobalDecl, MISSING_IDENTIFIER);
 }
 
 }
