@@ -5214,12 +5214,8 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
   while (1) {
     if (context->token_type == VECTOR) {
       switch (context->token_to_scan) {
-        case _V2:
-          *pVec_size = 2;
-          break;
-        case _V4:
-          *pVec_size = 4;
-          break;
+        case _V2: *pVec_size = 2; break;
+        case _V4: *pVec_size = 4; break;
         default:
           *pVec_size = 0;
       }
@@ -5237,12 +5233,6 @@ int LdModifierPart2(Context *context, BrigInstLdSt* pLdSt_op, int* pVec_size) {
 
     if(!Acq(context, &pmemSem)){
       pLdSt_op->memorySemantic = pmemSem;
-      continue;
-    }
-
-    if (context->token_to_scan == _DEP) {
-      pLdSt_op->memorySemantic = BrigDep;
-      context->token_to_scan = yylex();
       continue;
     }
 
@@ -5319,7 +5309,7 @@ int Ld(Context* context) {
   }
 
   tmp.storageClass = BrigFlatSpace;
-  tmp.memorySemantic  = BrigRegular;
+  tmp.memorySemantic = BrigRegular;
   tmp.equivClass = 0;
   if (LdModifierPart2(context, &tmp, &vector_size)) {
     return 1;

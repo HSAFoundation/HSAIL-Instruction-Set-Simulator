@@ -352,7 +352,7 @@ TEST(CodegenTest, Ld_Codegen){
   sbuf->clear();
 
 /**********************************************************************************/
-  in.assign( "ld_global_dep_u32 $s1, [&x];\n");
+  in.assign( "ld_global_u32 $s1, [&x];\n");
   op1.assign("$s1"); sbuf->append(op1);
 
   BrigOperandReg dest4 = {
@@ -391,7 +391,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigNoPacking,
     {0, sizeof(width4), sizeof(width4) + sizeof(dest4), 0, 0},
     BrigGlobalSpace,
-    BrigDep,
+    0,
     0
   };
   out4.size = sizeof(out4);

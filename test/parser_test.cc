@@ -3024,7 +3024,7 @@ TEST(ParserTest, Ld) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld(context));
 
-  input.assign("ld_arg_dep_equiv(2)_f32 $s1, [&y];");
+  input.assign("ld_arg_equiv(2)_f32 $s1, [&y];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Ld(context));

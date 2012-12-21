@@ -2482,12 +2482,12 @@ kernel &AllUp()
   ld_spill_s64 $d1, [$s2];
   ld_arg_f64 $d1, [$s2];
   ld_acq_u8 $s1, [$s2];
-  ld_dep_s8 $s1, [$s2];
+  ld_s8 $s1, [$s2];
   ld_acq_u16 $s1, [$s2];
   ld_part_acq_s32 $s1, [$s2];
   ld_part_acq_u64 $d1, [$s2];
   ld_acq_s64 $d1, [$s2];
-  ld_dep_f64 $d1, [$s2];
+  ld_f64 $d1, [$s2];
   ld_width(8)_kernarg_u16 $s1, [$s2];
   ld_width(16)_readonly_s16 $s1, [$s2];
   ld_private_u8 $s1, [$s2];
