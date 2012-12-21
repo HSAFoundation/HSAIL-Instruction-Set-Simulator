@@ -3577,11 +3577,11 @@ TEST(BrigKernelTest, Example6) {
 TEST(BrigInstTest, RegV2) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
-    "kernel &regV2(kernarg_u32 %r, kernarg_u32 %n)\n"
+    "kernel &regV2(kernarg_u32 %r, kernarg_u32 %x, kernarg_u32 %y)\n"
     "{\n"
     "  ld_kernarg_u32 $s5, [%r];\n"
-    "  ld_kernarg_u32 $s0, [%n];\n"
-    "  ld_kernarg_u32 $s1, [%n];\n"
+    "  ld_kernarg_u32 $s0, [%x];\n"
+    "  ld_kernarg_u32 $s1, [%y];\n"
     "  mov_b64 $d1, ($s0, $s1);\n"
     "  st_kernarg_u64 $d1, [$s5];\n"
     "};\n");
@@ -3590,26 +3590,31 @@ TEST(BrigInstTest, RegV2) {
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("regV2");
-  unsigned *input = new unsigned(0xffffffff);
-  uint64_t *output = new uint64_t(0);
-  void *args[] = { &output, input };
+  unsigned *x = new unsigned(0x12345678);
+  unsigned *y = new unsigned(0x9ABCDEF0);
+  uint32_t *output = new uint32_t[2];
+  memset(output, 0, sizeof(uint32_t[2]));
+  void *args[] = { &output, x, y };
   BE.launch(fun, args);
-  EXPECT_EQ(0xffffffffffffffffLL, *output);
+  EXPECT_EQ(0x12345678, output[0]);
+  EXPECT_EQ(0x9ABCDEF0, output[1]);
 
-  delete input;
+  delete x;
+  delete y;
   delete output;
 }
 
 TEST(BrigInstTest, RegV4) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$small;\n"
-    "kernel &regV4(kernarg_u32 %r, kernarg_u32 %input1, kernarg_u32 %input2)\n"
+    "kernel &regV4(kernarg_u32 %r, kernarg_u32 %w, kernarg_u32 %x,\n"
+    "                              kernarg_u32 %y, kernarg_u32 %z)\n"
     "{\n"
     "  ld_kernarg_u32 $s0, [%r];\n"
-    "  ld_kernarg_u32 $s1, [%input1];\n"
-    "  ld_kernarg_u32 $s2, [%input1];\n"
-    "  ld_kernarg_u32 $s3, [%input2];\n"
-    "  ld_kernarg_u32 $s4, [%input2];\n"
+    "  ld_kernarg_u32 $s1, [%w];\n"
+    "  ld_kernarg_u32 $s2, [%x];\n"
+    "  ld_kernarg_u32 $s3, [%y];\n"
+    "  ld_kernarg_u32 $s4, [%z];\n"
     "  mov_b128 $q0, ($s1, $s2, $s3, $s4);\n"
     "  st_kernarg_b128 $q0, [$s0];\n"
     "};\n");
@@ -3618,18 +3623,24 @@ TEST(BrigInstTest, RegV4) {
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("regV4");
-  unsigned *input1 = new unsigned(0xffffffff);
-  unsigned *input2 = new unsigned(0xeeeeeeee);
-  uint64_t *output = new uint64_t[2];
-  memset(output, 0, sizeof(uint64_t) * 2);
-  void *args[] = { &output, input1, input2 };
+  unsigned *w = new unsigned(0x01020304);
+  unsigned *x = new unsigned(0x05060708);
+  unsigned *y = new unsigned(0x090A0B0C);
+  unsigned *z = new unsigned(0x0D0E0F00);
+  uint32_t *output = new uint32_t[4];
+  memset(output, 0, sizeof(uint32_t[4]));
+  void *args[] = { &output, w, x, y, z };
   BE.launch(fun, args);
-  EXPECT_EQ(0xeeeeeeeeeeeeeeeeLL, output[0]);
-  EXPECT_EQ(0xffffffffffffffffLL, output[1]);
+  EXPECT_EQ(0x01020304, output[0]);
+  EXPECT_EQ(0x05060708, output[1]);
+  EXPECT_EQ(0x090A0B0C, output[2]);
+  EXPECT_EQ(0x0D0E0F00, output[3]);
 
-  delete input1;
-  delete input2;
-  delete output;
+  delete w;
+  delete x;
+  delete y;
+  delete z;
+  delete[] output;
 }
 
 TEST(BrigInstTest, Testb128) {

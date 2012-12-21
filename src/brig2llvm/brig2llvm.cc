@@ -285,10 +285,38 @@ static bool hasAddr(const BrigOperandBase *op) {
 static llvm::Value *getOperand(llvm::BasicBlock &B,
                                const BrigOperandBase *op,
                                const BrigInstHelper &helper,
+                               const FunState &state);
+
+template<class T>
+static llvm::Value *getVectorOperand(llvm::BasicBlock &B,
+                                     const T *op,
+                                     const BrigInstHelper &helper,
+                                     const FunState &state) {
+
+  llvm::LLVMContext &C = B.getContext();
+  llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
+
+  const size_t numElements = sizeof(op->regs) / sizeof(*op->regs);
+  llvm::Type *elementTy = runOnType(C, BrigDataType(op->type));
+  llvm::Type *vecTy = llvm::VectorType::get(elementTy, numElements);
+
+  llvm::Value *vec = llvm::UndefValue::get(vecTy);
+  for(unsigned i = 0; i < numElements; ++i) {
+    const BrigOperandBase *reg = helper.getReg(op, i);
+    llvm::Value *element = getOperand(B, reg, helper, state);
+    llvm::Value *idx = llvm::ConstantInt::get(int32Ty, i);
+    vec = llvm::InsertElementInst::Create(vec, element, idx, "", &B);
+  }
+
+  return vec;
+}
+
+static llvm::Value *getOperand(llvm::BasicBlock &B,
+                               const BrigOperandBase *op,
+                               const BrigInstHelper &helper,
                                const FunState &state) {
 
   llvm::LLVMContext &C = B.getContext();
-  llvm::Module *M = B.getParent()->getParent();
 
   if(hasAddr(op)) {
     llvm::Value *valAddr = getOperandAddr(B, op, helper, state);
@@ -365,45 +393,14 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
                                         adderInt, index, "", &B);
   }
 
-  if(const BrigOperandRegV2 *v2Op = dyn_cast<BrigOperandRegV2>(op)) {
-    llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
-    llvm::Type *argsTy[] = { int32Ty, int32Ty };
-    llvm::FunctionType *regV2FunTy =
-      llvm::FunctionType::get(llvm::Type::getInt64Ty(C), argsTy, false);
-    llvm::Constant *regV2Fun =
-      M->getOrInsertFunction("Mov_b64_b32", regV2FunTy);
+  if(const BrigOperandRegV2 *v2Op = dyn_cast<BrigOperandRegV2>(op))
+    return getVectorOperand(B, v2Op, helper, state);
 
-    const BrigOperandBase *regV1 = helper.getReg(v2Op, 0);
-    const BrigOperandBase *regV2 = helper.getReg(v2Op, 1);
-    llvm::Value *args[] =
-      { getOperand(B, regV1, helper, state),
-        getOperand(B, regV2, helper, state) };
-
-    return llvm::CallInst::Create(regV2Fun, args, "", &B);
-  }
-
-  if(const BrigOperandRegV4 *v4Op = dyn_cast<BrigOperandRegV4>(op)) {
-    llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
-    llvm::Type *argsTy[] = { int32Ty, int32Ty, int32Ty, int32Ty };
-    llvm::FunctionType *regV4FunTy =
-      llvm::FunctionType::get(llvm::Type::getIntNTy(C, 128), argsTy, false);
-    llvm::Constant *regV4Fun =
-      M->getOrInsertFunction("Mov_b128_b32", regV4FunTy);
-
-    const BrigOperandBase *regV1 = helper.getReg(v4Op, 0);
-    const BrigOperandBase *regV2 = helper.getReg(v4Op, 1);
-    const BrigOperandBase *regV3 = helper.getReg(v4Op, 2);
-    const BrigOperandBase *regV4 = helper.getReg(v4Op, 3);
-    llvm::Value *args[] =
-      { getOperand(B, regV1, helper, state),
-        getOperand(B, regV2, helper, state),
-        getOperand(B, regV3, helper, state),
-        getOperand(B, regV4, helper, state) };
-
-    return llvm::CallInst::Create(regV4Fun, args, "", &B);
-  }
+  if(const BrigOperandRegV4 *v4Op = dyn_cast<BrigOperandRegV4>(op))
+    return getVectorOperand(B, v4Op, helper, state);
 
   if(isa<BrigOperandWaveSz>(op)) {
+    llvm::Module *M = B.getParent()->getParent();
     llvm::FunctionType *getWavefrontSizeTy =
       llvm::FunctionType::get(llvm::Type::getInt32Ty(C), false);
     llvm::Constant *wavefrontSizeFn =
