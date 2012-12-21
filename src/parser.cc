@@ -1292,7 +1292,7 @@ int Version(Context* context) {
         case _SMALL: bdv.machine = BrigESmall; break;
         case _LARGE: bdv.machine = BrigELarge; break;
         case _FULL: bdv.profile = BrigEFull; break;
-        case _MOBILE: bdv.profile = BrigEMobile; break;
+        case _BASE: bdv.profile = BrigEBase; break;
       }
       context->set_machine(bdv.machine);
       context->set_profile(bdv.profile);

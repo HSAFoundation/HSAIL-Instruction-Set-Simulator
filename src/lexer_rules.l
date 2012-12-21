@@ -1634,10 +1634,10 @@ _p_sat              { free_string(context);
                       context->yycolno+=yyleng;
                       return  _FULL;}
 
-\$mobile            { free_string(context);
+\$base              { free_string(context);
                       context->token_type = TARGET;
                       context->yycolno+=yyleng;
-                      return  _MOBILE;}
+                      return  _BASE;}
 
 width               { free_string(context);
                       context->token_type = COMMON_KEYWORD;

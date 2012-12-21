@@ -166,7 +166,7 @@ enum BrigMachine {
 // BrigProfile is used to specify the kind of profile.
 enum BrigProfile {
   BrigEFull = 0,
-  BrigEMobile = 1
+  BrigEBase = 1
 };
 
 // PRM 19.5.12

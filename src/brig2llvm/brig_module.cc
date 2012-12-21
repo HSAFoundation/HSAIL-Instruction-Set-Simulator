@@ -575,7 +575,7 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
                  dir->machine == BrigESmall,
                  "Invalid machine");
   valid &= check(dir->profile == BrigEFull ||
-                 dir->profile == BrigEMobile,
+                 dir->profile == BrigEBase,
                  "Invalid profile");
 
   valid &= check(!dir->reserved, "Reserved not zero");

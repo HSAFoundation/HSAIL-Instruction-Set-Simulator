@@ -76,7 +76,7 @@ TEST(CodegenTest, Version_CodeGen) {
   TestCase2.Run_Test(&Version);
 
   /************************************* Test Case 3 ************************************/
-  in.assign("version 2:0:$large, $mobile;\n");
+  in.assign("version 2:0:$large, $base;\n");
 
   out.size = sizeof(out);
   out.kind = BrigEDirectiveVersion;
@@ -84,7 +84,7 @@ TEST(CodegenTest, Version_CodeGen) {
   out.major = 2;
   out.minor = 0;
   out.machine = BrigELarge;
-  out.profile = BrigEMobile;
+  out.profile = BrigEBase;
   out.reserved = 0;
 
   Version_Test TestCase3(in, &out);

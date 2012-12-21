@@ -61,7 +61,7 @@ struct VersionTest version_pair[34] = {
   },
 //version_pair[3]
   {
-    "version 2:0:$mobile;",
+    "version 2:0:$base;",
     {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -69,7 +69,7 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigELarge,             // machine
-    BrigEMobile,              // profile
+    BrigEBase,              // profile
     0                       // reserved
     }
   },
@@ -117,7 +117,7 @@ struct VersionTest version_pair[34] = {
   },
 //version_pair[7]
   {
-    "version 2:0:$mobile, $small;",
+    "version 2:0:$base, $small;",
     {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -125,13 +125,13 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigESmall,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   },
 //version_pair[8]
   {
-    "version 2:0:$mobile, $large;",
+    "version 2:0:$base, $large;",
     {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -139,7 +139,7 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigELarge,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   },
@@ -173,7 +173,7 @@ struct VersionTest version_pair[34] = {
   },
 //version_pair[11]
   {
-    "version 2:0:$mobile;",
+    "version 2:0:$base;",
     {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -181,13 +181,13 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigELarge,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   },
 //version_pair[12]
   {
-    "version 2:0:$mobile;",
+    "version 2:0:$base;",
     {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -195,7 +195,7 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigELarge,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   },
@@ -285,7 +285,7 @@ struct VersionTest version_pair[34] = {
   },
 //version_pair[19]
   {
-    "version 2:0:$large, $mobile;",
+    "version 2:0:$large, $base;",
      {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -293,13 +293,13 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigELarge,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   },
 //version_pair[20]
   {
-    "version 2:0:$large, $mobile;",
+    "version 2:0:$large, $base;",
     {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -307,7 +307,7 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigELarge,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   },
@@ -341,7 +341,7 @@ struct VersionTest version_pair[34] = {
   },
 //version_pair[23]
   {
-    "version 2:0:$small, $mobile;",
+    "version 2:0:$small, $base;",
      {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -349,13 +349,13 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigESmall,             // machine
-    BrigEMobile,              // profile
+    BrigEBase,              // profile
     0                       // reserved
     }
   },
 //version_pair[24]
   {
-    "version 2:0:$small, $mobile;",
+    "version 2:0:$small, $base;",
      {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -363,7 +363,7 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigESmall,             // machine
-    BrigEMobile,              // profile
+    BrigEBase,              // profile
     0                       // reserved
     }
   },
@@ -411,7 +411,7 @@ struct VersionTest version_pair[34] = {
   },
 //version_pair[28]
   {
-    "version 2:0:$full, $mobile;",
+    "version 2:0:$full, $base;",
      {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -419,7 +419,7 @@ struct VersionTest version_pair[34] = {
     2,                      // major
     0,                      // minor
     BrigELarge,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   },
@@ -467,7 +467,7 @@ struct VersionTest version_pair[34] = {
   },
 //version_pair[32]
   {
-    "version 3:2:$small, $full, $large, $mobile;",
+    "version 3:2:$small, $full, $large, $base;",
     {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -475,13 +475,13 @@ struct VersionTest version_pair[34] = {
     3,                      // major
     2,                      // minor
     BrigELarge,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   },
 //version_pair[33]
   {
-    "version 3:2:$small, $full, $large, $mobile, $small;",
+    "version 3:2:$small, $full, $large, $base, $small;",
      {
     brig_directive_version_size, //size
     BrigEDirectiveVersion,  //kind
@@ -489,7 +489,7 @@ struct VersionTest version_pair[34] = {
     3,                      // major
     2,                      // minor
     BrigESmall,             // machine
-    BrigEMobile,           // profile
+    BrigEBase,           // profile
     0                       // reserved
     }
   }
@@ -506,7 +506,7 @@ std::string inputarray_version_invalid[] = {
   "version 3:2:$test;",
   "version 2:0:$large ",
   "version 1.0f:2.0f:$small;",
-  "version 2:0:$mobile, $small, $stfz, $test;"
+  "version 2:0:$base, $small, $stfz, $test;"
 };
 
 }  // namespace brig
