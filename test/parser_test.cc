@@ -3925,7 +3925,7 @@ TEST(ParserTest, GlobalSymbolDeclTest) {
   EXPECT_EQ(0, GlobalSymbolDecl(context));
 
   context->clear_context();
-  input.assign("align 8 const static private_s32 &tmp[2];\n");
+  input.assign("align 8 static private_s32 &tmp[2];\n");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalSymbolDecl(context));
@@ -3943,7 +3943,7 @@ TEST(ParserTest, GlobalSymbolDeclTest) {
   EXPECT_EQ(0, GlobalSymbolDecl(context));
 
   context->clear_context();
-  input.assign("const extern group_b32 &tmp;\n");
+  input.assign("extern group_b32 &tmp;\n");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalSymbolDecl(context));
@@ -4185,70 +4185,70 @@ TEST(ParserTest,GlobalDecl){
 
   //for globalSamplerDecl
   context->clear_context();
-  std::string input("const extern global_Samp &demo ;");
+  std::string input("extern global_Samp &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const extern global_Samp &demo[10]={boundaryU = linear} ;");
+  input.assign("extern const global_Samp &demo[10]={boundaryU = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
+  input.assign("extern const global_Samp &demo[10]={boundaryU = linear , boundaryV = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for globalReadOlnyImageDecl
   context->clear_context();
-  input.assign("const  extern global_ROImg &demo ;");
+  input.assign("extern global_ROImg &demo;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern global_ROImg &demo[10] ;");
+  input.assign("extern global_ROImg &demo[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern global_ROImg &demo[10]={format = normalized } ;");
+  input.assign("extern const global_ROImg &demo[10]={format = normalized } ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern global_ROImg &demo[10]={format = normalized ,order = linear} ;");
+  input.assign("extern const global_ROImg &demo[10]={format = normalized ,order = linear} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for globalImageDecl
   context->clear_context();
-  input.assign("const  extern global_RWImg &demo ;");
+  input.assign("extern const global_RWImg &demo ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern global_RWImg &demo[10] ;");
+  input.assign(" extern global_RWImg &demo[10] ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const extern global_RWImg &demo[10]={format = normalized} ;");
+  input.assign("extern const global_RWImg &demo[10]={format = normalized} ;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   //for functionDecl
   context->clear_context();
-  input.assign("const extern function &get_global_id(arg_u32 %ret_val)");
+  input.assign("extern function &get_global_id(arg_u32 %ret_val)");
   input.append("(arg_u32 %arg_val0);\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -4293,37 +4293,37 @@ TEST(ParserTest,GlobalDecl){
 
   //for globalSymbolDecl
   context->clear_context();
-  input.assign("const  extern group_u32 &tmp[2][2];");
+  input.assign("extern group_u32 &tmp[2][2];");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern group_s32 &tmp;");
+  input.assign("extern group_s32 &tmp;");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern group_b32 &tmp[2];");
+  input.assign("extern group_b32 &tmp[2];");
   lexer->set_source_string(input);
   context->token_to_scan = yylex();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern private_u32 &tmp[2][2];");
+  input.assign("extern private_u32 &tmp[2][2];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern private_s32 &tmp;");
+  input.assign("extern private_s32 &tmp;");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
 
   context->clear_context();
-  input.assign("const  extern private_b32 &tmp[2];\n");
+  input.assign("extern private_b32 &tmp[2];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, GlobalDecl(context));
@@ -4345,7 +4345,7 @@ TEST(ParserTest, Program) {
   input.append("endblock;\n");
 
   input.append("function &abort() (); \n");
-  input.append("const  extern private_b32 &tmp[2];\n");
+  input.append("extern private_b32 &tmp[2];\n");
   input.append("function &get_global_id(arg_u32 %ret_val)\n");
   input.append(" (arg_u32 %arg_val0){\n");
   input.append("private_u32 %x ; \n");
@@ -4379,7 +4379,7 @@ TEST(ParserTest, SequenceOfPrograms) {
   input.append("endblock;\n");
 
   input.append("function &abort() (); \n");
-  input.append("const  extern private_b32 &tmp[2];\n");
+  input.append("extern private_b32 &tmp[2];\n");
   input.append("function &get_global_id(arg_u32 %ret_val)\n");
   input.append(" (arg_u32 %arg_val0){\n");
   input.append("private_u32 %x ; \n");
@@ -4453,7 +4453,7 @@ TEST(ParserTest, TopLevelStatement) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, TopLevelStatement(context));
 
-  input.assign("const  extern private_b32 &tmp[2];\n");
+  input.assign("extern private_b32 &tmp[2];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, TopLevelStatement(context));
@@ -4481,7 +4481,7 @@ TEST(ParserTest, TopLevelStatements) {
   input.append("endblock;\n");
 
   input.append("function &abort() (); \n");
-  input.append("const  extern private_b32 &tmp[2];\n");
+  input.append("extern private_b32 &tmp[2];\n");
   input.append("function &get_global_id(arg_u32 %ret_val)\n");
   input.append(" (arg_u32 %arg_val0){\n");
   input.append("private_u32 %x ; \n");

@@ -129,7 +129,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   TestCase3.Run_Test(&GlobalDecl);
   sbuf->clear();
   
-  in.assign("const align 8 extern group_u32 &x3;\n");
+  in.assign("align 8 extern group_u32 &x3;\n");
   name.assign("&x3"); sbuf->append(name);
 
   ref.size = sizeof(ref);
@@ -138,7 +138,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   ref.s.storageClass = BrigGroupSpace;
   ref.s.attribute = BrigExtern;
   ref.s.reserved = 0;
-  ref.s.symbolModifier = BrigConst;
+  ref.s.symbolModifier = 0;
   ref.s.dim = 0;
   ref.s.s_name = 0;
   ref.s.type = Brigu32;
@@ -212,7 +212,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   TestCase7.Run_Test(&GlobalDecl);
   sbuf->clear();
 
-  in.assign("const private_b64 &y5[8][256];\n");
+  in.assign("private_b64 &y5[8][256];\n");
   name.assign("&y5"); sbuf->append(name);
 
   ref.size = sizeof(ref);
@@ -221,7 +221,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   ref.s.storageClass = BrigPrivateSpace;
   ref.s.attribute = BrigNone;
   ref.s.reserved = 0;
-  ref.s.symbolModifier = BrigArray | BrigConst;
+  ref.s.symbolModifier = BrigArray;
   ref.s.dim = 2048;
   ref.s.s_name = 0;
   ref.s.type = Brigb64;

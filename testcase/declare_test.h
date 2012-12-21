@@ -1909,7 +1909,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[25]
 {
-    "const align 8 extern group_s8x8 &tmp;",
+    "align 8 extern group_s8x8 &tmp;",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -1918,7 +1918,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,                 // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigs8x8,              // type
@@ -1930,7 +1930,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[26]
   {
-    "const align 8 static private_s16x2 &tmp[2];",
+    "align 8 static private_s16x2 &tmp[2];",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -1939,7 +1939,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigs16x2,              // type
@@ -1951,7 +1951,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[27]
 {
-    "const extern group_u16x2 &tmp;",
+    "extern group_u16x2 &tmp;",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -1960,7 +1960,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,    // s_name
     Brigu16x2,              // type
@@ -1972,7 +1972,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[28]
   {
-    "const static private_f16x2 &tmp[2];",
+    "static private_f16x2 &tmp[2];",
       {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -1981,7 +1981,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigf16x2,              // type
@@ -1993,7 +1993,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[29]
   {
-    "const align 8 group_u16x4 &tmp;",
+    "align 8 group_u16x4 &tmp;",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2002,7 +2002,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigu16x4,              // type
@@ -2014,7 +2014,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[30]
   {
-    "const align 8 private_s16x4 &tmp[2];",
+    "align 8 private_s16x4 &tmp[2];",
      {
   brig_directive_symbol_size,  // size
   BrigEDirectiveSymbol,    // kind
@@ -2023,7 +2023,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigs16x4,              // type
@@ -2035,7 +2035,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[31]
   {
-    "align 8 const extern group_f16x4 &tmp;",
+    "align 8 extern group_f16x4 &tmp;",
     {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2044,7 +2044,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigf16x4,              // type
@@ -2056,7 +2056,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[32]
   {
-    "align 8 const static private_f16x4 &tmp[2];",
+    "align 8 static private_f16x4 &tmp[2];",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2065,7 +2065,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigf16x4,              // type
@@ -2077,7 +2077,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[33]
   {
-    "extern const align 8 group_f16x4 &tmp;",
+    "extern align 8 group_f16x4 &tmp;",
       {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2086,7 +2086,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigf16x4,              // type
@@ -2098,7 +2098,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[34]
   {
-    "static const align 8 private_f16x4 &tmp[2];",
+    "static align 8 private_f16x4 &tmp[2];",
       {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2107,7 +2107,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigf16x4,              // type
@@ -2119,7 +2119,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[35]
   {
-    "static const group_u32x4 &tmp;",
+    "static group_u32x4 &tmp;",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2128,7 +2128,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigu32x4,              // type
@@ -2140,7 +2140,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[36]
   {
-    "static const group_s32x4 &tmp;",
+    "static group_s32x4 &tmp;",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2149,7 +2149,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigs32x4,              // type
@@ -2161,7 +2161,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
  },
 //globalsymboldecl_pair[37]
   {
-    "static const group_f32x4 &tmp[2];",
+    "static group_f32x4 &tmp[2];",
     {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2170,7 +2170,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigf32x4,              // type
@@ -2182,7 +2182,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[38]
   {
-    "extern const private_u32x4 &tmp;",
+    "extern private_u32x4 &tmp;",
     {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2191,7 +2191,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigu32x4,              // type
@@ -2203,7 +2203,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[39]
   {
-    "extern const private_s32x4 &tmp;",
+    "extern private_s32x4 &tmp;",
       {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2212,7 +2212,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,    // s_name
     Brigs32x4,              // type
@@ -2224,7 +2224,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[40]
   {
-    "extern const private_f32x4 &tmp[2];",
+    "extern private_f32x4 &tmp[2];",
      {
   brig_directive_symbol_size,  // size
   BrigEDirectiveSymbol ,    // kind
@@ -2233,7 +2233,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigf32x4,              // type
@@ -2245,7 +2245,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[41]
   {
-    "align 8 const group_u32x2 &tmp;",
+    "align 8 group_u32x2 &tmp;",
     {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2254,7 +2254,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigu32x2,              // type
@@ -2266,7 +2266,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[42]
   {
-    "align 8 const group_s32x2 &tmp[2];",
+    "align 8 group_s32x2 &tmp[2];",
      {
   brig_directive_symbol_size,  // size
   BrigEDirectiveSymbol,    // kind
@@ -2275,7 +2275,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigs32x2,              // type
@@ -2287,7 +2287,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[43]
   {
-    "align 8 const private_f32x2 &tmp;",
+    "align 8 private_f32x2 &tmp;",
       {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2296,7 +2296,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigNone,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigf32x2,              // type
@@ -2308,7 +2308,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[44]
   {
-    "align 8 extern const group_f16x4 &tmp;",
+    "align 8 extern group_f16x4 &tmp;",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2317,7 +2317,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigf16x4,              // type
@@ -2329,7 +2329,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[45]
   {
-    "align 8 static const private_f16x4 &tmp[2];",
+    "align 8 static private_f16x4 &tmp[2];",
     {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2338,7 +2338,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigf16x4,              // type
@@ -2350,7 +2350,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[46]
   {
-    "extern align 8 const group_f16x4 &tmp[2];",
+    "extern align 8 group_f16x4 &tmp[2];",
     {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2359,7 +2359,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigGroupSpace,       // storag class 
     BrigExtern,             // attribute
     0,                      // reserved
-    BrigConst | BrigArray,              // symbolModifier
+    BrigArray,              // symbolModifier
     2,                      // dim
     string_offset,     // s_name
     Brigf16x4,              // type
@@ -2371,7 +2371,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
   },
 //globalsymboldecl_pair[47]
   {
-    "static align 8 const private_f16x4 &tmp;",
+    "static align 8 private_f16x4 &tmp;",
      {
   brig_directive_symbol_size, // size
   BrigEDirectiveSymbol ,    // kind
@@ -2380,7 +2380,7 @@ struct GlobalSymbolDeclTest globalsymboldecl_pair[54] = {
     BrigPrivateSpace,       // storag class 
     BrigStatic,             // attribute
     0,                      // reserved
-    BrigConst,              // symbolModifier
+    0,              // symbolModifier
     0,                      // dim
     string_offset,     // s_name
     Brigf16x4,              // type
@@ -2682,7 +2682,7 @@ struct KernelArgumentDeclTest kernelargumentdecl_pair[4] = {
   },
 //argumentdecl_pair[2]
   {
-    "const static kernarg_u32 %x[2];",
+    "static kernarg_u32 %x[2];",
     {
       brig_directive_symbol_size,
       BrigEDirectiveSymbol,
@@ -2691,7 +2691,7 @@ struct KernelArgumentDeclTest kernelargumentdecl_pair[4] = {
         BrigKernargSpace,
         BrigStatic, 
         0,
-        BrigConst | BrigArray,
+        BrigArray,
         2,
         string_offset,
         Brigu32,
@@ -2832,7 +2832,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
   },
 //argumentdecl_pair[2]
   {
-    "const static arg_u32 %x[2]",
+    "static arg_u32 %x[2]",
     {
       brig_directive_symbol_size,
       BrigEDirectiveSymbol,
@@ -2841,7 +2841,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
         BrigArgSpace,
         BrigStatic, 
         0,
-        BrigConst | BrigArray,
+        BrigArray,
         2,
         string_offset,
         Brigu32,
@@ -2853,7 +2853,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
   },
 //argumentdecl_pair[3]
   {
-    "const align 16 extern arg_ROImg %x",
+    "align 16 extern arg_ROImg %x",
     {
       brig_directive_symbol_size,
       BrigEDirectiveSymbol,
@@ -2862,7 +2862,7 @@ struct ArgumentDeclTest argumentdecl_pair[4] = {
         BrigArgSpace,
         BrigExtern,
         0,
-        BrigConst,
+        0,
         0,
         string_offset,
         BrigROImg,
