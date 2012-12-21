@@ -6648,11 +6648,6 @@ int BodyStatement(Context* context) {
 }
 
 int BodyStatements(Context* context) {
-  if (BodyStatement(context)) {
-    context->set_error(INVALID_CODEBLOCK);
-    // Codeblock should have atleast one bodyStatement
-    return 1;
-  }
   while (context->token_to_scan && (context->token_to_scan != '}')) {
     if(BodyStatement(context))
       break;
