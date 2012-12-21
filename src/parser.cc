@@ -2647,7 +2647,7 @@ int ArgUninitializableDecl(Context* context) {
   context->set_type(context->token_value.data_type);
   context->token_to_scan = yylex();
 
-  if (Identifier(context)) {
+  if (context->token_to_scan != TOKEN_LOCAL_IDENTIFIER) {
     context->set_error(MISSING_IDENTIFIER);
     return 1;
   }
