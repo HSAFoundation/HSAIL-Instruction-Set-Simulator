@@ -489,10 +489,12 @@ static llvm::Function *getInstFun(const inst_iterator inst,
                                   llvm::Module *M) {
 
   bool sret = isSRet(inst);
+  bool isStore = inst->opcode == BrigSt;
   llvm::LLVMContext &C = M->getContext();
 
-  llvm::Type *result =
-    sret ? llvm::Type::getVoidTy(C) : runOnType(C, BrigDataType(inst->type));
+  llvm::Type *result = sret || isStore ?
+    llvm::Type::getVoidTy(C) :
+    runOnType(C, BrigDataType(inst->type));
   std::vector<llvm::Type *> params;
   for(unsigned i = 0; i < sources.size(); ++i)
     params.push_back(sources[i]->getType());
