@@ -132,10 +132,10 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
     }
   }
 
-  if ((context->token_type == REGISTER) || 
+  if ((context->token_type == REGISTER) ||
       (context->token_to_scan == TOKEN_WAVESIZE)) {
     opName = context->token_value.string_val;
-  } else if (context->token_type == CONSTANT || 
+  } else if (context->token_type == CONSTANT ||
              context->token_to_scan == '-' ||
              context->token_to_scan == '+' ||
              context->token_type == DATA_TYPE_ID) {
@@ -145,12 +145,12 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
   }
 
   if (!Identifier(context)) {
-    *pRetOpOffset = (current_offset == context->get_operand_offset()) ? 
+    *pRetOpOffset = (current_offset == context->get_operand_offset()) ?
                       context->operand_map[opName] : current_offset;
     context->token_to_scan = yylex();
     return 0;
   } else if(!BaseOperand(context)) {
-    *pRetOpOffset = (current_offset == context->get_operand_offset()) ? 
+    *pRetOpOffset = (current_offset == context->get_operand_offset()) ?
                       context->operand_map[opName] : current_offset;
     context->token_to_scan = yylex();
     return 0;
@@ -165,10 +165,10 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   std::string opName;
   current_offset = context->get_operand_offset();
 
-  if ((context->token_type == REGISTER) || 
+  if ((context->token_type == REGISTER) ||
       (context->token_to_scan == TOKEN_WAVESIZE)) {
     opName = context->token_value.string_val;
-  } else if (context->token_type == CONSTANT || 
+  } else if (context->token_type == CONSTANT ||
              context->token_to_scan == '-' ||
              context->token_to_scan == '+' ||
              context->token_type == DATA_TYPE_ID) {
@@ -178,12 +178,12 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   }
 
   if (!Identifier(context)) {
-    *pRetOpOffset = (current_offset == context->get_operand_offset()) ? 
+    *pRetOpOffset = (current_offset == context->get_operand_offset()) ?
       context->operand_map[opName] : current_offset;
     context->token_to_scan = yylex();
     return 0;
   } else if(!BaseOperand(context)){
-    *pRetOpOffset = (current_offset == context->get_operand_offset()) ? 
+    *pRetOpOffset = (current_offset == context->get_operand_offset()) ?
       context->operand_map[opName] : current_offset;
     context->token_to_scan = yylex();
     return 0;
@@ -301,7 +301,7 @@ int BaseOperand(Context* context) {
     BrigDataType16_t subType;
     uint32_t size;
     std::vector<int64_t> decList;
-    type = ConvertTypeToB(context->token_value.data_type, &subType, &size); 
+    type = ConvertTypeToB(context->token_value.data_type, &subType, &size);
     context->token_to_scan = yylex();
     if (context->token_to_scan != '(') {
       context->set_error(MISSING_OPENNING_BRACKET);
@@ -315,7 +315,7 @@ int BaseOperand(Context* context) {
         return 1;
       }
       if (decList.size() != size) {
-        context->set_error(MISSING_INTEGER_CONSTANT); 
+        context->set_error(MISSING_INTEGER_CONSTANT);
         return 1;
       }
     }
@@ -325,7 +325,7 @@ int BaseOperand(Context* context) {
         return 1;
       }
       if (douList.size() != size) {
-        context->set_error(MISSING_DOUBLE_CONSTANT); 
+        context->set_error(MISSING_DOUBLE_CONSTANT);
         return 1;
       }
       switch (subType) {
@@ -359,7 +359,7 @@ int BaseOperand(Context* context) {
     //TODO(Chuang): f16 and b1 constant implement should be implemented
     size1 = size2 = size;
     if (type == Brigb128) {
-      //Note: 128bit constant is not exist except packed constant. 
+      //Note: 128bit constant is not exist except packed constant.
       //      If data type is Brigb128. Size will never be only 1.
       size1 >>= 1;
     }
@@ -377,32 +377,32 @@ int BaseOperand(Context* context) {
     switch (subType) {
       case Brigb8:
         for (i = 0 ; i < size1; ++i) {
-          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] <<= shift;
           boi.bits.l[0] += (uint8_t)decList[i];
         }
         for (; i < size2; ++i) {
-          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] <<= shift;
           boi.bits.l[1] += (uint8_t)decList[i];
         }
         break;
-      
+
       case Brigb16:
         for (i = 0 ; i < size1; ++i) {
-          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] <<= shift;
           boi.bits.l[0] += (uint16_t)decList[i];
         }
         for (; i < size2; ++i) {
-          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] <<= shift;
           boi.bits.l[1] += (uint16_t)decList[i];
         }
         break;
       case Brigb32:
         for (i = 0 ; i < size1; ++i) {
-          boi.bits.l[0] <<= shift; 
+          boi.bits.l[0] <<= shift;
           boi.bits.l[0] += (uint32_t)decList[i];
         }
         for (; i < size2; ++i) {
-          boi.bits.l[1] <<= shift; 
+          boi.bits.l[1] <<= shift;
           boi.bits.l[1] += (uint32_t)decList[i];
         }
         break;
@@ -427,7 +427,7 @@ int AddressableOperand(Context* context) {
   return AddressableOperand(context, &opOffset, true);
 }
 
-int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, 
+int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset,
     bool IsImageOrSampler){
   bool isIntConst = false; // check if match [name<int>]
   bool isBracket = false;  // check if include <..> in the [name ..]
@@ -517,7 +517,7 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset,
           case BrigKernargSpace:
             boa.type = Brigb64; break;
           default:
-            boa.type = Brigb32; 
+            boa.type = Brigb32;
         }
       }
     } else {
@@ -634,7 +634,7 @@ int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset) {
           (char *)(&elements[2]), offsets[2], sizeof(BrigOperandReg));
       context->get_operand_bytes(
           (char *)(&elements[3]), offsets[3], sizeof(BrigOperandReg));
-      if((elements[0].type != elements[1].type) || 
+      if((elements[0].type != elements[1].type) ||
           (elements[0].type != elements[2].type) ||
          (elements[0].type != elements[3].type)){
         context->set_error(INVALID_OPERAND);
@@ -1518,7 +1518,7 @@ int ArgumentDecl(Context* context) {
     case Brigb64: naturalAlign = 8; break;
     case Brigb128: naturalAlign = 16; break;
     case BrigRWImg: naturalAlign = 16; break;
-    case BrigROImg: naturalAlign = 16; break; 
+    case BrigROImg: naturalAlign = 16; break;
     case BrigSamp: naturalAlign = 16; break;
   }
 
@@ -1980,7 +1980,7 @@ int BranchCbr(Context* context) {
               case BrigKernargSpace:
                 boa.type = Brigb64; break;
               default:
-                boa.type = Brigb32; 
+                boa.type = Brigb32;
             }
           }
         } else {
@@ -2120,7 +2120,7 @@ int BranchBrn(Context* context) {
           };
           context->label_o_map[label_name] = context->get_operand_offset();
           opLabelRef.labeldirective = context->get_symbol(label_name);
-          
+
           context->append_operand(&opLabelRef);
         }
         OpOffset[2] = context->label_o_map[label_name];
@@ -2150,7 +2150,7 @@ int BranchBrn(Context* context) {
               case BrigKernargSpace:
                 boa.type = Brigb64; break;
               default:
-                boa.type = Brigb32; 
+                boa.type = Brigb32;
             }
           }
         } else {
@@ -2433,10 +2433,10 @@ int InitializableDecl(Context* context) {
   return (InitializableDecl(context, &context->global_symbol_map));
 }
 
-int InitializableDecl(Context *context, 
+int InitializableDecl(Context *context,
     std::map<std::string, BrigdOffset32_t> *symbol_map){
   int var_name_offset;
-  if (context->token_to_scan != GLOBAL && 
+  if (context->token_to_scan != GLOBAL &&
       context->token_to_scan != READONLY) {
     return 1;
   }
@@ -2484,7 +2484,7 @@ int InitializableDecl(Context *context,
     case Brigb64: naturalAlign = 8; break;
     case Brigb128: naturalAlign = 16; break;
     case BrigRWImg: naturalAlign = 16; break;
-    case BrigROImg: naturalAlign = 16; break; 
+    case BrigROImg: naturalAlign = 16; break;
     case BrigSamp: naturalAlign = 16; break;
   }
 
@@ -2500,7 +2500,7 @@ int InitializableDecl(Context *context,
     BrigEDirectiveSymbol,             // kind
     {
       context->get_code_offset(),       // c_code
-      storageClass,                     // storageClass 
+      storageClass,                     // storageClass
       context->get_attribute(),         // attribute
       0,                                // reserved
       context->get_symbol_modifier(),   // symbol modifier
@@ -2538,7 +2538,7 @@ int UninitializableDecl(Context* context) {
   return UninitializableDecl(context, &context->global_symbol_map);
 }
 
-int UninitializableDecl(Context* context, 
+int UninitializableDecl(Context* context,
     std::map<std::string, BrigdOffset32_t> *symbol_map) {
 
   BrigStorageClass32_t storage_class;
@@ -2548,7 +2548,7 @@ int UninitializableDecl(Context* context,
      &&(GROUP != context->token_to_scan)
      &&(SPILL != context->token_to_scan))
     return 1;
- 
+
   if (context->get_symbol_modifier() & BrigConst) {
     context->set_error(INVALID_IDENTIFIER);
     return 1;
@@ -2593,7 +2593,7 @@ int UninitializableDecl(Context* context,
     case Brigb64: naturalAlign = 8; break;
     case Brigb128: naturalAlign = 16; break;
     case BrigRWImg: naturalAlign = 16; break;
-    case BrigROImg: naturalAlign = 16; break; 
+    case BrigROImg: naturalAlign = 16; break;
     case BrigSamp: naturalAlign = 16; break;
   }
 
@@ -2678,7 +2678,7 @@ int ArgUninitializableDecl(Context* context) {
     case Brigb64: naturalAlign = 8; break;
     case Brigb128: naturalAlign = 16; break;
     case BrigRWImg: naturalAlign = 16; break;
-    case BrigROImg: naturalAlign = 16; break; 
+    case BrigROImg: naturalAlign = 16; break;
     case BrigSamp: naturalAlign = 16; break;
   }
 
@@ -2763,7 +2763,7 @@ int FileDecl(Context* context) {
   return 0;
 }
 
-int SignatureType(Context *context, 
+int SignatureType(Context *context,
     std::vector<BrigDirectiveSignature::BrigProtoType> *types) {
   // alignment optional
   if (ALIGN == context->token_to_scan) {
@@ -2801,7 +2801,7 @@ int SignatureType(Context *context,
     case Brigb64: naturalAlign = 8; break;
     case Brigb128: naturalAlign = 16; break;
     case BrigRWImg: naturalAlign = 16; break;
-    case BrigROImg: naturalAlign = 16; break; 
+    case BrigROImg: naturalAlign = 16; break;
     case BrigSamp: naturalAlign = 16; break;
   }
   if (context->get_alignment() == 0) {
@@ -2935,7 +2935,7 @@ int SysCall(Context* context) {
   return 0;
 }
 
-int SignatureArgumentList(Context *context, 
+int SignatureArgumentList(Context *context,
     std::vector<BrigDirectiveSignature::BrigProtoType> *types) {
   while (1) {
     if(')' == context->token_to_scan)
@@ -3863,7 +3863,7 @@ int KernelArgumentDecl(Context *context) {
     case Brigb64: naturalAlign = 8; break;
     case Brigb128: naturalAlign = 16; break;
     case BrigRWImg: naturalAlign = 16; break;
-    case BrigROImg: naturalAlign = 16; break; 
+    case BrigROImg: naturalAlign = 16; break;
     case BrigSamp: naturalAlign = 16; break;
   }
   if (context->get_alignment() == 0) {
@@ -4205,7 +4205,7 @@ int GlobalPrivateDecl(Context* context) {
     case Brigb64: naturalAlign = 8; break;
     case Brigb128: naturalAlign = 16; break;
     case BrigRWImg: naturalAlign = 16; break;
-    case BrigROImg: naturalAlign = 16; break; 
+    case BrigROImg: naturalAlign = 16; break;
     case BrigSamp: naturalAlign = 16; break;
   }
 
@@ -4233,7 +4233,7 @@ int GlobalPrivateDecl(Context* context) {
     0,                             // d_init
     0,                             // reserved
   };
-  
+
   context->global_symbol_map[symName] = context->get_directive_offset();
   context->append_directive(&bds);
   context->set_alignment(0);
@@ -4267,7 +4267,7 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
         case BrigKernargSpace:
           compound_op.type = Brigb64; break;
         default:
-          compound_op.type = Brigb32; 
+          compound_op.type = Brigb32;
       }
     }
 
@@ -4357,7 +4357,7 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
         case BrigKernargSpace:
           indirect_op.type = Brigb64; break;
         default:
-          indirect_op.type = Brigb32; 
+          indirect_op.type = Brigb32;
       }
     }
     if (context->token_type == REGISTER) {
@@ -4441,28 +4441,28 @@ int MemoryOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   BrigoOffset32_t currentToOffset = 0;
   context->token_to_scan = yylex();
   // AddressableOperand
-  if (context->token_type == REGISTER) {
-    if ((context->get_machine() == BrigELarge && 
-          context->token_to_scan != TOKEN_DREGISTER) ||
-        (context->get_machine() == BrigESmall && 
-         context->token_to_scan != TOKEN_SREGISTER)) {
-      context->set_error(INVALID_MEMORY_OPERAND);
-      return 1;
-    }
-  }
+  // if (context->token_type == REGISTER) {
+  //   if ((context->get_machine() == BrigELarge &&
+  //         context->token_to_scan != TOKEN_DREGISTER) ||
+  //       (context->get_machine() == BrigESmall &&
+  //        context->token_to_scan != TOKEN_SREGISTER)) {
+  //     context->set_error(INVALID_MEMORY_OPERAND);
+  //     return 1;
+  //   }
+  // }
 
   if (!AddressableOperand(context, &currentToOffset, false)) {
     if (context->token_to_scan == '[') {
       context->token_to_scan = yylex();
-      if (context->token_type == REGISTER) {
-        if ((context->get_machine() == BrigELarge && 
-              context->token_to_scan != TOKEN_DREGISTER) ||
-            (context->get_machine() == BrigESmall && 
-             context->token_to_scan != TOKEN_SREGISTER)) {
-          context->set_error(INVALID_MEMORY_OPERAND);
-          return 1;
-        }
-      }
+      // if (context->token_type == REGISTER) {
+      //   if ((context->get_machine() == BrigELarge &&
+      //         context->token_to_scan != TOKEN_DREGISTER) ||
+      //       (context->get_machine() == BrigESmall &&
+      //        context->token_to_scan != TOKEN_SREGISTER)) {
+      //     context->set_error(INVALID_MEMORY_OPERAND);
+      //     return 1;
+      //   }
+      // }
       if (!OffsetAddressableOperandPart2(context, currentToOffset, pRetOpOffset)) {
         // Global/Local Identifier with offsetAddressOperand.
         return 0;
@@ -4620,7 +4620,7 @@ int Ldc(Context* context) {
 
   // If the source is a function, the destination size depends on
   // the machine model. For large, the destination must be 64 bits;
-  // for small, the destination must be 32 bits. 
+  // for small, the destination must be 32 bits.
   context->set_type(context->token_value.data_type);
   type = context->token_value.data_type;
   context->token_to_scan = yylex();
@@ -4652,7 +4652,7 @@ int Ldc(Context* context) {
       labRef.size = sizeof(labRef);
 
       labRef.labeldirective = context->get_symbol(oper_name);
-      
+
       OpOffset[1] = context->get_operand_offset();
       context->label_o_map[oper_name] = context->get_operand_offset();
       context->append_operand(&labRef);
@@ -4725,7 +4725,7 @@ int Atom(Context* context) {
       case _MIN_:  atomicOperation = BrigAtomicMin; break;
       case _MAX_:  atomicOperation = BrigAtomicMax; break;
       case _SUB_:  atomicOperation = BrigAtomicSub; break;
-      default: 
+      default:
         context->set_error(MISSING_OPERATION); return 1;
     }
     context->token_to_scan = yylex();
@@ -4802,7 +4802,7 @@ int Atom(Context* context) {
     BrigAtomic,              // opcode
     DataType,                // type
     BrigNoPacking,           // packing
-    {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], 0},   
+    {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], 0},
     atomicOperation,         // atomicOperation
     StorageClass,            // storageClass
     MemorySemantic           // memorySemantic
@@ -4820,7 +4820,7 @@ int Mov(Context* context) {
   BrigoOffset32_t OpOffset[2] = {0, 0};
 
   context->token_to_scan = yylex();
-  // TODO(Chuang): When type is b128 or b64 etc, 
+  // TODO(Chuang): When type is b128 or b64 etc,
   // check whether the operands is correct.
   if (context->token_to_scan != _B1 &&
       context->token_to_scan != _B32 &&
@@ -4919,7 +4919,7 @@ int GlobalGroupDecl(Context* context) {
     case Brigb64: naturalAlign = 8; break;
     case Brigb128: naturalAlign = 16; break;
     case BrigRWImg: naturalAlign = 16; break;
-    case BrigROImg: naturalAlign = 16; break; 
+    case BrigROImg: naturalAlign = 16; break;
     case BrigSamp: naturalAlign = 16; break;
   }
 
@@ -5036,7 +5036,7 @@ int MulInst(Context* context) {
       opcode,                // opcode
       type,                  // type
       packing,               // packing
-      {OpOffset[0], OpOffset[1], OpOffset[2], 0, 0}     
+      {OpOffset[0], OpOffset[1], OpOffset[2], 0, 0}
     };
     mulInst.size = sizeof(mulInst);
     context->append_code(&mulInst);
@@ -5637,11 +5637,11 @@ int ImageRet(Context* context) {
   type = context->token_value.data_type;
 
   context->token_to_scan = yylex();
-  
+
   if (!CheckDestRegister(context->token_to_scan, type, BrigAtomicImage)) {
     context->set_error(INVALID_OPERAND);
     return 1;
-  } 
+  }
 
   if (Operand(context, &OpOffset[0])) {
     context->set_error(INVALID_OPERAND);
@@ -6205,7 +6205,7 @@ int SegpPart1Segmentp(Context* context) {
     return 1;
   }
   // datatypeId must be b1
-  if (context->token_to_scan != _B1) { 
+  if (context->token_to_scan != _B1) {
     context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
@@ -6220,8 +6220,8 @@ int SegpPart1Segmentp(Context* context) {
   // src must be u32/64
   context->set_type(context->token_value.data_type);
   stype = context->token_value.data_type;
-  
-  if (!CheckDataType(context->get_machine(), storageClass, stype)) { 
+
+  if (!CheckDataType(context->get_machine(), storageClass, stype)) {
     context->set_error(INVALID_DATA_TYPE);
     return 1;
   }
@@ -6592,7 +6592,7 @@ int Comment(Context* context) {
   }
   std::string comment(context->token_value.string_val);
   int comment_offset = context->add_symbol(comment);
-  BrigDirectiveComment dir_com = { 
+  BrigDirectiveComment dir_com = {
     sizeof(BrigDirectiveComment), BrigEDirectiveComment,
     context->get_code_offset(), comment_offset};
   context->append_directive(&dir_com);
@@ -8525,7 +8525,7 @@ int PairAddressableOperand(Context* context) {
         case BrigKernargSpace:
           boa.type = Brigb64; break;
         default:
-          boa.type = Brigb32; 
+          boa.type = Brigb32;
       }
     }
   } else {
@@ -8637,12 +8637,12 @@ int ArrayOperand(Context* context) {
   return ArrayOperand(context, &opOffset);
 }
 
-BrigDataType16_t ConvertTypeToB(BrigDataType16_t type, 
+BrigDataType16_t ConvertTypeToB(BrigDataType16_t type,
     BrigDataType16_t* pSubType, uint32_t* pSize) {
   BrigDataType16_t bType = type;
   BrigDataType16_t subType = Brigb32;
   uint32_t size = 0;
-  
+
   switch(type) {
     case Brigb1:      bType = Brigb1; subType = 0; size = 1; break;
     case Brigs8:
@@ -8687,7 +8687,7 @@ BrigDataType16_t ConvertTypeToB(BrigDataType16_t type,
     case Brigf64x2:   bType = Brigb128; subType = Brigb64; size = 2;  break;
   }
   if (pSubType != NULL) {
-    *pSubType = subType;    
+    *pSubType = subType;
     if (pSize != NULL) {
       *pSize = size;
     }
@@ -8712,7 +8712,7 @@ bool CheckDataType(BrigMachine16_t model,BrigStorageClass32_t addressType,
           addressType != BrigPrivateSpace &&
           addressType != BrigSpillSpace) {
         return false;
-      }	
+      }
     } else {
       if (addressType != BrigFlatSpace &&
           addressType != BrigGlobalSpace &&
@@ -8728,7 +8728,7 @@ bool CheckRegister(unsigned int token, BrigDataType16_t type) {
   BrigDataType16_t btype = ConvertTypeToB(type);
   //TODO(Chuang): How to handle F16 type.
   switch (btype) {
-    case Brigb1: 
+    case Brigb1:
       if (token != TOKEN_CREGISTER) {
         return false;
       }
@@ -8769,18 +8769,18 @@ bool CheckDestRegister(unsigned int token, BrigDataType16_t type, BrigOpcode32_t
   static const uint16_t packedKind = 0x0010;
   uint16_t regSize = 0x0;
   switch (token) {
-    case TOKEN_CREGISTER: regSize = _1Size; break; 
+    case TOKEN_CREGISTER: regSize = _1Size; break;
     case TOKEN_SREGISTER: regSize = _32Size; break;
     case TOKEN_DREGISTER: regSize = _64Size; break;
     case TOKEN_QREGISTER: regSize = _128Size; break;
     default: return false;
   }
 
-  // When a destination operand is larger than the 
+  // When a destination operand is larger than the
   // operation size (for example, when an
-  // add_u32 has a d (64-bit) destination register), 
+  // add_u32 has a d (64-bit) destination register),
   // the result is extended to fill the destination
-  // register. This does not apply to move operations 
+  // register. This does not apply to move operations
   // or to operations involving packed
   // data types or bit strings
   if (opcode == BrigPopCount || opcode == BrigFirstBit || opcode == BrigLastBit ||
@@ -8788,61 +8788,61 @@ bool CheckDestRegister(unsigned int token, BrigDataType16_t type, BrigOpcode32_t
     return token == TOKEN_SREGISTER ? true : false;
   }
   if (opcode == BrigMov    || opcode == BrigMovsLo || opcode == BrigMovsHi ||
-      opcode == BrigLda    || opcode == BrigMovdLo || opcode == BrigMovdHi || 
+      opcode == BrigLda    || opcode == BrigMovdLo || opcode == BrigMovdHi ||
       opcode == BrigLdc    || opcode == BrigBitRev || opcode == BrigExtract ||
       opcode == BrigInsert || opcode == BrigBitSelect || opcode == BrigFirstBit ||
       opcode == BrigLastBit) {
     return CheckRegister(token, type);
   }
   switch (type) {
-    case Brigb1:      kindOfType |= bKind;              kindOfType |= _1Size;  break; 
-    case Brigb8:      kindOfType |= bKind;              kindOfType |= _8Size;  break; 
+    case Brigb1:      kindOfType |= bKind;              kindOfType |= _1Size;  break;
+    case Brigb8:      kindOfType |= bKind;              kindOfType |= _8Size;  break;
     case Brigb16:     kindOfType |= bKind;              kindOfType |= _16Size; break;
-    case Brigb32:     kindOfType |= bKind;              kindOfType |= _32Size; break; 
-    case Brigb64:     kindOfType |= bKind;              kindOfType |= _64Size; break; 
-    case Brigb128:    kindOfType |= bKind;              kindOfType |= _128Size; break; 
-    case Brigs8:      kindOfType |= sKind;              kindOfType |= _8Size;  break; 
-    case Brigs16:     kindOfType |= sKind;              kindOfType |= _16Size; break; 
-    case Brigs32:     kindOfType |= sKind;              kindOfType |= _32Size; break; 
-    case Brigs8x4:    kindOfType |= sKind | packedKind; kindOfType |= _32Size; break;   
-    case Brigs16x2:   kindOfType |= sKind | packedKind; kindOfType |= _32Size; break;   
-    case Brigs64:     kindOfType |= sKind;              kindOfType |= _64Size; break; 
-    case Brigs8x8:    kindOfType |= sKind | packedKind; kindOfType |= _64Size; break;   
-    case Brigs16x4:   kindOfType |= sKind | packedKind; kindOfType |= _64Size; break;   
-    case Brigs32x2:   kindOfType |= sKind | packedKind; kindOfType |= _64Size; break;   
-    case Brigs8x16:   kindOfType |= sKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigs16x8:   kindOfType |= sKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigs32x4:   kindOfType |= sKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigs64x2:   kindOfType |= sKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigu8:      kindOfType |= uKind;              kindOfType |= _8Size;  break; 
-    case Brigu16:     kindOfType |= uKind;              kindOfType |= _16Size; break; 
-    case Brigu32:     kindOfType |= uKind;              kindOfType |= _32Size; break; 
-    case Brigu8x4:    kindOfType |= uKind | packedKind; kindOfType |= _32Size; break;   
-    case Brigu16x2:   kindOfType |= uKind | packedKind; kindOfType |= _32Size; break;   
-    case Brigu64:     kindOfType |= uKind;              kindOfType |= _64Size; break; 
-    case Brigu8x8:    kindOfType |= uKind | packedKind; kindOfType |= _64Size; break;   
-    case Brigu16x4:   kindOfType |= uKind | packedKind; kindOfType |= _64Size; break;   
-    case Brigu32x2:   kindOfType |= uKind | packedKind; kindOfType |= _64Size; break;   
-    case Brigu8x16:   kindOfType |= uKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigu16x8:   kindOfType |= uKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigu32x4:   kindOfType |= uKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigu64x2:   kindOfType |= uKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigf16:     kindOfType |= fKind;              kindOfType |= _16Size; break; 
-    case Brigf32:     kindOfType |= fKind;              kindOfType |= _32Size; break; 
+    case Brigb32:     kindOfType |= bKind;              kindOfType |= _32Size; break;
+    case Brigb64:     kindOfType |= bKind;              kindOfType |= _64Size; break;
+    case Brigb128:    kindOfType |= bKind;              kindOfType |= _128Size; break;
+    case Brigs8:      kindOfType |= sKind;              kindOfType |= _8Size;  break;
+    case Brigs16:     kindOfType |= sKind;              kindOfType |= _16Size; break;
+    case Brigs32:     kindOfType |= sKind;              kindOfType |= _32Size; break;
+    case Brigs8x4:    kindOfType |= sKind | packedKind; kindOfType |= _32Size; break;
+    case Brigs16x2:   kindOfType |= sKind | packedKind; kindOfType |= _32Size; break;
+    case Brigs64:     kindOfType |= sKind;              kindOfType |= _64Size; break;
+    case Brigs8x8:    kindOfType |= sKind | packedKind; kindOfType |= _64Size; break;
+    case Brigs16x4:   kindOfType |= sKind | packedKind; kindOfType |= _64Size; break;
+    case Brigs32x2:   kindOfType |= sKind | packedKind; kindOfType |= _64Size; break;
+    case Brigs8x16:   kindOfType |= sKind | packedKind; kindOfType |= _128Size; break;
+    case Brigs16x8:   kindOfType |= sKind | packedKind; kindOfType |= _128Size; break;
+    case Brigs32x4:   kindOfType |= sKind | packedKind; kindOfType |= _128Size; break;
+    case Brigs64x2:   kindOfType |= sKind | packedKind; kindOfType |= _128Size; break;
+    case Brigu8:      kindOfType |= uKind;              kindOfType |= _8Size;  break;
+    case Brigu16:     kindOfType |= uKind;              kindOfType |= _16Size; break;
+    case Brigu32:     kindOfType |= uKind;              kindOfType |= _32Size; break;
+    case Brigu8x4:    kindOfType |= uKind | packedKind; kindOfType |= _32Size; break;
+    case Brigu16x2:   kindOfType |= uKind | packedKind; kindOfType |= _32Size; break;
+    case Brigu64:     kindOfType |= uKind;              kindOfType |= _64Size; break;
+    case Brigu8x8:    kindOfType |= uKind | packedKind; kindOfType |= _64Size; break;
+    case Brigu16x4:   kindOfType |= uKind | packedKind; kindOfType |= _64Size; break;
+    case Brigu32x2:   kindOfType |= uKind | packedKind; kindOfType |= _64Size; break;
+    case Brigu8x16:   kindOfType |= uKind | packedKind; kindOfType |= _128Size; break;
+    case Brigu16x8:   kindOfType |= uKind | packedKind; kindOfType |= _128Size; break;
+    case Brigu32x4:   kindOfType |= uKind | packedKind; kindOfType |= _128Size; break;
+    case Brigu64x2:   kindOfType |= uKind | packedKind; kindOfType |= _128Size; break;
+    case Brigf16:     kindOfType |= fKind;              kindOfType |= _16Size; break;
+    case Brigf32:     kindOfType |= fKind;              kindOfType |= _32Size; break;
     case Brigf64:     kindOfType |= fKind;              kindOfType |= _64Size; break;
-    case Brigf16x2:   kindOfType |= fKind | packedKind; kindOfType |= _32Size; break;   
-    case Brigf16x4:   kindOfType |= fKind | packedKind; kindOfType |= _64Size; break;   
-    case Brigf32x2:   kindOfType |= fKind | packedKind; kindOfType |= _64Size; break;   
-    case Brigf16x8:   kindOfType |= fKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigf32x4:   kindOfType |= fKind | packedKind; kindOfType |= _128Size; break;   
-    case Brigf64x2:   kindOfType |= fKind | packedKind; kindOfType |= _128Size; break;   
+    case Brigf16x2:   kindOfType |= fKind | packedKind; kindOfType |= _32Size; break;
+    case Brigf16x4:   kindOfType |= fKind | packedKind; kindOfType |= _64Size; break;
+    case Brigf32x2:   kindOfType |= fKind | packedKind; kindOfType |= _64Size; break;
+    case Brigf16x8:   kindOfType |= fKind | packedKind; kindOfType |= _128Size; break;
+    case Brigf32x4:   kindOfType |= fKind | packedKind; kindOfType |= _128Size; break;
+    case Brigf64x2:   kindOfType |= fKind | packedKind; kindOfType |= _128Size; break;
   }
   if (opcode == BrigShuffle || opcode == BrigUnpackLo || opcode == BrigUnpackHi) {
     if (!(kindOfType & packedKind) || (kindOfType & 0xff00) >= _128Size) {
       return false;
     }
   }
-  
+
   if (kindOfType & packedKind || kindOfType & fKind) {
     return CheckRegister(token, type);
   }
