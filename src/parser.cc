@@ -1925,7 +1925,14 @@ int BranchCbr(Context* context) {
     }
     OpOffset[2] = context->label_o_map[label_name];
     context->token_to_scan = yylex();  // should be ';'
-  } else if (context->token_to_scan == TOKEN_SREGISTER) {
+  } else if (context->token_type == REGISTER) {
+    if ((context->get_machine() == BrigELarge && 
+         context->token_to_scan != TOKEN_DREGISTER) ||
+        (context->get_machine() == BrigESmall &&
+         context->token_to_scan != TOKEN_SREGISTER)) {
+      context->set_error(INVALID_OPERAND);
+      return 1;
+    }
     if (Operand(context, &OpOffset[2])) {
       context->set_error(INVALID_OPERAND);
       return 1;
@@ -2001,7 +2008,7 @@ int BranchCbr(Context* context) {
       }
       context->token_to_scan = yylex();
     }  // ','
-  } else {  // S register or Label
+  } else {  // register or Label
     context->set_error(MISSING_OPERAND);
     return 1;
   }
@@ -2095,7 +2102,10 @@ int BranchBrn(Context* context) {
     context->token_to_scan = yylex();
   } else if (!Identifier(context)) {
     // Must be an s register.
-    if (context->token_to_scan != TOKEN_SREGISTER) {
+    if ((context->get_machine() == BrigELarge && 
+         context->token_to_scan != TOKEN_DREGISTER) ||
+        (context->get_machine() == BrigESmall &&
+         context->token_to_scan != TOKEN_SREGISTER)) {
       context->set_error(INVALID_OPERAND);
       return 1;
     }
