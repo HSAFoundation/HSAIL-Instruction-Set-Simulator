@@ -2369,10 +2369,7 @@ bool BrigModule::validateLdc(const inst_iterator inst) const {
   valid &= check(isa<BrigOperandLabelRef>(src) ||
                  isa<BrigOperandFunctionRef>(src),
                  "Src should be LabelRef and FunctionRef");
-  if(isa<BrigOperandLabelRef>(src))
-    valid &= check(*getType(dest) == Brigb32,
-                   "Type of dest should be b32 if the source is label");
-  if(isa<BrigOperandFunctionRef>(src)) {
+  if(isa<BrigOperandFunctionRef>(src) || isa<BrigOperandLabelRef>(src)) {
     const BrigDirectiveVersion *bdv = getFirstVersionDirective();
     if(!check(bdv, "Missing version?")) return false;
     if(bdv->machine == BrigELarge)
@@ -3490,7 +3487,8 @@ bool BrigModule::validateBranchInst(const inst_iterator inst,
     oper_iterator dest(S_.operands + inst->o_operands[nary - 1]);
     valid &= check(isa<BrigOperandReg>(dest),
                      "Destination must be a Reg");
-    valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)),
+    valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)) ||
+                   64 == BrigInstHelper::getTypeSize(*getType(dest)),
                      "Invalid type size");
     oper_iterator labelOrAddr(S_.operands + inst->o_operands[nary]);
     valid &= check(isa<BrigOperandLabelRef>(labelOrAddr)   ||
