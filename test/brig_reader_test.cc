@@ -3924,3 +3924,108 @@ TEST(BrigInstTest, VectorPopcount) {
     testInst("popcount_b32", testVec);
   }
 }
+
+static const char Ldf32Tof64[] =
+    "version 1:0:$large;\n"
+    "global_f32 &n = %s;\n"
+    "kernel &Ldf32Tof64(kernarg_u64 %r)\n"
+    "{\n"
+    "  ld_kernarg_f64 $d0, [%r];\n"
+    "  ld_global_f64 $d1, [&n];\n"
+    "  st_kernarg_f64 $d1, [$d0];\n"
+    "  ret;\n"
+    "};\n";
+
+
+template<class T>
+static void testLdf32Tof64(const T &result,
+                           const char *value) {
+  char *buffer =
+    asnprintf(Ldf32Tof64, value);
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  T *arg_val0 = new T;
+  *arg_val0 = 0;
+
+  void *args[] = { &arg_val0 };
+  llvm::Function *fun = BP->getFunction("Ldf32Tof64");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+
+  EXPECT_EQ(result, *arg_val0);
+
+  delete arg_val0;
+
+}
+
+TEST(BrigKernelTest, Ldf32Tof64) {
+  {
+    const uint64_t result = uint64_t(0x7f7fffff);
+    const char *value = "0f7f7fffff";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0x0);
+    const char *value = "0f";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0xff7fffff);
+    const char *value = "0fff7fffff";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0x80000001);
+    const char *value = "0f80000001";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0x7f7ffffe);
+    const char *value = "0f7f7ffffe";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0x00000001);
+    const char *value = "0f00000001";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0xff7ffffe);
+    const char *value = "0fff7ffffe";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0x7f800000);
+    const char *value = "0f7f800000";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0xff800000);
+    const char *value = "0fff800000";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0xff800001);
+    const char *value = "0fff800001";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0x7f800001);
+    const char *value = "0f7f800001";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0x007fffff);
+    const char *value = "0f007fffff";
+    testLdf32Tof64(result, value);
+  }
+  {
+    const uint64_t result = uint64_t(0x807fffff);
+    const char *value = "0f807fffff";
+    testLdf32Tof64(result, value);
+  }
+}
