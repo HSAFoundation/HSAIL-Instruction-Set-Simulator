@@ -12,6 +12,7 @@ TEST_P(TestBrn,Brn)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->set_machine(BrigESmall);
  
   int n = GetParam();
   std::string input(branch_brn_pair[n].str);
@@ -46,6 +47,7 @@ TEST_P(TestCbr, Cbr)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->set_machine(BrigESmall);
  
   int n = GetParam();
   std::string input(branch_cbr_pair[n].str);
@@ -80,6 +82,7 @@ TEST_P(TestBrnFbr,BrnFbr)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->set_machine(BrigESmall);
  
   int n = GetParam();
   std::string input(branch_brn_fbr_pair[n].str);
@@ -114,6 +117,7 @@ TEST_P(TestCbrFbr,CbrFbr)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->set_machine(BrigESmall);
  
   int n = GetParam();
   std::string input(branch_cbr_fbr_pair[n].str);
