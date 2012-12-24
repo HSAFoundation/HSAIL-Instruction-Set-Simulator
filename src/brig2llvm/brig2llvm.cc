@@ -661,13 +661,13 @@ static void runOnIndirectBranchInst(llvm::BasicBlock &B,
     llvm::BranchInst::Create(launchBB, NULL, predVal, &B);
   }
 
-  llvm::IntegerType *int32Ty = llvm::Type::getInt32Ty(C);
+  llvm::IntegerType *labelTy = llvm::cast<llvm::IntegerType>(targetBB->getType());
   const FunState::CBMap &cbMap = state.cbMap;
   llvm::SwitchInst *launchInst =
     llvm::SwitchInst::Create(targetBB, &B, cbMap.size(), launchBB);
   for(FunState::CBIt cb = cbMap.begin(), E = cbMap.end(); cb != E; ++cb) {
     llvm::BasicBlock *dest = cb->second;
-    llvm::ConstantInt *label = llvm::ConstantInt::get(int32Ty, cb->first);
+    llvm::ConstantInt *label = llvm::ConstantInt::get(labelTy, cb->first);
     if(dest != &F->getEntryBlock())
       launchInst->addCase(label, dest);
   }
