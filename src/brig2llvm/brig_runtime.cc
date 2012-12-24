@@ -357,13 +357,13 @@ template<class T> static T Insert(T w, T x, b32 y, b32 z) {
 defineQuaternary(Insert, b32)
 defineQuaternary(Insert, b64)
 
-template<class T> static T Bitselect(T x, T y, T z) {
+template<class T> static T BitSelect(T x, T y, T z) {
   return (y & x) | (z & ~x);
 }
-defineTernary(Bitselect, b32)
-defineTernary(Bitselect, b64)
+defineTernary(BitSelect, b32)
+defineTernary(BitSelect, b64)
 
-template<class T> static T Firstbit(T x) {
+template<class T> static T FirstBit(T x) {
   if(Int<T>::isNeg(x)) x = ~x;
   if(!x) return ~T(0);
   T pos = T(0);
@@ -373,10 +373,10 @@ template<class T> static T Firstbit(T x) {
   }
   return pos;
 }
-defineUnary(Firstbit, b32)
-defineUnary(Firstbit, b64)
+defineUnary(FirstBit, b32)
+defineUnary(FirstBit, b64)
 
-template<class T> static T Lastbit(T x) {
+template<class T> static T LastBit(T x) {
   if(!x) return ~T(0);
   T pos = T(0);
   while(!(x & 1)) {
@@ -385,8 +385,8 @@ template<class T> static T Lastbit(T x) {
   }
   return pos;
 }
-defineUnary(Lastbit, b32)
-defineUnary(Lastbit, b64)
+defineUnary(LastBit, b32)
+defineUnary(LastBit, b64)
 
 template<class T> static T Mov(T x) { return x; }
 BitInst(define, Mov, Unary)
@@ -546,19 +546,19 @@ extern "C" u32 F2u4_u32(f32 w, f32 x, f32 y, f32 z){
              (lrint(z) & 0xFF));
 }
 
-extern "C" f32 Unpack3(b32 w) {
+extern "C" f32 Unpack3_b32(b32 w) {
   return f32((w >> 24) & 0xFF);
 }
 
-extern "C" f32 Unpack2(b32 w) {
+extern "C" f32 Unpack2_b32(b32 w) {
   return f32((w >> 16) & 0xFF);
 }
 
-extern "C" f32 Unpack1(b32 w) {
+extern "C" f32 Unpack1_b32(b32 w) {
   return f32((w >> 8) & 0xFF);
 }
 
-extern "C" f32 Unpack0(b32 w) {
+extern "C" f32 Unpack0_b32(b32 w) {
   return f32(w & 0xFF);
 }
 

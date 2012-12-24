@@ -3924,3 +3924,44 @@ TEST(BrigInstTest, VectorPopcount) {
     testInst("popcount_b32", testVec);
   }
 }
+
+TEST(BrigInstTest, VectorFirstBit) {
+  {
+    const uint32_t testVec[] = { 1, 0x7fffffff };
+    testInst("firstbit_b32", testVec);
+  }
+}
+
+TEST(BrigInstTest, VectorLastBit) {
+  {
+    const uint32_t testVec[] = { 0, 0x7fffffff };
+    testInst("lastbit_b32", testVec);
+  }
+}
+
+TEST(BrigInstTest, BitSelect) {
+  {
+    const uint32_t testVec[] = { 0xffffffff, 0xffff0000,
+                                 0xffff0000, 0x0000ffff };
+    testInst("bitselect_b32", testVec);
+  }
+}
+
+TEST(BrigInstTest, Unpack) {
+  {
+    const uint32_t testVec[] = { 0xff, 0xff };
+    testInst("unpack0", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xff, 0xff00 };
+    testInst("unpack1", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xff, 0xff0000 };
+    testInst("unpack2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xff, 0xff000000 };
+    testInst("unpack3", testVec);
+  }
+}
