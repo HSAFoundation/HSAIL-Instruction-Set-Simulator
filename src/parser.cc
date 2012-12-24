@@ -4273,14 +4273,12 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
 
     compound_op.name = addrOpOffset;
     if (context->token_type == REGISTER) {
-      // The register must be an s or d register (c registers are not allowed).
-      switch (context->token_to_scan) {
-        case TOKEN_DREGISTER:
-        case TOKEN_SREGISTER:
-          break;
-        default:
-          context->set_error(INVALID_OPERAND);
-          return 1;
+      if ((compound_op.type == Brigb64 && 
+           context->token_to_scan != TOKEN_DREGISTER) ||
+          (compound_op.type == Brigb32 && 
+           context->token_to_scan != TOKEN_SREGISTER)) {
+        context->set_error(INVALID_OPERAND);
+        return 1;
       }
       operand_name = context->token_value.string_val;
       // the token must be Register.
@@ -4362,13 +4360,12 @@ int OffsetAddressableOperandPart2(Context* context, BrigoOffset32_t addrOpOffset
     }
     if (context->token_type == REGISTER) {
       // The register must be an s or d register (c registers are not allowed).
-      switch (context->token_to_scan) {
-        case TOKEN_DREGISTER:
-        case TOKEN_SREGISTER:
-          break;
-        default:
-          context->set_error(INVALID_OPERAND);
-          return 1;
+      if ((indirect_op.type == Brigb64 && 
+           context->token_to_scan != TOKEN_DREGISTER) ||
+          (indirect_op.type == Brigb32 && 
+           context->token_to_scan != TOKEN_SREGISTER)) {
+        context->set_error(INVALID_OPERAND);
+        return 1;
       }
       operand_name = context->token_value.string_val;
       // the token must be Register.
@@ -4441,32 +4438,16 @@ int MemoryOperand(Context* context, BrigoOffset32_t* pRetOpOffset) {
   BrigoOffset32_t currentToOffset = 0;
   context->token_to_scan = yylex();
   // AddressableOperand
-  // if (context->token_type == REGISTER) {
-  //   if ((context->get_machine() == BrigELarge &&
-  //         context->token_to_scan != TOKEN_DREGISTER) ||
-  //       (context->get_machine() == BrigESmall &&
-  //        context->token_to_scan != TOKEN_SREGISTER)) {
-  //     context->set_error(INVALID_MEMORY_OPERAND);
-  //     return 1;
-  //   }
-  // }
 
   if (!AddressableOperand(context, &currentToOffset, false)) {
     if (context->token_to_scan == '[') {
       context->token_to_scan = yylex();
-      // if (context->token_type == REGISTER) {
-      //   if ((context->get_machine() == BrigELarge &&
-      //         context->token_to_scan != TOKEN_DREGISTER) ||
-      //       (context->get_machine() == BrigESmall &&
-      //        context->token_to_scan != TOKEN_SREGISTER)) {
-      //     context->set_error(INVALID_MEMORY_OPERAND);
-      //     return 1;
-      //   }
-      // }
-      if (!OffsetAddressableOperandPart2(context, currentToOffset, pRetOpOffset)) {
+      if (!OffsetAddressableOperandPart2(context, currentToOffset, 
+            pRetOpOffset)) {
         // Global/Local Identifier with offsetAddressOperand.
         return 0;
       }
+      return 1;
     }
     // only Global/Local Identifier without offsetAddressOperand.
     *pRetOpOffset = currentToOffset;
@@ -4704,7 +4685,7 @@ int Atom(Context* context) {
 
   BrigMemorySemantic32_t MemorySemantic = BrigRegular;
   BrigAtomicOperation32_t atomicOperation;
-  BrigStorageClass32_t StorageClass = BrigFlatSpace;
+  BrigStorageClass32_t storageClass = BrigFlatSpace;
   BrigDataType16_t DataType;
   BrigoOffset32_t OpOffset[4] = {0,0,0,0};
 
@@ -4737,8 +4718,8 @@ int Atom(Context* context) {
   }
 
   if(!AddressSpaceIdentifier(context)){
-    StorageClass = context->token_value.storage_class;
-    context->set_storageClass(StorageClass);
+    storageClass = context->token_value.storage_class;
+    context->set_storageClass(storageClass);
     context->token_to_scan = yylex();
   }
 
@@ -4770,6 +4751,7 @@ int Atom(Context* context) {
   context->token_to_scan = yylex();
 
   if (MemoryOperand(context, &OpOffset[1])) {
+    context->set_error(INVALID_MEMORY_OPERAND);
     return 1;
   }
   if (context->token_to_scan != ',') {
@@ -4804,7 +4786,7 @@ int Atom(Context* context) {
     BrigNoPacking,           // packing
     {OpOffset[0], OpOffset[1], OpOffset[2], OpOffset[3], 0},
     atomicOperation,         // atomicOperation
-    StorageClass,            // storageClass
+    storageClass,            // storageClass
     MemorySemantic           // memorySemantic
   };
   context->append_code(&atom_op);
