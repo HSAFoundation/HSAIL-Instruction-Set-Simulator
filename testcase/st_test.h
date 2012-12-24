@@ -243,7 +243,7 @@ struct StTest st_pair[30] = {
   },
 //st_pair[15]
   {
-    "st_spill_s64 $d1, [&x][$d2 - 5];",
+    "st_spill_s64 $d1, [&x][$s2 - 5];",
      {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -258,7 +258,7 @@ struct StTest st_pair[30] = {
   },
 //st_pair[16]
   {
-    "st_arg_f64 $d1, [&x][$d2 + 1];",
+    "st_arg_f64 $d1, [&x][$s2 + 1];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1042,7 +1042,7 @@ struct StTest stv2_pair[30] = {
   },
 //stv2_pair[7]
   {
-    "st_v2_spill_rel_s64 ($d1,$d2), [&x][$d3 - 5];",
+    "st_v2_spill_rel_s64 ($d1,$d2), [&x][$s3 - 5];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1058,7 +1058,7 @@ struct StTest stv2_pair[30] = {
   },
 //stv2_pair[8]
   {
-    "st_v2_arg_part_rel_f64 ($d1,$d2), [&x][$d3 + 1];",
+    "st_v2_arg_part_rel_f64 ($d1,$d2), [&x][$s3 + 1];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1170,7 +1170,7 @@ struct StTest stv2_pair[30] = {
   },
 //stv2_pair[15]
   {
-    "st_v2_spill_equiv(0)_s64 ($d1,$d2), [&x][$d3 - 5];",
+    "st_v2_spill_equiv(0)_s64 ($d1,$d2), [&x][$s3 - 5];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1186,7 +1186,7 @@ struct StTest stv2_pair[30] = {
   },
 //stv2_pair[16]
   {
-    "st_v2_arg_equiv(1)_f64 ($d1,$d2), [&x][$d3 + 1];",
+    "st_v2_arg_equiv(1)_f64 ($d1,$d2), [&x][$s3 + 1];",
      {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1656,7 +1656,7 @@ struct StTest stv4_pair[30] = {
   },
 //stv4_pair[15]
   {
-    "st_v4_spill_rel_equiv(0)_s64 ($d1,$d2,$d3,$d4), [&x][$d5 - 5];",
+    "st_v4_spill_rel_equiv(0)_s64 ($d1,$d2,$d3,$d4), [&x][$s5 - 5];",
      {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1672,7 +1672,7 @@ struct StTest stv4_pair[30] = {
   },
 //stv4_pair[16]
   {
-    "st_v4_arg_part_rel_equiv(1)_f64 ($d1,$d2,$d3,$d4), [&x][$d5 + 1];", 
+    "st_v4_arg_part_rel_equiv(1)_f64 ($d1,$d2,$d3,$d4), [&x][$s5 + 1];", 
      {
     brig_inst_ldst_size,
     BrigEInstLdSt,

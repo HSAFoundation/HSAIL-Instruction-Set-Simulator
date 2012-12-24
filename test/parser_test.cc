@@ -2778,20 +2778,22 @@ TEST(ParserTest, OffsetAddressableOperand) {
   EXPECT_CALL(mer, get_last_error())
       .Times(AtLeast(1));
 
-  std::string input("[$s1 + 0xf7]\n");
+  context->set_storageClass(BrigGlobalSpace);
+  std::string input("[$d1 + 0xf7]\n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
-  input.assign("[$s1]\n");
+  input.assign("[$d1]\n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, OffsetAddressableOperand(context));
 
+  context->set_storageClass(BrigGroupSpace);
   input.assign("[$s2 - 0xf7]\n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
@@ -2822,15 +2824,15 @@ TEST(ParserTest, OffsetAddressableOperand) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
   EXPECT_EQ(MISSING_OPERAND, mer.get_last_error());
-/*
-  input.assign("[$s1 * 0xf7]\n");  // '*' is the illegal operation
+
+  context->set_storageClass(BrigKernargSpace);
+  input.assign("[$s1 + 0xf7]\n");  // '*' is the illegal operation
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, OffsetAddressableOperand(context));
-  EXPECT_EQ(MISSING_CLOSING_BRACKET, mer.get_last_error());
-*/
+
   input.assign("[0xf7 + 0xf7]\n");  // the operation is illegal
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
@@ -4411,6 +4413,7 @@ TEST(ParserTest, PairAddressableOperandTest) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
 
+  context->set_machine(BrigESmall);
   std::string input("[%local][$s3]");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();

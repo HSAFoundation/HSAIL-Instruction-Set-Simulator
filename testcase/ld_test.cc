@@ -303,7 +303,7 @@ TEST_P(OperationLdV2, BrigLd){
     // BrigOperandReg
     EXPECT_EQ(reg_size, getReg.size);
     EXPECT_EQ(BrigEOperandReg, getReg.kind);
-    EXPECT_EQ(Brigb64, getReg.type);
+    EXPECT_EQ(Brigb32, getReg.type);
     EXPECT_EQ(0, getReg.reserved);
     EXPECT_EQ(string_offset + 4 * 2,  getReg.s_name);
 

@@ -479,7 +479,7 @@ namespace brig {
     },
     //ld_pair[22]
     {
-      "ld_spill_s64 $d1, [&x][$d2 - 5];",
+      "ld_spill_s64 $d1, [&x][$s2 - 5];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -500,7 +500,7 @@ namespace brig {
     },
     //ld_pair[23]
     {
-      "ld_arg_f64 $d1, [&x][$d2 + 1];",
+      "ld_arg_f64 $d1, [&x][$s2 + 1];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -1726,7 +1726,7 @@ namespace brig {
     },
     // ldv2_pair[1]
     {
-      "ld_width(2)_v2_arg_f64 ($d1,$d2), [&x][$d3 + 1];",
+      "ld_width(2)_v2_arg_f64 ($d1,$d2), [&x][$s3 + 1];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -1833,7 +1833,7 @@ namespace brig {
     },
     // ldv2_pair[6]
     {
-      "ld_width(1)_v2_spill_s64 ($d1,$d2), [&x][$d3 - 5];",
+      "ld_width(1)_v2_spill_s64 ($d1,$d2), [&x][$s3 - 5];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -2274,7 +2274,7 @@ namespace brig {
     },
     // ldv2_pair[27]
     {
-      "ld_v2_spill_acq_s64 ($d1,$d2), [&x][$d3 - 5];",
+      "ld_v2_spill_acq_s64 ($d1,$d2), [&x][$s3 - 5];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -2295,7 +2295,7 @@ namespace brig {
     },
     // ldv2_pair[28]
     {
-      "ld_v2_arg_f64 ($d1,$d2), [&x][$d3 + 1];",
+      "ld_v2_arg_f64 ($d1,$d2), [&x][$s3 + 1];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -2442,7 +2442,7 @@ namespace brig {
     },
     // ldv2_pair[35]
     {
-      "ld_v2_spill_equiv(0)_s64 ($d1,$d2), [&x][$d3 - 5];",
+      "ld_v2_spill_equiv(0)_s64 ($d1,$d2), [&x][$s3 - 5];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -2463,7 +2463,7 @@ namespace brig {
     },
     // ldv2_pair[36]
     {
-      "ld_v2_arg_equiv(1)_f64 ($d1,$d2), [&x][$d3 + 1];",
+      "ld_v2_arg_equiv(1)_f64 ($d1,$d2), [&x][$s3 + 1];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -3582,7 +3582,7 @@ namespace brig {
     },
     //ldv4_pair[9]
     {
-      "ld_width(1)_v4_spill_acq_s64 ($d1,$d2,$d3,$d4), [&x][$d5 - 5];",
+      "ld_width(1)_v4_spill_acq_s64 ($d1,$d2,$d3,$d4), [&x][$s5 - 5];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -3603,7 +3603,7 @@ namespace brig {
     },
     //ldv4_pair[10]
     {
-      "ld_width(2)_v4_arg_f64 ($d1,$d2,$d3,$d4), [&x][$d5 + 1];",
+      "ld_width(2)_v4_arg_f64 ($d1,$d2,$d3,$d4), [&x][$s5 + 1];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -3750,7 +3750,7 @@ namespace brig {
     },
     //ldv4_pair[17]
     {
-      "ld_width(1)_v4_spill_equiv(0)_s64 ($d1,$d2,$d3,$d4), [&x][$d5 - 5];",
+      "ld_width(1)_v4_spill_equiv(0)_s64 ($d1,$d2,$d3,$d4), [&x][$s5 - 5];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -3771,7 +3771,7 @@ namespace brig {
     },
     //ldv4_pair[18]
     {
-      "ld_width(2)_v4_arg_equiv(1)_f64 ($d1,$d2,$d3,$d4), [&x][$d5 + 1];",
+      "ld_width(2)_v4_arg_equiv(1)_f64 ($d1,$d2,$d3,$d4), [&x][$s5 + 1];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -4086,7 +4086,7 @@ namespace brig {
     },
     //ldv4_pair[33]
     {
-      "ld_v4_spill_acq_equiv(0)_s64 ($d1,$d2,$d3,$d4), [&x][$d5 - 5];", 
+      "ld_v4_spill_acq_equiv(0)_s64 ($d1,$d2,$d3,$d4), [&x][$s5 - 5];", 
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -4107,7 +4107,7 @@ namespace brig {
     },
     //ldv4_pair[34]
     {
-      "ld_v4_arg_equiv(1)_f64 ($d1,$d2,$d3,$d4), [&x][$d5 + 1];",
+      "ld_v4_arg_equiv(1)_f64 ($d1,$d2,$d3,$d4), [&x][$s5 + 1];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -4254,7 +4254,7 @@ namespace brig {
     },
     //ldv4_pair[41]
     {
-      "ld_width(1)_v4_spill_acq_equiv(0)_s64 ($d1,$d2,$d3,$d4), [&x][$d5 - 5];",
+      "ld_width(1)_v4_spill_acq_equiv(0)_s64 ($d1,$d2,$d3,$d4), [&x][$s5 - 5];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -4275,7 +4275,7 @@ namespace brig {
     },
     //ldv4_pair[42]
     {
-      "ld_width(2)_v4_arg_equiv(1)_f64 ($d1,$d2,$d3,$d4), [&x][$d5 + 1];",
+      "ld_width(2)_v4_arg_equiv(1)_f64 ($d1,$d2,$d3,$d4), [&x][$s5 + 1];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
