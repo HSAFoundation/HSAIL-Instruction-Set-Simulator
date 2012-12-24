@@ -3917,3 +3917,10 @@ TEST(BrigKernelTest, VariadicFunction) {
 
   delete output;
 }
+
+TEST(BrigInstTest, VectorPopcount) {
+  {
+    const uint32_t testVec[] = { 0x0, 0x00000000 };
+    testInst("popcount_b32", testVec);
+  }
+}

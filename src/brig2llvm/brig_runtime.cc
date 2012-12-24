@@ -311,10 +311,10 @@ template<class T> static T Not(T x) { return ~x; }
 template<> bool Not(bool x) { return !x; }
 BitInst(define, Not, Unary)
 
-static b32 Popcount(b32 x) { return __builtin_popcount(x); }
-static b64 Popcount(b64 x) { return __builtin_popcountll(x); }
-defineUnary(Popcount, b32)
-defineUnary(Popcount, b64)
+static b32 PopCount(b32 x) { return __builtin_popcount(x); }
+static b64 PopCount(b64 x) { return __builtin_popcountll(x); }
+defineUnary(PopCount, b32)
+defineUnary(PopCount, b64)
 
 // Bit reverse implementation loosely adapted from Sean Eron Anderson's article
 // at: http://graphics.stanford.edu/~seander/bithacks.html

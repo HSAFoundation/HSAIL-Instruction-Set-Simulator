@@ -404,7 +404,7 @@ template<class T> static void NotLogic(T result, T a) {
 }
 TestAll(BitInst, Not, Unary)
 
-template<class T> static void PopcountLogic(T result, T a) {
+template<class T> static void PopCountLogic(T result, T a) {
   int d = 0;
   T bits = a;
   while(bits != 0) {
@@ -413,10 +413,10 @@ template<class T> static void PopcountLogic(T result, T a) {
   }
   EXPECT_EQ(d, result);
 }
-declareUnary(Popcount, b32)
-declareUnary(Popcount, b64)
-MakeTest(Popcount_b32, PopcountLogic)
-MakeTest(Popcount_b64, PopcountLogic)
+declareUnary(PopCount, b32)
+declareUnary(PopCount, b64)
+MakeTest(PopCount_b32, PopCountLogic)
+MakeTest(PopCount_b64, PopCountLogic)
 
 // Bit reverse implementation loosely adapted from Sean Eron Anderson's article
 // at: http://graphics.stanford.edu/~seander/bithacks.html
