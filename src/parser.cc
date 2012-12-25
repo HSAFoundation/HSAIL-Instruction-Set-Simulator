@@ -444,9 +444,12 @@ int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset,
   std::string name(context->token_value.string_val);
 
   directive = context->get_symbol(name);
+  if (directive == 0) {
+    context->set_error(UNDEFINED_IDENTIFIER);
+    return 1;
+  }
   context->token_to_scan = yylex();
 
-  // check <..>
   if (context->token_to_scan == '<') {
     isBracket = true;
 
@@ -809,8 +812,11 @@ int CallArgs(Context* context) {
         BrigEOperandArgumentRef,
         0
       };
-      // TODO(Chuang): judge whether the identifier has been defined.
       opArgRef.arg = context->get_symbol(arg_name);
+      if (opArgRef.arg == 0) {
+        context->set_error(UNDEFINED_IDENTIFIER);
+        return 1;
+      }
       context->arg_map[arg_name] = context->get_operand_offset();
       context->append_operand(&opArgRef);
 
@@ -1973,32 +1979,29 @@ int BranchCbr(Context* context) {
         };
 
         boa.directive = context->get_symbol(idenName);
-        //TODO(Chuang): This Comparison for uint test.
-        if (boa.directive != 0) {
-          if (context->get_machine() == BrigELarge) {
-            BrigSymbolCommon symbol;
-            char* pSym = reinterpret_cast<char*>(&symbol);
-            context->get_directive_bytes(
-                pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
-            switch (symbol.storageClass) {
-              case BrigFlatSpace:
-              case BrigGlobalSpace:
-              case BrigReadonlySpace:
-              case BrigKernargSpace:
-                boa.type = Brigb64; break;
-              default:
-                boa.type = Brigb32;
-            }
-          }
-        } else {
-          if (context->get_machine() == BrigELarge) {
-            boa.type = Brigb64;
+        if (boa.directive == 0) {
+          context->set_error(UNDEFINED_IDENTIFIER);
+          return 1;
+        }
+        if (context->get_machine() == BrigELarge) {
+          BrigSymbolCommon symbol;
+          char* pSym = reinterpret_cast<char*>(&symbol);
+          context->get_directive_bytes(
+              pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
+          switch (symbol.storageClass) {
+            case BrigFlatSpace:
+            case BrigGlobalSpace:
+            case BrigReadonlySpace:
+            case BrigKernargSpace:
+              boa.type = Brigb64; break;
+            default:
+              boa.type = Brigb32;
           }
         }
         OpOffset[3] = context->get_operand_offset();
         context->append_operand(&boa);
       } else {  // Identifier or Label
-         context->set_error(MISSING_OPERAND);
+        context->set_error(MISSING_OPERAND);
         return 1;
       }
       context->token_to_scan = yylex();
@@ -2146,26 +2149,23 @@ int BranchBrn(Context* context) {
         };
 
         boa.directive = context->get_symbol(idenName);
-        //TODO(Chuang): This Comparison for uint test.
-        if (boa.directive != 0) {
-          if (context->get_machine() == BrigELarge) {
-            BrigSymbolCommon symbol;
-            char* pSym = reinterpret_cast<char*>(&symbol);
-            context->get_directive_bytes(
-                pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
-            switch (symbol.storageClass) {
-              case BrigFlatSpace:
-              case BrigGlobalSpace:
-              case BrigReadonlySpace:
-              case BrigKernargSpace:
-                boa.type = Brigb64; break;
-              default:
-                boa.type = Brigb32;
-            }
-          }
-        } else {
-          if (context->get_machine() == BrigELarge) {
-            boa.type = Brigb64;
+        if (boa.directive == 0) {
+          context->set_error(UNDEFINED_IDENTIFIER);
+          return 1;
+        }
+        if (context->get_machine() == BrigELarge) {
+          BrigSymbolCommon symbol;
+          char* pSym = reinterpret_cast<char*>(&symbol);
+          context->get_directive_bytes(
+              pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
+          switch (symbol.storageClass) {
+            case BrigFlatSpace:
+            case BrigGlobalSpace:
+            case BrigReadonlySpace:
+            case BrigKernargSpace:
+              boa.type = Brigb64; break;
+            default:
+              boa.type = Brigb32;
           }
         }
 
@@ -8503,26 +8503,23 @@ int PairAddressableOperand(Context* context) {
   };
 
   boa.directive = context->get_symbol(name);
-  //TODO(Chuang): This Comparison for uint test.
-  if (boa.directive != 0) {
-    if (context->get_machine() == BrigELarge) {
-      BrigSymbolCommon symbol;
-      char* pSym = reinterpret_cast<char*>(&symbol);
-      context->get_directive_bytes(
-          pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
-      switch (symbol.storageClass) {
-        case BrigFlatSpace:
-        case BrigGlobalSpace:
-        case BrigReadonlySpace:
-        case BrigKernargSpace:
-          boa.type = Brigb64; break;
-        default:
-          boa.type = Brigb32;
-      }
-    }
-  } else {
-    if (context->get_machine() == BrigELarge) {
-      boa.type = Brigb64;
+  if (boa.directive == 0) {
+    context->set_error(UNDEFINED_IDENTIFIER);
+    return 1;
+  }
+  if (context->get_machine() == BrigELarge) {
+    BrigSymbolCommon symbol;
+    char* pSym = reinterpret_cast<char*>(&symbol);
+    context->get_directive_bytes(
+        pSym, boa.directive + sizeof(uint16_t) * 2, sizeof(symbol));
+    switch (symbol.storageClass) {
+      case BrigFlatSpace:
+      case BrigGlobalSpace:
+      case BrigReadonlySpace:
+      case BrigKernargSpace:
+        boa.type = Brigb64; break;
+      default:
+        boa.type = Brigb32;
     }
   }
 

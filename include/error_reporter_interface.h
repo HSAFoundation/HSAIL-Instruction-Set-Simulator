@@ -86,6 +86,7 @@ enum error_code_t {
   MISSING_SEGMENT,
 
   REPEATED_DECLARATION,
+  UNDEFINED_IDENTIFIER,
 
   UNKNOWN_ERROR
 };
@@ -250,6 +251,9 @@ class ErrorReporterInterface {
           return std::string("Missing segment information for segment operation.");
         case REPEATED_DECLARATION:
           return std::string("Repeated declaration.");
+
+        case UNDEFINED_IDENTIFIER:
+          return std::string("Undefined identifier.");
 
         case UNKNOWN_ERROR:
         default:
