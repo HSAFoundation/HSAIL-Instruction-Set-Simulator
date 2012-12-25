@@ -1272,8 +1272,16 @@ int Version(Context* context) {
     return 1;
   }
   bdv.major = context->token_value.int_val;
-  context->token_to_scan = yylex();
+  if (!context->isFirstVersion) {
+    if (bdv.major != context->get_major()) {
+      context->set_error(INVALID_MAJOR_NUMBER);
+      return 1;
+    }
+  } else {
+    context->set_major(bdv.major);
+  }
 
+  context->token_to_scan = yylex();
   if (':' != context->token_to_scan) {
     context->set_error(MISSING_COLON);
     return 1;
@@ -1285,6 +1293,15 @@ int Version(Context* context) {
     return 1;
   }
   bdv.minor = context->token_value.int_val;
+  if (!context->isFirstVersion) {
+    if (bdv.minor != context->get_minor()) {
+      context->set_error(INVALID_MINOR_NUMBER);
+      return 1;
+    }
+  } else {
+    context->set_minor(bdv.minor);
+  }
+
   context->token_to_scan = yylex();
 
   if (':' == context->token_to_scan) {
@@ -1323,6 +1340,7 @@ int Version(Context* context) {
   context->append_directive(&bdv);
   context->token_to_scan = yylex();
   context->set_error(OK);
+  context->isFirstVersion = false;
   return 0;
 }
 

@@ -67,6 +67,8 @@ enum error_code_t {
   INVALID_SEGMENT_OPERATION,
   INVALID_MEMORY_OPERAND,
   INVALID_MODIFIER,
+  INVALID_MAJOR_NUMBER,
+  INVALID_MINOR_NUMBER,
   // missing part
   MISSING_VERSION_STATEMENT,
   MISSING_WIDTH_INFO,
@@ -217,6 +219,10 @@ class ErrorReporterInterface {
           return std::string("Invalid modifier.");
         case INVALID_MEMORY_OPERAND:
           return std::string("Invalid Memory Operand.");
+        case INVALID_MAJOR_NUMBER:
+          return std::string("Invalid Major Number.");
+        case INVALID_MINOR_NUMBER:
+          return std::string("Invalid Minor Number.");
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");
         case MISSING_WIDTH_INFO:
