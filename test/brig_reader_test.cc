@@ -3973,7 +3973,7 @@ static const char Ld[] =
     "{\n"
     "  ld_kernarg_u64 $d0, [%r];\n"
     "  ld_global_%s $%c1, [&n];\n"
-    "  st_kernarg_%s $%c1, [$d0];\n"
+    "  st_global_%s $%c1, [$d0];\n"
     "  ret;\n"
     "};\n";
 
