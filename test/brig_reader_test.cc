@@ -3965,3 +3965,110 @@ TEST(BrigInstTest, Unpack) {
     testInst("unpack3", testVec);
   }
 }
+
+static const char Ld[] =
+    "version 1:0:$large;\n"
+    "global_%s &n = %s;\n"
+    "kernel &testLd(kernarg_u64 %r)\n"
+    "{\n"
+    "  ld_kernarg_u64 $d0, [%r];\n"
+    "  ld_global_%s $%c1, [&n];\n"
+    "  st_kernarg_%s $%c1, [$d0];\n"
+    "  ret;\n"
+    "};\n";
+
+
+template<class T>
+static void testLd(const char *type1,
+                   const char *type2,
+                   const T &result,
+                   const char *value,
+                   unsigned bits) {
+  char reg = 0;
+  if(bits == 8 || bits == 16 || bits == 32)
+    reg = 's';
+  if(bits == 64)
+    reg = 'd';
+  char *buffer =
+    asnprintf(Ld,
+              type1,
+              value,
+              type2,
+              reg,
+              type2,
+              reg);
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  delete[] buffer;
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  T *arg_val0 = new T;
+  *arg_val0 = 0;
+
+  void *args[] = { &arg_val0 };
+  llvm::Function *fun = BP->getFunction("testLd");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+  
+  EXPECT_EQ(result, *arg_val0);
+
+  delete arg_val0;
+}
+
+TEST(BrigKernelTest, testLd) {
+  {
+    const int16_t result = int16_t(0xff81);
+    const char *value = "0x81";
+    unsigned bits = 16;
+    testLd("s8", "s16",  result, value, bits);
+  }
+  {
+    const int16_t result = int16_t(0x0001);
+    const char *value = "0x01";
+    unsigned bits = 16;
+    testLd("s8", "s16",  result, value, bits);
+  }
+  {
+    const int32_t result = int32_t(0xffffff81);
+    const char *value = "0x81";
+    unsigned bits = 32;
+    testLd("s8", "s32",  result, value, bits);
+  }
+  {
+    const int32_t result = int32_t(0x00000001);
+    const char *value = "0x01";
+    unsigned bits = 32;
+    testLd("s8", "s32",  result, value, bits);
+  }
+  {
+    const int32_t result = int32_t(0xffff8001);
+    const char *value = "0x8001";
+    unsigned bits = 32;
+    testLd("s16", "s32",  result, value, bits);
+  }
+  {
+    const int32_t result = int32_t(0x00000001);
+    const char *value = "0x0001";
+    unsigned bits = 32;
+    testLd("s16", "s32",  result, value, bits);
+  }
+  {
+    const uint16_t result = uint16_t(0x007f);
+    const char *value = "0x7f";
+    unsigned bits = 16;
+    testLd("u8", "u16",  result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x0000007f);
+    const char *value = "0x7f";
+    unsigned bits = 32;
+    testLd("u8", "u32",  result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x00007fff);
+    const char *value = "0x7fff";
+    unsigned bits = 32;
+    testLd("u16", "u32",  result, value, bits);
+  }
+}
