@@ -3925,30 +3925,43 @@ TEST(BrigInstTest, VectorPopcount) {
   }
 }
 
-TEST(BrigKernelTest, Ldf32Tof64) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
-    "global_f32 &n = 1.000000000f;\n"
-    "kernel &Ldf32Tof64(kernarg_u64 %r)\n"
-    "{\n"
-    "  ld_kernarg_u64 $d0, [%r];\n"
-    "  ld_global_f64 $d1, [&n];\n"
-    "  st_kernarg_f64 $d1, [$d0];\n"
-    "  ret;\n"
-    "};\n");
+TEST(BrigInstTest, VectorFirstBit) {
+  {
+    const uint32_t testVec[] = { 1, 0x7fffffff };
+    testInst("firstbit_b32", testVec);
+  }
+}
 
-  EXPECT_TRUE(BP);
-  if(!BP) return;
+TEST(BrigInstTest, VectorLastBit) {
+  {
+    const uint32_t testVec[] = { 0, 0x7fffffff };
+    testInst("lastbit_b32", testVec);
+  }
+}
 
-  double *arg_val0 = new double;
-  *arg_val0 = 0;
+TEST(BrigInstTest, BitSelect) {
+  {
+    const uint32_t testVec[] = { 0xffffffff, 0xffff0000,
+                                 0xffff0000, 0x0000ffff };
+    testInst("bitselect_b32", testVec);
+  }
+}
 
-  void *args[] = { &arg_val0 };
-  llvm::Function *fun = BP->getFunction("Ldf32Tof64");
-  hsa::brig::BrigEngine BE(BP);
-  BE.launch(fun, args);
-
-  EXPECT_EQ(1.000000000l, *arg_val0);
-
-  delete arg_val0;
+TEST(BrigInstTest, Unpack) {
+  {
+    const uint32_t testVec[] = { 0xff, 0xff };
+    testInst("unpack0", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xff, 0xff00 };
+    testInst("unpack1", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xff, 0xff0000 };
+    testInst("unpack2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xff, 0xff000000 };
+    testInst("unpack3", testVec);
+  }
 }

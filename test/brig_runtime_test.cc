@@ -482,16 +482,16 @@ declareQuaternary(Insert, b64)
 MakeTest(Insert_b32, InsertLogic)
 MakeTest(Insert_b64, InsertLogic)
 
-template<class T> static void BitselectLogic(T result, T a, T b, T c) {
+template<class T> static void BitSelectLogic(T result, T a, T b, T c) {
   EXPECT_EQ(b &  a, result &  a);
   EXPECT_EQ(c & ~a, result & ~a);
 }
-declareTernary(Bitselect, b32)
-declareTernary(Bitselect, b64)
-MakeTest(Bitselect_b32, BitselectLogic)
-MakeTest(Bitselect_b64, BitselectLogic)
+declareTernary(BitSelect, b32)
+declareTernary(BitSelect, b64)
+MakeTest(BitSelect_b32, BitSelectLogic)
+MakeTest(BitSelect_b64, BitSelectLogic)
 
-template<class T> static void FirstbitLogic(T result, T a) {
+template<class T> static void FirstBitLogic(T result, T a) {
 
   if(Int<T>::isNeg(a)) a = ~a;
 
@@ -505,12 +505,12 @@ template<class T> static void FirstbitLogic(T result, T a) {
   while(!(a & mask)) mask >>= 1;
   EXPECT_EQ(mask, T(1) << (Int<T>::Bits - result - 1));
 }
-declareUnary(Firstbit, b32)
-declareUnary(Firstbit, b64)
-MakeTest(Firstbit_b32, FirstbitLogic)
-MakeTest(Firstbit_b64, FirstbitLogic)
+declareUnary(FirstBit, b32)
+declareUnary(FirstBit, b64)
+MakeTest(FirstBit_b32, FirstBitLogic)
+MakeTest(FirstBit_b64, FirstBitLogic)
 
-template<class T> static void LastbitLogic(T result, T a) {
+template<class T> static void LastBitLogic(T result, T a) {
 
   if(!a) {
     EXPECT_EQ(~T(0), result);
@@ -522,10 +522,10 @@ template<class T> static void LastbitLogic(T result, T a) {
   while(!(a & mask)) mask <<= 1;
   EXPECT_EQ(mask, T(1) << result);
 }
-declareUnary(Lastbit, b32)
-declareUnary(Lastbit, b64)
-MakeTest(Lastbit_b32, LastbitLogic)
-MakeTest(Lastbit_b64, LastbitLogic)
+declareUnary(LastBit, b32)
+declareUnary(LastBit, b64)
+MakeTest(LastBit_b32, LastBitLogic)
+MakeTest(LastBit_b64, LastBitLogic)
 
 static void Movs_lo_b32_Logic(b32 result, b64 a) {
   EXPECT_EQ(b32(a), result);
@@ -848,26 +848,26 @@ MakeTest(F2u4_u32, F2u4_u32_Logic)
 static void Unpack3Logic(f32 result, b32 a) {
   EXPECT_EQ(result, (a >> 24) & 0xFF);
 }
-extern "C" f32 Unpack3(b32);
-MakeTest(Unpack3, Unpack3Logic)
+extern "C" f32 Unpack3_b32(b32);
+MakeTest(Unpack3_b32, Unpack3Logic)
 
 static void Unpack2Logic(f32 result, b32 a) {
   EXPECT_EQ(result, (a >> 16) & 0xFF);
 }
-extern "C" f32 Unpack2(b32);
-MakeTest(Unpack2, Unpack2Logic)
+extern "C" f32 Unpack2_b32(b32);
+MakeTest(Unpack2_b32, Unpack2Logic)
 
 static void Unpack1Logic(f32 result, b32 a) {
   EXPECT_EQ(result, (a >> 8) & 0xFF);
 }
-extern "C" f32 Unpack1(b32);
-MakeTest(Unpack1, Unpack1Logic)
+extern "C" f32 Unpack1_b32(b32);
+MakeTest(Unpack1_b32, Unpack1Logic)
 
 static void Unpack0Logic(f32 result, b32 a) {
   EXPECT_EQ(result, (a & 0xFF));
 }
-extern "C" f32 Unpack0(b32);
-MakeTest(Unpack0, Unpack0Logic)
+extern "C" f32 Unpack0_b32(b32);
+MakeTest(Unpack0_b32, Unpack0Logic)
 
 static void Bitalign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
   if(c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {

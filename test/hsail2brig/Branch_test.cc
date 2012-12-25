@@ -137,8 +137,8 @@ TEST(CodegenTest, Brn_Codegen){
   sbuf->clear();
 
   /*************************** Case 3 ********************************/
-  in.assign("brn_width(0)_fbar $s1;\n");
-  regName.assign("$s1");  sbuf->append(regName);
+  in.assign("brn_width(0)_fbar $d1;\n");
+  regName.assign("$d1");  sbuf->append(regName);
   
   outMod.size = sizeof(outMod);
   outMod.kind = BrigEInstMod;
@@ -163,7 +163,7 @@ TEST(CodegenTest, Brn_Codegen){
   
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -172,8 +172,8 @@ TEST(CodegenTest, Brn_Codegen){
   sbuf->clear();
 
   /*************************** Case 4 ********************************/
-  in.assign("brn_width(64) $s0;\n");
-  regName.assign("$s0");  sbuf->append(regName);
+  in.assign("brn_width(64) $d0;\n");
+  regName.assign("$d0");  sbuf->append(regName);
   
   outInst.size = sizeof(outInst);
   outInst.kind = BrigEInstBase;
@@ -195,7 +195,7 @@ TEST(CodegenTest, Brn_Codegen){
   
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -204,8 +204,8 @@ TEST(CodegenTest, Brn_Codegen){
   sbuf->clear();
 
   /*************************** Case 5 ********************************/
-  in.assign("brn $s1, [%jumptable2];\n");
-  regName.assign("$s1");  sbuf->append(regName);
+  in.assign("brn $d1, [%jumptable2];\n");
+  regName.assign("$d1");  sbuf->append(regName);
   
   outInst.size = sizeof(outInst);
   outInst.kind = BrigEInstBase;
@@ -227,7 +227,7 @@ TEST(CodegenTest, Brn_Codegen){
   
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -242,8 +242,8 @@ TEST(CodegenTest, Brn_Codegen){
   sbuf->clear();
 
   /*************************** Case 6 ********************************/
-  in.assign("brn_fbar $s3, [@targets];\n");
-  regName.assign("$s3");  sbuf->append(regName);
+  in.assign("brn_fbar $d3, [@targets];\n");
+  regName.assign("$d3");  sbuf->append(regName);
   
   outMod.size = sizeof(outMod);
   outMod.kind = BrigEInstMod;
@@ -268,7 +268,7 @@ TEST(CodegenTest, Brn_Codegen){
   
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb32;
+  reg.type = Brigb64;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -298,8 +298,8 @@ TEST(CodegenTest, Cbr_Codegen){
   BrigOperandAddress addr;
 
   /*************************** Case 1 ********************************/
-  in.assign("cbr_width(4) $c1, $s1, [@tab];\n");
-  reg1Name.assign("$c1");   reg2Name.assign("$s1");
+  in.assign("cbr_width(4) $c1, $d1, [@tab];\n");
+  reg1Name.assign("$c1");   reg2Name.assign("$d1");
   sbuf->append(reg1Name);   sbuf->append(reg2Name);
 
   outInst.size = sizeof(outInst);
@@ -328,7 +328,7 @@ TEST(CodegenTest, Cbr_Codegen){
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
-  reg2.type = Brigb32;
+  reg2.type = Brigb64;
   reg2.reserved = 0;
   reg2.s_name = reg1Name.size() + 1;
 
@@ -342,8 +342,8 @@ TEST(CodegenTest, Cbr_Codegen){
   sbuf->clear();
 
   /*************************** Case 2 ********************************/
-  in.assign("cbr_width(all)_fbar $c2, $s2, [%x];");
-  reg1Name.assign("$c2");   reg2Name.assign("$s2");
+  in.assign("cbr_width(all)_fbar $c2, $d2, [%x];");
+  reg1Name.assign("$c2");   reg2Name.assign("$d2");
   sbuf->append(reg1Name);   sbuf->append(reg2Name);
 
   outMod.size = sizeof(outMod);
@@ -375,7 +375,7 @@ TEST(CodegenTest, Cbr_Codegen){
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
-  reg2.type = Brigb32;
+  reg2.type = Brigb64;
   reg2.reserved = 0;
   reg2.s_name = reg1Name.size() + 1;
 
@@ -431,8 +431,8 @@ TEST(CodegenTest, Cbr_Codegen){
 
   /*************************** Case 4 ********************************/
 
-  in.assign("cbr $c1, $s1;\n");
-  reg1Name.assign("$c1");   reg2Name.assign("$s1");
+  in.assign("cbr $c1, $d1;\n");
+  reg1Name.assign("$c1");   reg2Name.assign("$d1");
   sbuf->append(reg1Name);   sbuf->append(reg2Name);
 
   outInst.size = sizeof(outInst);
@@ -461,7 +461,7 @@ TEST(CodegenTest, Cbr_Codegen){
 
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
-  reg2.type = Brigb32;
+  reg2.type = Brigb64;
   reg2.reserved = 0;
   reg2.s_name = reg1Name.size() + 1;
  

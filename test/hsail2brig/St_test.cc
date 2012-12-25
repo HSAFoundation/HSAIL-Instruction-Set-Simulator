@@ -119,56 +119,52 @@ public:
   }
 };
 
-TEST(CodegenTest, St_Codegen){
+TEST(CodegenTest, St_Codegen) {
 
-  /***********************************Common variables used by all tests**************************************/
   std::string in, op1, op2, op3, op4, op5, op6;
   StringBuffer* sbuf = new StringBuffer();
 
-  /*********************************** Test Case 1************************************************************/
+  /********************* Test Case 1 *****************************/
 
-  in.assign( "st_arg_f32 $s0, [%output][$d2-4];\n");
-  op1.assign("$s0"); op2.assign("%output"); op3.assign("$d2");
+  in.assign( "st_arg_f32 $s0, [%output][$s2-4];\n");
+  op1.assign("$s0"); op2.assign("%output"); op3.assign("$s2");
   sbuf->append(op1); sbuf->append(op2); sbuf->append(op3);
 
-  //Reference to $s0
   BrigOperandReg src = {
-  0,
-  BrigEOperandReg,
-  Brigb32,
-  0,
-  0  //Offset to string table
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    0 
   };
   src.size = sizeof(src);
 
-  //ref to %output - Not added in symbol table; it is assumed that it was added during variable decl
   BrigOperandAddress dest1 = {
-  0,
-  BrigEOperandAddress,
-  Brigb64,
-  0,
-  0  //Offset to .directives, However, no directive in .directives. Ambiguous testing.
+    0,
+    BrigEOperandAddress,
+    Brigb64,
+    0,
+    0 
   };
   dest1.size = sizeof(dest1);
 
-  //Ref to $s2
   BrigOperandReg dest2 = {
-  0,
-  BrigEOperandReg,
-  Brigb64,
-  0,
-  op1.size() + op2.size() +2,
+    0,
+    BrigEOperandReg,
+    Brigb32,
+    0,
+    op1.size() + op2.size() +2,
   };
   dest2.size = sizeof(dest2);
 
   BrigOperandCompound comp = {
-  0,
-  BrigEOperandCompound,
-  Brigb32,
-  0,
-  sizeof(src),//byte offset to operand addr
-  sizeof(src) + sizeof(dest1), //to operand reg
-  -4  //Offset in the included test case
+    0,
+    BrigEOperandCompound,
+    Brigb32,
+    0,
+    sizeof(src),//byte offset to operand addr
+    sizeof(src) + sizeof(dest1), //to operand reg
+    -4  //Offset in the included test case
   };
   comp.size = sizeof(comp);
 
@@ -191,8 +187,8 @@ TEST(CodegenTest, St_Codegen){
 
   /*********************************** Test Case 2************************************************************/
 
-  in.assign( "st_arg_f32 $s0, [$d2-4];\n");
-  op1.assign("$s0");  op2.assign("$d2");
+  in.assign( "st_arg_f32 $s0, [$s2-4];\n");
+  op1.assign("$s0");  op2.assign("$s2");
   sbuf->append(op1); sbuf->append(op2);
 
   //Reference to $s0
@@ -205,17 +201,17 @@ TEST(CodegenTest, St_Codegen){
   //Ref to $d2
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
-  dest2.type = Brigb64;
+  dest2.type = Brigb32;
   dest2.reserved = 0;
   dest2.s_name = op1.size() + 1;
 
   BrigOperandIndirect indirect = {
-  0,
-  BrigEOperandIndirect,
-  sizeof(src), //to operand reg
-  Brigb32,
-  0,
-  -4  //Offset in the included test case
+    0,
+    BrigEOperandIndirect,
+    sizeof(src), //to operand reg
+    Brigb32,
+    0,
+    -4  //Offset in the included test case
   };
   indirect.size = sizeof(indirect);
 
@@ -236,7 +232,7 @@ TEST(CodegenTest, St_Codegen){
   TestCase2.Run_Test(&St);
   sbuf->clear();
 
-  /*********************************** Test Case 3************************************************************/
+  /******************* Test Case 3 ********************/
 
   in.assign( "st_arg_f32 $s0, [%output];\n");
   op1.assign("$s0"); op2.assign("%output");
@@ -273,7 +269,7 @@ TEST(CodegenTest, St_Codegen){
   TestCase3.Run_Test(&St);
   sbuf->clear();
 
-  /*********************************** Test Case 4************************************************************/
+  /**************** Test Case 4 ***********************/
 
   in.assign( "st_arg_f32 0x1234, [%output];\n");
   op1.assign("%output");
@@ -317,10 +313,10 @@ TEST(CodegenTest, St_Codegen){
   TestCase4.Run_Test(&St);
   sbuf->clear();
 
-  /*********************************** Test Case 5************************************************************/
+  /***************** Test Case 5 **********************/
 
-  in.assign( "st_arg_f64 3.1415l, [$d2-4];\n");
-  op1.assign("$d2");
+  in.assign( "st_arg_f64 3.1415l, [$s2-4];\n");
+  op1.assign("$s2");
   sbuf->append(op1);
 
   //Reference to immed
@@ -333,7 +329,7 @@ TEST(CodegenTest, St_Codegen){
   //Ref to $d2
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
-  dest2.type = Brigb64;
+  dest2.type = Brigb32;
   dest2.reserved = 0;
   dest2.s_name = 0;
 
@@ -361,10 +357,10 @@ TEST(CodegenTest, St_Codegen){
   TestCase5.Run_Test(&St);
   sbuf->clear();
 
- /*********************************** Test Case 6************************************************************/
+ /*************** Test Case 6 ************************/
 
-  in.assign( "st_arg_f64 3.1415l, [%output][$d2-4];\n");
-  op1.assign("%output");  op2.assign("$d2");
+  in.assign( "st_arg_f64 3.1415l, [%output][$s2-4];\n");
+  op1.assign("%output");  op2.assign("$s2");
   sbuf->append(op1);  sbuf->append(op2);
 
   //Reference to immed
@@ -374,17 +370,16 @@ TEST(CodegenTest, St_Codegen){
   src1.reserved = 0;
   src1.bits.d = 3.1415l;
 
-  //ref to %output - Not added in symbol table; it is assumed that it was added during variable decl
   dest1.size = sizeof(dest1);
   dest1.kind = BrigEOperandAddress;
   dest1.type = Brigb64;
   dest1.reserved = 0;
-  dest1.directive = 0;//Offset to .directives, However, no directive in .directives. Ambiguous testing.
+  dest1.directive = 0;
 
   //Ref to $d2
   dest2.size = sizeof(dest2);
   dest2.kind = BrigEOperandReg;
-  dest2.type = Brigb64;
+  dest2.type = Brigb32;
   dest2.reserved = 0;
   dest2.s_name = op1.size() + 1;
 
@@ -453,12 +448,11 @@ TEST(CodegenTest, St_Codegen){
   };
   regv2.size = sizeof(regv2);
 
-  //ref to %output - Not added in symbol table; it is assumed that it was added during variable decl
   dest1.size = sizeof(dest1);
   dest1.kind = BrigEOperandAddress;
   dest1.type = Brigb64;
   dest1.reserved = 0;
-  dest1.directive = 0;//Offset to .directives, However, no directive in .directives. Ambiguous testing.
+  dest1.directive = 0;
 
   //Ref to $d2
   dest2.size = sizeof(dest2);
@@ -497,7 +491,7 @@ TEST(CodegenTest, St_Codegen){
   TestCase7.Run_Test(&St);
   sbuf->clear();
 
- /*********************************** Test Case8************************************************************/
+ /**************** Test Case8 *****************/
 
   in.assign( "st_v4_f32 ($s0,$s1,$s2,$s3), [%output][$d4-4];\n");
   op1.assign("$s0");  op2.assign("$s1");
@@ -552,12 +546,11 @@ TEST(CodegenTest, St_Codegen){
   };
   regv4.size = sizeof(regv4);
 
-  //ref to %output - Not added in symbol table; it is assumed that it was added during variable decl
   dest1.size = sizeof(dest1);
   dest1.kind = BrigEOperandAddress;
   dest1.type = Brigb64;
   dest1.reserved = 0;
-  dest1.directive = 0;//Offset to .directives, However, no directive in .directives. Ambiguous testing.
+  dest1.directive = 0;
 
   //Ref to $d4
   dest2.size = sizeof(dest2);

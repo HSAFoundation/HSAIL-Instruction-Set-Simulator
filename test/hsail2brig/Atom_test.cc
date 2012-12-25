@@ -264,9 +264,9 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 4 ************************************/
-  in.assign("atomic_or_group_u64 $d1, [%x][$d2 - 0x4], $d1;\n");
+  in.assign("atomic_or_group_u64 $d1, [%x][$s2 - 0x4], $d1;\n");
   destName.assign("$d1");  symbols->append(destName);
-  regName.assign("$d2");  symbols->append(regName);
+  regName.assign("$s2");  symbols->append(regName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -298,7 +298,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb64;
+  reg.type = Brigb32;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -637,13 +637,13 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 12 ************************************/
-  in.assign("atomic_inc_group_u64 $d1, [$d1], $d1;\n");
-  destName.assign("$d1");  symbols->append(destName);
+  in.assign("atomic_inc_group_u32 $s1, [$s1], $s1;\n");
+  destName.assign("$s1");  symbols->append(destName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
   out.opcode = BrigAtomic;
-  out.type = Brigu64;
+  out.type = Brigu32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = 0;
   out.o_operands[1] = sizeof(dest);
@@ -656,7 +656,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   dest.size = sizeof(dest);
   dest.kind = BrigEOperandReg;
-  dest.type = Brigb64;
+  dest.type = Brigb32;
   dest.reserved = 0;
   dest.s_name = 0;
 
@@ -714,9 +714,9 @@ TEST(CodegenTest, Atom_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 14 ************************************/
-  in.assign("atomic_inc_group_part_ar_u32 $s1, [$d2], $s3;\n");
+  in.assign("atomic_inc_group_part_ar_u32 $s1, [$s2], $s3;\n");
   destName.assign("$s1");  symbols->append(destName);
-  regName.assign("$d2");  symbols->append(regName);
+  regName.assign("$s2");  symbols->append(regName);
   op1Name.assign("$s3");  symbols->append(op1Name);
 
   out.size = sizeof(out);
@@ -748,7 +748,7 @@ TEST(CodegenTest, Atom_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb64;
+  reg.type = Brigb32;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -982,9 +982,9 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 5 ************************************/
-  in.assign("atomicNoRet_or_group_u64 [%x][$d2 - 0x4], $d1;\n");
+  in.assign("atomicNoRet_or_group_u64 [%x][$s2 - 0x4], $d1;\n");
   destName.assign("$d1");  symbols->append(destName);
-  regName.assign("$d2");  symbols->append(regName);
+  regName.assign("$s2");  symbols->append(regName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
@@ -1010,7 +1010,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb64;
+  reg.type = Brigb32;
   reg.reserved = 0;
   reg.s_name = destName.size() + 1;
 
@@ -1319,13 +1319,13 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
   symbols->clear();
 
   /************************************* Test Case 13 ************************************/
-  in.assign("atomicNoRet_inc_group_u64 [$d1], $d1;\n");
-  destName.assign("$d1");  symbols->append(destName);
+  in.assign("atomicNoRet_inc_group_u32 [$s1], $s1;\n");
+  destName.assign("$s1");  symbols->append(destName);
 
   out.size = sizeof(out);
   out.kind = BrigEInstAtomic;
   out.opcode = BrigAtomicNoRet;
-  out.type = Brigu64;
+  out.type = Brigu32;
   out.packing = BrigNoPacking;
   out.o_operands[0] = sizeof(reg);
   out.o_operands[1] = 0;
@@ -1345,7 +1345,7 @@ TEST(CodegenTest, AtomicNoRet_CodeGen) {
 
   reg.size = sizeof(reg);
   reg.kind = BrigEOperandReg;
-  reg.type = Brigb64;
+  reg.type = Brigb32;
   reg.reserved = 0;
   reg.s_name = 0;
 
@@ -1484,7 +1484,7 @@ TEST(ErrorReportTest, AtomicNoRet) {
   Atom_Test<> TestCase2(input);
   TestCase2.Run_Test(&AtomicNoRet, MISSING_DATA_TYPE);
 
-  input.assign("atomicNoRet_or_group_u64 [%x][$d2 - 0x4];\n");
+  input.assign("atomicNoRet_or_group_u64 [%x][$s2 - 0x4];\n");
   Atom_Test<> TestCase3(input);
   TestCase3.Run_Test(&AtomicNoRet, MISSING_COMMA);
 }
