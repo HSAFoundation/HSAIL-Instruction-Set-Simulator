@@ -3965,3 +3965,32 @@ TEST(BrigInstTest, Unpack) {
     testInst("unpack3", testVec);
   }
 }
+
+TEST(BrigKernelTest, testStf64Tof32) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "global_f32 &n;\n"
+    "global_f64 &n1 = 0d3ff0000000000000;\n"
+    "kernel &testSt(kernarg_u64 %r)\n"
+    "{\n"
+    "  ld_kernarg_u64 $d0, [%r];\n"
+    "  ld_global_f64 $d1, [&n1];\n"
+    "  st_global_f64 $d1, [&n];\n"
+    "  ld_global_f32 $s1, [&n];\n"
+    "  st_global_f32 $s1, [$d0];\n"
+    "  ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  float *arg_val0 = new float;
+  *arg_val0 = 0;
+
+  void *args[] = { &arg_val0 };
+  llvm::Function *fun = BP->getFunction("testSt");
+  hsa::brig::BrigEngine BE(BP);
+  BE.launch(fun, args);
+
+  EXPECT_EQ(1.0f, *arg_val0);
+  delete arg_val0;
+}
