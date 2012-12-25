@@ -288,6 +288,7 @@ TEST(ParserTest, Instruction2) {
 }
 
 TEST(ParserTest, VersionStatement) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -299,6 +300,7 @@ TEST(ParserTest, VersionStatement) {
   EXPECT_EQ(0, Version(context));
 
 
+  context->clear_context();
   input.assign("version 2:0:$large;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -4672,7 +4674,7 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   input.append(" }; \n");
 
   // Example 4
-  input.append("version 1:1:$small;\n");
+  input.append("version 1:0:$small;\n");
   input.append("function &branch_ops (arg_u8x4 %x)() {\n");
   input.append("cbr $c1, @then;\n");
   input.append("abs_p_s8x4 $s1, $s2;\n");
