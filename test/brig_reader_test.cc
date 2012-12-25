@@ -3974,7 +3974,7 @@ TEST(BrigKernelTest, Ldf32Tof64) {
     "{\n"
     "  ld_kernarg_u64 $d0, [%r];\n"
     "  ld_global_f64 $d1, [&n];\n"
-    "  st_kernarg_f64 $d1, [$d0];\n"
+    "  st_global_f64 $d1, [$d0];\n"
     "  ret;\n"
     "};\n");
 
