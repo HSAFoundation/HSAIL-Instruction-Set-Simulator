@@ -85,9 +85,11 @@ public:
         caseDirBrig(DirectivePragma);
         caseDirBrig(DirectiveExtension);
         case(BrigEDirectiveArgStart):
-        case(BrigEDirectiveArgEnd): /*validate_brig::validate((cast<BrigDirectiveScope>(refdir)), (cast<BrigDirectiveScope>(getdir)),
-                                      RefOutput, GetOutput);*/
-                                    break;
+        case(BrigEDirectiveArgEnd): 
+        /* validate_brig::validate((cast<BrigDirectiveScope>(refdir)), 
+           (cast<BrigDirectiveScope>(getdir)),
+           RefOutput, GetOutput); */
+          break;
         caseDirBrig(DirectiveBlockStart);
         caseDirBrig(DirectiveBlockNumeric);
         caseDirBrig(DirectiveBlockString);
@@ -129,7 +131,9 @@ public:
     }
   }
 
-  void Parse_Validate(int (*Rule)(Context*), struct BrigSections* RefOutput){
+  void Parse_Validate(int (*Rule)(Context*), struct BrigSections* RefOutput, 
+      const std::string *pSymName = NULL) {
+   
     main_reporter = ErrorReporter::get_instance();
     context = Context::get_instance();
 
@@ -138,16 +142,41 @@ public:
     Lexer *lexer = new Lexer();
     lexer->set_source_string(Input);
     context->token_to_scan = lexer->get_next_token();
+    if (pSymName != NULL) {
+      context->global_symbol_map[*pSymName] = context->get_directive_offset();
+      BrigDirectiveSymbol glo = {
+        sizeof(BrigDirectiveSymbol),
+        BrigEDirectiveSymbol,
+        {
+          0,                                // c_code
+          BrigGlobalSpace,                  // storageClass
+          BrigNone,                         // attribute
+          0,                                // reserved
+          BrigFlex,                         // symbol modifier
+          1,                                // dim
+          0,                                // s_name
+          Brigu32,                          // data type
+          4,                                // alignment
+        },
+        0,                                  // d_init
+        0                                   // reserved
+      };
+      context->append_directive(&glo);
+    }
     int ret = Rule(context);
     EXPECT_EQ(0, ret);
-    if(!ret){
+    if(!ret) {
 
       StringBuffer* str = context->get_strings();
       Buffer* dir = context->get_directive();
       Buffer* oper = context->get_operands();
       Buffer* code = context->get_code();
-      struct BrigSections GetOutput(reinterpret_cast<const char *>(&str->get()[0]), reinterpret_cast<const char *> (&dir->get()[0]), reinterpret_cast<const char *>(&code->get()[0]), reinterpret_cast<const char *>(&oper->get()[0]), NULL,
-         str->size(), dir->size(), code->size(), oper->size(), (size_t)0);
+      struct BrigSections GetOutput(
+          reinterpret_cast<const char *>(&str->get()[0]), 
+          reinterpret_cast<const char *> (&dir->get()[0]), 
+          reinterpret_cast<const char *>(&code->get()[0]), 
+          reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+          str->size(), dir->size(), code->size(), oper->size(), (size_t)0);
       validate(RefOutput, &GetOutput);
 
     }
@@ -155,7 +184,44 @@ public:
     delete lexer;
   }
 
-  void False_Validate(int (*Rule)(Context*), error_code_t refError) {
+  void Parse_Validate(int (*Rule)(Context*), struct BrigSections* RefOutput, 
+      const std::vector<std::string> *pSymNameList) {
+
+    main_reporter = ErrorReporter::get_instance();
+    context = Context::get_instance();
+
+    context->set_error_reporter(main_reporter);
+    context->clear_context();
+    Lexer *lexer = new Lexer();
+    lexer->set_source_string(Input);
+    context->token_to_scan = lexer->get_next_token();
+    if (pSymNameList != NULL) {
+      for (uint32_t i = 0 ; i < pSymNameList->size(); ++i) {
+        context->global_symbol_map[(*pSymNameList)[i]] = (i + 1) * 40;
+      }
+    }
+    int ret = Rule(context);
+    EXPECT_EQ(0, ret);
+    if(!ret) {
+
+      StringBuffer* str = context->get_strings();
+      Buffer* dir = context->get_directive();
+      Buffer* oper = context->get_operands();
+      Buffer* code = context->get_code();
+      struct BrigSections GetOutput(
+          reinterpret_cast<const char *>(&str->get()[0]), 
+          reinterpret_cast<const char *> (&dir->get()[0]), 
+          reinterpret_cast<const char *>(&code->get()[0]), 
+          reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+          str->size(), dir->size(), code->size(), oper->size(), (size_t)0);
+      validate(RefOutput, &GetOutput);
+
+    }
+    context->clear_context();
+    delete lexer;
+  }
+  void False_Validate(int (*Rule)(Context*), error_code_t refError, 
+      const std::string *symbolName = NULL) {
     Context* context = Context::get_instance();
     context->clear_context();
 
@@ -167,6 +233,55 @@ public:
 
     Lexer* lexer = new Lexer();
     lexer->set_source_string(Input);
+    if (symbolName != NULL) {
+      context->global_symbol_map[*symbolName] = context->get_directive_offset();
+      BrigDirectiveSymbol glo = {
+        sizeof(BrigDirectiveSymbol),
+        BrigEDirectiveSymbol,
+        {
+          0,                                // c_code
+          BrigGlobalSpace,                  // storageClass
+          BrigNone,                         // attribute
+          0,                                // reserved
+          BrigFlex,                         // symbol modifier
+          1,                                // dim
+          0,                                // s_name
+          Brigu32,                          // data type
+          4,                                // alignment
+        },
+        0,                                  // d_init
+        0                                   // reserved
+      };
+      context->append_directive(&glo);
+    }
+
+    context->token_to_scan = lexer->get_next_token();
+    EXPECT_FALSE(!(*Rule)(context));
+    EXPECT_EQ(refError, mer.get_last_error());
+
+    context->set_error_reporter(ErrorReporter::get_instance());
+    context->clear_context();
+    delete lexer;
+  }
+
+  void False_Validate(int (*Rule)(Context*), error_code_t refError, 
+      const std::vector<std::string> *symbolNameList) {
+    Context* context = Context::get_instance();
+    context->clear_context();
+
+    MockErrorReporter mer;
+    context->set_error_reporter(&mer);
+    mer.DelegateToFake();
+    EXPECT_CALL(mer, report_error(_, _, _)).Times(testing::AtLeast(1));
+    EXPECT_CALL(mer, get_last_error()).Times(testing::AtLeast(1));
+
+    Lexer* lexer = new Lexer();
+    lexer->set_source_string(Input);
+    if (symbolNameList != NULL) {
+      for (uint32_t i = 0 ; i < symbolNameList->size() ; ++i) {
+        context->global_symbol_map[(*symbolNameList)[i]] = (i + 1) * 40;
+      }
+    }
 
     context->token_to_scan = lexer->get_next_token();
     EXPECT_FALSE(!(*Rule)(context));

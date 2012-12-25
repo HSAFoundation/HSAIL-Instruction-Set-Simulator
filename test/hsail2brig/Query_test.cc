@@ -8,23 +8,23 @@ namespace brig{
 class Query_Test : public BrigCodeGenTest{
 private:
 
-  //Instruction in .code buffer
   const BrigInstBase* RefInst;
-  //Operands in .operands buffer
   const BrigOperandReg* RefDest;
   const BrigOperandOpaque* RefOpaque;
   const BrigOperandReg* RefOpaqueReg;
+  const std::string *SymbolName;
 
 public:
   Query_Test(std::string& in):
     BrigCodeGenTest(in) {}
 
-  Query_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref, BrigOperandReg* Dest, BrigOperandOpaque* Src1, BrigOperandReg* Src2 = NULL) :
+  Query_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref, 
+      BrigOperandReg* Dest, BrigOperandOpaque* Src1, BrigOperandReg* Src2 = NULL,
+      std::string *name = NULL) :
     BrigCodeGenTest(in, sbuf),
-    RefInst(ref),
-    RefDest(Dest),
-    RefOpaque(Src1),
-    RefOpaqueReg(Src2){ }
+    RefInst(ref),           RefDest(Dest),
+    RefOpaque(Src1),        RefOpaqueReg(Src2), 
+    SymbolName(name) {}
 
    void Run_Test(int (*Rule)(Context*)){  
     Buffer* code = new Buffer();
@@ -40,30 +40,29 @@ public:
       reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
       RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);    
     
-    Parse_Validate(Rule, &RefOutput);
+    Parse_Validate(Rule, &RefOutput, SymbolName);
     delete code;
     delete oper;
   }  
 
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
-    False_Validate(Rule, refError);
+    False_Validate(Rule, refError, SymbolName);
   }
 
 };
 
 TEST(CodegenTest, Query_CodeGen){
-  /********************************** Common variables used by all tests******************************/
-  //To keep the stack footprint low
 
-  std:: string in; std::string op1, op2,op3 ;
+  std::string in, symbolName; 
+  std::string op1, op2, op3;
   StringBuffer* symbols;
 
   BrigOperandReg reg1;
 
-  /************************************* Test Case 1************************************/
+  /***************** Test Case 1 **********************/
   symbols = new StringBuffer();
-  in.assign( "query_width_u32 $s1, [%RWImg3]; \n");
-  op1.assign("$s1"); op2.assign("%RWImg3");
+  in.assign( "query_width_u32 $s1, [&RWImg3];\n");
+  op1.assign("$s1"); 
   symbols->append(op1); symbols->append(op2);
 
   BrigOperandReg dest1 = {
@@ -87,23 +86,23 @@ TEST(CodegenTest, Query_CodeGen){
   };
   out1.size = sizeof(out1);
 
-  //ref to %RWImg3 - Not added in symbol table; it is assumed that it was added during variable decl
   BrigOperandOpaque src1 = {
-  0,                    // size
-  BrigEOperandOpaque,   // kind
-  0,         // name - offset to directives, not validated
-  0,                    // reg
-  0                     // Offset
+    0,                    // size
+    BrigEOperandOpaque,   // kind
+    0,         
+    0,                    // reg
+    0                     // Offset
   };
   src1.size = sizeof(src1);
 
-  Query_Test TestCase1(in, symbols, &out1, &dest1, &src1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase1(in, symbols, &out1, &dest1, &src1, NULL, &symbolName);
   TestCase1.Run_Test(&Query);
   symbols->clear();
 
 
-  /************************************* Test Case 2************************************/
-  in.assign( "query_width_u32 $s1, [%RWImg3<$s0 + 4>]; \n");
+  /***************** Test Case 2 ************************/
+  in.assign( "query_width_u32 $s1, [&RWImg3<$s0 + 4>];\n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -125,7 +124,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0 + 4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -138,13 +136,14 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase2(in, symbols, &out2, &dest1, &src1, &reg1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase2(in, symbols, &out2, &dest1, &src1, &reg1, &symbolName);
   TestCase2.Run_Test(&Query);
   symbols->clear();
 
 
-  /************************************* Test Case 3************************************/
-  in.assign( "query_width_u32 $s1, [%RWImg3<$s0>]; \n");
+  /*********************** Test Case 3 *************************/
+  in.assign( "query_width_u32 $s1, [&RWImg3<$s0>]; \n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -166,7 +165,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -179,12 +177,13 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase3(in, symbols, &out3, &dest1, &src1, &reg1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase3(in, symbols, &out3, &dest1, &src1, &reg1, &symbolName);
   TestCase3.Run_Test(&Query);
   symbols->clear();
 
-  /************************************* Test Case 4************************************/
-  in.assign( "query_width_u32 $s1, [%RWImg3<4>]; \n");
+  /************************ Test Case 4 ************************/
+  in.assign( "query_width_u32 $s1, [&RWImg3<4>]; \n");
   op1.assign("$s1");
   symbols->append(op1);
 
@@ -206,19 +205,19 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
   src1.reg = 0;
   src1.offset = 4;
 
-  Query_Test TestCase4(in, symbols, &out4, &dest1, &src1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase4(in, symbols, &out4, &dest1, &src1, NULL, &symbolName);
   TestCase4.Run_Test(&Query);
   symbols->clear();
 
-  /************************************* Test Case 5************************************/
-  in.assign( "query_height_u32 $s1, [%RWImg3<$s0 + 4>]; \n");
+  /******************** Test Case 5 ************************/
+  in.assign( "query_height_u32 $s1, [&RWImg3<$s0 + 4>]; \n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -240,7 +239,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0 + 4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -253,12 +251,13 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase5(in, symbols, &out5, &dest1, &src1, &reg1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase5(in, symbols, &out5, &dest1, &src1, &reg1, &symbolName);
   TestCase5.Run_Test(&Query);
   symbols->clear();
 
-  /************************************* Test Case 6************************************/
-  in.assign( "query_depth_u32 $s1, [%RWImg3<$s0 + 4>]; \n");
+  /******************* Test Case 6 *******************/
+  in.assign( "query_depth_u32 $s1, [&RWImg3<$s0 + 4>]; \n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -280,7 +279,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0 + 4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -293,12 +291,13 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase6(in, symbols, &out6, &dest1, &src1, &reg1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase6(in, symbols, &out6, &dest1, &src1, &reg1, &symbolName);
   TestCase6.Run_Test(&Query);
   symbols->clear();
 
-  /************************************* Test Case 7************************************/
-  in.assign( "query_array_b32 $s1, [%RWImg3<$s0 + 4>]; \n");
+  /************************* Test Case 7 ************************/
+  in.assign( "query_array_b32 $s1, [&RWImg3<$s0 + 4>]; \n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -320,7 +319,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0 + 4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -333,12 +331,13 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase7(in, symbols, &out7, &dest1, &src1, &reg1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase7(in, symbols, &out7, &dest1, &src1, &reg1, &symbolName);
   TestCase7.Run_Test(&Query);
   symbols->clear();
 
-  /************************************* Test Case 8************************************/
-  in.assign( "query_normalized_b32 $s1, [%RWSamp3<$s0 + 4>]; \n");
+  /******************* Test Case 8 *********************/
+  in.assign( "query_normalized_b32 $s1, [&RWSamp3<$s0 + 4>]; \n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -348,8 +347,7 @@ TEST(CodegenTest, Query_CodeGen){
     BrigQueryNormalized,
     Brigb32,
     BrigNoPacking,
-    {0,
-     sizeof(dest1) + sizeof(reg1),
+    {0, sizeof(dest1) + sizeof(reg1),
      0, 0, 0}
   };
   out8.size = sizeof(out8);
@@ -360,7 +358,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0 + 4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -373,12 +370,13 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase8(in, symbols, &out8, &dest1, &src1, &reg1);
+  symbolName.assign("&RWSamp3");
+  Query_Test TestCase8(in, symbols, &out8, &dest1, &src1, &reg1, &symbolName);
   TestCase8.Run_Test(&Query);
   symbols->clear();
 
-  /************************************* Test Case 9************************************/
-  in.assign( "query_filtering_b32 $s1, [%RWSamp3<$s0 + 4>]; \n");
+  /********************** Test Case 9 *******************/
+  in.assign( "query_filtering_b32 $s1, [&RWImg3<$s0 + 4>]; \n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -400,7 +398,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0 + 4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -413,12 +410,13 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase9(in, symbols, &out9, &dest1, &src1, &reg1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase9(in, symbols, &out9, &dest1, &src1, &reg1, &symbolName);
   TestCase9.Run_Test(&Query);
   symbols->clear();
 
-  /************************************* Test Case 10************************************/
-  in.assign( "query_order_b32 $s1, [%RWImg3<$s0 + 10>]; \n");
+  /***************** Test Case 10 *******************/
+  in.assign( "query_order_b32 $s1, [&RWImg3<$s0 + 10>]; \n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -440,7 +438,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0 + 4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -453,12 +450,13 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase10(in, symbols, &out10, &dest1, &src1, &reg1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase10(in, symbols, &out10, &dest1, &src1, &reg1, &symbolName);
   TestCase10.Run_Test(&Query);
   symbols->clear();
 
-  /************************************* Test Case 11************************************/
-  in.assign( "query_data_b32 $s1, [%RWImg3<$s0 + 4>]; \n");
+  /********************** Test Case 11 ******************/
+  in.assign( "query_data_b32 $s1, [&RWImg3<$s0 + 4>]; \n");
   op1.assign("$s1"); op3.assign("$s0");
   symbols->append(op1); symbols->append(op3);
 
@@ -480,7 +478,6 @@ TEST(CodegenTest, Query_CodeGen){
   dest1.reserved = 0;
   dest1.s_name = 0;
 
-  //ref to %RWImg3<$s0 + 4>
   src1.size = sizeof(src1);
   src1.kind = BrigEOperandOpaque;
   src1.directive = 0;
@@ -493,20 +490,20 @@ TEST(CodegenTest, Query_CodeGen){
   reg1.reserved = 0;
   reg1.s_name = op1.size()+1;
 
-  Query_Test TestCase11(in, symbols, &out11, &dest1, &src1, &reg1);
+  symbolName.assign("&RWImg3");
+  Query_Test TestCase11(in, symbols, &out11, &dest1, &src1, &reg1, &symbolName);
   TestCase11.Run_Test(&Query);
   symbols->clear();
 
-  /*************************************************************************/
   delete symbols;
 }
 
 TEST(ErrorReportTest, Query) {  
-  std::string input = "query_order $s1, [%RWImg3<$s0 + 10>];\n";
+  std::string input = "query_order $s1, [&RWImg3<$s0 + 10>];\n";
   Query_Test TestCase1(input);
   TestCase1.Run_Test(&Query, MISSING_DATA_TYPE);
   
-  input.assign( "query_width_u32 $s1 [%RWImg3]; \n");
+  input.assign( "query_width_u32 $s1 [&RWImg3]; \n");
   Query_Test TestCase2(input);
   TestCase2.Run_Test(&Query, MISSING_COMMA);
 

@@ -12,6 +12,8 @@ TEST_P(TestQuery,Query)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
+  context->global_symbol_map["%RWImg"] = 80;
  
   int n = GetParam();
   std::string input(query_pair[n].str);

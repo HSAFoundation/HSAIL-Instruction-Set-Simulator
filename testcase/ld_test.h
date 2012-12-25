@@ -164,7 +164,7 @@ namespace brig {
     },
     //ld_pair[7]
     {
-      "ld_s32 $s1, [&array][4];", 
+      "ld_s32 $s1, [&x][4];", 
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -269,7 +269,7 @@ namespace brig {
     },
     //ld_pair[12]
     {
-      "ld_width(256)_s32 $s1, [&array][4];",
+      "ld_width(256)_s32 $s1, [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -437,7 +437,7 @@ namespace brig {
     },
     //ld_pair[20]
     {
-      "ld_group_s32 $s1, [&array][4];",
+      "ld_group_s32 $s1, [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -605,7 +605,7 @@ namespace brig {
     },
     //ld_pair[28]
     {
-      "ld_part_acq_s32 $s1, [&array][4];",
+      "ld_part_acq_s32 $s1, [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -773,7 +773,7 @@ namespace brig {
     },
     //ld_pair[36]
     {
-      "ld_equiv(2)_s32 $s1, [&array][4];",
+      "ld_equiv(2)_s32 $s1, [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -1790,7 +1790,7 @@ namespace brig {
 
     // ldv2_pair[4]
     {
-      "ld_width(256)_v2_group_s32 ($s1,$s2), [&array][4];",
+      "ld_width(256)_v2_group_s32 ($s1,$s2), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -1896,7 +1896,7 @@ namespace brig {
     },
     // ldv2_pair[9]
     {
-      "ld_width(256)_v2_part_acq_s32 ($s1,$s2), [&array][4];",
+      "ld_width(256)_v2_part_acq_s32 ($s1,$s2), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -2064,7 +2064,7 @@ namespace brig {
     },
     // ldv2_pair[17]
     {
-      "ld_width(256)_v2_equiv(2)_s32 ($s1,$s2), [&array][4];",
+      "ld_width(256)_v2_equiv(2)_s32 ($s1,$s2), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -2232,7 +2232,7 @@ namespace brig {
     },
     // ldv2_pair[25]
     {
-      "ld_v2_group_part_acq_s32 ($s1,$s2), [&array][4];",
+      "ld_v2_group_part_acq_s32 ($s1,$s2), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -2400,7 +2400,7 @@ namespace brig {
     },
     // ldv2_pair[33]
     {
-      "ld_v2_group_equiv(2)_s32 ($s1,$s2), [&array][4];",
+      "ld_v2_group_equiv(2)_s32 ($s1,$s2), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -2568,7 +2568,7 @@ namespace brig {
     },
     //LdTest ldv2_pair[41]
     {
-      "ld_v2_part_acq_equiv(2)_s32 ($s1,$s2), [&array][4];",
+      "ld_v2_part_acq_equiv(2)_s32 ($s1,$s2), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -3561,7 +3561,7 @@ namespace brig {
     },
     //ldv4_pair[8]
     {
-      "ld_width(256)_v4_group_part_acq_s32 ($s1,$s2,$s3,$s4), [&array][4];",
+      "ld_width(256)_v4_group_part_acq_s32 ($s1,$s2,$s3,$s4), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -3708,7 +3708,7 @@ namespace brig {
     },
     //ldv4_pair[15]
     {
-      "ld_width(256)_v4_group_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&array][4];",
+      "ld_width(256)_v4_group_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -3876,7 +3876,7 @@ namespace brig {
     },
     //ldv4_pair[23]
     {
-      "ld_width(256)_v4_part_acq_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&array][4];",
+      "ld_width(256)_v4_part_acq_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -4044,7 +4044,7 @@ namespace brig {
     },
     //ldv4_pair[31]
     {
-      "ld_v4_group_part_acq_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&array][4];",
+      "ld_v4_group_part_acq_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -4212,7 +4212,7 @@ namespace brig {
     },
     //ldv4_pair[39]
     {
-      "ld_width(256)_v4_group_part_acq_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&array][4];",
+      "ld_width(256)_v4_group_part_acq_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&x][4];",
       {
         brig_inst_ldst_size,
         BrigEInstLdSt,
@@ -5239,7 +5239,7 @@ namespace brig {
     },
     //lda_pair[10]
     {
-      "lda_u32 $s1, [&array][4];",
+      "lda_u32 $s1, [&x][4];",
       {
         brig_inst_mem_size,
         BrigEInstMem,
@@ -5343,7 +5343,7 @@ namespace brig {
     },
     //lda_pair[18]
     {
-      "lda_u64 $d1, [&array][4];",
+      "lda_u64 $d1, [&x][4];",
       {
         brig_inst_mem_size,
         BrigEInstMem,

@@ -11,6 +11,8 @@ extern Context* context;
 TEST_P(OperationSt, BrigSt){
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&x"] = 40;
+  context->local_symbol_map["%g"] = 80;
 
   int n = GetParam();
   Lexer* lexer = new Lexer(st_pair[n].str);
@@ -54,7 +56,7 @@ TEST_P(OperationSt, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
   } 
   if(n == 1){
     context->get_operand(ref.o_operands[1], &getIndir);
@@ -73,7 +75,7 @@ TEST_P(OperationSt, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1], &getComp);
     // BrigOperandCompound
@@ -110,7 +112,7 @@ TEST_P(OperationSt, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb32, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1] - reg_size, &getReg);
     // BrigOperandReg
@@ -139,6 +141,8 @@ INSTANTIATE_TEST_CASE_P(CodegenTest,OperationSt,testing::Range(0,30));
 TEST_P(OperationStIm, BrigSt){
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&x"] = 40;
+  context->local_symbol_map["%g"] = 80;
 
   int n = GetParam();
   Lexer* lexer = new Lexer(stim_pair[n].str);
@@ -183,7 +187,7 @@ TEST_P(OperationStIm, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
   }
   if(n == 1){
     context->get_operand(ref.o_operands[0], &getImm);  
@@ -216,7 +220,7 @@ TEST_P(OperationStIm, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1], &getComp);
     // BrigOperandCompound
@@ -242,7 +246,7 @@ TEST_P(OperationStIm, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb32, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1] - reg_size, &getReg);
     // BrigOperandReg
@@ -322,6 +326,8 @@ INSTANTIATE_TEST_CASE_P(CodegenTest,OperationStIm,testing::Range(0, 30));
 TEST_P(OperationStV2, BrigSt){
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&x"] = 40;
+  context->local_symbol_map["%g"] = 80;
 
   int n = GetParam();
   Lexer* lexer = new Lexer(stv2_pair[n].str);
@@ -381,7 +387,7 @@ TEST_P(OperationStV2, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
   }
   if(n == 1){
     context->get_operand(ref.o_operands[1],&getIndir);
@@ -400,7 +406,7 @@ TEST_P(OperationStV2, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1],&getComp);
     // BrigOperandCompound
@@ -419,7 +425,7 @@ TEST_P(OperationStV2, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
 
     context->get_operand(ref.o_operands[1] - reg_size, &getReg);
     // BrigOperandReg
@@ -446,7 +452,7 @@ TEST_P(OperationStV2, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb32, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1] - reg_size, &getReg);
     // BrigOperandReg
@@ -493,6 +499,8 @@ INSTANTIATE_TEST_CASE_P(CodegenTest,OperationStV2,testing::Range(0,30));
 TEST_P(OperationStV4, BrigSt){
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&x"] = 40;
+  context->local_symbol_map["%g"] = 80;
 
   int n = GetParam();
   Lexer* lexer = new Lexer(stv4_pair[n].str);
@@ -568,7 +576,7 @@ TEST_P(OperationStV4, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
   }
   if(n == 1){
     context->get_operand(ref.o_operands[1], &getIndir);
@@ -587,7 +595,7 @@ TEST_P(OperationStV4, BrigSt){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1], &getComp);
     // BrigOperandCompound
