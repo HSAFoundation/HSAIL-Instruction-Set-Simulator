@@ -325,6 +325,56 @@ struct Instruction1Test instruction1_debugtrap_pair[2] = {
   }
 };
 
+class TestInstruction1Feclearexcept : public ::testing::TestWithParam<int>{
+};
+
+struct Instruction1Test instruction1_feclearexcept_pair[1] = {
+  {
+  "feclearexcept 0;",
+    {
+    brig_inst_base_size,
+    BrigEInstBase,
+    BrigFeClearExcept,
+    Brigb32,
+    BrigNoPacking,
+    {operand_offset, 0, 0, 0, 0}
+    }
+  }
+};
+
+class TestInstruction1Fegetexcept : public ::testing::TestWithParam<int>{
+};
+
+struct Instruction1Test instruction1_fegetexcept_pair[1] = {
+  {
+  "fegetexcept $s1;",
+    {
+    brig_inst_base_size,
+    BrigEInstBase,
+    BrigFeGetExcept,
+    Brigb32,
+    BrigNoPacking,
+    {operand_offset, 0, 0, 0, 0}
+    }
+  }
+};
+
+class TestInstruction1Fesetexcept : public ::testing::TestWithParam<int>{
+};
+
+struct Instruction1Test instruction1_fesetexcept_pair[1] = {
+  {
+  "fesetexcept 1;",
+    {
+    brig_inst_base_size,
+    BrigEInstBase,
+    BrigFeSetExcept,
+    Brigb32,
+    BrigNoPacking,
+    {operand_offset, 0, 0, 0, 0}
+    }
+  }
+};
 }  // namespace brig
 }  // namespace hsa
 #endif //INSTRUCTION1_TEST_H_
