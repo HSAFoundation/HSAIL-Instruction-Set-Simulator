@@ -1555,8 +1555,8 @@ int ArgumentDecl(Context* context) {
 
   BrigdOffset32_t dsize = context->get_directive_offset();
   BrigDirectiveSymbol sym_decl = {
-    sizeof(BrigDirectiveSymbol),                 // size
-    BrigEDirectiveSymbol,             // kind
+    sizeof(BrigDirectiveSymbol),        // size
+    BrigEDirectiveSymbol,               // kind
     {
       context->get_code_offset(),       // c_code
       storage_class,                    // storageClass
@@ -1565,16 +1565,14 @@ int ArgumentDecl(Context* context) {
       context->get_symbol_modifier(),   // symbol modifier
       context->get_dim(),               // dim
       arg_name_offset,                  // s_name
-      type,              // data type
+      type,                             // data type
       context->get_alignment(),         // alignment
     },
-    0,                                // d_init = 0 for arg
-    0                                 // reserved
+    0,                                  // d_init = 0 for arg
+    0                                   // reserved
   };
 
-  // append the DirectiveSymbol to .directive section.
   context->append_directive(&sym_decl);
-  //Mapping symbol names to declarations in .dir
   context->local_symbol_map[arg_name] = dsize;
   context->set_alignment(0);
 
@@ -2522,6 +2520,11 @@ int InitializableDecl(Context *context,
     context->set_error(INVALID_ALIGNMENT);
     return 1;
   }
+  if ((context->get_symbol_modifier() & BrigConst) && 
+      (storageClass != BrigGlobalSpace && storageClass != BrigReadonlySpace)) {
+    context->set_error(INVALID_DEFINITION);
+    return 1;
+  }
 
   BrigDirectiveSymbol sym_decl = {
     sizeof(sym_decl),                 // size
@@ -2546,8 +2549,9 @@ int InitializableDecl(Context *context,
   BrigdOffset32_t argdecl_offset = context->get_directive_offset();
   context->append_directive(&sym_decl);
 
-  if(context->token_to_scan == '='){
+  if (context->token_to_scan == '=') {
     if (Initializer(context, argdecl_offset)) {
+      context->set_error(INVALID_INITIALIZER);
       return 1;
     }
   }
@@ -2572,13 +2576,14 @@ int UninitializableDecl(Context* context,
   BrigStorageClass32_t storage_class;
   BrigsOffset32_t str_offset;
   // first_token is PRIVATE, GROUP or SPILL
-  if ((PRIVATE != context->token_to_scan)
-     &&(GROUP != context->token_to_scan)
-     &&(SPILL != context->token_to_scan))
+  if (PRIVATE != context->token_to_scan &&
+      GROUP != context->token_to_scan &&
+      SPILL != context->token_to_scan) {
     return 1;
+  }
 
   if (context->get_symbol_modifier() & BrigConst) {
-    context->set_error(INVALID_IDENTIFIER);
+    context->set_error(INVALID_DEFINITION);
     return 1;
   }
 

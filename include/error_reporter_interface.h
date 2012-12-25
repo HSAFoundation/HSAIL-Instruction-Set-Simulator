@@ -69,6 +69,7 @@ enum error_code_t {
   INVALID_MODIFIER,
   INVALID_MAJOR_NUMBER,
   INVALID_MINOR_NUMBER,
+  INVALID_DEFINITION,
   // missing part
   MISSING_VERSION_STATEMENT,
   MISSING_WIDTH_INFO,
@@ -223,6 +224,8 @@ class ErrorReporterInterface {
           return std::string("Invalid Major Number.");
         case INVALID_MINOR_NUMBER:
           return std::string("Invalid Minor Number.");
+        case INVALID_DEFINITION:
+          return std::string("Invalid Definition.");
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");
         case MISSING_WIDTH_INFO:
