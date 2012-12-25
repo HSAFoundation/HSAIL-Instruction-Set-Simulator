@@ -503,7 +503,7 @@ TEST_P(TestInstruction1Fegetexcept, Fegetexcept){
   context->clear_context();
 
   int n = GetParam();
-  Lexer* lexer = new Lexer(instruction1_feclearexcept_pair[n].str);
+  Lexer* lexer = new Lexer(instruction1_fegetexcept_pair[n].str);
   context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0, Instruction1(context));
@@ -544,7 +544,7 @@ TEST_P(TestInstruction1Fesetexcept, Fesetexcept){
   context->clear_context();
 
   int n = GetParam();
-  Lexer* lexer = new Lexer(instruction1_feclearexcept_pair[n].str);
+  Lexer* lexer = new Lexer(instruction1_fesetexcept_pair[n].str);
   context->token_to_scan = lexer->get_next_token();
 
   EXPECT_EQ(0, Instruction1(context));
