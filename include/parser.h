@@ -34,6 +34,7 @@ int SignatureArgumentList(Context *context,
 
 int Label(Context* context);
 int Label(Context* context, 
+    std::map<std::string, BrigoOffset32_t> *label_map,
     std::map<std::string, BrigdOffset32_t> *symbol_map);
 
 int LabelTargets(Context* context);
@@ -52,6 +53,10 @@ int Function(Context* context);
 int OptionalWidth(Context* context);
 int Program(Context* context);
 int Branch(Context* context);
+int Branch(Context* context,
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map);
+
 int CallTargets(Context* context);
 int CallArgs(Context* context);
 int Call(Context* context);
@@ -83,6 +88,9 @@ int GlobalPrivateDecl(Context* context);
 int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset);
 int MemoryOperand(Context* context);
 int Ldc(Context* context);
+int Ldc(Context* context, 
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map);
 int Instruction5(Context* context);
 int CvtModifier1(Context* context);
 int Mov(Context* context);
@@ -90,6 +98,9 @@ int Atom(Context* context);
 int Instruction0(Context* context);
 int Instruction1(Context* context);
 int Operation(Context* context);
+int Operation(Context* context,
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map);
 int Segp(Context* context);
 int SegpPart1Segmentp(Context* context);
 int SegpPart2StoFAndFtoS(Context* context);
@@ -205,8 +216,12 @@ int Instruction2OpcodeDT(Context* context);
 int Instruction2OpcodeNoDT(Context* context);
 int Instruction2OpcodeFtz(Context* context);
 
-int BranchCbr(Context* context);
-int BranchBrn(Context* context);
+int BranchCbr(Context* context,
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map);
+int BranchBrn(Context* context,
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map);
 
 BrigDataType16_t ConvertTypeToB(BrigDataType16_t type, 
     BrigDataType16_t* pSubType = NULL, uint32_t* pSize = NULL);

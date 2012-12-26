@@ -1313,11 +1313,13 @@ TEST(ParserTest, LabelTargets) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, LabelTargets(context));
 
+  context->clear_context();
   input.assign("@targets: labeltargets @label;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, LabelTargets(context));
 
+  context->clear_context();
   input.assign("@targets: labeltargets @label1, @label2, @label3, @label4,\n");
   input.append("@label5, @label6, @label7, @label8, @label9,\n");
   input.append("@label10, @label11;\n");
@@ -1325,6 +1327,7 @@ TEST(ParserTest, LabelTargets) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, LabelTargets(context));
 
+  context->clear_context();
   // wrong case
   // redundant ','
   input.assign("@targets: labeltargets @label1, @label2, @label3, ;\n");
@@ -1334,6 +1337,7 @@ TEST(ParserTest, LabelTargets) {
   EXPECT_EQ(MISSING_LABEL, mer.get_last_error());
 
 
+  context->clear_context();
   // redundant ','
   input.assign("@targets: ,labeltargets @label1, @label2, @label3;\n");
   lexer->set_source_string(input);
@@ -1341,12 +1345,14 @@ TEST(ParserTest, LabelTargets) {
   EXPECT_NE(0, LabelTargets(context));
   EXPECT_EQ(INVALID_LABEL_TARGETS, mer.get_last_error());
 
+  context->clear_context();
   input.assign("@targets: labeltargets;\n");  // number of label is zero
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_NE(0, LabelTargets(context));
   EXPECT_EQ(MISSING_LABEL, mer.get_last_error());
 
+  context->clear_context();
   input.assign("@targets: labeltargets @label\n");  // lack of ';'
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2185,16 +2191,6 @@ TEST(ParserTest, Operation) {
 }
 
 // -----------------  Test for BodyStatementNested rule -------------------
-// bodyStatementNested := TOKEN_COMMENT
-//                        | pragma
-//                        | block
-//                        | declprefix initializableDecl
-//                        | declprefix uninitializableDecl
-//                        | location
-//                        | label
-//                        | labeltarget
-//                        | operation
-//                          ;
 TEST(ParserTest, BodyStatementNested) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -2409,9 +2405,8 @@ TEST(ParserTest, BodyStatement) {
 // -----------------  Test for bodyStatements rule -------------------
 // bodyStatements := { bodyStatement } bodyStatement
 TEST(ParserTest, BodyStatements) {
-  // Create a lexer
   Lexer* lexer = new Lexer();
-  // register error reporter with context
+  context->clear_context();
   context->set_error_reporter(main_reporter);
   std::string input("/*This is Comment*/\n"); // one bodyStatement
 
