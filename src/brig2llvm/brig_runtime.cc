@@ -392,11 +392,11 @@ template<class T> static T Mov(T x) { return x; }
 BitInst(define, Mov, Unary)
 extern "C" b128 Mov_b128(b128 x) { return x; }
 
-extern "C" b32 Movs_lo_b32(b64 x) { return x; }
-extern "C" b32 Movs_hi_b32(b64 x) { return x >> 32; }
+extern "C" b32 MovsLo_b32(b64 x) { return x; }
+extern "C" b32 MovsHi_b32(b64 x) { return x >> 32; }
 
-extern "C" b64 Movd_lo_b64(b64 x, b32 y) { return (x >> 32 << 32) | b64(y); }
-extern "C" b64 Movd_hi_b64(b64 x, b32 y) {
+extern "C" b64 MovdLo_b64(b64 x, b32 y) { return (x >> 32 << 32) | b64(y); }
+extern "C" b64 MovdHi_b64(b64 x, b32 y) {
   return (b64(y) << 32) | (x >> 32);
 }
 

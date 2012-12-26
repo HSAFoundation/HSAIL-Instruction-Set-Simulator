@@ -4022,3 +4022,59 @@ TEST(BrigKernelTest, testStf64Tof32) {
   EXPECT_EQ(1.0f, *arg_val0);
   delete arg_val0;
 }
+
+TEST(BrigKernelTest, MovsLo) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__instruction2_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s64 %input)\n"
+    "{\n"
+    "        ld_kernarg_s64 $d1, [%input] ;\n"
+    "        movs_lo_b32 $s2, $d1 ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint64_t *arg1 = new uint64_t(0xffffffff00000000);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0, *arg0);
+  delete arg0;
+  delete arg1;
+}
+
+TEST(BrigKernelTest, MovsHi) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__instruction2_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s64 %input)\n"
+    "{\n"
+    "        ld_kernarg_s64 $d1, [%input] ;\n"
+    "        movs_hi_b32 $s2, $d1 ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint64_t *arg1 = new uint64_t(0xffffffff00000000);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xffffffff, *arg0);
+  delete arg0;
+  delete arg1;
+}

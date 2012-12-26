@@ -527,31 +527,31 @@ declareUnary(LastBit, b64)
 MakeTest(LastBit_b32, LastBitLogic)
 MakeTest(LastBit_b64, LastBitLogic)
 
-static void Movs_lo_b32_Logic(b32 result, b64 a) {
+static void MovsLo_b32_Logic(b32 result, b64 a) {
   EXPECT_EQ(b32(a), result);
 }
-extern "C" b32 Movs_lo_b32(b64);
-MakeTest(Movs_lo_b32, Movs_lo_b32_Logic)
+extern "C" b32 MovsLo_b32(b64);
+MakeTest(MovsLo_b32, MovsLo_b32_Logic)
 
-static void Movs_hi_b32_Logic(b32 result, b64 a) {
+static void MovsHi_b32_Logic(b32 result, b64 a) {
   EXPECT_EQ(a >> 32, result);
 }
-extern "C" b32 Movs_hi_b32(b64);
-MakeTest(Movs_hi_b32, Movs_hi_b32_Logic)
+extern "C" b32 MovsHi_b32(b64);
+MakeTest(MovsHi_b32, MovsHi_b32_Logic)
 
-static void Movd_lo_b64_Logic(b64 result, b64 a, b32 b) {
+static void MovdLo_b64_Logic(b64 result, b64 a, b32 b) {
   EXPECT_EQ(a >> 32, result >> 32);
   EXPECT_EQ(b32(b), b32(result));
 }
-extern "C" b64 Movd_lo_b64(b64, b32);
-MakeTest(Movd_lo_b64, Movd_lo_b64_Logic)
+extern "C" b64 MovdLo_b64(b64, b32);
+MakeTest(MovdLo_b64, MovdLo_b64_Logic)
 
-static void Movd_hi_b64_Logic(b64 result, b64 a, b32 b) {
+static void MovdHi_b64_Logic(b64 result, b64 a, b32 b) {
   EXPECT_EQ(a >> 32, b32(result));
   EXPECT_EQ(b32(b), result >> 32);
 }
-extern "C" b64 Movd_hi_b64(b64, b32);
-MakeTest(Movd_hi_b64, Movd_hi_b64_Logic)
+extern "C" b64 MovdHi_b64(b64, b32);
+MakeTest(MovdHi_b64, MovdHi_b64_Logic)
 
 template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
 
