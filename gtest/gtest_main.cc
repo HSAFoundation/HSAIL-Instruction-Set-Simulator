@@ -37,7 +37,7 @@ GTEST_API_ int main(int argc, char **argv) {
   ::testing::GTEST_FLAG(filter) =
       "-BrigRuntimeTest.Mad*:"
       "BrigRuntimeTest.Extract*:"
-      "BrigRuntimeTest.Bitselect*:"
+      "BrigRuntimeTest.BitSelect*:"
       "BrigRuntimeTest.Mov_b128_b32:"
       "BrigRuntimeTest.Shuffle*:"
       "BrigRuntimeTest.Cmov*:"
@@ -48,7 +48,7 @@ GTEST_API_ int main(int argc, char **argv) {
       "BrigRuntimeTest.Bytealign_b32:"
       "BrigRuntimeTest.Lerp_b32:"
       "BrigRuntimeTest.Sad*_b32:"
-      "BrigRuntimeTest.Cmp_*:"
+      "BrigRuntimeTest.*Cmp_*:"
       "BrigRuntimeTest.Atomic*Cas_*:";
 
   testing::InitGoogleTest(&argc, argv);
