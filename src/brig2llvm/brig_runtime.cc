@@ -457,6 +457,9 @@ extern "C" f64 Fract_f64(f64 d) {
 template<class T> static T Sqrt(T x) { return std::sqrt(x); }
 FloatInst(define, Sqrt, Unary)
 
+template<class T> static T Fsqrt(T x) { return std::sqrt(x); }
+FloatInst(define, Fsqrt, Unary)
+
 template<class T> static T Fma(T x, T y, T z) { return fma(x, y, z); }
 FloatInst(define, Fma, Ternary)
 

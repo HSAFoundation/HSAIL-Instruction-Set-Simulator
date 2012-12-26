@@ -4140,3 +4140,10 @@ TEST(BrigKernelTest, MovdHi) {
   delete arg1;
   delete arg2;
 }
+
+TEST(BrigInstTest, VectorFsqrt) {
+  {
+    const float testVec[] = { 2.0f, 4.0f };
+    testInst("fsqrt_f32", testVec);
+  }
+}
