@@ -3599,7 +3599,7 @@ TEST(BrigInstTest, RegV2) {
 
   delete x;
   delete y;
-  delete output;
+  delete[] output;
 }
 
 TEST(BrigInstTest, RegV4) {
@@ -3663,7 +3663,7 @@ TEST(BrigInstTest, Testb128) {
   EXPECT_EQ(0x0000000100000002LL, output[0]);
   EXPECT_EQ(0x0000000300000004LL, output[1]);
 
-  delete output;
+  delete[] output;
 }
 
 static const char Packed[] =
@@ -3859,7 +3859,7 @@ TEST(BrigPacked, testPackedConstants) {
   }
   {
     unsigned bits = 64;
-    uint32_t result = uint32_t(0x400000003f800000);
+    uint64_t result = uint64_t(0x400000003f800000);
     testPackedConstants(bits, "_f32x2(0d4000000000000000, 0d3ff0000000000000)",
                         result, "f32x2");
   }
