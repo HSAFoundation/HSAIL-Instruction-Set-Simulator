@@ -90,6 +90,7 @@ enum error_code_t {
 
   REPEATED_DECLARATION,
   UNDEFINED_IDENTIFIER,
+  UNDEFINED_LABEL,
 
   UNKNOWN_ERROR
 };
@@ -263,6 +264,8 @@ class ErrorReporterInterface {
 
         case UNDEFINED_IDENTIFIER:
           return std::string("Undefined identifier.");
+        case UNDEFINED_LABEL:
+          return std::string("Use undefined label.");
 
         case UNKNOWN_ERROR:
         default:

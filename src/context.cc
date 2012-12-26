@@ -55,7 +55,8 @@ void Context::clear_context(void) {
   func_map.clear();
   func_o_map.clear();
   operand_map.clear();
-  label_o_map.clear();
+  local_label_map.clear();
+  arg_label_map.clear();
   label_d_map.clear();
   global_symbol_map.clear();
   local_symbol_map.clear();

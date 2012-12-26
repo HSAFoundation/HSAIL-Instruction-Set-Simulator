@@ -1628,15 +1628,15 @@ int FunctionDefinitionPart2(Context* context) {
   context->func_map[func_name] = bdf_offset;
   uint16_t size = sizeof(BrigDirectiveFunction);
   BrigDirectiveFunction bdf = {
-    size,                      // size
-    BrigEDirectiveFunction,    // kind
-    context->get_code_offset(),   // c_code
-    str_offset,                            // name
+    size,                       // size
+    BrigEDirectiveFunction,     // kind
+    context->get_code_offset(), // c_code
+    str_offset,                 // name
     0,                          // in param count
     bdf_offset + size,          // d_firstScopedDirective
     0,                          // operation count
     bdf_offset + size,          // d_nextDirective
-    context->get_attribute(),  // attribute
+    context->get_attribute(),   // attribute
     0,    // fbar count
     0,    // out param count
     0     // d_firstInParam
@@ -1746,7 +1746,16 @@ int ArgBlock(Context* context) {
     return 1;
   }
   context->token_to_scan = yylex();
+  std::map<std::string, BrigoOffset32_t>::iterator it;
+  for (it = context->arg_label_map.begin(); 
+      it != context->arg_label_map.end(); it++) {
+    if (!context->arg_symbol_map[it->first]) {
+      context->set_error(UNDEFINED_LABEL);
+      return 1;
+    }
+  }
   context->arg_symbol_map.clear();
+  context->arg_label_map.clear();
   return 0;
 }
 
@@ -1760,7 +1769,16 @@ int CodeBlockEnd(Context* context) {
     return 1;
   }
   context->token_to_scan = yylex();
+  std::map<std::string, BrigoOffset32_t>::iterator it;
+  for (it = context->local_label_map.begin(); 
+      it != context->local_label_map.end(); it++) {
+    if (!context->local_symbol_map[it->first]) {
+      context->set_error(UNDEFINED_LABEL);
+      return 1;
+    }
+  }
   context->local_symbol_map.clear();
+  context->local_label_map.clear();
   return 0;
 }
 
@@ -1873,7 +1891,9 @@ int OptionalWidth(Context* context) {
   return 0;
 }
 
-int BranchCbr(Context* context) {
+int BranchCbr(Context* context, 
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map){
 
   BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
   BrigoOffset32_t OpOffset[4] = {0, 0, 0, 0};
@@ -1926,22 +1946,23 @@ int BranchCbr(Context* context) {
   context->token_to_scan = yylex();
   if (context->token_to_scan == TOKEN_LABEL) {
     std::string label_name = context->token_value.string_val;
-    if (!context->label_o_map.count(label_name)) {
+    if (!label_o_map->count(label_name)) {
       BrigOperandLabelRef opLabelRef = {
         sizeof(BrigOperandLabelRef),
         BrigEOperandLabelRef,
         0
       };
-      context->label_o_map[label_name] = context->get_operand_offset();
-      opLabelRef.labeldirective = context->get_symbol(label_name);
+      (*label_o_map)[label_name] = context->get_operand_offset();
+      opLabelRef.labeldirective = (*label_d_map)[label_name];
 
       context->append_operand(&opLabelRef);
     }
-    OpOffset[2] = context->label_o_map[label_name];
+
+    OpOffset[2] = (*label_o_map)[label_name];
     context->token_to_scan = yylex();  // should be ';'
   } else if (context->token_type == REGISTER) {
     if ((context->get_machine() == BrigELarge && 
-         context->token_to_scan != TOKEN_DREGISTER) ||
+          context->token_to_scan != TOKEN_DREGISTER) ||
         (context->get_machine() == BrigESmall &&
          context->token_to_scan != TOKEN_SREGISTER)) {
       context->set_error(INVALID_OPERAND);
@@ -1961,19 +1982,19 @@ int BranchCbr(Context* context) {
       context->token_to_scan = yylex();
       if (context->token_to_scan == TOKEN_LABEL) {
         std::string label_name = context->token_value.string_val;
-        if (!context->label_o_map.count(label_name)) {
+        if (!label_o_map->count(label_name)) {
           BrigOperandLabelRef opLabelRef = {
             sizeof(BrigOperandLabelRef),
             BrigEOperandLabelRef,
             0
           };
-          context->label_o_map[label_name] = context->get_operand_offset();
-          opLabelRef.labeldirective = context->get_symbol(label_name);
+          (*label_o_map)[label_name] = context->get_operand_offset();
+          opLabelRef.labeldirective = (*label_d_map)[label_name];
 
           context->append_operand(&opLabelRef);
         }
 
-        OpOffset[3] = context->label_o_map[label_name];
+        OpOffset[3] = (*label_o_map)[label_name];
 
       } else if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER ||
                  context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
@@ -2059,7 +2080,9 @@ int BranchCbr(Context* context) {
 
 }
 
-int BranchBrn(Context* context) {
+int BranchBrn(Context* context,
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map) {
 
   BrigAluModifier mod = {0, 0, 0, 0, 0, 0, 0};
   BrigoOffset32_t OpOffset[3] = {0, 0, 0};
@@ -2096,20 +2119,20 @@ int BranchBrn(Context* context) {
   }
 
   if (context->token_to_scan == TOKEN_LABEL) {
-
     std::string label_name = context->token_value.string_val;
-    if (!context->label_o_map.count(label_name)) {
+    if (!label_o_map->count(label_name)) {
       BrigOperandLabelRef opLabelRef = {
         sizeof(BrigOperandLabelRef),
         BrigEOperandLabelRef,
         0
       };
-      context->label_o_map[label_name] = context->get_operand_offset();
-      opLabelRef.labeldirective = context->get_symbol(label_name);
+      (*label_o_map)[label_name] = context->get_operand_offset();
+      opLabelRef.labeldirective = (*label_d_map)[label_name];
 
       context->append_operand(&opLabelRef);
     }
-    OpOffset[1] = context->label_o_map[label_name];
+
+    OpOffset[1] = (*label_o_map)[label_name];
     context->token_to_scan = yylex();
   } else if (!Identifier(context)) {
     // Must be an s register.
@@ -2131,22 +2154,22 @@ int BranchBrn(Context* context) {
       }
       context->token_to_scan = yylex();
       if (context->token_to_scan == TOKEN_LABEL) {
-
         std::string label_name = context->token_value.string_val;
-        if (!context->label_o_map.count(label_name)) {
+        if (!label_o_map->count(label_name)) {
           BrigOperandLabelRef opLabelRef = {
             sizeof(BrigOperandLabelRef),
             BrigEOperandLabelRef,
             0
           };
-          context->label_o_map[label_name] = context->get_operand_offset();
-          opLabelRef.labeldirective = context->get_symbol(label_name);
+          (*label_o_map)[label_name] = context->get_operand_offset();
+          opLabelRef.labeldirective = (*label_d_map)[label_name];
 
           context->append_operand(&opLabelRef);
         }
-        OpOffset[2] = context->label_o_map[label_name];
+
+        OpOffset[2] = (*label_o_map)[label_name];
       } else if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER ||
-                 context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
+          context->token_to_scan == TOKEN_LOCAL_IDENTIFIER) {
         std::string idenName(context->token_value.string_val);
         BrigOperandAddress boa = {
           sizeof(boa),            // size
@@ -2227,14 +2250,19 @@ int BranchBrn(Context* context) {
 }
 
 int Branch(Context* context) {
+  return Branch(context, &context->local_label_map, &context->local_symbol_map);
+} 
+int Branch(Context* context, 
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map) {
   unsigned int op = context->token_to_scan;  // CBR or BRN
 
   context->token_to_scan = yylex();
 
   if (op == CBR) {
-    return BranchCbr(context);
+    return BranchCbr(context, label_o_map, label_d_map);
   } else if (op == BRN) {
-    return BranchBrn(context);
+    return BranchBrn(context, label_o_map, label_d_map);
   }
   return 1;
 }
@@ -3064,9 +3092,12 @@ int FunctionSignature(Context *context) {
 
 int Label(Context* context) {
   //TODO(Chuang): For test cases.
-  return Label(context, &context->global_symbol_map);
+  return Label(context, &context->local_label_map, 
+      &context->local_symbol_map);
 }
-int Label(Context* context, std::map<std::string, BrigdOffset32_t> *symbol_map) {
+int Label(Context* context, 
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *symbol_map) {
   // first must be "label"
   BrigcOffset32_t c_code = 0;
   BrigsOffset32_t s_name = 0;
@@ -3089,8 +3120,7 @@ int Label(Context* context, std::map<std::string, BrigdOffset32_t> *symbol_map) 
     c_code,                        // c_code
     s_name                         // s_name
   };
-  symbol_map->insert(std::map<std::string, BrigdOffset32_t>::value_type(
-      name, context->get_directive_offset()));
+  (*symbol_map)[name] = context->get_directive_offset();
   context->append_directive(&labelDir);
 
   if (context->label_d_map.count(name)) {
@@ -3107,15 +3137,17 @@ int Label(Context* context, std::map<std::string, BrigdOffset32_t> *symbol_map) 
     }
   }
 
-  if (context->label_o_map.count(name)) {
-    BrigoOffset32_t labOpOffset = context->label_o_map[name];
-    BrigOperandLabelRef labOp;
-    context->get_operand(labOpOffset, &labOp);
-    labOp.labeldirective = context->get_symbol(name);
-    context->update_operand_bytes(
-      reinterpret_cast<unsigned char*>(&labOp),
-      labOpOffset, sizeof(labOp)
-    );
+  if (label_o_map != NULL) {
+    if (label_o_map->count(name)) {
+      BrigoOffset32_t labOpOffset = (*label_o_map)[name];
+      BrigOperandLabelRef labOp;
+      context->get_operand(labOpOffset, &labOp);
+      labOp.labeldirective = (*symbol_map)[name];
+      context->update_operand_bytes(
+          reinterpret_cast<unsigned char*>(&labOp),
+          labOpOffset, sizeof(labOp)
+          );
+    }
   }
 
   context->token_to_scan = yylex();
@@ -3127,7 +3159,7 @@ int LabelTargets(Context* context) {
   if (context->token_to_scan == TOKEN_LABEL) {
     labelName = context->token_value.string_val;
   }
-  if (Label(context, &context->global_symbol_map)) {
+  if (Label(context, &context->local_label_map, &context->local_symbol_map)) {
     context->set_error(MISSING_LABEL);
     return 1;
   }
@@ -4577,11 +4609,16 @@ int Extension(Context* context) {
 }
 
 int Ldc(Context* context) {
+  return Ldc(context, &context->local_label_map, &context->local_symbol_map);
+}
+int Ldc(Context* context,
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map) {
   // first token is LDC "ldc"
   context->token_to_scan = yylex();
 
   BrigDataType16_t type;
-  BrigoOffset32_t OpOffset[2] = {0,0};
+  BrigoOffset32_t OpOffset[2] = {0, 0};
   BrigMachine16_t machine = context->get_machine();
 
   if (context->token_to_scan != _U32 &&
@@ -4623,7 +4660,7 @@ int Ldc(Context* context) {
 
   if (context->token_to_scan == TOKEN_LABEL) {
     std::string oper_name = context->token_value.string_val;
-    if (!context->label_o_map.count(oper_name)) {
+    if (!label_o_map->count(oper_name)) {
       BrigOperandLabelRef labRef = {
         0,                     // size
         BrigEOperandLabelRef,  // kind
@@ -4631,14 +4668,14 @@ int Ldc(Context* context) {
       };
       labRef.size = sizeof(labRef);
 
-      labRef.labeldirective = context->get_symbol(oper_name);
+      labRef.labeldirective = (*label_d_map)[oper_name];
 
       OpOffset[1] = context->get_operand_offset();
-      context->label_o_map[oper_name] = context->get_operand_offset();
+      (*label_o_map)[oper_name] = context->get_operand_offset();
       context->append_operand(&labRef);
 
     } else {
-      OpOffset[1] = context->label_o_map[oper_name];
+      OpOffset[1] = (*label_o_map)[oper_name];
     }
   } else if (context->token_to_scan == TOKEN_GLOBAL_IDENTIFIER) {
     std::string oper_name = context->token_value.string_val;
@@ -6356,6 +6393,13 @@ int SegpPart2StoFAndFtoS(Context* context) {
 }
 
 int Operation(Context* context) {
+  //TODO(Chuang): Done for unit test.
+  return Operation(context, &context->local_label_map, 
+      &context->local_symbol_map);
+}
+int Operation(Context* context,
+    std::map<std::string, BrigoOffset32_t> *label_o_map,
+    std::map<std::string, BrigdOffset32_t> *label_d_map) {
   if (context->token_type == INSTRUCTION1_OPCODE_NODT ||
       context->token_to_scan == CLOCK ||
       context->token_type == INSTRUCTION1_OPCODE) {
@@ -6409,7 +6453,7 @@ int Operation(Context* context) {
       return 0;
     }
   } else if (context->token_to_scan == LDC) {
-    if (!Ldc(context)) {
+    if (!Ldc(context, label_o_map, label_d_map)) {
       return 0;
     }
   } else if (context->token_to_scan == ATOMIC ||
@@ -6468,7 +6512,7 @@ int Operation(Context* context) {
     }
   } else if (context->token_to_scan == CBR ||
              context->token_to_scan == BRN) {
-    if (!Branch(context)) {
+    if (!Branch(context, label_o_map, label_d_map)) {
       return 0;
     }
   } else if (context->token_type == QUERY_OP) {
@@ -6509,14 +6553,14 @@ int BodyStatementNested(Context* context) {
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
     std::string labelName = context->token_value.string_val;
-    if (Label(context, &context->arg_symbol_map)) {
+    if (Label(context, &context->arg_label_map, &context->arg_symbol_map)) {
       return 1;
     }
     if(context->token_to_scan == LABELTARGETS) {
       return LabelTargetsPart2(context, context->get_symbol(labelName));
     }
     return 0;
-  } else if (!Operation(context)) {
+  } else if (!Operation(context, &context->arg_label_map, &context->arg_symbol_map)) {
     context->update_bdf_operation_count();
     return 0;
   }
@@ -6608,13 +6652,13 @@ int BodyStatement(Context* context) {
     }
   } else if (context->token_to_scan == TOKEN_LABEL) {
     std::string labelName = context->token_value.string_val;
-    if (Label(context, &context->local_symbol_map)) {
+    if (Label(context, &context->local_label_map, &context->local_symbol_map)) {
       return 1;
     }
     if (context->token_to_scan == LABELTARGETS)
       return LabelTargetsPart2(context, context->get_symbol(labelName));
     return 0;
-  } else if (!Operation(context)) {
+  } else if (!Operation(context, &context->local_label_map, &context->local_symbol_map)) {
     context->update_bdf_operation_count();
     return 0;
   }
