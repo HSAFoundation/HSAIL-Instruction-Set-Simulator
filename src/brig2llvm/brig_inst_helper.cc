@@ -350,7 +350,7 @@ std::string BrigInstHelper::getInstName(const inst_iterator inst) {
   if(const BrigInstAtomic *atom = dyn_cast<BrigInstAtomic>(inst)) {
     BrigAtomicOperation atomicOp = BrigAtomicOperation(atom->atomicOperation);
     const char *atomicOpName = getAtomicOpName(atomicOp);
-    return std::string(base) + "_" + atomicOpName + "_" + type;
+    return std::string(base) + atomicOpName + "_" + type;
   }
 
   return std::string(base) + packing + "_" + type;
