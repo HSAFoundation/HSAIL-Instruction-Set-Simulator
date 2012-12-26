@@ -3993,7 +3993,7 @@ static void testLd(const char *type1,
     asnprintf(Ld,
               type1,
               value,
-              type2,
+              type1,
               reg,
               type2,
               reg);
