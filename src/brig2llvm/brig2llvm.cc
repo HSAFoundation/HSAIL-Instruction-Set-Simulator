@@ -439,6 +439,9 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
      (inst->opcode == BrigMovdLo  && opnum == 1))
     return runOnType(C, Brigu64);
 
+  if(inst->opcode == BrigF2u4 && opnum > 0)
+    return runOnType(C, Brigf32);
+
   return destType;
 }
 

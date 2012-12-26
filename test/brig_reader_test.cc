@@ -4321,3 +4321,43 @@ TEST(BrigKernelTest, AtomicNoRet) {
   delete arg1;
   delete arg2;
 }
+
+TEST(BrigKernelTest, F2u4) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__instruction5_test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_f32 %input1, \n"
+    "        kernarg_f32 %input2, \n"
+    "        kernarg_f32 %input3, \n"
+    "        kernarg_f32 %input4 )\n"
+    "{\n"
+    "        ld_kernarg_f32 $s1, [%input1] ;\n"
+    "        ld_kernarg_f32 $s2, [%input2] ;\n"
+    "        ld_kernarg_f32 $s3, [%input3] ;\n"
+    "        ld_kernarg_f32 $s4, [%input4] ;\n"
+    "        f2u4_u32 $s5, $s1, $s2, $s3, $s4 ;\n"
+    "        st_kernarg_u32 $s5, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction5_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  float *arg1 = new float(255.0);
+  float *arg2 = new float(0.0);
+  float *arg3 = new float(128.0);
+  float *arg4 = new float(3.14);
+  void *args[] = { arg0, arg1, arg2, arg3, arg4 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xFF008003, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+  delete arg3;
+  delete arg4;
+}
