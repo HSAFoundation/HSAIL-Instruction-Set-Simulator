@@ -392,11 +392,11 @@ template<class T> static T Mov(T x) { return x; }
 BitInst(define, Mov, Unary)
 extern "C" b128 Mov_b128(b128 x) { return x; }
 
-extern "C" b32 Movs_lo_b32(b64 x) { return x; }
-extern "C" b32 Movs_hi_b32(b64 x) { return x >> 32; }
+extern "C" b32 MovsLo_b32(b64 x) { return x; }
+extern "C" b32 MovsHi_b32(b64 x) { return x >> 32; }
 
-extern "C" b64 Movd_lo_b64(b64 x, b32 y) { return (x >> 32 << 32) | b64(y); }
-extern "C" b64 Movd_hi_b64(b64 x, b32 y) {
+extern "C" b64 MovdLo_b64(b64 x, b32 y) { return (x >> 32 << 32) | b64(y); }
+extern "C" b64 MovdHi_b64(b64 x, b32 y) {
   return (b64(y) << 32) | (x >> 32);
 }
 
@@ -456,6 +456,9 @@ extern "C" f64 Fract_f64(f64 d) {
 
 template<class T> static T Sqrt(T x) { return std::sqrt(x); }
 FloatInst(define, Sqrt, Unary)
+
+template<class T> static T Fsqrt(T x) { return std::sqrt(x); }
+FloatInst(define, Fsqrt, Unary)
 
 template<class T> static T Fma(T x, T y, T z) { return fma(x, y, z); }
 FloatInst(define, Fma, Ternary)
