@@ -360,35 +360,45 @@ void BrigEngine::launch(llvm::Function *EntryFn,
 
   pthread_attr_t attr;
   pthread_attr_init(&attr);
-
+  pthread_barrierattr_t barrierAttr;
+  pthread_barrierattr_init(&barrierAttr);
+  pthread_barrier_t *barriers = new pthread_barrier_t[blockNum];
   ThreadInfo **threads = new ThreadInfo *[blockNum * threadNum];
+
 
   uint32_t NDRangeSize = blockNum * threadNum;
   uint32_t workdim = 1;
   uint32_t workGroupSize[] = { threadNum, 1, 1 };
 
   for(uint32_t i = 0; i < blockNum; ++i) {
+    pthread_barrier_init(barriers + i, &barrierAttr, threadNum);
     for(uint32_t j = 0; j < threadNum; ++j) {
 
       uint32_t tid = i * threadNum + j;
       uint32_t workItemAbsId[] = { tid, 0, 0 };
       threads[tid] = new ThreadInfo(NDRangeSize, workdim,
                                     workGroupSize, workItemAbsId,
+                                    barriers + i,
                                     args.data(), args.size());
       pthread_create(&threads[tid]->tid, &attr, EntryFunPtr,
                      threads[tid]->argsArray);
     }
   }
 
-  for(uint32_t i = 0; i < blockNum * threadNum; ++i) {
-    void *retVal;
-    pthread_join(threads[i]->tid, &retVal);
-    delete threads[i];
-
+  for(uint32_t i = 0; i < blockNum; ++i) {
+    for(uint32_t j = 0; j < threadNum; ++j) {
+      uint32_t tid = i * threadNum + j;
+      void *retVal;
+      pthread_join(threads[tid]->tid, &retVal);
+      delete threads[tid];
+    }
+    pthread_barrier_destroy(barriers + i);
   }
 
+  pthread_barrierattr_destroy(&barrierAttr);
   pthread_attr_destroy(&attr);
 
+  delete[] barriers;
   delete[] threads;
 }
 

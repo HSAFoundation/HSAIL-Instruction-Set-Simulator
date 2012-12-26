@@ -4361,3 +4361,20 @@ TEST(BrigKernelTest, F2u4) {
   delete arg3;
   delete arg4;
 }
+
+TEST(BrigKernelTest, Barrier) {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &BarrierTest()\n"
+    "{\n"
+    "        barrier;\n"
+    "        ret;\n"
+    "};\n");
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("BarrierTest");
+    void *args[] = { 0 };
+    for(unsigned blocks = 1; blocks < 16; ++blocks)
+      for(unsigned threads = 1; threads < 16; ++threads)
+        BE.launch(fun, args, blocks, threads);
+}
