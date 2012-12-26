@@ -3106,6 +3106,10 @@ int Label(Context* context,
     return 1;
 
   std::string name = context->token_value.string_val;
+  if ((*symbol_map)[name]) {
+    context->set_error(REPEATED_DECLARATION);
+    return 1;
+  }
 
   context->token_to_scan = yylex();
   if (':' != context->token_to_scan) {
