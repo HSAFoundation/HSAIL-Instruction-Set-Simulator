@@ -432,6 +432,8 @@ INSTANTIATE_TEST_CASE_P(InvalidTest, TestLdImageInvalid, testing::Range(0,15));
 TEST_P(TestImageNoRetAdd, ImageNoRetAdd) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
+  
 
   int n = GetParam();
   std::string input(imagenoret_add_pair[n].str);
@@ -465,6 +467,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageNoRetAdd, testing::Range(0,6));
 TEST_P(TestImageNoRetSub, ImageNoRetSub) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 80; 
 
   int n = GetParam();
   std::string input(imagenoret_sub_pair[n].str);
@@ -498,6 +501,7 @@ INSTANTIATE_TEST_CASE_P(Codegen, TestImageNoRetSub, testing::Range(0,6));
 TEST_P(TestImageNoRetOr, ImageNoRetOr) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imagenoret_or_pair[n].str);
@@ -531,6 +535,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageNoRetOr, testing::Range(0,6));
 TEST_P(TestImageNoRetAnd, ImageNoRetAnd) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imagenoret_and_pair[n].str);
@@ -564,6 +569,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageNoRetAnd, testing::Range(0,6));
 TEST_P(TestImageNoRetXor, ImageNoRetXor) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imagenoret_xor_pair[n].str);
@@ -597,6 +603,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageNoRetXor, testing::Range(0,6));
 TEST_P(TestImageNoRetInc, ImageNoRetInc) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imagenoret_inc_pair[n].str);
@@ -630,6 +637,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageNoRetInc, testing::Range(0,6));
 TEST_P(TestImageNoRetDec, ImageNoRetDec) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imagenoret_dec_pair[n].str);
@@ -663,6 +671,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageNoRetDec, testing::Range(0,6));
 TEST_P(TestImageNoRetMax, ImageNoRetMax) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imagenoret_max_pair[n].str);
@@ -696,6 +705,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageNoRetMax, testing::Range(0,6));
 TEST_P(TestImageNoRetMin, ImageNoRetMin) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imagenoret_min_pair[n].str);
@@ -729,6 +739,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageNoRetMin, testing::Range(0,6));
 TEST_P(TestImageNoRetCas, ImageNoRetCas) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imagenoret_cas_pair[n].str);
@@ -1467,6 +1478,7 @@ INSTANTIATE_TEST_CASE_P(InvalidTest, TestRdImage2daInvalid, testing::Range(0,21)
 TEST_P(TestImageRetAdd, ImageRetAdd) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_add_pair[n].str);
@@ -1500,6 +1512,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetAdd, testing::Range(0,6));
 TEST_P(TestImageRetSub, ImageRetSub) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_sub_pair[n].str);
@@ -1533,6 +1546,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetSub, testing::Range(0,6));
 TEST_P(TestImageRetOr, ImageRetOr) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_or_pair[n].str);
@@ -1566,6 +1580,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetOr, testing::Range(0,6));
 TEST_P(TestImageRetAnd, ImageRetAnd) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_and_pair[n].str);
@@ -1599,6 +1614,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetAnd, testing::Range(0,6));
 TEST_P(TestImageRetXor, ImageRetXor) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_xor_pair[n].str);
@@ -1632,6 +1648,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetXor, testing::Range(0,6));
 TEST_P(TestImageRetInc, ImageRetInc) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_inc_pair[n].str);
@@ -1665,6 +1682,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetInc, testing::Range(0,6));
 TEST_P(TestImageRetDec, ImageRetDec) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_dec_pair[n].str);
@@ -1698,6 +1716,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetDec, testing::Range(0,6));
 TEST_P(TestImageRetMax, ImageRetMax) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_max_pair[n].str);
@@ -1731,6 +1750,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetMax, testing::Range(0,6));
 TEST_P(TestImageRetMin, ImageRetMin) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_min_pair[n].str);
@@ -1764,6 +1784,7 @@ INSTANTIATE_TEST_CASE_P(CodegenTest, TestImageRetMin, testing::Range(0,6));
 TEST_P(TestImageRetCas, ImageRetCas) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&RWImg"] = 40;
 
   int n = GetParam();
   std::string input(imageret_cas_pair[n].str);

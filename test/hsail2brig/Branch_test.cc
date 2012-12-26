@@ -20,19 +20,19 @@ private:
   const T1* RefSrc1;
   const T2* RefSrc2;
   const T3* RefSrc3;
+  const std::string *SymbolName;
 
 public:
-  Branch_Test(std::string& in):
-    BrigCodeGenTest(in) {}
+  Branch_Test(std::string &in, std::string *name = NULL):
+    BrigCodeGenTest(in), SymbolName(name) {}
   
   Branch_Test(std::string& in, StringBuffer* sbuf, Tinst* ref, 
-              BrigOperandImmed* width, T1* src1, T2* src2 = NULL, T3* src3 = NULL) : 
+              BrigOperandImmed* width, T1* src1, T2* src2 = NULL, 
+              T3* src3 = NULL, std::string *name = NULL): 
     BrigCodeGenTest(in, sbuf),
-    RefInst(ref), 
-    RefWidth(width),
-    RefSrc1(src1),
-    RefSrc2(src2),
-    RefSrc3(src3) { }
+    RefInst(ref),      RefWidth(width),
+    RefSrc1(src1),     RefSrc2(src2),
+    RefSrc3(src3),     SymbolName(name) { }
 
   void Run_Test(int (*Rule)(Context*)){  
     Buffer* code = new Buffer();
@@ -53,13 +53,13 @@ public:
       reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
       RefStr->size(), 0, code->size(), oper->size(), 0);    
     
-    Parse_Validate(Rule, &RefOutput);
+    Parse_Validate(Rule, &RefOutput, SymbolName);
     delete code;
     delete oper;
     delete dir;
   }  
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
-    False_Validate(Rule, refError);
+    False_Validate(Rule, refError, SymbolName);
   }
 };
 
@@ -67,6 +67,7 @@ TEST(CodegenTest, Brn_Codegen){
 
   /********************* Common variables **********************/
   std::string in, regName; 
+  std::string symbolName;
   StringBuffer* sbuf = new StringBuffer();
   BrigOperandImmed width;
   BrigOperandLabelRef labRef;
@@ -101,7 +102,8 @@ TEST(CodegenTest, Brn_Codegen){
   outInst.o_operands[3] = 0;
   outInst.o_operands[4] = 0;
 
-  Branch_Test<BrigInstBase, BrigOperandLabelRef> TestCase1(in, sbuf, &outInst, &width, &labRef);
+  Branch_Test<BrigInstBase, BrigOperandLabelRef> 
+    TestCase1(in, sbuf, &outInst, &width, &labRef);
   TestCase1.Run_Test(&Branch);  
   sbuf->clear();
 
@@ -132,7 +134,8 @@ TEST(CodegenTest, Brn_Codegen){
   labRef.kind = BrigEOperandLabelRef;
   labRef.labeldirective = 0;
  
-  Branch_Test<BrigInstMod, BrigOperandLabelRef> TestCase2(in, sbuf, &outMod, &width, &labRef);
+  Branch_Test<BrigInstMod, BrigOperandLabelRef> 
+    TestCase2(in, sbuf, &outMod, &width, &labRef);
   TestCase2.Run_Test(&Branch);  
   sbuf->clear();
 
@@ -167,7 +170,8 @@ TEST(CodegenTest, Brn_Codegen){
   reg.reserved = 0;
   reg.s_name = 0;
 
-  Branch_Test<BrigInstMod, BrigOperandReg> TestCase3(in, sbuf, &outMod, &width, &reg);
+  Branch_Test<BrigInstMod, BrigOperandReg> 
+    TestCase3(in, sbuf, &outMod, &width, &reg);
   TestCase3.Run_Test(&Branch);  
   sbuf->clear();
 
@@ -199,7 +203,8 @@ TEST(CodegenTest, Brn_Codegen){
   reg.reserved = 0;
   reg.s_name = 0;
 
-  Branch_Test<BrigInstBase, BrigOperandReg> TestCase4(in, sbuf, &outInst, &width, &reg);
+  Branch_Test<BrigInstBase, BrigOperandReg> 
+    TestCase4(in, sbuf, &outInst, &width, &reg);
   TestCase4.Run_Test(&Branch);
   sbuf->clear();
 
@@ -237,7 +242,9 @@ TEST(CodegenTest, Brn_Codegen){
   addr.reserved = 0;
   addr.directive = 0;
 
-  Branch_Test<BrigInstBase, BrigOperandReg, BrigOperandAddress> TestCase5(in, sbuf, &outInst, &width, &reg, &addr);
+  symbolName.assign("%jumptable2");
+  Branch_Test<BrigInstBase, BrigOperandReg, BrigOperandAddress> 
+    TestCase5(in, sbuf, &outInst, &width, &reg, &addr, NULL, &symbolName);
   TestCase5.Run_Test(&Branch);
   sbuf->clear();
 
@@ -276,11 +283,11 @@ TEST(CodegenTest, Brn_Codegen){
   labRef.kind = BrigEOperandLabelRef;
   labRef.labeldirective = 0;
 
-  Branch_Test<BrigInstMod, BrigOperandReg, BrigOperandLabelRef> TestCase6(in, sbuf, &outMod, &width, &reg, &labRef);
+  Branch_Test<BrigInstMod, BrigOperandReg, BrigOperandLabelRef> 
+    TestCase6(in, sbuf, &outMod, &width, &reg, &labRef);
   TestCase6.Run_Test(&Branch);
   sbuf->clear();
 
-  /***************************  End of tests ***********************/
   delete sbuf;
 }
 
@@ -290,6 +297,7 @@ TEST(CodegenTest, Cbr_Codegen){
   /********************* Common variables **********************/
   std::string in, reg1Name, reg2Name;
   StringBuffer* sbuf = new StringBuffer();
+  std::string symbolName;
   BrigOperandImmed width;
   BrigOperandLabelRef labRef;
   BrigInstBase outInst;
@@ -385,13 +393,13 @@ TEST(CodegenTest, Cbr_Codegen){
   addr.reserved = 0;
   addr.directive = 0;
  
+  symbolName.assign("%x");
   Branch_Test<BrigInstMod, BrigOperandReg, BrigOperandReg, BrigOperandAddress> 
-  TestCase2(in, sbuf, &outMod, &width, &reg1, &reg2, &addr);
+  TestCase2(in, sbuf, &outMod, &width, &reg1, &reg2, &addr, &symbolName);
   TestCase2.Run_Test(&Branch);  
   sbuf->clear();
 
   /*************************** Case 3 ********************************/
-
   in.assign("cbr_width(2) $c0, @label;\n");
   reg1Name.assign("$c0");
   sbuf->append(reg1Name);
@@ -470,8 +478,6 @@ TEST(CodegenTest, Cbr_Codegen){
   TestCase4.Run_Test(&Branch);  
   sbuf->clear();
 
-
-  /***************************  End of tests ***********************/
   delete sbuf;
 }
 TEST(ErrorReportTest, Branch) {  

@@ -992,7 +992,7 @@ struct AddressOperandTest address_operand_pair[2] = {
       BrigEOperandAddress,
       Brigb64,
       0,
-      0
+      40
     }
   },
 //address_operand_pair[1]
@@ -1003,7 +1003,7 @@ struct AddressOperandTest address_operand_pair[2] = {
       BrigEOperandAddress,
       Brigb64,
       0,
-      0
+      80
     }
   }
 };

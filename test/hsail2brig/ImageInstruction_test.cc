@@ -22,26 +22,24 @@ private:
 
   const BrigOperandReg* ImgReg;
   const BrigOperandReg* SmpReg;
+  const std::string *SymbolName;
 
 public:
-  ImageInst_Test(std::string& in):
-    BrigCodeGenTest(in) {}
+  ImageInst_Test(std::string& in, std::string *name = NULL):
+    BrigCodeGenTest(in), SymbolName(name) {}
 
   ImageInst_Test(std::string& input, StringBuffer* sbuf, TInst* ref,
                  BrigOperandRegV4* dest, BrigOperandReg* destList,
                  BrigOperandOpaque* image, BrigOperandOpaque* sample,
                  TSrc* src, BrigOperandReg* srcList = NULL,
-                 BrigOperandReg* imgReg = NULL, BrigOperandReg* smpReg = NULL):
+                 BrigOperandReg* imgReg = NULL, BrigOperandReg* smpReg = NULL,
+                 std::string *name = NULL):
     BrigCodeGenTest(input, sbuf),
-    RefInst(ref),
-    RefDest(dest),
-    RefDestList(destList),
-    RefImage(image),
-    RefSample(sample),
-    RefSrc(src),
-    RefSrcList(srcList) ,
-    ImgReg(imgReg),
-    SmpReg(smpReg) { }
+    RefInst(ref),              RefDest(dest),
+    RefDestList(destList),     RefImage(image),
+    RefSample(sample),         RefSrc(src),
+    RefSrcList(srcList),       ImgReg(imgReg),
+    SmpReg(smpReg),            SymbolName(name) { }
 
   void Run_Test(int (*Rule)(Context*)){
     Buffer* code = new Buffer();
@@ -72,36 +70,36 @@ public:
     if (RefSrcList != NULL) {
       if (RefSrc->kind == BrigEOperandRegV2) {
         for (uint32_t i = 0 ; i < 2 ; ++i) {
-          // If the structure is empty in srcList, the reg will be generated in other places.
+          // If the structure is empty in srcList, 
+          // the reg will be generated in other places.
           if (RefSrcList[i].size != 0) {
             oper->append(&RefSrcList[i]);
           }
         }
       } else if (RefSrc->kind == BrigEOperandRegV4) {
         for (uint32_t i = 0 ; i < 4 ; ++i) {
-          // If the structure is empty in srcList, the reg will be generated in other places.
+          // If the structure is empty in srcList, 
+          // the reg will be generated in other places.
           if (RefSrcList[i].size != 0) {
             oper->append(&RefSrcList[i]);
           }
         }
       }
     }
-
     oper->append(RefSrc);
-
     struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
       reinterpret_cast<const char *>(&dir->get()[0]),
       reinterpret_cast<const char *>(&code->get()[0]),
       reinterpret_cast<const char *>(&oper->get()[0]), NULL,
       RefStr->size(), 0, code->size(), oper->size(), 0);
 
-    Parse_Validate(Rule, &RefOutput);
+    Parse_Validate(Rule, &RefOutput, SymbolName);
     delete code;
     delete oper;
     delete dir;
   }
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
-    False_Validate(Rule, refError);
+    False_Validate(Rule, refError, SymbolName);
   }
 };
 
@@ -109,7 +107,7 @@ public:
 TEST(CodegenTest, ImageStore_Codegen) {
 
   /********************* Common variables **********************/
-  std::string in;
+  std::string in, symbolName;
   std::string reg1Name, reg2Name, reg3Name, reg4Name, reg5Name;
   StringBuffer* sbuf = new StringBuffer();
 
@@ -122,7 +120,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
 
 
   /**************************** Case 1 ***************************/
-  in.assign("st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s2,$s3,$s4,$s5);\n");
+  in.assign("st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [&RWImg3], ($s2,$s3,$s4,$s5);\n");
   reg1Name.assign("$s1");  reg2Name.assign("$s2");
   reg3Name.assign("$s3");  reg4Name.assign("$s4");
   reg5Name.assign("$s5");
@@ -159,7 +157,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg2.s_name = reg1Name.size() + 1;
 
   destList[1] = reg2;
-  // If the structure is empty in srcList, the reg will be generated in other places.
+  // If the structure is empty in srcList, 
+  // the reg will be generated in other places.
   memset(&srcList[0], 0, sizeof(srcList[0]));
 
   reg3.size = sizeof(reg3);
@@ -169,7 +168,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg3.s_name = reg1Name.size() + reg2Name.size() + 2;
 
   destList[2] = reg3;
-  // If the structure is empty in srcList, the reg will be generated in other places.
+  // If the structure is empty in srcList, 
+  // the reg will be generated in other places.
   memset(&srcList[1], 0, sizeof(srcList[1]));
 
   reg4.size = sizeof(reg4);
@@ -180,7 +180,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
                 reg3Name.size() + 3;
 
   destList[3] = reg4;
-  // If the structure is empty in srcList, the reg will be generated in other places.
+  // If the structure is empty in srcList, 
+  // the reg will be generated in other places.
   memset(&srcList[2], 0, sizeof(srcList[2]));
 
   dest.size = sizeof(dest);
@@ -218,14 +219,16 @@ TEST(CodegenTest, ImageStore_Codegen) {
 
   srcList[3] = reg4;
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandRegV4>
-  TestCase1(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV4, srcList);
+  TestCase1(in, sbuf, &out, &dest, destList, &image1, NULL, 
+      &srcRegV4, srcList, NULL, NULL, &symbolName);
   TestCase1.Run_Test(&ImageStore);
 
   sbuf->clear();
 
   /**************************** Case 2 ***************************/
-  in.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5);\n");
+  in.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [&RWImg3], ($s4,$s5);\n");
   reg1Name.assign("$s1");  reg2Name.assign("$s2");
   reg3Name.assign("$s3");  reg4Name.assign("$s4");
   reg5Name.assign("$s5");
@@ -279,7 +282,8 @@ TEST(CodegenTest, ImageStore_Codegen) {
                 reg3Name.size() + 3;
 
   destList[3] = reg4;
-  // If the structure is empty in srcList, the reg will be generated in other places.
+  // If the structure is empty in srcList, 
+  // the reg will be generated in other places.
   memset(&srcList[0], 0, sizeof(srcList[0]));
 
   dest.size = sizeof(dest);
@@ -315,14 +319,16 @@ TEST(CodegenTest, ImageStore_Codegen) {
 
   srcList[1] = reg4;
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandRegV2>
-  TestCase2(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV2, srcList);
+  TestCase2(in, sbuf, &out, &dest, destList, &image1, NULL, 
+      &srcRegV2, srcList, NULL, NULL, &symbolName);
   TestCase2.Run_Test(&ImageStore);
 
   sbuf->clear();
 
   /**************************** Case 3 ***************************/
-  in.assign("st_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3<$s4 - 0x4>], ($s5);\n");
+  in.assign("st_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), [&RWImg3<$s4 - 0x4>], ($s5);\n");
   reg1Name.assign("$s1");  reg2Name.assign("$s2");
   reg3Name.assign("$s3");  reg4Name.assign("$s4");
   reg5Name.assign("$s5");
@@ -399,12 +405,13 @@ TEST(CodegenTest, ImageStore_Codegen) {
   reg2.s_name = reg1Name.size() + reg2Name.size() +
                 reg3Name.size() + reg4Name.size() + 4;
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandReg>
-  TestCase3(in, sbuf, &out, &dest, destList, &image1, NULL, &reg2);
+  TestCase3(in, sbuf, &out, &dest, destList, &image1, NULL, &reg2, 
+      NULL, NULL, NULL, &symbolName);
   TestCase3.Run_Test(&ImageStore);
 
   sbuf->clear();
-  /***********************  End of tests *************************/
   delete sbuf;
 }
 
@@ -413,7 +420,7 @@ TEST(CodegenTest, ImageStore_Codegen) {
 TEST(CodegenTest, ImageLoad_Codegen) {
 
   /********************* Common variables **********************/
-  std::string in;
+  std::string in, symbolName;
   std::string reg1Name, reg2Name, reg3Name, reg4Name, reg5Name;
   StringBuffer* sbuf = new StringBuffer();
 
@@ -426,7 +433,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
 
 
   /**************************** Case 1 ***************************/
-  in.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5,$s2,$s3);\n");
+  in.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [&RWImg3], ($s4,$s5,$s2,$s3);\n");
   reg1Name.assign("$s1");  reg2Name.assign("$s2");
   reg3Name.assign("$s3");  reg4Name.assign("$s4");
   reg5Name.assign("$s5");
@@ -520,14 +527,16 @@ TEST(CodegenTest, ImageLoad_Codegen) {
 
   srcList[1] = reg4;
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandRegV4>
-  TestCase1(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV4, srcList);
+  TestCase1(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV4, 
+      srcList, NULL, NULL, &symbolName);
   TestCase1.Run_Test(&ImageLoad);
 
   sbuf->clear();
 
   /**************************** Case 2 ***************************/
-  in.assign("ld_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3], ($s4,$s5);\n");
+  in.assign("ld_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4), [&RWImg3], ($s4,$s5);\n");
   reg1Name.assign("$s1");  reg2Name.assign("$s2");
   reg3Name.assign("$s3");  reg4Name.assign("$s4");
   reg5Name.assign("$s5");
@@ -616,14 +625,16 @@ TEST(CodegenTest, ImageLoad_Codegen) {
 
   srcList[1] = reg4;
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandRegV2>
-  TestCase2(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV2, srcList);
+  TestCase2(in, sbuf, &out, &dest, destList, &image1, NULL, &srcRegV2, 
+      srcList, NULL, NULL, &symbolName);
   TestCase2.Run_Test(&ImageLoad);
 
   sbuf->clear();
 
   /**************************** Case 3 ***************************/
-  in.assign("ld_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3<$s4>], ($s5);\n");
+  in.assign("ld_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), [&RWImg3<$s4>], ($s5);\n");
   reg1Name.assign("$s1");  reg2Name.assign("$s2");
   reg3Name.assign("$s3");  reg4Name.assign("$s4");
   reg5Name.assign("$s5");
@@ -700,13 +711,14 @@ TEST(CodegenTest, ImageLoad_Codegen) {
   reg2.s_name = reg1Name.size() + reg2Name.size() +
                 reg3Name.size() + reg4Name.size() + 4;
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandReg>
-  TestCase3(in, sbuf, &out, &dest, destList, &image1, NULL, &reg2);
+  TestCase3(in, sbuf, &out, &dest, destList, &image1, NULL, &reg2,
+      NULL, NULL, NULL, &symbolName);
   TestCase3.Run_Test(&ImageLoad);
 
   sbuf->clear();
 
-  /***********************  End of tests *************************/
   delete sbuf;
 }
 
@@ -714,7 +726,7 @@ TEST(CodegenTest, ImageLoad_Codegen) {
 TEST(CodegenTest, ImageRead_Codegen) {
 
   /********************* Common variables **********************/
-  std::string in;
+  std::string in, symbolName;
   std::string reg1Name, reg2Name, reg3Name, reg4Name, reg5Name, reg6Name;
   StringBuffer* sbuf = new StringBuffer();
 
@@ -727,7 +739,7 @@ TEST(CodegenTest, ImageRead_Codegen) {
 
 
   /**************************** Case 1 ***************************/
-  in.assign("rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4), [%RWImg3],[%Samp3],($s5, $s6, $s4, $s3);\n");
+  in.assign("rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4), [&RWImg3],[&RWImg3],($s5, $s6, $s4, $s3);\n");
   reg1Name.assign("$s0");  reg2Name.assign("$s1");
   reg3Name.assign("$s3");  reg4Name.assign("$s4");
   reg5Name.assign("$s5");  reg6Name.assign("$s6");
@@ -833,14 +845,16 @@ TEST(CodegenTest, ImageRead_Codegen) {
                 reg5Name.size() + 5;
   srcList[1] = reg2;
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandRegV4>
-  TestCase1(in, sbuf, &out, &dest, destList, &image1, &samp2, &srcRegV4, srcList);
+  TestCase1(in, sbuf, &out, &dest, destList, &image1, &samp2, &srcRegV4, 
+      srcList, NULL, NULL, &symbolName);
   TestCase1.Run_Test(&ImageRead);
 
   sbuf->clear();
 
   /**************************** Case 2 ***************************/
-  in.assign("rd_image_v4_1da_s32_f32 ($s0,$s1,$s2,$s3), [%RWImg3<$s5 + 3>],[%Samp3<$s6>],($s0, $s1);\n");
+  in.assign("rd_image_v4_1da_s32_f32 ($s0,$s1,$s2,$s3), [&RWImg3<$s5 + 3>],[&RWImg3<$s6>],($s0, $s1);\n");
   reg1Name.assign("$s0");  reg2Name.assign("$s1");
   reg3Name.assign("$s2");  reg4Name.assign("$s3");
   reg5Name.assign("$s5");  reg6Name.assign("$s6");
@@ -945,14 +959,16 @@ TEST(CodegenTest, ImageRead_Codegen) {
   srcRegV2.regs[0] = 0;
   srcRegV2.regs[1] = sizeof(reg1);
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandRegV2>
-  TestCase2(in, sbuf, &out, &dest, destList, &image1, &samp2, &srcRegV2, srcList, &reg5, &reg6);
+  TestCase2(in, sbuf, &out, &dest, destList, &image1, &samp2, &srcRegV2, 
+      srcList, &reg5, &reg6, &symbolName);
   TestCase2.Run_Test(&ImageRead);
 
   sbuf->clear();
 
   /**************************** Case 3 ***************************/
-  in.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3),[%RWImg3], [%Samp3], ($s6);\n");
+  in.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3),[&RWImg3], [&RWImg3], ($s6);\n");
   reg1Name.assign("$s0");  reg2Name.assign("$s1");
   reg3Name.assign("$s5");  reg4Name.assign("$s3");
   reg5Name.assign("$s6");
@@ -1035,61 +1051,74 @@ TEST(CodegenTest, ImageRead_Codegen) {
   reg3.s_name = reg1Name.size() + reg2Name.size() +
                 reg3Name.size() + reg4Name.size() + 4;
 
+  symbolName.assign("&RWImg3");
   ImageInst_Test<BrigInstImage, BrigOperandReg>
-  TestCase3(in, sbuf, &out, &dest, destList, &image1, &samp2, &reg3);
+  TestCase3(in, sbuf, &out, &dest, destList, &image1, &samp2, &reg3,
+      NULL, NULL, NULL, &symbolName);
   TestCase3.Run_Test(&ImageRead);
 
   sbuf->clear();
 
-  /***********************  End of tests *************************/
   delete sbuf;
 }
 TEST(ErrorReportTest, ImageStore) {
+  std::string symbolName;
   std::string input = "st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),\
-                       [%RWImg3], ($s2,$s3,$s4,$s5)\n";
-  ImageInst_Test<> TestCase1(input);
+                       [&RWImg3], ($s2,$s3,$s4,$s5)\n";
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase1(input, &symbolName);
   TestCase1.Run_Test(&ImageStore, MISSING_SEMICOLON);
 
-  input.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4) [%RWImg3],\
+  input.assign("st_image_v4_1da_f32_u32 ($s1,$s2,$s3,$s4) [&RWImg3],\
                ($s4,$s5);\n");
-  ImageInst_Test<> TestCase2(input);
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase2(input, &symbolName);
   TestCase2.Run_Test(&ImageStore, MISSING_COMMA);
 
   input.assign("st_image_v4_1db_f32 ($s1,$s2,$s3,$s4),\
-                [%RWImg3<$s4 - 0x4>], ($s5);\n");
-  ImageInst_Test<> TestCase3(input);
+                [&RWImg3<$s4 - 0x4>], ($s5);\n");
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase3(input, &symbolName);
   TestCase3.Run_Test(&ImageStore, MISSING_DATA_TYPE);
 }
 TEST(ErrorReportTest, ImageLoad) {
+  std::string symbolName;
   std::string input = "ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),\
-                       [%RWImg3], ($s4,$s5,$s2,$s3)\n";
-  ImageInst_Test<> TestCase1(input);
+                       [&RWImg3], ($s4,$s5,$s2,$s3)\n";
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase1(input, &symbolName);
   TestCase1.Run_Test(&ImageLoad, MISSING_SEMICOLON);
 
   input.assign("ld_image_v4_1da_f32 ($s1,$s2,$s3,$s4),\
-                [%RWImg3], ($s4,$s5);\n");
-  ImageInst_Test<> TestCase2(input);
+                [&RWImg3], ($s4,$s5);\n");
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase2(input, &symbolName);
   TestCase2.Run_Test(&ImageLoad, MISSING_DATA_TYPE);
 
   input.assign("ld_image_v4_1db_f32_u32 ($s1,$s2,$s3,$s4), \
-                [%RWImg3<$s4>] ($s5);\n");
-  ImageInst_Test<> TestCase3(input);
+                [&RWImg3<$s4>] ($s5);\n");
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase3(input, &symbolName);
   TestCase3.Run_Test(&ImageLoad, MISSING_COMMA);
 }
 TEST(ErrorReportTest, ImageRead) {
+  std::string symbolName;
   std::string input = "rd_image_v4_2da_s32_f32 ($s0,$s1,$s3,$s4),\
-                       [%RWImg3],[%Samp3],($s5, $s6, $s4, $s3)\n";
-  ImageInst_Test<> TestCase1(input);
+                       [&RWImg3],[&RWImg3],($s5, $s6, $s4, $s3)\n";
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase1(input, &symbolName);
   TestCase1.Run_Test(&ImageRead, MISSING_SEMICOLON);
 
   input.assign("rd_image_v4_1d_f32_u32 ($s0,$s1,$s3,$s4),\
-                [%RWImg3],[%Samp3],(100)\n");
-  ImageInst_Test<> TestCase2(input);
+                [&RWImg3],[&RWImg3],(100)\n");
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase2(input, &symbolName);
   TestCase2.Run_Test(&ImageRead, INVALID_OPERAND);
 
-  input.assign("rd_image_v4_1d_s32 ($s0,$s1,$s5,$s3),[%RWImg3],\
-                [%Samp3], ($s6);\n");
-  ImageInst_Test<> TestCase3(input);
+  input.assign("rd_image_v4_1d_s32 ($s0,$s1,$s5,$s3),[&RWImg3],\
+                [&RWImg3], ($s6);\n");
+  symbolName.assign("&RWImg3");
+  ImageInst_Test<> TestCase3(input, &symbolName);
   TestCase3.Run_Test(&ImageRead, MISSING_DATA_TYPE);
 }
 

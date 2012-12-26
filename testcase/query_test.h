@@ -20,7 +20,7 @@ struct QueryTest{
 struct QueryTest query_pair[8] = {
 //query_pair[0]
   {
-    "query_width_u32 $s1, [%RWImg3];",
+    "query_width_u32 $s1, [%RWImg];",
     {
     brig_inst_base_size,
     BrigEInstBase,
@@ -32,7 +32,7 @@ struct QueryTest query_pair[8] = {
   },
 //query_pair[1]
   {
-    "query_height_u32 $s0, [&namedRWImg1];",
+    "query_height_u32 $s0, [&RWImg];",
      {
     brig_inst_base_size,
     BrigEInstBase,
@@ -44,7 +44,7 @@ struct QueryTest query_pair[8] = {
   },
 //query_pair[2]
   {
-    "query_depth_u32 $s0, [&namedRWImg1];",
+    "query_depth_u32 $s0, [&RWImg];",
      {
     brig_inst_base_size,
     BrigEInstBase,
@@ -56,7 +56,7 @@ struct QueryTest query_pair[8] = {
   },
 //query_pair[3]
   {
-    "query_array_b32 $s1, [%RWImg3];",
+    "query_array_b32 $s1, [%RWImg];",
     {
     brig_inst_base_size,
     BrigEInstBase,
@@ -68,7 +68,7 @@ struct QueryTest query_pair[8] = {
   },
 //query_pair[4]
   {
-    "query_normalized_b32 $s0, [&namedRWImg1];",
+    "query_normalized_b32 $s0, [&RWImg];",
     {
     brig_inst_base_size,
     BrigEInstBase,
@@ -80,7 +80,7 @@ struct QueryTest query_pair[8] = {
   },
 //query_pair[5]
   {
-    "query_filtering_b32  $s0, [&namedRWImg1];",
+    "query_filtering_b32  $s0, [&RWImg];",
     {
     brig_inst_base_size,
     BrigEInstBase,
@@ -92,7 +92,7 @@ struct QueryTest query_pair[8] = {
   },
 //query_pair[6]
   {
-    "query_order_b32 $s1, [%RWImg3];",
+    "query_order_b32 $s1, [%RWImg];",
     {
     brig_inst_base_size,
     BrigEInstBase,
@@ -104,7 +104,7 @@ struct QueryTest query_pair[8] = {
   },
 //query_pair[7]
   {
-    "query_data_b32 $s1, [%RWImg3];",
+    "query_data_b32 $s1, [%RWImg];",
     {
     brig_inst_base_size,
     BrigEInstBase,

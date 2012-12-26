@@ -458,6 +458,126 @@ TEST_P(TestInstruction1DebugTrap, DebugTrap){
 INSTANTIATE_TEST_CASE_P(CodegenTest,
                         TestInstruction1DebugTrap,
                         testing::Range(0,2));
+TEST_P(TestInstruction1Feclearexcept, Feclearexcept){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(instruction1_feclearexcept_pair[n].str);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction1(context));
+
+  BrigInstBase getBase;
+  BrigOperandImmed getImm;
+  context->get_code(code_offset, &getBase);
+  BrigInstBase ref = instruction1_feclearexcept_pair[n].ref;
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  context->get_operand(operand_offset, &getImm);
+  // BrigOperandImmed
+  EXPECT_EQ(immed_size, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(0, getImm.bits.u);
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(CodegenTest,
+                        TestInstruction1Feclearexcept,
+                        testing::Range(0,1));
+
+TEST_P(TestInstruction1Fegetexcept, Fegetexcept){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(instruction1_fegetexcept_pair[n].str);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction1(context));
+
+  BrigInstBase getBase;
+  BrigOperandReg getReg;
+  context->get_code(code_offset, &getBase);
+  BrigInstBase ref = instruction1_fegetexcept_pair[n].ref;
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  context->get_operand(operand_offset, &getReg);
+  // BrigOperandReg
+  EXPECT_EQ(reg_size, getReg.size);
+  EXPECT_EQ(BrigEOperandReg, getReg.kind);
+  EXPECT_EQ(Brigb32, getReg.type);
+  EXPECT_EQ(0, getReg.reserved);
+  EXPECT_EQ(string_offset, getReg.s_name);
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(CodegenTest,
+                        TestInstruction1Fegetexcept,
+                        testing::Range(0,1));
+
+TEST_P(TestInstruction1Fesetexcept, Fesetexcept){
+  context->set_error_reporter(main_reporter);
+  context->clear_context();
+
+  int n = GetParam();
+  Lexer* lexer = new Lexer(instruction1_fesetexcept_pair[n].str);
+  context->token_to_scan = lexer->get_next_token();
+
+  EXPECT_EQ(0, Instruction1(context));
+
+  BrigInstBase getBase;
+  BrigOperandImmed getImm;
+  context->get_code(code_offset, &getBase);
+  BrigInstBase ref = instruction1_fesetexcept_pair[n].ref;
+
+  EXPECT_EQ(ref.size, getBase.size);
+  EXPECT_EQ(ref.kind, getBase.kind);
+  EXPECT_EQ(ref.opcode, getBase.opcode);
+  EXPECT_EQ(ref.packing, getBase.packing);
+  EXPECT_EQ(ref.type, getBase.type);
+  EXPECT_EQ(ref.o_operands[0], getBase.o_operands[0]);
+  EXPECT_EQ(ref.o_operands[1], getBase.o_operands[1]);
+  EXPECT_EQ(ref.o_operands[2], getBase.o_operands[2]);
+  EXPECT_EQ(ref.o_operands[3], getBase.o_operands[3]);
+  EXPECT_EQ(ref.o_operands[4], getBase.o_operands[4]);
+
+  context->get_operand(operand_offset, &getImm);
+  // BrigOperandImmed
+  EXPECT_EQ(immed_size, getImm.size);
+  EXPECT_EQ(BrigEOperandImmed, getImm.kind);
+  EXPECT_EQ(Brigb32, getImm.type);
+  EXPECT_EQ(1, getImm.bits.u);
+
+  delete lexer;
+}
+
+INSTANTIATE_TEST_CASE_P(CodegenTest,
+                        TestInstruction1Fesetexcept,
+                        testing::Range(0,1));
 
 }  // namespace brig
 }  // namespace hsa

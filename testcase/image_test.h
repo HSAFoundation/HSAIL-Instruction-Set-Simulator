@@ -411,7 +411,7 @@ struct ImageNoRetTest{
 struct ImageNoRetTest imagenoret_add_pair[6] = {
 //imagenoret_add_pair[0]
   {
-    "atomicNoRet_image_add_1d_u32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_add_1d_u32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -433,7 +433,7 @@ struct ImageNoRetTest imagenoret_add_pair[6] = {
   },
 //imagenoret_add_pair[1]
   {
-    "atomicNoRet_image_add_2d_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_add_2d_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -455,7 +455,7 @@ struct ImageNoRetTest imagenoret_add_pair[6] = {
   },
 //imagenoret_add_pair[2]
   {
-    "atomicNoRet_image_add_3d_u64 [&namedRWImg2], ($d2, $d3, $d4, $d5), $d6;",
+    "atomicNoRet_image_add_3d_u64 [&RWImg], ($d2, $d3, $d4, $d5), $d6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -477,7 +477,7 @@ struct ImageNoRetTest imagenoret_add_pair[6] = {
   },
 //imagenoret_add_pair[3]
   {
-    "atomicNoRet_image_add_acq_1db_u32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_add_acq_1db_u32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -499,7 +499,7 @@ struct ImageNoRetTest imagenoret_add_pair[6] = {
   },
 //imagenoret_add_pair[4]
   {
-    "atomicNoRet_image_add_ar_1da_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_add_ar_1da_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -521,7 +521,7 @@ struct ImageNoRetTest imagenoret_add_pair[6] = {
   },
 //imagenoret_add_pair[5]
   {
-    "atomicNoRet_image_add_2da_u64 [&namedRWImg2], ($d2, $d3, $d4, $d5), $d6;",
+    "atomicNoRet_image_add_2da_u64 [&RWImg], ($d2, $d3, $d4, $d5), $d6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -551,7 +551,7 @@ class TestImageNoRetSub : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_sub_pair[6] = {
 //imagenoret_sub_pair[0]
   {
-    "atomicNoRet_image_sub_1d_u32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_sub_1d_u32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -573,7 +573,7 @@ struct ImageNoRetTest imagenoret_sub_pair[6] = {
   },
 //imagenoret_sub_pair[1]
   {
-    "atomicNoRet_image_sub_2d_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_sub_2d_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -595,7 +595,7 @@ struct ImageNoRetTest imagenoret_sub_pair[6] = {
   },
 //imagenoret_sub_pair[2]
   {
-    "atomicNoRet_image_sub_3d_u64 [&namedRWImg2], ($d2, $d3, $d4, $d5), $d6;",
+    "atomicNoRet_image_sub_3d_u64 [&RWImg], ($d2, $d3, $d4, $d5), $d6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -617,7 +617,7 @@ struct ImageNoRetTest imagenoret_sub_pair[6] = {
   },
 //imagenoret_sub_pair[3]
   {
-    "atomicNoRet_image_sub_acq_1db_u32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_sub_acq_1db_u32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -639,7 +639,7 @@ struct ImageNoRetTest imagenoret_sub_pair[6] = {
   },
 //imagenoret_sub_pair[4]
   {
-    "atomicNoRet_image_sub_ar_1da_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_sub_ar_1da_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -661,7 +661,7 @@ struct ImageNoRetTest imagenoret_sub_pair[6] = {
   },
 //imagenoret_sub_pair[5]
   {
-    "atomicNoRet_image_sub_2da_u64 [&namedRWImg2], ($d2, $d3, $d4, $d5), $d6;",
+    "atomicNoRet_image_sub_2da_u64 [&RWImg], ($d2, $d3, $d4, $d5), $d6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -692,7 +692,7 @@ class TestImageNoRetOr : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_or_pair[6] = {
 //imagenoret_or_pair[0]
   {
-    "atomicNoRet_image_or_1d_b32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_or_1d_b32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -714,7 +714,7 @@ struct ImageNoRetTest imagenoret_or_pair[6] = {
   },
 //imagenoret_or_pair[1]
   {
-    "atomicNoRet_image_or_2d_b32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_or_2d_b32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -736,7 +736,7 @@ struct ImageNoRetTest imagenoret_or_pair[6] = {
   },
 //imagenoret_or_pair[2]
   {
-    "atomicNoRet_image_or_3d_b32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_or_3d_b32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -758,7 +758,7 @@ struct ImageNoRetTest imagenoret_or_pair[6] = {
   },
 //imagenoret_or_pair[3]
   {
-    "atomicNoRet_image_or_acq_1db_b32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_or_acq_1db_b32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -780,7 +780,7 @@ struct ImageNoRetTest imagenoret_or_pair[6] = {
   },
 //imagenoret_or_pair[4]
   {
-    "atomicNoRet_image_or_ar_1da_b32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_or_ar_1da_b32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -802,7 +802,7 @@ struct ImageNoRetTest imagenoret_or_pair[6] = {
   },
 //imagenoret_or_pair[5]
   {
-    "atomicNoRet_image_or_2da_b32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_or_2da_b32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -832,7 +832,7 @@ class TestImageNoRetAnd : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_and_pair[6] = {
 //imagenoret_and_pair[0]
   {
-    "atomicNoRet_image_and_1d_b32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_and_1d_b32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -854,7 +854,7 @@ struct ImageNoRetTest imagenoret_and_pair[6] = {
   },
 //imagenoret_and_pair[1]
   {
-    "atomicNoRet_image_and_2d_b32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_and_2d_b32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -876,7 +876,7 @@ struct ImageNoRetTest imagenoret_and_pair[6] = {
   },
 //imagenoret_and_pair[2]
   {
-    "atomicNoRet_image_and_3d_b32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_and_3d_b32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -898,7 +898,7 @@ struct ImageNoRetTest imagenoret_and_pair[6] = {
   },
 //imagenoret_and_pair[3]
   {
-    "atomicNoRet_image_and_acq_1db_b32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_and_acq_1db_b32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -920,7 +920,7 @@ struct ImageNoRetTest imagenoret_and_pair[6] = {
   },
 //imagenoret_and_pair[4]
   {
-    "atomicNoRet_image_and_ar_1da_b32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_and_ar_1da_b32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -942,7 +942,7 @@ struct ImageNoRetTest imagenoret_and_pair[6] = {
   },
 //imagenoret_and_pair[5]
   {
-    "atomicNoRet_image_and_2da_b32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_and_2da_b32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -972,7 +972,7 @@ class TestImageNoRetXor : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_xor_pair[6] = {
 //imagenoret_xor_pair[0]
   {
-    "atomicNoRet_image_xor_1d_b32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_xor_1d_b32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -994,7 +994,7 @@ struct ImageNoRetTest imagenoret_xor_pair[6] = {
   },
 //imagenoret_xor_pair[1]
   {
-    "atomicNoRet_image_xor_2d_b32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_xor_2d_b32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1016,7 +1016,7 @@ struct ImageNoRetTest imagenoret_xor_pair[6] = {
   },
 //imagenoret_xor_pair[2]
   {
-    "atomicNoRet_image_xor_3d_b32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_xor_3d_b32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1038,7 +1038,7 @@ struct ImageNoRetTest imagenoret_xor_pair[6] = {
   },
 //imagenoret_xor_pair[3]
   {
-    "atomicNoRet_image_xor_acq_1db_b32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_xor_acq_1db_b32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1060,7 +1060,7 @@ struct ImageNoRetTest imagenoret_xor_pair[6] = {
   },
 //imagenoret_xor_pair[4]
   {
-    "atomicNoRet_image_xor_ar_1da_b32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_xor_ar_1da_b32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1082,7 +1082,7 @@ struct ImageNoRetTest imagenoret_xor_pair[6] = {
   },
 //imagenoret_xor_pair[5]
   {
-    "atomicNoRet_image_xor_2da_b32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_xor_2da_b32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1112,7 +1112,7 @@ class TestImageNoRetInc : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_inc_pair[6] = {
 //imagenoret_inc_pair[0]
   {
-    "atomicNoRet_image_inc_1d_s32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_inc_1d_s32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1134,7 +1134,7 @@ struct ImageNoRetTest imagenoret_inc_pair[6] = {
   },
 //imagenoret_inc_pair[1]
   {
-    "atomicNoRet_image_inc_2d_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_inc_2d_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1156,7 +1156,7 @@ struct ImageNoRetTest imagenoret_inc_pair[6] = {
   },
 //imagenoret_inc_pair[2]
   {
-    "atomicNoRet_image_inc_3d_s32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_inc_3d_s32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1178,7 +1178,7 @@ struct ImageNoRetTest imagenoret_inc_pair[6] = {
   },
 //imagenoret_inc_pair[3]
   {
-    "atomicNoRet_image_inc_acq_1db_s32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_inc_acq_1db_s32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1200,7 +1200,7 @@ struct ImageNoRetTest imagenoret_inc_pair[6] = {
   },
 //imagenoret_inc_pair[4]
   {
-    "atomicNoRet_image_inc_ar_1da_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_inc_ar_1da_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1222,7 +1222,7 @@ struct ImageNoRetTest imagenoret_inc_pair[6] = {
   },
 //imagenoret_inc_pair[5]
   {
-    "atomicNoRet_image_inc_2da_s32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_inc_2da_s32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1252,7 +1252,7 @@ class TestImageNoRetDec : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_dec_pair[6] = {
 //imagenoret_dec_pair[0]
   {
-    "atomicNoRet_image_dec_1d_s32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_dec_1d_s32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1274,7 +1274,7 @@ struct ImageNoRetTest imagenoret_dec_pair[6] = {
   },
 //imagenoret_dec_pair[1]
   {
-    "atomicNoRet_image_dec_2d_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_dec_2d_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1296,7 +1296,7 @@ struct ImageNoRetTest imagenoret_dec_pair[6] = {
   },
 //imagenoret_dec_pair[2]
   {
-    "atomicNoRet_image_dec_3d_s32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_dec_3d_s32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1318,7 +1318,7 @@ struct ImageNoRetTest imagenoret_dec_pair[6] = {
   },
 //imagenoret_dec_pair[3]
   {
-    "atomicNoRet_image_dec_acq_1db_s32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_dec_acq_1db_s32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1340,7 +1340,7 @@ struct ImageNoRetTest imagenoret_dec_pair[6] = {
   },
 //imagenoret_dec_pair[4]
   {
-    "atomicNoRet_image_dec_ar_1da_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_dec_ar_1da_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1362,7 +1362,7 @@ struct ImageNoRetTest imagenoret_dec_pair[6] = {
   },
 //imagenoret_dec_pair[5]
   {
-    "atomicNoRet_image_dec_2da_s32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_dec_2da_s32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1392,7 +1392,7 @@ class TestImageNoRetMax : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_max_pair[6] = {
 //imagenoret_max_pair[0]
   {
-    "atomicNoRet_image_max_1d_s32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_max_1d_s32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1414,7 +1414,7 @@ struct ImageNoRetTest imagenoret_max_pair[6] = {
   },
 //imagenoret_max_pair[1]
   {
-    "atomicNoRet_image_max_2d_u32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_max_2d_u32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1436,7 +1436,7 @@ struct ImageNoRetTest imagenoret_max_pair[6] = {
   },
 //imagenoret_max_pair[2]
   {
-    "atomicNoRet_image_max_3d_s32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_max_3d_s32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1458,7 +1458,7 @@ struct ImageNoRetTest imagenoret_max_pair[6] = {
   },
 //imagenoret_max_pair[3]
   {
-    "atomicNoRet_image_max_acq_1db_u32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_max_acq_1db_u32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1480,7 +1480,7 @@ struct ImageNoRetTest imagenoret_max_pair[6] = {
   },
 //imagenoret_max_pair[4]
   {
-    "atomicNoRet_image_max_ar_1da_s32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_max_ar_1da_s32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1502,7 +1502,7 @@ struct ImageNoRetTest imagenoret_max_pair[6] = {
   },
 //imagenoret_max_pair[5]
   {
-    "atomicNoRet_image_max_2da_u32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_max_2da_u32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1532,7 +1532,7 @@ class TestImageNoRetMin : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_min_pair[6] = {
 //imagenoret_min_pair[0]
   {
-    "atomicNoRet_image_min_1d_s32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_min_1d_s32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1554,7 +1554,7 @@ struct ImageNoRetTest imagenoret_min_pair[6] = {
   },
 //imagenoret_min_pair[1]
   {
-    "atomicNoRet_image_min_2d_u32 [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomicNoRet_image_min_2d_u32 [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1576,7 +1576,7 @@ struct ImageNoRetTest imagenoret_min_pair[6] = {
   },
 //imagenoret_min_pair[2]
   {
-    "atomicNoRet_image_min_3d_s32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomicNoRet_image_min_3d_s32 [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1598,7 +1598,7 @@ struct ImageNoRetTest imagenoret_min_pair[6] = {
   },
 //imagenoret_min_pair[3]
   {
-    "atomicNoRet_image_min_acq_1db_u32 [&namedRWImg2], $s2, $s3;",
+    "atomicNoRet_image_min_acq_1db_u32 [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1620,7 +1620,7 @@ struct ImageNoRetTest imagenoret_min_pair[6] = {
   },
 //imagenoret_min_pair[4]
   {
-    "atomicNoRet_image_min_ar_1da_s32 [&namedRWImg2], ($s2, $s3), 1;",
+    "atomicNoRet_image_min_ar_1da_s32 [&RWImg], ($s2, $s3), 1;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1642,7 +1642,7 @@ struct ImageNoRetTest imagenoret_min_pair[6] = {
   },
 //imagenoret_min_pair[5]
   {
-    "atomicNoRet_image_min_2da_u32 [&namedRWImg2], ($s2, $s3, $s4, $s5), WAVESIZE;",
+    "atomicNoRet_image_min_2da_u32 [&RWImg], ($s2, $s3, $s4, $s5), WAVESIZE;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1672,7 +1672,7 @@ class TestImageNoRetCas : public ::testing::TestWithParam<int>
 struct ImageNoRetTest imagenoret_cas_pair[6] = {
 //imagenoret_cas_pair[0]
   {
-    "atomicNoRet_image_cas_1d_b32 [&namedRWImg2], $s2, $s3, $s10;",
+    "atomicNoRet_image_cas_1d_b32 [&RWImg], $s2, $s3, $s10;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1694,7 +1694,7 @@ struct ImageNoRetTest imagenoret_cas_pair[6] = {
   },
 //imagenoret_cas_pair[1]
   {
-    "atomicNoRet_image_cas_2d_b32 [&namedRWImg2], ($s2, $s3), $s4, $s10;",
+    "atomicNoRet_image_cas_2d_b32 [&RWImg], ($s2, $s3), $s4, $s10;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1716,7 +1716,7 @@ struct ImageNoRetTest imagenoret_cas_pair[6] = {
   },
 //imagenoret_cas_pair[2]
   {
-    "atomicNoRet_image_cas_3d_b32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6, $s10;",
+    "atomicNoRet_image_cas_3d_b32 [&RWImg], ($s2, $s3, $s4, $s5), $s6, $s10;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1738,7 +1738,7 @@ struct ImageNoRetTest imagenoret_cas_pair[6] = {
   },
 //imagenoret_cas_pair[3]
   {
-    "atomicNoRet_image_cas_acq_1db_b32 [&namedRWImg2], $s2, $s3, $s10;",
+    "atomicNoRet_image_cas_acq_1db_b32 [&RWImg], $s2, $s3, $s10;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1760,7 +1760,7 @@ struct ImageNoRetTest imagenoret_cas_pair[6] = {
   },
 //imagenoret_cas_pair[4]
   {
-    "atomicNoRet_image_cas_ar_1da_b32 [&namedRWImg2], ($s2, $s3), $s4, 1;",
+    "atomicNoRet_image_cas_ar_1da_b32 [&RWImg], ($s2, $s3), $s4, 1;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -1782,7 +1782,7 @@ struct ImageNoRetTest imagenoret_cas_pair[6] = {
   },
 //imagenoret_Cas_pair[5]
   {
-    "atomicNoRet_image_cas_2da_b32 [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6, WAVESIZE;",
+    "atomicNoRet_image_cas_2da_b32 [&RWImg], ($s2, $s3, $s4, $s5), $s6, WAVESIZE;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2740,7 +2740,7 @@ struct ImageRetTest{
 struct ImageRetTest imageret_add_pair[6] = {
 //imageret_add_pair[0]
   {
-    "atomic_image_add_1d_u32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_add_1d_u32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2762,7 +2762,7 @@ struct ImageRetTest imageret_add_pair[6] = {
   },
 //imageret_add_pair[1]
   {
-    "atomic_image_add_2d_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_add_2d_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2784,7 +2784,7 @@ struct ImageRetTest imageret_add_pair[6] = {
   },
 //imageret_add_pair[2]
   {
-    "atomic_image_add_3d_u64 $d1, [&namedRWImg2], ($d2, $d3, $d4, $d5), $d6;",
+    "atomic_image_add_3d_u64 $d1, [&RWImg], ($d2, $d3, $d4, $d5), $d6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2806,7 +2806,7 @@ struct ImageRetTest imageret_add_pair[6] = {
   },
 //imageret_add_pair[3]
   {
-    "atomic_image_add_acq_1db_u32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_add_acq_1db_u32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2828,7 +2828,7 @@ struct ImageRetTest imageret_add_pair[6] = {
   },
 //imageret_add_pair[4]
   {
-    "atomic_image_add_ar_1da_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_add_ar_1da_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2850,7 +2850,7 @@ struct ImageRetTest imageret_add_pair[6] = {
   },
 //imageret_add_pair[5]
   {
-    "atomic_image_add_2da_u64 $d1, [&namedRWImg2], ($d2, $d3, $d4, $d5), $d6;",
+    "atomic_image_add_2da_u64 $d1, [&RWImg], ($d2, $d3, $d4, $d5), $d6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2880,7 +2880,7 @@ class TestImageRetSub : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_sub_pair[6] = {
 //imageret_sub_pair[0]
   {
-    "atomic_image_sub_1d_u32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_sub_1d_u32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2902,7 +2902,7 @@ struct ImageRetTest imageret_sub_pair[6] = {
   },
 //imageret_sub_pair[1]
   {
-    "atomic_image_sub_2d_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_sub_2d_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2924,7 +2924,7 @@ struct ImageRetTest imageret_sub_pair[6] = {
   },
 //imageret_sub_pair[2]
   {
-    "atomic_image_sub_3d_u64 $d1, [&namedRWImg2], ($d2, $d3, $d4, $d5), $d6;",
+    "atomic_image_sub_3d_u64 $d1, [&RWImg], ($d2, $d3, $d4, $d5), $d6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2946,7 +2946,7 @@ struct ImageRetTest imageret_sub_pair[6] = {
   },
 //imageret_sub_pair[3]
   {
-    "atomic_image_sub_acq_1db_u32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_sub_acq_1db_u32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2968,7 +2968,7 @@ struct ImageRetTest imageret_sub_pair[6] = {
   },
 //imageret_sub_pair[4]
   {
-    "atomic_image_sub_ar_1da_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_sub_ar_1da_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -2990,7 +2990,7 @@ struct ImageRetTest imageret_sub_pair[6] = {
   },
 //imageret_sub_pair[5]
   {
-    "atomic_image_sub_2da_u64 $d1, [&namedRWImg2], ($d2, $d3, $d4, $d5), $d6;",
+    "atomic_image_sub_2da_u64 $d1, [&RWImg], ($d2, $d3, $d4, $d5), $d6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3021,7 +3021,7 @@ class TestImageRetOr : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_or_pair[6] = {
 //imageret_or_pair[0]
   {
-    "atomic_image_or_1d_b32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_or_1d_b32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3043,7 +3043,7 @@ struct ImageRetTest imageret_or_pair[6] = {
   },
 //imageret_or_pair[1]
   {
-    "atomic_image_or_2d_b32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_or_2d_b32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3065,7 +3065,7 @@ struct ImageRetTest imageret_or_pair[6] = {
   },
 //imageret_or_pair[2]
   {
-    "atomic_image_or_3d_b32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_or_3d_b32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3087,7 +3087,7 @@ struct ImageRetTest imageret_or_pair[6] = {
   },
 //imageret_or_pair[3]
   {
-    "atomic_image_or_acq_1db_b32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_or_acq_1db_b32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3109,7 +3109,7 @@ struct ImageRetTest imageret_or_pair[6] = {
   },
 //imageret_or_pair[4]
   {
-    "atomic_image_or_ar_1da_b32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_or_ar_1da_b32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3131,7 +3131,7 @@ struct ImageRetTest imageret_or_pair[6] = {
   },
 //imageret_or_pair[5]
   {
-    "atomic_image_or_2da_b32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_or_2da_b32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3161,7 +3161,7 @@ class TestImageRetAnd : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_and_pair[6] = {
 //imageret_and_pair[0]
   {
-    "atomic_image_and_1d_b32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_and_1d_b32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3183,7 +3183,7 @@ struct ImageRetTest imageret_and_pair[6] = {
   },
 //imageret_and_pair[1]
   {
-    "atomic_image_and_2d_b32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_and_2d_b32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3205,7 +3205,7 @@ struct ImageRetTest imageret_and_pair[6] = {
   },
 //imageret_and_pair[2]
   {
-    "atomic_image_and_3d_b32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_and_3d_b32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3227,7 +3227,7 @@ struct ImageRetTest imageret_and_pair[6] = {
   },
 //imageret_and_pair[3]
   {
-    "atomic_image_and_acq_1db_b32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_and_acq_1db_b32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3249,7 +3249,7 @@ struct ImageRetTest imageret_and_pair[6] = {
   },
 //imageret_and_pair[4]
   {
-    "atomic_image_and_ar_1da_b32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_and_ar_1da_b32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3271,7 +3271,7 @@ struct ImageRetTest imageret_and_pair[6] = {
   },
 //imageret_and_pair[5]
   {
-    "atomic_image_and_2da_b32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_and_2da_b32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3301,7 +3301,7 @@ class TestImageRetXor : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_xor_pair[6] = {
 //imageret_xor_pair[0]
   {
-    "atomic_image_xor_1d_b32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_xor_1d_b32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3323,7 +3323,7 @@ struct ImageRetTest imageret_xor_pair[6] = {
   },
 //imageret_xor_pair[1]
   {
-    "atomic_image_xor_2d_b32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_xor_2d_b32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3345,7 +3345,7 @@ struct ImageRetTest imageret_xor_pair[6] = {
   },
 //imageret_xor_pair[2]
   {
-    "atomic_image_xor_3d_b32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_xor_3d_b32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3367,7 +3367,7 @@ struct ImageRetTest imageret_xor_pair[6] = {
   },
 //imageret_xor_pair[3]
   {
-    "atomic_image_xor_acq_1db_b32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_xor_acq_1db_b32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3389,7 +3389,7 @@ struct ImageRetTest imageret_xor_pair[6] = {
   },
 //imageret_xor_pair[4]
   {
-    "atomic_image_xor_ar_1da_b32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_xor_ar_1da_b32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3411,7 +3411,7 @@ struct ImageRetTest imageret_xor_pair[6] = {
   },
 //imageret_xor_pair[5]
   {
-    "atomic_image_xor_2da_b32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_xor_2da_b32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3441,7 +3441,7 @@ class TestImageRetInc : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_inc_pair[6] = {
 //imageret_inc_pair[0]
   {
-    "atomic_image_inc_1d_s32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_inc_1d_s32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3463,7 +3463,7 @@ struct ImageRetTest imageret_inc_pair[6] = {
   },
 //imageret_inc_pair[1]
   {
-    "atomic_image_inc_2d_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_inc_2d_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3485,7 +3485,7 @@ struct ImageRetTest imageret_inc_pair[6] = {
   },
 //imageret_inc_pair[2]
   {
-    "atomic_image_inc_3d_s32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_inc_3d_s32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3507,7 +3507,7 @@ struct ImageRetTest imageret_inc_pair[6] = {
   },
 //imageret_inc_pair[3]
   {
-    "atomic_image_inc_acq_1db_s32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_inc_acq_1db_s32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3529,7 +3529,7 @@ struct ImageRetTest imageret_inc_pair[6] = {
   },
 //imageret_inc_pair[4]
   {
-    "atomic_image_inc_ar_1da_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_inc_ar_1da_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3551,7 +3551,7 @@ struct ImageRetTest imageret_inc_pair[6] = {
   },
 //imageret_inc_pair[5]
   {
-    "atomic_image_inc_2da_s32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_inc_2da_s32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3581,7 +3581,7 @@ class TestImageRetDec : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_dec_pair[6] = {
 //imageret_dec_pair[0]
   {
-    "atomic_image_dec_1d_s32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_dec_1d_s32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3603,7 +3603,7 @@ struct ImageRetTest imageret_dec_pair[6] = {
   },
 //imageret_dec_pair[1]
   {
-    "atomic_image_dec_2d_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_dec_2d_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3625,7 +3625,7 @@ struct ImageRetTest imageret_dec_pair[6] = {
   },
 //imageret_dec_pair[2]
   {
-    "atomic_image_dec_3d_s32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_dec_3d_s32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3647,7 +3647,7 @@ struct ImageRetTest imageret_dec_pair[6] = {
   },
 //imageret_dec_pair[3]
   {
-    "atomic_image_dec_acq_1db_s32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_dec_acq_1db_s32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3669,7 +3669,7 @@ struct ImageRetTest imageret_dec_pair[6] = {
   },
 //imageret_dec_pair[4]
   {
-    "atomic_image_dec_ar_1da_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_dec_ar_1da_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3691,7 +3691,7 @@ struct ImageRetTest imageret_dec_pair[6] = {
   },
 //imageret_dec_pair[5]
   {
-    "atomic_image_dec_2da_s32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_dec_2da_s32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3721,7 +3721,7 @@ class TestImageRetMax : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_max_pair[6] = {
 //imageret_max_pair[0]
   {
-    "atomic_image_max_1d_s32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_max_1d_s32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3743,7 +3743,7 @@ struct ImageRetTest imageret_max_pair[6] = {
   },
 //imageret_max_pair[1]
   {
-    "atomic_image_max_2d_u32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_max_2d_u32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3765,7 +3765,7 @@ struct ImageRetTest imageret_max_pair[6] = {
   },
 //imageret_max_pair[2]
   {
-    "atomic_image_max_3d_s32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_max_3d_s32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3787,7 +3787,7 @@ struct ImageRetTest imageret_max_pair[6] = {
   },
 //imageret_max_pair[3]
   {
-    "atomic_image_max_acq_1db_u32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_max_acq_1db_u32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3809,7 +3809,7 @@ struct ImageRetTest imageret_max_pair[6] = {
   },
 //imageret_max_pair[4]
   {
-    "atomic_image_max_ar_1da_s32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_max_ar_1da_s32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3831,7 +3831,7 @@ struct ImageRetTest imageret_max_pair[6] = {
   },
 //imageret_max_pair[5]
   {
-    "atomic_image_max_2da_u32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_max_2da_u32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3861,7 +3861,7 @@ class TestImageRetMin : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_min_pair[6] = {
 //imageret_max_pair[0]
   {
-    "atomic_image_min_1d_s32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_min_1d_s32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3883,7 +3883,7 @@ struct ImageRetTest imageret_min_pair[6] = {
   },
 //imageret_min_pair[1]
   {
-    "atomic_image_min_2d_u32 $s1, [&namedRWImg2], ($s2, $s3), $s4;",
+    "atomic_image_min_2d_u32 $s1, [&RWImg], ($s2, $s3), $s4;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3905,7 +3905,7 @@ struct ImageRetTest imageret_min_pair[6] = {
   },
 //imageret_min_pair[2]
   {
-    "atomic_image_min_3d_s32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6;",
+    "atomic_image_min_3d_s32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3927,7 +3927,7 @@ struct ImageRetTest imageret_min_pair[6] = {
   },
 //imageret_min_pair[3]
   {
-    "atomic_image_min_acq_1db_u32 $s1, [&namedRWImg2], $s2, $s3;",
+    "atomic_image_min_acq_1db_u32 $s1, [&RWImg], $s2, $s3;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3949,7 +3949,7 @@ struct ImageRetTest imageret_min_pair[6] = {
   },
 //imageret_min_pair[4]
   {
-    "atomic_image_min_ar_1da_s32 $s1, [&namedRWImg2], ($s2, $s3), 1;",
+    "atomic_image_min_ar_1da_s32 $s1, [&RWImg], ($s2, $s3), 1;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -3971,7 +3971,7 @@ struct ImageRetTest imageret_min_pair[6] = {
   },
 //imageret_min_pair[5]
   {
-    "atomic_image_min_2da_u32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), WAVESIZE;",
+    "atomic_image_min_2da_u32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), WAVESIZE;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -4001,7 +4001,7 @@ class TestImageRetCas : public ::testing::TestWithParam<int>
 struct ImageRetTest imageret_cas_pair[6] = {
 //imageret_cas_pair[0]
   {
-    "atomic_image_cas_1d_b32 $s1, [&namedRWImg2], $s2, $s3, $s10;",
+    "atomic_image_cas_1d_b32 $s1, [&RWImg], $s2, $s3, $s10;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -4023,7 +4023,7 @@ struct ImageRetTest imageret_cas_pair[6] = {
   },
 //imageret_cas_pair[1]
   {
-    "atomic_image_cas_2d_b32 $s1, [&namedRWImg2], ($s2, $s3), $s4, $s10;",
+    "atomic_image_cas_2d_b32 $s1, [&RWImg], ($s2, $s3), $s4, $s10;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -4045,7 +4045,7 @@ struct ImageRetTest imageret_cas_pair[6] = {
   },
 //imageret_cas_pair[2]
   {
-    "atomic_image_cas_3d_b32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6, $s10;",
+    "atomic_image_cas_3d_b32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6, $s10;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -4067,7 +4067,7 @@ struct ImageRetTest imageret_cas_pair[6] = {
   },
 //imageret_cas_pair[3]
   {
-    "atomic_image_cas_acq_1db_b32 $s1, [&namedRWImg2], $s2, $s3, $s10;",
+    "atomic_image_cas_acq_1db_b32 $s1, [&RWImg], $s2, $s3, $s10;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -4089,7 +4089,7 @@ struct ImageRetTest imageret_cas_pair[6] = {
   },
 //imageret_cas_pair[4]
   {
-    "atomic_image_cas_ar_1da_b32 $s1, [&namedRWImg2], ($s2, $s3), $s4, 1;",
+    "atomic_image_cas_ar_1da_b32 $s1, [&RWImg], ($s2, $s3), $s4, 1;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,
@@ -4111,7 +4111,7 @@ struct ImageRetTest imageret_cas_pair[6] = {
   },
 //imageret_Cas_pair[5]
   {
-    "atomic_image_cas_2da_b32 $s1, [&namedRWImg2], ($s2, $s3, $s4, $s5), $s6, WAVESIZE;",
+    "atomic_image_cas_2da_b32 $s1, [&RWImg], ($s2, $s3, $s4, $s5), $s6, WAVESIZE;",
     {
       brig_inst_atomic_image_size,
       BrigEInstAtomicImage,

@@ -263,6 +263,8 @@ class Context {
     uint32_t get_dim() const;
     bool get_isArray() const;
     BrigStorageClass32_t get_storageClass() const;
+    uint16_t get_major() const { return major;}
+    uint16_t get_minor() const { return minor;}
     
     // set context
     void set_alu_modifier(BrigAluModifier modifier);
@@ -276,6 +278,8 @@ class Context {
     void set_isArray(bool is_array);
     void set_bdf_offset(BrigdOffset32_t offset) { this->current_bdf_offset = offset;};
     void set_storageClass(BrigStorageClass32_t storageClass);
+    void set_major(uint16_t major) {this->major = major;}
+    void set_minor(uint16_t minor) {this->minor = minor;}
     BrigdOffset32_t get_bdf_offset(){ return this->current_bdf_offset;};
     
     // get current offset
@@ -308,7 +312,8 @@ class Context {
     unsigned int token_to_scan;
     int               yycolno;
     TerminalType      token_type;
-    bool  valid_string;
+    bool valid_string;
+    bool isFirstVersion;
 
     union token_val {
       unsigned long long          int_val;
@@ -346,6 +351,8 @@ class Context {
     BrigProfile16_t profile;
     BrigdOffset32_t last_directive_offset;
     BrigdOffset32_t current_bdf_offset;
+    uint16_t major;
+    uint16_t minor;
     
     /* Body Statement specific variables */
     uint16_t alignment;

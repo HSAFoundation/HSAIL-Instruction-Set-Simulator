@@ -78,7 +78,7 @@ struct StTest st_pair[30] = {
   },
 //st_pair[4]
   {
-    "st_s32 $s1, [&array][4];",
+    "st_s32 $s1, [&x][4];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -213,7 +213,7 @@ struct StTest st_pair[30] = {
   },
 //st_pair[13]
   {
-    "st_group_s32 $s1, [&array][4];",
+    "st_group_s32 $s1, [&x][4];",
      {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -534,7 +534,7 @@ struct StTest stim_pair[30] = {
   },
 //stim_pair[4]
   {
-    "st_rel_s32 1, [&array][4];",
+    "st_rel_s32 1, [&x][4];",
      {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -669,7 +669,7 @@ struct StTest stim_pair[30] = {
   },
 //stim_pair[13]
   {
-    "st_equiv(2)_s32 1, [&array][4];",
+    "st_equiv(2)_s32 1, [&x][4];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1010,7 +1010,7 @@ struct StTest stv2_pair[30] = {
   },
 //stv2_pair[5]
   {
-    "st_v2_group_rel_s32 ($s1,$s2), [&array][4];",
+    "st_v2_group_rel_s32 ($s1,$s2), [&x][4];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1138,7 +1138,7 @@ struct StTest stv2_pair[30] = {
   },
 //stv2_pair[13]
   {
-    "st_v2_group_equiv(2)_s32 ($s1,$s2), [&array][4];",
+    "st_v2_group_equiv(2)_s32 ($s1,$s2), [&x][4];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1480,7 +1480,7 @@ struct StTest stv4_pair[30] = {
   },
 //stv4_pair[4]
   {
-    "st_v4_rel_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&array][4];",
+    "st_v4_rel_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&x][4];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,
@@ -1624,7 +1624,7 @@ struct StTest stv4_pair[30] = {
   },
 //stv4_pair[13] 
   {
-    "st_v4_group_rel_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&array][4];",
+    "st_v4_group_rel_equiv(2)_s32 ($s1,$s2,$s3,$s4), [&x][4];",
     {
     brig_inst_ldst_size,
     BrigEInstLdSt,

@@ -15,6 +15,8 @@ TEST_P(OperationLd, BrigLd){
   int n = GetParam();
   Lexer* lexer = new Lexer(ld_pair[n].str);
   context->token_to_scan = lexer->get_next_token();
+  context->global_symbol_map["&x"] = 40;
+  context->local_symbol_map["%g"] = 80;
 
   if(n>=43) context->set_machine(BrigESmall);
   EXPECT_EQ(0, Ld(context));
@@ -63,7 +65,7 @@ TEST_P(OperationLd, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
   }  
   if(n == 1){
     context->get_operand(ref.o_operands[2],&getIndir);
@@ -82,7 +84,7 @@ TEST_P(OperationLd, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[2],&getComp);
     // BrigOperandCompound
@@ -101,7 +103,7 @@ TEST_P(OperationLd, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[2] - reg_size, &getReg);
     // BrigOperandReg
@@ -128,7 +130,7 @@ TEST_P(OperationLd, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
 
     context->get_operand(ref.o_operands[2] - reg_size, &getReg);
     // BrigOperandReg
@@ -155,7 +157,7 @@ TEST_P(OperationLd, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
 
     context->get_operand(ref.o_operands[2] - reg_size, &getReg);
     // BrigOperandReg
@@ -223,6 +225,9 @@ TEST_P(OperationLdV2, BrigLd){
   int n = GetParam();
   Lexer* lexer = new Lexer(ldv2_pair[n].str);
   context->token_to_scan = lexer->get_next_token();
+  context->local_symbol_map["%g"] = 80;
+  context->global_symbol_map["&x"] = 40;
+
   if(n>=42) context->set_machine(BrigESmall);
   EXPECT_EQ(0, Ld(context));
 
@@ -278,7 +283,7 @@ TEST_P(OperationLdV2, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[2],&getComp);
     // BrigOperandCompound
@@ -297,7 +302,7 @@ TEST_P(OperationLdV2, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
 
     context->get_operand(ref.o_operands[2] - reg_size, &getReg);
     // BrigOperandReg
@@ -324,7 +329,7 @@ TEST_P(OperationLdV2, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
   }
   if(n == 3){  
     context->get_operand(ref.o_operands[2],&getIndir);
@@ -384,6 +389,8 @@ TEST_P(OperationLdV4, BrigLd){
   int n = GetParam();
   Lexer* lexer = new Lexer(ldv4_pair[n].str);
   context->token_to_scan = lexer->get_next_token();
+  context->global_symbol_map["%g"] = 80;
+  context->local_symbol_map["&x"] = 40;
 
   if(n>=43) context->set_machine(BrigESmall);
   EXPECT_EQ(0, Ld(context));
@@ -456,7 +463,7 @@ TEST_P(OperationLdV4, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[2] - reg_size, &getReg);
     // BrigOperandReg
@@ -483,7 +490,7 @@ TEST_P(OperationLdV4, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
 
     context->get_operand(ref.o_operands[2] - reg_size, &getReg);
     // BrigOperandReg
@@ -510,7 +517,7 @@ TEST_P(OperationLdV4, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
 
     context->get_operand(ref.o_operands[2] - reg_size, &getReg);
     // BrigOperandReg
@@ -547,7 +554,7 @@ TEST_P(OperationLdV4, BrigLd){
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[2], &getComp);
     // BrigOperandCompound
@@ -585,6 +592,8 @@ TEST_P(OperationLda, BrigLda)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["&x"] = 40;
+  context->local_symbol_map["%g"] = 80;
 
   int n = GetParam();
   Lexer* lexer = new Lexer(lda_pair[n].str);
@@ -628,7 +637,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
   }
   if(n == 2){
     context->get_operand(ref.o_operands[0], &getReg);
@@ -723,7 +732,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb32, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[0] + reg_size + address_size, &getReg);
     // BrigOperandReg
@@ -758,7 +767,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb32, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[0] + reg_size + address_size, &getReg);
     // BrigOperandReg
@@ -793,7 +802,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb32, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[0] + reg_size + address_size, &getReg);
     // BrigOperandReg
@@ -846,7 +855,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1],&getComp);
     // BrigOperandCompound
@@ -873,7 +882,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(40, getAdd.directive);
   }
   if(n == 13){
     context->get_operand(ref.o_operands[0], &getReg);
@@ -986,7 +995,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[1],&getComp);
     // BrigOperandCompound
@@ -1013,7 +1022,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[0] + reg_size + address_size, &getReg);
     // BrigOperandReg
@@ -1048,7 +1057,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[0] + reg_size + address_size, &getReg);
     // BrigOperandReg
@@ -1083,7 +1092,7 @@ TEST_P(OperationLda, BrigLda)
     EXPECT_EQ(BrigEOperandAddress, getAdd.kind);
     EXPECT_EQ(Brigb64, getAdd.type);
     EXPECT_EQ(0, getAdd.reserved);
-    EXPECT_EQ(0, getAdd.directive);
+    EXPECT_EQ(80, getAdd.directive);
 
     context->get_operand(ref.o_operands[0] + reg_size + address_size, &getReg);
     // BrigOperandReg

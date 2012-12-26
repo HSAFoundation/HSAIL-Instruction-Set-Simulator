@@ -839,6 +839,8 @@ INSTANTIATE_TEST_CASE_P(InvalidTest,
 TEST_P(TestAddressOperand, AddressOperand) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["%x"] = 40;
+  context->local_symbol_map["&y"] = 80;
 
   int n = GetParam();
   std::string input(address_operand_pair[n].str);
@@ -903,6 +905,8 @@ INSTANTIATE_TEST_CASE_P(CodegenTest,
 TEST_P(TestCompoundOperand, CompoundOperand) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->global_symbol_map["%x"] = 40;
+  context->local_symbol_map["&y"] = 80;
 
   int n = GetParam();
   std::string input(compound_operand_pair[n].str);

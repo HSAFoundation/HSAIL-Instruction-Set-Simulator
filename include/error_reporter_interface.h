@@ -67,6 +67,9 @@ enum error_code_t {
   INVALID_SEGMENT_OPERATION,
   INVALID_MEMORY_OPERAND,
   INVALID_MODIFIER,
+  INVALID_MAJOR_NUMBER,
+  INVALID_MINOR_NUMBER,
+  INVALID_DEFINITION,
   // missing part
   MISSING_VERSION_STATEMENT,
   MISSING_WIDTH_INFO,
@@ -86,6 +89,7 @@ enum error_code_t {
   MISSING_SEGMENT,
 
   REPEATED_DECLARATION,
+  UNDEFINED_IDENTIFIER,
 
   UNKNOWN_ERROR
 };
@@ -216,6 +220,12 @@ class ErrorReporterInterface {
           return std::string("Invalid modifier.");
         case INVALID_MEMORY_OPERAND:
           return std::string("Invalid Memory Operand.");
+        case INVALID_MAJOR_NUMBER:
+          return std::string("Invalid Major Number.");
+        case INVALID_MINOR_NUMBER:
+          return std::string("Invalid Minor Number.");
+        case INVALID_DEFINITION:
+          return std::string("Invalid Definition.");
         case MISSING_VERSION_STATEMENT:
           return std::string("Missing version statement.");
         case MISSING_WIDTH_INFO:
@@ -250,6 +260,9 @@ class ErrorReporterInterface {
           return std::string("Missing segment information for segment operation.");
         case REPEATED_DECLARATION:
           return std::string("Repeated declaration.");
+
+        case UNDEFINED_IDENTIFIER:
+          return std::string("Undefined identifier.");
 
         case UNKNOWN_ERROR:
         default:

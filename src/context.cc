@@ -74,6 +74,7 @@ void Context::initialize_all_fields(void) {
   token_to_scan = 0;
   token_value.int_val = 0;
   valid_string = false;
+  isFirstVersion = true;
   yycolno = 0;
   yylineno = 1;
   
@@ -81,6 +82,8 @@ void Context::initialize_all_fields(void) {
   profile = BrigEFull;
   last_directive_offset = 0;
   current_bdf_offset = 0;
+  major = 0;
+  minor = 0;
     
   attribute = BrigNone;
   alignment = 0;

@@ -450,8 +450,27 @@ static llvm::Value *decodePacking(llvm::BasicBlock &B,
   if(destTy == value->getType())
     return value;
 
-  if(destTy->isFloatingPointTy())
-    return new llvm::BitCastInst(value, destTy, "", &B);
+  if(destTy->isFloatingPointTy()) {
+    const unsigned typeSize = value->getType()->getPrimitiveSizeInBits();
+    const unsigned destTySize = destTy->getPrimitiveSizeInBits();
+
+    if(typeSize == destTySize) {
+      return new llvm::BitCastInst(value, destTy, "", &B);
+
+    } else if(typeSize == 64) {
+      llvm::Type *doubleTy = llvm::Type::getDoubleTy(C);
+      llvm::Value *result = new llvm::BitCastInst(value, doubleTy, "", &B);
+      return new llvm::FPTruncInst(result, destTy, "", &B);
+
+    } else if(typeSize == 32) {
+      llvm::Type *floatTy = llvm::Type::getFloatTy(C);
+      llvm::Value *result = new llvm::BitCastInst(value, floatTy, "", &B);
+      return new llvm::FPExtInst(result, destTy, "", &B);
+
+    } else {
+      assert(false && "Unimplemented");
+    }
+  }
 
   llvm::Instruction::CastOps castOp =
     llvm::CastInst::getCastOpcode(value, false, destTy, false);
@@ -464,13 +483,34 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
                                   const inst_iterator inst,
                                   const BrigInstHelper &helper) {
 
-  llvm::Type *encodedType = value->getType();
+  llvm::Type *encodedTy = value->getType();
 
-  if(encodedType == destTy)
+  if(encodedTy == destTy)
     return value;
 
-  if(encodedType->isFloatingPointTy() || encodedType->isVectorTy())
-    return new llvm::BitCastInst(value, destTy, "", &B);
+  if(encodedTy->isFloatingPointTy() || encodedTy->isVectorTy()) {
+
+    llvm::LLVMContext &C = B.getContext();
+    const unsigned encodedTySize = encodedTy->getPrimitiveSizeInBits();
+    const unsigned destTySize = destTy->getPrimitiveSizeInBits();
+
+    if(encodedTySize == destTySize) {
+      return new llvm::BitCastInst(value, destTy, "", &B);
+
+    } else if(encodedTySize == 64 && destTySize == 32) {
+      llvm::Type *floatTy = llvm::Type::getFloatTy(C);
+      llvm::Value *result = new llvm::FPTruncInst(value, floatTy, "", &B);
+      return encodePacking(B, result, destTy, inst, helper);
+
+    } else if(encodedTySize == 32 && destTySize == 64) {
+      llvm::Type *doubleTy = llvm::Type::getDoubleTy(C);
+      llvm::Value *result = new llvm::FPExtInst(value, doubleTy, "", &B);
+      return encodePacking(B, result, destTy, inst, helper);
+
+    } else {
+      assert(false && "Unimplemented");
+    }
+  }
 
   bool isSigned = helper.isSignedTy(BrigDataType(inst->type));
   llvm::Instruction::CastOps castOp =

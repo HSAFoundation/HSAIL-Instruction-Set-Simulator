@@ -60,6 +60,8 @@ TEST(ParserTest, AddressableOperandTest) {
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->local_symbol_map["%local_id"] = 80;
+  context->global_symbol_map["&global_id"] = 40;
 
   std::string input("[%local_id] \n");  // Int constant
   lexer->set_source_string(input);
@@ -82,14 +84,14 @@ TEST(ParserTest, AddressableOperandTest) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
-  input.assign("[%global_id<$s5 + 10>] \n");
+  input.assign("[&global_id<$s5 + 10>] \n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, AddressableOperand(context));
 
-  input.assign("[%global_id<$s6 - 10 >]\n");
+  input.assign("[&global_id<$s6 - 10 >]\n");
   lexer->set_source_string(input);
   // get 2 tokens to pass over '['
   context->token_to_scan = lexer->get_next_token();
@@ -104,6 +106,7 @@ TEST(ParserTest, QueryTest) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->global_symbol_map["&Test"] = 40;
 
   // test the Query types;
   std::string input("query_order_b32  $s1 , [&Test<$s7  + 100>]; \n");
@@ -285,6 +288,7 @@ TEST(ParserTest, Instruction2) {
 }
 
 TEST(ParserTest, VersionStatement) {
+  context->clear_context();
   // Create a lexer
   Lexer* lexer = new Lexer();
   // register error reporter with context
@@ -296,6 +300,7 @@ TEST(ParserTest, VersionStatement) {
   EXPECT_EQ(0, Version(context));
 
 
+  context->clear_context();
   input.assign("version 2:0:$large;\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -638,9 +643,12 @@ TEST(ParserTest, OptionalWidth) {
 
 TEST(ParserTest, BranchOperation) {
   // Create a lexer
+  context->clear_context();
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->set_machine(BrigESmall);
+ 
 
   // append a fake BDF to directive buffer
   BrigDirectiveFunction fake = {
@@ -659,6 +667,25 @@ TEST(ParserTest, BranchOperation) {
   };
   context->append_directive(&fake);
 
+  context->local_symbol_map["%local"] = context->get_directive_offset();
+  BrigDirectiveSymbol local = {
+    sizeof(BrigDirectiveSymbol),
+    BrigEDirectiveSymbol,
+    {
+      0,                                // c_code
+      BrigGlobalSpace,                  // storageClass
+      BrigNone,                         // attribute
+      0,                                // reserved
+      BrigFlex,                         // symbol modifier
+      1,                                // dim
+      0,                                // s_name
+      Brigu32,                          // data type
+      4,                                // alignment
+    },
+    0,                                  // d_init
+    0                                   // reserved
+  };
+  context->append_directive(&local);
 
   std::string input("cbr_width(all)_fbar $c1, @then;\n");
   lexer->set_source_string(input);
@@ -718,6 +745,7 @@ TEST(ParserTest, ParseCallTargets) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->clear_context();
 
   std::string input("[&globalfunc1, &globalfunc2]\n");
   lexer->set_source_string(input);
@@ -732,6 +760,13 @@ TEST(ParserTest, ParseCallArgs) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->clear_context();
+  context->global_symbol_map["&a"] = 40;
+  context->global_symbol_map["&fun1"] = 80;
+  context->global_symbol_map["&fun2"] = 120;
+  context->global_symbol_map["&fun3"] = 160;
+  context->local_symbol_map["%b"] = 200;
+  context->local_symbol_map["%c"] = 240;
 
   std::string input("()\n");
   lexer->set_source_string(input);
@@ -756,6 +791,11 @@ TEST(ParserTest, Call) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->clear_context();
+  context->local_symbol_map["%output"] = 40;
+  context->local_symbol_map["%input"] = 80;
+  context->local_symbol_map["%input1"] = 120;
+  context->local_symbol_map["%input2"] = 160;
 
   std::string input("call &callee (%output)(%input);\n");
   lexer->set_source_string(input);
@@ -1994,6 +2034,12 @@ TEST(ParserTest, Operation) {
   Lexer* lexer = new Lexer();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->global_symbol_map["&Test"] = 40;
+  context->global_symbol_map["&RWImg"] = 160;
+  context->global_symbol_map["&x"] = 200;
+  context->local_symbol_map["%RWImg"] = 240;
+  context->global_symbol_map["%Samp"] = 280;
+  context->global_symbol_map["%g"] = 320;
   std::string input("laneid_ftz $s1;\n"); // Instruction1
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2056,8 +2102,8 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3), [%RWImg3],");
-  input.append(" [%Samp3], ($s6);");
+  input.assign("rd_image_v4_1d_s32_f32 ($s0,$s1,$s5,$s3), [%RWImg],");
+  input.append(" [%Samp], ($s6);");
   //imageread
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2084,7 +2130,7 @@ TEST(ParserTest, Operation) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("atomic_image_and_1d_b32 $s2, [&namedRWImg2], $s1, $s3;");
+  input.assign("atomic_image_and_1d_b32 $s2, [&RWImg], $s1, $s3;");
   // imageRet
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2122,13 +2168,13 @@ TEST(ParserTest, Operation) {
   EXPECT_EQ(0, Operation(context));
 
   input.assign("st_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4),");
-  input.append("[%RWImg3], ($s4,$s5,$s6,$s7);");
+  input.append("[&RWImg], ($s4,$s5,$s6,$s7);");
   // imagestore
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Operation(context));
 
-  input.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],");
+  input.assign("ld_image_v4_2da_f32_u32 ($s1,$s2,$s3,$s4), [&RWImg],");
   input.append("($s4,$s1,$s2,$s3);");
   //imageload
   lexer->set_source_string(input);
@@ -2218,23 +2264,25 @@ TEST(ParserTest, BodyStatementNested) {
 // -----------------  Test for argStatement rule -------------------
 TEST(ParserTest, ArgStatement) {
   context->clear_context();
-  // Create a lexer
   Lexer* lexer = new Lexer();
-  // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->clear_context();
+
   std::string input("pragma \"this is string!\";\n"); // bodyStatementNested
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgStatement(context));
 
   context->clear_context();
-  input.assign("extern const"); // declprefix argUnitializableDecl
+  input.assign("extern"); // declprefix argUnitializableDecl
   input.append("arg_f32 %f[3];\n");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ArgStatement(context));
 
   context->clear_context();
+  context->local_symbol_map["%output"] = 40;
+  context->local_symbol_map["%input"] = 80;
   input.assign("call &callee (%output)(%input);\n"); // call
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -2851,6 +2899,7 @@ TEST(ParserTest, MemoryOperand) {
   // register error reporter with context
   context->set_error_reporter(main_reporter);
   context->clear_context();
+  context->local_symbol_map["%local_id"] = 40;
 
 
   std::string input("[%local_id]");  // Int constant
@@ -2994,6 +3043,8 @@ TEST(ParserTest, Ld) {
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->global_symbol_map["&x"] = 40;
+  context->global_symbol_map["&y"] = 80;
 
   std::string input("ld_f32 $s1, [&x];");
   lexer->set_source_string(input);
@@ -3107,6 +3158,8 @@ TEST(ParserTest, Ld) {
 TEST(ParserTest, St) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  context->clear_context();
+  context->global_symbol_map["&x"] = 40;
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
@@ -3121,6 +3174,7 @@ TEST(ParserTest, St) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, St(context));
 
+  context->set_machine(BrigESmall);
   input.assign("st_rel_equiv(2)_f32 $s1, [$s3+4];");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -3172,9 +3226,11 @@ TEST(ParserTest, St) {
 TEST(ParserTest, Lda) {
   // Create a lexer
   Lexer* lexer = new Lexer();
-
+  context->clear_context();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->local_symbol_map["%z"] = 40;
+  context->local_symbol_map["%g"] = 80;
 
   std::string input("lda_u64 $d2, [%z];");
   lexer->set_source_string(input);
@@ -3198,9 +3254,12 @@ TEST(ParserTest, Lda) {
 TEST(ParserTest, ImageRet) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  context->clear_context();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->global_symbol_map["&namedRWImg1"] = 40;
+  context->global_symbol_map["&namedRWImg2"] = 80;
 
   std::string input("atomic_image_and_ar_3d_b32 $s1, [&namedRWImg2],");
   input.append("($s0,$s3,$s1,$s10), $s1;");
@@ -3256,9 +3315,11 @@ TEST(ParserTest, ImageRet) {
 TEST(ParserTest, ImageNoRet) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  context->clear_context();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->global_symbol_map["&namedRWImg"] = 40;
 
   std::string input("atomicNoRet_image_and_ar_3d_b32 [&namedRWImg],");
   input.append("($s1,$s2,$s3,$s10), $s12;");
@@ -3398,11 +3459,6 @@ TEST(ParserTest, Cvt) {
 }
 
 // -----------------  Test for atom rule -------------------
-// format:
-// atom ::= ( "atomic" atomicOperationId
-//          AtomModifiers dataTypeId operand "," memoryOperand |
-//          atomcas AtomModifiers dataTypeId operand
-//          "," memoryOperand "," operand ) "," operand ";"
 TEST(ParserTest, Atom) {
   // Create a lexer
   Lexer* lexer = new Lexer();
@@ -3419,7 +3475,9 @@ TEST(ParserTest, Atom) {
       .Times(AtLeast(1));
 
   std::string input;
-  input.assign("atomic_and_u32 $s4, [&b], 1;\n");
+  context->global_symbol_map["&global_id"] = 40;
+  context->local_symbol_map["%local_id"] = 80;
+  input.assign("atomic_and_u32 $s4, [&global_id], 1;\n");
   // atomic without AtomModifiers
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -3431,7 +3489,7 @@ TEST(ParserTest, Atom) {
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, Atom(context));
 
-  input.assign("atomic_cas_ar_u64 $d1, [%global_id], $s1, 12;\n");
+  input.assign("atomic_cas_ar_u64 $d1, [&global_id], $s1, 12;\n");
   // atomic_cas with AtomModifiers
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
@@ -3453,9 +3511,11 @@ TEST(ParserTest, Atom) {
 TEST(ParserTest, ImageLoadTest) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  context->clear_context();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->local_symbol_map["%RWImg3"] = 40;
 
   std::string input("ld_image_v4_3d_f32_u32 ($s1,$s2,$s3,$s4), [%RWImg3],");
   input.append("($s4,$s5,$s6,$s7);");
@@ -3486,9 +3546,11 @@ TEST(ParserTest, ImageLoadTest) {
 TEST(ParserTest, ImageStoreTest) {
   // Create a lexer
   Lexer* lexer = new Lexer();
+  context->clear_context();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->local_symbol_map["%RWImg3"] = 40;
 
   std::string input("st_image_v4_3d_f32_u32 ($s1,$s2,$s3,$s4),");
   input.append("[%RWImg3], ($s4,$s5,$s6,$s7);");
@@ -3652,11 +3714,14 @@ TEST(ParserTest, RetTest) {
 
 TEST(ParserTest, ImageReadTest) {
   Lexer* lexer = new Lexer();
+  context->clear_context();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->local_symbol_map["%Samp3"] = 40;
+  context->local_symbol_map["%RWImg3"] = 80;
 
-  std::string input("rd_image_v4_3d_s32_f32 ($s0,$s1,$s5,$s3),[&images<2>], ");
-  input.append("[&samplers<$s1+4>], ($s6,$s7,$s10,$s11);");
+  std::string input("rd_image_v4_3d_s32_f32 ($s0,$s1,$s5,$s3),[%RWImg3<2>], ");
+  input.append("[%Samp3<$s1+4>], ($s6,$s7,$s10,$s11);");
   lexer->set_source_string(input);
   context->token_to_scan = lexer->get_next_token();
   EXPECT_EQ(0, ImageRead(context));
@@ -3742,8 +3807,10 @@ TEST(ParserTest, BarTest) {
 
 TEST(ParserTest, AtomicNoRetTest) {
   Lexer* lexer = new Lexer();
+  context->clear_context();
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->global_symbol_map["&x"] = 40;
 
   std::string input("atomicNoRet_and_global_ar_u32 [&x], 23;");
   lexer->set_source_string(input);
@@ -4408,10 +4475,14 @@ TEST(ParserTest, SequenceOfPrograms) {
 
 TEST(ParserTest, PairAddressableOperandTest) {
   // Create a lexer
+  context->clear_context();
   Lexer* lexer = new Lexer();
 
   // register error reporter with context
   context->set_error_reporter(main_reporter);
+  context->local_symbol_map["%local"] = context->get_directive_offset();
+  context->global_symbol_map["&global"] = context->get_directive_offset();
+
 
   context->set_machine(BrigESmall);
   std::string input("[%local][$s3]");
@@ -4603,7 +4674,7 @@ TEST(ParserWrapperTest, ParseSequenceOfPrograms) {
   input.append(" }; \n");
 
   // Example 4
-  input.append("version 1:1:$small;\n");
+  input.append("version 1:0:$small;\n");
   input.append("function &branch_ops (arg_u8x4 %x)() {\n");
   input.append("cbr $c1, @then;\n");
   input.append("abs_p_s8x4 $s1, $s2;\n");
