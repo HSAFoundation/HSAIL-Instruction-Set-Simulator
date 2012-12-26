@@ -450,8 +450,27 @@ static llvm::Value *decodePacking(llvm::BasicBlock &B,
   if(destTy == value->getType())
     return value;
 
-  if(destTy->isFloatingPointTy())
-    return new llvm::BitCastInst(value, destTy, "", &B);
+  if(destTy->isFloatingPointTy()) {
+    const unsigned typeSize = value->getType()->getPrimitiveSizeInBits();
+    const unsigned destTySize = destTy->getPrimitiveSizeInBits();
+
+    if(typeSize == destTySize) {
+      return new llvm::BitCastInst(value, destTy, "", &B);
+
+    } else if(typeSize == 64) {
+      llvm::Type *doubleTy = llvm::Type::getDoubleTy(C);
+      llvm::Value *result = new llvm::BitCastInst(value, doubleTy, "", &B);
+      return new llvm::FPTruncInst(result, destTy, "", &B);
+
+    } else if(typeSize == 32) {
+      llvm::Type *floatTy = llvm::Type::getFloatTy(C);
+      llvm::Value *result = new llvm::BitCastInst(value, floatTy, "", &B);
+      return new llvm::FPExtInst(result, destTy, "", &B);
+
+    } else {
+      assert(false && "Unimplemented");
+    }
+  }
 
   llvm::Instruction::CastOps castOp =
     llvm::CastInst::getCastOpcode(value, false, destTy, false);
