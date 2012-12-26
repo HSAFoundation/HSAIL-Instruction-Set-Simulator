@@ -794,6 +794,10 @@ extern "C" void Barrier_b32(void) {
   pthread_barrier_wait(__brigThreadInfo->barrier);
 }
 
+extern "C" void Sync_b32(void) {
+  _mm_mfence();
+}
+
 extern "C" u32 WorkItemAbsId_b32(u32 x) {
   return __brigThreadInfo->workItemAbsId[x];
 }
