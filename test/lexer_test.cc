@@ -865,13 +865,13 @@ TEST(LexTest, Bug40_Instruction2OpcodeNoDT) {
   lexer->set_source_string(input);
   EXPECT_EQ(WORKGROUPSIZE, lexer->get_next_token());
 
-  input.assign("ndrangesize");
+  input.assign("gridsize");
   lexer->set_source_string(input);
-  EXPECT_EQ(NDRANGESIZE, lexer->get_next_token());
+  EXPECT_EQ(GRIDSIZE, lexer->get_next_token());
 
-  input.assign("ndrangegroups");
+  input.assign("gridgroups");
   lexer->set_source_string(input);
-  EXPECT_EQ(NDRANGEGROUPS, lexer->get_next_token());
+  EXPECT_EQ(GRIDGROUPS, lexer->get_next_token());
 
   delete lexer;
 }

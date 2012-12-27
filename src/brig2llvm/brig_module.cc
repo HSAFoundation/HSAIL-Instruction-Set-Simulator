@@ -292,8 +292,8 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(DynWaveId);
       caseInst(LaneId);
       caseInst(MaxDynWaveId);
-      caseInst(NDRangeGroups);
-      caseInst(NDRangeSize);
+      caseInst(GridGroups);
+      caseInst(GridSize);
       caseInst(Nop);
       caseInst(NullPtr);
       caseInst(Qid);
@@ -3820,13 +3820,13 @@ bool BrigModule::validateMaxDynWaveId(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateNDRangeGroups(const inst_iterator inst) const {
+bool BrigModule::validateGridGroups(const inst_iterator inst) const {
   bool valid = true;
   valid &= validateSpecialInst(inst, 1);
   return valid;
 }
 
-bool BrigModule::validateNDRangeSize(const inst_iterator inst) const {
+bool BrigModule::validateGridSize(const inst_iterator inst) const {
   bool valid = true;
   valid &= validateSpecialInst(inst, 1);
   return valid;

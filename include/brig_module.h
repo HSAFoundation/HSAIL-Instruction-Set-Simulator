@@ -270,8 +270,8 @@ class BrigModule {
   bool validateDynWaveId(const inst_iterator inst) const;
   bool validateLaneId(const inst_iterator inst) const;
   bool validateMaxDynWaveId(const inst_iterator inst) const;
-  bool validateNDRangeGroups(const inst_iterator inst) const;
-  bool validateNDRangeSize(const inst_iterator inst) const;
+  bool validateGridGroups(const inst_iterator inst) const;
+  bool validateGridSize(const inst_iterator inst) const;
   bool validateNop(const inst_iterator inst) const;
   bool validateNullPtr(const inst_iterator inst) const;
   bool validateQid(const inst_iterator inst) const;

@@ -152,8 +152,6 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(GridSize);
     caseOper(LaneId);
     caseOper(MaxDynWaveId);
-    caseOper(NDRangeGroups);
-    caseOper(NDRangeSize);
     caseOper(Nop);
     caseOper(NullPtr);
     caseOper(Qid);

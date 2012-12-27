@@ -1504,14 +1504,14 @@ TEST(CodegenTest, Instruction2_CodeGen){
   symbols->clear();
 
   /**********************************************************************************/
-  in.assign("ndrangesize $s2, 2;");
+  in.assign("gridsize $s2, 2;");
   destName.assign("$s2");
   symbols->append(destName);
 
   BrigInstBase out53 = {
     0,
     BrigEInstBase,
-    BrigNDRangeSize,
+    BrigGridSize,
     Brigb32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0}
@@ -1536,14 +1536,14 @@ TEST(CodegenTest, Instruction2_CodeGen){
   symbols->clear();
 
   /**********************************************************************************/
-  in.assign("ndrangegroups $s2, 2;");
+  in.assign("gridgroups $s2, 2;");
   destName.assign("$s2");
   symbols->append(destName);
 
   BrigInstBase out54 = {
     0,
     BrigEInstBase,
-    BrigNDRangeGroups,
+    BrigGridGroups,
     Brigb32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0}

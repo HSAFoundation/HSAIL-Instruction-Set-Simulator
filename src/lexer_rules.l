@@ -1092,17 +1092,17 @@ workgroupid       { free_string(context);
                     context->token_value.opcode = BrigWorkGroupId ;
                     return WORKGROUPID;}
 
-ndrangesize         { free_string(context);
+gridsize            { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigNDRangeSize;
-                      return NDRANGESIZE;}
+                      context->token_value.opcode = BrigGridSize;
+                      return GRIDSIZE;}
 
-ndrangegroups       { free_string(context);
+gridgroups          { free_string(context);
                       context->token_type = INSTRUCTION2_OPCODE_NODT;
                       context->yycolno+=yyleng;
-                      context->token_value.opcode = BrigNDRangeGroups;
-                      return NDRANGEGROUPS; }
+                      context->token_value.opcode = BrigGridGroups;
+                      return GRIDGROUPS; }
 
 add                 { free_string(context);
                       context->token_value.opcode = BrigAdd;
