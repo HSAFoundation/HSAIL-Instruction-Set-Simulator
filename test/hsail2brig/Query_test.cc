@@ -16,17 +16,18 @@ private:
 
 public:
   Query_Test(std::string& in):
-    BrigCodeGenTest(in) {}
+    BrigCodeGenTest(in), RefInst(NULL), RefDest(NULL),
+    RefOpaque(NULL), RefOpaqueReg(NULL), SymbolName(NULL) {}
 
-  Query_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref, 
+  Query_Test(std::string& in, StringBuffer* sbuf, BrigInstBase* ref,
       BrigOperandReg* Dest, BrigOperandOpaque* Src1, BrigOperandReg* Src2 = NULL,
       std::string *name = NULL) :
     BrigCodeGenTest(in, sbuf),
     RefInst(ref),           RefDest(Dest),
-    RefOpaque(Src1),        RefOpaqueReg(Src2), 
+    RefOpaque(Src1),        RefOpaqueReg(Src2),
     SymbolName(name) {}
 
-   void Run_Test(int (*Rule)(Context*)){  
+   void Run_Test(int (*Rule)(Context*)){
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
     code->append(RefInst);
@@ -34,16 +35,16 @@ public:
     if (RefOpaqueReg)
       oper->append(RefOpaqueReg);
     oper->append(RefOpaque);
-    
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
-      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
-      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-      RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);    
-    
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
+      NULL, reinterpret_cast<const char *>(&code->get()[0]),
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+      RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);
+
     Parse_Validate(Rule, &RefOutput, SymbolName);
     delete code;
     delete oper;
-  }  
+  }
 
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
     False_Validate(Rule, refError, SymbolName);
@@ -53,7 +54,7 @@ public:
 
 TEST(CodegenTest, Query_CodeGen){
 
-  std::string in, symbolName; 
+  std::string in, symbolName;
   std::string op1, op2, op3;
   StringBuffer* symbols;
 
@@ -62,7 +63,7 @@ TEST(CodegenTest, Query_CodeGen){
   /***************** Test Case 1 **********************/
   symbols = new StringBuffer();
   in.assign( "query_width_u32 $s1, [&RWImg3];\n");
-  op1.assign("$s1"); 
+  op1.assign("$s1");
   symbols->append(op1); symbols->append(op2);
 
   BrigOperandReg dest1 = {
@@ -89,7 +90,7 @@ TEST(CodegenTest, Query_CodeGen){
   BrigOperandOpaque src1 = {
     0,                    // size
     BrigEOperandOpaque,   // kind
-    0,         
+    0,
     0,                    // reg
     0                     // Offset
   };
@@ -498,11 +499,11 @@ TEST(CodegenTest, Query_CodeGen){
   delete symbols;
 }
 
-TEST(ErrorReportTest, Query) {  
+TEST(ErrorReportTest, Query) {
   std::string input = "query_order $s1, [&RWImg3<$s0 + 10>];\n";
   Query_Test TestCase1(input);
   TestCase1.Run_Test(&Query, MISSING_DATA_TYPE);
-  
+
   input.assign( "query_width_u32 $s1 [&RWImg3]; \n");
   Query_Test TestCase2(input);
   TestCase2.Run_Test(&Query, MISSING_COMMA);

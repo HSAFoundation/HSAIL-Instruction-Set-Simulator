@@ -869,7 +869,7 @@ static void Unpack0Logic(f32 result, b32 a) {
 extern "C" f32 Unpack0_b32(b32);
 MakeTest(Unpack0_b32, Unpack0Logic)
 
-static void Bitalign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
+static void BitAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
   if(c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {
     unsigned tag = (32 - c) / 8;
     for(unsigned i = 0; i < 4; ++i) {
@@ -882,10 +882,10 @@ static void Bitalign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
     }
   }
 }
-extern "C" b32 Bitalign_b32(b32, b32, b32);
-MakeTest(Bitalign_b32, Bitalign_b32_Logic)
+extern "C" b32 BitAlign_b32(b32, b32, b32);
+MakeTest(BitAlign_b32, BitAlign_b32_Logic)
 
-static void Bytealign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
+static void ByteAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
   if(c <= 4) {
     unsigned tag = (4 - c);
     for(unsigned i = 0; i < 4; ++i) {
@@ -898,8 +898,8 @@ static void Bytealign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
     }
   }
 }
-extern "C" b32 Bytealign_b32(b32, b32, b32);
-MakeTest(Bytealign_b32, Bytealign_b32_Logic)
+extern "C" b32 ByteAlign_b32(b32, b32, b32);
+MakeTest(ByteAlign_b32, ByteAlign_b32_Logic)
 
 static void Lerp_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
   for(unsigned i = 0; i < 4; ++i) {

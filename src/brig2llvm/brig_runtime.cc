@@ -565,12 +565,12 @@ extern "C" f32 Unpack0_b32(b32 w) {
   return f32(w & 0xFF);
 }
 
-extern "C" b32 Bitalign_b32(b32 w, b32 x, b32 y) {
+extern "C" b32 BitAlign_b32(b32 w, b32 x, b32 y) {
   return (b64(w) << y) | (b64(x) >> (32 - y));
 }
 
-extern "C" b32 Bytealign_b32(b32 w, b32 x, b32 y) {
-  return Bitalign_b32(w, x, y * 8);
+extern "C" b32 ByteAlign_b32(b32 w, b32 x, b32 y) {
+  return BitAlign_b32(w, x, y * 8);
 }
 
 extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {

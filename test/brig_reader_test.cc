@@ -4438,7 +4438,7 @@ static void testLd(const char *type1,
   llvm::Function *fun = BP->getFunction("testLd");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
-  
+
   EXPECT_EQ(result, *arg_val0);
 
   delete arg_val0;
@@ -4499,4 +4499,31 @@ TEST(BrigKernelTest, testLd) {
     unsigned bits = 32;
     testLd("u16", "u32",  result, value, bits);
   }
+}
+
+TEST(BrigInstTest, VectorBitalign1) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$small;\n"
+    "\n"
+    "kernel &__instruction4_test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1)\n"
+    "{\n"
+    "        bitalign_b32 $s1, 0x77665544, 0x33221100, 16;"
+    "        st_kernarg_u32 $s1, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t( 0 );
+  uint32_t *arg1 = new uint32_t(0x55443322);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x55443322, *arg0);
+  delete arg0;
+  delete arg1;
 }
