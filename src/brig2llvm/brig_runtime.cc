@@ -790,6 +790,38 @@ template<class T> static T AtomicSub(T *x, T y) {
 }
 AtomicInst(define, Sub, Binary)
 
+template<class T> static T AtomicInc(T *x) {
+  return __sync_fetch_and_add (x, 1);
+}
+AtomicInst(define, Inc, Unary)
+
+template<class T> static T AtomicDec(T *x) {
+  return __sync_fetch_and_sub (x, 1);
+}
+AtomicInst(define, Dec, Unary)
+
+template<class T> static T AtomicMax(volatile T *x, T y) {
+  T oldVal;
+  T max;
+  do {
+    oldVal = *x;
+    max = std::max(oldVal, y);
+  } while(!__sync_bool_compare_and_swap(x, oldVal, max));
+  return max;
+}
+AtomicInst(define, Max, Binary)
+
+template<class T> static T AtomicMin(volatile T *x, T y) {
+  T oldVal;
+  T min;
+  do {
+    oldVal = *x;
+    min = std::min(oldVal, y);
+  } while(!__sync_bool_compare_and_swap(x, oldVal, min));
+  return min;
+}
+AtomicInst(define, Min, Binary)
+
 extern "C" void Barrier_b32(void) {
   pthread_barrier_wait(__brigThreadInfo->barrier);
 }

@@ -239,16 +239,16 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## CmpRet(Cmp_ ## FUNC, u32, TYPE)          \
   /* D ## CmpRet(Cmp_ ## FUNC, f16, TYPE) */    \
   D ## CmpRet(Cmp_ ## FUNC, f32, TYPE)
- 
+
 #define FPackedCmp(D,FUNC,TYPE)                          \
   PackedCmp(D, FUNC, TYPE)                               \
   PackedCmp(D, s ## FUNC, TYPE)                          \
   PackedCmp(D, FUNC ## u, TYPE)                          \
   PackedCmp(D, s ## FUNC ## u, TYPE)
- 
+
 #define PackedCmp(D,FUNC,TYPE)                           \
   D ## PackedCmp(PackedCmp_ ## FUNC, TYPE)
- 
+
 #define definePackedCmp(FUNC,TYPE)                       \
   extern "C" TYPE FUNC ## _ ## TYPE(TYPE t, TYPE u) {    \
     return FUNC(t, u);                                   \
@@ -366,6 +366,14 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
 #define defineShuffleVector(FUNC,TYPE)                            \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, b32 shift) { \
     return FUNC ## Vector(t, u, shift);                           \
+  }
+
+#define defineAtomicUnary(FUNC,TYPE)                            \
+  extern "C" TYPE Atomic ## FUNC ## _ ## TYPE (TYPE *t) {       \
+    return Atomic ## FUNC(t);                                   \
+  }                                                             \
+  extern "C" void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE *t) {  \
+    Atomic ## FUNC(t);                                          \
   }
 
 #define defineAtomicBinary(FUNC,TYPE)                                   \
