@@ -2767,7 +2767,7 @@ bool BrigModule::validateSad4Hi(const inst_iterator inst) const {
 bool BrigModule::validateUnpack0(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
-  valid &= check(inst->type == Brigb32, "Type of Unpack0 should be b32");
+  valid &= check(inst->type == Brigf32, "Type of Unpack0 should be f32");
   valid &= validateArithmeticInst(inst, 1);
   if(!valid) return false;
   oper_iterator dest(S_.operands + inst->o_operands[0]);
@@ -2780,7 +2780,7 @@ bool BrigModule::validateUnpack0(const inst_iterator inst) const {
 bool BrigModule::validateUnpack1(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
-  valid &= check(inst->type == Brigb32, "Type of Unpack1 should be b32");
+  valid &= check(inst->type == Brigf32, "Type of Unpack1 should be f32");
   valid &= validateArithmeticInst(inst, 1);
   if(!valid) return false;
   oper_iterator dest(S_.operands + inst->o_operands[0]);
@@ -2793,7 +2793,7 @@ bool BrigModule::validateUnpack1(const inst_iterator inst) const {
 bool BrigModule::validateUnpack2(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
-  valid &= check(inst->type == Brigb32, "Type of Unpack2 should be b32");
+  valid &= check(inst->type == Brigf32, "Type of Unpack2 should be f32");
   valid &= validateArithmeticInst(inst, 1);
   if(!valid) return false;
   oper_iterator dest(S_.operands + inst->o_operands[0]);
@@ -2806,7 +2806,7 @@ bool BrigModule::validateUnpack2(const inst_iterator inst) const {
 bool BrigModule::validateUnpack3(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
-  valid &= check(inst->type == Brigb32, "Type of Unpack3 should be b32");
+  valid &= check(inst->type == Brigf32, "Type of Unpack3 should be f32");
   valid &= validateArithmeticInst(inst, 1);
   if(!valid) return false;
   oper_iterator dest(S_.operands + inst->o_operands[0]);
