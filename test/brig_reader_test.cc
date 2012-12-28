@@ -4969,3 +4969,75 @@ TEST(Instruction2Test, Fract) {
  delete arg0;
  delete arg1;
 }
+
+TEST(Instruction4Test, Fma) {
+  {
+    const float testVec[] = { 14.6, 1.1, 6, 8 };
+    testInst("fma_f32", testVec);
+  }
+  {
+    const double testVec[] = { 18.884888, 1.666, 6, 8.888888 };
+    testInst("fma_f64", testVec);
+  }
+}
+
+TEST(Instruction4Test, Mad) {
+  {
+    const float testVec[] = { 14.6, 1.1, 6, 8 };
+    testInst("mad_f32", testVec);
+  }
+}
+
+TEST(Instruction4Test, Bitselect) {
+  {
+    const uint32_t testVec[] = { 5, 6, 13, 7 };
+    testInst("bitselect_b32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 277, 546, 456, 789 };
+    testInst("bitselect_b64", testVec);
+  }
+}
+
+TEST(Instruction4Test, Extract) {
+  {
+    const uint32_t testVec[] = { 1, 134, 7, 22 };
+    testInst("extract_b32", testVec);
+  }
+}
+
+TEST(Instruction4Test, DISABLED_Insert) {
+  {
+    const uint32_t testVec[] = { 895, 6, 13, 7 };
+    testInst("insert_b32", testVec);
+  }
+}
+
+TEST(Instruction4Test, Shuffle) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$large;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        shuffle_s8x4 $s1, 0x11223344, 0x55667788, 180;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0x66553344);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+ EXPECT_EQ(0x66553344, *arg0);
+ delete arg0;
+ delete arg1;
+}
+
+
