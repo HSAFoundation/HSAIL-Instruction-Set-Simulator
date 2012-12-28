@@ -4579,12 +4579,12 @@ TEST(Instruction2Test, Abs) {
   }
   {
     //_f32x2(-2.0f,-2.0f)
-    const uint64_t testVec[] = { 0x2, 0xfffffffefffffffe };
+    const double testVec[] = { 0x2, 0xfffffffefffffffe };
     testInst("abs_s_f32x2", testVec);
   }
   {
     //_f32x2(-2.0f,-2.0f)
-    const uint64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    const double testVec[] = { 0x200000002, 0xfffffffefffffffe };
     testInst("abs_p_f32x2", testVec);
   }
 */
@@ -4658,12 +4658,12 @@ TEST(Instruction2Test, Neg) {
   }
   {
     //_f32x2(-2.0f,-2.0f)
-    const uint64_t testVec[] = { 0x2, 0xfffffffefffffffe };
+    const double testVec[] = { 0x2, 0xfffffffefffffffe };
     testInst("neg_s_f32x2", testVec);
   }
  {
     //_f32x2(-2.0f,-2.0f)
-    const uint64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    const double testVec[] = { 0x200000002, 0xfffffffefffffffe };
     testInst("neg_p_f32x2", testVec);
   }
 */
@@ -4942,3 +4942,30 @@ TEST(Instruction2Test, Sqrt) {
   }
 }
 
+TEST(Instruction2Test, Fract) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$large;\n"
+  "\n"
+  "kernel &__instruction2_test_kernel(\n"
+  "        kernarg_s32 %result, \n"
+  "        kernarg_s32 %input)\n"
+  "{\n"
+  "        ld_kernarg_s32 $s1, [%input] ;\n"
+  "        fract_f32 $s2, $s1 ;\n"
+  "        st_kernarg_s32 $s2, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
+  float *arg0 = new float(0.0f);
+  float *arg1 = new float(4.6f);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+ EXPECT_FLOAT_EQ(0.6f, *arg0);
+ delete arg0;
+ delete arg1;
+}
