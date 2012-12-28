@@ -4528,3 +4528,713 @@ TEST(BrigInstTest, VectorBitalign1) {
   delete arg0;
   delete arg1;
 }
+
+TEST(Instruction2Test, Abs) {
+  {
+    const int32_t testVec[] = { 1, 1 };
+    testInst("abs_s32", testVec);
+  }
+  {
+    const int32_t testVec[] = { 1, -1 };
+    testInst("abs_s32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 3, -3 };
+    testInst("abs_s64", testVec);
+  }
+  {
+    //_s8x4(-1,0,-1,0)
+    const int32_t testVec[] = { 0x1000100, 0xff00ff00 };
+    testInst("abs_p_s8x4", testVec);
+  }
+  {
+    //_s8x8(-1,0,-1,0,-1,0,-1,0)
+    const int64_t testVec[] = {0x100010001000100, 0xff00ff00ff00ff00};
+    testInst("abs_p_s8x8", testVec);
+  }
+  {
+    //_s16x2(-1,-1)
+    const int32_t testVec[] = { 0x10001, 0xffffffff };
+    testInst("abs_p_s16x2", testVec);
+  }
+  {
+    //_s16x4(-1,0,-1,0)
+    const int64_t testVec[] = {0x1000000010000, 0xffff0000ffff0000};
+    testInst("abs_p_s16x4", testVec);
+  }
+  {
+    //_s32x2(-2,-2)
+    const int64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    testInst("abs_p_s32x2", testVec);
+  }
+}
+
+TEST(Instruction2Test, Neg) {
+  {
+    const int32_t testVec[] = { -1, 1 };
+    testInst("neg_s32", testVec);
+  }
+  {
+    const int32_t testVec[] = { 1, -1 };
+    testInst("neg_s32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 3, -3 };
+    testInst("neg_s64", testVec);
+  }
+
+  {
+    //_s8x4(-1,0,-1,0)
+    const int32_t testVec[] = { 0x1000100, 0xff00ff00 };
+    testInst("neg_p_s8x4", testVec);
+  }
+  {
+    //_s8x8(-1,0,-1,0,-1,0,-1,0)
+    const int64_t testVec[] = {0x100010001000100, 0xff00ff00ff00ff00};
+    testInst("neg_p_s8x8", testVec);
+  }
+  {
+    //_s16x2(-1,-1)
+    const int32_t testVec[] = { 0x10001, 0xffffffff };
+    testInst("neg_p_s16x2", testVec);
+  }
+  {
+    //_s16x4(-1,0,-1,0)
+    const int64_t testVec[] = {0x1000000010000, 0xffff0000ffff0000};
+    testInst("neg_p_s16x4", testVec);
+  }
+  {
+    //_s32x2(-2,-2)
+    const int64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    testInst("neg_p_s32x2", testVec);
+  }
+  {
+    const float testVec[] = { 1.2f, -1.2f };
+    testInst("neg_f32", testVec);
+  }
+  {
+    const double testVec[] = { 1.2, -1.2 };
+    testInst("neg_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Not) {
+  {
+    const uint32_t testVec[] = { 0x0, 0xffffffff };
+    testInst("not_b32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0xffffffffffffffff, 0x0 };
+    testInst("not_b64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Popcount) {
+  {
+    const uint32_t testVec[] = { 0x0, 0x00000000 };
+    testInst("popcount_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 24, 0x00ffffff };
+    testInst("popcount_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 31, 0x7fffffff };
+    testInst("popcount_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 25, 0x01ffffff };
+    testInst("popcount_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 32, 0xffffffff };
+    testInst("popcount_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 20, 0xffff0f00 };
+    testInst("popcount_b32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Bitrev) {
+  {
+    const uint32_t testVec[] = { 0x1e6a2c48, 0x12345678 };
+    testInst("bitrev_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x12345678, 0x1e6a2c48 };
+    testInst("bitrev_b32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x1234567812345678, 0x1e6a2c481e6a2c48 };
+    testInst("bitrev_b64", testVec);
+  }
+}
+
+TEST(Instruction2Test, FirstBit) {
+  {
+    const uint32_t testVec[] = { 0, 0xffffffff };
+    testInst("firstbit_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 1, 0x7fffffff };
+    testInst("firstbit_b32", testVec);
+  }
+  {
+    const int32_t testVec[] = { -1, 0x0};
+    testInst("firstbit_b32", testVec);
+  }
+}
+
+TEST(Instruction2Test, LastBit) {
+  {
+    const uint32_t testVec[] = { 0, 0xffffffff };
+    testInst("lastbit_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0, 0x7fffffff };
+    testInst("lastbit_b32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0, 0x01ffffff };
+    testInst("lastbit_b32", testVec);
+  }
+  {
+    const int32_t testVec[] = { -1, 0x0};
+    testInst("lastbit_b32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Mov) {
+  {
+    const uint32_t testVec[] = { 0x7fffffff, 0x7fffffff };
+    testInst("mov_b32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0xffffffffffff0f00, 0xffffffffffff0f00 };
+    testInst("mov_b64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Unpack3) {
+  {
+    union { float f32; uint32_t u32; } result = { 127.0f };
+    const uint32_t testVec[] = { result.u32, 0x7fffffff };
+    testInst("unpack3", testVec);
+  }
+}
+
+TEST(Instruction2Test, Unpack2) {
+  {
+    union { float f32; uint32_t u32; } result = { 175.0f };
+    const uint32_t testVec[] = { result.u32, 0x7eafffff };
+    testInst("unpack2", testVec);
+  }
+}
+
+TEST(Instruction2Test, Unpack1) {
+  {
+    union { float f32; uint32_t u32; } result = { 255.0f };
+    const uint32_t testVec[] = { result.u32, 0x7eafffff };
+    testInst("unpack1", testVec);
+  }
+}
+
+TEST(Instruction2Test, Unpack0) {
+  {
+    union { float f32; uint32_t u32; } result = { 126.0f };
+    const uint32_t testVec[] = { result.u32, 0xff7e };
+    testInst("unpack0", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fcos) {
+  {
+    const float testVec[] = { 1.0f, 0.0f };
+    testInst("fcos_f32", testVec);
+  }
+  {
+    const float testVec[] = { 1.0f, 0.0f };
+    testInst("fcos_ftz_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fsin) {
+  {
+    const float testVec[] = { 1.0f, M_PI/2 };
+    testInst("fsin_f32", testVec);
+  }
+  {
+    const float testVec[] = { 1.0f, M_PI/2 };
+    testInst("fsin_ftz_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Flog2) {
+  {
+    const float testVec[] = { 2.0f, 4.0f };
+    testInst("flog2_f32", testVec);
+  }
+  {
+    const float testVec[] = { 2.0f, 4.0f };
+    testInst("flog2_ftz_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fexp2) {
+  {
+    const float testVec[] = { 16.0f, 4.0f };
+    testInst("fexp2_f32", testVec);
+  }
+  {
+    const float testVec[] = { 16.0f, 4.0f };
+    testInst("fexp2_ftz_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fsqrt) {
+  {
+    const float testVec[] = { 2.0f, 4.0f };
+    testInst("fsqrt_f32", testVec);
+  }
+  {
+    const float testVec[] = { 2.0f, 4.0f };
+    testInst("fsqrt_ftz_f32", testVec);
+  }
+  {
+    const double testVec[] = { 2.0, 4.0 };
+    testInst("fsqrt_f64", testVec);
+  }
+  {
+    const double testVec[] = { 2.0, 4.0 };
+    testInst("fsqrt_ftz_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Copysign) {
+  {
+    const float testVec[] = { -456.5f, 456.5f, -0.22f };
+    testInst("copysign_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Frsqrt) {
+  {
+    const float testVec[] = { 0.5f, 4.0f };
+    testInst("frsqrt_f32", testVec);
+  }
+  {
+    const float testVec[] = { 0.5f, 4.0f };
+    testInst("frsqrt_ftz_f32", testVec);
+  }
+  {
+    const double testVec[] = { 0.5, 4.0 };
+    testInst("frsqrt_f64", testVec);
+  }
+  {
+    const double testVec[] = { 0.5, 4.0 };
+    testInst("frsqrt_ftz_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Frcp) {
+  {
+    const float testVec[] = { 0.25f, 4.0f };
+    testInst("frcp_f32", testVec);
+  }
+  {
+    const float testVec[] = { 0.25f, 4.0f };
+    testInst("frcp_ftz_f32", testVec);
+  }
+  {
+    const double testVec[] = { 0.25, 4.0 };
+    testInst("frcp_f64", testVec);
+  }
+  {
+    const double testVec[] = { 0.25, 4.0 };
+    testInst("frcp_ftz_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Sqrt) {
+  {
+    const float testVec[] = { 2.0f, 4.0f };
+    testInst("sqrt_f32", testVec);
+  }
+  {
+    const float testVec[] = { 2.0f, 4.0f };
+    testInst("sqrt_ftz_f32", testVec);
+  }
+  {
+    const double testVec[] = { 2.0, 4.0 };
+    testInst("sqrt_f64", testVec);
+  }
+  {
+    const double testVec[] = { 2.0, 4.0 };
+    testInst("sqrt_ftz_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fract) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__instruction2_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input] ;\n"
+    "        fract_f32 $s2, $s1 ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
+  float *arg0 = new float(0.0f);
+  float *arg1 = new float(4.6f);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_FLOAT_EQ(0.6f, *arg0);
+  delete arg0;
+  delete arg1;
+}
+
+TEST(Instruction3Test, Add) {
+  {
+    const int32_t testVec[] = { 0xffffffff, 0x7fffffff, 0x80000000};
+    testInst("add_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x1, 0xfffffffe, 0x3};
+    testInst("add_s32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0xfffffffffffffffe,
+                                0x7ffffffffffffffe,
+                                0x8000000000000000};
+    testInst("add_s64", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x1, 0xfffffffffffffffe, 0x3};
+    testInst("add_u64", testVec);
+  }
+  {
+    const int32_t testVec[] = { 0xefffff0c, 0x7ffffffe, 0x7000000e};
+    testInst("add_pp_s8x4", testVec);
+  }
+
+}
+
+TEST(Instruction3Test, Borrow) {
+  {
+    const int32_t testVec[] = { 0x1, 0x7ffffffe, 0x80000000};
+    testInst("borrow_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 000, 0xffffffff, 0xfffffffd};
+    testInst("borrow_u32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x1, 0x7fffffffffffffff, 0x8000000000000000};
+    testInst("borrow_s64", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x00, 0xfffffffffffffffe, 0x3};
+    testInst("borrow_u64", testVec);
+  }
+}
+
+TEST(Instruction3Test, Carry) {
+  {
+    const int32_t testVec[] = { 0, 0x7ffffffe, 0x80000000};
+    testInst("carry_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 1, 0xfffffffe, 0x3};
+    testInst("carry_u32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x0, 0x7ffffffffffffffe, 0x8000000000000000};
+    testInst("carry_s64", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x0, 0xfffffffffffffffd, 0x2};
+    testInst("carry_u64", testVec);
+  }
+}
+
+TEST(Instruction3Test, Div) {
+  {
+    const int32_t testVec[] = { -0x12abcdef, -0x380369cd, 0x3};
+    testInst("div_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x11111111, 0xffffffff, 0xf};
+    testInst("div_u32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x1, 0x7fffffffffffffff, 0x7ffffffffffffffe};
+    testInst("div_s64", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x10000020000, 0xfffffffffffffffe, 0xfffffe};
+    testInst("div_u64", testVec);
+  }
+}
+
+TEST(Instruction3Test, Rem) {
+  {
+    const int32_t testVec[] = { 0x0, 0x380369cd, 0x3};
+    testInst("rem_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x3, 0xffffffff, 0xe};
+    testInst("rem_u32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x2, 0x7fffffffffffffff, 0x7ffffffffffffffd};
+    testInst("rem_s64", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0xfffffffffffffffd,
+                                 0xfffffffffffffffd,
+                                 0xffffffffffffffff};
+    testInst("rem_u64", testVec);
+  }
+}
+
+TEST(Instruction3Test, Sub) {
+  {
+    const int32_t testVec[] = { 0xffffffff, 0x7ffffffe, 0x7fffffff };
+    testInst("sub_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfffffffe, 0xfffffffd, 0xffffffff };
+    testInst("sub_u32", testVec);
+  }
+}
+
+TEST(Instruction3Test, Shl) {
+  {
+    const int32_t testVec[] = { -506, -253, 33 };
+    testInst("shl_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 506, 253, 33 };
+    testInst("shl_u32", testVec);
+  }
+}
+
+TEST(Instruction3Test, Shr) {
+  {
+    const int32_t testVec[] = { 126, 253, 33 };
+    testInst("shr_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 126, 253, 33  };
+    testInst("shr_u32", testVec);
+  }
+}
+
+TEST(Instruction3Test, And) {
+  {
+    const uint32_t testVec[] = { 9, 13, 11 };
+    testInst("and_b32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 74898, 224694, 74898 };
+    testInst("and_b64", testVec);
+  }
+}
+
+TEST(Instruction3Test, Or) {
+  {
+    const uint32_t testVec[] = { 15, 13, 11 };
+    testInst("or_b32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 224694, 224694, 74898 };
+    testInst("or_b64", testVec);
+  }
+}
+
+TEST(Instruction3Test, Xor) {
+  {
+    const uint32_t testVec[] = { 6, 13, 11 };
+    testInst("xor_b32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 149796, 224694, 74898 };
+    testInst("xor_b64", testVec);
+  }
+}
+
+TEST(Instruction3Test, Unpackhi) {
+  {
+    const int32_t testVec[] = { 0x127e3474, 0x7e74feee, 0x12345678 };
+    testInst("unpackhi_s8x4", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x127e347456fe78ee,
+                                0x7e74feee0a0afffe,
+                                0x1234567812345678 };
+    testInst("unpackhi_s8x8", testVec);
+
+  }
+  {
+    const int32_t testVec[] = { 0x12347e74, 0x7e74feee, 0x12345678};
+    testInst("unpackhi_s16x2", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x12347e745678feee,
+                                0x7e74feee0a0afffe,
+                                0x1234567812345678 };
+    testInst("unpackhi_s16x4", testVec);
+
+  }
+}
+
+TEST(Instruction3Test, Unpacklo) {
+  {
+    const int32_t testVec[] = { 0x56fe78ee, 0x7e74feee, 0x12345678 };
+    testInst("unpacklo_s8x4", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x120a340a56ff78fe,
+                                0x7e74feee0a0afffe,
+                                0x1234567812345678 };
+    testInst("unpacklo_s8x8", testVec);
+
+  }
+  {
+    const int32_t testVec[] = { 0x5678feee, 0x7e74feee,0x12345678 };
+    testInst("unpacklo_s16x2", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x12340a0a5678fffe,
+                                0x7e74feee0a0afffe,
+                                0x1234567812345678 };
+    testInst("unpacklo_s16x4", testVec);
+
+  }
+  {
+    const int64_t testVec[] = { 0x123456780a0afffe,
+                                0x7e74feee0a0afffe,
+                                0x1234567812345678 };
+    testInst("unpacklo_s32x2", testVec);
+
+  }
+}
+
+TEST(Instruction3Test, Max) {
+  {
+    const int32_t testVec[] = { 0x7fffffff, 0x7fffffff, 0x80000000 };
+    testInst("max_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xffffffff, 0xfffffffe, 0xffffffff };
+    testInst("max_u32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x7ffffffffffffffe,
+                                0x7ffffffffffffffe,
+                                0x8000000000000001 };
+    testInst("max_s64", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0xffffffffffffffff,
+                                 0xffffffffffffffff,
+                                 0xfffffffffffffffe };
+    testInst("max_u64", testVec);
+  }
+}
+
+TEST(Instruction3Test, Min) {
+  {
+    const int32_t testVec[] = { 0x80000002, 0x7fffffff, 0x80000002 };
+    testInst("min_s32", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfffffffe, 0xfffffffe, 0xffffffff };
+    testInst("min_u32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 0x8000000000000001,
+                                0x7ffffffffffffffe,
+                                0x8000000000000001 };
+    testInst("min_s64", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0xfffffffffffffffe,
+                                 0xfffffffffffffffe,
+                                 0xfffffffffffffffe };
+    testInst("min_u64", testVec);
+  }
+}
+
+TEST(Instruction4Test, Fma) {
+  {
+    const float testVec[] = { 14.6, 1.1, 6, 8 };
+    testInst("fma_f32", testVec);
+  }
+  {
+    const double testVec[] = { 18.884888, 1.666, 6, 8.888888 };
+    testInst("fma_f64", testVec);
+  }
+}
+
+TEST(Instruction4Test, Mad) {
+  {
+    const float testVec[] = { 14.6, 1.1, 6, 8 };
+    testInst("mad_f32", testVec);
+  }
+}
+
+TEST(Instruction4Test, Bitselect) {
+  {
+    const uint32_t testVec[] = { 5, 6, 13, 7 };
+    testInst("bitselect_b32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 277, 546, 456, 789 };
+    testInst("bitselect_b64", testVec);
+  }
+}
+
+TEST(Instruction4Test, Extract) {
+  {
+    const uint32_t testVec[] = { 1, 134, 7, 22 };
+    testInst("extract_b32", testVec);
+  }
+}
+
+TEST(Instruction4Test, Shuffle) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__instruction4_test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1)\n"
+    "{\n"
+    "        shuffle_s8x4 $s1, 0x11223344, 0x55667788, 180;"
+    "        st_kernarg_u32 $s1, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0x66553344);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x66553344, *arg0);
+  delete arg0;
+  delete arg1;
+}
