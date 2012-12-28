@@ -3948,20 +3948,21 @@ TEST(BrigInstTest, BitSelect) {
 }
 
 TEST(BrigInstTest, Unpack) {
+  union { float f32; uint32_t u32; } result = { 255.0f };
   {
-    const uint32_t testVec[] = { 0xff, 0xff };
+    const uint32_t testVec[] = { result.u32, 0xff };
     testInst("unpack0", testVec);
   }
   {
-    const uint32_t testVec[] = { 0xff, 0xff00 };
+    const uint32_t testVec[] = { result.u32, 0xff00 };
     testInst("unpack1", testVec);
   }
   {
-    const uint32_t testVec[] = { 0xff, 0xff0000 };
+    const uint32_t testVec[] = { result.u32, 0xff0000 };
     testInst("unpack2", testVec);
   }
   {
-    const uint32_t testVec[] = { 0xff, 0xff000000 };
+    const uint32_t testVec[] = { result.u32, 0xff000000 };
     testInst("unpack3", testVec);
   }
 }

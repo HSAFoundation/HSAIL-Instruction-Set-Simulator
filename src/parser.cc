@@ -986,6 +986,12 @@ int Instruction2OpcodeNoDT(Context* context) {
   BrigAluModifier aluModifier = {0, 0, 0, 0, 0, 0, 0};
 
   inst.opcode = context->token_value.opcode;
+  if (inst.opcode == BrigUnpack0 ||
+      inst.opcode == BrigUnpack1 ||
+      inst.opcode == BrigUnpack2 ||
+      inst.opcode == BrigUnpack3) {
+    inst.type = Brigf32;
+  }
 
   context->token_to_scan = yylex();
   if (RoundingMode(context)) {

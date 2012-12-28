@@ -1150,7 +1150,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
     0,
     BrigEInstBase,
     BrigUnpack3,
-    Brigb32,
+    Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0}
   };
@@ -1176,7 +1176,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
     0,
     BrigEInstBase,
     BrigUnpack2,
-    Brigb32,
+    Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0}
   };
@@ -1202,7 +1202,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
     0,
     BrigEInstBase,
     BrigUnpack1,
-    Brigb32,
+    Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0}
   };
@@ -1228,7 +1228,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
     0,
     BrigEInstBase,
     BrigUnpack0,
-    Brigb32,
+    Brigf32,
     BrigNoPacking,
     {0, sizeof(reg1), 0, 0, 0}
   };

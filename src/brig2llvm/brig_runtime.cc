@@ -549,19 +549,19 @@ extern "C" u32 F2u4_u32(f32 w, f32 x, f32 y, f32 z){
              (lrint(z) & 0xFF));
 }
 
-extern "C" f32 Unpack3_b32(b32 w) {
+extern "C" f32 Unpack3_f32(b32 w) {
   return f32((w >> 24) & 0xFF);
 }
 
-extern "C" f32 Unpack2_b32(b32 w) {
+extern "C" f32 Unpack2_f32(b32 w) {
   return f32((w >> 16) & 0xFF);
 }
 
-extern "C" f32 Unpack1_b32(b32 w) {
+extern "C" f32 Unpack1_f32(b32 w) {
   return f32((w >> 8) & 0xFF);
 }
 
-extern "C" f32 Unpack0_b32(b32 w) {
+extern "C" f32 Unpack0_f32(b32 w) {
   return f32(w & 0xFF);
 }
 
@@ -605,7 +605,7 @@ extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
   return result + y;
 }
 
-extern "C" b32 Sad4hi_b32(b32 w, b32 x, b32 y) {
+extern "C" b32 Sad4Hi_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
   for(unsigned i = 0; i < 4; ++i){
     result += Sad_b32((w >> i * 8) & 0xFF,

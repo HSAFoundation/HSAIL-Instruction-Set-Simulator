@@ -848,26 +848,26 @@ MakeTest(F2u4_u32, F2u4_u32_Logic)
 static void Unpack3Logic(f32 result, b32 a) {
   EXPECT_EQ(result, (a >> 24) & 0xFF);
 }
-extern "C" f32 Unpack3_b32(b32);
-MakeTest(Unpack3_b32, Unpack3Logic)
+extern "C" f32 Unpack3_f32(b32);
+MakeTest(Unpack3_f32, Unpack3Logic)
 
 static void Unpack2Logic(f32 result, b32 a) {
   EXPECT_EQ(result, (a >> 16) & 0xFF);
 }
-extern "C" f32 Unpack2_b32(b32);
-MakeTest(Unpack2_b32, Unpack2Logic)
+extern "C" f32 Unpack2_f32(b32);
+MakeTest(Unpack2_f32, Unpack2Logic)
 
 static void Unpack1Logic(f32 result, b32 a) {
   EXPECT_EQ(result, (a >> 8) & 0xFF);
 }
-extern "C" f32 Unpack1_b32(b32);
-MakeTest(Unpack1_b32, Unpack1Logic)
+extern "C" f32 Unpack1_f32(b32);
+MakeTest(Unpack1_f32, Unpack1Logic)
 
 static void Unpack0Logic(f32 result, b32 a) {
   EXPECT_EQ(result, (a & 0xFF));
 }
-extern "C" f32 Unpack0_b32(b32);
-MakeTest(Unpack0_b32, Unpack0Logic)
+extern "C" f32 Unpack0_f32(b32);
+MakeTest(Unpack0_f32, Unpack0Logic)
 
 static void BitAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
   if(c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {
@@ -938,7 +938,7 @@ static void Sad4_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
 extern "C" b32 Sad4_b32(b32, b32, b32);
 MakeTest(Sad4_b32, Sad4_b32_Logic)
 
-static void Sad4hi_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+static void Sad4Hi_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
   EXPECT_EQ(((abs((a & 0xFF) - (b & 0xFF)) +
               abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF)) +
               abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF)) +
@@ -946,8 +946,8 @@ static void Sad4hi_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
             c,
             result);
 }
-extern "C" b32 Sad4hi_b32(b32, b32, b32);
-MakeTest(Sad4hi_b32, Sad4hi_b32_Logic)
+extern "C" b32 Sad4Hi_b32(b32, b32, b32);
+MakeTest(Sad4Hi_b32, Sad4Hi_b32_Logic)
 
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)
