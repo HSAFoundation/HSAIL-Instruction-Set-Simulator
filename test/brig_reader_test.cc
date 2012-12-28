@@ -4500,3 +4500,445 @@ TEST(BrigKernelTest, testLd) {
     testLd("u16", "u32",  result, value, bits);
   }
 }
+
+
+TEST(Instruction2Test, Abs) {
+  {
+    const int32_t testVec[] = { 1, 1 };
+    testInst("abs_s32", testVec);
+  }
+  {
+    const int32_t testVec[] = { 1, -1 };
+    testInst("abs_s32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 3, -3 };
+    testInst("abs_s64", testVec);
+  }
+
+  {
+    //_s8x4(-1,0,-1,0)
+    const int32_t testVec[] = { 0x1000100, 0xff00ff00 };
+    testInst("abs_p_s8x4", testVec);
+  }
+  {
+    //_s8x8(-1,0,-1,0,-1,0,-1,0)
+    const int64_t testVec[] = {0x100010001000100, 0xff00ff00ff00ff00};
+    testInst("abs_p_s8x8", testVec);
+  }
+  {
+    //_s16x2(-1,-1)
+    const int32_t testVec[] = { 0x10001, 0xffffffff };
+    testInst("abs_p_s16x2", testVec);
+  }
+  {
+    //_s16x4(-1,0,-1,0)
+    const int64_t testVec[] = {0x1000000010000, 0xffff0000ffff0000};
+    testInst("abs_p_s16x4", testVec);
+  }
+
+  {
+    //_s32x2(-2,-2)
+    const int64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    testInst("abs_p_s32x2", testVec);
+  }
+/*
+  {
+    //_s8x4(-1,0,-1,0)
+    const int32_t testVec[] = { 0x0, 0xff00ff00 };
+    testInst("abs_s_s8x4", testVec);
+  }
+  {
+    //_s8x8(-1,0,-1,0,-1,0,-1,0)
+    const int64_t testVec[] = {0x0, 0xff00ff00ff00ff00};
+    testInst("abs_s_s8x8", testVec);
+  }
+  {
+    //_s16x2(-1,-1)
+    const int32_t testVec[] = { 0x1, 0xffffffff };
+    testInst("abs_s_s16x2", testVec);
+  }
+  {
+    //_s16x4(-1,0,-1,0)
+    const int64_t testVec[] = {0x0, 0xffff0000ffff0000};
+    testInst("abs_s_s16x4", testVec);
+  }
+  {
+    //_s32x2(-2,-2)
+    const int64_t testVec[] = { 0x2, 0xfffffffefffffffe };
+    testInst("abs_s_s32x2", testVec);
+  }
+
+  {
+    const float testVec[] = { 1.2f, -1.2f };
+    testInst("abs_f32", testVec);
+  }
+  {
+    const double testVec[] = { 1.2, -1.2 };
+    testInst("abs_f64", testVec);
+  }
+  {
+    //_f32x2(-2.0f,-2.0f)
+    const uint64_t testVec[] = { 0x2, 0xfffffffefffffffe };
+    testInst("abs_s_f32x2", testVec);
+  }
+  {
+    //_f32x2(-2.0f,-2.0f)
+    const uint64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    testInst("abs_p_f32x2", testVec);
+  }
+*/
+}
+
+TEST(Instruction2Test, Neg) {
+  {
+    const int32_t testVec[] = { -1, 1 };
+    testInst("neg_s32", testVec);
+  }
+  {
+    const int32_t testVec[] = { 1, -1 };
+    testInst("neg_s32", testVec);
+  }
+  {
+    const int64_t testVec[] = { 3, -3 };
+    testInst("neg_s64", testVec);
+  }
+
+  {
+    //_s8x4(-1,0,-1,0)
+    const int32_t testVec[] = { 0x1000100, 0xff00ff00 };
+    testInst("neg_p_s8x4", testVec);
+  }
+  {
+    //_s8x8(-1,0,-1,0,-1,0,-1,0)
+    const int64_t testVec[] = {0x100010001000100, 0xff00ff00ff00ff00};
+    testInst("neg_p_s8x8", testVec);
+  }
+  {
+    //_s16x2(-1,-1)
+    const int32_t testVec[] = { 0x10001, 0xffffffff };
+    testInst("neg_p_s16x2", testVec);
+  }
+  {
+    //_s16x4(-1,0,-1,0)
+    const int64_t testVec[] = {0x1000000010000, 0xffff0000ffff0000};
+    testInst("neg_p_s16x4", testVec);
+  }
+
+  {
+    //_s32x2(-2,-2)
+    const int64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    testInst("neg_p_s32x2", testVec);
+  }
+/*
+  {
+    //_s8x4(-1,0,-1,0)
+    const int32_t testVec[] = { 0x0, 0xff00ff00 };
+    testInst("neg_s_s8x4", testVec);
+  }
+  {
+    //_s8x8(-1,0,-1,0,-1,0,-1,0)
+    const int64_t testVec[] = {0x0, 0xff00ff00ff00ff00};
+    testInst("neg_s_s8x8", testVec);
+  }
+  {
+    //_s16x2(-1,-1)
+    const int32_t testVec[] = { 0x1, 0xffffffff };
+    testInst("neg_s_s16x2", testVec);
+  }
+  {
+    //_s16x4(-1,0,-1,0)
+    const int64_t testVec[] = {0x0, 0xffff0000ffff0000};
+    testInst("neg_s_s16x4", testVec);
+  }
+  {
+    //_s32x2(-2,-2)
+    const int64_t testVec[] = { 0x2, 0xfffffffefffffffe };
+    testInst("neg_s_s32x2", testVec);
+  }
+  {
+    //_f32x2(-2.0f,-2.0f)
+    const uint64_t testVec[] = { 0x2, 0xfffffffefffffffe };
+    testInst("neg_s_f32x2", testVec);
+  }
+ {
+    //_f32x2(-2.0f,-2.0f)
+    const uint64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    testInst("neg_p_f32x2", testVec);
+  }
+*/
+  {
+    const float testVec[] = { 1.2f, -1.2f };
+    testInst("neg_f32", testVec);
+  }
+  {
+    const double testVec[] = { 1.2, -1.2 };
+    testInst("neg_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Not) {
+  {
+  const uint32_t testVec[] = { 0x0, 0xffffffff };
+  testInst("not_b32", testVec);
+  }
+  {
+  const uint64_t testVec[] = { 0xffffffffffffffff, 0x0 };
+  testInst("not_b64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Popcount) {
+  {
+  const uint32_t testVec[] = { 0x0, 0x00000000 };
+  testInst("popcount_b32", testVec);
+  }
+  {
+  const uint32_t testVec[] = { 24, 0x00ffffff };
+  testInst("popcount_b32", testVec);
+  }
+  {
+  const uint32_t testVec[] = { 31, 0x7fffffff };
+  testInst("popcount_b32", testVec);
+  }
+  {
+  const uint32_t testVec[] = { 25, 0x01ffffff };
+  testInst("popcount_b32", testVec);
+  }
+  {
+  const uint32_t testVec[] = { 32, 0xffffffff };
+  testInst("popcount_b32", testVec);
+  }
+  {
+  const uint32_t testVec[] = { 20, 0xffff0f00 };
+  testInst("popcount_b32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Bitrev) {
+  {
+  const uint32_t testVec[] = { 0x1e6a2c48, 0x12345678 };
+  testInst("bitrev_b32", testVec);
+  }
+ {
+  const uint32_t testVec[] = { 0x12345678, 0x1e6a2c48 };
+  testInst("bitrev_b32", testVec);
+  }
+ {
+  const uint64_t testVec[] = { 0x1234567812345678, 0x1e6a2c481e6a2c48 };
+  testInst("bitrev_b64", testVec);
+  }
+}
+
+TEST(Instruction2Test, FirstBit) {
+  {
+  const uint32_t testVec[] = { 0, 0xffffffff };
+  testInst("firstbit_b32", testVec);
+  }
+  {
+  const uint32_t testVec[] = { 1, 0x7fffffff };
+  testInst("firstbit_b32", testVec);
+  }
+/*
+  {
+  const uint64_t testVec[] = { 7, 0x01ffffffffffffff };
+  testInst("firstbit_b64", testVec);
+  }
+*/
+  {
+  const int32_t testVec[] = { -1, 0x0};
+  testInst("firstbit_b32", testVec);
+  }
+}
+
+TEST(Instruction2Test, LastBit) {
+  {
+  const uint32_t testVec[] = { 0, 0xffffffff };
+  testInst("lastbit_b32", testVec);
+  }
+  {
+  const uint32_t testVec[] = { 0, 0x7fffffff };
+  testInst("lastbit_b32", testVec);
+  }
+  {
+  const uint32_t testVec[] = { 0, 0x01ffffff };
+  testInst("lastbit_b32", testVec);
+  }
+/*
+  {
+  const uint64_t testVec[] = { 8, 0xffffffffffff0f00 };
+  testInst("lastbit_b64", testVec);
+  }
+*/
+  {
+  const int32_t testVec[] = { -1, 0x0};
+  testInst("lastbit_b32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Mov) {
+  {
+  const uint32_t testVec[] = { 0x7fffffff, 0x7fffffff };
+  testInst("mov_b32", testVec);
+  }
+  {
+  const uint64_t testVec[] = { 0xffffffffffff0f00, 0xffffffffffff0f00 };
+  testInst("mov_b64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Unpack3) {
+  {
+  const uint32_t testVec[] = { 127.0f, 0x7fffffff };
+  testInst("unpack3", testVec);
+  }
+}
+
+TEST(Instruction2Test, Unpack2) {
+  {
+  const uint32_t testVec[] = { 175.0f, 0x7eafffff };
+  testInst("unpack2", testVec);
+  }
+}
+
+TEST(Instruction2Test, Unpack1) {
+  {
+  const uint32_t testVec[] = { 255.0f, 0x7eafffff };
+  testInst("unpack1", testVec);
+  }
+}
+
+TEST(Instruction2Test, Unpack0) {
+  {
+  const uint32_t testVec[] = { 126.0f, 0xff7e };
+  testInst("unpack0", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fcos) {
+  {
+  const float testVec[] = { 1.0f, 0.0f };
+  testInst("fcos_f32", testVec);
+  }
+ {
+  const float testVec[] = { 1.0f, 0.0f };
+  testInst("fcos_ftz_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fsin) {
+  {
+  const float testVec[] = { 1.0f, M_PI/2 };
+  testInst("fsin_f32", testVec);
+  }
+ {
+  const float testVec[] = { 1.0f, M_PI/2 };
+  testInst("fsin_ftz_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Flog2) {
+  {
+  const float testVec[] = { 2.0f, 4.0f };
+  testInst("flog2_f32", testVec);
+  }
+ {
+  const float testVec[] = { 2.0f, 4.0f };
+  testInst("flog2_ftz_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fexp2) {
+  {
+  const float testVec[] = { 16.0f, 4.0f };
+  testInst("fexp2_f32", testVec);
+  }
+ {
+  const float testVec[] = { 16.0f, 4.0f };
+  testInst("fexp2_ftz_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Fsqrt) {
+  {
+  const float testVec[] = { 2.0f, 4.0f };
+  testInst("fsqrt_f32", testVec);
+  }
+ {
+  const float testVec[] = { 2.0f, 4.0f };
+  testInst("fsqrt_ftz_f32", testVec);
+  }
+  {
+  const double testVec[] = { 2.0, 4.0 };
+  testInst("fsqrt_f64", testVec);
+  }
+ {
+  const double testVec[] = { 2.0, 4.0 };
+  testInst("fsqrt_ftz_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Copysign) {
+  {
+  const float testVec[] = { -456.5f, 456.5f, -0.22f };
+  testInst("copysign_f32", testVec);
+  }
+}
+
+TEST(Instruction2Test, Frsqrt) {
+  {
+  const float testVec[] = { 0.5f, 4.0f };
+  testInst("frsqrt_f32", testVec);
+  }
+ {
+  const float testVec[] = { 0.5f, 4.0f };
+  testInst("frsqrt_ftz_f32", testVec);
+  }
+  {
+  const double testVec[] = { 0.5, 4.0 };
+  testInst("frsqrt_f64", testVec);
+  }
+ {
+  const double testVec[] = { 0.5, 4.0 };
+  testInst("frsqrt_ftz_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Frcp) {
+  {
+  const float testVec[] = { 0.25f, 4.0f };
+  testInst("frcp_f32", testVec);
+  }
+ {
+  const float testVec[] = { 0.25f, 4.0f };
+  testInst("frcp_ftz_f32", testVec);
+  }
+  {
+  const double testVec[] = { 0.25, 4.0 };
+  testInst("frcp_f64", testVec);
+  }
+ {
+  const double testVec[] = { 0.25, 4.0 };
+  testInst("frcp_ftz_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Sqrt) {
+  {
+  const float testVec[] = { 2.0f, 4.0f };
+  testInst("sqrt_f32", testVec);
+  }
+ {
+  const float testVec[] = { 2.0f, 4.0f };
+  testInst("sqrt_ftz_f32", testVec);
+  }
+  {
+  const double testVec[] = { 2.0, 4.0 };
+  testInst("sqrt_f64", testVec);
+  }
+ {
+  const double testVec[] = { 2.0, 4.0 };
+  testInst("sqrt_ftz_f64", testVec);
+  }
+}
+
