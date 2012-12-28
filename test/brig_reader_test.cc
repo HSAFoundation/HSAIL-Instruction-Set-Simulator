@@ -5238,3 +5238,30 @@ TEST(Instruction4Test, Shuffle) {
   delete arg0;
   delete arg1;
 }
+
+TEST(BrigInstTest, VectorSad4hi) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        sad4hi_b32 $s1, 0x22221111, 0x11112222, 0x10010001;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t( 0x10450001 );
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x10450001, *arg0);
+ delete arg0;
+ delete arg1;
+}
