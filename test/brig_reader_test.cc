@@ -5272,3 +5272,17 @@ TEST(BrigInstTest, PackedCmov) {
     testInst("cmov_s8x4", testVec);
   }
 }
+
+TEST(BrigInstTest, PackedShr) {
+  {
+    const uint32_t testVec[] = { 0, 0, 0 };
+    testInst("shr_s8x4", testVec);
+  }
+}
+
+TEST(BrigInstTest, PackedShl) {
+  {
+    const uint32_t testVec[] = { 0, 0, 0 };
+    testInst("shl_s8x4", testVec);
+  }
+}
