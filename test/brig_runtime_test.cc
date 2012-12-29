@@ -601,12 +601,12 @@ template<class T> static void CmovLogic(T result, T a, T b, T c) {
 }
 TestAll(BitInst, Cmov, Ternary)
 
-template<class T> static void CmovVectorLogic(T result, T a, T b, T c) {
+template<class T> static void Cmov_PPVectorLogic(T result, T a, T b, T c) {
   ForEach(CmovLogic, result, a, b, c);
 }
-TestAll(SignedVectorInst, Cmov, Ternary)
-TestAll(UnsignedVectorInst, Cmov, Ternary)
-TestAll(FloatVectorInst, Cmov, Ternary)
+TestAll(SignedVectorInst, Cmov_PP, Ternary)
+TestAll(UnsignedVectorInst, Cmov_PP, Ternary)
+TestAll(FloatVectorInst, Cmov_PP, Ternary)
 
 template<class T> static void FractLogic(T result, T a) {
 

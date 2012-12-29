@@ -5265,3 +5265,10 @@ TEST(BrigInstTest, VectorSad4hi) {
  delete arg0;
  delete arg1;
 }
+
+TEST(BrigInstTest, PackedCmov) {
+  {
+    const uint32_t testVec[] = { 0, 0, 0, 0 };
+    testInst("cmov_s8x4", testVec);
+  }
+}
