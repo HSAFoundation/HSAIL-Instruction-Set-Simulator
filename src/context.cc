@@ -295,47 +295,6 @@ void Context::initialize_statement_fields(void){
   storageClass = BrigFlatSpace;
 }
 
-// check context
-uint16_t Context::get_alignment() const {
-  return alignment;
-}
-
-BrigAttribute16_t Context::get_attribute() const {
-  return attribute;
-}
-
-BrigAluModifier Context::get_alu_modifier() const {
-  return aluModifier;
-}
-
-uint32_t Context::get_symbol_modifier() const {
-  return symModifier;
-}
-
-BrigMachine16_t Context::get_machine() const {
-  return machine;
-}
-
-BrigProfile16_t Context::get_profile() const {
-  return profile;
-}
-
-BrigDataType16_t Context::get_type() const {
-  return type;
-}
-
-uint32_t Context::get_dim() const {
-  return dim;
-}
-
-bool Context::get_isArray() const {
-  return is_array;
-}
-
-BrigStorageClass32_t Context::get_storageClass() const {
-  return storageClass;
-}
-
 BrigdOffset32_t Context::get_symbol(std::string name) {
   if (arg_symbol_map.count(name)) {
     return arg_symbol_map[name];
@@ -347,48 +306,6 @@ BrigdOffset32_t Context::get_symbol(std::string name) {
   return 0;
 }
 
-// set context
-void Context::set_alu_modifier(BrigAluModifier modifier) {
-  this->aluModifier = modifier;
-}
-
-void Context::set_symbol_modifier(BrigSymbolModifier modifier) {
-  this->symModifier |= ((uint32_t)(modifier));
-}
-
-void Context::set_attribute(BrigAttribute16_t attrib) {
-  this->attribute = attrib;
-}
-
-void Context::set_alignment(uint16_t align) {
-  this->alignment = align;
-}
-
-
-void Context::set_machine(BrigMachine16_t machine) {
-  this->machine = machine;
-}
-
-void Context::set_profile(BrigProfile16_t profile) {
-  this->profile = profile;
-}
-
-void Context::set_type(BrigDataType16_t type) {
-  this->type = type;
-}
-
-void Context::set_dim(uint32_t dim) {
-  this->dim = dim;
-}
-
-void Context::set_isArray(bool is_array) {
-  this->is_array = is_array;
-}
-
-void Context::set_storageClass(BrigStorageClass32_t storageClass) {
-  this->storageClass = storageClass;
-}
-
 // the operationCount of BrigDirectiveFunction add by 1
 void Context::update_bdf_operation_count(){
   BrigDirectiveFunction bdf;
@@ -398,8 +315,8 @@ void Context::update_bdf_operation_count(){
   unsigned char * bdf_charp =
       reinterpret_cast<unsigned char*>(&bdf);
   this->update_directive_bytes(bdf_charp,
-                                 this->current_bdf_offset,
-                                 sizeof(bdf));
+                               this->current_bdf_offset,
+                               sizeof(bdf));
 }
 
 }  // namespace brig
