@@ -5231,7 +5231,7 @@ TEST(Instruction4Test, Shuffle) {
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
-  uint32_t *arg1 = new uint32_t(0x66553344);
+  uint32_t *arg1 = new uint32_t(0);
   void *args[] = { arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0x66553344, *arg0);
@@ -5239,7 +5239,7 @@ TEST(Instruction4Test, Shuffle) {
   delete arg1;
 }
 
-TEST(BrigInstTest, VectorSad4hi) {
+TEST(Instruction4Test, Sad4hi) {
   hsa::brig::BrigProgram BP = TestHSAIL(
   "version 1:0:$small;\n"
   "\n"
@@ -5257,13 +5257,613 @@ TEST(BrigInstTest, VectorSad4hi) {
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
-  uint32_t *arg0 = new uint32_t( 0x10450001 );
+  uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
   void *args[] = { arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0x10450001, *arg0);
- delete arg0;
- delete arg1;
+  delete arg0;
+  delete arg1;
+}
+
+TEST(Instruction4Test, Sad) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        sad_b32 $s1, 0x22222222, 0x11111111, 0x1;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x11111112, *arg0);
+  delete arg0;
+  delete arg1;
+}
+
+TEST(Instruction4Test, Sad2) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$large;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        sad2_b32 $s1, 0x22232222, 0x11111111, 0x1;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x2224, *arg0);
+  delete arg0;
+  delete arg1;
+}
+
+TEST(Instruction4Test, Sad4) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$large;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        sad4_b32 $s1, 0x22221111, 0x11112222, 0x10010001;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x10010045, *arg0);
+  delete arg0;
+  delete arg1;
+}
+
+TEST(Instruction4Test, Cmov_32) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        cmov_b32 $s1, 0, 13, 7;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(7, *arg0);
+  delete arg0;
+  delete arg1;
+}
+
+TEST(Instruction4Test, Cmov_64) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$large;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u64 %result, \n"
+  "        kernarg_u64 %input1)\n"
+  "{\n"
+  "        cmov_b64 $d1, 14473758, 0x5555666677778888, 14473758;"
+  "        st_kernarg_u64 $d1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint64_t *arg0 = new uint64_t(0);
+  uint64_t *arg1 = new uint64_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(14473758, *arg0);
+  delete arg0;
+  delete arg1;
+}
+
+TEST(AtomTest, And) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atom_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomic_and_s32 $s3, [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x12345678, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomTest, Or) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atom_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomic_or_s32 $s3, [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xffffffff, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomTest, Xor) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atom_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomic_xor_s32 $s3, [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xedcba987, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomTest, Exch) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atom_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomic_exch_s32 $s3, [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xffffffff, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomTest, Add) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atom_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomic_add_s32 $s3, [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x12345677, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomTest, Sub) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atom_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomic_sub_s32 $s3, [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(3);
+  int32_t *arg2 = new int32_t(23);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(20, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomTest, Max) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atom_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomic_max_s32 $s3, [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(23);
+  int32_t *arg2 = new int32_t(3);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(23, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomTest, Min) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atom_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomic_min_s32 $s3, [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(23);
+  int32_t *arg2 = new int32_t(3);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(3, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomicNoRetTest, And) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atomicnoret_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomicNoRet_and_s32 [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x12345678, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomicNoRetTest, Or) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atomicnoret_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomicNoRet_or_s32 [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xffffffff, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomicNoRetTest, Xor) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atomicnoret_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomicNoRet_xor_s32 [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xedcba987, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomicNoRetTest, Add) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atomicnoret_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomicNoRet_add_s32 [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(0xffffffff);
+  int32_t *arg2 = new int32_t(0x12345678);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x12345677, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomicNoRetTest, Sub) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atomicnoret_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomicNoRet_sub_s32 [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(23);
+  int32_t *arg2 = new int32_t(3);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(-20, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomicNoRetTest, Max) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atomicnoret_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomicNoRet_max_s32 [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(23);
+  int32_t *arg2 = new int32_t(3);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(23, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+}
+
+TEST(AtomicNoRetTest, Min) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 1:0:$large;\n"
+    "\n"
+    "kernel &__atomicnoret_test_kernel(\n"
+    "        kernarg_s32 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_s32 $s1, [%input1] ;\n"
+    "        atomicNoRet_min_s32 [%input2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [%input2] ;\n"
+    "        st_kernarg_s32 $s2, [%result] ;\n"
+
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  int32_t *arg0 = new int32_t(0);
+  int32_t *arg1 = new int32_t(3);
+  int32_t *arg2 = new int32_t(23);
+  void *args[] = { arg0, arg1, arg2 };
+  BE.launch(fun, args);
+  EXPECT_EQ(3, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
 }
 
 TEST(BrigInstTest, PackedCmov) {
