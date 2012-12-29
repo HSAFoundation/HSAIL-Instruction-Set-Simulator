@@ -429,7 +429,11 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
     return runOnType(C, BrigDataType(cvt->stype));
 
   if((inst->opcode == BrigShr && opnum == 2) ||
-     (inst->opcode == BrigShl && opnum == 2))
+     (inst->opcode == BrigShl && opnum == 2) ||
+     (inst->opcode == BrigUnpack0 && opnum == 1) ||
+     (inst->opcode == BrigUnpack1 && opnum == 1) ||
+     (inst->opcode == BrigUnpack2 && opnum == 1) ||
+     (inst->opcode == BrigUnpack3 && opnum == 1))
     return runOnType(C, Brigu32);
 
   if((inst->opcode == BrigShuffle && opnum == 3) ||
