@@ -3833,12 +3833,12 @@ TEST(BrigPacked, testPackedConstants) {
   }
   {
     unsigned bits = 64;
-    uint64_t result = uint64_t(0x1700380022000a);
+    uint64_t result = uint64_t(0x1700380022000aLL);
     testPackedConstants(bits, "_s16x4(23, 56, 34,10)", result, "s16x4");
   }
   {
     unsigned bits = 64;
-    uint64_t result = uint64_t(0x1000000010000);
+    uint64_t result = uint64_t(0x1000000010000LL);
     testPackedConstants(bits, "_u16x4(1, 0, 1, 0)", result, "u16x4");
   }
   {
@@ -3853,13 +3853,13 @@ TEST(BrigPacked, testPackedConstants) {
   }
   {
     unsigned bits = 64;
-    uint64_t result = uint64_t(0x1738220a00000000);
+    uint64_t result = uint64_t(0x1738220a00000000LL);
     testPackedConstants(bits, "_s8x8(23, 56, 34, 10, 0, 0, 0, 0)",
                         result, "s8x8");
   }
   {
     unsigned bits = 64;
-    uint64_t result = uint64_t(0x400000003f800000);
+    uint64_t result = uint64_t(0x400000003f800000LL);
     testPackedConstants(bits, "_f32x2(0d4000000000000000, 0d3ff0000000000000)",
                         result, "f32x2");
   }
@@ -4044,7 +4044,7 @@ TEST(BrigKernelTest, MovsLo) {
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
-  uint64_t *arg1 = new uint64_t(0xffffffff00000000);
+  uint64_t *arg1 = new uint64_t(0xffffffff00000000LL);
   void *args[] = { arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0, *arg0);
@@ -4072,7 +4072,7 @@ TEST(BrigKernelTest, MovsHi) {
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
-  uint64_t *arg1 = new uint64_t(0xffffffff00000000);
+  uint64_t *arg1 = new uint64_t(0xffffffff00000000LL);
   void *args[] = { arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0xffffffff, *arg0);
@@ -4100,12 +4100,12 @@ TEST(BrigKernelTest, MovdLo) {
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction3_test_kernel");
-  uint64_t *arg0 = new uint64_t(0);
-  uint64_t *arg1 = new uint64_t(0xffffffff00000000);
+  uint64_t *arg0 = new uint64_t(0LL);
+  uint64_t *arg1 = new uint64_t(0xffffffff00000000LL);
   uint32_t *arg2 = new uint32_t(0x12345678);
   void *args[] = { arg0, arg1, arg2 };
   BE.launch(fun, args);
-  EXPECT_EQ(0xffffffff12345678, *arg0);
+  EXPECT_EQ(0xffffffff12345678LL, *arg0);
   delete arg0;
   delete arg1;
   delete arg2;
@@ -4131,12 +4131,12 @@ TEST(BrigKernelTest, MovdHi) {
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction3_test_kernel");
-  uint64_t *arg0 = new uint64_t(0);
-  uint64_t *arg1 = new uint64_t(0xffffffff00000000);
+  uint64_t *arg0 = new uint64_t(0LL);
+  uint64_t *arg1 = new uint64_t(0xffffffff00000000LL);
   uint32_t *arg2 = new uint32_t(0x12345678);
   void *args[] = { arg0, arg1, arg2 };
   BE.launch(fun, args);
-  EXPECT_EQ(0x12345678ffffffff, *arg0);
+  EXPECT_EQ(0x12345678ffffffffLL, *arg0);
   delete arg0;
   delete arg1;
   delete arg2;
@@ -4549,7 +4549,7 @@ TEST(Instruction2Test, Abs) {
   }
   {
     //_s8x8(-1,0,-1,0,-1,0,-1,0)
-    const int64_t testVec[] = {0x100010001000100, 0xff00ff00ff00ff00};
+    const int64_t testVec[] = {0x100010001000100LL, 0xff00ff00ff00ff00LL};
     testInst("abs_p_s8x8", testVec);
   }
   {
@@ -4559,12 +4559,12 @@ TEST(Instruction2Test, Abs) {
   }
   {
     //_s16x4(-1,0,-1,0)
-    const int64_t testVec[] = {0x1000000010000, 0xffff0000ffff0000};
+    const int64_t testVec[] = {0x1000000010000LL, 0xffff0000ffff0000LL};
     testInst("abs_p_s16x4", testVec);
   }
   {
     //_s32x2(-2,-2)
-    const int64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    const int64_t testVec[] = { 0x200000002LL, 0xfffffffefffffffeLL };
     testInst("abs_p_s32x2", testVec);
   }
 }
@@ -4590,7 +4590,7 @@ TEST(Instruction2Test, Neg) {
   }
   {
     //_s8x8(-1,0,-1,0,-1,0,-1,0)
-    const int64_t testVec[] = {0x100010001000100, 0xff00ff00ff00ff00};
+    const int64_t testVec[] = {0x100010001000100LL, 0xff00ff00ff00ff00LL};
     testInst("neg_p_s8x8", testVec);
   }
   {
@@ -4600,12 +4600,12 @@ TEST(Instruction2Test, Neg) {
   }
   {
     //_s16x4(-1,0,-1,0)
-    const int64_t testVec[] = {0x1000000010000, 0xffff0000ffff0000};
+    const int64_t testVec[] = {0x1000000010000LL, 0xffff0000ffff0000LL};
     testInst("neg_p_s16x4", testVec);
   }
   {
     //_s32x2(-2,-2)
-    const int64_t testVec[] = { 0x200000002, 0xfffffffefffffffe };
+    const int64_t testVec[] = { 0x200000002LL, 0xfffffffefffffffeLL };
     testInst("neg_p_s32x2", testVec);
   }
   {
@@ -4624,7 +4624,7 @@ TEST(Instruction2Test, Not) {
     testInst("not_b32", testVec);
   }
   {
-    const uint64_t testVec[] = { 0xffffffffffffffff, 0x0 };
+    const uint64_t testVec[] = { 0xffffffffffffffffLL, 0x0LL };
     testInst("not_b64", testVec);
   }
 }
@@ -4666,7 +4666,7 @@ TEST(Instruction2Test, Bitrev) {
     testInst("bitrev_b32", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x1234567812345678, 0x1e6a2c481e6a2c48 };
+    const uint64_t testVec[] = { 0x1234567812345678LL, 0x1e6a2c481e6a2c48LL };
     testInst("bitrev_b64", testVec);
   }
 }
@@ -4711,7 +4711,7 @@ TEST(Instruction2Test, Mov) {
     testInst("mov_b32", testVec);
   }
   {
-    const uint64_t testVec[] = { 0xffffffffffff0f00, 0xffffffffffff0f00 };
+    const uint64_t testVec[] = { 0xffffffffffff0f00LL, 0xffffffffffff0f00LL };
     testInst("mov_b64", testVec);
   }
 }
@@ -4912,13 +4912,13 @@ TEST(Instruction3Test, Add) {
     testInst("add_s32", testVec);
   }
   {
-    const int64_t testVec[] = { 0xfffffffffffffffe,
-                                0x7ffffffffffffffe,
-                                0x8000000000000000};
+    const int64_t testVec[] = { 0xfffffffffffffffeLL,
+                                0x7ffffffffffffffeLL,
+                                0x8000000000000000LL };
     testInst("add_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x1, 0xfffffffffffffffe, 0x3};
+    const uint64_t testVec[] = { 0x1LL, 0xfffffffffffffffeLL, 0x3LL};
     testInst("add_u64", testVec);
   }
   {
@@ -4938,11 +4938,11 @@ TEST(Instruction3Test, Borrow) {
     testInst("borrow_u32", testVec);
   }
   {
-    const int64_t testVec[] = { 0x1, 0x7fffffffffffffff, 0x8000000000000000};
+    const int64_t testVec[] = { 0x1, 0x7fffffffffffffffLL, 0x8000000000000000LL};
     testInst("borrow_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x00, 0xfffffffffffffffe, 0x3};
+    const uint64_t testVec[] = { 0x00LL, 0xfffffffffffffffeLL, 0x3LL};
     testInst("borrow_u64", testVec);
   }
 }
@@ -4957,11 +4957,11 @@ TEST(Instruction3Test, Carry) {
     testInst("carry_u32", testVec);
   }
   {
-    const int64_t testVec[] = { 0x0, 0x7ffffffffffffffe, 0x8000000000000000};
+    const int64_t testVec[] = { 0x0LL, 0x7ffffffffffffffeLL, 0x8000000000000000LL};
     testInst("carry_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x0, 0xfffffffffffffffd, 0x2};
+    const uint64_t testVec[] = { 0x0LL, 0xfffffffffffffffdLL, 0x2LL};
     testInst("carry_u64", testVec);
   }
 }
@@ -4976,11 +4976,11 @@ TEST(Instruction3Test, Div) {
     testInst("div_u32", testVec);
   }
   {
-    const int64_t testVec[] = { 0x1, 0x7fffffffffffffff, 0x7ffffffffffffffe};
+    const int64_t testVec[] = { 0x1LL, 0x7fffffffffffffffLL, 0x7ffffffffffffffeLL};
     testInst("div_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x10000020000, 0xfffffffffffffffe, 0xfffffe};
+    const uint64_t testVec[] = { 0x10000020000LL, 0xfffffffffffffffeLL, 0xfffffeLL};
     testInst("div_u64", testVec);
   }
 }
@@ -4995,13 +4995,13 @@ TEST(Instruction3Test, Rem) {
     testInst("rem_u32", testVec);
   }
   {
-    const int64_t testVec[] = { 0x2, 0x7fffffffffffffff, 0x7ffffffffffffffd};
+    const int64_t testVec[] = { 0x2LL, 0x7fffffffffffffffLL, 0x7ffffffffffffffdLL};
     testInst("rem_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0xfffffffffffffffd,
-                                 0xfffffffffffffffd,
-                                 0xffffffffffffffff};
+    const uint64_t testVec[] = { 0xfffffffffffffffdLL,
+                                 0xfffffffffffffffdLL,
+                                 0xffffffffffffffffLL};
     testInst("rem_u64", testVec);
   }
 }
@@ -5045,7 +5045,7 @@ TEST(Instruction3Test, And) {
     testInst("and_b32", testVec);
   }
   {
-    const uint64_t testVec[] = { 74898, 224694, 74898 };
+    const uint64_t testVec[] = { 74898LL, 224694LL, 74898LL };
     testInst("and_b64", testVec);
   }
 }
@@ -5056,7 +5056,7 @@ TEST(Instruction3Test, Or) {
     testInst("or_b32", testVec);
   }
   {
-    const uint64_t testVec[] = { 224694, 224694, 74898 };
+    const uint64_t testVec[] = { 224694LL, 224694LL, 74898LL };
     testInst("or_b64", testVec);
   }
 }
@@ -5067,7 +5067,7 @@ TEST(Instruction3Test, Xor) {
     testInst("xor_b32", testVec);
   }
   {
-    const uint64_t testVec[] = { 149796, 224694, 74898 };
+    const uint64_t testVec[] = { 149796LL, 224694LL, 74898LL };
     testInst("xor_b64", testVec);
   }
 }
@@ -5078,9 +5078,9 @@ TEST(Instruction3Test, Unpackhi) {
     testInst("unpackhi_s8x4", testVec);
   }
   {
-    const int64_t testVec[] = { 0x127e347456fe78ee,
-                                0x7e74feee0a0afffe,
-                                0x1234567812345678 };
+    const int64_t testVec[] = { 0x127e347456fe78eeLL,
+                                0x7e74feee0a0afffeLL,
+                                0x1234567812345678LL };
     testInst("unpackhi_s8x8", testVec);
 
   }
@@ -5089,9 +5089,9 @@ TEST(Instruction3Test, Unpackhi) {
     testInst("unpackhi_s16x2", testVec);
   }
   {
-    const int64_t testVec[] = { 0x12347e745678feee,
-                                0x7e74feee0a0afffe,
-                                0x1234567812345678 };
+    const int64_t testVec[] = { 0x12347e745678feeeLL,
+                                0x7e74feee0a0afffeLL,
+                                0x1234567812345678LL };
     testInst("unpackhi_s16x4", testVec);
 
   }
@@ -5103,9 +5103,9 @@ TEST(Instruction3Test, Unpacklo) {
     testInst("unpacklo_s8x4", testVec);
   }
   {
-    const int64_t testVec[] = { 0x120a340a56ff78fe,
-                                0x7e74feee0a0afffe,
-                                0x1234567812345678 };
+    const int64_t testVec[] = { 0x120a340a56ff78feLL,
+                                0x7e74feee0a0afffeLL,
+                                0x1234567812345678LL };
     testInst("unpacklo_s8x8", testVec);
 
   }
@@ -5114,16 +5114,16 @@ TEST(Instruction3Test, Unpacklo) {
     testInst("unpacklo_s16x2", testVec);
   }
   {
-    const int64_t testVec[] = { 0x12340a0a5678fffe,
-                                0x7e74feee0a0afffe,
-                                0x1234567812345678 };
+    const int64_t testVec[] = { 0x12340a0a5678fffeLL,
+                                0x7e74feee0a0afffeLL,
+                                0x1234567812345678LL };
     testInst("unpacklo_s16x4", testVec);
 
   }
   {
-    const int64_t testVec[] = { 0x123456780a0afffe,
-                                0x7e74feee0a0afffe,
-                                0x1234567812345678 };
+    const int64_t testVec[] = { 0x123456780a0afffeLL,
+                                0x7e74feee0a0afffeLL,
+                                0x1234567812345678LL };
     testInst("unpacklo_s32x2", testVec);
 
   }
@@ -5139,15 +5139,15 @@ TEST(Instruction3Test, Max) {
     testInst("max_u32", testVec);
   }
   {
-    const int64_t testVec[] = { 0x7ffffffffffffffe,
-                                0x7ffffffffffffffe,
-                                0x8000000000000001 };
+    const int64_t testVec[] = { 0x7ffffffffffffffeLL,
+                                0x7ffffffffffffffeLL,
+                                0x8000000000000001LL };
     testInst("max_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0xffffffffffffffff,
-                                 0xffffffffffffffff,
-                                 0xfffffffffffffffe };
+    const uint64_t testVec[] = { 0xffffffffffffffffLL,
+                                 0xffffffffffffffffLL,
+                                 0xfffffffffffffffeLL };
     testInst("max_u64", testVec);
   }
 }
@@ -5162,15 +5162,15 @@ TEST(Instruction3Test, Min) {
     testInst("min_u32", testVec);
   }
   {
-    const int64_t testVec[] = { 0x8000000000000001,
-                                0x7ffffffffffffffe,
-                                0x8000000000000001 };
+    const int64_t testVec[] = { 0x8000000000000001LL,
+                                0x7ffffffffffffffeLL,
+                                0x8000000000000001LL };
     testInst("min_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0xfffffffffffffffe,
-                                 0xfffffffffffffffe,
-                                 0xfffffffffffffffe };
+    const uint64_t testVec[] = { 0xfffffffffffffffeLL,
+                                 0xfffffffffffffffeLL,
+                                 0xfffffffffffffffeLL };
     testInst("min_u64", testVec);
   }
 }
@@ -5199,7 +5199,7 @@ TEST(Instruction4Test, Bitselect) {
     testInst("bitselect_b32", testVec);
   }
   {
-    const uint64_t testVec[] = { 277, 546, 456, 789 };
+    const uint64_t testVec[] = { 277LL, 546LL, 456LL, 789LL };
     testInst("bitselect_b64", testVec);
   }
 }
