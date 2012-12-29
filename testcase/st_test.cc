@@ -8,7 +8,7 @@ namespace brig {
 extern ErrorReporter* main_reporter;
 extern Context* context;
 
-TEST_P(OperationSt, BrigSt){
+TEST_P(OperationSt, DISABLED_BrigSt){
   context->set_error_reporter(main_reporter);
   context->clear_context();
   context->global_symbol_map["&x"] = 40;
@@ -138,7 +138,7 @@ TEST_P(OperationSt, BrigSt){
 
 INSTANTIATE_TEST_CASE_P(CodegenTest,OperationSt,testing::Range(0,30));
 
-TEST_P(OperationStIm, BrigSt){
+TEST_P(OperationStIm, DISABLED_BrigSt){
   context->set_error_reporter(main_reporter);
   context->clear_context();
   context->global_symbol_map["&x"] = 40;
@@ -323,7 +323,7 @@ TEST_P(OperationStIm, BrigSt){
 
 INSTANTIATE_TEST_CASE_P(CodegenTest,OperationStIm,testing::Range(0, 30));
 
-TEST_P(OperationStV2, BrigSt){
+TEST_P(OperationStV2, DISABLED_BrigSt){
   context->set_error_reporter(main_reporter);
   context->clear_context();
   context->global_symbol_map["&x"] = 40;
@@ -496,7 +496,7 @@ TEST_P(OperationStV2, BrigSt){
 
 INSTANTIATE_TEST_CASE_P(CodegenTest,OperationStV2,testing::Range(0,30));
 
-TEST_P(OperationStV4, BrigSt){
+TEST_P(OperationStV4, DISABLED_BrigSt){
   context->set_error_reporter(main_reporter);
   context->clear_context();
   context->global_symbol_map["&x"] = 40;

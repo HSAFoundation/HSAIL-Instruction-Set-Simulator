@@ -8,7 +8,7 @@ namespace brig {
 extern ErrorReporter* main_reporter;
 extern Context* context;
 
-TEST_P(OperationLd, BrigLd){
+TEST_P(OperationLd, DISABLED_BrigLd){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -218,7 +218,7 @@ TEST_P(OperationLd, BrigLd){
 
 INSTANTIATE_TEST_CASE_P(CodegenTest,OperationLd,testing::Range(0, 80));
 
-TEST_P(OperationLdV2, BrigLd){
+TEST_P(OperationLdV2, DISABLED_BrigLd){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -382,7 +382,7 @@ TEST_P(OperationLdV2, BrigLd){
 
 INSTANTIATE_TEST_CASE_P(CodegenTest,OperationLdV2,testing::Range(0,80));
 
-TEST_P(OperationLdV4, BrigLd){
+TEST_P(OperationLdV4, DISABLED_BrigLd){
   context->set_error_reporter(main_reporter);
   context->clear_context();
 
@@ -588,7 +588,7 @@ TEST_P(TestLdInvalid, LdInvalid) {
 INSTANTIATE_TEST_CASE_P(InvalidTest, TestLdInvalid, testing::Range(0,12));
 
 
-TEST_P(OperationLda, BrigLda)
+TEST_P(OperationLda, DISABLED_BrigLda)
 {
   context->set_error_reporter(main_reporter);
   context->clear_context();

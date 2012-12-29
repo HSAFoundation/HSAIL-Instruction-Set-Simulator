@@ -836,7 +836,7 @@ INSTANTIATE_TEST_CASE_P(InvalidTest,
                         WavesizeOperandInvalid,
                         testing::Range(0, 3));
 
-TEST_P(TestAddressOperand, AddressOperand) {
+TEST_P(TestAddressOperand, DISABLED_AddressOperand) {
   context->set_error_reporter(main_reporter);
   context->clear_context();
   context->global_symbol_map["%x"] = 40;
