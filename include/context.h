@@ -19,7 +19,7 @@ namespace brig {
 // context for code generation
 class Context {
   public:
-    enum context_error_t{
+    enum context_error_t {
       CONTEXT_OK = 0,
       INVALID_POINTER = 1,
       EMPTY_BUFFER,
@@ -117,7 +117,7 @@ class Context {
         // need padding to ensure code_offset is a multiple of 8
         BrigOperandPad bdp = {
           4,                 // Size
-          BrigEOperandPad  // type
+          BrigEOperandPad    // type
         };
         obuf->append(&bdp);
       }
@@ -228,7 +228,7 @@ class Context {
                                            uint32_t nBytes);
 
     context_error_t update_last_directive(unsigned char* value,
-                                            uint32_t nBytes);                                           
+                                          uint32_t nBytes);                                           
                                            
     context_error_t update_code_bytes(unsigned char* value,
                                       uint32_t offset,
@@ -238,7 +238,7 @@ class Context {
                                          uint32_t offset,
                                          uint32_t nBytes);
 
-    //modify the BrigDirectiveFunction filed
+    // modify the BrigDirectiveFunction filed
     void update_bdf_operation_count() ;
 
     // clear buffers
@@ -251,48 +251,79 @@ class Context {
     void initialize_all_fields(void);
     void initialize_statement_fields(void);
     
-    /* Temporary Context Manipulators */
-    // check context
-    uint16_t get_alignment() const;
-    BrigAttribute16_t get_attribute() const;
-    BrigAluModifier get_alu_modifier() const;
-    uint32_t get_symbol_modifier() const;
-    BrigMachine16_t get_machine() const;
-    BrigProfile16_t get_profile() const;
-    BrigDataType16_t get_type() const;
-    uint32_t get_dim() const;
-    bool get_isArray() const;
-    BrigStorageClass32_t get_storageClass() const;
-    uint16_t get_major() const { return major;}
-    uint16_t get_minor() const { return minor;}
+    uint16_t get_alignment() const                { return alignment; }
+
+    BrigAttribute16_t get_attribute() const       { return attribute; }
+
+    BrigAluModifier get_alu_modifier() const      { return aluModifier; }
+
+    uint32_t get_symbol_modifier() const          { return symModifier; }
+
+    BrigMachine16_t get_machine() const           { return machine; }
+
+    BrigProfile16_t get_profile() const           { return profile; }
+
+    BrigDataType16_t get_type() const             { return type; }
+
+    uint32_t get_dim() const                      { return dim; }
+
+    bool get_isArray() const                      { return is_array; }
+
+    BrigStorageClass32_t get_storageClass() const { return storageClass; }
+
+    uint16_t get_major() const                    { return major; }
+
+    uint16_t get_minor() const                    { return minor; }
     
     // set context
-    void set_alu_modifier(BrigAluModifier modifier);
-    void set_symbol_modifier(BrigSymbolModifier modifier);
-    void set_attribute(BrigAttribute16_t attrib);
-    void set_alignment(uint16_t align);
-    void set_machine(BrigMachine16_t machine);
-    void set_profile(BrigProfile16_t profile);
-    void set_type(BrigDataType16_t type);
-    void set_dim(uint32_t dim);
-    void set_isArray(bool is_array);
-    void set_bdf_offset(BrigdOffset32_t offset) { this->current_bdf_offset = offset;};
-    void set_storageClass(BrigStorageClass32_t storageClass);
-    void set_major(uint16_t major) {this->major = major;}
-    void set_minor(uint16_t minor) {this->minor = minor;}
-    BrigdOffset32_t get_bdf_offset(){ return this->current_bdf_offset;};
+    void set_alu_modifier(BrigAluModifier modifier) {
+      this->aluModifier = modifier;
+    }
+
+    void set_symbol_modifier(BrigSymbolModifier modifier) { 
+      this->symModifier |= (uint32_t)modifier;
+    }
+
+    void set_attribute(BrigAttribute16_t attrib)  { this->attribute = attrib; }
+
+    void set_alignment(uint16_t align)            { this->alignment = align; }
+
+    void set_machine(BrigMachine16_t machine)     { this->machine = machine; }
+
+    void set_profile(BrigProfile16_t profile)     { this->profile = profile; }
+
+    void set_type(BrigDataType16_t type)          { this->type = type; }
+
+    void set_dim(uint32_t dim)                    { this->dim = dim; }
+
+    void set_isArray(bool is_array)               { this->is_array = is_array; }
+
+    void set_major(uint16_t major)                { this->major = major; }
+
+    void set_minor(uint16_t minor)                { this->minor = minor; }
+
+
+    void set_bdf_offset(BrigdOffset32_t offset) { 
+      this->current_bdf_offset = offset;
+    };
+
+    void set_storageClass(BrigStorageClass32_t storageClass) {
+      this->storageClass = storageClass;
+    };
+
+    BrigdOffset32_t get_bdf_offset() { return this->current_bdf_offset; };
     
     // get current offset
-    BrigcOffset32_t get_code_offset(void) const {return cbuf->size();}
-    BrigdOffset32_t get_directive_offset(void) const {return dbuf->size();}
-    BrigoOffset32_t get_operand_offset(void) const {return obuf->size();}
-    BrigsOffset32_t get_string_offset(void) const {return sbuf->size();}
+    BrigcOffset32_t get_code_offset(void) const      { return cbuf->size(); }
+    BrigdOffset32_t get_directive_offset(void) const { return dbuf->size(); }
+    BrigoOffset32_t get_operand_offset(void) const   { return obuf->size(); }
+    BrigsOffset32_t get_string_offset(void) const    { return sbuf->size(); }
 
     // get buffer
-    Buffer *get_directive(void) const {return dbuf;}
-    Buffer *get_code(void) const {return cbuf;}
-    Buffer *get_operands(void) const {return obuf;}
-    StringBuffer *get_strings(void) const {return sbuf;}
+    Buffer *get_directive(void) const     { return dbuf; }
+    Buffer *get_code(void) const          { return cbuf; }
+    Buffer *get_operands(void) const      { return obuf; }
+    StringBuffer *get_strings(void) const { return sbuf; }
 
     BrigdOffset32_t get_symbol(std::string name);
 
@@ -310,26 +341,26 @@ class Context {
     std::map<std::string, BrigdOffset32_t> local_symbol_map;
     std::map<std::string, BrigdOffset32_t> arg_symbol_map;
 
-    unsigned int token_to_scan;
+    unsigned int      token_to_scan;
     int               yycolno;
     TerminalType      token_type;
-    bool valid_string;
-    bool isFirstVersion;
+    bool              valid_string;
+    bool              isFirstVersion;
 
     union token_val {
       unsigned long long          int_val;
-      float             float_val;
-      double            double_val;
-      char*             string_val;
-      BrigDataType16_t  data_type;
-      BrigOpcode32_t    opcode;
-      BrigPacking16_t   packing;
-      BrigStorageClass32_t storage_class;
-      BrigImageOrder32_t order;
-      BrigImageFormat32_t format;
-      BrigBoundaryMode8_t boundary_mode;
-      BrigAddrFilter8_t  filter ;
-      bool normalized ;
+      float                       float_val;
+      double                      double_val;
+      char*                       string_val;
+      BrigDataType16_t            data_type;
+      BrigOpcode32_t              opcode;
+      BrigPacking16_t             packing;
+      BrigStorageClass32_t        storage_class;
+      BrigImageOrder32_t          order;
+      BrigImageFormat32_t         format;
+      BrigBoundaryMode8_t         boundary_mode;
+      BrigAddrFilter8_t           filter;
+      bool                        normalized;
     } token_value;
 
     ~Context();
@@ -348,7 +379,7 @@ class Context {
     ErrorReporterInterface* err_reporter;
 
     /* Global context variables */
-    BrigMachine16_t machine;
+    BrigMachine16_t machine; 
     BrigProfile16_t profile;
     BrigdOffset32_t last_directive_offset;
     BrigdOffset32_t current_bdf_offset;
@@ -356,13 +387,13 @@ class Context {
     uint16_t minor;
     
     /* Body Statement specific variables */
-    uint16_t alignment;
-    uint32_t symModifier;
-    BrigAttribute16_t attribute;
-    BrigDataType16_t type;
-    BrigAluModifier aluModifier;
-    uint32_t dim;
-    bool is_array;
+    uint16_t             alignment;
+    uint32_t             symModifier;
+    BrigAttribute16_t    attribute;
+    BrigDataType16_t     type;
+    BrigAluModifier      aluModifier;
+    uint32_t             dim;
+    bool                 is_array;
     BrigStorageClass32_t storageClass;
       
 };
