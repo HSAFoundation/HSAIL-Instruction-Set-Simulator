@@ -5231,7 +5231,7 @@ TEST(Instruction4Test, Shuffle) {
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
-  uint32_t *arg1 = new uint32_t(0x66553344);
+  uint32_t *arg1 = new uint32_t(0);
   void *args[] = { arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0x66553344, *arg0);
@@ -5239,7 +5239,7 @@ TEST(Instruction4Test, Shuffle) {
   delete arg1;
 }
 
-TEST(BrigInstTest, VectorSad4hi) {
+TEST(Instruction4Test, Sad4hi) {
   hsa::brig::BrigProgram BP = TestHSAIL(
   "version 1:0:$small;\n"
   "\n"
@@ -5257,11 +5257,146 @@ TEST(BrigInstTest, VectorSad4hi) {
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
-  uint32_t *arg0 = new uint32_t( 0x10450001 );
+  uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
   void *args[] = { arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0x10450001, *arg0);
+ delete arg0;
+ delete arg1;
+}
+
+TEST(Instruction4Test, Sad) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        sad_b32 $s1, 0x22222222, 0x11111111, 0x1;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x11111112, *arg0);
+ delete arg0;
+ delete arg1;
+}
+
+TEST(Instruction4Test, Sad2) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$large;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        sad2_b32 $s1, 0x22232222, 0x11111111, 0x1;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x2224, *arg0);
+ delete arg0;
+ delete arg1;
+}
+
+TEST(Instruction4Test, Sad4) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$large;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        sad4_b32 $s1, 0x22221111, 0x11112222, 0x10010001;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x10010045, *arg0);
+ delete arg0;
+ delete arg1;
+}
+
+TEST(Instruction4Test, Cmov_32) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$small;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u32 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        cmov_b32 $s1, 0, 13, 7;"
+  "        st_kernarg_u32 $s1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(7, *arg0);
+ delete arg0;
+ delete arg1;
+}
+
+TEST(Instruction4Test, Cmov_64) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 1:0:$large;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u64 %result, \n"
+  "        kernarg_u64 %input1)\n"
+  "{\n"
+  "        cmov_b64 $d1, 14473758, 0x5555666677778888, 14473758;"
+  "        st_kernarg_u64 $d1, [%result] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint64_t *arg0 = new uint64_t(0);
+  uint64_t *arg1 = new uint64_t(0);
+  void *args[] = { arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(14473758, *arg0);
  delete arg0;
  delete arg1;
 }
