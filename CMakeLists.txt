@@ -215,6 +215,10 @@ set(fcos_SOURCES demo/fcos.cc)
 add_executable(fcos ${fcos_SOURCES})
 target_link_libraries(fcos hsa hsa2brig brig2llvm)
 
+set(brig_validate_SOURCES test/brig_validate.cc)
+add_executable(brig_validate ${brig_validate_SOURCES})
+target_link_libraries(brig_validate hsa2brig brig2llvm)
+
 set(debug_SOURCES demo/debug.cc)
 add_executable(debug ${debug_SOURCES})
 target_link_libraries(debug hsa)
