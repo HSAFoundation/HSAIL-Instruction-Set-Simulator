@@ -1023,7 +1023,7 @@ template<class R, class T> static void Cvt_zeroi_Logic(R result, T a) {
   } else if(isNegInf(a)) {
     EXPECT_EQ(getMin<R>(), result);
   } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
-    EXPECT_GE(llabs((uint64_t) a), llabs((uint64_t) result));
+    EXPECT_GE(llabs((int64_t) a), llabs((int64_t) result));
   }
 }
 template<class R, class T> static void Cvt_neari_Logic(R result, T a) {
