@@ -13,4 +13,6 @@ foreach(_file ${sample_sources})
   list(APPEND sample_OUTPUTS ${_file_o})
 endforeach()
 
-add_custom_target(HSAILAssemblerSamples ALL SOURCES ${sample_OUTPUTS})
+if(IS_X86)
+  add_custom_target(HSAILAssemblerSamples ALL SOURCES ${sample_OUTPUTS})
+endif(IS_X86)

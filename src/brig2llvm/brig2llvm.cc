@@ -19,6 +19,22 @@
 namespace hsa{
 namespace brig{
 
+static bool isI386(void) {
+#ifdef __i386__
+  return true;
+#else
+  return false;
+#endif
+}
+
+static bool isARM(void) {
+#ifdef __arm__
+  return true;
+#else
+  return false;
+#endif
+}
+
 void BrigProgram::delModule(llvm::Module *M) {
   if(!M) return;
   llvm::LLVMContext *C = &M->getContext();
@@ -110,7 +126,7 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
     llvm::Type *base = getElementTy(C, type);
     unsigned length = BrigInstHelper::getVectorLength(type);
 
-    if(base->isIntegerTy() || sizeof(void *) == 4) {
+    if(base->isIntegerTy() || isI386()) {
       unsigned bitWidth = base->getScalarSizeInBits() * length;
       return llvm::Type::getIntNTy(C, bitWidth);
     }
@@ -529,9 +545,24 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
 }
 
 static bool isSRet(const inst_iterator inst) {
-  return sizeof(void *) == 4 &&
-    BrigInstHelper::hasDest(inst) &&
-    BrigInstHelper::isVectorTy(BrigDataType(inst->type));
+  if(isI386())
+    return
+      BrigInstHelper::hasDest(inst) &&
+      BrigInstHelper::isVectorTy(BrigDataType(inst->type));
+
+  if(isARM()) {
+    BrigDataType type = BrigDataType(inst->type);
+    if(BrigInstHelper::hasDest(inst))
+      return
+        type == Brigu8x8  || type == Brigs8x8  ||
+        type == Brigu16x4 || type == Brigs16x4 ||
+        type == Brigu32x2 || type == Brigs32x2 ||
+        type == Brigb128;
+
+    return false;
+  }
+
+  return false;
 }
 
 static llvm::Function *getInstFun(const inst_iterator inst,
@@ -711,7 +742,8 @@ static void runOnIndirectBranchInst(llvm::BasicBlock &B,
     llvm::BranchInst::Create(launchBB, NULL, predVal, &B);
   }
 
-  llvm::IntegerType *labelTy = llvm::cast<llvm::IntegerType>(targetBB->getType());
+  llvm::IntegerType *labelTy =
+    llvm::cast<llvm::IntegerType>(targetBB->getType());
   const FunState::CBMap &cbMap = state.cbMap;
   llvm::SwitchInst *launchInst =
     llvm::SwitchInst::Create(targetBB, &B, cbMap.size(), launchBB);

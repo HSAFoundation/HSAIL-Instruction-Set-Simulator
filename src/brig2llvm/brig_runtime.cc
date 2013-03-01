@@ -1,7 +1,9 @@
 #include "brig_runtime.h"
 #include "brig_runtime_internal.h"
 
+#if defined(__i386__) || defined(__x86_64__)
 #include <pmmintrin.h>
+#endif // defined(__i386__) || defined(__x86_64__)
 
 #include <algorithm>
 #include <cmath>
@@ -17,13 +19,29 @@ static __thread ThreadInfo *__brigThreadInfo;
 extern "C" void __setThreadInfo(ThreadInfo *info) { __brigThreadInfo = info; }
 
 extern "C" void enableFtzMode(void) {
+#if defined(__i386__) || defined(__x86_64__)
   _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
   _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+#endif // defined(__i386__) || defined(__x86_64__)
+
+#if defined(__arm__)
+  __asm__ volatile("vmrs r0, fpscr\n"
+                   "orr r0, $(1 << 24)\n"
+                   "vmsr fpscr, r0" : : : "r0");
+#endif // defined(__arm__)
 }
 
 extern "C" void disableFtzMode(void) {
+#if defined(__i386__) || defined(__x86_64__)
   _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF);
   _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
+#endif // defined(__i386__) || defined(__x86_64__)
+
+#if defined(__arm__)
+  __asm__ volatile("vmrs r0, fpscr\n"
+                   "bic r0, $(1 << 24)\n"
+                   "vmsr fpscr, r0" : : : "r0");
+#endif // defined(__arm__)
 }
 
 extern "C" void setRoundingMode_near(void) {
@@ -829,7 +847,7 @@ extern "C" void Barrier_b32(void) {
 }
 
 extern "C" void Sync_b32(void) {
-  _mm_mfence();
+  __sync_synchronize();
 }
 
 extern "C" u32 WorkItemAbsId_b32(u32 x) {

@@ -24,6 +24,3 @@ static std::type_info &fake() {
 }
 
 #endif // __IS_GCC__ && __GNUC__ == 4 && __GNUC_MINOR__ <= 4
-
-
-

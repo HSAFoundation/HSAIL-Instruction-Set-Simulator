@@ -76,6 +76,9 @@ class Vector {
   }
 
  private:
+#ifdef __arm__
+  __attribute__ ((aligned(sizeof(Type))))
+#endif
   Type t_;
 };
 
@@ -107,7 +110,7 @@ declareVector(u64, 2);
 declareVector(s64, 2);
 declareVector(f64, 2);
 
-typedef u32x4 b128;
+typedef u64x2 b128;
 
 #undef declareVector
 #undef vector

@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
       }
 " HAS_ATOMICS)
 
-if ( NOT HAS_ATOMICS )
+if ( NOT HAS_ATOMICS AND IS_X86 )
   message(STATUS "Warning: Atomics missing, trying to enable prescott features")
   set(CMAKE_C_FLAGS "-march=prescott ${CMAKE_C_FLAGS}")
   set(CMAKE_CXX_FLAGS "-march=prescott ${CMAKE_CXX_FLAGS}")

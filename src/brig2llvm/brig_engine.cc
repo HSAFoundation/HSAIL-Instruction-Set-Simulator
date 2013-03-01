@@ -275,6 +275,21 @@ BrigEngine::BrigEngine(llvm::Module *Mod,
   init(forceInterpreter, optLevel);
 }
 
+#ifdef __arm__
+static bool isHardFP(int a, int b, int c) {
+  assert((b == 0x314159 || b == 0x271828) && "ABI Madness");
+  return b == 0x271828;
+}
+
+static bool isHardFP(void) {
+  union {
+    bool (*a)(int, int, int);
+    bool (*b)(float, int, int);
+  } foo = { isHardFP };
+  return foo.b(0, 0x314159, 0x271828);
+}
+#endif // __arm__
+
 void BrigEngine::init(bool forceInterpreter, char optLevel) {
 
   assert(!EE_ && "BrigEngine was already constructed?!");
@@ -321,6 +336,11 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
 
   llvm::TargetOptions options;
   options.JITEmitDebugInfo = true;
+
+#ifdef __arm__
+  if(isHardFP()) options.FloatABIType = llvm::FloatABI::Hard;
+#endif // __arm__
+
   builder.setTargetOptions(options);
 
   EE_ = builder.create();
