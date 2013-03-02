@@ -709,6 +709,23 @@ template<class R, class T> static R Cvt(T t, int mode)  {
   fesetround(oldMode);
   return result;
 }
+
+#if defined(__arm__)
+// Handle long to double conversions on platforms without hardware support (ARM).
+template<class T> static f64 l2d(T x, int mode) {
+  double d = x;
+  T y = d;
+  switch(mode) {
+  case FE_UPWARD: return y >= x ? d : nexttoward(d, INFINITY);
+  case FE_DOWNWARD: return y <= x ? d : nexttoward(d, -INFINITY);
+  case FE_TOWARDZERO: return llabs(y) <= llabs(x) ? d : nexttoward(d, 0);
+  default: return d;
+  }
+}
+template<> f64 Cvt(u64 x, int mode) { return l2d(x, mode); }
+template<> f64 Cvt(s64 x, int mode) { return l2d(x, mode); }
+#endif // defined(__arm__)
+
 RIICvt(define)
 RFICvt(define)
 RIFCvt(define)
