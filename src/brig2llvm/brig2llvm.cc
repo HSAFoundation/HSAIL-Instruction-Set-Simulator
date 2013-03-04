@@ -456,7 +456,7 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
      (inst->opcode == BrigMovdHi  && opnum == 1) ||
      (inst->opcode == BrigMovdLo  && opnum == 1) ||
      (inst->opcode == BrigMovsHi  && opnum == 1) ||
-     (inst->opcode == BrigMovdLo  && opnum == 1))
+     (inst->opcode == BrigMovsLo  && opnum == 1))
     return runOnType(C, Brigu64);
 
   if(inst->opcode == BrigF2u4 && opnum > 0)

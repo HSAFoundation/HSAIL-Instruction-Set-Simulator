@@ -3708,7 +3708,7 @@ bool BrigModule::validateSysCall(const inst_iterator inst) const {
                    isa<BrigOperandWaveSz>(src),
                    "Source must be a register, immediate, or wave size");
   }
-  return true;
+  return valid;
 }
 
 bool BrigModule::validateAlloca(const inst_iterator inst) const {
