@@ -365,8 +365,8 @@ defineTernary(Extract, b64)
 
 template<class T> static T Insert(T w, T x, b32 y, b32 z) {
   typedef typename Int<T>::Unsigned Unsigned;
-  T width  = y & T(Int<T>::Bits - 1);
-  T offset = z & T(Int<T>::Bits - 1);
+  b32 width  = y & b32(Int<T>::Bits - 1);
+  b32 offset = z & b32(Int<T>::Bits - 1);
   Unsigned mask = ~(~T(0) << width) << offset;
   mask = ~mask;
   w &= mask;

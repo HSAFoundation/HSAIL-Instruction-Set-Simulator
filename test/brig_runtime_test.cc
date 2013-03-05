@@ -467,8 +467,8 @@ MakeTest(Extract_b64, ExtractLogic)
 
 template<class T> static void InsertLogic(T result, T a, T b, T c, T d) {
 
-  unsigned width  = c & T(Int<T>::Bits - 1);
-  unsigned offset = d & T(Int<T>::Bits - 1);
+  b32 width  = c & b32(Int<T>::Bits - 1);
+  b32 offset = d & b32(Int<T>::Bits - 1);
   T resultNe = a;
   for (unsigned i = 0; i < width && offset + i < Int<T>::Bits; ++i) {
     resultNe &= ~(T(1) << (offset + i));
