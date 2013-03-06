@@ -334,7 +334,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   }
 
 #define defineQuaternary(FUNC,TYPE)                                     \
-  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v, TYPE w) {  \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, b32 v, b32 w) {    \
     return FUNC(t, u, v, w);                                            \
   }
 
@@ -404,8 +404,8 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
 #define declareTernary(FUNC,TYPE)                             \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v);
 
-#define declareQuaternary(FUNC,TYPE)                                  \
-  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v, TYPE w);
+#define declareQuaternary(FUNC,TYPE)                                \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, b32 v, b32 w);
 
 #define declareShift(FUNC,TYPE)                               \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift);

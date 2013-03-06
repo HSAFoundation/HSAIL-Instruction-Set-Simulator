@@ -465,7 +465,7 @@ declareTernary(Extract, b64)
 MakeTest(Extract_b32, ExtractLogic)
 MakeTest(Extract_b64, ExtractLogic)
 
-template<class T> static void InsertLogic(T result, T a, T b, T c, T d) {
+template<class T> static void InsertLogic(T result, T a, T b, b32 c, b32 d) {
 
   b32 width  = c & b32(Int<T>::Bits - 1);
   b32 offset = d & b32(Int<T>::Bits - 1);
