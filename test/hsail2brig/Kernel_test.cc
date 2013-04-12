@@ -183,7 +183,7 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
     BrigWorkItemAbsId,
     Brigb32,
     BrigNoPacking,
-    {o_operand, o_operand + sizeof(regs0), 0, 0, 0}
+    {o_operand, (unsigned) (o_operand + sizeof(regs0)), 0, 0, 0}
   };
   inst1.size = sizeof(inst1);
 
@@ -227,7 +227,10 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
     BrigLd,
     Brigu32,
     BrigNoPacking,
-    {o_operand, o_operand + sizeof(width), o_operand + sizeof(width) + sizeof(regs2), 0, 0},
+    {o_operand,
+     (unsigned) (o_operand + sizeof(width)),
+     (unsigned) (o_operand + sizeof(width) + sizeof(regs2)),
+     0, 0},
     BrigKernargSpace,
     BrigRegular,
     0
@@ -269,9 +272,10 @@ TEST(CodegenTest, Kernel_SimpleTest_Codegen){
     Brigu32,
     BrigNoPacking,
     {o_operand,
-     o_operand + sizeof(regs5),
+     (unsigned) (o_operand + sizeof(regs5)),
      s2_operand,
-     o_operand + sizeof(regs5) + sizeof(regs4), 0}
+     (unsigned) (o_operand + sizeof(regs5) + sizeof(regs4)),
+     0}
   };
   inst3.size = sizeof(inst3);
 

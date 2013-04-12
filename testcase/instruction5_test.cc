@@ -9,7 +9,7 @@ extern ErrorReporter* main_reporter;
 extern Context* context;
 
 //Function RoundUp8 : Returns the smallest multiple of 8.
-int RoundUp8 (int bytes){
+unsigned RoundUp8 (int bytes){
   return (((bytes) + kAlign - 1 ) & ~(kAlign - 1 ));
 }
 

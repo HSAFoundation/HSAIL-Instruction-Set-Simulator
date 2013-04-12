@@ -23,87 +23,87 @@ private:
   const std::string* SymbolName;
 
   BrigOperandReg RefSrc_RegList[4];
-  
+
 public:
   Ld_Test(std::string& in, std::string *symName = NULL):
     BrigCodeGenTest(in),
     SymbolName(symName) {}
 
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
-      BrigOperandImmed* width, T* dest, BrigOperandAddress* addr, 
+      BrigOperandImmed* width, T* dest, BrigOperandAddress* addr,
       BrigOperandReg *regList = NULL, std::string* symName = NULL):
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),       OpWidth(width),
     RefDest(dest),      RefSrc_Reg(NULL),
     RefSrc_Addr(addr),  RefSrc_Indir(NULL),
     RefSrc_Comp(NULL),  RefSrc_Label(NULL),
-    RefSrc_Function(NULL), SymbolName(symName) { 
+    RefSrc_Function(NULL), SymbolName(symName) {
       if (regList != NULL) {
         for (uint32_t i = 0 ; i < 4 ; ++i) {
           RefSrc_RegList[i] = regList[i];
-        } 
+        }
       } else {
         memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
       }
     }
 
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
-      BrigOperandImmed* width, T* dest, BrigOperandIndirect* indir, 
-      BrigOperandReg* reg = NULL, BrigOperandReg *regList = NULL, 
+      BrigOperandImmed* width, T* dest, BrigOperandIndirect* indir,
+      BrigOperandReg* reg = NULL, BrigOperandReg *regList = NULL,
       std::string *symName = NULL):
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),            OpWidth(width),
     RefDest(dest),           RefSrc_Reg(reg),
     RefSrc_Addr(NULL),       RefSrc_Indir(indir),
     RefSrc_Comp(NULL),       RefSrc_Label(NULL),
-    RefSrc_Function(NULL),   SymbolName(symName)  { 
+    RefSrc_Function(NULL),   SymbolName(symName)  {
       if (regList != NULL) {
         for (uint32_t i = 0 ; i < 4 ; ++i) {
           RefSrc_RegList[i] = regList[i];
-        } 
+        }
       } else {
         memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
       }
     }
 
   Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref,
-      BrigOperandImmed* width, T* dest, BrigOperandCompound* comp, 
-      BrigOperandAddress* addr, BrigOperandReg* reg = NULL, 
+      BrigOperandImmed* width, T* dest, BrigOperandCompound* comp,
+      BrigOperandAddress* addr, BrigOperandReg* reg = NULL,
       BrigOperandReg *regList = NULL, std::string *symName = NULL):
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),           OpWidth(width),
     RefDest(dest),          RefSrc_Reg(reg),
     RefSrc_Addr(addr),      RefSrc_Indir(NULL),
     RefSrc_Comp(comp),      RefSrc_Label(NULL),
-    RefSrc_Function(NULL),  SymbolName(symName)  { 
+    RefSrc_Function(NULL),  SymbolName(symName)  {
       if (regList != NULL) {
         for (uint32_t i = 0 ; i < 4 ; ++i) {
           RefSrc_RegList[i] = regList[i];
-        } 
+        }
       } else {
         memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
       }
     }
 
-  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, T* dest, 
-      BrigOperandLabelRef* src, BrigOperandReg *regList = NULL, 
+  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, T* dest,
+      BrigOperandLabelRef* src, BrigOperandReg *regList = NULL,
       std::string *symName = NULL):
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),                    OpWidth(NULL),
     RefDest(dest),                   RefSrc_Reg(NULL),
     RefSrc_Addr(NULL),               RefSrc_Indir(NULL),
     RefSrc_Comp(NULL),               RefSrc_Label(src),
-    RefSrc_Function(NULL),           SymbolName(symName) { 
+    RefSrc_Function(NULL),           SymbolName(symName) {
       if (regList != NULL) {
         for (uint32_t i = 0 ; i < 4 ; ++i) {
           RefSrc_RegList[i] = regList[i];
-        } 
+        }
       } else {
         memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
       }
     }
 
-  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, T* dest, 
+  Ld_Test(std::string& input, StringBuffer* sbuf, Tinst* ref, T* dest,
       BrigOperandFunctionRef* src, BrigOperandReg *regList = NULL,
       std::string *symName = NULL):
     BrigCodeGenTest(input, sbuf),
@@ -111,18 +111,18 @@ public:
     RefDest(dest),                RefSrc_Reg(NULL),
     RefSrc_Addr(NULL),            RefSrc_Indir(NULL),
     RefSrc_Comp(NULL),            RefSrc_Label(NULL),
-    RefSrc_Function(src),         SymbolName(symName)  { 
+    RefSrc_Function(src),         SymbolName(symName)  {
       if (regList != NULL) {
         for (uint32_t i = 0 ; i < 4 ; ++i) {
           RefSrc_RegList[i] = regList[i];
-        }  
+        }
       } else {
         memset(RefSrc_RegList, 0 , sizeof(RefSrc_RegList[0]) * 4);
       }
     }
 
-  
-  void Run_Test(int (*Rule)(Context*)){  
+
+  void Run_Test(int (*Rule)(Context*)){
 
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
@@ -131,39 +131,39 @@ public:
       oper->append(OpWidth);
     }
     for (uint32_t i = 0 ; i < 4 ; ++i) {
-      if (RefSrc_RegList[i].size != 0) { 
+      if (RefSrc_RegList[i].size != 0) {
         oper->append(&RefSrc_RegList[i]);
       }
     }
     oper->append(RefDest);
-    if (RefSrc_Addr != NULL) { 
+    if (RefSrc_Addr != NULL) {
       oper->append(RefSrc_Addr);
     }
-    if (RefSrc_Reg != NULL) { 
+    if (RefSrc_Reg != NULL) {
       oper->append(RefSrc_Reg);
     }
-    if (RefSrc_Indir != NULL) { 
+    if (RefSrc_Indir != NULL) {
       oper->append(RefSrc_Indir);
     }
-    if (RefSrc_Comp != NULL) { 
+    if (RefSrc_Comp != NULL) {
       oper->append(RefSrc_Comp);
     }
-    if (RefSrc_Label != NULL) { 
+    if (RefSrc_Label != NULL) {
       oper->append(RefSrc_Label);
     }
-    if (RefSrc_Function != NULL) { 
+    if (RefSrc_Function != NULL) {
       oper->append(RefSrc_Function);
     }
-    
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
-      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
-      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);    
-    
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
+      NULL, reinterpret_cast<const char *>(&code->get()[0]),
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);
+
     Parse_Validate(Rule, &RefOutput, SymbolName);
     delete code;
     delete oper;
-  }  
+  }
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
     False_Validate(Rule, refError, SymbolName);
   }
@@ -173,7 +173,7 @@ TEST(CodegenTest, Ld_Codegen){
 
   std::string in, op1, op2;
   StringBuffer* sbuf = new StringBuffer();
-  BrigOperandReg regList[4]; 
+  BrigOperandReg regList[4];
   std::string symbolName;
 
   /*****************************************************************/
@@ -222,7 +222,7 @@ TEST(CodegenTest, Ld_Codegen){
   out1.size = sizeof(out1);
 
   symbolName.assign("&input");
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase1(in, sbuf, &out1, &width1, &dest1, &addr1, NULL, &symbolName);
   TestCase1.Run_Test(&Ld);
   sbuf->clear();
@@ -273,7 +273,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out2.size = sizeof(out2);
 
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase2(in, sbuf, &out2, &width2, &dest2, &indir2, NULL);
   TestCase2.Run_Test(&Ld);
   sbuf->clear();
@@ -317,7 +317,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   reg3.size = sizeof(reg3);
 
@@ -334,7 +334,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out3.size = sizeof(out3);
 
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase3(in, sbuf, &out3, &width3, &dest3, &indir3, &reg3);
   TestCase3.Run_Test(&Ld);
   sbuf->clear();
@@ -385,7 +385,7 @@ TEST(CodegenTest, Ld_Codegen){
   out4.size = sizeof(out4);
 
   symbolName.assign("&x");
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase4(in, sbuf, &out4, &width4, &dest4, &addr4, NULL, &symbolName);
   TestCase4.Run_Test(&Ld);
   sbuf->clear();
@@ -435,7 +435,7 @@ TEST(CodegenTest, Ld_Codegen){
   out5.size = sizeof(out5);
 
   symbolName.assign("&x");
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase5(in, sbuf, &out5, &width5, &dest5, &addr5, NULL, &symbolName);
   TestCase5.Run_Test(&Ld);
   sbuf->clear();
@@ -495,9 +495,9 @@ TEST(CodegenTest, Ld_Codegen){
     0
   };
   out6.size = sizeof(out6);
-  
+
   symbolName.assign("&g");
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase6(in, sbuf, &out6, &width6, &dest6, &comp6, &addr6, NULL, NULL, &symbolName);
   TestCase6.Run_Test(&Ld);
   sbuf->clear();
@@ -540,7 +540,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   reg7.size = sizeof(reg7);
 
@@ -570,7 +570,7 @@ TEST(CodegenTest, Ld_Codegen){
   out7.size = sizeof(out7);
 
   symbolName.assign("&g");
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase7(in, sbuf, &out7, &width7, &dest7, &comp7, &addr7, &reg7, NULL, &symbolName);
   TestCase7.Run_Test(&Ld);
   sbuf->clear();
@@ -613,7 +613,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   reg8.size = sizeof(reg8);
 
@@ -634,7 +634,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,
     Brigu32,
     BrigNoPacking,
-    {0, sizeof(width8), sizeof(width8) + sizeof(dest8) + 
+    {0, sizeof(width8), sizeof(width8) + sizeof(dest8) +
       sizeof(addr8) + sizeof(reg8), 0, 0},
     BrigGlobalSpace,
     BrigRegular,
@@ -643,7 +643,7 @@ TEST(CodegenTest, Ld_Codegen){
   out8.size = sizeof(out8);
 
   symbolName.assign("&g");
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase8(in, sbuf, &out8, &width8, &dest8, &comp8, &addr8, &reg8, NULL, &symbolName);
   TestCase8.Run_Test(&Ld);
   sbuf->clear();
@@ -705,7 +705,7 @@ TEST(CodegenTest, Ld_Codegen){
   out9.size = sizeof(out9);
 
   symbolName.assign("&tbl");
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase9(in, sbuf, &out9, &width9, &dest9, &comp9, &addr9, NULL, NULL, &symbolName);
   TestCase9.Run_Test(&Ld);
   sbuf->clear();
@@ -740,14 +740,14 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb32,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   reg_v2.size = sizeof(reg_v2);
 
   regList[0] = reg_v1;
   regList[1] = reg_v2;
   memset(&regList[2], 0, sizeof(regList[2]));
-  memset(&regList[3], 0, sizeof(regList[3])); 
+  memset(&regList[3], 0, sizeof(regList[3]));
 
   BrigOperandRegV2 dest10 = {
     0,
@@ -763,7 +763,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    2 * (op1.size() + 1)
+    (unsigned) (2 * (op1.size() + 1))
   };
   reg10.size = sizeof(reg10);
 
@@ -784,7 +784,7 @@ TEST(CodegenTest, Ld_Codegen){
     Brigf32,
     BrigNoPacking,
     {0, sizeof(width10) + sizeof(reg_v1) + sizeof(reg_v2),
-     sizeof(width10) + sizeof(reg_v1) + sizeof (reg_v2) + 
+     sizeof(width10) + sizeof(reg_v1) + sizeof (reg_v2) +
      sizeof(dest10) + sizeof(reg10), 0, 0},
     BrigFlatSpace,
     BrigRegular,
@@ -792,7 +792,7 @@ TEST(CodegenTest, Ld_Codegen){
   };
   out10.size = sizeof(out10);
 
-  Ld_Test<BrigInstLdSt, BrigOperandRegV2> 
+  Ld_Test<BrigInstLdSt, BrigOperandRegV2>
     TestCase10(in, sbuf, &out10, &width10, &dest10, &indir10, &reg10, regList);
   TestCase10.Run_Test(&Ld);
   sbuf->clear();
@@ -828,7 +828,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   regv2_11.size = sizeof(regv2_11);
 
@@ -837,7 +837,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    2 * (op1.size() + 1)
+    (unsigned) (2 * (op1.size() + 1))
   };
   regv3_11.size = sizeof(regv3_11);
 
@@ -846,21 +846,21 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    3 * (op1.size() + 1)
+    (unsigned) (3 * (op1.size() + 1))
   };
   regv4_11.size = sizeof(regv4_11);
 
   regList[0] = regv1_11;
   regList[1] = regv2_11;
   regList[2] = regv3_11;
-  regList[3] = regv4_11; 
+  regList[3] = regv4_11;
 
   BrigOperandRegV4 dest11 = {
     0,
     BrigEOperandRegV4,
     Brigb64,
     0,
-    {sizeof(width11), sizeof(width11) + sizeof(regv1_11), 
+    {sizeof(width11), sizeof(width11) + sizeof(regv1_11),
      sizeof(width11) + sizeof(regv1_11) + sizeof(regv2_11),
      sizeof(width11) + sizeof(regv1_11) + sizeof(regv2_11) + sizeof(regv3_11)}
   };
@@ -881,8 +881,8 @@ TEST(CodegenTest, Ld_Codegen){
     BrigLd,
     Brigf64,
     BrigNoPacking,
-    {0, sizeof(width11) + sizeof(regv1_11) + sizeof(regv2_11) + 
-     sizeof(regv3_11) + sizeof(regv4_11), sizeof(width11) + sizeof(regv1_11) + 
+    {0, sizeof(width11) + sizeof(regv1_11) + sizeof(regv2_11) +
+     sizeof(regv3_11) + sizeof(regv4_11), sizeof(width11) + sizeof(regv1_11) +
      sizeof(regv2_11) + sizeof(regv3_11) + sizeof(regv4_11) + sizeof(dest11), 0, 0},
     BrigFlatSpace,
     BrigRegular,
@@ -891,7 +891,7 @@ TEST(CodegenTest, Ld_Codegen){
   out11.size = sizeof(out11);
 
   symbolName.assign("&x");
-  Ld_Test<BrigInstLdSt, BrigOperandRegV4> 
+  Ld_Test<BrigInstLdSt, BrigOperandRegV4>
     TestCase11(in, sbuf, &out11, &width11, &dest11, &addr11, regList, &symbolName);
   TestCase11.Run_Test(&Ld);
   sbuf->clear();
@@ -926,7 +926,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb32,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   regv2_12.size = sizeof(regv2_12);
 
@@ -935,7 +935,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb32,
     0,
-    2 * (op1.size() + 1)
+    (unsigned) (2 * (op1.size() + 1))
   };
   regv3_12.size = sizeof(regv3_12);
 
@@ -944,14 +944,14 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandReg,
     Brigb32,
     0,
-    3 * (op1.size() + 1)
+    (unsigned) (3 * (op1.size() + 1))
   };
   regv4_12.size = sizeof(regv4_12);
 
   regList[0] = regv1_12;
   regList[1] = regv2_12;
   regList[2] = regv3_12;
-  regList[3] = regv4_12; 
+  regList[3] = regv4_12;
 
   BrigOperandRegV4 dest12 = {
     0,
@@ -978,7 +978,7 @@ TEST(CodegenTest, Ld_Codegen){
     BrigEOperandCompound,
     Brigb64,
     0,
-    sizeof(width12) + sizeof(regv1_12) + sizeof(regv2_12) + 
+    sizeof(width12) + sizeof(regv1_12) + sizeof(regv2_12) +
     sizeof(regv3_12) + sizeof(regv4_12) + sizeof(dest12),
     0,
     2
@@ -1000,7 +1000,7 @@ TEST(CodegenTest, Ld_Codegen){
   out12.size = sizeof(out12);
 
   symbolName.assign("&tbl");
-  Ld_Test<BrigInstLdSt, BrigOperandRegV4> 
+  Ld_Test<BrigInstLdSt, BrigOperandRegV4>
     TestCase12(in, sbuf, &out12, &width12, &dest12, &comp12, &addr12, NULL, regList, &symbolName);
   TestCase12.Run_Test(&Ld);
   sbuf->clear();
@@ -1050,7 +1050,7 @@ TEST(CodegenTest, Ld_Codegen){
   out13.size = sizeof(out13);
 
   symbolName.assign("&g");
-  Ld_Test<BrigInstLdSt, BrigOperandReg> 
+  Ld_Test<BrigInstLdSt, BrigOperandReg>
     TestCase13(in, sbuf, &out13, &width13, &dest13, &addr13, NULL, &symbolName);
   TestCase13.Run_Test(&Ld);
   sbuf->clear();
@@ -1100,7 +1100,7 @@ TEST(CodegenTest, Lda_Codegen){
   out1.size = sizeof(out1);
 
   symbolName.assign("&loc");
-  Ld_Test<BrigInstMem, BrigOperandReg> 
+  Ld_Test<BrigInstMem, BrigOperandReg>
     TestCase1(in, sbuf, &out1, NULL, &dest1, &addr1, NULL, &symbolName);
   TestCase1.Run_Test(&Lda);
   sbuf->clear();
@@ -1139,7 +1139,7 @@ TEST(CodegenTest, Lda_Codegen){
   out2.size = sizeof(out2);
 
   symbolName.assign("&x");
-  Ld_Test<BrigInstMem, BrigOperandReg> 
+  Ld_Test<BrigInstMem, BrigOperandReg>
     TestCase2(in, sbuf, &out2, NULL, &dest2, &addr2, NULL, &symbolName);
   TestCase2.Run_Test(&Lda);
   sbuf->clear();
@@ -1163,7 +1163,7 @@ TEST(CodegenTest, Lda_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   reg3.size = sizeof(reg3);
 
@@ -1183,12 +1183,12 @@ TEST(CodegenTest, Lda_Codegen){
     BrigLda,
     Brigu32,
     BrigNoPacking,
-    {0, sizeof(dest3) + sizeof(reg3), 0, 0, 0},
+    {0, (unsigned) (sizeof(dest3) + sizeof(reg3)), 0, 0, 0},
     BrigFlatSpace
   };
   out3.size = sizeof(out3);
 
-  Ld_Test<BrigInstMem, BrigOperandReg> 
+  Ld_Test<BrigInstMem, BrigOperandReg>
     TestCase3(in, sbuf, &out3, NULL, &dest3, &indir3, &reg3);
   TestCase3.Run_Test(&Lda);
   sbuf->clear();
@@ -1212,7 +1212,7 @@ TEST(CodegenTest, Lda_Codegen){
     BrigEOperandReg,
     Brigb64,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   reg4.size = sizeof(reg4);
 
@@ -1237,7 +1237,7 @@ TEST(CodegenTest, Lda_Codegen){
   };
   out4.size = sizeof(out4);
 
-  Ld_Test<BrigInstMem, BrigOperandReg> 
+  Ld_Test<BrigInstMem, BrigOperandReg>
     TestCase4(in, sbuf, &out4, NULL, &dest4, &indir4, &reg4);
   TestCase4.Run_Test(&Lda);
   sbuf->clear();
@@ -1287,7 +1287,7 @@ TEST(CodegenTest, Lda_Codegen){
   out5.size = sizeof(out5);
 
   symbolName.assign("&array");
-  Ld_Test<BrigInstMem, BrigOperandReg> 
+  Ld_Test<BrigInstMem, BrigOperandReg>
     TestCase5(in, sbuf, &out5, NULL, &dest5, &comp5, &addr5, NULL, NULL, &symbolName);
   TestCase5.Run_Test(&Lda);
   sbuf->clear();
@@ -1375,31 +1375,31 @@ TEST(CodegenTest, Ldc_Codegen){
   delete sbuf;
 }
 
-TEST(ErrorReportTest, Ld) {  
+TEST(ErrorReportTest, Ld) {
   std::string symbolName;
   std::string input = "ld_readonly_s32 $s1, [&tbl][12]\n";
   symbolName.assign("&tbl");
   Ld_Test<> TestCase1(input, &symbolName);
   TestCase1.Run_Test(&Ld, MISSING_SEMICOLON);
-  
+
   input.assign( "ld_arg_f32 [&input];\n");
   symbolName.assign("&input");
   Ld_Test<> TestCase2(input, &symbolName);
   TestCase2.Run_Test(&Ld, INVALID_FIRST_OPERAND);
-  
+
   input.assign( "ld_group $d5, [100];\n");
   Ld_Test<> TestCase3(input);
   TestCase3.Run_Test(&Ld, MISSING_DATA_TYPE);
 }
 
 
-TEST(ErrorReportTest, Lda) {  
+TEST(ErrorReportTest, Lda) {
   std::string symbolName;
   std::string input = "lda_u32 $s1, [&loc]\n";
   symbolName.assign("&loc");
   Ld_Test<> TestCase1(input, &symbolName);
   TestCase1.Run_Test(&Lda, MISSING_SEMICOLON);
-  
+
   input.assign( "lda_u64 $d4, $d5;\n");
   Ld_Test<> TestCase2(input);
   TestCase2.Run_Test(&Lda, INVALID_OPERAND);
@@ -1410,11 +1410,11 @@ TEST(ErrorReportTest, Lda) {
   TestCase3.Run_Test(&Lda, MISSING_COMMA);
 }
 
-TEST(ErrorReportTest, Ldc) {  
+TEST(ErrorReportTest, Ldc) {
   std::string input = "ldc_u64 $d2, @lab\n";
   Ld_Test<> TestCase1(input);
   TestCase1.Run_Test(&Ldc, MISSING_SEMICOLON);
-  
+
   input.assign( "ldc_u64 $d4;\n");
   Ld_Test<> TestCase2(input);
   TestCase2.Run_Test(&Ldc, MISSING_COMMA);

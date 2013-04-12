@@ -32,7 +32,7 @@ Context::Context(void) {
   obuf = new Buffer();
   sbuf = new StringBuffer();
   err_reporter = NULL;
-    
+
   initialize_all_fields();
   for(unsigned i = 0; i < 8; ++i) cbuf->append_char(0);
   for(unsigned i = 0; i < 8; ++i) dbuf->append_char(0);
@@ -66,7 +66,7 @@ void Context::clear_context(void) {
     free(token_value.string_val);
     valid_string = false;
   }
-  initialize_all_fields();  
+  initialize_all_fields();
 }
 
 void Context::initialize_all_fields(void) {
@@ -78,14 +78,14 @@ void Context::initialize_all_fields(void) {
   isFirstVersion = true;
   yycolno = 0;
   yylineno = 1;
-  
+
   machine = BrigELarge;
   profile = BrigEFull;
   last_directive_offset = 0;
   current_bdf_offset = 0;
   major = 0;
   minor = 0;
-    
+
   attribute = BrigNone;
   alignment = 0;
   symModifier = 0;
@@ -107,7 +107,7 @@ ErrorReporterInterface* Context::get_error_reporter(void) const {
 }
 
 void Context::set_error_reporter(ErrorReporterInterface* error_reporter) {
-  this->err_reporter = error_reporter;  
+  this->err_reporter = error_reporter;
 }
 
 void Context::set_error(error_code_t error) {
@@ -120,17 +120,17 @@ void Context::set_error(error_code_t error) {
 
 // add a new symbol to .strings section.
 // return the offset to that symbol
-int Context::add_symbol(const std::string& s) {
+unsigned Context::add_symbol(const std::string& s) {
   // check if symbol exists
   int offset = sbuf->lookup(s);
   if (offset < 0) {
     // symbol does not exist. Add new
     offset = sbuf->size();  // current offset
     sbuf->append(s);
-    return offset;
+    return (unsigned) offset;
   } else {
   // symbol already exists in buffer
-    return offset;
+    return (unsigned) offset;
   }
 }
 
@@ -198,7 +198,7 @@ Context::context_error_t Context::update_directive_bytes(unsigned char* value,
 
 Context::context_error_t Context::update_last_directive(unsigned char* value,
                                        uint32_t nBytes) {
-  uint32_t offset = this->last_directive_offset;                                     
+  uint32_t offset = this->last_directive_offset;
   Buffer::error_t err = dbuf->modify(value, offset, nBytes);
 
   if (err == Buffer::SUCCESS)

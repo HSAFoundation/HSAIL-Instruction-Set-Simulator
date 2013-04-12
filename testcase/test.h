@@ -55,7 +55,7 @@ const int brig_inst_atomic_image_size = 48;
 const int brig_inst_atomic_size = 44;
 const int brig_directive_signature_size = 28;
 static const int kAlign = 8;
-extern int RoundUp8(int bytes);
+extern unsigned RoundUp8(int bytes);
 }  // namespace brig
 }  // namespace hsa
 #endif //TEST_H_

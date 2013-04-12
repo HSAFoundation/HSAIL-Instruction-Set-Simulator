@@ -1569,7 +1569,7 @@ TEST(CodegenTest, Instruction2_CodeGen){
 
   /**********************************************************************************/
   in.assign("currentworkgroupsize $s2, 077;");
-  destName.assign("$s2"); symbols->append(destName);  
+  destName.assign("$s2"); symbols->append(destName);
 
   BrigInstBase out55 = {
     0,
@@ -1819,11 +1819,11 @@ TEST(CodegenTest, MemorySegmentOps){
     BrigEOperandReg,
     Brigb32,
     0,
-    op1.size() + 1
+    (unsigned) (op1.size() + 1)
   };
   src.size = sizeof(src);
 
-  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> 
+  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg>
     TestCase1(in, sbuf, &ref1, &dest, &src);
   TestCase1.Run_Test(&Segp);
   sbuf->clear();
@@ -1894,7 +1894,7 @@ TEST(CodegenTest, MemorySegmentOps){
   src.reserved = 0;
   src.s_name = op1.size() + 1;
 
-  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> 
+  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg>
     TestCase3(in, sbuf, &ref3, &dest, &src);
   TestCase3.Run_Test(&Segp);
   sbuf->clear();
@@ -1929,7 +1929,7 @@ TEST(CodegenTest, MemorySegmentOps){
   src.reserved = 0;
   src.s_name = op1.size() + 1;
 
-  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> 
+  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg>
     TestCase4(in, sbuf, &ref4, &dest, &src);
   TestCase4.Run_Test(&Segp);
   sbuf->clear();
@@ -1964,7 +1964,7 @@ TEST(CodegenTest, MemorySegmentOps){
   src.reserved = 0;
   src.s_name = op1.size() + 1;
 
-  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg> 
+  Instruction2_Test<BrigInstSegp, BrigOperandReg, BrigOperandReg>
     TestCase5(in, sbuf, &ref5, &dest, &src);
   TestCase5.Run_Test(&Segp);
   sbuf->clear();

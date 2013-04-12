@@ -71,8 +71,10 @@ bool BrigWriter::write(llvm::raw_fd_ostream &out,
   out.seek(0);
 
   llvm::ELF::Elf32_Ehdr header = {
-    { llvm::ELF::ElfMagic[0],
-      llvm::ELF::ElfMagic[1], llvm::ELF::ElfMagic[2], llvm::ELF::ElfMagic[3],
+    { (unsigned char) llvm::ELF::ElfMagic[0],
+      (unsigned char) llvm::ELF::ElfMagic[1],
+      (unsigned char) llvm::ELF::ElfMagic[2],
+      (unsigned char) llvm::ELF::ElfMagic[3],
       llvm::ELF::ELFCLASS32,
       llvm::ELF::ELFDATA2LSB,
       llvm::ELF::EV_CURRENT,
@@ -122,8 +124,8 @@ void BrigWriter::writeSecHeader(llvm::raw_fd_ostream &out,
     sh_type, // sh_type
     0, // sh_flags
     0, // sh_addr
-    offset,
-    size,
+    llvm::ELF::Elf32_Off(offset),
+    llvm::ELF::Elf32_Word(size),
     0, // sh_link
     0, // sh_info
     sizeof(uint8_t), // sh_addralign

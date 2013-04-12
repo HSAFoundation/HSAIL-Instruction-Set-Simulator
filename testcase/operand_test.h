@@ -706,7 +706,7 @@ struct IntegerOperandTest integer_codegen_pair[18] = {
     BrigEOperandImmed,  // kind
     Brigb32,            // type
     0,                  // reserved
-    { -99 }
+    { (uint32_t) -99 }
   }
   },
 //integer_cogengen_pair[6]
@@ -717,18 +717,18 @@ struct IntegerOperandTest integer_codegen_pair[18] = {
     BrigEOperandImmed,  // kind
     Brigb32,            // type
     0,                  // reserved
-    { -1234567 }
+    { (uint32_t) -1234567 }
   }
   },
 //integer_cogengen_pair[7]
-  {  
+  {
     "-2147483648",
     {
     24,                 // size
     BrigEOperandImmed,  // kind
     Brigb32,            // type
     0,                  // reserved
-    { -2147483648}
+    { (uint32_t) -2147483648}
   }
   },
 //integer_cogengen_pair[8]
@@ -772,7 +772,7 @@ struct IntegerOperandTest integer_codegen_pair[18] = {
     BrigEOperandImmed,  // kind
     Brigb32,            // type
     0,                  // reserved
-    { -10 }
+    { (uint32_t) -10 }
   }
   },
 //integer_cogengen_pair[12]
@@ -805,7 +805,7 @@ struct IntegerOperandTest integer_codegen_pair[18] = {
     BrigEOperandImmed,  // kind
     Brigb32,            // type
     0,                  // reserved
-    {-18 }
+    { (uint32_t) -18 }
   }
   },
 //integer_cogengen_pair[15]
@@ -1193,4 +1193,3 @@ std::string inputarray_memory_invalid[2] = {
 }  // namespace brig
 }  // namespace hsa
 #endif // OPERAND_TEST_H_
-

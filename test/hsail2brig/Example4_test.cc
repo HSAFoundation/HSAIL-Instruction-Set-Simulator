@@ -17,16 +17,16 @@ public:
                 Buffer* code, Buffer* oper):
     BrigCodeGenTest(in, sbuf), RefDir(dir), RefOper(oper), RefCode(code) {}
 
-  void Run_Test(int (*Rule)(Context*)){  
+  void Run_Test(int (*Rule)(Context*)){
 
     struct BrigSections RefOutput (
-      reinterpret_cast<const char *>(&RefStr->get()[0]), 
+      reinterpret_cast<const char *>(&RefStr->get()[0]),
       reinterpret_cast<const char *>(&RefDir->get()[0]),
-      reinterpret_cast<const char *>(&RefCode->get()[0]), 
-      reinterpret_cast<const char *>(&RefOper->get()[0]), NULL, 
+      reinterpret_cast<const char *>(&RefCode->get()[0]),
+      reinterpret_cast<const char *>(&RefOper->get()[0]), NULL,
       RefStr->size(), RefDir->size(), RefCode->size(), RefOper->size(), 0
-    );    
-    
+    );
+
     Parse_Validate(Rule, &RefOutput);
   }
 };
@@ -87,7 +87,7 @@ TEST(CodegenTest, Example4_CodeGen) {
     {0, sizeof(width1), sizeof(reg1) + sizeof(width1), 0, 0}
   };
   instCbr.size = sizeof(instCbr);
- 
+
   code->append(&instCbr);
 
   width1.size = sizeof(width1);
@@ -119,7 +119,7 @@ TEST(CodegenTest, Example4_CodeGen) {
     BrigAbs,
     Brigs8x4,
     BrigPackP,
-    {sizeof(reg1) + sizeof(width1) + sizeof(lab1Ref), 
+    {sizeof(reg1) + sizeof(width1) + sizeof(lab1Ref),
      sizeof(width1) + sizeof(lab1Ref) + sizeof(reg1) + sizeof(reg2),
      0, 0, 0}
   };
@@ -127,7 +127,7 @@ TEST(CodegenTest, Example4_CodeGen) {
   instAbs.size = sizeof(instAbs);
 
   code->append(&instAbs);
- 
+
   reg2.size = sizeof(reg2);
   reg2.kind = BrigEOperandReg;
   reg2.type = Brigb32;
@@ -140,9 +140,9 @@ TEST(CodegenTest, Example4_CodeGen) {
   reg3.kind = BrigEOperandReg;
   reg3.type = Brigb32;
   reg3.reserved = 0;
-  reg3.s_name = funName.size() + symName.size() + 
+  reg3.s_name = funName.size() + symName.size() +
                 reg1Name.size() + reg2Name.size() + 4;
-  
+
   oper->append(&reg3);
 
   BrigInstBase instBrn = {
@@ -151,14 +151,14 @@ TEST(CodegenTest, Example4_CodeGen) {
     BrigBrn,
     Brigb32,
     BrigNoPacking,
-    {sizeof(width1) + sizeof(lab1Ref) + sizeof(reg1) + 
+    {sizeof(width1) + sizeof(lab1Ref) + sizeof(reg1) +
      sizeof(reg2) + sizeof(reg3),
-     sizeof(width1) + sizeof(lab1Ref) + sizeof(reg1) + 
-     sizeof(reg2) + sizeof(reg3) + sizeof(width2), 
+     sizeof(width1) + sizeof(lab1Ref) + sizeof(reg1) +
+     sizeof(reg2) + sizeof(reg3) + sizeof(width2),
      0, 0, 0}
   };
   instBrn.size = sizeof(instBrn);
- 
+
   code->append(&instBrn);
 
   width2.size = sizeof(width2);
@@ -182,19 +182,20 @@ TEST(CodegenTest, Example4_CodeGen) {
     BrigAdd,
     Brigu16x2,
     BrigPackPPsat,
-    {instAbs.o_operands[0], instBrn.o_operands[1] + sizeof(lab2Ref), 
-     instBrn.o_operands[1] + sizeof(lab2Ref) + sizeof(reg4), 0, 0}
+    {instAbs.o_operands[0],
+     (unsigned) (instBrn.o_operands[1] + sizeof(lab2Ref)),
+     (unsigned) (instBrn.o_operands[1] + sizeof(lab2Ref) + sizeof(reg4)), 0, 0}
   };
   instAdd.size = sizeof(instAdd);
- 
+
   code->append(&instAdd);
 
   reg4.size = sizeof(reg4);
   reg4.kind = BrigEOperandReg;
   reg4.type = Brigb32;
   reg4.reserved = 0;
-  reg4.s_name = funName.size() + symName.size() + 
-                reg1Name.size() + reg2Name.size() + 
+  reg4.s_name = funName.size() + symName.size() +
+                reg1Name.size() + reg2Name.size() +
                 reg3Name.size() + lab1Name.size() + 6;
 
   oper->append(&reg4);
@@ -204,7 +205,7 @@ TEST(CodegenTest, Example4_CodeGen) {
   reg5.type = Brigb32;
   reg5.reserved = 0;
   reg5.s_name = reg4.s_name + reg4Name.size() + 1;
-  
+
   oper->append(&reg5);
 
   BrigInstBase instRet = {
@@ -216,7 +217,7 @@ TEST(CodegenTest, Example4_CodeGen) {
     {0, 0, 0, 0, 0}     // o_operands[5]
   };
   instRet.size = sizeof(instRet);
-  
+
   code->append(&instRet);
 
   verRef.size = sizeof(verRef);
@@ -274,7 +275,7 @@ TEST(CodegenTest, Example4_CodeGen) {
   dirLab2Ref.kind = BrigEDirectiveLabel;
   dirLab2Ref.c_code = sizeof(instCbr) + sizeof(instAbs) + sizeof(instBrn) + sizeof(instAdd),
   dirLab2Ref.s_name = funName.size() + symName.size() + reg1Name.size() + lab1Name.size() +
-                      reg2Name.size() + reg3Name.size() + reg4Name.size() + 
+                      reg2Name.size() + reg3Name.size() + reg4Name.size() +
                       reg5Name.size() + 8;
 
   dir->append(&dirLab2Ref);
@@ -290,7 +291,3 @@ TEST(CodegenTest, Example4_CodeGen) {
 }
 } // namespace hsa
 } // namespace brig
-
-
-
-

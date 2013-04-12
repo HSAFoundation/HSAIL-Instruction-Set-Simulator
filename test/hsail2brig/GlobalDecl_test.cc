@@ -128,7 +128,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase3(in, sbuf, &ref);
   TestCase3.Run_Test(&GlobalDecl);
   sbuf->clear();
-  
+
   in.assign("align 8 extern group_u32 &x3;\n");
   name.assign("&x3"); sbuf->append(name);
 
@@ -231,7 +231,7 @@ TEST(CodegenTest, GlobalSymbolDecl_Codegen){
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase8(in, sbuf, &ref);
   TestCase8.Run_Test(&GlobalDecl);
   sbuf->clear();
-  
+
 
   /******************************************** End of tests ********************************/
   delete sbuf;
@@ -269,7 +269,8 @@ TEST(CodegenTest, FunctionDecl_Codegen){
   in.assign("extern function &callee(arg_u32 %val1)(arg_u16 %val2);\n ");
   name.assign("&callee"); arg1.assign("%val1"); arg2.assign("%val2");
   sbuf->append(name); sbuf->append(arg1); sbuf->append(arg2);
-  int dir_size = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)*2;
+  unsigned dir_size =
+    sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)*2;
   BrigdOffset32_t firstInParam = sizeof(BrigDirectiveFunction) + sizeof(BrigDirectiveSymbol)* 1;
   BrigDirectiveFunction ref2 = {
     sizeof(BrigDirectiveFunction),                       // size
@@ -295,7 +296,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
       0,
       0,
       0,
-      name.size()+1,
+      (unsigned) (name.size()+1),
       Brigu32,
       4,
     },
@@ -311,7 +312,7 @@ TEST(CodegenTest, FunctionDecl_Codegen){
       0,
       0,
       0,
-      name.size()+arg1.size()+2,
+      (unsigned) (name.size()+arg1.size()+2),
       Brigu16,
       2,
     },
@@ -896,7 +897,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdi7->initializationData.u64[0] = 0x1;                     // initializationData
   bdi7->initializationData.u64[1] = 0x0LL;
   bdi7->initializationData.u64[2] = 0x123456789ABCDEF0LL;
-  bdi7->initializationData.u64[3] = 0xFEDCBA01234LL; 
+  bdi7->initializationData.u64[3] = 0xFEDCBA01234LL;
   bdi7->initializationData.u64[4] = 0xFFFFFFFFFFFFFFFFLL;
 
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase7(in, sbuf, &ref7, bdi7);
@@ -1022,7 +1023,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdli10->d_labels[0] = 0;
   bdli10->d_labels[1] = 0;
 
-  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> 
+  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit>
     TestCase10(in, sbuf, &ref10, bdli10);
   TestCase10.Run_Test(&GlobalDecl);
   free(bdli10);  bdli10 = NULL;
@@ -1063,7 +1064,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdli11->d_labels[1] = 0;
   bdli11->d_labels[2] = 0;
 
-  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> 
+  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit>
     TestCase11(in, sbuf, &ref11, bdli11);
   TestCase11.Run_Test(&GlobalDecl);
   free(bdli11);  bdli11 = NULL;
@@ -1092,7 +1093,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   ref12.size = sizeof(ref12);
   ref12.d_init = sizeof(ref12);
 
-  arraySize = sizeof(BrigDirectiveLabelInit);  
+  arraySize = sizeof(BrigDirectiveLabelInit);
   BrigDirectiveLabelInit* bdli12 = (BrigDirectiveLabelInit*) (malloc(arraySize));
 
   bdli12->size = arraySize;                              // size
@@ -1102,7 +1103,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdli12->s_name = 0;
   bdli12->d_labels[0] = 0;
 
-  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit> 
+  GlobalDecl_Test<BrigDirectiveSymbol, BrigDirectiveLabelInit>
     TestCase12(in, sbuf, &ref12, bdli12);
   TestCase12.Run_Test(&GlobalDecl);
   free(bdli12);  bdli12 = NULL;
@@ -1435,7 +1436,7 @@ TEST(CodegenTest,GlobalSamplerDecl_Codegen){
   delete sbuf;
 }
 
-TEST(ErrorReportTest, GlobalDecl) {  
+TEST(ErrorReportTest, GlobalDecl) {
   std::string input = "group_u32 &x3\n";
   GlobalDecl_Test<> TestCase1(input);
   TestCase1.Run_Test(&GlobalDecl, MISSING_SEMICOLON);

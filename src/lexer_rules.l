@@ -13,7 +13,9 @@ hsa::brig::Context* context = hsa::brig::Context::get_instance();
 
 /* helper function for IEEE to Single */
 void ieee754tof(float *f, char *text) {
-  union { uint32_t u32; float f32; } result = { strtoull(text + 2, NULL, 16) };
+  union { uint32_t u32; float f32; } result = {
+    (unsigned) strtoull(text + 2, NULL, 16)
+  };
   // x86-32's fld instruction will not preserve 32-bit SNAN constants,
   // so don't return the result!
   *f = result.f32;
@@ -2238,4 +2240,3 @@ query_filtering   { free_string(context);
 Destructor static void fini(void) {
   yylex_destroy();
 }
-

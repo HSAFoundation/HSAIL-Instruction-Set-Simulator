@@ -52,16 +52,19 @@ TEST(Brig2LLVMTest, Example1) {
       8,   // c_code
       8,   // s_name
       1,   // inParamCount
-      directives.size() + sizeof(get_global_id) +
-      2 * sizeof(BrigDirectiveSymbol),  // d_firstScopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(get_global_id) +
+                     2 * sizeof(BrigDirectiveSymbol)), // d_firstScopedDirective
       0,   // operationCount
-      directives.size() + sizeof(get_global_id) +
-      2 * sizeof(BrigDirectiveSymbol),  // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(get_global_id) +
+                     2 * sizeof(BrigDirectiveSymbol)),  // d_nextDirective
       0,   // attribute
       0,   // fbarCount
       1,   // outParamCount
-      directives.size() + sizeof(get_global_id) +
-      sizeof(BrigDirectiveSymbol)    // d_firstInParam
+      BrigdOffset32_t(directives.size() +
+                     sizeof(get_global_id) +
+                     sizeof(BrigDirectiveSymbol))    // d_firstInParam
     };
     directives.append(&get_global_id);
 
@@ -108,9 +111,11 @@ TEST(Brig2LLVMTest, Example1) {
       8,   // c_code
       42,  // s_name
       0,   // inParamCount
-      directives.size() + sizeof(abort),  // d_firstScopedDirective
+      // d_firstScopedDirective
+      BrigdOffset32_t(directives.size() + sizeof(abort)),
       0,   // operationCount
-      directives.size() + sizeof(abort),  // d_nextDirective
+      // d_nextDirective
+      BrigdOffset32_t(directives.size() + sizeof(abort)),
       0,   // attribute
       0,   // fbarCount
       0,   // outParamCount
@@ -164,11 +169,13 @@ TEST(Brig2LLVMTest, Example2) {
       8,   // c_code
       8,   // s_name
       0,   // inParamCount
-      directives.size() + sizeof(bdf) +
-      sizeof(BrigDirectiveSymbol),  // d_firstScopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(bdf) +
+                     sizeof(BrigDirectiveSymbol)),  // d_firstScopedDirective
       1,   // operationCount
-      directives.size() + sizeof(bdf) +
-      sizeof(BrigDirectiveSymbol),  // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(bdf) +
+                     sizeof(BrigDirectiveSymbol)),  // d_nextDirective
       0,   // attribute
       0,   // fbarCount
       1,   // outParamCount
@@ -279,11 +286,13 @@ TEST(Brig2LLVMTest, Example3) {
       8,   // c_code
       8,   // s_name
       0,   // inParamCount
-      directives.size() + sizeof(bdf) +
-      sizeof(BrigDirectiveSymbol),  // d_firstScopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(bdf) +
+                     sizeof(BrigDirectiveSymbol)),  // d_firstScopedDirective
       1,   // operationCount
-      directives.size() + sizeof(bdf) +
-      sizeof(BrigDirectiveSymbol),  // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(bdf) +
+                     sizeof(BrigDirectiveSymbol)),  // d_nextDirective
       0,   // attribute
       0,   // fbarCount
       1,   // outParamCount
@@ -438,17 +447,19 @@ TEST(Brig2LLVMTest, Example4) {
     directives.append(&bdv);
 
     BrigDirectiveFunction bdf = {
-      sizeof(bdf),                    // size
+      sizeof(bdf),    // size
       BrigEDirectiveKernel,           // kind
       8,                              // c_code
       8,                              // s_name
       0,                              // inParamCount
-      directives.size() + sizeof(bdf) +
-      sizeof(BrigDirectiveSymbol),    // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(bdf) +
+                     sizeof(BrigDirectiveSymbol)),    // d_firstSCopedDirective
       5,                              // operationCount
-      directives.size() + sizeof(bdf) +
-      sizeof(BrigDirectiveSymbol) +
-      2 * sizeof(BrigDirectiveLabel), // d_nextDirectivef
+      BrigdOffset32_t(directives.size() +
+                     sizeof(bdf) +
+                     sizeof(BrigDirectiveSymbol) +
+                     2 * sizeof(BrigDirectiveLabel)), // d_nextDirectivef
       BrigNone,                       // attribute
       0,                              // fbarCount
       1,                              // outParamCount
@@ -677,11 +688,11 @@ TEST(Brig2LLVMTest, Example5) {
       8,                              // c_code
       8,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(callee),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_firstSCopedDirective
       1,                              // operationCount
-      directives.size() +
-      sizeof(callee),                 // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -693,13 +704,14 @@ TEST(Brig2LLVMTest, Example5) {
       sizeof(caller),                 // size
       BrigEDirectiveKernel,           // kind
       40,                             // c_code
-      16,                              // s_name
+      16,                             // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(caller),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(caller)), // d_firstSCopedDirective
       2,                              // operationCount
-      directives.size() + sizeof(callee) +
-      2 * sizeof(BrigDirectiveScope), // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee) +
+                     2 * sizeof(BrigDirectiveScope)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -1328,11 +1340,13 @@ TEST(Brig2LLVMTest, BrigDirectiveKernel_test) {
       8,                                       // c_code
       1,                                       // s_name
       0,                                       // inParamCount
-      directives.size() + sizeof(bdk) +
-      sizeof(BrigDirectiveSymbol),             // d_firstScopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(bdk) +
+                      sizeof(BrigDirectiveSymbol)), // d_firstScopedDirective
       1,                                       // operationCount
-      directives.size() + sizeof(bdk) +
-      sizeof(BrigDirectiveSymbol),             // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(bdk) +
+                     sizeof(BrigDirectiveSymbol)), // d_nextDirective
       0,                                       // attribute
       0,                                       // fbarCount
       1,                                       // outParamCount
@@ -2666,7 +2680,7 @@ TEST(Brig2LLVMTest, BrigDirectiveLabel_test) {
       sizeof(bdl),
       BrigEDirectiveLabel,
       0,
-      -1
+      BrigdOffset32_t(-1)
     };
     directives.append(&bdl);
 
@@ -2715,9 +2729,9 @@ TEST(Brig2LLVMTest, BrigDirectiveLabelList_test) {
       sizeof(bdll),
       BrigEDirectiveLabelList,
       8,
-      sizeof(bdv) + 8,
+      BrigdOffset32_t(sizeof(bdv) + 8),
       1,
-      { directives.size() + sizeof(BrigDirectiveLabelList) }
+      { BrigdOffset32_t(directives.size() + sizeof(BrigDirectiveLabelList)) }
     };
     directives.append(&bdll);
     BrigDirectiveLabel bdl2 = {
@@ -5922,11 +5936,11 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
       0,                              // c_code
       0,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(callee),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_firstSCopedDirective
       1,                              // operationCount
-      directives.size() +
-      sizeof(callee),                 // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -5980,11 +5994,11 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
       0,                              // c_code
       0,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(callee),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_firstSCopedDirective
       1,                              // operationCount
-      directives.size() +
-      sizeof(callee),                 // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -6007,7 +6021,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
     BrigOperandFunctionRef bofr = {
       sizeof(bofr),
       BrigEOperandFunctionRef,
-      directives.size() - sizeof(BrigDirectiveFunction)
+      BrigdOffset32_t(directives.size() - sizeof(BrigDirectiveFunction))
     };
     operands.append(&bofr);
 
@@ -6049,11 +6063,11 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionRef) {
       0,                              // c_code
       0,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(callee),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_firstSCopedDirective
       1,                              // operationCount
-      directives.size() +
-      sizeof(callee),                 // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -7197,11 +7211,11 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
       8,                              // c_code
       8,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(callee),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_firstSCopedDirective
       1,                              // operationCount
-      directives.size() +
-      sizeof(callee),                 // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -7294,11 +7308,11 @@ TEST(Brig2LLVMTest, validateBrigOperandArgumentList) {
       8,                              // c_code
       8,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(callee),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                      sizeof(callee)), // d_firstSCopedDirective
       1,                              // operationCount
-      directives.size() +
-      sizeof(callee),                 // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                      sizeof(callee)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -7374,11 +7388,11 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
       0,                              // c_code
       0,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(callee),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_firstSCopedDirective
       1,                              // operationCount
-      directives.size() +
-      sizeof(callee),                 // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -7392,11 +7406,12 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
       0,                             // c_code
       8,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(caller),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                      sizeof(caller)), // d_firstSCopedDirective
       2,                              // operationCount
-      directives.size() + sizeof(callee) +
-      2 * sizeof(BrigDirectiveScope), // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                     sizeof(callee) +
+                     2 * sizeof(BrigDirectiveScope)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount
@@ -7420,7 +7435,7 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     BrigOperandFunctionRef bofr2 = {
       sizeof(bofr2),
       BrigEOperandFunctionRef,
-      directives.size() - sizeof(BrigDirectiveFunction) //arg
+      BrigdOffset32_t(directives.size() - sizeof(BrigDirectiveFunction)) //arg
     };
     operands.append(&bofr2);
 
@@ -7464,16 +7479,16 @@ TEST(Brig2LLVMTest, validateBrigOperandFunctionList) {
     directives.append(&bdv);
 
     BrigDirectiveFunction callee = {
-      sizeof(callee),                 // size
+      sizeof(callee), // size
       BrigEDirectiveFunction,         // kind
       0,                              // c_code
       0,                              // s_name
       0,                              // inParamCount
-      directives.size() +
-      sizeof(callee),                 // d_firstSCopedDirective
+      BrigdOffset32_t(directives.size() +
+                      sizeof(callee)), // d_firstSCopedDirective
       1,                              // operationCount
-      directives.size() +
-      sizeof(callee),                 // d_nextDirective
+      BrigdOffset32_t(directives.size() +
+                      sizeof(callee)), // d_nextDirective
       BrigNone,                       // attribute
       0,                              // fbarCount
       0,                              // outParamCount

@@ -5,7 +5,7 @@
 namespace hsa{
 namespace brig{
 
-template <typename T=BrigOperandReg> 
+template <typename T=BrigOperandReg>
 class St_Test : public BrigCodeGenTest{
 private:
 
@@ -22,22 +22,22 @@ private:
 public:
   St_Test(std::string& in, std::string *name = NULL):
     BrigCodeGenTest(in), SymbolName(name) {}
-  
-  St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, T* src, 
-      BrigOperandAddress* addr,           std::string *name = NULL, 
-      BrigOperandReg *Reg1 = NULL,        BrigOperandReg *Reg2 = NULL,        
+
+  St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, T* src,
+      BrigOperandAddress* addr,           std::string *name = NULL,
+      BrigOperandReg *Reg1 = NULL,        BrigOperandReg *Reg2 = NULL,
       BrigOperandReg *Reg3 = NULL,        BrigOperandReg *Reg4 = NULL) :
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),            RefSrc(src),
     RefDest_Reg(NULL),       RefDest_Addr(addr),
     RefDest_Indir(NULL),     RefDest_Comp(NULL),
-    SymbolName(name),        RefReg1(Reg1),          
-    RefReg2(Reg2),           RefReg3(Reg3),           
+    SymbolName(name),        RefReg1(Reg1),
+    RefReg2(Reg2),           RefReg3(Reg3),
     RefReg4(Reg4) { }
 
   St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref,
       T* src, BrigOperandIndirect* indir, BrigOperandReg* reg = NULL,
-      BrigOperandReg *Reg1 = NULL, BrigOperandReg *Reg2 = NULL, 
+      BrigOperandReg *Reg1 = NULL, BrigOperandReg *Reg2 = NULL,
       BrigOperandReg *Reg3 = NULL, BrigOperandReg *Reg4 = NULL):
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),            RefSrc(src),
@@ -47,20 +47,20 @@ public:
     RefReg2(Reg2),           RefReg3(Reg3),
     RefReg4(Reg4) { }
 
-  St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, T* src, 
-      BrigOperandCompound* comp, BrigOperandAddress* addr, 
+  St_Test(std::string& input, StringBuffer* sbuf, BrigInstLdSt* ref, T* src,
+      BrigOperandCompound* comp, BrigOperandAddress* addr,
       BrigOperandReg* reg=NULL,  std::string *name = NULL,
-      BrigOperandReg *Reg1 = NULL,   BrigOperandReg *Reg2 = NULL,  
+      BrigOperandReg *Reg1 = NULL,   BrigOperandReg *Reg2 = NULL,
       BrigOperandReg *Reg3 = NULL,   BrigOperandReg *Reg4 = NULL):
     BrigCodeGenTest(input, sbuf),
     RefInst(ref),            RefSrc(src),
     RefDest_Reg(reg),        RefDest_Addr(addr),
     RefDest_Indir(NULL),     RefDest_Comp(comp),
-    SymbolName(name),        RefReg1(Reg1),           
-    RefReg2(Reg2),           RefReg3(Reg3), 
+    SymbolName(name),        RefReg1(Reg1),
+    RefReg2(Reg2),           RefReg3(Reg3),
     RefReg4(Reg4) { }
 
-  void Run_Test(int (*Rule)(Context*)){  
+  void Run_Test(int (*Rule)(Context*)){
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
     code->append(RefInst);
@@ -82,16 +82,16 @@ public:
       oper->append(RefDest_Indir);
     if (RefDest_Comp)
       oper->append(RefDest_Comp);
-    
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
-      NULL, reinterpret_cast<const char *>(&code->get()[0]), 
-      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-      RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);    
-    
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
+      NULL, reinterpret_cast<const char *>(&code->get()[0]),
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+      RefStr->size(), (size_t)0, code->size(), oper->size(), (size_t)0);
+
     Parse_Validate(Rule, &RefOutput, SymbolName);
     delete code;
     delete oper;
-  } 
+  }
 
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
     False_Validate(Rule, refError, SymbolName);
@@ -114,7 +114,7 @@ TEST(CodegenTest, St_Codegen) {
     BrigEOperandReg,
     Brigb32,
     0,
-    0 
+    0
   };
   src.size = sizeof(src);
 
@@ -123,7 +123,7 @@ TEST(CodegenTest, St_Codegen) {
     BrigEOperandAddress,
     Brigb64,
     0,
-    0 
+    0
   };
   dest1.size = sizeof(dest1);
 
@@ -132,7 +132,7 @@ TEST(CodegenTest, St_Codegen) {
     BrigEOperandReg,
     Brigb32,
     0,
-    op1.size() + op2.size() +2,
+    (unsigned) (op1.size() + op2.size() + 2),
   };
   dest2.size = sizeof(dest2);
 
@@ -142,8 +142,8 @@ TEST(CodegenTest, St_Codegen) {
     Brigb32,
     0,
     sizeof(src),
-    sizeof(src) + sizeof(dest1), 
-    -4  
+    sizeof(src) + sizeof(dest1),
+    -4
   };
   comp.size = sizeof(comp);
 
@@ -161,7 +161,7 @@ TEST(CodegenTest, St_Codegen) {
   out1.size = sizeof( out1);
 
   symbolName.assign("&output");
-  St_Test<BrigOperandReg> 
+  St_Test<BrigOperandReg>
     TestCase1(in, sbuf, &out1, &src, &comp, &dest1, &dest2, &symbolName);
   TestCase1.Run_Test(&St);
   sbuf->clear();
@@ -187,10 +187,10 @@ TEST(CodegenTest, St_Codegen) {
   BrigOperandIndirect indirect = {
     0,
     BrigEOperandIndirect,
-    sizeof(src), 
+    sizeof(src),
     Brigb32,
     0,
-    -4  
+    -4
   };
   indirect.size = sizeof(indirect);
 
@@ -200,7 +200,7 @@ TEST(CodegenTest, St_Codegen) {
     BrigSt,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {0, sizeof(src) + sizeof(dest2) , 0, 0, 0},  
+    {0, sizeof(src) + sizeof(dest2) , 0, 0, 0},
     BrigArgSpace,      // storageClass
     BrigRegular,       // memorySemantic
     0                  // equivClass
@@ -373,7 +373,7 @@ TEST(CodegenTest, St_Codegen) {
   out6.size = sizeof(out6);
 
   symbolName.assign("&output");
-  St_Test<BrigOperandImmed> 
+  St_Test<BrigOperandImmed>
     TestCase6(in, sbuf, &out6, &src1, &comp, &dest1, &dest2, &symbolName);
   TestCase6.Run_Test(&St);
   sbuf->clear();
@@ -399,7 +399,7 @@ TEST(CodegenTest, St_Codegen) {
     BrigEOperandReg,               //kind
     Brigb32,                       //type
     0,                             //reserved
-    op1.size() + 1                 //name
+    (unsigned) (op1.size() + 1)                 //name
   };
   reg1.size = sizeof(reg1);
 
@@ -447,7 +447,7 @@ TEST(CodegenTest, St_Codegen) {
   out7.size = sizeof( out7);
 
   symbolName.assign("&output");
-  St_Test<BrigOperandRegV2> 
+  St_Test<BrigOperandRegV2>
     TestCase7(in, sbuf, &out7, &regv2, &comp, &dest1, &dest2, &symbolName, &reg0, &reg1);
   TestCase7.Run_Test(&St);
   sbuf->clear();
@@ -479,7 +479,7 @@ TEST(CodegenTest, St_Codegen) {
     BrigEOperandReg,
     Brigb32,
     0,
-    op1.size() + op2.size() +2
+    (unsigned) (op1.size() + op2.size() + 2)
   };
   reg2.size = sizeof(reg2);
 
@@ -488,7 +488,7 @@ TEST(CodegenTest, St_Codegen) {
     BrigEOperandReg,                         // kind
     Brigb32,                                 // type
     0,                                       // reserved
-    op1.size() + op2.size() + op3.size() + 3 // name
+    (unsigned) (op1.size() + op2.size() + op3.size() + 3) // name
   };
   reg3.size = sizeof(reg3);
 
@@ -520,8 +520,8 @@ TEST(CodegenTest, St_Codegen) {
   comp.type = Brigb64;
   comp.reserved = 0;
   comp.name = sizeof(reg0) + sizeof(reg1) +
-    sizeof(reg2) + sizeof(reg3) + sizeof(regv4) ; 
-  comp.reg = sizeof(reg0) + sizeof(reg1) + 
+    sizeof(reg2) + sizeof(reg3) + sizeof(regv4) ;
+  comp.reg = sizeof(reg0) + sizeof(reg1) +
     sizeof(reg2) + sizeof(reg3) + sizeof(regv4) + sizeof(dest1);
   comp.offset = -4 ;
 
@@ -531,7 +531,7 @@ TEST(CodegenTest, St_Codegen) {
     BrigSt,            // opcode
     Brigf32,           // type
     BrigNoPacking,     // packing
-    {sizeof(reg0) + sizeof(reg1) + sizeof(reg2) + sizeof(reg3), 
+    {sizeof(reg0) + sizeof(reg1) + sizeof(reg2) + sizeof(reg3),
       sizeof(reg0) + sizeof(reg1) + sizeof(reg2) + sizeof(reg3) + sizeof(regv4)
         + sizeof(dest1) + sizeof(dest2), 0, 0, 0},  // operand[5]
     BrigFlatSpace,      // storageClass
@@ -541,7 +541,7 @@ TEST(CodegenTest, St_Codegen) {
   out8.size = sizeof(out8);
 
   symbolName.assign("&output");
-  St_Test<BrigOperandRegV4> 
+  St_Test<BrigOperandRegV4>
     TestCase8(in, sbuf, &out8, &regv4, &comp, &dest1, &dest2,
               &symbolName, &reg0, &reg1, &reg2, &reg3);
   TestCase8.Run_Test(&St);
@@ -550,7 +550,7 @@ TEST(CodegenTest, St_Codegen) {
   delete sbuf;
 }
 
-TEST(ErrorReportTest, St) {  
+TEST(ErrorReportTest, St) {
   std::string input = "st_arg 3.1415l, [$s2-4];\n";
   St_Test<> TestCase1(input);
   TestCase1.Run_Test(&St, MISSING_DATA_TYPE);

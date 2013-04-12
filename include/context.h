@@ -36,7 +36,7 @@ class Context {
     /* string buffer manipulators */
     // add a new symbol to .strings section.
     // return the offset to that symbol
-    int add_symbol(const std::string& s);
+    unsigned add_symbol(const std::string& s);
 
     // lookup offset to a symbol
     // if symbol does not exist, return -1
@@ -64,15 +64,15 @@ class Context {
     static BrigAlignment oper_alignment_check(T &item) {
       if(item.kind == BrigEOperandImmed)
         return BrigEAlignment_8;
-      else 
+      else
         return BrigEAlignment_4;
     }
-    
+
     template<class T>
     static BrigAlignment code_alignment_check(T &item) {
       return BrigEAlignment_4;
     }
-    
+
     /* code to append Brig structures to buffers */
 
     // append code
@@ -164,7 +164,7 @@ class Context {
 
       assert(false && "Unreachable");
     }
-    
+
     // get code at a specific offset
     template <class T>
     context_error_t get_code(uint32_t offset, T* item) {
@@ -228,8 +228,8 @@ class Context {
                                            uint32_t nBytes);
 
     context_error_t update_last_directive(unsigned char* value,
-                                          uint32_t nBytes);                                           
-                                           
+                                          uint32_t nBytes);
+
     context_error_t update_code_bytes(unsigned char* value,
                                       uint32_t offset,
                                       uint32_t nBytes);
@@ -250,7 +250,7 @@ class Context {
     void clear_context(void);
     void initialize_all_fields(void);
     void initialize_statement_fields(void);
-    
+
     uint16_t get_alignment() const                { return alignment; }
 
     BrigAttribute16_t get_attribute() const       { return attribute; }
@@ -274,13 +274,13 @@ class Context {
     uint16_t get_major() const                    { return major; }
 
     uint16_t get_minor() const                    { return minor; }
-    
+
     // set context
     void set_alu_modifier(BrigAluModifier modifier) {
       this->aluModifier = modifier;
     }
 
-    void set_symbol_modifier(BrigSymbolModifier modifier) { 
+    void set_symbol_modifier(BrigSymbolModifier modifier) {
       this->symModifier |= (uint32_t)modifier;
     }
 
@@ -303,7 +303,7 @@ class Context {
     void set_minor(uint16_t minor)                { this->minor = minor; }
 
 
-    void set_bdf_offset(BrigdOffset32_t offset) { 
+    void set_bdf_offset(BrigdOffset32_t offset) {
       this->current_bdf_offset = offset;
     };
 
@@ -312,7 +312,7 @@ class Context {
     };
 
     BrigdOffset32_t get_bdf_offset() { return this->current_bdf_offset; };
-    
+
     // get current offset
     BrigcOffset32_t get_code_offset(void) const      { return cbuf->size(); }
     BrigdOffset32_t get_directive_offset(void) const { return dbuf->size(); }
@@ -365,27 +365,27 @@ class Context {
 
     ~Context();
   private:
-    
+
     static Context* ctx;
     Context();
-    
+
     /*Buffers for code, directives, operands, and symbols */
-    Buffer* cbuf;  
-    Buffer* dbuf;  
-    Buffer* obuf;  
-    StringBuffer* sbuf; 
+    Buffer* cbuf;
+    Buffer* dbuf;
+    Buffer* obuf;
+    StringBuffer* sbuf;
 
     /* Error reporter */
     ErrorReporterInterface* err_reporter;
 
     /* Global context variables */
-    BrigMachine16_t machine; 
+    BrigMachine16_t machine;
     BrigProfile16_t profile;
     BrigdOffset32_t last_directive_offset;
     BrigdOffset32_t current_bdf_offset;
     uint16_t major;
     uint16_t minor;
-    
+
     /* Body Statement specific variables */
     uint16_t             alignment;
     uint32_t             symModifier;
@@ -395,7 +395,7 @@ class Context {
     uint32_t             dim;
     bool                 is_array;
     BrigStorageClass32_t storageClass;
-      
+
 };
 
 }  // namespace brig
