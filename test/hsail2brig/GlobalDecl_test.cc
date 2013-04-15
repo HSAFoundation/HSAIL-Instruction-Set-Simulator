@@ -652,18 +652,18 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdi2->type = Brigb32;                                           // type
   bdi2->reserved = 0;                                             // reserved
 
-  *(float*)&bdi2->initializationData.u32[0] = 1.1f;               // initializationData
+  bdi2->initializationData.u32[0] = bitCast<uint32_t>(1.1f);               // initializationData
 
-  *(float*)&bdi2->initializationData.u32[1] = 2.2f;
-  *(float*)&bdi2->initializationData.u32[2] = 3.3f;
-  *(float*)&bdi2->initializationData.u32[3] = 4.4f;
-  *(float*)&bdi2->initializationData.u32[4] = 5.5f;
+  bdi2->initializationData.u32[1] = bitCast<uint32_t>(2.2f);
+  bdi2->initializationData.u32[2] = bitCast<uint32_t>(3.3f);
+  bdi2->initializationData.u32[3] = bitCast<uint32_t>(4.4f);
+  bdi2->initializationData.u32[4] = bitCast<uint32_t>(5.5f);
 
-  *(float*)&bdi2->initializationData.u32[5] = 6.6f;
-  *(float*)&bdi2->initializationData.u32[6] = 7.7f;
-  *(float*)&bdi2->initializationData.u32[7] = 8.8f;
+  bdi2->initializationData.u32[5] = bitCast<uint32_t>(6.6f);
+  bdi2->initializationData.u32[6] = bitCast<uint32_t>(7.7f);
+  bdi2->initializationData.u32[7] = bitCast<uint32_t>(8.8f);
 
-  *(float*)&bdi2->initializationData.u32[8] = 9.9f;               // initializationData
+  bdi2->initializationData.u32[8] = bitCast<uint32_t>(9.9f);               // initializationData
   bdi2->initializationData.u32[9] = 0;
 
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase2(in, sbuf, &ref2, bdi2);
@@ -704,18 +704,18 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdi3->type = Brigb64;                                            // type
   bdi3->reserved = 0;                                              // reserved
 
-  *(double*)&bdi3->initializationData.u64[0] = 1.1l;               // initializationData
+  bdi3->initializationData.u64[0] = bitCast<uint64_t>(1.1);               // initializationData
 
-  *(double*)&bdi3->initializationData.u64[1] = 2.2l;
-  *(double*)&bdi3->initializationData.u64[2] = 3.3l;
-  *(double*)&bdi3->initializationData.u64[3] = 4.4l;
-  *(double*)&bdi3->initializationData.u64[4] = 5.5l;
+  bdi3->initializationData.u64[1] = bitCast<uint64_t>(2.2);
+  bdi3->initializationData.u64[2] = bitCast<uint64_t>(3.3);
+  bdi3->initializationData.u64[3] = bitCast<uint64_t>(4.4);
+  bdi3->initializationData.u64[4] = bitCast<uint64_t>(5.5);
 
-  *(double*)&bdi3->initializationData.u64[5] = 6.6l;
-  *(double*)&bdi3->initializationData.u64[6] = 7.7l;
-  *(double*)&bdi3->initializationData.u64[7] = 8.8l;
+  bdi3->initializationData.u64[5] = bitCast<uint64_t>(6.6);
+  bdi3->initializationData.u64[6] = bitCast<uint64_t>(7.7);
+  bdi3->initializationData.u64[7] = bitCast<uint64_t>(8.8);
 
-  *(double*)&bdi3->initializationData.u64[8] = 9.9l;               // initializationData
+  bdi3->initializationData.u64[8] = bitCast<uint64_t>(9.9);               // initializationData
 
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase3(in, sbuf, &ref3, bdi3);
   TestCase3.Run_Test(&GlobalDecl);
@@ -939,7 +939,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdi8->type = Brigb32;                                            // type
   bdi8->reserved = 0;                                              // reserved
 
-  *(float*)&bdi8->initializationData.u32[0] = -FLT_MAX;                     // initializationData
+  bdi8->initializationData.u32[0] = bitCast<uint32_t>(-FLT_MAX);                     // initializationData
   bdi8->initializationData.u32[1] = 0;                     // initializationData
 
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase8(in, sbuf, &ref8, bdi8);
@@ -981,7 +981,7 @@ TEST(CodegenTest, InitializableDecl_Codegen){
   bdi9->type = Brigb64;                                            // type
   bdi9->reserved = 0;                                              // reserved
 
-  *(double*)&bdi9->initializationData.u64[0] = -1.79769e+308;                     // initializationData
+  bdi9->initializationData.u64[0] = bitCast<uint64_t>(-1.79769e+308);                     // initializationData
 
   GlobalDecl_Test<BrigDirectiveSymbol> TestCase9(in, sbuf, &ref9, bdi9);
   TestCase9.Run_Test(&GlobalDecl);

@@ -124,6 +124,7 @@ int Operand(Context* context, BrigoOffset32_t* pRetOpOffset,
       case TOKEN_DREGISTER: type = Brigb64; break;
       case TOKEN_SREGISTER: type = Brigb32; break;
       case TOKEN_QREGISTER: type = Brigb128; break;
+      default: assert(false && "Unreachable");
     }
     if (expectedType != type) {
       context->set_error(INVALID_OPERAND);
@@ -332,7 +333,7 @@ int BaseOperand(Context* context) {
           float temp;
           for (uint32_t i = 0; i < douList.size(); ++i) {
             temp = (float)douList[i];
-            decList.push_back((uint64_t)(*reinterpret_cast<int32_t*>(&temp)));
+            decList.push_back((uint64_t)(bitCast<uint32_t>(temp)));
           }
           break;
         }
@@ -2228,7 +2229,7 @@ int BranchBrn(Context* context,
     return 1;
   }
 
-  if (*reinterpret_cast<uint32_t*>(&mod) == 0) {
+  if (bitCast<uint32_t>(mod) == 0) {
     BrigInstBase brnInst = {
       sizeof(BrigInstBase),
       BrigEInstBase,
@@ -6324,6 +6325,7 @@ int SegpPart2StoFAndFtoS(Context* context) {
       destAddrType = storageClass;
       srcAddrType = BrigFlatSpace;
       break;
+    default: assert(false && "Unreachable");
   }
 
   context->token_to_scan = yylex();
@@ -6954,7 +6956,7 @@ int SingleInitializer(Context* context, BrigdOffset32_t sym_offset){
   bdi->type = context->get_type();
   bdi->reserved = 0;
   for (uint32_t i = 0; i < single_list.size(); i++ ) {
-    *(float*)&bdi->initializationData.u32[i] = single_list[i];
+    bdi->initializationData.u32[i] = bitCast<uint32_t>(single_list[i]);
   }
   bds.d_init = context->get_directive_offset();
   if (bds.d_init % 8) {
@@ -7908,7 +7910,7 @@ int FloatInitializer(Context* context, BrigdOffset32_t symbol_offset){
   bdi->type = context->get_type();
   bdi->reserved = 0;
   for (uint32_t i = 0; i < float_list.size(); i++ ) {
-    *(double*)&bdi->initializationData.u64[i] = float_list[i];
+    bdi->initializationData.u64[i] = bitCast<uint64_t>(float_list[i]);
   }
   bds.d_init = context->get_directive_offset();
   if (bds.d_init % 8) {

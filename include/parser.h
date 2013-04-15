@@ -29,11 +29,11 @@ int Instruction3(Context* context);
 int Version(Context* context);
 int Alignment(Context* context);
 int SignatureArgumentList(Context *context);
-int SignatureArgumentList(Context *context, 
+int SignatureArgumentList(Context *context,
     std::vector<BrigDirectiveSignature::BrigProtoType> *types);
 
 int Label(Context* context);
-int Label(Context* context, 
+int Label(Context* context,
     std::map<std::string, BrigoOffset32_t> *label_map,
     std::map<std::string, BrigdOffset32_t> *symbol_map);
 
@@ -62,17 +62,17 @@ int CallArgs(Context* context);
 int Call(Context* context);
 int Initializer(Context* context, BrigdOffset32_t sym_offset);
 int InitializableDecl(Context* context);
-int InitializableDecl(Context* context, 
+int InitializableDecl(Context* context,
     std::map<std::string, BrigdOffset32_t> *symbol_map);
 
 int UninitializableDecl(Context* context);
-int UninitializableDecl(Context* context, 
+int UninitializableDecl(Context* context,
     std::map<std::string, BrigdOffset32_t> *symbol_map);
 
 int ArgUninitializableDecl(Context* context);
 int VectorToken(Context *context);
 int SignatureType(Context *context);
-int SignatureType(Context *context, 
+int SignatureType(Context *context,
     std::vector<BrigDirectiveSignature::BrigProtoType> *types);
 int FileDecl(Context* context);
 int SysCall(Context* context);
@@ -88,7 +88,7 @@ int GlobalPrivateDecl(Context* context);
 int OffsetAddressableOperand(Context* context, BrigoOffset32_t addrOpOffset);
 int MemoryOperand(Context* context);
 int Ldc(Context* context);
-int Ldc(Context* context, 
+int Ldc(Context* context,
     std::map<std::string, BrigoOffset32_t> *label_o_map,
     std::map<std::string, BrigdOffset32_t> *label_d_map);
 int Instruction5(Context* context);
@@ -175,12 +175,12 @@ int ArrayOperand(Context* context);
 int CodeBlockEnd(Context* context);
 int Comment(Context* context);
 
-//Declarations of Helper Functions 
+//Declarations of Helper Functions
 int GlobalImageDeclPart2(Context *context);
 int GlobalReadOnlyImageDeclPart2(Context *context);
 int GlobalInitializablePart2(Context* context);
 int GlobalSamplerDeclPart2(Context *context);
-int OffsetAddressableOperandPart2(Context* context, 
+int OffsetAddressableOperandPart2(Context* context,
     BrigoOffset32_t addrOpOffset, BrigoOffset32_t* pRetOpOffset);
 int LdModifierPart2(Context* context, BrigInstLdSt* pLdSt_op, int* pVec_size);
 int AddressSpaceIdentifier(Context* context);
@@ -190,10 +190,10 @@ int Acq(Context* context, BrigMemorySemantic32_t* memSemantic);
 int ArrayOperandList(Context* context, BrigoOffset32_t* pRetOpOffset);
 
 int ArrayOperand(Context* context, BrigoOffset32_t* pOperand);
-int ArrayOperand(Context* context, BrigoOffset32_t* pOperand, 
+int ArrayOperand(Context* context, BrigoOffset32_t* pOperand,
     BrigDataType16_t expectedType);
 
-int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset, 
+int AddressableOperand(Context* context, BrigoOffset32_t* pRetOpOffset,
     bool IsImageOrSampler);
 int ComparisonIdPart2(Context* context, BrigCompareOperation32_t* pCmpOperation);
 
@@ -223,16 +223,20 @@ int BranchBrn(Context* context,
     std::map<std::string, BrigoOffset32_t> *label_o_map,
     std::map<std::string, BrigdOffset32_t> *label_d_map);
 
-BrigDataType16_t ConvertTypeToB(BrigDataType16_t type, 
+BrigDataType16_t ConvertTypeToB(BrigDataType16_t type,
     BrigDataType16_t* pSubType = NULL, uint32_t* pSize = NULL);
-bool CheckDataType(BrigMachine16_t model, BrigStorageClass32_t addressType, 
+bool CheckDataType(BrigMachine16_t model, BrigStorageClass32_t addressType,
     BrigDataType16_t type);
-bool CheckRegister(unsigned int token, BrigDataType16_t type); 
+bool CheckRegister(unsigned int token, BrigDataType16_t type);
 
-bool CheckDestRegister(unsigned int token, BrigDataType16_t type, 
-    BrigOpcode32_t opcode); 
+bool CheckDestRegister(unsigned int token, BrigDataType16_t type,
+    BrigOpcode32_t opcode);
+
+template<class R, class T> R bitCast(T t) {
+  union { T t; R r; } x = { t };
+  return x.r;
+}
 
 }  // namespace brig
 }  // namespace hsa
 #endif  // INCLUDE_PARSER_H_
-

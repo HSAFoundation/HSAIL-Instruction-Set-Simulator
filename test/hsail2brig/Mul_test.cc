@@ -5,8 +5,8 @@
 namespace hsa {
 namespace brig {
 
-template <typename TInst=BrigInstBase, 
-          typename T1=BrigOperandReg, typename T2=BrigOperandReg, 
+template <typename TInst=BrigInstBase,
+          typename T1=BrigOperandReg, typename T2=BrigOperandReg,
           typename T3=BrigOperandReg>
 class Mul_Test: public BrigCodeGenTest {
 
@@ -21,7 +21,7 @@ private:
 public:
   Mul_Test(std::string& in):
     BrigCodeGenTest(in) {}
-  
+
   Mul_Test(std::string& in, StringBuffer* sbuf, TInst* ref,
            BrigOperandReg* Dest, T1* Src1, T2* Src2, T3* Src3 = NULL):
     BrigCodeGenTest(in, sbuf),
@@ -30,8 +30,8 @@ public:
     RefSrc1(Src1),
     RefSrc2(Src2),
     RefSrc3(Src3) {}
-  
-  void Run_Test(int (*Rule)(Context*)){  
+
+  void Run_Test(int (*Rule)(Context*)){
     Buffer* code = new Buffer();
     Buffer* oper = new Buffer();
     Buffer* dir = new Buffer();
@@ -41,18 +41,18 @@ public:
     oper->append(RefSrc2);
     if(RefSrc3)
       oper->append(RefSrc3);
-    
-    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]), 
+
+    struct BrigSections RefOutput(reinterpret_cast<const char *>(&RefStr->get()[0]),
       reinterpret_cast<const char *>(&dir->get()[0]),
-      reinterpret_cast<const char *>(&code->get()[0]), 
-      reinterpret_cast<const char *>(&oper->get()[0]), NULL, 
-      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);    
-    
+      reinterpret_cast<const char *>(&code->get()[0]),
+      reinterpret_cast<const char *>(&oper->get()[0]), NULL,
+      RefStr->size(), 0, code->size(), oper->size(), (size_t)0);
+
     Parse_Validate(Rule, &RefOutput);
     delete code;
     delete oper;
     delete dir;
-  }  
+  }
   void Run_Test(int (*Rule)(Context*), error_code_t refError){
     False_Validate(Rule, refError);
   }
@@ -231,7 +231,7 @@ TEST(CodegenTest, Mul_CodeGen) {
   imm2.type = Brigb64;
   imm2.reserved = 0;
   memset(&imm2.bits, 0, sizeof(imm2.bits));
-  *(double*)(&imm2.bits.l[0]) = 1.0;
+  imm2.bits.l[0] = bitCast<uint64_t>(1.0);
 
   Mul_Test<BrigInstBase, BrigOperandReg, BrigOperandImmed> TestCase4(in, symbols, &out, &dest, &reg1, &imm2);
   TestCase4.Run_Test(&Mul);
@@ -614,14 +614,14 @@ TEST(CodegenTest, Mul_AluModifier_CodeGen) {
   imm1.type = Brigb64;
   imm1.reserved = 0;
   memset(&imm1.bits, 0, sizeof(imm1.bits));
-  *(double*)(&imm1.bits.l[0]) = 1.2;
+  imm1.bits.l[0] = bitCast<uint64_t>(1.2);
 
   imm2.size = sizeof(imm2);
   imm2.kind = BrigEOperandImmed;
   imm2.type = Brigb64;
   imm2.reserved = 0;
   memset(&imm2.bits, 0, sizeof(imm2.bits));
-  *(double*)(&imm2.bits.l[0]) = 1.3;
+  imm2.bits.l[0] = bitCast<uint64_t>(1.3);
 
   Mul_Test<BrigInstMod, BrigOperandImmed, BrigOperandImmed> TestCase2(in, symbols, &out, &dest, &imm1, &imm2);
   TestCase2.Run_Test(&Mul);
@@ -630,11 +630,11 @@ TEST(CodegenTest, Mul_AluModifier_CodeGen) {
   delete symbols;
 }
 
-TEST(ErrorReportTest, Mul) {  
+TEST(ErrorReportTest, Mul) {
   std::string input = "mul_ftz_up $s1 ,$s2, $s3;\n";
   Mul_Test<> TestCase1(input);
   TestCase1.Run_Test(&Mul, MISSING_DATA_TYPE);
-  
+
   input.assign("mul_u32 $s1 $s2, $s3;\n");
   Mul_Test<> TestCase2(input);
   TestCase2.Run_Test(&Mul, MISSING_COMMA);
@@ -642,5 +642,3 @@ TEST(ErrorReportTest, Mul) {
 
 } // namespace hsa
 } // namespace brig
-
-
