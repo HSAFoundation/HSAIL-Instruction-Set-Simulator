@@ -341,8 +341,9 @@ std::string BrigInstHelper::getInstName(const inst_iterator inst) {
   if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst)) {
     const char *srcType = getTypeName(BrigDataType(cvt->stype));
     const char *roundingRaw = getRoundingName(cvt->aluModifier);
-    std::string rounding = llvm::StringRef(roundingRaw).lower();
-    return std::string(base) + "_" + rounding + "_" + type + "_" + srcType;
+    std::string rounding =
+      cvt->aluModifier.valid ? "_" + llvm::StringRef(roundingRaw).lower() : "";
+    return std::string(base) + rounding + "_" + type + "_" + srcType;
   }
 
   if(const BrigInstAtomic *atom = dyn_cast<BrigInstAtomic>(inst)) {

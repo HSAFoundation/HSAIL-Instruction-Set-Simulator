@@ -2,6 +2,7 @@
 #include "brig_llvm.h"
 #include "brig_module.h"
 #include "brig_reader.h"
+#include "brig_runtime.h"
 #include "brig_writer.h"
 #include "error_reporter.h"
 #include "parser_wrapper.h"
@@ -1751,15 +1752,46 @@ static void testInstCvt(const char *inst, const char *destTypeLength,
   delete src;
 }
 
+TEST(BrigInstTest, CvtIToI) {
+  union {
+    uint64_t u64; int64_t s64;
+    uint32_t u32; int32_t s32;
+    uint16_t u16; int16_t s16;
+    uint8_t u8; int8_t s8;
+  } result, input;
+
+#define CvtII(DEST,SRC) do {                                          \
+    result.DEST = input.SRC = ~SRC(0);                                \
+    testInstCvt("cvt", "_" #DEST, "_" #SRC, result.DEST, input.SRC);  \
+    result.DEST = input.SRC = SRC(1) << sizeof(SRC);                  \
+    testInstCvt("cvt", "_" #DEST, "_" #SRC, result.DEST, input.SRC);  \
+    result.DEST = input.SRC = ~(SRC(1) << sizeof(SRC));               \
+    testInstCvt("cvt", "_" #DEST, "_" #SRC, result.DEST, input.SRC);  \
+  } while(0)
+
+#define CvtBB(DEST, SRC) do {                   \
+    CvtII(s ## DEST, s ## SRC);                 \
+    CvtII(s ## DEST, u ## SRC);                 \
+    CvtII(u ## DEST, s ## SRC);                 \
+    CvtII(u ## DEST, u ## SRC);                 \
+  } while(0)
+
+  CvtBB( 8, 8); CvtBB( 8, 16); CvtBB( 8, 32); CvtBB( 8, 64);
+  CvtBB(16, 8); CvtBB(16, 16); CvtBB(16, 32); CvtBB(16, 64);
+  CvtBB(32, 8); CvtBB(32, 16); CvtBB(32, 32); CvtBB(32, 64);
+  CvtBB(64, 8); CvtBB(64, 16); CvtBB(64, 32); CvtBB(64, 64);
+
+#undef CvtBB
+#undef CvtII
+}
+
 TEST(BrigInstTest, CvtRoundingMode) {
-  union { uint64_t u64; double f64; int64_t s64;
-          uint32_t u32; float f32; int32_t s32;
-          uint16_t u16; int16_t s16;
-          uint8_t u8; int8_t s8; } result;
-  union { uint64_t u64; double f64; int64_t s64;
-          uint32_t u32; float f32; int32_t s32;
-          uint16_t u16; int16_t s16;
-          uint8_t u8; int8_t s8; } input;
+  union {
+    uint64_t u64; double f64; int64_t s64;
+    uint32_t u32; float f32; int32_t s32;
+    uint16_t u16; int16_t s16;
+    uint8_t u8; int8_t s8;
+  } result, input;
   {
     result.u8 = 0x2;
     input.u32 = 0x3FCCCCCD; //1.6f
