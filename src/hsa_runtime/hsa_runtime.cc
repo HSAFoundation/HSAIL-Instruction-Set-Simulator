@@ -99,7 +99,7 @@ class SimQueue : public Queue {
   }
 
   virtual DispatchEvent* dispatch(Kernel *kernel,
-                                  LaunchAttributes,
+                                  LaunchAttributes attrs,
                                   hsacommon::vector<Event *> &,
                                   hsacommon::vector<KernelArg> &kernArgs) {
 
@@ -112,8 +112,9 @@ class SimQueue : public Queue {
     llvm::Function *fun = sk->F_;
     llvm::Module *mod = fun->getParent();
     hsa::brig::BrigEngine BE(mod);
-    BE.launch(fun, args);
-
+    uint32_t blockNum = attrs.grid[0] * attrs.grid[1] * attrs.grid[2];
+    uint32_t threadNum = attrs.group[0] * attrs.group[1] * attrs.group[2];
+    BE.launch(fun, args, blockNum, threadNum);
     return NULL;
   }
 

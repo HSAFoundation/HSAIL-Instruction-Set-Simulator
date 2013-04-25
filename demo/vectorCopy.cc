@@ -15,6 +15,9 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include <iostream>
+using namespace std;
+
 #define STR(X) #X
 #define XSTR(X) STR(X)
 
@@ -65,7 +68,7 @@ int main(int argc, char **argv) {
     if(!a || !b) return -1;
 
     hsa::LaunchAttributes la;
-    la.grid[0] = 1;
+    la.grid[0] = length;
     la.grid[1] = 1;
     la.grid[2] = 1;
     la.group[0] = 1;
@@ -75,11 +78,14 @@ int main(int argc, char **argv) {
     hsacommon::vector<hsa::Event *> deps;
     queue->dispatch(kernel, la, deps, 3, argA, argB, argLength);
 
-    if(a[0] == b[0]) {
-      llvm::errs().changeColor(llvm::raw_ostream::GREEN);
-      llvm::errs() << "Vector copy success!\n";
-      llvm::errs().resetColor();
+	bool success = true;
+    for (int k=0; k<length; k++) {
+	  if(a[k] != b[k]) {
+		cout << "mismatch at index " << k << ", expected " << a[k] << ", saw " << b[k] << endl;
+		success = false;
+	  }
     }
+	if (success) cout << "Vector copy success for length " << length << endl;
 
     hsaRT->freeGlobalMemory(a);
     hsaRT->freeGlobalMemory(b);
