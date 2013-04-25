@@ -1761,11 +1761,14 @@ TEST(BrigInstTest, CvtIToI) {
   } result, input;
 
 #define CvtII(DEST,SRC) do {                                          \
-    result.DEST = input.SRC = ~SRC(0);                                \
+    input.SRC = ~SRC(0);                                              \
+    result.DEST = (DEST) input.SRC;                                   \
     testInstCvt("cvt", "_" #DEST, "_" #SRC, result.DEST, input.SRC);  \
-    result.DEST = input.SRC = SRC(1) << sizeof(SRC);                  \
+    input.SRC = SRC(1ULL << (sizeof(SRC) * 8 - 1));                   \
+    result.DEST = (DEST) input.SRC;                                   \
     testInstCvt("cvt", "_" #DEST, "_" #SRC, result.DEST, input.SRC);  \
-    result.DEST = input.SRC = ~(SRC(1) << sizeof(SRC));               \
+    input.SRC = ~input.SRC;                                           \
+    result.DEST = (DEST) input.SRC;                                   \
     testInstCvt("cvt", "_" #DEST, "_" #SRC, result.DEST, input.SRC);  \
   } while(0)
 
