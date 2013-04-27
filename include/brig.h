@@ -795,7 +795,7 @@ struct BrigDirectiveVersion {
     uint16_t minor;
     BrigMachine16_t machine;
     BrigProfile16_t profile;
-    uint16_t reserved;
+    uint32_t reserved;
 };
 
 // PRM 19.6.2
