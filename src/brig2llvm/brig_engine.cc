@@ -292,13 +292,16 @@ static bool isHardFP(void) {
 }
 #endif // __arm__
 
+static std::set<std::string> loadedLibs;
+
 void BrigEngine::init(bool forceInterpreter, char optLevel) {
 
   Dl_info info;
   int err = dladdr(&runtime, &info);
   assert(err && info.dli_fname &&
          "How are we executing if we haven't even been loaded?!");
-  llvm::sys::DynamicLibrary::LoadLibraryPermanently(info.dli_fname);
+  if(loadedLibs.insert(std::string(info.dli_fname)).second)
+    llvm::sys::DynamicLibrary::LoadLibraryPermanently(info.dli_fname);
 
   assert(!EE_ && "BrigEngine was already constructed?!");
 
