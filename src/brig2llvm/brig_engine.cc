@@ -34,6 +34,8 @@
 #include "llvm/Support/Memory.h"
 #include <cerrno>
 
+#include <dlfcn.h>
+
 #ifdef __linux__
 // These includes used by LLIMCJITMemoryManager::getPointerToNamedFunction()
 // for Glibc trickery. Look comments in this function for more information.
@@ -64,7 +66,7 @@ class LLIMCJITMemoryManager : public llvm::JITMemoryManager {
   llvm::SmallVector<llvm::sys::MemoryBlock, 16> AllocatedCodeMem;
   llvm::SmallVector<llvm::sys::MemoryBlock, 16> FreeCodeMem;
 
-  LLIMCJITMemoryManager() { }
+  LLIMCJITMemoryManager() {}
   ~LLIMCJITMemoryManager();
 
   virtual uint8_t *allocateCodeSection(uintptr_t Size, unsigned Alignment,
@@ -291,6 +293,12 @@ static bool isHardFP(void) {
 #endif // __arm__
 
 void BrigEngine::init(bool forceInterpreter, char optLevel) {
+
+  Dl_info info;
+  int err = dladdr(&runtime, &info);
+  assert(err && info.dli_fname &&
+         "How are we executing if we haven't even been loaded?!");
+  llvm::sys::DynamicLibrary::LoadLibraryPermanently(info.dli_fname);
 
   assert(!EE_ && "BrigEngine was already constructed?!");
 
