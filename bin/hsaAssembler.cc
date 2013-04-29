@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   context->get_string_bytes(strings.get(), 0, strSize);
 
   const char *outputFile = getOutputFile(argc, argv);
-  if(!inputFile) {
+  if(!outputFile) {
     llvm::errs() << argv[0] << ": No output file.\n";
     exit(-1);
   }
