@@ -1132,6 +1132,17 @@ int Instruction2(Context* context) {
   return 1;
 }
 
+static error_code_t checkFloatLiteral(BrigDataType16_t type, Context *context) {
+
+  if(context->token_to_scan == TOKEN_SINGLE_CONSTANT && type == Brigf64)
+    return MISSING_DOUBLE_CONSTANT;
+
+  if(context->token_to_scan == TOKEN_DOUBLE_CONSTANT && type == Brigf32)
+    return MISSING_SINGLE_CONSTANT;
+
+  return OK;
+}
+
 int Instruction3(Context* context) {
   // First token must be an Instruction3Opcode
 
@@ -1195,10 +1206,17 @@ int Instruction3(Context* context) {
       return 1;
     }
   }
+
+  if(error_code_t error = checkFloatLiteral(type, context)) {
+    context->set_error(error);
+    return 1;
+  }
+
   if (Operand(context, &OpOffset1)) {
     context->set_error(MISSING_OPERAND);
     return 1;
   }
+
   if (context->token_to_scan != ',') {
     context->set_error(MISSING_COMMA);
     return 1;
@@ -1214,6 +1232,12 @@ int Instruction3(Context* context) {
   if (opcode == BrigShl || opcode ==BrigShr) {
     context->set_type(Brigb32);
   }
+
+  if(error_code_t error = checkFloatLiteral(type, context)) {
+    context->set_error(error);
+    return 1;
+  }
+
   if (Operand(context, &OpOffset2)) {
     context->set_error(MISSING_OPERAND);
     return 1;
@@ -5036,6 +5060,11 @@ int MulInst(Context* context) {
   }
   context->token_to_scan = yylex();
 
+  if(error_code_t error = checkFloatLiteral(type, context)) {
+    context->set_error(error);
+    return 1;
+  }
+
   if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
     return 1;
@@ -5046,6 +5075,11 @@ int MulInst(Context* context) {
     return 1;
   }
   context->token_to_scan = yylex();
+
+  if(error_code_t error = checkFloatLiteral(type, context)) {
+    context->set_error(error);
+    return 1;
+  }
 
   if (Operand(context, &OpOffset[opCount++])) {
     context->set_error(INVALID_OPERAND);
