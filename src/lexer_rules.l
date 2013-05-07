@@ -1,7 +1,7 @@
 /* Copyright 2012 <MulticorewareInc> */
 
 %option noyywrap yylineno
-%option nounput
+%option nounput nodefault
 %{
 #include <stdio.h>
 #include "tokens.h"
@@ -145,15 +145,16 @@ IEEE_SINGLE (0(f|F)[0-9a-fA-F]{8})
 
 "/*"                          { BEGIN (COMMENT); }
 
-<COMMENT>"*/"                 { context->token_type = CODE_COMMENTS;
-                                BEGIN (INITIAL);
-                                return TOKEN_COMMENT; }
-
-<COMMENT>([^*]|\n)+|./"*/"    { free_string(context);
+<COMMENT>([^*]|\*+[^*/])*\**"*/" { free_string(context);
                                 context->token_value.string_val = strdup(yytext);
-                                context->valid_string = true;}
+                                size_t len = strlen(context->token_value.string_val);
+                                context->token_value.string_val[len - 2] = 0;
+                                context->valid_string = true;
+                                context->token_type = CODE_COMMENTS;
+                                BEGIN (INITIAL);
+                                return TOKEN_COMMENT;}
 
-<COMMENT><<EOF>>              { printf("%d: Unterminated comment\n", yylineno);
+<COMMENT>.*                   { printf("%d: Unterminated comment\n", yylineno);
                                 return 0; }
 
 "//"                          { BEGIN(INLINE_COMMENT); }

@@ -42,6 +42,12 @@ namespace brig {
     context->token_to_scan = lexer->get_next_token();
 
     while (context->token_to_scan != 0) {
+
+      // These comments cannot be correctly recorded in BRIG since they are
+      // before the version directive.
+      while(context->token_to_scan == TOKEN_COMMENT)
+        context->token_to_scan = lexer->get_next_token();
+
       if (context->token_to_scan == VERSION) {
         if (Program(context)) {
           return 1;
@@ -52,4 +58,3 @@ namespace brig {
   }
 }  // namespace brig
 }  // namespace hsa
-
