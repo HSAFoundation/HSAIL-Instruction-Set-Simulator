@@ -53,19 +53,25 @@ SET(LLVM_REQUIRES_EH "true")
 
 # obtain specific information about llvm setup
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
+SET(LOCAL_LIBHSAIL_INCLUDE src/brig2llvm/HSAIL-Tools/libHSAIL/libHSAIL)
+SET(LOCAL_LIBHSAIL_LIB ${PROJECT_SOURCE_DIR}/src/brig2llvm/HSAIL-Tools/libHSAIL/build_linux)
 
 include (EnsureAtomicOps)
 include (EnsureLLVMisPresent)
+include (EnsureLibHSAILisPresent)
+
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
+ensure_libHSAIL_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/HSAIL-Tools)
 
 SET(PROJ_SEARCH_PATH
 "${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
+"${PROJECT_SOURCE_DIR}/${LOCAL_LIBHSAIL_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/src")
 include_directories( ${PROJ_SEARCH_PATH} )
 
-LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
+LINK_DIRECTORIES( ${LLVM_LIB_DIR} ${LOCAL_LIBHSAIL_LIB} )
 
 add_subdirectory(src/brig2llvm/compiler)
 
