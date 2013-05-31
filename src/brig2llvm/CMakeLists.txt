@@ -54,5 +54,6 @@ add_llvm_library(brig2llvm
   brig_runtime.cc
   brig_reader.cc
   brig_writer.cc
+  hsailasm_wrapper.cc
   s_fma.c)
 llvm_config(brig2llvm ${LLVM_LINK_COMPONENTS})

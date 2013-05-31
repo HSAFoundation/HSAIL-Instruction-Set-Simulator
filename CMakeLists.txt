@@ -186,6 +186,7 @@ SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}" )
 
 set(brig2llvm_test_SOURCES
   test/brig2llvm_test.cc
+  test/hsailasm_wrapper_test.cc
   test/llvm_shutdown.cc
   gtest/gtest-all.cc
   gtest/gtest_main.cc
