@@ -11,8 +11,8 @@ namespace hsa {
 namespace brig {
 
 bool HsailAsm::assembleHSAILSource(const char *sourceFile,
-                                  const char *outputFile,
-                                  std::string *errMsg) {
+                                   const char *outputFile,
+                                   std::string *errMsg) {
 
   const char *args[5];
   args[0] = "hsailasm";

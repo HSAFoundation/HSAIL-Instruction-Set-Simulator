@@ -3,8 +3,11 @@
 
 #include "gtest/gtest.h"
 
+#define STR(X) #X
+#define XSTR(X) STR(X)
+
 TEST(HSAILASM_WRAPPER_TEST, VectorAdd) {
-  const char *source_file = "VectorAdd.hsail";
+  const char *source_file = XSTR(TEST_PATH) "/VectorAdd.hsail";
   const char *output_file = "VectorAdd.o";
   std::string ErrMsg;
 
