@@ -66,12 +66,11 @@ ensure_libHSAIL_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/HSAIL-Tools)
 SET(PROJ_SEARCH_PATH
 "${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
-"${PROJECT_SOURCE_DIR}/${LOCAL_LIBHSAIL_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/src")
 include_directories( ${PROJ_SEARCH_PATH} )
 
-LINK_DIRECTORIES( ${LLVM_LIB_DIR} ${LOCAL_LIBHSAIL_LIB} )
+LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
 
 add_subdirectory(src/brig2llvm/compiler)
 
@@ -245,3 +244,10 @@ add_executable(debug ${debug_SOURCES})
 target_link_libraries(debug hsa)
 
 add_subdirectory(test)
+
+set(HSAILASM_PATH
+  ${PROJECT_SOURCE_DIR}/src/brig2llvm/HSAIL-Tools/libHSAIL/build_linux/)
+
+add_custom_target( install_hsailasm ALL
+  DEPENDS build_libhsail
+  COMMAND cp ${HSAILASM_PATH}/hsailasm ${PROJECT_BINARY_DIR}/test )
