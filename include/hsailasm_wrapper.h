@@ -20,8 +20,13 @@ namespace brig {
 
 class HsailAsm {
  public:
-  static bool assembleHSAILSource(const char *source_file,
-                                  const char *output_file,
+
+  static bool assembleHSAILString(const char *source,
+                                  const char *outputFile,
+                                  std::string *ErrMsg = NULL);
+
+  static bool assembleHSAILSource(const char *sourceFile,
+                                  const char *outputFile,
                                   std::string *ErrMsg = NULL);
 };
 

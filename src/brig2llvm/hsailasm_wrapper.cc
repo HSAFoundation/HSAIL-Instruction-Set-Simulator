@@ -1,5 +1,6 @@
 #include "llvm/ADT/OwningPtr.h"
 #include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/system_error.h"
 
 #include "hsailasm_wrapper.h"
@@ -9,6 +10,35 @@
 
 namespace hsa {
 namespace brig {
+
+#define check(TEST,MESSAGE) do {                \
+    if(!TEST) {                                 \
+      if(errMsg) *errMsg = MESSAGE;             \
+      return false;                             \
+    }                                           \
+  } while(0)
+
+bool HsailAsm::assembleHSAILString(const char *sourceCode,
+                                   const char *outputFile,
+                                   std::string *errMsg) {
+
+  llvm::sys::Path sourceFile("temp.hsail");
+  if(sourceFile.createTemporaryFileOnDisk(true, errMsg))
+    return false;
+
+  std::string outErrMsg;
+  llvm::raw_fd_ostream out(sourceFile.c_str(), outErrMsg,
+                           llvm::raw_fd_ostream::F_Binary);
+  check(!outErrMsg.size(), outErrMsg);
+
+  out << sourceCode;
+  out.close();
+  check(!out.has_error(), "Error writing HSAIL");
+
+  bool result = assembleHSAILSource(sourceFile.c_str(), outputFile, errMsg);
+  sourceFile.eraseFromDisk();
+  return result;
+}
 
 bool HsailAsm::assembleHSAILSource(const char *sourceFile,
                                    const char *outputFile,
@@ -23,17 +53,8 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
 
   llvm::sys::Path programPath(XSTR(BIN_PATH) "/hsailasm");
 
-  if(!programPath.isRegularFile()) {
-    if(errMsg)
-      *errMsg = "Cannot find hsailasm";
-    return false;
-  }
-
-  if(!programPath.canExecute()) {
-    if(errMsg)
-      *errMsg = "Cannot execute hsailasm";
-    return false;
-  }
+  check(programPath.isRegularFile(), "Cannot find hsailasm");
+  check(programPath.canExecute(), "Cannot execute hsailasm");
 
   llvm::sys::Path errFile("hsailasm.log");
   if(errFile.createTemporaryFileOnDisk(true, errMsg))
@@ -65,11 +86,9 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
   }
 
   llvm::sys::Path output(outputFile);
-  if(!output.isRegularFile()) {
-    if(errMsg)
-      *errMsg = "Missing output";
-    return false;
-  }
+  check(output.isRegularFile(), "Missing output");
+
+  errFile.eraseFromDisk();
 
   return true;
 }
