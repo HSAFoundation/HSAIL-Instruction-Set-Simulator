@@ -450,8 +450,7 @@ template<> struct IntTypes<false> {
   typedef u8  Int8Ty;
 };
 
-template<class T, class U, bool S> struct IntPolicy :
-    public IntTypes<S> {
+template<class T, class U, bool S> struct IntPolicy : public IntTypes<S> {
   typedef U Unsigned;
   enum { isSigned = S };
   enum {

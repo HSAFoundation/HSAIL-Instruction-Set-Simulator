@@ -9,22 +9,23 @@
 #include <string>
 
 namespace llvm {
-  class StringRef;
-  class Path;
-  class Program;
+class StringRef;
+class Path;
+class Program;
 }
 
 
 namespace hsa {
-  namespace brig {
-    
+namespace brig {
+
 class HsailAsm {
-  public:
-    static int assembleHSAILSource(const char* source_file,
-                                   const char* output_file,
-                                   std::string* ErrMsg = NULL);
+ public:
+  static int assembleHSAILSource(const char *source_file,
+                                 const char *output_file,
+                                 std::string *ErrMsg = NULL);
 };
-  }  // namespace brig
+
+}  // namespace brig
 }  // namespace hsa
 
 #endif  // INCLUDE_HSAILASM_WRAPPER_H_
