@@ -1435,7 +1435,7 @@ bool BrigModule::validate(const BrigOperandRegV2 *operand) const {
     if(!validate(oper)) return false;
     const BrigOperandReg *bor = dyn_cast<BrigOperandReg>(oper);
     valid &= check(bor, "reg offset is wrong, not a BrigOperandReg");
-    if(!validate(bor)) return false;
+    if(!bor || !validate(bor)) return false;
     valid &= check(bor->type == operand->type,
                    "should be the same type with BrigOperandReg");
   }
