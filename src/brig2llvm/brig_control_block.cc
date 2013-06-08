@@ -10,7 +10,7 @@ BrigControlBlock &BrigControlBlock::operator++() {
   if(it_ == E) return *this;
 
   for(++it_; it_ != E; ++it_)
-    if(isa<BrigDirectiveLabel>(it_) || isa<BrigDirectiveMethod>(it_))
+    if(isa<BrigDirectiveLabel>(it_) || isa<BrigDirectiveExecutable>(it_))
       return *this;
 
   return *this;
@@ -25,11 +25,11 @@ BrigControlBlock cb_begin(const BrigFunction &F) {
 }
 
 BrigControlBlock cb_end(const BrigFunction &F) {
-  dir_iterator dirE(F.S_.directives + F.getMethod()->d_nextDirective);
+  dir_iterator dirE(F.S_.directives + F.getMethod()->nextTopLevelDirective);
   assert((dirE == F.S_.end() || !isa<BrigDirectiveLabel>(dirE)) &&
          "Label outside of function!?");
   BrigControlBlock E(F.S_, dirE);
-  if(dirE != F.S_.end() && !isa<BrigDirectiveMethod>(dirE)) ++E;
+  if(dirE != F.S_.end() && !isa<BrigDirectiveExecutable>(dirE)) ++E;
   return E;
 }
 

@@ -14,19 +14,19 @@ class BrigFunction {
 
   public:
 
-  const char *getName() const {
-    return S_.strings + getMethod()->s_name + 1;
+  const BrigString *getName() const {
+    return (const BrigString *) (S_.strings + getMethod()->name);
   }
 
   uint32_t getNumArgs() const {
-    const BrigDirectiveMethod *method = getMethod();
-    return method->inParamCount + method->outParamCount;
+    const BrigDirectiveExecutable *method = getMethod();
+    return method->inArgCount + method->outArgCount;
   }
 
-  bool isDeclaration() const { return !getMethod()->operationCount; }
+  bool isDeclaration() const { return !getMethod()->instCount; }
 
-  BrigAttribute getLinkage() const {
-    return BrigAttribute(getMethod()->attribute);
+  BrigLinkage8_t getLinkage() const {
+    return BrigLinkage8_t(getMethod()->modifier) & BRIG_EXECUTABLE_LINKAGE;
   }
 
   bool isKernel() const { return isa<BrigDirectiveKernel>(it_); }
@@ -62,8 +62,8 @@ class BrigFunction {
   BrigFunction(const BrigSections &S, const dir_iterator it) :
     S_(S), it_(it), ver_(NULL), maxWIPerG_(0), maxGPerC_(0), memOpt_(true) {}
 
-  const BrigDirectiveMethod *getMethod() const {
-    return cast<BrigDirectiveMethod>(it_);
+  const BrigDirectiveExecutable *getMethod() const {
+    return cast<BrigDirectiveExecutable>(it_);
   }
 
   void updateVersion(const BrigDirectiveVersion *ver);

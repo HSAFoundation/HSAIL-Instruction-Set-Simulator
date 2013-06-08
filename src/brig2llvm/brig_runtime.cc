@@ -329,10 +329,10 @@ template<class T> static T Not(T x) { return ~x; }
 template<> bool Not(bool x) { return !x; }
 BitInst(define, Not, Unary)
 
-static b32 PopCount(b32 x) { return __builtin_popcount(x); }
-static b64 PopCount(b64 x) { return __builtin_popcountll(x); }
-defineUnary(PopCount, b32)
-defineUnary(PopCount, b64)
+static u32 PopCount_u32(b32 x) { return __builtin_popcount(x); }
+static u32 PopCount_u32(b64 x) { return __builtin_popcountll(x); }
+defineUnary(PopCount_u32, b32)
+defineUnary(PopCount_u32, b64)
 
 // Bit reverse implementation loosely adapted from Sean Eron Anderson's article
 // at: http://graphics.stanford.edu/~seander/bithacks.html
@@ -354,14 +354,14 @@ template<class T> static T BitRev(T x) {
 defineUnary(BitRev, b32)
 defineUnary(BitRev, b64)
 
-template<class T> static T Extract(T x, b32 y, b32 z) {
+template<class T> static T BitExtract(T x, b32 y, b32 z) {
   unsigned offset = Int<T>::ShiftMask & y;
   unsigned width  = Int<T>::ShiftMask & z;
   if(!width) return 0;
   return (x << (Int<T>::Bits - width - offset)) >> (Int<T>::Bits - width);
 }
-defineTernary(Extract, b32)
-defineTernary(Extract, b64)
+SignedInst(define, BitExtract, Ternary)
+UnsignedInst(define, BitExtract, Ternary)
 
 template<class T> static T Insert(T w, T x, b32 y, b32 z) {
   typedef typename Int<T>::Unsigned Unsigned;
@@ -381,7 +381,7 @@ template<class T> static T BitSelect(T x, T y, T z) {
 defineTernary(BitSelect, b32)
 defineTernary(BitSelect, b64)
 
-template<class T> static T FirstBit(T x) {
+template<class T> static T FirstBit_u32(T x) {
   if(Int<T>::isNeg(x)) x = ~x;
   if(!x) return ~T(0);
   T pos = T(0);
@@ -391,10 +391,10 @@ template<class T> static T FirstBit(T x) {
   }
   return pos;
 }
-defineUnary(FirstBit, b32)
-defineUnary(FirstBit, b64)
+SignedInst(define, FirstBit_u32, Unary)
+UnsignedInst(define, FirstBit_u32, Unary)
 
-template<class T> static T LastBit(T x) {
+template<class T> static T LastBit_u32(T x) {
   if(!x) return ~T(0);
   T pos = T(0);
   while(!(x & 1)) {
@@ -403,12 +403,15 @@ template<class T> static T LastBit(T x) {
   }
   return pos;
 }
-defineUnary(LastBit, b32)
-defineUnary(LastBit, b64)
+SignedInst(define, LastBit_u32, Unary)
+UnsignedInst(define, LastBit_u32, Unary)
 
 template<class T> static T Mov(T x) { return x; }
 BitInst(define, Mov, Unary)
 extern "C" b128 Mov_b128(b128 x) { return x; }
+
+extern "C" b64 Combine_b64_b32(b64 x) { return x; }
+extern "C" b128 Combine_b128_b32(b128 x) { return x; }
 
 extern "C" b32 MovsLo_b32(b64 x) { return x; }
 extern "C" b32 MovsHi_b32(b64 x) { return x >> 32; }
@@ -453,12 +456,12 @@ template<class T> static T Cmov(T x, T y, T z) {
 }
 BitInst(define, Cmov, Ternary)
 
-template<class T> static T Cmov_PPVector(T x, T y, T z) {
+template<class T> static T CmovVector(T x, T y, T z) {
   return map(Cmov, x, y, z);
 }
-SignedVectorInst(define, Cmov_PP, Ternary)
-UnsignedVectorInst(define, Cmov_PP, Ternary)
-FloatVectorInst(define, Cmov_PP, Ternary)
+SignedVectorInst(define, Cmov, Ternary)
+UnsignedVectorInst(define, Cmov, Ternary)
+FloatVectorInst(define, Cmov, Ternary)
 
 // Neither C++98 nor C++11 implement C99's floating point hexadecimal
 // literals. :(
@@ -477,8 +480,8 @@ extern "C" f64 Fract_f64(f64 d) {
 template<class T> static T Sqrt(T x) { return std::sqrt(x); }
 FloatInst(define, Sqrt, Unary)
 
-template<class T> static T Fsqrt(T x) { return std::sqrt(x); }
-FloatInst(define, Fsqrt, Unary)
+template<class T> static T Nsqrt(T x) { return std::sqrt(x); }
+FloatInst(define, Nsqrt, Unary)
 
 template<class T> static T Fma(T x, T y, T z) { return fma(x, y, z); }
 FloatInst(define, Fma, Ternary)
@@ -503,7 +506,7 @@ template<class T> static b1 Class(T x, b32 y) {
 extern "C" b1 Class_f32(f32 f, b32 y) { return Class(f, y); }
 extern "C" b1 Class_f64(f64 f, b32 y) { return Class(f, y); }
 
-extern "C" f32 Fcos_f32(f32 x) {
+extern "C" f32 Ncos_f32(f32 x) {
   if(isNan(x)) return x;
   if(isInf(x)) return NAN;
   if(-512 * M_PI <= x && x <= 512 * M_PI) {
@@ -513,7 +516,7 @@ extern "C" f32 Fcos_f32(f32 x) {
   }
 }
 
-extern "C" f32 Fsin_f32(f32 x) {
+extern "C" f32 Nsin_f32(f32 x) {
   if(isNan(x)) return x;
   if(isInf(x)) return NAN;
   if(std::fpclassify(x) == FP_SUBNORMAL) {
@@ -526,7 +529,7 @@ extern "C" f32 Fsin_f32(f32 x) {
   }
 }
 
-extern "C" f32 Flog2_f32(f32 x) {
+extern "C" f32 Nlog2_f32(f32 x) {
   if(std::fpclassify(x) == FP_SUBNORMAL) {
     return -INFINITY;
   } else if(std::fpclassify(x) == FP_NORMAL && x < 0) {
@@ -536,7 +539,7 @@ extern "C" f32 Flog2_f32(f32 x) {
   }
 }
 
-extern "C" f32 Fexp2_f32(f32 x) {
+extern "C" f32 Nexp2_f32(f32 x) {
   if (std::fpclassify(x) == FP_NORMAL && x < 0) {
     return 0.0;
   } else {
@@ -544,23 +547,23 @@ extern "C" f32 Fexp2_f32(f32 x) {
   }
 }
 
-template<class T> static T Frsqrt(T x) {
+template<class T> static T Nrsqrt(T x) {
   if(std::fpclassify(x) == FP_SUBNORMAL) {
     return x > 0 ? INFINITY : -INFINITY;
   } else {
     return  T(1.0) / std::sqrt(x);
   }
 }
-FloatInst(define, Frsqrt, Unary)
+FloatInst(define, Nrsqrt, Unary)
 
-template<class T> static T Frcp(T x) {
+template<class T> static T Nrcp(T x) {
   if(std::fpclassify(x) == FP_SUBNORMAL) {
     return x > 0 ? INFINITY : -INFINITY;
   } else {
     return T(1.0) / x;
   }
 }
-FloatInst(define, Frcp, Unary)
+FloatInst(define, Nrcp, Unary)
 
 extern "C" u32 F2u4_u32(f32 w, f32 x, f32 y, f32 z){
   return u32(((lrint(w) & 0xFF) << 24) +
@@ -603,15 +606,15 @@ extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
   return result;
 }
 
-extern "C" b32 Sad_b32(b32 w, b32 x, b32 y) {
+extern "C" u32 Sad_u32_u32(u32 w, u32 x, u32 y) {
   return abs(w - x) + y;
 }
 
 extern "C" b32 Sad2_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
   for(unsigned i = 0; i < 2; ++i){
-    result += Sad_b32((w >> i * 16) & 0xFFFF,
-                      (x >> i * 16) & 0xFFFF, 0);
+    result += Sad_u32_u32((w >> i * 16) & 0xFFFF,
+                          (x >> i * 16) & 0xFFFF, 0);
   }
   return result + y;
 }
@@ -619,8 +622,8 @@ extern "C" b32 Sad2_b32(b32 w, b32 x, b32 y) {
 extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
   for(unsigned i = 0; i < 4; ++i){
-    result += Sad_b32((w >> i * 8) & 0xFF,
-                      (x >> i * 8) & 0xFF, 0);
+    result += Sad_u32_u32((w >> i * 8) & 0xFF,
+                          (x >> i * 8) & 0xFF, 0);
   }
   return result + y;
 }
@@ -628,8 +631,8 @@ extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
 extern "C" b32 Sad4Hi_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
   for(unsigned i = 0; i < 4; ++i){
-    result += Sad_b32((w >> i * 8) & 0xFF,
-                      (x >> i * 8) & 0xFF, 0);
+    result += Sad_u32_u32((w >> i * 8) & 0xFF,
+                          (x >> i * 8) & 0xFF, 0);
   }
   return (result << 16) + y;
 }
@@ -859,15 +862,15 @@ template<class T> static T AtomicMin(volatile T *x, T y) {
 }
 AtomicInst(define, Min, Binary)
 
-extern "C" void Barrier_b32(void) {
+extern "C" void Barrier(void) {
   pthread_barrier_wait(__brigThreadInfo->barrier);
 }
 
-extern "C" void Sync_b32(void) {
+extern "C" void Sync(void) {
   __sync_synchronize();
 }
 
-extern "C" u32 WorkItemAbsId_b32(u32 x) {
+extern "C" u32 WorkItemAbsId_u32(u32 x) {
   return __brigThreadInfo->workItemAbsId[x];
 }
 

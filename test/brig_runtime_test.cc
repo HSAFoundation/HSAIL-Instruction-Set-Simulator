@@ -413,10 +413,10 @@ template<class T> static void PopCountLogic(T result, T a) {
   }
   EXPECT_EQ(d, result);
 }
-declareUnary(PopCount, b32)
-declareUnary(PopCount, b64)
-MakeTest(PopCount_b32, PopCountLogic)
-MakeTest(PopCount_b64, PopCountLogic)
+declareUnary(PopCount_u32, b32)
+declareUnary(PopCount_u32, b64)
+MakeTest(PopCount_u32_b32, PopCountLogic)
+MakeTest(PopCount_u32_b64, PopCountLogic)
 
 // Bit reverse implementation loosely adapted from Sean Eron Anderson's article
 // at: http://graphics.stanford.edu/~seander/bithacks.html
@@ -448,7 +448,7 @@ declareUnary(BitRev, b64)
 MakeTest(BitRev_b32, BitRevLogic)
 MakeTest(BitRev_b64, BitRevLogic)
 
-template<class T> static void ExtractLogic(T result, T a, T b, T c) {
+template<class T> static void BitExtractLogic(T result, T a, T b, T c) {
 
   unsigned offset = Int<T>::ShiftMask & b;
   unsigned width  = Int<T>::ShiftMask & c;
@@ -460,10 +460,8 @@ template<class T> static void ExtractLogic(T result, T a, T b, T c) {
     EXPECT_EQ(signEx, result);
   }
 }
-declareTernary(Extract, b32)
-declareTernary(Extract, b64)
-MakeTest(Extract_b32, ExtractLogic)
-MakeTest(Extract_b64, ExtractLogic)
+TestAll(SignedInst, BitExtract, Ternary)
+TestAll(UnsignedInst, BitExtract, Ternary)
 
 template<class T> static void InsertLogic(T result, T a, T b, b32 c, b32 d) {
 
@@ -491,7 +489,7 @@ declareTernary(BitSelect, b64)
 MakeTest(BitSelect_b32, BitSelectLogic)
 MakeTest(BitSelect_b64, BitSelectLogic)
 
-template<class T> static void FirstBitLogic(T result, T a) {
+template<class T> static void FirstBit_u32Logic(T result, T a) {
 
   if(Int<T>::isNeg(a)) a = ~a;
 
@@ -505,12 +503,10 @@ template<class T> static void FirstBitLogic(T result, T a) {
   while(!(a & mask)) mask >>= 1;
   EXPECT_EQ(mask, T(1) << (Int<T>::Bits - result - 1));
 }
-declareUnary(FirstBit, b32)
-declareUnary(FirstBit, b64)
-MakeTest(FirstBit_b32, FirstBitLogic)
-MakeTest(FirstBit_b64, FirstBitLogic)
+TestAll(SignedInst, FirstBit_u32, Unary)
+TestAll(UnsignedInst, FirstBit_u32, Unary)
 
-template<class T> static void LastBitLogic(T result, T a) {
+template<class T> static void LastBit_u32Logic(T result, T a) {
 
   if(!a) {
     EXPECT_EQ(~T(0), result);
@@ -522,10 +518,8 @@ template<class T> static void LastBitLogic(T result, T a) {
   while(!(a & mask)) mask <<= 1;
   EXPECT_EQ(mask, T(1) << result);
 }
-declareUnary(LastBit, b32)
-declareUnary(LastBit, b64)
-MakeTest(LastBit_b32, LastBitLogic)
-MakeTest(LastBit_b64, LastBitLogic)
+TestAll(SignedInst, LastBit_u32, Unary)
+TestAll(UnsignedInst, LastBit_u32, Unary)
 
 static void MovsLo_b32_Logic(b32 result, b64 a) {
   EXPECT_EQ(b32(a), result);
@@ -601,12 +595,12 @@ template<class T> static void CmovLogic(T result, T a, T b, T c) {
 }
 TestAll(BitInst, Cmov, Ternary)
 
-template<class T> static void Cmov_PPVectorLogic(T result, T a, T b, T c) {
+template<class T> static void CmovVectorLogic(T result, T a, T b, T c) {
   ForEach(CmovLogic, result, a, b, c);
 }
-TestAll(SignedVectorInst, Cmov_PP, Ternary)
-TestAll(UnsignedVectorInst, Cmov_PP, Ternary)
-TestAll(FloatVectorInst, Cmov_PP, Ternary)
+TestAll(SignedVectorInst, Cmov, Ternary)
+TestAll(UnsignedVectorInst, Cmov, Ternary)
+TestAll(FloatVectorInst, Cmov, Ternary)
 
 template<class T> static void FractLogic(T result, T a) {
 
@@ -703,7 +697,7 @@ extern "C" b1 Class_f64(f64, unsigned);
 MakeTest(Class_f32, ClassLogic)
 MakeTest(Class_f64, ClassLogic)
 
-static void Fcos_f32_Logic(f32 result, f32 a) {
+static void Ncos_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isInf(a)) {
     EXPECT_PRED1(isNan<f32>, result);
@@ -719,10 +713,10 @@ static void Fcos_f32_Logic(f32 result, f32 a) {
     EXPECT_FLOAT_EQ(cos(a), result);
   }
 }
-extern "C" f32 Fcos_f32(f32);
-MakeTest(Fcos_f32, Fcos_f32_Logic)
+extern "C" f32 Ncos_f32(f32);
+MakeTest(Ncos_f32, Ncos_f32_Logic)
 
-static void Fsin_f32_Logic(f32 result, f32 a) {
+static void Nsin_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isInf(a)) {
     EXPECT_PRED1(isNan<f32>, result);
@@ -740,10 +734,10 @@ static void Fsin_f32_Logic(f32 result, f32 a) {
     EXPECT_FLOAT_EQ(sin(a), result);
   }
 }
-extern "C" f32 Fsin_f32(f32);
-MakeTest(Fsin_f32, Fsin_f32_Logic)
+extern "C" f32 Nsin_f32(f32);
+MakeTest(Nsin_f32, Nsin_f32_Logic)
 
-static void Flog2_f32_Logic(f32 result, f32 a) {
+static void Nlog2_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isNegInf(a)) {
     EXPECT_PRED1(isNan<f32>, result);
@@ -761,10 +755,10 @@ static void Flog2_f32_Logic(f32 result, f32 a) {
     EXPECT_FLOAT_EQ(log2(a), result);
   }
 }
-extern "C" f32 Flog2_f32(f32);
-MakeTest(Flog2_f32, Flog2_f32_Logic)
+extern "C" f32 Nlog2_f32(f32);
+MakeTest(Nlog2_f32, Nlog2_f32_Logic)
 
-static void Fexp2_f32_Logic(f32 result, f32 a) {
+static void Nexp2_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a)) {
     EXPECT_PRED1(isNan<f32>, result);
@@ -784,10 +778,10 @@ static void Fexp2_f32_Logic(f32 result, f32 a) {
     EXPECT_FLOAT_EQ(exp2(a), result);
   }
 }
-extern "C" f32 Fexp2_f32(f32);
-MakeTest(Fexp2_f32, Fexp2_f32_Logic)
+extern "C" f32 Nexp2_f32(f32);
+MakeTest(Nexp2_f32, Nexp2_f32_Logic)
 
-template<class T> static void FrsqrtLogic(T result, T a) {
+template<class T> static void NrsqrtLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a) || isNegInf(a)) {
     EXPECT_PRED1(isNan<T>, result);
@@ -807,9 +801,9 @@ template<class T> static void FrsqrtLogic(T result, T a) {
     EXPECT_FLOAT_EQ(a, (1.0 / result) * (1.0 / result));
   }
 }
-TestAll(FloatInst, Frsqrt, Unary)
+TestAll(FloatInst, Nrsqrt, Unary)
 
-template<class T> static void FrcpLogic(T result, T a) {
+template<class T> static void NrcpLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
   if(isNan(a)) {
     EXPECT_PRED1(isNan<T>, result);
@@ -829,7 +823,7 @@ template<class T> static void FrcpLogic(T result, T a) {
     EXPECT_FLOAT_EQ(a, 1.0 / result);
   }
 }
-TestAll(FloatInst, Frcp, Unary)
+TestAll(FloatInst, Nrcp, Unary)
 
 static void F2u4_u32_Logic(u32 result, f32 a, f32 b, f32 c, f32 d) {
   if(isNan(a) || a < 0.0f || a >= 256.0f) return;
@@ -912,11 +906,11 @@ static void Lerp_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
 extern "C" b32 Lerp_b32(b32, b32, b32);
 MakeTest(Lerp_b32, Lerp_b32_Logic)
 
-static void Sad_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+static void Sad_u32_u32_Logic(u32 result, u32 a, u32 b, u32 c) {
   EXPECT_EQ(abs(a - b) + c, result);
 }
-extern "C" b32 Sad_b32(b32, b32, b32);
-MakeTest(Sad_b32, Sad_b32_Logic)
+extern "C" u32 Sad_u32_u32(u32, u32, u32);
+MakeTest(Sad_u32_u32, Sad_u32_u32_Logic)
 
 static void Sad2_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
   EXPECT_EQ(abs((a & 0xFFFF) - (b & 0xFFFF)) +
@@ -1103,5 +1097,3 @@ template<class T> static void AtomicCasLogic(T result, T a, T b, T c) {
   }
 }
 TestAll(AtomicInst, Cas, Ternary)
-
-

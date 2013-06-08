@@ -2,7 +2,6 @@
 #define _BRIG_MODULE_H_
 
 #include "brig.h"
-#include "brig_buffer.h"
 #include "brig_reader.h"
 #include "brig_util.h"
 
@@ -22,25 +21,6 @@ class BrigSymbol;
 class BrigModule {
 
   public:
-
-  BrigModule(const Buffer &strings,
-             const Buffer &directives,
-             const Buffer &code,
-             const Buffer &operands,
-             const Buffer &debug,
-             llvm::raw_ostream *out) :
-    S_(reinterpret_cast<const char *>(&strings.get()[0]),
-       &directives.get()[0],
-       &code.get()[0],
-       &operands.get()[0],
-       &debug.get()[0],
-       strings.size(),
-       directives.size(),
-       code.size(),
-       operands.size(),
-       debug.size()),
-    out_(out),
-    valid_(validate()) {}
 
   BrigModule(const BrigReader &reader, llvm::raw_ostream *out) :
     S_(reader.getStrings().data(),
@@ -81,62 +61,53 @@ class BrigModule {
   bool validateCCode(void) const;
   bool validateInstructions(void) const;
 
-  bool validate(const BrigDirectiveMethod *dir) const;
-  bool validate(const BrigDirectiveSymbol *dir) const;
+  bool validate(const BrigDirectiveExecutable *dir) const;
+  bool validate(const BrigDirectiveVariable *dir) const;
   bool validate(const BrigDirectiveImage *dir) const;
   bool validate(const BrigDirectiveSampler *dir) const;
   bool validate(const BrigDirectiveLabel *dir) const;
-  bool validate(const BrigDirectiveLabelList *dir) const;
   bool validate(const BrigDirectiveVersion *dir) const;
   bool validate(const BrigDirectiveSignature *dir) const;
   bool validate(const BrigDirectiveFile *dir) const;
   bool validate(const BrigDirectiveComment *dir) const;
   bool validate(const BrigDirectiveLoc *dir) const;
-  bool validate(const BrigDirectiveInit *dir) const;
+  bool validate(const BrigDirectiveVariableInit *dir) const;
   bool validate(const BrigDirectiveLabelInit *dir) const;
   bool validate(const BrigDirectiveControl *dir) const;
   bool validate(const BrigDirectivePragma *dir) const;
   bool validate(const BrigDirectiveExtension *dir) const;
-  bool validate(const BrigDirectiveArgStart *dir) const;
-  bool validate(const BrigDirectiveArgEnd *dir) const;
+  bool validate(const BrigDirectiveArgScopeStart *dir) const;
+  bool validate(const BrigDirectiveArgScopeEnd *dir) const;
   bool validate(const BrigDirectiveBlockStart *dir) const;
   bool validate(const BrigDirectiveBlockNumeric *dir) const;
   bool validate(const BrigDirectiveBlockString *dir) const;
   bool validate(const BrigDirectiveBlockEnd *dir) const;
-  bool validate(const BrigDirectivePad *dir) const;
+  bool validate(const BrigDirectiveLabelTargets *dir) const;
 
-  bool validate(const BrigSymbolCommon *s) const;
-
+  bool validate(const BrigInstAddr *code) const;
   bool validate(const BrigInstAtomic *code) const;
   bool validate(const BrigInstAtomicImage *code) const;
   bool validate(const BrigInstBar *code) const;
-  bool validate(const BrigInstBase *code) const;
+  bool validate(const BrigInstBasic *code) const;
+  bool validate(const BrigInstBr *code) const;
   bool validate(const BrigInstCmp *code) const;
-  bool validate(const BrigInstImage *code) const;
   bool validate(const BrigInstCvt *code) const;
-  bool validate(const BrigInstLdSt *code) const;
+  bool validate(const BrigInstFbar *code) const;
+  bool validate(const BrigInstImage *code) const;
   bool validate(const BrigInstMem *code) const;
   bool validate(const BrigInstMod *code) const;
-  bool validate(const BrigInstSegp *code) const;
-
-  bool validate(const BrigAluModifier *c) const;
+  bool validate(const BrigInstSeg *code) const;
+  bool validate(const BrigInstSourceType *code) const;
 
   bool validate(const BrigOperandAddress *operand) const;
   bool validate(const BrigOperandArgumentList *operand) const;
   bool validate(const BrigOperandFunctionList *operand) const;
-  bool validate(const BrigOperandArgumentRef *operand) const;
-  bool validate(const BrigOperandBase *operand) const;
-  bool validate(const BrigOperandCompound *operand) const;
   bool validate(const BrigOperandFunctionRef *operand) const;
   bool validate(const BrigOperandImmed *operand) const;
-  bool validate(const BrigOperandIndirect *operand) const;
   bool validate(const BrigOperandLabelRef *operand) const;
-  bool validate(const BrigOperandOpaque *operand) const;
-  bool validate(const BrigOperandPad *operand) const;
   bool validate(const BrigOperandReg *operand) const;
-  bool validate(const BrigOperandRegV2 *operand) const;
-  bool validate(const BrigOperandRegV4 *operand) const;
-  bool validate(const BrigOperandWaveSz *operand) const;
+  bool validate(const BrigOperandRegVector *operand) const;
+  bool validate(const BrigOperandWavesize *operand) const;
 
   bool validate(const oper_iterator operands) const;
   bool validate(const inst_iterator inst) const;
@@ -202,13 +173,13 @@ class BrigModule {
   bool validateUnpackLo(const inst_iterator inst) const;
   bool validateCmov(const inst_iterator inst) const;
   bool validateClass(const inst_iterator inst) const;
-  bool validateFcos(const inst_iterator inst) const;
-  bool validateFexp2(const inst_iterator inst) const;
-  bool validateFlog2(const inst_iterator inst) const;
-  bool validateFrcp(const inst_iterator inst) const;
-  bool validateFsqrt(const inst_iterator inst) const;
-  bool validateFrsqrt(const inst_iterator inst) const;
-  bool validateFsin(const inst_iterator inst) const;
+  bool validateNcos(const inst_iterator inst) const;
+  bool validateNexp2(const inst_iterator inst) const;
+  bool validateNlog2(const inst_iterator inst) const;
+  bool validateNrcp(const inst_iterator inst) const;
+  bool validateNsqrt(const inst_iterator inst) const;
+  bool validateNrsqrt(const inst_iterator inst) const;
+  bool validateNsin(const inst_iterator inst) const;
   bool validateBitAlign(const inst_iterator inst) const;
   bool validateByteAlign(const inst_iterator inst) const;
   bool validateF2u4(const inst_iterator inst) const;
@@ -282,18 +253,21 @@ class BrigModule {
   bool validateWorkItemAbsIdFlat(const inst_iterator inst) const;
   bool validateWorkItemId(const inst_iterator inst) const;
   bool validateWorkItemIdFlat(const inst_iterator inst) const;
+  bool validateCombine(const inst_iterator inst) const;
+  bool validateBitExtract(const inst_iterator inst) const;
 
   bool validOrEnd(const dir_iterator dir) const;
   bool validate(const dir_iterator dir) const;
 
-  bool validateCCode(BrigcOffset32_t c_code) const;
-  bool validateSName(BrigsOffset32_t s_name) const;
+  bool validateCCode(BrigCodeOffset32_t c_code) const;
+  bool validateRegName(BrigStringOffset32_t reg, BrigType type) const;
+  bool validateSName(BrigStringOffset32_t s_name) const;
   bool validateAlignment(const void *dir, uint8_t alignment) const;
   template<typename T> bool validateSize(const T *brig) const;
 
   const BrigDirectiveVersion* getFirstVersionDirective() const;
-  bool isCompatibleAddrSize(const BrigStorageClass32_t sClass,
-                            const BrigDataType type) const;
+  bool isCompatibleAddrSize(const BrigSegment8_t sClass,
+                            const BrigType16_t type) const;
   const BrigSections S_;
   llvm::raw_ostream *out_;
   const bool valid_;

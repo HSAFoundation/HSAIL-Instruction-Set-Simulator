@@ -19,8 +19,8 @@ class BrigInstHelper {
     return dir_iterator(S_.directives + offset);
   }
 
-  const char *getName(const BrigDirectiveSymbol *symbol) const {
-    return S_.strings + symbol->s.s_name;
+  const BrigString *getName(const BrigDirectiveSymbol *symbol) const {
+    return (const BrigString *) (S_.strings + symbol->name);
   }
 
   // Operand methods
@@ -28,8 +28,15 @@ class BrigInstHelper {
     return oper_iterator(S_.operands + offset);
   }
 
-  const char *getName(const BrigOperandReg *reg) const {
-    return S_.strings + reg->s_name;
+  template<class T>
+  const BrigString *getRegName(const T *reg) const {
+    return (const BrigString *) (S_.strings + reg->reg);
+  }
+
+
+  const BrigString *getRegName(const BrigOperandRegVector *vec,
+                               unsigned i) const {
+    return (const BrigString *) (S_.strings + vec->regs[i]);
   }
 
   template<class T>
@@ -40,19 +47,10 @@ class BrigInstHelper {
     return base;
   }
 
-  template<class T>
-  const BrigOperandBase *getReg(const T *t, unsigned i) const {
-    assert(i < sizeof(t->regs) / sizeof(*t->regs));
-    if(!t->regs[i]) return NULL;
-    oper_iterator base(S_.operands + t->regs[i]);
-    assert(isa<BrigOperandReg>(base));
-    return base;
-  }
-
   const BrigOperandBase *getOperand(const inst_iterator &inst,
                                     unsigned opNum) const {
     assert(opNum < 5 && "Instructions never have more than five operands");
-    uint32_t o_operand = inst->o_operands[opNum];
+    uint32_t o_operand = inst->operands[opNum];
     assert(o_operand && "Missing operand?!");
     return reinterpret_cast<const BrigOperandBase *>(S_.operands + o_operand);
   }
@@ -71,219 +69,234 @@ class BrigInstHelper {
     // Most instruction have a destination. Check for each of the special cases.
     BrigOpcode opcode = BrigOpcode(inst->opcode);
     return
-      opcode != BrigSt        && opcode != BrigAtomicNoRet      &&
-      opcode != BrigStImage   && opcode != BrigAtomicNoRetImage &&
-      opcode != BrigBrn       && opcode != BrigCbr              &&
-      opcode != BrigSync      && opcode != BrigBarrier          &&
-      opcode != BrigRet       && opcode != BrigCall             &&
-      opcode != BrigDebugTrap && opcode != BrigNop;
+      opcode != BRIG_OPCODE_ST &&
+      opcode != BRIG_OPCODE_ATOMICNORET &&
+      opcode != BRIG_OPCODE_STIMAGE &&
+      opcode != BRIG_OPCODE_ATOMICIMAGENORET &&
+      opcode != BRIG_OPCODE_BRN &&
+      opcode != BRIG_OPCODE_CBR &&
+      opcode != BRIG_OPCODE_SYNC &&
+      opcode != BRIG_OPCODE_BARRIER &&
+      opcode != BRIG_OPCODE_RET &&
+      opcode != BRIG_OPCODE_CALL &&
+      opcode != BRIG_OPCODE_DEBUGTRAP &&
+      opcode != BRIG_OPCODE_NOP;
   }
 
-  static const BrigAluModifier *getAluModifier(const inst_iterator inst) {
+  static const BrigAluModifier16_t *getAluModifier(const inst_iterator inst) {
     if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
-      return &cmp->aluModifier;
+      return &cmp->modifier;
 
     if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
-      return &cvt->aluModifier;
+      return &cvt->modifier;
 
     if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst))
-      return &mod->aluModifier;
+      return &mod->modifier;
 
     return NULL;
   }
 
   static bool isFtz(const inst_iterator inst) {
-    const BrigAluModifier *aluMod = getAluModifier(inst);
-    return aluMod && aluMod->valid && aluMod->ftz;
+    const BrigAluModifier16_t *aluMod = getAluModifier(inst);
+    return aluMod && *aluMod & BRIG_ALU_FTZ;
   }
 
   static bool hasRoundingMode(const inst_iterator inst) {
     // Cvt instructions are handled as a special case
     if(isa<BrigInstCvt>(inst)) return false;
     // Ignore near mode, since it is the default anway
-    const BrigAluModifier *aluMod = getAluModifier(inst);
-    return aluMod && aluMod->valid && aluMod->rounding;
+    const BrigAluModifier16_t *aluMod = getAluModifier(inst);
+    return aluMod && *aluMod & BRIG_ALU_ROUND;
   }
 
-  static const char *getRoundingName(const BrigAluModifier &aluMod);
+  static const char *getRoundingName(BrigAluModifier16_t mod);
 
   // Type methods
-  static bool isFloatTy(BrigDataType type) {
+  static bool isFloatTy(BrigType type) {
     return
-      type == Brigf16   || type == Brigf32   || type == Brigf64   ||
-      type == Brigf16x2 || type == Brigf16x4 ||
-      type == Brigf32x2 || type == Brigf32x4 ||
-      type == Brigf64x2;
+      type == BRIG_TYPE_F16   || type == BRIG_TYPE_F32   ||
+      type == BRIG_TYPE_F64   ||
+      type == BRIG_TYPE_F16X2 || type == BRIG_TYPE_F16X4 ||
+      type == BRIG_TYPE_F32X2 || type == BRIG_TYPE_F32X4 ||
+      type == BRIG_TYPE_F64X2;
   }
 
-  static bool isVectorTy(BrigDataType type) {
-    return type >= Brigu8x4 && type <= Brigf64x2;
-  }
-
-  static bool isSignedTy(BrigDataType type) {
+  static bool isVectorTy(BrigType type) {
     return
-      type == Brigs8    || type == Brigs16   || type == Brigs32   ||
-      type == Brigs64   ||
-      type == Brigs8x4  || type == Brigs8x8  || type == Brigs8x16 ||
-      type == Brigs16x2 || type == Brigs16x4 || type == Brigs16x8 ||
-      type == Brigs32x2 || type == Brigs32x4 ||
-      type == Brigs64x2;
+      (type & BRIG_TYPE_PACK_32) ||
+      (type & BRIG_TYPE_PACK_64) ||
+      (type & BRIG_TYPE_PACK_128);
   }
 
-  static bool isUnsignedTy(BrigDataType type) {
+  static bool isSignedTy(BrigType type) {
     return
-      type == Brigu8    || type == Brigu16   || type == Brigu32   ||
-      type == Brigu64   ||
-      type == Brigu8x4  || type == Brigu8x8  || type == Brigu8x16 ||
-      type == Brigu16x2 || type == Brigu16x4 || type == Brigu16x8 ||
-      type == Brigu32x2 || type == Brigu32x4 ||
-      type == Brigu64x2;
+      type == BRIG_TYPE_S8    || type == BRIG_TYPE_S16   ||
+      type == BRIG_TYPE_S32   ||
+      type == BRIG_TYPE_S64   ||
+      type == BRIG_TYPE_S8X4  || type == BRIG_TYPE_S8X8  ||
+      type == BRIG_TYPE_S8X16 ||
+      type == BRIG_TYPE_S16X2 || type == BRIG_TYPE_S16X4 ||
+      type == BRIG_TYPE_S16X8 ||
+      type == BRIG_TYPE_S32X2 || type == BRIG_TYPE_S32X4 ||
+      type == BRIG_TYPE_S64X2;
   }
 
-  static bool isBitTy(BrigDataType type) {
+  static bool isUnsignedTy(BrigType type) {
     return
-      type == Brigb1  ||
-      type == Brigb8  ||
-      type == Brigb16 ||
-      type == Brigb32 ||
-      type == Brigb64 ||
-      type == Brigb128;
+      type == BRIG_TYPE_U8    || type == BRIG_TYPE_U16   ||
+      type == BRIG_TYPE_U32   ||
+      type == BRIG_TYPE_U64   ||
+      type == BRIG_TYPE_U8X4  || type == BRIG_TYPE_U8X8  ||
+      type == BRIG_TYPE_U8X16 ||
+      type == BRIG_TYPE_U16X2 || type == BRIG_TYPE_U16X4 ||
+      type == BRIG_TYPE_U16X8 ||
+      type == BRIG_TYPE_U32X2 || type == BRIG_TYPE_U32X4 ||
+      type == BRIG_TYPE_U64X2;
   }
 
-  static unsigned getVectorLength(BrigDataType type) {
+  static bool isBitTy(BrigType type) {
+    return
+      type == BRIG_TYPE_B1  ||
+      type == BRIG_TYPE_B8  ||
+      type == BRIG_TYPE_B16 ||
+      type == BRIG_TYPE_B32 ||
+      type == BRIG_TYPE_B64 ||
+      type == BRIG_TYPE_B128;
+  }
+
+  static unsigned getVectorLength(BrigType type) {
 
     assert(isVectorTy(type) && "Cannot get length of non-vector types");
 
     switch(type) {
-    case Brigu16x2: case Brigs16x2: case Brigf16x2:
-    case Brigu32x2: case Brigs32x2: case Brigf32x2:
-    case Brigu64x2: case Brigs64x2: case Brigf64x2:
+    case BRIG_TYPE_U16X2: case BRIG_TYPE_S16X2: case BRIG_TYPE_F16X2:
+    case BRIG_TYPE_U32X2: case BRIG_TYPE_S32X2: case BRIG_TYPE_F32X2:
+    case BRIG_TYPE_U64X2: case BRIG_TYPE_S64X2: case BRIG_TYPE_F64X2:
       return 2;
-    case Brigu8x4:  case Brigs8x4:
-    case Brigu16x4: case Brigs16x4: case Brigf16x4:
-    case Brigu32x4: case Brigs32x4: case Brigf32x4:
+    case BRIG_TYPE_U8X4:  case BRIG_TYPE_S8X4:
+    case BRIG_TYPE_U16X4: case BRIG_TYPE_S16X4: case BRIG_TYPE_F16X4:
+    case BRIG_TYPE_U32X4: case BRIG_TYPE_S32X4: case BRIG_TYPE_F32X4:
       return 4;
-    case Brigu8x8:  case Brigs8x8:  case Brigu16x8:
-    case Brigs16x8: case Brigf16x8:
+    case BRIG_TYPE_U8X8:  case BRIG_TYPE_S8X8:  case BRIG_TYPE_U16X8:
+    case BRIG_TYPE_S16X8: case BRIG_TYPE_F16X8:
       return 8;
-    case Brigu8x16: case Brigs8x16:
+    case BRIG_TYPE_U8X16: case BRIG_TYPE_S8X16:
       return 16;
     default:
       assert(false && "Unknown type");
     }
   }
 
-  static BrigDataType getElementTy(BrigDataType type) {
-
+  static BrigType getElementTy(BrigType type) {
     assert(isVectorTy(type) && "Cannot get element of non-vector types");
-
-    switch(type) {
-    case Brigu8x4:  case Brigu8x8:  case Brigu8x16: return Brigu8;
-    case Brigs8x4:  case Brigs8x8:  case Brigs8x16: return Brigs8;
-    case Brigu16x2: case Brigu16x4: case Brigu16x8: return Brigu16;
-    case Brigs16x2: case Brigs16x4: case Brigs16x8: return Brigs16;
-    case Brigf16x2: case Brigf16x4: case Brigf16x8: return Brigf16;
-    case Brigu32x2: case Brigu32x4:                 return Brigu32;
-    case Brigs32x2: case Brigs32x4:                 return Brigs32;
-    case Brigf32x2: case Brigf32x4:                 return Brigf32;
-    case Brigu64x2:                                 return Brigu64;
-    case Brigs64x2:                                 return Brigs64;
-    case Brigf64x2:                                 return Brigf64;
-    default: assert(false && "Unknown type");
-    }
+    return BrigType(type & BRIG_TYPE_BASE_MASK);
   }
 
-  static size_t getTypeSize(BrigDataType type) {
+  static size_t getTypeSize(BrigType16_t type) {
+    return getTypeSize(BrigType(type));
+  }
+
+  static size_t getTypeSize(BrigType type) {
 
     if(isVectorTy(type))
       return getVectorLength(type) * getTypeSize(getElementTy(type));
 
     switch(type) {
-    case Brigb1:                                                return 1;
-    case Brigs8:    case Brigu8:    case Brigb8:                return 8;
-    case Brigs16:   case Brigu16:   case Brigf16: case Brigb16: return 16;
-    case Brigs32:   case Brigu32:   case Brigf32: case Brigb32: return 32;
-    case Brigs64:   case Brigu64:   case Brigf64: case Brigb64: return 64;
-    case Brigb128:                                              return 128;
-    case BrigROImg: case BrigRWImg: case BrigSamp:              return 0;
-    default: assert(false && "Unknown type");
+      case BRIG_TYPE_B1:
+        return 1;
+      case BRIG_TYPE_S8:    case BRIG_TYPE_U8:    case BRIG_TYPE_B8:
+        return 8;
+      case BRIG_TYPE_S16:   case BRIG_TYPE_U16:   case BRIG_TYPE_F16:
+      case BRIG_TYPE_B16:
+        return 16;
+      case BRIG_TYPE_S32:   case BRIG_TYPE_U32:   case BRIG_TYPE_F32:
+      case BRIG_TYPE_B32:
+        return 32;
+      case BRIG_TYPE_S64:   case BRIG_TYPE_U64:   case BRIG_TYPE_F64:
+      case BRIG_TYPE_B64:
+        return 64;
+      case BRIG_TYPE_B128:
+        return 128;
+      case BRIG_TYPE_ROIMG: case BRIG_TYPE_RWIMG: case BRIG_TYPE_SAMP:
+        return 0;
+      default: assert(false && "Unknown type");
     }
   }
 
   // Arithmetic methods
-  static bool isPacked(BrigPacking packing, unsigned opnum) {
+  static bool isPacked(BrigPack8_t packing, unsigned opnum) {
     if(opnum == 1) {
       return
-        packing == BrigPackPP    || packing == BrigPackPS    ||
-        packing == BrigPackP     ||
-        packing == BrigPackPPsat || packing == BrigPackPSsat ||
-        packing == BrigPackPsat;
+        packing == BRIG_PACK_PP    || packing == BRIG_PACK_PS    ||
+        packing == BRIG_PACK_P     ||
+        packing == BRIG_PACK_PPSAT || packing == BRIG_PACK_PSSAT ||
+        packing == BRIG_PACK_PSAT;
     } else if(opnum == 2) {
       return
-        packing == BrigPackPP    || packing == BrigPackSP    ||
-        packing == BrigPackPPsat || packing == BrigPackSPsat;
+        packing == BRIG_PACK_PP    || packing == BRIG_PACK_SP    ||
+        packing == BRIG_PACK_PPSAT || packing == BRIG_PACK_SPSAT;
     }
 
     return false;
   }
 
-  static bool isBroadcast(BrigPacking packing, unsigned opnum) {
+  static bool isBroadcast(BrigPack8_t packing, unsigned opnum) {
     if(opnum == 1) {
       return
-        packing == BrigPackSS    || packing == BrigPackSP    ||
-        packing == BrigPackS     ||
-        packing == BrigPackSSsat || packing == BrigPackSPsat ||
-        packing == BrigPackSsat;
+        packing == BRIG_PACK_SS    || packing == BRIG_PACK_SP    ||
+        packing == BRIG_PACK_S     ||
+        packing == BRIG_PACK_SSSAT || packing == BRIG_PACK_SPSAT ||
+        packing == BRIG_PACK_SSAT;
     } else if(opnum == 2) {
       return
-        packing == BrigPackSS    || packing == BrigPackPS    ||
-        packing == BrigPackSSsat || packing == BrigPackPSsat;
+        packing == BRIG_PACK_SS    || packing == BRIG_PACK_PS    ||
+        packing == BRIG_PACK_SSSAT || packing == BRIG_PACK_PSSAT;
     }
 
     return false;
   }
 
-  static bool isSaturated(BrigPacking packing) {
+  static bool isSaturated(BrigPack8_t packing) {
     return
-      packing == BrigPackPPsat || packing == BrigPackPSsat ||
-      packing == BrigPackSPsat || packing == BrigPackSSsat ||
-      packing == BrigPackPsat  || packing == BrigPackSsat;
+      packing == BRIG_PACK_PPSAT || packing == BRIG_PACK_PSSAT ||
+      packing == BRIG_PACK_SPSAT || packing == BRIG_PACK_SSSAT ||
+      packing == BRIG_PACK_PSAT  || packing == BRIG_PACK_SSAT;
   }
 
-  static bool isValidPacking(BrigPacking packing, unsigned opnum) {
+  static bool isValidPacking(BrigPack8_t packing, unsigned opnum) {
     switch(packing) {
-    case BrigNoPacking:
-      return false;
-    case BrigPackS:
-    case BrigPackP:
-    case BrigPackSsat:
-    case BrigPackPsat:
-      return opnum == 1;
-    case BrigPackPP:
-    case BrigPackPS:
-    case BrigPackSP:
-    case BrigPackSS:
-    case BrigPackPPsat:
-    case BrigPackPSsat:
-    case BrigPackSPsat:
-    case BrigPackSSsat:
-      return opnum == 2;
-    default:
-      assert(false && "Invalid packing");
+      case BRIG_PACK_NONE:
+        return false;
+      case BRIG_PACK_S:
+      case BRIG_PACK_P:
+      case BRIG_PACK_SSAT:
+      case BRIG_PACK_PSAT:
+        return opnum == 1;
+      case BRIG_PACK_PP:
+      case BRIG_PACK_PS:
+      case BRIG_PACK_SP:
+      case BRIG_PACK_SS:
+      case BRIG_PACK_PPSAT:
+      case BRIG_PACK_PSSAT:
+      case BRIG_PACK_SPSAT:
+      case BRIG_PACK_SSSAT:
+        return opnum == 2;
+      default:
+        assert(false && "Invalid packing");
     }
   }
 
   static bool isBranchInst(const inst_iterator inst) {
     BrigOpcode opcode = BrigOpcode(inst->opcode);
-    return opcode == BrigBrn || opcode == BrigCbr;
+    return opcode == BRIG_OPCODE_BRN || opcode == BRIG_OPCODE_CBR;
   }
 
   const BrigOperandBase *getBranchTarget(const inst_iterator inst) const {
     BrigOpcode opcode = BrigOpcode(inst->opcode);
-    if(opcode == BrigBrn)
+    if(opcode == BRIG_OPCODE_BRN)
+      return getOperand(inst, 0);
+    if(opcode == BRIG_OPCODE_CBR)
       return getOperand(inst, 1);
-    if(opcode == BrigCbr)
-      return getOperand(inst, 2);
 
     assert(false && "Not a branch instruction");
   }
@@ -301,6 +314,12 @@ class BrigInstHelper {
  private:
   const BrigSections &S_;
 };
+
+long int nstrtol(size_t size, const uint8_t *str,
+                 const uint8_t **endptr, int base);
+
+long int nstrtol(const BrigString *str,
+                 const uint8_t **endptr, int base);
 
 }
 }

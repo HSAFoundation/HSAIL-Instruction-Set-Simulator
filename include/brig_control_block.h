@@ -15,7 +15,7 @@ class BrigControlBlock {
 
   const char *getName() const {
     if(const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_))
-      return S_.strings + label->s_name + 1;
+      return S_.strings + label->name + 1;
     return "brig.init";
   }
 
@@ -50,10 +50,10 @@ class BrigControlBlock {
   uint32_t getCCode() const {
     if(it_ == S_.end()) return S_.codeSize;
 
-    const BrigDirectiveMethod *fun = dyn_cast<BrigDirectiveMethod>(it_);
+    const BrigDirectiveExecutable *fun = dyn_cast<BrigDirectiveExecutable>(it_);
     const BrigDirectiveLabel *label = dyn_cast<BrigDirectiveLabel>(it_);
-    if(fun) return fun->c_code;
-    else if(label) return label->c_code;
+    if(fun) return fun->code;
+    else if(label) return label->code;
     else assert(false && "Bad control block");
   }
 

@@ -4,8 +4,7 @@
 #include "brig_reader.h"
 #include "brig_runtime.h"
 #include "brig_writer.h"
-#include "error_reporter.h"
-#include "parser_wrapper.h"
+#include "hsailasm_wrapper.h"
 
 #include "llvm/Module.h"
 #include "llvm/ADT/SmallString.h"
@@ -22,110 +21,9 @@
 
 using hsa::brig::BrigReader;
 using hsa::brig::BrigWriter;
-using hsa::brig::Buffer;
-using hsa::brig::Context;
-using hsa::brig::ErrorReporter;
-using hsa::brig::Lexer;
-using hsa::brig::Parser;
-
-TEST(BrigReaderTest, VectorCopy) {
-  BrigReader *reader =
-    BrigReader::createBrigReader(XSTR(TEST_PATH) "/VectorCopy.bin");
-  EXPECT_TRUE(reader);
-  if(!reader) return;
-
-  hsa::brig::BrigModule mod(*reader, NULL);
-  EXPECT_TRUE(!mod.isValid());
-
-  delete reader;
-}
-
-TEST(BrigWriterTest, EmptyBRIG) {
-
-  int result_fd;
-  llvm::SmallString<128> resultPath;
-  llvm::error_code ec =
-    llvm::sys::fs::unique_file("emptyBrig-%%%%%.o", result_fd, resultPath);
-  EXPECT_TRUE(!ec);
-  if(ec) return;
-
-  llvm::raw_fd_ostream out(result_fd, true);
-
-  hsa::brig::Buffer dirBuf;
-  for(unsigned i = 0; i < 8; ++i) dirBuf.append_char(0);
-  BrigDirectiveVersion bdv = {
-    sizeof(bdv),
-    BrigEDirectiveVersion,
-    8,
-    1,
-    0,
-    BrigELarge,
-    BrigEFull,
-    0
-  };
-  dirBuf.append(&bdv);
-  llvm::StringRef directives(&dirBuf.get()[0], dirBuf.size());
-
-  hsa::brig::Buffer codeBuf;
-  for(unsigned i = 0; i < 8; ++i) codeBuf.append_char(0);
-  llvm::StringRef code(&codeBuf.get()[0], codeBuf.size());
-
-  hsa::brig::Buffer operBuf;
-  for(unsigned i = 0; i < 8; ++i) operBuf.append_char(0);
-  llvm::StringRef operands(&operBuf.get()[0], operBuf.size());
-
-  hsa::brig::Buffer debugBuf;
-  for(unsigned i = 0; i < 8; ++i) debugBuf.append_char(0);
-  llvm::StringRef debug(&debugBuf.get()[0], debugBuf.size());
-
-  hsa::brig::StringBuffer stringsBuf;
-  for(unsigned i = 0; i < 8; ++i) stringsBuf.append_char(0);
-  llvm::StringRef strings(&stringsBuf.get()[0], stringsBuf.size());
-
-  bool result =
-    BrigWriter::write(out, directives, code, operands, debug, strings);
-  EXPECT_TRUE(result);
-  if(!result) return;
-  out.close();
-
-  BrigReader *reader =
-    BrigReader::createBrigReader(resultPath.c_str());
-  EXPECT_TRUE(reader);
-  if(!reader) return;
-
-  hsa::brig::BrigModule mod(*reader, &llvm::errs());
-  EXPECT_TRUE(mod.isValid());
-
-  delete reader;
-
-  bool existed;
-  llvm::sys::fs::remove(resultPath.c_str(), existed);
-  EXPECT_TRUE(existed);
-}
 
 hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
 
-  Parser parser(source);
-  Context *context = parser.get_context();
-  context->set_error_reporter(ErrorReporter::get_instance());
-  int res = parser.parse();
-  EXPECT_TRUE(!res);
-  if(res) return NULL;
-
-  BrigcOffset32_t codeSize = context->get_code_offset();
-  BrigdOffset32_t dirSize  = context->get_directive_offset();
-  BrigoOffset32_t operSize = context->get_operand_offset();
-  BrigsOffset32_t strSize  = context->get_string_offset();
-
-  llvm::OwningArrayPtr<char> code(new char[codeSize]);
-  llvm::OwningArrayPtr<char> directives(new char[dirSize]);
-  llvm::OwningArrayPtr<char> operands(new char[operSize]);
-  llvm::OwningArrayPtr<char> strings(new char[strSize]);
-
-  context->get_code_bytes(code.get(), 0, codeSize);
-  context->get_directive_bytes(directives.get(), 0, dirSize);
-  context->get_operand_bytes(operands.get(), 0, operSize);
-  context->get_string_bytes(strings.get(), 0, strSize);
 
   int result_fd;
   llvm::SmallString<128> resultPath;
@@ -134,18 +32,15 @@ hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
   EXPECT_TRUE(!ec);
   if(ec) return NULL;
 
-  llvm::raw_fd_ostream out(result_fd, true);
-
-  bool result =
-    BrigWriter::write(out,
-                      llvm::StringRef(directives.get(), dirSize),
-                      llvm::StringRef(code.get(), codeSize),
-                      llvm::StringRef(operands.get(), operSize),
-                      llvm::StringRef("", 0),
-                      llvm::StringRef(strings.get(), strSize));
-  EXPECT_TRUE(result);
-  if(!result) return NULL;
-  out.close();
+  std::string errMsg;
+  bool isValidHSA = hsa::brig::HsailAsm::assembleHSAILString(source.c_str(),
+                                                             resultPath.c_str(),
+                                                             &errMsg);
+  EXPECT_TRUE(isValidHSA);
+  if(!isValidHSA) {
+    llvm::errs() << "Assembly failed: " << errMsg << "\n";
+    return NULL;
+  }
 
   BrigReader *reader =
     BrigReader::createBrigReader(resultPath.c_str());
@@ -173,18 +68,18 @@ TEST(BrigKernelTest, Cosine) {
     "version 1:0:$small;\n"
     "\n"
     "//==========================================================\n"
-    "// Function: __Get_fcos\n"
+    "// Function: __Get_ncos\n"
     "//\n"
-    "// Inputs: arg_val0 - List of values to compute the fcos on\n"
+    "// Inputs: arg_val0 - List of values to compute the ncos on\n"
     "//\n"
     "// Outputs: arg_val1 - Results\n"
     "//\n"
     "//==========================================================\n"
     "\n"
-    "kernel &__Get_fcos(kernarg_u32 %arg_val0, kernarg_u32 %arg_val1)\n"
+    "kernel &__Get_ncos(kernarg_u32 %arg_val0, kernarg_u32 %arg_val1)\n"
     "{\n"
-    "	// Use workitemabsid to get the buffer offset\n"
-    "	workitemabsid $s1, 0;\n"
+    "	// Use workitemabsid_u32 to get the buffer offset\n"
+    "	workitemabsid_u32 $s1, 0;\n"
     "	shl_u32	 $s1, $s1, 2;  // Get offset by Multiplying by 4 because \n"
     "                        // that is the size of each value in the buffer\n"
     "	\n"
@@ -198,7 +93,7 @@ TEST(BrigKernelTest, Cosine) {
     "\n"
     "	// Execute Trig Opcode\n"
     "	ld_f32 $s0, [$s0];\n"
-    "   fcos_f32 $s2, $s0;\n"
+    "   ncos_f32 $s2, $s0;\n"
     "\n"
     "	// Store Dispatch ID on Kernel Argument\n"
     "	st_global_u32	$s2, [$s3] ;\n"
@@ -217,7 +112,7 @@ TEST(BrigKernelTest, Cosine) {
   *arg_val1 = 0.0f;
 
   void *args[] = { &arg_val0, &arg_val1 };
-  llvm::Function *fun = BP->getFunction("__Get_fcos");
+  llvm::Function *fun = BP->getFunction("__Get_ncos");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -314,7 +209,7 @@ TEST(BrigKernelTest, VectorCopy) {
     "{\n"
     "@__OpenCL_vec_copy_kernel_entry:\n"
     "        ld_kernarg_u32  $s0, [%arg_val2] ;\n"
-    "        workitemabsid   $s1, 0 ;\n"
+    "        workitemabsid_u32   $s1, 0 ;\n"
     "        cmp_ge_b1_u32   $c0, $s1, $s0 ;\n"
     "        ld_kernarg_u32  $s0, [%arg_val1] ;\n"
     "        ld_kernarg_u32  $s2, [%arg_val0] ;\n"
@@ -376,7 +271,7 @@ static const char InstTest[] =
   "{\n"
   "@__OpenCL_vec_add_kernel_entry:\n"
   "        ld_kernarg_u32 $s0, [%%array_size] ;\n"
-  "        workitemabsid $s1, 0 ;\n"
+  "        workitemabsid_u32 $s1, 0 ;\n"
   "        cmp_lt_b1_u32 $c0, $s1, $s0 ;\n"
   "        ld_kernarg_u32 $s0, [%%result] ;\n"
   "        ld_kernarg_u32 $s2, [%%arg_val0] ;\n"
@@ -865,7 +760,7 @@ TEST(BrigKernelTest, VectorAddArray) {
     "@__OpenCL_vec_add_kernel_entry:\n"
     "// BB#0:                                // %entry\n"
     "      ld_kernarg_u32    $s0, [%arg_val3];\n"
-    "      workitemabsid     $s1, 0;\n"
+    "      workitemabsid_u32     $s1, 0;\n"
     "      cmp_lt_b1_u32     $c0, $s1, $s0;\n"
     "      ld_kernarg_u32    $s0, [%arg_val2];\n"
     "      ld_kernarg_u32    $s2, [%arg_val1];\n"
@@ -964,34 +859,34 @@ TEST(BrigKernelTest, SubWordArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 1:0:$large;"
     ""
-    "global_u8 %array[16];"
+    "global_u8 &array[16];"
     ""
     "kernel &getArrayPtr(kernarg_u64 %ptr)"
     "{"
-    "  ld_u64 $d0, [%ptr];"
-    "  lda_u64 $d1, [%array];"
+    "  ld_kernarg_u64 $d0, [%ptr];"
+    "  lda_global_u64 $d1, [&array];"
     "  st_u64 $d1, [$d0];"
     "};"
     ""
     "kernel &SubWordArray(kernarg_u64 %size)"
     "{"
-    "  ld_u64 $d1, [%size];"         // n = size;
+    "  ld_kernarg_u64 $d1, [%size];"         // n = size;
     "  cmp_eq_b1_u64 $c0, $d1, 0;"
     "  cbr $c0, @sumLoopExit;"       // if(n == 0) goto sumLoopExit;
     "  mov_b64 $d2, 0;"              // sum = 0;
     "@sumLoopHeader:"
     "  sub_u64 $d1, $d1, 1;"         // --n;
-    "  ld_u8 $d3, [%array][$d1];"
+    "  ld_global_u8 $d3, [&array][$d1];"
     "  add_u64 $d2, $d2, $d3;"       // sum += array[n];
     "  cmp_ne_b1_u64 $c0, $d1, 0;"
     "  cbr $c0, @sumLoopHeader;"     // if(n != 0) goto sumLoopHeader;
     "@sumLoopExit:"
-    "  ld_u64 $d1, [%size];"         // n = size;
+    "  ld_kernarg_u64 $d1, [%size];"         // n = size;
     "  mov_b64 $d3, 0;"              // i = 0;
     "  cmp_eq_b1_u64 $c0, $d3, $d1;"
     "  cbr $c0, @exit;"              // if(i == size) goto exit
     "@assignHeader:"
-    "  st_u8 $d2, [%array][$d3];"
+    "  st_global_u8 $d2, [&array][$d3];"
     "  add_u64 $d3, $d3, 1;"
     "  cmp_ne_b1_u64 $c0, $d3, $d1;"
     "  cbr $c0, @assignHeader;"      // if(i != size) goto assignHeader;
@@ -1362,7 +1257,7 @@ TEST(BrigKernelTest, ThreadTest) {
     "kernel &threadTest(kernarg_s32 %r)\n"
     "{\n"
     "  ld_kernarg_u32 $s0, [%r];\n"
-    "  workitemabsid  $s1, 0;\n"
+    "  workitemabsid_u32  $s1, 0;\n"
     "	 shl_u32	      $s2, $s1, 2;\n"
     "  add_u32        $s0, $s0, $s2;\n"
     "  st_global_s32  $s1, [$s0];\n"
@@ -1681,7 +1576,7 @@ TEST(BrigWriterTest, GlobalInitialization) {
   "{\n"
   "@__OpenCL_Global_Initializer_kernel_entry:\n"
   "        ld_kernarg_u32 $s2, [%r];\n"
-  "        ld_kernarg_u32 $s1, [&n];\n"
+  "        ld_global_u32 $s1, [&n];\n"
   "        st_global_u32  $s1, [$s2];\n"
   "        ret;\n"
   "};\n"
@@ -2263,88 +2158,7 @@ TEST(BrigInstTest, CvtRoundingMode) {
     input.u64 = 0xBFF999999999999ALL; //-1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f64", result.s64, input.f64 );
   }
-  //f32 to f32
-  {
-    result.u32 = 0x40000000; //2.0f
-    input.u32 = 0x3FCCCCCD; //1.6f
-    testInstCvt("cvt_upi", "_f32", "_f32", result.f32, input.f32 );
-  }
-  {
-    result.u32 = 0xBF800000; //-1.0f
-    input.u32 = 0xBFCCCCCD; //-1.6f
-    testInstCvt("cvt_upi", "_f32", "_f32", result.f32, input.f32 );
-  }
-  {
-    result.u32 = 0x3F800000; //1.0f
-    input.u32 = 0x3FCCCCCD; //1.6f
-    testInstCvt("cvt_downi", "_f32", "_f32", result.f32, input.f32 );
-  }
-  {
-    result.u32 = 0xC0000000; //-2.0f
-    input.u32 = 0xBFCCCCCD; //-1.6f
-    testInstCvt("cvt_downi", "_f32", "_f32", result.f32, input.f32 );
-  }
-  {
-    result.u32 = 0x3F800000; //1.0f
-    input.u32 = 0x3FCCCCCD; //1.6f
-    testInstCvt("cvt_zeroi", "_f32", "_f32", result.f32, input.f32 );
-  }
-  {
-    result.u32 = 0xBF800000; //-1.0f
-    input.u32 = 0xBFCCCCCD; //-1.6f
-    testInstCvt("cvt_zeroi", "_f32", "_f32", result.f32, input.f32 );
-  }
-  {
-    result.u32 = 0x40000000; //2.0f
-    input.u32 = 0x3FCCCCCD; //1.6f
-    testInstCvt("cvt_neari", "_f32", "_f32", result.f32, input.f32 );
-  }
-  {
-    result.u32 = 0xC0000000; //-2.0f
-    input.u32 = 0xBFCCCCCD; //-1.6f
-    testInstCvt("cvt_neari", "_f32", "_f32", result.f32, input.f32 );
-  }
-  // f64 to f64
-  {
-    result.u64 = 0x4000000000000000LL; //2.0f
-    input.u64 = 0x3FF999999999999ALL; //1.6f
-    testInstCvt("cvt_upi", "_f64", "_f64", result.f64, input.f64 );
-  }
-  {
-    result.u64 = 0xBFF0000000000000LL; //-1.0f
-    input.u64 = 0xBFF999999999999ALL; //-1.6f
-    testInstCvt("cvt_upi", "_f64", "_f64", result.f64, input.f64 );
-  }
-  {
-    result.u64 = 0x3FF0000000000000LL; //1.0f
-    input.u64 = 0x3FF999999999999ALL; //1.6f
-    testInstCvt("cvt_downi", "_f64", "_f64", result.f64, input.f64 );
-  }
-  {
-    result.u64 = 0xC000000000000000LL; //-2.0f
-    input.u64 = 0xBFF999999999999ALL; //-1.6f
-    testInstCvt("cvt_downi", "_f64", "_f64", result.f64, input.f64 );
-  }
-  {
-    result.u64 = 0x3FF0000000000000LL; //1.0f
-    input.u64 = 0x3FF999999999999ALL; //1.6f
-    testInstCvt("cvt_zeroi", "_f64", "_f64", result.f64, input.f64 );
-  }
-  {
-    result.u64 = 0xBFF0000000000000LL; //-1.0f
-    input.u64 = 0xBFF999999999999ALL; //-1.6f
-    testInstCvt("cvt_zeroi", "_f64", "_f64", result.f64, input.f64 );
-  }
-  {
-    result.u64 = 0x4000000000000000LL; //2,0f
-    input.u64 = 0x3FF999999999999ALL; //1.6.f
-    testInstCvt("cvt_neari", "_f64", "_f64", result.f64, input.f64 );
-  }
-  {
-    result.u64 = 0xC000000000000000LL; //-2.0f
-    input.u64 = 0xBFF999999999999ALL; //-1.6f
-    testInstCvt("cvt_neari", "_f64", "_f64", result.f64, input.f64 );
-  }
+
   //f64 to f32
   {
     result.u32 = 0x3FCCCCCD; //1.6f
@@ -2634,7 +2448,7 @@ TEST(BrigWriterTest, GlobalInitialization_b64) {
   "{\n"
   "@__OpenCL_Global_Initializer_kernel_entry:\n"
   "        ld_kernarg_u64 $d2, [%r];\n"
-  "        ld_kernarg_u64 $d1, [&n];\n"
+  "        ld_global_u64 $d1, [&n];\n"
   "        st_global_u64  $d1, [$d2];\n"
   "        ret;\n"
   "};\n"
@@ -3242,7 +3056,13 @@ TEST(BrigGlobalTest, GlobalInitializer) {
   }
   {
     const uint32_t result = uint32_t(0x0);
-    const char *value = "0f";
+    const char *value = "0e0f";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x0);
+    const char *value = "0.0f";
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
@@ -3561,8 +3381,9 @@ TEST(BrigKernelTest, Ftz2) {
     "version 1:0:$small;\n"
     "kernel &ftzTest(kernarg_f32 %out)\n"
     "{\n"
-    " add_ftz_f32 $s1, 0x007FFFFF, 0;\n"
-    " st_kernarg_f32 $s1, [%out];\n"
+    " add_ftz_f32 $s1, 0f007FFFFF, 0;\n"
+    " ld_kernarg_f32 $s0, [%out];\n"
+    " st_f32 $s1, [$s0];\n"
     " ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
@@ -3571,7 +3392,7 @@ TEST(BrigKernelTest, Ftz2) {
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("ftzTest");
   float *arg1 = new float(7.0f);
-  void *args[] = { arg1 };
+  void *args[] = { &arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0.0f, *arg1);
   delete arg1;
@@ -3615,8 +3436,8 @@ TEST(BrigInstTest, RegV2) {
     "  ld_kernarg_u32 $s5, [%r];\n"
     "  ld_kernarg_u32 $s0, [%x];\n"
     "  ld_kernarg_u32 $s1, [%y];\n"
-    "  mov_b64 $d1, ($s0, $s1);\n"
-    "  st_kernarg_u64 $d1, [$s5];\n"
+    "  combine_v2_b64_b32 $d1, ($s0, $s1);\n"
+    "  st_u64 $d1, [$s5];\n"
     "};\n");
   EXPECT_TRUE(BP);
   if(!BP) return;
@@ -3648,8 +3469,8 @@ TEST(BrigInstTest, RegV4) {
     "  ld_kernarg_u32 $s2, [%x];\n"
     "  ld_kernarg_u32 $s3, [%y];\n"
     "  ld_kernarg_u32 $s4, [%z];\n"
-    "  mov_b128 $q0, ($s1, $s2, $s3, $s4);\n"
-    "  st_kernarg_b128 $q0, [$s0];\n"
+    "  combine_v4_b128_b32 $q0, ($s1, $s2, $s3, $s4);\n"
+    "  st_b128 $q0, [$s0];\n"
     "};\n");
   EXPECT_TRUE(BP);
   if(!BP) return;
@@ -3683,7 +3504,7 @@ TEST(BrigInstTest, Testb128) {
     "{\n"
     "  ld_kernarg_u32 $s0, [%r];\n"
     "  mov_b128 $q1, _u32x4(1, 2, 3, 4);\n"
-    "  st_kernarg_b128 $q1, [$s0];\n"
+    "  st_b128 $q1, [$s0];\n"
     "  ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
@@ -3695,8 +3516,8 @@ TEST(BrigInstTest, Testb128) {
   memset(output, 0, sizeof(uint64_t) * 2);
   void *args[] = { &output };
   BE.launch(fun, args);
-  EXPECT_EQ(0x0000000100000002LL, output[0]);
-  EXPECT_EQ(0x0000000300000004LL, output[1]);
+  EXPECT_EQ(0x0000000100000002LL, output[1]);
+  EXPECT_EQ(0x0000000300000004LL, output[0]);
 
   delete[] output;
 }
@@ -3711,7 +3532,7 @@ static const char Packed[] =
   "  ld_kernarg_u%u $%c0, [%%input];\n"
   "  ld_kernarg_u%u $%c1, [%%input];\n"
   "  shuffle_%s $%c2, $%c0, $%c1, 0x11;\n"
-  "  st_kernarg_u%u $%c2, [$s4];\n"
+  "  st_u%u $%c2, [$s4];\n"
   "  ret;\n"
   "};\n";
 
@@ -3814,7 +3635,7 @@ static const char packedConstants[] =
   "  ld_kernarg_u32 $s0, [%r];\n"
   "  mov_b%u $%c2, 0;\n"
   "  add_pp_%s $%c3, $%c2, %s;\n"
-  "  st_kernarg_u%u $%c3, [$s0];\n"
+  "  st_u%u $%c3, [$s0];\n"
   "  ret;\n"
   "};\n";
 template<class T>
@@ -3907,13 +3728,13 @@ TEST(BrigKernelTest, VariadicFunction) {
     "{\n"
       "ld_arg_u32 $s0, [%n];\n" // s0 holds the number to add
       "mov_b32 $s1, 0;\n"       // s1 holds the sum
-      "mov_b64 $d3, 0;\n"       // s3 is the offset into last
+      "mov_b32 $s3, 0;\n"       // s3 is the offset into last
       "@loop:\n"
       "cmp_eq_b1_u32 $c1, $s0, 0;\n"      // see if the count is zero
       "cbr $c1, @done;\n"                // if it is, jump to done
-      "ld_global_u32 $s4, [%last][$d3];\n" // load a value
+      "ld_arg_u32 $s4, [%last][$s3];\n" // load a value
       "add_f32 $s1, $s1, $s4;\n"        // add the value
-      "add_u64 $d3, $d3, 4;\n"          // advance the offset to the next element
+      "add_u32 $s3, $s3, 4;\n"          // advance the offset to the next element
       "sub_u32 $s0, $s0, 1;\n"          // decrement the count
       "brn @loop;\n"
       "@done:\n"
@@ -3925,10 +3746,10 @@ TEST(BrigKernelTest, VariadicFunction) {
     "  {\n"
     "    ld_kernarg_u64 $d2, [%r];\n"
     "    align 8 arg_u8 %n[16];\n"
-    "    st_f32 1.2f, [%n][0];\n"
-    "    st_f32 2.4f, [%n][4];\n"
-    "    st_f32 3.6f, [%n][8];\n"
-    "    st_f32 6.1f, [%n][12];\n"
+    "    st_arg_f32 1.2f, [%n][0];\n"
+    "    st_arg_f32 2.4f, [%n][4];\n"
+    "    st_arg_f32 3.6f, [%n][8];\n"
+    "    st_arg_f32 6.1f, [%n][12];\n"
     "    arg_u32 %count;\n"
     "    st_arg_u32 4, [%count];\n"
     "    arg_f32 %sum;\n"
@@ -3956,21 +3777,23 @@ TEST(BrigKernelTest, VariadicFunction) {
 TEST(BrigInstTest, VectorPopcount) {
   {
     const uint32_t testVec[] = { 0x0, 0x00000000 };
-    testInst("popcount_b32", testVec);
+    testInst("popcount_u32_b32", testVec);
   }
 }
 
 TEST(BrigInstTest, VectorFirstBit) {
   {
     const uint32_t testVec[] = { 1, 0x7fffffff };
-    testInst("firstbit_b32", testVec);
+    testInst("firstbit_u32_u32", testVec);
+    testInst("firstbit_u32_s32", testVec);
   }
 }
 
 TEST(BrigInstTest, VectorLastBit) {
   {
     const uint32_t testVec[] = { 0, 0x7fffffff };
-    testInst("lastbit_b32", testVec);
+    testInst("lastbit_u32_u32", testVec);
+    testInst("lastbit_u32_s32", testVec);
   }
 }
 
@@ -3982,205 +3805,10 @@ TEST(BrigInstTest, BitSelect) {
   }
 }
 
-TEST(BrigInstTest, Unpack) {
-  union { float f32; uint32_t u32; } result = { 255.0f };
-  {
-    const uint32_t testVec[] = { result.u32, 0xff };
-    testInst("unpack0", testVec);
-  }
-  {
-    const uint32_t testVec[] = { result.u32, 0xff00 };
-    testInst("unpack1", testVec);
-  }
-  {
-    const uint32_t testVec[] = { result.u32, 0xff0000 };
-    testInst("unpack2", testVec);
-  }
-  {
-    const uint32_t testVec[] = { result.u32, 0xff000000 };
-    testInst("unpack3", testVec);
-  }
-}
-
-TEST(BrigKernelTest, Ldf32Tof64) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
-    "global_f32 &n = 1.000000000f;\n"
-    "kernel &Ldf32Tof64(kernarg_u64 %r)\n"
-    "{\n"
-    "  ld_kernarg_u64 $d0, [%r];\n"
-    "  ld_global_f32 $d1, [&n];\n"
-    "  st_global_f64 $d1, [$d0];\n"
-    "  ret;\n"
-    "};\n");
-
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  double *arg_val0 = new double;
-  *arg_val0 = 0;
-
-  void *args[] = { &arg_val0 };
-  llvm::Function *fun = BP->getFunction("Ldf32Tof64");
-  hsa::brig::BrigEngine BE(BP);
-  BE.launch(fun, args);
-
-  EXPECT_EQ(1.000000000l, *arg_val0);
-
-  delete arg_val0;
-}
-
-TEST(BrigKernelTest, testStf64Tof32) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
-    "global_f32 &n;\n"
-    "global_f64 &n1 = 0d3ff0000000000000;\n"
-    "kernel &testSt(kernarg_u64 %r)\n"
-    "{\n"
-    "  ld_kernarg_u64 $d0, [%r];\n"
-    "  ld_global_f64 $d1, [&n1];\n"
-    "  st_global_f32 $d1, [&n];\n"
-    "  ld_global_f32 $s1, [&n];\n"
-    "  st_global_f32 $s1, [$d0];\n"
-    "  ret;\n"
-    "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  float *arg_val0 = new float;
-  *arg_val0 = 0;
-
-  void *args[] = { &arg_val0 };
-  llvm::Function *fun = BP->getFunction("testSt");
-  hsa::brig::BrigEngine BE(BP);
-  BE.launch(fun, args);
-
-  EXPECT_EQ(1.0f, *arg_val0);
-  delete arg_val0;
-}
-
-TEST(BrigKernelTest, MovsLo) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
-    "\n"
-    "kernel &__instruction2_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s64 %input)\n"
-    "{\n"
-    "        ld_kernarg_s64 $d1, [%input] ;\n"
-    "        movs_lo_b32 $s2, $d1 ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
-
-    "        ret;\n"
-    "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
-  uint32_t *arg0 = new uint32_t(0);
-  uint64_t *arg1 = new uint64_t(0xffffffff00000000LL);
-  void *args[] = { arg0, arg1 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0, *arg0);
-  delete arg0;
-  delete arg1;
-}
-
-TEST(BrigKernelTest, MovsHi) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
-    "\n"
-    "kernel &__instruction2_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s64 %input)\n"
-    "{\n"
-    "        ld_kernarg_s64 $d1, [%input] ;\n"
-    "        movs_hi_b32 $s2, $d1 ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
-
-    "        ret;\n"
-    "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
-  uint32_t *arg0 = new uint32_t(0);
-  uint64_t *arg1 = new uint64_t(0xffffffff00000000LL);
-  void *args[] = { arg0, arg1 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0xffffffff, *arg0);
-  delete arg0;
-  delete arg1;
-}
-
-TEST(BrigKernelTest, MovdLo) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
-    "\n"
-    "kernel &__instruction3_test_kernel(\n"
-    "        kernarg_s64 %result, \n"
-    "        kernarg_s64 %input1, kernarg_s32 %input2)\n"
-    "{\n"
-    "        ld_kernarg_s64 $d1, [%input1] ;\n"
-    "        ld_kernarg_s32 $s1, [%input2] ;\n"
-    "        movd_lo_b64 $d2, $d1, $s1 ;\n"
-    "        st_kernarg_s64 $d2, [%result] ;\n"
-
-    "        ret;\n"
-    "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction3_test_kernel");
-  uint64_t *arg0 = new uint64_t(0LL);
-  uint64_t *arg1 = new uint64_t(0xffffffff00000000LL);
-  uint32_t *arg2 = new uint32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0xffffffff12345678LL, *arg0);
-  delete arg0;
-  delete arg1;
-  delete arg2;
-}
-
-TEST(BrigKernelTest, MovdHi) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
-    "\n"
-    "kernel &__instruction3_test_kernel(\n"
-    "        kernarg_s64 %result, \n"
-    "        kernarg_s64 %input1, kernarg_s32 %input2)\n"
-    "{\n"
-    "        ld_kernarg_s64 $d1, [%input1] ;\n"
-    "        ld_kernarg_s32 $s1, [%input2] ;\n"
-    "        movd_hi_b64 $d2, $d1, $s1 ;\n"
-    "        st_kernarg_s64 $d2, [%result] ;\n"
-
-    "        ret;\n"
-    "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction3_test_kernel");
-  uint64_t *arg0 = new uint64_t(0LL);
-  uint64_t *arg1 = new uint64_t(0xffffffff00000000LL);
-  uint32_t *arg2 = new uint32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0x12345678ffffffffLL, *arg0);
-  delete arg0;
-  delete arg1;
-  delete arg2;
-}
-
-TEST(BrigInstTest, VectorFsqrt) {
+TEST(BrigInstTest, VectorNsqrt) {
   {
     const float testVec[] = { 2.0f, 4.0f };
-    testInst("fsqrt_f32", testVec);
+    testInst("nsqrt_f32", testVec);
   }
 }
 
@@ -4303,11 +3931,13 @@ TEST(BrigKernelTest, Atomic) {
     "\n"
     "kernel &__instruction2_test_kernel(\n"
     "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %input1, kernarg_s32 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_and_s32 $s3, [%input2], $s1;\n"
-    "        st_kernarg_s32 $s3, [%result] ;\n"
+    "        ld_kernarg_s64 $d2, [%input2] ;\n"
+    "        atomic_and_b32 $s3, [$d2], $s1;\n"
+    "        ld_kernarg_s64 $d2, [%result] ;\n"
+    "        st_s32 $s3, [$d2] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -4319,7 +3949,7 @@ TEST(BrigKernelTest, Atomic) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0x12345678, *arg0);
   delete arg0;
@@ -4336,9 +3966,11 @@ TEST(BrigKernelTest, AtomicNoRet) {
     "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomicNoRet_and_s32 [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_s64 $d2, [%input2] ;\n"
+    "        atomicnoret_and_b32 [$d2], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d2] ;\n"
+    "        ld_kernarg_s64 $d2, [%result] ;\n"
+    "        st_s32 $s2, [$d2] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -4350,52 +3982,12 @@ TEST(BrigKernelTest, AtomicNoRet) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0x12345678, *arg0);
   delete arg0;
   delete arg1;
   delete arg2;
-}
-
-TEST(BrigKernelTest, F2u4) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
-    "\n"
-    "kernel &__instruction5_test_kernel(\n"
-    "        kernarg_u32 %result, \n"
-    "        kernarg_f32 %input1, \n"
-    "        kernarg_f32 %input2, \n"
-    "        kernarg_f32 %input3, \n"
-    "        kernarg_f32 %input4 )\n"
-    "{\n"
-    "        ld_kernarg_f32 $s1, [%input1] ;\n"
-    "        ld_kernarg_f32 $s2, [%input2] ;\n"
-    "        ld_kernarg_f32 $s3, [%input3] ;\n"
-    "        ld_kernarg_f32 $s4, [%input4] ;\n"
-    "        f2u4_u32 $s5, $s1, $s2, $s3, $s4 ;\n"
-    "        st_kernarg_u32 $s5, [%result] ;\n"
-
-    "        ret;\n"
-    "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction5_test_kernel");
-  uint32_t *arg0 = new uint32_t(0);
-  float *arg1 = new float(255.0);
-  float *arg2 = new float(0.0);
-  float *arg3 = new float(128.0);
-  float *arg4 = new float(3.14);
-  void *args[] = { arg0, arg1, arg2, arg3, arg4 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0xFF008003, *arg0);
-  delete arg0;
-  delete arg1;
-  delete arg2;
-  delete arg3;
-  delete arg4;
 }
 
 TEST(BrigInstTest, Barrier) {
@@ -4407,6 +3999,9 @@ TEST(BrigInstTest, Barrier) {
     "        barrier;\n"
     "        ret;\n"
     "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("BarrierTest");
   void *args[] = { 0 };
@@ -4424,6 +4019,9 @@ TEST(BrigInstTest, Sync) {
     "        sync;\n"
     "        ret;\n"
     "};\n");
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("SyncTest");
   void *args[] = { 0 };
@@ -4539,14 +4137,15 @@ TEST(BrigKernelTest, testLd) {
 
 TEST(BrigInstTest, VectorBitalign1) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 1:0:$large;\n"
     "\n"
     "kernel &__instruction4_test_kernel(\n"
     "        kernarg_u32 %result, \n"
     "        kernarg_u32 %input1)\n"
     "{\n"
-    "        bitalign_b32 $s1, 0x77665544, 0x33221100, 16;"
-    "        st_kernarg_u32 $s1, [%result] ;\n"
+    "        bitalign_b32 $s1, 0x77665544, 0x33221100, 16;\n"
+    "        ld_kernarg_u64 $d0, [%result] ;\n"
+    "        st_u32 $s1, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -4557,7 +4156,7 @@ TEST(BrigInstTest, VectorBitalign1) {
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t( 0 );
   uint32_t *arg1 = new uint32_t(0x55443322);
-  void *args[] = { arg0, arg1 };
+  void *args[] = { &arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0x55443322, *arg0);
   delete arg0;
@@ -4667,27 +4266,27 @@ TEST(Instruction2Test, Not) {
 TEST(Instruction2Test, Popcount) {
   {
     const uint32_t testVec[] = { 0x0, 0x00000000 };
-    testInst("popcount_b32", testVec);
+    testInst("popcount_u32_b32", testVec);
   }
   {
     const uint32_t testVec[] = { 24, 0x00ffffff };
-    testInst("popcount_b32", testVec);
+    testInst("popcount_u32_b32", testVec);
   }
   {
     const uint32_t testVec[] = { 31, 0x7fffffff };
-    testInst("popcount_b32", testVec);
+    testInst("popcount_u32_b32", testVec);
   }
   {
     const uint32_t testVec[] = { 25, 0x01ffffff };
-    testInst("popcount_b32", testVec);
+    testInst("popcount_u32_b32", testVec);
   }
   {
     const uint32_t testVec[] = { 32, 0xffffffff };
-    testInst("popcount_b32", testVec);
+    testInst("popcount_u32_b32", testVec);
   }
   {
     const uint32_t testVec[] = { 20, 0xffff0f00 };
-    testInst("popcount_b32", testVec);
+    testInst("popcount_u32_b32", testVec);
   }
 }
 
@@ -4709,34 +4308,34 @@ TEST(Instruction2Test, Bitrev) {
 TEST(Instruction2Test, FirstBit) {
   {
     const uint32_t testVec[] = { 0, 0xffffffff };
-    testInst("firstbit_b32", testVec);
+    testInst("firstbit_u32_u32", testVec);
   }
   {
     const uint32_t testVec[] = { 1, 0x7fffffff };
-    testInst("firstbit_b32", testVec);
+    testInst("firstbit_u32_u32", testVec);
   }
   {
     const int32_t testVec[] = { -1, 0x0};
-    testInst("firstbit_b32", testVec);
+    testInst("firstbit_u32_u32", testVec);
   }
 }
 
 TEST(Instruction2Test, LastBit) {
   {
     const uint32_t testVec[] = { 0, 0xffffffff };
-    testInst("lastbit_b32", testVec);
+    testInst("lastbit_u32_u32", testVec);
   }
   {
     const uint32_t testVec[] = { 0, 0x7fffffff };
-    testInst("lastbit_b32", testVec);
+    testInst("lastbit_u32_u32", testVec);
   }
   {
     const uint32_t testVec[] = { 0, 0x01ffffff };
-    testInst("lastbit_b32", testVec);
+    testInst("lastbit_u32_u32", testVec);
   }
   {
     const int32_t testVec[] = { -1, 0x0};
-    testInst("lastbit_b32", testVec);
+    testInst("lastbit_u32_u32", testVec);
   }
 }
 
@@ -4751,98 +4350,42 @@ TEST(Instruction2Test, Mov) {
   }
 }
 
-TEST(Instruction2Test, Unpack3) {
-  {
-    union { float f32; uint32_t u32; } result = { 127.0f };
-    const uint32_t testVec[] = { result.u32, 0x7fffffff };
-    testInst("unpack3", testVec);
-  }
-}
-
-TEST(Instruction2Test, Unpack2) {
-  {
-    union { float f32; uint32_t u32; } result = { 175.0f };
-    const uint32_t testVec[] = { result.u32, 0x7eafffff };
-    testInst("unpack2", testVec);
-  }
-}
-
-TEST(Instruction2Test, Unpack1) {
-  {
-    union { float f32; uint32_t u32; } result = { 255.0f };
-    const uint32_t testVec[] = { result.u32, 0x7eafffff };
-    testInst("unpack1", testVec);
-  }
-}
-
-TEST(Instruction2Test, Unpack0) {
-  {
-    union { float f32; uint32_t u32; } result = { 126.0f };
-    const uint32_t testVec[] = { result.u32, 0xff7e };
-    testInst("unpack0", testVec);
-  }
-}
-
-TEST(Instruction2Test, Fcos) {
+TEST(Instruction2Test, Ncos) {
   {
     const float testVec[] = { 1.0f, 0.0f };
-    testInst("fcos_f32", testVec);
-  }
-  {
-    const float testVec[] = { 1.0f, 0.0f };
-    testInst("fcos_ftz_f32", testVec);
+    testInst("ncos_f32", testVec);
   }
 }
 
-TEST(Instruction2Test, Fsin) {
+TEST(Instruction2Test, Nsin) {
   {
     const float testVec[] = { 1.0f, M_PI/2 };
-    testInst("fsin_f32", testVec);
-  }
-  {
-    const float testVec[] = { 1.0f, M_PI/2 };
-    testInst("fsin_ftz_f32", testVec);
+    testInst("nsin_f32", testVec);
   }
 }
 
-TEST(Instruction2Test, Flog2) {
+TEST(Instruction2Test, Nlog2) {
   {
     const float testVec[] = { 2.0f, 4.0f };
-    testInst("flog2_f32", testVec);
-  }
-  {
-    const float testVec[] = { 2.0f, 4.0f };
-    testInst("flog2_ftz_f32", testVec);
+    testInst("nlog2_f32", testVec);
   }
 }
 
-TEST(Instruction2Test, Fexp2) {
+TEST(Instruction2Test, Nexp2) {
   {
     const float testVec[] = { 16.0f, 4.0f };
-    testInst("fexp2_f32", testVec);
-  }
-  {
-    const float testVec[] = { 16.0f, 4.0f };
-    testInst("fexp2_ftz_f32", testVec);
+    testInst("nexp2_f32", testVec);
   }
 }
 
-TEST(Instruction2Test, Fsqrt) {
+TEST(Instruction2Test, Nsqrt) {
   {
     const float testVec[] = { 2.0f, 4.0f };
-    testInst("fsqrt_f32", testVec);
-  }
-  {
-    const float testVec[] = { 2.0f, 4.0f };
-    testInst("fsqrt_ftz_f32", testVec);
+    testInst("nsqrt_f32", testVec);
   }
   {
     const double testVec[] = { 2.0, 4.0 };
-    testInst("fsqrt_f64", testVec);
-  }
-  {
-    const double testVec[] = { 2.0, 4.0 };
-    testInst("fsqrt_ftz_f64", testVec);
+    testInst("nsqrt_f64", testVec);
   }
 }
 
@@ -4853,41 +4396,25 @@ TEST(Instruction2Test, Copysign) {
   }
 }
 
-TEST(Instruction2Test, Frsqrt) {
+TEST(Instruction2Test, Nrsqrt) {
   {
     const float testVec[] = { 0.5f, 4.0f };
-    testInst("frsqrt_f32", testVec);
-  }
-  {
-    const float testVec[] = { 0.5f, 4.0f };
-    testInst("frsqrt_ftz_f32", testVec);
+    testInst("nrsqrt_f32", testVec);
   }
   {
     const double testVec[] = { 0.5, 4.0 };
-    testInst("frsqrt_f64", testVec);
-  }
-  {
-    const double testVec[] = { 0.5, 4.0 };
-    testInst("frsqrt_ftz_f64", testVec);
+    testInst("nrsqrt_f64", testVec);
   }
 }
 
-TEST(Instruction2Test, Frcp) {
+TEST(Instruction2Test, Nrcp) {
   {
     const float testVec[] = { 0.25f, 4.0f };
-    testInst("frcp_f32", testVec);
-  }
-  {
-    const float testVec[] = { 0.25f, 4.0f };
-    testInst("frcp_ftz_f32", testVec);
+    testInst("nrcp_f32", testVec);
   }
   {
     const double testVec[] = { 0.25, 4.0 };
-    testInst("frcp_f64", testVec);
-  }
-  {
-    const double testVec[] = { 0.25, 4.0 };
-    testInst("frcp_ftz_f64", testVec);
+    testInst("nrcp_f64", testVec);
   }
 }
 
@@ -4920,7 +4447,8 @@ TEST(Instruction2Test, Fract) {
     "{\n"
     "        ld_kernarg_s32 $s1, [%input] ;\n"
     "        fract_f32 $s2, $s1 ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%result] ;\n"
+    "        st_s32 $s2, [$d0] ;\n"
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
@@ -4930,7 +4458,7 @@ TEST(Instruction2Test, Fract) {
   llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
   float *arg0 = new float(0.0f);
   float *arg1 = new float(4.6f);
-  void *args[] = { arg0, arg1 };
+  void *args[] = { &arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_FLOAT_EQ(0.6f, *arg0);
   delete arg0;
@@ -5223,13 +4751,6 @@ TEST(Instruction4Test, Fma) {
   }
 }
 
-TEST(Instruction4Test, Mad) {
-  {
-    const float testVec[] = { 14.6, 1.1, 6, 8 };
-    testInst("mad_f32", testVec);
-  }
-}
-
 TEST(Instruction4Test, Bitselect) {
   {
     const uint32_t testVec[] = { 5, 6, 13, 7 };
@@ -5241,10 +4762,10 @@ TEST(Instruction4Test, Bitselect) {
   }
 }
 
-TEST(Instruction4Test, Extract) {
+TEST(Instruction4Test, Bitextract) {
   {
     const uint32_t testVec[] = { 1, 134, 7, 22 };
-    testInst("extract_b32", testVec);
+    testInst("bitextract_u32", testVec);
   }
 }
 
@@ -5256,8 +4777,9 @@ TEST(Instruction4Test, Shuffle) {
     "        kernarg_u32 %result, \n"
     "        kernarg_u32 %input1)\n"
     "{\n"
-    "        shuffle_s8x4 $s1, 0x11223344, 0x55667788, 180;"
-    "        st_kernarg_u32 $s1, [%result] ;\n"
+    "        shuffle_s8x4 $s1, 0x11223344, 0x55667788, 180;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_u32 $s1, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5269,50 +4791,24 @@ TEST(Instruction4Test, Shuffle) {
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
-  void *args[] = { arg0, arg1 };
+  void *args[] = { &arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0x66553344, *arg0);
   delete arg0;
   delete arg1;
 }
 
-TEST(Instruction4Test, Sad4hi) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$small;\n"
-  "\n"
-  "kernel &__instruction4_test_kernel(\n"
-  "        kernarg_u32 %result, \n"
-  "        kernarg_u32 %input1)\n"
-  "{\n"
-  "        sad4hi_b32 $s1, 0x22221111, 0x11112222, 0x10010001;"
-  "        st_kernarg_u32 $s1, [%result] ;\n"
-
-  "        ret;\n"
-  "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
-  uint32_t *arg0 = new uint32_t(0);
-  uint32_t *arg1 = new uint32_t(0);
-  void *args[] = { arg0, arg1 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0x10450001, *arg0);
-  delete arg0;
-  delete arg1;
-}
-
 TEST(Instruction4Test, Sad) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$small;\n"
+  "version 1:0:$large;\n"
   "\n"
   "kernel &__instruction4_test_kernel(\n"
-  "        kernarg_u32 %result, \n"
+  "        kernarg_u64 %result, \n"
   "        kernarg_u32 %input1)\n"
   "{\n"
-  "        sad_b32 $s1, 0x22222222, 0x11111111, 0x1;"
-  "        st_kernarg_u32 $s1, [%result] ;\n"
+  "        sad_u32_u32 $s1, 0x22222222, 0x11111111, 0x1;\n"
+  "        ld_kernarg_u64 $d0, [%result];\n"
+  "        st_u32 $s1, [$d0] ;\n"
 
   "        ret;\n"
   "};\n");
@@ -5323,77 +4819,24 @@ TEST(Instruction4Test, Sad) {
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
-  void *args[] = { arg0, arg1 };
+  void *args[] = { &arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(0x11111112, *arg0);
   delete arg0;
   delete arg1;
 }
 
-TEST(Instruction4Test, Sad2) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$large;\n"
-  "\n"
-  "kernel &__instruction4_test_kernel(\n"
-  "        kernarg_u32 %result, \n"
-  "        kernarg_u32 %input1)\n"
-  "{\n"
-  "        sad2_b32 $s1, 0x22232222, 0x11111111, 0x1;"
-  "        st_kernarg_u32 $s1, [%result] ;\n"
-
-  "        ret;\n"
-  "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
-  uint32_t *arg0 = new uint32_t(0);
-  uint32_t *arg1 = new uint32_t(0);
-  void *args[] = { arg0, arg1 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0x2224, *arg0);
-  delete arg0;
-  delete arg1;
-}
-
-TEST(Instruction4Test, Sad4) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$large;\n"
-  "\n"
-  "kernel &__instruction4_test_kernel(\n"
-  "        kernarg_u32 %result, \n"
-  "        kernarg_u32 %input1)\n"
-  "{\n"
-  "        sad4_b32 $s1, 0x22221111, 0x11112222, 0x10010001;"
-  "        st_kernarg_u32 $s1, [%result] ;\n"
-
-  "        ret;\n"
-  "};\n");
-  EXPECT_TRUE(BP);
-  if(!BP) return;
-
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
-  uint32_t *arg0 = new uint32_t(0);
-  uint32_t *arg1 = new uint32_t(0);
-  void *args[] = { arg0, arg1 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0x10010045, *arg0);
-  delete arg0;
-  delete arg1;
-}
-
 TEST(Instruction4Test, Cmov_32) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$small;\n"
+  "version 1:0:$large;\n"
   "\n"
   "kernel &__instruction4_test_kernel(\n"
-  "        kernarg_u32 %result, \n"
+  "        kernarg_u64 %result, \n"
   "        kernarg_u32 %input1)\n"
   "{\n"
-  "        cmov_b32 $s1, 0, 13, 7;"
-  "        st_kernarg_u32 $s1, [%result] ;\n"
+  "        cmov_b32 $s1, 0, 13, 7;\n"
+  "        ld_kernarg_u64 $d0, [%result];\n"
+  "        st_u32 $s1, [$d0];\n"
 
   "        ret;\n"
   "};\n");
@@ -5404,7 +4847,7 @@ TEST(Instruction4Test, Cmov_32) {
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
-  void *args[] = { arg0, arg1 };
+  void *args[] = { &arg0, arg1 };
   BE.launch(fun, args);
   EXPECT_EQ(7, *arg0);
   delete arg0;
@@ -5420,7 +4863,8 @@ TEST(Instruction4Test, Cmov_64) {
   "        kernarg_u64 %input1)\n"
   "{\n"
   "        cmov_b64 $d1, 14473758, 0x5555666677778888, 14473758;"
-  "        st_kernarg_u64 $d1, [%result] ;\n"
+  "        ld_kernarg_u64 $d0, [%result];\n"
+  "        st_u64 $d1, [$d0];\n"
 
   "        ret;\n"
   "};\n");
@@ -5431,9 +4875,9 @@ TEST(Instruction4Test, Cmov_64) {
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
   uint64_t *arg0 = new uint64_t(0);
   uint64_t *arg1 = new uint64_t(0);
-  void *args[] = { arg0, arg1 };
+  void *args[] = { &arg0, arg1 };
   BE.launch(fun, args);
-  EXPECT_EQ(14473758, *arg0);
+  EXPECT_EQ(0x5555666677778888, *arg0);
   delete arg0;
   delete arg1;
 }
@@ -5443,13 +4887,15 @@ TEST(AtomTest, And) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_and_s32 $s3, [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomic_and_b32 $s3, [$d0], $s1;\n"
+    "        ld_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5461,7 +4907,7 @@ TEST(AtomTest, And) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0x12345678, *arg0);
   delete arg0;
@@ -5474,13 +4920,15 @@ TEST(AtomTest, Or) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_or_s32 $s3, [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomic_or_b32 $s3, [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5492,7 +4940,7 @@ TEST(AtomTest, Or) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0xffffffff, *arg0);
   delete arg0;
@@ -5505,13 +4953,15 @@ TEST(AtomTest, Xor) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_xor_s32 $s3, [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomic_xor_b32 $s3, [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5523,7 +4973,7 @@ TEST(AtomTest, Xor) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0xedcba987, *arg0);
   delete arg0;
@@ -5536,13 +4986,15 @@ TEST(AtomTest, Exch) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_exch_s32 $s3, [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomic_exch_b32 $s3, [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5554,7 +5006,7 @@ TEST(AtomTest, Exch) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0xffffffff, *arg0);
   delete arg0;
@@ -5567,13 +5019,15 @@ TEST(AtomTest, Add) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_add_s32 $s3, [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomic_add_s32 $s3, [$d0], $s1;\n"
+    "        ld_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5585,7 +5039,7 @@ TEST(AtomTest, Add) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0x12345677, *arg0);
   delete arg0;
@@ -5598,13 +5052,15 @@ TEST(AtomTest, Sub) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_sub_s32 $s3, [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomic_sub_s32 $s3, [$d0], $s1;\n"
+    "        ld_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5616,7 +5072,7 @@ TEST(AtomTest, Sub) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(3);
   int32_t *arg2 = new int32_t(23);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(20, *arg0);
   delete arg0;
@@ -5629,13 +5085,15 @@ TEST(AtomTest, Max) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_max_s32 $s3, [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomic_max_s32 $s3, [$d0], $s1;\n"
+    "        ld_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5647,7 +5105,7 @@ TEST(AtomTest, Max) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(23);
   int32_t *arg2 = new int32_t(3);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(23, *arg0);
   delete arg0;
@@ -5660,13 +5118,15 @@ TEST(AtomTest, Min) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomic_min_s32 $s3, [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomic_min_s32 $s3, [$d0], $s1;\n"
+    "        ld_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5678,7 +5138,7 @@ TEST(AtomTest, Min) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(23);
   int32_t *arg2 = new int32_t(3);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(3, *arg0);
   delete arg0;
@@ -5691,13 +5151,15 @@ TEST(AtomicNoRetTest, And) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomicNoRet_and_s32 [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomicnoret_and_b32 [$d0], $s1;\n"
+    "        ld_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5709,7 +5171,7 @@ TEST(AtomicNoRetTest, And) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0x12345678, *arg0);
   delete arg0;
@@ -5726,9 +5188,11 @@ TEST(AtomicNoRetTest, Or) {
     "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomicNoRet_or_s32 [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomicnoret_or_b32 [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5740,7 +5204,7 @@ TEST(AtomicNoRetTest, Or) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0xffffffff, *arg0);
   delete arg0;
@@ -5753,13 +5217,15 @@ TEST(AtomicNoRetTest, Xor) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomicNoRet_xor_s32 [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomicnoret_xor_b32 [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5771,7 +5237,7 @@ TEST(AtomicNoRetTest, Xor) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0xedcba987, *arg0);
   delete arg0;
@@ -5784,13 +5250,15 @@ TEST(AtomicNoRetTest, Add) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomicNoRet_add_s32 [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomicnoret_add_s32 [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5802,7 +5270,7 @@ TEST(AtomicNoRetTest, Add) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(0x12345677, *arg0);
   delete arg0;
@@ -5815,13 +5283,15 @@ TEST(AtomicNoRetTest, Sub) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomicNoRet_sub_s32 [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomicnoret_sub_s32 [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5833,7 +5303,7 @@ TEST(AtomicNoRetTest, Sub) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(23);
   int32_t *arg2 = new int32_t(3);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(-20, *arg0);
   delete arg0;
@@ -5846,13 +5316,15 @@ TEST(AtomicNoRetTest, Max) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomicNoRet_max_s32 [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomicnoret_max_s32 [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5864,7 +5336,7 @@ TEST(AtomicNoRetTest, Max) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(23);
   int32_t *arg2 = new int32_t(3);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(23, *arg0);
   delete arg0;
@@ -5877,13 +5349,15 @@ TEST(AtomicNoRetTest, Min) {
     "version 1:0:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
-    "        kernarg_s32 %result, \n"
-    "        kernarg_s32 %input1, kernarg_s32 %input2)\n"
+    "        kernarg_s64 %result, \n"
+    "        kernarg_s32 %input1, kernarg_s64 %input2)\n"
     "{\n"
     "        ld_kernarg_s32 $s1, [%input1] ;\n"
-    "        atomicNoRet_min_s32 [%input2], $s1;\n"
-    "        ld_kernarg_s32 $s2, [%input2] ;\n"
-    "        st_kernarg_s32 $s2, [%result] ;\n"
+    "        ld_kernarg_u64 $d0, [%input2];\n"
+    "        atomicnoret_min_s32 [$d0], $s1;\n"
+    "        ld_kernarg_s32 $s2, [$d0] ;\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        st_s32 $s2, [$d0] ;\n"
 
     "        ret;\n"
     "};\n");
@@ -5895,7 +5369,7 @@ TEST(AtomicNoRetTest, Min) {
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(3);
   int32_t *arg2 = new int32_t(23);
-  void *args[] = { arg0, arg1, arg2 };
+  void *args[] = { &arg0, arg1, &arg2 };
   BE.launch(fun, args);
   EXPECT_EQ(3, *arg0);
   delete arg0;

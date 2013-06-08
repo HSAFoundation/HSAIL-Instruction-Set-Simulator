@@ -3,7 +3,6 @@
 #define INCLUDE_BRIG_LLVM_H_
 
 #include "brig.h"
-#include "brig_buffer.h"
 #include "brig_module.h"
 #include "brig_reader.h"
 #include "bugs.h"

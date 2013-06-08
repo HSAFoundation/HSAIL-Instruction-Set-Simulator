@@ -35,19 +35,19 @@ template<class T> inline T *dyn_cast(BrigOperandBase *inst) {
   return inst->kind == T::OperKind ? reinterpret_cast<T *>(inst) : NULL;
 }
 
-template<> inline BrigDirectiveMethod *dyn_cast(BrigDirectiveBase *dir) {
-  if(dir->kind == BrigEDirectiveFunction ||
-     dir->kind == BrigEDirectiveKernel)
-    return reinterpret_cast<BrigDirectiveMethod *>(dir);
+template<> inline BrigDirectiveExecutable *dyn_cast(BrigDirectiveBase *dir) {
+  if(dir->kind == BRIG_DIRECTIVE_FUNCTION ||
+     dir->kind == BRIG_DIRECTIVE_KERNEL)
+    return reinterpret_cast<BrigDirectiveExecutable *>(dir);
   return NULL;
 }
 
 template<> inline
-BrigDirectiveSymbolCommon *dyn_cast(BrigDirectiveBase *dir) {
-  if(dir->kind == BrigEDirectiveImage ||
-     dir->kind == BrigEDirectiveSampler ||
-     dir->kind == BrigEDirectiveSymbol)
-    return reinterpret_cast<BrigDirectiveSymbolCommon *>(dir);
+BrigDirectiveSymbol *dyn_cast(BrigDirectiveBase *dir) {
+  if(dir->kind == BRIG_DIRECTIVE_IMAGE ||
+     dir->kind == BRIG_DIRECTIVE_SAMPLER ||
+     dir->kind == BRIG_DIRECTIVE_VARIABLE)
+    return reinterpret_cast<BrigDirectiveSymbol *>(dir);
   return NULL;
 }
 
@@ -192,13 +192,13 @@ struct BrigSections {
     stringsSize(stringsSize), directivesSize(directivesSize),
     codeSize(codeSize), operandsSize(operandsSize), debugSize(debugSize) {}
 
-  dir_iterator begin() const { return dir_iterator(directives + 8); };
+  dir_iterator begin() const { return dir_iterator(directives + 4); };
   dir_iterator end() const {
     return dir_iterator(directives + directivesSize);
   };
-  inst_iterator code_begin() const { return inst_iterator(code + 8); };
+  inst_iterator code_begin() const { return inst_iterator(code + 4); };
   inst_iterator code_end() const { return inst_iterator(code + codeSize); };
-  oper_iterator oper_begin() const { return oper_iterator(operands + 8); };
+  oper_iterator oper_begin() const { return oper_iterator(operands + 4); };
   oper_iterator oper_end() const {
     return oper_iterator(operands + operandsSize);
   };

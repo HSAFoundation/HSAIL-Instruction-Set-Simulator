@@ -14,29 +14,31 @@ class BrigSymbol {
 
   public:
 
-  const char *getName() const {
-    return S_.strings + getSymbol()->s.s_name + 1;
+  const BrigString *getName() const {
+    return (const BrigString *) (S_.strings + getSymbol()->name);
   }
 
-  BrigStorageClass getStorageClass() const {
-    return BrigStorageClass(getSymbol()->s.storageClass);
+  BrigSegment getStorageClass() const {
+    return BrigSegment(getSymbol()->modifier);
   }
 
-  BrigAttribute getLinkage() const {
-    return BrigAttribute(getSymbol()->s.attribute);
+  BrigLinkage8_t getLinkage() const {
+    return BrigLinkage8_t(getSymbol()->modifier) & BRIG_SYMBOL_LINKAGE;
   }
 
-  bool isConst() const { return getSymbol()->s.symbolModifier & BrigConst; }
+  bool isConst() const { return getSymbol()->modifier & BRIG_SYMBOL_CONST; }
 
-  bool isArray() const { return getSymbol()->s.symbolModifier & BrigArray; }
+  bool isArray() const { return getSymbol()->modifier & BRIG_SYMBOL_ARRAY; }
 
   bool isFlexArray() const {
-    return getSymbol()->s.symbolModifier & BrigFlex;
+    return getSymbol()->modifier & BRIG_SYMBOL_FLEX_ARRAY;
   }
 
-  uint32_t getArrayDim() const { return getSymbol()->s.dim; }
+  uint64_t getArrayDim() const {
+    return ((uint64_t) getSymbol()->dimHi << 32) + getSymbol()->dimLo;
+  }
 
-  BrigDataType getType() const { return BrigDataType(getSymbol()->s.type); }
+  BrigType getType() const { return BrigType(getSymbol()->type); }
 
   bool isImage() const { return isa<BrigDirectiveImage>(it_); }
 
@@ -50,18 +52,20 @@ class BrigSymbol {
 
   bool hasInitializer() const {
     const BrigDirectiveSymbol *symbol = dyn_cast<BrigDirectiveSymbol>(it_);
-    return symbol && symbol->d_init;
+    return symbol && symbol->init;
   };
 
   template<class T> const T *getInit() const {
     const BrigDirectiveSymbol *symbol = cast<BrigDirectiveSymbol>(it_);
-    if(!symbol->d_init) return NULL;
+    if(!symbol->init) return NULL;
 
-    const BrigDirectiveInit *init =
-      dyn_cast<BrigDirectiveInit>(dir_iterator(S_.directives + symbol->d_init));
+    const BrigDirectiveVariableInit *init =
+      dyn_cast<BrigDirectiveVariableInit>(dir_iterator(S_.directives +
+                                                       symbol->init));
     if(!init) return NULL;
 
-    return reinterpret_cast<const T *>(&init->initializationData);
+    const BrigString *str = (const BrigString *) (S_.strings + init->data);
+    return reinterpret_cast<const T *>(str->bytes);
   }
 
   const void *getAddr() const { return it_; }
@@ -83,8 +87,8 @@ class BrigSymbol {
   BrigSymbol(const BrigSections &S, const dir_iterator &it) :
     S_(S), it_(it) { nextValid(); }
 
-  const BrigDirectiveSymbolCommon *getSymbol() const {
-    return cast<BrigDirectiveSymbolCommon>(it_);
+  const BrigDirectiveSymbol *getSymbol() const {
+    return cast<BrigDirectiveSymbol>(it_);
   }
 
   void nextValid();

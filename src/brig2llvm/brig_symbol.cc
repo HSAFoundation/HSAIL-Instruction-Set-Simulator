@@ -18,10 +18,11 @@ BrigSymbol &BrigSymbol::operator++() {
 
 void BrigSymbol::nextValid() {
   const dir_iterator E = S_.end();
-  while(it_ != E && !isa<BrigDirectiveSymbolCommon>(it_)) {
-    const BrigDirectiveMethod *method = dyn_cast<BrigDirectiveMethod>(it_);
+  while(it_ != E && !isa<BrigDirectiveSymbol>(it_)) {
+    const BrigDirectiveExecutable *method =
+      dyn_cast<BrigDirectiveExecutable>(it_);
     if(method) {
-      it_ = dir_iterator(S_.directives + method->d_nextDirective);
+      it_ = dir_iterator(S_.directives + method->nextTopLevelDirective);
     } else {
       ++it_;
     }
@@ -40,14 +41,14 @@ BrigSymbol arg_end(const BrigFunction &fun) {
 
 BrigSymbol local_begin(const BrigFunction &fun) {
   dir_iterator scopeBegin(fun.S_.directives +
-                          fun.getMethod()->d_firstScopedDirective);
+                          fun.getMethod()->firstScopedDirective);
   BrigSymbol symbol(fun.S_, scopeBegin);
   return symbol;
 }
 
 BrigSymbol local_end(const BrigFunction &fun) {
   dir_iterator scopeEnd(fun.S_.directives +
-                        fun.getMethod()->d_nextDirective);
+                        fun.getMethod()->nextTopLevelDirective);
   BrigSymbol symbol(fun.S_, scopeEnd);
   return symbol;
 }

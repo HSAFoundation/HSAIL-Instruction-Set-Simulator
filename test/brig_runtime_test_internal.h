@@ -45,15 +45,15 @@
   MakeTest(INST ## _f32, INST ## Logic)         \
   MakeTest(INST ## _f64, INST ## Logic)
 
-#define TestShiftInst(INST,NARY)                          \
-  TestSignedInst(INST, NARY)                              \
-  TestUnsignedInst(INST, NARY)                            \
-  MakeVectorTest(INST ## _PS_s8x4,  INST ## VectorLogic)  \
-  MakeVectorTest(INST ## _PS_s16x2, INST ## VectorLogic)  \
-  MakeVectorTest(INST ## _PS_s32x2, INST ## VectorLogic)  \
-  MakeVectorTest(INST ## _PS_u8x4,  INST ## VectorLogic)  \
-  MakeVectorTest(INST ## _PS_u16x2, INST ## VectorLogic)  \
-  MakeVectorTest(INST ## _PS_u32x2, INST ## VectorLogic)
+#define TestShiftInst(INST,NARY)                      \
+  TestSignedInst(INST, NARY)                          \
+  TestUnsignedInst(INST, NARY)                        \
+  MakeVectorTest(INST ## _s8x4,  INST ## VectorLogic) \
+  MakeVectorTest(INST ## _s16x2, INST ## VectorLogic) \
+  MakeVectorTest(INST ## _s32x2, INST ## VectorLogic) \
+  MakeVectorTest(INST ## _u8x4,  INST ## VectorLogic) \
+  MakeVectorTest(INST ## _u16x2, INST ## VectorLogic) \
+  MakeVectorTest(INST ## _u32x2, INST ## VectorLogic)
 
 #define TestUnpackInst(INST,NARY)                       \
   MakeVectorTest(INST ## _s8x4,   INST ## Logic)        \

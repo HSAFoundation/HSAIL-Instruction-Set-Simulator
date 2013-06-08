@@ -12,13 +12,3 @@ flex_target(lexer lexer_rules.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 
 MESSAGE("INCLUDE SEARCH DIRECTORIES: ${PROJ_SEARCH_PATH}")
 MESSAGE("Flex outputs: ${FLEX_lexer_OUTPUTS}")
-
-add_llvm_library(hsa2brig
-  ${FLEX_lexer_OUTPUTS}
-  brig_buffer.cc
-  context.cc
-  error_reporter.cc
-  lexer_wrapper.cc
-  parser.cc
-  parser_wrapper.cc
-  )

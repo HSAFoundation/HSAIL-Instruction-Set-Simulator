@@ -358,9 +358,9 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
     return FUNC ## Vector(t, u, v);                             \
   }
 
-#define defineShiftVector(FUNC,TYPE)                         \
-  extern "C" TYPE FUNC ## _PS_ ## TYPE (TYPE t, b32 shift) { \
-    return FUNC ## Vector(t, shift);                         \
+#define defineShiftVector(FUNC,TYPE)                      \
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, b32 shift) { \
+    return FUNC ## Vector(t, shift);                      \
   }
 
 #define defineShuffleVector(FUNC,TYPE)                            \
@@ -420,7 +420,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, TYPE v);
 
 #define declareShiftVector(FUNC,TYPE)                         \
-  extern "C" TYPE FUNC ## _PS_ ## TYPE (TYPE t, unsigned shift);
+  extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, unsigned shift);
 
 #define declareShuffleVector(FUNC,TYPE)                               \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t, TYPE u, unsigned shift);

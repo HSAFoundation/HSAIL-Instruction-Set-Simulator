@@ -12,7 +12,7 @@ version 1:0:$small;
 kernel &__Get_fcos(kernarg_u32 %arg_val0, kernarg_u32 %arg_val1)
 {
 	// Use workitemaid to get the buffer offset
-	workitemabsid $s1, 0;
+	workitemabsid_u32 $s1, 0;
 	shl_u32	 $s1, $s1, 2;  // Get offset by Multiplying by 4 because
                                // that is the size of each value in the buffer
 
@@ -26,7 +26,7 @@ kernel &__Get_fcos(kernarg_u32 %arg_val0, kernarg_u32 %arg_val1)
 
 	// Execute Trig Opcode
 	ld_f32 $s0, [$s0];
-        fcos_f32 $s2, $s0;
+        ncos_f32 $s2, $s0;
 
 	// Store Dispatch ID on Kernel Argument
 	st_global_u32	$s2, [$s3] ;

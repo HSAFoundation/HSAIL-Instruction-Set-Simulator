@@ -1,1181 +1,1226 @@
-/* Copyright 2012 <MulticorewareInc> */
+#ifndef BRIG_H
+#define BRIG_H
 
-#ifndef INCLUDE_BRIG_H_
-#define INCLUDE_BRIG_H_
 #include <stdint.h>
 
-// PRM 20.4
-// typedef
+typedef uint32_t BrigDirectiveOffset32_t;
+typedef uint32_t BrigCodeOffset32_t;
+typedef uint32_t BrigOperandOffset32_t;
+typedef uint32_t BrigStringOffset32_t;
 
-typedef uint16_t BrigPacking16_t;
-typedef uint16_t BrigDataType16_t;
-typedef uint32_t BrigGeom32_t;
-typedef uint32_t BrigImageFormat32_t;
-typedef uint32_t BrigDirectiveKinds32_t;
-typedef uint32_t BrigsOffset32_t;
-typedef uint32_t BrigcOffset32_t;
-typedef uint32_t BrigdOffset32_t;
-typedef uint32_t BrigoOffset32_t;
-typedef uint16_t BrigMachine16_t;
-typedef uint16_t BrigProfile16_t;
-typedef uint32_t BrigControlType32_t;
-typedef uint16_t BrigAttribute16_t;
-typedef uint32_t BrigStorageClass32_t;
-typedef uint32_t BrigImageOrder32_t;
-typedef uint32_t BrigOpcode32_t;
-typedef uint32_t BrigAtomicOperation32_t;
-typedef uint32_t BrigMemorySemantic32_t;
-typedef uint32_t BrigCompareOperation32_t;
-typedef uint8_t  BrigBoundaryMode8_t;
-typedef uint8_t  BrigAddrFilter8_t;
-// Enums
-
-// Custom enum to check for alignment of structs
-enum BrigAlignment {
-    BrigEAlignment_4,
-    BrigEAlignment_8
-};
-
-// PRM 19.5.21
-// BrigSymbolModifier
-enum BrigSymbolModifier {
-  BrigConst = 1,  // set means constant; not set means read/write
-  BrigArray = 2,  // set means vector (size in dim); not set means scalar
-  BrigFlex = 4    // set means flexible array
-};
-
-// 20.5.2
-// BrigAtomicOperation is used to specify the type of atomic operation.
-enum BrigAtomicOperation {
-  BrigAtomicAnd = 0,
-  BrigAtomicOr = 1,
-  BrigAtomicXor = 2,
-  BrigAtomicCas = 3,
-  BrigAtomicExch = 4,
-  BrigAtomicAdd = 5,
-  BrigAtomicInc = 6,
-  BrigAtomicDec = 7,
-  BrigAtomicMin = 8,
-  BrigAtomicMax = 9,
-  BrigAtomicSub = 10
-};
-
-// 20.5.3
-enum BrigAttribute {
-    BrigExtern = 0,
-    BrigStatic = 1,
-    BrigNone = 2
-};
-
-// 19.5.6
-enum BrigControlType {
-  BrigEMaxWIperG = 0, // work-items per work-group
-  BrigEMaxGperC = 1, // groups per compute unit
-  BrigEMemOpt = 2 // values[0] = 1 if on
-};
-
-// 19.5.7
-enum BrigDataType {
-    Brigs8 = 0,            // signed integer 8 bits
-    Brigs16 = 1,           // signed integer 16 bits
-    Brigs32 = 2,           // signed integer 32 bits
-    Brigs64 = 3,           // signed integer 64 bits
-    Brigu8 = 4,            // unsigned integer 8 bits
-    Brigu16 = 5,           // unsigned integer 16 bits
-    Brigu32 = 6,           // unsigned integer 32 bits
-    Brigu64 = 7,           // unsigned integer 64 bits
-    Brigf16 = 8,           // floating-point 16 bits
-    Brigf32 = 9,           // floating-point 32 bits
-    Brigf64 = 10,          // floating-point 64 bits
-    Brigb1 = 11,           // uninterpreted bit string of length 1 bit
-    Brigb8 = 12,           // uninterpreted bit string of length 8 bits
-    Brigb16 = 13,          // uninterpreted bit string of length 16 bits
-    Brigb32 = 14,          // uninterpreted bit string of length 32 bits
-    Brigb64 = 15,          // uninterpreted bit string of length 64 bits
-    Brigb128 = 16,         // uninterpreted bit string of length 128 bits
-    BrigROImg = 17,        // read-only image object
-    BrigRWImg = 18,        // read/write image object
-    BrigSamp = 19,         // sampler object
-    Brigu8x4 = 20,         // four bytes unsigned
-    Brigs8x4 = 21,         // four bytes signed
-    Brigu8x8 = 22,         // eight bytes unsigned
-    Brigs8x8 = 23,         // eight bytes signed
-    Brigu8x16 = 24,        // 16 bytes unsigned
-    Brigs8x16 = 25,        // 16 bytes signed
-    Brigu16x2 = 26,         // two short unsigned integers
-    Brigs16x2 = 27,         // two short signed integer
-    Brigf16x2 = 28,         // two half-floats
-    Brigu16x4 = 29,         // four short unsigned integers
-    Brigs16x4 = 30,         // four short signed integers
-    Brigf16x4 = 31,         // four half-floats
-    Brigu16x8 = 32,         // eight short unsigned integers
-    Brigs16x8 = 33,         // eight short signed integers
-    Brigf16x8 = 34,         // eight half-floats
-    Brigu32x2 = 35,         // two unsigned integers
-    Brigs32x2 = 36,         // two signed integers
-    Brigf32x2 = 37,         // two floats
-    Brigu32x4 = 38,         // four unsigned integers
-    Brigs32x4 = 39,         // four signed integers
-    Brigf32x4 = 40,         // four floats
-    Brigu64x2 = 41,         // two 64-bit unsigned integers
-    Brigs64x2 = 42,         // two 64-bit signed integers
-    Brigf64x2 = 43          // two doubles
-};
-// PRM 19.5.8
-// BrigDirectiveKinds
-// BrigDirectiveKinds is used to specify the kind of directive.
+typedef uint16_t BrigDirectiveKinds16_t;
 enum BrigDirectiveKinds {
-  BrigEDirectivePad = 0,
-  BrigEDirectiveFunction = 1,
-  BrigEDirectiveKernel = 2,
-  BrigEDirectiveSymbol = 3,
-  BrigEDirectiveImage = 4,
-  BrigEDirectiveSampler = 5,
-  BrigEDirectiveLabel = 6,
-  BrigEDirectiveLabelList = 7,
-  BrigEDirectiveVersion = 8,
-  BrigEDirectiveSignature = 9,
-  BrigEDirectiveFile = 10,
-  BrigEDirectiveComment = 11,
-  BrigEDirectiveLoc = 12,
-  BrigEDirectiveInit = 13,
-  BrigEDirectiveLabelInit = 14,
-  BrigEDirectiveControl = 15,
-  BrigEDirectivePragma = 16,
-  BrigEDirectiveExtension = 17,
-  BrigEDirectiveArgStart = 18,
-  BrigEDirectiveArgEnd = 19,
-  BrigEDirectiveBlockStart = 20,
-  BrigEDirectiveBlockNumeric = 21,
-  BrigEDirectiveBlockString = 22,
-  BrigEDirectiveBlockEnd = 23
+  BRIG_DIRECTIVE_ARG_SCOPE_END = 0,
+  BRIG_DIRECTIVE_ARG_SCOPE_START = 1,
+  BRIG_DIRECTIVE_BLOCK_END = 2,
+  BRIG_DIRECTIVE_BLOCK_NUMERIC = 3,
+  BRIG_DIRECTIVE_BLOCK_START = 4,
+  BRIG_DIRECTIVE_BLOCK_STRING = 5,
+  BRIG_DIRECTIVE_COMMENT = 6,
+  BRIG_DIRECTIVE_CONTROL = 7,
+  BRIG_DIRECTIVE_EXTENSION = 8,
+  BRIG_DIRECTIVE_FBARRIER = 9,
+  BRIG_DIRECTIVE_FILE = 10,
+  BRIG_DIRECTIVE_FUNCTION = 11,
+  BRIG_DIRECTIVE_IMAGE = 12,
+  BRIG_DIRECTIVE_IMAGE_INIT = 13,
+  BRIG_DIRECTIVE_KERNEL = 14,
+  BRIG_DIRECTIVE_LABEL = 15,
+  BRIG_DIRECTIVE_LABEL_INIT = 16,
+  BRIG_DIRECTIVE_LABEL_TARGETS = 17,
+  BRIG_DIRECTIVE_LOC = 18,
+  BRIG_DIRECTIVE_PRAGMA = 19,
+  BRIG_DIRECTIVE_SAMPLER = 20,
+  BRIG_DIRECTIVE_SAMPLER_INIT = 22,
+  BRIG_DIRECTIVE_SIGNATURE = 23,
+  BRIG_DIRECTIVE_VARIABLE = 24,
+  BRIG_DIRECTIVE_VARIABLE_INIT = 25,
+  BRIG_DIRECTIVE_VERSION = 26
 };
 
-// PRM 19.5.13
-// BrigMachine
-// BrigMachine is used to specify the type of machine model.
-enum BrigMachine {
-  BrigESmall = 0,  // 32-bit model (all addresses are 32 bits;
-                   // a pointer fits into an s register)
-  BrigELarge = 1   // 64-bit model (all addresses are 64 bits;
-                   // a pointer fits into a d register)
-};
-
-// PRM 19.5.18
-// BrigProfile
-// BrigProfile is used to specify the kind of profile.
-enum BrigProfile {
-  BrigEFull = 0,
-  BrigEBase = 1
-};
-
-// PRM 19.5.12
+typedef uint16_t BrigInstKinds16_t;
 enum BrigInstKinds {
-  BrigEInstBase = 0,
-  BrigEInstMod = 1,
-  BrigEInstCvt = 2,
-  BrigEInstImage = 3,
-  BrigEInstBar = 4,
-  BrigEInstLdSt = 5,
-  BrigEInstCmp = 6,
-  BrigEInstMem = 7,
-  BrigEInstAtomic = 8,
-  BrigEInstAtomicImage = 9,
-  BrigEInstSegp = 10
+  BRIG_INST_NONE = 0,
+  BRIG_INST_BASIC = 1,
+  BRIG_INST_ATOMIC = 2,
+  BRIG_INST_ATOMIC_IMAGE = 3,
+  BRIG_INST_BAR = 4,
+  BRIG_INST_BR = 5,
+  BRIG_INST_CMP = 6,
+  BRIG_INST_CVT = 7,
+  BRIG_INST_FBAR = 8,
+  BRIG_INST_IMAGE = 9,
+  BRIG_INST_MEM = 10,
+  BRIG_INST_ADDR = 11,
+  BRIG_INST_MOD = 12,
+  BRIG_INST_SEG = 13,
+  BRIG_INST_SOURCE_TYPE = 14
 };
 
-// 19.5.14
-// BrigMemorySemantic is used to specify the semantics for a memory operation.
-enum BrigMemorySemantic {
-  BrigRegular = 0,
-  BrigAcquire = 1,
-  BrigRelease = 2,
-  BrigAcquireRelease = 3,
-  BrigDep = 4,
-  BrigParAcquire = 5,
-  BrigParRelease = 6,
-  BrigParAcquireRelease = 7
-};
-
-// 19.5.20
-enum BrigStorageClass {
-  BrigGlobalSpace = 0,
-  BrigGroupSpace = 1,
-  BrigPrivateSpace = 2,
-  BrigKernargSpace = 3,
-  BrigReadonlySpace = 4,
-  BrigSpillSpace = 5,
-  BrigArgSpace = 6,
-  BrigFlatSpace = 7,
-  BrigInvalidSpace
-};
-// 8-16 reserved for extensions
-
-// BrigOperandKinds
-// BrigOperandKinds is used to specify the kind of operand.
+typedef uint16_t BrigOperandKinds16_t;
 enum BrigOperandKinds {
-  BrigEOperandPad = 0,
-  BrigEOperandBase = 1,
-  BrigEOperandReg = 2,
-  BrigEOperandImmed = 3,
-  BrigEOperandRegV2 = 4,
-  BrigEOperandRegV4 = 5,
-  BrigEOperandAddress = 6,
-  BrigEOperandLabelRef = 7,
-  BrigEOperandIndirect = 8,
-  BrigEOperandCompound = 9,
-  BrigEOperandArgumentList = 10,
-  BrigEOperandFunctionList = 11,
-  BrigEOperandArgumentRef = 12,
-  BrigEOperandWaveSz = 13,
-  BrigEOperandFunctionRef = 14,
-  BrigEOperandOpaque = 15
+  BRIG_OPERAND_IMMED         = 0,
+  BRIG_OPERAND_WAVESIZE      = 1,
+  BRIG_OPERAND_REG           = 2,
+  BRIG_OPERAND_REG_VECTOR    = 3,
+  BRIG_OPERAND_ADDRESS       = 4,
+  BRIG_OPERAND_LABEL_REF     = 5,
+  BRIG_OPERAND_ARGUMENT_REF  = 6,
+  BRIG_OPERAND_ARGUMENT_LIST = 7,
+  BRIG_OPERAND_FUNCTION_REF  = 8,
+  BRIG_OPERAND_FUNCTION_LIST = 9,
+  BRIG_OPERAND_SIGNATURE_REF = 10,
+  BRIG_OPERAND_FBARRIER_REF  = 11
 };
 
-// PRM 19.5.17
-// BrigPacking
-// BrigPacking is used to specify the packing type of HSAIL operation.
-enum BrigPacking {
-  BrigNoPacking = 0,
-  BrigPackPP = 1,
-  BrigPackPS = 2,
-  BrigPackSP = 3,
-  BrigPackSS = 4,
-  BrigPackS = 5,
-  BrigPackP = 6,
-  BrigPackPPsat = 7,
-  BrigPackPSsat = 8,
-  BrigPackSPsat = 9,
-  BrigPackSSsat = 10,
-  BrigPackSsat = 11,
-  BrigPackPsat = 12
+typedef uint16_t BrigAluModifier16_t;
+enum BrigAluModifierMask {
+  BRIG_ALU_ROUND = 15,
+  BRIG_ALU_FTZ = 16
 };
 
-// BrigOpcode
-// BrigOpcode is used to specify the opcode for the HSAIL operation.
-enum BrigOpcode {
-  BrigAbs = 0,
-  BrigAdd = 1,
-  BrigBorrow = 2,
-  BrigCarry = 3,
-  BrigCopySign = 4,
-  BrigDiv = 5,
-  BrigFma = 6,
-  BrigFract = 7,
-  BrigMad = 8,
-  BrigMax = 9,
-  BrigMin = 10,
-  BrigMul = 11,
-  BrigMulHi = 12,
-  BrigNeg = 13,
-  BrigRem = 14,
-  BrigSqrt = 15,
-  BrigSub = 16,
-  BrigMad24 = 17,
-  BrigMad24Hi = 18,
-  BrigMul24 = 19,
-  BrigMul24Hi = 20,
-  BrigShl = 21,
-  BrigShr = 22,
-  BrigAnd = 23,
-  BrigNot = 24,
-  BrigOr = 25,
-  BrigPopCount = 26,
-  BrigXor = 27,
-  BrigBitRev = 28,
-  BrigBitSelect = 29,
-  BrigExtract = 30,
-  BrigFirstBit = 31,
-  BrigInsert = 32,
-  BrigLastBit = 33,
-  BrigLda = 34,
-  BrigLdc = 35,
-  BrigMov = 36,
-  BrigMovdHi = 37,
-  BrigMovdLo = 38,
-  BrigMovsHi = 39,
-  BrigMovsLo = 40,
-  BrigShuffle = 41,
-  BrigUnpackHi = 42,
-  BrigUnpackLo = 43,
-  BrigCmov = 44,
-  BrigClass = 45,
-  BrigFcos = 46,
-  BrigFexp2 = 47,
-  BrigFlog2 = 48,
-  BrigFrcp = 49,
-  BrigFsqrt = 50,
-  BrigFrsqrt = 51,
-  BrigFsin = 52,
-  BrigBitAlign = 53,
-  BrigByteAlign = 54,
-  BrigF2u4 = 55,
-  BrigLerp = 56,
-  BrigSad = 57,
-  BrigSad2 = 58,
-  BrigSad4 = 59,
-  BrigSad4Hi = 60,
-  BrigUnpack0 = 61,
-  BrigUnpack1 = 62,
-  BrigUnpack2 = 63,
-  BrigUnpack3 = 64,
-  BrigSegmentp = 65,
-  BrigFtoS = 66,
-  BrigStoF = 67,
-  BrigCmp = 68,
-  BrigPackedCmp = 69,
-  BrigCvt = 70,
-  BrigLd = 71,
-  BrigSt = 72,
-  BrigAtomic = 73,
-  BrigAtomicNoRet = 74,
-  BrigRdImage = 75,
-  BrigLdImage = 76,
-  BrigStImage = 77,
-  BrigAtomicImage = 78,
-  BrigAtomicNoRetImage = 79,
-  BrigQueryArray = 80,
-  BrigQueryData = 81,
-  BrigQueryDepth = 82,
-  BrigQueryFiltering = 83,
-  BrigQueryHeight = 84,
-  BrigQueryNormalized = 85,
-  BrigQueryOrder = 86,
-  BrigQueryWidth = 87,
-  BrigCbr = 88,
-  BrigBrn = 89,
-  BrigBarrier = 90,
-  BrigFbarArrive = 91,
-  BrigFbarInit = 92,
-  BrigFbarRelease = 93,
-  BrigFbarSkip = 94,
-  BrigFbarWait = 95,
-  BrigSync = 96,
-  BrigCount = 97,
-  BrigCountUp = 98,
-  BrigMask = 99,
-  BrigSend = 100,
-  BrigReceive = 101,
-  BrigCall = 102,
-  BrigRet = 103,
-  BrigSysCall = 104,
-  BrigAlloca = 105,
-  BrigClock = 106,
-  BrigCU = 107,
-  BrigCurrentWorkGroupSize = 108,
-  BrigDebugTrap = 109,
-  BrigDispatchId = 110,
-  BrigDynWaveId = 111,
-  BrigFeClearExcept = 112,
-  BrigFeGetExcept = 113,
-  BrigFeSetExcept = 114,
-  BrigGridGroups = 115,
-  BrigGridSize = 116,
-  BrigLaneId = 117,
-  BrigMaxDynWaveId = 118,
-  BrigNop = 119,
-  BrigNullPtr = 120,
-  BrigQid = 121,
-  BrigWorkDim = 122,
-  BrigWorkGroupId = 123,
-  BrigWorkGroupSize = 124,
-  BrigWorkItemAbsId = 125,
-  BrigWorkItemAbsIdFlat = 126,
-  BrigWorkItemId = 127,
-  BrigWorkItemIdFlat = 128,
-  BrigInvalidOpcode
+typedef uint8_t BrigAtomicOperation8_t;
+enum BrigAtomicOperation {
+  BRIG_ATOMIC_AND = 0,
+  BRIG_ATOMIC_OR = 1,
+  BRIG_ATOMIC_XOR = 2,
+  BRIG_ATOMIC_CAS = 3,
+  BRIG_ATOMIC_EXCH = 4,
+  BRIG_ATOMIC_ADD = 5,
+  BRIG_ATOMIC_INC = 6,
+  BRIG_ATOMIC_DEC = 7,
+  BRIG_ATOMIC_MIN = 8,
+  BRIG_ATOMIC_MAX = 9,
+  BRIG_ATOMIC_SUB = 10
 };
 
-// Brig Support Structures
-// BrigAluModifier specifies arithmetic logic unit controls:
-struct BrigAluModifier {
-  uint32_t valid: 1;
-  uint32_t floatOrInt: 1;
-  uint32_t rounding: 2;
-  uint32_t ftz: 1;
-  uint32_t approx: 1;
-  uint32_t fbar: 1;
-  uint32_t reserved: 25;
-};
-
-//PRM 	19.5.9
-//BrigGeom
-//BrigGeom is used to specify the number of coordinates needed to access an
-//image.
-enum BrigGeom {
-  Briggeom_1d = 0,  //1D image (1 coordinate needed)
-  Briggeom_2d = 1,  //2D image (2 coordinate needed)
-  Briggeom_3d = 2,  //3D image (3 coordinate needed)
-  Briggeom_1da = 3, //1DA image array (2 coordinates needed)
-  Briggeom_1db = 4, //1DB image  buffer (1 coordinates needed)
-  Briggeom_2da = 5  //2DA image array (3 coordinates needed)
-};
-
-//PRM 	19.5.10
-enum BrigImageFormat {
-  BrigImageFormatUnknown = 0,
-  BrigSNORM_INT8 = 1,
-  BrigSNORM_INT16 = 2,
-  BrigUNORM_INT8 = 3,
-  BrigUNORM_INT16 = 4,
-  BrigUNORM_SHORT_565 = 5,
-  BrigUNORM_SHORT_555 = 6,
-  BrigUNORM_SHORT_101010 = 7,
-  BrigSIGNED_INT8 = 8,
-  BrigSIGNED_INT16 = 9,
-  BrigSIGNED_INT32 = 10,
-  BrigUNSIGNED_INT8 = 11,
-  BrigUNSIGNED_INT16 = 12,
-  BrigUNSIGNED_INT32 = 13,
-  BrigHALF_FLOAT = 14,
-  BrigFLOAT = 15,
-  BrigImageFormatInvalid
-};
-
-enum BrigImageOrder {
-  BrigImageOrderUnknown = 0, // used when no order is specified
-  BrigImage_R = 1,
-  BrigImage_A = 2,
-  BrigImage_RX = 3,
-  BrigImage_RG = 4,
-  BrigImage_RGX = 5,
-  BrigImage_RA = 6,
-  BrigImage_RGB = 7,
-  BrigImage_RGBA = 8,
-  BrigImage_RGBX = 9,
-  BrigImage_BGRA = 10,
-  BrigImage_ARGB = 11,
-  BrigImage_INTENSITY = 12,
-  BrigImage_LUMINANCE = 13,
-  BrigImageOrderInvalid
-};
-
-//PRM 20.5.1
-enum BrigAddrFilter {
-  BrigSamplerFilterLinear = 0,
-  BrigSamplerFilterNearest = 1
-};
-
-//PRM 20.5.4
-enum BrigBoundaryMode {
-  BrigSamplerClamp = 0,
-  BrigSamplerWrap = 1,
-  BrigSamplerMirror = 2,
-  BrigSamplerMirrorOnce = 3,
-  BrigSamplerBorder = 4
-};
-
-//PRM 19.5.5
+typedef uint8_t BrigCompareOperation8_t;
 enum BrigCompareOperation {
-  BrigEq = 0,
-  BrigNe = 1,
-  BrigLt = 2,
-  BrigLe = 3,
-  BrigGt = 4,
-  BrigGe = 5,
-  BrigEqu = 6,
-  BrigNeu = 7,
-  BrigLtu = 8,
-  BrigLeu = 9,
-  BrigGtu = 10,
-  BrigGeu = 11,
-  BrigNum = 12,
-  BrigNan = 13,
-  BrigSeq = 14,
-  BrigSne = 15,
-  BrigSlt = 16,
-  BrigSle = 17,
-  BrigSgt = 18,
-  BrigSge = 19,
-  BrigSgeu = 20,
-  BrigSequ = 21,
-  BrigSneu = 22,
-  BrigSltu = 23,
-  BrigSleu = 24,
-  BrigSnum = 25,
-  BrigSnan = 26,
-  BrigSgtu = 27
+  BRIG_COMPARE_EQ = 0,
+  BRIG_COMPARE_NE = 1,
+  BRIG_COMPARE_LT = 2,
+  BRIG_COMPARE_LE = 3,
+  BRIG_COMPARE_GT = 4,
+  BRIG_COMPARE_GE = 5,
+  BRIG_COMPARE_EQU = 6,
+  BRIG_COMPARE_NEU = 7,
+  BRIG_COMPARE_LTU = 8,
+  BRIG_COMPARE_LEU = 9,
+  BRIG_COMPARE_GTU = 11,
+  BRIG_COMPARE_GEU = 10,
+  BRIG_COMPARE_NUM = 12,
+  BRIG_COMPARE_NAN = 13,
+  BRIG_COMPARE_SEQ = 14,
+  BRIG_COMPARE_SNE = 15,
+  BRIG_COMPARE_SLT = 16,
+  BRIG_COMPARE_SLE = 17,
+  BRIG_COMPARE_SGT = 18,
+  BRIG_COMPARE_SGE = 19,
+  BRIG_COMPARE_SGEU = 20,
+  BRIG_COMPARE_SEQU = 21,
+  BRIG_COMPARE_SNEU = 22,
+  BRIG_COMPARE_SLTU = 23,
+  BRIG_COMPARE_SLEU = 24,
+  BRIG_COMPARE_SNUM = 25,
+  BRIG_COMPARE_SNAN = 26,
+  BRIG_COMPARE_SGTU = 27
 };
 
-// PRM 19.3.2
-struct BrigSymbolCommon {
-  BrigcOffset32_t c_code;
-  BrigStorageClass32_t storageClass;
-  BrigAttribute16_t attribute;
+typedef uint16_t BrigControlDirective16_t;
+enum BrigControlDirective {
+  BRIG_CONTROL_NONE = 0,
+  BRIG_CONTROL_ENABLEBREAKEXCEPTIONS = 1,
+  BRIG_CONTROL_ENABLEDETECTEXCEPTIONS = 2,
+  BRIG_CONTROL_MAXDYNAMICGROUPSIZE = 3,
+  BRIG_CONTROL_MAXFLATGRIDSIZE = 4,
+  BRIG_CONTROL_MAXFLATWORKGROUPSIZE = 5,
+  BRIG_CONTROL_REQUESTEDWORKGROUPSPERCU = 6,
+  BRIG_CONTROL_REQUIREDDIM = 7,
+  BRIG_CONTROL_REQUIREDGRIDSIZE = 8,
+  BRIG_CONTROL_REQUIREDWORKGROUPSIZE = 9,
+  BRIG_CONTROL_REQUIRENOPARTIALWORKGROUPS = 10
+};
+
+typedef uint8_t BrigExecutableModifier8_t;
+enum BrigExecuteableModifierMask {
+  BRIG_EXECUTABLE_LINKAGE = 3,
+  BRIG_EXECUTABLE_DECLARATION = 4
+};
+
+typedef uint8_t BrigImageFormat8_t;
+enum BrigImageFormat {
+  BRIG_FORMAT_SNORM_INT8 = 0,
+  BRIG_FORMAT_SNORM_INT16 = 1,
+  BRIG_FORMAT_UNORM_INT8 = 2,
+  BRIG_FORMAT_UNORM_INT16 = 3,
+  BRIG_FORMAT_UNORM_SHORT_565 = 4,
+  BRIG_FORMAT_UNORM_SHORT_555 = 5,
+  BRIG_FORMAT_UNORM_SHORT_101010 = 6,
+  BRIG_FORMAT_SIGNED_INT8 = 7,
+  BRIG_FORMAT_SIGNED_INT16 = 8,
+  BRIG_FORMAT_SIGNED_INT32 = 9,
+  BRIG_FORMAT_UNSIGNED_INT8 = 10,
+  BRIG_FORMAT_UNSIGNED_INT16 = 11,
+  BRIG_FORMAT_UNSIGNED_INT32 = 12,
+  BRIG_FORMAT_HALF_FLOAT = 13,
+  BRIG_FORMAT_FLOAT = 14,
+  BRIG_FORMAT_UNORM_INT24 = 15
+};
+
+typedef uint8_t BrigImageGeometry8_t;
+enum BrigImageGeometry {
+  BRIG_GEOMETRY_1D = 0,
+  BRIG_GEOMETRY_2D = 1,
+  BRIG_GEOMETRY_3D = 2,
+  BRIG_GEOMETRY_1DA = 3,
+  BRIG_GEOMETRY_1DB = 4,
+  BRIG_GEOMETRY_2DA = 5
+};
+
+typedef uint8_t BrigImageOrder8_t;
+enum BrigImageOrder {
+  BRIG_ORDER_R = 0,
+  BRIG_ORDER_A = 1,
+  BRIG_ORDER_RX = 2,
+  BRIG_ORDER_RG = 3,
+  BRIG_ORDER_RGX = 4,
+  BRIG_ORDER_RA = 5,
+  BRIG_ORDER_RGB = 6,
+  BRIG_ORDER_RGBA = 7,
+  BRIG_ORDER_RGBX = 8,
+  BRIG_ORDER_BGRA = 9,
+  BRIG_ORDER_ARGB = 10,
+  BRIG_ORDER_INTENSITY = 11,
+  BRIG_ORDER_LUMINANCE = 12,
+  BRIG_ORDER_SRGB = 13,
+  BRIG_ORDER_SRGBX = 14,
+  BRIG_ORDER_SRGBA = 15,
+  BRIG_ORDER_SBGRA = 16
+};
+
+typedef uint8_t BrigLinkage8_t;
+enum BrigLinkage {
+  BRIG_LINKAGE_NONE = 0,
+  BRIG_LINKAGE_STATIC = 1,
+  BRIG_LINKAGE_EXTERN = 2
+};
+
+typedef uint8_t BrigMachineModel8_t;
+enum BrigMachineModel {
+  BRIG_MACHINE_SMALL = 0,
+  BRIG_MACHINE_LARGE = 1
+};
+
+typedef uint8_t BrigMemoryFence8_t;
+enum BrigMemoryFence {
+  BRIG_FENCE_NONE = 0,
+  BRIG_FENCE_GROUP = 1,
+  BRIG_FENCE_GLOBAL = 2,
+  BRIG_FENCE_BOTH = 3,
+  BRIG_FENCE_PARTIAL = 4,
+  BRIG_FENCE_PARTIAL_BOTH = 5
+};
+
+typedef uint16_t BrigMemoryModifier8_t;
+enum BrigMemoryModifierMask {
+  BRIG_MEMORY_SEMANTIC = 15,
+  BRIG_MEMORY_ALIGNED = 16
+};
+
+typedef uint8_t BrigMemorySemantic8_t;
+enum BrigMemorySemantic {
+  BRIG_SEMANTIC_NONE = 0,
+  BRIG_SEMANTIC_REGULAR = 1,
+  BRIG_SEMANTIC_ACQUIRE = 2,
+  BRIG_SEMANTIC_RELEASE = 3,
+  BRIG_SEMANTIC_ACQUIRE_RELEASE = 4,
+  BRIG_SEMANTIC_PARTIAL_ACQUIRE = 5,
+  BRIG_SEMANTIC_PARTIAL_RELEASE = 6,
+  BRIG_SEMANTIC_PARTIAL_ACQUIRE_RELEASE = 7
+};
+
+typedef uint16_t BrigOpcode16_t;
+enum BrigOpcode {
+  BRIG_OPCODE_NOP = 0,
+  BRIG_OPCODE_ABS = 1,
+  BRIG_OPCODE_ADD = 2,
+  BRIG_OPCODE_BORROW = 3,
+  BRIG_OPCODE_CARRY = 4,
+  BRIG_OPCODE_CEIL = 5,
+  BRIG_OPCODE_COPYSIGN = 6,
+  BRIG_OPCODE_DIV = 7,
+  BRIG_OPCODE_FLOOR = 8,
+  BRIG_OPCODE_FMA = 9,
+  BRIG_OPCODE_FRACT = 10,
+  BRIG_OPCODE_MAD = 11,
+  BRIG_OPCODE_MAX = 12,
+  BRIG_OPCODE_MIN = 13,
+  BRIG_OPCODE_MUL = 14,
+  BRIG_OPCODE_MULHI = 15,
+  BRIG_OPCODE_NEG = 16,
+  BRIG_OPCODE_REM = 17,
+  BRIG_OPCODE_RINT = 18,
+  BRIG_OPCODE_SQRT = 19,
+  BRIG_OPCODE_SUB = 20,
+  BRIG_OPCODE_TRUNC = 21,
+  BRIG_OPCODE_MAD24 = 22,
+  BRIG_OPCODE_MAD24HI = 23,
+  BRIG_OPCODE_MUL24 = 24,
+  BRIG_OPCODE_MUL24HI = 25,
+  BRIG_OPCODE_SHL = 26,
+  BRIG_OPCODE_SHR = 27,
+  BRIG_OPCODE_AND = 28,
+  BRIG_OPCODE_NOT = 29,
+  BRIG_OPCODE_OR = 30,
+  BRIG_OPCODE_POPCOUNT = 31,
+  BRIG_OPCODE_XOR = 32,
+  BRIG_OPCODE_BITEXTRACT = 33,
+  BRIG_OPCODE_BITINSERT = 34,
+  BRIG_OPCODE_BITMASK = 35,
+  BRIG_OPCODE_BITREV = 36,
+  BRIG_OPCODE_BITSELECT = 37,
+  BRIG_OPCODE_FIRSTBIT = 38,
+  BRIG_OPCODE_LASTBIT = 39,
+  BRIG_OPCODE_COMBINE = 40,
+  BRIG_OPCODE_EXPAND = 41,
+  BRIG_OPCODE_LDA = 42,
+  BRIG_OPCODE_LDC = 43,
+  BRIG_OPCODE_MOV = 44,
+  BRIG_OPCODE_SHUFFLE = 45,
+  BRIG_OPCODE_UNPACKHI = 46,
+  BRIG_OPCODE_UNPACKLO = 47,
+  BRIG_OPCODE_PACK = 48,
+  BRIG_OPCODE_UNPACK = 49,
+  BRIG_OPCODE_CMOV = 50,
+  BRIG_OPCODE_CLASS = 51,
+  BRIG_OPCODE_NCOS = 52,
+  BRIG_OPCODE_NEXP2 = 53,
+  BRIG_OPCODE_NFMA = 54,
+  BRIG_OPCODE_NLOG2 = 55,
+  BRIG_OPCODE_NRCP = 56,
+  BRIG_OPCODE_NRSQRT = 57,
+  BRIG_OPCODE_NSIN = 58,
+  BRIG_OPCODE_NSQRT = 59,
+  BRIG_OPCODE_BITALIGN = 60,
+  BRIG_OPCODE_BYTEALIGN = 61,
+  BRIG_OPCODE_PACKCVT = 62,
+  BRIG_OPCODE_UNPACKCVT = 63,
+  BRIG_OPCODE_LERP = 64,
+  BRIG_OPCODE_SAD = 65,
+  BRIG_OPCODE_SADHI = 66,
+  BRIG_OPCODE_SEGMENTP = 67,
+  BRIG_OPCODE_FTOS = 68,
+  BRIG_OPCODE_STOF = 69,
+  BRIG_OPCODE_CMP = 70,
+  BRIG_OPCODE_CVT = 71,
+  BRIG_OPCODE_LD = 72,
+  BRIG_OPCODE_ST = 73,
+  BRIG_OPCODE_ATOMIC = 74,
+  BRIG_OPCODE_ATOMICNORET = 75,
+  BRIG_OPCODE_RDIMAGE = 76,
+  BRIG_OPCODE_LDIMAGE = 77,
+  BRIG_OPCODE_STIMAGE = 78,
+  BRIG_OPCODE_ATOMICIMAGE = 79,
+  BRIG_OPCODE_ATOMICIMAGENORET = 80,
+  BRIG_OPCODE_QUERYIMAGEARRAY = 81,
+  BRIG_OPCODE_QUERYIMAGEDEPTH = 82,
+  BRIG_OPCODE_QUERYIMAGEFORMAT = 83,
+  BRIG_OPCODE_QUERYIMAGEHEIGHT = 84,
+  BRIG_OPCODE_QUERYIMAGEORDER = 85,
+  BRIG_OPCODE_QUERYIMAGEWIDTH = 86,
+  BRIG_OPCODE_QUERYSAMPLERCOORD = 87,
+  BRIG_OPCODE_QUERYSAMPLERFILTER = 88,
+  BRIG_OPCODE_CBR = 89,
+  BRIG_OPCODE_BRN = 90,
+  BRIG_OPCODE_BARRIER = 91,
+  BRIG_OPCODE_ARRIVEFBAR = 92,
+  BRIG_OPCODE_INITFBAR = 93,
+  BRIG_OPCODE_JOINFBAR = 94,
+  BRIG_OPCODE_LEAVEFBAR = 95,
+  BRIG_OPCODE_RELEASEFBAR = 96,
+  BRIG_OPCODE_WAITFBAR = 97,
+  BRIG_OPCODE_LDF = 98,
+  BRIG_OPCODE_SYNC = 99,
+  BRIG_OPCODE_COUNTLANE = 100,
+  BRIG_OPCODE_COUNTUPLANE = 101,
+  BRIG_OPCODE_MASKLANE = 102,
+  BRIG_OPCODE_SENDLANE = 103,
+  BRIG_OPCODE_RECEIVELANE = 104,
+  BRIG_OPCODE_CALL = 105,
+  BRIG_OPCODE_RET = 106,
+  BRIG_OPCODE_SYSCALL = 107,
+  BRIG_OPCODE_ALLOCA = 108,
+  BRIG_OPCODE_CLEARDETECTEXCEPT = 109,
+  BRIG_OPCODE_CLOCK = 110,
+  BRIG_OPCODE_CUID = 111,
+  BRIG_OPCODE_CURRENTWORKGROUPSIZE = 112,
+  BRIG_OPCODE_DEBUGTRAP = 113,
+  BRIG_OPCODE_DIM = 114,
+  BRIG_OPCODE_DISPATCHID = 115,
+  BRIG_OPCODE_DISPATCHPTR = 116,
+  BRIG_OPCODE_GETDETECTEXCEPT = 117,
+  BRIG_OPCODE_GRIDGROUPS = 118,
+  BRIG_OPCODE_GRIDSIZE = 119,
+  BRIG_OPCODE_LANEID = 120,
+  BRIG_OPCODE_MAXCUID = 121,
+  BRIG_OPCODE_MAXWAVEID = 122,
+  BRIG_OPCODE_NULLPTR = 123,
+  BRIG_OPCODE_QID = 124,
+  BRIG_OPCODE_QPTR = 125,
+  BRIG_OPCODE_SETDETECTEXCEPT = 126,
+  BRIG_OPCODE_WAVEID = 127,
+  BRIG_OPCODE_WORKGROUPID = 128,
+  BRIG_OPCODE_WORKGROUPSIZE = 129,
+  BRIG_OPCODE_WORKITEMABSID = 130,
+  BRIG_OPCODE_WORKITEMFLATABSID = 131,
+  BRIG_OPCODE_WORKITEMFLATID = 132,
+  BRIG_OPCODE_WORKITEMID = 133,
+  BRIG_OPCODE_INVALID
+};
+
+typedef uint8_t BrigPack8_t;
+enum BrigPack {
+  BRIG_PACK_NONE = 0,
+  BRIG_PACK_PP = 1,
+  BRIG_PACK_PS = 2,
+  BRIG_PACK_SP = 3,
+  BRIG_PACK_SS = 4,
+  BRIG_PACK_S = 5,
+  BRIG_PACK_P = 6,
+  BRIG_PACK_PPSAT = 7,
+  BRIG_PACK_PSSAT = 8,
+  BRIG_PACK_SPSAT = 9,
+  BRIG_PACK_SSSAT = 10,
+  BRIG_PACK_SSAT = 11,
+  BRIG_PACK_PSAT = 12
+};
+
+typedef uint8_t BrigProfile8_t;
+enum BrigProfile {
+  BRIG_PROFILE_BASE = 0,
+  BRIG_PROFILE_FULL = 1
+};
+
+typedef uint8_t BrigRound8_t;
+enum BrigRound {
+  BRIG_ROUND_NONE = 0,
+  BRIG_ROUND_FLOAT_NEAR_EVEN = 1,
+  BRIG_ROUND_FLOAT_ZERO = 2,
+  BRIG_ROUND_FLOAT_PLUS_INFINITY = 3,
+  BRIG_ROUND_FLOAT_MINUS_INFINITY = 4,
+  BRIG_ROUND_INTEGER_NEAR_EVEN = 5,
+  BRIG_ROUND_INTEGER_ZERO = 6,
+  BRIG_ROUND_INTEGER_PLUS_INFINITY = 7,
+  BRIG_ROUND_INTEGER_MINUS_INFINITY = 8,
+  BRIG_ROUND_INTEGER_NEAR_EVEN_SAT = 9,
+  BRIG_ROUND_INTEGER_ZERO_SAT = 10,
+  BRIG_ROUND_INTEGER_PLUS_INFINITY_SAT = 11,
+  BRIG_ROUND_INTEGER_MINUS_INFINITY_SAT = 12
+};
+
+typedef uint8_t BrigSamplerBoundaryMode8_t;
+enum BrigSamplerBoundaryMode {
+  BRIG_BOUNDARY_CLAMP = 0,
+  BRIG_BOUNDARY_WRAP = 1,
+  BRIG_BOUNDARY_MIRROR = 2,
+  BRIG_BOUNDARY_MIRRORONCE = 3,
+  BRIG_BOUNDARY_BORDER = 4
+};
+
+enum BrigSamplerCoord {
+  BRIG_COORD_NORMALIZED = 0,
+  BRIG_COORD_UNNORMALIZED = 1
+};
+
+enum BrigSamplerFilter {
+  BRIG_FILTER_NEAREST = 0,
+  BRIG_FILTER_LINEAR = 1
+};
+
+typedef uint8_t BrigSamplerModifier8_t;
+enum BrigSamplerModifierMask {
+  BRIG_SAMPLER_FILTER = 63,
+  BRIG_SAMPLER_COORD = 64,
+  BRIG_SAMPLER_COORD_UNNORMALIZED = 64
+};
+
+typedef uint8_t BrigSegment8_t;
+enum BrigSegment {
+  BRIG_SEGMENT_NONE = 0,
+  BRIG_SEGMENT_FLAT = 1,
+  BRIG_SEGMENT_GLOBAL = 2,
+  BRIG_SEGMENT_READONLY = 3,
+  BRIG_SEGMENT_KERNARG = 4,
+  BRIG_SEGMENT_GROUP = 5,
+  BRIG_SEGMENT_PRIVATE = 6,
+  BRIG_SEGMENT_SPILL = 7,
+  BRIG_SEGMENT_ARG = 8,
+  BRIG_SEGMENT_INVALID
+};
+
+typedef uint8_t BrigSymbolModifier8_t;
+enum BrigSymbolModifierMask {
+  BRIG_SYMBOL_LINKAGE = 3,
+  BRIG_SYMBOL_DECLARATION = 4,
+  BRIG_SYMBOL_CONST = 8,
+  BRIG_SYMBOL_ARRAY = 16,
+  BRIG_SYMBOL_FLEX_ARRAY = 32
+};
+
+enum {
+  BRIG_TYPE_PACK_SHIFT = 5,
+  BRIG_TYPE_BASE_MASK = (1 << BRIG_TYPE_PACK_SHIFT) - 1,
+  BRIG_TYPE_PACK_MASK = 3 << BRIG_TYPE_PACK_SHIFT,
+  BRIG_TYPE_PACK_NONE = 0 << BRIG_TYPE_PACK_SHIFT,
+  BRIG_TYPE_PACK_32 = 1 << BRIG_TYPE_PACK_SHIFT,
+  BRIG_TYPE_PACK_64 = 2 << BRIG_TYPE_PACK_SHIFT,
+  BRIG_TYPE_PACK_128 = 3 << BRIG_TYPE_PACK_SHIFT
+};
+
+typedef uint16_t BrigType16_t;
+enum BrigType {
+  BRIG_TYPE_NONE = 0,
+  BRIG_TYPE_U8 = 1,
+  BRIG_TYPE_U16 = 2,
+  BRIG_TYPE_U32 = 3,
+  BRIG_TYPE_U64 = 4,
+  BRIG_TYPE_S8 = 5,
+  BRIG_TYPE_S16 = 6,
+  BRIG_TYPE_S32 = 7,
+  BRIG_TYPE_S64 = 8,
+  BRIG_TYPE_F16 = 9,
+  BRIG_TYPE_F32 = 10,
+  BRIG_TYPE_F64 = 11,
+  BRIG_TYPE_B1 = 12,
+  BRIG_TYPE_B8 = 13,
+  BRIG_TYPE_B16 = 14,
+  BRIG_TYPE_B32 = 15,
+  BRIG_TYPE_B64 = 16,
+  BRIG_TYPE_B128 = 17,
+  BRIG_TYPE_SAMP = 18,
+  BRIG_TYPE_ROIMG = 19,
+  BRIG_TYPE_RWIMG = 20,
+  BRIG_TYPE_FBAR = 21,
+  BRIG_TYPE_U8X4 = BRIG_TYPE_U8 | BRIG_TYPE_PACK_32,
+  BRIG_TYPE_U8X8 = BRIG_TYPE_U8 | BRIG_TYPE_PACK_64,
+  BRIG_TYPE_U8X16 = BRIG_TYPE_U8 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_U16X2 = BRIG_TYPE_U16 | BRIG_TYPE_PACK_32,
+  BRIG_TYPE_U16X4 = BRIG_TYPE_U16 | BRIG_TYPE_PACK_64,
+  BRIG_TYPE_U16X8 = BRIG_TYPE_U16 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_U32X2 = BRIG_TYPE_U32 | BRIG_TYPE_PACK_64,
+  BRIG_TYPE_U32X4 = BRIG_TYPE_U32 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_U64X2 = BRIG_TYPE_U64 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_S8X4 = BRIG_TYPE_S8 | BRIG_TYPE_PACK_32,
+  BRIG_TYPE_S8X8 = BRIG_TYPE_S8 | BRIG_TYPE_PACK_64,
+  BRIG_TYPE_S8X16 = BRIG_TYPE_S8 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_S16X2 = BRIG_TYPE_S16 | BRIG_TYPE_PACK_32,
+  BRIG_TYPE_S16X4 = BRIG_TYPE_S16 | BRIG_TYPE_PACK_64,
+  BRIG_TYPE_S16X8 = BRIG_TYPE_S16 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_S32X2 = BRIG_TYPE_S32 | BRIG_TYPE_PACK_64,
+  BRIG_TYPE_S32X4 = BRIG_TYPE_S32 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_S64X2 = BRIG_TYPE_S64 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_F16X2 = BRIG_TYPE_F16 | BRIG_TYPE_PACK_32,
+  BRIG_TYPE_F16X4 = BRIG_TYPE_F16 | BRIG_TYPE_PACK_64,
+  BRIG_TYPE_F16X8 = BRIG_TYPE_F16 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_F32X2 = BRIG_TYPE_F32 | BRIG_TYPE_PACK_64,
+  BRIG_TYPE_F32X4 = BRIG_TYPE_F32 | BRIG_TYPE_PACK_128,
+  BRIG_TYPE_F64X2 = BRIG_TYPE_F64 | BRIG_TYPE_PACK_128
+};
+
+typedef uint32_t BrigVersion32_t;
+enum BrigVersion {
+  BRIG_VERSION_HSAIL_MAJOR = 0,
+  BRIG_VERSION_HSAIL_MINOR = 97,
+  BRIG_VERSION_BRIG_MAJOR = 2,
+  BRIG_VERSION_BRIG_MINOR = 0
+};
+
+typedef uint8_t BrigWidth8_t;
+enum BrigWidth {
+  BRIG_WIDTH_NONE = 0,
+  BRIG_WIDTH_1 = 1,
+  BRIG_WIDTH_2 = 2,
+  BRIG_WIDTH_4 = 3,
+  BRIG_WIDTH_8 = 4,
+  BRIG_WIDTH_16 = 5,
+  BRIG_WIDTH_32 = 6,
+  BRIG_WIDTH_64 = 7,
+  BRIG_WIDTH_128 = 8,
+  BRIG_WIDTH_256 = 9,
+  BRIG_WIDTH_512 = 10,
+  BRIG_WIDTH_1024 = 11,
+  BRIG_WIDTH_2048 = 12,
+  BRIG_WIDTH_4096 = 13,
+  BRIG_WIDTH_8192 = 14,
+  BRIG_WIDTH_16364 = 15,
+  BRIG_WIDTH_32768 = 16,
+  BRIG_WIDTH_65536 = 17,
+  BRIG_WIDTH_131072 = 18,
+  BRIG_WIDTH_262144 = 19,
+  BRIG_WIDTH_524288 = 20,
+  BRIG_WIDTH_1048576 = 21,
+  BRIG_WIDTH_2097152 = 22,
+  BRIG_WIDTH_4194304 = 23,
+  BRIG_WIDTH_8388608 = 24,
+  BRIG_WIDTH_16777216 = 25,
+  BRIG_WIDTH_33554432 = 26,
+  BRIG_WIDTH_67108864 = 27,
+  BRIG_WIDTH_134217728 = 28,
+  BRIG_WIDTH_268435456 = 29,
+  BRIG_WIDTH_536870912 = 30,
+  BRIG_WIDTH_1073741824 = 31,
+  BRIG_WIDTH_2147483648 = 32,
+  BRIG_WIDTH_WAVESIZE = 33,
+  BRIG_WIDTH_ALL = 34
+};
+
+struct BrigSectionHeader {
+  uint32_t size;
+};
+
+struct BrigString {
+  uint32_t byteCount;
+  uint8_t bytes[1];
+  enum { FlexSize = sizeof(bytes) };
+};
+
+struct BrigBlockEnd {
+  enum { DirKind = BRIG_DIRECTIVE_BLOCK_END };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+};
+
+struct BrigBlockNumeric {
+  enum { DirKind = BRIG_DIRECTIVE_BLOCK_NUMERIC };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigType16_t type;
   uint16_t reserved;
-  uint32_t symbolModifier;
-  uint32_t dim;
-  BrigsOffset32_t s_name;
-  BrigDataType16_t type;
-  uint16_t align;
+  uint32_t elementCount;
+  BrigStringOffset32_t data;
 };
 
-// PRM 19.5.22
-enum BrigSyncFlags {
-  BrigGroupLevel = 1,
-  BrigGlobalLevel = 2,
-  BrigPartialLevel = 4
+struct BrigBlockStart {
+  enum { DirKind = BRIG_DIRECTIVE_BLOCK_START };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
 };
 
-// Directive structures
+struct BrigBlockString {
+  enum { DirKind = BRIG_DIRECTIVE_BLOCK_STRING };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigStringOffset32_t string;
+};
 
-// PRM 19.8.3
 struct BrigDirectiveBase {
   uint16_t size;
-  uint16_t kind;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
 };
 
-// PRM 19.8.4
+struct BrigDirectiveCallableBase {
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  uint16_t inArgCount;
+  uint16_t outArgCount;
+};
+
+struct BrigDirectiveArgScope {
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+};
+
+struct BrigDirectiveArgScopeStart {
+  enum { DirKind = BRIG_DIRECTIVE_ARG_SCOPE_START };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+};
+
+struct BrigDirectiveArgScopeEnd {
+  enum { DirKind = BRIG_DIRECTIVE_ARG_SCOPE_END };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+};
+
 struct BrigDirectiveComment {
-  enum { DirKind = BrigEDirectiveComment };
+  enum { DirKind = BRIG_DIRECTIVE_COMMENT };
   uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
 };
 
-// PRM 19.8.5
 struct BrigDirectiveControl {
-  enum { DirKind = BrigEDirectiveControl };
+  enum { DirKind = BRIG_DIRECTIVE_CONTROL };
   uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigControlType32_t controlType;
-  uint32_t values[3];
-};
-
-// PRM 19.8.6
-struct BrigDirectiveExtension {
-  enum { DirKind = BrigEDirectiveExtension };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
-};
-
-// PRM 19.8.7
-struct BrigDirectiveFile {
-  enum { DirKind = BrigEDirectiveFile };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  uint32_t fileid;
-  BrigsOffset32_t s_filename;
-};
-
-
-// PRM 19.8.8
-struct BrigDirectiveFunction {
-  enum { DirKind = BrigEDirectiveFunction };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
-  uint32_t inParamCount;
-  BrigdOffset32_t d_firstScopedDirective;
-  uint32_t operationCount;
-  BrigdOffset32_t d_nextDirective;
-  BrigAttribute16_t attribute;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigControlDirective16_t control;
+  BrigType16_t type;
   uint16_t reserved;
-  uint32_t outParamCount;
-  BrigdOffset32_t d_firstInParam;
+  uint16_t valueCount;
+  BrigOperandOffset32_t values[1];
+  enum { FlexSize = sizeof(values) };
 };
 
-// PRM 19.8.9
-struct BrigDirectiveImage {
-  enum { DirKind = BrigEDirectiveImage };
+struct BrigDirectiveExecutable {
+  enum { DirKind = BrigDirectiveKinds16_t(~0) };
   uint16_t size;
-  uint16_t kind;
-  BrigSymbolCommon s;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  uint16_t inArgCount;
+  uint16_t outArgCount;
+  BrigDirectiveOffset32_t firstInArg;
+  BrigDirectiveOffset32_t firstScopedDirective;
+  BrigDirectiveOffset32_t nextTopLevelDirective;
+  uint32_t instCount;
+  BrigExecutableModifier8_t modifier;
+  uint8_t reserved[3];
+};
+
+struct BrigDirectiveKernel {
+  enum { DirKind = BRIG_DIRECTIVE_KERNEL };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  uint16_t inArgCount;
+  uint16_t outArgCount;
+  BrigDirectiveOffset32_t firstInArg;
+  BrigDirectiveOffset32_t firstScopedDirective;
+  BrigDirectiveOffset32_t nextTopLevelDirective;
+  uint32_t instCount;
+  BrigExecutableModifier8_t modifier;
+  uint8_t reserved[3];
+};
+
+struct BrigDirectiveFunction {
+  enum { DirKind = BRIG_DIRECTIVE_FUNCTION };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  uint16_t inArgCount;
+  uint16_t outArgCount;
+  BrigDirectiveOffset32_t firstInArg;
+  BrigDirectiveOffset32_t firstScopedDirective;
+  BrigDirectiveOffset32_t nextTopLevelDirective;
+  uint32_t instCount;
+  BrigExecutableModifier8_t modifier;
+  uint8_t reserved[3];
+};
+
+struct BrigDirectiveExtension {
+  enum { DirKind = BRIG_DIRECTIVE_EXTENSION };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+};
+
+struct BrigDirectiveFbarrier {
+  enum { DirKind = BRIG_DIRECTIVE_FBARRIER };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+};
+
+struct BrigDirectiveFile {
+  enum { DirKind = BRIG_DIRECTIVE_FILE };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  uint32_t fileid;
+  BrigStringOffset32_t filename;
+};
+
+struct BrigDirectiveImageInit {
+  enum { DirKind = BRIG_DIRECTIVE_IMAGE_INIT };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
   uint32_t width;
   uint32_t height;
   uint32_t depth;
   uint32_t array;
-  BrigImageOrder32_t order;
-  BrigImageFormat32_t format;
-};
-
-// PRM 19.8.10
-struct BrigDirectiveInit {
-  enum { DirKind = BrigEDirectiveInit };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  uint32_t elementCount;
-  BrigDataType16_t type;
+  BrigImageOrder8_t order;
+  BrigImageFormat8_t format;
   uint16_t reserved;
-
-  union {
-    uint8_t u8[8];
-    uint16_t u16[4];
-    uint32_t u32[2];
-    uint64_t u64[1];
-  } initializationData;
 };
 
-
-// PRM 19.8.11
-struct BrigDirectiveKernel {
-  enum { DirKind = BrigEDirectiveKernel };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
-  uint32_t inParamCount;
-  BrigdOffset32_t d_firstScopedDirective;
-  uint32_t operationCount;
-  BrigdOffset32_t d_nextDirective;
-  BrigAttribute16_t attribute;
-  uint16_t reserved;
-  uint32_t outParamCount;
-  BrigdOffset32_t d_firstInParam;
-};
-
-struct BrigDirectiveMethod {
-  enum { DirKind = ~0 };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
-  uint32_t inParamCount;
-  BrigdOffset32_t d_firstScopedDirective;
-  uint32_t operationCount;
-  BrigdOffset32_t d_nextDirective;
-  BrigAttribute16_t attribute;
-  uint16_t reserved;
-  uint32_t outParamCount;
-  BrigdOffset32_t d_firstInParam;
-};
-
-// PRM 19.8.12
-// BrigDirectiveLabel
-// BrigDirectiveLabel declares a label.
 struct BrigDirectiveLabel {
-  enum { DirKind = BrigEDirectiveLabel };
+  enum { DirKind = BRIG_DIRECTIVE_LABEL };
   uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
 };
 
-// PRM 19.8.13
+struct BrigDirectiveLabelTargets {
+  enum { DirKind = BRIG_DIRECTIVE_LABEL_TARGETS };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigDirectiveOffset32_t label;
+  uint16_t labelCount;
+  uint16_t reserved;
+  BrigDirectiveOffset32_t labels[1];
+};
+
 struct BrigDirectiveLabelInit {
-  enum { DirKind = BrigEDirectiveLabelInit };
+  enum { DirKind = BRIG_DIRECTIVE_LABEL_INIT };
   uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  uint32_t elementCount;
-  BrigsOffset32_t s_name;
-  BrigdOffset32_t d_labels[1];
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigDirectiveOffset32_t label;
+  uint16_t labelCount;
+  uint16_t reserved;
+  BrigDirectiveOffset32_t labels[1];
+  enum { FlexSize = sizeof(labels) };
 };
 
-// PRM 19.8.14
-struct BrigDirectiveLabelList {
-  enum { DirKind = BrigEDirectiveLabelList };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigdOffset32_t label;
-  uint32_t elementCount;
-  BrigdOffset32_t d_labels[1];
-};
-
-// PRM 19.8.15
 struct BrigDirectiveLoc {
-  enum { DirKind = BrigEDirectiveLoc };
+  enum { DirKind = BRIG_DIRECTIVE_LOC };
   uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  uint32_t sourceFile;
-  uint32_t sourceLine;
-  uint32_t sourceColumn;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  uint32_t fileid;
+  uint32_t line;
+  uint32_t column;
 };
 
-// PRM 19.8.16
-// BrigDirectivePad
-// BrigDirectivePad is used to pad out the
-// .directives stream to ensure alignment.
-struct BrigDirectivePad {
-  enum { DirKind = BrigEDirectivePad };
-  uint16_t size;
-  uint16_t kind;
-};
-
-// PRM 19.8.17
 struct BrigDirectivePragma {
-  enum { DirKind = BrigEDirectivePragma };
+  enum { DirKind = BRIG_DIRECTIVE_PRAGMA };
   uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
 };
 
-// PRM 19.8.18
+struct BrigDirectiveSamplerInit {
+  enum { DirKind = BRIG_DIRECTIVE_SAMPLER_INIT };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigSamplerModifier8_t modifier;
+  BrigSamplerBoundaryMode8_t boundaryU;
+  BrigSamplerBoundaryMode8_t boundaryV;
+  BrigSamplerBoundaryMode8_t boundaryW;
+};
+
 struct BrigDirectiveSignature {
-  enum { DirKind = BrigEDirectiveSignature };
+  enum { DirKind = BRIG_DIRECTIVE_SIGNATURE };
   uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
-  uint32_t outCount;
-  uint32_t inCount;
-  struct BrigProtoType {
-    BrigDataType16_t type;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  uint16_t inArgCount;
+  uint16_t outArgCount;
+  struct {
+    BrigType16_t type;
     uint8_t align;
-    uint8_t hasDim;
-    uint32_t dim;
-  } types[1];
+    BrigSymbolModifier8_t modifier;
+    uint32_t dimLo;
+    uint32_t dimHi;
+  } args[1];
+  enum { FlexSize = sizeof(args) };
 };
 
-// PRM 19.8.19
-struct BrigDirectiveSampler {
-  enum { DirKind = BrigEDirectiveSampler };
-  uint16_t size;
-  uint16_t kind;
-  BrigSymbolCommon s;
-  uint8_t valid: 1;
-  uint8_t normalized: 1;
-  uint8_t filter:6;
-  uint8_t boundaryU;
-  uint8_t boundaryV;
-  uint8_t boundaryW;
-  uint32_t reserved;
-};
-
-// PRM 19.8.20
-// BrigDirectiveScope
-// BrigDirectiveScope is used to start or end a scope.
-struct BrigDirectiveScope {
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-};
-
-struct BrigDirectiveArgStart {
-  enum { DirKind = BrigEDirectiveArgStart };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-};
-
-struct BrigDirectiveArgEnd {
-  enum { DirKind = BrigEDirectiveArgEnd };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-};
-
-// 19.8.21
-// The documentation is in error. The BrigDirectiveSymbol needs size and kind
-// fields to be parsable. Otherwise, there is no way to tell if the second field
-// is a uint16_t kind or the second 16-bit word of BrigSymbolCommon's c_code
-// field. This view is supported by Table 20-3 in the HSA PRM.
 struct BrigDirectiveSymbol {
-  enum { DirKind = BrigEDirectiveSymbol };
   uint16_t size;
-  uint16_t kind;
-  BrigSymbolCommon s;
-  BrigdOffset32_t d_init;
-  uint32_t reserved;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  BrigDirectiveOffset32_t init;
+  BrigType16_t type;
+  BrigSegment8_t segment;
+  uint8_t align;
+  uint32_t dimLo;
+  uint32_t dimHi;
+  BrigSymbolModifier8_t modifier;
+  uint8_t reserved[3];
 };
 
-struct BrigDirectiveSymbolCommon {
+struct BrigDirectiveVariable {
+  enum { DirKind = BRIG_DIRECTIVE_VARIABLE };
   uint16_t size;
-  uint16_t kind;
-  BrigSymbolCommon s;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  BrigDirectiveOffset32_t init;
+  BrigType16_t type;
+  BrigSegment8_t segment;
+  uint8_t align;
+  uint32_t dimLo;
+  uint32_t dimHi;
+  BrigSymbolModifier8_t modifier;
+  uint8_t reserved[3];
 };
 
-// 19.8.22
+struct BrigDirectiveImage {
+  enum { DirKind = BRIG_DIRECTIVE_IMAGE };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  BrigDirectiveOffset32_t init;
+  BrigType16_t type;
+  BrigSegment8_t segment;
+  uint8_t align;
+  uint32_t dimLo;
+  uint32_t dimHi;
+  BrigSymbolModifier8_t modifier;
+  uint8_t reserved[3];
+};
+
+struct BrigDirectiveSampler {
+  enum { DirKind = BRIG_DIRECTIVE_SAMPLER };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t name;
+  BrigDirectiveOffset32_t init;
+  BrigType16_t type;
+  BrigSegment8_t segment;
+  uint8_t align;
+  uint32_t dimLo;
+  uint32_t dimHi;
+  BrigSymbolModifier8_t modifier;
+  uint8_t reserved[3];
+};
+
+struct BrigDirectiveVariableInit {
+  enum { DirKind = BRIG_DIRECTIVE_VARIABLE_INIT };
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigStringOffset32_t data;
+  uint32_t elementCount;
+  BrigType16_t type;
+  uint16_t reserved;
+};
+
 struct BrigDirectiveVersion {
-    enum { DirKind = BrigEDirectiveVersion };
-    uint16_t size;
-    uint16_t kind;
-    BrigcOffset32_t c_code;
-    uint16_t major;
-    uint16_t minor;
-    BrigMachine16_t machine;
-    BrigProfile16_t profile;
-    uint32_t reserved;
-};
-
-// PRM 19.6.2
-struct BrigBlockEnd {
-  enum { DirKind = BrigEDirectiveBlockEnd };
+  enum { DirKind = BRIG_DIRECTIVE_VERSION };
   uint16_t size;
-  uint16_t kind;
-};
-
-// PRM 19.6.3
-// BrigBlockNumeric
-// BrigBlockNumeric is a variable-size list of numeric values.
-// All the values should have
-// the same type.
-// More than one BrigBlockNumeric can be
-// in a single block section.
-// This structure must be aligned to an 8-byte boundary
-// (because of the uint64_t field).
-struct BrigBlockNumeric {
-  enum { DirKind = BrigEDirectiveBlockNumeric };
-  uint16_t size;
-  uint16_t kind;
-  BrigDataType16_t type;
-  uint16_t elementCount;
-  union {
-    uint8_t u8[8];
-    uint16_t u16[4];
-    uint32_t u32[2];
-    uint64_t u64[1];
-  };
-};
-
-// PRM 19.6.4
-// BrigBlockStart
-// BrigBlockStart starts a block section.
-// It provides a name that can be used to separate information used by different
-// debuggers or runtimes.
-// More than one BrigBlockStart can have the same name.
-struct BrigBlockStart {
-  enum { DirKind = BrigEDirectiveBlockStart };
-  uint16_t size;
-  uint16_t kind;
-  BrigcOffset32_t c_code;
-  BrigsOffset32_t s_name;
-};
-
-// PRM 19.6.5
-struct BrigBlockString {
-  enum { DirKind = BrigEDirectiveBlockString };
-  uint16_t size;
-  uint16_t kind;
-  BrigsOffset32_t s_name;
-};
-
-// Code structures
-
-// 19.9.9
-struct BrigInstLdSt {
-  enum { InstKind = BrigEInstLdSt };
-  uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigStorageClass32_t storageClass;
-  BrigMemorySemantic32_t memorySemantic;
-  uint32_t equivClass;
+  BrigDirectiveKinds16_t kind;
+  BrigCodeOffset32_t code;
+  BrigVersion32_t hsailMajor;
+  BrigVersion32_t hsailMinor;
+  BrigVersion32_t brigMajor;
+  BrigVersion32_t brigMinor;
+  BrigProfile8_t profile;
+  BrigMachineModel8_t machineModel;
+  uint16_t reserved;
 };
 
 struct BrigInstBase {
-  enum { InstKind = BrigEInstBase };
+  enum { InstKind = BrigInstKinds16_t(~0) };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
 };
 
-// BrigInstMod
-// The BrigInstMod format is used for ALU operations with a modifier.
-struct BrigInstMod {
-  enum { InstKind = BrigEInstMod };
+struct BrigInstBasic {
+  enum { InstKind = BRIG_INST_BASIC };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigAluModifier aluModifier;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
 };
 
-// BrigInstBar
-// The BrigInstBar format is used for the barrier and sync operations.
-struct BrigInstBar {
-  enum { InstKind = BrigEInstBar };
+struct BrigInstAddr {
+  enum { InstKind = BRIG_INST_ADDR };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  uint32_t syncFlags;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigSegment8_t segment;
+  uint8_t reserved[3];
 };
 
-// BrigInstAtomic
-// The BrigInstAtomic format is used for atomic operations: atomicReturn and
-// atomicNoReturn.
 struct BrigInstAtomic {
-  enum { InstKind = BrigEInstAtomic };
+  enum { InstKind = BRIG_INST_ATOMIC };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigAtomicOperation32_t atomicOperation;
-  BrigStorageClass32_t storageClass;
-  BrigMemorySemantic32_t memorySemantic;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigSegment8_t segment;
+  BrigMemorySemantic8_t memorySemantic;
+  BrigAtomicOperation8_t atomicOperation;
+  uint8_t reserved;
 };
 
-// BrigInstAtomicImage
-// The BrigInstAtomicImage format is used for atomicNoReturn image operations.
 struct BrigInstAtomicImage {
-  enum { InstKind = BrigEInstAtomicImage };
+  enum { InstKind = BRIG_INST_ATOMIC_IMAGE };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigAtomicOperation32_t atomicOperation;
-  BrigStorageClass32_t storageClass;
-  BrigMemorySemantic32_t memorySemantic;
-  BrigGeom32_t geom;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigType16_t imageType;
+  BrigType16_t coordType;
+  BrigImageGeometry8_t geometry;
+  BrigAtomicOperation8_t atomicOperation;
+  uint16_t reserved;
 };
 
-// BrigInstCmp
-// The BrigInstCmp format is used for compare operations.
+struct BrigInstBar {
+  enum { InstKind = BRIG_INST_BAR };
+  uint16_t size;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigMemoryFence8_t memoryFence;
+  BrigWidth8_t width;
+  uint16_t reserved;
+};
+
+struct BrigInstBr {
+  enum { InstKind = BRIG_INST_BR };
+  uint16_t size;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigAluModifier16_t modifier;
+  BrigWidth8_t width;
+  uint8_t reserved;
+};
+
 struct BrigInstCmp {
-  enum { InstKind = BrigEInstCmp };
+  enum { InstKind = BRIG_INST_CMP };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigAluModifier aluModifier;
-  BrigCompareOperation32_t comparisonOperator;
-  BrigDataType16_t sourceType;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigType16_t sourceType;
+  BrigAluModifier16_t modifier;
+  BrigCompareOperation8_t compare;
+  BrigPack8_t pack;
   uint16_t reserved;
 };
 
-// BrigInstCvt
-// The BrigInstCvt format is used for convert operations.
 struct BrigInstCvt {
-  enum { InstKind = BrigEInstCvt };
+  enum { InstKind = BRIG_INST_CVT };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigAluModifier aluModifier;
-  BrigDataType16_t stype;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigType16_t sourceType;
+  BrigAluModifier16_t modifier;
+};
+
+struct BrigInstFbar {
+  enum { InstKind = BRIG_INST_FBAR };
+  uint16_t size;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigMemoryFence8_t memoryFence;
+  BrigWidth8_t width;
   uint16_t reserved;
 };
 
-// BrigInstImage
-// The BrigInstImage format is used for the load image and store image
-// operations.
 struct BrigInstImage {
-  enum { InstKind = BrigEInstImage };
+  enum { InstKind = BRIG_INST_IMAGE };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigGeom32_t geom;
-  BrigDataType16_t sourceType;
-  uint16_t reserved;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigType16_t imageType;
+  BrigType16_t coordType;
+  BrigImageGeometry8_t geometry;
+  uint8_t reserved[3];
 };
 
-// BrigInstMem
-// The BrigInstMem format is used for operations that take a space modifier.
 struct BrigInstMem {
-  enum { InstKind = BrigEInstMem };
+  enum { InstKind = BRIG_INST_MEM };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigStorageClass32_t storageClass;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigSegment8_t segment;
+  BrigMemoryModifier8_t modifier;
+  uint8_t equivClass;
+  BrigWidth8_t width;
 };
 
-struct BrigInstSegp {
-  enum { InstKind = BrigEInstSegp };
+struct BrigInstMod {
+  enum { InstKind = BRIG_INST_MOD };
   uint16_t size;
-  uint16_t kind;
-  BrigOpcode32_t opcode;
-  BrigDataType16_t type;
-  BrigPacking16_t packing;
-  BrigoOffset32_t o_operands[5];
-  BrigStorageClass32_t storageClass;
-  BrigDataType16_t sourceType;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigAluModifier16_t modifier;
+  BrigPack8_t pack;
+  uint8_t reserved;
+};
+
+struct BrigInstNone {
+  enum { InstKind = BRIG_INST_NONE };
+  uint16_t size;
+  BrigInstKinds16_t kind;
+};
+
+struct BrigInstSeg {
+  enum { InstKind = BRIG_INST_SEG };
+  uint16_t size;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigType16_t sourceType;
+  BrigSegment8_t segment;
+  uint8_t reserved;
+};
+
+struct BrigInstSourceType {
+  enum { InstKind = BRIG_INST_SOURCE_TYPE };
+  uint16_t size;
+  BrigInstKinds16_t kind;
+  BrigOpcode16_t opcode;
+  BrigType16_t type;
+  BrigOperandOffset32_t operands[5];
+  BrigType16_t sourceType;
   uint16_t reserved;
 };
 
 struct BrigOperandBase {
-  enum { OperKind = BrigEOperandBase };
   uint16_t size;
-  uint16_t kind;
+  BrigOperandKinds16_t kind;
 };
 
-// Operand structures
-// BrigOperandReg
-// BrigOperandReg is used for a register (c, s, d, or q).
-struct BrigOperandReg {
-  enum { OperKind = BrigEOperandReg };
-  uint16_t size;
-  uint16_t kind;
-  BrigDataType16_t type;
-  uint16_t reserved;
-  BrigsOffset32_t s_name;
-};
-
-// BrigOperandImmed
-// BrigOperandImmed is used for a numeric value.
-struct BrigOperandImmed {
-  enum { OperKind = BrigEOperandImmed };
-  uint16_t size;
-  uint16_t kind;
-  BrigDataType16_t type;
-  uint16_t reserved;
-  union {
-    uint32_t u;
-    float f;
-    double d;
-    uint64_t l[2];
-    uint16_t h;
-    uint8_t c;
-  } bits;
-};
-
-// BrigOperandAddress
-// BrigOperandAddress is used for [name].
-// In the .operands section, BrigOperandAddress must start
-// on an offset divisible by 4.
 struct BrigOperandAddress {
-  enum { OperKind = BrigEOperandAddress };
+  enum { OperKind = BRIG_OPERAND_ADDRESS };
   uint16_t size;
-  uint16_t kind;
-  BrigDataType16_t type;
+  BrigOperandKinds16_t kind;
+  BrigDirectiveOffset32_t symbol;
+  BrigStringOffset32_t reg;
+  uint32_t offsetLo;
+  uint32_t offsetHi;
+  BrigType16_t type;
   uint16_t reserved;
-  BrigdOffset32_t directive;
 };
 
-// BrigOperandLabelRef
-// BrigOperandLabelRef is used for a label.
-struct BrigOperandLabelRef {
-  enum { OperKind = BrigEOperandLabelRef };
+struct BrigOperandImmed {
+  enum { OperKind = BRIG_OPERAND_IMMED };
   uint16_t size;
-  uint16_t kind;
-  BrigdOffset32_t labeldirective;
+  BrigOperandKinds16_t kind;
+  BrigType16_t type;
+  uint16_t byteCount;
+  uint8_t bytes[1];
+  enum { FlexSize = sizeof(bytes) };
 };
 
-// BrigOperandFunctionRef
-// BrigOperandFunctionRef is used for a reference
-// to a function or function signature.
-struct BrigOperandFunctionRef {
-  enum { OperKind = BrigEOperandFunctionRef };
+struct BrigOperandList {
   uint16_t size;
-  uint16_t kind;
-  BrigdOffset32_t fn;
+  BrigOperandKinds16_t kind;
+  uint16_t elementCount;
+  uint16_t reserved;
+  BrigDirectiveOffset32_t elements[1];
 };
 
-// BrigOperandArgumentList
-// BrigOperandArgumentList is used for the list of
-// arguments to a function or a list of
-// function names or function signatures.
-// Lists of function names or function signatures
-// are needed when the call statement has a list of possible targets.
 struct BrigOperandArgumentList {
-  enum { OperKind = BrigEOperandArgumentList };
+  enum { OperKind = BRIG_OPERAND_ARGUMENT_LIST };
   uint16_t size;
-  uint16_t kind;
-  uint32_t elementCount;
-  BrigdOffset32_t o_args[1];
+  BrigOperandKinds16_t kind;
+  uint16_t elementCount;
+  uint16_t reserved;
+  BrigDirectiveOffset32_t elements[1];
+  enum { FlexSize = sizeof(elements) };
 };
 
 struct BrigOperandFunctionList {
-  enum { OperKind = BrigEOperandFunctionList };
+  enum { OperKind = BRIG_OPERAND_FUNCTION_LIST };
   uint16_t size;
-  uint16_t kind;
-  uint32_t elementCount;
-  BrigdOffset32_t o_args[1];
-};
-
-// BrigOperandArgumentRef
-// BrigOperandArgumentRef is used for a single argument.
-struct BrigOperandArgumentRef {
-  enum { OperKind = BrigEOperandArgumentRef };
-  uint16_t size;
-  uint16_t kind;
-  BrigdOffset32_t arg;
-};
-
-//BrigOperandCompound
-//BrigOperandCompound is used for compound addressing modes.
-struct BrigOperandCompound {
-  enum { OperKind = BrigEOperandCompound };
-  uint16_t size;
-  uint16_t kind;
-  BrigDataType16_t type;
+  BrigOperandKinds16_t kind;
+  uint16_t elementCount;
   uint16_t reserved;
-  BrigoOffset32_t name;
-  BrigoOffset32_t reg;
-  int32_t offset;
+  BrigDirectiveOffset32_t elements[1];
+  enum { FlexSize = sizeof(elements) };
 };
 
-//BrigOperandIndirect
-//BrigOperandIndirect is used for register plus offset addressing modes.
-struct BrigOperandIndirect {
-  enum { OperKind = BrigEOperandIndirect };
+struct BrigOperandRef {
   uint16_t size;
-  uint16_t kind;
-  BrigoOffset32_t reg;
-  BrigDataType16_t type;
+  BrigOperandKinds16_t kind;
+  BrigDirectiveOffset32_t ref;
+};
+
+struct BrigOperandLabelRef {
+  enum { OperKind = BRIG_OPERAND_LABEL_REF };
+  uint16_t size;
+  BrigOperandKinds16_t kind;
+  BrigDirectiveOffset32_t ref;
+};
+
+struct BrigOperandFunctionRef {
+  enum { OperKind = BRIG_OPERAND_FUNCTION_REF };
+  uint16_t size;
+  BrigOperandKinds16_t kind;
+  BrigDirectiveOffset32_t ref;
+};
+
+struct BrigOperandSignatureRef {
+  enum { OperKind = BRIG_OPERAND_SIGNATURE_REF };
+  uint16_t size;
+  BrigOperandKinds16_t kind;
+  BrigDirectiveOffset32_t ref;
+};
+
+struct BrigOperandFbarrierRef {
+  enum { OperKind = BRIG_OPERAND_FBARRIER_REF };
+  uint16_t size;
+  BrigOperandKinds16_t kind;
+  BrigDirectiveOffset32_t ref;
+};
+
+struct BrigOperandReg {
+  enum { OperKind = BRIG_OPERAND_REG };
+  uint16_t size;
+  BrigOperandKinds16_t kind;
+  BrigStringOffset32_t reg;
+  BrigType16_t type;
   uint16_t reserved;
-  int32_t offset;
 };
 
-struct BrigOperandPad {
-  enum { OperKind = BrigEOperandPad };
+struct BrigOperandRegVector {
+  enum { OperKind = BRIG_OPERAND_REG_VECTOR };
   uint16_t size;
-  uint16_t kind;
+  BrigOperandKinds16_t kind;
+  BrigType16_t type;
+  uint16_t regCount;
+  BrigStringOffset32_t regs[1];
+  enum { FlexSize = sizeof(regs) };
 };
 
-//BrigOperandOpaque
-//BrigOperandOpaque is used for addressing image and sampler objects.
-struct BrigOperandOpaque {
-  enum { OperKind = BrigEOperandOpaque };
+struct BrigOperandWavesize {
+  enum { OperKind = BRIG_OPERAND_WAVESIZE };
   uint16_t size;
-  uint16_t kind;
-  BrigdOffset32_t directive;
-  BrigoOffset32_t reg;
-  int32_t offset;
-};
-
-//BrigOperandRegV2
-//BrigOperandRegV2 is used for certain memory operations.
-struct BrigOperandRegV2 {
-  enum { OperKind = BrigEOperandRegV2 };
-  uint16_t size;
-  uint16_t kind;
-  BrigDataType16_t type;
+  BrigOperandKinds16_t kind;
+  BrigType16_t type;
   uint16_t reserved;
-  BrigoOffset32_t regs[2];
 };
 
-//BrigOperandRegV4
-//BrigOperandRegV4 is used for certain memory operations.
-struct BrigOperandRegV4 {
-  enum { OperKind = BrigEOperandRegV4 };
-  uint16_t size;
-  uint16_t kind;
-  BrigDataType16_t type;
-  uint16_t reserved;
-  BrigoOffset32_t regs[4];
-};
-
-//BrigOperandWaveSz
-//BrigOperandWaveSz is a compile-time value equal to the size of a wavefront.
-struct BrigOperandWaveSz {
-  enum { OperKind = BrigEOperandWaveSz };
-  uint16_t size;
-  uint16_t kind;
-};
-
-#endif  // INCLUDE_BRIG_H_
+#endif /* BRIG_H */

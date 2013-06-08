@@ -1,5 +1,4 @@
 #include "brig.h"
-#include "brig_buffer.h"
 #include "brig_llvm.h"
 #include "brig_module.h"
 #include "brig_function.h"
@@ -81,65 +80,55 @@ static void insertSetThreadInfo(llvm::LLVMContext &C, llvm::Module *M) {
   M->getOrInsertFunction("__setThreadInfo", setThreadInfoTy);
 }
 
-static llvm::Type *getElementTy(llvm::LLVMContext &C, BrigDataType type) {
-
-  assert(BrigInstHelper::isVectorTy(type) &&
-         "Cannot get element of non-vector types");
-
-  const bool isFloat = BrigInstHelper::isFloatTy(type);
-
-  if(type >= Brigu8x4 && type <= Brigs8x16) {
-    return llvm::Type::getInt8Ty(C);
-  } else if(type >= Brigu16x2 && type <= Brigf16x8) {
-    if(isFloat) return llvm::Type::getHalfTy(C);
-    else return llvm::Type::getInt16Ty(C);
-  } else if(type >= Brigu32x2 && type <= Brigf32x4) {
-    if(isFloat) return llvm::Type::getFloatTy(C);
-    else return llvm::Type::getInt32Ty(C);
-  } else if(type >= Brigu64x2 && type <= Brigf64x2) {
-    if(isFloat) return llvm::Type::getDoubleTy(C);
-    else return llvm::Type::getInt64Ty(C);
-  } else {
-    assert(false && "Unknown type");
-  }
+static llvm::StringRef getStringRef(const BrigString *str) {
+  llvm::StringRef ref((char *) str->bytes + 1, str->byteCount - 1);
+  return ref;
 }
 
-static llvm::Type *runOnType(llvm::LLVMContext &C, BrigDataType type) {
-  if(type == Brigb1) {
-    return llvm::Type::getInt1Ty(C);
-  } else if(type == Brigs8  || type == Brigu8  || type == Brigb8)  {
-    return llvm::Type::getInt8Ty(C);
-  } else if(type == Brigs16 || type == Brigu16 || type == Brigb16) {
-    return llvm::Type::getInt16Ty(C);
-  } else if(type == Brigs32 || type == Brigu32 || type == Brigb32) {
-    return llvm::Type::getInt32Ty(C);
-  } else if(type == Brigs64 || type == Brigu64 || type == Brigb64) {
-    return llvm::Type::getInt64Ty(C);
-  } else if(type == Brigf32) {
-    return llvm::Type::getFloatTy(C);
-  } else if(type == Brigf64) {
-    return llvm::Type::getDoubleTy(C);
-  } else if(type == Brigb128) {
-    return llvm::Type::getIntNTy(C, 128);
-  } else if(BrigInstHelper::isVectorTy(type)) {
+static llvm::Type *runOnType(llvm::LLVMContext &C, BrigType type) {
 
-    llvm::Type *base = getElementTy(C, type);
-    unsigned length = BrigInstHelper::getVectorLength(type);
+  switch(type) {
+    case BRIG_TYPE_NONE:
+      return llvm::Type::getInt32Ty(C);
+    case BRIG_TYPE_B1:
+      return llvm::Type::getInt1Ty(C);
+    case BRIG_TYPE_S8: case BRIG_TYPE_U8: case BRIG_TYPE_B8:
+      return llvm::Type::getInt8Ty(C);
+    case BRIG_TYPE_S16: case BRIG_TYPE_U16: case BRIG_TYPE_B16:
+      return llvm::Type::getInt16Ty(C);
+    case BRIG_TYPE_S32: case BRIG_TYPE_U32: case BRIG_TYPE_B32:
+      return llvm::Type::getInt32Ty(C);
+    case BRIG_TYPE_S64: case BRIG_TYPE_U64: case BRIG_TYPE_B64:
+      return llvm::Type::getInt64Ty(C);
+    case BRIG_TYPE_F16:
+      return llvm::Type::getHalfTy(C);
+    case BRIG_TYPE_F32:
+      return llvm::Type::getFloatTy(C);
+    case BRIG_TYPE_F64:
+      return llvm::Type::getDoubleTy(C);
+    case BRIG_TYPE_B128:
+      return llvm::Type::getIntNTy(C, 128);
+    default:
+      if(BrigInstHelper::isVectorTy(type)) {
 
-    if(base->isIntegerTy() || isI386()) {
-      unsigned bitWidth = base->getScalarSizeInBits() * length;
-      return llvm::Type::getIntNTy(C, bitWidth);
-    }
+        llvm::Type *base = runOnType(C, BrigInstHelper::getElementTy(type));
+        unsigned length = BrigInstHelper::getVectorLength(type);
 
-    return llvm::VectorType::get(base, length);
-  } else {
-    assert(false && "Unimplemented type");
+        if(base->isIntegerTy() || isI386()) {
+          unsigned bitWidth = base->getScalarSizeInBits() * length;
+          return llvm::Type::getIntNTy(C, bitWidth);
+        }
+
+        return llvm::VectorType::get(base, length);
+      } else {
+        assert(false && "Unimplemented type");
+      }
   }
 }
 
 static llvm::Type *runOnType(llvm::LLVMContext &C,
                              const BrigSymbol &S) {
-  BrigDataType brigType = S.getType();
+  BrigType brigType = S.getType();
   llvm::Type *llvmType = runOnType(C, brigType);
   if(!S.isArray()) {
     return llvmType;
@@ -150,29 +139,29 @@ static llvm::Type *runOnType(llvm::LLVMContext &C,
   }
 }
 
-static llvm::GlobalValue::LinkageTypes runOnLinkage(BrigAttribute link) {
-  if(link == BrigExtern || link == BrigNone) {
+static llvm::GlobalValue::LinkageTypes runOnLinkage(BrigLinkage8_t link) {
+  if(link == BRIG_LINKAGE_EXTERN || link == BRIG_LINKAGE_NONE) {
     return llvm::GlobalValue::ExternalLinkage;
-  } else if(link == BrigStatic) {
+  } else if(link == BRIG_LINKAGE_STATIC) {
     return llvm::GlobalValue::InternalLinkage;
   }
 
   assert(false && "Invalid attribute");
 }
 
-static unsigned getRegField(const char *name) {
-  if(name[1] == 'c') return 0;
-  if(name[1] == 's') return 1;
-  if(name[1] == 'd') return 2;
-  if(name[1] == 'q') return 3;
+static unsigned getRegField(const BrigString *name) {
+  if(name->bytes[1] == 'c') return 0;
+  if(name->bytes[1] == 's') return 1;
+  if(name->bytes[1] == 'd') return 2;
+  if(name->bytes[1] == 'q') return 3;
 
   assert(false && "Unknown reg type");
 }
 
-static unsigned getRegOffset(const char *name) {
-  char *endptr;
-  unsigned offset = (unsigned) strtol(name + 2, &endptr, 10);
-  assert(!*endptr && "Invalid field");
+static unsigned getRegOffset(const BrigString *name) {
+  const uint8_t *endptr;
+  unsigned offset = (unsigned) nstrtol(name, &endptr, 10);
+  assert(endptr == name->bytes + name->byteCount && "Invalid field");
   assert(offset < 128 && "Invalid offset");
   return offset;
 }
@@ -195,9 +184,7 @@ struct FunState {
     return FunState(funMap, symbolMap, brigFun, llvmFun);
   }
 
-  template<class T>
-  llvm::Value *lookupSymbol(const T *symbol) const {
-    (void) symbol->s;
+  llvm::Value *lookupSymbol(const BrigDirectiveSymbol *symbol) const {
     SymbolMap::const_iterator it = symbolMap.find(symbol);
     return it != symbolMap.end() ? it->second : NULL;
   }
@@ -244,33 +231,39 @@ struct FunState {
 
     for(BrigSymbol local = brigFun.local_begin(),
           E = brigFun.local_end(); local != E; ++local) {
-      const char *name = local.getName();
+      llvm::StringRef name = getStringRef(local.getName());
       llvm::Type *type = runOnType(C, local);
       symbolMap[local.getAddr()] = new llvm::AllocaInst(type, name, &entry);
     }
   }
 };
 
+static llvm::Value *getRegAddr(llvm::BasicBlock &B,
+                               const BrigString *name,
+                               const BrigInstHelper &helper,
+                               const FunState &state) {
+
+  llvm::LLVMContext &C = B.getContext();
+
+  unsigned field = getRegField(name);
+  unsigned offset = getRegOffset(name);
+
+  llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
+  llvm::Value *array[] = { llvm::ConstantInt::get(int32Ty, 0),
+                           llvm::ConstantInt::get(int32Ty, field),
+                           llvm::ConstantInt::get(int32Ty, 0),
+                           llvm::ConstantInt::get(int32Ty, offset) };
+  llvm::ArrayRef<llvm::Value *> arrayRef(array, 4);
+
+  return llvm::GetElementPtrInst::Create(state.regs, arrayRef, "", &B);
+}
+
 static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
                                    const BrigOperandBase *op,
                                    const BrigInstHelper &helper,
                                    const FunState &state) {
-
-  llvm::LLVMContext &C = B.getContext();
-
   if(const BrigOperandReg *regOp = dyn_cast<BrigOperandReg>(op)) {
-    const char *name = helper.getName(regOp);
-    unsigned field = getRegField(name);
-    unsigned offset = getRegOffset(name);
-
-    llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
-    llvm::Value *array[] = { llvm::ConstantInt::get(int32Ty, 0),
-                             llvm::ConstantInt::get(int32Ty, field),
-                             llvm::ConstantInt::get(int32Ty, 0),
-                             llvm::ConstantInt::get(int32Ty, offset) };
-    llvm::ArrayRef<llvm::Value *> arrayRef(array, 4);
-
-    return llvm::GetElementPtrInst::Create(state.regs, arrayRef, "", &B);
+    return getRegAddr(B, helper.getRegName(regOp), helper, state);
   }
 
   assert(false && "Unimplemented operand");
@@ -279,20 +272,17 @@ static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
 static bool hasAddr(const BrigOperandBase *op) {
   BrigOperandKinds kind = BrigOperandKinds(op->kind);
   switch(kind) {
-  case BrigEOperandAddress:
-  case BrigEOperandCompound:
-  case BrigEOperandFunctionRef:
-  case BrigEOperandImmed:
-  case BrigEOperandIndirect:
-  case BrigEOperandLabelRef:
-  case BrigEOperandRegV2:
-  case BrigEOperandRegV4:
-  case BrigEOperandWaveSz:
-    return false;
-  case BrigEOperandReg:
-    return true;
-  default:
-    assert(false && "Unimplemented");
+    case BRIG_OPERAND_ADDRESS:
+    case BRIG_OPERAND_FUNCTION_REF:
+    case BRIG_OPERAND_IMMED:
+    case BRIG_OPERAND_LABEL_REF:
+    case BRIG_OPERAND_REG_VECTOR:
+    case BRIG_OPERAND_WAVESIZE:
+      return false;
+    case BRIG_OPERAND_REG:
+      return true;
+    default:
+      assert(false && "Unimplemented");
   }
 }
 
@@ -310,14 +300,15 @@ static llvm::Value *getVectorOperand(llvm::BasicBlock &B,
   llvm::LLVMContext &C = B.getContext();
   llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
 
-  const size_t numElements = sizeof(op->regs) / sizeof(*op->regs);
-  llvm::Type *elementTy = runOnType(C, BrigDataType(op->type));
+  const size_t numElements = op->regCount;
+  llvm::Type *elementTy = runOnType(C, BrigType(op->type));
   llvm::Type *vecTy = llvm::VectorType::get(elementTy, numElements);
 
   llvm::Value *vec = llvm::UndefValue::get(vecTy);
   for(unsigned i = 0; i < numElements; ++i) {
-    const BrigOperandBase *reg = helper.getReg(op, i);
-    llvm::Value *element = getOperand(B, reg, helper, state);
+    llvm::Value *regAddr =
+      getRegAddr(B, helper.getRegName(op, i), helper, state);
+    llvm::Value *element = new llvm::LoadInst(regAddr, "", false, &B);
     llvm::Value *idx = llvm::ConstantInt::get(int32Ty, i);
     vec = llvm::InsertElementInst::Create(vec, element, idx, "", &B);
   }
@@ -340,80 +331,86 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
 
   if(const BrigOperandLabelRef *label = dyn_cast<BrigOperandLabelRef>(op)) {
     llvm::Type *int32Ty = llvm::Type::getInt32Ty(C);
-    return llvm::ConstantInt::get(int32Ty, label->labeldirective);
+    return llvm::ConstantInt::get(int32Ty, label->ref);
   }
 
   if(const BrigOperandFunctionRef *func = dyn_cast<BrigOperandFunctionRef>(op))
-    return state.funMap.find(func->fn)->second;
+    return state.funMap.find(func->ref)->second;
 
   if(const BrigOperandImmed *immedOp = dyn_cast<BrigOperandImmed>(op)) {
-    llvm::Type *type = runOnType(C, BrigDataType(immedOp->type));
+    llvm::Type *type = runOnType(C, BrigType(immedOp->type));
     if(type->isIntegerTy(128)) {
-      llvm::APInt bigInt(128, immedOp->bits.l);
+      llvm::ArrayRef<uint64_t> bigIntArray((uint64_t *) immedOp->bytes, 2);
+      llvm::APInt bigInt(128, bigIntArray);
       return llvm::ConstantInt::get(type, bigInt);
     } else if(type->isIntegerTy(64)) {
-      return llvm::ConstantInt::get(type, immedOp->bits.l[0]);
+      uint64_t result;
+      memcpy(&result, immedOp->bytes, sizeof(result));
+      return llvm::ConstantInt::get(type, result);
     } else if(type->isIntegerTy(32)) {
-      return llvm::ConstantInt::get(type, immedOp->bits.u);
+      uint32_t result;
+      memcpy(&result, immedOp->bytes, sizeof(result));
+      return llvm::ConstantInt::get(type, result);
     } else if(type->isIntegerTy(16)) {
-      return llvm::ConstantInt::get(type, immedOp->bits.h);
+      uint16_t result;
+      memcpy(&result, immedOp->bytes, sizeof(result));
+      return llvm::ConstantInt::get(type, result);
     } else if(type->isIntegerTy(8)) {
-      return llvm::ConstantInt::get(type, immedOp->bits.c);
+      return llvm::ConstantInt::get(type, *(uint8_t *)  immedOp->bytes);
     } else if(type->isIntegerTy(1)) {
-      return llvm::ConstantInt::get(type, immedOp->bits.c);
+      return llvm::ConstantInt::get(type, *(uint8_t *)  immedOp->bytes);
     }
     assert(false && "Illegal immediate type");
   }
 
   if(const BrigOperandAddress *adderOp = dyn_cast<BrigOperandAddress>(op)) {
-    const BrigDirectiveSymbol *symbol =
-      cast<BrigDirectiveSymbol>(helper.getDirective(adderOp->directive));
-    llvm::Value *address = state.lookupSymbol(symbol);
-    assert(address && "Symbol not found");
-    return address;
-  }
 
-  if(const BrigOperandIndirect *indOp = dyn_cast<BrigOperandIndirect>(op)) {
-    llvm::Type *type = runOnType(C, BrigDataType(indOp->type));
-    const BrigOperandBase *reg = helper.getReg(indOp);
-    llvm::Value *base = reg ?
-      getOperand(B, reg, helper, state) :
-      llvm::ConstantInt::get(type, 0ULL);
-    llvm::Value *offset = llvm::ConstantInt::get(type, indOp->offset);
-    return llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
-                                        base, offset, "", &B);
-  }
+    llvm::Type *type = llvm::Type::getIntNTy(C, sizeof(intptr_t) * 8);
+    llvm::Value *addr;
+    if(adderOp->symbol) {
+      const BrigDirectiveSymbol *symbol =
+        cast<BrigDirectiveSymbol>(helper.getDirective(adderOp->symbol));
+      addr = state.lookupSymbol(symbol);
+    } else {
+      addr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(C));
+    }
 
-  if(const BrigOperandCompound *comOp = dyn_cast<BrigOperandCompound>(op)) {
-    llvm::Type *type = runOnType(C, BrigDataType(comOp->type));
-    const BrigOperandBase *addrOp = helper.getOperand(comOp->name);
-    llvm::Value *addr = getOperand(B, addrOp, helper, state);
-    if(!comOp->reg && !comOp->offset)
+    uint64_t offset = ((uint64_t) adderOp->offsetHi << 32) + adderOp->offsetLo;
+    if(!adderOp->reg && !offset)
       return addr;
 
     llvm::Value *adderInt = new llvm::PtrToIntInst(addr, type, "", &B);
 
-    const BrigOperandBase *reg = helper.getReg(comOp);
-    llvm::Value *base = reg ?
-      getOperand(B, reg, helper, state) :
-      llvm::ConstantInt::get(type, 0ULL);
+    llvm::Value *base;
+    if(adderOp->reg) {
+      llvm::Value *regAddr =
+        getRegAddr(B, helper.getRegName(adderOp), helper, state);
+      llvm::Value *regValue = new llvm::LoadInst(regAddr, "", false, &B);
 
-    llvm::Value *offset = llvm::ConstantInt::get(type, comOp->offset);
+      if(regValue->getType() == type) {
+        base = regValue;
+      } else {
+        llvm::Instruction::CastOps castOp =
+          llvm::CastInst::getCastOpcode(regValue, false, type, false);
+        base = llvm::CastInst::Create(castOp, regValue, type, "", &B);
+      }
+    } else {
+      base = llvm::ConstantInt::get(type, 0ULL);
+    }
+
+    llvm::Value *offsetValue = llvm::ConstantInt::get(type, offset);
 
     llvm::Value *index =
       llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
-                                   base, offset, "", &B);
+                                   base, offsetValue, "", &B);
     return llvm::BinaryOperator::Create(llvm::BinaryOperator::Add,
                                         adderInt, index, "", &B);
   }
 
-  if(const BrigOperandRegV2 *v2Op = dyn_cast<BrigOperandRegV2>(op))
-    return getVectorOperand(B, v2Op, helper, state);
+  if(const BrigOperandRegVector *vecOp = dyn_cast<BrigOperandRegVector>(op))
+    return getVectorOperand(B, vecOp, helper, state);
 
-  if(const BrigOperandRegV4 *v4Op = dyn_cast<BrigOperandRegV4>(op))
-    return getVectorOperand(B, v4Op, helper, state);
-
-  if(isa<BrigOperandWaveSz>(op)) {
+  if(isa<BrigOperandWavesize>(op)) {
     llvm::Module *M = B.getParent()->getParent();
     llvm::FunctionType *getWavefrontSizeTy =
       llvm::FunctionType::get(llvm::Type::getInt32Ty(C), false);
@@ -429,38 +426,27 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
                                 const inst_iterator inst,
                                 unsigned opnum) {
 
-  llvm::Type *destType = runOnType(C, BrigDataType(inst->type));
+  llvm::Type *destType = runOnType(C, BrigType(inst->type));
 
   if(opnum == 0) return destType;
 
-  if((inst->opcode == BrigLd          && opnum == 2) ||
-     (inst->opcode == BrigSt          && opnum == 1) ||
-     (inst->opcode == BrigAtomic      && opnum == 1))
+  if((inst->opcode == BRIG_OPCODE_LD     && opnum == 1) ||
+     (inst->opcode == BRIG_OPCODE_ST     && opnum == 1) ||
+     (inst->opcode == BRIG_OPCODE_ATOMIC && opnum == 1))
     return destType->getPointerTo();
 
   if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
-    return runOnType(C, BrigDataType(cmp->sourceType));
+    return runOnType(C, BrigType(cmp->sourceType));
 
   if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
-    return runOnType(C, BrigDataType(cvt->stype));
+    return runOnType(C, BrigType(cvt->sourceType));
 
-  if((inst->opcode == BrigShr && opnum == 2) ||
-     (inst->opcode == BrigShl && opnum == 2) ||
-     (inst->opcode == BrigUnpack0 && opnum == 1) ||
-     (inst->opcode == BrigUnpack1 && opnum == 1) ||
-     (inst->opcode == BrigUnpack2 && opnum == 1) ||
-     (inst->opcode == BrigUnpack3 && opnum == 1))
-    return runOnType(C, Brigu32);
+  if((inst->opcode == BRIG_OPCODE_SHR && opnum == 2) ||
+     (inst->opcode == BRIG_OPCODE_SHL && opnum == 2))
+    return runOnType(C, BRIG_TYPE_U32);
 
-  if((inst->opcode == BrigShuffle && opnum == 3) ||
-     (inst->opcode == BrigMovdHi  && opnum == 1) ||
-     (inst->opcode == BrigMovdLo  && opnum == 1) ||
-     (inst->opcode == BrigMovsHi  && opnum == 1) ||
-     (inst->opcode == BrigMovsLo  && opnum == 1))
-    return runOnType(C, Brigu64);
-
-  if(inst->opcode == BrigF2u4 && opnum > 0)
-    return runOnType(C, Brigf32);
+  if((inst->opcode == BRIG_OPCODE_SHUFFLE && opnum == 3))
+    return runOnType(C, BRIG_TYPE_U64);
 
   return destType;
 }
@@ -538,7 +524,7 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
     }
   }
 
-  bool isSigned = helper.isSignedTy(BrigDataType(inst->type));
+  bool isSigned = helper.isSignedTy(BrigType(inst->type));
   llvm::Instruction::CastOps castOp =
     llvm::CastInst::getCastOpcode(value, isSigned, destTy, isSigned);
   return llvm::CastInst::Create(castOp, value, destTy, "", &B);
@@ -548,16 +534,16 @@ static bool isSRet(const inst_iterator inst) {
   if(isI386())
     return
       BrigInstHelper::hasDest(inst) &&
-      BrigInstHelper::isVectorTy(BrigDataType(inst->type));
+      BrigInstHelper::isVectorTy(BrigType(inst->type));
 
   if(isARM()) {
-    BrigDataType type = BrigDataType(inst->type);
+    BrigType type = BrigType(inst->type);
     if(BrigInstHelper::hasDest(inst))
       return
-        type == Brigu8x8  || type == Brigs8x8  ||
-        type == Brigu16x4 || type == Brigs16x4 ||
-        type == Brigu32x2 || type == Brigs32x2 ||
-        type == Brigb128;
+        type == BRIG_TYPE_U8X8  || type == BRIG_TYPE_S8X8  ||
+        type == BRIG_TYPE_U16X4 || type == BRIG_TYPE_S16X4 ||
+        type == BRIG_TYPE_U32X2 || type == BRIG_TYPE_S32X2 ||
+        type == BRIG_TYPE_B128;
 
     return false;
   }
@@ -570,12 +556,12 @@ static llvm::Function *getInstFun(const inst_iterator inst,
                                   llvm::Module *M) {
 
   bool sret = isSRet(inst);
-  bool isStore = inst->opcode == BrigSt;
+  bool isStore = inst->opcode == BRIG_OPCODE_ST;
   llvm::LLVMContext &C = M->getContext();
 
   llvm::Type *result = sret || isStore ?
     llvm::Type::getVoidTy(C) :
-    runOnType(C, BrigDataType(inst->type));
+    runOnType(C, BrigType(inst->type));
   std::vector<llvm::Type *> params;
   for(unsigned i = 0; i < sources.size(); ++i)
     params.push_back(sources[i]->getType());
@@ -625,8 +611,7 @@ static void insertSetRoundingMode(llvm::BasicBlock &B,
   llvm::LLVMContext &C = M->getContext();
   llvm::FunctionType *setRoundTy =
     llvm::FunctionType::get(llvm::Type::getVoidTy(C), false);
-  const BrigAluModifier *aluMod = BrigInstHelper::getAluModifier(inst);
-  assert(aluMod->floatOrInt && "Integer rounding illegal on float arithmetic");
+  const BrigAluModifier16_t *aluMod = BrigInstHelper::getAluModifier(inst);
   const char *roundName = BrigInstHelper::getRoundingName(*aluMod);
   std::string setRoundName = std::string("setRoundingMode_") + roundName;
   llvm::Constant *setRoundMode =
@@ -659,9 +644,6 @@ static void runOnComplexInst(llvm::BasicBlock &B,
 
   bool sret = isSRet(inst);
 
-  // Skip the width parameter for loads.
-  if(inst->opcode == BrigLd) ++operand;
-
   std::vector<llvm::Value *> sources;
 
   llvm::Value *destAddr = NULL;
@@ -671,7 +653,7 @@ static void runOnComplexInst(llvm::BasicBlock &B,
     if(sret) sources.push_back(destAddr);
   }
 
-  for(; operand < 5 && inst->o_operands[operand]; ++operand) {
+  for(; operand < 5 && inst->operands[operand]; ++operand) {
     const BrigOperandBase *brigSrc = helper.getOperand(inst, operand);
     llvm::Value *srcRaw = getOperand(B, brigSrc, helper, state);
     llvm::Value *srcVal = decodePacking(B, srcRaw, operand, inst);
@@ -709,14 +691,14 @@ static void runOnDirectBranchInst(llvm::BasicBlock &B,
     llvm::cast<llvm::ConstantInt>(getOperand(B, target, helper, state));
   llvm::BasicBlock *targetBB = state.cbMap.find(cbNum->getZExtValue())->second;
 
-  if(inst->opcode == BrigCbr) {
-    const BrigOperandBase *pred = helper.getOperand(inst, 1);
+  if(inst->opcode == BRIG_OPCODE_CBR) {
+    const BrigOperandBase *pred = helper.getOperand(inst, 0);
     llvm::Value *predVal = getOperand(B, pred, helper, state);
     llvm::BranchInst::Create(targetBB, NULL, predVal, &B);
     return;
   }
 
-  if(inst->opcode == BrigBrn) {
+  if(inst->opcode == BRIG_OPCODE_BRN) {
     llvm::BranchInst::Create(targetBB, &B);
     return;
   }
@@ -735,9 +717,9 @@ static void runOnIndirectBranchInst(llvm::BasicBlock &B,
   llvm::Value *targetBB = getOperand(B, target, helper, state);
 
   llvm::BasicBlock *launchBB = &B;
-  if(inst->opcode == BrigCbr) {
+  if(inst->opcode == BRIG_OPCODE_CBR) {
     launchBB = llvm::BasicBlock::Create(C, B.getName() + ".launch", F);
-    const BrigOperandBase *pred = helper.getOperand(inst, 1);
+    const BrigOperandBase *pred = helper.getOperand(inst, 0);
     llvm::Value *predVal = getOperand(B, pred, helper, state);
     llvm::BranchInst::Create(launchBB, NULL, predVal, &B);
   }
@@ -785,20 +767,20 @@ static void runOnCallInst(llvm::BasicBlock &B,
   std::vector<llvm::Value *> args;
 
   const BrigOperandArgumentList *oArgList =
-    cast<BrigOperandArgumentList>(helper.getOperand(inst, 1));
+    cast<BrigOperandArgumentList>(helper.getOperand(inst, 0));
   for(unsigned i = 0; i < oArgList->elementCount; ++i) {
     const BrigSymbol symbol = helper.getArgument(oArgList, i);
     args.push_back(state.lookupSymbol(symbol));
   }
 
   const BrigOperandArgumentList *iArgList =
-    cast<BrigOperandArgumentList>(helper.getOperand(inst, 3));
+    cast<BrigOperandArgumentList>(helper.getOperand(inst, 2));
   for(unsigned i = 0; i < iArgList->elementCount; ++i) {
     const BrigSymbol symbol = helper.getArgument(iArgList, i);
     args.push_back(state.lookupSymbol(symbol));
   }
 
-  const BrigOperandBase *brigFun = helper.getOperand(inst, 2);
+  const BrigOperandBase *brigFun = helper.getOperand(inst, 1);
   llvm::Value *rawFun = getOperand(B, brigFun, helper, state);
   llvm::Value *fun = decodeFunPacking(B, rawFun, args);
   llvm::CallInst::Create(fun, args, "", &B);
@@ -810,13 +792,13 @@ static void runOnInstruction(llvm::BasicBlock &B,
                              const FunState &state) {
   llvm::LLVMContext &C = B.getContext();
 
-  if(inst->opcode == BrigRet) {
+  if(inst->opcode == BRIG_OPCODE_RET) {
     llvm::ReturnInst::Create(C, &B);
   } else if(helper.isDirectBranchInst(inst)) {
     runOnDirectBranchInst(B, inst, helper, state);
   } else if(helper.isIndirectBranchInst(inst)) {
     runOnIndirectBranchInst(B, inst, helper, state);
-  } else if(inst->opcode == BrigCall) {
+  } else if(inst->opcode == BRIG_OPCODE_CALL) {
     runOnCallInst(B, inst, helper, state);
   } else {
     runOnComplexInst(B, inst, helper, state);
@@ -869,7 +851,7 @@ static llvm::Value *getParameter(llvm::BasicBlock *bb,
 // We create a trampoline with the function signature:
 // void fun(char **argv)
 // The real function arguments are encoded in the argv array.
-static void makeKernelTrampoline(llvm::Function *fun, const char *name) {
+static void makeKernelTrampoline(llvm::Function *fun, llvm::StringRef name) {
 
   llvm::LLVMContext &C = fun->getContext();
   llvm::Module *M = fun->getParent();
@@ -917,7 +899,8 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   llvm::FunctionType *funTy = llvm::FunctionType::get(voidTy, args, false);
 
   llvm::GlobalValue::LinkageTypes linkage = runOnLinkage(F.getLinkage());
-  llvm::Twine name(F.getName());
+  llvm::StringRef nameRef = getStringRef(F.getName());
+  llvm::Twine name(nameRef);
 
   if(F.isKernel())
     name = "kernel." + name;
@@ -929,7 +912,7 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   llvm::Function::arg_iterator llvmArg = fun->arg_begin();
   llvm::Function::arg_iterator E = fun->arg_end();
   for(; llvmArg != E; ++brigArg, ++llvmArg) {
-    llvmArg->setName(brigArg.getName());
+    llvmArg->setName(getStringRef(brigArg.getName()));
     symbolMap[brigArg.getAddr()] = llvmArg;
   }
 
@@ -941,7 +924,7 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   }
 
   if(F.isKernel())
-    makeKernelTrampoline(fun, F.getName());
+    makeKernelTrampoline(fun, nameRef);
 }
 
 template<class T>
@@ -970,7 +953,7 @@ static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
                                         llvm::Type *type,
                                         const BrigSymbol &S) {
   const T *array = S.getInit<T>();
-  uint32_t size = std::max(1U, S.getArrayDim());
+  uint64_t size = std::max(uint64_t(1), S.getArrayDim());
   if(S.isArray()) {
     llvm::ArrayRef<T> arrayRef(array, size);
     return llvm::ConstantDataArray::get(C, arrayRef);
@@ -985,7 +968,7 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
   llvm::Type *type = runOnType(C, S);
   bool isConst = S.isConst();
   llvm::GlobalValue::LinkageTypes linkage = runOnLinkage(S.getLinkage());
-  llvm::Twine name(S.getName());
+  llvm::Twine name(getStringRef(S.getName()));
 
   llvm::Constant *init = NULL;
   if(S.hasInitializer()) {

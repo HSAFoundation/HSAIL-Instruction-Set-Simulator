@@ -11,10 +11,8 @@ const BrigSymbol getArgument(const BrigInstHelper &helper,
                              unsigned argNo) {
 
   assert(argNo < argList->elementCount && "Index beyond argument list");
-  BrigoOffset32_t operandOffset = argList->o_args[argNo];
-  oper_iterator argRef(helper.S_.operands + operandOffset);
-  BrigdOffset32_t dirOffset = cast<BrigOperandArgumentRef>(argRef)->arg;
-  dir_iterator symbolDirIt(helper.S_.directives + dirOffset);
+  BrigDirectiveOffset32_t operandOffset = argList->elements[argNo];
+  dir_iterator symbolDirIt(helper.S_.directives + operandOffset);
   assert(isa<BrigDirectiveSymbol>(symbolDirIt) &&
          "Arguments must reference symbols");
   return BrigSymbol(helper.S_, symbolDirIt);
@@ -28,140 +26,100 @@ BrigInstHelper::getArgument(const BrigOperandArgumentList *argList,
 
 static const char *getBaseName(const inst_iterator inst) {
 
-#define caseOper(X)                             \
-  case Brig ## X:                               \
+#define caseOper(X,Y)                           \
+  case BRIG_OPCODE_ ## Y:                       \
     return #X
 
   switch(inst->opcode) {
-    caseOper(Abs);
-    caseOper(Add);
-    caseOper(Borrow);
-    caseOper(Carry);
-    caseOper(CopySign);
-    caseOper(Div);
-    caseOper(Fma);
-    caseOper(Fract);
-    caseOper(Mad);
-    caseOper(Max);
-    caseOper(Min);
-    caseOper(Mul);
-    caseOper(MulHi);
-    caseOper(Neg);
-    caseOper(Rem);
-    caseOper(Sqrt);
-    caseOper(Sub);
-    caseOper(Mad24);
-    caseOper(Mad24Hi);
-    caseOper(Mul24);
-    caseOper(Mul24Hi);
-    caseOper(Shl);
-    caseOper(Shr);
-    caseOper(And);
-    caseOper(Not);
-    caseOper(Or);
-    caseOper(PopCount);
-    caseOper(Xor);
-    caseOper(BitRev);
-    caseOper(BitSelect);
-    caseOper(Extract);
-    caseOper(FirstBit);
-    caseOper(Insert);
-    caseOper(LastBit);
-    caseOper(Lda);
-    caseOper(Ldc);
-    caseOper(Mov);
-    caseOper(MovdHi);
-    caseOper(MovdLo);
-    caseOper(MovsHi);
-    caseOper(MovsLo);
-    caseOper(Shuffle);
-    caseOper(UnpackHi);
-    caseOper(UnpackLo);
-    caseOper(Cmov);
-    caseOper(Class);
-    caseOper(Fcos);
-    caseOper(Fexp2);
-    caseOper(Flog2);
-    caseOper(Frcp);
-    caseOper(Fsqrt);
-    caseOper(Frsqrt);
-    caseOper(Fsin);
-    caseOper(BitAlign);
-    caseOper(ByteAlign);
-    caseOper(F2u4);
-    caseOper(Lerp);
-    caseOper(Sad);
-    caseOper(Sad2);
-    caseOper(Sad4);
-    caseOper(Sad4Hi);
-    caseOper(Unpack0);
-    caseOper(Unpack1);
-    caseOper(Unpack2);
-    caseOper(Unpack3);
-    caseOper(Segmentp);
-    caseOper(FtoS);
-    caseOper(StoF);
-    caseOper(Cmp);
-    caseOper(PackedCmp);
-    caseOper(Cvt);
-    caseOper(Ld);
-    caseOper(St);
-    caseOper(Atomic);
-    caseOper(AtomicNoRet);
-    caseOper(RdImage);
-    caseOper(LdImage);
-    caseOper(StImage);
-    caseOper(AtomicImage);
-    caseOper(AtomicNoRetImage);
-    caseOper(QueryArray);
-    caseOper(QueryData);
-    caseOper(QueryDepth);
-    caseOper(QueryFiltering);
-    caseOper(QueryHeight);
-    caseOper(QueryNormalized);
-    caseOper(QueryOrder);
-    caseOper(QueryWidth);
-    caseOper(Cbr);
-    caseOper(Brn);
-    caseOper(Barrier);
-    caseOper(FbarArrive);
-    caseOper(FbarInit);
-    caseOper(FbarRelease);
-    caseOper(FbarSkip);
-    caseOper(FbarWait);
-    caseOper(Sync);
-    caseOper(Count);
-    caseOper(CountUp);
-    caseOper(Mask);
-    caseOper(Send);
-    caseOper(Receive);
-    caseOper(Call);
-    caseOper(Ret);
-    caseOper(SysCall);
-    caseOper(Alloca);
-    caseOper(Clock);
-    caseOper(CU);
-    caseOper(CurrentWorkGroupSize);
-    caseOper(DebugTrap);
-    caseOper(DispatchId);
-    caseOper(DynWaveId);
-    caseOper(FeClearExcept);
-    caseOper(FeGetExcept);
-    caseOper(FeSetExcept);
-    caseOper(GridGroups);
-    caseOper(GridSize);
-    caseOper(LaneId);
-    caseOper(MaxDynWaveId);
-    caseOper(Nop);
-    caseOper(NullPtr);
-    caseOper(Qid);
-    caseOper(WorkDim);
-    caseOper(WorkGroupId);
-    caseOper(WorkGroupSize);
-    caseOper(WorkItemAbsId);
-    caseOper(WorkItemAbsIdFlat);
-    caseOper(WorkItemId);
-    caseOper(WorkItemIdFlat);
+    caseOper(Abs, ABS);
+    caseOper(Add, ADD);
+    caseOper(Borrow, BORROW);
+    caseOper(Carry, CARRY);
+    caseOper(CopySign, COPYSIGN);
+    caseOper(Div, DIV);
+    caseOper(Fma, FMA);
+    caseOper(Fract, FRACT);
+    caseOper(Mad, MAD);
+    caseOper(Max, MAX);
+    caseOper(Min, MIN);
+    caseOper(Mul, MUL);
+    caseOper(MulHi, MULHI);
+    caseOper(Neg, NEG);
+    caseOper(Rem, REM);
+    caseOper(Sqrt, SQRT);
+    caseOper(Sub, SUB);
+    caseOper(Mad24, MAD24);
+    caseOper(Mad24Hi, MAD24HI);
+    caseOper(Mul24, MUL24);
+    caseOper(Mul24Hi, MUL24HI);
+    caseOper(Shl, SHL);
+    caseOper(Shr, SHR);
+    caseOper(And, AND);
+    caseOper(Not, NOT);
+    caseOper(Or, OR);
+    caseOper(PopCount, POPCOUNT);
+    caseOper(Xor, XOR);
+    caseOper(BitRev, BITREV);
+    caseOper(BitSelect, BITSELECT);
+    caseOper(FirstBit, FIRSTBIT);
+    caseOper(LastBit, LASTBIT);
+    caseOper(Lda, LDA);
+    caseOper(Ldc, LDC);
+    caseOper(Mov, MOV);
+    caseOper(Shuffle, SHUFFLE);
+    caseOper(UnpackHi, UNPACKHI);
+    caseOper(UnpackLo, UNPACKLO);
+    caseOper(Cmov, CMOV);
+    caseOper(Class, CLASS);
+    caseOper(Ncos, NCOS);
+    caseOper(Nexp2, NEXP2);
+    caseOper(Nlog2, NLOG2);
+    caseOper(Nrcp, NRCP);
+    caseOper(Nsqrt, NSQRT);
+    caseOper(Nrsqrt, NRSQRT);
+    caseOper(Nsin, NSIN);
+    caseOper(BitAlign, BITALIGN);
+    caseOper(ByteAlign, BYTEALIGN);
+    caseOper(Lerp, LERP);
+    caseOper(Segmentp, SEGMENTP);
+    caseOper(FtoS, FTOS);
+    caseOper(StoF, STOF);
+    caseOper(Cmp, CMP);
+    caseOper(Cvt, CVT);
+    caseOper(Ld, LD);
+    caseOper(St, ST);
+    caseOper(Atomic, ATOMIC);
+    caseOper(AtomicNoRet, ATOMICNORET);
+    caseOper(RdImage, RDIMAGE);
+    caseOper(LdImage, LDIMAGE);
+    caseOper(StImage, STIMAGE);
+    caseOper(AtomicImage, ATOMICIMAGE);
+    caseOper(AtomicNoRetImage, ATOMICIMAGENORET);
+    caseOper(Cbr, CBR);
+    caseOper(Brn, BRN);
+    caseOper(Barrier, BARRIER);
+    caseOper(Sync, SYNC);
+    caseOper(Call, CALL);
+    caseOper(Ret, RET);
+    caseOper(SysCall, SYSCALL);
+    caseOper(Alloca, ALLOCA);
+    caseOper(Clock, CLOCK);
+    caseOper(CurrentWorkGroupSize, CURRENTWORKGROUPSIZE);
+    caseOper(DebugTrap, DEBUGTRAP);
+    caseOper(DispatchId, DISPATCHID);
+    caseOper(GridGroups, GRIDGROUPS);
+    caseOper(GridSize, GRIDSIZE);
+    caseOper(LaneId, LANEID);
+    caseOper(Nop, NOP);
+    caseOper(NullPtr, NULLPTR);
+    caseOper(Qid, QID);
+    caseOper(WorkGroupId, WORKGROUPID);
+    caseOper(WorkGroupSize, WORKGROUPSIZE);
+    caseOper(WorkItemAbsId, WORKITEMABSID);
+    caseOper(WorkItemId, WORKITEMID);
+    caseOper(Combine, COMBINE);
+    caseOper(BitExtract, BITEXTRACT);
+    caseOper(Sad, SAD);
   default:
     assert(false && "Unknown instruction");
   }
@@ -169,80 +127,82 @@ static const char *getBaseName(const inst_iterator inst) {
 }
 
 static const char *getPackingName(const inst_iterator inst) {
-#define casePacking(X)                          \
-case BrigPack ## X:                             \
-    return "_" #X
 
-  switch(inst->packing) {
-    casePacking(PP);
-    casePacking(PS);
-    casePacking(SP);
-    casePacking(SS);
-    casePacking(S);
-    casePacking(P);
-  case BrigPackPPsat: return "Sat_PP";
-  case BrigPackPSsat: return "Sat_PS";
-  case BrigPackSPsat: return "Sat_SP";
-  case BrigPackSSsat: return "Sat_SS";
-  case BrigPackSsat:  return "Sat_S";
-  case BrigPackPsat:  return "Sat_P";
-  case BrigNoPacking: return "";
+  const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst);
+  const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst);
+  if(!cmp && !mod) return "";
+
+  BrigPack pack = BrigPack(cmp ? cmp->pack : mod->pack);
+  switch(pack) {
+    case BRIG_PACK_PP:    return "_PP";
+    case BRIG_PACK_PS:    return "_PS";
+    case BRIG_PACK_SP:    return "_SP";
+    case BRIG_PACK_SS:    return "_SS";
+    case BRIG_PACK_S:     return "_S";
+    case BRIG_PACK_P:     return "_P";
+    case BRIG_PACK_PPSAT: return "_Sat_PP";
+    case BRIG_PACK_PSSAT: return "_Sat_PS";
+    case BRIG_PACK_SPSAT: return "_Sat_SP";
+    case BRIG_PACK_SSSAT: return "_Sat_SS";
+    case BRIG_PACK_SSAT:  return "_Sat_S";
+    case BRIG_PACK_PSAT:  return "_Sat_P";
+    case BRIG_PACK_NONE:  return "";
   default:
     assert(false && "Unknown packing");
   }
-#undef castPacking
 }
 
-static const char *getTypeName(BrigDataType type) {
-#define caseBrig(X)                              \
-  case Brig ## X:                                \
-  return #X
+static const char *getTypeName(BrigType type) {
+#define caseBrig(X,Y)                           \
+  case BRIG_ ## Y:                              \
+    return "_" #X
 
   switch(type) {
-    caseBrig(s8);
-    caseBrig(s16);
-    caseBrig(s32);
-    caseBrig(s64);
-    caseBrig(u8);
-    caseBrig(u16);
-    caseBrig(u32);
-    caseBrig(u64);
-    caseBrig(f16);
-    caseBrig(f32);
-    caseBrig(f64);
-    caseBrig(b1);
-    caseBrig(b8);
-    caseBrig(b16);
-    caseBrig(b32);
-    caseBrig(b64);
-    caseBrig(b128);
-    caseBrig(ROImg);
-    caseBrig(RWImg);
-    caseBrig(Samp);
-    caseBrig(u8x4);
-    caseBrig(s8x4);
-    caseBrig(u8x8);
-    caseBrig(s8x8);
-    caseBrig(u8x16);
-    caseBrig(s8x16);
-    caseBrig(u16x2);
-    caseBrig(s16x2);
-    caseBrig(f16x2);
-    caseBrig(u16x4);
-    caseBrig(s16x4);
-    caseBrig(f16x4);
-    caseBrig(u16x8);
-    caseBrig(s16x8);
-    caseBrig(f16x8);
-    caseBrig(u32x2);
-    caseBrig(s32x2);
-    caseBrig(f32x2);
-    caseBrig(u32x4);
-    caseBrig(s32x4);
-    caseBrig(f32x4);
-    caseBrig(u64x2);
-    caseBrig(s64x2);
-    caseBrig(f64x2);
+    case BRIG_TYPE_NONE: return "";
+    caseBrig(s8, TYPE_S8);
+    caseBrig(s16, TYPE_S16);
+    caseBrig(s32, TYPE_S32);
+    caseBrig(s64, TYPE_S64);
+    caseBrig(u8, TYPE_U8);
+    caseBrig(u16, TYPE_U16);
+    caseBrig(u32, TYPE_U32);
+    caseBrig(u64, TYPE_U64);
+    caseBrig(f16, TYPE_F16);
+    caseBrig(f32, TYPE_F32);
+    caseBrig(f64, TYPE_F64);
+    caseBrig(b1, TYPE_B1);
+    caseBrig(b8, TYPE_B8);
+    caseBrig(b16, TYPE_B16);
+    caseBrig(b32, TYPE_B32);
+    caseBrig(b64, TYPE_B64);
+    caseBrig(b128, TYPE_B128);
+    caseBrig(ROImg, TYPE_ROIMG);
+    caseBrig(RWImg, TYPE_RWIMG);
+    caseBrig(Samp, TYPE_SAMP);
+    caseBrig(u8x4, TYPE_U8X4);
+    caseBrig(s8x4, TYPE_S8X4);
+    caseBrig(u8x8, TYPE_U8X8);
+    caseBrig(s8x8, TYPE_S8X8);
+    caseBrig(u8x16, TYPE_U8X16);
+    caseBrig(s8x16, TYPE_S8X16);
+    caseBrig(u16x2, TYPE_U16X2);
+    caseBrig(s16x2, TYPE_S16X2);
+    caseBrig(f16x2, TYPE_F16X2);
+    caseBrig(u16x4, TYPE_U16X4);
+    caseBrig(s16x4, TYPE_S16X4);
+    caseBrig(f16x4, TYPE_F16X4);
+    caseBrig(u16x8, TYPE_U16X8);
+    caseBrig(s16x8, TYPE_S16X8);
+    caseBrig(f16x8, TYPE_F16X8);
+    caseBrig(u32x2, TYPE_U32X2);
+    caseBrig(s32x2, TYPE_S32X2);
+    caseBrig(f32x2, TYPE_F32X2);
+    caseBrig(u32x4, TYPE_U32X4);
+    caseBrig(s32x4, TYPE_S32X4);
+    caseBrig(f32x4, TYPE_F32X4);
+    caseBrig(u64x2, TYPE_U64X2);
+    caseBrig(s64x2, TYPE_S64X2);
+    caseBrig(f64x2, TYPE_F64X2);
   default:
     assert(false && "Unknown type");
   }
@@ -250,76 +210,81 @@ static const char *getTypeName(BrigDataType type) {
 
 const char *getPredName(BrigCompareOperation pred) {
   switch(pred) {
-    caseBrig(Eq);
-    caseBrig(Ne);
-    caseBrig(Lt);
-    caseBrig(Le);
-    caseBrig(Gt);
-    caseBrig(Ge);
-    caseBrig(Equ);
-    caseBrig(Neu);
-    caseBrig(Ltu);
-    caseBrig(Leu);
-    caseBrig(Gtu);
-    caseBrig(Geu);
-    caseBrig(Num);
-    caseBrig(Nan);
-    caseBrig(Seq);
-    caseBrig(Sne);
-    caseBrig(Slt);
-    caseBrig(Sle);
-    caseBrig(Sgt);
-    caseBrig(Sge);
-    caseBrig(Sequ);
-    caseBrig(Sgeu);
-    caseBrig(Sneu);
-    caseBrig(Sleu);
-    caseBrig(Sltu);
-    caseBrig(Snum);
-    caseBrig(Snan);
-    caseBrig(Sgtu);
+    caseBrig(Eq, COMPARE_EQ);
+    caseBrig(Ne, COMPARE_NE);
+    caseBrig(Lt, COMPARE_LT);
+    caseBrig(Le, COMPARE_LE);
+    caseBrig(Gt, COMPARE_GT);
+    caseBrig(Ge, COMPARE_GE);
+    caseBrig(Equ, COMPARE_EQU);
+    caseBrig(Neu, COMPARE_NEU);
+    caseBrig(Ltu, COMPARE_LTU);
+    caseBrig(Leu, COMPARE_LEU);
+    caseBrig(Gtu, COMPARE_GTU);
+    caseBrig(Geu, COMPARE_GEU);
+    caseBrig(Num, COMPARE_NUM);
+    caseBrig(Nan, COMPARE_NAN);
+    caseBrig(Seq, COMPARE_SEQ);
+    caseBrig(Sne, COMPARE_SNE);
+    caseBrig(Slt, COMPARE_SLT);
+    caseBrig(Sle, COMPARE_SLE);
+    caseBrig(Sgt, COMPARE_SGT);
+    caseBrig(Sge, COMPARE_SGE);
+    caseBrig(Sequ, COMPARE_SEQU);
+    caseBrig(Sgeu, COMPARE_SGEU);
+    caseBrig(Sneu, COMPARE_SNEU);
+    caseBrig(Sleu, COMPARE_SLEU);
+    caseBrig(Sltu, COMPARE_SLTU);
+    caseBrig(Snum, COMPARE_SNUM);
+    caseBrig(Snan, COMPARE_SNAN);
+    caseBrig(Sgtu, COMPARE_SGTU);
   default:
     assert(false && "Unknown comparison operation");
   }
 #undef caseBrig
 }
 
-const char *BrigInstHelper::getRoundingName(const BrigAluModifier &aluMod) {
-  if(aluMod.floatOrInt) {
-    switch(aluMod.rounding) {
-    case 0: return "near";
-    case 1: return "zero";
-    case 2: return "up";
-    case 3: return "down";
+static bool hasRoundingMode(BrigAluModifier16_t mod) {
+  return BrigRound(mod & BRIG_ALU_ROUND) != BRIG_ROUND_NONE;
+}
+
+const char *BrigInstHelper::getRoundingName(BrigAluModifier16_t mod) {
+
+  BrigRound round = BrigRound(mod & BRIG_ALU_ROUND);
+  switch(round) {
+    case BRIG_ROUND_NONE:                       return "";
+    case BRIG_ROUND_FLOAT_NEAR_EVEN:            return "near";
+    case BRIG_ROUND_FLOAT_ZERO:                 return "zero";
+    case BRIG_ROUND_FLOAT_PLUS_INFINITY:        return "up";
+    case BRIG_ROUND_FLOAT_MINUS_INFINITY:       return "down";
+    case BRIG_ROUND_INTEGER_NEAR_EVEN:          return "neari";
+    case BRIG_ROUND_INTEGER_ZERO:               return "zeroi";
+    case BRIG_ROUND_INTEGER_PLUS_INFINITY:      return "upi";
+    case BRIG_ROUND_INTEGER_MINUS_INFINITY:     return "downi";
+    case BRIG_ROUND_INTEGER_NEAR_EVEN_SAT:      return "nears";
+    case BRIG_ROUND_INTEGER_ZERO_SAT:           return "zeros";
+    case BRIG_ROUND_INTEGER_PLUS_INFINITY_SAT:  return "ups";
+    case BRIG_ROUND_INTEGER_MINUS_INFINITY_SAT: return "downs";
     default: assert(false && "Unknown rounding mode");
-    }
-  } else {
-    switch(aluMod.rounding) {
-    case 0: return "neari";
-    case 1: return "zeroi";
-    case 2: return "upi";
-    case 3: return "downi";
-    default: assert(false && "Unknown rounding mode");
-    }
   }
 }
 
 const char *getAtomicOpName(BrigAtomicOperation atomicOp) {
-#define caseBrigAtomic(X)                        \
-  case BrigAtomic ## X:                          \
-  return #X
+#define caseBrigAtomic(X,Y)                     \
+  case BRIG_ATOMIC_ ## Y:                       \
+    return #X
   switch(atomicOp) {
-    caseBrigAtomic(And);
-    caseBrigAtomic(Or);
-    caseBrigAtomic(Xor);
-    caseBrigAtomic(Cas);
-    caseBrigAtomic(Exch);
-    caseBrigAtomic(Add);
-    caseBrigAtomic(Inc);
-    caseBrigAtomic(Dec);
-    caseBrigAtomic(Min);
-    caseBrigAtomic(Max);
-    caseBrigAtomic(Sub);
+    caseBrigAtomic(And, AND);
+    caseBrigAtomic(Or, OR);
+    caseBrigAtomic(Xor, XOR);
+    caseBrigAtomic(Cas, CAS);
+    caseBrigAtomic(Exch, EXCH);
+    caseBrigAtomic(Add, ADD);
+    caseBrigAtomic(Inc, INC);
+    caseBrigAtomic(Dec, DEC);
+    caseBrigAtomic(Min, MIN);
+    caseBrigAtomic(Max, MAX);
+    caseBrigAtomic(Sub, SUB);
   default: assert(false && "Unknown atomic operation");
   }
 #undef caseBrigAtomic
@@ -328,31 +293,58 @@ const char *getAtomicOpName(BrigAtomicOperation atomicOp) {
 std::string BrigInstHelper::getInstName(const inst_iterator inst) {
   const char *base = getBaseName(inst);
   const char *packing = getPackingName(inst);
-  const char *type = getTypeName(BrigDataType(inst->type));
+  const char *type = getTypeName(BrigType(inst->type));
 
   if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst)) {
-    const char *srcType = getTypeName(BrigDataType(cmp->sourceType));
+    const char *srcType = getTypeName(BrigType(cmp->sourceType));
     const char *predRaw =
-      getPredName(BrigCompareOperation(cmp->comparisonOperator));
+      getPredName(BrigCompareOperation(cmp->compare));
     std::string pred = llvm::StringRef(predRaw).lower();
-    return std::string(base) + "_" + pred +  "_" + type + "_" + srcType;
+    return std::string(base) + pred + type + srcType;
   }
 
   if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst)) {
-    const char *srcType = getTypeName(BrigDataType(cvt->stype));
-    const char *roundingRaw = getRoundingName(cvt->aluModifier);
+    const char *srcType = getTypeName(BrigType(cvt->sourceType));
+    const char *roundingRaw = getRoundingName(cvt->modifier);
     std::string rounding =
-      cvt->aluModifier.valid ? "_" + llvm::StringRef(roundingRaw).lower() : "";
-    return std::string(base) + rounding + "_" + type + "_" + srcType;
+      hsa::brig::hasRoundingMode(cvt->modifier) ?
+      "_" + llvm::StringRef(roundingRaw).lower() : "";
+    return std::string(base) + rounding + type + srcType;
   }
 
   if(const BrigInstAtomic *atom = dyn_cast<BrigInstAtomic>(inst)) {
     BrigAtomicOperation atomicOp = BrigAtomicOperation(atom->atomicOperation);
     const char *atomicOpName = getAtomicOpName(atomicOp);
-    return std::string(base) + atomicOpName + "_" + type;
+    return std::string(base) + atomicOpName + type;
   }
 
-  return std::string(base) + packing + "_" + type;
+  if(const BrigInstSourceType *src = dyn_cast<BrigInstSourceType>(inst)) {
+    const char *srcType = getTypeName(BrigType(src->sourceType));
+    return std::string(base) + type + srcType;
+  }
+
+  return std::string(base) + packing + type;
+}
+
+long int nstrtol(size_t size, const uint8_t *str,
+                 const uint8_t **endptr, int base) {
+  assert(base == 10 && "Unimplemented");
+
+  long int result = 0;
+  size_t i;
+  for(i = 0; i < size; ++i) {
+    if(str[i] < '0' || str[i] > '9') break;
+    result *= 10;
+    result += str[i] - '0';
+  }
+
+  if(endptr) *endptr = str + i;
+
+  return result;
+}
+
+long int nstrtol(const BrigString *str, const uint8_t **endptr, int base) {
+  return nstrtol(str->byteCount - 2, str->bytes + 2, endptr, 10);
 }
 
 } // namespace brig
