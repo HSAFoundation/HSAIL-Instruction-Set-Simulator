@@ -885,36 +885,41 @@ bool BrigModule::validate(const BrigDirectiveArgScopeEnd *dir) const {
 bool BrigModule::validate(const BrigDirectiveBlockStart *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
+  valid &= validateAlignment(dir, 4);
   valid &= validateSName(dir->name);
-  const char *string = S_.strings + dir->name;
-  valid &= check(0 == strcmp(string, "debug") ||
-                 0 == strcmp(string, "rti"),
-                 "Invalid s_name, should be either debug or rti");
-  valid &= validateCCode(dir->code);
-
+  const BrigString* bs = reinterpret_cast<const BrigString*>(S_.strings +
+                                                             dir->name);
+  std::string name(reinterpret_cast<const char*>(bs->bytes), bs->byteCount);
+  valid &= check(0 == strcmp(name.c_str(), "debug") ||
+                 0 == strcmp(name.c_str(), "rti"),
+                 "Invalid name, should be either debug or rti");
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockNumeric *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
+  valid &= validateAlignment(dir, 4);
   valid &= check(0 == dir->size % 8,
                  "Invalid size, must be a multiple of 8");
-  valid &= check(BRIG_TYPE_B1 == dir->type  || BRIG_TYPE_B8 == dir->type  ||
-                 BRIG_TYPE_B16 == dir->type || BRIG_TYPE_B32 == dir->type ||
+  valid &= check(BRIG_TYPE_B8 == dir->type  ||
+                 BRIG_TYPE_B16 == dir->type ||
+                 BRIG_TYPE_B32 == dir->type ||
                  BRIG_TYPE_B64 == dir->type,
-                 "Invalid type, must be b1, b8, b16, b32, or b64");
+                 "Invalid type, must be b8, b16, b32, or b64");
   BrigType type = BrigType(dir->type);
-  size_t size = sizeof(BrigBlockNumeric) - sizeof(uint64_t) +
-    dir->elementCount * BrigInstHelper::getTypeSize(type) / 8;
-  valid &= check(size <= dir->size,
-                 "Directive size too small for elementCount");
+  const BrigString* bs = reinterpret_cast<const BrigString*>(S_.strings +
+                                                             dir->data);
+  valid &= check(bs->byteCount ==
+                 dir->elementCount*BrigInstHelper::getTypeSize(type),
+                 "Number of data bytes is incorrect");
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveBlockString *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
+  valid &= validateAlignment(dir, 4);
   valid &= validateSName(dir->string);
   return valid;
 }
