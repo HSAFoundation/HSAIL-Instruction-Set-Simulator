@@ -304,6 +304,7 @@ class BrigModule {
   template<typename T> bool validateSize(const T *brig) const;
 
   const BrigDirectiveVersion* getFirstVersionDirective() const;
+  BrigStringOffset32_t lookupFilename(uint32_t fileid) const;
   bool isCompatibleAddrSize(const BrigSegment8_t sClass,
                             const BrigType16_t type) const;
   const BrigSections S_;

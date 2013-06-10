@@ -717,6 +717,13 @@ bool BrigModule::validate(const BrigDirectiveLoc *dir) const {
   if (!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->code);
+  BrigStringOffset32_t filename = lookupFilename(dir->fileid);
+
+  valid &= check(filename,
+                 "There is no BrigDirectiveFile for this BrigDirectiveLoc");
+  if (filename) {
+    valid &= validateSName(filename);
+  }
   return valid;
 }
 
@@ -3809,6 +3816,19 @@ bool BrigModule::validateQPtr(const inst_iterator inst) const {
 
 const BrigDirectiveVersion* BrigModule::getFirstVersionDirective() const {
   return dyn_cast<BrigDirectiveVersion>(S_.begin());
+}
+
+BrigStringOffset32_t BrigModule::lookupFilename(uint32_t fileid) const {
+  dir_iterator it = S_.begin();
+  const dir_iterator E = S_.end();
+
+  while (it != E) {
+    const BrigDirectiveFile *dir = dyn_cast<BrigDirectiveFile>(it);
+    if (dir && dir->fileid == fileid) {
+      return dir->filename;
+    }
+  }
+  return 0;
 }
 
 }  // namespace brig
