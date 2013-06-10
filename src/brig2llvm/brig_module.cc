@@ -661,6 +661,37 @@ bool BrigModule::validate(const BrigDirectiveSignature *dir) const {
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->code);
   valid &= validateSName(dir->name);
+  uint16_t numArgs = dir->inArgCount + dir->outArgCount;
+
+  for (int i = 0; i < numArgs; i++) {
+    valid &= check(dir->args[i].type <= BRIG_TYPE_F64X2,
+                   "Invalid type");
+    valid &= check(dir->args[i].align == 0 ||
+                   dir->args[i].align == 1 ||
+                   dir->args[i].align == 2 ||
+                   dir->args[i].align == 4 ||
+                   dir->args[i].align == 8 ||
+                   dir->args[i].align == 16,
+                   "Invalid align, must be 0, 1, 2, 4, 8 or 16");
+
+    valid &= check((dir->args[i].modifier & BRIG_SYMBOL_LINKAGE) ==
+                   BRIG_LINKAGE_NONE,
+                   "Signature arguments must have BRIG_LINKAGE_NONE");
+
+    valid &= check(!(dir->args[i].modifier & BRIG_SYMBOL_CONST),
+                   "Signautre argument cannot be marked by BRIG_SYMBOL_CONST");
+
+    uint64_t dim = ((uint64_t)dir->args[i].dimHi << 32) + dir->args[i].dimLo;
+    if (dim)
+      valid &= check((dir->args[i].modifier & BRIG_SYMBOL_ARRAY) &&
+                     !(dir->args[i].modifier & BRIG_SYMBOL_FLEX_ARRAY),
+                     "Non-array and flexible array arguments "
+                     "must have dim = 0");
+
+    if (dir->args[i].modifier & BRIG_SYMBOL_FLEX_ARRAY)
+      valid &= check(i == numArgs-1,
+                     "Only the last argument can be flexible");
+  }
   return valid;
 }
 
