@@ -1172,8 +1172,8 @@ bool BrigModule::validate(const BrigInstAtomicImage *code) const {
   if (!validateSize(code)) return false;
   valid &= check(code->opcode == BRIG_OPCODE_ATOMICIMAGE ||
                  code->opcode == BRIG_OPCODE_ATOMICIMAGENORET,
-                 "Invalid opcode, should be either BrigAtomicImage or "
-                 "BrigAtomicNoRetImage");
+                 "Invalid opcode, must be either "
+                 "BRIG_OPCODE_ATOMIC_IMAGE or BRIG_OPCODE_ATOMIC_IMAGENORET");
   valid &= check(code->type <= BRIG_TYPE_F64X2,
                  "Invalid type");
   for (unsigned i = 0; i < 5; ++i) {
@@ -1182,9 +1182,16 @@ bool BrigModule::validate(const BrigInstAtomicImage *code) const {
                      "operands past the operands section");
     }
   }
+  valid &= check(code->imageType == BRIG_TYPE_RWIMG,
+                 "Invalid image type, must be BRIG_TYPE_RWIMG");
+  valid &= check(code->coordType == BRIG_TYPE_U32,
+                 "Invalid coordType, must be BRIG_TYPE_U32");
   valid &= check(code->atomicOperation <= BRIG_ATOMIC_SUB,
                  "Invalid atomicOperation");
-  valid &= check(code->geometry <= BRIG_GEOMETRY_2DA, "Invalid geom");
+  valid &= check(code->geometry <= BRIG_GEOMETRY_2DA,
+                "Invalid geometry");
+  valid &= check(!(code->reserved),
+                 "Reserved must be zero");
   return valid;
 }
 
