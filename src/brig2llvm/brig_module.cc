@@ -1199,10 +1199,9 @@ bool BrigModule::validate(const BrigInstBar *code) const {
   bool valid = true;
   if (!validateSize(code)) return false;
   valid &= check(code->opcode == BRIG_OPCODE_BARRIER ||
-                 code->opcode == BRIG_OPCODE_SYNC    ||
-                 code->opcode == BRIG_OPCODE_BRN,
-                 "Invalid opcode, should be either BrigBarrier, BrigSync or "
-                 "BrigBrn");
+                 code->opcode == BRIG_OPCODE_SYNC,
+                 "Invalid opcode, must be either "
+                 "BRIG_OPCODE_BARRIER or BRIG_OPCODE_SYNC");
   valid &= check(code->type <= BRIG_TYPE_F64X2, "Invalid type");
   for (unsigned i = 0; i < 5; ++i) {
     if (code->operands[i]) {
@@ -1210,6 +1209,12 @@ bool BrigModule::validate(const BrigInstBar *code) const {
                      "operands past the operands section");
     }
   }
+  valid &= check(code->memoryFence <= BRIG_FENCE_PARTIAL_BOTH,
+                 "Invalid memoryFence");
+  valid &= check(code->width <= BRIG_WIDTH_ALL,
+                 "Invalid width");
+  valid &= check(!(code->reserved),
+                 "Reserved must be zero");
   return valid;
 }
 
