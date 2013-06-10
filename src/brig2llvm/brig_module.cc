@@ -826,6 +826,25 @@ bool BrigModule::validate(const BrigDirectiveControl *dir) const {
   if (!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->code);
+  valid &= check(dir->control <= BRIG_CONTROL_REQUIRENOPARTIALWORKGROUPS,
+                 "Invalid control directive");
+  valid &= check(dir->type <= BRIG_TYPE_F64X2,
+                 "Invalid type");
+
+  valid &= check(dir->reserved == 0,
+                 "reserved in BrigDirectiveControl must be zero");
+
+  for (int i = 0; i < dir->valueCount; i++) {
+    valid &= check(dir->values[i],
+                   "Missing a value");
+
+    oper_iterator oper(S_.operands + dir->values[i]);
+
+    valid &= check(isa<BrigOperandImmed>(oper) ||
+                   isa<BrigOperandWavesize>(oper),
+                   "Operand of BrigDirectiveControl must be "
+                   "either immediate or wavesize");
+  }
   return valid;
 }
 
