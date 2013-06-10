@@ -1235,7 +1235,25 @@ bool BrigModule::validate(const BrigInstBasic *code) const {
 }
 
 bool BrigModule::validate(const BrigInstBr *code) const {
-  return true;
+  bool valid = true;
+  if (!validateSize(code)) return false;
+  valid &= check(code->opcode == BRIG_OPCODE_BRN ||
+                 code->opcode == BRIG_OPCODE_CBR ||
+                 code->opcode == BRIG_OPCODE_CALL ,
+                 "Invalid opcode, must be either BRN, CBR or CALL");
+
+  valid &= check(code->type <= BRIG_TYPE_F64X2, "Invalid type");
+  for (unsigned i = 0; i < 5; ++i) {
+    if (code->operands[i]) {
+      valid &= check(code->operands[i] < S_.operandsSize,
+                     "operands past the operands section");
+    }
+  }
+  valid &= check(code->width <= BRIG_WIDTH_ALL,
+                 "Invalid width");
+  valid &= check(!(code->reserved),
+                 "Reserved must be 0");
+  return valid;
 }
 
 bool BrigModule::validate(const BrigInstCmp *code) const {
