@@ -1348,6 +1348,50 @@ bool BrigModule::validate(const BrigInstCvt *code) const {
   }
   valid &= check(code->sourceType <= BRIG_TYPE_F64X2,
                  "Invalid stype");
+  BrigRound rounding = BrigRound(code->modifier & BRIG_ALU_ROUND);
+  BrigType sourceType = BrigType(code->sourceType);
+  BrigType destType = BrigType(code->type);
+
+  if (code->modifier & BRIG_ALU_FTZ)
+    valid &= check(BrigInstHelper::isFloatTy(sourceType),
+                   "FTZ is only allowed when "
+                   "source type is floating-point");
+
+  if (BrigInstHelper::isFloatTy(sourceType) &&
+      BrigInstHelper::isFloatTy(destType)) {
+    size_t destSize = BrigInstHelper::getTypeSize(destType);
+    size_t srcSize = BrigInstHelper::getTypeSize(sourceType);
+
+    if (destSize < srcSize)
+      valid &= check(rounding == BRIG_ROUND_FLOAT_NEAR_EVEN ||
+                     rounding == BRIG_ROUND_FLOAT_ZERO ||
+                     rounding == BRIG_ROUND_FLOAT_PLUS_INFINITY ||
+                     rounding == BRIG_ROUND_FLOAT_MINUS_INFINITY,
+                     "Invalid rounding, must be float rounding");
+    else
+      valid &= check(rounding == BRIG_ROUND_NONE,
+                     "Invalid rounding");
+
+
+  } else if (BrigInstHelper::isFloatTy(sourceType) &&
+             (BrigInstHelper::isSignedTy(destType) ||
+              BrigInstHelper::isUnsignedTy(destType)) ) {
+    valid &= check(rounding >= BRIG_ROUND_INTEGER_NEAR_EVEN &&
+                   rounding <= BRIG_ROUND_INTEGER_MINUS_INFINITY_SAT,
+                   "Invalid rounding, must be integer rounding");
+
+  } else if (BrigInstHelper::isFloatTy(destType) &&
+             (BrigInstHelper::isSignedTy(sourceType) ||
+              BrigInstHelper::isUnsignedTy(sourceType)) ) {
+    valid &= check(rounding == BRIG_ROUND_FLOAT_NEAR_EVEN ||
+                     rounding == BRIG_ROUND_FLOAT_ZERO ||
+                     rounding == BRIG_ROUND_FLOAT_PLUS_INFINITY ||
+                     rounding == BRIG_ROUND_FLOAT_MINUS_INFINITY,
+                     "Invalid rounding, must be float rounding");
+  } else {
+    valid &= check(rounding == BRIG_ROUND_NONE,
+                   "Invalid rounding");
+  }
   return valid;
 }
 
