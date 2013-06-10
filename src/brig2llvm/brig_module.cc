@@ -749,6 +749,22 @@ bool BrigModule::validate(const BrigDirectiveSamplerInit *dir) const {
   return valid;
 }
 
+bool BrigModule::validate(const BrigDirectiveLabelTargets *dir) const {
+  bool valid = true;
+  if (!validateSize(dir)) return false;
+  valid &= validateAlignment(dir, 4);
+  valid &= validateCCode(dir->code);
+  for (unsigned i = 0; i < dir->labelCount; i++) {
+    const dir_iterator init(S_.directives + dir->labels[i]);
+    if (!validate(init)) return false;
+    if (!check(isa<BrigDirectiveLabel>(init),
+              "labels offset is wrong, must point to a BrigDirectiveLabel"))
+      return false;
+  }
+  valid &= check(dir->reserved == 0,
+                 "reserved field in BrigDirectiveLabelTargets must be zero");
+  return valid;
+}
 
 bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
   bool valid = true;
@@ -759,15 +775,11 @@ bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
     const dir_iterator init(S_.directives + dir->labels[i]);
     if (!validate(init)) return false;
     if (!check(isa<BrigDirectiveLabel>(init),
-              "d_labels offset is wrong, not a BrigDirectiveLabel"))
+              "labels offset is wrong, not a BrigDirectiveLabel"))
       return false;
   }
-  return valid;
-}
-
-bool BrigModule::validate(const BrigDirectiveLabelTargets *dir) const {
-  bool valid = true;
-  if (!validateSize(dir)) return false;
+  valid &= check(dir->reserved == 0,
+                 "reserved field in BrigDirectiveLabelInit must be zero");
   return valid;
 }
 
