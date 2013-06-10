@@ -929,6 +929,9 @@ bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) const {
 bool BrigModule::validate(const BrigDirectiveFbarrier *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
+  valid &= validateAlignment(dir, 4);
+  valid &= validateCCode(dir->code);
+  valid &= validateSName(dir->name);
   return valid;
 }
 
