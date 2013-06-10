@@ -1,4 +1,4 @@
-version 1:0:$small;
+version 0:96:$full:$small;
 
 //==========================================================
 // Function: __Get_fcos

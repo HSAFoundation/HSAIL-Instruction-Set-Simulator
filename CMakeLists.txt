@@ -142,6 +142,10 @@ set(fib_SOURCES demo/fib.cc)
 add_executable(fib ${fib_SOURCES})
 target_link_libraries(fib hsa brig2llvm)
 
+set(barrierTest_SOURCES demo/barrierTest.cc)
+add_executable(barrierTest ${barrierTest_SOURCES})
+target_link_libraries(barrierTest hsa brig2llvm)
+
 set(fcos_SOURCES demo/fcos.cc)
 add_executable(fcos ${fcos_SOURCES})
 target_link_libraries(fcos hsa brig2llvm)

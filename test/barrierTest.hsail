@@ -1,0 +1,63 @@
+// This hsail basically came from the following opencl routine
+// (I wanted to use local memory but could not make that work in the simulator)
+//
+//  __kernel void run(
+//	  __global int *out,
+//	  __global int *loc) {
+//    int gid = get_global_id(0);
+//    loc[gid] = gid;
+//	  barrier(CLK_LOCAL_MEM_FENCE);  // wait for others
+//	  int grpSize = get_local_size(0);
+//	  int sum=0;
+//	  int startgid = gid - (gid % grpSize);
+//	  for (int i=startgid; i<(startgid + grpSize); i++) {
+//	    sum += loc[i];
+//	  }
+//	  out[gid] = sum;
+//  }
+
+
+version 0:96:$full:$large;
+
+kernel &run(
+   kernarg_u64 %_out,
+   kernarg_u64 %_loc
+){
+
+	workitemabsid_u32	$s0, 0;
+	cvt_s64_s32	$d0, $s0;
+	shl_u64	$d0, $d0, 2;
+	ld_kernarg_u64	$d1, [%_loc];
+	add_u64	$d2, $d1, $d0;
+	st_global_u32	$s0, [$d2];
+	workgroupsize_u32	$s1, 0;
+	mov_b32	$s2, 0;
+	barrier_fgroup;
+	ld_kernarg_u64	$d2, [%_out];
+	cmp_lt_b1_s32	$c0, $s1, 1;
+	cbr	$c0, @BB0_3;
+	// BB#1:                                // %for.body.preheader
+	rem_s32	$s2, $s0, $s1;
+	sub_u32	$s3, $s0, $s2;
+	add_u32	$s1, $s3, $s1;
+	sub_u32	$s2, $s0, $s2;
+	cvt_s64_s32	$d3, $s2;
+	shl_u64	$d3, $d3, 2;
+	add_u64	$d1, $d1, $d3;
+	mov_b32	$s2, 0;
+
+@BB0_2:
+	// %for.body
+	ld_global_u32	$s0, [$d1];
+	add_u32	$s2, $s0, $s2;
+	add_u64	$d1, $d1, 4;
+	add_u32	$s3, $s3, 1;
+	cmp_lt_b1_s32	$c0, $s3, $s1;
+	cbr	$c0, @BB0_2;
+
+@BB0_3:
+	// %for.exit
+	add_u64	$d0, $d2, $d0;
+	st_global_u32	$s2, [$d0];
+	ret;
+};

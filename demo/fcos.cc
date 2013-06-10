@@ -73,4 +73,9 @@ int main(int argc, char **argv) {
   }
 
   hsaRT->freeGlobalMemory(r);
+
+  delete queue;
+  delete kernel;
+  delete program;
+  delete hsaRT;
 }

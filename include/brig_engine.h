@@ -36,6 +36,7 @@ class BrigEngine {
  private:
   llvm::ExecutionEngine *EE_;
   llvm::Module *M_;
+  uint32_t numProcessors;
 
   void init(bool forceInterpreter = false,
             char optLevel = ' ');

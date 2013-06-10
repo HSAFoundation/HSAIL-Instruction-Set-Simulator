@@ -240,13 +240,18 @@ class SimRuntimeApi : public RuntimeApi {
       devices.push_back(new SimDevice());
   }
 
+  ~SimRuntimeApi() {
+    for(unsigned i = 0; i < devices.size(); ++i)
+      delete devices[i];
+  }
+
   virtual uint32_t getDeviceCount() { return 1U; }
 
   virtual const DeviceList &getDevices() { return devices; }
 
   virtual Program *createProgram(char *elf, size_t elfSize, DeviceList *) {
-    hsa::brig::BrigReader *reader =
-      hsa::brig::BrigReader::createBrigReader(elf, elfSize);
+    llvm::OwningPtr<hsa::brig::BrigReader> reader
+      (hsa::brig::BrigReader::createBrigReader(elf, elfSize));
     if(!reader) return NULL;
 
     hsa::brig::BrigModule brigMod(*reader, &llvm::errs());

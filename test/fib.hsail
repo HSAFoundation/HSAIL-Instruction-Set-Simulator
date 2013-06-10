@@ -1,4 +1,4 @@
-version 1:0:$small;
+version 0:96:$full:$small;
 function &fib (arg_s32 %r) (arg_s32 %n)
 {
   ld_arg_s32 $s1, [%n];

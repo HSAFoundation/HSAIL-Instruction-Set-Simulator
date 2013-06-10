@@ -78,16 +78,22 @@ int main(int argc, char **argv) {
     hsacommon::vector<hsa::Event *> deps;
     queue->dispatch(kernel, la, deps, 3, argA, argB, argLength);
 
-	bool success = true;
+    bool success = true;
     for (int k=0; k<length; k++) {
-	  if(a[k] != b[k]) {
-		cout << "mismatch at index " << k << ", expected " << a[k] << ", saw " << b[k] << endl;
-		success = false;
-	  }
+      if(a[k] != b[k]) {
+        cout << "mismatch at index " << k << ", expected " << a[k] << ", saw " << b[k] << endl;
+        success = false;
+      }
     }
-	if (success) cout << "Vector copy success for length " << length << endl;
+    if (success) cout << "Vector copy success for length " << length << endl;
 
     hsaRT->freeGlobalMemory(a);
     hsaRT->freeGlobalMemory(b);
+
+    delete queue;
   }
+
+  delete kernel;
+  delete program;
+  delete hsaRT;
 }

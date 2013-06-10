@@ -1,4 +1,4 @@
-version 1:0:$full:$small;
+version 0:96:$full:$small;
 
 function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0);
 

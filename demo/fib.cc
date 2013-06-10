@@ -72,4 +72,9 @@ int main(int argc, char **argv) {
   llvm::outs() << "\n";
 
   hsaRT->freeGlobalMemory(r);
+
+  delete queue;
+  delete kernel;
+  delete program;
+  delete hsaRT;
 }

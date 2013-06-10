@@ -874,5 +874,9 @@ extern "C" u32 WorkItemAbsId_u32(u32 x) {
   return __brigThreadInfo->workItemAbsId[x];
 }
 
+extern "C" u32 WorkGroupSize_u32(u32 x) {
+  return __brigThreadInfo->workGroupSize[x];
+}
+
 } // namespace brig
 } // namespace hsa

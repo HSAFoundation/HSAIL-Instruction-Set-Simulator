@@ -1,4 +1,4 @@
-version 1:0:$small;
+version 0:96:$full:$small;
 
 kernel &__OpenCL_vec_copy_kernel(
         kernarg_u32 %arg_val0,

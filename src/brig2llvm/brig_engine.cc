@@ -297,6 +297,15 @@ static std::set<std::string> loadedLibs;
 void BrigEngine::init(bool forceInterpreter, char optLevel) {
 
   Dl_info info;
+  char *threnv = getenv("SIMTHREADS");
+  if (threnv != NULL && atoi(threnv) > 0) {
+    numProcessors = atoi(threnv);
+  } else if(sysconf(_SC_NPROCESSORS_CONF) > 0) {
+    numProcessors = sysconf(_SC_NPROCESSORS_CONF);
+  } else {
+    numProcessors = 1;
+  }
+
   int err = dladdr(&runtime, &info);
   assert(err && info.dli_fname &&
          "How are we executing if we haven't even been loaded?!");
@@ -378,14 +387,82 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
     JMM->invalidateInstructionCache();
 }
 
+
+typedef void *(*EntryFunPtrTy)(void*);
+
+// a struct that adds fields used by the threads that run the WorkItemLoop
+struct WorkItemLoopThreadInfo : public ThreadInfo {
+  EntryFunPtrTy EntryFunPtr;
+  uint32_t absidLow;
+  uint32_t absidStep;
+  uint32_t groupSize;
+  pthread_barrier_t *barriers;
+
+  WorkItemLoopThreadInfo(uint32_t NDRangeSize, uint32_t workdim,
+                         uint32_t workGroupSize[3], uint32_t workItemAbsId[3],
+                         pthread_barrier_t *barrier,
+                         void *const *args, size_t size,
+                         EntryFunPtrTy EntryFunPtr,
+                         uint32_t absidLow, uint32_t absidStep,
+                         uint32_t groupSize, pthread_barrier_t *barriers) :
+    ThreadInfo(NDRangeSize, workdim, workGroupSize, workItemAbsId, barrier, args, size),
+    EntryFunPtr(EntryFunPtr), absidLow(absidLow), absidStep(absidStep),
+    groupSize(groupSize), barriers(barriers) {
+  }
+};
+
+static uint32_t roundUp(int val, int multiple) {
+  return ((val + multiple - 1) / multiple) * multiple;
+}
+
+// the workItemLoop runs a set of workItems (from different workGroups)
+// all in the same pthread.  It assigns the workItems a barrier
+// based on the workGroupId. (absid / workGroupSize)
+
+static void *workItemLoop(void *vargs) {
+  void **args = (void **) vargs;
+  WorkItemLoopThreadInfo *thrInfo = (WorkItemLoopThreadInfo *) (args[0]);
+  // compute size of the last group
+  uint32_t lastGroupSize = thrInfo->NDRangeSize % thrInfo->groupSize;
+  uint32_t lastGroupNum = (roundUp(thrInfo->NDRangeSize, thrInfo->groupSize) / thrInfo->groupSize) - 1;
+  if (lastGroupSize == 0) lastGroupSize = thrInfo->groupSize;
+  for(uint32_t absid = thrInfo->absidLow; absid < thrInfo->NDRangeSize; absid += thrInfo->absidStep ) {
+    thrInfo->workItemAbsId[0] = absid;
+    uint32_t workGroupNum = absid / thrInfo->groupSize;
+    thrInfo->barrier = &thrInfo->barriers[workGroupNum];
+    // insert correct groupsize if we are in last group
+    if (workGroupNum == lastGroupNum) {
+      thrInfo->workGroupSize[0] = lastGroupSize;
+    }
+    // all other fields such as argsArray, etc were set up when thrInfo created
+    (thrInfo->EntryFunPtr)(vargs);
+  }
+  return NULL;
+}
+
+
 void BrigEngine::launch(llvm::Function *EntryFn,
                         llvm::ArrayRef<void *> args,
                         uint32_t blockNum,
-                        uint32_t threadNum) {
+                        uint32_t workGroupSize) {
 
-  assert(blockNum && threadNum && "Thread count too low");
+  /***
+   *  Note: This interface is currently built on the assumption that
+   *  the actual NDRangeSize is blockNum * _workGroupSize.  In other
+   *  words, blockNum is the grid dimensions.  The latest HSAIL
+   *  programmer's guide supports NDRangeSizes that are not exact
+   *  multiples of the workGroupSize.  So eventually the interface to
+   *  this routine should take NDRangeSize and compute blockNum from
+   *  that instead of the other way around (would have to round up).
+   *  Right now there might be brig_reader tests that depend on the
+   *  current interface that would have to change.
+   ***/
 
-  typedef void *(*EntryFunPtrTy)(void*);
+  uint32_t NDRangeSize = blockNum * workGroupSize;
+
+
+  assert(blockNum && workGroupSize && "Thread count too low");
+
   EntryFunPtrTy EntryFunPtr =
     (EntryFunPtrTy)(intptr_t) EE_->getPointerToFunction(EntryFn);
 
@@ -393,36 +470,69 @@ void BrigEngine::launch(llvm::Function *EntryFn,
   pthread_attr_init(&attr);
   pthread_barrierattr_t barrierAttr;
   pthread_barrierattr_init(&barrierAttr);
+
+  /***
+   * Currently we use one barrier per block (although we probably
+   * could get away with a number of barriers equal to the number of
+   * concurrently executing workgroups).  Another optimization would
+   * be to avoid barrier initialization at all if we had detected that
+   * the kernel never uses barriers (nor calls external functions)
+   ***/
   pthread_barrier_t *barriers = new pthread_barrier_t[blockNum];
-  ThreadInfo **threads = new ThreadInfo *[blockNum * threadNum];
 
+  // compute how many pthreads we will start we need at least as many
+  // as the incoming workGroupSize but we will also try to keep all
+  // the processors busy by using multiples of the workGroupSize if
+  // necessary
+  uint32_t numConcurrentWorkGroups = roundUp(numProcessors, workGroupSize) / workGroupSize;
+  uint32_t numPthreads = numConcurrentWorkGroups * workGroupSize;
 
-  uint32_t NDRangeSize = blockNum * threadNum;
+  WorkItemLoopThreadInfo **threads = new WorkItemLoopThreadInfo *[numPthreads];
+
   uint32_t workdim = 1;
-  uint32_t workGroupSize[] = { threadNum, 1, 1 };
+  uint32_t workGroupSizeV3[] = { workGroupSize, 1, 1 };
 
+  // initialize all the barriers
   for(uint32_t i = 0; i < blockNum; ++i) {
-    pthread_barrier_init(barriers + i, &barrierAttr, threadNum);
-    for(uint32_t j = 0; j < threadNum; ++j) {
-
-      uint32_t tid = i * threadNum + j;
-      uint32_t workItemAbsId[] = { tid, 0, 0 };
-      threads[tid] = new ThreadInfo(NDRangeSize, workdim,
-                                    workGroupSize, workItemAbsId,
-                                    barriers + i,
-                                    args.data(), args.size());
-      pthread_create(&threads[tid]->tid, &attr, EntryFunPtr,
-                     threads[tid]->argsArray);
-    }
+    pthread_barrier_init(barriers + i, &barrierAttr, workGroupSize);
   }
 
+  // The final barrier might not have the full workGroupSize threads on it
+  // (when we move to the input being NDRangeSize)
+  if (NDRangeSize % workGroupSize != 0) {
+    pthread_barrier_init(&barriers[blockNum-1], &barrierAttr, NDRangeSize % workGroupSize);
+  }
+
+  // create the workItemLoop pthreads
+  for (uint32_t k=0; k<numPthreads; k++) {
+    uint32_t workItemAbsId[] = { 0, 0, 0 };  // will be filled in by the workItemLoop
+    pthread_barrier_t *barrier = NULL;     // will be filled in by the workItemLoop
+    uint32_t absidLow = k;
+    uint32_t absidStep = numPthreads;
+    uint32_t groupSize = workGroupSize;
+
+    threads[k] = new WorkItemLoopThreadInfo(NDRangeSize, workdim,
+                                            workGroupSizeV3, workItemAbsId,
+                                            barrier,
+                                            args.data(), args.size(),
+                                            EntryFunPtr,
+                                            absidLow, absidStep,
+                                            groupSize, barriers);
+
+
+    pthread_create(&threads[k]->tid, &attr, &workItemLoop, threads[k]->argsArray);
+  }
+
+  // join all the workItemLoop pthreads
+  for (uint32_t k=0; k<numPthreads; k++) {
+    WorkItemLoopThreadInfo *thrInfo = threads[k];
+    void *retVal;
+    pthread_join(thrInfo->tid, &retVal);
+    delete threads[k];
+  }
+
+  // destroy all the barriers
   for(uint32_t i = 0; i < blockNum; ++i) {
-    for(uint32_t j = 0; j < threadNum; ++j) {
-      uint32_t tid = i * threadNum + j;
-      void *retVal;
-      pthread_join(threads[tid]->tid, &retVal);
-      delete threads[tid];
-    }
     pthread_barrier_destroy(barriers + i);
   }
 
