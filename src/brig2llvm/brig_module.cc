@@ -79,6 +79,8 @@ bool BrigModule::validateDirectives(void) const {
       caseBrig(Dir, DirectiveFile);
       caseBrig(Dir, DirectiveComment);
       caseBrig(Dir, DirectiveLoc);
+      caseBrig(Dir, DirectiveImageInit);
+      caseBrig(Dir, DirectiveSamplerInit);
       caseBrig(Dir, DirectiveVariableInit);
       caseBrig(Dir, DirectiveLabelInit);
       caseBrig(Dir, DirectiveControl);
@@ -660,24 +662,59 @@ bool BrigModule::validate(const BrigDirectiveVariableInit *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 8);
-  valid &= check(BRIG_TYPE_B1 == dir->type  || BRIG_TYPE_B8 == dir->type  ||
-                 BRIG_TYPE_B16 == dir->type || BRIG_TYPE_B32 == dir->type ||
-                 BRIG_TYPE_B64 == dir->type || BRIG_TYPE_B128 == dir->type,
-                 "Invalid type, must be b1, b8, b16, b32, b64, or b128");
+  valid &= validateCCode(dir->code);
+  valid &= check(dir->type <= BRIG_TYPE_F64X2,
+                 "Invalid data type");
+  valid &= validateSName(dir->data);
+  const BrigString *bs = reinterpret_cast<const BrigString*>(S_.strings +
+                                                       dir->data);
+
+  valid &= check(bs->byteCount <=
+                 dir->elementCount*BrigInstHelper::getTypeSize(dir->type),
+                 "Invalid size of data in BrigDirectiveVariableInit");
+
+  valid &= check(dir->reserved == 0,
+                 "reserved field must be zero");
+
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveImageInit *dir) const {
   bool valid = true;
+  if (!validateSize(dir)) return false;
+  valid &= validateAlignment(dir, 8);
+  valid &= validateCCode(dir->code);
 
+  if (dir->array > 1)
+    valid &= check(dir->depth == 1,
+                   "Depth must be 1 for 1D or 2D image");
+
+  valid &= check(dir->order <= BRIG_ORDER_SBGRA,
+                 "Invalid image order");
+
+  valid &= check(dir->format <= BRIG_FORMAT_UNORM_INT24,
+                 "Invalid image format");
+
+  valid &= check(dir->reserved == 0,
+                 "reserved field is not zero");
 
   return valid;
 }
 
 bool BrigModule::validate(const BrigDirectiveSamplerInit *dir) const {
   bool valid = true;
+  if (!validateSize(dir)) return false;
+  valid &= validateAlignment(dir, 8);
 
+  valid &= check(dir->boundaryU <= BRIG_BOUNDARY_BORDER,
+                 "Invalid sampler boundary value");
+  valid &= check(dir->boundaryV <= BRIG_BOUNDARY_BORDER,
+                 "Invalid sampler boundary value");
+  valid &= check(dir->boundaryW <= BRIG_BOUNDARY_BORDER,
+                 "Invalid sampler boundary value");
 
+  valid &= check((dir->modifier & BRIG_SAMPLER_FILTER) <= BRIG_FILTER_LINEAR,
+                 "Invalid sampler filter");
   return valid;
 }
 
