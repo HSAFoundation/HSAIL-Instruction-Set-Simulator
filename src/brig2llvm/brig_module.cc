@@ -1079,6 +1079,16 @@ template<typename T> bool BrigModule::validateSize(const T *brig) const {
 bool BrigModule::validate(const BrigInstAddr *code) const {
   bool valid = true;
   if (!validateSize(code)) return false;
+  for (unsigned i = 0; i < 5; ++i) {
+    if (code->operands[i]) {
+      valid &= check(code->operands[i] < S_.operandsSize,
+                   "operands past the operands section");
+    }
+  }
+  valid &= check(!(code->reserved[0] ||
+                   code->reserved[1] ||
+                   code->reserved[2]),
+                 "reserved must be zero");
   return valid;
 }
 
