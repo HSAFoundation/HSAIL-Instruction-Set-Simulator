@@ -364,6 +364,23 @@ bool BrigModule::validate(const BrigDirectiveExecutable *dir) const {
   valid &= validateCCode(dir->code);
   valid &= validateSName(dir->name);
 
+  if (dir->kind == BRIG_DIRECTIVE_KERNEL)
+    valid &= check(!(dir->outArgCount),
+                   "Kernel must not have any output parameters");
+
+  if (dir->inArgCount) {
+    dir_iterator firstInParam1(dir);
+
+    for (int i = 0; i < dir->outArgCount + 1; ++i) {
+      ++firstInParam1;
+      if (!validate(firstInParam1)) return false;
+    }
+
+    const dir_iterator firstInParam2(S_.directives + dir->firstInArg);
+    if (!validate(firstInParam2)) return false;
+    valid &= check(firstInParam1 == firstInParam2, "firstInArg is wrong");
+  }
+
   const unsigned paramCount = dir->inArgCount + dir->outArgCount;
   dir_iterator argIt = dir_iterator(dir) + 1;
   for (unsigned i = 0; i < paramCount; ++i, ++argIt) {
@@ -386,6 +403,15 @@ bool BrigModule::validate(const BrigDirectiveExecutable *dir) const {
                  "The first scoped directive is too early");
   valid &= check(dir->firstScopedDirective <= dir->nextTopLevelDirective,
                  "The next directive is before the first scoped directive");
+  const BrigExecutableModifier8_t mod = dir->modifier;
+
+  if (mod & BRIG_EXECUTABLE_DECLARATION) {   // a declaration
+    valid &= check(dir->firstScopedDirective == dir->nextTopLevelDirective,
+                   "firstScopedDirective must be the same as"
+                   "nextTopLevelDirective for function declaration");
+    valid &= check(dir->instCount == 0,
+                   "Function declaration must have zero instCount");
+  }
 
   if (dir->inArgCount) {
     dir_iterator firstInParam1(dir);
@@ -397,6 +423,11 @@ bool BrigModule::validate(const BrigDirectiveExecutable *dir) const {
     const dir_iterator firstInParam2(S_.directives + dir->firstInArg);
     if (!validate(firstInParam2)) return false;
     valid &= check(firstInParam1 == firstInParam2, "d_firstInParam is wrong");
+  }
+
+  for (int i = 0; i < 3; i++) {
+    valid &= check(dir->reserved[i] == 0,
+                   "reserved field of BrigDirectiveExecutable must be zero");
   }
 
   return valid;
