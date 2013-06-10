@@ -68,9 +68,11 @@ bool BrigModule::validateDirectives(void) const {
       case BRIG_DIRECTIVE_KERNEL:
         if (!validate(cast<BrigDirectiveExecutable>(it))) return false;
         break;
-      caseBrig(Dir, DirectiveVariable);
-      caseBrig(Dir, DirectiveImage);
-      caseBrig(Dir, DirectiveSampler);
+      case BRIG_DIRECTIVE_VARIABLE:
+      case BRIG_DIRECTIVE_IMAGE:
+      case BRIG_DIRECTIVE_SAMPLER:
+        if (!validate(cast<BrigDirectiveSymbol>(it))) return false;
+        break;
       caseBrig(Dir, DirectiveLabel);
       caseBrig(Dir, DirectiveVersion);
       caseBrig(Dir, DirectiveSignature);
@@ -364,7 +366,7 @@ bool BrigModule::validate(const BrigDirectiveExecutable *dir) const {
   dir_iterator argIt = dir_iterator(dir) + 1;
   for (unsigned i = 0; i < paramCount; ++i, ++argIt) {
     if (!validate(argIt)) return false;
-    const BrigDirectiveVariable *bds = dyn_cast<BrigDirectiveVariable>(argIt);
+    const BrigDirectiveSymbol *bds = dyn_cast<BrigDirectiveSymbol>(argIt);
     if (!check(bds, "Too few argument symbols")) return false;
     if (!validate(bds)) return false;
     if (dir->kind == BRIG_DIRECTIVE_FUNCTION)
@@ -475,51 +477,107 @@ bool BrigModule::validateCCode(void) const {
   return true;
 }
 
-bool BrigModule::validate(const BrigDirectiveVariable *dir) const {
+bool BrigModule::validate(const BrigDirectiveSymbol *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
+  valid &= validateCCode(dir->code);
+  valid &= validateSName(dir->name);
+  valid &= check(dir->align == 0 || dir->align == 1 ||
+                 dir->align == 2 || dir->align == 4 ||
+                 dir->align == 8 || dir->align == 16,
+                 "Invalid align field. Must be 0, 1, 2, 4, 8 or 16");
+  uint64_t dim = ((uint64_t) dir->dimHi << 32) + dir->dimLo;
+  BrigSymbolModifier8_t mod = dir->modifier;
+  if (!(mod & BRIG_SYMBOL_ARRAY))
+    valid &= check(dim == 0, "Dim must be zero for non-array symbol");
 
+  if (mod & BRIG_SYMBOL_FLEX_ARRAY) {
+    valid &= check(mod & BRIG_SYMBOL_ARRAY,
+                   "A flexible array must be an array");
+
+    valid &= check(dim == 0, "Flexible array must have dim set to zero");
+  }
+
+  // check if reserved is zero
+  for (int i = 0; i < 3; i++) {
+    valid &= check(dir->reserved[i] == 0,
+                   "reserved field of BrigDirectiveSymbol must be zero");
+    if (!valid) break;
+  }
   if (dir->init) {
     // 4.23
     valid &= check(dir->segment == BRIG_SEGMENT_READONLY ||
                    dir->segment == BRIG_SEGMENT_GLOBAL,
                    "Only global and readonly spaces can be initialized");
-
-    const dir_iterator init(S_.directives + dir->init);
-    if (!validate(init)) return false;
-    const BrigDirectiveVariableInit *bdi =
-      dyn_cast<BrigDirectiveVariableInit>(init);
-    const BrigDirectiveLabelInit *bdli =
-      dyn_cast<BrigDirectiveLabelInit>(init);
-    if (!check(bdi || bdli, "Missing initializer")) return false;
-
-    if (bdi && !validate(bdi)) return false;
-    if (bdli && !validate(bdli)) return false;
-
-    uint32_t elementCount = bdi ? bdi->elementCount : bdli->labelCount;
-    uint64_t dim = ((uint64_t) dir->dimHi << 32) + dir->dimLo;
-    if (dim)
-      valid &= check(elementCount == dim,
-                     "Inconsistent array dimensions");
   }
 
+  if (dir->kind == BRIG_DIRECTIVE_VARIABLE) {
+    valid &= check(dir->type != BRIG_TYPE_ROIMG &&
+                   dir->type != BRIG_TYPE_RWIMG &&
+                   dir->type != BRIG_TYPE_SAMP,
+                   "Invalid type");
+
+    if (dir->init) {
+      const dir_iterator init(S_.directives + dir->init);
+      if (!validate(init)) return false;
+      const BrigDirectiveVariableInit *bdi =
+        dyn_cast<BrigDirectiveVariableInit>(init);
+      const BrigDirectiveLabelInit *bli =
+        dyn_cast<BrigDirectiveLabelInit>(init);
+
+      if (!check(bdi || bli, "Missing variable initializer")) return false;
+      if (bdi && !validate(bdi)) return false;
+      if (bli && !validate(bli)) return false;
+
+      if (bdi) {
+        if (!validate(bdi)) return false;
+        uint32_t elementCount = bdi->elementCount;
+        uint64_t dim = ((uint64_t) dir->dimHi << 32) + dir->dimLo;
+
+        if (dim)
+          valid &= check(elementCount == dim,
+                       "Inconsistent array dimensions");
+      }
+      if (bli) {
+        if (!validate(bli)) return false;
+        uint16_t labelCount = bli->labelCount;
+        uint64_t dim = ((uint64_t) dir->dimHi << 32) + dir->dimLo;
+
+        if (dim)
+          valid &= check(labelCount == dim,
+                       "Inconsistent array dimensions");
+      }
+    }
+  } else if (dir->kind == BRIG_DIRECTIVE_IMAGE) {
+    valid &= check(dir->type == BRIG_TYPE_ROIMG ||
+                   dir->type == BRIG_TYPE_RWIMG,
+                   "Invalid type");
+    if (dir->init) {
+      const dir_iterator init(S_.directives + dir->init);
+      if (!validate(init)) return false;
+      const BrigDirectiveImageInit *bdi =
+        dyn_cast<BrigDirectiveImageInit>(init);
+
+      if (!check(bdi, "Missing image initializer")) return false;
+      if (bdi && !validate(bdi)) return false;
+    }
+  } else if (dir->kind == BRIG_DIRECTIVE_SAMPLER) {
+    if (dir->init) {
+      const dir_iterator init(S_.directives + dir->init);
+      if (!validate(init)) return false;
+      const BrigDirectiveSamplerInit *bdi =
+        dyn_cast<BrigDirectiveSamplerInit>(init);
+
+      if (!check(bdi, "Missing sampler initializer")) return false;
+      if (bdi && !validate(bdi)) return false;
+    }
+  } else {
+    check(false, "Invalid BrigDirectiveSymbol");
+    return false;
+  }
   return valid;
 }
-
-bool BrigModule::validate(const BrigDirectiveImage *dir) const {
-  bool valid = true;
-  if (!validateSize(dir)) return false;
-  valid &= validateAlignment(dir, 4);
-  return valid;
-}
-
-bool BrigModule::validate(const BrigDirectiveSampler *dir) const {
-  bool valid = true;
-  if (!validateSize(dir)) return false;
-  return valid;
-}
-
 bool BrigModule::validate(const BrigDirectiveLabel *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
@@ -547,7 +605,6 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
                  "Unsupported Brig version");
   valid &= check(!(dir->reserved),
                  "reserved field of BrigDirectiveVersion must be zero");
-
   const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
   if (!check(bdfv, "Missing BrigDirectiveVersion")) return false;
   valid &= check(dir->hsailMajor == bdfv->hsailMajor,
@@ -609,6 +666,21 @@ bool BrigModule::validate(const BrigDirectiveVariableInit *dir) const {
                  "Invalid type, must be b1, b8, b16, b32, b64, or b128");
   return valid;
 }
+
+bool BrigModule::validate(const BrigDirectiveImageInit *dir) const {
+  bool valid = true;
+
+
+  return valid;
+}
+
+bool BrigModule::validate(const BrigDirectiveSamplerInit *dir) const {
+  bool valid = true;
+
+
+  return valid;
+}
+
 
 bool BrigModule::validate(const BrigDirectiveLabelInit *dir) const {
   bool valid = true;
