@@ -332,10 +332,12 @@ bool BrigModule::validateStrings(void) const {
 
   while (maxLen) {
     const BrigString *str = (const BrigString *) curr;
-    if (!check(str->byteCount + 4 <= maxLen, "String overflows string section"))
+    if (!check(str->byteCount + 4 <= maxLen,
+               "String overflows string section"))
       return false;
 
-    std::string s(reinterpret_cast<const char *>(str->bytes), str->byteCount);
+    std::string s(reinterpret_cast<const char *>(str->bytes),
+                  str->byteCount);
     valid &= check(stringSet.insert(s).second, "Duplicate string detected");
 
     size_t size = (str->byteCount + 7) / 4 * 4;
@@ -754,11 +756,21 @@ bool BrigModule::validateSName(BrigStringOffset32_t s_name) const {
   // Do attempt the next test if s_name is past the end of the strings
   // section! It may cause a segmentation fault.
   if (!valid) return false;
+  valid &= check(!(s_name % 4),
+                 "BrigString must start on 4-byte boundary");
+  const BrigString *bs = reinterpret_cast <const BrigString *>(S_.strings +
+                                                               s_name);
+  uint32_t numBytes = bs->byteCount;
 
-  size_t maxlen = S_.stringsSize - s_name;
-  size_t length = strnlen(S_.strings + s_name, maxlen);
-  valid &= check(length != maxlen, "String not null terminated");
+  if (!check(s_name + numBytes <= S_.stringsSize,
+             "s_name past the end of string section"))
+    return false;
 
+  for (uint32_t i = numBytes; i < ((numBytes + 3)/4)*4; i++) {
+    valid &= check(!bs->bytes[i],
+                   "Padding bytes in BrigString must be zero");
+    if (!valid) break;
+  }
   return valid;
 }
 
