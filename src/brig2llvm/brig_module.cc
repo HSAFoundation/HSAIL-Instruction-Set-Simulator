@@ -1265,16 +1265,45 @@ bool BrigModule::validate(const BrigInstCmp *code) const {
                  "Invalid type");
   valid &= check(code->pack <= BRIG_PACK_PSAT,
                  "Invalid packing control");
+  valid &= check(code->compare <= BRIG_COMPARE_SGTU,
+                 "Invalid comparisonOperator");
+  valid &= check(code->sourceType <= BRIG_TYPE_F64X2,
+                 "Invalid sourceType");
+  valid &= check(code->reserved == 0,
+                 "Reserved must be zero");
+
+  BrigType sourceType = BrigType(code->sourceType);
+  BrigType destType = BrigType(code->type);
+
+  if (code->pack != BRIG_PACK_NONE)
+    valid &= check(BrigInstHelper::isUnsignedTy(destType) &&
+                   BrigInstHelper::getTypeSize(destType) ==
+                     BrigInstHelper::getTypeSize(sourceType),
+                   "Type must be Unsigned with the same length as"
+                   " sourceType for packed compares");
+
   for (unsigned i = 0; i < 5; ++i) {
     if (code->operands[i]) {
       valid &= check(code->operands[i] < S_.operandsSize,
                    "operands past the operands section");
     }
   }
-  valid &= check(code->compare <= BRIG_COMPARE_SGTU,
-                 "Invalid comparisonOperator");
-  valid &= check(code->sourceType <= BRIG_TYPE_F64X2,
-                 "Invalid sourceType");
+
+  if (code->modifier & BRIG_ALU_FTZ)
+    valid &= check(BrigInstHelper::isFloatTy(sourceType),
+                   "FTZ modifier is only supported if "
+                   "sourceType is floating-point");
+
+  if (BrigInstHelper::isBitTy(sourceType)) {
+    valid &= check(code->compare == BRIG_COMPARE_EQ ||
+                   code->compare == BRIG_COMPARE_NE,
+                   "Invalid compare operation for bit type, must be NE or EQ");
+  } else if (BrigInstHelper::isSignedTy(sourceType) ||
+             BrigInstHelper::isUnsignedTy(sourceType)) {
+    valid &= check(code->compare <= BRIG_COMPARE_GE,
+                   "Invalid compare operation for integer type");
+  }
+
   return valid;
 }
 
