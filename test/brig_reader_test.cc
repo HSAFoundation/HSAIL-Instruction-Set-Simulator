@@ -65,7 +65,7 @@ hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
 
 TEST(BrigKernelTest, Cosine) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "\n"
     "//==========================================================\n"
     "// Function: __Get_ncos\n"
@@ -125,7 +125,7 @@ TEST(BrigKernelTest, Cosine) {
 
 TEST(BrigKernelTest, Fib) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "function &fib (arg_s32 %r) (arg_s32 %n)\n"
     "{\n"
     "  ld_arg_s32 $s1, [%n];\n"
@@ -200,7 +200,7 @@ TEST(BrigKernelTest, Fib) {
 
 TEST(BrigKernelTest, VectorCopy) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "\n"
     "kernel &__OpenCL_vec_copy_kernel(\n"
     "        kernarg_u32 %arg_val0, \n"
@@ -260,7 +260,7 @@ TEST(BrigAllUpTest, AllUp) {
 }
 
 static const char InstTest[] =
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "\n"
   "kernel &__OpenCL_vec_test_kernel(\n"
   "        kernarg_u32 %%arg_val0, \n"
@@ -583,7 +583,7 @@ TEST(BrigWriterTest, VectorArith) {
 
 TEST(BrigWriterTest, GlobalArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "\n"
     "global_u32 &array[10] = {1,2,3,4,5,6,7,8};\n"
     "\n"
@@ -600,7 +600,7 @@ TEST(BrigWriterTest, GlobalArray) {
 }
 
 static const char SubwordsInst[] =
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "\n"
   "kernel &__OpenCL_subwords_kernel(\n"
   "        kernarg_u32 %%arg_val0)\n"
@@ -678,7 +678,7 @@ TEST(BrigWriterTest, Subwords) {
 
 TEST(BrigKernelTest, EuclideanGCD) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "\n"
     "kernel &__run(\n"
     "      kernarg_u32 %arg_val2,\n"
@@ -745,7 +745,7 @@ TEST(BrigKernelTest, EuclideanGCD) {
 
 TEST(BrigKernelTest, VectorAddArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "\n"
     "function &get_global_id(arg_u32 %ret_val) (arg_u32 %arg_val0);\n"
     "\n"
@@ -809,7 +809,7 @@ TEST(BrigKernelTest, VectorAddArray) {
 
 TEST(BrigKernelTest, SExtZExt) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;"
+    "version 0:96:$full:$small;"
     ""
     "kernel &SextZext("
     "      kernarg_u32 %input,"
@@ -857,7 +857,7 @@ TEST(BrigKernelTest, SubWordArray) {
   if(sizeof(void *) == 4) return;
 
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;"
+    "version 0:96:$full:$large;"
     ""
     "global_u8 &array[16];"
     ""
@@ -928,7 +928,7 @@ TEST(BrigKernelTest, SubWordArray) {
 
 TEST(BrigKernelTest, EmptyCB) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;"
+    "version 0:96:$full:$large;"
     ""
     "kernel &EmptyCB()"
     "{"
@@ -975,7 +975,7 @@ TEST(BrigKernelTest, CRC32) {
   //CRC32 in C++ end. ret is CRC32 result.
 
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "\n"
     "kernel &CRC32Kernel(kernarg_u32 %r,\n"
     "                    kernarg_u32 %n_ptr,\n"
@@ -1045,7 +1045,7 @@ TEST(BrigKernelTest, CRC32) {
 
 TEST(BrigKernelTest, FizzBuzz) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "kernel &__fizzbuzz (kernarg_s32 %r, kernarg_s32 %n)\n"
     "{\n"
        //$s0 ret, $s1 %n, $s2 i
@@ -1120,7 +1120,7 @@ TEST(BrigKernelTest, FizzBuzz) {
 
 TEST(BrigKernelTest, InsertionSorter) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "kernel &insertionsortKernel(kernarg_u32 %r, kernarg_u32 %l)\n"
     "{\n"
        //$s0 %l, $s1 %r, $s2 i, $s3 t %r[i], $s4 j, $s5 P_%r[j], $s6 P_%r[j-1]
@@ -1183,7 +1183,7 @@ TEST(BrigKernelTest, InsertionSorter) {
 
 TEST(BrigKernelTest,  zeller) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "kernel &zeller (kernarg_s32 %r, kernarg_s32 %m,\n"
     "kernarg_s32 %d, kernarg_s32 %y)\n"
     "{\n"
@@ -1253,7 +1253,7 @@ TEST(BrigKernelTest,  zeller) {
 
 TEST(BrigKernelTest, ThreadTest) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "kernel &threadTest(kernarg_s32 %r)\n"
     "{\n"
     "  ld_kernarg_u32 $s0, [%r];\n"
@@ -1285,7 +1285,7 @@ TEST(BrigKernelTest, ThreadTest) {
 TEST(BrigKernelTest, IndirectBranches) {
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
-      "version 1:0:$small;\n"
+      "version 0:96:$full:$small;\n"
       "\n"
       "kernel &indirectBranchesKernel(kernarg_u32 %r,\n"
       "                               kernarg_u32 %n)\n"
@@ -1353,7 +1353,7 @@ TEST(BrigKernelTest, IndirectBranches) {
   }
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
-      "version 1:0:$small;\n"
+      "version 0:96:$full:$small;\n"
       "\n"
       "kernel &indirectBranchesKernel(kernarg_u32 %r,\n"
       "                               kernarg_u32 %n)\n"
@@ -1424,7 +1424,7 @@ TEST(BrigKernelTest, IndirectBranches) {
   }
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
-      "version 1:0:$small;\n"
+      "version 0:96:$full:$small;\n"
       "\n"
       "kernel &indirectBranchesKernel(kernarg_u32 %r,\n"
       "                               kernarg_u32 %n)\n"
@@ -1502,7 +1502,7 @@ TEST(BrigKernelTest, IndirectBranches) {
 
 TEST(BrigKernelTest, DISABLED_IndirectCall) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "function &foo (arg_u32 %r) (arg_u32 %n)\n"
     "{\n"
     "  ld_arg_u32 $s1, [%n];\n"     //add 1 to %n and set result to %r
@@ -1568,7 +1568,7 @@ TEST(BrigKernelTest, DISABLED_IndirectCall) {
 
 TEST(BrigWriterTest, GlobalInitialization) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "\n"
   "global_u32 &n = 9;\n"
   "kernel &__OpenCL_Global_Initializer_kernel(\n"
@@ -1587,7 +1587,7 @@ TEST(BrigWriterTest, GlobalInitialization) {
 }
 
 static const char InstTestCvt[] =
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "\n"
   "kernel &__Cvt_rounding_mode_test_kernel(\n"
   "        kernarg_u32 %%result, \n"
@@ -1674,10 +1674,10 @@ TEST(BrigInstTest, CvtIToI) {
     CvtII(u ## DEST, u ## SRC);                 \
   } while(0)
 
-  CvtBB( 8, 8); CvtBB( 8, 16); CvtBB( 8, 32); CvtBB( 8, 64);
-  CvtBB(16, 8); CvtBB(16, 16); CvtBB(16, 32); CvtBB(16, 64);
-  CvtBB(32, 8); CvtBB(32, 16); CvtBB(32, 32); CvtBB(32, 64);
-  CvtBB(64, 8); CvtBB(64, 16); CvtBB(64, 32); CvtBB(64, 64);
+                CvtBB( 8, 16); CvtBB( 8, 32); CvtBB( 8, 64);
+  CvtBB(16, 8);                CvtBB(16, 32); CvtBB(16, 64);
+  CvtBB(32, 8); CvtBB(32, 16);                CvtBB(32, 64);
+  CvtBB(64, 8); CvtBB(64, 16); CvtBB(64, 32);
 
 #undef CvtBB
 #undef CvtII
@@ -2417,7 +2417,7 @@ TEST(BrigInstTest, CvtRoundingMode) {
 
 TEST(BrigWriterTest, FlexArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "function &maxofN(arg_f32 %r)(arg_u32 %n, align 8 arg_u8 %last[])\n"
     "{\n"
     "ld_arg_u32 $s0, [%n];\n"
@@ -2440,7 +2440,7 @@ TEST(BrigWriterTest, FlexArray) {
 
 TEST(BrigWriterTest, GlobalInitialization_b64) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$large;\n"
+  "version 0:96:$full:$large;\n"
   "\n"
   "global_b64 &n = 0;\n"
   "kernel &__OpenCL_Global_Initializer_kernel(\n"
@@ -2459,7 +2459,7 @@ TEST(BrigWriterTest, GlobalInitialization_b64) {
 }
 
 static const char GlobalInitializerInst[] =
-  "version 1:0:$%s;\n"
+  "version 0:96:$full:$%s;\n"
   "\n"
   "global_%s &n = %s;\n"
   "kernel &__OpenCL_Global_Initializer_kernel(\n"
@@ -3213,7 +3213,7 @@ TEST(BrigGlobalTest, GlobalInitializer) {
 }
 
 static const char GlobalArrayInst[] =
-  "version 1:0:$large;\n"
+  "version 0:96:$full:$large;\n"
   "\n"
   "global_%s &array[] = { %s };\n"
   "\n"
@@ -3328,7 +3328,7 @@ TEST(BrigGlobalTest, GlobalArray) {
 TEST(BrigInstTest, WaveSize) {
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
-      "version 1:0:$large;\n"
+      "version 0:96:$full:$large;\n"
       "kernel &waveTest(kernarg_u64 %r)\n"
       "{\n"
       "  ld_kernarg_u64 $d0, [%r];\n"
@@ -3351,21 +3351,21 @@ TEST(BrigInstTest, WaveSize) {
 
 TEST(BrigKernelTest, MultipleVersionStatements) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "\n"
   "kernel &__Kernel_in_First_Scope(\n"
   "        kernarg_u32 %r)\n"
   "{\n"
   "        ret;\n"
   "};\n"
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "\n"
   "kernel &__Kernel_in_Second_Scope(\n"
   "        kernarg_u32 %r)\n"
   "{\n"
   "        ret;\n"
   "};\n"
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "\n"
   "kernel &__Kernel_in_Third_Scope(\n"
   "        kernarg_u32 %r)\n"
@@ -3378,7 +3378,7 @@ TEST(BrigKernelTest, MultipleVersionStatements) {
 }
 TEST(BrigKernelTest, Ftz2) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "kernel &ftzTest(kernarg_f32 %out)\n"
     "{\n"
     " add_ftz_f32 $s1, 0f007FFFFF, 0;\n"
@@ -3400,7 +3400,7 @@ TEST(BrigKernelTest, Ftz2) {
 
 TEST(BrigGlobalTest, Align16) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "align 16 readonly_s32 &x[] = {12, 13, 14, -13};"
     );
   EXPECT_TRUE(BP);
@@ -3408,7 +3408,7 @@ TEST(BrigGlobalTest, Align16) {
 
 TEST(BrigKernelTest, Example6) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;"
+    "version 0:96:$full:$small;"
     "function &callee(arg_f32 %output)(arg_f32 %input) {"
     "  ld_arg_f32 $s0, [%input];"
     "  st_arg_f32 $s0, [%output];"
@@ -3430,7 +3430,7 @@ TEST(BrigKernelTest, Example6) {
 
 TEST(BrigInstTest, RegV2) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "kernel &regV2(kernarg_u32 %r, kernarg_u32 %x, kernarg_u32 %y)\n"
     "{\n"
     "  ld_kernarg_u32 $s5, [%r];\n"
@@ -3460,7 +3460,7 @@ TEST(BrigInstTest, RegV2) {
 
 TEST(BrigInstTest, RegV4) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "kernel &regV4(kernarg_u32 %r, kernarg_u32 %w, kernarg_u32 %x,\n"
     "                              kernarg_u32 %y, kernarg_u32 %z)\n"
     "{\n"
@@ -3499,7 +3499,7 @@ TEST(BrigInstTest, RegV4) {
 
 TEST(BrigInstTest, Testb128) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$small;\n"
+    "version 0:96:$full:$small;\n"
     "kernel &MovB128(kernarg_u32 %r)\n"
     "{\n"
     "  ld_kernarg_u32 $s0, [%r];\n"
@@ -3523,7 +3523,7 @@ TEST(BrigInstTest, Testb128) {
 }
 
 static const char Packed[] =
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "\n"
   "kernel &packed_kernel(\n"
   "        kernarg_u32 %%r, kernarg_u%u %%input)\n"
@@ -3629,7 +3629,7 @@ TEST(BrigPacked, testPacked) {
 }
 
 static const char packedConstants[] =
-  "version 1:0:$small;\n"
+  "version 0:96:$full:$small;\n"
   "kernel &packedConstants(kernarg_u32 %%r)\n"
   "{\n"
   "  ld_kernarg_u32 $s0, [%r];\n"
@@ -3723,8 +3723,8 @@ TEST(BrigPacked, testPackedConstants) {
 
 TEST(BrigKernelTest, VariadicFunction) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;"
-    "function &maxofN(arg_f32 %r)(arg_u32 %n, align 8 arg_u32 %last[])"
+    "version 0:96:$full:$large;"
+    "function &maxofN(arg_f32 %r)(arg_u32 %n, align 8 arg_f32 %last[])"
     "{\n"
       "ld_arg_u32 $s0, [%n];\n" // s0 holds the number to add
       "mov_b32 $s1, 0;\n"       // s1 holds the sum
@@ -3745,7 +3745,7 @@ TEST(BrigKernelTest, VariadicFunction) {
     "{\n"                             // here is an example caller passing in 4 32-bit floats
     "  {\n"
     "    ld_kernarg_u64 $d2, [%r];\n"
-    "    align 8 arg_u8 %n[16];\n"
+    "    align 8 arg_f32 %n[4];\n"
     "    st_arg_f32 1.2f, [%n][0];\n"
     "    st_arg_f32 2.4f, [%n][4];\n"
     "    st_arg_f32 3.6f, [%n][8];\n"
@@ -3813,7 +3813,7 @@ TEST(BrigInstTest, VectorNsqrt) {
 }
 
 static const char St[] =
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "global_%s &n;\n"
     "global_%s &m = %s;\n"
     "kernel &testSt(kernarg_u64 %r)\n"
@@ -3927,7 +3927,7 @@ TEST(BrigKernelTest, testSt) {
 
 TEST(BrigKernelTest, Atomic) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__instruction2_test_kernel(\n"
     "        kernarg_s32 %result, \n"
@@ -3959,7 +3959,7 @@ TEST(BrigKernelTest, Atomic) {
 
 TEST(BrigKernelTest, AtomicNoRet) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__instruction2_test_kernel(\n"
     "        kernarg_s32 %result, \n"
@@ -3992,7 +3992,7 @@ TEST(BrigKernelTest, AtomicNoRet) {
 
 TEST(BrigInstTest, Barrier) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &BarrierTest()\n"
     "{\n"
@@ -4012,7 +4012,7 @@ TEST(BrigInstTest, Barrier) {
 
 TEST(BrigInstTest, Sync) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &SyncTest()\n"
     "{\n"
@@ -4029,7 +4029,7 @@ TEST(BrigInstTest, Sync) {
 }
 
 static const char Ld[] =
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "global_%s &n = %s;\n"
     "kernel &testLd(kernarg_u64 %r)\n"
     "{\n"
@@ -4137,7 +4137,7 @@ TEST(BrigKernelTest, testLd) {
 
 TEST(BrigInstTest, VectorBitalign1) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__instruction4_test_kernel(\n"
     "        kernarg_u32 %result, \n"
@@ -4439,7 +4439,7 @@ TEST(Instruction2Test, Sqrt) {
 
 TEST(Instruction2Test, Fract) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__instruction2_test_kernel(\n"
     "        kernarg_s32 %result, \n"
@@ -4771,7 +4771,7 @@ TEST(Instruction4Test, Bitextract) {
 
 TEST(Instruction4Test, Shuffle) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__instruction4_test_kernel(\n"
     "        kernarg_u32 %result, \n"
@@ -4800,7 +4800,7 @@ TEST(Instruction4Test, Shuffle) {
 
 TEST(Instruction4Test, Sad) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$large;\n"
+  "version 0:96:$full:$large;\n"
   "\n"
   "kernel &__instruction4_test_kernel(\n"
   "        kernarg_u64 %result, \n"
@@ -4828,7 +4828,7 @@ TEST(Instruction4Test, Sad) {
 
 TEST(Instruction4Test, Cmov_32) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$large;\n"
+  "version 0:96:$full:$large;\n"
   "\n"
   "kernel &__instruction4_test_kernel(\n"
   "        kernarg_u64 %result, \n"
@@ -4856,7 +4856,7 @@ TEST(Instruction4Test, Cmov_32) {
 
 TEST(Instruction4Test, Cmov_64) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-  "version 1:0:$large;\n"
+  "version 0:96:$full:$large;\n"
   "\n"
   "kernel &__instruction4_test_kernel(\n"
   "        kernarg_u64 %result, \n"
@@ -4884,7 +4884,7 @@ TEST(Instruction4Test, Cmov_64) {
 
 TEST(AtomTest, And) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -4917,7 +4917,7 @@ TEST(AtomTest, And) {
 
 TEST(AtomTest, Or) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -4950,7 +4950,7 @@ TEST(AtomTest, Or) {
 
 TEST(AtomTest, Xor) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -4983,7 +4983,7 @@ TEST(AtomTest, Xor) {
 
 TEST(AtomTest, Exch) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5016,7 +5016,7 @@ TEST(AtomTest, Exch) {
 
 TEST(AtomTest, Add) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5049,7 +5049,7 @@ TEST(AtomTest, Add) {
 
 TEST(AtomTest, Sub) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5082,7 +5082,7 @@ TEST(AtomTest, Sub) {
 
 TEST(AtomTest, Max) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5115,7 +5115,7 @@ TEST(AtomTest, Max) {
 
 TEST(AtomTest, Min) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atom_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5148,7 +5148,7 @@ TEST(AtomTest, Min) {
 
 TEST(AtomicNoRetTest, And) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5181,7 +5181,7 @@ TEST(AtomicNoRetTest, And) {
 
 TEST(AtomicNoRetTest, Or) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
     "        kernarg_s32 %result, \n"
@@ -5214,7 +5214,7 @@ TEST(AtomicNoRetTest, Or) {
 
 TEST(AtomicNoRetTest, Xor) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5247,7 +5247,7 @@ TEST(AtomicNoRetTest, Xor) {
 
 TEST(AtomicNoRetTest, Add) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5280,7 +5280,7 @@ TEST(AtomicNoRetTest, Add) {
 
 TEST(AtomicNoRetTest, Sub) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5313,7 +5313,7 @@ TEST(AtomicNoRetTest, Sub) {
 
 TEST(AtomicNoRetTest, Max) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
     "        kernarg_s64 %result, \n"
@@ -5346,7 +5346,7 @@ TEST(AtomicNoRetTest, Max) {
 
 TEST(AtomicNoRetTest, Min) {
   hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 1:0:$large;\n"
+    "version 0:96:$full:$large;\n"
     "\n"
     "kernel &__atomicnoret_test_kernel(\n"
     "        kernarg_s64 %result, \n"

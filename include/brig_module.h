@@ -259,6 +259,7 @@ class BrigModule {
   bool validOrEnd(const dir_iterator dir) const;
   bool validate(const dir_iterator dir) const;
 
+  bool validateSectionSize(const char *section, unsigned expectedSize) const;
   bool validateCCode(BrigCodeOffset32_t c_code) const;
   bool validateRegName(BrigStringOffset32_t reg, BrigType type) const;
   bool validateSName(BrigStringOffset32_t s_name) const;

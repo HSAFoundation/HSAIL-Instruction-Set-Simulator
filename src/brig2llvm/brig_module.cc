@@ -36,10 +36,8 @@ bool BrigModule::validateDirectives(void) const {
   dir_iterator it = S_.begin();
   const dir_iterator E = S_.end();
 
-  for(unsigned i = 0; i < std::min(size_t(4), S_.codeSize); ++i)
-    if(!check(!S_.directives[i],
-              "The first four bytes of the directives section must be zero"))
-      return false;
+  if(!validateSectionSize(S_.directives, S_.directivesSize))
+    return false;
 
   if(!validate(it)) return false;
   if(!check(it != E, "Empty directive section")) return false;
@@ -97,9 +95,8 @@ bool BrigModule::validateCode(void) const {
   inst_iterator it = S_.code_begin();
   const inst_iterator E = S_.code_end();
 
-  for(unsigned i = 0; i < std::min(size_t(4), S_.codeSize); ++i)
-    check(!S_.code[i],
-          "The first four bytes of the code section must be zero");
+  if(!validateSectionSize(S_.code, S_.codeSize))
+    return false;
 
   for(; it != E; it++) {
     if(!validate(it)) return false;
@@ -131,9 +128,8 @@ bool BrigModule::validateOperands(void) const {
   oper_iterator it = S_.oper_begin();
   const oper_iterator E = S_.oper_end();
 
-  for(unsigned i = 0; i < std::min(size_t(4), S_.operandsSize); ++i)
-    check(!S_.operands[i],
-          "The first four bytes of the operands section must be zero");
+  if(!validateSectionSize(S_.operands, S_.operandsSize))
+    return false;
 
   for(; it < E; ++it) {
     if(!validate(it)) return false;
@@ -163,9 +159,8 @@ bool BrigModule::validateInstructions(void) const {
   inst_iterator it = S_.code_begin();
   const inst_iterator E = S_.code_end();
 
-  for(unsigned i = 0; i < std::min(size_t(4), S_.codeSize); ++i)
-    check(!S_.code[i],
-          "The first four bytes of the code section must be zero");
+  if(!validateSectionSize(S_.code, S_.codeSize))
+    return false;
 
 #define caseInst(X,Y)                           \
   case BRIG_OPCODE_ ## Y:                       \
@@ -276,9 +271,8 @@ bool BrigModule::validateStrings(void) const {
 
   bool valid = true;
 
-  for(unsigned i = 0; i < std::min(size_t(4), S_.stringsSize); ++i)
-    check(!S_.strings[i],
-          "The first four bytes of the strings section must be zero");
+  if(!validateSectionSize(S_.strings, S_.stringsSize))
+    return false;
 
   std::set<std::string> stringSet;
 
@@ -349,6 +343,17 @@ bool BrigModule::validate(const BrigDirectiveExecutable *dir) const {
   }
 
   return valid;
+}
+
+bool BrigModule::validateSectionSize(const char *section,
+                                     unsigned expectedSize) const {
+
+  if(!check(expectedSize >= 4, "Section too small"))
+    return false;
+
+  unsigned size;
+  memcpy(&size, section, sizeof(size));
+  return check(size == expectedSize, "Inconsistent section size");
 }
 
 template<class T>
@@ -1253,7 +1258,11 @@ bool BrigModule::isCompatibleAddrSize(const  BrigSegment8_t sClass,
     case BRIG_SEGMENT_PRIVATE:
     case BRIG_SEGMENT_SPILL:
     case BRIG_SEGMENT_ARG:
-      valid &= check(32 == size, "Invalid type");
+      // FIXME: Disable check since AMD's assembler currently does this wrong.
+      // Look at Brigantine::setOperand in HSAILBrigantine.cpp line 824, which
+      // currently sets all address sizes to B64 for large targets.
+
+      //valid &= check(32 == size, "Invalid type");
       break;
     default:
       const BrigDirectiveVersion *bdv = getFirstVersionDirective();

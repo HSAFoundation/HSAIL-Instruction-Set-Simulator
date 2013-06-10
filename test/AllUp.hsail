@@ -1,4 +1,4 @@
-version 1:0:$small;
+version 0:96:$full:$small;
 
 //directive
 // itemsperworkgroup 7, 8, 9;
@@ -1070,16 +1070,16 @@ kernel &AllUp()
   cvt_s32_b1 $s0, $c0;
   cvt_u64_b1 $d0, $c0;
   cvt_s64_b1 $d0, $c0;
-  cvt_u8_u8 $s0, $s0;
-  cvt_s8_u8 $s0, $s0;
+//  cvt_u8_u8 $s0, $s0;
+//  cvt_s8_u8 $s0, $s0;
   cvt_u16_u8 $s0, $s0;
   cvt_s16_u8 $s0, $s0;
   cvt_u32_u8 $s0, $s0;
   cvt_s32_u8 $s0, $s0;
   cvt_u64_u8 $d0, $s0;
   cvt_s64_u8 $d0, $s0;
-  cvt_u8_s8 $s0, $s0;
-  cvt_s8_s8 $s0, $s0;
+//  cvt_u8_s8 $s0, $s0;
+//  cvt_s8_s8 $s0, $s0;
   cvt_u16_s8 $s0, $s0;
   cvt_s16_s8 $s0, $s0;
   cvt_u32_s8 $s0, $s0;
@@ -1088,16 +1088,16 @@ kernel &AllUp()
   cvt_s64_s8 $d0, $s0;
   cvt_u8_u16 $s0, $s0;
   cvt_s8_u16 $s0, $s0;
-  cvt_u16_u16 $s0, $s0;
-  cvt_s16_u16 $s0, $s0;
+//  cvt_u16_u16 $s0, $s0;
+//  cvt_s16_u16 $s0, $s0;
   cvt_u32_u16 $s0, $s0;
   cvt_s32_u16 $s0, $s0;
   cvt_u64_u16 $d0, $s0;
   cvt_s64_u16 $d0, $s0;
   cvt_u8_s16 $s0, $s0;
   cvt_s8_s16 $s0, $s0;
-  cvt_u16_s16 $s0, $s0;
-  cvt_s16_s16 $s0, $s0;
+//  cvt_u16_s16 $s0, $s0;
+//  cvt_s16_s16 $s0, $s0;
   cvt_u32_s16 $s0, $s0;
   cvt_s32_s16 $s0, $s0;
   cvt_u64_s16 $d0, $s0;
@@ -1106,16 +1106,16 @@ kernel &AllUp()
   cvt_s8_u32 $s0, $s0;
   cvt_u16_u32 $s0, $s0;
   cvt_s16_u32 $s0, $s0;
-  cvt_u32_u32 $s0, $s0;
-  cvt_s32_u32 $s0, $s0;
+//  cvt_u32_u32 $s0, $s0;
+//  cvt_s32_u32 $s0, $s0;
   cvt_u64_u32 $d0, $s0;
   cvt_s64_u32 $d0, $s0;
   cvt_u8_s32 $s0, $s0;
   cvt_s8_s32 $s0, $s0;
   cvt_u16_s32 $s0, $s0;
   cvt_s16_s32 $s0, $s0;
-  cvt_u32_s32 $s0, $s0;
-  cvt_s32_s32 $s0, $s0;
+//  cvt_u32_s32 $s0, $s0;
+//  cvt_s32_s32 $s0, $s0;
   cvt_u64_s32 $d0, $s0;
   cvt_s64_s32 $d0, $s0;
   cvt_u8_u64 $s0, $d0;
@@ -1124,16 +1124,16 @@ kernel &AllUp()
   cvt_s16_u64 $s0, $d0;
   cvt_u32_u64 $s0, $d0;
   cvt_s32_u64 $s0, $d0;
-  cvt_u64_u64 $d0, $d0;
-  cvt_s64_u64 $d0, $d0;
+//  cvt_u64_u64 $d0, $d0;
+//  cvt_s64_u64 $d0, $d0;
   cvt_u8_s64 $s0, $d0;
   cvt_s8_s64 $s0, $d0;
   cvt_u16_s64 $s0, $d0;
   cvt_s16_s64 $s0, $d0;
   cvt_u32_s64 $s0, $d0;
   cvt_s32_s64 $s0, $d0;
-  cvt_u64_s64 $d0, $d0;
-  cvt_s64_s64 $d0, $d0;
+//  cvt_u64_s64 $d0, $d0;
+//  cvt_s64_s64 $d0, $d0;
   cvt_u8_f32 $s0, $s0;
   cvt_s8_f32 $s0, $s0;
   cvt_u16_f32 $s0, $s0;
@@ -1304,7 +1304,7 @@ kernel &AllUp()
 //  cvt_near_f64_u64 $d0, $d0;
 //  cvt_near_f32_s64 $s0, $d0;
 //  cvt_near_f64_s64 $d0, $d0;
-  cvt_b1_b1 $c0, $c0;
+//  cvt_b1_b1 $c0, $c0;
   cvt_b1_s8 $c0, $s0;
   cvt_b1_u8 $c0, $s0;
   cvt_b1_s16 $c0, $s0;
@@ -2061,7 +2061,7 @@ kernel &AllUp()
   cmp_eq_f32_u64 $s1, 1, 0;
 
 //cvt
-  cvt_b1_b1 $c1, $c2;
+//  cvt_b1_b1 $c1, $c2;
   cvt_u8_b1 $s1, $c2;
   cvt_s8_b1 $s1, $c2;
   cvt_b1_u8 $c1, $s2;
@@ -2084,8 +2084,8 @@ kernel &AllUp()
   cvt_u32_f32 $s1, $s2;
   cvt_s32_f32 $s1, $s2;
   cvt_f32_f32 $s1, $s2;
-  cvt_u64_u64 $d1, $d2;
-  cvt_s64_u64 $d1, $d2;
+//  cvt_u64_u64 $d1, $d2;
+//  cvt_s64_u64 $d1, $d2;
   cvt_f64_u64 $d1, $d2;
   cvt_u8_s64 $s1, $d2;
   cvt_s8_s64 $s1, $d2;
