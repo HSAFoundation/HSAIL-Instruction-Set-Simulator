@@ -1099,8 +1099,6 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
                  code->opcode == BRIG_OPCODE_ATOMICNORET,
                  "Invalid opcode, should be either BrigAtomic or "
                  "BrigAtomicNoRet");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(code->type)),
-                 "Invalid type");
   for (unsigned i = 0; i < 5; ++i) {
     if (code->operands[i]) {
       valid &= check(code->operands[i] < S_.operandsSize,
@@ -1109,22 +1107,63 @@ bool BrigModule::validate(const BrigInstAtomic *code) const {
   }
   valid &= check(code->atomicOperation <= BRIG_ATOMIC_SUB,
                  "Invalid atomicOperation");
+  // PRM 6.5.1
   valid &= check(code->segment == BRIG_SEGMENT_GLOBAL ||
                  code->segment == BRIG_SEGMENT_GROUP ||
-                 code->segment == BRIG_SEGMENT_PRIVATE ||
-                 code->segment == BRIG_SEGMENT_KERNARG ||
-                 code->segment == BRIG_SEGMENT_READONLY ||
-                 code->segment == BRIG_SEGMENT_SPILL ||
-                 code->segment == BRIG_SEGMENT_ARG ||
                  code->segment == BRIG_SEGMENT_FLAT,
                  "Invalid storage class, can be global, group, "
-                 "private, kernarg, readonly, spill, or arg");
+                 "or flat");
   valid &= check(code->memorySemantic == BRIG_SEMANTIC_REGULAR ||
                  code->memorySemantic == BRIG_SEMANTIC_ACQUIRE ||
                  code->memorySemantic == BRIG_SEMANTIC_ACQUIRE_RELEASE ||
                  code->memorySemantic == BRIG_SEMANTIC_PARTIAL_ACQUIRE_RELEASE,
                  "Invalid memorySemantic, can be regular, acquire, "
                  "acquire release, or partial acquire release");
+  // validate type
+  BrigType type = BrigType(code->type);
+  valid &= check(!BrigInstHelper::isVectorTy(type),
+                 "Invalid type");
+  switch (code->atomicOperation) {
+    case BRIG_ATOMIC_AND:
+    case BRIG_ATOMIC_OR:
+    case BRIG_ATOMIC_XOR:
+    case BRIG_ATOMIC_CAS:
+    case BRIG_ATOMIC_EXCH:
+      valid &= check(BrigInstHelper::isBitTy(type),
+                     "Invalid type. Must be bit type for "
+                     "atomic and, or, xor, cas, exch");
+      break;
+    case BRIG_ATOMIC_ADD:
+    case BRIG_ATOMIC_SUB:
+    case BRIG_ATOMIC_MAX:
+    case BRIG_ATOMIC_MIN:
+      valid &= check(BrigInstHelper::isUnsignedTy(type) ||
+                     BrigInstHelper::isSignedTy(type),
+                     "Invalid type. Must be integer type for "
+                     "atomic add, sub, max or min");
+      break;
+    case BRIG_ATOMIC_INC:
+    case BRIG_ATOMIC_DEC:
+      valid &= check(BrigInstHelper::isUnsignedTy(type),
+                     "Invalid type. Must be unsigned type for "
+                     "atomic inc or dec");
+      break;
+
+    default:
+      check(false, "Invalid operation");
+      return false;
+  }
+
+  const BrigDirectiveVersion *bdv = getFirstVersionDirective();
+  if (bdv->machineModel == BRIG_MACHINE_LARGE)
+    valid &= check(BrigInstHelper::getTypeSize(type) == 32 ||
+                   BrigInstHelper::getTypeSize(type) == 64,
+                   "Invalid type length, must  be 32 or 64");
+
+  if (bdv->machineModel == BRIG_MACHINE_SMALL)
+    valid &= check(BrigInstHelper::getTypeSize(type) == 32,
+                   "64 bit atomic operation is not allowed "
+                   "on small machine model");
   return valid;
 }
 
