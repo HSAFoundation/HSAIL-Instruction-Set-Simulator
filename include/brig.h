@@ -539,9 +539,9 @@ enum BrigType {
 typedef uint32_t BrigVersion32_t;
 enum BrigVersion {
   BRIG_VERSION_HSAIL_MAJOR = 0,
-  BRIG_VERSION_HSAIL_MINOR = 97,
-  BRIG_VERSION_BRIG_MAJOR = 2,
-  BRIG_VERSION_BRIG_MINOR = 0
+  BRIG_VERSION_HSAIL_MINOR = 96,
+  BRIG_VERSION_BRIG_MAJOR = 0,
+  BRIG_VERSION_BRIG_MINOR = 1
 };
 
 typedef uint8_t BrigWidth8_t;

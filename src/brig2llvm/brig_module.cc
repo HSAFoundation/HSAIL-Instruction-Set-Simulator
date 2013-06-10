@@ -542,12 +542,26 @@ bool BrigModule::validate(const BrigDirectiveVersion *dir) const {
                  dir->profile == BRIG_PROFILE_BASE,
                  "Invalid profile");
 
+  valid &= check(dir->brigMajor == BRIG_VERSION_BRIG_MAJOR &&
+                 dir->brigMinor == BRIG_VERSION_BRIG_MINOR,
+                 "Unsupported Brig version");
+  valid &= check(!(dir->reserved),
+                 "reserved field of BrigDirectiveVersion must be zero");
+
   const BrigDirectiveVersion *bdfv = getFirstVersionDirective();
   if (!check(bdfv, "Missing BrigDirectiveVersion")) return false;
+  valid &= check(dir->hsailMajor == bdfv->hsailMajor,
+                 "All BrigDirectiveVersions must have the same value");
+  valid &= check(dir->hsailMinor == bdfv->hsailMinor,
+                 "All BrigDirectiveVersions must have the same value");
+  valid &= check(dir->brigMajor == bdfv->brigMajor,
+                 "All BrigDirectiveVersions must have the same value");
+  valid &= check(dir->brigMinor == bdfv->brigMinor,
+                 "All BrigDirectiveVersions must have the same value");
   valid &= check(dir->machineModel == bdfv->machineModel,
-                 "version statement must have the same machine operands");
+                 "All BrigDirectiveVersions must have the same value");
   valid &= check(dir->profile == bdfv->profile,
-                 "version statement must have the same profile operands");
+                 "All BrigDirectiveVersions must have the same value");
   return valid;
 }
 
