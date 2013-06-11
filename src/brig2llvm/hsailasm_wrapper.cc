@@ -70,8 +70,10 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
                                                   0,
                                                   errMsg);
 
-  if(errMsg && errMsg->size() > 0)
+  if(errMsg && errMsg->size() > 0) {
+    errFile.eraseFromDisk();
     return false;
+  }
 
   if(result) {
     if(errMsg) {
@@ -82,6 +84,7 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
         std::string(result->getBuffer()) :
         error.message();
     }
+    errFile.eraseFromDisk();
     return false;
   }
 
