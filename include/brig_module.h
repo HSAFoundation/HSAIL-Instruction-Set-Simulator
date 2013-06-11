@@ -102,6 +102,7 @@ class BrigModule {
   bool validate(const BrigInstImage *code) const;
   bool validate(const BrigInstMem *code) const;
   bool validate(const BrigInstMod *code) const;
+  bool validate(const BrigInstNone *code) const;
   bool validate(const BrigInstSeg *code) const;
   bool validate(const BrigInstSourceType *code) const;
 

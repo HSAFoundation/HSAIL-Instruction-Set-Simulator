@@ -124,6 +124,7 @@ bool BrigModule::validateCode(void) const {
       caseBrig(Inst, InstImage);
       caseBrig(Inst, InstMem);
       caseBrig(Inst, InstMod);
+      caseBrig(Inst, InstNone);
       caseBrig(Inst, InstSeg);
       caseBrig(Inst, InstSourceType);
       default:
@@ -1572,6 +1573,20 @@ bool BrigModule::validate(const BrigInstMod *code) const {
   }
   valid &= check(code->reserved == 0,
                  "reserved must be zero");
+  return valid;
+}
+
+bool BrigModule::validate(const BrigInstNone *code) const {
+  bool valid = true;
+  valid &= check(!((code->size)%4),
+                 "BrigInstNone must have size equal to a multiple of 4");
+  if (!valid) return false;
+  if (code->size > 4) {
+    for (int i = 4; i < code->size; i++) {
+       valid &= check(*(reinterpret_cast<const char*>(code) + i) == 0,
+                      "Extra bytes following BrigInstNone must be 0");
+    }
+  }
   return valid;
 }
 
