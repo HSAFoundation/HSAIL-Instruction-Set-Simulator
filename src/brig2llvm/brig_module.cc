@@ -1681,15 +1681,35 @@ bool BrigModule::validate(const inst_iterator inst) const {
 bool BrigModule::validate(const BrigOperandAddress *operand) const {
   bool valid = true;
   if (!validateSize(operand)) return false;
+   
+  // PRM 19.8.3 BrigOperandAddress
+  // type - must be u32 or u64 ... ?
   valid &= check(operand->type == BRIG_TYPE_B32 ||
-                 operand->type == BRIG_TYPE_B64, "Invalid datatype, should be "
-                 "BRIG_TYPE_B32 and BRIG_TYPE_B64");
+                 operand->type == BRIG_TYPE_B64,
+                 "Invalid datatype, must be "
+                 "B32 or B64");
+  
   if (operand->symbol) {
     dir_iterator dir(S_.directives + operand->symbol);
     if (!validate(dir)) return false;
     valid &= check(isa<BrigDirectiveSymbol>(dir),
                    "Invalid directive, should point to a BrigDirectiveSymbol");
   }
+
+  if (operand->reg) {
+    valid &= validateRegName(operand->reg,
+                             BrigType(operand->type));
+  }
+
+  // PRM 19.8.3 offsetHi must be 0 if type size is 32
+
+  /*
+  if (BrigInstHelper::getTypeSize(BrigType(operand->type)) == 32)
+    valid &= check(operand->offsetHi == 0,
+                   "OffsetHi must be 0 if type size is 32");
+  */
+  valid &= check(operand->reserved == 0,
+                 "reserved field in BrigOperandAddress must be zero");
   return valid;
 }
 
