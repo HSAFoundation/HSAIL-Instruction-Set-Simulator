@@ -57,7 +57,7 @@ bool BrigModule::validateDirectives(void) const {
   if (!validate(bdv)) return false;
 
 #define caseBrig(Y, X)                                 \
-  case Brig ## X::Y ## Kind:                          \
+  case Brig ## X::Y ## Kind:                           \
     if (!validate(cast<Brig ## X>(it))) return false;  \
     break
 
@@ -1310,6 +1310,28 @@ bool BrigModule::validate(const BrigInstCmp *code) const {
 bool BrigModule::validate(const BrigInstFbar *code) const {
   bool valid = true;
   if (!validateSize(code)) return false;
+  valid &= check(code->opcode == BRIG_OPCODE_INITFBAR ||
+                 code->opcode == BRIG_OPCODE_JOINFBAR ||
+                 code->opcode == BRIG_OPCODE_WAITFBAR ||
+                 code->opcode == BRIG_OPCODE_ARRIVEFBAR ||
+                 code->opcode == BRIG_OPCODE_LEAVEFBAR ||
+                 code->opcode == BRIG_OPCODE_RELEASEFBAR,
+                 "Invalid opcode. Must be fbar opcodes");
+  valid &= check(code->type == BRIG_TYPE_NONE,
+                 "Invalid type. Fbarrier operations do not have "
+                 "destination type");
+  for (unsigned i = 0; i < 5; ++i) {
+    if (code->operands[i]) {
+      valid &= check(code->operands[i] < S_.operandsSize,
+                   "operands past the operands section");
+    }
+  }
+  valid &= check(code->memoryFence <= BRIG_FENCE_PARTIAL_BOTH,
+                 "Invalid memoryFence");
+  valid &= check(code->width <= BRIG_WIDTH_ALL,
+                 "Invalid width");
+  valid &= check(code->reserved == 0,
+                 "Reserved must be zero");
   return valid;
 }
 
