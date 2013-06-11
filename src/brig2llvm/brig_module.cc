@@ -81,6 +81,7 @@ bool BrigModule::validateDirectives(void) const {
       caseBrig(Dir, DirectiveBlockString);
       caseBrig(Dir, DirectiveBlockEnd);
       caseBrig(Dir, DirectiveLabelTargets);
+      caseBrig(Dir, DirectiveFbarrier);
     default:
       check(false, "Unrecognized directive");
       return false;
@@ -143,6 +144,7 @@ bool BrigModule::validateOperands(void) const {
       caseBrig(Oper, OperandReg);
       caseBrig(Oper, OperandRegVector);
       caseBrig(Oper, OperandWavesize);
+      caseBrig(Oper, OperandFbarrierRef);
       default:
         check(false, "Unrecognized operands");
         return false;
@@ -256,6 +258,51 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(Combine, COMBINE);
       caseInst(BitExtract, BITEXTRACT);
       caseInst(Sad, SAD);
+      caseInst(Ceil, CEIL);
+      caseInst(Floor, FLOOR);
+      caseInst(Rint, RINT);
+      caseInst(Trunc, TRUNC);
+      caseInst(BitMask, BITMASK);
+      caseInst(BitMask, BITINSERT);
+      caseInst(Expand, EXPAND);
+      caseInst(NFma, NFMA);
+      caseInst(Lerp, LERP);
+      caseInst(Sadhi, SADHI);
+      caseInst(PackCvt, PACKCVT);
+      caseInst(UnpackCvt, UNPACKCVT);
+      caseInst(AtomicNoRetImage, ATOMICIMAGENORET);
+      caseInst(QueryImageArray, QUERYIMAGEARRAY);
+      caseInst(QueryImageDepth, QUERYIMAGEDEPTH);
+      caseInst(QueryImageFormat, QUERYIMAGEFORMAT);
+      caseInst(QueryImageHeight, QUERYIMAGEHEIGHT);
+      caseInst(QueryImageOrder, QUERYIMAGEORDER);
+      caseInst(QueryImageWidth, QUERYIMAGEWIDTH);
+      caseInst(QuerySamplerCoord, QUERYSAMPLERCOORD);
+      caseInst(QuerySamplerFilter, QUERYSAMPLERFILTER);
+      caseInst(ArriveFbar, ARRIVEFBAR);
+      caseInst(InitFbar, INITFBAR);
+      caseInst(JoinFbar, JOINFBAR);
+      caseInst(LeaveFbar, LEAVEFBAR);
+      caseInst(ReleaseFbar, RELEASEFBAR);
+      caseInst(WaitFbar, WAITFBAR);
+      caseInst(Ldf, LDF);
+      caseInst(MaskLane, MASKLANE);
+      caseInst(CountLane, COUNTLANE);
+      caseInst(CountUpLane, COUNTUPLANE);
+      caseInst(SendLane, SENDLANE);
+      caseInst(ReceiveLane, RECEIVELANE);
+      caseInst(CuId, CUID);
+      caseInst(Dim, DIM);
+      caseInst(GetDetectExcept, GETDETECTEXCEPT);
+      caseInst(MaxCuId, MAXCUID);
+      caseInst(MaxWaveId, MAXWAVEID);
+      caseInst(WaveId, WAVEID);
+      caseInst(WorkItemFlatAbsId, WORKITEMFLATABSID);
+      caseInst(WorkItemFlatId, WORKITEMFLATID);
+      caseInst(ClearDetectExcept, CLEARDETECTEXCEPT);
+      caseInst(SetDetectExcept, SETDETECTEXCEPT);
+      caseInst(DispatchPtr, DISPATCHPTR);
+      caseInst(QPtr, QPTR);
     default:
       check(false, "Unrecognized opcode");
       return false;
@@ -652,6 +699,12 @@ bool BrigModule::validate(const BrigDirectiveBlockEnd *dir) const {
   return valid;
 }
 
+bool BrigModule::validate(const BrigDirectiveFbarrier *dir) const {
+  bool valid = true;
+  if(!validateSize(dir)) return false;
+  return valid;
+}
+
 bool BrigModule::validOrEnd(const dir_iterator dir) const {
 
   // Exit early to avoid segmentation faults.
@@ -927,8 +980,6 @@ bool BrigModule::validate(const BrigInstImage *code) const {
                  "Invalid type of image geometry");
   valid &= check(code->type <= BRIG_TYPE_F64X2,
                  "Invalid type");
-  valid &= check(code->reserved == 0,
-                 "reserved must be zero");
   return valid;
 }
 
@@ -997,9 +1048,7 @@ bool BrigModule::validate(const BrigInstMod *code) const {
 bool BrigModule::validate(const BrigInstSeg *code) const {
   bool valid = true;
   if(!validateSize(code)) return false;
-  valid &= check(code->opcode == BRIG_OPCODE_SEGMENTP ||
-                 code->opcode == BRIG_OPCODE_FTOS ||
-                 code->opcode == BRIG_OPCODE_STOF,
+  valid &= check(code->opcode < BRIG_OPCODE_INVALID,
                  "Invalid opcode");
   valid &= check(code->type <= BRIG_TYPE_F64X2,
                  "Invalid type");
@@ -1010,8 +1059,6 @@ bool BrigModule::validate(const BrigInstSeg *code) const {
     }
   }
   valid &= check(code->segment < BRIG_SEGMENT_INVALID,
-                 "Invalid storage class");
-  valid &= check(code->segment != BRIG_SEGMENT_FLAT,
                  "Invalid storage class");
   valid &= check(code->sourceType <= BRIG_TYPE_F64X2,
                  "Invalid type");
@@ -1167,7 +1214,7 @@ bool BrigModule::validate(const BrigOperandReg *operand) const {
 bool BrigModule::validate(const BrigOperandRegVector *operand) const {
   bool valid = true;
   if(!validateSize(operand)) return false;
-  if(!check(operand->regCount == 2 || operand->regCount == 4,
+  if(!check(operand->regCount >= 2 && operand->regCount <= 4,
             "Register vectors must have size 2 or 4"))
     return false;
   for(int i = 0; i < operand->regCount; ++i) {
@@ -1183,6 +1230,12 @@ bool BrigModule::validate(const BrigOperandRegVector *operand) const {
 bool BrigModule::validate(const BrigOperandWavesize *operand) const {
   if(!validateSize(operand)) return false;
   return true;
+}
+
+bool BrigModule::validate(const BrigOperandFbarrierRef *operand) const {
+  bool valid = true;
+  if(!validateSize(operand)) return false;
+  return valid;
 }
 
 bool BrigModule::validate(const oper_iterator operand) const {
@@ -1243,6 +1296,9 @@ static bool isCompatibleSrc(BrigType type, const oper_iterator oper) {
 
   const BrigType16_t *srcTy = getType(oper);
   if(!srcTy) return false;
+
+  if(type == BRIG_TYPE_F16 && isa<BrigOperandReg>(oper))
+    return *srcTy == BRIG_TYPE_B32;
 
   const size_t instSize = BrigInstHelper::getTypeSize(type);
   const size_t srcSize = BrigInstHelper::getTypeSize(*srcTy);
@@ -1308,7 +1364,7 @@ bool BrigModule::validateArithmeticInst(const inst_iterator inst,
     valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
   }
 
-  valid &= check(BrigInstHelper::getTypeSize(type) <= 64, "Illegal data type");
+  valid &= check(BrigInstHelper::getTypeSize(type) <= 128, "Illegal data type");
 
   valid &= check(BrigInstHelper::getTypeSize(type) <=
                  BrigInstHelper::getTypeSize(BrigType(destReg->type)),
@@ -1348,23 +1404,11 @@ bool BrigModule::validateShiftInst(const inst_iterator inst) const {
     valid &= check(*getType(src1) == BRIG_TYPE_B32,
                    "Type of src1 should be BRIG_TYPE_B32");
 
-  if(BrigInstHelper::isVectorTy(type)) {
-    valid &= check(inst->type == BRIG_TYPE_U8X4  ||
-                   inst->type == BRIG_TYPE_U16X2 ||
-                   inst->type == BRIG_TYPE_S8X4  ||
-                   inst->type == BRIG_TYPE_S16X2 ||
-                   inst->type == BRIG_TYPE_U8X8  ||
-                   inst->type == BRIG_TYPE_U16X4 ||
-                   inst->type == BRIG_TYPE_S8X8  ||
-                   inst->type == BRIG_TYPE_S16X4 ||
-                   inst->type == BRIG_TYPE_S32X2 ||
-                   inst->type == BRIG_TYPE_U32X2,
-                   "Length should be 8x4, 8x8, 16x2, 16x4 or 32x2");
-  } else {
+  if(!BrigInstHelper::isVectorTy(type))
     valid &= check(BrigInstHelper::getTypeSize(type) == 32 ||
                    BrigInstHelper::getTypeSize(type) == 64,
                    "If regular form, length should be 32 or 64");
-  }
+
   return valid;
 }
 
@@ -1526,14 +1570,18 @@ bool BrigModule::validateParaSynInst(const inst_iterator inst,
                    "Source shoule be register, immediate or waveSz");
     valid &= check(isCompatibleSrc(type, src), "Incompatible Source operand");
   }
-  valid &= check(BrigInstHelper::isVectorTy(type),
+  valid &= check(!BrigInstHelper::isVectorTy(type),
                  "ParaSynInst can not accept vector types");
   return valid;
 }
 
 bool BrigModule::validateFirstLastbitInst(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(isa<BrigInstSourceType>(inst), "Incorrect instruction kind");
+
+  const BrigInstSourceType *stype = dyn_cast<BrigInstSourceType>(inst);
+  if(!check(stype, "Incorrect instruction kind"))
+    return false;
+
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
   BrigType type = BrigType(inst->type);
@@ -1548,7 +1596,10 @@ bool BrigModule::validateFirstLastbitInst(const inst_iterator inst) const {
                  isa<BrigOperandImmed>(src) ||
                  isa<BrigOperandWavesize>(src),
                  "Source should be register, immediate or wave size");
-  valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
+
+  BrigType sourceType = BrigType(stype->sourceType);
+  valid &= check(isCompatibleSrc(sourceType, src),
+                 "Incompatible source operand");
   valid &= check(!BrigInstHelper::isVectorTy(type),
                  "First and Last cannot accept vector types");
   return valid;
@@ -1598,8 +1649,6 @@ bool BrigModule::validateCopySign(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
                  "CopySign is only valid for floating point types");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "CopySign cannot accept vector types");
   valid &= validateArithmeticInst(inst, 2);
   return valid;
 }
@@ -1608,8 +1657,6 @@ bool BrigModule::validateDiv(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!BrigInstHelper::isBitTy(BrigType(inst->type)),
                  "Div is not valid for bit types");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Div cannot accept vector types");
   valid &= validateArithmeticInst(inst, 2);
   return valid;
 }
@@ -1628,8 +1675,6 @@ bool BrigModule::validateFract(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
                  "Fract is only valid for floating point type");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Fract cannot accept vector types");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -1670,13 +1715,13 @@ bool BrigModule::validateMul(const inst_iterator inst) const {
 
 bool BrigModule::validateMulHi(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
   valid &= check(BrigInstHelper::isSignedTy(BrigType(inst->type)) ||
                  BrigInstHelper::isUnsignedTy(BrigType(inst->type)),
                  "MulHi is only valid for signed and unsigned types");
   if(!BrigInstHelper::isVectorTy(BrigType(inst->type))) {
-    valid &= check(inst->type == BRIG_TYPE_U32 || inst->type == BRIG_TYPE_S32,
-                   "MulHi should be u32 and s32");
+    valid &= check(inst->type == BRIG_TYPE_U32 || inst->type == BRIG_TYPE_S32 ||
+                   inst->type == BRIG_TYPE_U64 || inst->type == BRIG_TYPE_S64,
+                   "MulHi should be u32, s32, u64, or s64");
   }
   valid &= validateArithmeticInst(inst, 2);
   return valid;
@@ -1707,8 +1752,6 @@ bool BrigModule::validateSqrt(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
                  "Sqrt is only valid for floating point types");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Sqrt cannot accept vector types");
   valid &= validateArithmeticInst(inst, 1);
   return valid;
 }
@@ -1814,8 +1857,10 @@ bool BrigModule::validateOr(const inst_iterator inst) const {
 
 bool BrigModule::validatePopCount(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(isa<BrigInstSourceType>(inst), "Incorrect instruction kind");
-  BrigType type = BrigType(inst->type);
+  const BrigInstSourceType *stype = dyn_cast<BrigInstSourceType>(inst);
+  if(!check(stype, "Incorrect instruction kind"))
+    return false;
+
   valid &= check(inst->type == BRIG_TYPE_U32,
                  "Type of PopCount shoud be u32");
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
@@ -1834,8 +1879,10 @@ bool BrigModule::validatePopCount(const inst_iterator inst) const {
                  isa<BrigOperandWavesize>(src),
                  "Source should be reg, immediate or Wavesize");
 
+  BrigType sourceType = BrigType(stype->sourceType);
   if(isa<BrigOperandReg>(src) || isa<BrigOperandImmed>(src))
-    valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
+    valid &= check(isCompatibleSrc(sourceType, src),
+                   "Incompatible source operand");
 
   return valid;
 }
@@ -1994,9 +2041,6 @@ bool BrigModule::validateMov(const inst_iterator inst) const {
   valid &= check(isa<BrigInstBasic>(inst), "Incorrect instruction kind");
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
-  valid &= check(inst->type == BRIG_TYPE_B1 || inst->type == BRIG_TYPE_B32 ||
-                 inst->type == BRIG_TYPE_B64 || inst->type == BRIG_TYPE_B128,
-                 "Length should be 1, 32, 64 or 128");
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
                  "Mov cannot accept vector types");
   BrigType type = BrigType(inst->type);
@@ -2008,8 +2052,9 @@ bool BrigModule::validateMov(const inst_iterator inst) const {
   oper_iterator src(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
                  isa<BrigOperandRegVector>(src) ||
-                 isa<BrigOperandImmed>(src),
-                 "Src of Mov should be reg, regVector or immediate");
+                 isa<BrigOperandImmed>(src) ||
+                 isa<BrigOperandWavesize>(src),
+                 "Src of Mov should be reg, regVector, immediate or wavesize");
 
   if(isa<BrigOperandReg>(dest))
     valid &= check(isCompatibleSrc(type, dest),
@@ -2119,8 +2164,9 @@ bool BrigModule::validateCmov(const inst_iterator inst) const {
   for(int i = 1; i < 4; ++i) {
     oper_iterator src(S_.operands + inst->operands[i]);
     valid &= check(isa<BrigOperandReg>(src) ||
-                   isa<BrigOperandImmed>(src),
-                   "Source should be reg or immdiate");
+                   isa<BrigOperandImmed>(src) ||
+                   isa<BrigOperandWavesize>(src),
+                   "Source should be reg, immdiate, or wavesize");
   }
 
   if(BrigInstHelper::isVectorTy(type)) {
@@ -2140,11 +2186,17 @@ bool BrigModule::validateCmov(const inst_iterator inst) const {
 
 bool BrigModule::validateClass(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(isa<BrigInstBasic>(inst), "Incorrect instruction kind");
+
+  const BrigInstSourceType *stype = dyn_cast<BrigInstSourceType>(inst);
+  if(!check(stype, "Incorrect instruction kind"))
+    return false;
+
   if(!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
     return false;
-  valid &= check(inst->type == BRIG_TYPE_F32 || inst->type == BRIG_TYPE_F64,
-                 "Type of Class should be f32 or f64");
+
+  BrigType sourceType = BrigType(stype->sourceType);
+  valid &= check(BrigInstHelper::isFloatTy(sourceType),
+                 "Type of Class should be f16, f32, or f64");
 
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest),
@@ -2155,17 +2207,19 @@ bool BrigModule::validateClass(const inst_iterator inst) const {
   for(int i = 1; i < 3; ++i) {
     oper_iterator src(S_.operands + inst->operands[i]);
     valid &= check(isa<BrigOperandReg>(src) ||
-                   isa<BrigOperandImmed>(dest),
+                   isa<BrigOperandImmed>(src) ||
+                   isa<BrigOperandWavesize>(src),
                    "Source should be register or immediate");
   }
 
-  BrigType type = BrigType(inst->type);
   oper_iterator src0(S_.operands + inst->operands[1]);
-  valid &= check(isCompatibleSrc(type, src0), "Incompatible src0 operand");
+  valid &= check(isCompatibleSrc(sourceType, src0),
+                 "Incompatible src0 operand");
 
   oper_iterator src1(S_.operands + inst->operands[2]);
-  valid &= check(*getType(src1) == BRIG_TYPE_B32,
-                 "Type of src1 should be BRIG_TYPE_B32");
+  if(getType(src1))
+    valid &= check(*getType(src1) == BRIG_TYPE_B32,
+                   "Type of src1 should be BRIG_TYPE_B32");
 
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
                  "Class can not accept the vector");
@@ -2201,8 +2255,8 @@ bool BrigModule::validateNlog2(const inst_iterator inst) const {
 
 bool BrigModule::validateNrcp(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_F32 || inst->type == BRIG_TYPE_F64,
-                 "Type should be f32 or f64");
+  valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
+                 "Type should be f16, f32, or f64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
                  "Frcp can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
@@ -2211,8 +2265,8 @@ bool BrigModule::validateNrcp(const inst_iterator inst) const {
 
 bool BrigModule::validateNsqrt(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_F32 || inst->type == BRIG_TYPE_F64,
-                 "Type should be f32 or f64");
+  valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
+                 "Type should be f16, f32, or f64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
                  "Fsqrt can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
@@ -2221,8 +2275,8 @@ bool BrigModule::validateNsqrt(const inst_iterator inst) const {
 
 bool BrigModule::validateNrsqrt(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_F32 || inst->type == BRIG_TYPE_F64,
-                 "Type should be f32 or f64");
+  valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
+                 "Type should be f16, f32, or f64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
                  "Frsqrt can not accept vector types");
   valid &= validateArithmeticInst(inst, 1);
@@ -2289,9 +2343,7 @@ bool BrigModule::validateF2u4(const inst_iterator inst) const {
 bool BrigModule::validateLerp(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(!isa<BrigInstMod>(inst), "Incorrect instruction kind");
-  valid &= check(inst->type == BRIG_TYPE_B32, "Type of Lerp should be b32");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Lerp can not accept vector types");
+  valid &= check(inst->type == BRIG_TYPE_U8X4, "Type of Lerp should be u8x4");
   valid &= validateArithmeticInst(inst, 3);
   if(!valid) return false;
   oper_iterator dest(S_.operands + inst->operands[0]);
@@ -2421,8 +2473,9 @@ bool BrigModule::validateSegmentp(const inst_iterator inst) const {
   if(!check(mem, "Invalid instruction kind")) return false;
   BrigType type = BrigType(mem->type);
   valid &= check(type == BRIG_TYPE_B1, "Type of Segmentp should be b1");
-  valid &= check(mem->segment <= 6, "StorageClass should be global, "
-                "group, private, kernarg, readonly, spill, or arg");
+  valid &= check(mem->segment < BRIG_SEGMENT_INVALID,
+                 "StorageClass should be global, "
+                 "group, private, kernarg, readonly, spill, or arg");
   oper_iterator dest(S_.operands + mem->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
   valid &= check(isCompatibleSrc(type, dest),
@@ -2478,7 +2531,8 @@ bool BrigModule::validateStoF(const inst_iterator inst) const {
                  "Incompatible destination operand");
   oper_iterator src(S_.operands + mem->operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
-                 isa<BrigOperandImmed>(src),
+                 isa<BrigOperandImmed>(src) ||
+                 isa<BrigOperandWavesize>(src),
                  "Source should be reg, immediate or waveSz");
   valid &= check(isCompatibleAddrSize(mem->segment, *getType(dest)),
                  "Incompatible address size");
@@ -2496,23 +2550,7 @@ bool BrigModule::validateCmp(const inst_iterator inst) const {
   const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst);
   if(!check(cmp, "Invalid instruction kind")) return false;
   BrigType type = BrigType(cmp->type);
-  valid &= check(type == BRIG_TYPE_B1  || type == BRIG_TYPE_B32 ||
-                 type == BRIG_TYPE_U32 ||
-                 type == BRIG_TYPE_S32 || type == BRIG_TYPE_F32 ||
-                 type == BRIG_TYPE_F16 ||
-                 type == BRIG_TYPE_S16 || type == BRIG_TYPE_U16 ||
-                 type == BRIG_TYPE_B16,
-                 "Invalid destination type");
   BrigType srcTy = BrigType(cmp->sourceType);
-  valid &= check(srcTy == BRIG_TYPE_B1  || srcTy == BRIG_TYPE_B32 ||
-                 srcTy == BRIG_TYPE_U32 ||
-                 srcTy == BRIG_TYPE_S32 || srcTy == BRIG_TYPE_F32 ||
-                 srcTy == BRIG_TYPE_B64 ||
-                 srcTy == BRIG_TYPE_U64 || srcTy == BRIG_TYPE_S64 ||
-                 srcTy == BRIG_TYPE_F64 ||
-                 srcTy == BRIG_TYPE_F16 || srcTy == BRIG_TYPE_S16 ||
-                 srcTy == BRIG_TYPE_U16 ||
-                 srcTy == BRIG_TYPE_B16, "Invalid source type");
   oper_iterator dest(S_.operands + cmp->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
   valid &= check(isCompatibleSrc(type, dest),
@@ -2521,25 +2559,24 @@ bool BrigModule::validateCmp(const inst_iterator inst) const {
     oper_iterator src(S_.operands + cmp->operands[i]);
     if(BrigInstHelper::isFloatTy(type)) {
       valid &= check(isa<BrigOperandReg>(src) ||
-                     isa<BrigOperandImmed>(src),
-                     "Source should be reg or immediate");
+                     isa<BrigOperandImmed>(src) ||
+                     isa<BrigOperandWavesize>(src),
+                     "Source should be reg, immediate, or wavesize");
     } else {
       valid &= check(isa<BrigOperandReg>(src)   ||
                      isa<BrigOperandImmed>(src) ||
                      isa<BrigOperandWavesize>(src),
-                     "Source should be reg, immediate or waveSz");
+                     "Source should be reg, immediate or wavesize");
     }
 
     valid &= check(isCompatibleSrc(srcTy, src), "Incompatible source operand");
   }
   if(BrigInstHelper::isUnsignedTy(srcTy) || BrigInstHelper::isSignedTy(srcTy))
-    valid &= check(cmp->compare <= 5, "Invalid compare");
+    valid &= check(cmp->compare <= BRIG_COMPARE_GE, "Invalid compare");
 
   if(BrigInstHelper::isFloatTy(srcTy))
-    valid &= check(cmp->compare <= 27, "Invalid compare");
+    valid &= check(cmp->compare <= BRIG_COMPARE_SGTU, "Invalid compare");
 
-  valid &= check(!BrigInstHelper::isVectorTy(type),
-                 "Cmp can not accept vector types");
   return valid;
 }
 
@@ -2629,34 +2666,11 @@ bool BrigModule::validateCvt(const inst_iterator inst) const {
   oper_iterator dest(S_.operands + cvt->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
 
-  if(BrigInstHelper::getTypeSize(type) == 8 ||
-     BrigInstHelper::getTypeSize(type) == 16) {
-    valid &= check(*getType(dest) == BRIG_TYPE_B32,
-                   "Destination should be s register");
-  } else {
-    valid &= check(isCompatibleSrc(type, dest),
-                   "Incompatible destination operand");
-  }
-
   oper_iterator src(S_.operands + cvt->operands[1]);
-  if(BrigInstHelper::isFloatTy(type)) {
-    valid &= check(isa<BrigOperandReg>(src) ||
-                   isa<BrigOperandImmed>(src),
-                   "Source should be reg or immediate");
-  } else {
-    valid &= check(isa<BrigOperandReg>(src) ||
-                   isa<BrigOperandImmed>(src) ||
-                   isa<BrigOperandWavesize>(src),
-                   "Source should be reg, immediate or waveSz");
-  }
-
-  if(BrigInstHelper::getTypeSize(srcTy) == 8 ||
-     BrigInstHelper::getTypeSize(srcTy) == 16) {
-    valid &= check(*getType(src) == BRIG_TYPE_B32,
-                   "Source should be s register");
-  } else {
-    valid &= check(isCompatibleSrc(srcTy, src), "Incompatible source operand");
-  }
+  valid &= check(isa<BrigOperandReg>(src) ||
+                 isa<BrigOperandImmed>(src) ||
+                 isa<BrigOperandWavesize>(src),
+                 "Source should be reg, immediate or wavesize");
 
   valid &= check(!BrigInstHelper::isVectorTy(type),
                  "Cvt can not accept vector types");
@@ -2682,13 +2696,9 @@ bool BrigModule::validateLd(const inst_iterator inst) const {
                    && 128 == BrigInstHelper::getTypeSize(type),
                    "Destination must be a q register if type is Bits");
   } else {
-    valid &= check(BrigInstHelper::isSignedTy(type)   ||
-                   BrigInstHelper::isUnsignedTy(type) ||
-                   BrigInstHelper::isFloatTy(type),
-                   "Invalid type");
     valid &= check(BrigInstHelper::getTypeSize(type) <=
-                   BrigInstHelper::getTypeSize(*destTy)
-                   && 64 >= BrigInstHelper::getTypeSize(*destTy),
+                   BrigInstHelper::getTypeSize(*destTy) &&
+                   64 >= BrigInstHelper::getTypeSize(*destTy),
                    "Destination register is too small");
   }
   oper_iterator addr(S_.operands + inst->operands[1]);
@@ -2723,14 +2733,11 @@ bool BrigModule::validateSt(const inst_iterator inst) const {
                    && 128 == BrigInstHelper::getTypeSize(type),
                    "Destination must be a q register if type is b128");
   } else {
-    valid &= check(BrigInstHelper::isSignedTy(type)   ||
-                   BrigInstHelper::isUnsignedTy(type) ||
-                   BrigInstHelper::isFloatTy(type),
-                   "Invalid type");
-    valid &= check(BrigInstHelper::getTypeSize(type) <=
-                   BrigInstHelper::getTypeSize(*destTy)
-                   && 64 >= BrigInstHelper::getTypeSize(*destTy),
-                   "Destination register is too small");
+    if(destTy)
+      valid &= check(BrigInstHelper::getTypeSize(type) <=
+                     BrigInstHelper::getTypeSize(*destTy) &&
+                     64 >= BrigInstHelper::getTypeSize(*destTy),
+                     "Destination register is too small");
   }
   oper_iterator addr(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandAddress>(addr),
@@ -2856,30 +2863,24 @@ bool BrigModule::validateAtomicImageInst(const inst_iterator inst,
                  "Image cannot accept vector types");
   switch(type){
     case BRIG_TYPE_U32:
+    case BRIG_TYPE_S32:
+    case BRIG_TYPE_U64:
+    case BRIG_TYPE_S64:
       valid &= check(atoIm->atomicOperation == BRIG_ATOMIC_ADD ||
                      atoIm->atomicOperation == BRIG_ATOMIC_SUB ||
-                     atoIm->atomicOperation == BRIG_ATOMIC_MIN ||
-                     atoIm->atomicOperation == BRIG_ATOMIC_MAX,
-                     "Invalid type");
-      break;
-    case BRIG_TYPE_S32:
-      valid &= check(atoIm->atomicOperation == BRIG_ATOMIC_ADD ||
                      atoIm->atomicOperation == BRIG_ATOMIC_MIN ||
                      atoIm->atomicOperation == BRIG_ATOMIC_MAX ||
                      atoIm->atomicOperation == BRIG_ATOMIC_INC ||
                      atoIm->atomicOperation == BRIG_ATOMIC_DEC,
                      "Invalid type");
       break;
-    case BRIG_TYPE_U64:
-      valid &= check(atoIm->atomicOperation == BRIG_ATOMIC_ADD ||
-                     atoIm->atomicOperation == BRIG_ATOMIC_SUB,
-                     "Invalid type");
-      break;
     case BRIG_TYPE_B32:
+    case BRIG_TYPE_B64:
       valid &= check(atoIm->atomicOperation == BRIG_ATOMIC_AND ||
                      atoIm->atomicOperation == BRIG_ATOMIC_OR  ||
                      atoIm->atomicOperation == BRIG_ATOMIC_XOR ||
-                     atoIm->atomicOperation == BRIG_ATOMIC_CAS,
+                     atoIm->atomicOperation == BRIG_ATOMIC_CAS ||
+                     atoIm->atomicOperation == BRIG_ATOMIC_EXCH,
                      "Invalid type");
       break;
     default:
@@ -2933,23 +2934,15 @@ bool BrigModule::validateAtomicNoRetImage(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateQueryArray(const inst_iterator inst) const {
+bool BrigModule::validateQueryImageArray(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_B32,
+  valid &= check(inst->type == BRIG_TYPE_U32,
                  "Type of QueryArray should be b32");
   valid &= validateImageQueryInst(inst);
   return valid;
 }
 
-bool BrigModule::validateQueryData(const inst_iterator inst) const {
-  bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_B32,
-                 "Type of QueryData should be b32");
-  valid &= validateImageQueryInst(inst);
-  return valid;
-}
-
-bool BrigModule::validateQueryDepth(const inst_iterator inst) const {
+bool BrigModule::validateQueryImageDepth(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == BRIG_TYPE_U32,
                  "Type of QueryDepth should be u32");
@@ -2957,15 +2950,27 @@ bool BrigModule::validateQueryDepth(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateQueryFiltering(const inst_iterator inst) const {
+bool BrigModule::validateQuerySamplerFilter(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_B32,
+  valid &= check(inst->type == BRIG_TYPE_U32,
                  "Type of QueryFiltering should be b32");
   valid &= validateImageQueryInst(inst);
   return valid;
 }
 
-bool BrigModule::validateQueryHeight(const inst_iterator inst) const {
+bool BrigModule::validateQueryImageFormat(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= validateImageQueryInst(inst);
+  return valid;
+}
+
+bool BrigModule::validateQuerySamplerCoord(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= validateImageQueryInst(inst);
+  return valid;
+}
+
+bool BrigModule::validateQueryImageHeight(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == BRIG_TYPE_U32,
                  "Type of QueryHeight should be u32");
@@ -2973,23 +2978,23 @@ bool BrigModule::validateQueryHeight(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateQueryNormalized(const inst_iterator inst) const {
+bool BrigModule::validateQueryImageNormalized(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_B32,
+  valid &= check(inst->type == BRIG_TYPE_U32,
                  "Type of QueryNormalized should be b32");
   valid &= validateImageQueryInst(inst);
   return valid;
 }
 
-bool BrigModule::validateQueryOrder(const inst_iterator inst) const {
+bool BrigModule::validateQueryImageOrder(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_B32,
+  valid &= check(inst->type == BRIG_TYPE_U32,
                  "Type of QueryOrder should be b32");
   valid &= validateImageQueryInst(inst);
   return valid;
 }
 
-bool BrigModule::validateQueryWidth(const inst_iterator inst) const {
+bool BrigModule::validateQueryImageWidth(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == BRIG_TYPE_U32,
                  "Type of QueryWidth should be u32");
@@ -3110,7 +3115,7 @@ bool BrigModule::validateSync(const inst_iterator inst) const {
   return true;
 }
 
-bool BrigModule::validateCount(const inst_iterator inst) const {
+bool BrigModule::validateCountLane(const inst_iterator inst) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operand"))
     return false;
@@ -3123,22 +3128,23 @@ bool BrigModule::validateCount(const inst_iterator inst) const {
                  isa<BrigOperandImmed>(src) ||
                  isa<BrigOperandWavesize>(src),
                  "Source should be register, immediate or waveSz");
-  valid &= check(*getType(src) == BRIG_TYPE_B1 ||
-                 *getType(src) == BRIG_TYPE_B32,
-                 "Source should be c or s register");
-  valid &= check(BrigInstHelper::isVectorTy(type),
+  if(getType(src))
+    valid &= check(*getType(src) == BRIG_TYPE_B1 ||
+                   *getType(src) == BRIG_TYPE_B32,
+                   "Source should be c or s register");
+  valid &= check(!BrigInstHelper::isVectorTy(type),
                  "Count can not accept vector types");
   return valid;
 }
 
-bool BrigModule::validateCountUp(const inst_iterator inst) const {
+bool BrigModule::validateCountUpLane(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == BRIG_TYPE_U32, "Type should be u32");
   valid &= validateParaSynInst(inst, 0);
   return valid;
 }
 
-bool BrigModule::validateMask(const inst_iterator inst) const {
+bool BrigModule::validateMaskLane(const inst_iterator inst) const {
   bool valid = true;
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operand"))
     return false;
@@ -3153,22 +3159,23 @@ bool BrigModule::validateMask(const inst_iterator inst) const {
                  isa<BrigOperandImmed>(src) ||
                  isa<BrigOperandWavesize>(src),
                  "Source should be register, immediate or waveSz");
-  valid &= check(*getType(src) == BRIG_TYPE_B1 ||
-                 *getType(src) == BRIG_TYPE_B32,
-                 "Source should be c or s register");
-  valid &= check(BrigInstHelper::isVectorTy(type),
+  if(getType(src))
+    valid &= check(*getType(src) == BRIG_TYPE_B1 ||
+                   *getType(src) == BRIG_TYPE_B32,
+                   "Source should be c or s register");
+  valid &= check(!BrigInstHelper::isVectorTy(type),
                  "Mask can not accept vector types");
   return valid;
 }
 
-bool BrigModule::validateSend(const inst_iterator inst) const {
+bool BrigModule::validateSendLane(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == BRIG_TYPE_B32, "Type should be b32");
   valid &= validateParaSynInst(inst, 2);
   return valid;
 }
 
-bool BrigModule::validateReceive(const inst_iterator inst) const {
+bool BrigModule::validateReceiveLane(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(inst->type == BRIG_TYPE_B32, "Type should be b32");
   valid &= validateParaSynInst(inst, 2);
@@ -3215,16 +3222,23 @@ bool BrigModule::validateSysCall(const inst_iterator inst) const {
     return false;
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
-  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)),
-                 "Destination register type must be b32");
+  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)) ||
+                 64 == BrigInstHelper::getTypeSize(*getType(dest)),
+                 "Destination register type must be b32 or b64");
   oper_iterator number(S_.operands + inst->operands[1]);
-  valid &= check(isa<BrigOperandImmed>(number), "number must be an immediate");
-  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)),
-                 "immediate type must be b32");
+  valid &= check(isa<BrigOperandImmed>(number) ||
+                 isa<BrigOperandWavesize>(number),
+                 "number must be an immediate or wavesize");
+
+  if(getType(number))
+    valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)) ||
+                   64 == BrigInstHelper::getTypeSize(*getType(number)),
+                   "immediate type must be b32 or b64");
   for(unsigned i = 2; i < 5; ++i) {
     oper_iterator src(S_.operands + inst->operands[i]);
     if(!isa<BrigOperandWavesize>(src))
-      valid &= check(BrigInstHelper::getTypeSize(*getType(src)) == 32,
+      valid &= check(BrigInstHelper::getTypeSize(*getType(src)) == 32 ||
+                     BrigInstHelper::getTypeSize(*getType(src)) == 64,
                      "Illegal data type");
     valid &= check(isa<BrigOperandReg>(src)   ||
                    isa<BrigOperandImmed>(src) ||
@@ -3236,7 +3250,7 @@ bool BrigModule::validateSysCall(const inst_iterator inst) const {
 
 bool BrigModule::validateAlloca(const inst_iterator inst) const {
   bool valid = true;
-  if(!check(isa<BrigInstBasic>(inst),"Incorrect instruction kind"))
+  if(!check(isa<BrigInstSeg>(inst), "Incorrect instruction kind"))
     return false;
   if(!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
@@ -3266,7 +3280,8 @@ bool BrigModule::validateSpecialInst(const inst_iterator inst,
     return false;
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
-  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)),
+  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)) ||
+                 64 == BrigInstHelper::getTypeSize(*getType(dest)),
                  "Destination register type must be b32");
   if(1 == nary){
     oper_iterator number(S_.operands + inst->operands[1]);
@@ -3364,8 +3379,8 @@ bool BrigModule::validateNop(const inst_iterator inst) const {
 
 bool BrigModule::validateNullPtr(const inst_iterator inst) const {
   bool valid = true;
-  if(!check(isa<BrigInstMem>(inst),"Incorrect instruction kind"))
-    return false;
+  const BrigInstSeg *mem = dyn_cast<BrigInstSeg>(inst);
+  if(!check(mem, "Invalid instruction kind")) return false;
   if(!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
     return false;
   BrigType type = BrigType(inst->type);
@@ -3374,8 +3389,7 @@ bool BrigModule::validateNullPtr(const inst_iterator inst) const {
                  64 == BrigInstHelper::getTypeSize(type), "Illegal data type");
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
-  const BrigInstMem *mem = dyn_cast<BrigInstMem>(inst);
-  if(!check(mem, "Invalid instruction kind")) return false;
+
   valid &= check(isCompatibleAddrSize(mem->segment, *getType(dest)),
                  "Incompatible address size");
   return valid;
@@ -3441,6 +3455,151 @@ bool BrigModule::validateCombine(const inst_iterator inst) const {
 }
 
 bool BrigModule::validateBitExtract(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateCeil(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateFloor(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateRint(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateTrunc(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateBitMask(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateExpand(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateNFma(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateSadhi(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validatePackCvt(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateUnpackCvt(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateArriveFbar(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateInitFbar(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateJoinFbar(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateLeaveFbar(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateReleaseFbar(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateWaitFbar(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateLdf(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateCuId(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateDim(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateGetDetectExcept(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateMaxCuId(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateMaxWaveId(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateWaveId(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateWorkItemFlatAbsId(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateWorkItemFlatId(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateClearDetectExcept(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateSetDetectExcept(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateDispatchPtr(const inst_iterator inst) const {
+  bool valid = true;
+  return valid;
+}
+
+bool BrigModule::validateQPtr(const inst_iterator inst) const {
   bool valid = true;
   return valid;
 }

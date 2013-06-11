@@ -259,6 +259,16 @@ TEST(BrigAllUpTest, AllUp) {
   EXPECT_TRUE(BP);
 }
 
+TEST(BrigAllUpTest, AMDAllUp) {
+  llvm::OwningPtr<llvm::MemoryBuffer> file;
+  const char filename[] = XSTR(TEST_PATH) "/hsail_tests_p.hsail";
+  llvm::error_code ec = llvm::MemoryBuffer::getFile(filename, file);
+  EXPECT_TRUE(!ec);
+
+  hsa::brig::BrigProgram BP = TestHSAIL(file->getBufferStart());
+  EXPECT_TRUE(BP);
+}
+
 static const char InstTest[] =
   "version 0:96:$full:$small;\n"
   "\n"

@@ -80,7 +80,9 @@ class BrigInstHelper {
       opcode != BRIG_OPCODE_RET &&
       opcode != BRIG_OPCODE_CALL &&
       opcode != BRIG_OPCODE_DEBUGTRAP &&
-      opcode != BRIG_OPCODE_NOP;
+      opcode != BRIG_OPCODE_NOP &&
+      opcode != BRIG_OPCODE_CLEARDETECTEXCEPT &&
+      opcode != BRIG_OPCODE_SETDETECTEXCEPT;
   }
 
   static const BrigAluModifier16_t *getAluModifier(const inst_iterator inst) {
@@ -117,6 +119,7 @@ class BrigInstHelper {
       type == BRIG_TYPE_F16   || type == BRIG_TYPE_F32   ||
       type == BRIG_TYPE_F64   ||
       type == BRIG_TYPE_F16X2 || type == BRIG_TYPE_F16X4 ||
+      type == BRIG_TYPE_F16X8 ||
       type == BRIG_TYPE_F32X2 || type == BRIG_TYPE_F32X4 ||
       type == BRIG_TYPE_F64X2;
   }
@@ -218,7 +221,7 @@ class BrigInstHelper {
       case BRIG_TYPE_B128:
         return 128;
       case BRIG_TYPE_ROIMG: case BRIG_TYPE_RWIMG: case BRIG_TYPE_SAMP:
-        return 0;
+        return 64;
       default: assert(false && "Unknown type");
     }
   }

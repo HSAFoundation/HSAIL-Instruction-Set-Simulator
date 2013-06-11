@@ -99,6 +99,7 @@ static llvm::Type *runOnType(llvm::LLVMContext &C, BrigType type) {
     case BRIG_TYPE_S32: case BRIG_TYPE_U32: case BRIG_TYPE_B32:
       return llvm::Type::getInt32Ty(C);
     case BRIG_TYPE_S64: case BRIG_TYPE_U64: case BRIG_TYPE_B64:
+    case BRIG_TYPE_ROIMG: case BRIG_TYPE_RWIMG: case BRIG_TYPE_SAMP:
       return llvm::Type::getInt64Ty(C);
     case BRIG_TYPE_F16:
       return llvm::Type::getHalfTy(C);
@@ -469,6 +470,11 @@ static llvm::Value *decodePacking(llvm::BasicBlock &B,
     if(typeSize == destTySize) {
       return new llvm::BitCastInst(value, destTy, "", &B);
 
+    } else if(destTySize == 16) {
+      llvm::Type *int16Ty = llvm::Type::getInt16Ty(C);
+      llvm::Value *result = new llvm::TruncInst(value, int16Ty, "", &B);
+      return new llvm::BitCastInst(result, destTy, "", &B);
+
     } else if(typeSize == 64) {
       llvm::Type *doubleTy = llvm::Type::getDoubleTy(C);
       llvm::Value *result = new llvm::BitCastInst(value, doubleTy, "", &B);
@@ -517,6 +523,11 @@ static llvm::Value *encodePacking(llvm::BasicBlock &B,
     } else if(encodedTySize == 32 && destTySize == 64) {
       llvm::Type *doubleTy = llvm::Type::getDoubleTy(C);
       llvm::Value *result = new llvm::FPExtInst(value, doubleTy, "", &B);
+      return encodePacking(B, result, destTy, inst, helper);
+
+    } else if(encodedTySize == 16 && destTySize == 32) {
+      llvm::Type *int16Ty = llvm::Type::getInt16Ty(C);
+      llvm::Value *result = new llvm::BitCastInst(value, int16Ty, "", &B);
       return encodePacking(B, result, destTy, inst, helper);
 
     } else {
