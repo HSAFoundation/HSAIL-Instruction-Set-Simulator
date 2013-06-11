@@ -64,11 +64,8 @@ bool BrigModule::validateDirectives(void) const {
   for (; it != E; ++it) {
     if (!validate(it)) return false;
     switch (it->kind) {
-      case BRIG_DIRECTIVE_FUNCTION:
-      case BRIG_DIRECTIVE_KERNEL:
-        if (!validate(cast<BrigDirectiveExecutable>(it))) return false;
-        break;
-
+      caseBrig(Dir, DirectiveKernel);
+      caseBrig(Dir, DirectiveFunction);
       caseBrig(Dir, DirectiveVariable);
       caseBrig(Dir, DirectiveImage);
       caseBrig(Dir, DirectiveSampler);
@@ -357,15 +354,100 @@ bool BrigModule::validateDebug(void) const {
   return valid;
 }
 
-bool BrigModule::validate(const BrigDirectiveExecutable *dir) const {
+bool BrigModule::validate(const BrigDirectiveFunction *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
   valid &= validateAlignment(dir, 4);
   valid &= validateCCode(dir->code);
   valid &= validateSName(dir->name);
 
-  if (dir->kind == BRIG_DIRECTIVE_KERNEL)
-    valid &= check(!(dir->outArgCount),
+  if (dir->inArgCount) {
+    dir_iterator firstInParam1(dir);
+
+    for (int i = 0; i < dir->outArgCount + 1; ++i) {
+      ++firstInParam1;
+      if (!validate(firstInParam1)) return false;
+    }
+
+    const dir_iterator firstInParam2(S_.directives + dir->firstInArg);
+    if (!validate(firstInParam2)) return false;
+    valid &= check(firstInParam1 == firstInParam2, "firstInArg is wrong");
+  }
+
+  const unsigned paramCount = dir->inArgCount + dir->outArgCount;
+  dir_iterator argIt = dir_iterator(dir) + 1;
+  for (unsigned i = 0; i < paramCount; ++i, ++argIt) {
+    if (!validate(argIt)) return false;
+    const BrigDirectiveVariable *bdv = dyn_cast<BrigDirectiveVariable>(argIt);
+    const BrigDirectiveImage *bdi = dyn_cast<BrigDirectiveImage>(argIt);
+    const BrigDirectiveSampler *bds = dyn_cast<BrigDirectiveSampler>(argIt);
+
+    if (!check(bds || bdi || bdv, "Too few argument symbols")) return false;
+
+    if (bds) {
+      if (!validate(bds)) return false;
+      valid &= check(bds->segment == BRIG_SEGMENT_ARG,
+                       "Argument not in arg space");
+    }
+
+    if (bdv) {
+      if (!validate(bdv)) return false;
+      valid &= check(bdv->segment == BRIG_SEGMENT_ARG,
+                       "Argument not in arg space");
+    }
+
+    if (bdi) {
+      if (!validate(bdi)) return false;
+      valid &= check(bdi->segment == BRIG_SEGMENT_ARG,
+                       "Argument not in arg space");
+    }
+  }
+
+  const dir_iterator firstScopedDir(S_.directives +
+                                    dir->firstScopedDirective);
+  if (!validOrEnd(firstScopedDir)) return false;
+  valid &= check(argIt <= firstScopedDir,
+                 "The first scoped directive is too early");
+  valid &= check(dir->firstScopedDirective <= dir->nextTopLevelDirective,
+                 "The next directive is before the first scoped directive");
+  const BrigExecutableModifier8_t mod = dir->modifier;
+
+  if (mod & BRIG_EXECUTABLE_DECLARATION) {   // a declaration
+    valid &= check(dir->firstScopedDirective == dir->nextTopLevelDirective,
+                   "firstScopedDirective must be the same as"
+                   "nextTopLevelDirective for function declaration");
+    valid &= check(dir->instCount == 0,
+                   "Function declaration must have zero instCount");
+  }
+
+  if (dir->inArgCount) {
+    dir_iterator firstInParam1(dir);
+    for (int i = 0; i < dir->outArgCount + 1; ++i) {
+      ++firstInParam1;
+      if (!validate(firstInParam1)) return false;
+    }
+
+    const dir_iterator firstInParam2(S_.directives + dir->firstInArg);
+    if (!validate(firstInParam2)) return false;
+    valid &= check(firstInParam1 == firstInParam2, "firstInParam is wrong");
+  }
+
+  for (int i = 0; i < 3; i++) {
+    valid &= check(dir->reserved[i] == 0,
+                   "reserved field of BrigDirectiveFunction must be zero");
+  }
+
+  return valid;
+}
+
+
+bool BrigModule::validate(const BrigDirectiveKernel *dir) const {
+  bool valid = true;
+  if (!validateSize(dir)) return false;
+  valid &= validateAlignment(dir, 4);
+  valid &= validateCCode(dir->code);
+  valid &= validateSName(dir->name);
+  valid &= check(!(dir->outArgCount),
                    "Kernel must not have any output parameters");
 
   if (dir->inArgCount) {
@@ -393,31 +475,19 @@ bool BrigModule::validate(const BrigDirectiveExecutable *dir) const {
 
     if (bds) {
       if (!validate(bds)) return false;
-      if (dir->kind == BRIG_DIRECTIVE_FUNCTION)
-        valid &= check(bds->segment == BRIG_SEGMENT_ARG,
-                       "Argument not in arg space");
-      if (dir->kind == BRIG_DIRECTIVE_KERNEL)
-        valid &= check(bds->segment == BRIG_SEGMENT_KERNARG,
+      valid &= check(bds->segment == BRIG_SEGMENT_KERNARG,
                      "Argument not in kernarg space");
     }
 
     if (bdv) {
       if (!validate(bdv)) return false;
-      if (dir->kind == BRIG_DIRECTIVE_FUNCTION)
-        valid &= check(bdv->segment == BRIG_SEGMENT_ARG,
-                       "Argument not in arg space");
-      if (dir->kind == BRIG_DIRECTIVE_KERNEL)
-        valid &= check(bdv->segment == BRIG_SEGMENT_KERNARG,
+      valid &= check(bdv->segment == BRIG_SEGMENT_KERNARG,
                      "Argument not in kernarg space");
     }
 
     if (bdi) {
       if (!validate(bdi)) return false;
-      if (dir->kind == BRIG_DIRECTIVE_FUNCTION)
-        valid &= check(bdi->segment == BRIG_SEGMENT_ARG,
-                       "Argument not in arg space");
-      if (dir->kind == BRIG_DIRECTIVE_KERNEL)
-        valid &= check(bdi->segment == BRIG_SEGMENT_KERNARG,
+      valid &= check(bdi->segment == BRIG_SEGMENT_KERNARG,
                      "Argument not in kernarg space");
     }
   }
@@ -448,12 +518,12 @@ bool BrigModule::validate(const BrigDirectiveExecutable *dir) const {
 
     const dir_iterator firstInParam2(S_.directives + dir->firstInArg);
     if (!validate(firstInParam2)) return false;
-    valid &= check(firstInParam1 == firstInParam2, "d_firstInParam is wrong");
+    valid &= check(firstInParam1 == firstInParam2, "firstInParam is wrong");
   }
 
   for (int i = 0; i < 3; i++) {
     valid &= check(dir->reserved[i] == 0,
-                   "reserved field of BrigDirectiveExecutable must be zero");
+                   "reserved field of BrigDirectiveKernel must be zero");
   }
 
   return valid;
