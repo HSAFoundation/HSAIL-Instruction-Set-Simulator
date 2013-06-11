@@ -1,3 +1,12 @@
+//===- bugts.h ------------------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #if !defined(__ICC) && !defined(__clang__) && defined(__GNUC__)
 #define __IS_GCC__ 1
 #else // !defined(__ICC) && !defined(__clang__) && defined(__GNUC__)

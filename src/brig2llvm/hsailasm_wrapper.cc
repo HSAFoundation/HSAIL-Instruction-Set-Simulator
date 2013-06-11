@@ -1,3 +1,12 @@
+//===- hsailasm_wrapper.cc ------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #include "llvm/ADT/OwningPtr.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/raw_ostream.h"

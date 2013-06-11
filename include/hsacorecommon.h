@@ -1,3 +1,12 @@
+//===- hsacorecommon.h ----------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef _HSACORECOMMON_H_
 #define _HSACORECOMMON_H_
 
@@ -9,7 +18,7 @@
     #ifdef ATI_OS_WIN
         #include <cstdint>
     #endif
-    
+
     #ifdef ATI_OS_LINUX
         #include <unistd.h>
         #include <stdexcept>
@@ -18,16 +27,16 @@
 #endif
 
 #include "hsacommon.h"
-/** 
- * @addtogroup HSACoreCommonTyps 
+/**
+ * @addtogroup HSACoreCommonTyps
  * Cross-Core-Module common Types
  *  @{
  */
 namespace hsacore
 {
 
-/** 
- * @addtogroup HSACoreCommonTyps 
+/**
+ * @addtogroup HSACoreCommonTyps
  * Cross-Core-Module common Types
  *  @{
  */
@@ -73,18 +82,18 @@ typedef hsa::KernelArg KernelArg;
 
 /* @}*/
 
-/** 
- * @addtogroup HSACoreHSAILUtility 
+/**
+ * @addtogroup HSACoreHSAILUtility
  * @{
  */
 class DLL_PUBLIC HsailKernel
 {
- 
+
     public:
         HsailKernel(){};
 
-        /*! Getter function for the ISA (Pure Virtual function) 
-         *  @param ISA - The starting address of the ISA is 
+        /*! Getter function for the ISA (Pure Virtual function)
+         *  @param ISA - The starting address of the ISA is
          *               assigned to this pointer
          *  @param size - the size of the ISA blob is stored here
          *  @return The ISA and the size are stored in the parameters
@@ -97,41 +106,41 @@ class DLL_PUBLIC HsailKernel
          */
         virtual int getNumArgs() = 0;
 
-        /*! Getter function for the user elements (Pure Virtual function) 
-         *  @param userElements  -  The address of the userELements in the 
+        /*! Getter function for the user elements (Pure Virtual function)
+         *  @param userElements  -  The address of the userELements in the
          *                          shader is assigned to this pointer
          *
-         *  @param noUserElements - The number of user elements is 
+         *  @param noUserElements - The number of user elements is
          *                          assigned to this parameter
          *
-         *  @return -               The userELements and the count are 
+         *  @return -               The userELements and the count are
          *                          stored in the parameters
          */
          virtual void getUserElements(void* &userElements,
                         int& noUserELements) = 0;
 
          /*! Getter function for the extended user elements
-          * (Pure Virtual function) 
-          *  @param extUserElements   - The address of the extended 
-          *                             userELements in the shader is 
+          * (Pure Virtual function)
+          *  @param extUserElements   - The address of the extended
+          *                             userELements in the shader is
           *                             assigned to this pointer
           *
-          *  @param noExtUserElements - The number of extended user elements 
+          *  @param noExtUserElements - The number of extended user elements
           *                             is assigned to this parameter
-          *  @return                  - The extUserELements and the count 
+          *  @return                  - The extUserELements and the count
           *                             are stored in the parameters
           */
           virtual void getExtUserElements(void* &extUserElements,
                        int& noExtUserELements) = 0;
 
 
-          /*! Getter function for the extended user elements 
-           *  (Pure Virtual function) 
+          /*! Getter function for the extended user elements
+           *  (Pure Virtual function)
            *  @return returns the number of spgr elements
            */
           virtual int getNoSGPRs() = 0;
 
-           /*! Getter function for the number of vgpr 
+           /*! Getter function for the number of vgpr
             *  @return returns the number of vpgrs
            */
           virtual int getNoVGPRs() = 0;
@@ -143,13 +152,13 @@ class DLL_PUBLIC HsailKernel
           virtual bool reserveVGPRs(int noOfRegisters) = 0;
 
 
-          /* @brief - Returns the first index of the registers 
+          /* @brief - Returns the first index of the registers
           *  reserved for the debugger
           *  return - Returns the index of type uint32_t
           */
           virtual int getTrapReservedVGPRIndex() = 0;
 
-          /* @brief - Returns the index of the register that 
+          /* @brief - Returns the index of the register that
           * contains the Buffer Wave offset
           * return - Returns the index of type uint32_t
           * returns -1 if value is scratch buffer is not set
@@ -161,18 +170,18 @@ class DLL_PUBLIC HsailKernel
           */
           virtual void* getDebugISASourceInfo() = 0;
 
-          /* @brief - Returns a pointer to the DWARF info 
+          /* @brief - Returns a pointer to the DWARF info
           * (Higher level language to BRIG)
           * return - Returns the index of type uint32_t
           */
           virtual void* getDebugBRIGSourceInfo() = 0;
 
-          /* 
-           * @brief - Returns the size (in bytes) of group memory statically 
+          /*
+           * @brief - Returns the size (in bytes) of group memory statically
            *          allocated by compiler.
            * @return Size (in bytes) of compiler's group memory allocation.
            */
-          virtual size_t 
+          virtual size_t
           getSizeStaticGroupMemory() const = 0;
 
           virtual ~HsailKernel(){};

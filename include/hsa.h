@@ -1,9 +1,18 @@
+//===- hsa.h --------------------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef _HSA_H_
 #define _HSA_H_
 
 
 // lhowes: Temporary workaround for tool chain issues
-// Once headers finalized we can come up with a cleaner 
+// Once headers finalized we can come up with a cleaner
 // solution if system includes are still necessary
 #if !defined(AMD_AMP_HSA_INCLUDES)
 #include <vector>
@@ -12,7 +21,7 @@
 
 //#include "hsailutil.h"
 // lhowes: Temporary workaround for tool chain issues
-// Once headers finalized we can come up with a cleaner 
+// Once headers finalized we can come up with a cleaner
 // solution if system includes are still necessary
 #if !defined(AMD_AMP_HSA_INCLUDES)
 #include <stdint.h>
@@ -56,7 +65,7 @@ typedef enum {
     STATE_STARTED,       // Command processing started
     STATE_COMPLETED      // Command processing complete
 } EventState;
- 
+
 
 /**
  * @ingroup Dispatch, Debugger
@@ -139,7 +148,7 @@ typedef struct ExceptionPolicy_ {
     ExceptionPolicy_()
     {
         exceptionMask = 0;
-        exceptionType = 0x0; 
+        exceptionType = 0x0;
         waveAction = WAVE_ACTION_HALT;
         waveMode   = WAVE_MODE_SINGLE;
         hostAction = HOST_ACTION_IGNORE;
@@ -157,7 +166,7 @@ typedef struct _EventTimeInfo
     uint64_t * submittedTime;
     uint64_t * runningTime;
     uint64_t * completeTime;
-    
+
     _EventTimeInfo()
     {
         hostTime = NULL;
@@ -192,7 +201,7 @@ typedef enum {
                     the kernel has completed executing. */
 } BlockingPolicy;
 
-/** 
+/**
  * @brief enum for the event type to be utilized in one of the constructors
  */
 typedef enum USER_EVENT_TYPE_
@@ -204,19 +213,19 @@ typedef enum USER_EVENT_TYPE_
     MAX_EVENTS
 } USER_EVENT_TYPE;
 
-/** 
- * index of each type of trap handler 
+/**
+ * index of each type of trap handler
  */
 typedef enum {
     DEBUG_TRAP     = 1, /*!< level-2, debug trap handler index */
     SYSCALL_TRAP   = 2, /*!< level-2, syscall trap handler index */
     EXCEPTION_TRAP = 3, /*!< level-2, exception trap handler index */
     MAX_TRAPS           /*!< the number of trap handlers */
-} TrapType; 
+} TrapType;
 
 
-/** 
- * trap handler and the trap handler buffer info 
+/**
+ * trap handler and the trap handler buffer info
  */
 typedef struct TrapHandlerInfo_ {
     void *trapHandler;
@@ -233,9 +242,9 @@ typedef struct TrapHandlerInfo_ {
     }
 } TrapHandlerInfo;
 
-/** 
+/**
  * @brief trap handler class, maintains all trap handlers used
- * in the dispatch 
+ * in the dispatch
  */
 class TrapHandler {
 
@@ -268,7 +277,7 @@ public:
      * @brief Set up trap handler buffer in the current device
      *
      * @param trapType different types of trap handler, currently,
-     * support runtime,  
+     * support runtime,
      *
      * @param trapHandlerBuffer pointer to the trap handler buffer,
      * this address needs to be 256-byte aligned.
@@ -290,9 +299,9 @@ public:
      * @return void
      */
     virtual void copyTrapHandlerFromDevice(Device *dev) = 0;
-	
+
     /**
-     * @brief get all the trap handlers 
+     * @brief get all the trap handlers
      *
      * @param trapHandlerInfo pointer to the trap handler info to be copied from
      *
@@ -301,9 +310,9 @@ public:
     virtual void getTrapHandlerInfo(Device *dev) = 0;
 };
 
-/** 
+/**
  * attributes of a launch include, exception policy, launch policy and cache
- * policy 
+ * policy
  */
 typedef struct LaunchAttributes_ {
 
@@ -314,12 +323,12 @@ typedef struct LaunchAttributes_ {
                                           exceptions*/
 
     CachePolicy cachePolicy;    /*!< default is to flush everything */
-	
+
     TrapHandler *trapHandler;   /*!< trap handler object used for the
 	                             current kernel dispatch */
     bool debugMode;             /*!< default is NOT executed in the debug
                                  mode */
-    
+
     int grid[3];                /*!< default is 1*/
     int group[3];               /*!< default is 1*/
     int groupOffsets[3];        /*!< default is 0*/
@@ -355,41 +364,41 @@ typedef struct LaunchAttributes_ {
 
 
 /**
- * @brief Allocate global memory that is shared by all devices 
- *        in the platform. 
+ * @brief Allocate global memory that is shared by all devices
+ *        in the platform.
  *
- * Allocates \c size bytes of linear memory and returns a pointer to 
- * the allocated memory. The memory is not initialized. 
+ * Allocates \c size bytes of linear memory and returns a pointer to
+ * the allocated memory. The memory is not initialized.
  *
- * The allocated memory by default will be a system memory that is pageable, 
- * cache coherent and readable / writeable by both host and devices. 
+ * The allocated memory by default will be a system memory that is pageable,
+ * cache coherent and readable / writeable by both host and devices.
  *
  * @param size Requested allocation size in bytes. This parameter needs to be larger
      *             than zero.
- * @param alignment The alignment size in bytes for the address of resulting 
- *                  allocation. The default value of this parameter is zero, 
- *                  where no particular alignment will be applied. If the value 
- *                  is not zero, it needs to be a power of two and minimum of 
- *                  sizeof(void*). 
+ * @param alignment The alignment size in bytes for the address of resulting
+ *                  allocation. The default value of this parameter is zero,
+ *                  where no particular alignment will be applied. If the value
+ *                  is not zero, it needs to be a power of two and minimum of
+ *                  sizeof(void*).
  * @exception HsaException if the input is invalid, or if the runtime is
- *            unable to allocate enough memory to perform the requested 
+ *            unable to allocate enough memory to perform the requested
  *            operation.
  * @return Pointer to allocated memory.
  *
  */
-DLL_PUBLIC void* 
-allocateGlobalMemory(size_t size, 
+DLL_PUBLIC void*
+allocateGlobalMemory(size_t size,
                      size_t alignment = 0);
 
 /**
  * @brief Frees global memory pointed to by \c ptr, which must have been
- *        returned by a previous call to \c hsa::allocateGlobalMemory(). Otherwise, 
- *        or if this function has already been called before, undefined 
- *        behavior may occur. 
+ *        returned by a previous call to \c hsa::allocateGlobalMemory(). Otherwise,
+ *        or if this function has already been called before, undefined
+ *        behavior may occur.
  *
  * @param ptr Pointer to the memory to be freed.
  */
-DLL_PUBLIC void 
+DLL_PUBLIC void
 freeGlobalMemory(void* ptr);
 
 /**
@@ -453,10 +462,10 @@ public:
    	/**
      * @brief get the max user-mode queue size possible
      *
-     * @return returns max queue size in bytes 
+     * @return returns max queue size in bytes
      */
-    virtual uint32_t getMaxQueueSize()=0;    
-	
+    virtual uint32_t getMaxQueueSize()=0;
+
 	/**
      * @brief Get the wavefront size
      *
@@ -473,11 +482,11 @@ public:
      *
      * @param trapHandlerSizeByte size of the trap handler in bytes
      *
-     * @param trapType different types of trap handler, currently, support runtime,  
+     * @param trapType different types of trap handler, currently, support runtime,
      *  debugger, exception, system call.
      */
     virtual void setTrapHandler(void *trapHandler, size_t trapHandlerSizeByte, uint32_t trapType) = 0;
-	
+
     /**
      * @brief Set up trap handler buffer in the current device
      *
@@ -512,13 +521,13 @@ public:
      *
      * @param trapID, this is used for just the action of h_trap, in which
      *  a trap ID is needed.
-     * 
-     * @param msgPtr, pointer to a message indicate various information. 
+     *
+     * @param msgPtr, pointer to a message indicate various information.
      *  see the KFD design for specific information.
      */
-    virtual void waveControl(uint32_t action, 
-                             uint32_t mode, 
-                             uint32_t trapID, 
+    virtual void waveControl(uint32_t action,
+                             uint32_t mode,
+                             uint32_t trapID,
                              void *msgPtr) = 0;
 
     /**
@@ -529,93 +538,93 @@ public:
      * @param cachePolicy indicate how the cache should be invalidated.
      */
     virtual void flushCaches(CachePolicy cachePolicy) = 0;
-	
+
     /**
      * @ingroup Debugger
      * @brief APIs for creating a user trap event
      *
      * @param dev pointer to the HSA runtime device
      *
-     * @param eventType user event type, can be 
+     * @param eventType user event type, can be
      *  HW_EXCEPTION_EVENT         = 3, ///< Exception event
      *  SYSTEM_CALL_EVENT          = 4, ///< Syscall event with parameter info
      *  DEBUG_EVENT                = 5, ///< Debug event
      *
      * @param manualReset if this parameter is true the function creates a
      * manual-reset event object; if this parameter is false the function creates
-     * an auto-reset event object.  
+     * an auto-reset event object.
      *
      * @param isSignaled if this parameter is true, the initial state of the event
      * is signaled, otherwise is nonsignaled.
      */
-    TrapEvent * createTrapEvent(USER_EVENT_TYPE eventType, 
+    TrapEvent * createTrapEvent(USER_EVENT_TYPE eventType,
                                    bool manualReset, bool state) = 0;
 
     #endif      /***   HSA_EXPERIMENTAL   ***/
 
 
     /**
-     * @brief Allocates global memory with specific properties. The allocated 
+     * @brief Allocates global memory with specific properties. The allocated
      *        memory is shared by the host and the calling device.
      *
-     * Developers can determine the properties of the allocation, such as the 
-     * heap type, host/device accessibility, and performance hint, by setting 
+     * Developers can determine the properties of the allocation, such as the
+     * heap type, host/device accessibility, and performance hint, by setting
      * the \c heapType and \c flag parameter.
-     * 
-     * The \c heapType parameter must contain one of the following heap types. 
-     * @li HEAP_TYPE_SYSTEM The global memory is allocated in the system 
-     *                      near the calling device. 
-     * @li HEAP_TYPE_DEVICE_PUBLIC The global memory is allocated in host visible 
+     *
+     * The \c heapType parameter must contain one of the following heap types.
+     * @li HEAP_TYPE_SYSTEM The global memory is allocated in the system
+     *                      near the calling device.
+     * @li HEAP_TYPE_DEVICE_PUBLIC The global memory is allocated in host visible
      *                             part of the device local memory.
      *
      * The \c flag parameter must contain one of the following host accessibility options.
      * @li MEMORY_OPTION_HOST_READ_WRITE The host is able to read and write to
      *     the allocated memory.
-     * @li MEMORY_OPTION_HOST_READ_ONLY The host can only read 
+     * @li MEMORY_OPTION_HOST_READ_ONLY The host can only read
      *                                  the allocated memory.
-     * @li MEMORY_OPTION_HOST_WRITE_ONLY The host can only write to 
+     * @li MEMORY_OPTION_HOST_WRITE_ONLY The host can only write to
      *                                   the allocated memory.
-     * @li MEMORY_OPTION_HOST_NO_ACCESS The host can not read or write to 
+     * @li MEMORY_OPTION_HOST_NO_ACCESS The host can not read or write to
      *     the allocated memory.
      *
-     * The \c flag parameter must contain one of the following 
+     * The \c flag parameter must contain one of the following
      * device accessibility options.
-     * @li MEMORY_OPTION_DEVICE_READ_WRITE The calling device is able to 
+     * @li MEMORY_OPTION_DEVICE_READ_WRITE The calling device is able to
      *     read and write to the allocated memory.
-     * @li MEMORY_OPTION_DEVICE_READ_ONLY The calling device can only read 
+     * @li MEMORY_OPTION_DEVICE_READ_ONLY The calling device can only read
      *                                    the allocated memory.
-     * @li MEMORY_OPTION_DEVICE_WRITE_ONLY The calling device can only write 
+     * @li MEMORY_OPTION_DEVICE_WRITE_ONLY The calling device can only write
      *                                     to the allcoated memory.
-     * @li MEMORY_OPTION_DEVICE_NO_ACCESS The calling device can not 
+     * @li MEMORY_OPTION_DEVICE_NO_ACCESS The calling device can not
      *                                    read or write to the allocated memory.
      *
-     * Additionaly, a \c flag parameter can be combined with the following 
+     * Additionaly, a \c flag parameter can be combined with the following
      * performance hints.
      * Note that these options are not mandatory.
-     * @li MEMORY_OPTION_UNCACHED Sets the allocated memory to be non-cachable. 
-     *                            This option is mutually exclusive with 
+     * @li MEMORY_OPTION_UNCACHED Sets the allocated memory to be non-cachable.
+     *                            This option is mutually exclusive with
      *                            MEMORY_OPTION_WRITE_COMBINED.
-     * @li MEMORY_OPTION_WRITE_COMBINED Sets the allocated memory to be 
-     *                                  write-combined. This option is mutually 
+     * @li MEMORY_OPTION_WRITE_COMBINED Sets the allocated memory to be
+     *                                  write-combined. This option is mutually
      *                                  exclusive with MEMORY_OPTION_UNCACHED.
      * @li MEMORY_OPTION_NONPAGEABLE Disables paging on the allocated memory.
      *
      * @param size Size of the allocation in bytes. This parameter needs to be larger
      *             than zero.
-     * @param alignment The alignment size in bytes for the address of resulting 
-     *                  allocation. The default value of this parameter is zero, 
-     *                  where no particular alignment will be applied. If the value 
-     *                  is not zero, it needs to be a power of two and minimum of 
-     *                  sizeof(void*). 
+     * @param alignment The alignment size in bytes for the address of resulting
+     *                  allocation. The default value of this parameter is zero,
+     *                  where no particular alignment will be applied. If the value
+     *                  is not zero, it needs to be a power of two and minimum of
+     *                  sizeof(void*).
      * @param heapType The backing storage of the allocated global memory.
      * @param flag The properties of the allocated memory.
      * @exception HsaException if the input is invalid, or if the runtime is
-     *            unable to allocate enough memory to perform the requested 
+     *            unable to allocate enough memory to perform the requested
      *            operation.
      * @return Pointer to the allocated memory.
      */
-    virtual void* 
-    allocateGlobalMemory(size_t size, 
+    virtual void*
+    allocateGlobalMemory(size_t size,
                          size_t alignment = 0,
                          HeapType heapType = HEAP_TYPE_SYSTEM,
                          uint32_t flag = (MEMORY_OPTION_HOST_READ_WRITE
@@ -623,75 +632,75 @@ public:
 
     /**
      * @brief Frees a global memory region, which must have been
-     *        returned by a previous call to \c hsa::Device::allocateGlobalMemory(). 
-     *        Otherwise, or if this function has already been called before, 
+     *        returned by a previous call to \c hsa::Device::allocateGlobalMemory().
+     *        Otherwise, or if this function has already been called before,
      *        undefined behavior may occur.
      *
      * @param ptr Pointer to the memory to be freed.
      */
-    virtual void 
+    virtual void
     freeGlobalMemory(void* ptr) = 0;
 
     /**
      * @brief Gives hint to the runtime that a particular memory region
-     *        will be used by the calling device. This routine is optional 
+     *        will be used by the calling device. This routine is optional
      *        and is exclusively provided for the purpose of performance.
      *
-     * Registration to a memory region, which overlapped with a previously 
-     * registered memory is allowed. This includes registering the same memory 
+     * Registration to a memory region, which overlapped with a previously
+     * registered memory is allowed. This includes registering the same memory
      * region multiple times.
      *
-     * Memory region allocated with hsa::allocateGlobalMemory or 
+     * Memory region allocated with hsa::allocateGlobalMemory or
      * hsa::Device::allocateGlobalMemory is automatically registered.
-     * Registering this kind of memory region will not generate an error and 
+     * Registering this kind of memory region will not generate an error and
      * simply be ignored.
      *
      * @param ptr Pointer to a valid system memory.
-     * @param size Requested registration size in bytes. This parameter needs to 
+     * @param size Requested registration size in bytes. This parameter needs to
      *             be larger than zero.
-     * @exception HsaException if the input is invalid, or if the runtime is 
+     * @exception HsaException if the input is invalid, or if the runtime is
      *            unable to perform the requested operation.
      */
-    virtual void 
+    virtual void
     registerMemory(void* ptr, size_t size) = 0;
-    
+
     /**
      * @brief Deregister system memory previously registered by the device.
      *
      * Deregisters the memory space pointed to by ptr, which must been
-     * registered by a previous call to hsa::Device::registerMemory(). 
-     * Otherwise, undefined behavior ocurrs. A memory region that was registered 
+     * registered by a previous call to hsa::Device::registerMemory().
+     * Otherwise, undefined behavior ocurrs. A memory region that was registered
      * multiple times needs to be deregistered for the same amount of time.
      *
      * @param ptr Pointer to memory to deregister.
      */
-    virtual void 
+    virtual void
     deregisterMemory(void* ptr) = 0;
-    
+
     /**
-     * @brief Indicates that a global memory region will be used by the 
+     * @brief Indicates that a global memory region will be used by the
      *        host or the calling device.
      *
-     * This method has several purposes depending on  
+     * This method has several purposes depending on
      * the location of the memory.
-     * \li In the case of global memory located in the system, this function is optional 
+     * \li In the case of global memory located in the system, this function is optional
      *     and may speed up the access.
-     * \li As for global memory located in the device local memory, a call to this 
-     *     function is mandatory to make the memory region accessible by the host or the 
+     * \li As for global memory located in the device local memory, a call to this
+     *     function is mandatory to make the memory region accessible by the host or the
      *     calling device. Otherwise, undefined behavior may occurs.
      *
      * @param ptr Pointer to a valid memory.
      * @param size Requested mapping size in bytes. This parameter needs to be larger
      *             than zero.
-     * @exception HsaException if the input is invalid or the runtime is unable to map 
+     * @exception HsaException if the input is invalid or the runtime is unable to map
      *            enough memory to perform the requested operation.
      *
      */
-    virtual void 
+    virtual void
     mapMemory(void* ptr, size_t size) = 0;
-    
+
     /**
-     * @brief Indicates that a memory regions will not longer be used 
+     * @brief Indicates that a memory regions will not longer be used
      *        by the host or calling device.
      *
      * The memory region to be unmapped must have been
@@ -701,7 +710,7 @@ public:
      * @param ptr Pointer to a valid memory to unmap.
      *
      */
-    virtual void 
+    virtual void
     unmapMemory(void* ptr) = 0;
 
     /**
@@ -711,11 +720,11 @@ public:
     * The frequency returned will be the max frequency reported by the ASIC.
     * Additionally, until the KFD implements the wall clock feature, this will
     * return invalid data.
-    * @return DeviceClockCounterInfo containing the clock stamps from host 
+    * @return DeviceClockCounterInfo containing the clock stamps from host
     *         and device along with device frequency.
     */
     virtual DeviceClockCounterInfo getClockCounterInfo() = 0;
-    
+
     /**
     * @brief Returns the max frequency as reported by kfd for the
     *        approriate device type.
@@ -781,7 +790,7 @@ public:
     virtual hsa::Status wait(uint32_t timeOut) = 0;
 
 };
- 
+
 /**
  * @brief Creates a Dispatch Event that allows users to monitor the
  * completion of a kernel dispatch. It supports monitoring by allowing
@@ -822,7 +831,7 @@ public:
     /**
      * @brief Retrieves the time when Dispatch event has transitioned
      * to input state.
-     * 
+     *
      * @return uint64_t time structure containing wallclock time
      * in Gpu domain. Will be initialized to zero if input state
      * is invalid or event has not  yet reached input state.
@@ -880,7 +889,7 @@ public:
  * @brief the user event is used for syscall, exception processing,
  * and debugger.
  */
-class DLL_PUBLIC TrapEvent : public Event 
+class DLL_PUBLIC TrapEvent : public Event
 {
 
 public:
@@ -945,7 +954,7 @@ public:
                                          hsa::LaunchAttributes launchAttr,
                                          hsa::vector<hsa::Event *> &depEvents,
                                          uint32_t numArgs, ...) = 0;
-    
+
     /**
      * @brief Submits a compiled Hsail Kernel for execution. HsaRt is guided
      * in this process by various attributes of kernel launch, including any
@@ -969,7 +978,7 @@ public:
                                          hsa::LaunchAttributes launchAttr,
                                          hsa::vector<hsa::Event *> &depEvents,
                                          hsa::vector<KernelArg> &krnlArgs) = 0;
-    
+
     virtual void flush()=0;
 
 };
@@ -978,7 +987,7 @@ public:
 class DLL_PUBLIC Kernel
 {
 public:
-    
+
     /*! @brief destructor
     */
 
@@ -1000,13 +1009,13 @@ public:
 
    virtual hsa::string& getName()=0;
 
-   /** @brief Returns the starting address of the group memory 
+   /** @brief Returns the starting address of the group memory
      *        in flat memory model.
      *
-     *        The developer can use this address to calculate 
+     *        The developer can use this address to calculate
      *        the address of each group memory parameter in the kernel.
-     *        To avoid unexpected behavior, the developer needs 
-     *        to check the upper bound of the group memory region of 
+     *        To avoid unexpected behavior, the developer needs
+     *        to check the upper bound of the group memory region of
      *        associated device.
      *
      * @return Pointer to group memory.
@@ -1025,10 +1034,10 @@ DLL_PUBLIC hsa::RuntimeApi* getRuntime();
 
 // typedef comes handy when GetProcAddress() returns the func pointer which needs to be cast.
 typedef hsa::RuntimeApi* (*fptr_getRuntime)();
- 
+
 }
 
-class DLL_PUBLIC RuntimeApi  
+class DLL_PUBLIC RuntimeApi
 {
 public:
     // All the exported global functions must have corresponding pure virtual public method declared in this interface class.
@@ -1040,7 +1049,7 @@ public:
     * @param elfSize - size of the ELF
     * @param pDevices - pointer to a list of devices
     */
-    virtual hsa::Program* createProgram(char *charElf, 
+    virtual hsa::Program* createProgram(char *charElf,
                                         size_t elfSize,
                                         hsa::vector<hsa::Device *> *devList)=0;
 
@@ -1055,7 +1064,7 @@ public:
     * @param prog pointer to the program
     * @param pDevices - pointer to a list of devices
     */
-    virtual void destroyProgram(hsa::Program*)=0; 
+    virtual void destroyProgram(hsa::Program*)=0;
 
     /**
      * @brief Get the runtime API version
@@ -1068,8 +1077,8 @@ public:
     /**
      * @copydoc hsa::allocateGlobalMemory(size_t,size_t)
      */
-    virtual void* 
-    allocateGlobalMemory(size_t size, 
+    virtual void*
+    allocateGlobalMemory(size_t size,
                          size_t alignment = 0) = 0;
 
     /**
@@ -1085,9 +1094,9 @@ class DLL_PUBLIC Program
 {
 public:
     /* This is experimental */
-    /*! @brief Builds and returns a kernel for the list of devices owned 
-    * @param kernelName the name of the kernel to build 
-    * @param size length of kernel name 
+    /*! @brief Builds and returns a kernel for the list of devices owned
+    * @param kernelName the name of the kernel to build
+    * @param size length of kernel name
     * @return returns a built kernel for execution
     */
 
@@ -1111,7 +1120,7 @@ public:
  * @param devList - pointer to a list of devices
 */
 
-DLL_PUBLIC hsa::Program* createProgram(char *charElf, 
+DLL_PUBLIC hsa::Program* createProgram(char *charElf,
                                         size_t elfSize,
                                         hsa::vector<hsa::Device *> *devList);
 
@@ -1141,30 +1150,30 @@ DLL_PUBLIC uint32_t getDeviceCount();
 /**
  * @brief get a list of devices available on the platform.
  *
- * @return Returns the list of all Devices 
+ * @return Returns the list of all Devices
  */
 DLL_PUBLIC const hsa::vector<hsa::Device*>& getDevices();
 
 /**
  * @brief get the version of the RuntimeApi.
- * 
+ *
  * Rules for incrementing the major, minor, patch versions:
- * a) major: 
+ * a) major:
  *       i) incremented only when public APIs signatures
  *          are changed, IS NOT backward compatible with
  *          previous major versions.
  *      ii) Reset the minor version to 0.
  *     iii) Reset the patch version to 0.
- * b) minor: 
+ * b) minor:
  *       i) incremented when new feature is added, needs
- *          to be backward compatible with previous minor 
+ *          to be backward compatible with previous minor
  *          versions.
  *      ii) Reset the patch version to 0.
- * c) patch: 
+ * c) patch:
  *       i) incremented only for bug fixes, no user visible
  *          API changes, needs to be backward and forward
  *          compatible with previous patch versions.
- * @return string containing the version number in the 
+ * @return string containing the version number in the
  *         form major.minor.patch
  */
 DLL_PUBLIC const hsa::string& getVersion();
@@ -1175,4 +1184,3 @@ DLL_PUBLIC const hsa::string& getVersion();
 }
 
 #endif
-

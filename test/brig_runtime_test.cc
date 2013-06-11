@@ -1,3 +1,12 @@
+//===- brig_runtime_test.cc -----------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #include "brig_runtime_test_internal.h"
 
 #include "gtest/gtest.h"

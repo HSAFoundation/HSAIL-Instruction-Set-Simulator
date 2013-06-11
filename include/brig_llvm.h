@@ -1,4 +1,12 @@
-/* Copyright 2012 <MulticorewareInc> */
+//===- brig_llvm.h --------------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef INCLUDE_BRIG_LLVM_H_
 #define INCLUDE_BRIG_LLVM_H_
 

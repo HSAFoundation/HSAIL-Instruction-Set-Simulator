@@ -1,3 +1,12 @@
+//===- brig_inst_helper.cc ---- -------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #include "brig_inst_helper.h"
 #include "brig_symbol.h"
 

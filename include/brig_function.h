@@ -1,3 +1,12 @@
+//===- brig_function.h ----------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef _BRIG_FUNCTION_H_
 #define _BRIG_FUNCTION_H_
 

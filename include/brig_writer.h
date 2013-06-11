@@ -1,3 +1,12 @@
+//===- brig_writer.h ------------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef BRIG_WRITER_H
 #define BRIG_WRITER_H
 

@@ -1,4 +1,12 @@
-/* Copyright 2013 <MulticorewareInc> */
+//===- hsailasm_wrapper.h -------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef INCLUDE_HSAILASM_WRAPPER_H_
 #define INCLUDE_HSAILASM_WRAPPER_H_
 

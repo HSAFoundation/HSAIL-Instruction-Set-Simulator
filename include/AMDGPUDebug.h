@@ -1,3 +1,12 @@
+//===- AMDGPUDebug.h ------------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 /*****************************************************************************//**
 ** Copyright (c) 2012 Advanced Micro Devices, Inc. All rights reserved.
 **

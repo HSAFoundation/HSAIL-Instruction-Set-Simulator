@@ -1,3 +1,12 @@
+//===- barrierTest.cc -----------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 // Header files the HSA runtime implicitly depends on
 #include <cstdio>
 #include <cstdlib>
