@@ -1593,20 +1593,27 @@ bool BrigModule::validate(const BrigInstNone *code) const {
 bool BrigModule::validate(const BrigInstSeg *code) const {
   bool valid = true;
   if (!validateSize(code)) return false;
-  valid &= check(code->opcode < BRIG_OPCODE_INVALID,
+  valid &= check(code->opcode == BRIG_OPCODE_SEGMENTP ||
+                 code->opcode == BRIG_OPCODE_FTOS ||
+                 code->opcode == BRIG_OPCODE_STOF ||
+                 code->opcode == BRIG_OPCODE_ALLOCA ||
+                 code->opcode == BRIG_OPCODE_DISPATCHPTR ||
+                 code->opcode == BRIG_OPCODE_NULLPTR ||
+                 code->opcode == BRIG_OPCODE_QPTR,
                  "Invalid opcode");
   valid &= check(code->type <= BRIG_TYPE_F64X2,
                  "Invalid type");
+  valid &= check(code->sourceType <= BRIG_TYPE_F64X2,
+                 "Invalid source type");
+  valid &= check(code->segment < BRIG_SEGMENT_INVALID,
+                 "Invalid segment");
   for (unsigned i = 0; i < 5; ++i) {
     if (code->operands[i]) {
       valid &= check(code->operands[i] < S_.operandsSize,
                    "operands past the operands section");
     }
   }
-  valid &= check(code->segment < BRIG_SEGMENT_INVALID,
-                 "Invalid storage class");
-  valid &= check(code->sourceType <= BRIG_TYPE_F64X2,
-                 "Invalid type");
+
   return valid;
 }
 
