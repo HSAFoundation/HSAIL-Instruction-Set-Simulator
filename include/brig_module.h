@@ -67,7 +67,9 @@ class BrigModule {
   bool validateInstructions(void) const;
 
   bool validate(const BrigDirectiveExecutable *dir) const;
-  bool validate(const BrigDirectiveSymbol *dir) const;
+  bool validate(const BrigDirectiveVariable *dir) const;
+  bool validate(const BrigDirectiveImage *dir) const;
+  bool validate(const BrigDirectiveSampler *dir) const;
   bool validate(const BrigDirectiveLabel *dir) const;
   bool validate(const BrigDirectiveVersion *dir) const;
   bool validate(const BrigDirectiveSignature *dir) const;
