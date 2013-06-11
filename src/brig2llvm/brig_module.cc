@@ -1620,6 +1620,40 @@ bool BrigModule::validate(const BrigInstSeg *code) const {
 bool BrigModule::validate(const BrigInstSourceType *code) const {
   bool valid = true;
   if (!validateSize(code)) return false;
+  valid &= check(code->opcode == BRIG_OPCODE_POPCOUNT ||
+                 code->opcode == BRIG_OPCODE_FIRSTBIT ||
+                 code->opcode == BRIG_OPCODE_LASTBIT  ||
+                 code->opcode == BRIG_OPCODE_COMBINE  ||
+                 code->opcode == BRIG_OPCODE_EXPAND   ||
+                 code->opcode == BRIG_OPCODE_PACK     ||
+                 code->opcode == BRIG_OPCODE_UNPACK   ||
+                 code->opcode == BRIG_OPCODE_CLASS    ||
+                 code->opcode == BRIG_OPCODE_PACKCVT  ||
+                 code->opcode == BRIG_OPCODE_UNPACKCVT||
+                 code->opcode == BRIG_OPCODE_SAD      ||
+                 code->opcode == BRIG_OPCODE_SADHI    ||
+                 code->opcode == BRIG_OPCODE_QUERYIMAGEWIDTH ||
+                 code->opcode == BRIG_OPCODE_QUERYIMAGEHEIGHT ||
+                 code->opcode == BRIG_OPCODE_QUERYIMAGEDEPTH ||
+                 code->opcode == BRIG_OPCODE_QUERYIMAGEARRAY ||
+                 code->opcode == BRIG_OPCODE_QUERYIMAGEORDER ||
+                 code->opcode == BRIG_OPCODE_QUERYIMAGEFORMAT ||
+                 code->opcode == BRIG_OPCODE_QUERYSAMPLERCOORD ||
+                 code->opcode == BRIG_OPCODE_QUERYSAMPLERFILTER,
+                 "Invalid opcode");
+  valid &= check(code->type <= BRIG_TYPE_F64X2,
+                 "Invalid type");
+  valid &= check(code->sourceType <= BRIG_TYPE_F64X2,
+                 "Invalid source type");
+  for (unsigned i = 0; i < 5; ++i) {
+    if (code->operands[i]) {
+      valid &= check(code->operands[i] < S_.operandsSize,
+                   "operands past the operands section");
+    }
+  }
+
+  valid &= check(code->reserved == 0,
+                 "reserved must be zero");
   return valid;
 }
 
