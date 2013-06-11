@@ -1221,8 +1221,92 @@ bool BrigModule::validate(const BrigInstBar *code) const {
 bool BrigModule::validate(const BrigInstBasic *code) const {
   bool valid = true;
   if (!validateSize(code)) return false;
-  valid &= check(code->opcode < BRIG_OPCODE_INVALID,
-                 "Invalid opcode");
+  BrigOpcode16_t op = code->opcode;
+  valid &= check(op == BRIG_OPCODE_ABS ||
+                 op == BRIG_OPCODE_ADD ||
+                 op == BRIG_OPCODE_BORROW ||
+                 op == BRIG_OPCODE_CARRY ||
+                 op == BRIG_OPCODE_CEIL ||
+                 op == BRIG_OPCODE_COPYSIGN ||
+                 op == BRIG_OPCODE_DIV ||
+                 op == BRIG_OPCODE_FLOOR ||
+                 op == BRIG_OPCODE_FMA ||
+                 op == BRIG_OPCODE_FRACT ||
+                 op == BRIG_OPCODE_MAX ||
+                 op == BRIG_OPCODE_MIN ||
+                 op == BRIG_OPCODE_MUL ||
+                 op == BRIG_OPCODE_MULHI ||
+                 op == BRIG_OPCODE_NEG ||
+                 op == BRIG_OPCODE_REM ||
+                 op == BRIG_OPCODE_SUB ||
+                 op == BRIG_OPCODE_MAD ||
+                 op == BRIG_OPCODE_MAD24 ||
+                 op == BRIG_OPCODE_MAD24HI ||
+                 op == BRIG_OPCODE_MUL24 ||
+                 op == BRIG_OPCODE_MUL24HI ||
+                 op == BRIG_OPCODE_SHL ||
+                 op == BRIG_OPCODE_SHR ||
+                 op == BRIG_OPCODE_AND ||
+                 op == BRIG_OPCODE_NOT ||
+                 op == BRIG_OPCODE_OR ||
+                 op == BRIG_OPCODE_XOR ||
+                 op == BRIG_OPCODE_BITEXTRACT ||
+                 op == BRIG_OPCODE_BITINSERT ||
+                 op == BRIG_OPCODE_BITMASK ||
+                 op == BRIG_OPCODE_BITREV ||
+                 op == BRIG_OPCODE_BITSELECT ||
+                 op == BRIG_OPCODE_LDC ||
+                 op == BRIG_OPCODE_MOV ||
+                 op == BRIG_OPCODE_SHUFFLE ||
+                 op == BRIG_OPCODE_UNPACKHI ||
+                 op == BRIG_OPCODE_UNPACKLO ||
+                 op == BRIG_OPCODE_CMOV ||
+                 op == BRIG_OPCODE_RINT ||
+                 op == BRIG_OPCODE_SQRT ||
+                 op == BRIG_OPCODE_TRUNC ||
+                 op == BRIG_OPCODE_NCOS ||
+                 op == BRIG_OPCODE_NEXP2 ||
+                 op == BRIG_OPCODE_NFMA ||
+                 op == BRIG_OPCODE_NLOG2 ||
+                 op == BRIG_OPCODE_NRCP ||
+                 op == BRIG_OPCODE_NSIN ||
+                 op == BRIG_OPCODE_NRSQRT ||
+                 op == BRIG_OPCODE_NSQRT ||
+                 op == BRIG_OPCODE_BITALIGN ||
+                 op == BRIG_OPCODE_BYTEALIGN ||
+                 op == BRIG_OPCODE_LERP ||
+                 op == BRIG_OPCODE_LDF ||
+                 op == BRIG_OPCODE_COUNTLANE ||
+                 op == BRIG_OPCODE_COUNTUPLANE ||
+                 op == BRIG_OPCODE_MASKLANE ||
+                 op == BRIG_OPCODE_SENDLANE ||
+                 op == BRIG_OPCODE_RECEIVELANE ||
+                 op == BRIG_OPCODE_RET ||
+                 op == BRIG_OPCODE_SYSCALL ||
+                 op == BRIG_OPCODE_CLEARDETECTEXCEPT ||
+                 op == BRIG_OPCODE_CLOCK ||
+                 op == BRIG_OPCODE_CUID ||
+                 op == BRIG_OPCODE_CURRENTWORKGROUPSIZE ||
+                 op == BRIG_OPCODE_DEBUGTRAP ||
+                 op == BRIG_OPCODE_DIM ||
+                 op == BRIG_OPCODE_DISPATCHID ||
+                 op == BRIG_OPCODE_GETDETECTEXCEPT ||
+                 op == BRIG_OPCODE_GRIDGROUPS ||
+                 op == BRIG_OPCODE_GRIDSIZE ||
+                 op == BRIG_OPCODE_LANEID ||
+                 op == BRIG_OPCODE_MAXCUID ||
+                 op == BRIG_OPCODE_MAXWAVEID ||
+                 op == BRIG_OPCODE_NOP ||
+                 op == BRIG_OPCODE_QID ||
+                 op == BRIG_OPCODE_SETDETECTEXCEPT ||
+                 op == BRIG_OPCODE_WAVEID ||
+                 op == BRIG_OPCODE_WORKGROUPID ||
+                 op == BRIG_OPCODE_WORKGROUPSIZE ||
+                 op == BRIG_OPCODE_WORKITEMABSID ||
+                 op == BRIG_OPCODE_WORKITEMFLATABSID ||
+                 op == BRIG_OPCODE_WORKITEMFLATID ||
+                 op == BRIG_OPCODE_WORKITEMID,
+                 "Invalid opcode in BrigInstBasic");
   valid &= check(code->type <= BRIG_TYPE_F64X2,
                  "Invalid type");
   for (unsigned i = 0; i < 5; ++i) {
