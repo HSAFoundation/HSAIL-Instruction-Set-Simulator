@@ -28,9 +28,7 @@ class BrigFunction;
 class BrigSymbol;
 
 class BrigModule {
-
   public:
-
   BrigModule(const BrigReader &reader, llvm::raw_ostream *out) :
     S_(reader.getStrings().data(),
        reader.getDirectives().data(),
@@ -41,8 +39,7 @@ class BrigModule {
        reader.getDirectives().size(),
        reader.getCode().size(),
        reader.getOperands().size(),
-       reader.getDebug().size()
-      ),
+       reader.getDebug().size()),
     out_(out),
     valid_(validate()) {}
 
@@ -55,7 +52,6 @@ class BrigModule {
   BrigSymbol global_end() const;
 
   private:
-
   template<class Message>
   bool check(bool test, const Message &msg,
              const char *filename, unsigned lineno,
@@ -319,7 +315,7 @@ class BrigModule {
   friend BrigSymbol global_end(const BrigModule &mod);
 };
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa
 
-#endif /* _BRIG_MODULE_H_ */
+#endif  // _BRIG_MODULE_H_
