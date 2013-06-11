@@ -12,7 +12,6 @@
 #include "brig_module.h"
 #include "brig_reader.h"
 #include "brig_runtime.h"
-#include "brig_writer.h"
 #include "hsailasm_wrapper.h"
 
 #include "llvm/Module.h"
@@ -29,7 +28,6 @@
 #define XSTR(X) STR(X)
 
 using hsa::brig::BrigReader;
-using hsa::brig::BrigWriter;
 
 hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
 
