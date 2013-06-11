@@ -1425,10 +1425,13 @@ bool BrigModule::validate(const BrigInstCvt *code) const {
 bool BrigModule::validate(const BrigInstMem *code) const {
   bool valid = true;
   if (!validateSize(code)) return false;
-  valid &= check(code->opcode < BRIG_OPCODE_INVALID,
+  valid &= check(code->opcode == BRIG_OPCODE_LDA ||
+                 code->opcode == BRIG_OPCODE_LD  ||
+                 code->opcode == BRIG_OPCODE_ST,
                  "Invalid opcode");
   valid &= check(code->type <= BRIG_TYPE_F64X2,
                  "Invalid type");
+
   for (unsigned i = 0; i < 5; ++i) {
     if (code->operands[i]) {
       valid &= check(code->operands[i] < S_.operandsSize,
@@ -1445,6 +1448,8 @@ bool BrigModule::validate(const BrigInstMem *code) const {
                  code->segment == BRIG_SEGMENT_FLAT,
                  "Invalid storage class, can be global, group, "
                  "private, kernarg, readonly, spill, arg, or flat");
+  valid &= check(code->width <= BRIG_WIDTH_ALL,
+                 "Invalid width");
   return valid;
 }
 
