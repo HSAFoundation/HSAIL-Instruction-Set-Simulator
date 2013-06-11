@@ -1,3 +1,12 @@
+//===- VectorCopy.hsail ---------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 version 0:96:$full:$small;
 
 kernel &__OpenCL_vec_copy_kernel(

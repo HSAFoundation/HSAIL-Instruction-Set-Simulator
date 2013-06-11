@@ -1,3 +1,12 @@
+//===- fib.hsail ----------------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 version 0:96:$full:$small;
 function &fib (arg_s32 %r) (arg_s32 %n)
 {
