@@ -1341,13 +1341,18 @@ bool BrigModule::validate(const BrigInstImage *code) const {
   valid &= check(code->opcode == BRIG_OPCODE_LDIMAGE ||
                  code->opcode == BRIG_OPCODE_STIMAGE ||
                  code->opcode == BRIG_OPCODE_RDIMAGE,
-                 "Invalid opcode");
+                 "Invalid opcode. Must be RDIMAGE, LDIMAGE or STIMAGE");
   for (unsigned i = 0; i < 5; ++i) {
     if (code->operands[i]) {
       valid &= check(code->operands[i] < S_.operandsSize,
                    "operands past the operands section");
     }
   }
+  valid &= check(code->imageType == BRIG_TYPE_ROIMG ||
+                 code->imageType == BRIG_TYPE_RWIMG,
+                 "Invalid image type");
+  valid &= check(code->coordType <= BRIG_TYPE_F64X2,
+                 "Invalid coordinate type");
   valid &= check(code->geometry <= BRIG_GEOMETRY_2DA,
                  "Invalid type of image geometry");
   valid &= check(code->type <= BRIG_TYPE_F64X2,
