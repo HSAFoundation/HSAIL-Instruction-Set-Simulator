@@ -1456,6 +1456,24 @@ bool BrigModule::validate(const BrigInstMem *code) const {
 bool BrigModule::validate(const BrigInstMod *code) const {
   bool valid = true;
   if (!validateSize(code)) return false;
+  valid &= check(code->opcode == BRIG_OPCODE_ABS ||
+                 code->opcode == BRIG_OPCODE_ADD ||
+                 code->opcode == BRIG_OPCODE_MAX ||
+                 code->opcode == BRIG_OPCODE_MIN ||
+                 code->opcode == BRIG_OPCODE_MUL ||
+                 code->opcode == BRIG_OPCODE_MULHI ||
+                 code->opcode == BRIG_OPCODE_NEG ||
+                 code->opcode == BRIG_OPCODE_SUB ||
+                 code->opcode == BRIG_OPCODE_CEIL ||
+                 code->opcode == BRIG_OPCODE_COPYSIGN ||
+                 code->opcode == BRIG_OPCODE_DIV ||
+                 code->opcode == BRIG_OPCODE_FLOOR ||
+                 code->opcode == BRIG_OPCODE_FMA ||
+                 code->opcode == BRIG_OPCODE_FRACT ||
+                 code->opcode == BRIG_OPCODE_RINT ||
+                 code->opcode == BRIG_OPCODE_SQRT ||
+                 code->opcode == BRIG_OPCODE_TRUNC,
+                 "Invalid opcode in BrigInstMod");
   valid &= check(code->opcode < BRIG_OPCODE_INVALID,
                  "Invalid opcode");
   valid &= check(code->type <= BRIG_TYPE_F64X2,
@@ -1468,6 +1486,8 @@ bool BrigModule::validate(const BrigInstMod *code) const {
                    "operands past the operands section");
     }
   }
+  valid &= check(code->reserved == 0,
+                 "reserved must be zero");
   return valid;
 }
 
