@@ -3675,18 +3675,24 @@ bool BrigModule::validateSegmentp(const inst_iterator inst) const {
   const BrigInstSeg *mem = dyn_cast<BrigInstSeg>(inst);
   if (!check(mem, "Invalid instruction kind")) return false;
   BrigType type = BrigType(mem->type);
-  valid &= check(type == BRIG_TYPE_B1, "Type of Segmentp should be b1");
+  valid &= check(type == BRIG_TYPE_B1, "Type of Segmentp must be b1");
+  valid &= check(mem->sourceType == BRIG_TYPE_U32 ||
+                 mem->sourceType == BRIG_TYPE_U64,
+                "Invalid source type, must be U32 or U64");
   valid &= check(mem->segment < BRIG_SEGMENT_INVALID,
-                 "StorageClass should be global, "
+                 "segment must be global, "
                  "group, private, kernarg, readonly, spill, or arg");
+
   oper_iterator dest(S_.operands + mem->operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be register");
   valid &= check(isCompatibleSrc(type, dest),
                  "Incompatible destination operand");
+
+
   oper_iterator src(S_.operands + mem->operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
                  isa<BrigOperandImmed>(src),
-                 "Source should be reg, immediate");
+                 "Source must be reg, immediate");
   valid &= check(isCompatibleAddrSize(mem->segment, *getType(src)),
                  "Incompatible address size");
   return valid;
@@ -3698,17 +3704,22 @@ bool BrigModule::validateFtoS(const inst_iterator inst) const {
     return false;
   const BrigInstSeg *mem = dyn_cast<BrigInstSeg>(inst);
   if (!check(mem, "Invalid instruction kind")) return false;
-  valid &= check(mem->type == BRIG_TYPE_U32 || mem->type == BRIG_TYPE_U64,
-                 "Type of FtoS should be u32 or u64");
+  valid &= validate(mem);
+  valid &= check(mem->type == BRIG_TYPE_U32 ||
+                 mem->type == BRIG_TYPE_U64,
+                 "Type of FtoS must be u32 or u64");
+
   BrigType type = BrigType(mem->type);
   oper_iterator dest(S_.operands + mem->operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
+
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be register");
   valid &= check(isCompatibleAddrSize(mem->segment, *getType(dest)),
                  "Incompatible address size");
+
   oper_iterator src(S_.operands + mem->operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
                  isa<BrigOperandImmed>(src),
-                 "Source should be reg, immediate");
+                 "Source must be reg, immediate");
   valid &= check(isCompatibleAddrSize(BrigSegment(BRIG_SEGMENT_FLAT),
                                       *getType(src)),
                  "Incompatible address size");
@@ -3723,20 +3734,26 @@ bool BrigModule::validateStoF(const inst_iterator inst) const {
     return false;
   const BrigInstSeg *mem = dyn_cast<BrigInstSeg>(inst);
   if (!check(mem, "Invalid instruction kind")) return false;
+  valid &= validate(mem);
+
   BrigType type = BrigType(mem->type);
-  valid &= check(type == BRIG_TYPE_U32 || type == BRIG_TYPE_U64,
-                 "Type of StoF should be u32 or u64");
+  valid &= check(type == BRIG_TYPE_U32 ||
+                 type == BRIG_TYPE_U64,
+                 "Type of StoF must be u32 or u64");
   valid &= check(isCompatibleAddrSize(BrigSegment(BRIG_SEGMENT_FLAT), type),
                  "Incompatible address size");
+
   oper_iterator dest(S_.operands + mem->operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest), "Destination should be register");
+  valid &= check(isa<BrigOperandReg>(dest),
+                "Destination must be register");
   valid &= check(isCompatibleSrc(type, dest),
                  "Incompatible destination operand");
+
   oper_iterator src(S_.operands + mem->operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
                  isa<BrigOperandImmed>(src) ||
                  isa<BrigOperandWavesize>(src),
-                 "Source should be reg, immediate or waveSz");
+                 "Source must be reg, immediate or wavesize");
   valid &= check(isCompatibleAddrSize(mem->segment, *getType(dest)),
                  "Incompatible address size");
   valid &= check(!BrigInstHelper::isVectorTy(type),
