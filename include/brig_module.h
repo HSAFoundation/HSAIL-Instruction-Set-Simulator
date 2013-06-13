@@ -186,6 +186,7 @@ class BrigModule {
   bool validateUnpackLo(const inst_iterator inst) const;
   bool validateCmov(const inst_iterator inst) const;
   bool validateClass(const inst_iterator inst) const;
+  bool validateNativeFloatInst(const inst_iterator inst) const;
   bool validateNcos(const inst_iterator inst) const;
   bool validateNexp2(const inst_iterator inst) const;
   bool validateNlog2(const inst_iterator inst) const;

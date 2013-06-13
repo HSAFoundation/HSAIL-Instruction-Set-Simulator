@@ -3235,14 +3235,14 @@ bool BrigModule::validateCmov(const inst_iterator inst) const {
 
   BrigType type = BrigType(inst->type);
   oper_iterator dest(S_.operands + inst->operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
+
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be reg");
 
   oper_iterator src0(S_.operands + inst->operands[1]);
-
   oper_iterator src1(S_.operands + inst->operands[2]);
-  valid &= check(isCompatibleSrc(type, src1), "Incompatible src1 operand");
-
   oper_iterator src2(S_.operands + inst->operands[3]);
+
+  valid &= check(isCompatibleSrc(type, src1), "Incompatible src1 operand");
   valid &= check(isCompatibleSrc(type, src2), "Incompatible src2 operand");
 
   for (int i = 1; i < 4; ++i) {
@@ -3250,7 +3250,7 @@ bool BrigModule::validateCmov(const inst_iterator inst) const {
     valid &= check(isa<BrigOperandReg>(src) ||
                    isa<BrigOperandImmed>(src) ||
                    isa<BrigOperandWavesize>(src),
-                   "Source should be reg, immdiate, or wavesize");
+                   "Source must be reg, immdiate, or wavesize");
   }
 
   if (BrigInstHelper::isVectorTy(type)) {
@@ -3260,10 +3260,11 @@ bool BrigModule::validateCmov(const inst_iterator inst) const {
                    "Invalid type");
     valid &= check(isCompatibleSrc(type, src0), "Incompatible src0 operand");
   } else {
-    valid &= check(inst->type == BRIG_TYPE_B1 || inst->type == BRIG_TYPE_B32 ||
+    valid &= check(inst->type == BRIG_TYPE_B1 ||
+                   inst->type == BRIG_TYPE_B32 ||
                    inst->type == BRIG_TYPE_B64,
-                   "Type should be b1, b32 and b64");
-    valid &= check(*getType(src0) == BRIG_TYPE_B1, "Type of Src0 should be b1");
+                   "Type must be b1, b32 and b64");
+    valid &= check(*getType(src0) == BRIG_TYPE_B1, "Type of Src0 must be b1");
   }
   return valid;
 }
@@ -3280,20 +3281,20 @@ bool BrigModule::validateClass(const inst_iterator inst) const {
 
   BrigType sourceType = BrigType(stype->sourceType);
   valid &= check(BrigInstHelper::isFloatTy(sourceType),
-                 "Type of Class should be f16, f32, or f64");
+                 "SourceType of Class must be f16, f32, or f64");
 
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest),
-                 "Destination should be a register");
+                 "Destination must be a register");
   valid &= check(*getType(dest) == BRIG_TYPE_B1,
-                 "Destination should be a c reg");
+                 "Destination must be a c reg");
 
   for (int i = 1; i < 3; ++i) {
     oper_iterator src(S_.operands + inst->operands[i]);
     valid &= check(isa<BrigOperandReg>(src) ||
-                   isa<BrigOperandImmed>(src) ||
-                   isa<BrigOperandWavesize>(src),
-                   "Source should be register or immediate");
+                   isa<BrigOperandWavesize>(src) ||
+                   isa<BrigOperandImmed>(src),
+                   "Source must be register, immediate or wavesize");
   }
 
   oper_iterator src0(S_.operands + inst->operands[1]);
@@ -3301,78 +3302,155 @@ bool BrigModule::validateClass(const inst_iterator inst) const {
                  "Incompatible src0 operand");
 
   oper_iterator src1(S_.operands + inst->operands[2]);
+
+  // PRM 5.12.1
+  // src1: ... must be a register or immediate value of compound type u32
   if (getType(src1))
     valid &= check(*getType(src1) == BRIG_TYPE_B32,
-                   "Type of src1 should be BRIG_TYPE_B32");
+                   "Type of src1 must be BRIG_TYPE_B32");
 
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Class can not accept the vector");
+                 "Class can not accept vector type");
+  return valid;
+}
+
+bool BrigModule::validateNativeFloatInst(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(isa<BrigInstBasic>(inst),
+                 "Invalid instruction kind");
+  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+
+  valid &= check(BrigInstHelper::isFloatTy(type),
+                 "Type must be floating-point");
+  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
+                 "Can not accept vector types");
+
+  oper_iterator dest(S_.operands + inst->operands[0]);
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(destReg, "Destination must be a register");
+
+  oper_iterator src(S_.operands + inst->operands[1]);
+  valid &= check(isa<BrigOperandReg>(src) ||
+                 isa<BrigOperandImmed>(src),
+                 "Source must be a register or immediate");
+
+  valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
+
+  valid &= check(BrigInstHelper::getTypeSize(type) <=
+                 BrigInstHelper::getTypeSize(BrigType(destReg->type)),
+                 "Destination register is too small");
   return valid;
 }
 
 bool BrigModule::validateNcos(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_F32, "Type should be f32");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Fcos can not accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
+  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+  valid &= check(type == BRIG_TYPE_F32, "Type of ncos must be f32");
+  valid &= validateNativeFloatInst(inst);
   return valid;
 }
 
 bool BrigModule::validateNexp2(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_F32, "Type should be f32");
+  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+  valid &= check(type == BRIG_TYPE_F32, "Type of nexp2 must be f32");
+  valid &= validateNativeFloatInst(inst);
+  return valid;
+}
+
+bool BrigModule::validateNFma(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(isa<BrigInstBasic>(inst),
+                 "Invalid instruction kind");
+  if (!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+  valid &= check(type == BRIG_TYPE_F32 ||
+                 type == BRIG_TYPE_F16 ||
+                 type == BRIG_TYPE_F64,
+                 "Type of nrcp must be f16, f32 or f64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Fexp2 can not accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
+                 "Can not accept vector types");
+  oper_iterator dest(S_.operands + inst->operands[0]);
+  const BrigOperandReg *destReg = dyn_cast<BrigOperandReg>(dest);
+  valid &= check(destReg, "Destination must be a register");
+
+  for (int i = 1; i < 4; i++) {
+    oper_iterator src(S_.operands + inst->operands[i]);
+    valid &= check(isa<BrigOperandReg>(src) ||
+                 isa<BrigOperandImmed>(src),
+                 "Source must be a register or immediate");
+    valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
+  }
+
+  valid &= check(BrigInstHelper::getTypeSize(type) <=
+                 BrigInstHelper::getTypeSize(BrigType(destReg->type)),
+                 "Destination register is too small");
   return valid;
 }
 
 bool BrigModule::validateNlog2(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_F32, "Type should be f32");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Flog2 can not accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
+  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+  valid &= check(type == BRIG_TYPE_F32, "Type of nlog2 must be f32");
+  valid &= validateNativeFloatInst(inst);
   return valid;
 }
 
 bool BrigModule::validateNrcp(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
-                 "Type should be f16, f32, or f64");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Frcp can not accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
+  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+  valid &= check(type == BRIG_TYPE_F32 ||
+                 type == BRIG_TYPE_F16 ||
+                 type == BRIG_TYPE_F64,
+                 "Type of nrcp must be f16, f32 or f64");
+  valid &= validateNativeFloatInst(inst);
   return valid;
 }
 
 bool BrigModule::validateNsqrt(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
-                 "Type should be f16, f32, or f64");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Fsqrt can not accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
+  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+  valid &= check(type == BRIG_TYPE_F32 ||
+                 type == BRIG_TYPE_F16 ||
+                 type == BRIG_TYPE_F64,
+                 "Type of nsqrt must be f16, f32 or f64");
+  valid &= validateNativeFloatInst(inst);
   return valid;
 }
 
 bool BrigModule::validateNrsqrt(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(BrigInstHelper::isFloatTy(BrigType(inst->type)),
-                 "Type should be f16, f32, or f64");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Frsqrt can not accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
+  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+  valid &= check(type == BRIG_TYPE_F32 ||
+                 type == BRIG_TYPE_F16 ||
+                 type == BRIG_TYPE_F64,
+                 "Type of nrsqrt must be f16, f32 or f64");
+  valid &= validateNativeFloatInst(inst);
   return valid;
 }
 
 bool BrigModule::validateNsin(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(inst->type == BRIG_TYPE_F32, "Type should be f32");
-  valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
-                 "Fsin can not accept vector types");
-  valid &= validateArithmeticInst(inst, 1);
+  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+    return false;
+  BrigType type = BrigType(inst->type);
+  valid &= check(type == BRIG_TYPE_F32, "Type of nsin must be f32");
+  valid &= validateNativeFloatInst(inst);
   return valid;
 }
 
@@ -4431,10 +4509,7 @@ bool BrigModule::validateExpand(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateNFma(const inst_iterator inst) const {
-  bool valid = true;
-  return valid;
-}
+
 
 bool BrigModule::validateSadhi(const inst_iterator inst) const {
   bool valid = true;
