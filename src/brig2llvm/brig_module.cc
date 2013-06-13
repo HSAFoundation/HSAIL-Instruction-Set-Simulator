@@ -2396,7 +2396,7 @@ bool BrigModule::validateShiftInst(const inst_iterator inst) const {
   return valid;
 }
 
-bool BrigModule::validateUnpackInst(const inst_iterator inst) const {
+bool BrigModule::validateInterleaveInst(const inst_iterator inst) const {
   bool valid = true;
   valid &= check(isa<BrigInstBasic>(inst), "Incorrect instruction kind");
   if (!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
@@ -2416,25 +2416,22 @@ bool BrigModule::validateUnpackInst(const inst_iterator inst) const {
                  inst->type == BRIG_TYPE_S8X8  ||
                  inst->type == BRIG_TYPE_U8X4  ||
                  inst->type == BRIG_TYPE_S8X4,
-                 "Length of Unpack should be 8x4, 8x8, 16x2, 16x4 or 32x2");
+                 "Type of interleave operations must be "
+                " U, S or F with length 8x4, 8x8, 16x2, 16x4 or 32x2");
 
   oper_iterator dest(S_.operands + inst->operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be reg");
   oper_iterator src0(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandReg>(src0) ||
-                 isa<BrigOperandImmed>(src0), "Src should be reg or immed");
+                 isa<BrigOperandImmed>(src0), "Src must be reg or immed");
   oper_iterator src1(S_.operands + inst->operands[2]);
   valid &= check(isa<BrigOperandReg>(src1) ||
-                 isa<BrigOperandImmed>(src1), "Src should be reg or immed");
+                 isa<BrigOperandImmed>(src1), "Src must be reg or immed");
 
   for (int i = 0; i < 3; ++i) {
     oper_iterator reg(S_.operands + inst->operands[i]);
     valid &= check(isCompatibleSrc(type, reg), "Incompatible source operand");
   }
-
-  valid &= check(BrigInstHelper::isVectorTy(type),
-                 "Unpack should accept vector types");
-
   return valid;
 }
 
@@ -2890,7 +2887,7 @@ bool BrigModule::validateBitMask(const inst_iterator inst) const {
                  "Incorrect instruction kind");
   valid &= check(inst->type == BRIG_TYPE_B32 ||
                  inst->type == BRIG_TYPE_B64,
-                 "Type of BitMask must be b32 or b64");
+                 "Type of BitMask must be B32 or B64");
   valid &= validateBitInst(inst, 2);
   return valid;
 }
@@ -3041,6 +3038,7 @@ bool BrigModule::validateShuffle(const inst_iterator inst) const {
   valid &= check(isa<BrigInstBasic>(inst), "Incorrect instruction kind");
   if (!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
     return false;
+
   BrigType type = BrigType(inst->type);
   valid &= check(inst->type == BRIG_TYPE_U16X2 ||
                  inst->type == BRIG_TYPE_S16X2 ||
@@ -3055,35 +3053,178 @@ bool BrigModule::validateShuffle(const inst_iterator inst) const {
                  inst->type == BRIG_TYPE_S8X8  ||
                  inst->type == BRIG_TYPE_U8X4  ||
                  inst->type == BRIG_TYPE_S8X4,
-                 "Length of Shuffle should be 8x4, 8x8, 16x2, 16x4 or 32x2");
+                 "Type of Shuffle must be U, S or F with length "
+                 "8x4, 8x8, 16x2, 16x4 or 32x2");
 
   oper_iterator dest(S_.operands + inst->operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest), "Destination should be reg");
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be reg");
   oper_iterator src0(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandReg>(src0) ||
-                 isa<BrigOperandImmed>(src0), "Src0 should be reg or immed");
+                 isa<BrigOperandImmed>(src0), "Src0 must be reg or immed");
   oper_iterator src1(S_.operands + inst->operands[2]);
   valid &= check(isa<BrigOperandReg>(src1) ||
-                 isa<BrigOperandImmed>(src1), "Src1 should be reg or immed");
+                 isa<BrigOperandImmed>(src1), "Src1 must be reg or immed");
   oper_iterator src2(S_.operands + inst->operands[3]);
-  valid &= check(isa<BrigOperandImmed>(src2), "Src2 should be immed");
+  valid &= check(isa<BrigOperandImmed>(src2), "Src2 must be immed");
 
   for (int i = 0; i < 4; ++i) {
     oper_iterator reg(S_.operands + inst->operands[i]);
     valid &= check(isCompatibleSrc(type, reg), "Incompatible operand");
   }
 
-  valid &= check(BrigInstHelper::isVectorTy(type),
-                 "Shuffle should accept vector types");
   return valid;
 }
 
 bool BrigModule::validateUnpackHi(const inst_iterator inst) const {
-  return validateUnpackInst(inst);
+  return validateInterleaveInst(inst);
 }
 
 bool BrigModule::validateUnpackLo(const inst_iterator inst) const {
-  return validateUnpackInst(inst);
+  return validateInterleaveInst(inst);
+}
+
+bool BrigModule::validatePack(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(isa<BrigInstSourceType>(inst), "Incorrect instruction kind");
+  if (!valid) return false;
+
+  if (!check(getNumOperands(inst) == 4, "Incorrect number of operands"))
+    return false;
+
+  const BrigInstSourceType * bist = dyn_cast<BrigInstSourceType>(inst);
+
+  BrigType type = BrigType(bist->type);
+  valid &= check(type == BRIG_TYPE_U16X2 ||
+                 type == BRIG_TYPE_S16X2 ||
+                 type == BRIG_TYPE_F16X2 ||
+                 type == BRIG_TYPE_U16X4 ||
+                 type == BRIG_TYPE_S16X4 ||
+                 type == BRIG_TYPE_F16X4 ||
+                 type == BRIG_TYPE_U16X8 ||
+                 type == BRIG_TYPE_S16X8 ||
+                 type == BRIG_TYPE_F16X8 ||
+                 type == BRIG_TYPE_U32X2 ||
+                 type == BRIG_TYPE_S32X2 ||
+                 type == BRIG_TYPE_F32X2 ||
+                 type == BRIG_TYPE_U32X4 ||
+                 type == BRIG_TYPE_S32X4 ||
+                 type == BRIG_TYPE_F32X4 ||
+                 type == BRIG_TYPE_U64X2 ||
+                 type == BRIG_TYPE_S64X2 ||
+                 type == BRIG_TYPE_F64X2 ||
+                 type == BRIG_TYPE_U8X8  ||
+                 type == BRIG_TYPE_S8X8  ||
+                 type == BRIG_TYPE_U8X4  ||
+                 type == BRIG_TYPE_S8X4  ||
+                 type == BRIG_TYPE_U8X16 ||
+                 type == BRIG_TYPE_S8X16,
+                 "Type of Pack must be U, S or F with length "
+                 "8x4, 8x8, 8x16, 16x2, 16x4, 16x8 "
+                 "32x2, 32x4, 32x8 or 64x2");
+
+  BrigType sourceType = BrigType(bist->sourceType);
+
+  valid &= check(sourceType == BRIG_TYPE_U32 ||
+                 sourceType == BRIG_TYPE_S32 ||
+                 sourceType == BRIG_TYPE_F32 ||
+                 sourceType == BRIG_TYPE_U64 ||
+                 sourceType == BRIG_TYPE_S64 ||
+                 sourceType == BRIG_TYPE_F64 ||
+                 sourceType == BRIG_TYPE_F16 ||
+                 sourceType == BRIG_TYPE_U16 ||
+                 sourceType == BRIG_TYPE_S16,
+                 "sourceType of Pack can have length 32 or 64,"
+                 " and can be 16 if destType is f");
+
+  oper_iterator dest(S_.operands + inst->operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be reg");
+
+  oper_iterator src0(S_.operands + inst->operands[1]);
+  valid &= check(isa<BrigOperandReg>(src0) ||
+                 isa<BrigOperandImmed>(src0), "Src must be reg or immed");
+
+  oper_iterator src1(S_.operands + inst->operands[2]);
+  valid &= check(isa<BrigOperandReg>(src1) ||
+                 isa<BrigOperandImmed>(src1), "Src must be reg or immed");
+
+  oper_iterator src2(S_.operands + inst->operands[3]);
+  valid &= check(isa<BrigOperandImmed>(src2), "Src must be immed");
+
+  for (int i = 0; i < 4; ++i) {
+    oper_iterator reg(S_.operands + inst->operands[i]);
+    valid &= check(isCompatibleSrc(type, reg), "Incompatible operand");
+  }
+  return valid;
+}
+
+bool BrigModule::validateUnpack(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(isa<BrigInstSourceType>(inst), "Incorrect instruction kind");
+  if (!valid) return false;
+
+  if (!check(getNumOperands(inst) == 3, "Incorrect number of operands"))
+    return false;
+
+  const BrigInstSourceType * bist = dyn_cast<BrigInstSourceType>(inst);
+
+  BrigType sourceType = BrigType(bist->sourceType);
+  valid &= check(sourceType == BRIG_TYPE_U16X2 ||
+                 sourceType == BRIG_TYPE_S16X2 ||
+                 sourceType == BRIG_TYPE_F16X2 ||
+                 sourceType == BRIG_TYPE_U16X4 ||
+                 sourceType == BRIG_TYPE_S16X4 ||
+                 sourceType == BRIG_TYPE_F16X4 ||
+                 sourceType == BRIG_TYPE_U16X8 ||
+                 sourceType == BRIG_TYPE_S16X8 ||
+                 sourceType == BRIG_TYPE_F16X8 ||
+                 sourceType == BRIG_TYPE_U32X2 ||
+                 sourceType == BRIG_TYPE_S32X2 ||
+                 sourceType == BRIG_TYPE_F32X2 ||
+                 sourceType == BRIG_TYPE_U32X4 ||
+                 sourceType == BRIG_TYPE_S32X4 ||
+                 sourceType == BRIG_TYPE_F32X4 ||
+                 sourceType == BRIG_TYPE_U64X2 ||
+                 sourceType == BRIG_TYPE_S64X2 ||
+                 sourceType == BRIG_TYPE_F64X2 ||
+                 sourceType == BRIG_TYPE_U8X8  ||
+                 sourceType == BRIG_TYPE_S8X8  ||
+                 sourceType == BRIG_TYPE_U8X4  ||
+                 sourceType == BRIG_TYPE_S8X4  ||
+                 sourceType == BRIG_TYPE_U8X16 ||
+                 sourceType == BRIG_TYPE_S8X16,
+                 "sourceType of Unpack must be U, S or F with length "
+                 "8x4, 8x8, 8x16, 16x2, 16x4, 16x8 "
+                 "32x2, 32x4, 32x8 or 64x2");
+
+  BrigType type = BrigType(bist->type);
+  valid &= check(type == BRIG_TYPE_U32 ||
+                 type == BRIG_TYPE_S32 ||
+                 type == BRIG_TYPE_F32 ||
+                 type == BRIG_TYPE_U64 ||
+                 type == BRIG_TYPE_S64 ||
+                 type == BRIG_TYPE_F64 ||
+                 type == BRIG_TYPE_F16 ||
+                 type == BRIG_TYPE_U16 ||
+                 type == BRIG_TYPE_S16,
+                 "type of Pack can have length 32 or 64,"
+                 " and can be 16 if destType is f");
+
+  oper_iterator dest(S_.operands + inst->operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be reg");
+
+  oper_iterator src0(S_.operands + inst->operands[1]);
+  valid &= check(isa<BrigOperandReg>(src0) ||
+                 isa<BrigOperandImmed>(src0), "Src must be reg or immed");
+
+  oper_iterator src1(S_.operands + inst->operands[2]);
+  valid &= check(isa<BrigOperandReg>(src1) ||
+                 isa<BrigOperandImmed>(src1), "Src must be reg or immed");
+
+  for (int i = 0; i < 3; ++i) {
+    oper_iterator reg(S_.operands + inst->operands[i]);
+    valid &= check(isCompatibleSrc(type, reg), "Incompatible operand");
+  }
+  return valid;
 }
 
 bool BrigModule::validateCmov(const inst_iterator inst) const {

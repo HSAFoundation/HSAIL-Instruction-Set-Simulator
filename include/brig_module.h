@@ -135,7 +135,7 @@ class BrigModule {
   bool validateSimpleArithmeticInst(const inst_iterator inst, unsigned nary) const;
   bool validateArithmeticInst(const inst_iterator inst, unsigned nary) const;
   bool validateShiftInst(const inst_iterator inst) const;
-  bool validateUnpackInst(const inst_iterator inst) const;
+  bool validateInterleaveInst(const inst_iterator inst) const;
   bool validateBranchInst(const inst_iterator inst, unsigned nary) const;
   bool validateImageQueryInst(const inst_iterator inst) const;
   bool validateParaSynInst(const inst_iterator inst, unsigned nary) const;
@@ -278,6 +278,8 @@ class BrigModule {
   bool validateDispatchPtr(const inst_iterator inst) const;
   bool validateQPtr(const inst_iterator inst) const;
   bool validateBitInsert(const inst_iterator inst) const;
+  bool validatePack(const inst_iterator inst) const;
+  bool validateUnpack(const inst_iterator inst) const;
 
   bool validOrEnd(const dir_iterator dir) const;
   bool validate(const dir_iterator dir) const;
