@@ -152,6 +152,8 @@ bool BrigModule::validateOperands(void) const {
       caseBrig(Oper, OperandRegVector);
       caseBrig(Oper, OperandWavesize);
       caseBrig(Oper, OperandFbarrierRef);
+      caseBrig(Oper, OperandSignatureRef);
+      caseBrig(Oper, OperandArgumentRef);
       default:
         check(false, "Unrecognized operands");
         return false;
@@ -1934,16 +1936,67 @@ bool BrigModule::validate(const BrigOperandFunctionRef *operand) const {
   if (!validateSize(operand)) return false;
   dir_iterator fnDir(S_.directives + operand->ref);
   if (!validate(fnDir)) return false;
-  valid &= check(isa<BrigDirectiveFunction>(fnDir) ||
-                 isa<BrigDirectiveSignature>(fnDir),
-                 "Invalid directive, should point to a "
-                 "BrigDirectiveFunction or BrigDirectiveSignature");
+  valid &= check(isa<BrigDirectiveFunction>(fnDir),
+                 "Invalid directive, BrigOperandFunctionRef must "
+                 "point to a BrigDirectiveFunction");
+  return valid;
+}
+
+bool BrigModule::validate(const BrigOperandSignatureRef *operand) const {
+  bool valid = true;
+  if (!validateSize(operand)) return false;
+  dir_iterator sgDir(S_.directives + operand->ref);
+  if (!validate(sgDir)) return false;
+  valid &= check(isa<BrigDirectiveSignature>(sgDir),
+                 "Invalid directive, BrigOperandSignatureRef must "
+                 "point to a BrigDirectiveSignature");
+  return valid;
+}
+
+bool BrigModule::validate(const BrigOperandArgumentRef *operand) const {
+  bool valid = true;
+  if (!validateSize(operand)) return false;
+  dir_iterator symDir(S_.directives + operand->ref);
+  if (!validate(symDir)) return false;
+  valid &= check(isa<BrigDirectiveSymbol>(symDir),
+                 "Invalid directive, BrigOperandArgumentRef must "
+                 "point to a BrigDirectiveSymbol");
+  if (!valid) return false;
+  const BrigDirectiveVariable *bdv = dyn_cast<BrigDirectiveVariable>(symDir);
+  const BrigDirectiveImage *bdi = dyn_cast<BrigDirectiveImage>(symDir);
+  const BrigDirectiveSampler *bds = dyn_cast<BrigDirectiveSampler>(symDir);
+  if (!check(bdv||bdi||bds,
+             "Invalid OperandArgumentRef, the referenced symbol is invalid"))
+    return false;
+
+  if (bdv) {
+    if (!validate(bdv)) return false;
+    valid &= check(bdv->segment == BRIG_SEGMENT_ARG,
+                 "Invalid symbol, BrigOperandArgumentRef must "
+                 "point to a symbol in Arg segment");
+  }
+
+  if (bds) {
+    if (!validate(bds)) return false;
+    valid &= check(bds->segment == BRIG_SEGMENT_ARG,
+                 "Invalid symbol, BrigOperandArgumentRef must "
+                 "point to a symbol in Arg segment");
+  }
+
+  if (bdi) {
+    if (!validate(bdi)) return false;
+    valid &= check(bdi->segment == BRIG_SEGMENT_ARG,
+                 "Invalid symbol, BrigOperandArgumentRef must "
+                 "point to a symbol in Arg segment");
+  }
   return valid;
 }
 
 bool BrigModule::validate(const BrigOperandImmed *operand) const {
   bool valid = true;
   if (!validateSize(operand)) return false;
+  valid &= check(operand->size % 4 == 0,
+                 "Invalid size");
   if (!check(BRIG_TYPE_B1 == operand->type  ||
             BRIG_TYPE_B8 == operand->type  ||
             BRIG_TYPE_B16 == operand->type ||
@@ -1953,10 +2006,16 @@ bool BrigModule::validate(const BrigOperandImmed *operand) const {
             "Invalid type, must be b1, b8, b16, b32, b64 or b128"))
     return false;
   BrigType type = BrigType(operand->type);
-  size_t immediateSize = sizeof(BrigOperandImmed) - sizeof(uint8_t) +
-    (BrigInstHelper::getTypeSize(type) / 8 + 3) / 4;
-  valid &= check(immediateSize <= operand->size,
-                 "Operand size too small for immediate");
+
+  valid &= check(operand->byteCount == (BrigInstHelper::getTypeSize(type)+7)/8,
+                 "Size of data different from size of data type");
+  /* Current assembled codes did not pass this test
+  for (int i = operand->byteCount; i < ((operand->byteCount + 3)/4)*4; i++) {
+    valid &= check(operand->bytes[i] == 0,
+                   "bytes in BrigOperandImmed from byteCount "
+                   "to end must be zero");
+  } 
+  */
   return valid;
 }
 
@@ -1967,7 +2026,7 @@ bool BrigModule::validate(const BrigOperandLabelRef *operand) const {
   if (!validate(directiveDir)) return false;
   valid &= check(isa<BrigDirectiveLabel>(directiveDir) ||
                  isa<BrigDirectiveLabelTargets>(directiveDir),
-                 "Invalid directive, should point "
+                 "Invalid directive, BrigOperandLabelRef must point "
                  "to a BrigDirectiveLabel or BrigDirectiveLabelTargets");
   return valid;
 }
@@ -1983,7 +2042,7 @@ bool BrigModule::validate(const BrigOperandRegVector *operand) const {
   bool valid = true;
   if (!validateSize(operand)) return false;
   if (!check(operand->regCount >= 2 && operand->regCount <= 4,
-            "Register vectors must have size 2 or 4"))
+            "Register vectors must have size 2, 3 or 4"))
     return false;
   for (int i = 0; i < operand->regCount; ++i) {
     valid &= validateRegName(operand->regs[i], BrigType(operand->type));
@@ -1991,18 +2050,26 @@ bool BrigModule::validate(const BrigOperandRegVector *operand) const {
   valid &= check(operand->type == BRIG_TYPE_B1 ||
                  operand->type == BRIG_TYPE_B32 ||
                  operand->type == BRIG_TYPE_B64,
-                 "Invalid date type");
+                 "Invalid data type");
   return valid;
 }
 
 bool BrigModule::validate(const BrigOperandWavesize *operand) const {
+  bool valid = true;
   if (!validateSize(operand)) return false;
-  return true;
+  valid &= check(operand->reserved == 0,
+                 "reserved field in BrigOperandWavesize must be zero");
+  return valid;
 }
 
 bool BrigModule::validate(const BrigOperandFbarrierRef *operand) const {
   bool valid = true;
   if (!validateSize(operand)) return false;
+  dir_iterator directiveDir(S_.directives + operand->ref);
+  if (!validate(directiveDir)) return false;
+  valid &= check(isa<BrigDirectiveFbarrier>(directiveDir),
+                 "Invalid directive, BrigOperandFbarrier ref must point "
+                 "to a BrigDirectiveFbarrier");
   return valid;
 }
 
@@ -4793,8 +4860,6 @@ bool BrigModule::validateSetDetectExcept(const inst_iterator inst) const {
                  "Exception number must be an immed or wavesize");
   return valid;
 }
-
-
 
 bool BrigModule::validateQPtr(const inst_iterator inst) const {
   bool valid = true;

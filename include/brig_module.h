@@ -125,6 +125,8 @@ class BrigModule {
   bool validate(const BrigOperandRegVector *operand) const;
   bool validate(const BrigOperandWavesize *operand) const;
   bool validate(const BrigOperandFbarrierRef *operand) const;
+  bool validate(const BrigOperandSignatureRef *operand) const;
+  bool validate(const BrigOperandArgumentRef *operand) const;
 
   bool validate(const oper_iterator operands) const;
   bool validate(const inst_iterator inst) const;

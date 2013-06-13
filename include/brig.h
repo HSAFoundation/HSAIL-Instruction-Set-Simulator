@@ -1186,6 +1186,13 @@ struct BrigOperandRef {
   BrigDirectiveOffset32_t ref;
 };
 
+struct BrigOperandArgumentRef {
+  enum { OperKind = BRIG_OPERAND_ARGUMENT_REF };
+  uint16_t size;
+  BrigOperandKinds16_t kind;
+  BrigDirectiveOffset32_t ref;
+};
+
 struct BrigOperandLabelRef {
   enum { OperKind = BRIG_OPERAND_LABEL_REF };
   uint16_t size;
