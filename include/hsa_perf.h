@@ -110,7 +110,7 @@ class TraceGroup {
   enum parameter { PARAM_MAX };
 
   TraceGroup();
-  ~TraceGroup();
+  virtual ~TraceGroup();
   virtual uint32_t getCollectedBufferCount() = 0;
   virtual bool lock(uint32_t bufferId) = 0;
   virtual bool unlock(uint32_t bufferId) = 0;

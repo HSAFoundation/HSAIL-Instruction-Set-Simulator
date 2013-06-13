@@ -18,7 +18,7 @@
 #include "brig_module.h"
 #include "brig_reader.h"
 
-#include "llvm/Module.h"
+#include "llvm/IR/Module.h"
 
 #include <cassert>
 #include <cstdarg>

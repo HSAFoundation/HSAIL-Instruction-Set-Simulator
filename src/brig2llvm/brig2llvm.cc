@@ -15,13 +15,13 @@
 #include "brig_control_block.h"
 #include "brig_inst_helper.h"
 
-#include "llvm/Attributes.h"
-#include "llvm/DerivedTypes.h"
-#include "llvm/Instructions.h"
-#include "llvm/IRBuilder.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
 #include "llvm/Analysis/Verifier.h"
+#include "llvm/IR/Attributes.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
 
 namespace hsa{
@@ -595,11 +595,12 @@ static llvm::Function *getInstFun(const inst_iterator inst,
 
   if(sret) {
     llvm::AttrBuilder AB;
-    AB.addAttribute(llvm::Attributes::StructRet);
-    AB.addAttribute(llvm::Attributes::NoAlias);
-    AB.addAttribute(llvm::Attributes::NoCapture);
-    llvm::Attributes attrs = llvm::Attributes::get(C, AB);
-    instFun->addAttribute(1, attrs);
+    AB.addAttribute(llvm::Attribute::StructRet);
+    AB.addAttribute(llvm::Attribute::NoAlias);
+    AB.addAttribute(llvm::Attribute::NoCapture);
+    llvm::AttributeSet attrs =
+      llvm::AttributeSet::get(C, llvm::AttributeSet::FunctionIndex, AB);
+    instFun->setAttributes(attrs);
   }
 
   return instFun;
