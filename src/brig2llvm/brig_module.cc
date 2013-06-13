@@ -2927,26 +2927,34 @@ bool BrigModule::validateLastBit(const inst_iterator inst) const {
 
 bool BrigModule::validateLda(const inst_iterator inst) const {
   bool valid = true;
-  valid &= check(isa<BrigInstAddr>(inst), "Incorrect instruction kind");
-  if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
+  // PRM 19.10.1.7 Table 19-11
+  // LDA use BrigInstMem but hsailasm generated BrigInstAddr
+  if (!check(isa<BrigInstAddr>(inst),
+             "Incorrect instruction kind"))
     return false;
+
+  if (!check(getNumOperands(inst) == 2,
+            "Incorrect number of operands"))
+    return false;
+
   BrigType type = BrigType(inst->type);
+
   valid &= check(type == BRIG_TYPE_U32 || type == BRIG_TYPE_U64,
-                 "Length should be 32 or 64");
+                 "Type must be U32 or U64");
   const BrigInstAddr *mem = dyn_cast<BrigInstAddr>(inst);
-  if (!check(mem, "Invalid instruction kind")) return false;
+
   valid &= check(isCompatibleAddrSize(mem->segment, type),
                  "Incompatible address size");
   valid &= check(!BrigInstHelper::isVectorTy(type),
                  "Lda cannot accept vector types");
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest),
-                 "Destination should be BrigOperandReg");
+                 "Destination must be a BrigOperandReg");
   valid &= check(isCompatibleSrc(type, dest),
                  "Incompatible destination operand");
   oper_iterator src(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandAddress>(src),
-                 "Src should be BrigOperandAddress");
+                 "Src must be BrigOperandAddress");
   valid &= check(isCompatibleAddrSize(mem->segment, *getType(src)),
                  "Incompatible address size");
   return valid;
@@ -2957,27 +2965,29 @@ bool BrigModule::validateLdc(const inst_iterator inst) const {
   valid &= check(isa<BrigInstBasic>(inst), "Incorrect instruction kind");
   if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
-  valid &= check(inst->type == BRIG_TYPE_U32 || inst->type == BRIG_TYPE_U64,
-                 "Length should be 32 or 64");
+
+  valid &= check(inst->type == BRIG_TYPE_U32 ||
+                 inst->type == BRIG_TYPE_U64,
+                 "Type must be U32 or U64");
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
                  "Ldc cannot accept vector types");
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest),
-                 "Destination should be BrigOperandReg");
+                 "Destination must be BrigOperandReg");
+
   oper_iterator src(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandLabelRef>(src) ||
                  isa<BrigOperandFunctionRef>(src),
-                 "Src should be LabelRef and FunctionRef");
-  if (isa<BrigOperandFunctionRef>(src) || isa<BrigOperandLabelRef>(src)) {
-    const BrigDirectiveVersion *bdv = getFirstVersionDirective();
-    if (!check(bdv, "Missing version?")) return false;
-    if (bdv->machineModel == BRIG_MACHINE_LARGE)
-      valid &= check(*getType(dest) == BRIG_TYPE_B64,
-                     "Type of dest should be b64 if machine model is large");
-    if (bdv->machineModel == BRIG_MACHINE_SMALL)
-      valid &= check(*getType(dest) == BRIG_TYPE_B32,
-                     "Type of dest should be b32 if machine model is small");
-  }
+                 "Src must be LabelRef or FunctionRef");
+
+  const BrigDirectiveVersion *bdv = getFirstVersionDirective();
+  if (!check(bdv, "Missing version?")) return false;
+  if (bdv->machineModel == BRIG_MACHINE_LARGE)
+    valid &= check(*getType(dest) == BRIG_TYPE_B64,
+                   "Type of dest must be b64 if machine model is large");
+  if (bdv->machineModel == BRIG_MACHINE_SMALL)
+    valid &= check(*getType(dest) == BRIG_TYPE_B32,
+                     "Type of dest must be b32 if machine model is small");
   return valid;
 }
 
@@ -2989,17 +2999,32 @@ bool BrigModule::validateMov(const inst_iterator inst) const {
   valid &= check(!BrigInstHelper::isVectorTy(BrigType(inst->type)),
                  "Mov cannot accept vector types");
   BrigType type = BrigType(inst->type);
+
+  valid &= check(type == BRIG_TYPE_B1 ||
+                    type == BRIG_TYPE_B32 ||
+                    type == BRIG_TYPE_B64 ||
+                    type == BRIG_TYPE_B128 ||
+                    type == BRIG_TYPE_U32 ||
+                    type == BRIG_TYPE_U64 ||
+                    type == BRIG_TYPE_S32 ||
+                    type == BRIG_TYPE_S64 ||
+                    type == BRIG_TYPE_F16 ||
+                    type == BRIG_TYPE_F32 ||
+                    type == BRIG_TYPE_F64 ||
+                    type == BRIG_TYPE_ROIMG ||
+                    type == BRIG_TYPE_RWIMG ||
+                    type == BRIG_TYPE_SAMP,
+                    "Invalid type");
+
   oper_iterator dest(S_.operands + inst->operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest) ||
-                 isa<BrigOperandRegVector>(dest),
-                 "Destination of Mov should be reg, regVector");
+  valid &= check(isa<BrigOperandReg>(dest),
+                 "Destination of Mov must be register");
 
   oper_iterator src(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandReg>(src) ||
-                 isa<BrigOperandRegVector>(src) ||
                  isa<BrigOperandImmed>(src) ||
                  isa<BrigOperandWavesize>(src),
-                 "Src of Mov should be reg, regVector, immediate or wavesize");
+                 "Src of Mov should be reg, immediate or wavesize");
 
   if (isa<BrigOperandReg>(dest))
     valid &= check(isCompatibleSrc(type, dest),
@@ -3008,17 +3033,6 @@ bool BrigModule::validateMov(const inst_iterator inst) const {
   if (isa<BrigOperandReg>(src))
     valid &= check(isCompatibleSrc(type, src), "Incompatible source operand");
 
-  if (isa<BrigOperandRegVector>(dest))
-    valid &= check(isa<BrigOperandReg>(src) &&
-                   *getType(src) == BRIG_TYPE_B64 &&
-                   *getType(dest) == BRIG_TYPE_B32,
-                   "Src should point to d reg and type of dest should be b32");
-
-  if (isa<BrigOperandRegVector>(src))
-    valid &= check(isa<BrigOperandReg>(dest) &&
-                   *getType(dest) == BRIG_TYPE_B64 &&
-                   *getType(src) == BRIG_TYPE_B32,
-                   "Dest should point to d reg and type of src should be b32");
   return valid;
 }
 
@@ -4217,11 +4231,62 @@ bool BrigModule::validateWorkItemFlatId(const inst_iterator inst) const {
 
 bool BrigModule::validateCombine(const inst_iterator inst) const {
   bool valid = true;
+  const BrigInstSourceType *stype = dyn_cast<BrigInstSourceType>(inst);
+  if (!check(stype, "Incorrect instruction kind"))
+    return false;
+
+  valid &= check(stype->type == BRIG_TYPE_B64 ||
+                 stype->type  == BRIG_TYPE_B128,
+                 "Type of combine must be b64 or b128");
+
+  valid &= check(stype->sourceType == BRIG_TYPE_B32 ||
+                 stype->sourceType  == BRIG_TYPE_B64,
+                 "Source type of combine must be b64 or b32");
+
+  valid &= check(!BrigInstHelper::isVectorTy(BrigType(stype->type)),
+                 "Combine cannot accept vector types");
+
+  if (!check(getNumOperands(inst) == 2,
+             "Incorrect number of operands"))
+    return false;
+
+  oper_iterator dest(S_.operands + inst->operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
+
+  oper_iterator src(S_.operands + inst->operands[1]);
+  valid &= check(isa<BrigOperandRegVector>(src),
+                 "Source of Combine must be reg vector");
   return valid;
 }
 
 bool BrigModule::validateExpand(const inst_iterator inst) const {
   bool valid = true;
+  const BrigInstSourceType *stype = dyn_cast<BrigInstSourceType>(inst);
+  if (!check(stype, "Incorrect instruction kind"))
+    return false;
+
+  valid &= check(stype->type == BRIG_TYPE_B32 ||
+                 stype->type  == BRIG_TYPE_B64,
+                 "Type of expand must be b64 or b32");
+
+  valid &= check(stype->sourceType == BRIG_TYPE_B64 ||
+                 stype->sourceType  == BRIG_TYPE_B128,
+                 "Source type of expand must be b64 or b128");
+
+  valid &= check(!BrigInstHelper::isVectorTy(BrigType(stype->type)),
+                 "Expand cannot accept vector types");
+
+  if (!check(getNumOperands(inst) == 2,
+             "Incorrect number of operands"))
+    return false;
+
+  oper_iterator dest(S_.operands + inst->operands[0]);
+  valid &= check(isa<BrigOperandRegVector>(dest),
+                "Destination must be a register vector");
+
+  oper_iterator src(S_.operands + inst->operands[1]);
+  valid &= check(isa<BrigOperandReg>(src),
+                 "Source of expand must be register");
   return valid;
 }
 
