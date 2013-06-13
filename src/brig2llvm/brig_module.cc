@@ -4375,11 +4375,17 @@ bool BrigModule::validateSysCall(const inst_iterator inst) const {
     return false;
   if (!check(getNumOperands(inst) == 5, "Incorrect number of operands"))
     return false;
+
+  valid &= check(inst->type == BRIG_TYPE_U32 ||
+                 inst->type == BRIG_TYPE_U64,
+                 "Invalid type, must be u32or u64");
+
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
   valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)) ||
                  64 == BrigInstHelper::getTypeSize(*getType(dest)),
                  "Destination register type must be b32 or b64");
+
   oper_iterator number(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandImmed>(number) ||
                  isa<BrigOperandWavesize>(number),
@@ -4389,6 +4395,7 @@ bool BrigModule::validateSysCall(const inst_iterator inst) const {
     valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)) ||
                    64 == BrigInstHelper::getTypeSize(*getType(number)),
                    "immediate type must be b32 or b64");
+
   for (unsigned i = 2; i < 5; ++i) {
     oper_iterator src(S_.operands + inst->operands[i]);
     if (!isa<BrigOperandWavesize>(src))
@@ -4409,6 +4416,13 @@ bool BrigModule::validateAlloca(const inst_iterator inst) const {
     return false;
   if (!check(getNumOperands(inst) == 2, "Incorrect number of operands"))
     return false;
+
+  const BrigInstSeg * bis = dyn_cast<BrigInstSeg>(inst);
+  valid &= check(bis->segment == BRIG_SEGMENT_PRIVATE,
+                 "Invalid segment, must be private segment");
+  valid &= check(bis->type == BRIG_TYPE_U32,
+                 "Invalid type, must be U32");
+
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
   valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)),
@@ -4433,11 +4447,12 @@ bool BrigModule::validateSpecialInst(const inst_iterator inst,
     return false;
   if (!check(getNumOperands(inst) == nary + 1, "Incorrect number of operands"))
     return false;
+
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
   valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)) ||
                  64 == BrigInstHelper::getTypeSize(*getType(dest)),
-                 "Destination register type must be b32");
+                 "Destination register type must be b32 or b64");
   if (1 == nary) {
     oper_iterator number(S_.operands + inst->operands[1]);
     valid &= check(32 == BrigInstHelper::getTypeSize(*getType(number)),
@@ -4455,6 +4470,10 @@ bool BrigModule::validateClock(const inst_iterator inst) const {
     return false;
   if (!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
     return false;
+
+  valid &= check(inst->type == BRIG_TYPE_U64,
+                 "Invalid type, must be u64");
+
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
   valid &= check(64 == BrigInstHelper::getTypeSize(*getType(dest)),
@@ -4464,12 +4483,16 @@ bool BrigModule::validateClock(const inst_iterator inst) const {
 
 bool BrigModule::validateCuId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 0);
   return valid;
 }
 
 bool BrigModule::validateCurrentWorkGroupSize(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 1);
   return valid;
 }
@@ -4480,6 +4503,8 @@ bool BrigModule::validateDebugTrap(const inst_iterator inst) const {
     return false;
   if (!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
     return false;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   oper_iterator src(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(src)   ||
                  isa<BrigOperandImmed>(src) ||
@@ -4488,38 +4513,87 @@ bool BrigModule::validateDebugTrap(const inst_iterator inst) const {
   return valid;
 }
 
+bool BrigModule::validateDim(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
+  valid &= validateSpecialInst(inst, 0);
+  return valid;
+}
+
 bool BrigModule::validateDispatchId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U64,
+                 "Invalid type, must be u64");
   valid &= validateSpecialInst(inst, 0);
+  return valid;
+}
+
+bool BrigModule::validateDispatchPtr(const inst_iterator inst) const {
+  bool valid = true;
+  if (!check(isa<BrigInstSeg>(inst), "Invalid instruction kind"))
+    return false;
+  const BrigInstSeg *bis = dyn_cast<BrigInstSeg>(inst);
+
+  valid &= check(bis->segment == BRIG_SEGMENT_GLOBAL,
+                 "Invalid segment, must be global segment");
+  valid &= check(bis->type == BRIG_TYPE_U32 ||
+                 bis->type == BRIG_TYPE_U64,
+                 "Invalid type, must be u32 or u64");
+
+  oper_iterator dest(S_.operands + inst->operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest),
+                 "Destination must be a register");
+  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)) ||
+                 64 == BrigInstHelper::getTypeSize(*getType(dest)),
+                 "Invalid length of dest, must be 32 or 64");
   return valid;
 }
 
 bool BrigModule::validateWaveId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 0);
   return valid;
 }
 
 bool BrigModule::validateLaneId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
+  valid &= validateSpecialInst(inst, 0);
+  return valid;
+}
+
+bool BrigModule::validateMaxCuId(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 0);
   return valid;
 }
 
 bool BrigModule::validateMaxWaveId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 0);
   return valid;
 }
 
 bool BrigModule::validateGridGroups(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 1);
   return valid;
 }
 
 bool BrigModule::validateGridSize(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 1);
   return valid;
 }
@@ -4552,54 +4626,56 @@ bool BrigModule::validateNullPtr(const inst_iterator inst) const {
 
 bool BrigModule::validateQid(const inst_iterator inst) const {
   bool valid = true;
-  // maybe BrigInstBase, or other.
-  if (!check(isa<BrigInstBasic>(inst), "Incorrect instruction kind"))
-    return false;
-  if (!check(getNumOperands(inst) == 1, "Incorrect number of operands"))
-    return false;
-  oper_iterator dest(S_.operands + inst->operands[0]);
-  valid &= check(isa<BrigOperandReg>(dest), "Destination must be a register");
-  valid &= check(*getType(dest) == BRIG_TYPE_B32,
-                 "Type of destination should be s register");
-  return valid;
-}
-
-bool BrigModule::validateDim(const inst_iterator inst) const {
-  bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 0);
   return valid;
 }
 
 bool BrigModule::validateWorkGroupId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 1);
   return valid;
 }
 
 bool BrigModule::validateWorkGroupSize(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 1);
   return valid;
 }
 
 bool BrigModule::validateWorkItemAbsId(const inst_iterator inst) const {
+  bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
+  valid &= validateSpecialInst(inst, 1);
   return true;
 }
 
 bool BrigModule::validateWorkItemFlatAbsId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 0);
   return valid;
 }
 
 bool BrigModule::validateWorkItemId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 1);
   return valid;
 }
 
 bool BrigModule::validateWorkItemFlatId(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 0);
   return valid;
 }
@@ -4668,36 +4744,76 @@ bool BrigModule::validateExpand(const inst_iterator inst) const {
 
 bool BrigModule::validateLdf(const inst_iterator inst) const {
   bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
+  valid &= validateParaSynInst(inst, 0);
   return valid;
 }
 
 bool BrigModule::validateGetDetectExcept(const inst_iterator inst) const {
   bool valid = true;
-  return valid;
-}
-
-bool BrigModule::validateMaxCuId(const inst_iterator inst) const {
-  bool valid = true;
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
+  valid &= validateSpecialInst(inst, 0);
   return valid;
 }
 
 bool BrigModule::validateClearDetectExcept(const inst_iterator inst) const {
   bool valid = true;
+  if (!check(isa<BrigInstBasic>(inst), "Invalid instruction kind"))
+    return false;
+
+  if (!check(getNumOperands(inst) == 1,
+    "Incorrect number of operands"))
+    return false;
+
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
+  oper_iterator exceptionNo(S_.operands + inst->operands[0]);
+  valid &= check(isa<BrigOperandImmed>(exceptionNo) ||
+                 isa<BrigOperandWavesize>(exceptionNo),
+                 "Exception number must be an immed or wavesize");
   return valid;
 }
 
 bool BrigModule::validateSetDetectExcept(const inst_iterator inst) const {
   bool valid = true;
+  if (!check(isa<BrigInstBasic>(inst), "Invalid instruction kind"))
+    return false;
+
+  if (!check(getNumOperands(inst) == 1,
+              "Incorrect number of operands"))
+    return false;
+
+  valid &= check(inst->type == BRIG_TYPE_U32,
+                 "Invalid type, must be u32");
+  oper_iterator exceptionNo(S_.operands + inst->operands[0]);
+  valid &= check(isa<BrigOperandImmed>(exceptionNo) ||
+                 isa<BrigOperandWavesize>(exceptionNo),
+                 "Exception number must be an immed or wavesize");
   return valid;
 }
 
-bool BrigModule::validateDispatchPtr(const inst_iterator inst) const {
-  bool valid = true;
-  return valid;
-}
+
 
 bool BrigModule::validateQPtr(const inst_iterator inst) const {
   bool valid = true;
+  if (!check(isa<BrigInstSeg>(inst), "Invalid instruction kind"))
+    return false;
+  const BrigInstSeg *bis = dyn_cast<BrigInstSeg>(inst);
+
+  valid &= check(bis->segment == BRIG_SEGMENT_GLOBAL,
+                 "Invalid segment, must be global segment");
+  valid &= check(bis->type == BRIG_TYPE_U32 ||
+                 bis->type == BRIG_TYPE_U64,
+                 "Invalid type, must be u32 or u64");
+
+  oper_iterator dest(S_.operands + inst->operands[0]);
+  valid &= check(isa<BrigOperandReg>(dest),
+                 "Destination must be a register");
+  valid &= check(32 == BrigInstHelper::getTypeSize(*getType(dest)) ||
+                 64 == BrigInstHelper::getTypeSize(*getType(dest)),
+                 "Invalid length of dest, must be 32 or 64");
   return valid;
 }
 
