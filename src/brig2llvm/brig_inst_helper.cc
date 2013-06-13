@@ -134,7 +134,7 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(Rint, RINT);
     caseOper(Trunc, TRUNC);
     caseOper(BitMask, BITMASK);
-    caseOper(BitMask, BITINSERT);
+    caseOper(BitInsert, BITINSERT);
     caseOper(Expand, EXPAND);
     caseOper(NFma, NFMA);
     caseOper(Sadhi, SADHI);

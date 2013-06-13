@@ -4839,6 +4839,14 @@ TEST(Instruction4Test, Bitextract) {
     const uint32_t testVec[] = { 1, 134, 7, 22 };
     testInst("bitextract_u32", testVec);
   }
+  {
+    const uint32_t testVec[] = { 4, 134, 5, 3 };
+    testInst("bitextract_u32", testVec);
+  }
+  {
+    const int32_t testVec[] = { -4, 134, 5, 3 };
+    testInst("bitextract_s32", testVec);
+  }
 }
 
 TEST(Instruction4Test, Mad) {
