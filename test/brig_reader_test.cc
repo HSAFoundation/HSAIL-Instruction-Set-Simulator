@@ -4219,6 +4219,36 @@ TEST(Instruction2Test, Abs) {
     const uint64_t testVec[] = { 0x200000002LL, 0xfffffffefffffffeLL };
     testInst("abs_p_s32x2", testVec);
   }
+  {
+    //_s8x4(-1,0,0,-1)
+    const uint32_t testVec[] = { 0x01010101, 0xff0000ff };
+    testInst("abs_s_s8x4", testVec);
+  }
+  {
+    //_s8x4(-1,0,0,2)
+    const uint32_t testVec[] = { 0x02020202, 0xff000002 };
+    testInst("abs_s_s8x4", testVec);
+  }
+  {
+    //_s8x8(-1,0,-1,0,-1,0,0,-1)
+    const uint64_t testVec[] = {0x101010101010101LL, 0xff00ff00ff0000ffLL};
+    testInst("abs_s_s8x8", testVec);
+  }
+  {
+    //_s16x2(0,-1)
+    const uint32_t testVec[] = { 0x10001, 0xffffffff };
+    testInst("abs_s_s16x2", testVec);
+  }
+  {
+    //_s16x4(-1,0,0,-1)
+    const uint64_t testVec[] = {0x1000100010001LL, 0xffff00000000ffffLL};
+    testInst("abs_s_s16x4", testVec);
+  }
+  {
+    //_s32x2(-1,-2)
+    const uint64_t testVec[] = { 0x200000002LL, 0xfffffffffffffffeLL };
+    testInst("abs_s_s32x2", testVec);
+  }  
 }
 
 TEST(Instruction2Test, Neg) {
@@ -4234,7 +4264,6 @@ TEST(Instruction2Test, Neg) {
     const int64_t testVec[] = { 3, -3 };
     testInst("neg_s64", testVec);
   }
-
   {
     //_s8x4(-1,0,-1,0)
     const uint32_t testVec[] = { 0x1000100, 0xff00ff00 };
@@ -4260,6 +4289,31 @@ TEST(Instruction2Test, Neg) {
     const uint64_t testVec[] = { 0x200000002LL, 0xfffffffefffffffeLL };
     testInst("neg_p_s32x2", testVec);
   }
+  {
+    //_s8x4(-1,0,0,-1)
+    const uint32_t testVec[] = { 0x01010101, 0xff0000ff };
+    testInst("neg_s_s8x4", testVec);
+  }
+  {
+    //_s8x8(-1,0,-1,0,-1,0,0,1)
+    const uint64_t testVec[] = {0xffffffffffffffffLL, 0xff00ff00ff000001LL};
+    testInst("neg_s_s8x8", testVec);
+  }
+  {
+    //_s16x2(-1,1)
+    const uint32_t testVec[] = { 0xffffffff, 0xffff0001 };
+    testInst("neg_s_s16x2", testVec);
+  }
+  {
+    //_s16x4(-1,0,-1,0)
+    const uint64_t testVec[] = {0x0LL, 0xffff0000ffff0000LL};
+    testInst("neg_s_s16x4", testVec);
+  }
+  {
+    //_s32x2(-2,-3)
+    const uint64_t testVec[] = { 0x300000003LL, 0xfffffffefffffffdLL };
+    testInst("neg_s_s32x2", testVec);
+  }  
   {
     const float testVec[] = { 1.2f, -1.2f };
     testInst("neg_f32", testVec);
@@ -4784,6 +4838,17 @@ TEST(Instruction4Test, Bitextract) {
   {
     const uint32_t testVec[] = { 1, 134, 7, 22 };
     testInst("bitextract_u32", testVec);
+  }
+}
+
+TEST(Instruction4Test, Mad) {
+  {
+    const uint32_t testVec[] = { 9, 2, 2, 5};
+    testInst("mad_u32", testVec);
+  }
+  {
+    const int32_t testVec[] = { 1, 2, 2, -3};
+    testInst("mad_s32", testVec);
   }
 }
 
