@@ -232,8 +232,10 @@ UnsignedInst(define, Rem, Binary)
 
 template <class T> static T Carry(T x, T y) {
   typedef typename Int<T>::Unsigned Unsigned;
-  if ((Unsigned) x + (Unsigned) y < (Unsigned) x) return T(1);
-  else return T(0);
+  if ((Unsigned) x + (Unsigned) y < (Unsigned) x)
+    return T(1);
+  else
+    return T(0);
 }
 SignedInst(define, Carry, Binary)
 UnsignedInst(define, Carry, Binary)
@@ -372,7 +374,7 @@ template<class T> static T BitExtract(T x, b32 y, b32 z) {
 SignedInst(define, BitExtract, Ternary)
 UnsignedInst(define, BitExtract, Ternary)
 
-template<class T> static T Insert(T w, T x, b32 y, b32 z) {
+template<class T> static T BitInsert(T w, T x, b32 y, b32 z) {
   typedef typename Int<T>::Unsigned Unsigned;
   b32 width  = y & b32(Int<T>::Bits - 1);
   b32 offset = z & b32(Int<T>::Bits - 1);
@@ -381,8 +383,8 @@ template<class T> static T Insert(T w, T x, b32 y, b32 z) {
   w &= mask;
   return w | (x << offset);
 }
-defineQuaternary(Insert, b32)
-defineQuaternary(Insert, b64)
+defineQuaternary(BitInsert, b32)
+defineQuaternary(BitInsert, b64)
 
 template<class T> static T BitSelect(T x, T y, T z) {
   return (y & x) | (z & ~x);
@@ -422,14 +424,6 @@ extern "C" b128 Mov_b128(b128 x) { return x; }
 extern "C" b64 Combine_b64_b32(b64 x) { return x; }
 extern "C" b128 Combine_b128_b32(b128 x) { return x; }
 
-extern "C" b32 MovsLo_b32(b64 x) { return x; }
-extern "C" b32 MovsHi_b32(b64 x) { return x >> 32; }
-
-extern "C" b64 MovdLo_b64(b64 x, b32 y) { return (x >> 32 << 32) | b64(y); }
-extern "C" b64 MovdHi_b64(b64 x, b32 y) {
-  return (b64(y) << 32) | (x >> 32);
-}
-
 template<class T> static T Lda(T x) { return x; }
 UnsignedInst(define, Lda, Unary)
 
@@ -437,7 +431,6 @@ template<class T> static T Ldc(T x) { return x; }
 UnsignedInst(define, Ldc, Unary)
 
 template<class T> static T ShuffleVector(T x, T y, b32 z) {
-
   unsigned len   = T::Len;
   unsigned mask  = len - 1;
   unsigned shift = T::LogLen;
@@ -574,29 +567,6 @@ template<class T> static T Nrcp(T x) {
 }
 FloatInst(define, Nrcp, Unary)
 
-extern "C" u32 F2u4_u32(f32 w, f32 x, f32 y, f32 z){
-  return u32(((lrint(w) & 0xFF) << 24) +
-             ((lrint(x) & 0xFF) << 16) +
-             ((lrint(y) & 0xFF) << 8) +
-             (lrint(z) & 0xFF));
-}
-
-extern "C" f32 Unpack3_f32(b32 w) {
-  return f32((w >> 24) & 0xFF);
-}
-
-extern "C" f32 Unpack2_f32(b32 w) {
-  return f32((w >> 16) & 0xFF);
-}
-
-extern "C" f32 Unpack1_f32(b32 w) {
-  return f32((w >> 8) & 0xFF);
-}
-
-extern "C" f32 Unpack0_f32(b32 w) {
-  return f32(w & 0xFF);
-}
-
 extern "C" b32 BitAlign_b32(b32 w, b32 x, b32 y) {
   return (b64(w) << y) | (b64(x) >> (32 - y));
 }
@@ -621,7 +591,7 @@ extern "C" u32 Sad_u32_u32(u32 w, u32 x, u32 y) {
 
 extern "C" b32 Sad2_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
-  for (unsigned i = 0; i < 2; ++i){
+  for (unsigned i = 0; i < 2; ++i) {
     result += Sad_u32_u32((w >> i * 16) & 0xFFFF,
                           (x >> i * 16) & 0xFFFF, 0);
   }
@@ -630,7 +600,7 @@ extern "C" b32 Sad2_b32(b32 w, b32 x, b32 y) {
 
 extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
-  for (unsigned i = 0; i < 4; ++i){
+  for (unsigned i = 0; i < 4; ++i) {
     result += Sad_u32_u32((w >> i * 8) & 0xFF,
                           (x >> i * 8) & 0xFF, 0);
   }
@@ -639,7 +609,7 @@ extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
 
 extern "C" b32 Sad4Hi_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
-  for (unsigned i = 0; i < 4; ++i){
+  for (unsigned i = 0; i < 4; ++i) {
     result += Sad_u32_u32((w >> i * 8) & 0xFF,
                           (x >> i * 8) & 0xFF, 0);
   }

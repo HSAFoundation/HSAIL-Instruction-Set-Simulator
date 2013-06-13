@@ -36,14 +36,13 @@ GTEST_API_ int main(int argc, char **argv) {
 
   ::testing::GTEST_FLAG(filter) =
       "-BrigRuntimeTest.Mad*:"
-      "BrigRuntimeTest.Extract*:"
+      "BrigRuntimeTest.BitExtract*:"
       "BrigRuntimeTest.BitSelect*:"
       "BrigRuntimeTest.Mov_b128_b32:"
       "BrigRuntimeTest.Shuffle*:"
       "BrigRuntimeTest.Cmov*:"
       "BrigRuntimeTest.Fma*:"
-      "BrigRuntimeTest.Insert*:"
-      "BrigRuntimeTest.F2u4_u32:"
+      "BrigRuntimeTest.BitInsert*:"
       "BrigRuntimeTest.BitAlign_b32:"
       "BrigRuntimeTest.ByteAlign_b32:"
       "BrigRuntimeTest.Lerp_b32:"

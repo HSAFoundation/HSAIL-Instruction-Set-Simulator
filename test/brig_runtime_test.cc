@@ -472,8 +472,7 @@ template<class T> static void BitExtractLogic(T result, T a, T b, T c) {
 TestAll(SignedInst, BitExtract, Ternary)
 TestAll(UnsignedInst, BitExtract, Ternary)
 
-template<class T> static void InsertLogic(T result, T a, T b, b32 c, b32 d) {
-
+template<class T> static void BitInsertLogic(T result, T a, T b, b32 c, b32 d) {
   b32 width  = c & b32(Int<T>::Bits - 1);
   b32 offset = d & b32(Int<T>::Bits - 1);
   T resultNe = a;
@@ -484,10 +483,10 @@ template<class T> static void InsertLogic(T result, T a, T b, b32 c, b32 d) {
   resultNe |= (b & (~T(0) << width)) << offset;
   EXPECT_EQ(resultNe, result);
 }
-declareQuaternary(Insert, b32)
-declareQuaternary(Insert, b64)
-MakeTest(Insert_b32, InsertLogic)
-MakeTest(Insert_b64, InsertLogic)
+declareQuaternary(BitInsert, b32)
+declareQuaternary(BitInsert, b64)
+MakeTest(BitInsert_b32, BitInsertLogic)
+MakeTest(BitInsert_b64, BitInsertLogic)
 
 template<class T> static void BitSelectLogic(T result, T a, T b, T c) {
   EXPECT_EQ(b &  a, result &  a);
@@ -529,32 +528,6 @@ template<class T> static void LastBit_u32Logic(T result, T a) {
 }
 TestAll(SignedInst, LastBit_u32, Unary)
 TestAll(UnsignedInst, LastBit_u32, Unary)
-
-static void MovsLo_b32_Logic(b32 result, b64 a) {
-  EXPECT_EQ(b32(a), result);
-}
-extern "C" b32 MovsLo_b32(b64);
-MakeTest(MovsLo_b32, MovsLo_b32_Logic)
-
-static void MovsHi_b32_Logic(b32 result, b64 a) {
-  EXPECT_EQ(a >> 32, result);
-}
-extern "C" b32 MovsHi_b32(b64);
-MakeTest(MovsHi_b32, MovsHi_b32_Logic)
-
-static void MovdLo_b64_Logic(b64 result, b64 a, b32 b) {
-  EXPECT_EQ(a >> 32, result >> 32);
-  EXPECT_EQ(b32(b), b32(result));
-}
-extern "C" b64 MovdLo_b64(b64, b32);
-MakeTest(MovdLo_b64, MovdLo_b64_Logic)
-
-static void MovdHi_b64_Logic(b64 result, b64 a, b32 b) {
-  EXPECT_EQ(a >> 32, b32(result));
-  EXPECT_EQ(b32(b), result >> 32);
-}
-extern "C" b64 MovdHi_b64(b64, b32);
-MakeTest(MovdHi_b64, MovdHi_b64_Logic)
 
 template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
 
@@ -834,44 +807,6 @@ template<class T> static void NrcpLogic(T result, T a) {
 }
 TestAll(FloatInst, Nrcp, Unary)
 
-static void F2u4_u32_Logic(u32 result, f32 a, f32 b, f32 c, f32 d) {
-  if (isNan(a) || a < 0.0f || a >= 256.0f) return;
-  if (isNan(b) || b < 0.0f || b >= 256.0f) return;
-  if (isNan(c) || c < 0.0f || c >= 256.0f) return;
-  if (isNan(d) || d < 0.0f || d >= 256.0f) return;
-
-  EXPECT_EQ((result      ) & 0xFF, lrint(d) & 0xFF);
-  EXPECT_EQ((result >>  8) & 0xFF, lrint(c) & 0xFF);
-  EXPECT_EQ((result >> 16) & 0xFF, lrint(b) & 0xFF);
-  EXPECT_EQ((result >> 24) & 0xFF, lrint(a) & 0xFF);
-}
-extern "C" u32 F2u4_u32(f32 a, f32 b, f32 c, f32 d);
-MakeTest(F2u4_u32, F2u4_u32_Logic)
-
-static void Unpack3Logic(f32 result, b32 a) {
-  EXPECT_EQ(result, (a >> 24) & 0xFF);
-}
-extern "C" f32 Unpack3_f32(b32);
-MakeTest(Unpack3_f32, Unpack3Logic)
-
-static void Unpack2Logic(f32 result, b32 a) {
-  EXPECT_EQ(result, (a >> 16) & 0xFF);
-}
-extern "C" f32 Unpack2_f32(b32);
-MakeTest(Unpack2_f32, Unpack2Logic)
-
-static void Unpack1Logic(f32 result, b32 a) {
-  EXPECT_EQ(result, (a >> 8) & 0xFF);
-}
-extern "C" f32 Unpack1_f32(b32);
-MakeTest(Unpack1_f32, Unpack1Logic)
-
-static void Unpack0Logic(f32 result, b32 a) {
-  EXPECT_EQ(result, (a & 0xFF));
-}
-extern "C" f32 Unpack0_f32(b32);
-MakeTest(Unpack0_f32, Unpack0Logic)
-
 static void BitAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
   if (c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {
     unsigned tag = (32 - c) / 8;
@@ -920,37 +855,6 @@ static void Sad_u32_u32_Logic(u32 result, u32 a, u32 b, u32 c) {
 }
 extern "C" u32 Sad_u32_u32(u32, u32, u32);
 MakeTest(Sad_u32_u32, Sad_u32_u32_Logic)
-
-static void Sad2_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
-  EXPECT_EQ(abs((a & 0xFFFF) - (b & 0xFFFF)) +
-            abs(((a >> 16) & 0xFFFF) - ((b >> 16) & 0xFFFF)) +
-            c,
-            result);
-}
-extern "C" b32 Sad2_b32(b32, b32, b32);
-MakeTest(Sad2_b32, Sad2_b32_Logic)
-
-static void Sad4_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
-  EXPECT_EQ(abs((a & 0xFF) - (b & 0xFF)) +
-            abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF)) +
-            abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF)) +
-            abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF)) +
-            c,
-            result);
-}
-extern "C" b32 Sad4_b32(b32, b32, b32);
-MakeTest(Sad4_b32, Sad4_b32_Logic)
-
-static void Sad4Hi_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
-  EXPECT_EQ(((abs((a & 0xFF) - (b & 0xFF)) +
-              abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF)) +
-              abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF)) +
-              abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF))) << 16) +
-            c,
-            result);
-}
-extern "C" b32 Sad4Hi_b32(b32, b32, b32);
-MakeTest(Sad4Hi_b32, Sad4Hi_b32_Logic)
 
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)
