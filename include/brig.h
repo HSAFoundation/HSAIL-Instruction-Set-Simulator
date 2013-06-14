@@ -590,7 +590,7 @@ struct BrigSectionHeader {
 struct BrigString {
   uint32_t byteCount;
   uint8_t bytes[1];
-  enum { FlexSize = sizeof(bytes) };
+  enum { FlexSize = sizeof(uint8_t) };
 };
 
 struct BrigDebugBase {
@@ -686,7 +686,7 @@ struct BrigDirectiveControl {
   uint16_t reserved;
   uint16_t valueCount;
   BrigOperandOffset32_t values[1];
-  enum { FlexSize = sizeof(values) };
+  enum { FlexSize = sizeof(BrigOperandOffset32_t) };
 };
 
 struct BrigDirectiveExecutable {
@@ -804,7 +804,7 @@ struct BrigDirectiveLabelInit {
   uint16_t labelCount;
   uint16_t reserved;
   BrigDirectiveOffset32_t labels[1];
-  enum { FlexSize = sizeof(labels) };
+  enum { FlexSize = sizeof(BrigDirectiveOffset32_t) };
 };
 
 struct BrigDirectiveLoc {
@@ -843,14 +843,14 @@ struct BrigDirectiveSignature {
   BrigStringOffset32_t name;
   uint16_t inArgCount;
   uint16_t outArgCount;
-  struct {
+  struct BrigSigType {
     BrigType16_t type;
     uint8_t align;
     BrigSymbolModifier8_t modifier;
     uint32_t dimLo;
     uint32_t dimHi;
   } args[1];
-  enum { FlexSize = sizeof(args) };
+  enum { FlexSize = sizeof(BrigSigType) };
 };
 
 struct BrigDirectiveSymbol {
@@ -1149,7 +1149,7 @@ struct BrigOperandImmed {
   BrigType16_t type;
   uint16_t byteCount;
   uint8_t bytes[1];
-  enum { FlexSize = sizeof(bytes) };
+  enum { FlexSize = sizeof(uint8_t) };
 };
 
 struct BrigOperandList {
@@ -1167,7 +1167,7 @@ struct BrigOperandArgumentList {
   uint16_t elementCount;
   uint16_t reserved;
   BrigDirectiveOffset32_t elements[1];
-  enum { FlexSize = sizeof(elements) };
+  enum { FlexSize = sizeof(BrigDirectiveOffset32_t) };
 };
 
 struct BrigOperandFunctionList {
@@ -1177,7 +1177,7 @@ struct BrigOperandFunctionList {
   uint16_t elementCount;
   uint16_t reserved;
   BrigDirectiveOffset32_t elements[1];
-  enum { FlexSize = sizeof(elements) };
+  enum { FlexSize = sizeof(BrigDirectiveOffset32_t) };
 };
 
 struct BrigOperandRef {
@@ -1230,7 +1230,7 @@ struct BrigOperandRegVector {
   BrigType16_t type;
   uint16_t regCount;
   BrigStringOffset32_t regs[1];
-  enum { FlexSize = sizeof(regs) };
+  enum { FlexSize = sizeof(BrigStringOffset32_t) };
 };
 
 struct BrigOperandWavesize {

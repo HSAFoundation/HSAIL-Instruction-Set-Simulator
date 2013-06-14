@@ -52,6 +52,8 @@ class SimKernel : public Kernel {
 
   virtual hsacommon::string &getName() {
     assert(false && "Unimplemented");
+    static hsacommon::string name;
+    return name;
   }
 
   llvm::Function *F_;
@@ -73,6 +75,7 @@ class SimProgram : public Program {
   virtual size_t getElfSize() { return 0; }
   virtual void *getGlobalBase() {
     assert(false && "Unimplemented");
+    return NULL;
   }
 
   virtual ~SimProgram() {}
@@ -143,64 +146,84 @@ class SimDevice : public Device {
                           const char *,
                           const char *) {
     assert(false && "Unimplemented");
+    return NULL;
   }
 
   virtual const hsacommon::string &getVendorName() const {
     assert(false && "Unimplemented");
+    static hsacommon::string vendorName;
+    return vendorName;
   }
 
   virtual uint32_t getVendorID() {
     assert(false && "Unimplemented");
+    return 0;
   }
 
   virtual unsigned int getComputeUnitsCount() {
     assert(false && "Unimplemented");
+    return 0;
   }
 
   virtual uint32_t getCapabilities() {
     assert(false && "Unimplemented");
+    return 0;
   }
 
   virtual hsacommon::string &getName() {
     assert(false && "Unimplemented");
+    static hsacommon::string name;
+    return name;
   }
 
   typedef hsacommon::vector<hsacommon::MemoryDescriptor *> MemDescriptorList;
   virtual const MemDescriptorList &getMemoryDescriptors() {
     assert(false && "Unimplemented");
+    static const MemDescriptorList mdl;
+    return mdl;
   }
 
   typedef hsacommon::vector<hsacommon::CacheDescriptor *> CachDescriptorList;
   virtual const CachDescriptorList &getCacheDescriptors() {
     assert(false && "Unimplemented");
+    static const CachDescriptorList cdl;
+    return cdl;
   }
 
   virtual bool isDoublePrecision() {
     assert(false && "Unimplemented");
+    return false;
   }
 
   virtual bool isDebug() {
     assert(false && "Unimplemented");
+    return false;
   }
 
   virtual bool isDedicatedCompute() {
     assert(false && "Unimplemented");
+    return false;
   }
 
   virtual uint32_t getMaxGroupMemorySize() {
     assert(false && "Unimplemented");
+    return false;
   }
 
   virtual uint32_t getMaxQueueSize() {
     assert(false && "Unimplemented");
+    return false;
   }
 
   virtual int getWaveFrontSize() {
     assert(false && "Unimplemented");
+    return 0;
   }
 
-  virtual void *allocateGlobalMemory(size_t, size_t, hsacommon::HeapType, uint32_t) {
+  virtual void *allocateGlobalMemory(size_t, size_t, hsacommon::HeapType,
+                                     uint32_t) {
     assert(false && "Unimplemented");
+    return NULL;
   }
 
   virtual void freeGlobalMemory(void *) {
@@ -226,6 +249,7 @@ class SimDevice : public Device {
 
   virtual hsacommon::DeviceClockCounterInfo getClockCounterInfo() {
     assert(false && "Unimplemented");
+    return hsacommon::DeviceClockCounterInfo();
   }
 
   virtual int getMaxFrequency() {
