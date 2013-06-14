@@ -95,6 +95,15 @@ template<class T> static T FloorVector(T t) { return map(Floor, t); }
 FloatInst(define, Floor, Unary)
 FloatVectorInst(define, Floor, Unary)
 
+template<class T> static T Trunc(T t) {
+  if (t >= 0)
+    return std::floor(t);
+  else
+    return std::ceil(t);
+}
+template<class T> static T TruncVector(T t) { return map(Trunc, t); }
+FloatInst(define, Trunc, Unary)
+FloatVectorInst(define, Trunc, Unary)
 
 template<class T> static T Add(T x, T y) { return x + y; }
 template<class T> static T AddVector(T x, T y) { return map(Add, x, y); }

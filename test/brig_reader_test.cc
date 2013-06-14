@@ -438,6 +438,25 @@ TEST(BrigInstTest, VectorFloor) {
   }      
 }
 
+TEST(BrigInstTest, VectorTrunc) {
+  {
+    const float testVec[] = { 1.0, 1.7 };
+    testInst("trunc_f32", testVec);
+  }
+  {
+    const double testVec[] = { 1.0L, 1.7L };
+    testInst("trunc_f64", testVec);
+  }
+  {
+    const float testVec[] = { -1.0 , -1.7 };
+    testInst("trunc_f32", testVec);
+  }
+  {
+    const double testVec[] = { -1.0L , -1.7L };
+    testInst("trunc_f64", testVec);
+  }      
+}
+
 TEST(BrigInstTest, VectorAdd) {
   const float testVec[] = { M_PI, M_PI, 0 };
   testInst("add_f32", testVec);
@@ -4627,6 +4646,25 @@ TEST(Instruction2Test, Floor) {
     const float testVec[] = { -0.0,-1e-45 };
     testInst("floor_ftz_f32", testVec);
   }
+}
+
+TEST(Instruction2Test, Trunc) {
+  {
+    const float testVec[] = { 1.0, 1.7 };
+    testInst("trunc_f32", testVec);
+  }
+  {
+    const double testVec[] = { 1.0L, 1.7L };
+    testInst("trunc_f64", testVec);
+  }
+  {
+    const float testVec[] = { -1.0 , -1.7 };
+    testInst("trunc_f32", testVec);
+  }
+  {
+    const double testVec[] = { -1.0L , -1.7L };
+    testInst("trunc_f64", testVec);
+  } 
 }
 
 TEST(Instruction3Test, Add) {
