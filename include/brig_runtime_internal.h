@@ -19,7 +19,7 @@ namespace brig {
 
 template<class T>
 inline T map(typename T::UMapFn MapFn, T t) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     t[i] = MapFn(t[i]);
   }
   return t;
@@ -27,7 +27,7 @@ inline T map(typename T::UMapFn MapFn, T t) {
 
 template<class T>
 inline T map(typename T::BMapFn MapFn, T x, T y) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     x[i] = MapFn(x[i], y[i]);
   }
   return x;
@@ -35,7 +35,7 @@ inline T map(typename T::BMapFn MapFn, T x, T y) {
 
 template<class T>
 inline T map(typename T::TMapFn MapFn, T x, T y, T z) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     x[i] = MapFn(x[i], y[i], z[i]);
   }
   return x;
@@ -43,7 +43,7 @@ inline T map(typename T::TMapFn MapFn, T x, T y, T z) {
 
 template<class T>
 inline T map(typename T::SMapFn MapFn, T x, typename T::Base y) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     x[i] = MapFn(x[i], y);
   }
   return x;
@@ -51,35 +51,35 @@ inline T map(typename T::SMapFn MapFn, T x, typename T::Base y) {
 
 template<class T>
 inline void ForEach(typename T::UForEachFn MapFn, T t) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     MapFn(t[i]);
   }
 }
 
 template<class T>
 inline void ForEach(typename T::BForEachFn MapFn, T x, T y) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     MapFn(x[i], y[i]);
   }
 }
 
 template<class T>
 inline void ForEach(typename T::TForEachFn MapFn, T x, T y, T z) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     MapFn(x[i], y[i], z[i]);
   }
 }
 
 template<class T>
 inline void ForEach(typename T::QForEachFn MapFn, T x, T y, T z, T w) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     MapFn(x[i], y[i], z[i], w[i]);
   }
 }
 
 template<class T>
 inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
-  for(unsigned i = 0; i < T::Len; ++i) {
+  for (unsigned i = 0; i < T::Len; ++i) {
     MapFn(x[i], y[i], z);
   }
 }
@@ -490,13 +490,13 @@ template<> inline bool isNan(double d) { return std::isnan(d); }
 
 template<class T> inline bool isSNan(T t) { return false; }
 template<> inline bool isSNan(f32 f) {
-  if(!isNan(f)) return false;
+  if (!isNan(f)) return false;
   union { f32 f; b32 b; } Conv = { f };
   b32 mask = (1U << 22);
   return Conv.b & mask;
 }
 template<> inline bool isSNan(f64 f) {
-  if(!isNan(f)) return false;
+  if (!isNan(f)) return false;
   union { f64 f; b64 b; } Conv = { f };
   b64 mask = (1ULL << 51);
   return Conv.b & mask;
@@ -505,10 +505,10 @@ template<> inline bool isSNan(f64 f) {
 template<class T> inline bool isQNan(T t) { return isNan(t) && !isSNan(t); }
 
 template<class T> inline bool isDivisionError(T x, T y) {
-  if(y == 0) return true;
-  if(!Int<T>::isSigned) return false;
-  if(Int<T>::isNegOne(x) && y == Int<T>::Min) return true;
-  if(x == Int<T>::Min && Int<T>::isNegOne(y)) return true;
+  if (y == 0) return true;
+  if (!Int<T>::isSigned) return false;
+  if (Int<T>::isNegOne(x) && y == Int<T>::Min) return true;
+  if (x == Int<T>::Min && Int<T>::isNegOne(y)) return true;
   return false;
 }
 template<> inline bool isDivisionError(float, float) { return false; }

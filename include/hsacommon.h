@@ -101,7 +101,7 @@ public:
     vector(const vector& rhs) :
         items_(0), data_(0), capacity_(0), size_(0)
     {
-        if(rhs.size_ != 0){
+        if (rhs.size_ != 0){
             assign(rhs.begin(), rhs.end());
         }
     }
@@ -115,10 +115,10 @@ public:
      */
     const vector& operator=(const vector& rhs)
     {
-        if(this == &rhs){
+        if (this == &rhs){
             return *this;
         }
-        if(rhs.size_ != 0){
+        if (rhs.size_ != 0){
             assign(rhs.begin(), rhs.end());
         }
         else {
@@ -138,7 +138,7 @@ public:
     template <class Iterator> void assign(Iterator start, Iterator end)
     {
         clear();
-        while(start != end){
+        while (start != end){
             push_back(*start);
             start++;
         }
@@ -183,7 +183,7 @@ public:
      */
     void clear()
     {
-        while(size_ > 0){
+        while (size_ > 0){
             pop_back();
         }
     }
@@ -195,7 +195,7 @@ public:
      */
     void pop_back()
     {
-        if(size_ > 0) {
+        if (size_ > 0) {
             items_[size_ -1].~T();
             size_--;
         }
@@ -211,19 +211,19 @@ public:
     {
         size_t itemSize = sizeof(T);
 
-        if(capacity_ == 0){
+        if (capacity_ == 0){
             capacity_ = 1;
 
             data_ = new char[capacity_ * itemSize];
             items_ = reinterpret_cast<T*>(data_);
         }
-        if(size_ == capacity_) {
+        if (size_ == capacity_) {
             capacity_ *= 2;
             T* prevItems( items_ ); ///< Pointer to current buffer of items to be copied to a new location
             char *prevData( data_ ); ///< Point to previous location of data_ char buffer
             data_ = new char[capacity_ * itemSize];
             items_ = reinterpret_cast<T*>(data_);
-            for(size_t cpyCount=0; cpyCount < size_; cpyCount++){
+            for (size_t cpyCount=0; cpyCount < size_; cpyCount++){
                 new (&items_[cpyCount]) T(prevItems[cpyCount]);
             }
             // TODO: memory leak in case of exceptions. Make RAII.
@@ -243,7 +243,7 @@ public:
      */
     T& back()
     {
-        if(size_ <= 0) {
+        if (size_ <= 0) {
             throw std::out_of_range("vector::back() called on empty hsa::vector.");
         }
         return (items_[size_-1]);
@@ -259,7 +259,7 @@ public:
      */
     const T& back() const
     {
-        if(size_ <= 0) {
+        if (size_ <= 0) {
             throw std::out_of_range("vector::back() called on empty hsa::vector.");
         }
         return (items_[size_-1]);
@@ -302,7 +302,7 @@ public:
      */
     T& at(size_t n)
     {
-        if(n >= size_){
+        if (n >= size_){
             throw std::out_of_range("vector::at() called on element outside hsa::vector.");
         }
         return items_[n];
@@ -319,7 +319,7 @@ public:
      */
     const T& at(size_t n) const
     {
-        if(n >= size_){
+        if (n >= size_){
             throw std::out_of_range("vector::at() called on element outside hsa::vector.");
         }
         return items_[n];

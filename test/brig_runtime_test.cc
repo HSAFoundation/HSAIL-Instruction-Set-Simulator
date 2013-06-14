@@ -30,7 +30,7 @@ using hsa::brig::isSNan;
 using hsa::brig::isUnordered;
 
 template<class T> static void AbsLogic(T result, T a) {
-  if(!isNan(result) && !isNan(a))  {
+  if (!isNan(result) && !isNan(a))  {
     EXPECT_TRUE(result == a || result == -a);
     // Do a cast back to T since operator- turns subword types into ints.
     EXPECT_LE((T) -a, result);
@@ -48,7 +48,7 @@ TestAll(SignedVectorInst, Abs, Unary)
 TestAll(FloatVectorInst,  Abs, Unary)
 
 template<class T> static void NegLogic(T result, T a) {
-  if(isNan(a)) {
+  if (isNan(a)) {
     EXPECT_PRED1(isNan<T>, result);
     EXPECT_NE(std::signbit(result), std::signbit(a));
   } else {
@@ -64,11 +64,11 @@ TestAll(SignedVectorInst,   Neg, Unary)
 TestAll(FloatVectorInst,    Neg, Unary)
 
 template<class T> static void AddLogic(T result, T a, T b) {
-  if(isNan(a) || isNan(b)) {
+  if (isNan(a) || isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if((isPosInf(a) && isNegInf(b))) {
+  } else if ((isPosInf(a) && isNegInf(b))) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if((isNegInf(a) && isPosInf(b))) {
+  } else if ((isNegInf(a) && isPosInf(b))) {
     EXPECT_PRED1(isNan<T>, result);
   } else {
     EXPECT_EQ(result, T(a + b));
@@ -86,8 +86,8 @@ TestAll(FloatVectorInst,    Add, Binary)
 
 template<class T> static void AddSatLogic(T result, T a, T b) {
   s64 result64 = s64(a) + s64(b);
-  if(result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);
-  else if(result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
+  if (result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);
+  else if (result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
   else EXPECT_EQ(result64, result);
 }
 template<class T> static void AddSatVectorLogic(T result, T a, T b) {
@@ -97,13 +97,13 @@ TestAll(SignedVectorInst,   AddSat, Binary)
 TestAll(UnsignedVectorInst, AddSat, Binary)
 
 template<class T> static void DivLogic(T result, T a, T b) {
-  if(hsa::brig::isDivisionError(a, b)) {
+  if (hsa::brig::isDivisionError(a, b)) {
     EXPECT_EQ(result, 0);
-  } else if(isNan(a) || isNan(b)) {
+  } else if (isNan(a) || isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(a == 0 && b == 0) {
+  } else if (a == 0 && b == 0) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isInf(a) && isInf(b)) {
+  } else if (isInf(a) && isInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
   } else {
     EXPECT_EQ(T(a / b), result);
@@ -117,11 +117,11 @@ TestAll(UnsignedInst,       Div, Binary)
 TestAll(FloatInst,          Div, Binary)
 
 template<class T> static void MulLogic(T result, T a, T b) {
-  if(isNan(a) || isNan(b)) {
+  if (isNan(a) || isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isInf(a) && b == 0) {
+  } else if (isInf(a) && b == 0) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(a == 0 && isInf(b)) {
+  } else if (a == 0 && isInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
   } else {
     EXPECT_EQ(T(a * b), result);
@@ -142,8 +142,8 @@ template<class T> static void MulSatLogic(T result, T a, T b) {
   // bit.
   typedef typename Int<T>::Int64Ty Int64Ty;
   Int64Ty result64 = Int64Ty(a) * Int64Ty(b);
-  if(result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);
-  else if(result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
+  if (result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);
+  else if (result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
   else EXPECT_EQ(result64, result);
 }
 template<class T> static void MulSatVectorLogic(T result, T a, T b) {
@@ -170,8 +170,8 @@ TestAll(UnsignedVectorInst, MulHi, Binary)
 
 template<class T> static void SubSatLogic(T result, T a, T b) {
   s64 result64 = s64(a) - s64(b);
-  if(result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);
-  else if(result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
+  if (result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);
+  else if (result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
   else EXPECT_EQ(result64, result);
 }
 template<class T> static void SubSatVectorLogic(T result, T a, T b) {
@@ -181,12 +181,12 @@ TestAll(SignedVectorInst,   SubSat, Binary)
 TestAll(UnsignedVectorInst, SubSat, Binary)
 
 template<class T> static void MaxLogic(T result, T a, T b) {
-  if(!isNegZero(a) && !isNegZero(b))
+  if (!isNegZero(a) && !isNegZero(b))
     EXPECT_PRED2(Not<T>, isNegZero<T>, result);
 
-  if(isNan(a) && isNan(b)) {
+  if (isNan(a) && isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isNan(a) || isNan(b)) {
+  } else if (isNan(a) || isNan(b)) {
     EXPECT_PRED2(Not<T>, isNan<T>, result);
     EXPECT_TRUE(a == result || b == result);
   } else {
@@ -206,12 +206,12 @@ TestAll(UnsignedVectorInst, Max, Binary)
 TestAll(FloatVectorInst,    Max, Binary)
 
 template<class T> static void MinLogic(T result, T a, T b) {
-  if(!isPosZero(a) && !isPosZero(b))
+  if (!isPosZero(a) && !isPosZero(b))
     EXPECT_PRED2(Not<T>, isPosZero<T>, result);
 
-  if(isNan(a) && isNan(b)) {
+  if (isNan(a) && isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isNan(a) || isNan(b)) {
+  } else if (isNan(a) || isNan(b)) {
     EXPECT_PRED2(Not<T>, isNan<T>, result);
     EXPECT_TRUE(a == result || b == result);
   } else {
@@ -231,13 +231,13 @@ TestAll(UnsignedVectorInst, Min, Binary)
 TestAll(FloatVectorInst,    Min, Binary)
 
 template<class T> static void RemLogic(T result, T a, T b) {
-  if(hsa::brig::isDivisionError(a, b)) {
+  if (hsa::brig::isDivisionError(a, b)) {
     EXPECT_EQ(result, 0);
-  } else if(isNan(a) || isNan(b)) {
+  } else if (isNan(a) || isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(a == 0 && b == 0) {
+  } else if (a == 0 && b == 0) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isInf(a) && isInf(b)) {
+  } else if (isInf(a) && isInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
   } else {
     EXPECT_EQ(T(a % b), result);
@@ -261,11 +261,11 @@ TestAll(SignedInst,         Carry, Binary)
 TestAll(UnsignedInst,       Carry, Binary)
 
 template<class T> static void BorrowLogic(T result, T a, T b) {
-  if(Int<T>::isSigned) {
+  if (Int<T>::isSigned) {
     bool isNegA = Int<T>::isNeg(a);
     bool isNegB = Int<T>::isNeg(b);
     bool isNegResult = Int<T>::isNeg(a - b);
-    if(isNegA == isNegB) EXPECT_EQ(isNegResult, result);
+    if (isNegA == isNegB) EXPECT_EQ(isNegResult, result);
     else EXPECT_EQ(!isNegA && isNegB, result);
   } else {
     EXPECT_EQ(a < a - b, result);
@@ -275,15 +275,15 @@ TestAll(SignedInst,         Borrow, Binary)
 TestAll(UnsignedInst,       Borrow, Binary)
 
 template<class T> static void MadLogic(T result, T a, T b, T c) {
-  if(isNan(a) || isNan(b) || isNan(c)) {
+  if (isNan(a) || isNan(b) || isNan(c)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isInf(a) && b == 0) {
+  } else if (isInf(a) && b == 0) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(a == 0 && isInf(b)) {
+  } else if (a == 0 && isInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isNegInf(a * b) && isPosInf(c)) {
+  } else if (isNegInf(a * b) && isPosInf(c)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isPosInf(a * b) && isNegInf(c)) {
+  } else if (isPosInf(a * b) && isNegInf(c)) {
     EXPECT_PRED1(isNan<T>, result);
   } else {
     EXPECT_EQ(a * b + c, result);
@@ -356,14 +356,14 @@ template<class T> static void ShrVectorLogic(T result, T a, unsigned b) {
 TestAll(ShiftInst, Shr, Binary)
 
 template<class T> static void UnpackLoLogic(T result, T a, T b) {
-  for(unsigned i = 0; i < T::Len / 2; ++i) {
-    if(!isNan(a[i]) &&
+  for (unsigned i = 0; i < T::Len / 2; ++i) {
+    if (!isNan(a[i]) &&
        !isNan(result[i * 2]))
     {
       EXPECT_EQ(a[i],
                       result[i * 2]);
     }
-    if(!isNan(b[i]) &&
+    if (!isNan(b[i]) &&
        !isNan(result[i * 2 + 1]))
     {
       EXPECT_EQ(b[i],
@@ -374,14 +374,14 @@ template<class T> static void UnpackLoLogic(T result, T a, T b) {
 TestAll(UnpackInst, UnpackLo, Binary)
 
 template<class T> static void UnpackHiLogic(T result, T a, T b) {
-  for(unsigned i = 0; i < T::Len / 2; ++i) {
-    if(!isNan(a[i + T::Len /2]) &&
+  for (unsigned i = 0; i < T::Len / 2; ++i) {
+    if (!isNan(a[i + T::Len /2]) &&
          !isNan(result[i * 2]))
     {
       EXPECT_EQ(a[i + T::Len / 2],
                       result[i * 2]);
     }
-    if(!isNan(b[i + T::Len / 2]) &&
+    if (!isNan(b[i + T::Len / 2]) &&
        !isNan(result[i * 2 + 1]))
     {
       EXPECT_EQ(b[i + T::Len / 2],
@@ -416,8 +416,8 @@ TestAll(BitInst, Not, Unary)
 template<class T> static void PopCountLogic(T result, T a) {
   int d = 0;
   T bits = a;
-  while(bits != 0) {
-    if(bits & 1) ++d;
+  while (bits != 0) {
+    if (bits & 1) ++d;
     bits >>= 1;
   }
   EXPECT_EQ(d, result);
@@ -437,11 +437,11 @@ template<class T> static void BitRevLogic(T result, T a) {
 
   Helper orig, rev;
   orig.t = a;
-  for(unsigned i = 0; i < sizeof(T); ++i) {
+  for (unsigned i = 0; i < sizeof(T); ++i) {
     rev.a[i] = orig.a[sizeof(T) - i - 1];
   }
 
-  for(unsigned i = 0; i < sizeof(T); ++i) {
+  for (unsigned i = 0; i < sizeof(T); ++i) {
     // swap odd and even bits
     rev.a[i] = ((rev.a[i] >> 1) & 0x55)  | ((rev.a[i] & 0x55) << 1);
     // swap consecutive pairs
@@ -462,7 +462,7 @@ template<class T> static void BitExtractLogic(T result, T a, T b, T c) {
   unsigned offset = Int<T>::ShiftMask & b;
   unsigned width  = Int<T>::ShiftMask & c;
 
-  if(width && offset + width <= Int<T>::Bits) {
+  if (width && offset + width <= Int<T>::Bits) {
     T mask = ~(~T(0) << width);
     T noSign = (a >> offset) & mask;
     T signEx = noSign << (Int<T>::Bits - width) >> (Int<T>::Bits - width);
@@ -500,16 +500,16 @@ MakeTest(BitSelect_b64, BitSelectLogic)
 
 template<class T> static void FirstBit_u32Logic(T result, T a) {
 
-  if(Int<T>::isNeg(a)) a = ~a;
+  if (Int<T>::isNeg(a)) a = ~a;
 
-  if(a == 0) {
+  if (a == 0) {
     EXPECT_EQ(~T(0), result);
     return;
   }
 
   typedef typename Int<T>::Unsigned Unsigned;
   Unsigned mask = Int<Unsigned>::HighBit;
-  while(!(a & mask)) mask >>= 1;
+  while (!(a & mask)) mask >>= 1;
   EXPECT_EQ(mask, T(1) << (Int<T>::Bits - result - 1));
 }
 TestAll(SignedInst, FirstBit_u32, Unary)
@@ -517,14 +517,14 @@ TestAll(UnsignedInst, FirstBit_u32, Unary)
 
 template<class T> static void LastBit_u32Logic(T result, T a) {
 
-  if(!a) {
+  if (!a) {
     EXPECT_EQ(~T(0), result);
     return;
   }
 
   typedef typename Int<T>::Unsigned Unsigned;
   T mask = 1;
-  while(!(a & mask)) mask <<= 1;
+  while (!(a & mask)) mask <<= 1;
   EXPECT_EQ(mask, T(1) << result);
 }
 TestAll(SignedInst, LastBit_u32, Unary)
@@ -565,9 +565,9 @@ template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
   unsigned shift = T::LogLen;
   b32 shuffle = c;
 
-  for(unsigned i = 0; i < len / 2; ++i) {
+  for (unsigned i = 0; i < len / 2; ++i) {
     unsigned offset = shuffle & mask;
-    if(isNan(a[offset])) {
+    if (isNan(a[offset])) {
       EXPECT_PRED1(isNan<Base>, result[i]);
     } else {
       EXPECT_EQ(a[offset], result[i]);
@@ -575,9 +575,9 @@ template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
     shuffle >>= shift;
   }
 
-  for(unsigned i = len / 2; i < len; ++i) {
+  for (unsigned i = len / 2; i < len; ++i) {
     unsigned offset = shuffle & mask;
-    if(isNan(b[offset])) {
+    if (isNan(b[offset])) {
       EXPECT_PRED1(isNan<Base>, result[i]);
     } else {
       EXPECT_EQ(b[offset], result[i]);
@@ -588,14 +588,14 @@ template<class T> static void ShuffleLogic(T result, T a, T b, b32 c) {
 TestAll(ShuffleVectorInst, Shuffle, Ternary)
 
 template<class T> static void CmovLogic(T result, T a, T b, T c) {
-  if(a == 0) {
-    if(isNan(c)) {
+  if (a == 0) {
+    if (isNan(c)) {
       EXPECT_PRED1(isNan<T>, result);
     } else {
       EXPECT_EQ(c, result);
     }
   } else {
-    if(isNan(b)) {
+    if (isNan(b)) {
       EXPECT_PRED1(isNan<T>, result);
     } else {
       EXPECT_EQ(b, result);
@@ -613,14 +613,14 @@ TestAll(FloatVectorInst, Cmov, Ternary)
 
 template<class T> static void FractLogic(T result, T a) {
 
-  if(isNan(a) || isInf(a)) {
+  if (isNan(a) || isInf(a)) {
     EXPECT_PRED1(isNan<T>, result);
     return;
   }
 
   EXPECT_GT(1, result);
   EXPECT_LE(0, result);
-  if(a >= 0 || a <= -FLT_EPSILON)
+  if (a >= 0 || a <= -FLT_EPSILON)
     EXPECT_DOUBLE_EQ(a, std::floor(a) + result);
   else
     EXPECT_FLOAT_EQ(1.0f, result);
@@ -628,30 +628,30 @@ template<class T> static void FractLogic(T result, T a) {
 TestAll(FloatInst, Fract, Unary)
 
 template<class T> static void SqrtLogic(T result, T a) {
-  if(isNan(a)) {
+  if (isNan(a)) {
     EXPECT_PRED1(isNan<T>, a);
-  } else if(a >= 0.0) {
+  } else if (a >= 0.0) {
     EXPECT_FLOAT_EQ(a, result * result);
   }
 }
 TestAll(FloatInst, Sqrt, Unary)
 
 template<class T> static void FmaLogic(T result, T a, T b, T c) {
-  if(isNan(a) || isNan(b) || isNan(c)) {
+  if (isNan(a) || isNan(b) || isNan(c)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isInf(a) && b == 0) {
+  } else if (isInf(a) && b == 0) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(a == 0 && isInf(b)) {
+  } else if (a == 0 && isInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(!isInf(a) && !isInf(b) && isInf(c)) {
+  } else if (!isInf(a) && !isInf(b) && isInf(c)) {
     EXPECT_EQ(c, result);
-  } else if(isNegInf(a * b) && isPosInf(c)) {
+  } else if (isNegInf(a * b) && isPosInf(c)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isPosInf(a * b) && isNegInf(c)) {
+  } else if (isPosInf(a * b) && isNegInf(c)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isInf(a * b) && !isInf(c)) {
+  } else if (isInf(a * b) && !isInf(c)) {
     EXPECT_FLOAT_EQ(a * b, result - c);
-  } else if(result >= FLT_EPSILON || result <= -FLT_EPSILON) {
+  } else if (result >= FLT_EPSILON || result <= -FLT_EPSILON) {
     EXPECT_FLOAT_EQ((double ) a * b + c, result);
   }
 }
@@ -680,25 +680,25 @@ TestAll(FloatInst, CopySign, Binary)
 
 template<class T> static void ClassLogic(b1 result, T a, b32 b) {
   int fpclass = std::fpclassify(a);
-  if(b & hsa::brig::SNan && isSNan(a))
+  if (b & hsa::brig::SNan && isSNan(a))
     EXPECT_TRUE(result);
-  if(b & hsa::brig::QNan && isQNan(a))
+  if (b & hsa::brig::QNan && isQNan(a))
     EXPECT_TRUE(result);
-  if(b & hsa::brig::NegInf && isNegInf(a))
+  if (b & hsa::brig::NegInf && isNegInf(a))
     EXPECT_TRUE(result);
-  if(b & hsa::brig::NegNorm && fpclass == FP_NORMAL && a < 0)
+  if (b & hsa::brig::NegNorm && fpclass == FP_NORMAL && a < 0)
     EXPECT_TRUE(result);
-  if(b & hsa::brig::NegSubnorm && fpclass == FP_SUBNORMAL && a < 0)
+  if (b & hsa::brig::NegSubnorm && fpclass == FP_SUBNORMAL && a < 0)
     EXPECT_TRUE(result);
-  if(b & hsa::brig::NegZero && isNegZero(a))
+  if (b & hsa::brig::NegZero && isNegZero(a))
     EXPECT_TRUE(result);
-  if(b & hsa::brig::PosZero && isPosZero(a))
+  if (b & hsa::brig::PosZero && isPosZero(a))
     EXPECT_TRUE(result);
-  if(b & hsa::brig::PosSubnorm && fpclass == FP_SUBNORMAL && a > 0)
+  if (b & hsa::brig::PosSubnorm && fpclass == FP_SUBNORMAL && a > 0)
     EXPECT_TRUE(result);
-  if(b & hsa::brig::PosNorm && fpclass == FP_NORMAL && a > 0)
+  if (b & hsa::brig::PosNorm && fpclass == FP_NORMAL && a > 0)
     EXPECT_TRUE(result);
-  if(b & hsa::brig::PosInf && isPosInf(a))
+  if (b & hsa::brig::PosInf && isPosInf(a))
     EXPECT_TRUE(result);
 }
 extern "C" b1 Class_f32(f32, unsigned);
@@ -708,15 +708,15 @@ MakeTest(Class_f64, ClassLogic)
 
 static void Ncos_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
-  if(isNan(a) || isInf(a)) {
+  if (isNan(a) || isInf(a)) {
     EXPECT_PRED1(isNan<f32>, result);
-  } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
+  } else if (fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
     EXPECT_FLOAT_EQ(cos(1.0), result);
-  } else if(fpclass == FP_SUBNORMAL) {
+  } else if (fpclass == FP_SUBNORMAL) {
     EXPECT_EQ(1.0, result);
-  } else if(isNegZero(a)) {
+  } else if (isNegZero(a)) {
     EXPECT_EQ(1.0, result);
-  } else if(isPosZero(a)) {
+  } else if (isPosZero(a)) {
     EXPECT_EQ(1.0, result);
   } else {
     EXPECT_FLOAT_EQ(cos(a), result);
@@ -727,17 +727,17 @@ MakeTest(Ncos_f32, Ncos_f32_Logic)
 
 static void Nsin_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
-  if(isNan(a) || isInf(a)) {
+  if (isNan(a) || isInf(a)) {
     EXPECT_PRED1(isNan<f32>, result);
-  } else if(fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
+  } else if (fpclass == FP_NORMAL && (-512 * M_PI > a || a > 512 * M_PI)) {
     EXPECT_FLOAT_EQ(sin(1.0), result);
-  } else if(fpclass == FP_SUBNORMAL && a > 0.0) {
+  } else if (fpclass == FP_SUBNORMAL && a > 0.0) {
     EXPECT_PRED1(isPosZero<f32>, result);
-  } else if(fpclass == FP_SUBNORMAL && a < 0.0) {
+  } else if (fpclass == FP_SUBNORMAL && a < 0.0) {
     EXPECT_PRED1(isNegZero<f32>, result);
-  } else if(isNegZero(a)) {
+  } else if (isNegZero(a)) {
     EXPECT_PRED1(isNegZero<f32>, result);
-  } else if(isPosZero(a)) {
+  } else if (isPosZero(a)) {
     EXPECT_PRED1(isPosZero<f32>, result);
   } else {
     EXPECT_FLOAT_EQ(sin(a), result);
@@ -748,17 +748,17 @@ MakeTest(Nsin_f32, Nsin_f32_Logic)
 
 static void Nlog2_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
-  if(isNan(a) || isNegInf(a)) {
+  if (isNan(a) || isNegInf(a)) {
     EXPECT_PRED1(isNan<f32>, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_PRED1(isPosInf<f32>, result);
-  } else if(fpclass == FP_NORMAL && a < 0.0) {
+  } else if (fpclass == FP_NORMAL && a < 0.0) {
     EXPECT_PRED1(isNegInf<f32>, result);
-  } else if(fpclass == FP_SUBNORMAL) {
+  } else if (fpclass == FP_SUBNORMAL) {
     EXPECT_PRED1(isNegInf<f32>, result);
-  } else if(isNegZero(a)) {
+  } else if (isNegZero(a)) {
     EXPECT_PRED1(isNegInf<f32>, result);
-  } else if(isPosZero(a)) {
+  } else if (isPosZero(a)) {
     EXPECT_PRED1(isNegInf<f32>, result);
   } else {
     EXPECT_FLOAT_EQ(log2(a), result);
@@ -769,19 +769,19 @@ MakeTest(Nlog2_f32, Nlog2_f32_Logic)
 
 static void Nexp2_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
-  if(isNan(a)) {
+  if (isNan(a)) {
     EXPECT_PRED1(isNan<f32>, result);
-  } else if(isNegInf(a)) {
+  } else if (isNegInf(a)) {
     EXPECT_PRED1(isPosZero<f32>, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_PRED1(isPosInf<f32>, result);
-  } else if(fpclass == FP_NORMAL && a < 0.0) {
+  } else if (fpclass == FP_NORMAL && a < 0.0) {
     EXPECT_PRED1(isPosZero<f32>, result);
-  } else if(fpclass == FP_SUBNORMAL) {
+  } else if (fpclass == FP_SUBNORMAL) {
     EXPECT_EQ(1.0, result);
-  } else if(isNegZero(a)) {
+  } else if (isNegZero(a)) {
     EXPECT_EQ(1.0, result);
-  } else if(isPosZero(a)) {
+  } else if (isPosZero(a)) {
     EXPECT_EQ(1.0, result);
   } else {
     EXPECT_FLOAT_EQ(exp2(a), result);
@@ -792,19 +792,19 @@ MakeTest(Nexp2_f32, Nexp2_f32_Logic)
 
 template<class T> static void NrsqrtLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
-  if(isNan(a) || isNegInf(a)) {
+  if (isNan(a) || isNegInf(a)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(fpclass == FP_NORMAL && a < 0.0) {
+  } else if (fpclass == FP_NORMAL && a < 0.0) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(fpclass == FP_SUBNORMAL && a < 0.0) {
+  } else if (fpclass == FP_SUBNORMAL && a < 0.0) {
     EXPECT_PRED1(isNegInf<T>, result);
-  } else if(isNegZero(a)) {
+  } else if (isNegZero(a)) {
     EXPECT_PRED1(isNegInf<T>, result);
-  } else if(isPosZero(a)) {
+  } else if (isPosZero(a)) {
     EXPECT_PRED1(isPosInf<T>, result);
-  } else if(fpclass == FP_SUBNORMAL && a > 0.0) {
+  } else if (fpclass == FP_SUBNORMAL && a > 0.0) {
     EXPECT_PRED1(isPosInf<T>, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_EQ(0.0, result);
   } else {
     EXPECT_FLOAT_EQ(a, (1.0 / result) * (1.0 / result));
@@ -814,19 +814,19 @@ TestAll(FloatInst, Nrsqrt, Unary)
 
 template<class T> static void NrcpLogic(T result, T a) {
   int fpclass = std::fpclassify(a);
-  if(isNan(a)) {
+  if (isNan(a)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isNegInf(a)) {
+  } else if (isNegInf(a)) {
     EXPECT_PRED1(isNegZero<T>, result);
-  } else if(fpclass == FP_SUBNORMAL && a < 0) {
+  } else if (fpclass == FP_SUBNORMAL && a < 0) {
     EXPECT_PRED1(isNegInf<T>, result);
-  } else if(isNegZero(a)) {
+  } else if (isNegZero(a)) {
     EXPECT_PRED1(isNegInf<T>, result);
-  } else if(isPosZero(a)) {
+  } else if (isPosZero(a)) {
     EXPECT_PRED1(isPosInf<T>, result);
-  } else if(fpclass == FP_SUBNORMAL && a > 0) {
+  } else if (fpclass == FP_SUBNORMAL && a > 0) {
     EXPECT_PRED1(isPosInf<T>, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_PRED1(isPosZero<T>, result);
   } else {
     EXPECT_FLOAT_EQ(a, 1.0 / result);
@@ -835,10 +835,10 @@ template<class T> static void NrcpLogic(T result, T a) {
 TestAll(FloatInst, Nrcp, Unary)
 
 static void F2u4_u32_Logic(u32 result, f32 a, f32 b, f32 c, f32 d) {
-  if(isNan(a) || a < 0.0f || a >= 256.0f) return;
-  if(isNan(b) || b < 0.0f || b >= 256.0f) return;
-  if(isNan(c) || c < 0.0f || c >= 256.0f) return;
-  if(isNan(d) || d < 0.0f || d >= 256.0f) return;
+  if (isNan(a) || a < 0.0f || a >= 256.0f) return;
+  if (isNan(b) || b < 0.0f || b >= 256.0f) return;
+  if (isNan(c) || c < 0.0f || c >= 256.0f) return;
+  if (isNan(d) || d < 0.0f || d >= 256.0f) return;
 
   EXPECT_EQ((result      ) & 0xFF, lrint(d) & 0xFF);
   EXPECT_EQ((result >>  8) & 0xFF, lrint(c) & 0xFF);
@@ -873,10 +873,10 @@ extern "C" f32 Unpack0_f32(b32);
 MakeTest(Unpack0_f32, Unpack0Logic)
 
 static void BitAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
-  if(c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {
+  if (c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {
     unsigned tag = (32 - c) / 8;
-    for(unsigned i = 0; i < 4; ++i) {
-      if(i + tag > 3)
+    for (unsigned i = 0; i < 4; ++i) {
+      if (i + tag > 3)
         EXPECT_EQ((a >> (((i + tag) % 4) * 8)) & 0xFF,
                   (result >> (i * 8)) & 0xFF);
       else
@@ -889,10 +889,10 @@ extern "C" b32 BitAlign_b32(b32, b32, b32);
 MakeTest(BitAlign_b32, BitAlign_b32_Logic)
 
 static void ByteAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
-  if(c <= 4) {
+  if (c <= 4) {
     unsigned tag = (4 - c);
-    for(unsigned i = 0; i < 4; ++i) {
-      if(i + tag > 3)
+    for (unsigned i = 0; i < 4; ++i) {
+      if (i + tag > 3)
         EXPECT_EQ(((a) >> (((i + tag) % 4) * 8)) & 0xFF,
                   (result >> (i * 8)) & 0xFF);
       else
@@ -905,7 +905,7 @@ extern "C" b32 ByteAlign_b32(b32, b32, b32);
 MakeTest(ByteAlign_b32, ByteAlign_b32_Logic)
 
 static void Lerp_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
-  for(unsigned i = 0; i < 4; ++i) {
+  for (unsigned i = 0; i < 4; ++i) {
     EXPECT_EQ((result >> i * 8) & 0xFF,
                 ((((a >> i * 8) & 0xFF)
                 + ((b >> i * 8) & 0xFF)
@@ -984,59 +984,59 @@ MakeCmpTest(nan, f32)
 MakeCmpTest(nan, f64)
 
 template<class R, class T> static void Cvt_Logic(R result, T a) {
-  if(isBool<R>()) {
+  if (isBool<R>()) {
     EXPECT_EQ(result, a != T(0));
-  } else if(isNan(a)) {
+  } else if (isNan(a)) {
     EXPECT_EQ(0, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_EQ(getMax<R>(), result);
-  } else if(isNegInf(a)) {
+  } else if (isNegInf(a)) {
     EXPECT_EQ(getMin<R>(), result);
-  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
     EXPECT_EQ(R(a), result);
   }
 }
 template<class R, class T> static void Cvt_upi_Logic(R result, T a) {
-  if(isNan(a)) {
+  if (isNan(a)) {
     EXPECT_EQ(0, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_EQ(getMax<R>(), result);
-  } else if(isNegInf(a)) {
+  } else if (isNegInf(a)) {
     EXPECT_EQ(getMin<R>(), result);
-  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
     EXPECT_LE(a, result);
   }
 }
 template<class R, class T> static void Cvt_downi_Logic(R result, T a) {
-  if(isNan(a)) {
+  if (isNan(a)) {
     EXPECT_EQ(0, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_EQ(getMax<R>(), result);
-  } else if(isNegInf(a)) {
+  } else if (isNegInf(a)) {
     EXPECT_EQ(getMin<R>(), result);
-  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
     EXPECT_GE(a, result);
   }
 }
 template<class R, class T> static void Cvt_zeroi_Logic(R result, T a) {
-  if(isNan(a)) {
+  if (isNan(a)) {
     EXPECT_EQ(0, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_EQ(getMax<R>(), result);
-  } else if(isNegInf(a)) {
+  } else if (isNegInf(a)) {
     EXPECT_EQ(getMin<R>(), result);
-  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
     EXPECT_GE(llabs((int64_t) a), llabs((int64_t) result));
   }
 }
 template<class R, class T> static void Cvt_neari_Logic(R result, T a) {
-  if(isNan(a)) {
+  if (isNan(a)) {
     EXPECT_EQ(0, result);
-  } else if(isPosInf(a)) {
+  } else if (isPosInf(a)) {
     EXPECT_EQ(getMax<R>(), result);
-  } else if(isNegInf(a)) {
+  } else if (isNegInf(a)) {
     EXPECT_EQ(getMin<R>(), result);
-  } else if(T(getMin<R>()) < a && a < T(getMax<R>())) {
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
     EXPECT_GE(0.5, std::abs(f64(result) - f64(a)));
   }
 }
@@ -1073,11 +1073,11 @@ template<class T> static void AtomicExchLogic(T result, T a, T b) {
 TestAll(AtomicInst, Exch, Binary)
 
 template<class T> static void AtomicAddLogic(T result, T a, T b) {
-  if(isNan(a) || isNan(b)) {
+  if (isNan(a) || isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isPosInf(a) && isNegInf(b)) {
+  } else if (isPosInf(a) && isNegInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isNegInf(a) && isPosInf(b)) {
+  } else if (isNegInf(a) && isPosInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
   } else {
     EXPECT_EQ(T(a + b), result);
@@ -1086,11 +1086,11 @@ template<class T> static void AtomicAddLogic(T result, T a, T b) {
 TestAll(AtomicInst, Add, Binary)
 
 template<class T> static void AtomicSubLogic(T result, T a, T b) {
-  if(isNan(a) || isNan(b)) {
+  if (isNan(a) || isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isPosInf(a) && isPosInf(b)) {
+  } else if (isPosInf(a) && isPosInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
-  } else if(isNegInf(a) && isNegInf(b)) {
+  } else if (isNegInf(a) && isNegInf(b)) {
     EXPECT_PRED1(isNan<T>, result);
   } else {
     EXPECT_EQ(T(a - b), result);
@@ -1099,7 +1099,7 @@ template<class T> static void AtomicSubLogic(T result, T a, T b) {
 TestAll(AtomicInst, Sub, Binary)
 
 template<class T> static void AtomicCasLogic(T result, T a, T b, T c) {
-  if(a == b) {
+  if (a == b) {
     EXPECT_EQ(c, result);
   } else {
     EXPECT_EQ(a, result);

@@ -19,13 +19,13 @@ BrigReader::~BrigReader() { delete objFile_; }
 
 BrigReader *BrigReader::createBrigReader(const char *filename) {
   llvm::OwningPtr<llvm::MemoryBuffer> file;
-  if(llvm::MemoryBuffer::getFile(filename, file))
+  if (llvm::MemoryBuffer::getFile(filename, file))
     return NULL;
   llvm::object::ObjectFile *objFile =
     llvm::object::ObjectFile::createELFObjectFile(file.take());
 
   BrigReader *reader = createBrigReader(objFile);
-  if(!reader) delete objFile;
+  if (!reader) delete objFile;
   return reader;
 }
 
@@ -37,7 +37,7 @@ BrigReader *BrigReader::createBrigReader(const char *buffer, size_t size) {
     llvm::object::ObjectFile::createELFObjectFile(file);
 
   BrigReader *reader = createBrigReader(objFile);
-  if(!reader) delete objFile;
+  if (!reader) delete objFile;
   return reader;
 }
 
@@ -51,31 +51,31 @@ BrigReader *BrigReader::createBrigReader(llvm::object::ObjectFile *objFile) {
   typedef llvm::object::section_iterator SecIt;
   const SecIt E = objFile->end_sections();
   llvm::error_code ec;
-  for(SecIt it = objFile->begin_sections(); it != E; it.increment(ec)) {
+  for (SecIt it = objFile->begin_sections(); it != E; it.increment(ec)) {
 
-    if(ec) return NULL;
+    if (ec) return NULL;
 
     llvm::StringRef name;
     it->getName(name);
 
-    if(name == ".brig_directives" || name == ".directives") {
-      if(it->getContents(directives)) return NULL;
-    } else if(name == ".brig_code" || name == ".code") {
-      if(it->getContents(code)) return NULL;
-    } else if(name == ".brig_operands" || name == ".operands") {
-      if(it->getContents(operands)) return NULL;
-    } else if(name == ".brig_debug" || name == ".debug") {
-      if(it->getContents(debug)) return NULL;
-    } else if(name == ".brig_strtab" || name == ".strtab" ||
+    if (name == ".brig_directives" || name == ".directives") {
+      if (it->getContents(directives)) return NULL;
+    } else if (name == ".brig_code" || name == ".code") {
+      if (it->getContents(code)) return NULL;
+    } else if (name == ".brig_operands" || name == ".operands") {
+      if (it->getContents(operands)) return NULL;
+    } else if (name == ".brig_debug" || name == ".debug") {
+      if (it->getContents(debug)) return NULL;
+    } else if (name == ".brig_strtab" || name == ".strtab" ||
               name == ".strings") {
-      if(it->getContents(strings)) return NULL;
+      if (it->getContents(strings)) return NULL;
     }
   }
 
-  if(!directives.size()) return NULL;
-  if(!code.size()) return NULL;
-  if(!operands.size()) return NULL;
-  if(!strings.size()) return NULL;
+  if (!directives.size()) return NULL;
+  if (!code.size()) return NULL;
+  if (!operands.size()) return NULL;
+  if (!strings.size()) return NULL;
 
   return new BrigReader(objFile, directives, code, operands, debug, strings);
 }

@@ -102,7 +102,7 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
   char *threnv = getenv("SIMTHREADS");
   if (threnv != NULL && atoi(threnv) > 0) {
     numProcessors = atoi(threnv);
-  } else if(sysconf(_SC_NPROCESSORS_CONF) > 0) {
+  } else if (sysconf(_SC_NPROCESSORS_CONF) > 0) {
     numProcessors = sysconf(_SC_NPROCESSORS_CONF);
   } else {
     numProcessors = 1;
@@ -111,7 +111,7 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
   int err = dladdr(&runtime, &info);
   assert(err && info.dli_fname &&
          "How are we executing if we haven't even been loaded?!");
-  if(loadedLibs.insert(std::string(info.dli_fname)).second)
+  if (loadedLibs.insert(std::string(info.dli_fname)).second)
     llvm::sys::DynamicLibrary::LoadLibraryPermanently(info.dli_fname);
 
   assert(!EE_ && "BrigEngine was already constructed?!");
@@ -136,7 +136,7 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
                         : llvm::EngineKind::JIT);
 
   llvm::SectionMemoryManager *JMM = NULL;
-  if(!forceInterpreter) {
+  if (!forceInterpreter) {
     JMM = new llvm::SectionMemoryManager();
     builder.setJITMemoryManager(JMM);
   }
@@ -160,7 +160,7 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
   options.JITEmitDebugInfo = true;
 
 #ifdef __arm__
-  if(isHardFP()) options.FloatABIType = llvm::FloatABI::Hard;
+  if (isHardFP()) options.FloatABIType = llvm::FloatABI::Hard;
 #endif // __arm__
 
   builder.setTargetOptions(options);
@@ -188,7 +188,7 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
       EE_->getPointerToFunction(Fn);
   }
 
-  if(JMM)
+  if (JMM)
     JMM->invalidateInstructionCache();
 }
 
@@ -231,7 +231,7 @@ static void *workItemLoop(void *vargs) {
   uint32_t lastGroupSize = thrInfo->NDRangeSize % thrInfo->groupSize;
   uint32_t lastGroupNum = (roundUp(thrInfo->NDRangeSize, thrInfo->groupSize) / thrInfo->groupSize) - 1;
   if (lastGroupSize == 0) lastGroupSize = thrInfo->groupSize;
-  for(uint32_t absid = thrInfo->absidLow; absid < thrInfo->NDRangeSize; absid += thrInfo->absidStep ) {
+  for (uint32_t absid = thrInfo->absidLow; absid < thrInfo->NDRangeSize; absid += thrInfo->absidStep ) {
     thrInfo->workItemAbsId[0] = absid;
     uint32_t workGroupNum = absid / thrInfo->groupSize;
     thrInfo->barrier = &thrInfo->barriers[workGroupNum];
@@ -298,7 +298,7 @@ void BrigEngine::launch(llvm::Function *EntryFn,
   uint32_t workGroupSizeV3[] = { workGroupSize, 1, 1 };
 
   // initialize all the barriers
-  for(uint32_t i = 0; i < blockNum; ++i) {
+  for (uint32_t i = 0; i < blockNum; ++i) {
     pthread_barrier_init(barriers + i, &barrierAttr, workGroupSize);
   }
 
@@ -337,7 +337,7 @@ void BrigEngine::launch(llvm::Function *EntryFn,
   }
 
   // destroy all the barriers
-  for(uint32_t i = 0; i < blockNum; ++i) {
+  for (uint32_t i = 0; i < blockNum; ++i) {
     pthread_barrier_destroy(barriers + i);
   }
 

@@ -38,14 +38,14 @@ hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
     llvm::sys::fs::unique_file("emptyBrig-%%%%%.o", result_fd, resultPath);
   close(result_fd);
   EXPECT_TRUE(!ec);
-  if(ec) return NULL;
+  if (ec) return NULL;
 
   std::string errMsg;
   bool isValidHSA = hsa::brig::HsailAsm::assembleHSAILString(source.c_str(),
                                                              resultPath.c_str(),
                                                              &errMsg);
   EXPECT_TRUE(isValidHSA);
-  if(!isValidHSA) {
+  if (!isValidHSA) {
     llvm::errs() << "Assembly failed: " << errMsg << "\n";
     return NULL;
   }
@@ -53,11 +53,11 @@ hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
   BrigReader *reader =
     BrigReader::createBrigReader(resultPath.c_str());
   EXPECT_TRUE(reader);
-  if(!reader) return NULL;
+  if (!reader) return NULL;
 
   hsa::brig::BrigModule mod(*reader, &llvm::errs());
   EXPECT_TRUE(mod.isValid());
-  if(!mod.isValid()) return NULL;
+  if (!mod.isValid()) return NULL;
 
   hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
   EXPECT_TRUE(BP);
@@ -111,7 +111,7 @@ TEST(BrigKernelTest, Cosine) {
     );
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   float *arg_val0 = new float;
   float *arg_val1 = new float;
@@ -183,7 +183,7 @@ TEST(BrigKernelTest, Fib) {
     "};"
     );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   int *r = new int;
   int *n = new int;
@@ -193,7 +193,7 @@ TEST(BrigKernelTest, Fib) {
 
   int fib1 = 1;
   int fib2 = 0;
-  for(int i = 1; i < 25; ++i) {
+  for (int i = 1; i < 25; ++i) {
     *n = i;
     hsa::brig::BrigEngine BE(BP);
     BE.launch(fun, args);
@@ -233,12 +233,12 @@ TEST(BrigKernelTest, VectorCopy) {
     "};\n"
     );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   const unsigned arraySize = 16;
   float *arg_val0 = new float[arraySize];
   float *arg_val1 = new float[arraySize];
-  for(unsigned i = 0; i < arraySize; ++i) {
+  for (unsigned i = 0; i < arraySize; ++i) {
     arg_val0[i] = M_PI;
     arg_val1[i] = 0;
   }
@@ -357,14 +357,14 @@ template<class T, size_t N>
 static void testInst(const char *inst, const T(&testVec)[N]) {
   hsa::brig::BrigProgram BP = makeTest(N - 1, inst, sizeof(T) * 8);
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   unsigned arraySize = 16;
   T *input1 = new T[arraySize];
   T *input2 = new T[arraySize];
   T *input3 = new T[arraySize];
   T *output = new T[arraySize];
-  for(unsigned i = 0; i < arraySize; ++i) {
+  for (unsigned i = 0; i < arraySize; ++i) {
     input1[i] = N > 1 ? testVec[1] : T(0);
     input2[i] = N > 2 ? testVec[2] : T(0);
     input3[i] = N > 3 ? testVec[3] : T(0);
@@ -614,7 +614,7 @@ TEST(BrigWriterTest, GlobalArray) {
     );
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 }
 
 static const char SubwordsInst[] =
@@ -636,7 +636,7 @@ static void testSubwords(const char *type, const T &result, const char *value) {
   delete[] buffer;
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   T *arg_val0 = new T;
   *arg_val0 = 0;
@@ -731,7 +731,7 @@ TEST(BrigKernelTest, EuclideanGCD) {
     "};\n"
   );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   int *number1 = new int[4];
   int *number2 = new int[4];
@@ -751,7 +751,7 @@ TEST(BrigKernelTest, EuclideanGCD) {
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__run");
 
-  for(int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
     void *args[] = { &divisor, number1 + i, number2 + i };
     BE.launch(fun, args);
     EXPECT_EQ(*divisor, temp[i]);
@@ -801,13 +801,13 @@ TEST(BrigKernelTest, VectorAddArray) {
     );
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   unsigned arraySize = 16;
   float *arg_val0 = new float[arraySize];
   float *arg_val1 = new float[arraySize];
   float *arg_val2 = new float[arraySize];
-  for(unsigned i = 0; i < arraySize; ++i) {
+  for (unsigned i = 0; i < arraySize; ++i) {
     arg_val0[i] = 1;
     arg_val1[i] = 2;
     arg_val2[i] = 0;
@@ -848,7 +848,7 @@ TEST(BrigKernelTest, SExtZExt) {
     );
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   int8_t *input = new int8_t;
   int8_t *sext = new int8_t;
@@ -872,7 +872,7 @@ TEST(BrigKernelTest, SExtZExt) {
 
 TEST(BrigKernelTest, SubWordArray) {
 
-  if(sizeof(void *) == 4) return;
+  if (sizeof(void *) == 4) return;
 
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$large;"
@@ -890,31 +890,31 @@ TEST(BrigKernelTest, SubWordArray) {
     "{"
     "  ld_kernarg_u64 $d1, [%size];"         // n = size;
     "  cmp_eq_b1_u64 $c0, $d1, 0;"
-    "  cbr $c0, @sumLoopExit;"       // if(n == 0) goto sumLoopExit;
+    "  cbr $c0, @sumLoopExit;"       // if (n == 0) goto sumLoopExit;
     "  mov_b64 $d2, 0;"              // sum = 0;
     "@sumLoopHeader:"
     "  sub_u64 $d1, $d1, 1;"         // --n;
     "  ld_global_u8 $d3, [&array][$d1];"
     "  add_u64 $d2, $d2, $d3;"       // sum += array[n];
     "  cmp_ne_b1_u64 $c0, $d1, 0;"
-    "  cbr $c0, @sumLoopHeader;"     // if(n != 0) goto sumLoopHeader;
+    "  cbr $c0, @sumLoopHeader;"     // if (n != 0) goto sumLoopHeader;
     "@sumLoopExit:"
     "  ld_kernarg_u64 $d1, [%size];"         // n = size;
     "  mov_b64 $d3, 0;"              // i = 0;
     "  cmp_eq_b1_u64 $c0, $d3, $d1;"
-    "  cbr $c0, @exit;"              // if(i == size) goto exit
+    "  cbr $c0, @exit;"              // if (i == size) goto exit
     "@assignHeader:"
     "  st_global_u8 $d2, [&array][$d3];"
     "  add_u64 $d3, $d3, 1;"
     "  cmp_ne_b1_u64 $c0, $d3, $d1;"
-    "  cbr $c0, @assignHeader;"      // if(i != size) goto assignHeader;
+    "  cbr $c0, @assignHeader;"      // if (i != size) goto assignHeader;
     "@exit:"
     "  ret;"
     "};"
     );
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
 
@@ -927,7 +927,7 @@ TEST(BrigKernelTest, SubWordArray) {
     EXPECT_TRUE(array);
   }
 
-  for(unsigned i = 0; i < size; ++i) {
+  for (unsigned i = 0; i < size; ++i) {
     (*array)[i] = (char) i;
   }
 
@@ -936,7 +936,7 @@ TEST(BrigKernelTest, SubWordArray) {
     llvm::Function *fun = BP->getFunction("SubWordArray");
     BE.launch(fun, args);
 
-    for(unsigned i = 0; i < size; ++i) {
+    for (unsigned i = 0; i < size; ++i) {
       EXPECT_EQ((size * size - size) / 2, (*array)[i]);
     }
   }
@@ -956,7 +956,7 @@ TEST(BrigKernelTest, EmptyCB) {
     );
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("EmptyCB");
   llvm::ArrayRef<void *> args;
@@ -966,7 +966,7 @@ TEST(BrigKernelTest, EmptyCB) {
 TEST(BrigKernelTest, CRC32) {
   const unsigned arraySize = 16;
   char *a = new char[arraySize];
-  for(unsigned i = 0; i < arraySize; ++i) {
+  for (unsigned i = 0; i < arraySize; ++i) {
     a[i] = 'a' + i;
   }
   unsigned len = 10;
@@ -974,10 +974,10 @@ TEST(BrigKernelTest, CRC32) {
   uint   CRC32[256];
   unsigned   i,j;
   uint   crc;
-  for(i = 0;i < 256;i++){
+  for (i = 0;i < 256;i++){
     crc = i;
-    for(j = 0;j < 8;j++){
-      if(crc & 1){
+    for (j = 0;j < 8;j++){
+      if (crc & 1){
         crc = (crc >> 1) ^ 0xEDB88320;
       }else{
         crc = crc >> 1;
@@ -986,7 +986,7 @@ TEST(BrigKernelTest, CRC32) {
     CRC32[i] = crc;
   }
   uint ret = 0xFFFFFFFF;
-  for(i = 0; i < len;i++){
+  for (i = 0; i < len;i++){
     ret = CRC32[((ret & 0xFF) ^ a[i])] ^ (ret >> 8);
   }
   ret = ~ret;
@@ -1044,7 +1044,7 @@ TEST(BrigKernelTest, CRC32) {
     "};"
     );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   unsigned *r = new unsigned;
   unsigned *l = new unsigned(len);
@@ -1111,7 +1111,7 @@ TEST(BrigKernelTest, FizzBuzz) {
     "};\n"
   );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   unsigned size = 1000;
   int *r = new int[size];
@@ -1121,7 +1121,7 @@ TEST(BrigKernelTest, FizzBuzz) {
   void *args[] = { &r, n };
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
-  for(unsigned i = 0; i < size; ++i) {
+  for (unsigned i = 0; i < size; ++i) {
     if (i % 15 == 0)
       EXPECT_EQ(15, r[i]);
     else {
@@ -1177,12 +1177,12 @@ TEST(BrigKernelTest, InsertionSorter) {
     "};\n"
   );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   const unsigned arraySize = 1024;
   unsigned *r = new unsigned[arraySize];
 
-  for(unsigned i = 0; i < arraySize; i++) {
+  for (unsigned i = 0; i < arraySize; i++) {
     r[i] = ((10653245 * i + 3325) % 2048);
   }
 
@@ -1191,7 +1191,7 @@ TEST(BrigKernelTest, InsertionSorter) {
   llvm::Function *fun = BP->getFunction("insertionsortKernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
-  for(unsigned i = 0; i < arraySize - 1; ++i) {
+  for (unsigned i = 0; i < arraySize - 1; ++i) {
     EXPECT_LE(r[i], r[i+1]);
   }
 
@@ -1237,7 +1237,7 @@ TEST(BrigKernelTest,  zeller) {
     "};"
     );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
   int *m_arg = new int[4];
   int *d_arg = new int[4];
   int *y_arg = new int[4];
@@ -1256,7 +1256,7 @@ TEST(BrigKernelTest,  zeller) {
   y_arg[3] = 2012;
   int temp[4] = {1,0,2,4};
 
-  for(int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
     hsa::brig::BrigEngine BE(BP);
     void *args[] = { &r_arg, m_arg+i, d_arg+i,y_arg+i };
     llvm::Function *fun = BP->getFunction("zeller");
@@ -1282,10 +1282,10 @@ TEST(BrigKernelTest, ThreadTest) {
     "  ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
   const unsigned threads = 16;
   unsigned *tids = new unsigned[threads];
-  for(unsigned i = 0; i < threads; ++i) {
+  for (unsigned i = 0; i < threads; ++i) {
     tids[i] = ~0;
   }
 
@@ -1294,7 +1294,7 @@ TEST(BrigKernelTest, ThreadTest) {
   llvm::Function *fun = BP->getFunction("threadTest");
   BE.launch(fun, args, 1, threads);
 
-  for(unsigned i = 0; i < threads; ++i) {
+  for (unsigned i = 0; i < threads; ++i) {
     EXPECT_EQ(i, tids[i]);
   }
   delete[] tids;
@@ -1333,7 +1333,7 @@ TEST(BrigKernelTest, IndirectBranches) {
       "};"
     );
     EXPECT_TRUE(BP);
-    if(!BP) return;
+    if (!BP) return;
 
     unsigned *r = new unsigned;
     unsigned *n = new unsigned;
@@ -1405,7 +1405,7 @@ TEST(BrigKernelTest, IndirectBranches) {
       "};"
     );
     EXPECT_TRUE(BP);
-    if(!BP) return;
+    if (!BP) return;
 
     unsigned *r = new unsigned;
     unsigned *n = new unsigned;
@@ -1480,7 +1480,7 @@ TEST(BrigKernelTest, IndirectBranches) {
       "};"
     );
     EXPECT_TRUE(BP);
-    if(!BP) return;
+    if (!BP) return;
 
     unsigned *r = new unsigned;
     unsigned *n = new unsigned;
@@ -1569,7 +1569,7 @@ TEST(BrigKernelTest, DISABLED_IndirectCall) {
     "};"
     );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   int *r = new int;
   int *n = new int(5);
@@ -1601,7 +1601,7 @@ TEST(BrigWriterTest, GlobalInitialization) {
     );
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 }
 
 static const char InstTestCvt[] =
@@ -1631,8 +1631,8 @@ static hsa::brig::BrigProgram makeTestCvt(const char *inst,
                                           unsigned srcBits) {
   char dc = destBits > 32 ? 'd' : 's';
   char sc = srcBits > 32 ? 'd' : 's';
-  if(destBits < 32) destBits = 32;
-  if(srcBits < 32) srcBits = 32;
+  if (destBits < 32) destBits = 32;
+  if (srcBits < 32) srcBits = 32;
   unsigned args = ((destBits >> 5) & 0x2) | (srcBits >> 6);
   char *buffer =
     asnprintf(InstTestCvt,
@@ -1652,7 +1652,7 @@ static void testInstCvt(const char *inst, const char *destTypeLength,
   hsa::brig::BrigProgram BP = makeTestCvt(inst, destTypeLength, srcTypeLength,
                                           sizeof(R) * 8, sizeof(T) * 8);
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
   T *src = new T(input);
   R *dest = new R;
   void *args[] = {&dest, src};
@@ -1683,14 +1683,14 @@ TEST(BrigInstTest, CvtIToI) {
     input.SRC = ~input.SRC;                                           \
     result.DEST = (DEST) input.SRC;                                   \
     testInstCvt("cvt", "_" #DEST, "_" #SRC, result.DEST, input.SRC);  \
-  } while(0)
+  } while (0)
 
 #define CvtBB(DEST, SRC) do {                   \
     CvtII(s ## DEST, s ## SRC);                 \
     CvtII(s ## DEST, u ## SRC);                 \
     CvtII(u ## DEST, s ## SRC);                 \
     CvtII(u ## DEST, u ## SRC);                 \
-  } while(0)
+  } while (0)
 
                 CvtBB( 8, 16); CvtBB( 8, 32); CvtBB( 8, 64);
   CvtBB(16, 8);                CvtBB(16, 32); CvtBB(16, 64);
@@ -2349,7 +2349,7 @@ TEST(BrigInstTest, CvtRoundingMode) {
                                     "cvt_down",
                                     "cvt_near",
                                     "cvt_zero"};
-  for(unsigned i = 0; i < 4; ++i){
+  for (unsigned i = 0; i < 4; ++i){
     //u8 to f32
     {
       input.u8 = 0xFF;
@@ -2473,7 +2473,7 @@ TEST(BrigWriterTest, GlobalInitialization_b64) {
     );
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 }
 
 static const char GlobalInitializerInst[] =
@@ -2500,9 +2500,9 @@ static void testGlobalInitializer(const char *type,
                                   unsigned bits) {
 for(unsigned i = 0; i < 2; ++i) {
   char reg = 0;
-  if(bits == 8 || bits == 16 || bits == 32)
+  if (bits == 8 || bits == 16 || bits == 32)
     reg = 's';
-  if(bits == 64)
+  if (bits == 64)
     reg = 'd';
   char *buffer =
     asnprintf(GlobalInitializerInst,
@@ -2521,7 +2521,7 @@ for(unsigned i = 0; i < 2; ++i) {
   delete[] buffer;
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   T *arg_val0 = new T;
   *arg_val0 = 0;
@@ -3263,9 +3263,9 @@ static void testGlobalArray(const char *type,
                             unsigned bits,
                             unsigned arraySz) {
   char reg = 0;
-  if(bits == 8 || bits == 16 || bits == 32)
+  if (bits == 8 || bits == 16 || bits == 32)
     reg = 's';
-  if(bits == 64)
+  if (bits == 64)
     reg = 'd';
   char *buffer =
     asnprintf(GlobalArrayInst,
@@ -3279,7 +3279,7 @@ static void testGlobalArray(const char *type,
   delete[] buffer;
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   T *arg_val0 = new T[arraySz];
   for (unsigned i = 0; i < arraySz; i++) {
@@ -3355,7 +3355,7 @@ TEST(BrigInstTest, WaveSize) {
       "  ret;\n"
       "};\n");
     EXPECT_TRUE(BP);
-    if(!BP) return;
+    if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
     llvm::Function *fun = BP->getFunction("waveTest");
@@ -3392,7 +3392,7 @@ TEST(BrigKernelTest, MultipleVersionStatements) {
   "};\n");
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 }
 TEST(BrigKernelTest, Ftz2) {
   hsa::brig::BrigProgram BP = TestHSAIL(
@@ -3405,7 +3405,7 @@ TEST(BrigKernelTest, Ftz2) {
     " ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("ftzTest");
@@ -3458,7 +3458,7 @@ TEST(BrigInstTest, RegV2) {
     "  st_u64 $d1, [$s5];\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("regV2");
@@ -3491,7 +3491,7 @@ TEST(BrigInstTest, RegV4) {
     "  st_b128 $q0, [$s0];\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("regV4");
@@ -3526,7 +3526,7 @@ TEST(BrigInstTest, Testb128) {
     "  ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("MovB128");
@@ -3560,9 +3560,9 @@ static void testPacked(const char *type,
                        T *input,
                        unsigned bits) {
   char reg = 0;
-  if(bits == 32)
+  if (bits == 32)
     reg = 's';
-  if(bits == 64)
+  if (bits == 64)
     reg = 'd';
   char *buffer =
     asnprintf(Packed,
@@ -3581,7 +3581,7 @@ static void testPacked(const char *type,
   delete[] buffer;
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   T *arg_val0 = new T(0);
 
@@ -3662,9 +3662,9 @@ static void testPackedConstants(unsigned bits,
                                 const T &result,
                                 const char *type) {
   char reg = 0;
-  if(bits == 32)
+  if (bits == 32)
     reg = 's';
-  if(bits == 64)
+  if (bits == 64)
     reg = 'd';
   char *buffer =
     asnprintf(packedConstants,
@@ -3681,7 +3681,7 @@ static void testPackedConstants(unsigned bits,
   delete[] buffer;
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("packedConstants");
@@ -3778,7 +3778,7 @@ TEST(BrigKernelTest, VariadicFunction) {
     "};\n"
     );
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("adder");
@@ -3851,9 +3851,9 @@ static void testSt(const char *type1,
                    const char *value,
                    unsigned bits) {
   char reg = 0;
-  if(bits == 8 || bits == 16 || bits == 32)
+  if (bits == 8 || bits == 16 || bits == 32)
     reg = 's';
-  if(bits == 64)
+  if (bits == 64)
     reg = 'd';
   char *buffer =
     asnprintf(St,
@@ -3872,7 +3872,7 @@ static void testSt(const char *type1,
   delete[] buffer;
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   T *arg_val0 = new T;
   *arg_val0 = 0;
@@ -3960,7 +3960,7 @@ TEST(BrigKernelTest, Atomic) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
@@ -3993,7 +3993,7 @@ TEST(BrigKernelTest, AtomicNoRet) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
@@ -4018,13 +4018,13 @@ TEST(BrigInstTest, Barrier) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("BarrierTest");
   void *args[] = { 0 };
-  for(unsigned blocks = 1; blocks < 16; ++blocks)
-    for(unsigned threads = 1; threads < 16; ++threads)
+  for (unsigned blocks = 1; blocks < 16; ++blocks)
+    for (unsigned threads = 1; threads < 16; ++threads)
       BE.launch(fun, args, blocks, threads);
 }
 
@@ -4038,7 +4038,7 @@ TEST(BrigInstTest, Sync) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("SyncTest");
@@ -4065,9 +4065,9 @@ static void testLd(const char *type1,
                    const char *value,
                    unsigned bits) {
   char reg = 0;
-  if(bits == 8 || bits == 16 || bits == 32)
+  if (bits == 8 || bits == 16 || bits == 32)
     reg = 's';
-  if(bits == 64)
+  if (bits == 64)
     reg = 'd';
   char *buffer =
     asnprintf(Ld,
@@ -4081,7 +4081,7 @@ static void testLd(const char *type1,
   delete[] buffer;
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   T *arg_val0 = new T;
   *arg_val0 = 0;
@@ -4168,7 +4168,7 @@ TEST(BrigInstTest, VectorBitalign1) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
@@ -4470,7 +4470,7 @@ TEST(Instruction2Test, Fract) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
@@ -4803,7 +4803,7 @@ TEST(Instruction4Test, Shuffle) {
     "};\n");
 
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
@@ -4831,7 +4831,7 @@ TEST(Instruction4Test, Sad) {
   "        ret;\n"
   "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
@@ -4859,7 +4859,7 @@ TEST(Instruction4Test, Cmov_32) {
   "        ret;\n"
   "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
@@ -4887,7 +4887,7 @@ TEST(Instruction4Test, Cmov_64) {
   "        ret;\n"
   "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
@@ -4918,7 +4918,7 @@ TEST(AtomTest, And) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atom_test_kernel");
@@ -4951,7 +4951,7 @@ TEST(AtomTest, Or) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atom_test_kernel");
@@ -4984,7 +4984,7 @@ TEST(AtomTest, Xor) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atom_test_kernel");
@@ -5017,7 +5017,7 @@ TEST(AtomTest, Exch) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atom_test_kernel");
@@ -5050,7 +5050,7 @@ TEST(AtomTest, Add) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atom_test_kernel");
@@ -5083,7 +5083,7 @@ TEST(AtomTest, Sub) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atom_test_kernel");
@@ -5116,7 +5116,7 @@ TEST(AtomTest, Max) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atom_test_kernel");
@@ -5149,7 +5149,7 @@ TEST(AtomTest, Min) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atom_test_kernel");
@@ -5182,7 +5182,7 @@ TEST(AtomicNoRetTest, And) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
@@ -5215,7 +5215,7 @@ TEST(AtomicNoRetTest, Or) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
@@ -5248,7 +5248,7 @@ TEST(AtomicNoRetTest, Xor) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
@@ -5281,7 +5281,7 @@ TEST(AtomicNoRetTest, Add) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
@@ -5314,7 +5314,7 @@ TEST(AtomicNoRetTest, Sub) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
@@ -5347,7 +5347,7 @@ TEST(AtomicNoRetTest, Max) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
@@ -5380,7 +5380,7 @@ TEST(AtomicNoRetTest, Min) {
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");

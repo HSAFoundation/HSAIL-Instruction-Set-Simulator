@@ -28,17 +28,17 @@ static void printSourceLine(T &out, llvm::DILineInfo &info) {
   uint32_t column = info.getColumn();
 
   llvm::OwningPtr<llvm::MemoryBuffer> file;
-  if(llvm::MemoryBuffer::getFile(filename, file)) {
+  if (llvm::MemoryBuffer::getFile(filename, file)) {
     out << "<Missing file: " << filename << ">\n";
     return;
   }
 
   const char *start = file->getBufferStart();
-  for(unsigned i = 1; start < file->getBufferEnd() && i < line; ++i) {
-    while(start < file->getBufferEnd() && *start != '\n' && *start != '\r')
+  for (unsigned i = 1; start < file->getBufferEnd() && i < line; ++i) {
+    while (start < file->getBufferEnd() && *start != '\n' && *start != '\r')
       ++start;
     ++start;
-    if(start < file->getBufferEnd() && start[-1] != *start &&
+    if (start < file->getBufferEnd() && start[-1] != *start &&
        ( *start == '\n' || *start == '\r'))
       ++start;
   }
@@ -46,8 +46,8 @@ static void printSourceLine(T &out, llvm::DILineInfo &info) {
   start += (column - 1);
 
   const char *end = start;
-  while(end < file->getBufferEnd() && *end != ';') ++end;
-  while(end < file->getBufferEnd() && *end != '\n' && *end != '\r') ++end;
+  while (end < file->getBufferEnd() && *end != ';') ++end;
+  while (end < file->getBufferEnd() && *end != '\n' && *end != '\r') ++end;
 
   std::string text(start, end - start);
   out << text;
@@ -66,20 +66,20 @@ int main(int argc, char **argv) {
 
   hsa::brig::BrigReader *reader =
     hsa::brig::BrigReader::createBrigReader(XSTR(BIN_PATH) "/fib.o");
-  if(!reader) {
+  if (!reader) {
     std::cerr << argv[0] << ": File not found: " << argv[1] << "\n";
     return 0;
   }
 
   hsa::brig::BrigModule mod(*reader);
-  if(!mod.isValid()) {
+  if (!mod.isValid()) {
     std::cerr << argv[0] << ": Input is invalid!\n";
     return 0;
   }
 
   hsa::brig::BrigProgram BP =
     hsa::brig::GenLLVM::getLLVMModule(mod, callback, &BP);
-  if(!BP) {
+  if (!BP) {
     std::cerr << argv[0] << ": Translation failure\n";
     return 0;
   }
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 
   const char *funName = "fibKernel";
   llvm::Function *fun = BP->getFunction(funName);
-  if(!fun) {
+  if (!fun) {
     std::cerr << argv[0] << ": Kernel &" << funName << " missing\n";
     return 0;
   }

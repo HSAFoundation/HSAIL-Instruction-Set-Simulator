@@ -97,21 +97,21 @@ FloatVectorInst(define, Add, Binary)
 // Saturated arithmetic implementation loosely adapted from Steven Fuerest's
 // article at: http://locklessinc.com/articles/sat_arithmetic/
 template<class T> static T AddSat(T x, T y) {
-  if(Int<T>::isSigned) {
+  if (Int<T>::isSigned) {
     T res = x + y;
 
     bool isNegX = Int<T>::isNeg(x);
     bool isNegY = Int<T>::isNeg(y);
     bool isNegResult = Int<T>::isNeg(res);
 
-    if(isNegX == isNegY && isNegX != isNegResult)
+    if (isNegX == isNegY && isNegX != isNegResult)
       return isNegX ? Int<T>::Min : Int<T>::Max;
 
     return res;
 
   } else {
     T res = x + y;
-    if(res < x) return Int<T>::Max;
+    if (res < x) return Int<T>::Max;
     return res;
   }
 }
@@ -120,7 +120,7 @@ SignedVectorInst(define, AddSat, Binary)
 UnsignedVectorInst(define, AddSat, Binary)
 
 template<class T> static T Div(T x, T y) {
-  if(isDivisionError(x, y)) return T(0);
+  if (isDivisionError(x, y)) return T(0);
   return x / y;
 }
 SignedInst(define, Div, Binary)
@@ -137,14 +137,14 @@ UnsignedVectorInst(define, Mul, Binary)
 FloatVectorInst(define, Mul, Binary)
 
 template<class T> static T MulSat(T x, T y) {
-  if(Int<T>::isSigned) {
+  if (Int<T>::isSigned) {
     s64 res = (s64) x * (s64) y;
-    if(res > (s64) Int<T>::Max) return Int<T>::Max;
-    if(res < (s64) Int<T>::Min) return Int<T>::Min;
+    if (res > (s64) Int<T>::Max) return Int<T>::Max;
+    if (res < (s64) Int<T>::Min) return Int<T>::Min;
     return res;
   } else {
     u64 res = (u64) x * (u64) y;
-    if(res > (u64) Int<T>::Max) return Int<T>::Max;
+    if (res > (u64) Int<T>::Max) return Int<T>::Max;
     return res;
   }
 }
@@ -175,21 +175,21 @@ UnsignedVectorInst(define, Sub, Binary)
 FloatVectorInst(define, Sub, Binary)
 
 template<class T> static T SubSat(T x, T y) {
-  if(Int<T>::isSigned) {
+  if (Int<T>::isSigned) {
     T res = x - y;
 
     bool isNegX = Int<T>::isNeg(x);
     bool isNegY = Int<T>::isNeg(y);
     bool isNegResult = Int<T>::isNeg(res);
 
-    if(isNegX != isNegY && isNegX != isNegResult)
+    if (isNegX != isNegY && isNegX != isNegResult)
       return isNegX ? Int<T>::Min : Int<T>::Max;
 
     return res;
 
   } else {
     T res = x - y;
-    if(res > x) return Int<T>::Min;
+    if (res > x) return Int<T>::Min;
     return res;
   }
 }
@@ -198,8 +198,8 @@ SignedVectorInst(define, SubSat, Binary)
 UnsignedVectorInst(define, SubSat, Binary)
 
 template<class T> static T Max(T x, T y) {
-  if(isNan(x)) return y;
-  if(isNan(y)) return x;
+  if (isNan(x)) return y;
+  if (isNan(y)) return x;
   return std::max(x, y);
 }
 template<class T> static T MaxVector(T x, T y) { return map(Max, x, y); }
@@ -211,8 +211,8 @@ UnsignedVectorInst(define, Max, Binary)
 FloatVectorInst(define, Max, Binary)
 
 template<class T> static T Min(T x, T y) {
-  if(isNan(x)) return y;
-  if(isNan(y)) return x;
+  if (isNan(x)) return y;
+  if (isNan(y)) return x;
   return std::min(x, y);
 }
 template<class T> static T MinVector(T x, T y) { return map(Min, x, y); }
@@ -224,7 +224,7 @@ UnsignedVectorInst(define, Min, Binary)
 FloatVectorInst(define, Min, Binary)
 
 template<class T> static T Rem(T x, T y) {
-  if(isDivisionError(x, y)) return T(0);
+  if (isDivisionError(x, y)) return T(0);
   return x % y;
 }
 SignedInst(define, Rem, Binary)
@@ -306,7 +306,7 @@ ShiftInst(define, Shr, Binary)
 
 template<class T> static T UnpackLo(T x, T y) {
   T result;
-  for(unsigned i = 0; i < T::Len; i += 2) {
+  for (unsigned i = 0; i < T::Len; i += 2) {
     result[i]     = x[i / 2];
     result[i + 1] = y[i / 2];
   }
@@ -317,7 +317,7 @@ UnpackInst(define, UnpackLo, Binary)
 template<class T> static T UnpackHi(T x, T y) {
   T result;
   unsigned Len = T::Len;
-  for(unsigned i = 0; i < Len; i += 2) {
+  for (unsigned i = 0; i < Len; i += 2) {
     result[i]     = x[i / 2 + Len / 2];
     result[i + 1] = y[i / 2 + Len / 2];
   }
@@ -366,7 +366,7 @@ defineUnary(BitRev, b64)
 template<class T> static T BitExtract(T x, b32 y, b32 z) {
   unsigned offset = Int<T>::ShiftMask & y;
   unsigned width  = Int<T>::ShiftMask & z;
-  if(!width) return 0;
+  if (!width) return 0;
   return (x << (Int<T>::Bits - width - offset)) >> (Int<T>::Bits - width);
 }
 SignedInst(define, BitExtract, Ternary)
@@ -391,10 +391,10 @@ defineTernary(BitSelect, b32)
 defineTernary(BitSelect, b64)
 
 template<class T> static T FirstBit_u32(T x) {
-  if(Int<T>::isNeg(x)) x = ~x;
-  if(!x) return ~T(0);
+  if (Int<T>::isNeg(x)) x = ~x;
+  if (!x) return ~T(0);
   T pos = T(0);
-  while(!(x & Int<T>::HighBit)) {
+  while (!(x & Int<T>::HighBit)) {
     x <<= 1;
     ++pos;
   }
@@ -404,9 +404,9 @@ SignedInst(define, FirstBit_u32, Unary)
 UnsignedInst(define, FirstBit_u32, Unary)
 
 template<class T> static T LastBit_u32(T x) {
-  if(!x) return ~T(0);
+  if (!x) return ~T(0);
   T pos = T(0);
-  while(!(x & 1)) {
+  while (!(x & 1)) {
     x >>= 1;
     ++pos;
   }
@@ -444,13 +444,13 @@ template<class T> static T ShuffleVector(T x, T y, b32 z) {
   b32 shuffle = z;
   T result;
 
-  for(unsigned i = 0; i < len / 2; ++i) {
+  for (unsigned i = 0; i < len / 2; ++i) {
     unsigned offset = shuffle & mask;
     result[i] = x[offset];
     shuffle >>= shift;
   }
 
-  for(unsigned i = len / 2; i < len; ++i) {
+  for (unsigned i = len / 2; i < len; ++i) {
     unsigned offset = shuffle & mask;
     result[i] = y[offset];
     shuffle >>= shift;
@@ -500,25 +500,25 @@ FloatInst(define, CopySign, Binary)
 
 template<class T> static b1 Class(T x, b32 y) {
   int fpclass = std::fpclassify(x);
-  if(y & SNan && isSNan(x)) return true;
-  if(y & QNan && isQNan(x)) return true;
-  if(y & NegInf && isNegInf(x)) return true;
-  if(y & NegNorm && fpclass == FP_NORMAL && x < 0) return true;
-  if(y & NegSubnorm && fpclass == FP_SUBNORMAL && x < 0) return true;
-  if(y & NegZero && isNegZero(x)) return true;
-  if(y & PosZero && isPosZero(x)) return true;
-  if(y & PosSubnorm && fpclass == FP_SUBNORMAL && x > 0) return true;
-  if(y & PosNorm && fpclass == FP_NORMAL && x > 0) return true;
-  if(y & PosInf && isPosInf(x)) return true;
+  if (y & SNan && isSNan(x)) return true;
+  if (y & QNan && isQNan(x)) return true;
+  if (y & NegInf && isNegInf(x)) return true;
+  if (y & NegNorm && fpclass == FP_NORMAL && x < 0) return true;
+  if (y & NegSubnorm && fpclass == FP_SUBNORMAL && x < 0) return true;
+  if (y & NegZero && isNegZero(x)) return true;
+  if (y & PosZero && isPosZero(x)) return true;
+  if (y & PosSubnorm && fpclass == FP_SUBNORMAL && x > 0) return true;
+  if (y & PosNorm && fpclass == FP_NORMAL && x > 0) return true;
+  if (y & PosInf && isPosInf(x)) return true;
   return false;
 }
 extern "C" b1 Class_f32(f32 f, b32 y) { return Class(f, y); }
 extern "C" b1 Class_f64(f64 f, b32 y) { return Class(f, y); }
 
 extern "C" f32 Ncos_f32(f32 x) {
-  if(isNan(x)) return x;
-  if(isInf(x)) return NAN;
-  if(-512 * M_PI <= x && x <= 512 * M_PI) {
+  if (isNan(x)) return x;
+  if (isInf(x)) return NAN;
+  if (-512 * M_PI <= x && x <= 512 * M_PI) {
     return std::cos(x);
   } else {
     return std::cos(1.0);
@@ -526,12 +526,12 @@ extern "C" f32 Ncos_f32(f32 x) {
 }
 
 extern "C" f32 Nsin_f32(f32 x) {
-  if(isNan(x)) return x;
-  if(isInf(x)) return NAN;
-  if(std::fpclassify(x) == FP_SUBNORMAL) {
+  if (isNan(x)) return x;
+  if (isInf(x)) return NAN;
+  if (std::fpclassify(x) == FP_SUBNORMAL) {
     return copysign(0.0, x);
   }
-  if(-512 * M_PI <= x && x <= 512 * M_PI) {
+  if (-512 * M_PI <= x && x <= 512 * M_PI) {
     return std::sin(x);
   } else {
     return std::sin(1.0);
@@ -539,9 +539,9 @@ extern "C" f32 Nsin_f32(f32 x) {
 }
 
 extern "C" f32 Nlog2_f32(f32 x) {
-  if(std::fpclassify(x) == FP_SUBNORMAL) {
+  if (std::fpclassify(x) == FP_SUBNORMAL) {
     return -INFINITY;
-  } else if(std::fpclassify(x) == FP_NORMAL && x < 0) {
+  } else if (std::fpclassify(x) == FP_NORMAL && x < 0) {
     return -INFINITY;
   } else {
     return log2(x);
@@ -557,7 +557,7 @@ extern "C" f32 Nexp2_f32(f32 x) {
 }
 
 template<class T> static T Nrsqrt(T x) {
-  if(std::fpclassify(x) == FP_SUBNORMAL) {
+  if (std::fpclassify(x) == FP_SUBNORMAL) {
     return x > 0 ? INFINITY : -INFINITY;
   } else {
     return  T(1.0) / std::sqrt(x);
@@ -566,7 +566,7 @@ template<class T> static T Nrsqrt(T x) {
 FloatInst(define, Nrsqrt, Unary)
 
 template<class T> static T Nrcp(T x) {
-  if(std::fpclassify(x) == FP_SUBNORMAL) {
+  if (std::fpclassify(x) == FP_SUBNORMAL) {
     return x > 0 ? INFINITY : -INFINITY;
   } else {
     return T(1.0) / x;
@@ -607,7 +607,7 @@ extern "C" b32 ByteAlign_b32(b32 w, b32 x, b32 y) {
 
 extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
-  for(unsigned i = 0; i < 4; ++i) {
+  for (unsigned i = 0; i < 4; ++i) {
     result |= (((((w >> 8 * i) & 0xFF)
                  + ((x >> 8 * i) & 0xFF)
                  + ((y >> 8 * i) & 0x1)) >> 1) & 0xFF) << 8 * i;
@@ -621,7 +621,7 @@ extern "C" u32 Sad_u32_u32(u32 w, u32 x, u32 y) {
 
 extern "C" b32 Sad2_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
-  for(unsigned i = 0; i < 2; ++i){
+  for (unsigned i = 0; i < 2; ++i){
     result += Sad_u32_u32((w >> i * 16) & 0xFFFF,
                           (x >> i * 16) & 0xFFFF, 0);
   }
@@ -630,7 +630,7 @@ extern "C" b32 Sad2_b32(b32 w, b32 x, b32 y) {
 
 extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
-  for(unsigned i = 0; i < 4; ++i){
+  for (unsigned i = 0; i < 4; ++i){
     result += Sad_u32_u32((w >> i * 8) & 0xFF,
                           (x >> i * 8) & 0xFF, 0);
   }
@@ -639,7 +639,7 @@ extern "C" b32 Sad4_b32(b32 w, b32 x, b32 y) {
 
 extern "C" b32 Sad4Hi_b32(b32 w, b32 x, b32 y) {
   b32 result = 0;
-  for(unsigned i = 0; i < 4; ++i){
+  for (unsigned i = 0; i < 4; ++i){
     result += Sad_u32_u32((w >> i * 8) & 0xFF,
                           (x >> i * 8) & 0xFF, 0);
   }
@@ -677,10 +677,10 @@ Cmp(define, snan, f64)
 // Integer rounding:
 // f32 to Int, f32 to f32, f32 to f64
 template<class R> static R Cvt(f32 f, int mode) {
-  if(isPosInf(f)) return getMax<R>();
-  if(isNegInf(f)) return getMin<R>();
-  if(isNan(f)) return 0;
-  if(!~mode) return R(f);
+  if (isPosInf(f)) return getMax<R>();
+  if (isNegInf(f)) return getMin<R>();
+  if (isNan(f)) return 0;
+  if (!~mode) return R(f);
   int oldMode = fegetround();
   fesetround(mode);
   volatile R result = R(nearbyint(f));
@@ -691,10 +691,10 @@ template<> bool Cvt(f32 f, int mode) { return f != 0.0f; }
 // Integer rounding:
 // f64 to Int, f64 to f64
 template<class R> static R Cvt(f64 f, int mode) {
-  if(isPosInf(f)) return getMax<R>();
-  if(isNegInf(f)) return getMin<R>();
-  if(isNan(f)) return 0;
-  if(!~mode) return R(f);
+  if (isPosInf(f)) return getMax<R>();
+  if (isNegInf(f)) return getMin<R>();
+  if (isNan(f)) return 0;
+  if (!~mode) return R(f);
   int oldMode = fegetround();
   fesetround(mode);
   volatile R result = R(nearbyint(f));
@@ -714,7 +714,7 @@ template<> bool Cvt(f64 f, int mode) { return f != 0.0; }
 // Floating point rounding:
 // Int to Int, Int to f32, Int to f64
 template<class R, class T> static R Cvt(T t, int mode)  {
-  if(!~mode) return R(t);
+  if (!~mode) return R(t);
   int oldMode = fegetround();
   fesetround(mode);
   volatile R result = R(t);
@@ -855,7 +855,7 @@ template<class T> static T AtomicMax(volatile T *x, T y) {
   do {
     oldVal = *x;
     max = std::max(oldVal, y);
-  } while(!__sync_bool_compare_and_swap(x, oldVal, max));
+  } while (!__sync_bool_compare_and_swap(x, oldVal, max));
   return max;
 }
 AtomicInst(define, Max, Binary)
@@ -866,7 +866,7 @@ template<class T> static T AtomicMin(volatile T *x, T y) {
   do {
     oldVal = *x;
     min = std::min(oldVal, y);
-  } while(!__sync_bool_compare_and_swap(x, oldVal, min));
+  } while (!__sync_bool_compare_and_swap(x, oldVal, min));
   return min;
 }
 AtomicInst(define, Min, Binary)

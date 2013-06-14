@@ -16,20 +16,20 @@
 
 int main(int argc, char **argv) {
 
-  if(argc < 2) {
+  if (argc < 2) {
     std::cerr << argv[0] << ": Missing input!\n";
     return 1;
   }
 
   hsa::brig::BrigReader *reader =
     hsa::brig::BrigReader::createBrigReader(argv[1]);
-  if(!reader) {
+  if (!reader) {
     std::cerr << argv[0] << ": File not found: " << argv[1] << "\n";
     return 0;
   }
 
   hsa::brig::BrigModule mod(*reader, &llvm::errs());
-  if(!mod.isValid())
+  if (!mod.isValid())
     std::cerr << argv[0] << ": Input is invalid!\n";
 
   delete reader;

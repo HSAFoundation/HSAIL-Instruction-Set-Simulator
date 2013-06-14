@@ -182,7 +182,7 @@ static const char *getPackingName(const inst_iterator inst) {
 
   const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst);
   const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst);
-  if(!cmp && !mod) return "";
+  if (!cmp && !mod) return "";
 
   BrigPack pack = BrigPack(cmp ? cmp->pack : mod->pack);
   switch(pack) {
@@ -347,7 +347,7 @@ std::string BrigInstHelper::getInstName(const inst_iterator inst) {
   const char *packing = getPackingName(inst);
   const char *type = getTypeName(BrigType(inst->type));
 
-  if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst)) {
+  if (const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst)) {
     const char *srcType = getTypeName(BrigType(cmp->sourceType));
     const char *predRaw =
       getPredName(BrigCompareOperation(cmp->compare));
@@ -355,7 +355,7 @@ std::string BrigInstHelper::getInstName(const inst_iterator inst) {
     return std::string(base) + pred + type + srcType;
   }
 
-  if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst)) {
+  if (const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst)) {
     const char *srcType = getTypeName(BrigType(cvt->sourceType));
     const char *roundingRaw = getRoundingName(cvt->modifier);
     std::string rounding =
@@ -364,13 +364,13 @@ std::string BrigInstHelper::getInstName(const inst_iterator inst) {
     return std::string(base) + rounding + type + srcType;
   }
 
-  if(const BrigInstAtomic *atom = dyn_cast<BrigInstAtomic>(inst)) {
+  if (const BrigInstAtomic *atom = dyn_cast<BrigInstAtomic>(inst)) {
     BrigAtomicOperation atomicOp = BrigAtomicOperation(atom->atomicOperation);
     const char *atomicOpName = getAtomicOpName(atomicOp);
     return std::string(base) + atomicOpName + type;
   }
 
-  if(const BrigInstSourceType *src = dyn_cast<BrigInstSourceType>(inst)) {
+  if (const BrigInstSourceType *src = dyn_cast<BrigInstSourceType>(inst)) {
     const char *srcType = getTypeName(BrigType(src->sourceType));
     return std::string(base) + type + srcType;
   }
@@ -384,13 +384,13 @@ long int nstrtol(size_t size, const uint8_t *str,
 
   long int result = 0;
   size_t i;
-  for(i = 0; i < size; ++i) {
-    if(str[i] < '0' || str[i] > '9') break;
+  for (i = 0; i < size; ++i) {
+    if (str[i] < '0' || str[i] > '9') break;
     result *= 10;
     result += str[i] - '0';
   }
 
-  if(endptr) *endptr = str + i;
+  if (endptr) *endptr = str + i;
 
   return result;
 }

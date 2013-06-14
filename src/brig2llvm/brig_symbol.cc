@@ -17,7 +17,7 @@ namespace brig {
 BrigSymbol &BrigSymbol::operator++() {
 
   const dir_iterator E = S_.end();
-  if(it_ == E) return *this;
+  if (it_ == E) return *this;
 
   ++it_;
   nextValid();
@@ -27,10 +27,10 @@ BrigSymbol &BrigSymbol::operator++() {
 
 void BrigSymbol::nextValid() {
   const dir_iterator E = S_.end();
-  while(it_ != E && !isa<BrigDirectiveSymbol>(it_)) {
+  while (it_ != E && !isa<BrigDirectiveSymbol>(it_)) {
     const BrigDirectiveExecutable *method =
       dyn_cast<BrigDirectiveExecutable>(it_);
-    if(method) {
+    if (method) {
       it_ = dir_iterator(S_.directives + method->nextTopLevelDirective);
     } else {
       ++it_;

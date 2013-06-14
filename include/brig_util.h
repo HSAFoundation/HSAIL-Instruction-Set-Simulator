@@ -49,7 +49,7 @@ template<class T> inline T *dyn_cast(BrigDebugBase *inst) {
 }
 
 template<> inline BrigDirectiveExecutable *dyn_cast(BrigDirectiveBase *dir) {
-  if(dir->kind == BRIG_DIRECTIVE_FUNCTION ||
+  if (dir->kind == BRIG_DIRECTIVE_FUNCTION ||
      dir->kind == BRIG_DIRECTIVE_KERNEL)
     return reinterpret_cast<BrigDirectiveExecutable *>(dir);
   return NULL;
@@ -57,7 +57,7 @@ template<> inline BrigDirectiveExecutable *dyn_cast(BrigDirectiveBase *dir) {
 
 template<> inline
 BrigDirectiveSymbol *dyn_cast(BrigDirectiveBase *dir) {
-  if(dir->kind == BRIG_DIRECTIVE_IMAGE ||
+  if (dir->kind == BRIG_DIRECTIVE_IMAGE ||
      dir->kind == BRIG_DIRECTIVE_SAMPLER ||
      dir->kind == BRIG_DIRECTIVE_VARIABLE)
     return reinterpret_cast<BrigDirectiveSymbol *>(dir);
@@ -130,7 +130,7 @@ template<class Super> class brig_iterator {
 
   Self operator+(intptr_t addend) const {
     brig_iterator other = *this;
-    for(intptr_t i = 0; i < addend; ++i) {
+    for (intptr_t i = 0; i < addend; ++i) {
       ++other;
     }
     return other;

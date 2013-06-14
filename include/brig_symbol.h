@@ -66,12 +66,12 @@ class BrigSymbol {
 
   template<class T> const T *getInit() const {
     const BrigDirectiveSymbol *symbol = cast<BrigDirectiveSymbol>(it_);
-    if(!symbol->init) return NULL;
+    if (!symbol->init) return NULL;
 
     const BrigDirectiveVariableInit *init =
       dyn_cast<BrigDirectiveVariableInit>(dir_iterator(S_.directives +
                                                        symbol->init));
-    if(!init) return NULL;
+    if (!init) return NULL;
 
     const BrigString *str = (const BrigString *) (S_.strings + init->data);
     return reinterpret_cast<const T *>(str->bytes);

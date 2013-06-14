@@ -100,7 +100,7 @@ class SimQueue : public Queue {
 
     va_list ap;
     va_start(ap, count);
-    for(unsigned i = 0; i < count; ++i) {
+    for (unsigned i = 0; i < count; ++i) {
       kernArgs.push_back(va_arg(ap, KernelArg));
     }
 
@@ -115,7 +115,7 @@ class SimQueue : public Queue {
     SimKernel *sk = reinterpret_cast<SimKernel *>(kernel);
 
     std::vector<void *> args;
-    for(unsigned i = 0; i < kernArgs.size(); ++i)
+    for (unsigned i = 0; i < kernArgs.size(); ++i)
       args.push_back(&kernArgs[i]);
 
     llvm::Function *fun = sk->F_;
@@ -245,12 +245,12 @@ class SimRuntimeApi : public RuntimeApi {
  public:
 
   SimRuntimeApi() {
-    if(!devices.size())
+    if (!devices.size())
       devices.push_back(new SimDevice());
   }
 
   ~SimRuntimeApi() {
-    for(unsigned i = 0; i < devices.size(); ++i)
+    for (unsigned i = 0; i < devices.size(); ++i)
       delete devices[i];
   }
 
@@ -261,10 +261,10 @@ class SimRuntimeApi : public RuntimeApi {
   virtual Program *createProgram(char *elf, size_t elfSize, DeviceList *) {
     llvm::OwningPtr<hsa::brig::BrigReader> reader
       (hsa::brig::BrigReader::createBrigReader(elf, elfSize));
-    if(!reader) return NULL;
+    if (!reader) return NULL;
 
     hsa::brig::BrigModule brigMod(*reader, &llvm::errs());
-    if(!brigMod.isValid()) return NULL;
+    if (!brigMod.isValid()) return NULL;
 
     return new SimProgram(brigMod);
   }
@@ -272,10 +272,10 @@ class SimRuntimeApi : public RuntimeApi {
   virtual Program *createProgramFromFile(const char *filename, DeviceList *) {
     hsa::brig::BrigReader *reader =
       hsa::brig::BrigReader::createBrigReader(filename);
-    if(!reader) return NULL;
+    if (!reader) return NULL;
 
     hsa::brig::BrigModule brigMod(*reader, &llvm::errs());
-    if(!brigMod.isValid()) return NULL;
+    if (!brigMod.isValid()) return NULL;
 
     return new SimProgram(brigMod);
   }
@@ -290,7 +290,7 @@ class SimRuntimeApi : public RuntimeApi {
 
   virtual void *allocateGlobalMemory(size_t size, size_t align) {
     void *memptr;
-    if(posix_memalign(&memptr, std::max(sizeof(void *), align), size))
+    if (posix_memalign(&memptr, std::max(sizeof(void *), align), size))
       return NULL;
     return memptr;
   }

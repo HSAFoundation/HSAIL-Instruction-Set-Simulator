@@ -21,11 +21,11 @@ namespace hsa {
 namespace brig {
 
 #define check(TEST,MESSAGE) do {                \
-    if(!TEST) {                                 \
-      if(errMsg) *errMsg = MESSAGE;             \
+    if (!TEST) {                                \
+      if (errMsg) *errMsg = MESSAGE;            \
       return false;                             \
     }                                           \
-  } while(0)
+  } while (0)
 
 bool HsailAsm::assembleHSAILString(const char *sourceCode,
                                    const char *outputFile,
@@ -33,7 +33,7 @@ bool HsailAsm::assembleHSAILString(const char *sourceCode,
                                    bool enableDebug) {
 
   llvm::sys::Path sourceFile("temp.hsail");
-  if(sourceFile.createTemporaryFileOnDisk(true, errMsg))
+  if (sourceFile.createTemporaryFileOnDisk(true, errMsg))
     return false;
 
   std::string outErrMsg;
@@ -65,7 +65,7 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
   check(programPath.canExecute(), "Cannot execute hsailasm");
 
   llvm::sys::Path errFile("hsailasm.log");
-  if(errFile.createTemporaryFileOnDisk(true, errMsg))
+  if (errFile.createTemporaryFileOnDisk(true, errMsg))
     return false;
 
   const llvm::sys::Path *redirects[] = { &errFile, &errFile, 0 };
@@ -78,13 +78,13 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
                                                   0,
                                                   errMsg);
 
-  if(errMsg && errMsg->size() > 0) {
+  if (errMsg && errMsg->size() > 0) {
     errFile.eraseFromDisk();
     return false;
   }
 
-  if(result) {
-    if(errMsg) {
+  if (result) {
+    if (errMsg) {
       llvm::OwningPtr<llvm::MemoryBuffer> result;
       llvm::error_code error =
         llvm::MemoryBuffer::getFile(errFile.c_str(), result);

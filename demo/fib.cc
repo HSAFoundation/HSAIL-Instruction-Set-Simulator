@@ -29,37 +29,37 @@
 
 int main(int argc, char **argv) {
   hsa::RuntimeApi *hsaRT = hsa::getRuntime();
-  if(!hsaRT) return -1;
+  if (!hsaRT) return -1;
 
   uint32_t numDevices = hsaRT->getDeviceCount();
-  if(!numDevices) return -1;
+  if (!numDevices) return -1;
 
   hsa::vector<hsa::Device *> devices = hsaRT->getDevices();
 
   llvm::OwningPtr<llvm::MemoryBuffer> file;
   llvm::error_code ec =
     llvm::MemoryBuffer::getFile(XSTR(BIN_PATH) "/fib.o", file);
-  if(ec) return -1;
+  if (ec) return -1;
 
   hsa::Program *program =
     hsaRT->createProgram(const_cast<char *>(file->getBufferStart()),
                          file->getBufferSize(),
                          &devices);
-  if(!program) return -1;
+  if (!program) return -1;
 
   hsa::Kernel *kernel =
     program->compileKernel("&fibKernel", "");
-  if(!kernel) return -1;
+  if (!kernel) return -1;
 
   hsa::Device *device = devices[0];
   hsa::Queue *queue = device->createQueue(1);
-  if(!queue) return -1;
+  if (!queue) return -1;
 
   llvm::outs() << "Fib sequence: ";
 
   int *r = (int *) hsaRT->allocateGlobalMemory(sizeof(int),
                                                sizeof(int));
-  if(!r) return -1;
+  if (!r) return -1;
 
   hsa::KernelArg argR = { r };
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   la.group[1] = 1;
   la.group[2] = 1;
 
-  for(int i = 1; i < 20; ++i) {
+  for (int i = 1; i < 20; ++i) {
     hsa::KernelArg argN;
     argN.s32value = i;
     hsacommon::vector<hsa::Event *> deps;

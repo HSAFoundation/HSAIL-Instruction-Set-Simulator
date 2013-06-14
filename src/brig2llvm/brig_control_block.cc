@@ -16,10 +16,10 @@ namespace brig {
 
 BrigControlBlock &BrigControlBlock::operator++() {
   dir_iterator E = S_.end();
-  if(it_ == E) return *this;
+  if (it_ == E) return *this;
 
-  for(++it_; it_ != E; ++it_)
-    if(isa<BrigDirectiveLabel>(it_) || isa<BrigDirectiveExecutable>(it_))
+  for (++it_; it_ != E; ++it_)
+    if (isa<BrigDirectiveLabel>(it_) || isa<BrigDirectiveExecutable>(it_))
       return *this;
 
   return *this;
@@ -38,7 +38,7 @@ BrigControlBlock cb_end(const BrigFunction &F) {
   assert((dirE == F.S_.end() || !isa<BrigDirectiveLabel>(dirE)) &&
          "Label outside of function!?");
   BrigControlBlock E(F.S_, dirE);
-  if(dirE != F.S_.end() && !isa<BrigDirectiveExecutable>(dirE)) ++E;
+  if (dirE != F.S_.end() && !isa<BrigDirectiveExecutable>(dirE)) ++E;
   return E;
 }
 

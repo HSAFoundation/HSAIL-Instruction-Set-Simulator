@@ -18,18 +18,18 @@ BrigFunction &BrigFunction::operator++() {
 
   const dir_iterator E = S_.end();
 
-  if(it_ == E) return *this;
-  for(++it_; it_ != E; ++it_) {
+  if (it_ == E) return *this;
+  for (++it_; it_ != E; ++it_) {
     const uint16_t kind = it_->kind;
-    if(kind == BRIG_DIRECTIVE_CONTROL)
+    if (kind == BRIG_DIRECTIVE_CONTROL)
       updateControl(cast<BrigDirectiveControl>(it_));
-    else if(kind == BRIG_DIRECTIVE_EXTENSION)
+    else if (kind == BRIG_DIRECTIVE_EXTENSION)
       updateExtension(cast<BrigDirectiveExtension>(it_));
-    else if(kind == BRIG_DIRECTIVE_FUNCTION || kind == BRIG_DIRECTIVE_KERNEL)
+    else if (kind == BRIG_DIRECTIVE_FUNCTION || kind == BRIG_DIRECTIVE_KERNEL)
       return *this;
-    else if(kind == BRIG_DIRECTIVE_PRAGMA)
+    else if (kind == BRIG_DIRECTIVE_PRAGMA)
       updatePragma(cast<BrigDirectivePragma>(it_));
-    else if(kind == BRIG_DIRECTIVE_VERSION)
+    else if (kind == BRIG_DIRECTIVE_VERSION)
       updateVersion(cast<BrigDirectiveVersion>(it_));
   }
 

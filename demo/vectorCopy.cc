@@ -32,32 +32,32 @@ using namespace std;
 
 int main(int argc, char **argv) {
   hsa::RuntimeApi *hsaRT = hsa::getRuntime();
-  if(!hsaRT) return -1;
+  if (!hsaRT) return -1;
 
   uint32_t numDevices = hsaRT->getDeviceCount();
-  if(!numDevices) return -1;
+  if (!numDevices) return -1;
 
   hsa::vector<hsa::Device *> devices = hsaRT->getDevices();
 
   llvm::OwningPtr<llvm::MemoryBuffer> file;
   llvm::error_code ec =
     llvm::MemoryBuffer::getFile(XSTR(BIN_PATH) "/VectorCopy.o", file);
-  if(ec) return -1;
+  if (ec) return -1;
 
   hsa::Program *program =
     hsaRT->createProgram(const_cast<char *>(file->getBufferStart()),
                          file->getBufferSize(),
                          &devices);
-  if(!program) return -1;
+  if (!program) return -1;
 
   hsa::Kernel *kernel =
     program->compileKernel("&__OpenCL_vec_copy_kernel", "");
-  if(!kernel) return -1;
+  if (!kernel) return -1;
 
-  for(unsigned i = 0; i < numDevices; ++i) {
+  for (unsigned i = 0; i < numDevices; ++i) {
     hsa::Device *device = devices[i];
     hsa::Queue *queue = device->createQueue(1);
-    if(!queue) return -1;
+    if (!queue) return -1;
 
     const int32_t length = 16;
     float *a = (float *) hsaRT->allocateGlobalMemory(sizeof(float[length]),
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     float *b = (float *) hsaRT->allocateGlobalMemory(sizeof(float[length]),
                                                      sizeof(float));
 
-    for(int32_t j = 0; j < length; ++j) {
+    for (int32_t j = 0; j < length; ++j) {
       a[j] = (float) (M_PI * (j + 1));
       b[j] = 0;
     }
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     hsa::KernelArg argB = { b };
     hsa::KernelArg argLength;
     argLength.s32value = length;
-    if(!a || !b) return -1;
+    if (!a || !b) return -1;
 
     hsa::LaunchAttributes la;
     la.grid[0] = length;
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
 
     bool success = true;
     for (int k=0; k<length; k++) {
-      if(a[k] != b[k]) {
+      if (a[k] != b[k]) {
         cout << "mismatch at index " << k << ", expected " << a[k] << ", saw " << b[k] << endl;
         success = false;
       }

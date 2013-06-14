@@ -58,7 +58,7 @@ class BrigInstHelper {
 
   template<class T>
   const BrigOperandBase *getReg(const T *t) const {
-    if(!t->reg) return NULL;
+    if (!t->reg) return NULL;
     oper_iterator base(S_.operands + t->reg);
     assert(isa<BrigOperandReg>(base));
     return base;
@@ -107,13 +107,13 @@ class BrigInstHelper {
   }
 
   static const BrigAluModifier16_t *getAluModifier(const inst_iterator inst) {
-    if(const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
+    if (const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
       return &cmp->modifier;
 
-    if(const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
+    if (const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
       return &cvt->modifier;
 
-    if(const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst))
+    if (const BrigInstMod *mod = dyn_cast<BrigInstMod>(inst))
       return &mod->modifier;
 
     return NULL;
@@ -126,7 +126,7 @@ class BrigInstHelper {
 
   static bool hasRoundingMode(const inst_iterator inst) {
     // Cvt instructions are handled as a special case
-    if(isa<BrigInstCvt>(inst)) return false;
+    if (isa<BrigInstCvt>(inst)) return false;
     // Ignore near mode, since it is the default anway
     const BrigAluModifier16_t *aluMod = getAluModifier(inst);
     return aluMod && *aluMod & BRIG_ALU_ROUND;
@@ -222,7 +222,7 @@ class BrigInstHelper {
 
   static size_t getTypeSize(BrigType type) {
 
-    if(isVectorTy(type))
+    if (isVectorTy(type))
       return getVectorLength(type) * getTypeSize(getElementTy(type));
 
     switch(type) {
@@ -249,13 +249,13 @@ class BrigInstHelper {
 
   // Arithmetic methods
   static bool isPacked(BrigPack8_t packing, unsigned opnum) {
-    if(opnum == 1) {
+    if (opnum == 1) {
       return
         packing == BRIG_PACK_PP    || packing == BRIG_PACK_PS    ||
         packing == BRIG_PACK_P     ||
         packing == BRIG_PACK_PPSAT || packing == BRIG_PACK_PSSAT ||
         packing == BRIG_PACK_PSAT;
-    } else if(opnum == 2) {
+    } else if (opnum == 2) {
       return
         packing == BRIG_PACK_PP    || packing == BRIG_PACK_SP    ||
         packing == BRIG_PACK_PPSAT || packing == BRIG_PACK_SPSAT;
@@ -265,13 +265,13 @@ class BrigInstHelper {
   }
 
   static bool isBroadcast(BrigPack8_t packing, unsigned opnum) {
-    if(opnum == 1) {
+    if (opnum == 1) {
       return
         packing == BRIG_PACK_SS    || packing == BRIG_PACK_SP    ||
         packing == BRIG_PACK_S     ||
         packing == BRIG_PACK_SSSAT || packing == BRIG_PACK_SPSAT ||
         packing == BRIG_PACK_SSAT;
-    } else if(opnum == 2) {
+    } else if (opnum == 2) {
       return
         packing == BRIG_PACK_SS    || packing == BRIG_PACK_PS    ||
         packing == BRIG_PACK_SSSAT || packing == BRIG_PACK_PSSAT;
@@ -317,21 +317,21 @@ class BrigInstHelper {
 
   const BrigOperandBase *getBranchTarget(const inst_iterator inst) const {
     BrigOpcode opcode = BrigOpcode(inst->opcode);
-    if(opcode == BRIG_OPCODE_BRN)
+    if (opcode == BRIG_OPCODE_BRN)
       return getOperand(inst, 0);
-    if(opcode == BRIG_OPCODE_CBR)
+    if (opcode == BRIG_OPCODE_CBR)
       return getOperand(inst, 1);
 
     assert(false && "Not a branch instruction");
   }
 
   bool isDirectBranchInst(const inst_iterator inst) const {
-    if(!isBranchInst(inst)) return false;
+    if (!isBranchInst(inst)) return false;
     return isa<BrigOperandLabelRef>(getBranchTarget(inst));
   }
 
   bool isIndirectBranchInst(const inst_iterator inst) const {
-    if(!isBranchInst(inst)) return false;
+    if (!isBranchInst(inst)) return false;
     return isa<BrigOperandReg>(getBranchTarget(inst));
   }
 

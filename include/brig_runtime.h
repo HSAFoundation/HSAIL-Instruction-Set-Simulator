@@ -65,7 +65,7 @@ class Vector {
   typedef void (*SForEachFn)(Base, Base, unsigned);
 
   Vector(Base b = 0) {
-    for(unsigned i = 0; i < Len; ++i)
+    for (unsigned i = 0; i < Len; ++i)
       t_[i] = b;
   }
 
@@ -75,7 +75,7 @@ class Vector {
 
   Self S() const {
     Self other = *this;
-    for(unsigned i = 1; i < Len; ++i)
+    for (unsigned i = 1; i < Len; ++i)
       other[i] = other[0];
     return other;
   }
@@ -140,13 +140,13 @@ struct ThreadInfo {
     argsArray(new void*[size + 1]),
     NDRangeSize(NDRangeSize), workdim(workdim), barrier(barrier) {
 
-    for(unsigned i = 0; i < 3; ++i) {
+    for (unsigned i = 0; i < 3; ++i) {
       this->workGroupSize[i] = workGroupSize[i];
       this->workItemAbsId[i] = workItemAbsId[i];
     }
 
     argsArray[0] = this;
-    for(unsigned i = 0; i < size; ++i)
+    for (unsigned i = 0; i < size; ++i)
       argsArray[i + 1] = args[i];
   }
 

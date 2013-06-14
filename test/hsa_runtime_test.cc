@@ -27,11 +27,11 @@
 TEST(HSARuntimeTest, VectorCopy) {
   hsa::RuntimeApi *hsaRT = hsa::getRuntime();
   EXPECT_TRUE(hsaRT);
-  if(!hsaRT) return;
+  if (!hsaRT) return;
 
   uint32_t numDevices = hsaRT->getDeviceCount();
   EXPECT_LE(1U, numDevices);
-  if(!numDevices) return;
+  if (!numDevices) return;
 
   hsa::vector<hsa::Device *> devices = hsaRT->getDevices();
   EXPECT_EQ(numDevices, devices.size());
@@ -40,25 +40,25 @@ TEST(HSARuntimeTest, VectorCopy) {
   llvm::error_code ec =
     llvm::MemoryBuffer::getFile(XSTR(BIN_PATH) "/VectorCopy.o", file);
   EXPECT_TRUE(!ec);
-  if(ec) return;
+  if (ec) return;
 
   hsa::Program *program =
     hsaRT->createProgram(const_cast<char *>(file->getBufferStart()),
                          file->getBufferSize(),
                          &devices);
   EXPECT_TRUE(program);
-  if(!program) return;
+  if (!program) return;
 
   hsa::Kernel *kernel =
     program->compileKernel("&__OpenCL_vec_copy_kernel", "");
   EXPECT_TRUE(kernel);
-  if(!kernel) return;
+  if (!kernel) return;
 
-  for(unsigned i = 0; i < numDevices; ++i) {
+  for (unsigned i = 0; i < numDevices; ++i) {
     hsa::Device *device = devices[i];
     hsa::Queue *queue = device->createQueue(1);
     EXPECT_TRUE(queue);
-    if(!queue) return;
+    if (!queue) return;
 
     const int32_t length = 16;
     float *a = (float *) hsaRT->allocateGlobalMemory(sizeof(float[length]),
@@ -66,7 +66,7 @@ TEST(HSARuntimeTest, VectorCopy) {
     float *b = (float *) hsaRT->allocateGlobalMemory(sizeof(float[length]),
                                                      sizeof(float));
 
-    for(int32_t j = 0; j < length; ++j) {
+    for (int32_t j = 0; j < length; ++j) {
       a[j] = (float) (M_PI * (j + 1));
       b[j] = 0;
     }
@@ -78,7 +78,7 @@ TEST(HSARuntimeTest, VectorCopy) {
 
     EXPECT_TRUE(a);
     EXPECT_TRUE(b);
-    if(!a || !b) return;
+    if (!a || !b) return;
 
     hsa::LaunchAttributes la;
     la.grid[0] = 1;

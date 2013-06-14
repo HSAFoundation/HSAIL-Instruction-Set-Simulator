@@ -13,10 +13,10 @@ HwDbgStatus
 HwDbgGetAPIVersion(unsigned int* pVersionMajorOut,
                    unsigned int* pVersionMinorOut,
                    unsigned int* pVersionBuildOut) {
-  if(pVersionMajorOut) *pVersionMajorOut = AMDGPUDEBUG_VERSION_MAJOR;
-  if(pVersionMinorOut) *pVersionMinorOut = AMDGPUDEBUG_VERSION_MINOR;
-  if(pVersionBuildOut) *pVersionBuildOut = AMDGPUDEBUG_VERSION_BUILD;
-  if(!pVersionMajorOut ||
+  if (pVersionMajorOut) *pVersionMajorOut = AMDGPUDEBUG_VERSION_MAJOR;
+  if (pVersionMinorOut) *pVersionMinorOut = AMDGPUDEBUG_VERSION_MINOR;
+  if (pVersionBuildOut) *pVersionBuildOut = AMDGPUDEBUG_VERSION_BUILD;
+  if (!pVersionMajorOut ||
      !pVersionMinorOut ||
      !pVersionBuildOut) {
     return HWDBG_STATUS_NULL_POINTER;
@@ -26,7 +26,7 @@ HwDbgGetAPIVersion(unsigned int* pVersionMajorOut,
 
 HwDbgStatus
 HwDbgGetAPIType(HwDbgAPIType* pAPITypeOut) {
-  if(!pAPITypeOut) return HWDBG_STATUS_NULL_POINTER;
+  if (!pAPITypeOut) return HWDBG_STATUS_NULL_POINTER;
   *pAPITypeOut = HWDBG_API_HSA;
   return HWDBG_STATUS_SUCCESS;
 }
