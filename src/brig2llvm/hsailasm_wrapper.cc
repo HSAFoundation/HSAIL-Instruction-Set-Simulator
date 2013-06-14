@@ -7,12 +7,15 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "hsailasm_wrapper.h"
+
 #include "llvm/ADT/OwningPtr.h"
+#include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/system_error.h"
 
-#include "hsailasm_wrapper.h"
+#include <unistd.h>
 
 #define STR(X) #X
 #define XSTR(X) STR(X)
@@ -32,9 +35,12 @@ bool HsailAsm::assembleHSAILString(const char *sourceCode,
                                    std::string *errMsg,
                                    bool enableDebug) {
 
-  llvm::sys::Path sourceFile("temp.hsail");
-  if (sourceFile.createTemporaryFileOnDisk(true, errMsg))
-    return false;
+  int result_fd;
+  llvm::SmallString<128> sourceFile;
+  llvm::error_code ec =
+    llvm::sys::fs::unique_file("temp-%%%%.hsail", result_fd, sourceFile);
+  close(result_fd);
+  check(!ec, ec.message());
 
   std::string outErrMsg;
   llvm::raw_fd_ostream out(sourceFile.c_str(), outErrMsg,
@@ -47,8 +53,11 @@ bool HsailAsm::assembleHSAILString(const char *sourceCode,
 
   bool result =
     assembleHSAILSource(sourceFile.c_str(), outputFile, errMsg, enableDebug);
-  sourceFile.eraseFromDisk();
-  return result;
+
+  bool existed;
+  llvm::sys::fs::remove(sourceFile.c_str(), existed);
+
+  return result && existed;
 }
 
 bool HsailAsm::assembleHSAILSource(const char *sourceFile,
@@ -64,9 +73,14 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
   check(programPath.isRegularFile(), "Cannot find hsailasm");
   check(programPath.canExecute(), "Cannot execute hsailasm");
 
-  llvm::sys::Path errFile("hsailasm.log");
-  if (errFile.createTemporaryFileOnDisk(true, errMsg))
-    return false;
+  int result_fd;
+  llvm::SmallString<128> resultPath;
+  llvm::error_code ec =
+    llvm::sys::fs::unique_file("hsailasm-%%%%.log", result_fd, resultPath);
+  close(result_fd);
+  check(!ec, ec.message());
+
+  llvm::sys::Path errFile(resultPath);
 
   const llvm::sys::Path *redirects[] = { &errFile, &errFile, 0 };
 
