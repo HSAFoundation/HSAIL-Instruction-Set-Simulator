@@ -97,7 +97,7 @@ static llvm::StringRef getStringRef(const BrigString *str) {
 
 static llvm::Type *runOnType(llvm::LLVMContext &C, BrigType type) {
 
-  switch(type) {
+  switch (type) {
     case BRIG_TYPE_NONE:
       return llvm::Type::getInt32Ty(C);
     case BRIG_TYPE_B1:
@@ -288,7 +288,7 @@ static llvm::Value *getOperandAddr(llvm::BasicBlock &B,
 
 static bool hasAddr(const BrigOperandBase *op) {
   BrigOperandKinds kind = BrigOperandKinds(op->kind);
-  switch(kind) {
+  switch (kind) {
     case BRIG_OPERAND_ADDRESS:
     case BRIG_OPERAND_FUNCTION_REF:
     case BRIG_OPERAND_IMMED:

@@ -192,7 +192,7 @@ class BrigInstHelper {
 
     assert(isVectorTy(type) && "Cannot get length of non-vector types");
 
-    switch(type) {
+    switch (type) {
     case BRIG_TYPE_U16X2: case BRIG_TYPE_S16X2: case BRIG_TYPE_F16X2:
     case BRIG_TYPE_U32X2: case BRIG_TYPE_S32X2: case BRIG_TYPE_F32X2:
     case BRIG_TYPE_U64X2: case BRIG_TYPE_S64X2: case BRIG_TYPE_F64X2:
@@ -225,7 +225,7 @@ class BrigInstHelper {
     if (isVectorTy(type))
       return getVectorLength(type) * getTypeSize(getElementTy(type));
 
-    switch(type) {
+    switch (type) {
       case BRIG_TYPE_B1:
         return 1;
       case BRIG_TYPE_S8:    case BRIG_TYPE_U8:    case BRIG_TYPE_B8:
@@ -288,7 +288,7 @@ class BrigInstHelper {
   }
 
   static bool isValidPacking(BrigPack8_t packing, unsigned opnum) {
-    switch(packing) {
+    switch (packing) {
       case BRIG_PACK_NONE:
         return false;
       case BRIG_PACK_S:

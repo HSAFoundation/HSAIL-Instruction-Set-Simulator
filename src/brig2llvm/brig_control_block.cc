@@ -45,5 +45,5 @@ BrigControlBlock cb_end(const BrigFunction &F) {
 BrigControlBlock BrigFunction::begin() const { return cb_begin(*this); }
 BrigControlBlock BrigFunction::end() const { return cb_end(*this); }
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa

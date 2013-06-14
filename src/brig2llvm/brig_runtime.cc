@@ -12,7 +12,7 @@
 
 #if defined(__i386__) || defined(__x86_64__)
 #include <pmmintrin.h>
-#endif // defined(__i386__) || defined(__x86_64__)
+#endif  // defined(__i386__) || defined(__x86_64__)
 
 #include <algorithm>
 #include <cmath>
@@ -31,26 +31,26 @@ extern "C" void enableFtzMode(void) {
 #if defined(__i386__) || defined(__x86_64__)
   _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
   _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
-#endif // defined(__i386__) || defined(__x86_64__)
+#endif  // defined(__i386__) || defined(__x86_64__)
 
 #if defined(__arm__)
   __asm__ volatile("vmrs r0, fpscr\n"
                    "orr r0, $(1 << 24)\n"
                    "vmsr fpscr, r0" : : : "r0");
-#endif // defined(__arm__)
+#endif  // defined(__arm__)
 }
 
 extern "C" void disableFtzMode(void) {
 #if defined(__i386__) || defined(__x86_64__)
   _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF);
   _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
-#endif // defined(__i386__) || defined(__x86_64__)
+#endif  // defined(__i386__) || defined(__x86_64__)
 
 #if defined(__arm__)
   __asm__ volatile("vmrs r0, fpscr\n"
                    "bic r0, $(1 << 24)\n"
                    "vmsr fpscr, r0" : : : "r0");
-#endif // defined(__arm__)
+#endif  // defined(__arm__)
 }
 
 extern "C" void setRoundingMode_near(void) {
@@ -347,16 +347,16 @@ defineUnary(PopCount_u32, b64)
 // at: http://graphics.stanford.edu/~seander/bithacks.html
 template<class T> static T BitRev(T x) {
   typedef typename Int<T>::Unsigned Unsigned;
-  Unsigned v = Unsigned(x); // input bits to be reversed
-  Unsigned r = v; // r will be reversed bits of v; first get LSB of v
-  int s = Int<T>::Bits - 1; // extra shift needed at end
+  Unsigned v = Unsigned(x);  // input bits to be reversed
+  Unsigned r = v;  // r will be reversed bits of v; first get LSB of v
+  int s = Int<T>::Bits - 1;  // extra shift needed at end
 
   for (v >>= 1; v; v >>= 1) {
     r <<= 1;
     r |= v & 1;
     s--;
   }
-  r <<= s; // shift when v's highest bits are zero
+  r <<= s;  // shift when v's highest bits are zero
 
   return T(r);
 }
@@ -723,11 +723,12 @@ template<class R, class T> static R Cvt(T t, int mode)  {
 }
 
 #if defined(__arm__)
-// Handle long to double conversions on platforms without hardware support (ARM).
+// Handle long to double conversions on platforms without hardware support
+// (ARM).
 template<class T> static f64 l2d(T x, int mode) {
   double d = x;
   T y = d;
-  switch(mode) {
+  switch (mode) {
   case FE_UPWARD: return y >= x ? d : nexttoward(d, INFINITY);
   case FE_DOWNWARD: return y <= x ? d : nexttoward(d, -INFINITY);
   case FE_TOWARDZERO: return llabs(y) <= llabs(x) ? d : nexttoward(d, 0);
@@ -736,7 +737,7 @@ template<class T> static f64 l2d(T x, int mode) {
 }
 template<> f64 Cvt(u64 x, int mode) { return l2d(x, mode); }
 template<> f64 Cvt(s64 x, int mode) { return l2d(x, mode); }
-#endif // defined(__arm__)
+#endif  // defined(__arm__)
 
 RIICvt(define)
 RFICvt(define)
@@ -887,5 +888,5 @@ extern "C" u32 WorkGroupSize_u32(u32 x) {
   return __brigThreadInfo->workGroupSize[x];
 }
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa

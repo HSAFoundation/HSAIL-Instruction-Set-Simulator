@@ -80,5 +80,5 @@ BrigReader *BrigReader::createBrigReader(llvm::object::ObjectFile *objFile) {
   return new BrigReader(objFile, directives, code, operands, debug, strings);
 }
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa

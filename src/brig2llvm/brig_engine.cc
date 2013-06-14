@@ -92,7 +92,7 @@ static bool isHardFP(void) {
   } foo = { isHardFP };
   return foo.b(0, 0x314159, 0x271828);
 }
-#endif // __arm__
+#endif  // __arm__
 
 static std::set<std::string> loadedLibs;
 
@@ -161,7 +161,7 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
 
 #ifdef __arm__
   if (isHardFP()) options.FloatABIType = llvm::FloatABI::Hard;
-#endif // __arm__
+#endif  // __arm__
 
   builder.setTargetOptions(options);
 
@@ -353,5 +353,5 @@ BrigEngine::~BrigEngine() {
   delete EE_;
 }
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa

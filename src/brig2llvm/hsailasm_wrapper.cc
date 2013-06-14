@@ -118,5 +118,5 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
   return true;
 }
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa

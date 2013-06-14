@@ -39,7 +39,7 @@ static const char *getBaseName(const inst_iterator inst) {
   case BRIG_OPCODE_ ## Y:                       \
     return #X
 
-  switch(inst->opcode) {
+  switch (inst->opcode) {
     caseOper(Abs, ABS);
     caseOper(Add, ADD);
     caseOper(Borrow, BORROW);
@@ -185,7 +185,7 @@ static const char *getPackingName(const inst_iterator inst) {
   if (!cmp && !mod) return "";
 
   BrigPack pack = BrigPack(cmp ? cmp->pack : mod->pack);
-  switch(pack) {
+  switch (pack) {
     case BRIG_PACK_PP:    return "_PP";
     case BRIG_PACK_PS:    return "_PS";
     case BRIG_PACK_SP:    return "_SP";
@@ -209,7 +209,7 @@ static const char *getTypeName(BrigType type) {
   case BRIG_ ## Y:                              \
     return "_" #X
 
-  switch(type) {
+  switch (type) {
     case BRIG_TYPE_NONE: return "";
     caseBrig(s8, TYPE_S8);
     caseBrig(s16, TYPE_S16);
@@ -261,7 +261,7 @@ static const char *getTypeName(BrigType type) {
 }
 
 const char *getPredName(BrigCompareOperation pred) {
-  switch(pred) {
+  switch (pred) {
     caseBrig(Eq, COMPARE_EQ);
     caseBrig(Ne, COMPARE_NE);
     caseBrig(Lt, COMPARE_LT);
@@ -303,7 +303,7 @@ static bool hasRoundingMode(BrigAluModifier16_t mod) {
 const char *BrigInstHelper::getRoundingName(BrigAluModifier16_t mod) {
 
   BrigRound round = BrigRound(mod & BRIG_ALU_ROUND);
-  switch(round) {
+  switch (round) {
     case BRIG_ROUND_NONE:                       return "";
     case BRIG_ROUND_FLOAT_NEAR_EVEN:            return "near";
     case BRIG_ROUND_FLOAT_ZERO:                 return "zero";
@@ -325,7 +325,7 @@ const char *getAtomicOpName(BrigAtomicOperation atomicOp) {
 #define caseBrigAtomic(X,Y)                     \
   case BRIG_ATOMIC_ ## Y:                       \
     return #X
-  switch(atomicOp) {
+  switch (atomicOp) {
     caseBrigAtomic(And, AND);
     caseBrigAtomic(Or, OR);
     caseBrigAtomic(Xor, XOR);
@@ -399,5 +399,5 @@ long int nstrtol(const BrigString *str, const uint8_t **endptr, int base) {
   return nstrtol(str->byteCount - 2, str->bytes + 2, endptr, 10);
 }
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa

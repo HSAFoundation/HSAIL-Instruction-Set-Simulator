@@ -55,5 +55,5 @@ BrigFunction BrigModule::end() const {
   return hsa::brig::fun_end(S_);
 }
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa

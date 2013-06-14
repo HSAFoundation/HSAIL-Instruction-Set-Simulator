@@ -171,7 +171,7 @@ bool BrigModule::validateInstructions(void) const {
     return false;
 
 #define caseInst(X, Y)                           \
-  case BRIG_OPCODE_ ## Y:                       \
+  case BRIG_OPCODE_ ## Y:                        \
     if (!validate ## X(it)) return false;        \
     break
 
@@ -569,10 +569,10 @@ bool BrigModule::validateCCode(void) const {
   dir_iterator it = S_.begin();
   const dir_iterator E = S_.end();
 
-#define caseBrig(X)                                     \
-  case Brig ## X::DirKind:                              \
-    if (!check(updateCCode(c_code, cast<Brig ## X>(it)), \
-              "c_code out of order")) return false;     \
+#define caseBrig(X)                                       \
+  case Brig ## X::DirKind:                                \
+    if (!check(updateCCode(c_code, cast<Brig ## X>(it)),  \
+               "c_code out of order")) return false;      \
     break
 
   for (; it != E; ++it) {

@@ -96,5 +96,5 @@ BrigSymbol BrigModule::global_end() const {
   return hsa::brig::global_end(*this);
 }
 
-} // namespace brig
-} // namespace hsa
+}  // namespace brig
+}  // namespace hsa

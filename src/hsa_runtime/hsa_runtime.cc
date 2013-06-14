@@ -335,4 +335,4 @@ RuntimeApi *getRuntime() {
   return new SimRuntimeApi();
 }
 
-} // namespace hsa
+}  // namespace hsa
