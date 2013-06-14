@@ -7,13 +7,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "brig.h"
 #include "brig_llvm.h"
-#include "brig_module.h"
-#include "brig_function.h"
-#include "brig_symbol.h"
+
+#include "brig.h"
 #include "brig_control_block.h"
+#include "brig_function.h"
 #include "brig_inst_helper.h"
+#include "brig_module.h"
+#include "brig_symbol.h"
 
 #include "llvm/Analysis/Verifier.h"
 #include "llvm/IR/Attributes.h"
@@ -23,6 +24,9 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
+
+#include <fcntl.h>
+#include <unistd.h>
 
 namespace hsa{
 namespace brig{
@@ -71,13 +75,10 @@ static void insertGPUStateTy(llvm::LLVMContext &C) {
     createSOAType(C, llvm::Type::getInt64Ty(C), "d_regs", 64);
   llvm::StructType *q_reg_type =
     createSOAType(C, llvm::Type::getIntNTy(C, 128), "q_regs", 32);
-  llvm::StructType *pc_reg_type =
-    createSOAType(C, llvm::Type::getIntNTy(C, 32), "pc_regs", 3);
   llvm::Type *tv1[] = { c_reg_type,
                         s_reg_type,
                         d_reg_type,
-                        q_reg_type,
-                        pc_reg_type };
+                        q_reg_type };
   llvm::StructType::create(C, tv1, std::string("struct.regs"), false);
 }
 
@@ -186,12 +187,15 @@ struct FunState {
   CBMap cbMap;
   const FunMap &funMap;
   llvm::Value *regs;
+  const Callback callback;
+  CallbackData cbd;
 
   static const FunState Create(const FunMap &funMap,
                                SymbolMap &symbolMap,
                                const BrigFunction &brigFun,
-                               llvm::Function *llvmFun) {
-    return FunState(funMap, symbolMap, brigFun, llvmFun);
+                               llvm::Function *llvmFun,
+                               Callback callback, CallbackData cbd) {
+    return FunState(funMap, symbolMap, brigFun, llvmFun, callback, cbd);
   }
 
   llvm::Value *lookupSymbol(const BrigDirectiveSymbol *symbol) const {
@@ -208,8 +212,11 @@ struct FunState {
   SymbolMap &symbolMap;
 
   FunState(const FunMap &funMap, SymbolMap &symbolMap,
-           const BrigFunction &brigFun, llvm::Function *llvmFun) :
+           const BrigFunction &brigFun, llvm::Function *llvmFun,
+           Callback callback, CallbackData cbd) :
     funMap(funMap),
+    callback(callback),
+    cbd(cbd),
     symbolMap(symbolMap) {
 
     llvm::LLVMContext &C = llvmFun->getContext();
@@ -650,6 +657,37 @@ static void insertRestoreRoundingMode(llvm::BasicBlock &B) {
   llvm::CallInst::Create(restoreRound, "", &B);
 }
 
+static void insertDebugCallback(llvm::BasicBlock &B,
+                                inst_iterator inst,
+                                const BrigInstHelper &helper,
+                                const FunState &state) {
+
+  if(!state.callback) return;
+
+  llvm::LLVMContext &C = B.getContext();
+
+  llvm::Type *intPtrTy = llvm::Type::getIntNTy(C, sizeof(intptr_t) * 8);
+
+  llvm::Type *argsTy[] = { state.regs->getType(), intPtrTy, intPtrTy };
+  llvm::FunctionType *callbackTy =
+    llvm::FunctionType::get(llvm::Type::getVoidTy(C), argsTy, false);
+
+  llvm::Constant *cbIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) state.callback);
+  llvm::Value *cbFPValue =
+    llvm::ConstantExpr::getIntToPtr(cbIntValue, callbackTy->getPointerTo());
+
+  llvm::Value *pcValue =
+    llvm::ConstantInt::get(intPtrTy, helper.getAddr(inst));
+
+  llvm::Value *cbdIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) state.cbd);
+
+  llvm::Value *args[] = { state.regs, pcValue, cbdIntValue };
+
+  llvm::CallInst::Create(cbFPValue, args, "", &B);
+}
+
 static void runOnComplexInst(llvm::BasicBlock &B,
                              const inst_iterator inst,
                              const BrigInstHelper &helper,
@@ -813,6 +851,8 @@ static void runOnInstruction(llvm::BasicBlock &B,
                              const FunState &state) {
   llvm::LLVMContext &C = B.getContext();
 
+  insertDebugCallback(B, inst, helper, state);
+
   if(inst->opcode == BRIG_OPCODE_RET) {
     llvm::ReturnInst::Create(C, &B);
   } else if(helper.isDirectBranchInst(inst)) {
@@ -907,7 +947,8 @@ static void makeKernelTrampoline(llvm::Function *fun, llvm::StringRef name) {
 }
 
 static void runOnFunction(llvm::Module &M, const BrigFunction &F,
-                          FunMap &funMap, SymbolMap &symbolMap) {
+                          FunMap &funMap, SymbolMap &symbolMap,
+                          Callback callback, CallbackData cbd) {
 
   llvm::LLVMContext &C = M.getContext();
 
@@ -939,7 +980,8 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
 
   if(F.isDeclaration()) return;
 
-  const FunState state = FunState::Create(funMap, symbolMap, F, fun);
+  const FunState state =
+    FunState::Create(funMap, symbolMap, F, fun, callback, cbd);
   for(BrigControlBlock cb = F.begin(), E = F.end(); cb != E; ++cb) {
     runOnCB(*fun, cb, state);
   }
@@ -1018,7 +1060,39 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
     new llvm::GlobalVariable(M, type, isConst, linkage, init, name);
 }
 
-BrigProgram GenLLVM::getLLVMModule(const BrigModule &M) {
+llvm::DIContext *runOnDebugInfo(const BrigModule &M) {
+
+  BrigInstHelper helper = M.getInstHelper();
+
+  for(debug_iterator it = M.debug_begin(),
+        E = M.debug_end(); it != E; ++it) {
+    if(const BrigBlockNumeric *numeric = dyn_cast<BrigBlockNumeric>(it)) {
+      const BrigString *str = helper.getData(numeric);
+      llvm::StringRef debugData((const char *) str->bytes, str->byteCount);
+      llvm::MemoryBuffer *debugDataBuffer =
+        llvm::MemoryBuffer::getMemBuffer(debugData, "", false);
+      llvm::object::ObjectFile *objFile =
+        llvm::object::ObjectFile::createObjectFile(debugDataBuffer);
+
+      int errFID = dup(STDERR_FILENO);
+      int nullFID = open("/dev/null", O_WRONLY);
+      dup2(nullFID, STDERR_FILENO);
+
+      llvm::DIContext *dic = llvm::DIContext::getDWARFContext(objFile);
+
+      dup2(errFID, STDERR_FILENO);
+      close(nullFID);
+
+      return dic;
+    }
+  }
+
+  return NULL;
+}
+
+BrigProgram GenLLVM::getLLVMModule(const BrigModule &M,
+                                   Callback callback,
+                                   CallbackData cbd) {
 
   if(!M.isValid()) return NULL;
 
@@ -1036,14 +1110,18 @@ BrigProgram GenLLVM::getLLVMModule(const BrigModule &M) {
 
   FunMap funMap;
   for(BrigFunction fun = M.begin(), E = M.end(); fun != E; ++fun) {
-    runOnFunction(*mod, fun, funMap, symbolMap);
+    runOnFunction(*mod, fun, funMap, symbolMap, callback, cbd);
   }
 
-  return BrigProgram(mod);
+  llvm::DIContext *debugInfo = runOnDebugInfo(M);
+
+  return BrigProgram(mod, debugInfo);
 }
 
-std::string GenLLVM::getLLVMString(const BrigModule &M) {
-  BrigProgram BP = getLLVMModule(M);
+std::string GenLLVM::getLLVMString(const BrigModule &M,
+                                   Callback callback,
+                                   CallbackData cbd) {
+  BrigProgram BP = getLLVMModule(M, callback, cbd);
   if(!BP) return "";
 
   std::string output;

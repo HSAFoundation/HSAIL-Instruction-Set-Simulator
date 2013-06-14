@@ -31,11 +31,13 @@ class HsailAsm {
 
   static bool assembleHSAILString(const char *source,
                                   const char *outputFile,
-                                  std::string *ErrMsg = NULL);
+                                  std::string *ErrMsg = NULL,
+                                  bool enableDebug = true);
 
   static bool assembleHSAILSource(const char *sourceFile,
                                   const char *outputFile,
-                                  std::string *ErrMsg = NULL);
+                                  std::string *ErrMsg = NULL,
+                                  bool enableDebug = true);
 };
 
 }  // namespace brig

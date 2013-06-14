@@ -4053,5 +4053,9 @@ BrigStringOffset32_t BrigModule::lookupFilename(uint32_t fileid) const {
   return 0;
 }
 
+BrigInstHelper BrigModule::getInstHelper() const {
+  return BrigInstHelper(S_);
+}
+
 }  // namespace brig
 }  // namespace hsa

@@ -29,7 +29,8 @@ namespace brig {
 
 bool HsailAsm::assembleHSAILString(const char *sourceCode,
                                    const char *outputFile,
-                                   std::string *errMsg) {
+                                   std::string *errMsg,
+                                   bool enableDebug) {
 
   llvm::sys::Path sourceFile("temp.hsail");
   if(sourceFile.createTemporaryFileOnDisk(true, errMsg))
@@ -44,21 +45,19 @@ bool HsailAsm::assembleHSAILString(const char *sourceCode,
   out.close();
   check(!out.has_error(), "Error writing HSAIL");
 
-  bool result = assembleHSAILSource(sourceFile.c_str(), outputFile, errMsg);
+  bool result =
+    assembleHSAILSource(sourceFile.c_str(), outputFile, errMsg, enableDebug);
   sourceFile.eraseFromDisk();
   return result;
 }
 
 bool HsailAsm::assembleHSAILSource(const char *sourceFile,
                                    const char *outputFile,
-                                   std::string *errMsg) {
+                                   std::string *errMsg,
+                                   bool enableDebug) {
 
-  const char *args[5];
-  args[0] = "hsailasm";
-  args[1] = sourceFile;
-  args[2] = "-o";
-  args[3] = outputFile;
-  args[4] = NULL;
+  const char *args[] = { "hsailasm", sourceFile, "-o", outputFile,
+                         enableDebug ? "-g" : NULL, NULL };
 
   llvm::sys::Path programPath(XSTR(BIN_PATH) "/hsailasm");
 

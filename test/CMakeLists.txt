@@ -1,6 +1,6 @@
 macro(assembleHSAIL input_name output_name)
 add_custom_command(OUTPUT ${output_name}
-  COMMAND ${PROJECT_BINARY_DIR}/test/hsailasm ${input_name} -o ${output_name}
+  COMMAND ${PROJECT_BINARY_DIR}/test/hsailasm ${input_name} -o ${output_name} -g
   DEPENDS ${input_name} install_hsailasm
 )
 endmacro()

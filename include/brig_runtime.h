@@ -153,4 +153,17 @@ struct ThreadInfo {
   ~ThreadInfo() { delete[] argsArray; }
 };
 
+namespace hsa {
+namespace brig {
+
+struct BrigRegState {
+  b1 c[8];
+  b32 s[128];
+  b64 d[64];
+  b128 q[32];
+};
+
+}
+}
+
 #endif // BRIG_RUNTIME_H

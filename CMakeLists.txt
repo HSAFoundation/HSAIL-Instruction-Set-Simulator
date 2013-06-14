@@ -154,6 +154,10 @@ set(brig_validate_SOURCES test/brig_validate.cc)
 add_executable(brig_validate ${brig_validate_SOURCES})
 target_link_libraries(brig_validate brig2llvm)
 
+set(fibDebug_SOURCES demo/fibDebug.cc)
+add_executable(fibDebug ${fibDebug_SOURCES})
+target_link_libraries(fibDebug brig2llvm)
+
 set(debug_SOURCES demo/debug.cc)
 add_executable(debug ${debug_SOURCES})
 target_link_libraries(debug hsa)

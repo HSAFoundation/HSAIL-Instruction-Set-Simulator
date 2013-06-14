@@ -25,11 +25,12 @@ namespace hsa {
 namespace brig {
 
 class BrigFunction;
+class BrigInstHelper;
 class BrigSymbol;
 
 class BrigModule {
   public:
-  BrigModule(const BrigReader &reader, llvm::raw_ostream *out) :
+  BrigModule(const BrigReader &reader, llvm::raw_ostream *out = NULL) :
     S_(reader.getStrings().data(),
        reader.getDirectives().data(),
        reader.getCode().data(),
@@ -50,6 +51,11 @@ class BrigModule {
 
   BrigSymbol global_begin() const;
   BrigSymbol global_end() const;
+
+  debug_iterator debug_begin() const { return S_.debug_begin(); }
+  debug_iterator debug_end() const { return S_.debug_end(); }
+
+  BrigInstHelper getInstHelper() const;
 
   private:
   template<class Message>

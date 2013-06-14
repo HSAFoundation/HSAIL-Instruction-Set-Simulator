@@ -39,7 +39,7 @@ add_custom_target( build_libhsail ALL
   COMMAND ${CMAKE_MAKE_PROGRAM} LLVM_SRC=${LLVM_SRC_DIR} LLVM_BUILD=${LLVM_BUILD_DIR}
   WORKING_DIRECTORY ${LibHSAIL_BUILD_DIR} )
 
-set(LLVM_LINK_COMPONENTS core jit mcjit nativecodegen)
+set(LLVM_LINK_COMPONENTS core jit mcjit nativecodegen debuginfo)
 add_llvm_library(brig2llvm
   brig2llvm.cc
   brig_module.cc

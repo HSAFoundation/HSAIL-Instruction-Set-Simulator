@@ -593,14 +593,21 @@ struct BrigString {
   enum { FlexSize = sizeof(bytes) };
 };
 
+struct BrigDebugBase {
+  uint16_t size;
+  BrigDirectiveKinds16_t kind;
+};
+
 struct BrigBlockEnd {
   enum { DirKind = BRIG_DIRECTIVE_BLOCK_END };
+  enum { DebugKind = BRIG_DIRECTIVE_BLOCK_END };
   uint16_t size;
   BrigDirectiveKinds16_t kind;
 };
 
 struct BrigBlockNumeric {
   enum { DirKind = BRIG_DIRECTIVE_BLOCK_NUMERIC };
+  enum { DebugKind = BRIG_DIRECTIVE_BLOCK_NUMERIC };
   uint16_t size;
   BrigDirectiveKinds16_t kind;
   BrigType16_t type;
@@ -611,6 +618,7 @@ struct BrigBlockNumeric {
 
 struct BrigBlockStart {
   enum { DirKind = BRIG_DIRECTIVE_BLOCK_START };
+  enum { DebugKind = BRIG_DIRECTIVE_BLOCK_START };
   uint16_t size;
   BrigDirectiveKinds16_t kind;
   BrigCodeOffset32_t code;
@@ -619,6 +627,7 @@ struct BrigBlockStart {
 
 struct BrigBlockString {
   enum { DirKind = BRIG_DIRECTIVE_BLOCK_STRING };
+  enum { DebugKind = BRIG_DIRECTIVE_BLOCK_STRING };
   uint16_t size;
   BrigDirectiveKinds16_t kind;
   BrigStringOffset32_t string;

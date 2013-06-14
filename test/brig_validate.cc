@@ -23,9 +23,16 @@ int main(int argc, char **argv) {
 
   hsa::brig::BrigReader *reader =
     hsa::brig::BrigReader::createBrigReader(argv[1]);
+  if(!reader) {
+    std::cerr << argv[0] << ": File not found: " << argv[1] << "\n";
+    return 0;
+  }
+
   hsa::brig::BrigModule mod(*reader, &llvm::errs());
   if(!mod.isValid())
     std::cerr << argv[0] << ": Input is invalid!\n";
+
+  delete reader;
 
   return 0;
 }

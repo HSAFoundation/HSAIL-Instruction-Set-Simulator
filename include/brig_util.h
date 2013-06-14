@@ -44,6 +44,10 @@ template<class T> inline T *dyn_cast(BrigOperandBase *inst) {
   return inst->kind == T::OperKind ? reinterpret_cast<T *>(inst) : NULL;
 }
 
+template<class T> inline T *dyn_cast(BrigDebugBase *inst) {
+  return inst->kind == T::DebugKind ? reinterpret_cast<T *>(inst) : NULL;
+}
+
 template<> inline BrigDirectiveExecutable *dyn_cast(BrigDirectiveBase *dir) {
   if(dir->kind == BRIG_DIRECTIVE_FUNCTION ||
      dir->kind == BRIG_DIRECTIVE_KERNEL)
@@ -157,9 +161,16 @@ struct oper_super {
   template<class T> oper_super(const T *t) { (void) T::OperKind; }
 };
 
+struct debug_super {
+  typedef BrigDebugBase Base;
+  debug_super() {}
+  template<class T> debug_super(const T *t) { (void) T::DebugKind; }
+};
+
 typedef brig_iterator<dir_super> dir_iterator;
 typedef brig_iterator<inst_super> inst_iterator;
 typedef brig_iterator<oper_super> oper_iterator;
+typedef brig_iterator<debug_super> debug_iterator;
 
 // The dir_iterator versions of dyn_cast, cast, and isa
 template<class T, class It> inline const T *dyn_cast(const It it) {
@@ -186,6 +197,8 @@ struct BrigSections {
   const size_t operandsSize;
   const size_t debugSize;
 
+  enum { HeaderSize = sizeof(BrigSectionHeader) };
+
   BrigSections(const char *strings,
                const char *directives,
                const char *code,
@@ -201,16 +214,27 @@ struct BrigSections {
     stringsSize(stringsSize), directivesSize(directivesSize),
     codeSize(codeSize), operandsSize(operandsSize), debugSize(debugSize) {}
 
-  dir_iterator begin() const { return dir_iterator(directives + 4); };
+  dir_iterator begin() const { return dir_iterator(directives + HeaderSize); }
   dir_iterator end() const {
     return dir_iterator(directives + directivesSize);
-  };
-  inst_iterator code_begin() const { return inst_iterator(code + 4); };
-  inst_iterator code_end() const { return inst_iterator(code + codeSize); };
-  oper_iterator oper_begin() const { return oper_iterator(operands + 4); };
+  }
+
+  inst_iterator code_begin() const { return inst_iterator(code + HeaderSize); }
+  inst_iterator code_end() const { return inst_iterator(code + codeSize); }
+
+  oper_iterator oper_begin() const {
+    return oper_iterator(operands + HeaderSize);
+  }
   oper_iterator oper_end() const {
     return oper_iterator(operands + operandsSize);
-  };
+  }
+
+  debug_iterator debug_begin() const {
+    return debug_iterator(debug + HeaderSize);
+  }
+  debug_iterator debug_end() const {
+    return debug_iterator(debug + debugSize);
+  }
 };
 
 } // namespace brig

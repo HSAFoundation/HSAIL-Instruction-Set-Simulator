@@ -48,6 +48,14 @@ class BrigInstHelper {
     return (const BrigString *) (S_.strings + vec->regs[i]);
   }
 
+  const BrigString *getData(const BrigBlockNumeric *block) {
+    return (const BrigString *) (S_.strings + block->data);
+  }
+
+  const BrigString *getString(const BrigBlockString *block) {
+    return (const BrigString *) (S_.strings + block->string);
+  }
+
   template<class T>
   const BrigOperandBase *getReg(const T *t) const {
     if(!t->reg) return NULL;
@@ -73,6 +81,10 @@ class BrigInstHelper {
 
   // Instruction methods
   static std::string getInstName(const inst_iterator inst);
+
+  size_t getAddr(const inst_iterator inst) const {
+    return (char *) &*inst - S_.code;
+  }
 
   static bool hasDest(const inst_iterator inst) {
     // Most instruction have a destination. Check for each of the special cases.
