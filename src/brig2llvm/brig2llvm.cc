@@ -1084,6 +1084,8 @@ llvm::DIContext *runOnDebugInfo(const BrigModule &M) {
       close(nullFID);
       close(errFID);
 
+      delete objFile;
+
       return dic;
     }
   }
