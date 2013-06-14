@@ -90,6 +90,12 @@ template<class T> static T CeilVector(T t) { return map(Ceil, t); }
 FloatInst(define, Ceil, Unary)
 FloatVectorInst(define, Ceil, Unary)
 
+template<class T> static T Floor(T t) { return std::floor(t); }
+template<class T> static T FloorVector(T t) { return map(Floor, t); }
+FloatInst(define, Floor, Unary)
+FloatVectorInst(define, Floor, Unary)
+
+
 template<class T> static T Add(T x, T y) { return x + y; }
 template<class T> static T AddVector(T x, T y) { return map(Add, x, y); }
 SignedInst(define, Add, Binary)

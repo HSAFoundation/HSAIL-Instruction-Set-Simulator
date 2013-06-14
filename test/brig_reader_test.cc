@@ -419,6 +419,25 @@ TEST(BrigInstTest, VectorCeil) {
   }      
 }
 
+TEST(BrigInstTest, VectorFloor) {
+  {
+    const float testVec[] = { 1.0, 1.8 };
+    testInst("floor_f32", testVec);
+  }
+  {
+    const double testVec[] = { 1.0L, 1.8L };
+    testInst("floor_f64", testVec);
+  }
+  {
+    const float testVec[] = { -2.0 , -1.2 };
+    testInst("floor_f32", testVec);
+  }
+  {
+    const double testVec[] = { -2.0L , -1.2L };
+    testInst("floor_f64", testVec);
+  }      
+}
+
 TEST(BrigInstTest, VectorAdd) {
   const float testVec[] = { M_PI, M_PI, 0 };
   testInst("add_f32", testVec);
@@ -4580,6 +4599,33 @@ TEST(Instruction2Test, Ceil) {
   {
     const double testVec[] = { -1.0L , -1.8L };
     testInst("ceil_f64", testVec);
+  }
+}
+
+TEST(Instruction2Test, Floor) {
+  {
+    const float testVec[] = { 1.0, 1.8 };
+    testInst("floor_f32", testVec);
+  }
+  {
+    const double testVec[] = { 1.0L, 1.8L };
+    testInst("floor_f64", testVec);
+  }
+  {
+    const float testVec[] = { -2.0 , -1.2 };
+    testInst("floor_f32", testVec);
+  }
+  {
+    const double testVec[] = { -2.0L , -1.2L };
+    testInst("floor_f64", testVec);
+  }      
+  {
+    const float testVec[] = { -1.0,-1e-45 };
+    testInst("floor_f32", testVec);
+  }
+  {
+    const float testVec[] = { -0.0,-1e-45 };
+    testInst("floor_ftz_f32", testVec);
   }
 }
 

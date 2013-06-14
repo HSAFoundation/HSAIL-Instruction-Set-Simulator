@@ -77,6 +77,23 @@ template<class T> static void CeilLogic(T result, T a) {
 }
 TestAll(FloatInst, Ceil, Unary)
 
+template<class T> static void FloorLogic(T result, T a) {
+  if (isInf(a)) {
+    EXPECT_PRED1(isInf<T>, result);
+    return;
+  }
+  
+  if (isNan(a)) {
+    EXPECT_PRED1(isNan<T>, result);
+    return;
+  }
+
+  EXPECT_GE(result, a-1);
+  EXPECT_LE(result, a);
+  EXPECT_FLOAT_EQ(trunc(result), result);   
+}
+TestAll(FloatInst, Floor, Unary)
+
 template<class T> static void AddLogic(T result, T a, T b) {
   if (isNan(a) || isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
