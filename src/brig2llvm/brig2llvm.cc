@@ -1082,6 +1082,7 @@ llvm::DIContext *runOnDebugInfo(const BrigModule &M) {
 
       dup2(errFID, STDERR_FILENO);
       close(nullFID);
+      close(errFID);
 
       return dic;
     }
