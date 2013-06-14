@@ -44,7 +44,7 @@ static void printSourceLine(T &out, llvm::DILineInfo &info) {
   out << text;
 }
 
-static void foo(hsa::brig::BrigRegState *regs, size_t pc, void *data) {
+static void callback(hsa::brig::BrigRegState *regs, size_t pc, void *data) {
   hsa::brig::BrigProgram *BP = (hsa::brig::BrigProgram *) data;
   llvm::DILineInfo info = BP->getLineInfoForAddress(pc);
   std::cout << info.getFunctionName() << " at "
@@ -68,7 +68,8 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod, foo, &BP);
+  hsa::brig::BrigProgram BP =
+    hsa::brig::GenLLVM::getLLVMModule(mod, callback, &BP);
   if(!BP) {
     std::cerr << argv[0] << ": Translation failure\n";
     return 0;
