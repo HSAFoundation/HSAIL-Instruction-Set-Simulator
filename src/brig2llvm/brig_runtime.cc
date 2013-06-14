@@ -85,6 +85,11 @@ FloatInst(define, Neg, Unary)
 SignedVectorInst(define, Neg, Unary)
 FloatVectorInst(define, Neg, Unary)
 
+template<class T> static T Ceil(T t) { return std::ceil(t); }
+template<class T> static T CeilVector(T t) { return map(Ceil, t); }
+FloatInst(define, Ceil, Unary)
+FloatVectorInst(define, Ceil, Unary)
+
 template<class T> static T Add(T x, T y) { return x + y; }
 template<class T> static T AddVector(T x, T y) { return map(Add, x, y); }
 SignedInst(define, Add, Binary)

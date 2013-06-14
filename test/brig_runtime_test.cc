@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "brig_runtime_test_internal.h"
-
 #include "gtest/gtest.h"
 
 using hsa::brig::cmpResult;
@@ -62,6 +61,21 @@ TestAll(SignedInst,         Neg, Unary)
 TestAll(FloatInst,          Neg, Unary)
 TestAll(SignedVectorInst,   Neg, Unary)
 TestAll(FloatVectorInst,    Neg, Unary)
+
+template<class T> static void CeilLogic(T result, T a) {
+  if (isInf(a)) {
+    EXPECT_PRED1(isInf<T>, result);
+    return;
+  }  
+  if (isNan<T>(a)) {
+    EXPECT_PRED1(isNan<T>, result);
+    return;
+  }   
+  EXPECT_GE(result, a);
+  EXPECT_LE(result, a+1);
+  EXPECT_FLOAT_EQ(trunc(result), result);   
+}
+TestAll(FloatInst, Ceil, Unary)
 
 template<class T> static void AddLogic(T result, T a, T b) {
   if (isNan(a) || isNan(b)) {
