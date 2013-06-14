@@ -1,3 +1,12 @@
+//===- brigDebug.cc -------------------------------------------------------===//
+//
+//                     The HSA Simultor
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 #include "brig_engine.h"
 #include "brig_llvm.h"
 #include "brig_module.h"
