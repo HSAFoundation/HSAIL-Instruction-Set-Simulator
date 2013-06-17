@@ -652,8 +652,8 @@ extern "C" u32 Sad_u32_u8x4(u32 w, u32 x, u32 y) {
   return result + y;
 }
 
-extern "C" b32 Sad4Hi_b32(b32 w, b32 x, b32 y) {
-  b32 result = 0;
+extern "C" u32 Sadhi_u16x2_u8x4(u32 w, u32 x, u32 y) {
+  u32 result = 0;
   for (unsigned i = 0; i < 4; ++i) {
     result += Sad_u32_u32((w >> i * 8) & 0xFF,
                           (x >> i * 8) & 0xFF, 0);

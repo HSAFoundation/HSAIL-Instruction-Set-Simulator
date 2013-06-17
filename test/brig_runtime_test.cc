@@ -934,6 +934,17 @@ static void Sad_u32_u8x4_Logic(u32 result, u32 a, u32 b, u32 c) {
 extern "C" u32 Sad_u32_u8x4(u32, u32, u32);
 MakeTest(Sad_u32_u8x4, Sad_u32_u8x4_Logic)
 
+static void SadHi_u16x2_u8x4_Logic(u32 result, u32 a, u32 b, u32 c) {
+  EXPECT_EQ(((abs((a & 0xFF) - (b & 0xFF)) +
+              abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF)) +
+              abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF)) +
+              abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF))) << 16) +
+            c,
+            result);
+}
+extern "C" u32 Sadhi_u16x2_u8x4(u32, u32, u32);
+MakeTest(Sadhi_u16x2_u8x4, SadHi_u16x2_u8x4_Logic)
+
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)
 TestCmp(lt, a <  b)

@@ -5168,6 +5168,34 @@ TEST(Instruction4Test, Sad_u32_u8x4) {
   delete arg1;
 }
 
+TEST(Instruction4Test, SadHi_u16x2_u8x4) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+  "version 0:96:$full:$large;\n"
+  "\n"
+  "kernel &__instruction4_test_kernel(\n"
+  "        kernarg_u64 %result, \n"
+  "        kernarg_u32 %input1)\n"
+  "{\n"
+  "        sadhi_u16x2_u8x4 $s1, 0x22232232, 0x11111111, 0x1;\n"
+  "        ld_kernarg_u64 $d0, [%result];\n"
+  "        st_u32 $s1, [$d0] ;\n"
+
+  "        ret;\n"
+  "};\n");
+  EXPECT_TRUE(BP);
+  if (!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  uint32_t *arg1 = new uint32_t(0);
+  void *args[] = { &arg0, arg1 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x550001, *arg0);
+  delete arg0;
+  delete arg1;
+}
+
 TEST(Instruction4Test, Cmov_32) {
   hsa::brig::BrigProgram BP = TestHSAIL(
   "version 0:96:$full:$large;\n"
