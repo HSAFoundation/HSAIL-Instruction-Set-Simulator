@@ -274,7 +274,6 @@ template<class T> static T Mad(T x, T y, T z) {
 }
 SignedInst(define, Mad, Ternary)
 UnsignedInst(define, Mad, Ternary)
-FloatInst(define, Mad, Ternary)
 
 template<class T> static T Mul24(T x, T y) {
   typedef typename Int<T>::Int64Ty Int64Ty;

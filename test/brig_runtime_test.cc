@@ -336,7 +336,6 @@ template<class T> static void MadLogic(T result, T a, T b, T c) {
 }
 TestAll(SignedInst,         Mad, Ternary)
 TestAll(UnsignedInst,       Mad, Ternary)
-TestAll(FloatInst,          Mad, Ternary)
 
 template<class T> static void Mul24Logic(T result, T a, T b) {
   typedef typename Int<T>::Int64Ty Int64Ty;
