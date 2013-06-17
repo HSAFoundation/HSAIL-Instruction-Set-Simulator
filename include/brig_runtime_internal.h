@@ -564,6 +564,14 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
     return BitMask<TYPE>(t, u);                                \
   }
 
+#define SignedVectorMulHi(D)                \
+  SignedVectorInst(D, MulHi, Binary)        \
+  BinaryVector(D, MulHi, s64x2)             \
+
+#define UnsignedVectorMulHi(D)              \
+  UnsignedVectorInst(D, MulHi, Binary)      \
+  BinaryVector(D, MulHi, u64x2)      
+
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {
   typedef s64 Int64Ty;

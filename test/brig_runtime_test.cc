@@ -211,22 +211,6 @@ template<class T> static void MulSatVectorLogic(T result, T a, T b) {
 TestAll(SignedVectorInst,   MulSat, Binary)
 TestAll(UnsignedVectorInst, MulSat, Binary)
 
-template<class T> static void MulHiLogic(T result, T a, T b) {
-  typedef typename Int<T>::Int64Ty Int64Ty;
-  Int64Ty a64 = Int64Ty(a);
-  Int64Ty b64 = Int64Ty(b);
-  EXPECT_EQ(T((a64 * b64) >> Int<T>::Bits), result);
-}
-template<class T> static void MulHiVectorLogic(T result, T a, T b) {
-  ForEach(MulHiLogic, result, a, b);
-}
-declareBinary(MulHi, s32)
-declareBinary(MulHi, u32)
-MakeTest(MulHi_s32, MulHiLogic)
-MakeTest(MulHi_u32, MulHiLogic)
-TestAll(SignedVectorInst,   MulHi, Binary)
-TestAll(UnsignedVectorInst, MulHi, Binary)
-
 template<class T> static void SubSatLogic(T result, T a, T b) {
   s64 result64 = s64(a) - s64(b);
   if (result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);

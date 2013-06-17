@@ -499,6 +499,25 @@ TEST(BrigInstTest, VectorMul) {
   testInst("mul_s32", testVec);
 }
 
+TEST(BrigInstTest, VectorMulHi) {
+  {
+    const uint32_t testVec[] = { 0x1, 0x40000000, 4};
+    testInst("mulhi_u32", testVec);
+  }
+  {
+    const uint64_t testVec[] = { 0x1, 0x4000000000000000LL, 4 };
+    testInst("mulhi_u64", testVec);
+  }  
+  {
+    const int32_t testVec[] = { -0x1, 0x40000000, -4 };
+    testInst("mulhi_s32", testVec);
+  }
+  {
+    const int64_t testVec[] = {-0x3, 0x6000000000000000LL, -8 };
+    testInst("mulhi_s64", testVec);
+  }  
+}
+
 TEST(BrigInstTest, VectorSub) {
   const int32_t testVec[] = { 1, 2, 1 };
   testInst("sub_s32", testVec);
