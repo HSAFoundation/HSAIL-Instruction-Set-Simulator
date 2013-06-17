@@ -336,6 +336,9 @@ template<class T> static T Mad24Hi(T x, T y, T z) {
 SignedInst(define, Mad24Hi, Ternary)
 UnsignedInst(define, Mad24Hi, Ternary)
 
+template<class T> static T Fma(T x, T y, T z) { return fma(x, y, z); }
+FloatInst(define, Fma, Ternary)
+
 template<class T> static T Shl(T x, unsigned y) {
   return x << (y & Int<T>::ShiftMask);
 }
@@ -527,8 +530,8 @@ FloatInst(define, Sqrt, Unary)
 template<class T> static T Nsqrt(T x) { return std::sqrt(x); }
 FloatInst(define, Nsqrt, Unary)
 
-template<class T> static T Fma(T x, T y, T z) { return fma(x, y, z); }
-FloatInst(define, Fma, Ternary)
+template<class T> static T NFma(T x, T y, T z) { return fma(x, y, z); }
+FloatInst(define, NFma, Ternary)
 
 template<class T> static T CopySign(T x, T y) { return copysign(x, y); }
 FloatInst(define, CopySign, Binary)

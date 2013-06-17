@@ -5007,6 +5007,17 @@ TEST(Instruction4Test, Fma) {
   }
 }
 
+TEST(Instruction4Test, NFma) {
+  {
+    const float testVec[] = { 14.6, 1.1, 6, 8 };
+    testInst("nfma_f32", testVec);
+  }
+  {
+    const double testVec[] = { 18.884888, 1.666, 6, 8.888888 };
+    testInst("nfma_f64", testVec);
+  }
+}
+
 TEST(Instruction4Test, Bitselect) {
   {
     const uint32_t testVec[] = { 5, 6, 13, 7 };

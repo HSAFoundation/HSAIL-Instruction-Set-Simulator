@@ -42,6 +42,7 @@ GTEST_API_ int main(int argc, char **argv) {
       "BrigRuntimeTest.Shuffle*:"
       "BrigRuntimeTest.Cmov*:"
       "BrigRuntimeTest.Fma*:"
+      "BrigRuntimeTest.NFma*:"
       "BrigRuntimeTest.BitInsert*:"
       "BrigRuntimeTest.BitAlign_b32:"
       "BrigRuntimeTest.ByteAlign_b32:"
