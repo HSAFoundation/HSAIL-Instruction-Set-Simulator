@@ -3530,7 +3530,7 @@ TEST(BrigKernelTest, Example6) {
   EXPECT_TRUE(BP);
 }
 
-TEST(BrigInstTest, RegV2) {
+TEST(BrigInstTest, CombineV2_b32) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$small;\n"
     "kernel &regV2(kernarg_u32 %r, kernarg_u32 %x, kernarg_u32 %y)\n"
@@ -3560,7 +3560,37 @@ TEST(BrigInstTest, RegV2) {
   delete[] output;
 }
 
-TEST(BrigInstTest, RegV4) {
+TEST(BrigInstTest, CombineV2_b64) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "kernel &regV2(kernarg_u32 %r, kernarg_u64 %x, kernarg_u64 %y)\n"
+    "{\n"
+    "  ld_kernarg_u32 $s5, [%r];\n"
+    "  ld_kernarg_u64 $d0, [%x];\n"
+    "  ld_kernarg_u64 $d1, [%y];\n"
+    "  combine_v2_b128_b64 $q0, ($d0, $d1);\n"
+    "  st_b128 $q0, [$s5];\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if (!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("regV2");
+  uint64_t *x = new uint64_t(0x1234567887654321);
+  uint64_t *y = new uint64_t(0x9ABCDEF00FEDCBA9);
+  uint64_t *output = new uint64_t[2];
+  memset(output, 0, sizeof(uint64_t[2]));
+  void *args[] = { &output, x, y };
+  BE.launch(fun, args);
+  EXPECT_EQ(0x1234567887654321, output[0]);
+  EXPECT_EQ(0x9ABCDEF00FEDCBA9, output[1]);
+
+  delete x;
+  delete y;
+  delete[] output;
+}
+
+TEST(BrigInstTest, CombineV4) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$small;\n"
     "kernel &regV4(kernarg_u32 %r, kernarg_u32 %w, kernarg_u32 %x,\n"

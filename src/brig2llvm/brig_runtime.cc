@@ -478,6 +478,7 @@ extern "C" b128 Mov_b128(b128 x) { return x; }
 
 extern "C" b64 Combine_b64_b32(b64 x) { return x; }
 extern "C" b128 Combine_b128_b32(b128 x) { return x; }
+extern "C" b128 Combine_b128_b64(b128 x) { return x; }
 
 template<class T> static T Lda(T x) { return x; }
 UnsignedInst(define, Lda, Unary)
