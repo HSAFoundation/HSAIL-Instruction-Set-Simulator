@@ -105,6 +105,29 @@ template<class T> static T TruncVector(T t) { return map(Trunc, t); }
 FloatInst(define, Trunc, Unary)
 FloatVectorInst(define, Trunc, Unary)
 
+template<class T> static T Rint(T a) {
+  if (isNan(a) || isInf(a))
+    return a;
+
+  T ceil_a = std::ceil(a);
+  T floor_a = std::floor(a);
+
+  if (ceil_a - a < a - floor_a) {
+    return ceil_a;
+  } else if (ceil_a - a > a - floor_a) {
+    return floor_a;
+  } else {
+    uint64_t int_ceil = (uint64_t) ceil_a;
+    if (int_ceil % 2 == 0)
+      return ceil_a;
+    else
+      return floor_a;
+  }
+}
+template<class T> static T RintVector(T t) { return map(Rint, t); }
+FloatInst(define, Rint, Unary)
+FloatVectorInst(define, Rint, Unary)
+
 template<class T> static T Add(T x, T y) { return x + y; }
 template<class T> static T AddVector(T x, T y) { return map(Add, x, y); }
 SignedInst(define, Add, Binary)

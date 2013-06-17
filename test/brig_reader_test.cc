@@ -457,6 +457,33 @@ TEST(BrigInstTest, VectorTrunc) {
   }      
 }
 
+TEST(BrigInstTest, VectorRint) {
+  {
+    const float testVec[] = { 2.0, 1.7 };
+    testInst("rint_f32", testVec);
+  }
+  {
+    const float testVec[] = { 1.0, 1.2 };
+    testInst("rint_f32", testVec);
+  }
+  {
+    const float testVec[] = { 2.0, 1.5 };
+    testInst("rint_f32", testVec);
+  }
+  {
+    const double testVec[] = { 2.0L, 1.7L };
+    testInst("rint_f64", testVec);
+  }
+  {
+    const double testVec[] = { 1.0L, 1.2L };
+    testInst("rint_f64", testVec);
+  }
+  {
+    const double testVec[] = { 2.0L, 1.5L };
+    testInst("rint_f64", testVec);
+  }
+}
+
 TEST(BrigInstTest, VectorAdd) {
   const float testVec[] = { M_PI, M_PI, 0 };
   testInst("add_f32", testVec);
@@ -4665,6 +4692,33 @@ TEST(Instruction2Test, Trunc) {
     const double testVec[] = { -1.0L , -1.7L };
     testInst("trunc_f64", testVec);
   } 
+}
+
+TEST(Instruction2Test, Rint) {
+  {
+    const float testVec[] = { 2.0, 1.7 };
+    testInst("rint_f32", testVec);
+  }
+  {
+    const float testVec[] = { 1.0, 1.2 };
+    testInst("rint_f32", testVec);
+  }
+  {
+    const float testVec[] = { 2.0, 1.5 };
+    testInst("rint_f32", testVec);
+  }
+  {
+    const double testVec[] = { 2.0L, 1.7L };
+    testInst("rint_f64", testVec);
+  }
+  {
+    const double testVec[] = { 1.0L, 1.2L };
+    testInst("rint_f64", testVec);
+  }
+  {
+    const double testVec[] = { 2.0L, 1.5L };
+    testInst("rint_f64", testVec);
+  }
 }
 
 TEST(Instruction3Test, Add) {

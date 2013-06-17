@@ -108,6 +108,20 @@ template<class T> static void TruncLogic(T result, T a) {
 }
 TestAll(FloatInst, Trunc, Unary)
 
+template<class T> static void RintLogic(T result, T a) {
+  if (isInf(a)) {
+    EXPECT_PRED1(isInf<T>, result);
+    return;
+  }  
+  if (isNan(a)) {
+    EXPECT_PRED1(isNan<T>, result);
+    return;
+  }
+  
+  EXPECT_FLOAT_EQ(rint(a), result);
+}
+TestAll(FloatInst, Rint, Unary)
+
 template<class T> static void AddLogic(T result, T a, T b) {
   if (isNan(a) || isNan(b)) {
     EXPECT_PRED1(isNan<T>, result);
