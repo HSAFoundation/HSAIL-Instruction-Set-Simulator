@@ -255,6 +255,8 @@ struct FunScope {
         new llvm::AllocaInst(type, name, &entry);
     }
 
+    if (!hasDebugInfo()) return;
+
     BrigControlBlock firstCB = brigFun.begin();
     BrigInstHelper helper = firstCB.getInstHelper();
     inst_iterator firstInst = firstCB.begin();
@@ -292,6 +294,7 @@ struct FunScope {
 
   Callback getCallback() const { return parent.callback; }
   CallbackData getCBD() const { return parent.cbd; }
+  bool hasDebugInfo() const { return parent.debugInfo; }
 
   llvm::DILineInfo getLineInfo(size_t addr) const {
     llvm::DILineInfoSpecifier spec(
@@ -931,6 +934,8 @@ static void updateDebugInfo(llvm::BasicBlock &B,
                             const inst_iterator inst,
                             const BrigInstHelper &helper,
                             const FunScope &scope) {
+
+  if (!scope.hasDebugInfo()) return;
 
   llvm::DebugLoc loc = scope.getDebugLoc(helper.getAddr(inst));
 
