@@ -444,6 +444,11 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   extern "C"                                                            \
   void AtomicNoRet ## FUNC ## _ ## TYPE (TYPE *t, TYPE u, TYPE v);
 
+#define defineBitMask(TYPE)                              \
+  extern "C" TYPE BitMask ## _ ## TYPE (b32 t, b32 u) {  \
+    return BitMask<TYPE>(t, u);                                \
+  }
+
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {
   typedef s64 Int64Ty;

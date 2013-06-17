@@ -431,6 +431,16 @@ template<class T> static T BitInsert(T w, T x, b32 y, b32 z) {
 defineQuaternary(BitInsert, b32)
 defineQuaternary(BitInsert, b64)
 
+template<class T> static T BitMask(b32 y, b32 z) {
+  unsigned offset = Int<T>::ShiftMask & y;
+  unsigned width  = Int<T>::ShiftMask & z;
+  if (!width) return 0;
+  T mask = (1 << width) - 1;
+  return mask << offset;
+}
+defineBitMask(b32)
+defineBitMask(b64)
+
 template<class T> static T BitSelect(T x, T y, T z) {
   return (y & x) | (z & ~x);
 }

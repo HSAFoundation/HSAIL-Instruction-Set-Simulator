@@ -4996,6 +4996,13 @@ TEST(Instruction3Test, Min) {
   }
 }
 
+TEST(Instruction3Test, BitMask) {
+  {
+    const uint32_t testVec[] = {0x1e00, 9, 4};
+    testInst("bitmask_b32", testVec);
+  }
+}
+
 TEST(Instruction4Test, Fma) {
   {
     const float testVec[] = { 14.6, 1.1, 6, 8 };
