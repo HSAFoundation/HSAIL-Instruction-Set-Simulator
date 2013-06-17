@@ -47,7 +47,8 @@ GTEST_API_ int main(int argc, char **argv) {
       "BrigRuntimeTest.BitAlign_b32:"
       "BrigRuntimeTest.ByteAlign_b32:"
       "BrigRuntimeTest.Lerp_b32:"
-      "BrigRuntimeTest.Sad*_b32:"
+      "BrigRuntimeTest.Sad_u32_u16x2:"
+      "BrigRuntimeTest.Sad_u32_u8x4:"
       "BrigRuntimeTest.*Cmp_*:"
       "BrigRuntimeTest.Atomic*Cas_*:";
 
