@@ -5033,6 +5033,25 @@ TEST(Instruction3Test, BitMask) {
   }
 }
 
+TEST(Instruction3Test, Unpack) {
+  {
+    const uint32_t testVec[] = {0x11ff, 0x11ff00ff, 1 };
+    testInst("unpack_u32_u16x2", testVec); 
+  }
+  {
+    const uint32_t testVec[] = {0x0, 0x11ff00ff, 1 };
+    testInst("unpack_u32_u8x4", testVec); 
+  }
+  {
+    const uint32_t testVec[] = {0xff, 0x11ff00ff, 0 };
+    testInst("unpack_u32_u16x2", testVec); 
+  }  
+  {
+    const uint32_t testVec[] = {0x11, 0x11ff00ff, 3 };
+    testInst("unpack_u32_u8x4", testVec); 
+  }
+}
+
 TEST(Instruction4Test, Fma) {
   {
     const float testVec[] = { 14.6, 1.1, 6, 8 };

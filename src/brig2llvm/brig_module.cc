@@ -312,6 +312,7 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(SetDetectExcept, SETDETECTEXCEPT);
       caseInst(DispatchPtr, DISPATCHPTR);
       caseInst(QPtr, QPTR);
+      caseInst(Unpack, UNPACK);
     default:
       check(false, "Unrecognized opcode");
       return false;

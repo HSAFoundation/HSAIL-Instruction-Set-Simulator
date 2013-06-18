@@ -173,6 +173,7 @@ static const char *getBaseName(const inst_iterator inst) {
     caseOper(DispatchPtr, DISPATCHPTR);
     caseOper(QPtr, QPTR);
     caseOper(Pack, PACK);
+    caseOper(Unpack, UNPACK);
   default:
     assert(false && "Unknown instruction");
   }

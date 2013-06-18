@@ -381,6 +381,14 @@ template<class D, class S> static D Pack(D src0, S src1, u32 src2) {
 }
 PackInst(define)
 
+template<class D, class S> static D Unpack(S src0, u32 src1) {
+  if (src1 >= S::Len)
+    return 0;
+  else
+    return D(src0[src1]);
+}
+UnpackInst2(define)
+
 template<class T> static T And(T x, T y) { return x & y; }
 BitInst(define, And, Binary)
 
