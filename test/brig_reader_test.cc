@@ -416,7 +416,7 @@ TEST(BrigInstTest, VectorCeil) {
   {
     const double testVec[] = { -1.0L , -1.8L };
     testInst("ceil_f64", testVec);
-  }      
+  }
 }
 
 TEST(BrigInstTest, VectorFloor) {
@@ -435,7 +435,7 @@ TEST(BrigInstTest, VectorFloor) {
   {
     const double testVec[] = { -2.0L , -1.2L };
     testInst("floor_f64", testVec);
-  }      
+  }
 }
 
 TEST(BrigInstTest, VectorTrunc) {
@@ -454,7 +454,7 @@ TEST(BrigInstTest, VectorTrunc) {
   {
     const double testVec[] = { -1.0L , -1.7L };
     testInst("trunc_f64", testVec);
-  }      
+  }
 }
 
 TEST(BrigInstTest, VectorRint) {
@@ -4332,7 +4332,7 @@ TEST(Instruction2Test, Abs) {
     //_s32x2(-1,-2)
     const uint64_t testVec[] = { 0x200000002LL, 0xfffffffffffffffeLL };
     testInst("abs_s_s32x2", testVec);
-  }  
+  }
 }
 
 TEST(Instruction2Test, Neg) {
@@ -4397,7 +4397,7 @@ TEST(Instruction2Test, Neg) {
     //_s32x2(-2,-3)
     const uint64_t testVec[] = { 0x300000003LL, 0xfffffffefffffffdLL };
     testInst("neg_s_s32x2", testVec);
-  }  
+  }
   {
     const float testVec[] = { 1.2f, -1.2f };
     testInst("neg_f32", testVec);
@@ -4664,7 +4664,7 @@ TEST(Instruction2Test, Floor) {
   {
     const double testVec[] = { -2.0L , -1.2L };
     testInst("floor_f64", testVec);
-  }      
+  }
   {
     const float testVec[] = { -1.0,-1e-45 };
     testInst("floor_f32", testVec);
@@ -4691,7 +4691,7 @@ TEST(Instruction2Test, Trunc) {
   {
     const double testVec[] = { -1.0L , -1.7L };
     testInst("trunc_f64", testVec);
-  } 
+  }
 }
 
 TEST(Instruction2Test, Rint) {
@@ -5766,4 +5766,29 @@ TEST(BrigInstTest, PackedShl) {
     const uint32_t testVec[] = { 0, 0, 0 };
     testInst("shl_s8x4", testVec);
   }
+}
+
+TEST(DebugTest, Square) {
+  const char filename[] = XSTR(BIN_PATH) "/square.o";
+  BrigReader *reader = BrigReader::createBrigReader(filename);
+  EXPECT_TRUE(reader);
+  if (!reader) return;
+
+  hsa::brig::BrigModule mod(*reader, &llvm::errs());
+  EXPECT_TRUE(mod.isValid());
+  if (!mod.isValid()) return;
+
+  hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
+  EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("run");
+  float *out = new float(0);
+  float *in = new float(4);
+  void *args[] = { &out, &in };
+  BE.launch(fun, args);
+  EXPECT_EQ(16.0, *out);
+  delete in;
+  delete out;
 }

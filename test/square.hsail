@@ -1,0 +1,21 @@
+version 0:96:$full:$large;
+
+kernel &run(
+   kernarg_u64 %_out,
+   kernarg_u64 %_in
+){
+   ld_kernarg_u64 $d0, [%_out];
+   ld_kernarg_u64 $d1, [%_in];
+
+   @block0:
+   workitemabsid_u32 $s2, 0;
+   cvt_s64_s32 $d2, $s2;
+   mad_u64 $d3, $d2, 4, $d1;
+   ld_global_f32 $s3, [$d3];
+   mad_u64 $d4, $d2, 4, $d1;
+   ld_global_f32 $s4, [$d4];
+   mul_f32 $s5, $s3, $s4;
+   mad_u64 $d4, $d2, 4, $d0;
+   st_global_f32 $s5, [$d4];
+   ret;
+  };
