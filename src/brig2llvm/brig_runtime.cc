@@ -372,6 +372,15 @@ template<class T> static T UnpackHi(T x, T y) {
 }
 UnpackInst(define, UnpackHi, Binary)
 
+template<class D, class S> static D Pack(D src0, S src1, u32 src2) {
+  D result = src0;
+  unsigned Len = D::Len;
+  unsigned index = src2 & (Len-1);
+  result[index] = src1;
+  return result;
+}
+PackInst(define)
+
 template<class T> static T And(T x, T y) { return x & y; }
 BitInst(define, And, Binary)
 

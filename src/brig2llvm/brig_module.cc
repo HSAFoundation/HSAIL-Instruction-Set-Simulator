@@ -278,6 +278,7 @@ bool BrigModule::validateInstructions(void) const {
       caseInst(Sadhi, SADHI);
       caseInst(PackCvt, PACKCVT);
       caseInst(UnpackCvt, UNPACKCVT);
+      caseInst(Pack, PACK);
       caseInst(AtomicNoRetImage, ATOMICIMAGENORET);
       caseInst(QueryImageArray, QUERYIMAGEARRAY);
       caseInst(QueryImageDepth, QUERYIMAGEDEPTH);
@@ -3220,7 +3221,8 @@ bool BrigModule::validatePack(const inst_iterator inst) const {
                  isa<BrigOperandImmed>(src1), "Src must be reg or immed");
 
   oper_iterator src2(S_.operands + inst->operands[3]);
-  valid &= check(isa<BrigOperandImmed>(src2), "Src must be immed");
+  valid &= check(isa<BrigOperandReg>(src1) ||
+                 isa<BrigOperandImmed>(src2), "Src must be reg or immed");
 
   for (int i = 0; i < 4; ++i) {
     oper_iterator reg(S_.operands + inst->operands[i]);

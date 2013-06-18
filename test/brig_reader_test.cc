@@ -5289,6 +5289,21 @@ TEST(Instruction4Test, Cmov_64) {
   delete arg1;
 }
 
+TEST(Instruction4Test, Pack) {
+  {
+    const uint32_t testVec[] = {0xff1111ff, 0x11ff, 0xff11, 1 };
+    testInst("pack_u16x2_u32", testVec); 
+  }
+  {
+    const uint32_t testVec[] = {0x22ff, 0x11ff, 0xff22, 1 };
+    testInst("pack_u8x4_u32", testVec); 
+  }
+  {
+    const uint32_t testVec[] = {0x2211ff, 0x11ff, 0xff22, 2 };
+    testInst("pack_u8x4_u32", testVec); 
+  }
+}
+
 TEST(AtomTest, And) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$large;\n"

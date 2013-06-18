@@ -146,7 +146,53 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   /* D ## NARY(INST, f16x2) */                  \
   /* D ## NARY(INST, f16x4) */                  \
   D ## NARY(INST, f32x2)
-
+  
+#define PackInst(D)                             \
+  D ## Pack(u8x4, u32)                          \
+  D ## Pack(u8x8, u32)                          \
+  D ## Pack(u8x16, u32)                         \
+  D ## Pack(u16x2, u32)                         \
+  D ## Pack(u16x4, u32)                         \
+  D ## Pack(u16x8, u32)                         \
+  D ## Pack(u32x2, u32)                         \
+  D ## Pack(u32x4, u32)                         \
+                                                \
+  D ## Pack(u8x4, u64)                          \
+  D ## Pack(u8x8, u64)                          \
+  D ## Pack(u8x16, u64)                         \
+  D ## Pack(u16x2, u64)                         \
+  D ## Pack(u16x4, u64)                         \
+  D ## Pack(u16x8, u64)                         \
+  D ## Pack(u32x2, u64)                         \
+  D ## Pack(u32x4, u64)                         \
+  D ## Pack(u64x2, u64)                         \
+                                                \
+  D ## Pack(s8x4, s32)                          \
+  D ## Pack(s8x8, s32)                          \
+  D ## Pack(s8x16, s32)                         \
+  D ## Pack(s16x2, s32)                         \
+  D ## Pack(s16x4, s32)                         \
+  D ## Pack(s16x8, s32)                         \
+  D ## Pack(s32x2, s32)                         \
+  D ## Pack(s32x4, s32)                         \
+                                                \
+  D ## Pack(s8x4, s64)                          \
+  D ## Pack(s8x8, s64)                          \
+  D ## Pack(s8x16, s64)                         \
+  D ## Pack(s16x2, s64)                         \
+  D ## Pack(s16x4, s64)                         \
+  D ## Pack(s16x8, s64)                         \
+  D ## Pack(s32x2, s64)                         \
+  D ## Pack(s32x4, s64)                         \
+  D ## Pack(s64x2, s64)                         \
+                                                \
+  D ## Pack(f32x2, f32)                         \
+  D ## Pack(f32x4, f32)                         \
+                                                \
+  D ## Pack(f32x2, f64)                         \
+  D ## Pack(f32x4, f64)                         \
+  D ## Pack(f64x2, f64)   
+                                              
 #define FloatVectorInst(D,INST,NARY)            \
   /* NARY ## Vector(D, INST, f16x2) */          \
   /* NARY ## Vector(D, INST, f16x4) */          \
@@ -403,6 +449,19 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
     Atomic ## FUNC(t, u, v);                                            \
   }
 
+#define declarePack(DTYPE,STYPE)                             \
+  extern "C" DTYPE Pack ## _ ## DTYPE ## _ ## STYPE(         \
+                                                DTYPE src0,  \
+                                                STYPE src1,  \
+                                                u32   src2);
+
+#define definePack(DTYPE, STYPE)                             \
+  extern "C" DTYPE Pack ## _ ## DTYPE ## _ ## STYPE(         \
+                                                DTYPE src0,  \
+                                                STYPE src1,  \
+                                                u32   src2){ \
+    return Pack(src0, src1, src2);                           \
+  }                                               
 
 #define declareUnary(FUNC,TYPE)                 \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t);
