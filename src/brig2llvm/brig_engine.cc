@@ -141,6 +141,10 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
     builder.setJITMemoryManager(JMM);
   }
 
+  // If SIMNOOPT is defined, optimization will be disabled to facilitate
+  // debugging
+  if(getenv("SIMNOOPT")) optLevel = '0';
+
   llvm::CodeGenOpt::Level OLvl = llvm::CodeGenOpt::Default;
   switch (optLevel) {
   default:
