@@ -354,7 +354,8 @@ std::string BrigInstHelper::getInstName(const inst_iterator inst) {
     const char *predRaw =
       getPredName(BrigCompareOperation(cmp->compare));
     std::string pred = llvm::StringRef(predRaw).lower();
-    return std::string(base) + pred + type + srcType;
+    std::string pack = llvm::StringRef(packing).lower();
+    return std::string(base) + pred + pack + type + srcType;
   }
 
   if (const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst)) {

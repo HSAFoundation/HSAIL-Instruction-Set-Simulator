@@ -162,8 +162,9 @@
   /* MakeTest(Cmp_ ## FUNC ## _f16_ ## TYPE, Cmp_ ## FUNC ## Logic) */  \
   MakeTest(Cmp_ ## FUNC ## _f32_ ## TYPE, Cmp_ ## FUNC ## Logic)
 
-#define MakePackedCmpTest(FUNC,TYPE)                                    \
-  MakeVectorTest(PackedCmp_ ## FUNC ## _ ## TYPE, PackedCmp_ ## FUNC ## Logic)
+#define MakePackedCmpTest(FUNC,RET,TYPE)                    \
+  MakeVectorTest(Cmp_ ## FUNC ## _pp_ ## RET ## _ ## TYPE,  \
+                 PackedCmp_ ## FUNC ## Logic)
 
 #define TestCmp(FUNC,PRED)                                  \
   template<class R, class T>                                \
@@ -199,30 +200,30 @@
   /* Cmp(declare, Cmp_ ## FUNC, f16) */                     \
   FCmp(declare, FUNC, f32)                                  \
   FCmp(declare, FUNC, f64)                                  \
-  PackedCmp(declare, FUNC, u8x4)                            \
-  PackedCmp(declare, FUNC, u8x8)                            \
-  PackedCmp(declare, FUNC, u8x16)                           \
-  PackedCmp(declare, FUNC, u16x2)                           \
-  PackedCmp(declare, FUNC, u16x4)                           \
-  PackedCmp(declare, FUNC, u16x8)                           \
-  PackedCmp(declare, FUNC, u32x2)                           \
-  PackedCmp(declare, FUNC, u32x4)                           \
-  PackedCmp(declare, FUNC, u64x2)                           \
-  PackedCmp(declare, FUNC, s8x4)                            \
-  PackedCmp(declare, FUNC, s8x8)                            \
-  PackedCmp(declare, FUNC, s8x16)                           \
-  PackedCmp(declare, FUNC, s16x2)                           \
-  PackedCmp(declare, FUNC, s16x4)                           \
-  PackedCmp(declare, FUNC, s16x8)                           \
-  PackedCmp(declare, FUNC, s32x2)                           \
-  PackedCmp(declare, FUNC, s32x4)                           \
-  PackedCmp(declare, FUNC, s64x2)                           \
-  /*FPackedCmp(declare, FUNC, f16x2) */                     \
-  /*FPackedCmp(declare, FUNC, f16x4) */                     \
-  /*FPackedCmp(declare, FUNC, f16x8) */                     \
-  FPackedCmp(declare, FUNC, f32x2)                          \
-  FPackedCmp(declare, FUNC, f32x4)                          \
-  FPackedCmp(declare, FUNC, f64x2)                          \
+  PackedCmp(declare, FUNC, u8x4, u8x4)                      \
+  PackedCmp(declare, FUNC, u8x8, u8x8)                      \
+  PackedCmp(declare, FUNC, u8x16, u8x16)                    \
+  PackedCmp(declare, FUNC, u16x2, u16x2)                    \
+  PackedCmp(declare, FUNC, u16x4, u16x4)                    \
+  PackedCmp(declare, FUNC, u16x8, u16x8)                    \
+  PackedCmp(declare, FUNC, u32x2, u32x2)                    \
+  PackedCmp(declare, FUNC, u32x4, u32x4)                    \
+  PackedCmp(declare, FUNC, u64x2, u64x2)                    \
+  PackedCmp(declare, FUNC, u8x4, s8x4)                      \
+  PackedCmp(declare, FUNC, u8x8, s8x8)                      \
+  PackedCmp(declare, FUNC, u8x16, s8x16)                    \
+  PackedCmp(declare, FUNC, u16x2, s16x2)                    \
+  PackedCmp(declare, FUNC, u16x4, s16x4)                    \
+  PackedCmp(declare, FUNC, u16x8, s16x8)                    \
+  PackedCmp(declare, FUNC, u32x2, s32x2)                    \
+  PackedCmp(declare, FUNC, u32x4, s32x4)                    \
+  PackedCmp(declare, FUNC, u64x2, s64x2)                    \
+  /*FPackedCmp(declare, FUNC, u16x2, f16x2) */              \
+  /*FPackedCmp(declare, FUNC, u16x4 f16x4) */               \
+  /*FPackedCmp(declare, FUNC, u16x8, f16x8) */              \
+  FPackedCmp(declare, FUNC, u32x2, f32x2)                   \
+  FPackedCmp(declare, FUNC, u32x4, f32x4)                   \
+  FPackedCmp(declare, FUNC, u64x2, f64x2)                   \
   MakeCmpTest(FUNC, b32)                                    \
   MakeCmpTest(FUNC, b64)                                    \
   MakeCmpTest(FUNC, s32)                                    \
@@ -234,36 +235,36 @@
   MakeCmpTest(FUNC ## u, f32)                               \
   MakeCmpTest(FUNC, f64)                                    \
   MakeCmpTest(FUNC ## u, f64)                               \
-  MakePackedCmpTest(FUNC, u8x4)                             \
-  MakePackedCmpTest(FUNC, u8x8)                             \
-  MakePackedCmpTest(FUNC, u8x16)                            \
-  MakePackedCmpTest(FUNC, u16x2)                            \
-  MakePackedCmpTest(FUNC, u16x4)                            \
-  MakePackedCmpTest(FUNC, u16x8)                            \
-  MakePackedCmpTest(FUNC, u32x2)                            \
-  MakePackedCmpTest(FUNC, u32x4)                            \
-  MakePackedCmpTest(FUNC, u64x2)                            \
-  MakePackedCmpTest(FUNC, s8x4)                             \
-  MakePackedCmpTest(FUNC, s8x8)                             \
-  MakePackedCmpTest(FUNC, s8x16)                            \
-  MakePackedCmpTest(FUNC, s16x2)                            \
-  MakePackedCmpTest(FUNC, s16x4)                            \
-  MakePackedCmpTest(FUNC, s16x8)                            \
-  MakePackedCmpTest(FUNC, s32x2)                            \
-  MakePackedCmpTest(FUNC, s32x4)                            \
-  MakePackedCmpTest(FUNC, s64x2)                            \
-  /* MakePackedCmpTest(FUNC, f16x2) */                      \
-  /* MakePackedCmpTest(FUNC, f16x4) */                      \
-  /* MakePackedCmpTest(FUNC, f16x2) */                      \
-  MakePackedCmpTest(FUNC, f32x2)                            \
-  MakePackedCmpTest(FUNC, f32x4)                            \
-  MakePackedCmpTest(FUNC, f64x2)                            \
+  MakePackedCmpTest(FUNC, u8x4, u8x4)                       \
+  MakePackedCmpTest(FUNC, u8x8, u8x8)                       \
+  MakePackedCmpTest(FUNC, u8x16, u8x16)                     \
+  MakePackedCmpTest(FUNC, u16x2, u16x2)                     \
+  MakePackedCmpTest(FUNC, u16x4, u16x4)                     \
+  MakePackedCmpTest(FUNC, u16x8, u16x8)                     \
+  MakePackedCmpTest(FUNC, u32x2, u32x2)                     \
+  MakePackedCmpTest(FUNC, u32x4, u32x4)                     \
+  MakePackedCmpTest(FUNC, u64x2, u64x2)                     \
+  MakePackedCmpTest(FUNC, u8x4, s8x4)                       \
+  MakePackedCmpTest(FUNC, u8x8, s8x8)                       \
+  MakePackedCmpTest(FUNC, u8x16, s8x16)                     \
+  MakePackedCmpTest(FUNC, u16x2, s16x2)                     \
+  MakePackedCmpTest(FUNC, u16x4, s16x4)                     \
+  MakePackedCmpTest(FUNC, u16x8, s16x8)                     \
+  MakePackedCmpTest(FUNC, u32x2, s32x2)                     \
+  MakePackedCmpTest(FUNC, u32x4, s32x4)                     \
+  MakePackedCmpTest(FUNC, u64x2, s64x2)                     \
+  /* MakePackedCmpTest(FUNC, u16x2, f16x2) */               \
+  /* MakePackedCmpTest(FUNC, u16x4, f16x4) */               \
+  /* MakePackedCmpTest(FUNC, u16x2, f16x2) */               \
+  MakePackedCmpTest(FUNC, u32x2, f32x2)                     \
+  MakePackedCmpTest(FUNC, u32x4, f32x4)                     \
+  MakePackedCmpTest(FUNC, u64x2, f64x2)                     \
   /* MakePackedCmpTest(FUNC ## u, f16x2) */                 \
   /* MakePackedCmpTest(FUNC ## u, f16x4) */                 \
   /* MakePackedCmpTest(FUNC ## u, f16x2) */                 \
-  MakePackedCmpTest(FUNC ## u, f32x2)                       \
-  MakePackedCmpTest(FUNC ## u, f32x4)                       \
-  MakePackedCmpTest(FUNC ## u, f64x2)
+  MakePackedCmpTest(FUNC ## u, u32x2, f32x2)                \
+  MakePackedCmpTest(FUNC ## u, u32x4, f32x4)                \
+  MakePackedCmpTest(FUNC ## u, u64x2, f64x2)
 
 
 #define MakeCvtF2FsTest(TYPE)                   \

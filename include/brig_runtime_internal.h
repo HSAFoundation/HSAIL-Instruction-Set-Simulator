@@ -277,12 +277,12 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## Atomic ## NARY(INST, u32)                \
   D ## Atomic ## NARY(INST, u64)
 
-#define CmpImpl(FUNC,PRED)                                    \
-  template<class T> static T Cmp_ ## FUNC (T x, T y) {        \
-    return cmpResult<T>(PRED);                                \
-  }                                                           \
-  template<class T> static T PackedCmp_ ## FUNC (T x, T y) {  \
-    return map(Cmp_ ## FUNC, x, y);                           \
+#define CmpImpl(FUNC,PRED)                                      \
+  template<class T> static T Cmp_ ## FUNC (T x, T y) {          \
+    return cmpResult<T>(PRED);                                  \
+  }                                                             \
+  template<class T> static T Cmp_ ## FUNC ## _pp_ (T x, T y) {  \
+    return map(Cmp_ ## FUNC, x, y);                             \
   }
 
 #define CmpInst(FUNC,PRED)                              \
@@ -299,30 +299,30 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   /* Cmp(define, Cmp_ ## FUNC, f16) */                  \
   FCmp(define, FUNC, f32)                               \
   FCmp(define, FUNC, f64)                               \
-  PackedCmp(define, FUNC, u8x4)                         \
-  PackedCmp(define, FUNC, u8x8)                         \
-  PackedCmp(define, FUNC, u8x16)                        \
-  PackedCmp(define, FUNC, u16x2)                        \
-  PackedCmp(define, FUNC, u16x4)                        \
-  PackedCmp(define, FUNC, u16x8)                        \
-  PackedCmp(define, FUNC, u32x2)                        \
-  PackedCmp(define, FUNC, u32x4)                        \
-  PackedCmp(define, FUNC, u64x2)                        \
-  PackedCmp(define, FUNC, s8x4)                         \
-  PackedCmp(define, FUNC, s8x8)                         \
-  PackedCmp(define, FUNC, s8x16)                        \
-  PackedCmp(define, FUNC, s16x2)                        \
-  PackedCmp(define, FUNC, s16x4)                        \
-  PackedCmp(define, FUNC, s16x8)                        \
-  PackedCmp(define, FUNC, s32x2)                        \
-  PackedCmp(define, FUNC, s32x4)                        \
-  PackedCmp(define, FUNC, s64x2)                        \
-  /*FPackedCmp(define, FUNC, f16x2) */                  \
-  /*FPackedCmp(define, FUNC, f16x4) */                  \
-  /*FPackedCmp(define, FUNC, f16x8) */                  \
-  FPackedCmp(define, FUNC, f32x2)                       \
-  FPackedCmp(define, FUNC, f32x4)                       \
-  FPackedCmp(define, FUNC, f64x2)
+  PackedCmp(define, FUNC, u8x4, u8x4)                   \
+  PackedCmp(define, FUNC, u8x8, u8x8)                   \
+  PackedCmp(define, FUNC, u8x16, u8x16)                 \
+  PackedCmp(define, FUNC, u16x2, u16x2)                 \
+  PackedCmp(define, FUNC, u16x4, u16x4)                 \
+  PackedCmp(define, FUNC, u16x8, u16x8)                 \
+  PackedCmp(define, FUNC, u32x2, u32x2)                 \
+  PackedCmp(define, FUNC, u32x4, u32x4)                 \
+  PackedCmp(define, FUNC, u64x2, u64x2)                 \
+  PackedCmp(define, FUNC, u8x4, s8x4)                   \
+  PackedCmp(define, FUNC, u8x8, s8x8)                   \
+  PackedCmp(define, FUNC, u8x16, s8x16)                 \
+  PackedCmp(define, FUNC, u16x2, s16x2)                 \
+  PackedCmp(define, FUNC, u16x4, s16x4)                 \
+  PackedCmp(define, FUNC, u16x8, s16x8)                 \
+  PackedCmp(define, FUNC, u32x2, s32x2)                 \
+  PackedCmp(define, FUNC, u32x4, s32x4)                 \
+  PackedCmp(define, FUNC, u64x2, s64x2)                 \
+  /*FPackedCmp(define, FUNC, u16x2, f16x2) */           \
+  /*FPackedCmp(define, FUNC, u16x4 f16x4) */            \
+  /*FPackedCmp(define, FUNC, u16x8, f16x8) */           \
+  FPackedCmp(define, FUNC, u32x2, f32x2)                \
+  FPackedCmp(define, FUNC, u32x4, f32x4)                \
+  FPackedCmp(define, FUNC, u64x2, f64x2)
 
 #define FCmp(D,FUNC,TYPE)                       \
   Cmp(D, FUNC, TYPE)                            \
@@ -333,27 +333,33 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
 #define Cmp(D,FUNC,TYPE)                        \
   D ## CmpRet(Cmp_ ## FUNC, b1, TYPE)           \
   D ## CmpRet(Cmp_ ## FUNC, b32, TYPE)          \
+  D ## CmpRet(Cmp_ ## FUNC, b64, TYPE)          \
   D ## CmpRet(Cmp_ ## FUNC, s32, TYPE)          \
+  D ## CmpRet(Cmp_ ## FUNC, s64, TYPE)          \
+  D ## CmpRet(Cmp_ ## FUNC, u8, TYPE)           \
+  D ## CmpRet(Cmp_ ## FUNC, u16, TYPE)          \
+  D ## CmpRet(Cmp_ ## FUNC, u64, TYPE)          \
   D ## CmpRet(Cmp_ ## FUNC, u32, TYPE)          \
   /* D ## CmpRet(Cmp_ ## FUNC, f16, TYPE) */    \
-  D ## CmpRet(Cmp_ ## FUNC, f32, TYPE)
+  D ## CmpRet(Cmp_ ## FUNC, f32, TYPE)          \
+  D ## CmpRet(Cmp_ ## FUNC, f64, TYPE)
 
-#define FPackedCmp(D,FUNC,TYPE)                          \
-  PackedCmp(D, FUNC, TYPE)                               \
-  PackedCmp(D, s ## FUNC, TYPE)                          \
-  PackedCmp(D, FUNC ## u, TYPE)                          \
-  PackedCmp(D, s ## FUNC ## u, TYPE)
+#define FPackedCmp(D,FUNC, RET, TYPE)                         \
+  PackedCmp(D, FUNC, RET, TYPE)                               \
+  PackedCmp(D, s ## FUNC, RET, TYPE)                          \
+  PackedCmp(D, FUNC ## u, RET, TYPE)                          \
+  PackedCmp(D, s ## FUNC ## u, RET, TYPE)
 
-#define PackedCmp(D,FUNC,TYPE)                           \
-  D ## PackedCmp(PackedCmp_ ## FUNC, TYPE)
+#define PackedCmp(D,FUNC,RET,TYPE)                            \
+  D ## PackedCmp(FUNC, RET, TYPE)
 
-#define definePackedCmp(FUNC,TYPE)                       \
-  extern "C" TYPE FUNC ## _ ## TYPE(TYPE t, TYPE u) {    \
-    return FUNC(t, u);                                   \
-  }
+#define definePackedCmp(FUNC,RET,TYPE)                                       \
+  extern "C" TYPE Cmp_ ## FUNC ## _pp_ ## RET ## _ ## TYPE(TYPE t, TYPE u) { \
+    return Cmp_ ## FUNC ## _pp_ (t, u);                                      \
+}
 
-#define declarePackedCmp(FUNC,TYPE)                      \
-  extern "C" TYPE FUNC ## _ ## TYPE(TYPE t, TYPE u);
+#define declarePackedCmp(FUNC,RET,TYPE)                                     \
+  extern "C" TYPE Cmp_ ## FUNC ## _pp_ ## RET ## _ ## TYPE(TYPE t, TYPE u);
 
 #define defineCmpRet(FUNC,RET,TYPE)                                 \
   extern "C" bool FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u) {  \
