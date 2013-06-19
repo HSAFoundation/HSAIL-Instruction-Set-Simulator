@@ -2016,7 +2016,7 @@ bool BrigModule::validate(const BrigOperandImmed *operand) const {
     valid &= check(operand->bytes[i] == 0,
                    "bytes in BrigOperandImmed from byteCount "
                    "to end must be zero");
-  } 
+  }
   */
   return valid;
 }
@@ -4723,7 +4723,7 @@ bool BrigModule::validateWorkItemAbsId(const inst_iterator inst) const {
   valid &= check(inst->type == BRIG_TYPE_U32,
                  "Invalid type, must be u32");
   valid &= validateSpecialInst(inst, 1);
-  return true;
+  return valid;
 }
 
 bool BrigModule::validateWorkItemFlatAbsId(const inst_iterator inst) const {

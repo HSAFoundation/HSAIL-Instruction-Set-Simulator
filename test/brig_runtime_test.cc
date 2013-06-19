@@ -66,14 +66,14 @@ template<class T> static void CeilLogic(T result, T a) {
   if (isInf(a)) {
     EXPECT_PRED1(isInf<T>, result);
     return;
-  }  
+  }
   if (isNan<T>(a)) {
     EXPECT_PRED1(isNan<T>, result);
     return;
-  }   
+  }
   EXPECT_GE(result, a);
   EXPECT_LE(result, a+1);
-  EXPECT_FLOAT_EQ(trunc(result), result);   
+  EXPECT_FLOAT_EQ(trunc(result), result);
 }
 TestAll(FloatInst, Ceil, Unary)
 
@@ -82,7 +82,7 @@ template<class T> static void FloorLogic(T result, T a) {
     EXPECT_PRED1(isInf<T>, result);
     return;
   }
-  
+
   if (isNan(a)) {
     EXPECT_PRED1(isNan<T>, result);
     return;
@@ -90,7 +90,7 @@ template<class T> static void FloorLogic(T result, T a) {
 
   EXPECT_GE(result, a-1);
   EXPECT_LE(result, a);
-  EXPECT_FLOAT_EQ(trunc(result), result);   
+  EXPECT_FLOAT_EQ(trunc(result), result);
 }
 TestAll(FloatInst, Floor, Unary)
 
@@ -99,7 +99,7 @@ template<class T> static void TruncLogic(T result, T a) {
     EXPECT_PRED1(isInf<T>, result);
     return;
   }
-  
+
   if (isNan(a)) {
     EXPECT_PRED1(isNan<T>, result);
     return;
@@ -112,12 +112,12 @@ template<class T> static void RintLogic(T result, T a) {
   if (isInf(a)) {
     EXPECT_PRED1(isInf<T>, result);
     return;
-  }  
+  }
   if (isNan(a)) {
     EXPECT_PRED1(isNan<T>, result);
     return;
   }
-  
+
   EXPECT_FLOAT_EQ(rint(a), result);
 }
 TestAll(FloatInst, Rint, Unary)
@@ -167,9 +167,6 @@ template<class T> static void DivLogic(T result, T a, T b) {
   } else {
     EXPECT_EQ(T(a / b), result);
   }
-}
-template<class T> static void DivVectorLogic(T result, T a, T b) {
-  ForEach(DivLogic, result, a, b);
 }
 TestAll(SignedInst,         Div, Binary)
 TestAll(UnsignedInst,       Div, Binary)
