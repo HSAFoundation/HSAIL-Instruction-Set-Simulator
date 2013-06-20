@@ -24,6 +24,8 @@ set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DBIN_PATH=${PROJECT_BINARY_DIR}/test ${CMAKE_CXX_FLAGS}")
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -78,7 +80,7 @@ include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfi
 include(HandleLLVMOptions)
 
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-Werror -Wunknown-warning -Wno-return-type-c-linkage" SUPPORTS_NO_RET_C_LINK)
+CHECK_CXX_COMPILER_FLAG("-Werror -Wunknown-warning-option -Wno-return-type-c-linkage" SUPPORTS_NO_RET_C_LINK)
 if (SUPPORTS_NO_RET_C_LINK)
   add_llvm_definitions(-Wno-return-type-c-linkage)
 endif (SUPPORTS_NO_RET_C_LINK)
