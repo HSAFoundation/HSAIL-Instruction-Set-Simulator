@@ -2279,7 +2279,6 @@ TEST(BrigInstTest, CvtRoundingMode) {
     input.u64 = 0xBFF999999999999ALL;  //-1.6f
     testInstCvt("cvt_zeroi", "_s64", "_f64", result.s64, input.f64 );
   }
-
   //f64 to f32
   {
     result.u32 = 0x3FCCCCCD;  //1.6f
@@ -2535,6 +2534,1219 @@ TEST(BrigInstTest, CvtRoundingMode) {
     }
   }
 }
+
+TEST(BrigInstTest, CvtSatRoundingMode) {
+  union {
+    uint64_t u64; double f64; int64_t s64;
+    uint32_t u32; float f32; int32_t s32;
+    uint16_t u16; int16_t s16;
+    uint8_t u8; int8_t s8;
+  } result, input;
+
+  // upi_sat
+  // f32 -> u8
+  {
+    result.u8 = 0x2;         // 2
+    input.u32 = 0x3FCCCCCD;  // 1.6f
+    testInstCvt("cvt_upi_sat", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0xff;        // 255
+    input.u32 = 0x43804CCD;  // 256.6f
+    testInstCvt("cvt_upi_sat", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0x0;         //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_u8", "_f32", result.u8, input.f32 );
+  } 
+  // f32 -> s8
+  {
+    result.u8 = 0x2;         // 2
+    input.u32 = 0x3FCCCCCD;  // 1.6f
+    testInstCvt("cvt_upi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0x7F;        // 127
+    input.u32 = 0x43018000;  // 129.5f
+    testInstCvt("cvt_upi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }   
+  {
+    result.u8 = 0xFF;        // -1
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0x80;        // -128
+    input.u32 = 0xC3018000;  // -129.5f
+    testInstCvt("cvt_upi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  // f32 -> u16
+  {
+    result.u16 = 0x101;      // 257
+    input.u32 = 0x43804CCD;  // 256.6f
+    testInstCvt("cvt_upi_sat", "_u16", "_f32", result.u16, input.f32 );
+  } 
+  {
+    result.u16 = 0xFFFF;     // 65536
+    input.u32 = 0x4780E8CD;  // 66001.6f
+    testInstCvt("cvt_upi_sat", "_u16", "_f32", result.u16, input.f32 );
+  }
+  {
+    result.u16 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_u16", "_f32", result.u16, input.f32 );
+  }   
+  
+  // f32 -> s16
+  {
+    result.u16 = 0x7FFF;     // 32767
+    input.u32 = 0x4700E99A;  // 33001.6f
+    testInstCvt("cvt_upi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0x82;       // 130
+    input.u32 = 0x43018000;  // 129.5f
+    testInstCvt("cvt_upi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0xFF7F;     // -129
+    input.u32 = 0xC3018000;  // -129.5f
+    testInstCvt("cvt_upi_sat", "_s16", "_f32", result.s16, input.f32 );  
+  }
+  {
+    result.u16 = 0x8000;     // -32768
+    input.u32 = 0xC700E99A;  // -33001.6f
+    testInstCvt("cvt_upi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  
+  // f32 -> u32
+  {
+    result.u32 = 0x101D2;    // 66002
+    input.u32 = 0x4780E8CD;  // 66001.6f
+    testInstCvt("cvt_upi_sat", "_u32", "_f32", result.u32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF; // 4294967295
+    input.u32 = 0x4F802666;   // 4300000256f
+    testInstCvt("cvt_upi_sat", "_u32", "_f32", result.u32, input.f32 );
+  }  
+  {
+    result.u32 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_u16", "_f32", result.u32, input.f32 );
+  }   
+  
+  // f32 -> s32
+  {
+    result.u32 = 0x80EA;     // 33002
+    input.u32 = 0x4700E99A;  // 33001.6f
+    testInstCvt("cvt_upi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0x7FFFFFFF; // 2147483647
+    input.u32 = 0x4F032156;  // 2200000000f
+    testInstCvt("cvt_upi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFF7F17; // -33001
+    input.u32 = 0xC700E99A;  // -33001.6f
+    testInstCvt("cvt_upi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0x80000000; //-2147483648
+    input.u32 = 0xCF032156;  //-2200000000f
+    testInstCvt("cvt_upi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  // f32 -> u64 
+  {
+    result.u64 = 0x1004CCC00LL; // 4300000256
+    input.u32 = 0x4F802666;   // 4300000256 f
+    testInstCvt("cvt_upi_sat", "_u64", "_f32", result.u64, input.f32 );
+  }    
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
+    input.u32 = 0x6124CC7A;   // 1.9e+20
+    testInstCvt("cvt_upi_sat", "_u64", "_f32", result.u64 , input.f32 );
+  }
+  {
+    result.u64 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_u64", "_f32", result.u64, input.f32 );
+  } 
+  
+  // f32 -> s64  
+  {
+    result.u64 = 0x83215600; // 2200000000
+    input.u32 = 0x4F032156;  // 2200000000 f
+    testInstCvt("cvt_upi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0xFFFFFFFF7CDEAA00LL; //-2200000000
+    input.u32 = 0xCF032156;          //-2200000000f
+    testInstCvt("cvt_upi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0x7FFFFFFFFFFFFFFFLL; // 9.223372e+18-1
+    input.u32 = 0x5F0AC723;            // 1e+19
+    testInstCvt("cvt_upi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0x8000000000000000LL; //-9.223372e+18
+    input.u32 = 0xDF0AC723;            //-9999999980506447872f
+    testInstCvt("cvt_upi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  
+  // f64 -> u8
+  {
+    result.u8 = 0x2;                   // 2
+    input.u64 = 0x3FF999999999999ALL;  // 1.6f
+    testInstCvt("cvt_upi_sat", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0xFF;                  // 255
+    input.u64 = 0x407009999999999ALL;  // 256.6f
+    testInstCvt("cvt_upi_sat", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0x0;                   //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_u8", "_f64", result.u8, input.f64 );
+  } 
+  // f64-> s8
+  {
+    result.u8 = 0x2;                   // 2
+    input.u64 = 0x3FF999999999999ALL;  // 1.6f
+    testInstCvt("cvt_upi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0x7F;                  // 127
+    input.u64 = 0x4060300000000000LL;  // 129.5f
+    testInstCvt("cvt_upi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }  
+  {
+    result.u8 = 0xFF;                  // -1
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0x80;                  // -128
+    input.u64 = 0xC060300000000000LL;  // -129.5f
+    testInstCvt("cvt_upi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }  
+  
+  // f64 -> u16
+  {
+    result.u16 = 0x101;                // 257
+    input.u64 = 0x407009999999999ALL;  // 256.6f
+    testInstCvt("cvt_upi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0xFFFF;               // 65536
+    input.u64 = 0x40F01D199999999ALL;  // 66001.6f
+    testInstCvt("cvt_upi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  
+  // f64 -> s16
+  {
+    result.u16 = 0x7FFF;                // 32767
+    input.u64 =  0x40E01D3333333333LL;  // 33001.6f
+    testInstCvt("cvt_upi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0x82;                 // 130
+    input.u64 = 0x4060300000000000LL;  // 129.5f
+    testInstCvt("cvt_upi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0xFF7F;               // -129
+    input.u64 = 0xC060300000000000LL;  // -129.5f
+    testInstCvt("cvt_upi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }  
+  
+  // f64 -> u32
+  {
+    result.u32 = 0x101D2;              // 66002
+    input.u64 = 0x40F01D199999999ALL;  // 66001.6f
+    testInstCvt("cvt_upi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;            // 4294967295
+    input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
+    testInstCvt("cvt_upi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }  
+  {
+    result.u32 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }
+    
+  // f64 -> s32
+  {
+    result.u32 = 0x80EA;                // 33002
+    input.u64 =  0x40E01D3333333333LL;  // 33001.6f
+    testInstCvt("cvt_upi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFF7F17;           // -33001
+    input.u64 = 0xC0E01D3333333333LL;  // -33001.6f
+    testInstCvt("cvt_upi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0x7FFFFFFF;           // 2147483647
+    input.u64 = 0x41E0642AC0000000LL;  // 2200000000f
+    testInstCvt("cvt_upi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0x80000000;           //-2147483648
+    input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
+    testInstCvt("cvt_upi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }  
+  // f64 -> u64
+  {
+    result.u64 =  0x1004CCC01LL;        // 4300000257
+    input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
+    testInstCvt("cvt_upi_sat", "_u64", "_f64", result.u64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
+    input.u64 = 0x4424998F32AC7870LL;   // 1.9e+20
+    testInstCvt("cvt_upi_sat", "_u64", "_f64", result.u64, input.f64 );
+  }  
+  {
+    result.u64 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_upi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }  
+  
+  // f64 -> s64
+  {
+    result.u64 = 0x83215601LL;         // 2200000001
+    input.u64 = 0x41E0642AC0133333LL;  // 2200000000.6 f
+    testInstCvt("cvt_upi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFF7CDEAA00LL; //-2200000000
+    input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
+    testInstCvt("cvt_upi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0x7FFFFFFFFFFFFFFFLL;  // 9.223372e+18-1
+    input.u64  = 0x43F07AD8F556C6C0LL;  // 1.9e+19
+    testInstCvt("cvt_upi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0x8000000000000000LL;  //-9.223372e+18
+    input.u64 = 0xC3F07AD8F556C6C0LL;    // -1.9e+19
+    testInstCvt("cvt_upi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  
+  //downi_sat
+  // f32 -> u8
+  {
+    result.u8 = 0x1;         // 1
+    input.u32 = 0x3FCCCCCD;  // 1.6f
+    testInstCvt("cvt_downi_sat", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0xff;        // 255
+    input.u32 = 0x43804CCD;  // 256.6f
+    testInstCvt("cvt_downi_sat", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0x0;         //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_u8", "_f32", result.u8, input.f32 );
+  } 
+  // f32 -> s8
+  {
+    result.u8 = 0x1;         // 1
+    input.u32 = 0x3FCCCCCD;  // 1.6f
+    testInstCvt("cvt_downi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0x7F;        // 127
+    input.u32 = 0x43018000;  // 129.5f
+    testInstCvt("cvt_downi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }   
+  {
+    result.u8 = 0xFE;        // -2
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0x80;        // -128
+    input.u32 = 0xC3018000;  // -129.5f
+    testInstCvt("cvt_downi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+    // f32 -> u16
+  {
+    result.u16 = 0x100;      // 256
+    input.u32 = 0x43804CCD;  // 256.6f
+    testInstCvt("cvt_downi_sat", "_u16", "_f32", result.u16, input.f32 );
+  } 
+  {
+    result.u16 = 0xFFFF;     // 65536
+    input.u32 = 0x4780E8CD;  // 66001.6f
+    testInstCvt("cvt_downi_sat", "_u16", "_f32", result.u16, input.f32 );
+  }
+  {
+    result.u16 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_u16", "_f32", result.u16, input.f32 );
+  }   
+  
+  // f32 -> s16
+  {
+    result.u16 = 0x7FFF;     // 32767
+    input.u32 = 0x4700E99A;  // 33001.6f
+    testInstCvt("cvt_downi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0x81;       // 129
+    input.u32 = 0x43018000;  // 129.5f
+    testInstCvt("cvt_downi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0xFF7E;     // -130
+    input.u32 = 0xC3018000;  // -129.5f
+    testInstCvt("cvt_downi_sat", "_s16", "_f32", result.s16, input.f32 );  
+  }
+  {
+    result.u16 = 0x8000;     // -32768
+    input.u32 = 0xC700E99A;  // -33001.6f
+    testInstCvt("cvt_downi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  // f32 -> u32
+  {
+    result.u32 = 0x101D1;    // 66001
+    input.u32 = 0x4780E8CD;  // 66001.6f
+    testInstCvt("cvt_downi_sat", "_u32", "_f32", result.u32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;  // 4294967295
+    input.u32 = 0x4F802666;   // 4300000256f
+    testInstCvt("cvt_downi_sat", "_u32", "_f32", result.u32, input.f32 );
+  }  
+  {
+    result.u32 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_u16", "_f32", result.u32, input.f32 );
+  }   
+  
+  // f32 -> s32
+  {
+    result.u32 = 0x80E9;     // 33001
+    input.u32 = 0x4700E99A;  // 33001.6f
+    testInstCvt("cvt_downi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0x7FFFFFFF; // 2147483647
+    input.u32 = 0x4F032156;  // 2200000000f
+    testInstCvt("cvt_downi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFF7F16; // -33002
+    input.u32 = 0xC700E99A;  // -33001.6f
+    testInstCvt("cvt_downi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0x80000000; //-2147483648
+    input.u32 = 0xCF032156;  //-2200000000f
+    testInstCvt("cvt_downi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  // f32 -> u64 
+  {
+    result.u64 = 0x1004CCC00LL; // 4300000256
+    input.u32 = 0x4F802666;     // 4300000256 f
+    testInstCvt("cvt_downi_sat", "_u64", "_f32", result.u64, input.f32 );
+  }    
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
+    input.u32 = 0x6124CC7A;             // 1.9e+20
+    testInstCvt("cvt_downi_sat", "_u64", "_f32", result.u64 , input.f32 );
+  }
+  {
+    result.u64 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_u64", "_f32", result.u64, input.f32 );
+  } 
+  
+  // f32 -> s64  
+  {
+    result.u64 = 0x83215600; // 2200000000
+    input.u32 =  0x4F032156;  // 2200000000 f
+    testInstCvt("cvt_downi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0xFFFFFFFF7CDEAA00LL; //-2200000000
+    input.u32 = 0xCF032156;            //-2200000000f
+    testInstCvt("cvt_downi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0x7FFFFFFFFFFFFFFFLL; // 9.223372e+18-1
+    input.u32 = 0x5F0AC723;            // 1e+19
+    testInstCvt("cvt_downi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0x8000000000000000LL; //-9.223372e+18
+    input.u32 = 0xDF0AC723;            //-9999999980506447872f
+    testInstCvt("cvt_downi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }  
+  // f64 -> u8
+  {
+    result.u8 = 0x1;                   // 1
+    input.u64 = 0x3FF999999999999ALL;  // 1.6f
+    testInstCvt("cvt_downi_sat", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0xFF;                  // 255
+    input.u64 = 0x407009999999999ALL;  // 256.6f
+    testInstCvt("cvt_downi_sat", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0x0;         //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_u8", "_f64", result.u8, input.f64 );
+  } 
+  // f64-> s8
+  {
+    result.u8 = 0x1;                   // 1
+    input.u64 = 0x3FF999999999999ALL;  // 1.6f
+    testInstCvt("cvt_downi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0x7F;                  // 127
+    input.u64 = 0x4060300000000000LL;  // 129.5f
+    testInstCvt("cvt_downi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }  
+  {
+    result.u8 = 0xFE;                  // -2
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0x80;        // -128
+    input.u64 = 0xC060300000000000LL;  // -129.5f
+    testInstCvt("cvt_downi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }  
+  
+  // f64 -> u16
+  {
+    result.u16 = 0x100;                // 256
+    input.u64 = 0x407009999999999ALL;  // 256.6f
+    testInstCvt("cvt_downi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0xFFFF;               // 65536
+    input.u64 = 0x40F01D199999999ALL;  // 66001.6f
+    testInstCvt("cvt_downi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  
+  // f64 -> s16
+  {
+    result.u16 = 0x7FFF;                // 32767
+    input.u64 =  0x40E01D3333333333LL;  // 33001.6f
+    testInstCvt("cvt_downi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0x81;                 // 129
+    input.u64 = 0x4060300000000000LL;  // 129.5f
+    testInstCvt("cvt_downi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0xFF7E;               // -130
+    input.u64 = 0xC060300000000000LL;  // -129.5f
+    testInstCvt("cvt_downi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }  
+  
+  // f64 -> u32
+  {
+    result.u32 = 0x101D1;              // 66001
+    input.u64 = 0x40F01D199999999ALL;  // 66001.6f
+    testInstCvt("cvt_downi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;            // 4294967295
+    input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
+    testInstCvt("cvt_downi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }  
+  {
+    result.u32 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }
+    
+  // f64 -> s32
+  {
+    result.u32 = 0x80E9;                // 33001
+    input.u64 =  0x40E01D3333333333LL;  // 33001.6f
+    testInstCvt("cvt_downi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFF7F16;           // -33002
+    input.u64 = 0xC0E01D3333333333LL;  // -33001.6f
+    testInstCvt("cvt_downi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0x7FFFFFFF;           // 2147483647
+    input.u64 = 0x41E0642AC0133333LL;  // 2200000000.6 f
+    testInstCvt("cvt_downi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0x80000000;           //-2147483648
+    input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
+    testInstCvt("cvt_downi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }  
+  // f64 -> u64
+  {
+    result.u64 =  0x1004CCC00LL;        // 4300000256
+    input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
+    testInstCvt("cvt_downi_sat", "_u64", "_f64", result.u64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
+    input.u64 = 0x4424998F32AC7870LL;   // 1.9e+20
+    testInstCvt("cvt_downi_sat", "_u64", "_f64", result.u64, input.f64 );
+  }  
+  {
+    result.u64 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_downi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }  
+  
+  // f64 -> s64
+  {
+    result.u64 = 0x83215600LL;         // 2200000000
+    input.u64 = 0x41E0642AC0133333LL;  // 2200000000.6 f
+    testInstCvt("cvt_downi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFF7CDEA9FFLL; //-2200000001
+    input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
+    testInstCvt("cvt_downi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0x7FFFFFFFFFFFFFFFLL;  // 9.223372e+18-1
+    input.u64  = 0x43F07AD8F556C6C0LL;  // 1.9e+19
+    testInstCvt("cvt_downi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0x8000000000000000LL;   //-9.223372e+18
+    input.u64 = 0xC3F07AD8F556C6C0LL;    // -1.9e+19
+    testInstCvt("cvt_downi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  // neari_sat
+  {
+    result.u8 = 0x2;         // 2
+    input.u32 = 0x3FCCCCCD;  // 1.6f
+    testInstCvt("cvt_neari_sat", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0xff;        // 255
+    input.u32 = 0x43804CCD;  // 256.6f
+    testInstCvt("cvt_neari_sat", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0x0;         //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_u8", "_f32", result.u8, input.f32 );
+  } 
+  // f32 -> s8
+  {
+    result.u8 = 0x2;         // 2
+    input.u32 = 0x3FCCCCCD;  // 1.6f
+    testInstCvt("cvt_neari_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0x7F;        // 127
+    input.u32 = 0x43018000;  // 129.5f
+    testInstCvt("cvt_neari_sat", "_s8", "_f32", result.s8, input.f32 );
+  }   
+  {
+    result.u8 = 0xFE;        // -2
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0x80;        // -128
+    input.u32 = 0xC3018000;  // -129.5f
+    testInstCvt("cvt_neari_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+    // f32 -> u16
+  {
+    result.u16 = 0x101;      // 257
+    input.u32 = 0x43804CCD;  // 256.6f
+    testInstCvt("cvt_neari_sat", "_u16", "_f32", result.u16, input.f32 );
+  } 
+  {
+    result.u16 = 0xFFFF;     // 65536
+    input.u32 = 0x4780E8CD;  // 66001.6f
+    testInstCvt("cvt_neari_sat", "_u16", "_f32", result.u16, input.f32 );
+  }
+  {
+    result.u16 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_u16", "_f32", result.u16, input.f32 );
+  }   
+  
+  // f32 -> s16
+  {
+    result.u16 = 0x7FFF;     // 32767
+    input.u32 = 0x4700E99A;  // 33001.6f
+    testInstCvt("cvt_neari_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0x82;       // 130
+    input.u32 = 0x43018000;  // 129.5f
+    testInstCvt("cvt_neari_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0xFF7E;     // -130
+    input.u32 = 0xC3018000;  // -129.5f
+    testInstCvt("cvt_neari_sat", "_s16", "_f32", result.s16, input.f32 );  
+  }
+  {
+    result.u16 = 0x8000;     // -32768
+    input.u32 = 0xC700E99A;  // -33001.6f
+    testInstCvt("cvt_neari_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  // f32 -> u32
+  {
+    result.u32 = 0x101D2;    // 66002
+    input.u32 = 0x4780E8CD;  // 66001.6f
+    testInstCvt("cvt_neari_sat", "_u32", "_f32", result.u32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;  // 4294967295
+    input.u32 = 0x4F802666;   // 4300000256f
+    testInstCvt("cvt_neari_sat", "_u32", "_f32", result.u32, input.f32 );
+  }  
+  {
+    result.u32 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_u16", "_f32", result.u32, input.f32 );
+  }   
+  
+  // f32 -> s32
+  {
+    result.u32 = 0x80EA;     // 33002
+    input.u32 = 0x4700E99A;  // 33001.6f
+    testInstCvt("cvt_neari_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0x7FFFFFFF; // 2147483647
+    input.u32 = 0x4F032156;  // 2200000000f
+    testInstCvt("cvt_neari_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFF7F16; // -33002
+    input.u32 = 0xC700E99A;  // -33001.6f
+    testInstCvt("cvt_neari_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0x80000000; //-2147483648
+    input.u32 = 0xCF032156;  //-2200000000f
+    testInstCvt("cvt_neari_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  // f32 -> u64 
+  {
+    result.u64 = 0x1004CCC00LL; // 4300000256
+    input.u32 = 0x4F802666;     // 4300000256 f
+    testInstCvt("cvt_neari_sat", "_u64", "_f32", result.u64, input.f32 );
+  }    
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
+    input.u32 = 0x6124CC7A;             // 1.9e+20
+    testInstCvt("cvt_neari_sat", "_u64", "_f32", result.u64 , input.f32 );
+  }
+  {
+    result.u64 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_u64", "_f32", result.u64, input.f32 );
+  } 
+  
+  // f32 -> s64  
+  {
+    result.u64 = 0x83215600;  // 2200000000
+    input.u32 =  0x4F032156;  // 2200000000 f
+    testInstCvt("cvt_neari_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0xFFFFFFFF7CDEAA00LL; //-2200000000
+    input.u32 = 0xCF032156;            //-2200000000f
+    testInstCvt("cvt_neari_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0x7FFFFFFFFFFFFFFFLL; // 9.223372e+18-1
+    input.u32 = 0x5F0AC723;            // 1e+19
+    testInstCvt("cvt_neari_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0x8000000000000000LL; //-9.223372e+18
+    input.u32 = 0xDF0AC723;            //-9999999980506447872f
+    testInstCvt("cvt_neari_sat", "_s64", "_f32", result.s64, input.f32 );
+  }  
+  // f64 -> u8
+  {
+    result.u8 = 0x2;                   // 2
+    input.u64 = 0x3FF999999999999ALL;  // 1.6f
+    testInstCvt("cvt_neari_sat", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0xFF;                  // 255
+    input.u64 = 0x407009999999999ALL;  // 256.6f
+    testInstCvt("cvt_neari_sat", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0x0;                   //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_u8", "_f64", result.u8, input.f64 );
+  } 
+  // f64-> s8
+  {
+    result.u8 = 0x2;                   // 2
+    input.u64 = 0x3FF999999999999ALL;  // 1.6f
+    testInstCvt("cvt_neari_sat", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0x7F;                  // 127
+    input.u64 = 0x4060300000000000LL;  // 129.5f
+    testInstCvt("cvt_neari_sat", "_s8", "_f64", result.s8, input.f64 );
+  }  
+  {
+    result.u8 = 0xFE;                  // -2
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0x80;                  // -128
+    input.u64 = 0xC060300000000000LL;  // -129.5f
+    testInstCvt("cvt_neari_sat", "_s8", "_f64", result.s8, input.f64 );
+  }  
+  
+  // f64 -> u16
+  {
+    result.u16 = 0x101;                // 257
+    input.u64 = 0x407009999999999ALL;  // 256.6f
+    testInstCvt("cvt_neari_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0xFFFF;               // 65536
+    input.u64 = 0x40F01D199999999ALL;  // 66001.6f
+    testInstCvt("cvt_neari_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  
+  // f64 -> s16
+  {
+    result.u16 = 0x7FFF;                // 32767
+    input.u64 =  0x40E01D3333333333LL;  // 33001.6f
+    testInstCvt("cvt_neari_sat", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0x82;                 // 130
+    input.u64 = 0x4060300000000000LL;  // 129.5f
+    testInstCvt("cvt_neari_sat", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0xFF7E;               // -130
+    input.u64 = 0xC060300000000000LL;  // -129.5f
+    testInstCvt("cvt_neari_sat", "_s16", "_f64", result.s16, input.f64 );
+  }  
+  
+  // f64 -> u32
+  {
+    result.u32 = 0x101D2;              // 66002
+    input.u64 = 0x40F01D199999999ALL;  // 66001.6f
+    testInstCvt("cvt_neari_sat", "_u32", "_f64", result.u32, input.f64 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;            // 4294967295
+    input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
+    testInstCvt("cvt_neari_sat", "_u32", "_f64", result.u32, input.f64 );
+  }  
+  {
+    result.u32 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_u32", "_f64", result.u32, input.f64 );
+  }
+    
+  // f64 -> s32
+  {
+    result.u32 = 0x80EA;                // 33002
+    input.u64 =  0x40E01D3333333333LL;  // 33001.6f
+    testInstCvt("cvt_neari_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFF7F16;           // -33002
+    input.u64 = 0xC0E01D3333333333LL;  // -33001.6f
+    testInstCvt("cvt_neari_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0x7FFFFFFF;           // 2147483647
+    input.u64 = 0x41E0642AC0133333LL;  // 2200000000.6 f
+    testInstCvt("cvt_neari_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0x80000000;           //-2147483648
+    input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
+    testInstCvt("cvt_neari_sat", "_s32", "_f64", result.s32, input.f64 );
+  }  
+  // f64 -> u64
+  {
+    result.u64 =  0x1004CCC01LL;        // 4300000257
+    input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
+    testInstCvt("cvt_neari_sat", "_u64", "_f64", result.u64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
+    input.u64 = 0x4424998F32AC7870LL;   // 1.9e+20
+    testInstCvt("cvt_neari_sat", "_u64", "_f64", result.u64, input.f64 );
+  }  
+  {
+    result.u64 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_neari_sat", "_u32", "_f64", result.u32, input.f64 );
+  }  
+  
+  // f64 -> s64
+  {
+    result.u64 = 0x83215601LL;         // 2200000001
+    input.u64 = 0x41E0642AC0133333LL;  // 2200000000.6 f
+    testInstCvt("cvt_neari_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFF7CDEA9FFLL; //-2200000001
+    input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
+    testInstCvt("cvt_neari_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0x7FFFFFFFFFFFFFFFLL;  // 9.223372e+18-1
+    input.u64  = 0x43F07AD8F556C6C0LL;  // 1.9e+19
+    testInstCvt("cvt_neari_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0x8000000000000000LL;   //-9.223372e+18
+    input.u64 = 0xC3F07AD8F556C6C0LL;    // -1.9e+19
+    testInstCvt("cvt_neari_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  
+  // zeroi_sat
+  {
+    result.u8 = 0x1;         // 1
+    input.u32 = 0x3FCCCCCD;  // 1.6f
+    testInstCvt("cvt_zeroi_sat", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0xff;        // 255
+    input.u32 = 0x43804CCD;  // 256.6f
+    testInstCvt("cvt_zeroi_sat", "_u8", "_f32", result.u8, input.f32 );
+  }
+  {
+    result.u8 = 0x0;         //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_u8", "_f32", result.u8, input.f32 );
+  } 
+  // f32 -> s8
+  {
+    result.u8 = 0x1;         // 1
+    input.u32 = 0x3FCCCCCD;  // 1.6f
+    testInstCvt("cvt_zeroi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0x7F;        // 127
+    input.u32 = 0x43018000;  // 129.5f
+    testInstCvt("cvt_zeroi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }   
+  {
+    result.u8 = 0xFF;        // -1
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+  {
+    result.u8 = 0x80;        // -128
+    input.u32 = 0xC3018000;  // -129.5f
+    testInstCvt("cvt_zeroi_sat", "_s8", "_f32", result.s8, input.f32 );
+  }
+    // f32 -> u16
+  {
+    result.u16 = 0x100;      // 256
+    input.u32 = 0x43804CCD;  // 256.6f
+    testInstCvt("cvt_zeroi_sat", "_u16", "_f32", result.u16, input.f32 );
+  } 
+  {
+    result.u16 = 0xFFFF;     // 65536
+    input.u32 = 0x4780E8CD;  // 66001.6f
+    testInstCvt("cvt_zeroi_sat", "_u16", "_f32", result.u16, input.f32 );
+  }
+  {
+    result.u16 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_u16", "_f32", result.u16, input.f32 );
+  }   
+  
+  // f32 -> s16
+  {
+    result.u16 = 0x7FFF;     // 32767
+    input.u32 = 0x4700E99A;  // 33001.6f
+    testInstCvt("cvt_zeroi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0x81;       // 129
+    input.u32 = 0x43018000;  // 129.5f
+    testInstCvt("cvt_zeroi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  {
+    result.u16 = 0xFF7F;     // -129
+    input.u32 = 0xC3018000;  // -129.5f
+    testInstCvt("cvt_zeroi_sat", "_s16", "_f32", result.s16, input.f32 );  
+  }
+  {
+    result.u16 = 0x8000;     // -32768
+    input.u32 = 0xC700E99A;  // -33001.6f
+    testInstCvt("cvt_zeroi_sat", "_s16", "_f32", result.s16, input.f32 );
+  }
+  // f32 -> u32
+  {
+    result.u32 = 0x101D1;    // 66001
+    input.u32 = 0x4780E8CD;  // 66001.6f
+    testInstCvt("cvt_zeroi_sat", "_u32", "_f32", result.u32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;  // 4294967295
+    input.u32 = 0x4F802666;   // 4300000256f
+    testInstCvt("cvt_zeroi_sat", "_u32", "_f32", result.u32, input.f32 );
+  }  
+  {
+    result.u32 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_u16", "_f32", result.u32, input.f32 );
+  }   
+  
+  // f32 -> s32
+  {
+    result.u32 = 0x80E9;     // 33001
+    input.u32 = 0x4700E99A;  // 33001.6f
+    testInstCvt("cvt_zeroi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0x7FFFFFFF; // 2147483647
+    input.u32 = 0x4F032156;  // 2200000000f
+    testInstCvt("cvt_zeroi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0xFFFF7F17; // -33001
+    input.u32 = 0xC700E99A;  // -33001.6f
+    testInstCvt("cvt_zeroi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  {
+    result.u32 = 0x80000000; //-2147483648
+    input.u32 = 0xCF032156;  //-2200000000f
+    testInstCvt("cvt_zeroi_sat", "_s32", "_f32", result.s32, input.f32 );
+  }
+  // f32 -> u64 
+  {
+    result.u64 = 0x1004CCC00LL; // 4300000256
+    input.u32 = 0x4F802666;     // 4300000256 f
+    testInstCvt("cvt_zeroi_sat", "_u64", "_f32", result.u64, input.f32 );
+  }    
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
+    input.u32 = 0x6124CC7A;             // 1.9e+20
+    testInstCvt("cvt_zeroi_sat", "_u64", "_f32", result.u64 , input.f32 );
+  }
+  {
+    result.u64 = 0x0;        //  0
+    input.u32 = 0xBFCCCCCD;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_u64", "_f32", result.u64, input.f32 );
+  } 
+  
+  // f32 -> s64  
+  {
+    result.u64 = 0x83215600;  // 2200000000
+    input.u32 =  0x4F032156;  // 2200000000 f
+    testInstCvt("cvt_zeroi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0xFFFFFFFF7CDEAA00LL; //-2200000000
+    input.u32 = 0xCF032156;            //-2200000000f
+    testInstCvt("cvt_zeroi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0x7FFFFFFFFFFFFFFFLL; // 9.223372e+18-1
+    input.u32 = 0x5F0AC723;            // 1e+19
+    testInstCvt("cvt_zeroi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }
+  {
+    result.u64 = 0x8000000000000000LL; //-9.223372e+18
+    input.u32 = 0xDF0AC723;            //-9999999980506447872f
+    testInstCvt("cvt_zeroi_sat", "_s64", "_f32", result.s64, input.f32 );
+  }  
+  // f64 -> u8
+  {
+    result.u8 = 0x1;                   // 1
+    input.u64 = 0x3FF999999999999ALL;  // 1.6f
+    testInstCvt("cvt_zeroi_sat", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0xFF;                  // 255
+    input.u64 = 0x407009999999999ALL;  // 256.6f
+    testInstCvt("cvt_zeroi_sat", "_u8", "_f64", result.u8, input.f64 );
+  }
+  {
+    result.u8 = 0x0;                   //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_u8", "_f64", result.u8, input.f64 );
+  } 
+  // f64-> s8
+  {
+    result.u8 = 0x1;                   // 1
+    input.u64 = 0x3FF999999999999ALL;  // 1.6f
+    testInstCvt("cvt_zeroi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0x7F;                  // 127
+    input.u64 = 0x4060300000000000LL;  // 129.5f
+    testInstCvt("cvt_zeroi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }  
+  {
+    result.u8 = 0xFF;                  // -1
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }
+  {
+    result.u8 = 0x80;                  // -128
+    input.u64 = 0xC060300000000000LL;  // -129.5f
+    testInstCvt("cvt_zeroi_sat", "_s8", "_f64", result.s8, input.f64 );
+  }  
+  
+  // f64 -> u16
+  {
+    result.u16 = 0x100;                // 256
+    input.u64 = 0x407009999999999ALL;  // 256.6f
+    testInstCvt("cvt_zeroi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0xFFFF;               // 65536
+    input.u64 = 0x40F01D199999999ALL;  // 66001.6f
+    testInstCvt("cvt_zeroi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  {
+    result.u16 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_u16", "_f64", result.u16, input.f64 );
+  }
+  
+  // f64 -> s16
+  {
+    result.u16 = 0x7FFF;                // 32767
+    input.u64 =  0x40E01D3333333333LL;  // 33001.6f
+    testInstCvt("cvt_zeroi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0x81;                 // 129
+    input.u64 = 0x4060300000000000LL;  // 129.5f
+    testInstCvt("cvt_zeroi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }
+  {
+    result.u16 = 0xFF7F;               // -129
+    input.u64 = 0xC060300000000000LL;  // -129.5f
+    testInstCvt("cvt_zeroi_sat", "_s16", "_f64", result.s16, input.f64 );
+  }  
+  
+  // f64 -> u32
+  {
+    result.u32 = 0x101D1;              // 66001
+    input.u64 = 0x40F01D199999999ALL;  // 66001.6f
+    testInstCvt("cvt_zeroi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }
+  {
+    result.u32 = 0xFFFFFFFF;            // 4294967295
+    input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
+    testInstCvt("cvt_zeroi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }  
+  {
+    result.u32 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }
+    
+  // f64 -> s32
+  {
+    result.u32 = 0x80E9;                // 33001
+    input.u64 =  0x40E01D3333333333LL;  // 33001.6f
+    testInstCvt("cvt_zeroi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFF7F17;           // -33001
+    input.u64 = 0xC0E01D3333333333LL;  // -33001.6f
+    testInstCvt("cvt_zeroi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0x7FFFFFFF;           // 2147483647
+    input.u64 = 0x41E0642AC0000000LL;  // 2200000000f
+    testInstCvt("cvt_zeroi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }
+  {
+    result.u32 = 0x80000000;           //-2147483648
+    input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
+    testInstCvt("cvt_zeroi_sat", "_s32", "_f64", result.s32, input.f64 );
+  }  
+  // f64 -> u64
+  {
+    result.u64 =  0x1004CCC00LL;        // 4300000256
+    input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
+    testInstCvt("cvt_zeroi_sat", "_u64", "_f64", result.u64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
+    input.u64 = 0x4424998F32AC7870LL;   // 1.9e+20
+    testInstCvt("cvt_zeroi_sat", "_u64", "_f64", result.u64, input.f64 );
+  }  
+  {
+    result.u64 = 0x0;                  //  0
+    input.u64 = 0xBFF999999999999ALL;  // -1.6f
+    testInstCvt("cvt_zeroi_sat", "_u32", "_f64", result.u32, input.f64 );
+  }  
+  
+  // f64 -> s64
+  {
+    result.u64 = 0x83215600LL;         // 2200000000
+    input.u64 = 0x41E0642AC0133333LL;  // 2200000000.6 f
+    testInstCvt("cvt_zeroi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0xFFFFFFFF7CDEAA00LL; //-2200000000
+    input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
+    testInstCvt("cvt_zeroi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0x7FFFFFFFFFFFFFFFLL; // 9.223372e+18-1
+    input.u64  = 0x43F07AD8F556C6C0LL; // 1.9e+19
+    testInstCvt("cvt_zeroi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+  {
+    result.u64 = 0x8000000000000000LL; //-9.223372e+18
+    input.u64 = 0xC3F07AD8F556C6C0LL;  // -1.9e+19
+    testInstCvt("cvt_zeroi_sat", "_s64", "_f64", result.s64, input.f64 );
+  }
+}
+
 
 TEST(BrigWriterTest, FlexArray) {
   hsa::brig::BrigProgram BP = TestHSAIL(

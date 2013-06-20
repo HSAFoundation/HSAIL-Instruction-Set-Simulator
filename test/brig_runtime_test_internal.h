@@ -268,11 +268,8 @@
 
 
 #define MakeCvtF2FsTest(TYPE)                   \
-  MakeCvtF2FsTestFun(TYPE, Cvt, TYPE)           \
-  MakeCvtF2FsTestFun(TYPE, Cvt_upi, ceil)       \
-  MakeCvtF2FsTestFun(TYPE, Cvt_downi, floor)    \
-  MakeCvtF2FsTestFun(TYPE, Cvt_zeroi, trunc)    \
-  MakeCvtF2FsTestFun(TYPE, Cvt_neari, nearbyint)
+  MakeCvtF2FsTestFun(TYPE, Cvt, TYPE)
+
 
 #define MakeCvtF2FsTestFun(TYPE,NAME,FUNC)                              \
   static void NAME ## _ ## TYPE ## _ ## TYPE ## _Logic(TYPE result,     \
@@ -317,15 +314,19 @@
   MakeCvtX2ITestRet(TYPE, s64, NAME)
 
 #define MakeCvtF2ITest(TYPE)                 \
-  MakeCvtX2ITest(TYPE, Cvt_)                 \
   MakeCvtX2ITest(TYPE, Cvt_upi_)             \
   MakeCvtX2ITest(TYPE, Cvt_downi_)           \
   MakeCvtX2ITest(TYPE, Cvt_zeroi_)           \
-  MakeCvtX2ITest(TYPE, Cvt_neari_)
+  MakeCvtX2ITest(TYPE, Cvt_neari_)           \
+  /* Sat Int rounding */                     \
+  MakeCvtX2ITest(TYPE, Cvt_ups_)             \
+  MakeCvtX2ITest(TYPE, Cvt_downs_)           \
+  MakeCvtX2ITest(TYPE, Cvt_zeros_)           \
+  MakeCvtX2ITest(TYPE, Cvt_nears_)           \
 
 #define MakeCvtI2FTestRet(TYPE,RET,NAME)              \
   extern "C" RET NAME ## RET ## _ ## TYPE (TYPE);     \
-  MakeTest(NAME ## RET ## _ ## TYPE,  NAME ## Logic)
+  MakeTest(NAME ## RET ## _ ## TYPE,  Cvt_Logic)
 
 #define MakeCvtI2FTestType(TYPE,NAME)           \
   /* MakeCvtI2FTestRet(TYPE, f16, NAME) */      \

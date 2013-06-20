@@ -738,11 +738,31 @@ Cmp(define, nan,  f64)
 Cmp(define, snan, f32)
 Cmp(define, snan, f64)
 
+// PRM 5.18.4
+// Regular integer rounding: if the value is out of range, the result
+// is undefined and an invalid operation exception is generated
+//
+// Saturating integer rounding: the value is clamped to the range of the destination type, with NaN converted to 0 
 // Integer rounding:
-// f32 to Int, f32 to f32, f32 to f64
+// f32 to Int
 template<class R> static R Cvt(f32 f, int mode) {
+  if (isPosInf(f) || isNegInf(f) || isNan(f) ||
+      f <= getMin<R>() || f >= getMax<R>())
+    return 0;  // should be undefined value 
+  // an exception should be thrown
+  
+    
+  int oldMode = fegetround();
+  fesetround(mode);
+  volatile R result = R(nearbyint(f));
+  fesetround(oldMode);
+  return result;
+}
+template<class R> static R Cvt_sat(f32 f, int mode) {
   if (isPosInf(f)) return getMax<R>();
   if (isNegInf(f)) return getMin<R>();
+  if (f > getMax<R>()) return getMax<R>();
+  if (f < getMin<R>()) return getMin<R>();
   if (isNan(f)) return 0;
   if (!~mode) return R(f);
   int oldMode = fegetround();
@@ -751,12 +771,27 @@ template<class R> static R Cvt(f32 f, int mode) {
   fesetround(oldMode);
   return result;
 }
+
 template<> bool Cvt(f32 f, int mode) { return f != 0.0f; }
 // Integer rounding:
-// f64 to Int, f64 to f64
+// f64 to Int
 template<class R> static R Cvt(f64 f, int mode) {
+  if (isPosInf(f) || isNegInf(f) || isNan(f) ||
+      f <= getMin<R>() || f >= getMax<R>())
+    return 0;   // should be undefined value 
+  // an exception should be thrown  
+    
+  int oldMode = fegetround();
+  fesetround(mode);
+  volatile R result = R(nearbyint(f));
+  fesetround(oldMode);
+  return result;
+}
+template<class R> static R Cvt_sat(f64 f, int mode) {
   if (isPosInf(f)) return getMax<R>();
   if (isNegInf(f)) return getMin<R>();
+  if (f > getMax<R>()) return getMax<R>();
+  if (f < getMin<R>()) return getMin<R>();
   if (isNan(f)) return 0;
   if (!~mode) return R(f);
   int oldMode = fegetround();
@@ -765,6 +800,19 @@ template<class R> static R Cvt(f64 f, int mode) {
   fesetround(oldMode);
   return result;
 }
+
+// Float to Float
+// same size or larger size
+template<> f32 Cvt(f32 f, int mode) {
+  return f32(f);
+}
+template<> f64 Cvt(f64 f, int mode) {
+  return f64(f);
+}
+template<> f64 Cvt(f32 f, int mode) {
+  return f64(f);
+}
+
 // Floating point rounding:
 // f64 to f32
 template<> f32 Cvt(f64 f, int mode) {
@@ -803,9 +851,17 @@ template<> f64 Cvt(u64 x, int mode) { return l2d(x, mode); }
 template<> f64 Cvt(s64 x, int mode) { return l2d(x, mode); }
 #endif  // defined(__arm__)
 
-RIICvt(define)
+// Conversion from a floating point to integer requires
+// an integer rounding
 RFICvt(define)
+
+// saturating float to int
+RFICvtSat(define)
+
+// Conversion from integer to floating-point requires 
+// a floating-point rounding
 RIFCvt(define)
+
 // Boolean conversions
 defineCvt(Cvt,       ~0,            b1,  b1)
 defineCvt(Cvt,       ~0,            b1,  s8)
@@ -818,25 +874,26 @@ defineCvt(Cvt,       ~0,            b1,  f32)
 defineCvt(Cvt,       ~0,            b1,  s64)
 defineCvt(Cvt,       ~0,            b1,  u64)
 defineCvt(Cvt,       ~0,            b1,  f64)
-// Converting from a floating point to a floating point of the same type takes
-// an integer rounding modifier
-defineCvt(Cvt,       ~0,            f32, f32)
-defineCvt(Cvt,       ~0,            f64, f64)
-defineCvt(Cvt_upi,   FE_UPWARD,     f32, f32)
-defineCvt(Cvt_upi,   FE_UPWARD,     f64, f64)
-defineCvt(Cvt_downi, FE_DOWNWARD,   f32, f32)
-defineCvt(Cvt_downi, FE_DOWNWARD,   f64, f64)
-defineCvt(Cvt_zeroi, FE_TOWARDZERO, f32, f32)
-defineCvt(Cvt_zeroi, FE_TOWARDZERO, f64, f64)
-defineCvt(Cvt_neari, FE_TONEAREST,  f32, f32)
-defineCvt(Cvt_neari, FE_TONEAREST,  f64, f64)
-// A rounding modifier is required where precision may be lost
-defineCvt(Cvt_up,   FE_UPWARD,     f32, f64)
-defineCvt(Cvt_down, FE_DOWNWARD,   f32, f64)
-defineCvt(Cvt_zero, FE_TOWARDZERO, f32, f64)
-defineCvt(Cvt_near, FE_TONEAREST,  f32, f64)
-// A rounding modifier is illegal in all other cases
+
+// b1 to f must not specify rounding
+defineCvt(Cvt,      ~0,            f32, b1)
+defineCvt(Cvt,      ~0,            f64, b1)
+
+// Conversion from a floating point to a floating point with
+// smaller size requires a floating-point rounding
+defineCvt(Cvt_up,   FE_UPWARD,      f32, f64)
+defineCvt(Cvt_down, FE_DOWNWARD,    f32, f64)
+defineCvt(Cvt_zero, FE_TOWARDZERO,  f32, f64)
+defineCvt(Cvt_near, FE_TONEAREST,   f32, f64)
+
+// A rounding modifier is illegal in conversion from f to f
+// with the same size or larger size, and in conversion 
+// from f to b1 and vice-versa, and in conversion from
+// b1, s or u to b1, s or u
+RIICvt(define)
 defineCvt(Cvt, ~0, f64, f32)
+defineCvt(Cvt, ~0, f32, f32)
+defineCvt(Cvt, ~0, f64, f64)
 
 template<class T> static T Ld(T *x) { return *x; }
 #define defineLd(X)                             \

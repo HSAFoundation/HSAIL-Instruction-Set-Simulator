@@ -971,6 +971,15 @@ template<class R, class T> static void Cvt_Logic(R result, T a) {
   }
 }
 template<class R, class T> static void Cvt_upi_Logic(R result, T a) {
+  if (isNan(a) || isPosInf(a) || isNegInf(a)) {
+    EXPECT_EQ(0, result); // should have an exception
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_LE(a, result);
+  } else {
+    EXPECT_EQ(0, result); // should have an exception
+  }
+}
+template<class R, class T> static void Cvt_ups_Logic(R result, T a) {
   if (isNan(a)) {
     EXPECT_EQ(0, result);
   } else if (isPosInf(a)) {
@@ -982,6 +991,15 @@ template<class R, class T> static void Cvt_upi_Logic(R result, T a) {
   }
 }
 template<class R, class T> static void Cvt_downi_Logic(R result, T a) {
+  if (isNan(a) || isPosInf(a) || isNegInf(a)) {
+    EXPECT_EQ(0, result); // should have an exception
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_GE(a, result);
+  } else {
+    EXPECT_EQ(0, result); // should have an exception
+  }
+}
+template<class R, class T> static void Cvt_downs_Logic(R result, T a) {
   if (isNan(a)) {
     EXPECT_EQ(0, result);
   } else if (isPosInf(a)) {
@@ -993,6 +1011,15 @@ template<class R, class T> static void Cvt_downi_Logic(R result, T a) {
   }
 }
 template<class R, class T> static void Cvt_zeroi_Logic(R result, T a) {
+  if (isNan(a) || isPosInf(a) || isNegInf(a)) {
+    EXPECT_EQ(0, result); // should have an exception
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_GE(llabs((int64_t) a), llabs((int64_t) result));
+  } else {
+    EXPECT_EQ(0, result); // should have an exception
+  }
+}
+template<class R, class T> static void Cvt_zeros_Logic(R result, T a) {
   if (isNan(a)) {
     EXPECT_EQ(0, result);
   } else if (isPosInf(a)) {
@@ -1004,6 +1031,15 @@ template<class R, class T> static void Cvt_zeroi_Logic(R result, T a) {
   }
 }
 template<class R, class T> static void Cvt_neari_Logic(R result, T a) {
+  if (isNan(a) || isPosInf(a) || isNegInf(a)) {
+    EXPECT_EQ(0, result); // should have an exception
+  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
+    EXPECT_GE(0.5, std::abs(f64(result) - f64(a)));
+  } else {
+    EXPECT_EQ(0, result); // should have an exception
+  }
+}
+template<class R, class T> static void Cvt_nears_Logic(R result, T a) {
   if (isNan(a)) {
     EXPECT_EQ(0, result);
   } else if (isPosInf(a)) {
@@ -1014,17 +1050,40 @@ template<class R, class T> static void Cvt_neari_Logic(R result, T a) {
     EXPECT_GE(0.5, std::abs(f64(result) - f64(a)));
   }
 }
-MakeCvtI2FTest(Cvt_)
+// Integer to float
+MakeCvtI2FTest(Cvt_up_)
+MakeCvtI2FTest(Cvt_down_)
+MakeCvtI2FTest(Cvt_zero_)
+MakeCvtI2FTest(Cvt_near_)
+// Float to integer
 MakeCvtF2ITest(f32)
 MakeCvtF2ITest(f64)
+// Float to bool
 MakeCvtX2ITestRet(f32, b1, Cvt_)
 MakeCvtX2ITestRet(f64, b1, Cvt_)
+// Float to float (same size)
 MakeCvtF2FsTest(f32)
 MakeCvtF2FsTest(f64)
+// Float to smaller size float
 MakeCvtF2FdTest(up,   a <= result)
 MakeCvtF2FdTest(down, a >= result)
 MakeCvtF2FdTest(zero, std::abs(a) >= std::abs(result))
 MakeCvtF2FdTest(near, (f32) a == result)
+// Float to larger size float
+static void Cvt_f64_f32_Logic(f64 result, f32 a) {
+  if (isNan(a)) {
+    EXPECT_PRED1(isNan<f64>, result);
+  } else if (isPosInf(a)) {
+    EXPECT_PRED1(isPosInf<f64>, result);
+  } else if (isNegInf(a)) {
+    EXPECT_PRED1(isNegInf<f64>, result);
+  } else {
+    EXPECT_TRUE((f64)a == result);
+  }
+}
+extern "C" f64 Cvt_f64_f32(f32);
+MakeTest(Cvt_f64_f32, Cvt_f64_f32_Logic)
+
 
 template<class T> static void AtomicAndLogic(T result, T a, T b) {
   EXPECT_EQ(T(a & b), result);

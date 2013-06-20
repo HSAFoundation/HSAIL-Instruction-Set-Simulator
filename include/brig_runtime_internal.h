@@ -370,24 +370,38 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   extern "C" bool FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u);
 
 #define RIICvt(D)                               \
-  IBCvt(I, D, Cvt, ~0)
+  ICvt(D, Cvt, ~0, b1)                          \
+  ICvt(D, Cvt, ~0, u8)                          \
+  ICvt(D, Cvt, ~0, s8)                          \
+  ICvt(D, Cvt, ~0, u16)                         \
+  ICvt(D, Cvt, ~0, s16)                         \
+  ICvt(D, Cvt, ~0, u32)                         \
+  ICvt(D, Cvt, ~0, s32)                         \
+  ICvt(D, Cvt, ~0, u64)                         \
+  ICvt(D, Cvt, ~0, s64)
 
 #define RFICvt(D)                               \
-  FICvt(D, Cvt,       ~0)                       \
   FICvt(D, Cvt_upi,   FE_UPWARD)                \
   FICvt(D, Cvt_downi, FE_DOWNWARD)              \
   FICvt(D, Cvt_zeroi, FE_TOWARDZERO)            \
   FICvt(D, Cvt_neari, FE_TONEAREST)
+  
+#define RFICvtSat(D)                            \
+  /* Sat int rounding */                        \
+  FICvtSat(D, Cvt_ups,   FE_UPWARD)             \
+  FICvtSat(D, Cvt_downs, FE_DOWNWARD)           \
+  FICvtSat(D, Cvt_zeros, FE_TOWARDZERO)         \
+  FICvtSat(D, Cvt_nears, FE_TONEAREST)
 
 #define RIFCvt(D)                               \
-  IBCvt(F, D, Cvt,      ~0)                     \
-  IBCvt(F, D, Cvt_up,   FE_UPWARD)              \
-  IBCvt(F, D, Cvt_down, FE_DOWNWARD)            \
-  IBCvt(F, D, Cvt_zero, FE_TOWARDZERO)          \
-  IBCvt(F, D, Cvt_near, FE_TONEAREST)
-
-#define IBCvt(B,D,FUNC,ROUND)                   \
-  B ## Cvt(D, FUNC, ROUND, b1)                  \
+  IFBCvt(F, D, Cvt_up,   FE_UPWARD)             \
+  IFBCvt(F, D, Cvt_down, FE_DOWNWARD)           \
+  IFBCvt(F, D, Cvt_zero, FE_TOWARDZERO)         \
+  IFBCvt(F, D, Cvt_near, FE_TONEAREST)
+  
+// b1 to f conversion must not specify 
+// a rounding
+#define IFBCvt(B,D,FUNC,ROUND)                  \
   B ## Cvt(D, FUNC, ROUND, u8)                  \
   B ## Cvt(D, FUNC, ROUND, s8)                  \
   B ## Cvt(D, FUNC, ROUND, u16)                 \
@@ -401,6 +415,11 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   /* ICvt(D, FUNC, ROUND, f16) */               \
   ICvt(D, FUNC, ROUND, f32)                     \
   ICvt(D, FUNC, ROUND, f64)
+  
+#define FICvtSat(D,FUNC,ROUND)                  \
+  /* ICvtSat(D, FUNC, ROUND, f16) */            \
+  ICvtSat(D, FUNC, ROUND, f32)                  \
+  ICvtSat(D, FUNC, ROUND, f64)  
 
 #define ICvt(D,FUNC,ROUND,TYPE)                 \
   D ## Cvt(FUNC, ROUND, u8,  TYPE)              \
@@ -411,6 +430,17 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## Cvt(FUNC, ROUND, s32, TYPE)              \
   D ## Cvt(FUNC, ROUND, u64, TYPE)              \
   D ## Cvt(FUNC, ROUND, s64, TYPE)
+  
+#define ICvtSat(D,FUNC,ROUND,TYPE)              \
+  D ## CvtSat(FUNC, ROUND, u8,  TYPE)           \
+  D ## CvtSat(FUNC, ROUND, s8,  TYPE)           \
+  D ## CvtSat(FUNC, ROUND, u16, TYPE)           \
+  D ## CvtSat(FUNC, ROUND, s16, TYPE)           \
+  D ## CvtSat(FUNC, ROUND, u32, TYPE)           \
+  D ## CvtSat(FUNC, ROUND, s32, TYPE)           \
+  D ## CvtSat(FUNC, ROUND, u64, TYPE)           \
+  D ## CvtSat(FUNC, ROUND, s64, TYPE)  
+  
 
 #define FCvt(D,FUNC,ROUND,TYPE)                 \
   /* D ## Cvt(FUNC, ROUND, f16, TYPE) */        \
@@ -421,6 +451,11 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   extern "C" RET FUNC ## _ ## RET ## _ ## TYPE (TYPE t) { \
     return Cvt<RET>(t, ROUND);                      \
   }
+  
+#define defineCvtSat(FUNC,ROUND,RET,TYPE)                 \
+  extern "C" RET FUNC ## _ ## RET ## _ ## TYPE (TYPE t) { \
+    return Cvt_sat<RET>(t, ROUND);                        \
+  }  
 
 #define defineUnary(FUNC,TYPE)                  \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t) {  \
