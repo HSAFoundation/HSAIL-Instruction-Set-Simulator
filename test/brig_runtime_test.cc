@@ -1177,6 +1177,45 @@ static void Cvt_f64_f32_Logic(f64 result, f32 a) {
 extern "C" f64 Cvt_f64_f32(f32);
 MakeTest(Cvt_f64_f32, Cvt_f64_f32_Logic)
 
+extern "C" void PackCvtLogic(u8x4 result, 
+                             f32 src0, 
+                             f32 src1, 
+                             f32 src2, 
+                             f32 src3) {
+  if (isNan(src0) || isNegInf(src0) || src0 <= 0.0f) {
+    EXPECT_EQ(0, result[0]);
+  } else if (isPosInf(src0) || src0 >= 255.0) {
+    EXPECT_EQ(255, result[0]);
+  } else {
+    EXPECT_EQ(result[0], u8(nearbyint(src0)));
+  }
+    
+  if (isNan(src1) || isNegInf(src1) || src1 <= 0.0f) {
+    EXPECT_EQ(0, result[1]);
+  } else if (isPosInf(src1) || src1 >= 255.0) {
+    EXPECT_EQ(255, result[1]);
+  } else {
+    EXPECT_EQ(result[1], u8(nearbyint(src1))); 
+  }
+    
+  if (isNan(src2) || isNegInf(src2) || src2 <= 0.0f) {
+    EXPECT_EQ(0, result[2]);
+  } else if (isPosInf(src2) || src2 >= 255.0) {
+    EXPECT_EQ(255, result[2]);
+  } else {
+    EXPECT_EQ(result[2], u8(nearbyint(src2))); 
+  }
+    
+  if (isNan(src3) || isNegInf(src3) || src3 <= 0.0f) {
+    EXPECT_EQ(0, result[3]);
+  } else if (isPosInf(src3) || src3 >= 255.0) {
+    EXPECT_EQ(255, result[3]);              
+  } else {
+    EXPECT_EQ(result[3], u8(nearbyint(src3))); 
+  }               
+} 
+extern "C" u8x4 PackCvt_u8x4_f32(f32, f32, f32, f32);
+MakeTest(PackCvt_u8x4_f32, PackCvtLogic)
 
 template<class T> static void AtomicAndLogic(T result, T a, T b) {
   EXPECT_EQ(T(a & b), result);

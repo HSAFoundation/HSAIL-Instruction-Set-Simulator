@@ -52,7 +52,8 @@ GTEST_API_ int main(int argc, char **argv) {
       "BrigRuntimeTest.SadHi*:"
       "BrigRuntimeTest.*Cmp_*:"
       "BrigRuntimeTest.Atomic*Cas_*:"
-      "BrigRuntimeTest.Pack_*:";
+      "BrigRuntimeTest.Pack_*:"
+      "BrigRuntimeTest.PackCvt_u8x4_f32:";
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

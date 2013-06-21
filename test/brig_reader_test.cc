@@ -6759,6 +6759,47 @@ TEST(Instruction4Test, Cmov_64) {
   delete arg1;
 }
 
+TEST(Instruction5Test, PackCvt) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__instruction5_test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_f32 %input1, \n"
+    "        kernarg_f32 %input2, \n"
+    "        kernarg_f32 %input3, \n"
+    "        kernarg_f32 %input4) \n"
+    "{\n"
+    "        ld_kernarg_f32 $s1, [%input1];\n"
+    "        ld_kernarg_f32 $s2, [%input2];\n"
+    "        ld_kernarg_f32 $s3, [%input3];\n"
+    "        ld_kernarg_f32 $s4, [%input4];\n"
+    "        packcvt_u8x4_f32 $s9, $s1, $s2, $s3, $s4 ;\n"
+    "        ld_kernarg_u32 $s0, [%result];\n"
+    "        st_global_u32 $s9, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+
+  EXPECT_TRUE(BP);
+  if (!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("__instruction5_test_kernel");
+  uint32_t *arg0 = new uint32_t(0);
+  f32 *arg1 = new f32(3.4);
+  f32 *arg2 = new f32(-1.6);
+  f32 *arg3 = new f32(1.6);
+  f32 *arg4 = new f32(256.6);
+  void *args[] = { &arg0, arg1, arg2, arg3, arg4 };
+  BE.launch(fun, args);
+  EXPECT_EQ(0xff020003, *arg0);
+  delete arg0;
+  delete arg1;
+  delete arg2;
+  delete arg3;
+  delete arg4; 
+}
+
 TEST(Instruction4Test, Pack) {
   {
     const uint32_t testVec[] = {0xff1111ff, 0x11ff, 0xff11, 1 };

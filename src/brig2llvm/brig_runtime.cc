@@ -843,6 +843,15 @@ template<class R, class T> static R Cvt(volatile T t, int mode)  {
   return result;
 }
 
+extern "C" u8x4 PackCvt_u8x4_f32(f32 src0, f32 src1, f32 src2, f32 src3) {
+  u8x4 result;
+  result[0] = Cvt_sat<u8>(src0, FE_TONEAREST);
+  result[1] = Cvt_sat<u8>(src1, FE_TONEAREST);
+  result[2] = Cvt_sat<u8>(src2, FE_TONEAREST);
+  result[3] = Cvt_sat<u8>(src3, FE_TONEAREST);
+  return result;
+}
+
 #if defined(__arm__)
 // Handle long to double conversions on platforms without hardware support
 // (ARM).
