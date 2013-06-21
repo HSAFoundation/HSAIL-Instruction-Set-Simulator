@@ -5843,6 +5843,61 @@ TEST(Instruction2Test, FirstBit) {
     const int32_t testVec[] = { -1, 0x0};
     testInst("firstbit_u32_u32", testVec);
   }
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1)\n"
+    "{\n"
+    "        firstbit_u32_u64 $s1, 0x7ff0f00f0e00000;\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_u32 $s1, [$s0] ;\n"
+
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t *arg0 = new uint32_t(0);
+    uint32_t *arg1 = new uint32_t(0);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(5, *arg0);
+    delete arg0;
+    delete arg1;
+  }
+  
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1)\n"
+    "{\n"
+    "        firstbit_u32_s64 $s1, 0x7ff0f00f0e00000;\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_u32 $s1, [$s0] ;\n"
+
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t *arg0 = new uint32_t(0);
+    uint32_t *arg1 = new uint32_t(0);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(5, *arg0);
+    delete arg0;
+    delete arg1;
+  }
 }
 
 TEST(Instruction2Test, LastBit) {
