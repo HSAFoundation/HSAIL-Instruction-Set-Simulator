@@ -512,8 +512,8 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
   if (opnum == 0) return destType;
 
   if ((inst->opcode == BRIG_OPCODE_LD     && opnum == 1) ||
-     (inst->opcode == BRIG_OPCODE_ST     && opnum == 1) ||
-     (inst->opcode == BRIG_OPCODE_ATOMIC && opnum == 1))
+      (inst->opcode == BRIG_OPCODE_ST     && opnum == 1) ||
+      (inst->opcode == BRIG_OPCODE_ATOMIC && opnum == 1))
     return destType->getPointerTo();
 
   if (const BrigInstCmp *cmp = dyn_cast<BrigInstCmp>(inst))
@@ -521,7 +521,12 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
 
   if (const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
     return runOnType(C, BrigType(cvt->sourceType));
-
+     
+  if (const BrigInstSourceType *st = dyn_cast<BrigInstSourceType>(inst)) {
+    if (st->opcode != BRIG_OPCODE_COMBINE)
+      return runOnType(C, BrigType(st->sourceType));    
+  }
+  
   if ((inst->opcode == BRIG_OPCODE_SHR && opnum == 2) ||
      (inst->opcode == BRIG_OPCODE_SHL && opnum == 2))
     return runOnType(C, BRIG_TYPE_U32);
