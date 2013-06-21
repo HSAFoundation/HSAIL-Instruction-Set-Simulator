@@ -1217,6 +1217,17 @@ extern "C" void PackCvtLogic(u8x4 result,
 extern "C" u8x4 PackCvt_u8x4_f32(f32, f32, f32, f32);
 MakeTest(PackCvt_u8x4_f32, PackCvtLogic)
 
+extern "C" void UnpackCvtLogic(f32 result,
+                               u8x4 src0,
+                               u32  src1) {
+  if (src1 > 3)
+    EXPECT_FLOAT_EQ(result, 0.0);
+  else
+    EXPECT_FLOAT_EQ(result, src0[src1]);                              
+}
+extern "C" f32 UnpackCvt_f32_u8x4(u8x4, u32);
+MakeVectorTest(UnpackCvt_f32_u8x4, UnpackCvtLogic)
+
 template<class T> static void AtomicAndLogic(T result, T a, T b) {
   EXPECT_EQ(T(a & b), result);
 }

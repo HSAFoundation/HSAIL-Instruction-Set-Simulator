@@ -6503,6 +6503,65 @@ TEST(Instruction3Test, Unpack) {
   
 }
 
+TEST(Instruction3Test, UnpackCvt) {
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$small;\n"
+      "\n"
+      "kernel &__test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "    unpackcvt_f32_u8x4 $s1, 0xff020003, 0;\n"
+      "    ld_kernarg_u32 $s0, [%result];\n"
+      "    st_f32 $s1, [$s0] ;\n"
+      "    ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    f32 *arg0 = new f32(0);
+    uint32_t *arg1 = new uint32_t(0);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_FLOAT_EQ(3.0, *arg0);  
+    
+    delete arg0;
+    delete arg1;
+  }
+  
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$small;\n"
+      "\n"
+      "kernel &__test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "    unpackcvt_f32_u8x4 $s1, 0xff020003, 3;\n"
+      "    ld_kernarg_u32 $s0, [%result];\n"
+      "    st_f32 $s1, [$s0] ;\n"
+      "    ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    f32 *arg0 = new f32(0);
+    uint32_t *arg1 = new uint32_t(0);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_FLOAT_EQ(255.0, *arg0);  
+    
+    delete arg0;
+    delete arg1;
+  }
+}
+
+
 TEST(Instruction4Test, Fma) {
   {
     const float testVec[] = { 14.6, 1.1, 6, 8 };

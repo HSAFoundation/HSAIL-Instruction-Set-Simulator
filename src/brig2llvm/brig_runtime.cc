@@ -852,6 +852,12 @@ extern "C" u8x4 PackCvt_u8x4_f32(f32 src0, f32 src1, f32 src2, f32 src3) {
   return result;
 }
 
+extern "C" f32 UnpackCvt_f32_u8x4(u8x4 src0, u32 src1) {
+  if (src1 > 3)
+    return 0;
+  return src0[src1];
+}
+
 #if defined(__arm__)
 // Handle long to double conversions on platforms without hardware support
 // (ARM).
