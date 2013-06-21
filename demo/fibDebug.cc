@@ -53,7 +53,35 @@ static void printSourceLine(T &out, llvm::DILineInfo &info) {
   out << text;
 }
 
+static hsa::brig::BrigRegState prevRegState;
+
+template<typename T, size_t N>
+static int getArraySize(T (&array)[N]) { return N; }
+
+static void showRegChanges(hsa::brig::BrigRegState *regs) {
+  for (int i = 0; i < getArraySize(regs->c); ++i) {
+    if (regs->c[i] != prevRegState.c[i]) {
+      std::cout << "$c" << i << "=" << regs->c[i] << "\n";
+    }
+  }
+  for (int i = 0; i < getArraySize(regs->s); ++i) {
+    if (regs->s[i] != prevRegState.s[i]) {
+      std::cout << "$s" << i << "=" << regs->s[i]
+                << ",  FP: " << *(float *)(regs->s + i) << "\n";
+    }
+  }
+  for (int i = 0; i < getArraySize(regs->d); ++i) {
+    if (regs->d[i] != prevRegState.d[i]) {
+      std::cout << "$d" << i << "=" << regs->d[i]
+                << ",  FP: " << *(double *)(regs->d + i) << "\n";
+    }
+  }
+  std::cout << "\n";
+  prevRegState = *regs;
+}
+
 static void callback(hsa::brig::BrigRegState *regs, size_t pc, void *data) {
+  showRegChanges(regs);
   hsa::brig::BrigProgram *BP = (hsa::brig::BrigProgram *) data;
   llvm::DILineInfo info = BP->getLineInfoForAddress(pc);
   std::cout << info.getFunctionName() << " at "
