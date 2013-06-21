@@ -200,26 +200,27 @@ template<class T> static T MulHi(T x, T y) {
   Int64Ty x64 = Int64Ty(x);
   Int64Ty y64 = Int64Ty(y);
 
-  if (Int<T>::Bits <= 32) {
-    Int64Ty res = x64 * y64;
-    return T(res >> Int<T>::Bits);
-  } else {  // (Int<T>::Bits == 64) {
-    Int64Ty x_lo = x64 & 0xFFFFFFFF;
-    Int64Ty x_hi = x64 >> 32;
-    Int64Ty y_lo = y64 & 0xFFFFFFFF;
-    Int64Ty y_hi = y64 >> 32;
-
-    Int64Ty prod1 = x_lo*y_lo;
-    Int64Ty prod3 = y_hi*x_hi;
-    Int64Ty prod2 = (x_hi + x_lo)*(y_hi + y_lo) - prod1 - prod3;
-    Int64Ty temp = prod2 + (prod1 >> 32);
-    // lower part of the product:
-    //  Int64Ty res_lo =  (prod1 & 0xFFFFFFFF) +
-    //                    ((temp & 0xFFFFFFFF) << 32);
-    Int64Ty res_hi = prod3 + (temp >> 32);
-    return res_hi;
-  }
+  Int64Ty res = x64 * y64;
+  return T(res >> Int<T>::Bits);
 }
+template<class T> static u64 MulHi64(T x, T y) {
+  T x_lo = x & 0xFFFFFFFF;
+  T x_hi = x >> 32;
+  T y_lo = y & 0xFFFFFFFF;
+  T y_hi = y >> 32;
+
+  T prod1 = x_lo*y_lo;
+  T prod3 = y_hi*x_hi;
+  T prod2 = (x_hi + x_lo)*(y_hi + y_lo) - prod1 - prod3;
+  T temp = prod2 + (prod1 >> 32);
+  // lower part of the product:
+  //  T res_lo =  (prod1 & 0xFFFFFFFF) +
+  //              ((temp & 0xFFFFFFFF) << 32);
+  T res_hi = prod3 + (temp >> 32);
+  return res_hi;
+}
+template<> u64 MulHi(u64 x, u64 y) { return MulHi64(x, y); }
+template<> s64 MulHi(s64 x, s64 y) { return MulHi64(x, y); }
 template<class T> static T MulHiVector(T x, T y) { return map(MulHi, x, y); }
 defineBinary(MulHi, s32)
 defineBinary(MulHi, u32)
