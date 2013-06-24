@@ -607,8 +607,8 @@ template<class T> static b1 Class(T x, b32 y) {
   if (y & PosInf && isPosInf(x)) return true;
   return false;
 }
-extern "C" b1 Class_f32(f32 f, b32 y) { return Class(f, y); }
-extern "C" b1 Class_f64(f64 f, b32 y) { return Class(f, y); }
+extern "C" b1 Class_b1_f32(f32 f, b32 y) { return Class(f, y); }
+extern "C" b1 Class_b1_f64(f64 f, b32 y) { return Class(f, y); }
 
 extern "C" f32 Ncos_f32(f32 x) {
   if (isNan(x)) return x;

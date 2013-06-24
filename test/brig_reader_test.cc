@@ -13,6 +13,7 @@
 #include "brig_reader.h"
 #include "brig_runtime.h"
 #include "hsailasm_wrapper.h"
+#include "brig_runtime_internal.h"
 
 #include "llvm/ADT/SmallString.h"
 #include "llvm/IR/Module.h"
@@ -6086,6 +6087,650 @@ TEST(Instruction2Test, LastBit) {
     EXPECT_EQ(41, *arg0);
     delete arg0;
     delete arg1;
+  }
+}
+
+TEST(Instruction2Test, Class) {
+  // f32
+  { // PosInf
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_u32  $s1, [%input];\n"
+    "        class_b1_f32 $c1, 0f7f800000, $s1;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    uint32_t arg1 = uint32_t(hsa::brig::PosInf);
+    void *args[] = { &arg0, &arg1};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // PosInf
+  {  // NegInf
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_u32  $s1, [%input];\n"
+    "        class_b1_f32 $c1, 0fff800000, $s1;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    uint32_t arg1 = uint32_t(hsa::brig::NegInf);
+    void *args[] = { &arg0, &arg1};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // NegInf
+  {  // QNaN
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_u32  $s1, [%input];\n"
+    "        class_b1_f32 $c1, 0f7fc00000, $s1;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    uint32_t arg1 = uint32_t(hsa::brig::QNan);
+    void *args[] = { &arg0, &arg1};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  } // QNaN
+  { // SNaN - hard coded SNAN into the test source code to avoid
+    // being changed into QNAN on 32-bit platforms
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_u32  $s1, [%input];\n"
+    "        class_b1_f32 $c1, 0fff800001, $s1;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    uint32_t arg1 = uint32_t(hsa::brig::SNan);
+    void *args[] = { &arg0, &arg1};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // SNaN
+  {  // PosZero
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f32  $s1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f32 $c1, $s1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f32 arg1 = +0.0f;
+    uint32_t arg2 = uint32_t(hsa::brig::PosZero);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // PosZero
+  {  // NegZero
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f32  $s1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f32 $c1, $s1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f32 arg1 = -0.0f;
+    uint32_t arg2 = uint32_t(hsa::brig::NegZero);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // NegZero
+  {  // PosNorm
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f32  $s1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f32 $c1, $s1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f32 arg1 = +1.0f;
+    uint32_t arg2 = uint32_t(hsa::brig::PosNorm);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // PosNorm
+  {  // NegNorm
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f32  $s1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f32 $c1, $s1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f32 arg1 = -1.0f;
+    uint32_t arg2 = uint32_t(hsa::brig::NegNorm);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // NegNorm
+  {  // PosSubnorm
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f32  $s1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f32 $c1, $s1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f32 arg1 = 1e-45f;
+    uint32_t arg2 = uint32_t(hsa::brig::PosSubnorm);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // PosSubnorm
+  {  // NegSubnorm
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f32  $s1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f32 $c1, $s1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f32 arg1 = -1e-45f;
+    uint32_t arg2 = uint32_t(hsa::brig::NegSubnorm);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }
+
+  // f64
+  {  // PosInf
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_u32  $s1, [%input];\n"
+    "        class_b1_f64 $c1, 0d7ff0000000000000, $s1;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint64_t* arg0  = new uint64_t(0);
+    uint32_t arg1 = uint32_t(hsa::brig::PosInf);
+    void *args[] = { &arg0, &arg1};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // PosInf  
+  {  // NegInf
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_u32  $s1, [%input];\n"
+    "        class_b1_f64 $c1, 0dfff0000000000000, $s1;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint64_t* arg0  = new uint64_t(0);
+    uint32_t arg1 = uint32_t(hsa::brig::NegInf);
+    void *args[] = { &arg0, &arg1};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // NegInf
+  {  // QNaN
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_u32  $s1, [%input];\n"
+    "        class_b1_f64 $c1, 0d7ff8000000000000, $s1;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    uint32_t arg1 = uint32_t(hsa::brig::QNan);
+    void *args[] = { &arg0, &arg1};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // QNaN
+  { // SNaN - hard coded SNAN into the test source code to avoid
+    // being changed into QNAN on 32-bit platforms
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_u32  $s1, [%input];\n"
+    "        class_b1_f64 $c1, 0dfff0000000000001, $s1;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    uint32_t arg1 = uint32_t(hsa::brig::SNan);
+    void *args[] = { &arg0, &arg1};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // SNaN
+  {  // PosZero
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f64  $d1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f64 $c1, $d1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f64 arg1 = +0.0l;
+    uint32_t arg2 = uint32_t(hsa::brig::PosZero);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // PosZero
+  {  // NegZero
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f64  $d1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f64 $c1, $d1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f64 arg1 = -0.0l;
+    uint32_t arg2 = uint32_t(hsa::brig::NegZero);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // NegZero
+  {  // PosNorm
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f64  $d1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f64 $c1, $d1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f64 arg1 = +1.0l;
+    uint32_t arg2 = uint32_t(hsa::brig::PosNorm);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // PosNorm
+  {  // NegNorm
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f64  $d1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f64 $c1, $d1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    f64 arg1 = -1.0l;
+    uint32_t arg2 = uint32_t(hsa::brig::NegNorm);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // NegNorm
+  {  // PosSubnorm
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f64  $d1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f64 $c1, $d1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    double arg1 = 1e-323l;
+    uint32_t arg2 = uint32_t(hsa::brig::PosSubnorm);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
+  }  // PosSubnorm
+  {  // NegSubnorm
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u32 %input1, \n"
+    "        kernarg_u32 %input2)\n"
+    "{\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        ld_kernarg_f64  $d1, [%input1];\n"
+    "        ld_kernarg_u32  $s2, [%input2];\n"
+    "        class_b1_f64 $c1, $d1, $s2;\n"
+    "        cbr $c1, @BB;\n"
+    "        ret;\n"
+    "@BB:\n"
+    "        ld_kernarg_u32 $s0, [%result] ;\n"
+    "        st_global_u32 1, [$s0] ;\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t* arg0  = new uint32_t();
+    double arg1 = -1e-323l;
+    uint32_t arg2 = uint32_t(hsa::brig::NegSubnorm);
+    void *args[] = { &arg0, &arg1, &arg2};
+    BE.launch(fun, args);
+    EXPECT_EQ(1, *arg0);
+    delete arg0;
   }
 }
 

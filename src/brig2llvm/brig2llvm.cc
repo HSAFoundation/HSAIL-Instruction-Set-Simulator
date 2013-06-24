@@ -521,6 +521,10 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
 
   if (const BrigInstCvt *cvt = dyn_cast<BrigInstCvt>(inst))
     return runOnType(C, BrigType(cvt->sourceType));
+
+  if ((inst->opcode == BRIG_OPCODE_CLASS && opnum == 2)) {
+    return runOnType(C, BRIG_TYPE_U32);
+  }    
      
   if (inst->opcode == BRIG_OPCODE_PACK && opnum == 1)
     return destType;

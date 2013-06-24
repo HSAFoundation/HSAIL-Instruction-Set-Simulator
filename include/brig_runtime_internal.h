@@ -666,13 +666,15 @@ template<> inline bool isSNan(f32 f) {
   if (!isNan(f)) return false;
   union { f32 f; b32 b; } Conv = { f };
   b32 mask = (1U << 22);
-  return Conv.b & mask;
+  // SNan has the most significant fraction bit CLEAR
+  return !(Conv.b & mask);
 }
 template<> inline bool isSNan(f64 f) {
   if (!isNan(f)) return false;
   union { f64 f; b64 b; } Conv = { f };
   b64 mask = (1ULL << 51);
-  return Conv.b & mask;
+  // SNan has the most significant fraction bit CLEAR
+  return !(Conv.b & mask);
 }
 
 template<class T> inline bool isQNan(T t) { return isNan(t) && !isSNan(t); }

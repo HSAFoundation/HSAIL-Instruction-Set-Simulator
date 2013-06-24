@@ -750,10 +750,10 @@ template<class T> static void ClassLogic(b1 result, T a, b32 b) {
   if (b & hsa::brig::PosInf && isPosInf(a))
     EXPECT_TRUE(result);
 }
-extern "C" b1 Class_f32(f32, unsigned);
-extern "C" b1 Class_f64(f64, unsigned);
-MakeTest(Class_f32, ClassLogic)
-MakeTest(Class_f64, ClassLogic)
+extern "C" b1 Class_b1_f32(f32, unsigned);
+extern "C" b1 Class_b1_f64(f64, unsigned);
+MakeTest(Class_b1_f32, ClassLogic)
+MakeTest(Class_b1_f64, ClassLogic)
 
 static void Ncos_f32_Logic(f32 result, f32 a) {
   int fpclass = std::fpclassify(a);
