@@ -135,6 +135,49 @@
   MakeVectorTest2(INST ## _s32x2_s64, INST ## Logic)     \
   MakeVectorTest2(INST ## _s32x4_s64, INST ## Logic)     \
   MakeVectorTest2(INST ## _s64x2_s64, INST ## Logic)
+  
+#define TestUnpackInst2(INST)                               \
+  MakeVectorTest(INST ## _u32_u8x4, INST ## Logic)          \
+  MakeVectorTest(INST ## _u32_u8x8, INST ## Logic)          \
+  MakeVectorTest(INST ## _u32_u8x16, INST ## Logic)         \
+  MakeVectorTest(INST ## _u32_u16x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _u32_u16x4, INST ## Logic)         \
+  MakeVectorTest(INST ## _u32_u16x8, INST ## Logic)         \
+  MakeVectorTest(INST ## _u32_u32x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _u32_u32x4, INST ## Logic)         \
+                                                            \
+  MakeVectorTest(INST ## _u64_u8x4, INST ## Logic)          \
+  MakeVectorTest(INST ## _u64_u8x8, INST ## Logic)          \
+  MakeVectorTest(INST ## _u64_u8x16, INST ## Logic)         \
+  MakeVectorTest(INST ## _u64_u16x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _u64_u16x4, INST ## Logic)         \
+  MakeVectorTest(INST ## _u64_u16x8, INST ## Logic)         \
+  MakeVectorTest(INST ## _u64_u32x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _u64_u32x4, INST ## Logic)         \
+  MakeVectorTest(INST ## _u64_u64x2, INST ## Logic)         \
+                                                            \
+  MakeVectorTest(INST ## _s32_s8x4, INST ## Logic)          \
+  MakeVectorTest(INST ## _s32_s8x8, INST ## Logic)          \
+  MakeVectorTest(INST ## _s32_s8x16, INST ## Logic)         \
+  MakeVectorTest(INST ## _s32_s16x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _s32_s16x4, INST ## Logic)         \
+  MakeVectorTest(INST ## _s32_s16x8, INST ## Logic)         \
+  MakeVectorTest(INST ## _s32_s32x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _s32_s32x4, INST ## Logic)         \
+                                                            \
+  MakeVectorTest(INST ## _s64_s8x4, INST ## Logic)          \
+  MakeVectorTest(INST ## _s64_s8x8, INST ## Logic)          \
+  MakeVectorTest(INST ## _s64_s8x16, INST ## Logic)         \
+  MakeVectorTest(INST ## _s64_s16x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _s64_s16x4, INST ## Logic)         \
+  MakeVectorTest(INST ## _s64_s16x8, INST ## Logic)         \
+  MakeVectorTest(INST ## _s64_s32x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _s64_s32x4, INST ## Logic)         \
+  MakeVectorTest(INST ## _s64_s64x2, INST ## Logic)         \
+                                                            \
+  MakeVectorTest(INST ## _f32_f32x2, INST ## Logic)         \
+  MakeVectorTest(INST ## _f32_f32x4, INST ## Logic)         \
+  MakeVectorTest(INST ## _f64_f64x2, INST ## Logic)
 
 #define TestAtomicInst(INST,NARY)                                   \
   MakeAtomicTest(Atomic ## INST ## _s32, INST ## Logic, NARY)       \

@@ -454,7 +454,22 @@ template<class R, class T> static void PackLogic(R result, R src0,
 }
 PackInst(declare)
 TestPackInst(Pack)
-                                                
+
+template<class R, class T> static void UnpackLogic(R result, T src0, u32 src1) {
+  unsigned Len = T::Len;
+  if (isNan(src1) || isInf(src1))
+    return;
+  if (src1 >= Len)
+    return;
+  
+  if (isNan(src0[src1]) ||
+      isInf(src0[src1]))
+    return;
+
+  EXPECT_EQ(R(src0[src1]), result);    
+}
+UnpackInst2(declare)
+TestUnpackInst2(Unpack)
 
 template<class T> static void AndLogic(T result, T a, T b) {
   EXPECT_EQ(~(~a | ~b), result);

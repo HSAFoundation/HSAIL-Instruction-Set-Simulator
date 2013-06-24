@@ -6472,6 +6472,35 @@ TEST(Instruction3Test, Unpack) {
     const uint32_t testVec[] = {0x11, 0x11ff00ff, 3 };
     testInst("unpack_u32_u8x4", testVec); 
   }
+  
+  {  
+    hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$small;\n"
+    "\n"
+    "kernel &__test_kernel(\n"
+    "        kernarg_u32 %result, \n"
+    "        kernarg_u64 %input1)\n"
+    "{\n"
+    "        ld_kernarg_u64 $d2, [%input1];\n"
+    "        unpack_u32_u32x2 $s1, $d2, 1;\n"
+    "        ld_kernarg_u32 $s0, [%result];\n"
+    "        st_u32 $s1, [$s0];\n"
+    "        ret;\n"
+    "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__test_kernel");
+    uint32_t *arg0 = new uint32_t(0);
+    uint64_t *arg1 = new uint64_t(0xffff000076771111);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(0xffff0000, *arg0);
+    delete arg0;
+    delete arg1;
+  }
+  
 }
 
 TEST(Instruction4Test, Fma) {

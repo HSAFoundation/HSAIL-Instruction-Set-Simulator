@@ -3284,19 +3284,17 @@ bool BrigModule::validateUnpack(const inst_iterator inst) const {
 
   oper_iterator dest(S_.operands + inst->operands[0]);
   valid &= check(isa<BrigOperandReg>(dest), "Destination must be reg");
+  valid &= check(isCompatibleSrc(type, dest), "Incompatible operand");
 
   oper_iterator src0(S_.operands + inst->operands[1]);
   valid &= check(isa<BrigOperandReg>(src0) ||
                  isa<BrigOperandImmed>(src0), "Src must be reg or immed");
-
+ valid &= check(isCompatibleSrc(sourceType, src0), "Incompatible operand");
+ 
   oper_iterator src1(S_.operands + inst->operands[2]);
   valid &= check(isa<BrigOperandReg>(src1) ||
                  isa<BrigOperandImmed>(src1), "Src must be reg or immed");
 
-  for (int i = 0; i < 3; ++i) {
-    oper_iterator reg(S_.operands + inst->operands[i]);
-    valid &= check(isCompatibleSrc(type, reg), "Incompatible operand");
-  }
   return valid;
 }
 
