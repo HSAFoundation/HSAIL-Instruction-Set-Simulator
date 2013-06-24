@@ -32,8 +32,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-namespace hsa{
-namespace brig{
+namespace hsa {
+namespace brig {
 
 static bool isI386(void) {
 #ifdef __i386__
@@ -527,9 +527,9 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
 
   if (const BrigInstSourceType *st = dyn_cast<BrigInstSourceType>(inst)) {
     if (st->opcode != BRIG_OPCODE_COMBINE)
-      return runOnType(C, BrigType(st->sourceType));    
+      return runOnType(C, BrigType(st->sourceType));
   }
- 
+
   if ((inst->opcode == BRIG_OPCODE_SHR && opnum == 2) ||
      (inst->opcode == BRIG_OPCODE_SHL && opnum == 2))
     return runOnType(C, BRIG_TYPE_U32);
@@ -544,7 +544,6 @@ static llvm::Value *decodePacking(llvm::BasicBlock &B,
                                   llvm::Value *value,
                                   unsigned opnum,
                                   const inst_iterator inst) {
-
   llvm::LLVMContext &C = B.getContext();
   llvm::Type *destTy = getOperandTy(C, inst, opnum);
 
@@ -948,8 +947,8 @@ static void updateDebugInfo(llvm::BasicBlock &B,
   llvm::DebugLoc loc = scope.getDebugLoc(helper.getAddr(inst));
 
   typedef llvm::BasicBlock::iterator BBIt;
-  for(BBIt it = B.begin(), E = B.end(); it != E; ++it)
-    if(!it->hasMetadata())
+  for (BBIt it = B.begin(), E = B.end(); it != E; ++it)
+    if (!it->hasMetadata())
       it->setDebugLoc(loc);
 }
 

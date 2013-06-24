@@ -751,16 +751,16 @@ Cmp(define, snan, f64)
 // Regular integer rounding: if the value is out of range, the result
 // is undefined and an invalid operation exception is generated
 //
-// Saturating integer rounding: the value is clamped to the range of the destination type, with NaN converted to 0 
+// Saturating integer rounding: the value is clamped to the range of
+// the destination type, with NaN converted to 0
 // Integer rounding:
 // f32 to Int
 template<class R> static R Cvt(f32 f, int mode) {
   if (isPosInf(f) || isNegInf(f) || isNan(f) ||
       f <= getMin<R>() || f >= getMax<R>())
-    return 0;  // should be undefined value 
+    return 0;  // should be undefined value
   // an exception should be thrown
-  
-    
+
   int oldMode = fegetround();
   fesetround(mode);
   volatile R result = R(nearbyint(f));
@@ -787,9 +787,9 @@ template<> bool Cvt(f32 f, int mode) { return f != 0.0f; }
 template<class R> static R Cvt(f64 f, int mode) {
   if (isPosInf(f) || isNegInf(f) || isNan(f) ||
       f <= getMin<R>() || f >= getMax<R>())
-    return 0;   // should be undefined value 
-  // an exception should be thrown  
-    
+    return 0;   // should be undefined value
+  // an exception should be thrown
+
   int oldMode = fegetround();
   fesetround(mode);
   volatile R result = R(nearbyint(f));
@@ -882,7 +882,7 @@ RFICvt(define)
 // saturating float to int
 RFICvtSat(define)
 
-// Conversion from integer to floating-point requires 
+// Conversion from integer to floating-point requires
 // a floating-point rounding
 RIFCvt(define)
 
@@ -911,7 +911,7 @@ defineCvt(Cvt_zero, FE_TOWARDZERO,  f32, f64)
 defineCvt(Cvt_near, FE_TONEAREST,   f32, f64)
 
 // A rounding modifier is illegal in conversion from f to f
-// with the same size or larger size, and in conversion 
+// with the same size or larger size, and in conversion
 // from f to b1 and vice-versa, and in conversion from
 // b1, s or u to b1, s or u
 RIICvt(define)
