@@ -26,6 +26,11 @@
   TEST(BrigRuntimeTest, INST) {                 \
     TestVectorInst(INST, LOGIC);                \
   }
+  
+#define MakeVectorTest2(INST,LOGIC)              \
+  TEST(BrigRuntimeTest, INST) {                 \
+    TestVectorInst2(INST, LOGIC);                \
+  }  
 
 #define MakeAtomicTest(INST,LOGIC,NARY)         \
   TEST(BrigRuntimeTest, INST) {                 \
@@ -84,6 +89,52 @@
   /* MakeVectorTest(INST ## _f16x2,  INST ## Logic )*/  \
   /* MakeVectorTest(INST ## _f16x4,  INST ## Logic) */  \
   MakeVectorTest(INST ## _f32x2,  INST ## Logic)
+
+#define TestPackInst(INST)                               \
+  MakeVectorTest2(INST ## _f32x2_f32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _f32x4_f32, INST ## Logic)     \
+                                                         \
+  MakeVectorTest2(INST ## _u8x4_u32, INST ## Logic)      \
+  MakeVectorTest2(INST ## _u8x8_u32, INST ## Logic)      \
+  MakeVectorTest2(INST ## _u8x16_u32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u16x2_u32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u16x4_u32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u16x8_u32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u32x2_u32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u32x4_u32, INST ## Logic)     \
+                                                         \
+  MakeVectorTest2(INST ## _s8x4_s32, INST ## Logic)      \
+  MakeVectorTest2(INST ## _s8x8_s32, INST ## Logic)      \
+  MakeVectorTest2(INST ## _s8x16_s32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s16x2_s32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s16x4_s32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s16x8_s32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s32x2_s32, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s32x4_s32, INST ## Logic)     \
+                                                         \
+  MakeVectorTest2(INST ## _f32x2_f64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _f32x4_f64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _f64x2_f64, INST ## Logic)     \
+                                                         \
+  MakeVectorTest2(INST ## _u8x4_u64, INST ## Logic)      \
+  MakeVectorTest2(INST ## _u8x8_u64, INST ## Logic)      \
+  MakeVectorTest2(INST ## _u8x16_u64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u16x2_u64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u16x4_u64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u16x8_u64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u32x2_u64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u32x4_u64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _u64x2_u64, INST ## Logic)     \
+                                                         \
+  MakeVectorTest2(INST ## _s8x4_s64, INST ## Logic)      \
+  MakeVectorTest2(INST ## _s8x8_s64, INST ## Logic)      \
+  MakeVectorTest2(INST ## _s8x16_s64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s16x2_s64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s16x4_s64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s16x8_s64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s32x2_s64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s32x4_s64, INST ## Logic)     \
+  MakeVectorTest2(INST ## _s64x2_s64, INST ## Logic)
 
 #define TestAtomicInst(INST,NARY)                                   \
   MakeAtomicTest(Atomic ## INST ## _s32, INST ## Logic, NARY)       \
@@ -575,6 +626,26 @@ static void TestSadhiVectorInst(R (*Impl)(T, T, R),
     }
   }
 }
+
+template<class T, class R>
+static void TestVectorInst2(R (*Impl)(R, T, unsigned),
+                           void (*Logic)(R, R, T, unsigned)) {
+  typedef typename R::Base Base;
+  const std::vector<Base> &testVectorA = getTestVector<Base>();
+  const std::vector<T> &testVectorB = getTestVector<T>();
+  const std::vector<unsigned> &testVectorU = getTestVector<unsigned>();
+  for(unsigned i = 0; i < testVectorA.size(); ++i) {
+    R a = testVectorA[i];
+    for(unsigned j = 0; j < testVectorB.size(); ++j) {
+      T b = testVectorB[j];
+      for(unsigned k = 0; k < testVectorB.size(); ++k) {
+        unsigned c = testVectorU[k];
+        Logic(Impl(a, b, c), a, b, c);
+      }
+    }
+  }
+}
+
 
 template<class R, class A, class B>
 static void TestAtomicBinary(R (*Impl)(A*, B), void (*Logic)(R, A, B)) {

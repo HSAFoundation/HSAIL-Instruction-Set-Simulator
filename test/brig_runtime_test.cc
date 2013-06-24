@@ -430,6 +430,32 @@ template<class T> static void UnpackHiLogic(T result, T a, T b) {
 }
 TestAll(UnpackInst, UnpackHi, Binary)
 
+template<class R, class T> static void PackLogic(R result, R src0,
+                                                 T src1,   u32 src2) {
+                                                 
+  if (isNan(src1) || isNan(src2) ||
+      isInf(src1) || isInf(src2)) 
+    return;
+    
+  unsigned Len = R::Len;
+  if (src2 >= Len)
+    return;
+  
+  for (unsigned idx = 0; idx < Len; idx++) {
+    if (isNan(src0[idx]) ||
+        isInf(src0[idx]))
+      return;
+      
+    if (idx == src2)
+      EXPECT_EQ(typename R::Base(src1), result[src2]);
+    else
+      EXPECT_EQ(src0[idx], result[idx]);        
+  }        
+}
+PackInst(declare)
+TestPackInst(Pack)
+                                                
+
 template<class T> static void AndLogic(T result, T a, T b) {
   EXPECT_EQ(~(~a | ~b), result);
 }
