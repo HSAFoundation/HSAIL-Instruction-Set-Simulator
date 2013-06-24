@@ -6183,20 +6183,48 @@ TEST(Instruction3Test, Add) {
     testInst("add_s32", testVec);
   }
   {
-    const uint64_t testVec[] = { 0xfffffffffffffffeLL,
-                                 0x7ffffffffffffffeLL,
-                                 0x8000000000000000LL };
+    const uint64_t testVec[] = { 0xfffffffffffffffeULL,
+                                 0x7ffffffffffffffeULL,
+                                 0x8000000000000000ULL };
     testInst("add_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x1LL, 0xfffffffffffffffeLL, 0x3LL};
+    const uint64_t testVec[] = { 0x1ULL, 0xfffffffffffffffeULL, 0x3ULL};
     testInst("add_u64", testVec);
   }
   {
     const uint32_t testVec[] = { 0xefffff0c, 0x7ffffffe, 0x7000000e};
     testInst("add_pp_s8x4", testVec);
   }
-
+  {
+    const uint32_t testVec[] = { 0xefffffff, 0x7ffffffe, 0x7000000e};
+    testInst("add_pp_sat_u8x4", testVec);
+  }  
+  {
+    const uint32_t testVec[] = { 0x7fffff0c, 0x7ffffffe, 0x7000000e};
+    testInst("add_pp_sat_s8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xffe7ffff, 0x7007fffe, 0x700000e0};
+    testInst("add_ps_sat_u8x4", testVec);
+  }  
+  {
+    const uint32_t testVec[] = { 0x50e7dfde, 0x7007fffe, 0x700000e0};
+    testInst("add_ps_sat_s8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x6efefede, 0x7007fffe, 0x700000e0};
+    testInst("add_sp_sat_s8x4", testVec);
+  }
+  {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are not modified.
+    
+    const uint32_t testVec[] = { 0xdededede, 0x7007fffe, 0x700000e0};
+    testInst("add_ss_sat_s8x4", testVec);
+  }
 }
 
 TEST(Instruction3Test, Borrow) {
@@ -6288,6 +6316,92 @@ TEST(Instruction3Test, Sub) {
     const uint32_t testVec[] = { 0xfffffffe, 0xfffffffd, 0xffffffff };
     testInst("sub_u32", testVec);
   }
+  // u8x4
+  {
+    const uint32_t testVec[] = { 0xa00fffe, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_pp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xa000000, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_pp_sat_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfbfcfdfe, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_ps_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x0, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_ps_sat_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xd0200fe, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_sp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xd020000, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_sp_sat_u8x4", testVec);
+  }
+  {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are NOT modified.
+    
+    const uint32_t testVec[] = { 0xfefefefe, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_ss_u8x4", testVec);
+  }
+  {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are NOT modified.
+  
+    const uint32_t testVec[] = { 0x0, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_ss_sat_u8x4", testVec);
+  }
+  // u16x2
+  {
+    const uint32_t testVec[] = { 0xa00fefe, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_pp_u16x2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xa000000, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_pp_sat_u16x2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfcfcfefe, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_ps_u16x2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x0, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_ps_sat_u16x2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x0c02fefe, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_sp_u16x2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x0c020000, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_sp_sat_u16x2", testVec);
+  }
+    {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are NOT modified.
+    
+    const uint32_t testVec[] = { 0xfefefefe, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_ss_u16x2", testVec);
+  }
+  {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are NOT modified.
+  
+    const uint32_t testVec[] = { 0x0, 0xfafbfcfd, 0xf0fbfdff };
+    testInst("sub_ss_sat_u16x2", testVec);
+  }  
 }
 
 TEST(Instruction3Test, Shl) {
@@ -6452,6 +6566,112 @@ TEST(Instruction3Test, BitMask) {
   {
     const uint32_t testVec[] = {0x1e00, 9, 4};
     testInst("bitmask_b32", testVec);
+  }
+}
+
+TEST(Instruction3Test, Mul) {
+  {
+    const uint32_t testVec[] = {1000, 100, 10};
+    testInst("mul_u32", testVec);
+  }
+  {
+    const int32_t testVec[] = {-1000, 100, -10};
+    testInst("mul_s32", testVec);
+  }
+  {
+    const uint64_t testVec[] = {0x100000000ULL, 2, 0x80000000ULL};
+    testInst("mul_u64", testVec);
+  }
+  {
+    const uint64_t testVec[] = {0xFFFFFFFF00000000ULL, ~2ULL + 1, 0x80000000ULL};
+    testInst("mul_s64", testVec);
+  }
+  // packed mul unsigned
+  {
+    const uint32_t testVec[] = {0x40606d1, 0x403021f, 0x102030f};
+    testInst("mul_pp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = {0x40606ff, 0x403021f, 0x102030f};
+    testInst("mul_pp_sat_u8x4", testVec);
+  }  
+  {
+    const uint32_t testVec[] = {0x1f3e5dd1, 0x403021f, 0x102030f};
+    testInst("mul_sp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = {0x1f3e5dff, 0x403021f, 0x102030f};
+    testInst("mul_sp_sat_u8x4", testVec);
+  }  
+  {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are NOT modified.
+    
+    const uint32_t testVec[] = {0xd1d1d1d1, 0x403021f, 0x102030f};
+    testInst("mul_ss_u8x4", testVec);
+  }
+  {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are NOT modified.
+    
+    const uint32_t testVec[] = {0xffffffff, 0x403021f, 0x102030f};
+    testInst("mul_ss_sat_u8x4", testVec);
+  }  
+  {
+    const uint32_t testVec[] = {0x3c2d1ed1, 0x403021f, 0x102030f};
+    testInst("mul_ps_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = {0x3c2d1eff, 0x403021f, 0x102030f};
+    testInst("mul_ps_sat_u8x4", testVec);
+  }
+  
+  // packed mul signed
+  {
+    const uint32_t testVec[] = {0x4060600, 0x40302f0, 0x10203f0};
+    testInst("mul_pp_s8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = {0x406067f, 0x40302f0, 0x10203f0};
+    testInst("mul_pp_sat_s8x4", testVec);
+  }  
+  {
+    const uint32_t testVec[] = {0xf0e0d000, 0x40302f0, 0x10203f0};
+    testInst("mul_sp_s8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = {0xf0e0d07f, 0x40302f0, 0x10203f0};
+    testInst("mul_sp_sat_s8x4", testVec);
+  }  
+  {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are NOT modified.
+    
+    const uint32_t testVec[] = {0x0,  0x40302f0, 0x10203f0};
+    testInst("mul_ss_s8x4", testVec);
+  }
+  {
+    // Note: PRM  4.12 Table 4-5
+    // ss : the lower element of both sources is used. 
+    // the result is written into the lower element of the dest.
+    // the other bits of the dest are NOT modified.
+    
+    const uint32_t testVec[] = {0x7f7f7f7f, 0x40302f0, 0x10203f0};
+    testInst("mul_ss_sat_s8x4", testVec);
+  }  
+  {
+    const uint32_t testVec[] = {0xc0d0e000, 0x40302f0, 0x10203f0};
+    testInst("mul_ps_s8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = {0xc0d0e07f, 0x40302f0, 0x10203f0};
+    testInst("mul_ps_sat_s8x4", testVec);
   }
 }
 

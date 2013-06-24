@@ -148,7 +148,7 @@ FloatVectorInst(define, Add, Binary)
 
 // Saturated arithmetic implementation loosely adapted from Steven Fuerest's
 // article at: http://locklessinc.com/articles/sat_arithmetic/
-template<class T> static T AddSat(T x, T y) {
+template<class T> static T Add_Sat(T x, T y) {
   if (Int<T>::isSigned) {
     T res = x + y;
 
@@ -167,9 +167,9 @@ template<class T> static T AddSat(T x, T y) {
     return res;
   }
 }
-template<class T> static T AddSatVector(T x, T y) { return map(AddSat, x, y); }
-SignedVectorInst(define, AddSat, Binary)
-UnsignedVectorInst(define, AddSat, Binary)
+template<class T> static T Add_SatVector(T x, T y) { return map(Add_Sat, x, y); }
+SignedVectorInst(define, Add_Sat, Binary)
+UnsignedVectorInst(define, Add_Sat, Binary)
 
 template<class T> static T Div(T x, T y) {
   if (isDivisionError(x, y)) return T(0);
@@ -188,7 +188,7 @@ SignedVectorInst(define, Mul, Binary)
 UnsignedVectorInst(define, Mul, Binary)
 FloatVectorInst(define, Mul, Binary)
 
-template<class T> static T MulSat(T x, T y) {
+template<class T> static T Mul_Sat(T x, T y) {
   if (Int<T>::isSigned) {
     s64 res = (s64) x * (s64) y;
     if (res > (s64) Int<T>::Max) return Int<T>::Max;
@@ -200,9 +200,9 @@ template<class T> static T MulSat(T x, T y) {
     return res;
   }
 }
-template<class T> static T MulSatVector(T x, T y) { return map(MulSat, x, y); }
-SignedVectorInst(define, MulSat, Binary)
-UnsignedVectorInst(define, MulSat, Binary)
+template<class T> static T Mul_SatVector(T x, T y) { return map(Mul_Sat, x, y); }
+SignedVectorInst(define, Mul_Sat, Binary)
+UnsignedVectorInst(define, Mul_Sat, Binary)
 
 template<class T> static T MulHi(T x, T y) {
   typedef typename Int<T>::Int64Ty Int64Ty;
@@ -247,7 +247,7 @@ SignedVectorInst(define, Sub, Binary)
 UnsignedVectorInst(define, Sub, Binary)
 FloatVectorInst(define, Sub, Binary)
 
-template<class T> static T SubSat(T x, T y) {
+template<class T> static T Sub_Sat(T x, T y) {
   if (Int<T>::isSigned) {
     T res = x - y;
 
@@ -266,9 +266,9 @@ template<class T> static T SubSat(T x, T y) {
     return res;
   }
 }
-template<class T> static T SubSatVector(T x, T y) { return map(SubSat, x, y); }
-SignedVectorInst(define, SubSat, Binary)
-UnsignedVectorInst(define, SubSat, Binary)
+template<class T> static T Sub_SatVector(T x, T y) { return map(Sub_Sat, x, y); }
+SignedVectorInst(define, Sub_Sat, Binary)
+UnsignedVectorInst(define, Sub_Sat, Binary)
 
 template<class T> static T Max(T x, T y) {
   if (isNan(x)) return y;

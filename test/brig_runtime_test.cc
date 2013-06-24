@@ -143,17 +143,17 @@ TestAll(SignedVectorInst,   Add, Binary)
 TestAll(UnsignedVectorInst, Add, Binary)
 TestAll(FloatVectorInst,    Add, Binary)
 
-template<class T> static void AddSatLogic(T result, T a, T b) {
+template<class T> static void Add_SatLogic(T result, T a, T b) {
   s64 result64 = s64(a) + s64(b);
   if (result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);
   else if (result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
   else EXPECT_EQ(result64, result);
 }
-template<class T> static void AddSatVectorLogic(T result, T a, T b) {
-  ForEach(AddSatLogic, result, a, b);
+template<class T> static void Add_SatVectorLogic(T result, T a, T b) {
+  ForEach(Add_SatLogic, result, a, b);
 }
-TestAll(SignedVectorInst,   AddSat, Binary)
-TestAll(UnsignedVectorInst, AddSat, Binary)
+TestAll(SignedVectorInst,   Add_Sat, Binary)
+TestAll(UnsignedVectorInst, Add_Sat, Binary)
 
 template<class T> static void DivLogic(T result, T a, T b) {
   if (hsa::brig::isDivisionError(a, b)) {
@@ -193,7 +193,7 @@ TestAll(SignedVectorInst,   Mul, Binary)
 TestAll(UnsignedVectorInst, Mul, Binary)
 TestAll(FloatVectorInst,    Mul, Binary)
 
-template<class T> static void MulSatLogic(T result, T a, T b) {
+template<class T> static void Mul_SatLogic(T result, T a, T b) {
   // Handle signed and unsigned ints differently to avoid overflow into the sign
   // bit.
   typedef typename Int<T>::Int64Ty Int64Ty;
@@ -202,23 +202,23 @@ template<class T> static void MulSatLogic(T result, T a, T b) {
   else if (result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
   else EXPECT_EQ(result64, result);
 }
-template<class T> static void MulSatVectorLogic(T result, T a, T b) {
-  ForEach(MulSatLogic, result, a, b);
+template<class T> static void Mul_SatVectorLogic(T result, T a, T b) {
+  ForEach(Mul_SatLogic, result, a, b);
 }
-TestAll(SignedVectorInst,   MulSat, Binary)
-TestAll(UnsignedVectorInst, MulSat, Binary)
+TestAll(SignedVectorInst,   Mul_Sat, Binary)
+TestAll(UnsignedVectorInst, Mul_Sat, Binary)
 
-template<class T> static void SubSatLogic(T result, T a, T b) {
+template<class T> static void Sub_SatLogic(T result, T a, T b) {
   s64 result64 = s64(a) - s64(b);
   if (result64 > Int<T>::Max) EXPECT_EQ(Int<T>::Max, result);
   else if (result64 <= Int<T>::Min) EXPECT_EQ(Int<T>::Min, result);
   else EXPECT_EQ(result64, result);
 }
-template<class T> static void SubSatVectorLogic(T result, T a, T b) {
-  ForEach(SubSatLogic, result, a, b);
+template<class T> static void Sub_SatVectorLogic(T result, T a, T b) {
+  ForEach(Sub_SatLogic, result, a, b);
 }
-TestAll(SignedVectorInst,   SubSat, Binary)
-TestAll(UnsignedVectorInst, SubSat, Binary)
+TestAll(SignedVectorInst,   Sub_Sat, Binary)
+TestAll(UnsignedVectorInst, Sub_Sat, Binary)
 
 template<class T> static void MaxLogic(T result, T a, T b) {
   if (!isNegZero(a) && !isNegZero(b))
