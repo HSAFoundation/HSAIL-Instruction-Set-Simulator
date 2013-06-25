@@ -8066,23 +8066,43 @@ TEST(AtomicNoRetTest, Min) {
 
 TEST(BrigInstTest, PackedCmov) {
   {
-    const uint32_t testVec[] = { 0, 0, 0, 0 };
+    const uint32_t testVec[] = { 0x12dc5601U, 0x1000100U, 0x12345678U, 0xfedcba01U };
+    testInst("cmov_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0x12dc5601, 0x1000100, 0x12345678, 0xfedcba01 };
     testInst("cmov_s8x4", testVec);
   }
 }
 
 TEST(BrigInstTest, PackedShr) {
   {
-    const uint32_t testVec[] = { 0, 0, 0 };
+    const uint32_t testVec[] = { 0x3c1e0f07U, 0xf0783c1eU, 2 };
+    testInst("shr_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfc1e0f07, 0xf0783c1e, 2 };
     testInst("shr_s8x4", testVec);
   }
+  {
+    const uint32_t testVec[] = { 0x1e0f0783U, 0xf0783c1eU, 3 };
+    testInst("shr_u16x2", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfe0f0783, 0xf0783c1e, 3 };
+    testInst("shr_s16x2", testVec);
+  }  
 }
 
 TEST(BrigInstTest, PackedShl) {
   {
-    const uint32_t testVec[] = { 0, 0, 0 };
-    testInst("shl_s8x4", testVec);
+    const uint32_t testVec[] = { 0xc0e0f078U, 0xf0783c1eU, 2 };
+    testInst("shl_u8x4", testVec);
   }
+  {
+    const uint32_t testVec[] = { 0xc1e0f078U, 0xf0783c1eU, 2 };
+    testInst("shl_u16x2", testVec);
+  }  
 }
 
 TEST(DebugTest, Square) {
